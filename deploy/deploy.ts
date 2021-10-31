@@ -18,5 +18,11 @@ const func: DeployFunction = async (
     args: [],
     log: true,
   });
+
+  await hre.deployments.deploy("Comptroller", {
+    from: deployer,
+    args: [],
+    log: true,
+  });
 };
 export default func;
