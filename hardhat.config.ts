@@ -1,4 +1,5 @@
 import "hardhat-deploy";
+import "@nomiclabs/hardhat-waffle";
 
 import { config as dotEnvConfig } from "dotenv";
 import { HardhatUserConfig } from "hardhat/types";
