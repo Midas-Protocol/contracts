@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 pragma solidity 0.6.12;
 
-import "./PriceOracle.sol";
-import "./CToken.sol";
-import "./Unitroller.sol";
-import "./RewardsDistributor.sol";
+import "./IPriceOracle.sol";
+import "./ICToken.sol";
+import "./IUnitroller.sol";
+import "./IRewardsDistributor.sol";
 
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
  */
-interface Comptroller {
+interface IComptroller {
     function admin() external view returns (address);
     function adminHasRights() external view returns (bool);
     function fuseAdminHasRights() external view returns (bool);
