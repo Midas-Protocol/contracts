@@ -1,6 +1,7 @@
 import { ethers, waffle, deployments } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 
 use(solidity);
 
@@ -17,12 +18,36 @@ const setupTest = deployments.createFixture(
 );
 
 describe("FusePoolDirectory", () => {
+  let deployer: SignerWithAddress;
   beforeEach(async () => {
+    deployer = await ethers.getNamedSigner("deployer");
     await setupTest();
   });
 
   it("should deploy the pool", async () => {
-    const FusePoolDirectory = await deployments.get("FusePoolDirectory");
-    expect(FusePoolDirectory.address).to.be.ok;
+    const priceOracleFactory = await ethers.getContractFactory(
+      "SimplePriceOracle",
+      deployer
+    );
+    const priceOracle = await priceOracleFactory.deploy();
+    console.log("priceOracle.address: ", priceOracle.address);
+    expect(priceOracle.address).to.be.ok;
+
+    const fusePoolDirectory = await ethers.getContract("FusePoolDirectory");
+    console.log("fusePoolDirectory.address: ", fusePoolDirectory.address);
+    expect(fusePoolDirectory.address).to.be.ok;
+
+    const comptroller = await ethers.getContract("Comptroller");
+
+    const deploy = await fusePoolDirectory.functions.deployPool(
+      "TEST",
+      comptroller.address,
+      true,
+      0,
+      0,
+      priceOracle.address
+    );
+
+    console.log("deploy: ", deploy);
   });
 });
