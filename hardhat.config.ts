@@ -50,6 +50,11 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {},
+    ganache: {
+      accounts: { mnemonic },
+      chainId: 1337,
+      url: "http://localhost:8545",
+    },
     rinkeby: {
       accounts: { mnemonic },
       chainId: 4,
