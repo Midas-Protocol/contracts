@@ -19,7 +19,7 @@ const func: DeployFunction = async (
     log: true,
   });
 
-  await hre.deployments.deploy("Comptroller", {
+  await hre.deployments.deploy("FuseFeeDistributor", {
     from: deployer,
     args: [],
     log: true,
