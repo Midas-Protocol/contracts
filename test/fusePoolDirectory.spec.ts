@@ -1,145 +1,100 @@
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
 // @ts-ignore
-import { poolAssets, setUpTest } from "./setUp";
-import Fuse from "../sdk/fuse-sdk";
-import { Contract } from "@ethersproject/contracts";
-import { Big } from "big.js";
+import Web3 from "web3";
+import { poolAssets } from "./setUp";
+import Fuse from "fuse-sdk-new";
+import { deploy, getContractsConfig, prepare, initializeWithWhitelist } from "./utilities";
 
 use(solidity);
 
-let comptroller: Contract;
-let deployedPoolAddress: string;
+let deployedPoolAddress;
 
-before(async () => {
-  await setUpTest();
-});
+describe("FusePoolDirectory", function () {
+  before(async function () {
+    await prepare(this, [
+      ["FusePoolDirectory", null],
+      ["FuseFeeDistributor", null],
+      ["Comptroller", null],
+      ["JumpRateModel", null],
+    ]);
 
-describe("FusePoolDirectory", () => {
-  it("should deploy the pool", async () => {
-    const deployer = await ethers.getNamedSigner("deployer");
-    const alice = await ethers.getNamedSigner("alice");
-
-    comptroller = await ethers.getContract("Comptroller", deployer);
-
-    const priceOracleFactory = await ethers.getContractFactory(
-      "SimplePriceOracle",
-      deployer
-    );
-    const priceOracle = await priceOracleFactory.deploy();
-    expect(priceOracle.address).to.be.ok;
-
-    const fusePoolDirectory = await ethers.getContract(
-      "FusePoolDirectory",
-      alice
-    );
-    expect(fusePoolDirectory.address).to.be.ok;
-
-    const deploy = await fusePoolDirectory.functions.deployPool(
-      "TEST",
-      comptroller.address,
-      true,
-      "500000000000000000",
-      "1100000000000000000",
-      priceOracle.address
-    );
-
-    console.log("deploy: ", deploy);
+    await deploy(this, [
+      ["fpd", this.FusePoolDirectory],
+      ["ffd", this.FuseFeeDistributor],
+      ["comp", this.Comptroller],
+      [
+        "jrm",
+        this.JumpRateModel,
+        [
+          "20000000000000000", // baseRatePerYear
+          "200000000000000000", // multiplierPerYear
+          "2000000000000000000", //jumpMultiplierPerYear
+          "900000000000000000", // kink
+        ],
+      ],
+    ]);
+    await initializeWithWhitelist(this);
   });
-});
 
-describe("SDK deployPool", () => {
-  it("should deploy the pool", async () => {
-    const bob = await ethers.getNamedSigner("bob");
+  describe("Deploy pool", async function () {
+    it("should deploy the pool", async function () {
+      await prepare(this, [["SimplePriceOracle", "alice"]]);
+      await deploy(this, [["spo", this.SimplePriceOracle]]);
 
-    const sdk = new Fuse("http://localhost:8545");
-    const priceOracleFactory = await ethers.getContractFactory(
-      "SimplePriceOracle",
-      bob
-    );
-
-    const oracle = await priceOracleFactory.deploy();
-
-    const [poolAddress, implementationAddress, priceOracleAddress] =
-      await sdk.deployPool(
+      const fdpWithSigner = await this.fpd.connect(this.bob);
+      const deployedPool = await fdpWithSigner.deployPool(
         "TEST",
+        this.comp.address,
         true,
         "500000000000000000",
         "1100000000000000000",
-        oracle.address,
-        {},
-        { from: bob.address },
-        [bob.address]
+        this.spo.address
       );
-    deployedPoolAddress = poolAddress;
+      expect(deployedPool).to.be.ok;
+    });
+  });
+  it("should deploy pool from sdk", async function () {
+    await prepare(this, [["SimplePriceOracle", "bob"]]);
+    await deploy(this, [["spo", this.SimplePriceOracle]]);
+
+    const contractConfig = await getContractsConfig(network.name, this);
+    const sdk = new Fuse(ethers.provider, contractConfig);
+
+    const [poolAddress, implementationAddress, priceOracleAddress] = await sdk.deployPool(
+      "TEST",
+      true,
+      "500000000000000000",
+      2,
+      "1100000000000000000",
+      this.spo.address,
+      {},
+      { from: this.bob.address },
+      [this.bob.address]
+    );
     console.log(
       `Pool with address: ${poolAddress}, \ncomptroller address: ${implementationAddress}, \noracle address: ${priceOracleAddress} deployed`
     );
+    deployedPoolAddress = poolAddress;
     expect(poolAddress).to.be.ok;
     expect(implementationAddress).to.be.ok;
   });
+  it("should deploy assets to pool", async function () {
+    const contractConfig = await getContractsConfig(network.name, this);
+    const sdk = new Fuse(ethers.provider, contractConfig);
+    const assets = poolAssets(this.jrm.address, deployedPoolAddress);
 
-  it("should get pool directory past events", async () => {
-    const bob = await ethers.getNamedSigner("bob");
-    const sdk = new Fuse("http://localhost:8545");
-    const events = (
-      await sdk.contracts.FusePoolDirectory.getPastEvents("PoolRegistered", {
-        fromBlock: "earliest",
-        toBlock: "latest",
-      })
-    ).filter(
-      (event) =>
-        event.returnValues.pool.creator.toLowerCase() ===
-        bob.address.toLowerCase()
-    )[0];
-    expect(events.returnValues.pool.name).to.be.eq("TEST");
-  });
-});
-
-describe("SDK deployAsset", () => {
-  it("should deploy the asset to the pool", async () => {
-    const bob = await ethers.getNamedSigner("bob");
-    const sdk = new Fuse("http://localhost:8545");
-
-    const assets = poolAssets.assets;
-    for (const asset of assets) {
-      const poolConfig = {
-        name: poolAssets.shortName + ": " + asset.underlying,
-        symbol: poolAssets.assetSymbolPrefix + asset.underlyingSymbol,
-        underlying: asset.underlying,
-        collateralFactor: asset.collateralFactor,
-        reserveFactor: asset.reserveFactor,
-        interestRateModel: asset.interestRateModel,
-        comptroller: deployedPoolAddress,
-        admin: bob.address,
-        adminFee: Fuse.Web3.utils.toBN(0),
-      };
-
-      const [assetAddress, implementationAddress, interestRateModel, receipt] =
-        await sdk.deployAsset(
-          poolConfig,
-          Fuse.Web3.utils.toBN(
-            new Big(poolConfig.collateralFactor)
-              .mul(new Big(10).pow(18))
-              .toFixed(0)
-          ),
-          Fuse.Web3.utils.toBN(
-            new Big(poolConfig.reserveFactor)
-              .mul(new Big(10).pow(18))
-              .toFixed(0)
-          ),
-          poolConfig.adminFee,
-          { from: bob.address },
-          true
-        );
-      console.log(
-        "deployed asset: ",
-        assetAddress,
-        implementationAddress,
-        interestRateModel,
-        receipt
-      );
+    for (const assetConf of assets.assets) {
+      const [assetAddress, implementationAddress, receipt] = await sdk.deployAsset(Fuse.JumpRateModelConf, assetConf, {
+        from: this.bob.address,
+      });
+      console.log("-----------------");
+      console.log("deployed asset: ", assetConf.name);
+      console.log("Asset Address: ", assetAddress);
+      console.log("Implementation Address: ", implementationAddress);
+      console.log("TX Receipt: ", receipt.hash);
+      console.log("-----------------");
     }
   });
 });
