@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { contractConfig } from "fuse-sdk-new";
+import { contractConfig } from "../sdk/fuse-sdk";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -45,11 +45,11 @@ export function getNetworkPath(basePath: string | null, network: string, extensi
   return path.join(basePath || "", "network", `${network}${extension ? `.${extension}` : ""}`);
 }
 
-export async function readFile<T>(file: string, def: T, fn: (data: string) => T): Promise<T> {
+export async function readFile<T>(file: string, fn: (data: string) => T): Promise<T> {
   return new Promise((resolve, reject) => {
     fs.access(file, fs.constants.F_OK, (err) => {
       if (err) {
-        resolve(def);
+        console.log(`Error reading file ${err}`);
       } else {
         fs.readFile(file, "utf8", (err, data) => {
           return err ? reject(err) : resolve(fn(data));
@@ -68,25 +68,36 @@ export async function getContractsConfig(network: string, thisObject?: Object): 
   if (network === "hardhat" || network === "development" || network == "localhost") {
     return await createLocalContractConfig(thisObject);
   }
-  return await readFile(getNetworkPath(basePath, network), contractConfig, parseNetworkFile);
+  return await readFile(getNetworkPath(basePath, network), parseNetworkFile);
 }
 
 async function createLocalContractConfig(thisObject): Promise<contractConfig> {
   return {
+    TOKEN_ADDRESS: { DAI_JUG: "", DAI_POT: "", USDC: "", W_TOKEN: "" },
     COMPOUND_CONTRACT_ADDRESSES: {
       Comptroller: thisObject.comp.address,
       CErc20Delegate: "", // thisObject.cErc20Delegate,
       CEther20Delegate: "", //thisObject.cEther20Delegate,
+      InitializableClones: "",
+      RewardsDistributorDelegate: "",
     },
     FUSE_CONTRACT_ADDRESSES: {
       FusePoolDirectory: thisObject.fpd.address,
       FuseFeeDistributor: thisObject.ffd.address,
       FusePoolLens: "0x8dA38681826f4ABBe089643D2B3fE4C6e4730493", //thisObject.fpl.address,
       FuseSafeLiquidator: "0x41C7F2D48bde2397dFf43DadA367d2BD3527452F", //thisObject.fpls.address,
+      MasterPriceOracleImplementation: "",
+      FusePoolLensSecondary: "",
     },
     PUBLIC_INTEREST_RATE_MODEL_CONTRACT_ADDRESSES: {},
-    PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {},
+    PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {
+      UniswapV2_PairInit: "",
+    },
     PUBLIC_PRICE_ORACLE_CONTRACT_ADDRESSES: {},
-    FACTORY: {},
+    FACTORY: {
+      UniswapV2_Factory: "",
+      UniswapV3TwapPriceOracleV2_Factory: "",
+      UniswapTwapPriceOracleV2_Factory: "",
+    },
   };
 }

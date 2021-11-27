@@ -2,7 +2,7 @@ import { deployments, network } from "hardhat";
 import { use } from "chai";
 import { solidity } from "ethereum-waffle";
 // @ts-ignore
-import Fuse, { cERC20Conf } from "fuse-sdk-new";
+import Fuse, { cERC20Conf } from "../sdk/fuse-sdk";
 
 use(solidity);
 

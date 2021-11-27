@@ -4,7 +4,7 @@ import { solidity } from "ethereum-waffle";
 // @ts-ignore
 import Web3 from "web3";
 import { poolAssets } from "./setUp";
-import Fuse from "fuse-sdk-new";
+import { Fuse } from "../sdk/fuse-sdk";
 import { deploy, getContractsConfig, prepare, initializeWithWhitelist } from "./utilities";
 
 use(solidity);
