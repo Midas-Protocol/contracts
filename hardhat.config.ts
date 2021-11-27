@@ -76,6 +76,11 @@ const config: HardhatUserConfig = {
       chainId: 97,
       url: "https://data-seed-prebsc-2-s1.binance.org:8545/",
     },
+    mainnet: {
+      accounts: { mnemonic },
+      chainId: 1,
+      url: "https://eth-mainnet.alchemyapi.io/v2/2Mt-6brbJvTA4w9cpiDtnbTo6qOoySnN",
+    },
   },
 };
 
