@@ -4,12 +4,13 @@ import { solidity } from "ethereum-waffle";
 // @ts-ignore
 import Web3 from "web3";
 import { poolAssets } from "./setUp";
-import { Fuse } from "../sdk/fuse-sdk";
+import { Fuse } from "midas-sdk";
 import { deploy, getContractsConfig, prepare, initializeWithWhitelist } from "./utilities";
+import { BigNumber } from "ethers";
 
 use(solidity);
 
-let deployedPoolAddress;
+let deployedPoolAddress: string;
 
 describe("FusePoolDirectory", function () {
   before(async function () {
@@ -65,9 +66,9 @@ describe("FusePoolDirectory", function () {
     const [poolAddress, implementationAddress, priceOracleAddress] = await sdk.deployPool(
       "TEST",
       true,
-      "500000000000000000",
+      BigNumber.from("500000000000000000"),
       2,
-      "1100000000000000000",
+      BigNumber.from("1100000000000000000"),
       this.spo.address,
       {},
       { from: this.bob.address },
@@ -86,9 +87,14 @@ describe("FusePoolDirectory", function () {
     const assets = poolAssets(this.jrm.address, deployedPoolAddress);
 
     for (const assetConf of assets.assets) {
-      const [assetAddress, implementationAddress, receipt] = await sdk.deployAsset(Fuse.JumpRateModelConf, assetConf, {
-        from: this.bob.address,
-      });
+      const [assetAddress, implementationAddress, receipt] = await sdk.deployAsset(
+        Fuse.JumpRateModelConf,
+        assetConf.collateralFactor,
+        assetConf.reserveFactor,
+        assetConf.adminFee,
+        { from: this.bob.address },
+        true
+      );
       console.log("-----------------");
       console.log("deployed asset: ", assetConf.name);
       console.log("Asset Address: ", assetAddress);

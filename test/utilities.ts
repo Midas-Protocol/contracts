@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { contractConfig } from "../sdk/fuse-sdk";
+import { contractConfig } from "midas-sdk";
 import * as fs from "fs";
 import * as path from "path";
 
