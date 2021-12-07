@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 pragma solidity 0.6.12;
 
-import "./ICToken.sol";
+import "./CToken.sol";
 
 /**
  * @title Compound's CErc20 Contract

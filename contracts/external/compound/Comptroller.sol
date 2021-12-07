@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: BSD-3-Clause
 pragma solidity 0.6.12;
 
-import "./IPriceOracle.sol";
-import "./ICToken.sol";
-import "./IUnitroller.sol";
-import "./IRewardsDistributor.sol";
+import "./PriceOracle.sol";
+import "./CToken.sol";
+import "./Unitroller.sol";
 
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
  */
-interface IComptroller {
+interface Comptroller {
     function admin() external view returns (address);
     function adminHasRights() external view returns (bool);
     function fuseAdminHasRights() external view returns (bool);
@@ -23,16 +22,13 @@ interface IComptroller {
 
     function getAssetsIn(address account) external view returns (CToken[] memory);
     function checkMembership(address account, CToken cToken) external view returns (bool);
-    function getAccountLiquidity(address account) external view returns (uint, uint, uint);
-
+    
     function _setPriceOracle(PriceOracle newOracle) external returns (uint);
     function _setCloseFactor(uint newCloseFactorMantissa) external returns (uint256);
+    function _setMaxAssets(uint newMaxAssets) external returns (uint);
     function _setLiquidationIncentive(uint newLiquidationIncentiveMantissa) external returns (uint);
     function _become(Unitroller unitroller) external;
 
-    function borrowGuardianPaused(address cToken) external view returns (bool);
-
-    function getRewardsDistributors() external view returns (RewardsDistributor[] memory);
     function getAllMarkets() external view returns (CToken[] memory);
     function getAllBorrowers() external view returns (address[] memory);
     function suppliers(address account) external view returns (bool);
@@ -41,6 +37,4 @@ interface IComptroller {
 
     function _setWhitelistEnforcement(bool enforce) external returns (uint);
     function _setWhitelistStatuses(address[] calldata _suppliers, bool[] calldata statuses) external returns (uint);
-
-    function _toggleAutoImplementations(bool enabled) external returns (uint);
 }
