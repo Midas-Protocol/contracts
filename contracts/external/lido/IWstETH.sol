@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2021 Lido <info@lido.fi>
-pragma solidity 0.6.12;
+pragma solidity >=0.7.0;
 
 /**
  * @title StETH token wrapper with static balances.

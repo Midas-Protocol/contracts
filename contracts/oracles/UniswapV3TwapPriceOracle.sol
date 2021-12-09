@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.6.12;
+pragma solidity >=0.7.0;
 
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
@@ -51,7 +51,7 @@ contract UniswapV3TwapPriceOracle is BasePriceOracle {
         // Return token/WETH TWAP
         address pool = IUniswapV3Factory(uniswapV3Factory).getPool(underlying, WETH, feeTier);
         int24 timeWeightedAverageTick = OracleLibrary.consult(pool, TWAP_PERIOD);
-        uint128 baseUnit = 10 ** uint128(ERC20Upgradeable(underlying).decimals());
+        uint128 baseUnit = uint128(10 ** uint128(ERC20Upgradeable(underlying).decimals()));
         return OracleLibrary.getQuoteAtTick(timeWeightedAverageTick, baseUnit, underlying, WETH);
     }
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.6.12;
+pragma solidity >=0.7.0;
 
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
@@ -63,15 +63,15 @@ contract Keep3rV2PriceOracle is PriceOracle, BasePriceOracle {
         uint length = feed.length();
         require(length > 0, 'no length-1 observation');
         (uint lastTime, uint lastPx0CumuCompressed, ) = feed.observations(length - 1);
-        if (lastTime > now - MIN_TWAP_TIME) {
+        if (lastTime > block.timestamp - MIN_TWAP_TIME) {
             require(length > 1, 'no length-2 observation');
             (lastTime, lastPx0CumuCompressed, ) = feed.observations(length - 2);
         }
-        uint elapsedTime = now - lastTime;
+        uint elapsedTime = block.timestamp - lastTime;
         require(elapsedTime >= MIN_TWAP_TIME, 'no TWAP satisfying MIN_TWAP_TIME');
         uint lastPx0Cumu = uint(lastPx0CumuCompressed) * (2 ** 112) / 1e18;
         uint currPx0Cumu = currentPx0Cumu(pair);
-        return (currPx0Cumu - lastPx0Cumu) / (now - lastTime); // overflow is desired
+        return (currPx0Cumu - lastPx0Cumu) / (block.timestamp - lastTime); // overflow is desired
     }
 
     /**
@@ -84,15 +84,15 @@ contract Keep3rV2PriceOracle is PriceOracle, BasePriceOracle {
         uint length = feed.length();
         require(length > 0, 'no length-1 observation');
         (uint lastTime, , uint112 lastPx1CumuCompressed) = feed.observations(length - 1);
-        if (lastTime > now - MIN_TWAP_TIME) {
+        if (lastTime > block.timestamp - MIN_TWAP_TIME) {
             require(length > 1, 'no length-2 observation');
             (lastTime, , lastPx1CumuCompressed) = feed.observations(length - 2);
         }
-        uint elapsedTime = now - lastTime;
+        uint elapsedTime = block.timestamp - lastTime;
         require(elapsedTime >= MIN_TWAP_TIME, 'no TWAP satisfying MIN_TWAP_TIME');
         uint lastPx1Cumu = uint(lastPx1CumuCompressed) * (2 ** 112) / 1e18;
         uint currPx1Cumu = currentPx1Cumu(pair);
-        return (currPx1Cumu - lastPx1Cumu) / (now - lastTime); // overflow is desired
+        return (currPx1Cumu - lastPx1Cumu) / (block.timestamp - lastTime); // overflow is desired
     }
 
     /**
@@ -101,10 +101,10 @@ contract Keep3rV2PriceOracle is PriceOracle, BasePriceOracle {
      * @param pair The uniswap pair to query for price0 cumulative value.
      */
     function currentPx0Cumu(address pair) internal view returns (uint px0Cumu) {
-        uint32 currTime = uint32(now);
+        uint32 currTime = uint32(block.timestamp);
         px0Cumu = IUniswapV2Pair(pair).price0CumulativeLast();
         (uint reserve0, uint reserve1, uint32 lastTime) = IUniswapV2Pair(pair).getReserves();
-        if (lastTime != now) {
+        if (lastTime != block.timestamp) {
             uint32 timeElapsed = currTime - lastTime; // overflow is desired
             px0Cumu += uint((reserve1 << 112) / reserve0) * timeElapsed; // overflow is desired
         }
@@ -116,7 +116,7 @@ contract Keep3rV2PriceOracle is PriceOracle, BasePriceOracle {
      * @param pair The uniswap pair to query for price1 cumulative value.
      */
     function currentPx1Cumu(address pair) internal view returns (uint px1Cumu) {
-        uint32 currTime = uint32(now);
+        uint32 currTime = uint32(block.timestamp);
         px1Cumu = IUniswapV2Pair(pair).price1CumulativeLast();
         (uint reserve0, uint reserve1, uint32 lastTime) = IUniswapV2Pair(pair).getReserves();
         if (lastTime != currTime) {

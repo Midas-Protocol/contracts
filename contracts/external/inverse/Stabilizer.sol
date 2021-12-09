@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-pragma solidity 0.6.12;
+pragma solidity >=0.7.0;
 
 interface Stabilizer {
     function buyFee() external view returns (uint256);

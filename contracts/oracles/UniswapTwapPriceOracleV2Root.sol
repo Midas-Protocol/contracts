@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.6.12;
+pragma solidity >=0.7.0;
 
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
@@ -34,14 +34,14 @@ contract UniswapTwapPriceOracleV2Root {
         uint length = observationCount[pair];
         require(length > 0, 'No length-1 TWAP observation.');
         Observation memory lastObservation = observations[pair][(length - 1) % OBSERVATION_BUFFER];
-        if (lastObservation.timestamp > now - MIN_TWAP_TIME) {
+        if (lastObservation.timestamp > block.timestamp - MIN_TWAP_TIME) {
             require(length > 1, 'No length-2 TWAP observation.');
             lastObservation = observations[pair][(length - 2) % OBSERVATION_BUFFER];
         }
-        uint elapsedTime = now - lastObservation.timestamp;
+        uint elapsedTime = block.timestamp - lastObservation.timestamp;
         require(elapsedTime >= MIN_TWAP_TIME, 'Bad TWAP time.');
         uint currPx0Cumu = currentPx0Cumu(pair);
-        return (currPx0Cumu - lastObservation.price0Cumulative) / (now - lastObservation.timestamp); // overflow is desired
+        return (currPx0Cumu - lastObservation.price0Cumulative) / (block.timestamp - lastObservation.timestamp); // overflow is desired
     }
 
     /**
@@ -53,14 +53,14 @@ contract UniswapTwapPriceOracleV2Root {
         uint length = observationCount[pair];
         require(length > 0, 'No length-1 TWAP observation.');
         Observation memory lastObservation = observations[pair][(length - 1) % OBSERVATION_BUFFER];
-        if (lastObservation.timestamp > now - MIN_TWAP_TIME) {
+        if (lastObservation.timestamp > block.timestamp - MIN_TWAP_TIME) {
             require(length > 1, 'No length-2 TWAP observation.');
             lastObservation = observations[pair][(length - 2) % OBSERVATION_BUFFER];
         }
-        uint elapsedTime = now - lastObservation.timestamp;
+        uint elapsedTime = block.timestamp - lastObservation.timestamp;
         require(elapsedTime >= MIN_TWAP_TIME, 'Bad TWAP time.');
         uint currPx1Cumu = currentPx1Cumu(pair);
-        return (currPx1Cumu - lastObservation.price1Cumulative) / (now - lastObservation.timestamp); // overflow is desired
+        return (currPx1Cumu - lastObservation.price1Cumulative) / (block.timestamp - lastObservation.timestamp); // overflow is desired
     }
 
     /**
@@ -69,10 +69,10 @@ contract UniswapTwapPriceOracleV2Root {
      * @param pair The uniswap pair to query for price0 cumulative value.
      */
     function currentPx0Cumu(address pair) internal view returns (uint px0Cumu) {
-        uint32 currTime = uint32(now);
+        uint32 currTime = uint32(block.timestamp);
         px0Cumu = IUniswapV2Pair(pair).price0CumulativeLast();
         (uint reserve0, uint reserve1, uint32 lastTime) = IUniswapV2Pair(pair).getReserves();
-        if (lastTime != now) {
+        if (lastTime != block.timestamp) {
             uint32 timeElapsed = currTime - lastTime; // overflow is desired
             px0Cumu += uint((reserve1 << 112) / reserve0) * timeElapsed; // overflow is desired
         }
@@ -84,7 +84,7 @@ contract UniswapTwapPriceOracleV2Root {
      * @param pair The uniswap pair to query for price1 cumulative value.
      */
     function currentPx1Cumu(address pair) internal view returns (uint px1Cumu) {
-        uint32 currTime = uint32(now);
+        uint32 currTime = uint32(block.timestamp);
         px1Cumu = IUniswapV2Pair(pair).price1CumulativeLast();
         (uint reserve0, uint reserve1, uint32 lastTime) = IUniswapV2Pair(pair).getReserves();
         if (lastTime != currTime) {
