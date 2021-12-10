@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-import "./external/compound/Comptroller.sol";
+import "./external/compound/IComptroller.sol";
 import "./external/compound/Unitroller.sol";
 import "./external/compound/PriceOracle.sol";
 
@@ -91,7 +91,7 @@ contract FusePoolDirectory is OwnableUpgradeable {
      * @return The index of the registered Fuse pool.
      */
     function registerPool(string memory name, address comptroller) external returns (uint256) {
-        require(msg.sender == Comptroller(comptroller).admin(), "Pool admin is not the sender.");
+        require(msg.sender == IComptroller(comptroller).admin(), "Pool admin is not the sender.");
         return _registerPool(name, comptroller);
     }
 
@@ -140,9 +140,9 @@ contract FusePoolDirectory is OwnableUpgradeable {
         // Setup Unitroller
         Unitroller unitroller = Unitroller(proxy);
         unitroller._setPendingImplementation(implementation);
-        Comptroller comptrollerImplementation = Comptroller(implementation);
+        IComptroller comptrollerImplementation = IComptroller(implementation);
         comptrollerImplementation._become(unitroller);
-        Comptroller comptrollerProxy = Comptroller(proxy);
+        IComptroller comptrollerProxy = IComptroller(proxy);
 
         // Set pool parameters
         comptrollerProxy._setCloseFactor(closeFactor);
@@ -176,7 +176,7 @@ contract FusePoolDirectory is OwnableUpgradeable {
         uint256 arrayLength = 0;
 
         for (uint256 i = 0; i < pools.length; i++) {
-            try Comptroller(pools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
+            try IComptroller(pools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
                 if (enforceWhitelist) continue;
             } catch { }
 
@@ -188,7 +188,7 @@ contract FusePoolDirectory is OwnableUpgradeable {
         uint256 index = 0;
 
         for (uint256 i = 0; i < pools.length; i++) {
-            try Comptroller(pools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
+            try IComptroller(pools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
                 if (enforceWhitelist) continue;
             } catch { }
 

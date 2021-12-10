@@ -1,5 +1,6 @@
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-waffle";
+// import "@typechain/hardhat";
 
 import { config as dotEnvConfig } from "dotenv";
 import { HardhatUserConfig } from "hardhat/types";
@@ -67,18 +68,12 @@ const config: HardhatUserConfig = {
     rinkeby: {
       accounts: { mnemonic },
       chainId: 4,
-      url:
-        urlOverride ||
-        process.env.RINKEBY_ETH_PROVIDER_URL ||
-        "http://localhost:8545",
+      url: urlOverride || process.env.RINKEBY_ETH_PROVIDER_URL || "http://localhost:8545",
     },
     bsc: {
       accounts: { mnemonic },
       chainId: 56,
-      url:
-        urlOverride ||
-        process.env.BSC_PROVIDER_URL ||
-        "https://bsc-dataseed.binance.org/",
+      url: urlOverride || process.env.BSC_PROVIDER_URL || "https://bsc-dataseed.binance.org/",
     },
     chapel: {
       accounts: { mnemonic },

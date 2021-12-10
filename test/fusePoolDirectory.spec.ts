@@ -1,11 +1,11 @@
-import { ethers, network } from "hardhat";
+import { ethers, network, deployments } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
 // @ts-ignore
 import Web3 from "web3";
 import { poolAssets } from "./setUp";
 import { Fuse } from "midas-sdk";
-import { deploy, getContractsConfig, prepare, initializeWithWhitelist } from "./utilities";
+import { deploy, getContractsConfig, prepare } from "./utilities";
 import { BigNumber } from "ethers";
 
 use(solidity);
@@ -13,49 +13,35 @@ use(solidity);
 let deployedPoolAddress: string;
 
 describe("FusePoolDirectory", function () {
-  before(async function () {
-    await prepare(this, [
-      ["FusePoolDirectory", null],
-      ["FuseFeeDistributor", null],
-      ["Comptroller", null],
-      ["JumpRateModel", null],
-    ]);
-
-    await deploy(this, [
-      ["fpd", this.FusePoolDirectory],
-      ["ffd", this.FuseFeeDistributor],
-      ["comp", this.Comptroller],
-      [
-        "jrm",
-        this.JumpRateModel,
-        [
-          "20000000000000000", // baseRatePerYear
-          "200000000000000000", // multiplierPerYear
-          "2000000000000000000", //jumpMultiplierPerYear
-          "900000000000000000", // kink
-        ],
-      ],
-    ]);
-    await initializeWithWhitelist(this);
+  beforeEach(async function () {
+    await deployments.fixture(); // ensure you start from a fresh deployments
   });
 
   describe("Deploy pool", async function () {
-    it("should deploy the pool", async function () {
-      await prepare(this, [["SimplePriceOracle", "alice"]]);
-      await deploy(this, [["spo", this.SimplePriceOracle]]);
+    it.only("should deploy the pool", async function () {
+      const { alice, bob } = await ethers.getNamedSigners();
+      const spoFactory = await ethers.getContractFactory("SimplePriceOracle", alice);
+      const spo = await spoFactory.deploy();
+      console.log('spo.address: ', spo.address);
 
-      const fdpWithSigner = await this.fpd.connect(this.bob);
-      const deployedPool = await fdpWithSigner.deployPool(
+      const compFactory = await ethers.getContractFactory("Comptroller", alice);
+      const comp = await compFactory.deploy();
+      console.log('comp.address: ', comp.address);
+
+      const fpdWithSigner = await ethers.getContract("FusePoolDirectory", bob);
+      const deployedPool = await fpdWithSigner.deployPool(
         "TEST",
-        this.comp.address,
+        comp.address,
         true,
         "500000000000000000",
+        100,
         "1100000000000000000",
-        this.spo.address
+        spo.address
       );
       expect(deployedPool).to.be.ok;
     });
   });
+
   it("should deploy pool from sdk", async function () {
     await prepare(this, [["SimplePriceOracle", "bob"]]);
     await deploy(this, [["spo", this.SimplePriceOracle]]);
