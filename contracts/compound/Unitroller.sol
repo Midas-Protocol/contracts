@@ -3,6 +3,8 @@ pragma solidity ^0.5.16;
 import "./ErrorReporter.sol";
 import "./ComptrollerStorage.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title Unitroller
  * @dev Storage for the comptroller is at this address, while execution is delegated to the `comptrollerImplementation`.
@@ -50,15 +52,8 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
         if (!hasAdminRights()) {
             return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_OWNER_CHECK);
         }
-
-        if (!fuseAdmin.comptrollerImplementationWhitelist(comptrollerImplementation, newPendingImplementation)) {
-            return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_CONTRACT_CHECK);
-        }
-
         address oldPendingImplementation = pendingComptrollerImplementation;
-
         pendingComptrollerImplementation = newPendingImplementation;
-
         emit NewPendingImplementation(oldPendingImplementation, pendingComptrollerImplementation);
 
         return uint(Error.NO_ERROR);

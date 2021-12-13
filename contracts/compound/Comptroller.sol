@@ -67,6 +67,12 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     /// @notice Emitted when a new RewardsDistributor contract is added to hooks
     event AddedRewardsDistributor(address rewardsDistributor);
 
+    /**
+ * @notice Emitted when maxAssets is changed by admin
+     */
+    event NewMaxAssets(uint oldMaxAssets, uint newMaxAssets);
+
+
     // closeFactorMantissa must be strictly greater than this value
     uint internal constant closeFactorMinMantissa = 0.05e18; // 0.05
 
@@ -1304,6 +1310,28 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
             supplyCaps[address(cTokens[i])] = newSupplyCaps[i];
             emit NewSupplyCap(cTokens[i], newSupplyCaps[i]);
         }
+    }
+    function adminOrInitializing() internal view returns (bool) {
+        bool initializing = (
+        msg.sender == comptrollerImplementation
+        &&
+        //solium-disable-next-line security/no-tx-origin
+        tx.origin == admin
+        );
+        bool isAdmin = hasAdminRights();
+        return isAdmin || initializing;
+    }
+
+    function _setMaxAssets(uint newMaxAssets) external returns (uint) {
+        // Check caller is admin OR currently initialzing as new unitroller implementation
+        if (!adminOrInitializing()) {
+            return fail(Error.UNAUTHORIZED, FailureInfo.SET_MAX_ASSETS_OWNER_CHECK);
+        }
+        uint oldMaxAssets = maxAssets;
+        maxAssets = newMaxAssets;
+        emit NewMaxAssets(oldMaxAssets, newMaxAssets);
+
+        return uint(Error.NO_ERROR);
     }
 
     /**

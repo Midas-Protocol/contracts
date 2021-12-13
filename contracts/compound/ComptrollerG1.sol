@@ -8,6 +8,8 @@ import "./ComptrollerInterface.sol";
 import "./ComptrollerStorage.sol";
 import "./Unitroller.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
@@ -878,8 +880,10 @@ contract ComptrollerG1 is ComptrollerV1Storage, ComptrollerInterface, Comptrolle
     function _setMaxAssets(uint newMaxAssets) external returns (uint) {
         // Check caller is admin OR currently initialzing as new unitroller implementation
         if (!adminOrInitializing()) {
+            console.log("HERE!!! FAILING");
             return fail(Error.UNAUTHORIZED, FailureInfo.SET_MAX_ASSETS_OWNER_CHECK);
         }
+        console.log("PAssed ceck");
 
         uint oldMaxAssets = maxAssets;
         maxAssets = newMaxAssets;
@@ -988,6 +992,8 @@ contract ComptrollerG1 is ComptrollerV1Storage, ComptrollerInterface, Comptrolle
                 tx.origin == admin
         );
         bool isAdmin = hasAdminRights();
+        console.log(isAdmin);
+        console.log(initializing);
         return isAdmin || initializing;
     }
 }
