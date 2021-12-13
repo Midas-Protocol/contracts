@@ -46,6 +46,13 @@ const config: HardhatUserConfig = {
       },
     ],
   },
+  external: {
+    contracts: [
+      {
+        artifacts: "./artifacts/contracts/compound",
+      },
+    ],
+  },
   paths: {
     artifacts: "./artifacts",
     sources: "./contracts",

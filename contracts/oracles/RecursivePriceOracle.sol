@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "../external/compound/PriceOracle.sol";
 import "../external/compound/CToken.sol";
 import "../external/compound/CErc20.sol";
-import "../external/compound/IComptroller.sol";
+import "../external/compound/Comptroller.sol";
 
 import "../external/chainlink/AggregatorV3Interface.sol";
 
@@ -44,7 +44,7 @@ contract RecursivePriceOracle is PriceOracle {
         CToken underlying = CToken(CErc20(address(cToken)).underlying());
 
         // Get Comptroller
-        IComptroller comptroller = IComptroller(underlying.comptroller());
+        Comptroller comptroller = Comptroller(underlying.comptroller());
 
         // Check for Compound Comptroller
         if (address(comptroller) == COMPOUND_COMPTROLLER) {

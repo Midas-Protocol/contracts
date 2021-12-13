@@ -9,7 +9,7 @@ import "./Unitroller.sol";
  * @title Compound's Comptroller Contract
  * @author Compound
  */
-interface IComptroller {
+interface Comptroller {
     function admin() external view returns (address);
     function adminHasRights() external view returns (bool);
     function fuseAdminHasRights() external view returns (bool);

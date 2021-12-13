@@ -44,7 +44,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
   await fuseFeeDistributor._setPoolLimits(
     ethers.utils.parseEther("1"),
     ethers.constants.MaxUint256,
-    ethers.constants.MaxUint256,
+    ethers.constants.MaxUint256
   );
 
   dep = await deployments.deterministic("FusePoolLens", {
