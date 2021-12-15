@@ -5,7 +5,7 @@ import { solidity } from "ethereum-waffle";
 import Web3 from "web3";
 import { poolAssets } from "./setUp";
 import { Fuse } from "midas-sdk";
-import { deploy, getContractsConfig, prepare } from "./utilities";
+import { deploy, getContractsConfig, initializeWithWhitelist, prepare } from "./utilities";
 import { BigNumber, utils } from "ethers";
 
 use(solidity);
@@ -18,8 +18,8 @@ describe("FusePoolDirectory", function () {
   });
 
   describe("Deploy pool", async function () {
-    it("should deploy the pool", async function () {
-      const { alice, deployer, bob } = await ethers.getNamedSigners();
+    it("should deploy the pool via contract", async function () {
+      const { alice, deployer } = await ethers.getNamedSigners();
       const spoFactory = await ethers.getContractFactory("SimplePriceOracle", alice);
       const spo = await spoFactory.deploy();
       console.log("spo.address: ", spo.address);
@@ -28,13 +28,12 @@ describe("FusePoolDirectory", function () {
       const comp = await compFactory.deploy();
       console.log("comp.address: ", comp.address);
 
-      const fpdWithSigner = await ethers.getContract("FusePoolDirectory", deployer);
+      const fpdWithSigner = await ethers.getContract("FusePoolDirectory", alice);
       const maxAssets = "20";
       // 50% -> 0.5 * 1e18
       const bigCloseFactor = utils.parseUnits((50 / 100).toString());
       // 8% -> 1.08 * 1e8
       const bigLiquidationIncentive = utils.parseUnits((8 / 100 + 1).toString());
-
       const deployedPool = await fpdWithSigner.deployPool(
         "TEST",
         comp.address,
@@ -48,18 +47,40 @@ describe("FusePoolDirectory", function () {
     });
 
     it("should deploy pool from sdk", async function () {
-      await prepare(this, [["SimplePriceOracle", "bob"]]);
-      await deploy(this, [["spo", this.SimplePriceOracle]]);
+      await prepare(this, [
+        ["FusePoolDirectory", null],
+        ["FuseFeeDistributor", null],
+        ["Comptroller", "bob"],
+        ["JumpRateModel", null],
+        ["SimplePriceOracle", "bob"],
+      ]);
 
+      await deploy(this, [
+        ["fpd", this.FusePoolDirectory],
+        ["ffd", this.FuseFeeDistributor],
+        ["comp", this.Comptroller],
+        ["spo", this.SimplePriceOracle],
+        [
+          "jrm",
+          this.JumpRateModel,
+          [
+            "20000000000000000", // baseRatePerYear
+            "200000000000000000", // multiplierPerYear
+            "2000000000000000000", //jumpMultiplierPerYear
+            "900000000000000000", // kink
+          ],
+        ],
+      ]);
+      await initializeWithWhitelist(this);
       const contractConfig = await getContractsConfig(network.name, this);
       const sdk = new Fuse(ethers.provider, contractConfig);
 
       const [poolAddress, implementationAddress, priceOracleAddress] = await sdk.deployPool(
         "TEST",
         true,
-        BigNumber.from("500000000000000000"),
-        2,
-        BigNumber.from("1100000000000000000"),
+        BigNumber.from("500000000000000000").toString(),
+        20,
+        BigNumber.from("1100000000000000000").toString(),
         this.spo.address,
         {},
         { from: this.bob.address },
