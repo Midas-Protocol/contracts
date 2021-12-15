@@ -18,7 +18,7 @@ describe("FusePoolDirectory", function () {
   });
 
   describe("Deploy pool", async function () {
-    it.only("should deploy the pool via contract", async function () {
+    it("should deploy the pool via contract", async function () {
       const { alice, deployer } = await ethers.getNamedSigners();
       const spoFactory = await ethers.getContractFactory("SimplePriceOracle", alice);
       const spo = await spoFactory.deploy();
@@ -46,45 +46,30 @@ describe("FusePoolDirectory", function () {
       expect(deployedPool).to.be.ok;
     });
 
-    it("should deploy pool from sdk", async function () {
-      await prepare(this, [
-        ["FusePoolDirectory", null],
-        ["FuseFeeDistributor", null],
-        ["Comptroller", "bob"],
-        ["JumpRateModel", null],
-        ["SimplePriceOracle", "bob"],
-      ]);
-
-      await deploy(this, [
-        ["fpd", this.FusePoolDirectory],
-        ["ffd", this.FuseFeeDistributor],
-        ["comp", this.Comptroller],
-        ["spo", this.SimplePriceOracle],
-        [
-          "jrm",
-          this.JumpRateModel,
-          [
-            "20000000000000000", // baseRatePerYear
-            "200000000000000000", // multiplierPerYear
-            "2000000000000000000", //jumpMultiplierPerYear
-            "900000000000000000", // kink
-          ],
-        ],
-      ]);
-      await initializeWithWhitelist(this);
+    it.only("should deploy pool from sdk", async function () {
+      
+      const { deployer, bob } = await ethers.getNamedSigners();
+      const spoFactory = await ethers.getContractFactory("SimplePriceOracle", bob);
+      const spo = await spoFactory.deploy();
+      console.log("spo.address: ", spo.address);
+      
+      const compFactory = await ethers.getContractFactory("Comptroller", deployer);
+      const comp = await compFactory.deploy();
+      console.log("comp.address: ", comp.address);
+      
       const contractConfig = await getContractsConfig(network.name, this);
       const sdk = new Fuse(ethers.provider, contractConfig);
-
+      
       const [poolAddress, implementationAddress, priceOracleAddress] = await sdk.deployPool(
         "TEST",
         true,
         BigNumber.from("500000000000000000").toString(),
         20,
         BigNumber.from("1100000000000000000").toString(),
-        this.spo.address,
+        spo.address,
         {},
-        { from: this.bob.address },
-        [this.bob.address]
+        { from: bob.address },
+        [bob.address]
       );
       console.log(
         `Pool with address: ${poolAddress}, \ncomptroller address: ${implementationAddress}, \noracle address: ${priceOracleAddress} deployed`
@@ -93,6 +78,56 @@ describe("FusePoolDirectory", function () {
       expect(poolAddress).to.be.ok;
       expect(implementationAddress).to.be.ok;
     });
+
+    it.skip("old test", async () => {
+      it("should deploy pool from sdk", async function () {
+        await prepare(this, [
+          ["FusePoolDirectory", null],
+          ["FuseFeeDistributor", null],
+          ["Comptroller", "bob"],
+          ["JumpRateModel", null],
+          ["SimplePriceOracle", "bob"],
+        ]);
+  
+        await deploy(this, [
+          ["fpd", this.FusePoolDirectory],
+          ["ffd", this.FuseFeeDistributor],
+          ["comp", this.Comptroller],
+          ["spo", this.SimplePriceOracle],
+          [
+            "jrm",
+            this.JumpRateModel,
+            [
+              "20000000000000000", // baseRatePerYear
+              "200000000000000000", // multiplierPerYear
+              "2000000000000000000", //jumpMultiplierPerYear
+              "900000000000000000", // kink
+            ],
+          ],
+        ]);
+        await initializeWithWhitelist(this);
+        const contractConfig = await getContractsConfig(network.name, this);
+        const sdk = new Fuse(ethers.provider, contractConfig);
+  
+        const [poolAddress, implementationAddress, priceOracleAddress] = await sdk.deployPool(
+          "TEST",
+          true,
+          BigNumber.from("500000000000000000").toString(),
+          20,
+          BigNumber.from("1100000000000000000").toString(),
+          this.spo.address,
+          {},
+          { from: this.bob.address },
+          [this.bob.address]
+        );
+        console.log(
+          `Pool with address: ${poolAddress}, \ncomptroller address: ${implementationAddress}, \noracle address: ${priceOracleAddress} deployed`
+        );
+        deployedPoolAddress = poolAddress;
+        expect(poolAddress).to.be.ok;
+        expect(implementationAddress).to.be.ok;
+      });
+    })
 
     it("should deploy assets to pool", async function () {
       const contractConfig = await getContractsConfig(network.name, this);

@@ -66,26 +66,26 @@ function parseNetworkFile(data: string | object) {
 export async function getContractsConfig(network: string, thisObject?: Object): Promise<contractConfig> {
   const basePath = __dirname + "/../";
   if (network === "hardhat" || network === "development" || network == "localhost") {
-    return await createLocalContractConfig(thisObject);
+    return await createLocalContractConfig();
   }
   return await readFile(getNetworkPath(basePath, network), parseNetworkFile);
 }
 
-async function createLocalContractConfig(thisObject): Promise<contractConfig> {
+async function createLocalContractConfig(): Promise<contractConfig> {
   return {
     TOKEN_ADDRESS: { DAI_JUG: "", DAI_POT: "", USDC: "", W_TOKEN: "" },
     COMPOUND_CONTRACT_ADDRESSES: {
-      Comptroller: thisObject.comp.address,
-      CErc20Delegate: "", // thisObject.cErc20Delegate,
-      CEther20Delegate: "", //thisObject.cEther20Delegate,
+      Comptroller: "0x610178dA211FEF7D417bC0e6FeD39F05609AD788", // comp.address,
+      CErc20Delegate: "", // cErc20Delegate,
+      CEther20Delegate: "", //cEther20Delegate,
       InitializableClones: "",
       RewardsDistributorDelegate: "",
     },
     FUSE_CONTRACT_ADDRESSES: {
-      FusePoolDirectory: thisObject.fpd.address,
-      FuseFeeDistributor: thisObject.ffd.address,
-      FusePoolLens: "0x8dA38681826f4ABBe089643D2B3fE4C6e4730493", //thisObject.fpl.address,
-      FuseSafeLiquidator: "0x41C7F2D48bde2397dFf43DadA367d2BD3527452F", //thisObject.fpls.address,
+      FusePoolDirectory: "0x787b0DFDa508D69d7E70eB30021739579F42CE85", // fpd.address,
+      FuseFeeDistributor: "0x92cACDD2ffF6ba0C64e5f8f894062EBe5bBD994A", // ffd.address,
+      FusePoolLens: "0x8dA38681826f4ABBe089643D2B3fE4C6e4730493", //fpl.address,
+      FuseSafeLiquidator: "0x41C7F2D48bde2397dFf43DadA367d2BD3527452F", //fpls.address,
       MasterPriceOracleImplementation: "",
       FusePoolLensSecondary: "",
     },

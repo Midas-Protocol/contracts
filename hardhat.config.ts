@@ -66,7 +66,9 @@ const config: HardhatUserConfig = {
     rando: { default: 3 },
   },
   networks: {
-    hardhat: {},
+    hardhat: {
+      saveDeployments: false
+    },
     ganache: {
       accounts: { mnemonic },
       chainId: 1337,
