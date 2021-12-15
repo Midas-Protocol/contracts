@@ -5,7 +5,7 @@ import { solidity } from "ethereum-waffle";
 import Web3 from "web3";
 import { poolAssets } from "./setUp";
 import { Fuse } from "../lib/esm";
-import { deploy, getContractsConfig, initializeWithWhitelist, prepare } from "./utilities";
+import { getContractsConfig } from "./utilities";
 import { BigNumber, utils } from "ethers";
 
 use(solidity);
@@ -46,9 +46,9 @@ describe("FusePoolDirectory", function () {
       expect(deployedPool).to.be.ok;
     });
 
-    it.only("should deploy pool from sdk", async function () {
-      
+    it("should deploy pool from sdk", async function () {
       const { deployer, bob } = await ethers.getNamedSigners();
+
       const spoFactory = await ethers.getContractFactory("SimplePriceOracle", bob);
       const spo = await spoFactory.deploy();
       console.log("spo.address: ", spo.address);
@@ -57,9 +57,9 @@ describe("FusePoolDirectory", function () {
       const comp = await compFactory.deploy();
       console.log("comp.address: ", comp.address);
       
-      const contractConfig = await getContractsConfig(network.name, this);
+      const contractConfig = await getContractsConfig(network.name);
       const sdk = new Fuse(ethers.provider, contractConfig);
-      
+
       const [poolAddress, implementationAddress, priceOracleAddress] = await sdk.deployPool(
         "TEST",
         true,
@@ -79,60 +79,13 @@ describe("FusePoolDirectory", function () {
       expect(implementationAddress).to.be.ok;
     });
 
-    it.skip("old test", async () => {
-      it("should deploy pool from sdk", async function () {
-        await prepare(this, [
-          ["FusePoolDirectory", null],
-          ["FuseFeeDistributor", null],
-          ["Comptroller", "bob"],
-          ["JumpRateModel", null],
-          ["SimplePriceOracle", "bob"],
-        ]);
-  
-        await deploy(this, [
-          ["fpd", this.FusePoolDirectory],
-          ["ffd", this.FuseFeeDistributor],
-          ["comp", this.Comptroller],
-          ["spo", this.SimplePriceOracle],
-          [
-            "jrm",
-            this.JumpRateModel,
-            [
-              "20000000000000000", // baseRatePerYear
-              "200000000000000000", // multiplierPerYear
-              "2000000000000000000", //jumpMultiplierPerYear
-              "900000000000000000", // kink
-            ],
-          ],
-        ]);
-        await initializeWithWhitelist(this);
-        const contractConfig = await getContractsConfig(network.name, this);
-        const sdk = new Fuse(ethers.provider, contractConfig);
-  
-        const [poolAddress, implementationAddress, priceOracleAddress] = await sdk.deployPool(
-          "TEST",
-          true,
-          BigNumber.from("500000000000000000").toString(),
-          20,
-          BigNumber.from("1100000000000000000").toString(),
-          this.spo.address,
-          {},
-          { from: this.bob.address },
-          [this.bob.address]
-        );
-        console.log(
-          `Pool with address: ${poolAddress}, \ncomptroller address: ${implementationAddress}, \noracle address: ${priceOracleAddress} deployed`
-        );
-        deployedPoolAddress = poolAddress;
-        expect(poolAddress).to.be.ok;
-        expect(implementationAddress).to.be.ok;
-      });
-    })
+    it.only("should deploy assets to pool", async function () {
+      const { alice, deployer, bob } = await ethers.getNamedSigners();
 
-    it("should deploy assets to pool", async function () {
-      const contractConfig = await getContractsConfig(network.name, this);
+      const jrm = await ethers.getContract("JumpRateModel", alice);
+      const contractConfig = await getContractsConfig(network.name);
       const sdk = new Fuse(ethers.provider, contractConfig);
-      const assets = poolAssets(this.jrm.address, deployedPoolAddress);
+      const assets = poolAssets(jrm.address, deployedPoolAddress);
 
       for (const assetConf of assets.assets) {
         const [assetAddress, implementationAddress, receipt] = await sdk.deployAsset(
@@ -140,7 +93,7 @@ describe("FusePoolDirectory", function () {
           assetConf.collateralFactor,
           assetConf.reserveFactor,
           assetConf.adminFee,
-          { from: this.bob.address },
+          { from: bob.address },
           true
         );
         console.log("-----------------");
