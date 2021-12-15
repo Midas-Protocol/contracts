@@ -2,9 +2,18 @@
   "name": "midasprotocol",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./lib/cjs/index.js",
+  "module": "./lib/esm/index.js",
+  "files": [
+    "/lib/"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "hardhat test",
+    "export": "hardhat export --export-all ./deployments.json",
+    "build": "build:sdk && build:contracts",
+    "build:sdk": "tsc -p tsconfig-sdk.json",
+    "build:contracts": "hardhat compile",
+    "prepublish": "tsc -p tsconfig-sdk.json && tsc -p tsconfig-cjs.json"
   },
   "keywords": [],
   "author": "Rahul Sethuram",

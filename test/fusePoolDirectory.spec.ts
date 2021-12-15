@@ -4,7 +4,7 @@ import { solidity } from "ethereum-waffle";
 // @ts-ignore
 import Web3 from "web3";
 import { poolAssets } from "./setUp";
-import { Fuse } from "midas-sdk";
+import { Fuse } from "../lib/esm";
 import { deploy, getContractsConfig, initializeWithWhitelist, prepare } from "./utilities";
 import { BigNumber, utils } from "ethers";
 
@@ -18,7 +18,7 @@ describe("FusePoolDirectory", function () {
   });
 
   describe("Deploy pool", async function () {
-    it("should deploy the pool via contract", async function () {
+    it.only("should deploy the pool via contract", async function () {
       const { alice, deployer } = await ethers.getNamedSigners();
       const spoFactory = await ethers.getContractFactory("SimplePriceOracle", alice);
       const spo = await spoFactory.deploy();
@@ -93,6 +93,7 @@ describe("FusePoolDirectory", function () {
       expect(poolAddress).to.be.ok;
       expect(implementationAddress).to.be.ok;
     });
+
     it("should deploy assets to pool", async function () {
       const contractConfig = await getContractsConfig(network.name, this);
       const sdk = new Fuse(ethers.provider, contractConfig);
