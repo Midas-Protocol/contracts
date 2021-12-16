@@ -692,8 +692,8 @@ export default class Fuse {
         this.provider.getSigner(options.from)
       );
 
-      const deployedInterestRateModel = await interestRateModelContract.deploy(deployArgs, { ...options });
-      return deployedInterestRateModel.options.address;
+      const deployedInterestRateModel = await interestRateModelContract.deploy(...deployArgs);
+      return deployedInterestRateModel.address;
     };
 
     this.deployCToken = async function (
@@ -1248,6 +1248,7 @@ export default class Fuse {
               } else await promptForUniswapV2Pair(this);
             } // Prompt for Uniswap V2 pair
 
+            // @ts-ignore
             async function promptForUniswapV2Pair(self: Fuse) {
               // Predict correct Uniswap V2 pair
               let isNotReversed =
