@@ -71,5 +71,25 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
   });
   const jrm = await dep.deploy();
   console.log("JumpRateModel: ", jrm.address);
+
+  dep = await deployments.deterministic("CErc20Delegate", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [
+    ],
+    log: true,
+  });
+  const erc20Del = await dep.deploy();
+  console.log("CErc20Delegate: ", erc20Del.address);
+
+  dep = await deployments.deterministic("CEtherDelegate", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [
+    ],
+    log: true,
+  });
+  const ethDel = await dep.deploy();
+  console.log("CEtherDelegate: ", ethDel.address);
 };
 export default func;
