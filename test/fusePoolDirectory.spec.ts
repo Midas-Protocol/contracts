@@ -80,7 +80,7 @@ describe("FusePoolDirectory", function () {
     });
 
     it.only("should deploy assets to pool", async function () {
-      const { alice, deployer, bob } = await ethers.getNamedSigners();
+      const { alice, bob } = await ethers.getNamedSigners();
 
       const jrm = await ethers.getContract("JumpRateModel", alice);
       const contractConfig = await getContractsConfig(network.name);
