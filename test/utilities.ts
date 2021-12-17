@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { contractConfig } from "midas-sdk";
+import { contractConfig } from "../lib/esm";
 import * as fs from "fs";
 import * as path from "path";
 
