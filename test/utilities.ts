@@ -75,7 +75,7 @@ async function createLocalContractConfig(): Promise<contractConfig> {
   return {
     TOKEN_ADDRESS: { DAI_JUG: "", DAI_POT: "", USDC: "", W_TOKEN: "" },
     COMPOUND_CONTRACT_ADDRESSES: {
-      Comptroller: "0x610178dA211FEF7D417bC0e6FeD39F05609AD788", // comp.address,
+      Comptroller: "0xc3E10104b9B067971A5270c0e2fCbFD8Dd93D9Cb", // comp.address,
       CErc20Delegate: "0x4aBEA9f62DbcF65A82b66876227cF4Aa0bD3dd5C", // cErc20Delegate,
       CEther20Delegate: "0x464ffd3844f7f39E98022B5B25125Ae9d98Ac36B", //cEther20Delegate,
       InitializableClones: "",

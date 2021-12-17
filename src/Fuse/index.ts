@@ -27,6 +27,7 @@ import uniswapV3PoolAbiSlim from "./abi/UniswapV3Pool.slim.json";
 import initializableClonesAbi from "./abi/InitializableClones.json";
 import { Interface } from "@ethersproject/abi";
 import { COMPTROLLER_ERROR_CODES, CTOKEN_ERROR_CODES, JUMP_RATE_MODEL_CONF, ORACLES } from "./config";
+import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 type MinifiedContracts = {
   [key: string]: {
@@ -59,9 +60,9 @@ type cERC20Conf = {
   symbol: string; // ERC20 Symbol
   decimals: number; // decimal precision
   admin: string; // Address of the admin
-  collateralFactor: string;
-  reserveFactor: string;
-  adminFee: string;
+  collateralFactor: number;
+  reserveFactor: number;
+  adminFee: number;
   bypassPriceFeedCheck: boolean;
 };
 
@@ -210,11 +211,11 @@ export default class Fuse {
   deployPool;
   deployPriceOracle;
   deployComptroller;
-  deployAsset;
-  deployInterestRateModel;
-  deployCToken;
-  deployCEther;
-  deployCErc20;
+  deployAsset: (i: interestRateModelConf, t: cERC20Conf, o: Object) => Promise<(string | TransactionReceipt)[]>;
+  deployInterestRateModel: (o: any, m?: string, c?: interestRateModelParams) => Promise<string>;
+  deployCToken: (t: cERC20Conf, o: Object) => Promise<(string | TransactionReceipt)[]>;
+  deployCEther: (t: cERC20Conf, o: Object, i: string | null) => Promise<(string | TransactionReceipt)[]>;
+  deployCErc20: (t: cERC20Conf, o: Object, i: string | null) => Promise<(string | TransactionReceipt)[]>;
   identifyInterestRateModel;
   getInterestRateModel;
   checkForCErc20PriceFeed;
@@ -595,12 +596,9 @@ export default class Fuse {
 
     this.deployAsset = async function (
       irmConf: interestRateModelConf,
-      collateralFactor: number,
-      reserveFactor: number, // Amount of accrue interest that will go to the pool's reserves. Usually 0.1
-      adminFee: number,
-      options: any,
-      bypassPriceFeedCheck: any // ?
-    ) {
+      cTokenConf: cERC20Conf,
+      options: any
+    ): Promise<(string | TransactionReceipt)[]> {
       let assetAddress;
       let implementationAddress;
       let receipt;
@@ -616,9 +614,9 @@ export default class Fuse {
       ) {
         try {
           irmConf.interestRateModel = await this.deployInterestRateModel(
+            options,
             irmConf.interestRateModel,
-            irmConf.interestRateModelParams,
-            options
+            irmConf.interestRateModelParams
           ); // TODO: anchorMantissa
         } catch (error: any) {
           throw Error("Deployment of interest rate model failed: " + (error.message ? error.message : error));
@@ -627,22 +625,18 @@ export default class Fuse {
 
       // Deploy new asset to existing pool via SDK
       try {
-        [assetAddress, implementationAddress, receipt] = await this.deployCToken(
-          irmConf,
-          collateralFactor,
-          reserveFactor,
-          adminFee,
-          options,
-          bypassPriceFeedCheck
-        );
+        [assetAddress, implementationAddress, receipt] = await this.deployCToken(cTokenConf, options);
       } catch (error: any) {
         throw Error("Deployment of asset to Fuse pool failed: " + (error.message ? error.message : error));
       }
-
       return [assetAddress, implementationAddress, irmConf.interestRateModel, receipt];
     };
 
-    this.deployInterestRateModel = async function (model: string, conf: interestRateModelParams, options: any) {
+    this.deployInterestRateModel = async function (
+      options: any,
+      model?: string,
+      conf?: interestRateModelParams
+    ): Promise<string> {
       // Default model = JumpRateModel
       if (!model) {
         model = "JumpRateModel";
@@ -696,24 +690,15 @@ export default class Fuse {
       return deployedInterestRateModel.address;
     };
 
-    this.deployCToken = async function (
-      conf: any,
-      collateralFactor: any,
-      reserveFactor: number,
-      adminFee: number,
-      options: any,
-      bypassPriceFeedCheck: boolean
-    ) {
+    this.deployCToken = async function (conf: cERC20Conf, options: any): Promise<(string | TransactionReceipt)[]> {
       // BigNumbers
-
       // 10% -> 0.1 * 1e18
-      const reserveFactorBN = utils.parseUnits((reserveFactor / 100).toString());
+      const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
       // 5% -> 0.05 * 1e18
-      const adminFeeBN = utils.parseUnits((adminFee / 100).toString());
+      const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
       // 50% -> 0.5 * 1e18
       // TODO: find out if this is a number or string. If its a number, parseUnits will not work. Also parse Units works if number is between 0 - 0.9
-      const collateralFactorBN = utils.parseUnits((collateralFactor / 100).toString());
-
+      const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
       // Check collateral factor
       if (!collateralFactorBN.gte(constants.Zero) || collateralFactorBN.gt(utils.parseUnits("0.9", 18)))
         throw Error("Collateral factor must range from 0 to 0.9.");
@@ -738,36 +723,29 @@ export default class Fuse {
         !BigNumber.from(conf.underlying).isZero()
         ? await this.deployCErc20(
             conf,
-            collateralFactor,
-            reserveFactor,
-            adminFee,
             options,
-            bypassPriceFeedCheck,
             this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CErc20Delegate
               ? this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CErc20Delegate
-              : undefined
+              : null
           )
         : await this.deployCEther(
             conf,
-            collateralFactor,
-            reserveFactor,
-            adminFee,
+            options,
             this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEther20Delegate
               ? this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEther20Delegate
-              : null,
-            options
+              : null
           );
     };
 
     this.deployCEther = async function (
       conf: cERC20Conf,
-      supportMarket: boolean,
-      collateralFactor: number,
-      reserveFactor: number,
-      adminFee: number,
       options: any,
-      implementationAddress?: string
-    ) {
+      implementationAddress: string | null
+    ): Promise<(string | TransactionReceipt)[]> {
+      const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
+      const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
+      const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
+
       // Deploy CEtherDelegate implementation contract if necessary
       if (!implementationAddress) {
         const cEtherDelegateFactory = new ContractFactory(
@@ -780,7 +758,6 @@ export default class Fuse {
         implementationAddress = cEtherDelegateDeployed.address;
       }
 
-      // Deploy CEtherDelegator proxy contract
       let deployArgs = [
         conf.comptroller,
         conf.interestRateModel,
@@ -788,8 +765,8 @@ export default class Fuse {
         conf.symbol,
         implementationAddress,
         "0x00",
-        reserveFactor ? reserveFactor.toString() : 0,
-        adminFee ? adminFee.toString() : 0,
+        reserveFactorBN,
+        adminFeeBN,
       ];
 
       const abiCoder = new utils.AbiCoder();
@@ -802,18 +779,16 @@ export default class Fuse {
         this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi,
         this.provider.getSigner(options.from)
       );
-      const errorCode = await comptroller._deployMarket(
+
+      const tx = await comptroller._deployMarket(
         "0x0000000000000000000000000000000000000000",
         constructorData,
-        collateralFactor
+        collateralFactorBN
       );
-      if (errorCode != constants.Zero)
-        throw "Failed to deploy market with error code: " + Fuse.COMPTROLLER_ERROR_CODES[errorCode];
-      const receipt = await comptroller._deployMarket(
-        "0x0000000000000000000000000000000000000000",
-        constructorData,
-        collateralFactor
-      );
+      const receipt: TransactionReceipt = await tx.wait();
+
+      // if (errorCode != constants.Zero)
+      //   throw "Failed to deploy market with error code: " + Fuse.COMPTROLLER_ERROR_CODES[errorCode];
 
       const saltsHash = utils.solidityKeccak256(
         ["address", "address", "uint"],
@@ -836,21 +811,22 @@ export default class Fuse {
 
     this.deployCErc20 = async function (
       conf: cERC20Conf,
-      collateralFactor: number,
-      reserveFactor: number,
-      adminFee: number,
       options: any,
-      bypassPriceFeedCheck: boolean,
-      implementationAddress?: string // cERC20Delegate implementation
-    ) {
+      implementationAddress: string | null // cERC20Delegate implementation
+    ): Promise<(string | TransactionReceipt)[]> {
+      const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
+      const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
+      const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
+
       // Get Comptroller
       const comptroller = new Contract(
         conf.comptroller,
-        this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi
+        this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi,
+        this.provider.getSigner(options.from)
       );
 
       // Check for price feed assuming !bypassPriceFeedCheck
-      if (!bypassPriceFeedCheck) await this.checkForCErc20PriceFeed(comptroller, conf);
+      if (!conf.bypassPriceFeedCheck) await this.checkForCErc20PriceFeed(comptroller, conf);
 
       // Deploy CErc20Delegate implementation contract if necessary
       if (!implementationAddress) {
@@ -860,12 +836,13 @@ export default class Fuse {
           this.compoundContracts[
             "contracts/" + conf.delegateContractName + ".sol:" + conf.delegateContractName
           ].bytecode,
-          this.provider.getSigner()
+          this.provider.getSigner(options.from)
         );
         const cErc20DelegateDeployed = await cErc20Delegate.deploy();
         implementationAddress = cErc20DelegateDeployed.address;
       }
 
+      // Deploy CEtherDelegator proxy contract
       let deployArgs = [
         conf.underlying,
         conf.comptroller,
@@ -874,8 +851,8 @@ export default class Fuse {
         conf.symbol,
         implementationAddress,
         "0x00",
-        reserveFactor ? reserveFactor.toString() : 0,
-        adminFee ? adminFee.toString() : 0,
+        reserveFactorBN,
+        adminFeeBN,
       ];
 
       const abiCoder = new utils.AbiCoder();
@@ -883,11 +860,11 @@ export default class Fuse {
         ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
         deployArgs
       );
-      const errorCode = await comptroller._deployMarket(false, constructorData, collateralFactor);
-      if (errorCode != constants.Zero)
-        throw "Failed to deploy market with error code: " + Fuse.COMPTROLLER_ERROR_CODES[errorCode];
+      const tx = await comptroller._deployMarket(false, constructorData, collateralFactorBN);
+      const receipt = await tx.wait();
 
-      const receipt = await comptroller._deployMarket(false, constructorData, collateralFactor);
+      // if (errorCode != constants.Zero)
+      //   throw "Failed to deploy market with error code: " + Fuse.COMPTROLLER_ERROR_CODES[errorCode];
 
       const saltsHash = utils.solidityKeccak256(
         ["address", "address", "uint"],

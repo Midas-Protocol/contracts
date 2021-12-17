@@ -65,8 +65,8 @@ export const poolAssets = (interestRateModelAddress: string, comptroller: string
     symbol: "RGT",
     decimals: 18,
     admin: "true",
-    collateralFactor: "0.45",
-    reserveFactor: "0.3",
+    collateralFactor: "0.65",
+    reserveFactor: "0.2",
     adminFee: "0",
     bypassPriceFeedCheck: true,
   };

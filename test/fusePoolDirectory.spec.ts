@@ -19,14 +19,12 @@ describe("FusePoolDirectory", function () {
 
   describe("Deploy pool", async function () {
     it("should deploy the pool via contract", async function () {
-      const { alice, deployer } = await ethers.getNamedSigners();
+      const { alice } = await ethers.getNamedSigners();
+      const contractConfig = await getContractsConfig(network.name);
+
       const spoFactory = await ethers.getContractFactory("SimplePriceOracle", alice);
       const spo = await spoFactory.deploy();
       console.log("spo.address: ", spo.address);
-
-      const compFactory = await ethers.getContractFactory("Comptroller", deployer);
-      const comp = await compFactory.deploy();
-      console.log("comp.address: ", comp.address);
 
       const fpdWithSigner = await ethers.getContract("FusePoolDirectory", alice);
       const maxAssets = "20";
@@ -36,7 +34,7 @@ describe("FusePoolDirectory", function () {
       const bigLiquidationIncentive = utils.parseUnits((8 / 100 + 1).toString());
       const deployedPool = await fpdWithSigner.deployPool(
         "TEST",
-        comp.address,
+        contractConfig.COMPOUND_CONTRACT_ADDRESSES.Comptroller,
         true,
         bigCloseFactor,
         maxAssets,
@@ -47,16 +45,11 @@ describe("FusePoolDirectory", function () {
     });
 
     it("should deploy pool from sdk", async function () {
-      const { deployer, bob } = await ethers.getNamedSigners();
+      const { bob } = await ethers.getNamedSigners();
 
       const spoFactory = await ethers.getContractFactory("SimplePriceOracle", bob);
       const spo = await spoFactory.deploy();
-      console.log("spo.address: ", spo.address);
-      
-      const compFactory = await ethers.getContractFactory("Comptroller", deployer);
-      const comp = await compFactory.deploy();
-      console.log("comp.address: ", comp.address);
-      
+
       const contractConfig = await getContractsConfig(network.name);
       const sdk = new Fuse(ethers.provider, contractConfig);
 
@@ -79,7 +72,7 @@ describe("FusePoolDirectory", function () {
       expect(implementationAddress).to.be.ok;
     });
 
-    it.only("should deploy assets to pool", async function () {
+    it("should deploy assets to pool", async function () {
       const { alice, bob } = await ethers.getNamedSigners();
 
       const jrm = await ethers.getContract("JumpRateModel", alice);
@@ -88,19 +81,17 @@ describe("FusePoolDirectory", function () {
       const assets = poolAssets(jrm.address, deployedPoolAddress);
 
       for (const assetConf of assets.assets) {
-        const [assetAddress, implementationAddress, receipt] = await sdk.deployAsset(
+        const [assetAddress, implementationAddress, irmModel, receipt] = await sdk.deployAsset(
           Fuse.JumpRateModelConf,
-          assetConf.collateralFactor,
-          assetConf.reserveFactor,
-          assetConf.adminFee,
-          { from: bob.address },
-          true
+          assetConf,
+          { from: bob.address }
         );
         console.log("-----------------");
         console.log("deployed asset: ", assetConf.name);
         console.log("Asset Address: ", assetAddress);
         console.log("Implementation Address: ", implementationAddress);
-        console.log("TX Receipt: ", receipt.hash);
+        // @ts-ignore
+        console.log("TX Receipt: ", receipt.transactionHash);
         console.log("-----------------");
       }
     });

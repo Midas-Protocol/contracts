@@ -10,7 +10,7 @@
   "scripts": {
     "test": "hardhat test",
     "export": "hardhat export --export-all ./deployments.json",
-    "build": "build:sdk && build:contracts",
+    "build": "npm run build:sdk && npm run build:contracts",
     "build:sdk": "tsc -p tsconfig-sdk.json",
     "build:cjs": "tsc -p tsconfig-cjs.json",
     "build:contracts": "hardhat compile",

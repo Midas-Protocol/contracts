@@ -1,5 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
+import { ethers } from "hardhat";
 
 /**
  * Hardhat task defining the contract deployments for nxtp
@@ -9,8 +10,17 @@ import { DeployFunction } from "hardhat-deploy/types";
 const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { bob, alice, deployer } = await getNamedAccounts();
   console.log("deployer: ", deployer);
+  let dep = await deployments.deterministic("Comptroller", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [],
+    log: true,
+  });
 
-  let dep = await deployments.deterministic("FusePoolDirectory", {
+  const comp = await dep.deploy();
+  console.log("Comptroller: ", comp.address);
+
+  dep = await deployments.deterministic("FusePoolDirectory", {
     from: deployer,
     salt: ethers.utils.keccak256(deployer),
     args: [],
@@ -75,8 +85,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
   dep = await deployments.deterministic("CErc20Delegate", {
     from: deployer,
     salt: ethers.utils.keccak256(deployer),
-    args: [
-    ],
+    args: [],
     log: true,
   });
   const erc20Del = await dep.deploy();
@@ -85,8 +94,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
   dep = await deployments.deterministic("CEtherDelegate", {
     from: deployer,
     salt: ethers.utils.keccak256(deployer),
-    args: [
-    ],
+    args: [],
     log: true,
   });
   const ethDel = await dep.deploy();
