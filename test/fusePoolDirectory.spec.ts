@@ -56,9 +56,9 @@ describe("FusePoolDirectory", function () {
       const [poolAddress, implementationAddress, priceOracleAddress] = await sdk.deployPool(
         "TEST",
         true,
-        BigNumber.from("500000000000000000").toString(),
+        BigNumber.from("500000000000000000"),
         20,
-        BigNumber.from("1100000000000000000").toString(),
+        BigNumber.from("1100000000000000000"),
         spo.address,
         {},
         { from: bob.address },
@@ -90,7 +90,6 @@ describe("FusePoolDirectory", function () {
         console.log("deployed asset: ", assetConf.name);
         console.log("Asset Address: ", assetAddress);
         console.log("Implementation Address: ", implementationAddress);
-        // @ts-ignore
         console.log("TX Receipt: ", receipt.transactionHash);
         console.log("-----------------");
       }

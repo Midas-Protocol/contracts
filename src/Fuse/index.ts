@@ -208,14 +208,28 @@ export default class Fuse {
   oracleContracts: MinifiedContracts;
   getEthUsdPriceBN;
   identifyPriceOracle;
-  deployPool;
+  deployPool: (
+    poolName: string,
+    enforceWhitelist: boolean,
+    closeFactor: BigNumber,
+    maxAssets: number,
+    liquidationIncentive: BigNumber,
+    priceOracle: string,
+    priceOracleConf: any,
+    options: any,
+    whitelist: string[]
+  ) => Promise<[string, string, string]>;
   deployPriceOracle;
   deployComptroller;
-  deployAsset: (i: interestRateModelConf, t: cERC20Conf, o: Object) => Promise<(string | TransactionReceipt)[]>;
+  deployAsset: (
+    i: interestRateModelConf,
+    t: cERC20Conf,
+    o: Object
+  ) => Promise<[string, string, string, TransactionReceipt]>;
   deployInterestRateModel: (o: any, m?: string, c?: interestRateModelParams) => Promise<string>;
-  deployCToken: (t: cERC20Conf, o: Object) => Promise<(string | TransactionReceipt)[]>;
-  deployCEther: (t: cERC20Conf, o: Object, i: string | null) => Promise<(string | TransactionReceipt)[]>;
-  deployCErc20: (t: cERC20Conf, o: Object, i: string | null) => Promise<(string | TransactionReceipt)[]>;
+  deployCToken: (t: cERC20Conf, o: Object) => Promise<[string, string, TransactionReceipt]>;
+  deployCEther: (t: cERC20Conf, o: Object, i: string | null) => Promise<[string, string, TransactionReceipt]>;
+  deployCErc20: (t: cERC20Conf, o: Object, i: string | null) => Promise<[string, string, TransactionReceipt]>;
   identifyInterestRateModel;
   getInterestRateModel;
   checkForCErc20PriceFeed;
@@ -289,7 +303,7 @@ export default class Fuse {
       priceOracleConf: any,
       options: any, // We might need to add sender as argument. Getting address from options will colide with the override arguments in ethers contract method calls. It doesnt take address.
       whitelist: string[] // An array of whitelisted addresses
-    ) {
+    ): Promise<[string, string, string]> {
       // 1. Deploy new price oracle via SDK if requested
       if (Fuse.ORACLES.indexOf(priceOracle) >= 0) {
         try {
@@ -598,7 +612,7 @@ export default class Fuse {
       irmConf: interestRateModelConf,
       cTokenConf: cERC20Conf,
       options: any
-    ): Promise<(string | TransactionReceipt)[]> {
+    ): Promise<[string, string, string, TransactionReceipt]> {
       let assetAddress;
       let implementationAddress;
       let receipt;
@@ -690,7 +704,7 @@ export default class Fuse {
       return deployedInterestRateModel.address;
     };
 
-    this.deployCToken = async function (conf: cERC20Conf, options: any): Promise<(string | TransactionReceipt)[]> {
+    this.deployCToken = async function (conf: cERC20Conf, options: any): Promise<[string, string, TransactionReceipt]> {
       // BigNumbers
       // 10% -> 0.1 * 1e18
       const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
@@ -741,7 +755,7 @@ export default class Fuse {
       conf: cERC20Conf,
       options: any,
       implementationAddress: string | null
-    ): Promise<(string | TransactionReceipt)[]> {
+    ): Promise<[string, string, TransactionReceipt]> {
       const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
       const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
       const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
@@ -813,7 +827,7 @@ export default class Fuse {
       conf: cERC20Conf,
       options: any,
       implementationAddress: string | null // cERC20Delegate implementation
-    ): Promise<(string | TransactionReceipt)[]> {
+    ): Promise<[string, string, TransactionReceipt]> {
       const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
       const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
       const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
