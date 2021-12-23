@@ -1,14 +1,6 @@
 import { run } from "hardhat";
 import hre from "hardhat";
-import * as fs from "fs";
-
-export async function writeFile<T>(file: string, data: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    fs.writeFile(file, data, (err) => {
-      return err ? reject(err) : console.log(err); // XXXS `!`
-    });
-  });
-}
+import { writeFile } from "./util";
 
 async function main() {
   await run("compile");
@@ -27,7 +19,7 @@ async function main() {
       bytecode: artifact.bytecode,
     };
   });
-  await writeFile("./out/" + "compound-protocol.json", JSON.stringify(compiledContracts));
+  await writeFile("./src/Fuse/contracts/" + "compound-protocol.json", JSON.stringify(compiledContracts));
 }
 
 main()
