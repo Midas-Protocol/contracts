@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0;
 
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
@@ -17,17 +18,8 @@ import "./UniswapTwapPriceOracleV2Root.sol";
  * @dev Implements `PriceOracle` and `BasePriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract UniswapTwapPriceOracleV2 is PriceOracle, BasePriceOracle {
+contract UniswapTwapPriceOracleV2 is Initializable, PriceOracle, BasePriceOracle {
     using SafeMathUpgradeable for uint256;
-
-    /**
-     * @dev Constructor that sets the UniswapV2Factory.
-     */
-    constructor (address _rootOracle, address _uniswapV2Factory, address _baseToken) public {
-        rootOracle = UniswapTwapPriceOracleV2Root(_rootOracle);
-        uniswapV2Factory = _uniswapV2Factory;
-        baseToken = _baseToken == address(0) ? address(WETH) : _baseToken;
-    }
 
     /**
      * @dev WETH token contract address.
@@ -37,17 +29,28 @@ contract UniswapTwapPriceOracleV2 is PriceOracle, BasePriceOracle {
     /**
      * @dev UniswapTwapPriceOracleV2Root contract address.
      */
-    UniswapTwapPriceOracleV2Root immutable public rootOracle;
+    UniswapTwapPriceOracleV2Root public rootOracle;
 
     /**
      * @dev UniswapV2Factory contract address.
      */
-    address immutable public uniswapV2Factory;
+    address public uniswapV2Factory;
 
     /**
      * @dev The token on which to base TWAPs (its price must be available via `msg.sender`).
      */
-    address immutable public baseToken;
+    address public baseToken;
+
+    /**
+     * @dev Constructor that sets the UniswapTwapPriceOracleV2Root, UniswapV2Factory, and base token.
+     */
+    function initialize(address _rootOracle, address _uniswapV2Factory, address _baseToken) external initializer {
+        require(_rootOracle != address(0), "UniswapTwapPriceOracleV2Root not defined.");
+        require(_uniswapV2Factory != address(0), "UniswapV2Factory not defined.");
+        rootOracle = UniswapTwapPriceOracleV2Root(_rootOracle);
+        uniswapV2Factory = _uniswapV2Factory;
+        baseToken = _baseToken == address(0) ? address(WETH) : _baseToken;
+    }
     
     /**
      * @notice Returns the price in ETH of the token underlying `cToken`.

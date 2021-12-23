@@ -50,7 +50,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
   const ffd = await dep.deploy();
   console.log("FuseFeeDistributor: ", ffd.address);
   const fuseFeeDistributor = await ethers.getContract("FuseFeeDistributor", deployer);
-  tx = await fuseFeeDistributor.initialize(ethers.utils.parseEther("0.1"));
+  await fuseFeeDistributor.initialize(ethers.utils.parseEther("0.1"));
   await fuseFeeDistributor._setPoolLimits(
     ethers.utils.parseEther("1"),
     ethers.constants.MaxUint256,
@@ -66,7 +66,18 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
   const fpl = await dep.deploy();
   console.log("FusePoolLens: ", fpl.address);
   const fusePoolLens = await ethers.getContract("FusePoolLens", deployer);
-  tx = await fusePoolLens.initialize(fusePoolDirectory.address);
+  await fusePoolLens.initialize(fusePoolDirectory.address);
+
+  dep = await deployments.deterministic("FusePoolLensSecondary", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [],
+    log: true,
+  });
+  const fpls = await dep.deploy();
+  console.log("FusePoolLensSecondary: ", fpls.address);
+  const fusePoolLensSecondary = await ethers.getContract("FusePoolLensSecondary", deployer);
+  await fusePoolLensSecondary.initialize(fusePoolDirectory.address);
 
   dep = await deployments.deterministic("JumpRateModel", {
     from: deployer,

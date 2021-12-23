@@ -4,6 +4,7 @@ pragma solidity >=0.7.0;
 import "./PriceOracle.sol";
 import "./CToken.sol";
 import "./Unitroller.sol";
+import "./RewardsDistributor.sol";
 
 /**
  * @title Compound's Comptroller Contract
@@ -22,13 +23,16 @@ interface Comptroller {
 
     function getAssetsIn(address account) external view returns (CToken[] memory);
     function checkMembership(address account, CToken cToken) external view returns (bool);
-    
+    function getAccountLiquidity(address account) external view returns (uint, uint, uint);
+
     function _setPriceOracle(PriceOracle newOracle) external returns (uint);
     function _setCloseFactor(uint newCloseFactorMantissa) external returns (uint256);
-    function _setMaxAssets(uint newMaxAssets) external returns (uint);
     function _setLiquidationIncentive(uint newLiquidationIncentiveMantissa) external returns (uint);
     function _become(Unitroller unitroller) external;
 
+    function borrowGuardianPaused(address cToken) external view returns (bool);
+
+    function getRewardsDistributors() external view returns (RewardsDistributor[] memory);
     function getAllMarkets() external view returns (CToken[] memory);
     function getAllBorrowers() external view returns (address[] memory);
     function suppliers(address account) external view returns (bool);
@@ -37,4 +41,6 @@ interface Comptroller {
 
     function _setWhitelistEnforcement(bool enforce) external returns (uint);
     function _setWhitelistStatuses(address[] calldata _suppliers, bool[] calldata statuses) external returns (uint);
+
+    function _toggleAutoImplementations(bool enabled) external returns (uint);
 }
