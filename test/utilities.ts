@@ -82,10 +82,10 @@ async function createLocalContractConfig(): Promise<contractConfig> {
       RewardsDistributorDelegate: "",
     },
     FUSE_CONTRACT_ADDRESSES: {
-      FusePoolDirectory: "0x16A480f68B540d3787cd756d87a49d9da01020F1", // fpd.address,
+      FusePoolDirectory: "0x5E5be5aAF574fBB4f66Da933A06DD31DeD748E52", // fpd.address,
       FuseFeeDistributor: "0x3f739767fdaF80020f6A407a92866DD884810cFc", // ffd.address,
-      FusePoolLens: "0x109940E2068738C9F536d28e4973ce429f6Fe20F", //fpl.address,
-      FusePoolLensSecondary: "0xe946CC59bC36582737c47B18847a310d8E88Cd6f", //fpl.address,
+      FusePoolLens: "0xefF651143CceF7FcB8C73cF5F0F18b887aceB22F", //fpl.address,
+      FusePoolLensSecondary: "0x954FAd8bCb920FD2D8f9f0dBd6269E7ffC68F1A5", //fpl.address,
       FuseSafeLiquidator: "0xc292D493f6CE7245a41bA414C6494Fa01B6C6E3F", //fpls.address,
       MasterPriceOracleImplementation: "",
     },

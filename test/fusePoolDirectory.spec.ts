@@ -56,7 +56,6 @@ describe("FusePoolDirectory", function () {
         "TEST",
         true,
         BigNumber.from("500000000000000000"),
-        20,
         BigNumber.from("1100000000000000000"),
         spo.address,
         {},
