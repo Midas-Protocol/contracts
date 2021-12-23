@@ -29,7 +29,7 @@ export default class Vaults {
   provider: JsonRpcProvider;
   cache: Cache;
   price: any; // Response from coingecko
-  getEthUsdPriceBN;
+  getEthUsdPriceBN: () => Promise<BigNumber>;
   getAllTokens;
   subpools;
   pools;

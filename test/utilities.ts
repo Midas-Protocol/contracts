@@ -75,19 +75,19 @@ async function createLocalContractConfig(): Promise<contractConfig> {
   return {
     TOKEN_ADDRESS: { DAI_JUG: "", DAI_POT: "", USDC: "", W_TOKEN: "" },
     COMPOUND_CONTRACT_ADDRESSES: {
-      Comptroller: "0xc3E10104b9B067971A5270c0e2fCbFD8Dd93D9Cb", // comp.address,
-      CErc20Delegate: "0x4aBEA9f62DbcF65A82b66876227cF4Aa0bD3dd5C", // cErc20Delegate,
-      CEther20Delegate: "0x464ffd3844f7f39E98022B5B25125Ae9d98Ac36B", //cEther20Delegate,
+      Comptroller: "0x7AD018c7d6217f37B0121AdA46AC4e99Ab8dd8C1", // comp.address,
+      CErc20Delegate: "0xFdB32Ead5e92e81d3A90B09Ca8021088aD0975E9", // cErc20Delegate,
+      CEther20Delegate: "0xff8F1382a78A7b910E516508D1CC934bbA08208f", //cEther20Delegate,
       InitializableClones: "",
       RewardsDistributorDelegate: "",
     },
     FUSE_CONTRACT_ADDRESSES: {
-      FusePoolDirectory: "0x787b0DFDa508D69d7E70eB30021739579F42CE85", // fpd.address,
-      FuseFeeDistributor: "0x92cACDD2ffF6ba0C64e5f8f894062EBe5bBD994A", // ffd.address,
-      FusePoolLens: "0x8dA38681826f4ABBe089643D2B3fE4C6e4730493", //fpl.address,
-      FuseSafeLiquidator: "0x41C7F2D48bde2397dFf43DadA367d2BD3527452F", //fpls.address,
+      FusePoolDirectory: "0x16A480f68B540d3787cd756d87a49d9da01020F1", // fpd.address,
+      FuseFeeDistributor: "0x3f739767fdaF80020f6A407a92866DD884810cFc", // ffd.address,
+      FusePoolLens: "0x109940E2068738C9F536d28e4973ce429f6Fe20F", //fpl.address,
+      FusePoolLensSecondary: "0xe946CC59bC36582737c47B18847a310d8E88Cd6f", //fpl.address,
+      FuseSafeLiquidator: "0xc292D493f6CE7245a41bA414C6494Fa01B6C6E3F", //fpls.address,
       MasterPriceOracleImplementation: "",
-      FusePoolLensSecondary: "",
     },
     PUBLIC_INTEREST_RATE_MODEL_CONTRACT_ADDRESSES: {},
     PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {

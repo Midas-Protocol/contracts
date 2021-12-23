@@ -22,12 +22,12 @@ describe("FusePoolDirectory", function () {
       const { alice } = await ethers.getNamedSigners();
       const contractConfig = await getContractsConfig(network.name);
 
-      const spoFactory = await ethers.getContractFactory("SimplePriceOracle", alice);
-      const spo = await spoFactory.deploy();
-      console.log("spo.address: ", spo.address);
+      const cpoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", alice);
+      const cpo = await cpoFactory.deploy([10]);
+      console.log("Chainlink Price Oracle Address: ", cpo.address);
 
       const fpdWithSigner = await ethers.getContract("FusePoolDirectory", alice);
-      const maxAssets = "20";
+
       // 50% -> 0.5 * 1e18
       const bigCloseFactor = utils.parseUnits((50 / 100).toString());
       // 8% -> 1.08 * 1e8
@@ -37,9 +37,8 @@ describe("FusePoolDirectory", function () {
         contractConfig.COMPOUND_CONTRACT_ADDRESSES.Comptroller,
         true,
         bigCloseFactor,
-        maxAssets,
         bigLiquidationIncentive,
-        spo.address
+        cpo.address
       );
       expect(deployedPool).to.be.ok;
     });
@@ -47,8 +46,8 @@ describe("FusePoolDirectory", function () {
     it("should deploy pool from sdk", async function () {
       const { bob } = await ethers.getNamedSigners();
 
-      const spoFactory = await ethers.getContractFactory("SimplePriceOracle", bob);
-      const spo = await spoFactory.deploy();
+      const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", bob);
+      const spo = await spoFactory.deploy([10]);
 
       const contractConfig = await getContractsConfig(network.name);
       const sdk = new Fuse(ethers.provider, contractConfig);
