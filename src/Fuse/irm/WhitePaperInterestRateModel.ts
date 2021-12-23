@@ -1,6 +1,6 @@
 import { BigNumber, BigNumberish } from "ethers";
 import { createContract, toBN } from "../utils/web3";
-import contracts from "../contracts/compound-protocol-new.json";
+import contracts from "../contracts/compound-protocol.json";
 import { Web3Provider } from "@ethersproject/providers";
 
 export default class WhitePaperInterestRateModel {

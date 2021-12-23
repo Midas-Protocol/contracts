@@ -1,6 +1,6 @@
 import { createContract, toBN } from "../utils/web3";
 import JumpRateModel from "./JumpRateModel.js";
-import contracts from "../contracts/compound-protocol-new.json";
+import contracts from "../contracts/compound-protocol.json";
 import { BigNumber } from "@ethersproject/bignumber";
 import { BigNumberish } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";

@@ -13,7 +13,7 @@ import fuseFeeDistributorAbi from "./abi/FuseFeeDistributor.json";
 import fusePoolLensSecondaryAbi from "./abi/FusePoolLensSecondary.json";
 
 // Contracts
-import CompoundMini from "./contracts/compound-protocol-new.json";
+import CompoundMini from "./contracts/compound-protocol.json";
 import openOracle from "./contracts/open-oracle.min.json";
 import Oracle from "./contracts/oracles.min.json";
 
@@ -212,7 +212,6 @@ export default class Fuse {
     poolName: string,
     enforceWhitelist: boolean,
     closeFactor: BigNumber,
-    maxAssets: number,
     liquidationIncentive: BigNumber,
     priceOracle: string,
     priceOracleConf: any,
@@ -297,7 +296,6 @@ export default class Fuse {
       poolName: string,
       enforceWhitelist: boolean,
       closeFactor: BigNumber,
-      maxAssets: number,
       liquidationIncentive: BigNumber,
       priceOracle: string, // Contract address
       priceOracleConf: any,
@@ -335,11 +333,11 @@ export default class Fuse {
           implementationAddress,
           enforceWhitelist,
           closeFactor,
-          maxAssets,
           liquidationIncentive,
           priceOracle
         );
         await receipt.wait();
+        console.log(`Deployment of pool ${poolName} succeeded!`);
       } catch (error: any) {
         throw Error("Deployment and registration of new Fuse pool failed: " + (error.message ? error.message : error));
       }
