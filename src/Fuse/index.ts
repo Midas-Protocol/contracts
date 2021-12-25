@@ -11,10 +11,11 @@ import fusePoolLensAbi from "./abi/FusePoolLens.json";
 import fuseSafeLiquidatorAbi from "./abi/FuseSafeLiquidator.json";
 import fuseFeeDistributorAbi from "./abi/FuseFeeDistributor.json";
 import fusePoolLensSecondaryAbi from "./abi/FusePoolLensSecondary.json";
+import uniswapV3PoolAbiSlim from "./abi/UniswapV3Pool.slim.json";
 
 // Contracts
 import CompoundMini from "./contracts/compound-protocol.json";
-import openOracle from "./contracts/open-oracle.min.json";
+import OpenOracle from "./contracts/open-oracle.min.json";
 import Oracle from "./contracts/oracles.min.json";
 
 // InterestRate Models
@@ -23,84 +24,27 @@ import JumpRateModelV2 from "./irm/JumpRateModelV2";
 import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
 
-import uniswapV3PoolAbiSlim from "./abi/UniswapV3Pool.slim.json";
-import initializableClonesAbi from "./abi/InitializableClones.json";
-import { Interface } from "@ethersproject/abi";
-import { COMPTROLLER_ERROR_CODES, CTOKEN_ERROR_CODES, JUMP_RATE_MODEL_CONF, ORACLES } from "./config";
+// Types
+import {
+  cERC20Conf,
+  interestRateModelConf,
+  interestRateModelParams,
+  MinifiedCompoundContracts,
+  MinifiedContracts,
+  MinifiedOraclesContractss,
+  OracleConf,
+} from "./types";
+
+import {
+  COMPTROLLER_ERROR_CODES,
+  CTOKEN_ERROR_CODES,
+  JUMP_RATE_MODEL_CONF,
+  ORACLES,
+  SIMPLE_DEPLOY_ORACLES,
+} from "./config";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
-type MinifiedContracts = {
-  [key: string]: {
-    abi?: any;
-    bin?: any;
-  };
-};
-
-type MinifiedCompoundContracts = {
-  [key: string]: {
-    abi?: any;
-    bytecode?: any;
-  };
-};
-
-type interestRateModelType =
-  | JumpRateModel
-  | JumpRateModelV2
-  | DAIInterestRateModelV2
-  | WhitePaperInterestRateModel
-  | undefined;
-
-type cERC20Conf = {
-  delegateContractName?: any;
-  underlying: string; // underlying ERC20
-  comptroller: string; // Address of the comptroller
-  interestRateModel: string; // Address of the IRM
-  initialExchangeRateMantissa: BigNumber; // Initial exchange rate scaled by 1e18
-  name: string; // ERC20 name of this token
-  symbol: string; // ERC20 Symbol
-  decimals: number; // decimal precision
-  admin: string; // Address of the admin
-  collateralFactor: number;
-  reserveFactor: number;
-  adminFee: number;
-  bypassPriceFeedCheck: boolean;
-};
-
-type OracleConf = {
-  anchorPeriod?: any;
-  tokenConfigs?: any;
-  canAdminOverwrite?: any;
-  isPublic?: any;
-  maxSecondsBeforePriceIsStale?: any;
-  chainlinkPriceOracle?: any;
-  secondaryPriceOracle?: any;
-  reporter?: any;
-  anchorMantissa?: any;
-  isSecure?: any;
-  useRootOracle?: any;
-  underlyings?: any;
-  sushiswap?: any;
-  oracles?: any;
-  admin?: any;
-  rootOracle?: any;
-  uniswapV2Factory?: any;
-  baseToken?: any;
-  uniswapV3Factory?: any;
-  feeTier?: any;
-  defaultOracle?: any;
-};
-
-type interestRateModelParams = {
-  baseRatePerYear?: string;
-  multiplierPerYear?: string;
-  jumpMultiplierPerYear?: string;
-  kink?: string;
-};
-
-type interestRateModelConf = {
-  interestRateModel?: any;
-  interestRateModelParams?: interestRateModelParams;
-};
+import { deployMasterPriceOracle, getDeployArgs, getOracleConf, simpleDeploy } from "./ops/oracles";
 
 export declare type contractConfig = {
   COMPOUND_CONTRACT_ADDRESSES: {
@@ -205,7 +149,7 @@ export default class Fuse {
   contractConfig: contractConfig;
   compoundContracts: MinifiedCompoundContracts;
   openOracleContracts: MinifiedContracts;
-  oracleContracts: MinifiedContracts;
+  oracleContracts: MinifiedOraclesContractss;
   getEthUsdPriceBN;
   identifyPriceOracle;
   deployPool: (
@@ -218,7 +162,7 @@ export default class Fuse {
     options: any,
     whitelist: string[]
   ) => Promise<[string, string, string]>;
-  deployPriceOracle;
+  deployPriceOracle: (m: string, c: OracleConf, o: any) => Promise<Contract>;
   deployComptroller;
   deployAsset: (
     i: interestRateModelConf,
@@ -239,9 +183,11 @@ export default class Fuse {
   identifyInterestRateModelName;
 
   static ORACLES = ORACLES;
+  static SIMPLE_DEPLOY_ORACLES = SIMPLE_DEPLOY_ORACLES;
   static COMPTROLLER_ERROR_CODES = COMPTROLLER_ERROR_CODES;
   static CTOKEN_ERROR_CODES = CTOKEN_ERROR_CODES;
   static JumpRateModelConf: interestRateModelConf = JUMP_RATE_MODEL_CONF;
+  private getOracleContractFactory: (contractName: string, signer?: string) => Promise<ContractFactory>;
 
   constructor(web3Provider: JsonRpcProvider | Web3Provider, contractConfig: contractConfig) {
     this.contractConfig = contractConfig;
@@ -249,9 +195,9 @@ export default class Fuse {
     this.provider = web3Provider;
     this.constants = constants;
     this.compoundContracts = CompoundMini.contracts;
-
-    this.openOracleContracts = openOracle.contracts;
+    this.openOracleContracts = OpenOracle.contracts;
     this.oracleContracts = Oracle.contracts;
+
     this.contracts = {
       FusePoolDirectory: new Contract(
         this.contractConfig.FUSE_CONTRACT_ADDRESSES.FusePoolDirectory,
@@ -300,7 +246,7 @@ export default class Fuse {
       priceOracle: string, // Contract address
       priceOracleConf: any,
       options: any, // We might need to add sender as argument. Getting address from options will colide with the override arguments in ethers contract method calls. It doesnt take address.
-      whitelist: string[] // An array of whitelisted addresses
+      whitelist: string[] = [] // An array of whitelisted addresses
     ): Promise<[string, string, string]> {
       // 1. Deploy new price oracle via SDK if requested
       if (Fuse.ORACLES.indexOf(priceOracle) >= 0) {
@@ -384,181 +330,31 @@ export default class Fuse {
       return [poolAddress, implementationAddress, priceOracle];
     };
 
+    this.getOracleContractFactory = async (contractName: string, signer?: string): Promise<ContractFactory> => {
+      return new ContractFactory(
+        this.oracleContracts[contractName].abi,
+        this.oracleContracts[contractName].bytecode,
+        this.provider.getSigner(signer)
+      );
+    };
+
     this.deployPriceOracle = async function (
       model: string, // TODO: find a way to use this.ORACLES
       conf: OracleConf, // This conf depends on which comptroller model we're deploying
       options: any
-    ) {
-      let deployArgs: any[] = [];
-
-      let priceOracleContract: any;
-      let deployedPriceOracle: any;
-      let oracleFactoryContract: any | Contract;
-
+    ): Promise<Contract> {
       if (!model) model = "ChainlinkPriceOracle";
       if (!conf) conf = {};
 
-      switch (model) {
-        case "ChainlinkPriceOracle":
-          deployArgs = [conf.maxSecondsBeforePriceIsStale ? conf.maxSecondsBeforePriceIsStale : 0];
-          priceOracleContract = new ContractFactory(
-            this.oracleContracts["ChainlinkPriceOracle"].abi,
-            this.oracleContracts["ChainlinkPriceOracle"].bin,
-            this.provider.getSigner()
-          );
-          deployedPriceOracle = await priceOracleContract.deploy(deployArgs, { ...options });
-          break;
-        case "UniswapLpTokenPriceOracle":
-          deployArgs = [!!conf.useRootOracle];
-          priceOracleContract = new ContractFactory(
-            this.oracleContracts["UniswapLpTokenPriceOracle"].abi,
-            this.oracleContracts["UniswapLpTokenPriceOracle"].bin,
-            this.provider.getSigner()
-          );
-          deployedPriceOracle = priceOracleContract.deploy(deployArgs, { ...options });
-          break;
-        case "UniswapTwapPriceOracle": // Uniswap V2 TWAPs
-          // Input Validation
-          if (!conf.uniswapV2Factory) conf.uniswapV2Factory = this.contractConfig.FACTORY.UniswapV2_Factory;
+      const oracleConf = getOracleConf(this, model, conf);
+      const deployArgs = getDeployArgs(this, model, oracleConf, options);
 
-          deployArgs = [
-            this.contractConfig.PUBLIC_PRICE_ORACLE_CONTRACT_ADDRESSES.UniswapTwapPriceOracle_RootContract,
-            conf.uniswapV2Factory,
-          ]; // Default to official Uniswap V2 factory
-
-          // Deploy Oracle
-          priceOracleContract = new ContractFactory(
-            this.oracleContracts["UniswapTwapPriceOracle"].abi,
-            this.oracleContracts["UniswapTwapPriceOracle"].bin,
-            this.provider.getSigner()
-          );
-          deployedPriceOracle = await priceOracleContract.deploy(deployArgs, { options });
-          break;
-        case "UniswapTwapPriceOracleV2": // Uniswap V2 TWAPs
-          // Input validation
-          if (!conf.uniswapV2Factory) conf.uniswapV2Factory = this.contractConfig.FACTORY.UniswapV2_Factory;
-
-          // Check for existing oracle
-          oracleFactoryContract = new Contract(
-            this.contractConfig.FACTORY.UniswapTwapPriceOracleV2_Factory,
-            this.oracleContracts.UniswapTwapPriceOracleV2Factory.abi,
-            this.provider.getSigner(options.from)
-          );
-          deployedPriceOracle = await oracleFactoryContract.oracles(this.contractConfig.FACTORY.UniswapV2_Factory);
-
-          // Deploy if oracle does not exist
-          if (deployedPriceOracle === "0x0000000000000000000000000000000000000000") {
-            await oracleFactoryContract.deploy(this.contractConfig.FACTORY.UniswapV2_Factory);
-            deployedPriceOracle = await oracleFactoryContract.oracles(this.contractConfig.FACTORY.UniswapV2_Factory);
-          }
-          break;
-        case "ChainlinkPriceOracleV2":
-          priceOracleContract = new ContractFactory(
-            this.oracleContracts["ChainlinkPriceOracleV2"].abi,
-            this.oracleContracts["ChainlinkPriceOracleV2"].bin,
-            this.provider.getSigner(options.from)
-          );
-          deployArgs = [conf.admin ? conf.admin : options.from, !!conf.canAdminOverwrite];
-          deployedPriceOracle = await priceOracleContract.deploy(deployArgs);
-          break;
-        case "UniswapV3TwapPriceOracle":
-          // Input validation
-          if (!conf.uniswapV3Factory) conf.uniswapV3Factory = this.contractConfig.FACTORY.UniswapV3_Factory;
-          if ([500, 3000, 10000].indexOf(parseInt(conf.feeTier)) < 0)
-            throw Error("Invalid fee tier passed to UniswapV3TwapPriceOracle deployment.");
-
-          // Deploy oracle
-
-          deployArgs = [conf.uniswapV3Factory, conf.feeTier]; // Default to official Uniswap V3 factory
-
-          priceOracleContract = new ContractFactory(
-            this.oracleContracts["UniswapV3TwapPriceOracle"].abi,
-            this.oracleContracts["UniswapV3TwapPriceOracle"].bin,
-            this.provider.getSigner(options.from)
-          );
-
-          deployedPriceOracle = await priceOracleContract.deploy(deployArgs);
-          break;
-        case "UniswapV3TwapPriceOracleV2":
-          // Input validation
-          if (!conf.uniswapV3Factory) conf.uniswapV3Factory = this.contractConfig.FACTORY.UniswapV3_Factory;
-          if ([500, 3000, 10000].indexOf(parseInt(conf.feeTier)) < 0)
-            throw Error("Invalid fee tier passed to UniswapV3TwapPriceOracleV2 deployment.");
-          // Check for existing oracle
-          oracleFactoryContract = new Contract(
-            this.contractConfig.FACTORY.UniswapV3TwapPriceOracleV2_Factory,
-            this.oracleContracts.UniswapV3TwapPriceOracleV2Factory.abi,
-            this.provider.getSigner(options.from)
-          );
-
-          deployedPriceOracle = await oracleFactoryContract.methods
-            .oracles(conf.uniswapV3Factory, conf.feeTier, conf.baseToken)
-            .call();
-
-          // Deploy if oracle does not exist
-          if (deployedPriceOracle == "0x0000000000000000000000000000000000000000") {
-            await oracleFactoryContract.deploy(conf.uniswapV3Factory, conf.feeTier, conf.baseToken);
-            deployedPriceOracle = await oracleFactoryContract.oracles(
-              conf.uniswapV3Factory,
-              conf.feeTier,
-              conf.baseToken
-            );
-          }
-
-          break;
-        case "FixedTokenPriceOracle":
-          priceOracleContract = new ContractFactory(
-            this.oracleContracts["FixedTokenPriceOracle"].abi,
-            this.oracleContracts["FixedTokenPriceOracle"].bin,
-            this.provider.getSigner(options.from)
-          );
-          deployArgs = [conf.baseToken];
-          deployedPriceOracle = await priceOracleContract.deploy(deployArgs);
-          break;
-        case "MasterPriceOracle":
-          const initializableClones = new Contract(
-            this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.InitializableClones,
-            initializableClonesAbi,
-            this.provider.getSigner()
-          );
-          const masterPriceOracle = new Interface(Oracle["MasterPriceOracle"].abi);
-          deployArgs = [
-            conf.underlyings ? conf.underlyings : [],
-            conf.oracles ? conf.oracles : [],
-            conf.defaultOracle ? conf.defaultOracle : "0x0000000000000000000000000000000000000000",
-            conf.admin ? conf.admin : options.from,
-            !!conf.canAdminOverwrite,
-          ];
-          const initializerData = masterPriceOracle.encodeDeploy(deployArgs);
-          const receipt = await initializableClones.clone(
-            // this.contractConfig
-            this.contractConfig.FUSE_CONTRACT_ADDRESSES.MasterPriceOracleImplementation,
-            initializerData
-          );
-          deployedPriceOracle = new Contract(
-            Oracle["MasterPriceOracle"].abi,
-            receipt.events["Deployed"].returnValues.instance
-          );
-          break;
-        case "SimplePriceOracle":
-          priceOracleContract = new ContractFactory(
-            JSON.parse(this.contracts["contracts/SimplePriceOracle.sol:SimplePriceOracle"].abi),
-            this.contracts["contracts/SimplePriceOracle.sol:SimplePriceOracle"].bin,
-            this.provider.getSigner(options.from)
-          );
-          deployedPriceOracle = await priceOracleContract.deploy();
-          break;
-        default:
-          priceOracleContract = new ContractFactory(
-            this.oracleContracts[model].abi,
-            this.oracleContracts[model].bin,
-            this.provider.getSigner(options.from)
-          );
-          deployedPriceOracle = await priceOracleContract.deploy();
-          break;
+      if (Fuse.SIMPLE_DEPLOY_ORACLES.indexOf(model) >= 0) {
+        const factory = await this.getOracleContractFactory(model, options.from ?? null);
+        return await simpleDeploy(factory, deployArgs);
+      } else {
+        return await deployMasterPriceOracle(this, oracleConf, deployArgs, options);
       }
-      return deployedPriceOracle;
-      //return deployedPriceOracle.options.address;
     };
 
     this.deployComptroller = async function (
