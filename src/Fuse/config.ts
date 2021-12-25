@@ -1,3 +1,12 @@
+export const SIMPLE_DEPLOY_ORACLES: Array<string> = [
+  "ChainlinkPriceOracle",
+  "UniswapLpTokenPriceOracle",
+  "UniswapTwapPriceOracle",
+  "FixedTokenPriceOracle",
+  "ChainlinkPriceOracleV2",
+  "UniswapV3TwapPriceOracle",
+  "SimplePriceOracle",
+];
 export const ORACLES: Array<string> = [
   "SimplePriceOracle",
   "PreferredPriceOracle",
