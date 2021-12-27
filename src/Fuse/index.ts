@@ -46,7 +46,7 @@ import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 import { deployMasterPriceOracle, getDeployArgs, getOracleConf, simpleDeploy } from "./ops/oracles";
 
-export declare type contractConfig = {
+export declare type ContractConfig = {
   COMPOUND_CONTRACT_ADDRESSES: {
     Comptroller: string;
     CErc20Delegate: string;
@@ -137,63 +137,28 @@ export declare type contractConfig = {
 };
 
 export default class Fuse {
-  provider: JsonRpcProvider | Web3Provider;
-  constants: typeof constants;
-  contracts: {
+  public provider: JsonRpcProvider | Web3Provider;
+  public contracts: {
     FusePoolDirectory: Contract;
     FusePoolLens: Contract;
     FusePoolLensSecondary: Contract;
     FuseSafeLiquidator: Contract;
     FuseFeeDistributor: Contract;
   };
-  contractConfig: contractConfig;
-  compoundContracts: MinifiedCompoundContracts;
-  openOracleContracts: MinifiedContracts;
-  oracleContracts: MinifiedOraclesContractss;
-  getEthUsdPriceBN;
-  identifyPriceOracle;
-  deployPool: (
-    poolName: string,
-    enforceWhitelist: boolean,
-    closeFactor: BigNumber,
-    liquidationIncentive: BigNumber,
-    priceOracle: string,
-    priceOracleConf: any,
-    options: any,
-    whitelist: string[]
-  ) => Promise<[string, string, string]>;
-  deployPriceOracle: (m: string, c: OracleConf, o: any) => Promise<Contract>;
-  deployComptroller;
-  deployAsset: (
-    i: interestRateModelConf,
-    t: cERC20Conf,
-    o: Object
-  ) => Promise<[string, string, string, TransactionReceipt]>;
-  deployInterestRateModel: (o: any, m?: string, c?: interestRateModelParams) => Promise<string>;
-  deployCToken: (t: cERC20Conf, o: Object) => Promise<[string, string, TransactionReceipt]>;
-  deployCEther: (t: cERC20Conf, o: Object, i: string | null) => Promise<[string, string, TransactionReceipt]>;
-  deployCErc20: (t: cERC20Conf, o: Object, i: string | null) => Promise<[string, string, TransactionReceipt]>;
-  identifyInterestRateModel;
-  getInterestRateModel;
-  checkForCErc20PriceFeed;
-  getPriceOracle;
-  deployRewardsDistributor;
-  checkCardinality;
-  primeUniswapV3Oracle;
-  identifyInterestRateModelName;
+  public contractConfig: ContractConfig;
+  public compoundContracts: MinifiedCompoundContracts;
+  public openOracleContracts: MinifiedContracts;
+  public oracleContracts: MinifiedOraclesContractss;
 
   static ORACLES = ORACLES;
   static SIMPLE_DEPLOY_ORACLES = SIMPLE_DEPLOY_ORACLES;
   static COMPTROLLER_ERROR_CODES = COMPTROLLER_ERROR_CODES;
   static CTOKEN_ERROR_CODES = CTOKEN_ERROR_CODES;
   static JumpRateModelConf: interestRateModelConf = JUMP_RATE_MODEL_CONF;
-  private getOracleContractFactory: (contractName: string, signer?: string) => Promise<ContractFactory>;
 
-  constructor(web3Provider: JsonRpcProvider | Web3Provider, contractConfig: contractConfig) {
+  constructor(web3Provider: JsonRpcProvider | Web3Provider, contractConfig: ContractConfig) {
     this.contractConfig = contractConfig;
-
     this.provider = web3Provider;
-    this.constants = constants;
     this.compoundContracts = CompoundMini.contracts;
     this.openOracleContracts = OpenOracle.contracts;
     this.oracleContracts = Oracle.contracts;
@@ -226,706 +191,741 @@ export default class Fuse {
         this.provider
       ),
     };
+  }
 
-    this.getEthUsdPriceBN = async function () {
-      // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
-      const UsdPrice: number = (
-        await axios.get("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=ethereum")
-      ).data.ethereum.usd;
+  async getEthUsdPriceBN() {
+    // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
+    const UsdPrice: number = (
+      await axios.get("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=ethereum")
+    ).data.ethereum.usd;
 
-      // Now we turn it into a big number
-      // To parse this back into USD usdPriceBN.div(constants.WeiPerEther).toString()
-      return utils.parseUnits(UsdPrice.toString(), 18);
-    };
+    // Now we turn it into a big number
+    // To parse this back into USD usdPriceBN.div(constants.WeiPerEther).toString()
+    return utils.parseUnits(UsdPrice.toString(), 18);
+  }
 
-    this.deployPool = async function (
-      poolName: string,
-      enforceWhitelist: boolean,
-      closeFactor: BigNumber,
-      liquidationIncentive: BigNumber,
-      priceOracle: string, // Contract address
-      priceOracleConf: any,
-      options: any, // We might need to add sender as argument. Getting address from options will colide with the override arguments in ethers contract method calls. It doesnt take address.
-      whitelist: string[] // An array of whitelisted addresses
-    ): Promise<[string, string, string]> {
-      // 1. Deploy new price oracle via SDK if requested
-      if (Fuse.ORACLES.indexOf(priceOracle) >= 0) {
-        try {
-          priceOracle = (await this.deployPriceOracle(priceOracle, priceOracleConf, options)).address; // TODO: anchorMantissa / anchorPeriod
-        } catch (error: any) {
-          throw Error("Deployment of price oracle failed: " + (error.message ? error.message : error));
-        }
-      }
-
-      // 2. Deploy Comptroller implementation if necessary
-      let implementationAddress = this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.Comptroller;
-
-      if (!implementationAddress) {
-        const comptrollerContract = new ContractFactory(
-          this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi,
-          this.compoundContracts["contracts/Comptroller.sol:Comptroller"].bytecode,
-          this.provider.getSigner(options.from)
-        );
-        const deployedComptroller = await comptrollerContract.deploy();
-        implementationAddress = deployedComptroller.options.address;
-      }
-
-      //3. Register new pool with FusePoolDirectory
-      let receipt;
+  async deployPool(
+    poolName: string,
+    enforceWhitelist: boolean,
+    closeFactor: BigNumber,
+    liquidationIncentive: BigNumber,
+    priceOracle: string, // Contract address
+    priceOracleConf: any,
+    options: any, // We might need to add sender as argument. Getting address from options will colide with the override arguments in ethers contract method calls. It doesnt take address.
+    whitelist: string[] // An array of whitelisted addresses
+  ): Promise<[string, string, string]> {
+    // 1. Deploy new price oracle via SDK if requested
+    if (Fuse.ORACLES.indexOf(priceOracle) >= 0) {
       try {
-        const contract = this.contracts.FusePoolDirectory.connect(this.provider.getSigner(options.from));
-        const tx = await contract.deployPool(
-          poolName,
-          implementationAddress,
-          enforceWhitelist,
-          closeFactor,
-          liquidationIncentive,
-          priceOracle
-        );
-        receipt = await tx.wait();
-        console.log(`Deployment of pool ${poolName} succeeded!`);
+        priceOracle = (await this.deployPriceOracle(priceOracle, priceOracleConf, options)).address; // TODO: anchorMantissa / anchorPeriod
       } catch (error: any) {
-        throw Error("Deployment and registration of new Fuse pool failed: " + (error.message ? error.message : error));
+        throw Error("Deployment of price oracle failed: " + (error.message ? error.message : error));
       }
-      //4. Compute Unitroller address
-      const saltsHash = utils.solidityKeccak256(
-        ["address", "string", "uint"],
-        [options.from, poolName, receipt.blockNumber]
-      );
-      const byteCodeHash = utils.keccak256(this.compoundContracts["contracts/Unitroller.sol:Unitroller"].bytecode);
+    }
 
-      let poolAddress = utils.getCreate2Address(
-        this.contractConfig.FUSE_CONTRACT_ADDRESSES.FusePoolDirectory,
-        saltsHash,
-        byteCodeHash
-      );
+    // 2. Deploy Comptroller implementation if necessary
+    let implementationAddress = this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.Comptroller;
 
-      let unitroller = new Contract(
+    if (!implementationAddress) {
+      const comptrollerContract = new ContractFactory(
+        this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi,
+        this.compoundContracts["contracts/Comptroller.sol:Comptroller"].bytecode,
+        this.provider.getSigner(options.from)
+      );
+      const deployedComptroller = await comptrollerContract.deploy();
+      implementationAddress = deployedComptroller.options.address;
+    }
+
+    //3. Register new pool with FusePoolDirectory
+    let receipt;
+    try {
+      const contract = this.contracts.FusePoolDirectory.connect(this.provider.getSigner(options.from));
+      const tx = await contract.deployPool(
+        poolName,
+        implementationAddress,
+        enforceWhitelist,
+        closeFactor,
+        liquidationIncentive,
+        priceOracle
+      );
+      receipt = await tx.wait();
+      console.log(`Deployment of pool ${poolName} succeeded!`);
+    } catch (error: any) {
+      throw Error("Deployment and registration of new Fuse pool failed: " + (error.message ? error.message : error));
+    }
+    //4. Compute Unitroller address
+    const saltsHash = utils.solidityKeccak256(
+      ["address", "string", "uint"],
+      [options.from, poolName, receipt.blockNumber]
+    );
+    const byteCodeHash = utils.keccak256(this.compoundContracts["contracts/Unitroller.sol:Unitroller"].bytecode);
+
+    let poolAddress = utils.getCreate2Address(
+      this.contractConfig.FUSE_CONTRACT_ADDRESSES.FusePoolDirectory,
+      saltsHash,
+      byteCodeHash
+    );
+
+    let unitroller = new Contract(
+      poolAddress,
+      this.compoundContracts["contracts/Unitroller.sol:Unitroller"].abi,
+      this.provider.getSigner(options.from)
+    );
+    // const unitrollerWithSigner = unitroller.connect(this.provider.getSigner(options.from));
+
+    // Accept admin status via Unitroller
+    try {
+      await unitroller._acceptAdmin();
+    } catch (error: any) {
+      throw Error("Accepting admin status failed: " + (error.message ? error.message : error));
+    }
+
+    // Whitelist
+    if (enforceWhitelist) {
+      let comptroller = new Contract(
         poolAddress,
-        this.compoundContracts["contracts/Unitroller.sol:Unitroller"].abi,
+        this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi,
         this.provider.getSigner(options.from)
       );
-      // const unitrollerWithSigner = unitroller.connect(this.provider.getSigner(options.from));
 
-      // Accept admin status via Unitroller
-      try {
-        await unitroller._acceptAdmin();
-      } catch (error: any) {
-        throw Error("Accepting admin status failed: " + (error.message ? error.message : error));
-      }
+      // Already enforced so now we just need to add the addresses
+      await comptroller._setWhitelistStatuses(whitelist, Array(whitelist.length).fill(true));
+    }
 
-      // Whitelist
-      if (enforceWhitelist) {
-        let comptroller = new Contract(
-          poolAddress,
-          this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi,
-          this.provider.getSigner(options.from)
-        );
+    return [poolAddress, implementationAddress, priceOracle];
+  }
 
-        // Already enforced so now we just need to add the addresses
-        await comptroller._setWhitelistStatuses(whitelist, Array(whitelist.length).fill(true));
-      }
+  private async getOracleContractFactory(contractName: string, signer?: string): Promise<ContractFactory> {
+    return new ContractFactory(
+      this.oracleContracts[contractName].abi,
+      this.oracleContracts[contractName].bytecode,
+      this.provider.getSigner(signer)
+    );
+  }
 
-      return [poolAddress, implementationAddress, priceOracle];
-    };
+  async deployPriceOracle(
+    model: string, // TODO: find a way to use this.ORACLES
+    conf: OracleConf, // This conf depends on which comptroller model we're deploying
+    options: any
+  ): Promise<Contract> {
+    if (!model) model = "ChainlinkPriceOracle";
+    if (!conf) conf = {};
 
-    this.getOracleContractFactory = async (contractName: string, signer?: string): Promise<ContractFactory> => {
-      return new ContractFactory(
-        this.oracleContracts[contractName].abi,
-        this.oracleContracts[contractName].bytecode,
-        this.provider.getSigner(signer)
+    const oracleConf = getOracleConf(this, model, conf);
+    const deployArgs = getDeployArgs(this, model, oracleConf, options);
+
+    if (Fuse.SIMPLE_DEPLOY_ORACLES.indexOf(model) >= 0) {
+      const factory = await this.getOracleContractFactory(model, options.from ?? null);
+
+      return await simpleDeploy(factory, deployArgs);
+    } else {
+      return await deployMasterPriceOracle(this, oracleConf, deployArgs, options);
+    }
+  }
+
+  async deployComptroller(
+    closeFactor: number,
+    maxAssets: number,
+    liquidationIncentive: number,
+    priceOracle: string, // Contract address
+    implementationAddress: string, // Address of comptroller if its already deployed
+    options: any
+  ) {
+    let deployedComptroller;
+    // 1. Deploy comptroller if necessary
+    if (!implementationAddress) {
+      const comptrollerContract = new Contract(
+        this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi,
+        this.compoundContracts["contracts/Comptroller.sol:Comptroller"].bytecode,
+        this.provider.getSigner(options.from)
       );
-    };
+      deployedComptroller = await comptrollerContract.deploy();
+      implementationAddress = deployedComptroller.options.address;
+    }
 
-    this.deployPriceOracle = async function (
-      model: string, // TODO: find a way to use this.ORACLES
-      conf: OracleConf, // This conf depends on which comptroller model we're deploying
-      options: any
-    ): Promise<Contract> {
-      if (!model) model = "ChainlinkPriceOracle";
-      if (!conf) conf = {};
+    // 2. Get Unitroller to set the comptroller implementation address for the pool
+    const unitrollerContract = new ContractFactory(
+      this.compoundContracts["contracts/Unitroller.sol:Unitroller"].abi,
+      this.compoundContracts["contracts/Unitroller.sol:Unitroller"].bytecode,
+      this.provider.getSigner(options.from)
+    );
 
-      const oracleConf = getOracleConf(this, model, conf);
-      const deployArgs = getDeployArgs(this, model, oracleConf, options);
+    const deployedUnitroller = await unitrollerContract.deploy();
+    await deployedUnitroller._setPendingImplementation(deployedComptroller.options.address, { ...options });
 
-      if (Fuse.SIMPLE_DEPLOY_ORACLES.indexOf(model) >= 0) {
-        const factory = await this.getOracleContractFactory(model, options.from ?? null);
+    // Comptroller becomes unitroller.
+    await deployedComptroller._become(deployedUnitroller.address, { ...options });
 
-        return await simpleDeploy(factory, deployArgs);
-      } else {
-        return await deployMasterPriceOracle(this, oracleConf, deployArgs, options);
-      }
-    };
+    deployedComptroller.address = deployedUnitroller.address;
 
-    this.deployComptroller = async function (
-      closeFactor: number,
-      maxAssets: number,
-      liquidationIncentive: number,
-      priceOracle: string, // Contract address
-      implementationAddress: string, // Address of comptroller if its already deployed
-      options: any
+    // Set comptroller configuration
+    if (closeFactor) await deployedComptroller._setCloseFactor(closeFactor, { ...options });
+    if (maxAssets) await deployedComptroller._setMaxAssets(maxAssets, { ...options });
+    if (liquidationIncentive)
+      await deployedComptroller.methods._setLiquidationIncentive(liquidationIncentive, { ...options });
+    if (priceOracle) await deployedComptroller._setPriceOracle(priceOracle, { ...options });
+
+    return [deployedUnitroller.options.address, implementationAddress];
+  }
+
+  async deployAsset(
+    irmConf: interestRateModelConf,
+    cTokenConf: cERC20Conf,
+    options: any
+  ): Promise<[string, string, string, TransactionReceipt]> {
+    let assetAddress;
+    let implementationAddress;
+    let receipt;
+    // Deploy new interest rate model via SDK if requested
+    if (
+      [
+        "WhitePaperInterestRateModel",
+        "JumpRateModel",
+        "JumpRateModelV2",
+        "ReactiveJumpRateModelV2",
+        "DAIInterestRateModelV2",
+      ].indexOf(irmConf.interestRateModel) >= 0
     ) {
-      let deployedComptroller;
-      // 1. Deploy comptroller if necessary
-      if (!implementationAddress) {
-        const comptrollerContract = new Contract(
-          this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi,
-          this.compoundContracts["contracts/Comptroller.sol:Comptroller"].bytecode,
-          this.provider.getSigner(options.from)
-        );
-        deployedComptroller = await comptrollerContract.deploy();
-        implementationAddress = deployedComptroller.options.address;
-      }
-
-      // 2. Get Unitroller to set the comptroller implementation address for the pool
-      const unitrollerContract = new ContractFactory(
-        this.compoundContracts["contracts/Unitroller.sol:Unitroller"].abi,
-        this.compoundContracts["contracts/Unitroller.sol:Unitroller"].bytecode,
-        this.provider.getSigner(options.from)
-      );
-
-      const deployedUnitroller = await unitrollerContract.deploy();
-      await deployedUnitroller._setPendingImplementation(deployedComptroller.options.address, { ...options });
-
-      // Comptroller becomes unitroller.
-      await deployedComptroller._become(deployedUnitroller.address, { ...options });
-
-      deployedComptroller.address = deployedUnitroller.address;
-
-      // Set comptroller configuration
-      if (closeFactor) await deployedComptroller._setCloseFactor(closeFactor, { ...options });
-      if (maxAssets) await deployedComptroller._setMaxAssets(maxAssets, { ...options });
-      if (liquidationIncentive)
-        await deployedComptroller.methods._setLiquidationIncentive(liquidationIncentive, { ...options });
-      if (priceOracle) await deployedComptroller._setPriceOracle(priceOracle, { ...options });
-
-      return [deployedUnitroller.options.address, implementationAddress];
-    };
-
-    this.deployAsset = async function (
-      irmConf: interestRateModelConf,
-      cTokenConf: cERC20Conf,
-      options: any
-    ): Promise<[string, string, string, TransactionReceipt]> {
-      let assetAddress;
-      let implementationAddress;
-      let receipt;
-      // Deploy new interest rate model via SDK if requested
-      if (
-        [
-          "WhitePaperInterestRateModel",
-          "JumpRateModel",
-          "JumpRateModelV2",
-          "ReactiveJumpRateModelV2",
-          "DAIInterestRateModelV2",
-        ].indexOf(irmConf.interestRateModel) >= 0
-      ) {
-        try {
-          irmConf.interestRateModel = await this.deployInterestRateModel(
-            options,
-            irmConf.interestRateModel,
-            irmConf.interestRateModelParams
-          ); // TODO: anchorMantissa
-        } catch (error: any) {
-          throw Error("Deployment of interest rate model failed: " + (error.message ? error.message : error));
-        }
-      }
-
-      // Deploy new asset to existing pool via SDK
       try {
-        [assetAddress, implementationAddress, receipt] = await this.deployCToken(cTokenConf, options);
+        irmConf.interestRateModel = await this.deployInterestRateModel(
+          options,
+          irmConf.interestRateModel,
+          irmConf.interestRateModelParams
+        ); // TODO: anchorMantissa
       } catch (error: any) {
-        throw Error("Deployment of asset to Fuse pool failed: " + (error.message ? error.message : error));
+        throw Error("Deployment of interest rate model failed: " + (error.message ? error.message : error));
       }
-      return [assetAddress, implementationAddress, irmConf.interestRateModel, receipt];
-    };
+    }
 
-    this.deployInterestRateModel = async function (
-      options: any,
-      model?: string,
-      conf?: interestRateModelParams
-    ): Promise<string> {
-      // Default model = JumpRateModel
-      if (!model) {
-        model = "JumpRateModel";
-      }
+    // Deploy new asset to existing pool via SDK
+    try {
+      [assetAddress, implementationAddress, receipt] = await this.deployCToken(cTokenConf, options);
+    } catch (error: any) {
+      throw Error("Deployment of asset to Fuse pool failed: " + (error.message ? error.message : error));
+    }
+    return [assetAddress, implementationAddress, irmConf.interestRateModel, receipt];
+  }
 
-      // Get deployArgs
-      let deployArgs: any[] = [];
+  async deployInterestRateModel(options: any, model?: string, conf?: interestRateModelParams): Promise<string> {
+    // Default model = JumpRateModel
+    if (!model) {
+      model = "JumpRateModel";
+    }
 
-      switch (model) {
-        case "JumpRateModel":
-          if (!conf)
-            conf = {
-              baseRatePerYear: "20000000000000000",
-              multiplierPerYear: "200000000000000000",
-              jumpMultiplierPerYear: "2000000000000000000",
-              kink: "900000000000000000",
-            };
-          deployArgs = [conf.baseRatePerYear, conf.multiplierPerYear, conf.jumpMultiplierPerYear, conf.kink];
-          break;
-        case "DAIInterestRateModelV2":
-          if (!conf)
-            conf = {
-              jumpMultiplierPerYear: "2000000000000000000",
-              kink: "900000000000000000",
-            };
-          deployArgs = [
-            conf.jumpMultiplierPerYear,
-            conf.kink,
-            this.contractConfig.TOKEN_ADDRESS.DAI_POT,
-            this.contractConfig.TOKEN_ADDRESS.DAI_JUG,
-          ];
-          break;
-        case "WhitePaperInterestRateModel":
-          if (!conf)
-            conf = {
-              baseRatePerYear: "20000000000000000",
-              multiplierPerYear: "200000000000000000",
-            };
-          deployArgs = [conf.baseRatePerYear, conf.multiplierPerYear];
-          break;
-      }
+    // Get deployArgs
+    let deployArgs: any[] = [];
 
-      // Deploy InterestRateModel
-      const interestRateModelContract = new ContractFactory(
-        this.compoundContracts["contracts/" + model + ".sol:" + model].abi,
-        this.compoundContracts["contracts/" + model + ".sol:" + model].bytecode,
-        this.provider.getSigner(options.from)
-      );
+    switch (model) {
+      case "JumpRateModel":
+        if (!conf)
+          conf = {
+            baseRatePerYear: "20000000000000000",
+            multiplierPerYear: "200000000000000000",
+            jumpMultiplierPerYear: "2000000000000000000",
+            kink: "900000000000000000",
+          };
+        deployArgs = [conf.baseRatePerYear, conf.multiplierPerYear, conf.jumpMultiplierPerYear, conf.kink];
+        break;
+      case "DAIInterestRateModelV2":
+        if (!conf)
+          conf = {
+            jumpMultiplierPerYear: "2000000000000000000",
+            kink: "900000000000000000",
+          };
+        deployArgs = [
+          conf.jumpMultiplierPerYear,
+          conf.kink,
+          this.contractConfig.TOKEN_ADDRESS.DAI_POT,
+          this.contractConfig.TOKEN_ADDRESS.DAI_JUG,
+        ];
+        break;
+      case "WhitePaperInterestRateModel":
+        if (!conf)
+          conf = {
+            baseRatePerYear: "20000000000000000",
+            multiplierPerYear: "200000000000000000",
+          };
+        deployArgs = [conf.baseRatePerYear, conf.multiplierPerYear];
+        break;
+    }
 
-      const deployedInterestRateModel = await interestRateModelContract.deploy(...deployArgs);
-      return deployedInterestRateModel.address;
-    };
+    // Deploy InterestRateModel
+    const interestRateModelContract = new ContractFactory(
+      this.compoundContracts["contracts/" + model + ".sol:" + model].abi,
+      this.compoundContracts["contracts/" + model + ".sol:" + model].bytecode,
+      this.provider.getSigner(options.from)
+    );
 
-    this.deployCToken = async function (conf: cERC20Conf, options: any): Promise<[string, string, TransactionReceipt]> {
-      // BigNumbers
-      // 10% -> 0.1 * 1e18
-      const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
-      // 5% -> 0.05 * 1e18
-      const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
-      // 50% -> 0.5 * 1e18
-      // TODO: find out if this is a number or string. If its a number, parseUnits will not work. Also parse Units works if number is between 0 - 0.9
-      const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
-      // Check collateral factor
-      if (!collateralFactorBN.gte(constants.Zero) || collateralFactorBN.gt(utils.parseUnits("0.9", 18)))
-        throw Error("Collateral factor must range from 0 to 0.9.");
+    const deployedInterestRateModel = await interestRateModelContract.deploy(...deployArgs);
+    return deployedInterestRateModel.address;
+  }
 
-      // Check reserve factor + admin fee + Fuse fee
-      if (!reserveFactorBN.gte(constants.Zero)) throw Error("Reserve factor cannot be negative.");
-      if (!adminFeeBN.gte(constants.Zero)) throw Error("Admin fee cannot be negative.");
+  async deployCToken(conf: cERC20Conf, options: any): Promise<[string, string, TransactionReceipt]> {
+    // BigNumbers
+    // 10% -> 0.1 * 1e18
+    const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
+    // 5% -> 0.05 * 1e18
+    const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
+    // 50% -> 0.5 * 1e18
+    // TODO: find out if this is a number or string. If its a number, parseUnits will not work. Also parse Units works if number is between 0 - 0.9
+    const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
+    // Check collateral factor
+    if (!collateralFactorBN.gte(constants.Zero) || collateralFactorBN.gt(utils.parseUnits("0.9", 18)))
+      throw Error("Collateral factor must range from 0 to 0.9.");
 
-      // If reserveFactor or adminFee is greater than zero, we get fuse fee.
-      // Sum of reserveFactor and adminFee should not be greater than fuse fee. ? i think
-      if (reserveFactorBN.gt(constants.Zero) || adminFeeBN.gt(constants.Zero)) {
-        const fuseFee = await this.contracts.FuseFeeDistributor.interestFeeRate();
-        if (reserveFactorBN.add(adminFeeBN).add(BigNumber.from(fuseFee)).gt(constants.WeiPerEther))
-          throw Error(
-            "Sum of reserve factor and admin fee should range from 0 to " + (1 - parseInt(fuseFee) / 1e18) + "."
-          );
-      }
+    // Check reserve factor + admin fee + Fuse fee
+    if (!reserveFactorBN.gte(constants.Zero)) throw Error("Reserve factor cannot be negative.");
+    if (!adminFeeBN.gte(constants.Zero)) throw Error("Admin fee cannot be negative.");
 
-      return conf.underlying !== undefined &&
-        conf.underlying !== null &&
-        conf.underlying.length > 0 &&
-        !BigNumber.from(conf.underlying).isZero()
-        ? await this.deployCErc20(
-            conf,
-            options,
-            this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CErc20Delegate
-              ? this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CErc20Delegate
-              : null
-          )
-        : await this.deployCEther(
-            conf,
-            options,
-            this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEther20Delegate
-              ? this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEther20Delegate
-              : null
-          );
-    };
-
-    this.deployCEther = async function (
-      conf: cERC20Conf,
-      options: any,
-      implementationAddress: string | null
-    ): Promise<[string, string, TransactionReceipt]> {
-      const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
-      const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
-      const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
-
-      // Deploy CEtherDelegate implementation contract if necessary
-      if (!implementationAddress) {
-        const cEtherDelegateFactory = new ContractFactory(
-          this.compoundContracts["contracts/CEtherDelegate.sol:CEtherDelegate"].abi,
-          this.compoundContracts["contracts/CEtherDelegate.sol:CEtherDelegate"].bytecode,
-          this.provider.getSigner(options.from)
+    // If reserveFactor or adminFee is greater than zero, we get fuse fee.
+    // Sum of reserveFactor and adminFee should not be greater than fuse fee. ? i think
+    if (reserveFactorBN.gt(constants.Zero) || adminFeeBN.gt(constants.Zero)) {
+      const fuseFee = await this.contracts.FuseFeeDistributor.interestFeeRate();
+      if (reserveFactorBN.add(adminFeeBN).add(BigNumber.from(fuseFee)).gt(constants.WeiPerEther))
+        throw Error(
+          "Sum of reserve factor and admin fee should range from 0 to " + (1 - parseInt(fuseFee) / 1e18) + "."
         );
+    }
 
-        const cEtherDelegateDeployed = await cEtherDelegateFactory.deploy();
-        implementationAddress = cEtherDelegateDeployed.address;
-      }
-
-      let deployArgs = [
-        conf.comptroller,
-        conf.interestRateModel,
-        conf.name,
-        conf.symbol,
-        implementationAddress,
-        "0x00",
-        reserveFactorBN,
-        adminFeeBN,
-      ];
-
-      const abiCoder = new utils.AbiCoder();
-      const constructorData = abiCoder.encode(
-        ["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
-        deployArgs
-      );
-      const comptroller = new Contract(
-        conf.comptroller,
-        this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi,
-        this.provider.getSigner(options.from)
-      );
-
-      const tx = await comptroller._deployMarket(
-        "0x0000000000000000000000000000000000000000",
-        constructorData,
-        collateralFactorBN
-      );
-      const receipt: TransactionReceipt = await tx.wait();
-
-      // if (errorCode != constants.Zero)
-      //   throw "Failed to deploy market with error code: " + Fuse.COMPTROLLER_ERROR_CODES[errorCode];
-
-      const saltsHash = utils.solidityKeccak256(
-        ["address", "address", "uint"],
-        [conf.comptroller, "0x0000000000000000000000000000000000000000", receipt.blockNumber]
-      );
-
-      const byteCodeHash = utils.keccak256(
-        this.compoundContracts["contracts/CEtherDelegator.sol:CEtherDelegator"].bytecode
-      );
-
-      const cEtherDelegatorAddress = utils.getCreate2Address(
-        this.contractConfig.FUSE_CONTRACT_ADDRESSES.FuseFeeDistributor,
-        saltsHash,
-        byteCodeHash
-      );
-
-      // Return cToken proxy and implementation contract addresses
-      return [cEtherDelegatorAddress, implementationAddress, receipt];
-    };
-
-    this.deployCErc20 = async function (
-      conf: cERC20Conf,
-      options: any,
-      implementationAddress: string | null // cERC20Delegate implementation
-    ): Promise<[string, string, TransactionReceipt]> {
-      const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
-      const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
-      const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
-
-      // Get Comptroller
-      const comptroller = new Contract(
-        conf.comptroller,
-        this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi,
-        this.provider.getSigner(options.from)
-      );
-
-      // Check for price feed assuming !bypassPriceFeedCheck
-      if (!conf.bypassPriceFeedCheck) await this.checkForCErc20PriceFeed(comptroller, conf);
-
-      // Deploy CErc20Delegate implementation contract if necessary
-      if (!implementationAddress) {
-        if (!conf.delegateContractName) conf.delegateContractName = "CErc20Delegate";
-        const cErc20Delegate = new ContractFactory(
-          this.compoundContracts["contracts/" + conf.delegateContractName + ".sol:" + conf.delegateContractName].abi,
-          this.compoundContracts[
-            "contracts/" + conf.delegateContractName + ".sol:" + conf.delegateContractName
-          ].bytecode,
-          this.provider.getSigner(options.from)
+    return conf.underlying !== undefined &&
+      conf.underlying !== null &&
+      conf.underlying.length > 0 &&
+      !BigNumber.from(conf.underlying).isZero()
+      ? await this.deployCErc20(
+          conf,
+          options,
+          this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CErc20Delegate
+            ? this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CErc20Delegate
+            : null
+        )
+      : await this.deployCEther(
+          conf,
+          options,
+          this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEther20Delegate
+            ? this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEther20Delegate
+            : null
         );
-        const cErc20DelegateDeployed = await cErc20Delegate.deploy();
-        implementationAddress = cErc20DelegateDeployed.address;
+  }
+
+  async deployCEther(
+    conf: cERC20Conf,
+    options: any,
+    implementationAddress: string | null
+  ): Promise<[string, string, TransactionReceipt]> {
+    const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
+    const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
+    const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
+
+    // Deploy CEtherDelegate implementation contract if necessary
+    if (!implementationAddress) {
+      const cEtherDelegateFactory = new ContractFactory(
+        this.compoundContracts["contracts/CEtherDelegate.sol:CEtherDelegate"].abi,
+        this.compoundContracts["contracts/CEtherDelegate.sol:CEtherDelegate"].bytecode,
+        this.provider.getSigner(options.from)
+      );
+
+      const cEtherDelegateDeployed = await cEtherDelegateFactory.deploy();
+      implementationAddress = cEtherDelegateDeployed.address;
+    }
+
+    let deployArgs = [
+      conf.comptroller,
+      conf.interestRateModel,
+      conf.name,
+      conf.symbol,
+      implementationAddress,
+      "0x00",
+      reserveFactorBN,
+      adminFeeBN,
+    ];
+
+    const abiCoder = new utils.AbiCoder();
+    const constructorData = abiCoder.encode(
+      ["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
+      deployArgs
+    );
+    const comptroller = new Contract(
+      conf.comptroller,
+      this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi,
+      this.provider.getSigner(options.from)
+    );
+
+    const tx = await comptroller._deployMarket(
+      "0x0000000000000000000000000000000000000000",
+      constructorData,
+      collateralFactorBN
+    );
+    const receipt: TransactionReceipt = await tx.wait();
+
+    // if (errorCode != constants.Zero)
+    //   throw "Failed to deploy market with error code: " + Fuse.COMPTROLLER_ERROR_CODES[errorCode];
+
+    const saltsHash = utils.solidityKeccak256(
+      ["address", "address", "uint"],
+      [conf.comptroller, "0x0000000000000000000000000000000000000000", receipt.blockNumber]
+    );
+
+    const byteCodeHash = utils.keccak256(
+      this.compoundContracts["contracts/CEtherDelegator.sol:CEtherDelegator"].bytecode
+    );
+
+    const cEtherDelegatorAddress = utils.getCreate2Address(
+      this.contractConfig.FUSE_CONTRACT_ADDRESSES.FuseFeeDistributor,
+      saltsHash,
+      byteCodeHash
+    );
+
+    // Return cToken proxy and implementation contract addresses
+    return [cEtherDelegatorAddress, implementationAddress, receipt];
+  }
+
+  async deployCErc20(
+    conf: cERC20Conf,
+    options: any,
+    implementationAddress: string | null // cERC20Delegate implementation
+  ): Promise<[string, string, TransactionReceipt]> {
+    const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
+    const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
+    const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
+
+    // Get Comptroller
+    const comptroller = new Contract(
+      conf.comptroller,
+      this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi,
+      this.provider.getSigner(options.from)
+    );
+
+    // Check for price feed assuming !bypassPriceFeedCheck
+    if (!conf.bypassPriceFeedCheck) await this.checkForCErc20PriceFeed(comptroller, conf);
+
+    // Deploy CErc20Delegate implementation contract if necessary
+    if (!implementationAddress) {
+      if (!conf.delegateContractName) conf.delegateContractName = "CErc20Delegate";
+      const cErc20Delegate = new ContractFactory(
+        this.compoundContracts["contracts/" + conf.delegateContractName + ".sol:" + conf.delegateContractName].abi,
+        this.compoundContracts["contracts/" + conf.delegateContractName + ".sol:" + conf.delegateContractName].bytecode,
+        this.provider.getSigner(options.from)
+      );
+      const cErc20DelegateDeployed = await cErc20Delegate.deploy();
+      implementationAddress = cErc20DelegateDeployed.address;
+    }
+
+    // Deploy CEtherDelegator proxy contract
+    let deployArgs = [
+      conf.underlying,
+      conf.comptroller,
+      conf.interestRateModel,
+      conf.name,
+      conf.symbol,
+      implementationAddress,
+      "0x00",
+      reserveFactorBN,
+      adminFeeBN,
+    ];
+
+    const abiCoder = new utils.AbiCoder();
+    const constructorData = abiCoder.encode(
+      ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
+      deployArgs
+    );
+    const tx = await comptroller._deployMarket(false, constructorData, collateralFactorBN);
+    const receipt = await tx.wait();
+
+    // if (errorCode != constants.Zero)
+    //   throw "Failed to deploy market with error code: " + Fuse.COMPTROLLER_ERROR_CODES[errorCode];
+
+    const saltsHash = utils.solidityKeccak256(
+      ["address", "address", "uint"],
+      [conf.comptroller, conf.underlying, receipt.blockNumber]
+    );
+    const byteCodeHash = utils.keccak256(this.compoundContracts["contracts/Unitroller.sol:Unitroller"].bytecode);
+
+    const cErc20DelegatorAddress = utils.getCreate2Address(
+      this.contractConfig.FUSE_CONTRACT_ADDRESSES.FuseFeeDistributor,
+      saltsHash,
+      byteCodeHash
+    );
+
+    // Return cToken proxy and implementation contract addresses
+    return [cErc20DelegatorAddress, implementationAddress, receipt];
+  }
+
+  async identifyPriceOracle(priceOracleAddress: string) {
+    // Get PriceOracle type from runtime bytecode hash
+    const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(priceOracleAddress));
+
+    for (const oracleContractName of Object.keys(this.contractConfig.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES)) {
+      const valueOrArr = this.contractConfig.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES[oracleContractName];
+
+      if (Array.isArray(valueOrArr)) {
+        for (const potentialHash of valueOrArr) if (runtimeBytecodeHash == potentialHash) return oracleContractName;
+      } else {
+        if (runtimeBytecodeHash == valueOrArr) return oracleContractName;
       }
+    }
 
-      // Deploy CEtherDelegator proxy contract
-      let deployArgs = [
-        conf.underlying,
-        conf.comptroller,
-        conf.interestRateModel,
-        conf.name,
-        conf.symbol,
-        implementationAddress,
-        "0x00",
-        reserveFactorBN,
-        adminFeeBN,
-      ];
+    return null;
+  }
 
-      const abiCoder = new utils.AbiCoder();
-      const constructorData = abiCoder.encode(
-        ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
-        deployArgs
-      );
-      const tx = await comptroller._deployMarket(false, constructorData, collateralFactorBN);
-      const receipt = await tx.wait();
-
-      // if (errorCode != constants.Zero)
-      //   throw "Failed to deploy market with error code: " + Fuse.COMPTROLLER_ERROR_CODES[errorCode];
-
-      const saltsHash = utils.solidityKeccak256(
-        ["address", "address", "uint"],
-        [conf.comptroller, conf.underlying, receipt.blockNumber]
-      );
-      const byteCodeHash = utils.keccak256(this.compoundContracts["contracts/Unitroller.sol:Unitroller"].bytecode);
-
-      const cErc20DelegatorAddress = utils.getCreate2Address(
-        this.contractConfig.FUSE_CONTRACT_ADDRESSES.FuseFeeDistributor,
-        saltsHash,
-        byteCodeHash
-      );
-
-      // Return cToken proxy and implementation contract addresses
-      return [cErc20DelegatorAddress, implementationAddress, receipt];
+  async identifyInterestRateModel(interestRateModelAddress: string): Promise<any> {
+    // Get interest rate model type from runtime bytecode hash and init class
+    const interestRateModels: { [key: string]: any } = {
+      JumpRateModel: JumpRateModel,
+      JumpRateModelV2: JumpRateModelV2,
+      DAIInterestRateModelV2: DAIInterestRateModelV2,
+      WhitePaperInterestRateModel: WhitePaperInterestRateModel,
     };
+    const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(interestRateModelAddress));
+    // Find ONE interes ratemodel and return thath
+    // compare runtimeByrecodeHash with
+    //
 
-    this.identifyPriceOracle = async function (priceOracleAddress: string) {
-      // Get PriceOracle type from runtime bytecode hash
-      const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(priceOracleAddress));
-
-      for (const oracleContractName of Object.keys(this.contractConfig.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES)) {
-        const valueOrArr = this.contractConfig.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES[oracleContractName];
-
-        if (Array.isArray(valueOrArr)) {
-          for (const potentialHash of valueOrArr) if (runtimeBytecodeHash == potentialHash) return oracleContractName;
-        } else {
-          if (runtimeBytecodeHash == valueOrArr) return oracleContractName;
-        }
-      }
-
-      return null;
-    };
-
-    this.identifyInterestRateModel = async function (interestRateModelAddress: string): Promise<any> {
-      // Get interest rate model type from runtime bytecode hash and init class
-      const interestRateModels: { [key: string]: any } = {
-        JumpRateModel: JumpRateModel,
-        JumpRateModelV2: JumpRateModelV2,
-        DAIInterestRateModelV2: DAIInterestRateModelV2,
-        WhitePaperInterestRateModel: WhitePaperInterestRateModel,
-      };
-      const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(interestRateModelAddress));
-      // Find ONE interes ratemodel and return thath
-      // compare runtimeByrecodeHash with
-      //
-
-      let irm;
-      outerLoop: for (const model of Object.keys(interestRateModels)) {
-        if (interestRateModels[model].RUNTIME_BYTECODE_HASHES !== undefined) {
-          for (const hash of interestRateModels[model].RUNTIME_BYTECODE_HASHES) {
-            if (runtimeBytecodeHash === hash) {
-              irm = new interestRateModels[model]();
-              console.log(irm);
-              break outerLoop;
-            }
+    let irm;
+    outerLoop: for (const model of Object.keys(interestRateModels)) {
+      if (interestRateModels[model].RUNTIME_BYTECODE_HASHES !== undefined) {
+        for (const hash of interestRateModels[model].RUNTIME_BYTECODE_HASHES) {
+          if (runtimeBytecodeHash === hash) {
+            irm = new interestRateModels[model]();
+            console.log(irm);
+            break outerLoop;
           }
-        } else if (runtimeBytecodeHash === interestRateModels[model].RUNTIME_BYTECODE_HASH) {
-          irm = new interestRateModels[model]();
-          break;
         }
+      } else if (runtimeBytecodeHash === interestRateModels[model].RUNTIME_BYTECODE_HASH) {
+        irm = new interestRateModels[model]();
+        break;
       }
+    }
 
-      console.log(irm, "WHY");
-      return irm;
-    };
+    console.log(irm, "WHY");
+    return irm;
+  }
 
-    this.getInterestRateModel = async function (assetAddress: string): Promise<any | undefined> {
-      // Get interest rate model address from asset address
-      const assetContract = new Contract(
-        assetAddress,
-        this.compoundContracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi,
+  async getInterestRateModel(assetAddress: string): Promise<any | undefined> {
+    // Get interest rate model address from asset address
+    const assetContract = new Contract(
+      assetAddress,
+      this.compoundContracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi,
+      this.provider
+    );
+    const interestRateModelAddress: string = await assetContract.callStatic.interestRateModel();
+
+    const interestRateModel = await this.identifyInterestRateModel(interestRateModelAddress);
+
+    await interestRateModel.init(interestRateModelAddress, assetAddress, this.provider);
+    return interestRateModel;
+  }
+
+  async checkForCErc20PriceFeed(
+    comptroller: Contract,
+    conf: {
+      underlying: string; // Address of the underlying ERC20 Token
+    },
+    options: any = {}
+  ) {
+    // Get price feed
+    // 1. Get priceOracle's address used by the comprtroller. PriceOracle can have multiple implementations so:
+    // 1.1 We try to figure out which implementation it is, by (practically) bruteforcing it.
+    //1.1.2 We first assume its a ChainlinkPriceOracle.
+    //1.1.3 We then try with PrefferedOracle's primary oracle i.e ChainlinkPriceOracle
+    //1.1.4 We try with UniswapAnchoredView
+    //1.1.5 We try with UniswapView
+    //1.1.6 We try with PrefferedOracle's secondary oracle i.e UniswapAnchoredView or UniswapView
+    //1.1.6
+
+    // 2. Check
+
+    // Get address of the priceOracle used by the comptroller
+    const priceOracle: string = await comptroller.callStatic.oracle();
+
+    // Check for a ChainlinkPriceOracle with a feed for the ERC20 Token
+    let chainlinkPriceOracle: Contract;
+    let chainlinkPriceFeed: boolean | undefined = undefined; // will be true if chainlink has a price feed for underlying Erc20 token
+
+    chainlinkPriceOracle = new Contract(priceOracle, this.oracleContracts["ChainlinkPriceOracle"].abi, this.provider);
+
+    // If underlying Erc20 is WETH use chainlinkPriceFeed, otherwise check if Chainlink supports it.
+    if (conf.underlying.toLowerCase() === this.contractConfig.TOKEN_ADDRESS.W_TOKEN.toLowerCase()) {
+      chainlinkPriceFeed = true;
+    } else {
+      try {
+        chainlinkPriceFeed = await chainlinkPriceOracle.hasPriceFeed(conf.underlying);
+      } catch {}
+    }
+
+    if (chainlinkPriceFeed === undefined || !chainlinkPriceFeed) {
+      const preferredPriceOracle = new Contract(
+        priceOracle,
+        this.oracleContracts["PreferredPriceOracle"].abi,
         this.provider
       );
-      const interestRateModelAddress: string = await assetContract.callStatic.interestRateModel();
 
-      const interestRateModel = await this.identifyInterestRateModel(interestRateModelAddress);
+      try {
+        // Get the underlying ChainlinkOracle address of the PreferredPriceOracle
+        const chainlinkPriceOracleAddress = await preferredPriceOracle.chainlinkOracle();
 
-      await interestRateModel.init(interestRateModelAddress, assetAddress, this.provider);
-      return interestRateModel;
-    };
-
-    this.checkForCErc20PriceFeed = async function (
-      comptroller: Contract,
-      conf: {
-        underlying: string; // Address of the underlying ERC20 Token
-      },
-      options: any
-    ) {
-      // Get price feed
-      // 1. Get priceOracle's address used by the comprtroller. PriceOracle can have multiple implementations so:
-      // 1.1 We try to figure out which implementation it is, by (practically) bruteforcing it.
-      //1.1.2 We first assume its a ChainlinkPriceOracle.
-      //1.1.3 We then try with PrefferedOracle's primary oracle i.e ChainlinkPriceOracle
-      //1.1.4 We try with UniswapAnchoredView
-      //1.1.5 We try with UniswapView
-      //1.1.6 We try with PrefferedOracle's secondary oracle i.e UniswapAnchoredView or UniswapView
-      //1.1.6
-
-      // 2. Check
-
-      // Get address of the priceOracle used by the comptroller
-      const priceOracle: string = await comptroller.callStatic.oracle();
-
-      // Check for a ChainlinkPriceOracle with a feed for the ERC20 Token
-      let chainlinkPriceOracle: Contract;
-      let chainlinkPriceFeed: boolean | undefined = undefined; // will be true if chainlink has a price feed for underlying Erc20 token
-
-      chainlinkPriceOracle = new Contract(priceOracle, this.oracleContracts["ChainlinkPriceOracle"].abi, this.provider);
-
-      // If underlying Erc20 is WETH use chainlinkPriceFeed, otherwise check if Chainlink supports it.
-      if (conf.underlying.toLowerCase() === this.contractConfig.TOKEN_ADDRESS.W_TOKEN.toLowerCase()) {
-        chainlinkPriceFeed = true;
-      } else {
-        try {
-          chainlinkPriceFeed = await chainlinkPriceOracle.hasPriceFeed(conf.underlying);
-        } catch {}
-      }
-
-      if (chainlinkPriceFeed === undefined || !chainlinkPriceFeed) {
-        const preferredPriceOracle = new Contract(
-          priceOracle,
-          this.oracleContracts["PreferredPriceOracle"].abi,
+        // Initiate ChainlinkOracle
+        chainlinkPriceOracle = new Contract(
+          chainlinkPriceOracleAddress,
+          this.oracleContracts["ChainlinkPriceOracle"].abi,
           this.provider
         );
 
-        try {
-          // Get the underlying ChainlinkOracle address of the PreferredPriceOracle
-          const chainlinkPriceOracleAddress = await preferredPriceOracle.chainlinkOracle();
+        // Check if chainlink has an available price feed for the Erc20Token
+        chainlinkPriceFeed = await chainlinkPriceOracle.hasPriceFeed(conf.underlying);
+      } catch {}
+    }
 
-          // Initiate ChainlinkOracle
-          chainlinkPriceOracle = new Contract(
-            chainlinkPriceOracleAddress,
-            this.oracleContracts["ChainlinkPriceOracle"].abi,
-            this.provider
-          );
+    if (chainlinkPriceFeed === undefined || !chainlinkPriceFeed) {
+      // Check if we can get a UniswapAnchoredView
+      var isUniswapAnchoredView = false;
 
-          // Check if chainlink has an available price feed for the Erc20Token
-          chainlinkPriceFeed = await chainlinkPriceOracle.hasPriceFeed(conf.underlying);
-        } catch {}
-      }
-
-      if (chainlinkPriceFeed === undefined || !chainlinkPriceFeed) {
-        // Check if we can get a UniswapAnchoredView
-        var isUniswapAnchoredView = false;
-
-        let uniswapOrUniswapAnchoredViewContract: Contract;
+      let uniswapOrUniswapAnchoredViewContract: Contract;
+      try {
+        uniswapOrUniswapAnchoredViewContract = new Contract(
+          priceOracle,
+          JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapAnchoredView.sol:UniswapAnchoredView"].abi),
+          this.provider
+        );
+        await uniswapOrUniswapAnchoredViewContract.IS_UNISWAP_ANCHORED_VIEW();
+        isUniswapAnchoredView = true;
+      } catch {
         try {
           uniswapOrUniswapAnchoredViewContract = new Contract(
             priceOracle,
-            JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapAnchoredView.sol:UniswapAnchoredView"].abi),
+            JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapView.sol:UniswapView"].abi),
             this.provider
           );
-          await uniswapOrUniswapAnchoredViewContract.IS_UNISWAP_ANCHORED_VIEW();
-          isUniswapAnchoredView = true;
+          await uniswapOrUniswapAnchoredViewContract.IS_UNISWAP_VIEW();
         } catch {
+          // Check for PreferredPriceOracle's secondary oracle.
+          const preferredPriceOracle = new Contract(
+            priceOracle,
+            this.oracleContracts["PreferredPriceOracle"].abi,
+            this.provider
+          );
+
+          let uniswapOrUniswapAnchoredViewAddress;
+
+          try {
+            uniswapOrUniswapAnchoredViewAddress = await preferredPriceOracle.secondaryOracle();
+          } catch {
+            throw Error("Underlying token price for this asset is not available via this oracle.");
+          }
+
           try {
             uniswapOrUniswapAnchoredViewContract = new Contract(
-              priceOracle,
-              JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapView.sol:UniswapView"].abi),
+              uniswapOrUniswapAnchoredViewAddress,
+              JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapAnchoredView.sol:UniswapAnchoredView"].abi),
               this.provider
             );
-            await uniswapOrUniswapAnchoredViewContract.IS_UNISWAP_VIEW();
+            await uniswapOrUniswapAnchoredViewContract.IS_UNISWAP_ANCHORED_VIEW();
+            isUniswapAnchoredView = true;
           } catch {
-            // Check for PreferredPriceOracle's secondary oracle.
-            const preferredPriceOracle = new Contract(
-              priceOracle,
-              this.oracleContracts["PreferredPriceOracle"].abi,
-              this.provider
-            );
-
-            let uniswapOrUniswapAnchoredViewAddress;
-
-            try {
-              uniswapOrUniswapAnchoredViewAddress = await preferredPriceOracle.secondaryOracle();
-            } catch {
-              throw Error("Underlying token price for this asset is not available via this oracle.");
-            }
-
             try {
               uniswapOrUniswapAnchoredViewContract = new Contract(
                 uniswapOrUniswapAnchoredViewAddress,
-                JSON.parse(
-                  this.openOracleContracts["contracts/Uniswap/UniswapAnchoredView.sol:UniswapAnchoredView"].abi
-                ),
+                JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapView.sol:UniswapView"].abi),
                 this.provider
               );
-              await uniswapOrUniswapAnchoredViewContract.IS_UNISWAP_ANCHORED_VIEW();
-              isUniswapAnchoredView = true;
+              await uniswapOrUniswapAnchoredViewContract.methods.IS_UNISWAP_VIEW();
             } catch {
-              try {
-                uniswapOrUniswapAnchoredViewContract = new Contract(
-                  uniswapOrUniswapAnchoredViewAddress,
-                  JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapView.sol:UniswapView"].abi),
-                  this.provider
-                );
-                await uniswapOrUniswapAnchoredViewContract.methods.IS_UNISWAP_VIEW();
-              } catch {
-                throw Error(
-                  "Underlying token price not available via ChainlinkPriceOracle, and no UniswapAnchoredView or UniswapView was found."
-                );
-              }
+              throw Error(
+                "Underlying token price not available via ChainlinkPriceOracle, and no UniswapAnchoredView or UniswapView was found."
+              );
             }
           }
+        }
 
-          // Check if the token already exists
-          try {
-            await uniswapOrUniswapAnchoredViewContract.getTokenConfigByUnderlying(conf.underlying);
-          } catch {
-            // If not, add it!
-            const underlyingToken = new Contract(
-              conf.underlying,
-              this.compoundContracts["contracts/EIP20Interface.sol:EIP20Interface"].abi,
-              this.provider
+        // Check if the token already exists
+        try {
+          await uniswapOrUniswapAnchoredViewContract.getTokenConfigByUnderlying(conf.underlying);
+        } catch {
+          // If not, add it!
+          const underlyingToken = new Contract(
+            conf.underlying,
+            this.compoundContracts["contracts/EIP20Interface.sol:EIP20Interface"].abi,
+            this.provider
+          );
+
+          const underlyingSymbol: string = await underlyingToken.symbol();
+          const underlyingDecimals: number = await underlyingToken.decimals();
+
+          const PriceSource = {
+            FIXED_ETH: 0,
+            FIXED_USD: 1,
+            REPORTER: 2,
+            TWAP: 3,
+          };
+
+          if (conf.underlying.toLowerCase() === this.contractConfig.TOKEN_ADDRESS.W_TOKEN.toLowerCase()) {
+            // WETH
+            await uniswapOrUniswapAnchoredViewContract.add(
+              [
+                {
+                  underlying: conf.underlying,
+                  symbolHash: utils.solidityKeccak256(["string"], [underlyingSymbol]),
+                  baseUnit: BigNumber.from(10).pow(BigNumber.from(underlyingDecimals)).toString(),
+                  priceSource: PriceSource.FIXED_ETH,
+                  fixedPrice: constants.WeiPerEther.toString(),
+                  uniswapMarket: "0x0000000000000000000000000000000000000000",
+                  isUniswapReversed: false,
+                },
+              ],
+              { ...options }
             );
-
-            const underlyingSymbol: string = await underlyingToken.symbol();
-            const underlyingDecimals: number = await underlyingToken.decimals();
-
-            const PriceSource = {
-              FIXED_ETH: 0,
-              FIXED_USD: 1,
-              REPORTER: 2,
-              TWAP: 3,
-            };
-
-            if (conf.underlying.toLowerCase() === this.contractConfig.TOKEN_ADDRESS.W_TOKEN.toLowerCase()) {
-              // WETH
+          } else if (conf.underlying === this.contractConfig.TOKEN_ADDRESS.USDC) {
+            // USDC
+            if (isUniswapAnchoredView) {
               await uniswapOrUniswapAnchoredViewContract.add(
                 [
                   {
-                    underlying: conf.underlying,
-                    symbolHash: utils.solidityKeccak256(["string"], [underlyingSymbol]),
-                    baseUnit: BigNumber.from(10).pow(BigNumber.from(underlyingDecimals)).toString(),
-                    priceSource: PriceSource.FIXED_ETH,
-                    fixedPrice: constants.WeiPerEther.toString(),
+                    underlying: this.contractConfig.TOKEN_ADDRESS.USDC,
+                    symbolHash: utils.solidityKeccak256(["string"], ["USDC"]),
+                    baseUnit: BigNumber.from(1e6).toString(),
+                    priceSource: PriceSource.FIXED_USD,
+                    fixedPrice: 1e6,
                     uniswapMarket: "0x0000000000000000000000000000000000000000",
                     isUniswapReversed: false,
                   },
                 ],
                 { ...options }
               );
-            } else if (conf.underlying === this.contractConfig.TOKEN_ADDRESS.USDC) {
-              // USDC
-              if (isUniswapAnchoredView) {
+            } else {
+              await uniswapOrUniswapAnchoredViewContract.add(
+                [
+                  {
+                    underlying: this.contractConfig.TOKEN_ADDRESS.USDC,
+                    symbolHash: utils.solidityKeccak256(["string"], ["USDC"]),
+                    baseUnit: BigNumber.from(1e6).toString(),
+                    priceSource: PriceSource.TWAP,
+                    fixedPrice: 0,
+                    uniswapMarket: "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc",
+                    isUniswapReversed: false,
+                  },
+                ],
+                { ...options }
+              );
+              await uniswapOrUniswapAnchoredViewContract.postPrices([this.contractConfig.TOKEN_ADDRESS.USDC], {
+                ...options,
+              });
+            }
+          } else {
+            // Ask about fixed prices if UniswapAnchoredView or if UniswapView is not public; otherwise, prompt for Uniswap V2 pair
+            if (isUniswapAnchoredView || !(await uniswapOrUniswapAnchoredViewContract.isPublic())) {
+              // Check for fixed ETH
+              const fixedEth = confirm("Should the price of this token be fixed to 1 ETH?");
+
+              if (fixedEth) {
                 await uniswapOrUniswapAnchoredViewContract.add(
                   [
                     {
-                      underlying: this.contractConfig.TOKEN_ADDRESS.USDC,
-                      symbolHash: utils.solidityKeccak256(["string"], ["USDC"]),
-                      baseUnit: BigNumber.from(1e6).toString(),
-                      priceSource: PriceSource.FIXED_USD,
-                      fixedPrice: 1e6,
+                      underlying: conf.underlying,
+                      symbolHash: utils.solidityKeccak256(["string"], [underlyingSymbol]),
+                      baseUnit: BigNumber.from(10)
+                        .pow(underlyingDecimals === 18 ? constants.WeiPerEther : BigNumber.from(underlyingDecimals))
+                        .toString(),
+                      priceSource: PriceSource.FIXED_ETH,
+                      fixedPrice: constants.WeiPerEther.toString(),
                       uniswapMarket: "0x0000000000000000000000000000000000000000",
                       isUniswapReversed: false,
                     },
@@ -933,240 +933,196 @@ export default class Fuse {
                   { ...options }
                 );
               } else {
-                await uniswapOrUniswapAnchoredViewContract.add(
-                  [
+                // Check for fixed USD
+                let msg = "Should the price of this token be fixed to 1 USD?";
+                if (!isUniswapAnchoredView)
+                  msg +=
+                    " If so, please note that you will need to run postPrices on your UniswapView for USDC instead of " +
+                    underlyingSymbol +
+                    " (as technically, the " +
+                    underlyingSymbol +
+                    " price would be fixed to 1 USDC).";
+                const fixedUsd = confirm(msg);
+
+                if (fixedUsd) {
+                  const tokenConfigs = [
                     {
-                      underlying: this.contractConfig.TOKEN_ADDRESS.USDC,
-                      symbolHash: utils.solidityKeccak256(["string"], ["USDC"]),
-                      baseUnit: BigNumber.from(1e6).toString(),
-                      priceSource: PriceSource.TWAP,
-                      fixedPrice: 0,
-                      uniswapMarket: "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc",
+                      underlying: conf.underlying,
+                      symbolHash: utils.solidityKeccak256(["string"], [underlyingSymbol]),
+                      baseUnit: BigNumber.from(10)
+                        .pow(underlyingDecimals === 18 ? constants.WeiPerEther : BigNumber.from(underlyingDecimals))
+                        .toString(),
+                      priceSource: PriceSource.FIXED_USD,
+                      fixedPrice: BigNumber.from(1e6).toString(),
+                      uniswapMarket: "0x0000000000000000000000000000000000000000",
                       isUniswapReversed: false,
                     },
-                  ],
-                  { ...options }
-                );
-                await uniswapOrUniswapAnchoredViewContract.postPrices([this.contractConfig.TOKEN_ADDRESS.USDC], {
-                  ...options,
-                });
-              }
-            } else {
-              // Ask about fixed prices if UniswapAnchoredView or if UniswapView is not public; otherwise, prompt for Uniswap V2 pair
-              if (isUniswapAnchoredView || !(await uniswapOrUniswapAnchoredViewContract.isPublic())) {
-                // Check for fixed ETH
-                const fixedEth = confirm("Should the price of this token be fixed to 1 ETH?");
+                  ];
 
-                if (fixedEth) {
-                  await uniswapOrUniswapAnchoredViewContract.add(
-                    [
-                      {
-                        underlying: conf.underlying,
-                        symbolHash: utils.solidityKeccak256(["string"], [underlyingSymbol]),
-                        baseUnit: BigNumber.from(10)
-                          .pow(underlyingDecimals === 18 ? constants.WeiPerEther : BigNumber.from(underlyingDecimals))
-                          .toString(),
-                        priceSource: PriceSource.FIXED_ETH,
-                        fixedPrice: constants.WeiPerEther.toString(),
-                        uniswapMarket: "0x0000000000000000000000000000000000000000",
+                  // UniswapView only: add USDC token config if not present so price oracle can convert from USD to ETH
+                  if (!isUniswapAnchoredView) {
+                    try {
+                      await uniswapOrUniswapAnchoredViewContract.getTokenConfigByUnderlying(
+                        this.contractConfig.TOKEN_ADDRESS.USDC
+                      );
+                    } catch (error) {
+                      tokenConfigs.push({
+                        underlying: this.contractConfig.TOKEN_ADDRESS.USDC,
+                        symbolHash: utils.solidityKeccak256(["string"], ["USDC"]),
+                        baseUnit: BigNumber.from(1e6).toString(),
+                        priceSource: PriceSource.TWAP,
+                        fixedPrice: "0",
+                        uniswapMarket: "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc",
                         isUniswapReversed: false,
-                      },
-                    ],
-                    { ...options }
-                  );
-                } else {
-                  // Check for fixed USD
-                  let msg = "Should the price of this token be fixed to 1 USD?";
-                  if (!isUniswapAnchoredView)
-                    msg +=
-                      " If so, please note that you will need to run postPrices on your UniswapView for USDC instead of " +
-                      underlyingSymbol +
-                      " (as technically, the " +
-                      underlyingSymbol +
-                      " price would be fixed to 1 USDC).";
-                  const fixedUsd = confirm(msg);
-
-                  if (fixedUsd) {
-                    const tokenConfigs = [
-                      {
-                        underlying: conf.underlying,
-                        symbolHash: utils.solidityKeccak256(["string"], [underlyingSymbol]),
-                        baseUnit: BigNumber.from(10)
-                          .pow(underlyingDecimals === 18 ? constants.WeiPerEther : BigNumber.from(underlyingDecimals))
-                          .toString(),
-                        priceSource: PriceSource.FIXED_USD,
-                        fixedPrice: BigNumber.from(1e6).toString(),
-                        uniswapMarket: "0x0000000000000000000000000000000000000000",
-                        isUniswapReversed: false,
-                      },
-                    ];
-
-                    // UniswapView only: add USDC token config if not present so price oracle can convert from USD to ETH
-                    if (!isUniswapAnchoredView) {
-                      try {
-                        await uniswapOrUniswapAnchoredViewContract.getTokenConfigByUnderlying(
-                          this.contractConfig.TOKEN_ADDRESS.USDC
-                        );
-                      } catch (error) {
-                        tokenConfigs.push({
-                          underlying: this.contractConfig.TOKEN_ADDRESS.USDC,
-                          symbolHash: utils.solidityKeccak256(["string"], ["USDC"]),
-                          baseUnit: BigNumber.from(1e6).toString(),
-                          priceSource: PriceSource.TWAP,
-                          fixedPrice: "0",
-                          uniswapMarket: "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc",
-                          isUniswapReversed: false,
-                        });
-                      }
-                    }
-
-                    // Add token config(s)
-                    await uniswapOrUniswapAnchoredViewContract.add(tokenConfigs, { ...options });
-
-                    // UniswapView only: post USDC price
-                    if (!isUniswapAnchoredView)
-                      await uniswapOrUniswapAnchoredViewContract.postPrices([this.contractConfig.TOKEN_ADDRESS.USDC], {
-                        ...options,
                       });
-                  } else await promptForUniswapV2Pair(this); // Prompt for Uniswap V2 pair
-                }
-              } else await promptForUniswapV2Pair(this);
-            } // Prompt for Uniswap V2 pair
+                    }
+                  }
 
-            // @ts-ignore
-            async function promptForUniswapV2Pair(self: Fuse) {
-              // Predict correct Uniswap V2 pair
-              let isNotReversed =
-                conf.underlying.toLowerCase() < self.contractConfig.TOKEN_ADDRESS.W_TOKEN.toLowerCase();
-              const salt = utils.solidityKeccak256(
-                ["string", "string"],
-                [conf.underlying, self.contractConfig.TOKEN_ADDRESS.W_TOKEN]
-              );
+                  // Add token config(s)
+                  await uniswapOrUniswapAnchoredViewContract.add(tokenConfigs, { ...options });
 
-              let uniswapV2Pair = utils.getCreate2Address(
-                self.contractConfig.FACTORY.UniswapV2_Factory,
-                salt,
-                self.contractConfig.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES.UniswapV2_PairInit
-              );
-
-              // Double-check with user that pair is correct
-              const correctUniswapV2Pair = confirm(
-                "We have determined that the correct Uniswap V2 pair for " +
-                  (isNotReversed ? underlyingSymbol + "/ETH" : "ETH/" + underlyingSymbol) +
-                  " is " +
-                  uniswapV2Pair +
-                  ". Is this correct?"
-              );
-
-              if (!correctUniswapV2Pair) {
-                let uniswapV2Pair = prompt("Please enter the underlying token's ETH-based Uniswap V2 pair address:");
-                if (uniswapV2Pair && uniswapV2Pair.length === 0)
-                  throw Error(
-                    isUniswapAnchoredView
-                      ? "Reported prices must have a Uniswap V2 pair as an anchor!"
-                      : "Non-fixed prices must have a Uniswap V2 pair from which to source prices!"
-                  );
-                isNotReversed = confirm(
-                  "Press OK if the Uniswap V2 pair is " +
-                    underlyingSymbol +
-                    "/ETH. If it is reversed (ETH/" +
-                    underlyingSymbol +
-                    "), press Cancel."
-                );
+                  // UniswapView only: post USDC price
+                  if (!isUniswapAnchoredView)
+                    await uniswapOrUniswapAnchoredViewContract.postPrices([this.contractConfig.TOKEN_ADDRESS.USDC], {
+                      ...options,
+                    });
+                } else await promptForUniswapV2Pair(this); // Prompt for Uniswap V2 pair
               }
+            } else await promptForUniswapV2Pair(this);
+          } // Prompt for Uniswap V2 pair
 
-              // Add asset to oracle
-              await uniswapOrUniswapAnchoredViewContract.add(
-                [
-                  {
-                    underlying: conf.underlying,
-                    symbolHash: utils.solidityKeccak256(["string"], [underlyingSymbol]),
-                    baseUnit: BigNumber.from(10)
-                      .pow(underlyingDecimals === 18 ? constants.WeiPerEther : BigNumber.from(underlyingDecimals))
-                      .toString(),
-                    priceSource: isUniswapAnchoredView ? PriceSource.REPORTER : PriceSource.TWAP,
-                    fixedPrice: 0,
-                    uniswapMarket: uniswapV2Pair,
-                    isUniswapReversed: !isNotReversed,
-                  },
-                ],
-                { ...options }
-              );
+          // @ts-ignore
+          async function promptForUniswapV2Pair(self: Fuse) {
+            // Predict correct Uniswap V2 pair
+            let isNotReversed = conf.underlying.toLowerCase() < self.contractConfig.TOKEN_ADDRESS.W_TOKEN.toLowerCase();
+            const salt = utils.solidityKeccak256(
+              ["string", "string"],
+              [conf.underlying, self.contractConfig.TOKEN_ADDRESS.W_TOKEN]
+            );
 
-              // Post first price
-              if (isUniswapAnchoredView) {
-                // Post reported price or (if price has never been reported) have user report and post price
-                const priceData = new Contract(
-                  await uniswapOrUniswapAnchoredViewContract.priceData(),
-                  JSON.parse(self.openOracleContracts["contracts/OpenOraclePriceData.sol:OpenOraclePriceData"].abi),
-                  self.provider
+            let uniswapV2Pair = utils.getCreate2Address(
+              self.contractConfig.FACTORY.UniswapV2_Factory,
+              salt,
+              self.contractConfig.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES.UniswapV2_PairInit
+            );
+
+            // Double-check with user that pair is correct
+            const correctUniswapV2Pair = confirm(
+              "We have determined that the correct Uniswap V2 pair for " +
+                (isNotReversed ? underlyingSymbol + "/ETH" : "ETH/" + underlyingSymbol) +
+                " is " +
+                uniswapV2Pair +
+                ". Is this correct?"
+            );
+
+            if (!correctUniswapV2Pair) {
+              let uniswapV2Pair = prompt("Please enter the underlying token's ETH-based Uniswap V2 pair address:");
+              if (uniswapV2Pair && uniswapV2Pair.length === 0)
+                throw Error(
+                  isUniswapAnchoredView
+                    ? "Reported prices must have a Uniswap V2 pair as an anchor!"
+                    : "Non-fixed prices must have a Uniswap V2 pair from which to source prices!"
                 );
-                var reporter = await uniswapOrUniswapAnchoredViewContract.methods.reporter();
-                if (BigNumber.from(await priceData.getPrice(reporter, underlyingSymbol)).gt(constants.Zero))
-                  await uniswapOrUniswapAnchoredViewContract.postPrices([], [], [underlyingSymbol], { ...options });
-                else
-                  prompt(
-                    "It looks like prices have never been reported for " +
-                      underlyingSymbol +
-                      ". Please click OK once you have reported and posted prices for" +
-                      underlyingSymbol +
-                      "."
-                  );
-              } else {
-                await uniswapOrUniswapAnchoredViewContract.postPrices([conf.underlying], { ...options });
-              }
+              isNotReversed = confirm(
+                "Press OK if the Uniswap V2 pair is " +
+                  underlyingSymbol +
+                  "/ETH. If it is reversed (ETH/" +
+                  underlyingSymbol +
+                  "), press Cancel."
+              );
+            }
+
+            // Add asset to oracle
+            await uniswapOrUniswapAnchoredViewContract.add(
+              [
+                {
+                  underlying: conf.underlying,
+                  symbolHash: utils.solidityKeccak256(["string"], [underlyingSymbol]),
+                  baseUnit: BigNumber.from(10)
+                    .pow(underlyingDecimals === 18 ? constants.WeiPerEther : BigNumber.from(underlyingDecimals))
+                    .toString(),
+                  priceSource: isUniswapAnchoredView ? PriceSource.REPORTER : PriceSource.TWAP,
+                  fixedPrice: 0,
+                  uniswapMarket: uniswapV2Pair,
+                  isUniswapReversed: !isNotReversed,
+                },
+              ],
+              { ...options }
+            );
+
+            // Post first price
+            if (isUniswapAnchoredView) {
+              // Post reported price or (if price has never been reported) have user report and post price
+              const priceData = new Contract(
+                await uniswapOrUniswapAnchoredViewContract.priceData(),
+                JSON.parse(self.openOracleContracts["contracts/OpenOraclePriceData.sol:OpenOraclePriceData"].abi),
+                self.provider
+              );
+              var reporter = await uniswapOrUniswapAnchoredViewContract.methods.reporter();
+              if (BigNumber.from(await priceData.getPrice(reporter, underlyingSymbol)).gt(constants.Zero))
+                await uniswapOrUniswapAnchoredViewContract.postPrices([], [], [underlyingSymbol], { ...options });
+              else
+                prompt(
+                  "It looks like prices have never been reported for " +
+                    underlyingSymbol +
+                    ". Please click OK once you have reported and posted prices for" +
+                    underlyingSymbol +
+                    "."
+                );
+            } else {
+              await uniswapOrUniswapAnchoredViewContract.postPrices([conf.underlying], { ...options });
             }
           }
         }
       }
-    };
-
-    this.getPriceOracle = async function (oracleAddress: string) {
-      // Get price oracle contract name from runtime bytecode hash
-      const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(oracleAddress));
-      for (const model of Object.keys(this.contractConfig.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES)) {
-        if (runtimeBytecodeHash === this.contractConfig.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES[model]) return model;
-        return null;
-      }
-    };
-
-    this.deployRewardsDistributor = async function (rewardToken, options) {
-      const distributor = new ContractFactory(
-        this.compoundContracts["contracts/RewardsDistributorDelegator.sol:RewardsDistributorDelegator"].abi,
-        this.compoundContracts["contracts/RewardsDistributorDelegator.sol:RewardsDistributorDelegator"].bytecode,
-        this.provider.getSigner()
-      );
-      console.log({ options, rewardToken });
-
-      // const rdAddress = distributor.options.address;
-      return await distributor.deploy({
-        arguments: [
-          options.from,
-          rewardToken,
-          this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.RewardsDistributorDelegate,
-        ],
-      });
-    };
-
-    this.checkCardinality = async function (uniswapV3Pool: string) {
-      const uniswapV3PoolContract = new Contract(uniswapV3Pool, uniswapV3PoolAbiSlim);
-      return (await uniswapV3PoolContract.methods.slot0().call()).observationCardinalityNext < 64;
-    };
-
-    this.primeUniswapV3Oracle = async function (uniswapV3Pool, options) {
-      const uniswapV3PoolContract = new Contract(uniswapV3Pool, uniswapV3PoolAbiSlim);
-      await uniswapV3PoolContract.methods.increaseObservationCardinalityNext(64).send(options);
-    };
-
-    this.identifyInterestRateModelName = (irmAddress) => {
-      let name = "";
-
-      Object.entries(this.contractConfig.PUBLIC_INTEREST_RATE_MODEL_CONTRACT_ADDRESSES).forEach(([key, value]) => {
-        if (value === irmAddress) {
-          name = key;
-        }
-      });
-      return name;
-    };
+    }
   }
+
+  async getPriceOracle(oracleAddress: string) {
+    // Get price oracle contract name from runtime bytecode hash
+    const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(oracleAddress));
+    for (const model of Object.keys(this.contractConfig.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES)) {
+      if (runtimeBytecodeHash === this.contractConfig.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES[model]) return model;
+      return null;
+    }
+  }
+
+  async deployRewardsDistributor(rewardToken, options) {
+    const distributor = new ContractFactory(
+      this.compoundContracts["contracts/RewardsDistributorDelegator.sol:RewardsDistributorDelegator"].abi,
+      this.compoundContracts["contracts/RewardsDistributorDelegator.sol:RewardsDistributorDelegator"].bytecode,
+      this.provider.getSigner()
+    );
+    console.log({ options, rewardToken });
+
+    // const rdAddress = distributor.options.address;
+    return await distributor.deploy({
+      arguments: [
+        options.from,
+        rewardToken,
+        this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.RewardsDistributorDelegate,
+      ],
+    });
+  }
+
+  async checkCardinality(uniswapV3Pool: string) {
+    const uniswapV3PoolContract = new Contract(uniswapV3Pool, uniswapV3PoolAbiSlim);
+    return (await uniswapV3PoolContract.methods.slot0().call()).observationCardinalityNext < 64;
+  }
+
+  async primeUniswapV3Oracle(uniswapV3Pool, options) {
+    const uniswapV3PoolContract = new Contract(uniswapV3Pool, uniswapV3PoolAbiSlim);
+    await uniswapV3PoolContract.methods.increaseObservationCardinalityNext(64).send(options);
+  }
+
+  identifyInterestRateModelName = (irmAddress) => {
+    let name = "";
+
+    Object.entries(this.contractConfig.PUBLIC_INTEREST_RATE_MODEL_CONTRACT_ADDRESSES).forEach(([key, value]) => {
+      if (value === irmAddress) {
+        name = key;
+      }
+    });
+    return name;
+  };
 }
