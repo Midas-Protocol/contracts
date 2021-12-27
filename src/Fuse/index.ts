@@ -45,6 +45,7 @@ import {
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 import { deployMasterPriceOracle, getDeployArgs, getOracleConf, simpleDeploy } from "./ops/oracles";
+import { InterestRateModel } from "./irm/InterestRateModel";
 
 export declare type ContractConfig = {
   COMPOUND_CONTRACT_ADDRESSES: {
@@ -667,7 +668,7 @@ export default class Fuse {
     return null;
   }
 
-  async identifyInterestRateModel(interestRateModelAddress: string): Promise<any> {
+  async identifyInterestRateModel(interestRateModelAddress: string): Promise<InterestRateModel> {
     // Get interest rate model type from runtime bytecode hash and init class
     const interestRateModels: { [key: string]: any } = {
       JumpRateModel: JumpRateModel,
