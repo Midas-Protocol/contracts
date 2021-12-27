@@ -9,5 +9,7 @@ export {
   MinifiedContracts,
   MinifiedOraclesContracts,
   OracleConf,
-  InterestRateModel
+  InterestRateModel,
 } from "./Fuse/types";
+import ERC20Abi from "./Fuse/abi/ERC20.json";
+export { ERC20Abi };
