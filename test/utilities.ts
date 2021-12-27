@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { contractConfig } from "../lib/esm";
+import { ContractConfig } from "../lib/esm";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -63,7 +63,7 @@ function parseNetworkFile(data: string | object) {
   return typeof data === "string" ? JSON.parse(data) : data;
 }
 
-export async function getContractsConfig(network: string, thisObject?: Object): Promise<contractConfig> {
+export async function getContractsConfig(network: string, thisObject?: Object): Promise<ContractConfig> {
   const basePath = __dirname + "/../";
   if (network === "hardhat" || network === "development" || network == "localhost") {
     return await createLocalContractConfig();
@@ -71,7 +71,7 @@ export async function getContractsConfig(network: string, thisObject?: Object): 
   return await readFile(getNetworkPath(basePath, network), parseNetworkFile);
 }
 
-async function createLocalContractConfig(): Promise<contractConfig> {
+async function createLocalContractConfig(): Promise<ContractConfig> {
   return {
     TOKEN_ADDRESS: { DAI_JUG: "", DAI_POT: "", USDC: "", W_TOKEN: "" },
     COMPOUND_CONTRACT_ADDRESSES: {
