@@ -93,7 +93,9 @@ async function createLocalContractConfig(): Promise<ContractConfig> {
     PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {
       UniswapV2_PairInit: "",
     },
-    PUBLIC_PRICE_ORACLE_CONTRACT_ADDRESSES: {},
+    PUBLIC_PRICE_ORACLE_CONTRACT_ADDRESSES: {
+      MasterPriceOracle: "0x5c6C5139Ac2C9ce4DDF8c4FF0E1e6FBF3a5ACd23",
+    },
     FACTORY: {
       UniswapV2_Factory: "",
       UniswapV3TwapPriceOracleV2_Factory: "",
