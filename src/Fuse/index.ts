@@ -246,7 +246,7 @@ export default class Fuse {
       priceOracle: string, // Contract address
       priceOracleConf: any,
       options: any, // We might need to add sender as argument. Getting address from options will colide with the override arguments in ethers contract method calls. It doesnt take address.
-      whitelist: string[] = [] // An array of whitelisted addresses
+      whitelist: string[] // An array of whitelisted addresses
     ): Promise<[string, string, string]> {
       // 1. Deploy new price oracle via SDK if requested
       if (Fuse.ORACLES.indexOf(priceOracle) >= 0) {
@@ -274,7 +274,7 @@ export default class Fuse {
       let receipt;
       try {
         const contract = this.contracts.FusePoolDirectory.connect(this.provider.getSigner(options.from));
-        receipt = await contract.deployPool(
+        const tx = await contract.deployPool(
           poolName,
           implementationAddress,
           enforceWhitelist,
@@ -282,12 +282,11 @@ export default class Fuse {
           liquidationIncentive,
           priceOracle
         );
-        await receipt.wait();
+        receipt = await tx.wait();
         console.log(`Deployment of pool ${poolName} succeeded!`);
       } catch (error: any) {
         throw Error("Deployment and registration of new Fuse pool failed: " + (error.message ? error.message : error));
       }
-
       //4. Compute Unitroller address
       const saltsHash = utils.solidityKeccak256(
         ["address", "string", "uint"],
@@ -351,6 +350,7 @@ export default class Fuse {
 
       if (Fuse.SIMPLE_DEPLOY_ORACLES.indexOf(model) >= 0) {
         const factory = await this.getOracleContractFactory(model, options.from ?? null);
+
         return await simpleDeploy(factory, deployArgs);
       } else {
         return await deployMasterPriceOracle(this, oracleConf, deployArgs, options);
