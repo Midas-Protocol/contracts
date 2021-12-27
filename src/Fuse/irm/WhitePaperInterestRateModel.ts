@@ -1,8 +1,8 @@
 import { BigNumber, BigNumberish, Contract } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
-import { InterestRateModel } from "./InterestRateModel";
 
 import contracts from "../contracts/compound-protocol.json";
+import { InterestRateModel } from "../types";
 
 export default class WhitePaperInterestRateModel implements InterestRateModel {
   static RUNTIME_BYTECODE_HASH = "0xe3164248fb86cce0eb8037c9a5c8d05aac2b2ebdb46741939be466a7b17d0b83";

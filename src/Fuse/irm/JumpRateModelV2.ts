@@ -2,8 +2,9 @@ import { BigNumber, BigNumberish, Contract } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
 
 import contracts from "../contracts/compound-protocol.json";
+import { InterestRateModel } from "../types";
 
-export default class JumpRateModelV2 {
+export default class JumpRateModelV2 implements InterestRateModel {
   static RUNTIME_BYTECODE_HASH = "0xc6df64d77d18236fa0e3a1bb939e979d14453af5c8287891decfb67710972c3c";
 
   initialized: boolean | undefined;
@@ -41,11 +42,11 @@ export default class JumpRateModelV2 {
   }
 
   async _init(
-    provider: Web3Provider,
     interestRateModelAddress: string,
     reserveFactorMantissa: BigNumberish,
     adminFeeMantissa: BigNumberish,
-    fuseFeeMantissa: BigNumberish
+    fuseFeeMantissa: BigNumberish,
+    provider: Web3Provider,
   ) {
     const jumpRateModelContract = new Contract(
       interestRateModelAddress,

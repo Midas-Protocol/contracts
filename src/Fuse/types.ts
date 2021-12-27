@@ -1,8 +1,9 @@
+import { BigNumber, BigNumberish, providers } from "ethers";
+
 import JumpRateModel from "./irm/JumpRateModel";
 import JumpRateModelV2 from "./irm/JumpRateModelV2";
 import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
-import { BigNumber } from "ethers";
 
 export type MinifiedContracts = {
   [key: string]: {
@@ -18,9 +19,36 @@ export type MinifiedCompoundContracts = {
   };
 };
 
-export type MinifiedOraclesContractss = MinifiedCompoundContracts;
+export type MinifiedOraclesContracts = MinifiedCompoundContracts;
 
-export type interestRateModelType =
+export interface InterestRateModel {
+  init(interestRateModelAddress: string, assetAddress: string, provider: providers.Web3Provider | providers.JsonRpcProvider): Promise<void>;
+
+  _init(
+    interestRateModelAddress: string,
+    reserveFactorMantissa: BigNumberish,
+    adminFeeMantissa: BigNumberish,
+    fuseFeeMantissa: BigNumberish,
+    provider: providers.Web3Provider | providers.JsonRpcProvider
+  ): Promise<void>;
+
+  __init(
+    baseRatePerBlock: BigNumberish,
+    multiplierPerBlock: BigNumberish,
+    jumpMultiplierPerBlock: BigNumberish,
+    kink: BigNumberish,
+    reserveFactorMantissa: BigNumberish,
+    adminFeeMantissa: BigNumberish,
+    fuseFeeMantissa: BigNumberish
+  ): Promise<void>;
+
+  getBorrowRate(utilizationRate: BigNumber): BigNumber;
+
+  getSupplyRate(utilizationRate: BigNumber): BigNumber;
+}
+
+
+export type InterestRateModelType =
   | JumpRateModel
   | JumpRateModelV2
   | DAIInterestRateModelV2
@@ -67,14 +95,14 @@ export type OracleConf = {
   defaultOracle?: any;
 };
 
-export type interestRateModelParams = {
+export type InterestRateModelParams = {
   baseRatePerYear?: string;
   multiplierPerYear?: string;
   jumpMultiplierPerYear?: string;
   kink?: string;
 };
 
-export type interestRateModelConf = {
-  interestRateModel?: any;
-  interestRateModelParams?: interestRateModelParams;
+export type InterestRateModelConf = {
+  interestRateModel?: string;
+  interestRateModelParams?: InterestRateModelParams;
 };
