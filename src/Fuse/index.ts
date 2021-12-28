@@ -177,9 +177,8 @@ export default class Fuse {
         fusePoolLensAbi,
         this.provider
       ),
-      // TODO: figure out what this contract even is
       FusePoolLensSecondary: new Contract(
-        this.contractConfig.FUSE_CONTRACT_ADDRESSES.FusePoolLens,
+        this.contractConfig.FUSE_CONTRACT_ADDRESSES.FusePoolLensSecondary,
         fusePoolLensSecondaryAbi,
         this.provider
       ),
