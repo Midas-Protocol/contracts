@@ -75,29 +75,29 @@ async function createLocalContractConfig(): Promise<ContractConfig> {
   return {
     TOKEN_ADDRESS: { DAI_JUG: "", DAI_POT: "", USDC: "", W_TOKEN: "" },
     COMPOUND_CONTRACT_ADDRESSES: {
-      Comptroller: "0x7AD018c7d6217f37B0121AdA46AC4e99Ab8dd8C1", // comp.address,
-      CErc20Delegate: "0xFdB32Ead5e92e81d3A90B09Ca8021088aD0975E9", // cErc20Delegate,
-      CEther20Delegate: "0xff8F1382a78A7b910E516508D1CC934bbA08208f", //cEther20Delegate,
+      Comptroller: (await ethers.getContract("Comptroller")).address, // comp.address,
+      CErc20Delegate: (await ethers.getContract("CErc20Delegate")).address, // cErc20Delegate,
+      CEtherDelegate: (await ethers.getContract("CEtherDelegate")).address, //cEtherDelegate,
       InitializableClones: "",
       RewardsDistributorDelegate: "",
     },
     FUSE_CONTRACT_ADDRESSES: {
-      FusePoolDirectory: "0x5E5be5aAF574fBB4f66Da933A06DD31DeD748E52", // fpd.address,
-      FuseFeeDistributor: "0x3f739767fdaF80020f6A407a92866DD884810cFc", // ffd.address,
-      FusePoolLens: "0xefF651143CceF7FcB8C73cF5F0F18b887aceB22F", //fpl.address,
-      FusePoolLensSecondary: "0x954FAd8bCb920FD2D8f9f0dBd6269E7ffC68F1A5", //fpl.address,
-      FuseSafeLiquidator: "0xc292D493f6CE7245a41bA414C6494Fa01B6C6E3F", //fpls.address,
+      FusePoolDirectory: (await ethers.getContract("FusePoolDirectory")).address, // fpd.address,
+      FuseFeeDistributor: (await ethers.getContract("FuseFeeDistributor")).address, // ffd.address,
+      FusePoolLens: (await ethers.getContract("FusePoolLens")).address, //fpl.address,
+      FusePoolLensSecondary: (await ethers.getContract("FusePoolLensSecondary")).address, //fpl.address,
+      FuseSafeLiquidator: (await ethers.getContract("FuseSafeLiquidator")).address, //fpls.address,
       MasterPriceOracleImplementation: "",
     },
     PUBLIC_INTEREST_RATE_MODEL_CONTRACT_ADDRESSES: {
-      WhitePaperInterestRateModel: "0x666186dC1389A4f1cB06C1bcA4Eb2f4e150899f0",
-      JumpRateModel: "0x071aB319d920b2A9110DbD53546fa0Ed8c612f6C",
+      WhitePaperInterestRateModel: (await ethers.getContract("WhitePaperInterestRateModel")).address,
+      JumpRateModel: (await ethers.getContract("JumpRateModel")).address,
     },
     PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {
       UniswapV2_PairInit: "",
     },
     PUBLIC_PRICE_ORACLE_CONTRACT_ADDRESSES: {
-      MasterPriceOracle: "0x5c6C5139Ac2C9ce4DDF8c4FF0E1e6FBF3a5ACd23",
+      MasterPriceOracle: (await ethers.getContract("MasterPriceOracle")).address,
     },
     FACTORY: {
       UniswapV2_Factory: "",

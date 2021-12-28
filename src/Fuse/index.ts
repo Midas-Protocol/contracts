@@ -1,5 +1,5 @@
 // Ethers
-import { BigNumber, constants, Contract, ContractFactory, utils } from "ethers";
+import { BigNumber, constants, Contract, ContractFactory, providers, utils } from "ethers";
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 
 // Axios
@@ -51,7 +51,7 @@ export declare type ContractConfig = {
   COMPOUND_CONTRACT_ADDRESSES: {
     Comptroller: string;
     CErc20Delegate: string;
-    CEther20Delegate: string;
+    CEtherDelegate: string;
     RewardsDistributorDelegate?: string;
     InitializableClones: string;
   };
@@ -241,7 +241,7 @@ export default class Fuse {
     }
 
     //3. Register new pool with FusePoolDirectory
-    let receipt;
+    let receipt: providers.TransactionReceipt;
     try {
       const contract = this.contracts.FusePoolDirectory.connect(this.provider.getSigner(options.from));
       const tx = await contract.deployPool(
@@ -263,6 +263,7 @@ export default class Fuse {
       [options.from, poolName, receipt.blockNumber]
     );
     const byteCodeHash = utils.keccak256(this.compoundContracts["contracts/Unitroller.sol:Unitroller"].bytecode);
+    console.log('byteCodeHash: ', byteCodeHash);
 
     let poolAddress = utils.getCreate2Address(
       this.contractConfig.FUSE_CONTRACT_ADDRESSES.FusePoolDirectory,
@@ -285,6 +286,7 @@ export default class Fuse {
     }
 
     // Whitelist
+    console.log('enforceWhitelist: ', enforceWhitelist);
     if (enforceWhitelist) {
       let comptroller = new Contract(
         poolAddress,
@@ -293,6 +295,7 @@ export default class Fuse {
       );
 
       // Already enforced so now we just need to add the addresses
+      console.log('whitelist: ', whitelist);
       await comptroller._setWhitelistStatuses(whitelist, Array(whitelist.length).fill(true));
     }
 
@@ -505,8 +508,8 @@ export default class Fuse {
       : await this.deployCEther(
           conf,
           options,
-          this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEther20Delegate
-            ? this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEther20Delegate
+          this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEtherDelegate
+            ? this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEtherDelegate
             : null
         );
   }

@@ -1,8 +1,6 @@
 import { deployments, ethers, network } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-// @ts-ignore
-import Web3 from "web3";
 import { poolAssets } from "./setUp";
 import { Fuse } from "../lib/esm";
 import { getContractsConfig } from "./utilities";
@@ -24,14 +22,13 @@ describe("FusePoolDirectory", function () {
 
       const cpoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", alice);
       const cpo = await cpoFactory.deploy([10]);
-      console.log("Chainlink Price Oracle Address: ", cpo.address);
 
       const fpdWithSigner = await ethers.getContract("FusePoolDirectory", alice);
 
       // 50% -> 0.5 * 1e18
-      const bigCloseFactor = utils.parseUnits((50 / 100).toString());
+      const bigCloseFactor = utils.parseEther((50 / 100).toString());
       // 8% -> 1.08 * 1e8
-      const bigLiquidationIncentive = utils.parseUnits((8 / 100 + 1).toString());
+      const bigLiquidationIncentive = utils.parseEther((8 / 100 + 1).toString());
       const deployedPool = await fpdWithSigner.deployPool(
         "TEST",
         contractConfig.COMPOUND_CONTRACT_ADDRESSES.Comptroller,
@@ -41,9 +38,11 @@ describe("FusePoolDirectory", function () {
         cpo.address
       );
       expect(deployedPool).to.be.ok;
+
+
     });
 
-    it("should deploy pool from sdk", async function () {
+    it("should deploy pool from sdk without whitelist", async function () {
       const { bob } = await ethers.getNamedSigners();
 
       const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", bob);
@@ -52,11 +51,16 @@ describe("FusePoolDirectory", function () {
       const contractConfig = await getContractsConfig(network.name);
       const sdk = new Fuse(ethers.provider, contractConfig);
 
+      // 50% -> 0.5 * 1e18
+      const bigCloseFactor = utils.parseEther((50 / 100).toString());
+      // 8% -> 1.08 * 1e8
+      const bigLiquidationIncentive = utils.parseEther((8 / 100 + 1).toString());
+
       const [poolAddress, implementationAddress, priceOracleAddress] = await sdk.deployPool(
         "TEST",
-        true,
-        BigNumber.from("500000000000000000"),
-        BigNumber.from("1100000000000000000"),
+        false,
+        bigCloseFactor,
+        bigLiquidationIncentive,
         spo.address,
         {},
         { from: bob.address },
@@ -70,7 +74,7 @@ describe("FusePoolDirectory", function () {
       expect(implementationAddress).to.be.ok;
     });
 
-    it("should deploy assets to pool", async function () {
+    it.only("should deploy assets to pool", async function () {
       const { alice, bob } = await ethers.getNamedSigners();
 
       const jrm = await ethers.getContract("JumpRateModel", alice);
