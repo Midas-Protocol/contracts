@@ -1,9 +1,10 @@
-import { BigNumber, BigNumberish } from "ethers";
-import { createContract, toBN } from "../utils/web3";
-import contracts from "../contracts/compound-protocol.json";
+import { BigNumber, BigNumberish, Contract } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
 
-export default class JumpRateModelV2 {
+import contracts from "../contracts/compound-protocol.json";
+import { InterestRateModel } from "../types";
+
+export default class JumpRateModelV2 implements InterestRateModel {
   static RUNTIME_BYTECODE_HASH = "0xc6df64d77d18236fa0e3a1bb939e979d14453af5c8287891decfb67710972c3c";
 
   initialized: boolean | undefined;
@@ -14,52 +15,52 @@ export default class JumpRateModelV2 {
   reserveFactorMantissa: BigNumber | undefined;
 
   async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
-    const jumpRateModelContract = createContract(
+    const jumpRateModelContract = new Contract(
       interestRateModelAddress,
       contracts.contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
       provider
     );
 
-    this.baseRatePerBlock = toBN(await jumpRateModelContract.callStatic.baseRatePerBlock());
-    this.multiplierPerBlock = toBN(await jumpRateModelContract.callStatic.multiplierPerBlock());
-    this.jumpMultiplierPerBlock = toBN(await jumpRateModelContract.callStatic.jumpMultiplierPerBlock());
-    this.kink = toBN(await jumpRateModelContract.callStatic.kink());
+    this.baseRatePerBlock = BigNumber.from(await jumpRateModelContract.callStatic.baseRatePerBlock());
+    this.multiplierPerBlock = BigNumber.from(await jumpRateModelContract.callStatic.multiplierPerBlock());
+    this.jumpMultiplierPerBlock = BigNumber.from(await jumpRateModelContract.callStatic.jumpMultiplierPerBlock());
+    this.kink = BigNumber.from(await jumpRateModelContract.callStatic.kink());
 
-    const cTokenContract = createContract(
+    const cTokenContract = new Contract(
       assetAddress,
       contracts.contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi,
       provider
     );
-    this.reserveFactorMantissa = toBN(await cTokenContract.callStatic.reserveFactorMantissa());
+    this.reserveFactorMantissa = BigNumber.from(await cTokenContract.callStatic.reserveFactorMantissa());
     this.reserveFactorMantissa = this.reserveFactorMantissa.add(
-      toBN(await cTokenContract.callStatic.adminFeeMantissa())
+      BigNumber.from(await cTokenContract.callStatic.adminFeeMantissa())
     );
     this.reserveFactorMantissa = this.reserveFactorMantissa.add(
-      toBN(await cTokenContract.callStatic.fuseFeeMantissa())
+      BigNumber.from(await cTokenContract.callStatic.fuseFeeMantissa())
     );
     this.initialized = true;
   }
 
   async _init(
-    provider: Web3Provider,
     interestRateModelAddress: string,
     reserveFactorMantissa: BigNumberish,
     adminFeeMantissa: BigNumberish,
-    fuseFeeMantissa: BigNumberish
+    fuseFeeMantissa: BigNumberish,
+    provider: Web3Provider,
   ) {
-    const jumpRateModelContract = createContract(
+    const jumpRateModelContract = new Contract(
       interestRateModelAddress,
       contracts.contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
       provider
     );
-    this.baseRatePerBlock = toBN(await jumpRateModelContract.callStatic.baseRatePerBlock());
-    this.multiplierPerBlock = toBN(await jumpRateModelContract.callStatic.multiplierPerBlock());
-    this.jumpMultiplierPerBlock = toBN(await jumpRateModelContract.callStatic.jumpMultiplierPerBlock());
-    this.kink = toBN(await jumpRateModelContract.callStatic.kink());
+    this.baseRatePerBlock = BigNumber.from(await jumpRateModelContract.callStatic.baseRatePerBlock());
+    this.multiplierPerBlock = BigNumber.from(await jumpRateModelContract.callStatic.multiplierPerBlock());
+    this.jumpMultiplierPerBlock = BigNumber.from(await jumpRateModelContract.callStatic.jumpMultiplierPerBlock());
+    this.kink = BigNumber.from(await jumpRateModelContract.callStatic.kink());
 
-    this.reserveFactorMantissa = toBN(reserveFactorMantissa);
-    this.reserveFactorMantissa = this.reserveFactorMantissa.add(toBN(adminFeeMantissa));
-    this.reserveFactorMantissa = this.reserveFactorMantissa.add(toBN(fuseFeeMantissa));
+    this.reserveFactorMantissa = BigNumber.from(reserveFactorMantissa);
+    this.reserveFactorMantissa = this.reserveFactorMantissa.add(BigNumber.from(adminFeeMantissa));
+    this.reserveFactorMantissa = this.reserveFactorMantissa.add(BigNumber.from(fuseFeeMantissa));
 
     this.initialized = true;
   }
@@ -73,19 +74,19 @@ export default class JumpRateModelV2 {
     adminFeeMantissa: BigNumberish,
     fuseFeeMantissa: BigNumberish
   ) {
-    this.baseRatePerBlock = toBN(baseRatePerBlock);
-    this.multiplierPerBlock = toBN(multiplierPerBlock);
-    this.jumpMultiplierPerBlock = toBN(jumpMultiplierPerBlock);
-    this.kink = toBN(kink);
+    this.baseRatePerBlock = BigNumber.from(baseRatePerBlock);
+    this.multiplierPerBlock = BigNumber.from(multiplierPerBlock);
+    this.jumpMultiplierPerBlock = BigNumber.from(jumpMultiplierPerBlock);
+    this.kink = BigNumber.from(kink);
 
-    this.reserveFactorMantissa = toBN(reserveFactorMantissa);
-    this.reserveFactorMantissa = this.reserveFactorMantissa.add(toBN(adminFeeMantissa));
-    this.reserveFactorMantissa = this.reserveFactorMantissa.add(toBN(fuseFeeMantissa));
+    this.reserveFactorMantissa = BigNumber.from(reserveFactorMantissa);
+    this.reserveFactorMantissa = this.reserveFactorMantissa.add(BigNumber.from(adminFeeMantissa));
+    this.reserveFactorMantissa = this.reserveFactorMantissa.add(BigNumber.from(fuseFeeMantissa));
 
     this.initialized = true;
   }
 
-  getBorrowRate(utilizationRate: BigNumber) {
+  getBorrowRate(utilizationRate: BigNumber): BigNumber {
     if (
       !this.initialized ||
       !this.multiplierPerBlock ||
@@ -95,19 +96,19 @@ export default class JumpRateModelV2 {
     )
       throw new Error("Interest rate model class not initialized.");
     if (utilizationRate.lte(this.kink)) {
-      return utilizationRate.mul(this.multiplierPerBlock).div(toBN(1e18)).add(this.baseRatePerBlock);
+      return utilizationRate.mul(this.multiplierPerBlock).div(BigNumber.from(1e18)).add(this.baseRatePerBlock);
     } else {
-      const normalRate = this.kink.mul(this.multiplierPerBlock).div(toBN(1e18)).add(this.baseRatePerBlock);
+      const normalRate = this.kink.mul(this.multiplierPerBlock).div(BigNumber.from(1e18)).add(this.baseRatePerBlock);
       const excessUtil = utilizationRate.sub(this.kink);
-      return excessUtil.mul(this.jumpMultiplierPerBlock).div(toBN(1e18)).add(normalRate);
+      return excessUtil.mul(this.jumpMultiplierPerBlock).div(BigNumber.from(1e18)).add(normalRate);
     }
   }
 
-  getSupplyRate(utilizationRate: BigNumber) {
+  getSupplyRate(utilizationRate: BigNumber): BigNumber {
     if (!this.initialized || !this.reserveFactorMantissa) throw new Error("Interest rate model class not initialized.");
-    const oneMinusReserveFactor = toBN(1e18).sub(this.reserveFactorMantissa);
+    const oneMinusReserveFactor = BigNumber.from(1e18).sub(this.reserveFactorMantissa);
     const borrowRate = this.getBorrowRate(utilizationRate);
-    const rateToPool = borrowRate.mul(oneMinusReserveFactor).div(toBN(1e18));
-    return utilizationRate.mul(rateToPool).div(toBN(1e18));
+    const rateToPool = borrowRate.mul(oneMinusReserveFactor).div(BigNumber.from(1e18));
+    return utilizationRate.mul(rateToPool).div(BigNumber.from(1e18));
   }
 }

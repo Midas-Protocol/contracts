@@ -27,11 +27,12 @@ import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
 // Types
 import {
   cERC20Conf,
-  interestRateModelConf,
-  interestRateModelParams,
+  InterestRateModel,
+  InterestRateModelConf,
+  InterestRateModelParams,
   MinifiedCompoundContracts,
   MinifiedContracts,
-  MinifiedOraclesContractss,
+  MinifiedOraclesContracts,
   OracleConf,
 } from "./types";
 
@@ -66,6 +67,7 @@ export declare type ContractConfig = {
     PreferredPriceOracle?: string;
     ChainlinkPriceOracle?: string;
     ChainlinkPriceOracleV2?: string;
+    ChainlinkPriceOracleV3?: string
     UniswapView?: string;
     Keep3rPriceOracle_Uniswap?: string;
     Keep3rPriceOracle_SushiSwap?: string;
@@ -89,6 +91,7 @@ export declare type ContractConfig = {
   PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {
     ChainlinkPriceOracle?: string;
     ChainlinkPriceOracleV2?: string;
+    ChainlinkPriceOracleV3?: string
     UniswapTwapPriceOracle_Uniswap?: string;
     UniswapTwapPriceOracle_SushiSwap?: string;
     UniswapV3TwapPriceOracle_Uniswap_3000?: string;
@@ -148,13 +151,13 @@ export default class Fuse {
   public contractConfig: ContractConfig;
   public compoundContracts: MinifiedCompoundContracts;
   public openOracleContracts: MinifiedContracts;
-  public oracleContracts: MinifiedOraclesContractss;
+  public oracleContracts: MinifiedOraclesContracts;
 
   static ORACLES = ORACLES;
   static SIMPLE_DEPLOY_ORACLES = SIMPLE_DEPLOY_ORACLES;
   static COMPTROLLER_ERROR_CODES = COMPTROLLER_ERROR_CODES;
   static CTOKEN_ERROR_CODES = CTOKEN_ERROR_CODES;
-  static JumpRateModelConf: interestRateModelConf = JUMP_RATE_MODEL_CONF;
+  static JumpRateModelConf: InterestRateModelConf = JUMP_RATE_MODEL_CONF;
 
   constructor(web3Provider: JsonRpcProvider | Web3Provider, contractConfig: ContractConfig) {
     this.contractConfig = contractConfig;
@@ -174,9 +177,8 @@ export default class Fuse {
         fusePoolLensAbi,
         this.provider
       ),
-      // TODO: figure out what this contract even is
       FusePoolLensSecondary: new Contract(
-        this.contractConfig.FUSE_CONTRACT_ADDRESSES.FusePoolLens,
+        this.contractConfig.FUSE_CONTRACT_ADDRESSES.FusePoolLensSecondary,
         fusePoolLensSecondaryAbi,
         this.provider
       ),
@@ -369,7 +371,7 @@ export default class Fuse {
   }
 
   async deployAsset(
-    irmConf: interestRateModelConf,
+    irmConf: InterestRateModelConf,
     cTokenConf: cERC20Conf,
     options: any
   ): Promise<[string, string, string, TransactionReceipt]> {
@@ -384,7 +386,7 @@ export default class Fuse {
         "JumpRateModelV2",
         "ReactiveJumpRateModelV2",
         "DAIInterestRateModelV2",
-      ].indexOf(irmConf.interestRateModel) >= 0
+      ].indexOf(irmConf.interestRateModel!) >= 0
     ) {
       try {
         irmConf.interestRateModel = await this.deployInterestRateModel(
@@ -403,10 +405,10 @@ export default class Fuse {
     } catch (error: any) {
       throw Error("Deployment of asset to Fuse pool failed: " + (error.message ? error.message : error));
     }
-    return [assetAddress, implementationAddress, irmConf.interestRateModel, receipt];
+    return [assetAddress, implementationAddress, irmConf.interestRateModel!, receipt];
   }
 
-  async deployInterestRateModel(options: any, model?: string, conf?: interestRateModelParams): Promise<string> {
+  async deployInterestRateModel(options: any, model?: string, conf?: InterestRateModelParams): Promise<string> {
     // Default model = JumpRateModel
     if (!model) {
       model = "JumpRateModel";
@@ -463,14 +465,14 @@ export default class Fuse {
   async deployCToken(conf: cERC20Conf, options: any): Promise<[string, string, TransactionReceipt]> {
     // BigNumbers
     // 10% -> 0.1 * 1e18
-    const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
+    const reserveFactorBN = utils.parseEther((conf.reserveFactor / 100).toString());
     // 5% -> 0.05 * 1e18
-    const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
+    const adminFeeBN = utils.parseEther((conf.adminFee / 100).toString());
     // 50% -> 0.5 * 1e18
-    // TODO: find out if this is a number or string. If its a number, parseUnits will not work. Also parse Units works if number is between 0 - 0.9
-    const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
+    // TODO: find out if this is a number or string. If its a number, parseEther will not work. Also parse Units works if number is between 0 - 0.9
+    const collateralFactorBN = utils.parseEther((conf.collateralFactor / 100).toString());
     // Check collateral factor
-    if (!collateralFactorBN.gte(constants.Zero) || collateralFactorBN.gt(utils.parseUnits("0.9", 18)))
+    if (!collateralFactorBN.gte(constants.Zero) || collateralFactorBN.gt(utils.parseEther("0.9")))
       throw Error("Collateral factor must range from 0 to 0.9.");
 
     // Check reserve factor + admin fee + Fuse fee
@@ -667,7 +669,7 @@ export default class Fuse {
     return null;
   }
 
-  async identifyInterestRateModel(interestRateModelAddress: string): Promise<any> {
+  async identifyInterestRateModel(interestRateModelAddress: string): Promise<InterestRateModel> {
     // Get interest rate model type from runtime bytecode hash and init class
     const interestRateModels: { [key: string]: any } = {
       JumpRateModel: JumpRateModel,

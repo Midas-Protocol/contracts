@@ -1,9 +1,8 @@
-import { createContract, toBN } from "../utils/web3";
 import JumpRateModel from "./JumpRateModel.js";
-import contracts from "../contracts/compound-protocol.json";
-import { BigNumber } from "@ethersproject/bignumber";
-import { BigNumberish } from "ethers";
+import { BigNumberish, Contract, BigNumber } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
+
+import contracts from "../contracts/compound-protocol.json";
 
 export default class DAIInterestRateModelV2 extends JumpRateModel {
   static RUNTIME_BYTECODE_HASH = "0x4b4c4f6386fd72d3f041a03e9eee3945189457fcf4299e99098d360a9f619539";
@@ -18,23 +17,23 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
   async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
     await super.init(interestRateModelAddress, assetAddress, provider);
 
-    const interestRateContract = createContract(
+    const interestRateContract = new Contract(
       interestRateModelAddress,
       contracts.contracts["contracts/DAIInterestRateModelV2.sol:DAIInterestRateModelV2"].abi,
       provider
     );
 
-    this.dsrPerBlock = toBN(await interestRateContract.callStatic.dsrPerBlock());
+    this.dsrPerBlock = BigNumber.from(await interestRateContract.callStatic.dsrPerBlock());
 
-    const cTokenContract = createContract(
+    const cTokenContract = new Contract(
       assetAddress,
       contracts.contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi,
       provider
     );
 
-    this.cash = toBN(await cTokenContract.callStatic.getCash());
-    this.borrows = toBN(await cTokenContract.callStatic.totalBorrowsCurrent());
-    this.reserves = toBN(await cTokenContract.callStatic.totalReserves());
+    this.cash = BigNumber.from(await cTokenContract.callStatic.getCash());
+    this.borrows = BigNumber.from(await cTokenContract.callStatic.totalBorrowsCurrent());
+    this.reserves = BigNumber.from(await cTokenContract.callStatic.totalReserves());
   }
 
   async _init(
@@ -46,15 +45,15 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
   ) {
     await super._init(interestRateModelAddress, reserveFactorMantissa, adminFeeMantissa, fuseFeeMantissa, provider);
 
-    const interestRateContract = createContract(
+    const interestRateContract = new Contract(
       interestRateModelAddress,
       contracts.contracts["contracts/DAIInterestRateModelV2.sol:DAIInterestRateModelV2"].abi,
       provider
     );
-    this.dsrPerBlock = toBN(await interestRateContract.callStatic.dsrPerBlock());
-    this.cash = toBN(0);
-    this.borrows = toBN(0);
-    this.reserves = toBN(0);
+    this.dsrPerBlock = BigNumber.from(await interestRateContract.callStatic.dsrPerBlock());
+    this.cash = BigNumber.from(0);
+    this.borrows = BigNumber.from(0);
+    this.reserves = BigNumber.from(0);
   }
 
   async __init(
@@ -75,10 +74,10 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
       adminFeeMantissa,
       fuseFeeMantissa
     );
-    this.dsrPerBlock = toBN(0); // TODO: Make this work if DSR ever goes positive again
-    this.cash = toBN(0);
-    this.borrows = toBN(0);
-    this.reserves = toBN(0);
+    this.dsrPerBlock = BigNumber.from(0); // TODO: Make this work if DSR ever goes positive again
+    this.cash = BigNumber.from(0);
+    this.borrows = BigNumber.from(0);
+    this.reserves = BigNumber.from(0);
   }
 
   getSupplyRate(utilizationRate: BigNumber) {
