@@ -380,9 +380,9 @@ export default class Fuse {
     cTokenConf: cERC20Conf,
     options: any
   ): Promise<[string, string, string, TransactionReceipt]> {
-    let assetAddress;
-    let implementationAddress;
-    let receipt;
+    let assetAddress: string;
+    let implementationAddress: string;
+    let receipt: providers.TransactionReceipt;
     // Deploy new interest rate model via SDK if requested
     if (
       [

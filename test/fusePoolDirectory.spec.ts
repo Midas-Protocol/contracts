@@ -38,12 +38,10 @@ describe("FusePoolDirectory", function () {
         cpo.address
       );
       expect(deployedPool).to.be.ok;
-
-
     });
 
     it("should deploy pool from sdk without whitelist", async function () {
-      const { bob } = await ethers.getNamedSigners();
+      const { bob , alice} = await ethers.getNamedSigners();
 
       const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", bob);
       const spo = await spoFactory.deploy([10]);
@@ -72,14 +70,8 @@ describe("FusePoolDirectory", function () {
       deployedPoolAddress = poolAddress;
       expect(poolAddress).to.be.ok;
       expect(implementationAddress).to.be.ok;
-    });
-
-    it.only("should deploy assets to pool", async function () {
-      const { alice, bob } = await ethers.getNamedSigners();
 
       const jrm = await ethers.getContract("JumpRateModel", alice);
-      const contractConfig = await getContractsConfig(network.name);
-      const sdk = new Fuse(ethers.provider, contractConfig);
       const assets = poolAssets(jrm.address, deployedPoolAddress);
 
       for (const assetConf of assets.assets) {
@@ -91,6 +83,7 @@ describe("FusePoolDirectory", function () {
         console.log("-----------------");
         console.log("deployed asset: ", assetConf.name);
         console.log("Asset Address: ", assetAddress);
+        console.log("irmModel: ", irmModel);
         console.log("Implementation Address: ", implementationAddress);
         console.log("TX Receipt: ", receipt.transactionHash);
         console.log("-----------------");
