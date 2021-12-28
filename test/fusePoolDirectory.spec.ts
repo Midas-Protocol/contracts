@@ -4,7 +4,7 @@ import { solidity } from "ethereum-waffle";
 import { poolAssets } from "./setUp";
 import { Fuse } from "../lib/esm";
 import { getContractsConfig } from "./utilities";
-import { BigNumber, utils } from "ethers";
+import { utils } from "ethers";
 
 use(solidity);
 
@@ -41,7 +41,7 @@ describe("FusePoolDirectory", function () {
     });
 
     it("should deploy pool from sdk without whitelist", async function () {
-      const { bob , alice} = await ethers.getNamedSigners();
+      const { bob, alice } = await ethers.getNamedSigners();
 
       const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", bob);
       const spo = await spoFactory.deploy([10]);
@@ -72,7 +72,7 @@ describe("FusePoolDirectory", function () {
       expect(implementationAddress).to.be.ok;
 
       const jrm = await ethers.getContract("JumpRateModel", alice);
-      const assets = poolAssets(jrm.address, deployedPoolAddress);
+      const assets = poolAssets(jrm.address, implementationAddress);
 
       for (const assetConf of assets.assets) {
         const [assetAddress, implementationAddress, irmModel, receipt] = await sdk.deployAsset(

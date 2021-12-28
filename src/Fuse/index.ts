@@ -263,7 +263,7 @@ export default class Fuse {
       [options.from, poolName, receipt.blockNumber]
     );
     const byteCodeHash = utils.keccak256(this.compoundContracts["contracts/Unitroller.sol:Unitroller"].bytecode);
-    console.log('byteCodeHash: ', byteCodeHash);
+    console.log("byteCodeHash: ", byteCodeHash);
 
     let poolAddress = utils.getCreate2Address(
       this.contractConfig.FUSE_CONTRACT_ADDRESSES.FusePoolDirectory,
@@ -286,7 +286,7 @@ export default class Fuse {
     }
 
     // Whitelist
-    console.log('enforceWhitelist: ', enforceWhitelist);
+    console.log("enforceWhitelist: ", enforceWhitelist);
     if (enforceWhitelist) {
       let comptroller = new Contract(
         poolAddress,
@@ -295,7 +295,7 @@ export default class Fuse {
       );
 
       // Already enforced so now we just need to add the addresses
-      console.log('whitelist: ', whitelist);
+      console.log("whitelist: ", whitelist);
       await comptroller._setWhitelistStatuses(whitelist, Array(whitelist.length).fill(true));
     }
 
@@ -545,7 +545,6 @@ export default class Fuse {
       reserveFactorBN,
       adminFeeBN,
     ];
-
     const abiCoder = new utils.AbiCoder();
     const constructorData = abiCoder.encode(
       ["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
