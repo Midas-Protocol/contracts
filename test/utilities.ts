@@ -89,7 +89,10 @@ async function createLocalContractConfig(): Promise<ContractConfig> {
       FuseSafeLiquidator: "0xc292D493f6CE7245a41bA414C6494Fa01B6C6E3F", //fpls.address,
       MasterPriceOracleImplementation: "",
     },
-    PUBLIC_INTEREST_RATE_MODEL_CONTRACT_ADDRESSES: {},
+    PUBLIC_INTEREST_RATE_MODEL_CONTRACT_ADDRESSES: {
+      WhitePaperInterestRateModel: "0x666186dC1389A4f1cB06C1bcA4Eb2f4e150899f0",
+      JumpRateModel: "0x071aB319d920b2A9110DbD53546fa0Ed8c612f6C",
+    },
     PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {
       UniswapV2_PairInit: "",
     },

@@ -1,4 +1,4 @@
-import { BigNumberish, BigNumber, Contract } from "ethers";
+import { BigNumberish, BigNumber, Contract, utils } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
 
 import contracts from "../contracts/compound-protocol.json";
@@ -6,7 +6,7 @@ import { InterestRateModel } from "../types";
 
 export default class JumpRateModel implements InterestRateModel {
   static RUNTIME_BYTECODE_HASHES = [
-    "0x00f083d6c0022358b6b3565c026e815cfd6fc9dcd6c3ad1125e72cbb81f41b2a",
+    "0x94ca8bfbe00d07bbf758f8066d48c98aee997ab66422192fc05d550be0837f60",
     "0x47d7a0e70c9e049792bb96abf3c7527c7543154450c6267f31b52e2c379badc7",
   ];
 
@@ -51,6 +51,14 @@ export default class JumpRateModel implements InterestRateModel {
     fuseFeeMantissa: BigNumberish,
     provider: Web3Provider
   ): Promise<void> {
+    console.log(
+      interestRateModelAddress,
+      reserveFactorMantissa,
+      adminFeeMantissa,
+      fuseFeeMantissa,
+      provider,
+      "IRMMMMMM PARAMS JRM"
+    );
     const jumpRateModelContract = new Contract(
       interestRateModelAddress,
       contracts.contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
@@ -99,19 +107,19 @@ export default class JumpRateModel implements InterestRateModel {
     )
       throw new Error("Interest rate model class not initialized.");
     if (utilizationRate.lte(this.kink)) {
-      return utilizationRate.mul(this.multiplierPerBlock).div(BigNumber.from(1e18)).add(this.baseRatePerBlock);
+      return utilizationRate.mul(this.multiplierPerBlock).div(utils.parseEther("1")).add(this.baseRatePerBlock);
     } else {
-      const normalRate = this.kink.mul(this.multiplierPerBlock).div(BigNumber.from(1e18)).add(this.baseRatePerBlock);
+      const normalRate = this.kink.mul(this.multiplierPerBlock).div(utils.parseEther("1")).add(this.baseRatePerBlock);
       const excessUtil = utilizationRate.sub(this.kink);
-      return excessUtil.mul(this.jumpMultiplierPerBlock).div(BigNumber.from(1e18)).add(normalRate);
+      return excessUtil.mul(this.jumpMultiplierPerBlock).div(utils.parseEther("1")).add(normalRate);
     }
   }
 
   getSupplyRate(utilizationRate: BigNumber) {
     if (!this.initialized || !this.reserveFactorMantissa) throw new Error("Interest rate model class not initialized.");
-    const oneMinusReserveFactor = BigNumber.from(1e18).sub(this.reserveFactorMantissa);
+    const oneMinusReserveFactor = utils.parseEther("1").sub(this.reserveFactorMantissa);
     const borrowRate = this.getBorrowRate(utilizationRate);
-    const rateToPool = borrowRate.mul(oneMinusReserveFactor).div(BigNumber.from(1e18));
-    return utilizationRate.mul(rateToPool).div(BigNumber.from(1e18));
+    const rateToPool = borrowRate.mul(oneMinusReserveFactor).div(utils.parseEther("1"));
+    return utilizationRate.mul(rateToPool).div(utils.parseEther("1"));
   }
 }

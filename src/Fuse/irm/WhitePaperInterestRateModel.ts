@@ -5,7 +5,7 @@ import contracts from "../contracts/compound-protocol.json";
 import { InterestRateModel } from "../types";
 
 export default class WhitePaperInterestRateModel implements InterestRateModel {
-  static RUNTIME_BYTECODE_HASH = "0xe3164248fb86cce0eb8037c9a5c8d05aac2b2ebdb46741939be466a7b17d0b83";
+  static RUNTIME_BYTECODE_HASH = "0x3290dd1cc5cb57a6423c6bef1f7e59b902fd1484409bf5b51fc6a25326306d03";
   initialized: boolean | undefined;
   baseRatePerBlock: BigNumber | undefined;
   multiplierPerBlock: BigNumber | undefined;
@@ -43,6 +43,14 @@ export default class WhitePaperInterestRateModel implements InterestRateModel {
     fuseFeeMantissa: BigNumberish,
     provider: Web3Provider
   ) {
+    console.log(
+      interestRateModelAddress,
+      reserveFactorMantissa,
+      adminFeeMantissa,
+      fuseFeeMantissa,
+      provider,
+      "IRMMMMMM PARAMS WPIRM"
+    );
     const whitePaperModelContract = new Contract(
       interestRateModelAddress,
       contracts.contracts["contracts/WhitePaperInterestRateModel.sol:WhitePaperInterestRateModel"].abi,

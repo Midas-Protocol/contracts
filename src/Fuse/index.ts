@@ -67,7 +67,7 @@ export declare type ContractConfig = {
     PreferredPriceOracle?: string;
     ChainlinkPriceOracle?: string;
     ChainlinkPriceOracleV2?: string;
-    ChainlinkPriceOracleV3?: string
+    ChainlinkPriceOracleV3?: string;
     UniswapView?: string;
     Keep3rPriceOracle_Uniswap?: string;
     Keep3rPriceOracle_SushiSwap?: string;
@@ -91,7 +91,7 @@ export declare type ContractConfig = {
   PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {
     ChainlinkPriceOracle?: string;
     ChainlinkPriceOracleV2?: string;
-    ChainlinkPriceOracleV3?: string
+    ChainlinkPriceOracleV3?: string;
     UniswapTwapPriceOracle_Uniswap?: string;
     UniswapTwapPriceOracle_SushiSwap?: string;
     UniswapV3TwapPriceOracle_Uniswap_3000?: string;
@@ -110,6 +110,8 @@ export declare type ContractConfig = {
     UniswapV2_PairInit: string;
   };
   PUBLIC_INTEREST_RATE_MODEL_CONTRACT_ADDRESSES: {
+    WhitePaperInterestRateModel: string;
+    JumpRateModel: string;
     WhitePaperInterestRateModel_Compound_ETH?: string;
     WhitePaperInterestRateModel_Compound_WBTC?: string;
     JumpRateModel_Compound_Stables?: string;
@@ -681,11 +683,13 @@ export default class Fuse {
     // Find ONE interes ratemodel and return thath
     // compare runtimeByrecodeHash with
     //
+    console.log(runtimeBytecodeHash, "deployed contract bytecode hash");
 
     let irm;
     outerLoop: for (const model of Object.keys(interestRateModels)) {
       if (interestRateModels[model].RUNTIME_BYTECODE_HASHES !== undefined) {
         for (const hash of interestRateModels[model].RUNTIME_BYTECODE_HASHES) {
+          console.log(hash, `hash of: ${model}`);
           if (runtimeBytecodeHash === hash) {
             irm = new interestRateModels[model]();
             console.log(irm);
