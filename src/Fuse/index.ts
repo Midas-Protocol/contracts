@@ -237,7 +237,7 @@ export default class Fuse {
         this.provider.getSigner(options.from)
       );
       const deployedComptroller = await comptrollerContract.deploy();
-      implementationAddress = deployedComptroller.options.address;
+      implementationAddress = deployedComptroller.address;
     }
 
     //3. Register new pool with FusePoolDirectory
@@ -276,11 +276,11 @@ export default class Fuse {
       this.compoundContracts["contracts/Unitroller.sol:Unitroller"].abi,
       this.provider.getSigner(options.from)
     );
-    // const unitrollerWithSigner = unitroller.connect(this.provider.getSigner(options.from));
-
     // Accept admin status via Unitroller
     try {
-      await unitroller._acceptAdmin();
+      const tx = await unitroller._acceptAdmin();
+      const receipt = await tx.wait();
+      console.log(receipt.status, "Accepted admin status for admin: ", await unitroller.admin());
     } catch (error: any) {
       throw Error("Accepting admin status failed: " + (error.message ? error.message : error));
     }
@@ -555,16 +555,25 @@ export default class Fuse {
       this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi,
       this.provider.getSigner(options.from)
     );
+    console.log("Comptroller's with address: ", comptroller.address, "has admin of", await comptroller.admin());
+    const comptrollerWithSigner = comptroller.connect(this.provider.getSigner(options.from));
+    // const errorCode = await comptroller.callStatic._deployMarket(
+    //   "0x0000000000000000000000000000000000000000",
+    //   constructorData,
+    //   collateralFactorBN
+    // );
+    // console.log(errorCode.toNumber(), Fuse.COMPTROLLER_ERROR_CODES[errorCode.toNumber()], "ERROR CODE!");
 
-    const tx = await comptroller._deployMarket(
+    const tx = await comptrollerWithSigner._deployMarket(
       "0x0000000000000000000000000000000000000000",
       constructorData,
       collateralFactorBN
     );
     const receipt: TransactionReceipt = await tx.wait();
 
-    // if (errorCode != constants.Zero)
-    //   throw "Failed to deploy market with error code: " + Fuse.COMPTROLLER_ERROR_CODES[errorCode];
+    if (receipt.status != constants.One.toNumber()) {
+      throw "Failed to deploy market ";
+    }
 
     const saltsHash = utils.solidityKeccak256(
       ["address", "address", "uint"],
@@ -635,10 +644,11 @@ export default class Fuse {
       deployArgs
     );
     const tx = await comptroller._deployMarket(false, constructorData, collateralFactorBN);
-    const receipt = await tx.wait();
+    const receipt: TransactionReceipt = await tx.wait();
 
-    // if (errorCode != constants.Zero)
-    //   throw "Failed to deploy market with error code: " + Fuse.COMPTROLLER_ERROR_CODES[errorCode];
+    if (receipt.status != constants.One.toNumber())
+      // throw "Failed to deploy market with error code: " + Fuse.COMPTROLLER_ERROR_CODES[errorCode];
+      throw "Failed to deploy market ";
 
     const saltsHash = utils.solidityKeccak256(
       ["address", "address", "uint"],
