@@ -70,6 +70,7 @@ describe("FusePoolDirectory", function () {
       expect(implementationAddress).to.be.ok;
 
       const { comptroller, name: _unfiliteredName } = await sdk.contracts.FusePoolDirectory.pools(0);
+      console.log(`This comptroller here: ${comptroller} doesn't have the admin status for bob`);
 
       expect(_unfiliteredName).to.be.equal("TEST");
 
@@ -78,7 +79,9 @@ describe("FusePoolDirectory", function () {
 
       const ethConf: cERC20Conf = {
         underlying: "0x0000000000000000000000000000000000000000",
-        comptroller: implementationAddress,
+        comptroller: implementationAddress, // this is the defualt deployed comptroller
+        // addres, i.e. this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.Comptroller;
+        // but that is not what we want -- we want to use the newly deployed comptroller
         interestRateModel: jrm.address,
         name: "Ethereum",
         symbol: "ETH",
@@ -97,6 +100,12 @@ describe("FusePoolDirectory", function () {
           ? sdk.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEtherDelegate
           : null
       );
+
+      // check the call to _deployMarket: it logs a few things:
+      // if (!hasAdminRights()) {
+      //   console.log(adminHasRights, msg.sender, admin); // true 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc 0x0000000000000000000000000000000000000000
+      //   console.log("NO ADMINS!");
+
       console.log(cEtherDelegatorAddress, cEthImplAddr, receipt.status);
       // for (const assetConf of assets.assets) {
       //   const [assetAddress, cTokenImplementationAddress, irmModel, receipt] = await sdk.deployAsset(
