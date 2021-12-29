@@ -9,6 +9,7 @@ import "./ComptrollerInterface.sol";
 import "./ComptrollerStorage.sol";
 import "./Unitroller.sol";
 import "./RewardsDistributorDelegate.sol";
+import "hardhat/console.sol";
 
 /**
  * @title Compound's Comptroller Contract
@@ -66,12 +67,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     /// @notice Emitted when a new RewardsDistributor contract is added to hooks
     event AddedRewardsDistributor(address rewardsDistributor);
-
-    /**
- * @notice Emitted when maxAssets is changed by admin
-     */
-    event NewMaxAssets(uint oldMaxAssets, uint newMaxAssets);
-
 
     // closeFactorMantissa must be strictly greater than this value
     uint internal constant closeFactorMinMantissa = 0.05e18; // 0.05
@@ -155,7 +150,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         //  and not whenever we want to check if an account is in a particular market
         marketToJoin.accountMembership[borrower] = true;
         accountAssets[borrower].push(cToken);
-        
+
         // Add to allBorrowers
         if (!borrowers[borrower]) {
             allBorrowers.push(borrower);
@@ -257,7 +252,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         if (!markets[cToken].isListed) {
             return uint(Error.MARKET_NOT_LISTED);
         }
-        
+
         // Make sure minter is whitelisted
         if (enforceWhitelist && !whitelist[minter]) {
             return uint(Error.SUPPLIER_NOT_WHITELISTED);
@@ -406,7 +401,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         if (oracle.getUnderlyingPrice(CToken(cToken)) == 0) {
             return uint(Error.PRICE_ERROR);
         }
-        
+
         // Make sure borrower is whitelisted
         if (enforceWhitelist && !whitelist[borrower]) {
             return uint(Error.SUPPLIER_NOT_WHITELISTED);
@@ -1206,6 +1201,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     ) external returns (uint) {
         // Check caller is admin
         if (!hasAdminRights()) {
+            console.log(adminHasRights, msg.sender, admin);
+            console.log("NO ADMINS!");
             return fail(Error.UNAUTHORIZED, FailureInfo.SUPPORT_MARKET_OWNER_CHECK);
         }
 
@@ -1244,7 +1241,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
         // Unlist market
         delete markets[address(cToken)];
-        
+
         /* Delete cToken from allMarkets */
         // load into memory for faster iteration
         CToken[] memory _allMarkets = allMarkets;
@@ -1299,7 +1296,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       * @param newSupplyCaps The new supply cap values in underlying to be set. A value of 0 corresponds to unlimited supplying.
       */
     function _setMarketSupplyCaps(CToken[] calldata cTokens, uint[] calldata newSupplyCaps) external {
-    	require(msg.sender == admin || msg.sender == borrowCapGuardian, "only admin or borrow cap guardian can set supply caps"); 
+        require(msg.sender == admin || msg.sender == borrowCapGuardian, "only admin or borrow cap guardian can set supply caps");
 
         uint numMarkets = cTokens.length;
         uint numSupplyCaps = newSupplyCaps.length;
@@ -1311,28 +1308,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
             emit NewSupplyCap(cTokens[i], newSupplyCaps[i]);
         }
     }
-    function adminOrInitializing() internal view returns (bool) {
-        bool initializing = (
-        msg.sender == comptrollerImplementation
-        &&
-        //solium-disable-next-line security/no-tx-origin
-        tx.origin == admin
-        );
-        bool isAdmin = hasAdminRights();
-        return isAdmin || initializing;
-    }
-
-    function _setMaxAssets(uint newMaxAssets) external returns (uint) {
-        // Check caller is admin OR currently initialzing as new unitroller implementation
-        if (!adminOrInitializing()) {
-            return fail(Error.UNAUTHORIZED, FailureInfo.SET_MAX_ASSETS_OWNER_CHECK);
-        }
-        uint oldMaxAssets = maxAssets;
-        maxAssets = newMaxAssets;
-        emit NewMaxAssets(oldMaxAssets, newMaxAssets);
-
-        return uint(Error.NO_ERROR);
-    }
 
     /**
       * @notice Set the given borrow caps for the given cToken markets. Borrowing that brings total borrows to or above borrow cap will revert.
@@ -1341,7 +1316,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       * @param newBorrowCaps The new borrow cap values in underlying to be set. A value of 0 corresponds to unlimited borrowing.
       */
     function _setMarketBorrowCaps(CToken[] calldata cTokens, uint[] calldata newBorrowCaps) external {
-    	require(msg.sender == admin || msg.sender == borrowCapGuardian, "only admin or borrow cap guardian can set borrow caps"); 
+        require(msg.sender == admin || msg.sender == borrowCapGuardian, "only admin or borrow cap guardian can set borrow caps");
 
         uint numMarkets = cTokens.length;
         uint numBorrowCaps = newBorrowCaps.length;
@@ -1492,9 +1467,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
      */
     function isDeprecated(CToken cToken) public view returns (bool) {
         return
-            markets[address(cToken)].collateralFactorMantissa == 0 && 
-            borrowGuardianPaused[address(cToken)] == true && 
-            add_(add_(cToken.reserveFactorMantissa(), cToken.adminFeeMantissa()), cToken.fuseFeeMantissa()) == 1e18
+        markets[address(cToken)].collateralFactorMantissa == 0 &&
+        borrowGuardianPaused[address(cToken)] == true &&
+        add_(add_(cToken.reserveFactorMantissa(), cToken.adminFeeMantissa()), cToken.fuseFeeMantissa()) == 1e18
         ;
     }
 

@@ -2,9 +2,9 @@ import { deployments, ethers, network } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
 import { poolAssets } from "./setUp";
-import { Fuse } from "../lib/esm";
+import { cERC20Conf, Fuse } from "../lib/esm";
 import { getContractsConfig } from "./utilities";
-import { utils } from "ethers";
+import { BigNumber, utils } from "ethers";
 
 use(solidity);
 
@@ -40,7 +40,7 @@ describe("FusePoolDirectory", function () {
       expect(deployedPool).to.be.ok;
     });
 
-    it("should deploy pool from sdk without whitelist", async function () {
+    it.only("should deploy pool from sdk without whitelist", async function () {
       const { bob, alice } = await ethers.getNamedSigners();
 
       const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", bob);
@@ -64,30 +64,59 @@ describe("FusePoolDirectory", function () {
         { from: bob.address },
         [bob.address]
       );
-      console.log(
-        `Pool with address: ${poolAddress}, \ncomptroller address: ${implementationAddress}, \noracle address: ${priceOracleAddress} deployed`
-      );
+      console.log(`Pool with address: ${poolAddress}, \noracle address: ${priceOracleAddress} deployed`);
       deployedPoolAddress = poolAddress;
       expect(poolAddress).to.be.ok;
       expect(implementationAddress).to.be.ok;
 
-      const jrm = await ethers.getContract("JumpRateModel", alice);
-      const assets = poolAssets(jrm.address, implementationAddress);
+      const { comptroller, name: _unfiliteredName } = await sdk.contracts.FusePoolDirectory.pools(0);
 
-      for (const assetConf of assets.assets) {
-        const [assetAddress, implementationAddress, irmModel, receipt] = await sdk.deployAsset(
-          Fuse.JumpRateModelConf,
-          assetConf,
-          { from: bob.address }
-        );
-        console.log("-----------------");
-        console.log("deployed asset: ", assetConf.name);
-        console.log("Asset Address: ", assetAddress);
-        console.log("irmModel: ", irmModel);
-        console.log("Implementation Address: ", implementationAddress);
-        console.log("TX Receipt: ", receipt.transactionHash);
-        console.log("-----------------");
-      }
+      expect(_unfiliteredName).to.be.equal("TEST");
+
+      const jrm = await ethers.getContract("JumpRateModel", bob);
+      // const assets = poolAssets(jrm.address, implementationAddress);
+
+      const ethConf: cERC20Conf = {
+        underlying: "0x0000000000000000000000000000000000000000",
+        comptroller: implementationAddress,
+        interestRateModel: jrm.address,
+        name: "Ethereum",
+        symbol: "ETH",
+        decimals: 8,
+        admin: "true",
+        collateralFactor: 75,
+        reserveFactor: 20,
+        adminFee: 10,
+        bypassPriceFeedCheck: true,
+        initialExchangeRateMantissa: utils.parseEther("0.1"),
+      };
+      const [cEtherDelegatorAddress, cEthImplAddr, receipt] = await sdk.deployCEther(
+        ethConf,
+        { from: bob.address },
+        sdk.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEtherDelegate
+          ? sdk.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEtherDelegate
+          : null
+      );
+      console.log(cEtherDelegatorAddress, cEthImplAddr, receipt.status);
+      // for (const assetConf of assets.assets) {
+      //   const [assetAddress, cTokenImplementationAddress, irmModel, receipt] = await sdk.deployAsset(
+      //     Fuse.JumpRateModelConf,
+      //     assetConf,
+      //     { from: bob.address }
+      //   );
+      //   console.log("-----------------");
+      //   console.log("deployed asset: ", assetConf.name);
+      //   console.log("Asset Address: ", assetAddress);
+      //   console.log("irmModel: ", irmModel);
+      //   console.log("Implementation Address: ", cTokenImplementationAddress);
+      //   console.log("TX Receipt: ", receipt.transactionHash);
+      //   console.log("-----------------");
+      // }
+      const t = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(implementationAddress);
+      console.log(t, "pool summary for implementation: ", implementationAddress);
+      const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(implementationAddress);
+
+      console.log(fusePoolData, "FPD");
     });
   });
 });

@@ -1,6 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { ethers } from "hardhat";
+import { ETH_ZERO_ADDRESS } from "../test/utilities";
 
 /**
  * Hardhat task defining the contract deployments for nxtp
@@ -56,6 +57,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
     ethers.constants.MaxUint256,
     ethers.constants.MaxUint256
   );
+  await fuseFeeDistributor._editComptrollerImplementationWhitelist([ETH_ZERO_ADDRESS], [comp.address], [true]);
 
   dep = await deployments.deterministic("FusePoolLens", {
     from: deployer,

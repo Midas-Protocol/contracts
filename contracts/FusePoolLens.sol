@@ -90,7 +90,7 @@ contract FusePoolLens is Initializable {
     function getPoolsData(FusePoolDirectory.FusePool[] memory pools) internal returns (FusePoolData[] memory, bool[] memory) {
         FusePoolData[] memory data = new FusePoolData[](pools.length);
         bool[] memory errored = new bool[](pools.length);
-        
+
         for (uint256 i = 0; i < pools.length; i++) {
             try this.getPoolSummary(Comptroller(pools[i].comptroller)) returns (uint256 _totalSupply, uint256 _totalBorrow, address[] memory _underlyingTokens, string[] memory _underlyingSymbols, bool _whitelistedAdmin) {
                 data[i] = FusePoolData(_totalSupply, _totalBorrow, _underlyingTokens, _underlyingSymbols, _whitelistedAdmin);

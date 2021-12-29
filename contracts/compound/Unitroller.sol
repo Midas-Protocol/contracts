@@ -2,7 +2,6 @@ pragma solidity ^0.5.16;
 
 import "./ErrorReporter.sol";
 import "./ComptrollerStorage.sol";
-
 import "hardhat/console.sol";
 
 /**
@@ -51,6 +50,9 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
     function _setPendingImplementation(address newPendingImplementation) public returns (uint) {
         if (!hasAdminRights()) {
             return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_OWNER_CHECK);
+        }
+        if (!fuseAdmin.comptrollerImplementationWhitelist(comptrollerImplementation, newPendingImplementation)) {
+            return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_CONTRACT_CHECK);
         }
         address oldPendingImplementation = pendingComptrollerImplementation;
         pendingComptrollerImplementation = newPendingImplementation;
@@ -161,6 +163,7 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
       */
     function _acceptAdmin() public returns (uint) {
         // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
+        console.log(msg.sender, pendingAdmin, "ADMINS");
         if (msg.sender != pendingAdmin || msg.sender == address(0)) {
             return fail(Error.UNAUTHORIZED, FailureInfo.ACCEPT_ADMIN_PENDING_ADMIN_CHECK);
         }
