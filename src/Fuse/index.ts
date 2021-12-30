@@ -569,11 +569,16 @@ export default class Fuse {
       constructorData,
       collateralFactorBN
     );
+    console.log("NOT GETTING HERE");
+
     const receipt: TransactionReceipt = await tx.wait();
 
     if (receipt.status != constants.One.toNumber()) {
       throw "Failed to deploy market ";
     }
+
+    // Carlo Mazzaferro: double check this -> In FFD, the create2 address is created differently:
+    // bytes32 salt = keccak256(abi.encodePacked(msg.sender, address(0), block.number));
 
     const saltsHash = utils.solidityKeccak256(
       ["address", "address", "uint"],

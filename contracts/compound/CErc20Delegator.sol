@@ -1,7 +1,8 @@
 pragma solidity ^0.5.16;
 
-import "./CTokenInterfaces.sol";
-import "./ComptrollerStorage.sol";
+import "./ComptrollerInterface.sol";
+import "./InterestRateModel.sol";
+import "./CDelegateInterface.sol";
 
 /**
  * @title Compound's CErc20Delegator Contract

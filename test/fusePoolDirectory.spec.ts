@@ -69,8 +69,12 @@ describe("FusePoolDirectory", function () {
       expect(poolAddress).to.be.ok;
       expect(implementationAddress).to.be.ok;
 
+      const comptrollerAt = await ethers.getContractAt("Comptroller", poolAddress, bob);
+      console.log(`ComptrollerAt: ${comptrollerAt.address} has admin: ${await comptrollerAt.admin()}`);
+
       const { comptroller, name: _unfiliteredName } = await sdk.contracts.FusePoolDirectory.pools(0);
-      console.log(`This comptroller here: ${comptroller} doesn't have the admin status for bob`);
+      const comptrollerAt2 = await ethers.getContractAt("Comptroller", comptroller, bob);
+      console.log(`Fetched Comptroller: ${comptrollerAt2.address} has admin: ${await comptrollerAt2.admin()}`);
 
       expect(_unfiliteredName).to.be.equal("TEST");
 
@@ -79,7 +83,7 @@ describe("FusePoolDirectory", function () {
 
       const ethConf: cERC20Conf = {
         underlying: "0x0000000000000000000000000000000000000000",
-        comptroller: implementationAddress, // this is the defualt deployed comptroller
+        comptroller: comptroller, // this is the defualt deployed comptroller
         // addres, i.e. this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.Comptroller;
         // but that is not what we want -- we want to use the newly deployed comptroller
         interestRateModel: jrm.address,

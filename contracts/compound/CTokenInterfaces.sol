@@ -9,7 +9,7 @@ contract CTokenAdminStorage {
     /**
      * @notice Administrator for Fuse
      */
-    IFuseFeeDistributor internal constant fuseAdmin = IFuseFeeDistributor(0x3595907cBC25dE2957D5302b9bc0f446089f85E3);
+    IFuseFeeDistributor internal constant fuseAdmin = IFuseFeeDistributor(0x21b529df6dbBDEA04dfFD748566F96f1a5ecdEfE);
 
     /**
      * @dev LEGACY USE ONLY: Administrator for this contract
@@ -310,39 +310,4 @@ contract CEtherInterface is CErc20Storage {
      * @notice Indicator that this is a CEther contract (for inspection)
      */
     bool public constant isCEther = true;
-}
-
-contract CDelegationStorage {
-    /**
-     * @notice Implementation address for this contract
-     */
-    address public implementation;
-}
-
-contract CDelegateInterface is CDelegationStorage {
-    /**
-     * @notice Emitted when implementation is changed
-     */
-    event NewImplementation(address oldImplementation, address newImplementation);
-
-    /**
-     * @notice Called by the admin to update the implementation of the delegator
-     * @param implementation_ The address of the new implementation for delegation
-     * @param allowResign Flag to indicate whether to call _resignImplementation on the old implementation
-     * @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation
-     */
-    function _setImplementationSafe(address implementation_, bool allowResign, bytes calldata becomeImplementationData) external;
-
-    /**
-     * @notice Called by the delegator on a delegate to initialize it for duty
-     * @dev Should revert if any issues arise which make it unfit for delegation
-     * @param data The encoded bytes data for any initialization
-     */
-    function _becomeImplementation(bytes calldata data) external;
-
-    /**
-     * @notice Function called before all delegator functions
-     * @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary
-     */
-    function _prepare() external payable;
 }
