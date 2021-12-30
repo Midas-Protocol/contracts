@@ -4,7 +4,7 @@ import { solidity } from "ethereum-waffle";
 import { poolAssets } from "./setUp";
 import { cERC20Conf, Fuse } from "../lib/esm";
 import { getContractsConfig } from "./utilities";
-import { BigNumber, utils } from "ethers";
+import { BigNumber, constants, utils } from "ethers";
 
 use(solidity);
 
@@ -16,31 +16,98 @@ describe("FusePoolDirectory", function () {
   });
 
   describe("Deploy pool", async function () {
-    it("should deploy the pool via contract", async function () {
+    it.only("should deploy the pool via contract", async function () {
       const { alice } = await ethers.getNamedSigners();
-      const contractConfig = await getContractsConfig(network.name);
+      console.log("alice: ", alice.address);
 
       const cpoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", alice);
       const cpo = await cpoFactory.deploy([10]);
 
       const fpdWithSigner = await ethers.getContract("FusePoolDirectory", alice);
+      const implementationComptroller = await ethers.getContract("Comptroller");
 
-      // 50% -> 0.5 * 1e18
+      //// DEPLOY POOL
       const bigCloseFactor = utils.parseEther((50 / 100).toString());
-      // 8% -> 1.08 * 1e8
       const bigLiquidationIncentive = utils.parseEther((8 / 100 + 1).toString());
       const deployedPool = await fpdWithSigner.deployPool(
         "TEST",
-        contractConfig.COMPOUND_CONTRACT_ADDRESSES.Comptroller,
+        implementationComptroller.address,
         true,
         bigCloseFactor,
         bigLiquidationIncentive,
         cpo.address
       );
       expect(deployedPool).to.be.ok;
+      const depReceipt = await deployedPool.wait();
+
+      // Confirm Unitroller address
+      const saltsHash = utils.solidityKeccak256(
+        ["address", "string", "uint"],
+        [alice.address, "TEST", depReceipt.blockNumber]
+      );
+      const byteCodeHash = utils.keccak256((await deployments.getArtifact("Unitroller")).bytecode);
+      let poolAddress = utils.getCreate2Address(fpdWithSigner.address, saltsHash, byteCodeHash);
+      console.log("poolAddress: ", poolAddress);
+
+      const pools = await fpdWithSigner.getPoolsByAccount(alice.address);
+      const pool = pools[1][0];
+      expect(pool.comptroller).to.eq(poolAddress);
+
+      const unitroller = await ethers.getContractAt("Unitroller", poolAddress, alice);
+      const adminTx = await unitroller._acceptAdmin();
+      await adminTx.wait();
+
+      const comptroller = await ethers.getContractAt("Comptroller", poolAddress, alice);
+      const admin = await comptroller.admin();
+      expect(admin).to.eq(alice.address);
+
+      //// DEPLOY ASSETS
+      const jrm = await ethers.getContract("JumpRateModel", alice);
+
+      const ethConf: cERC20Conf = {
+        underlying: "0x0000000000000000000000000000000000000000",
+        comptroller: unitroller.address,
+        interestRateModel: jrm.address,
+        name: "Ethereum",
+        symbol: "ETH",
+        decimals: 8,
+        admin: "true",
+        collateralFactor: 0.75,
+        reserveFactor: 0.2,
+        adminFee: 0,
+        bypassPriceFeedCheck: true,
+        initialExchangeRateMantissa: constants.One,
+      };
+      const delegate = await ethers.getContract("CEtherDelegate");
+      const reserveFactorBN = utils.parseUnits((ethConf.reserveFactor / 100).toString());
+      const adminFeeBN = utils.parseUnits((ethConf.adminFee / 100).toString());
+      const collateralFactorBN = utils.parseUnits((ethConf.collateralFactor / 100).toString());
+
+      let deployArgs = [
+        ethConf.comptroller,
+        ethConf.interestRateModel,
+        ethConf.name,
+        ethConf.symbol,
+        delegate.address,
+        "0x00",
+        reserveFactorBN,
+        adminFeeBN,
+      ];
+      const abiCoder = new utils.AbiCoder();
+      const constructorData = abiCoder.encode(
+        ["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
+        deployArgs
+      );
+      const tx = await comptroller._deployMarket(
+        "0x0000000000000000000000000000000000000000",
+        constructorData,
+        collateralFactorBN
+      );
+      const res = await tx.wait();
+      console.log('res: ', res);
     });
 
-    it.only("should deploy pool from sdk without whitelist", async function () {
+    it("should deploy pool from sdk without whitelist", async function () {
       const { bob, alice } = await ethers.getNamedSigners();
 
       const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", bob);
@@ -79,7 +146,7 @@ describe("FusePoolDirectory", function () {
       expect(_unfiliteredName).to.be.equal("TEST");
 
       const jrm = await ethers.getContract("JumpRateModel", bob);
-      // const assets = poolAssets(jrm.address, implementationAddress);
+      const assets = poolAssets(jrm.address, implementationAddress);
 
       const ethConf: cERC20Conf = {
         underlying: "0x0000000000000000000000000000000000000000",
@@ -110,24 +177,23 @@ describe("FusePoolDirectory", function () {
       //   console.log(adminHasRights, msg.sender, admin); // true 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc 0x0000000000000000000000000000000000000000
       //   console.log("NO ADMINS!");
 
-      console.log(cEtherDelegatorAddress, cEthImplAddr, receipt.status);
-      // for (const assetConf of assets.assets) {
-      //   const [assetAddress, cTokenImplementationAddress, irmModel, receipt] = await sdk.deployAsset(
-      //     Fuse.JumpRateModelConf,
-      //     assetConf,
-      //     { from: bob.address }
-      //   );
-      //   console.log("-----------------");
-      //   console.log("deployed asset: ", assetConf.name);
-      //   console.log("Asset Address: ", assetAddress);
-      //   console.log("irmModel: ", irmModel);
-      //   console.log("Implementation Address: ", cTokenImplementationAddress);
-      //   console.log("TX Receipt: ", receipt.transactionHash);
-      //   console.log("-----------------");
-      // }
-      const t = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(implementationAddress);
-      console.log(t, "pool summary for implementation: ", implementationAddress);
-      const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(implementationAddress);
+      for (const assetConf of assets.assets) {
+        const [assetAddress, cTokenImplementationAddress, irmModel, receipt] = await sdk.deployAsset(
+          Fuse.JumpRateModelConf,
+          assetConf,
+          { from: bob.address }
+        );
+        console.log("-----------------");
+        console.log("deployed asset: ", assetConf.name);
+        console.log("Asset Address: ", assetAddress);
+        console.log("irmModel: ", irmModel);
+        console.log("Implementation Address: ", cTokenImplementationAddress);
+        console.log("TX Receipt: ", receipt.transactionHash);
+        console.log("-----------------");
+      }
+      const t = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(deployedPoolAddress);
+      console.log(t, "pool summary for implementation: ", deployedPoolAddress);
+      const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(deployedPoolAddress);
 
       console.log(fusePoolData, "FPD");
     });

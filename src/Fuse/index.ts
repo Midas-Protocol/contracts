@@ -263,15 +263,14 @@ export default class Fuse {
       [options.from, poolName, receipt.blockNumber]
     );
     const byteCodeHash = utils.keccak256(this.compoundContracts["contracts/Unitroller.sol:Unitroller"].bytecode);
-    console.log("byteCodeHash: ", byteCodeHash);
 
-    let poolAddress = utils.getCreate2Address(
+    const poolAddress = utils.getCreate2Address(
       this.contractConfig.FUSE_CONTRACT_ADDRESSES.FusePoolDirectory,
       saltsHash,
       byteCodeHash
     );
 
-    let unitroller = new Contract(
+    const unitroller = new Contract(
       poolAddress,
       this.compoundContracts["contracts/Unitroller.sol:Unitroller"].abi,
       this.provider.getSigner(options.from)

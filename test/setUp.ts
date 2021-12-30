@@ -30,10 +30,13 @@ export const setUpTest = deployments.createFixture(async ({ deployments, getName
   );
 });
 
-export const poolAssets = (interestRateModelAddress: string, comptroller: string) => {
+export const poolAssets = (
+  interestRateModelAddress: string,
+  comptroller: string
+): { shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] } => {
   const ethConf: cERC20Conf = {
     underlying: "0x0000000000000000000000000000000000000000",
-    comptroller: comptroller,
+    comptroller,
     interestRateModel: interestRateModelAddress,
     name: "Ethereum",
     symbol: "ETH",
@@ -46,7 +49,7 @@ export const poolAssets = (interestRateModelAddress: string, comptroller: string
   };
   const daiConf: cERC20Conf = {
     underlying: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-    comptroller: comptroller,
+    comptroller,
     interestRateModel: interestRateModelAddress,
     name: "Dai",
     symbol: "DAI",
@@ -59,7 +62,7 @@ export const poolAssets = (interestRateModelAddress: string, comptroller: string
   };
   const rgtConf: cERC20Conf = {
     underlying: "0xD291E7a03283640FDc51b121aC401383A46cC623",
-    comptroller: comptroller,
+    comptroller,
     interestRateModel: interestRateModelAddress,
     name: "Rari Governance Token",
     symbol: "RGT",
