@@ -16,7 +16,17 @@ describe("FusePoolDirectory", function () {
   });
 
   describe("Deploy pool", async function () {
+    it("should decode", async function () {
+      const abiCoder = new utils.AbiCoder();
+      const constructorData = abiCoder.decode(
+        ["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
+        "0x0000000000000000000000002a183d878ccdc00c0d20db9cbea033f11d5adf6a000000000000000000000000071ab319d920b2a9110dbd53546fa0ed8c612f6c0000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000014000000000000000000000000023df7c0f61f9d82dddadf53c7b1c09112f070fcd000000000000000000000000000000000000000000000000000000000000018000000000000000000000000000000000000000000000000000071afd498d000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008457468657265756d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003455448000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000"
+      );
+      console.log("constructorData: ", constructorData);
+    });
+
     it.only("should deploy the pool via contract", async function () {
+      this.timeout(120_000);
       const { alice } = await ethers.getNamedSigners();
       console.log("alice: ", alice.address);
 
@@ -39,6 +49,7 @@ describe("FusePoolDirectory", function () {
       );
       expect(deployedPool).to.be.ok;
       const depReceipt = await deployedPool.wait();
+      console.log("Deployed pool");
 
       // Confirm Unitroller address
       const saltsHash = utils.solidityKeccak256(
@@ -104,7 +115,7 @@ describe("FusePoolDirectory", function () {
         collateralFactorBN
       );
       const res = await tx.wait();
-      console.log('res: ', res);
+      console.log("res: ", res);
     });
 
     it("should deploy pool from sdk without whitelist", async function () {

@@ -9,7 +9,7 @@ contract CTokenAdminStorage {
     /**
      * @notice Administrator for Fuse
      */
-    IFuseFeeDistributor internal constant fuseAdmin = IFuseFeeDistributor(0x21b529df6dbBDEA04dfFD748566F96f1a5ecdEfE);
+    IFuseFeeDistributor internal constant fuseAdmin = IFuseFeeDistributor(0x530b8A1c84594a730B8FbebD9C3a4696dDDe97Ff);
 
     /**
      * @dev LEGACY USE ONLY: Administrator for this contract

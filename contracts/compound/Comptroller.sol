@@ -9,7 +9,6 @@ import "./ComptrollerInterface.sol";
 import "./ComptrollerStorage.sol";
 import "./Unitroller.sol";
 import "./RewardsDistributorDelegate.sol";
-import "hardhat/console.sol";
 
 /**
  * @title Compound's Comptroller Contract
@@ -1201,8 +1200,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     ) external returns (uint) {
         // Check caller is admin
         if (!hasAdminRights()) {
-            console.log(adminHasRights, msg.sender, admin);
-            console.log("NO ADMINS!");
             return fail(Error.UNAUTHORIZED, FailureInfo.SUPPORT_MARKET_OWNER_CHECK);
         }
 
@@ -1215,7 +1212,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
         // Reset Fuse admin rights to the original value
         fuseAdminHasRights = oldFuseAdminHasRights;
-
         // Support market here in the Comptroller
         uint256 err = _supportMarket(cToken);
 
