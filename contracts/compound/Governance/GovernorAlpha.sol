@@ -150,23 +150,21 @@ contract GovernorAlpha {
         uint endBlock = add256(startBlock, votingPeriod());
 
         proposalCount++;
-        Proposal memory newProposal = Proposal({
-            id: proposalCount,
-            proposer: msg.sender,
-            eta: 0,
-            targets: targets,
-            values: values,
-            signatures: signatures,
-            calldatas: calldatas,
-            startBlock: startBlock,
-            endBlock: endBlock,
-            forVotes: 0,
-            againstVotes: 0,
-            canceled: false,
-            executed: false
-        });
+        Proposal storage newProposal = proposals[proposalCount];
+        newProposal.id = proposalCount;
+        newProposal.proposer = msg.sender;
+        newProposal.eta = 0;
+        newProposal.targets = targets;
+        newProposal.values = values;
+        newProposal.signatures = signatures;
+        newProposal.calldatas = calldatas;
+        newProposal.startBlock = startBlock;
+        newProposal.endBlock = endBlock;
+        newProposal.forVotes = 0;
+        newProposal.againstVotes = 0;
+        newProposal.canceled = false;
+        newProposal.executed = false;
 
-        proposals[newProposal.id] = newProposal;
         latestProposalIds[newProposal.proposer] = newProposal.id;
 
         emit ProposalCreated(newProposal.id, msg.sender, targets, values, signatures, calldatas, startBlock, endBlock, description);
@@ -194,7 +192,7 @@ contract GovernorAlpha {
         Proposal storage proposal = proposals[proposalId];
         proposal.executed = true;
         for (uint i = 0; i < proposal.targets.length; i++) {
-            timelock.executeTransaction.value(proposal.values[i])(proposal.targets[i], proposal.values[i], proposal.signatures[i], proposal.calldatas[i], proposal.eta);
+            timelock.executeTransaction{value:proposal.values[i]}(proposal.targets[i], proposal.values[i], proposal.signatures[i], proposal.calldatas[i], proposal.eta);
         }
         emit ProposalExecuted(proposalId);
     }

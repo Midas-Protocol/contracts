@@ -1180,7 +1180,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         }
 
         // List market and emit event
-        markets[address(cToken)] = Market({isListed: true, collateralFactorMantissa: 0});
+        Market storage market = markets[address(cToken)];
+        market.isListed = true;
+        market.collateralFactorMantissa = 0;
         allMarkets.push(cToken);
         cTokensByUnderlying[underlying] = cToken;
         emit MarketListed(cToken);

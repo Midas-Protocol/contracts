@@ -135,7 +135,7 @@ contract CEther is CToken, CEtherInterface {
 
     function doTransferOut(address payable to, uint amount) internal {
         // Send the Ether and revert on failure
-        (bool success, ) = to.call.value(amount)("");
+        (bool success, ) = to.call{value:amount}("");
         require(success, "doTransferOut failed");
     }
 

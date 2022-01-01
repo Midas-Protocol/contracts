@@ -215,7 +215,7 @@ contract ComptrollerG1 is ComptrollerV1Storage, ComptrollerInterface, Comptrolle
         // copy last item in list to location of item to be removed, reduce length by 1
         CToken[] storage storedList = accountAssets[msg.sender];
         storedList[assetIndex] = storedList[storedList.length - 1];
-        storedList.length--;
+        storedList.pop();
 
         emit MarketExited(cToken, msg.sender);
 
@@ -935,7 +935,9 @@ contract ComptrollerG1 is ComptrollerV1Storage, ComptrollerInterface, Comptrolle
 
         cToken.isCToken(); // Sanity check to make sure its really a CToken
 
-        markets[address(cToken)] = Market({isListed: true, collateralFactorMantissa: 0});
+        Market storage market = markets[address(cToken)];
+        market.isListed = true;
+        market.collateralFactorMantissa = 0;
         emit MarketListed(cToken);
 
         return uint(Error.NO_ERROR);

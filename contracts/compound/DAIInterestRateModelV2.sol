@@ -96,14 +96,14 @@ contract DAIInterestRateModelV2 is JumpRateModel {
 
 /*** Maker Interfaces ***/
 
-contract PotLike {
-    function chi() external view returns (uint);
-    function dsr() external view returns (uint);
-    function rho() external view returns (uint);
-    function pie(address) external view returns (uint);
-    function drip() external returns (uint);
-    function join(uint) external;
-    function exit(uint) external;
+abstract contract PotLike {
+    function chi() virtual external view returns (uint);
+    function dsr() virtual external view returns (uint);
+    function rho() virtual external view returns (uint);
+    function pie(address) virtual external view returns (uint);
+    function drip() virtual external returns (uint);
+    function join(uint) virtual external;
+    function exit(uint) virtual external;
 }
 
 contract JugLike {

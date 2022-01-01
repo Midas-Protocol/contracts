@@ -279,9 +279,9 @@ contract CTokenInterface is CTokenStorage {
 
     /*** Admin Functions ***/
 
-    function _setReserveFactor(uint newReserveFactorMantissa) external returns (uint);
-    function _reduceReserves(uint reduceAmount) external returns (uint);
-    function _setInterestRateModel(InterestRateModel newInterestRateModel) public returns (uint);
+    function _setReserveFactor(uint newReserveFactorMantissa) virtual external returns (uint);
+    function _reduceReserves(uint reduceAmount) virtual external returns (uint);
+    function _setInterestRateModel(InterestRateModel newInterestRateModel) virtual public returns (uint);
 }
 
 contract CErc20Storage {
@@ -295,13 +295,13 @@ contract CErc20Interface is CErc20Storage {
 
     /*** User Interface ***/
 
-    function mint(uint mintAmount) external returns (uint);
-    function redeem(uint redeemTokens) external returns (uint);
-    function redeemUnderlying(uint redeemAmount) external returns (uint);
-    function borrow(uint borrowAmount) external returns (uint);
-    function repayBorrow(uint repayAmount) external returns (uint);
-    function repayBorrowBehalf(address borrower, uint repayAmount) external returns (uint);
-    function liquidateBorrow(address borrower, uint repayAmount, CTokenInterface cTokenCollateral) external returns (uint);
+    function mint(uint mintAmount) virtual external returns (uint);
+    function redeem(uint redeemTokens) virtual external returns (uint);
+    function redeemUnderlying(uint redeemAmount) virtual external returns (uint);
+    function borrow(uint borrowAmount) virtual external returns (uint);
+    function repayBorrow(uint repayAmount) virtual external returns (uint);
+    function repayBorrowBehalf(address borrower, uint repayAmount) virtual external returns (uint);
+    function liquidateBorrow(address borrower, uint repayAmount, CTokenInterface cTokenCollateral) virtual external returns (uint);
 
 }
 
