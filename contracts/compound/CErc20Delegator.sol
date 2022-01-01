@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity >=0.7.0;
 
 import "./ComptrollerInterface.sol";
 import "./InterestRateModel.sol";
@@ -54,7 +54,7 @@ contract CErc20Delegator is CDelegationStorage {
         (bool success, bytes memory returnData) = callee.delegatecall(data);
         assembly {
             if eq(success, 0) {
-                revert(add(returnData, 0x20), returndatasize)
+                revert(add(returnData, 0x20), returndatasize())
             }
         }
         return returnData;
@@ -64,7 +64,7 @@ contract CErc20Delegator is CDelegationStorage {
      * @notice Delegates execution to an implementation contract
      * @dev It returns to the external caller whatever the implementation returns or forwards reverts
      */
-    function () external payable {
+    fallback () external payable {
         // Cannot send value to CErc20Delegator
         require(msg.value == 0, "CErc20Delegator:fallback: cannot send value to fallback");
 
@@ -76,11 +76,11 @@ contract CErc20Delegator is CDelegationStorage {
 
         assembly {
             let free_mem_ptr := mload(0x40)
-            returndatacopy(free_mem_ptr, 0, returndatasize)
+            returndatacopy(free_mem_ptr, 0, returndatasize())
 
             switch success
-            case 0 { revert(free_mem_ptr, returndatasize) }
-            default { return(free_mem_ptr, returndatasize) }
+            case 0 { revert(free_mem_ptr, returndatasize()) }
+            default { return(free_mem_ptr, returndatasize()) }
         }
     }
 }

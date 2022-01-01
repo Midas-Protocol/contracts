@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity >=0.7.0;
 
 import "./CToken.sol";
 
@@ -102,7 +102,7 @@ contract CEther is CToken, CEtherInterface {
     /**
      * @notice Send Ether to CEther to mint
      */
-    function () external payable {
+    fallback () external payable {
         (uint err,) = mintInternal(msg.value);
         requireNoError(err, "mint failed");
     }

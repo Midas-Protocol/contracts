@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity >=0.7.0;
 
 import "./ErrorReporter.sol";
 import "./ComptrollerStorage.sol";
@@ -189,7 +189,7 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
      * It returns to the external caller whatever the implementation returns
      * or forwards reverts.
      */
-    function () payable external {
+    fallback () payable external {
         // Check for automatic implementation
         if (msg.sender != address(this)) {
             (bool callSuccess, bytes memory data) = address(this).staticcall(abi.encodeWithSignature("autoImplementation()"));
@@ -212,11 +212,11 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
 
         assembly {
               let free_mem_ptr := mload(0x40)
-              returndatacopy(free_mem_ptr, 0, returndatasize)
+              returndatacopy(free_mem_ptr, 0, returndatasize())
 
               switch success
-              case 0 { revert(free_mem_ptr, returndatasize) }
-              default { return(free_mem_ptr, returndatasize) }
+              case 0 { revert(free_mem_ptr, returndatasize()) }
+              default { return(free_mem_ptr, returndatasize()) }
         }
     }
 }

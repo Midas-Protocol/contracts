@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity >=0.7.0;
 
 import "./IFuseFeeDistributor.sol";
 import "./ComptrollerStorage.sol";
@@ -258,23 +258,23 @@ contract CTokenInterface is CTokenStorage {
 
     /*** User Interface ***/
 
-    function transfer(address dst, uint amount) external returns (bool);
-    function transferFrom(address src, address dst, uint amount) external returns (bool);
-    function approve(address spender, uint amount) external returns (bool);
-    function allowance(address owner, address spender) external view returns (uint);
-    function balanceOf(address owner) external view returns (uint);
-    function balanceOfUnderlying(address owner) external returns (uint);
-    function getAccountSnapshot(address account) external view returns (uint, uint, uint, uint);
-    function borrowRatePerBlock() external view returns (uint);
-    function supplyRatePerBlock() external view returns (uint);
-    function totalBorrowsCurrent() external returns (uint);
-    function borrowBalanceCurrent(address account) external returns (uint);
-    function borrowBalanceStored(address account) public view returns (uint);
-    function exchangeRateCurrent() public returns (uint);
-    function exchangeRateStored() public view returns (uint);
-    function getCash() external view returns (uint);
-    function accrueInterest() public returns (uint);
-    function seize(address liquidator, address borrower, uint seizeTokens) external returns (uint);
+    function transfer(address dst, uint amount) virtual external returns (bool);
+    function transferFrom(address src, address dst, uint amount) virtual external returns (bool);
+    function approve(address spender, uint amount) virtual external returns (bool);
+    function allowance(address owner, address spender) external virtual view returns (uint);
+    function balanceOf(address owner) external virtual view returns (uint);
+    function balanceOfUnderlying(address owner) virtual external returns (uint);
+    function getAccountSnapshot(address account) virtual external view returns (uint, uint, uint, uint);
+    function borrowRatePerBlock() external virtual view returns (uint);
+    function supplyRatePerBlock() external virtual view returns (uint);
+    function totalBorrowsCurrent() virtual external returns (uint);
+    function borrowBalanceCurrent(address account) virtual external returns (uint);
+    function borrowBalanceStored(address account) public virtual view returns (uint);
+    function exchangeRateCurrent() virtual public returns (uint);
+    function exchangeRateStored() public virtual view returns (uint);
+    function getCash() external virtual view returns (uint);
+    function accrueInterest() virtual public returns (uint);
+    function seize(address liquidator, address borrower, uint seizeTokens) virtual external returns (uint);
 
 
     /*** Admin Functions ***/

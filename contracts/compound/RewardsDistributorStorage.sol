@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity >=0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./CToken.sol";
@@ -25,10 +25,10 @@ contract RewardsDistributorDelegateStorageV1 is RewardsDistributorDelegatorStora
     address public rewardToken;
 
     struct CompMarketState {
-        /// @notice The market's last updated compBorrowIndex or compSupplyIndex
+        // The market's last updated compBorrowIndex or compSupplyIndex
         uint224 index;
 
-        /// @notice The block number the index was last updated at
+        // The block number the index was last updated at
         uint32 block;
     }
 

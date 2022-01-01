@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity >=0.7.0;
 
 import "./ComptrollerInterface.sol";
 import "./CTokenInterfaces.sol";

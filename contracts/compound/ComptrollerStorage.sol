@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity >=0.7.0;
 
 import "./IFuseFeeDistributor.sol";
 import "./CToken.sol";
@@ -78,21 +78,15 @@ contract ComptrollerV1Storage is UnitrollerAdminStorage {
 
 contract ComptrollerV2Storage is ComptrollerV1Storage {
     struct Market {
-        /**
-         * @notice Whether or not this market is listed
-         */
+        // Whether or not this market is listed
         bool isListed;
 
-        /**
-         * @notice Multiplier representing the most one can borrow against their collateral in this market.
-         *  For instance, 0.9 to allow borrowing 90% of collateral value.
-         *  Must be between 0 and 1, and stored as a mantissa.
-         */
+        // Multiplier representing the most one can borrow against their collateral in this market.
+        // For instance, 0.9 to allow borrowing 90% of collateral value.
+        // Must be between 0 and 1, and stored as a mantissa.
         uint collateralFactorMantissa;
 
-        /**
-         * @notice Per-market mapping of "accounts in this asset"
-         */
+        // Per-market mapping of "accounts in this asset"
         mapping(address => bool) accountMembership;
     }
 

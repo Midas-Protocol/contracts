@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity >=0.7.0;
 
 
 contract CDelegationStorage {
@@ -9,7 +9,7 @@ contract CDelegationStorage {
 }
 
 
-contract CDelegateInterface is CDelegationStorage {
+abstract contract CDelegateInterface is CDelegationStorage {
     /**
      * @notice Emitted when implementation is changed
      */
