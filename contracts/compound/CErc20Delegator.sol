@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0;
 
 import "./ComptrollerInterface.sol";
@@ -64,7 +65,7 @@ contract CErc20Delegator is CDelegationStorage {
      * @notice Delegates execution to an implementation contract
      * @dev It returns to the external caller whatever the implementation returns or forwards reverts
      */
-    fallback () external payable {
+    receive() external payable {
         // Cannot send value to CErc20Delegator
         require(msg.value == 0, "CErc20Delegator:fallback: cannot send value to fallback");
 

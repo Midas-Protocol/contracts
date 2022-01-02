@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0;
 
 import "./ComptrollerInterface.sol";
@@ -62,7 +63,7 @@ contract CEtherDelegator is CDelegationStorage {
      * @notice Delegates execution to an implementation contract
      * @dev It returns to the external caller whatever the implementation returns or forwards reverts
      */
-    fallback () external payable {
+    receive() external payable {
         // Check for automatic implementation
         delegateTo(implementation, abi.encodeWithSignature("_prepare()"));
 

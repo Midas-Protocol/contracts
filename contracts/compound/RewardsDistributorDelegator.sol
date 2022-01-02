@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0;
 pragma experimental ABIEncoderV2;
 
@@ -57,7 +58,7 @@ contract RewardsDistributorDelegator is RewardsDistributorDelegatorStorage {
      * It returns to the external caller whatever the implementation returns
      * or forwards reverts.
      */
-    fallback () external payable {
+    receive() external payable {
         // delegate all other functions to current implementation
         (bool success, ) = implementation.delegatecall(msg.data);
 
