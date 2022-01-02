@@ -35,7 +35,7 @@ contract DAIInterestRateModelV2 is JumpRateModel {
      * @param pot_ The address of the Dai pot (where DSR is earned)
      * @param jug_ The address of the Dai jug (where SF is kept)
      */
-    constructor(uint jumpMultiplierPerYear, uint kink_, address pot_, address jug_) JumpRateModel(0, 0, jumpMultiplierPerYear, kink_) public {
+    constructor(uint jumpMultiplierPerYear, uint kink_, address pot_, address jug_) JumpRateModel(0, 0, jumpMultiplierPerYear, kink_) {
         pot = PotLike(pot_);
         jug = JugLike(jug_);
         poke();
@@ -49,7 +49,7 @@ contract DAIInterestRateModelV2 is JumpRateModel {
      * @param reserveFactorMantissa The current reserve factor the market has
      * @return The supply rate per block (as a percentage, and scaled by 1e18)
      */
-    function getSupplyRate(uint cash, uint borrows, uint reserves, uint reserveFactorMantissa) public view returns (uint) {
+    function getSupplyRate(uint cash, uint borrows, uint reserves, uint reserveFactorMantissa) public view override returns (uint) {
         uint protocolRate = super.getSupplyRate(cash, borrows, reserves, reserveFactorMantissa);
 
         uint underlying = cash.add(borrows).sub(reserves);

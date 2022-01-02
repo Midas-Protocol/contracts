@@ -6,8 +6,8 @@ import "./ComptrollerInterface.sol";
 import "./InterestRateModel.sol";
 
 contract CTokenAdminStorage {
-    /**
-     * @notice Administrator for Fuse
+    /*
+     * Administrator for Fuse
      */
     IFuseFeeDistributor internal constant fuseAdmin = IFuseFeeDistributor(0x530b8A1c84594a730B8FbebD9C3a4696dDDe97Ff);
 
@@ -48,18 +48,18 @@ contract CTokenStorage is CTokenAdminStorage {
      */
     uint8 public decimals;
 
-    /**
-     * @notice Maximum borrow rate that can ever be applied (.0005% / block)
+    /*
+     * Maximum borrow rate that can ever be applied (.0005% / block)
      */
     uint internal constant borrowRateMaxMantissa = 0.0005e16;
 
-    /**
-     * @notice Maximum fraction of interest that can be set aside for reserves + fees
+    /*
+     * Maximum fraction of interest that can be set aside for reserves + fees
      */
     uint internal constant reserveFactorPlusFeesMaxMantissa = 1e18;
 
-    /**
-     * @notice LEGACY USE ONLY: Pending administrator for this contract
+    /*
+     * LEGACY USE ONLY: Pending administrator for this contract
      */
     address payable private __pendingAdmin;
 
@@ -73,8 +73,8 @@ contract CTokenStorage is CTokenAdminStorage {
      */
     InterestRateModel public interestRateModel;
 
-    /**
-     * @notice Initial exchange rate used when minting the first CTokens (used when totalSupply = 0)
+    /*
+     * Initial exchange rate used when minting the first CTokens (used when totalSupply = 0)
      */
     uint internal initialExchangeRateMantissa;
 
@@ -128,13 +128,13 @@ contract CTokenStorage is CTokenAdminStorage {
      */
     uint public totalSupply;
 
-    /**
-     * @notice Official record of token balances for each account
+    /*
+     * Official record of token balances for each account
      */
     mapping (address => uint) internal accountTokens;
 
-    /**
-     * @notice Approved token transfer amounts on behalf of others
+    /*
+     * Approved token transfer amounts on behalf of others
      */
     mapping (address => mapping (address => uint)) internal transferAllowances;
 
@@ -148,27 +148,31 @@ contract CTokenStorage is CTokenAdminStorage {
         uint interestIndex;
     }
 
-    /**
-     * @notice Mapping of account addresses to outstanding borrow balances
+    /*
+     * Mapping of account addresses to outstanding borrow balances
      */
     mapping(address => BorrowSnapshot) internal accountBorrows;
 
-    /**
-     * @notice Share of seized collateral that is added to reserves
+    /*
+     * Share of seized collateral that is added to reserves
      */
     uint public constant protocolSeizeShareMantissa = 2.8e16; //2.8%
 }
 
-contract CTokenInterface is CTokenStorage {
+abstract contract CTokenInterface is CTokenStorage {
     /**
      * @notice Indicator that this is a CToken contract (for inspection)
      */
-    bool public constant isCToken = true;
+    function isCToken() external virtual returns (bool) {
+        return true;
+    }
 
     /**
      * @notice Indicator that this is or is not a CEther contract (for inspection)
      */
-    bool public constant isCEther = false;
+    function isCEther() external virtual returns (bool) {
+        return false;
+    }
 
     /*** Market Events ***/
 
@@ -250,11 +254,6 @@ contract CTokenInterface is CTokenStorage {
      */
     event Approval(address indexed owner, address indexed spender, uint amount);
 
-    /**
-     * @notice Failure event
-     */
-    event Failure(uint error, uint info, uint detail);
-
 
     /*** User Interface ***/
 
@@ -291,7 +290,7 @@ contract CErc20Storage {
     address public underlying;
 }
 
-contract CErc20Interface is CErc20Storage {
+abstract contract CErc20Interface is CErc20Storage {
 
     /*** User Interface ***/
 
@@ -305,9 +304,4 @@ contract CErc20Interface is CErc20Storage {
 
 }
 
-contract CEtherInterface is CErc20Storage {
-    /**
-     * @notice Indicator that this is a CEther contract (for inspection)
-     */
-    bool public constant isCEther = true;
-}
+contract CEtherInterface is CErc20Storage {}

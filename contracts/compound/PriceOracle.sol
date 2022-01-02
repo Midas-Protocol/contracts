@@ -2,7 +2,7 @@ pragma solidity >=0.7.0;
 
 import "./CToken.sol";
 
-contract PriceOracle {
+abstract contract PriceOracle {
     /// @notice Indicator that this is a PriceOracle contract (for inspection)
     bool public constant isPriceOracle = true;
 

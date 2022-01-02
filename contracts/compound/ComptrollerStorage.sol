@@ -5,8 +5,8 @@ import "./CToken.sol";
 import "./PriceOracle.sol";
 
 contract UnitrollerAdminStorage {
-    /**
-     * @notice Administrator for Fuse
+    /*
+     * Administrator for Fuse
      */
     IFuseFeeDistributor internal constant fuseAdmin = IFuseFeeDistributor(0x530b8A1c84594a730B8FbebD9C3a4696dDDe97Ff);
 
@@ -64,8 +64,8 @@ contract ComptrollerV1Storage is UnitrollerAdminStorage {
      */
     uint public liquidationIncentiveMantissa;
 
-    /**
-     * @notice UNUSED AFTER UPGRADE: Max number of assets a single account can participate in (borrow or use as collateral)
+    /*
+     * UNUSED AFTER UPGRADE: Max number of assets a single account can participate in (borrow or use as collateral)
      */
     uint internal maxAssets;
 
@@ -107,7 +107,7 @@ contract ComptrollerV2Storage is ComptrollerV1Storage {
     /// @notice A list of all borrowers who have entered markets
     address[] public allBorrowers;
 
-    /// @notice Indexes of borrower account addresses in the `allBorrowers` array
+    // Indexes of borrower account addresses in the `allBorrowers` array
     mapping(address => uint256) internal borrowerIndexes;
 
     /**
@@ -127,7 +127,7 @@ contract ComptrollerV2Storage is ComptrollerV1Storage {
     /// @notice An array of all whitelisted accounts
     address[] public whitelistArray;
 
-    /// @notice Indexes of account addresses in the `whitelistArray` array
+    // Indexes of account addresses in the `whitelistArray` array
     mapping(address => uint256) internal whitelistIndexes;
 
     /**
