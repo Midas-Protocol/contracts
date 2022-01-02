@@ -27,7 +27,7 @@ contract CEtherDelegator is CDelegationStorage {
                 address implementation_,
                 bytes memory becomeImplementationData,
                 uint256 reserveFactorMantissa_,
-                uint256 adminFeeMantissa_) public {
+                uint256 adminFeeMantissa_) {
         // First delegate gets to initialize the delegator (i.e. storage contract)
         delegateTo(implementation_, abi.encodeWithSignature("initialize(address,address,string,string,uint256,uint256)",
                                                             comptroller_,

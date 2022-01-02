@@ -8,9 +8,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-periphery/contracts/libraries/OracleLibrary.sol";
 
-import "../external/compound/PriceOracle.sol";
-import "../external/compound/CToken.sol";
-import "../external/compound/CErc20.sol";
+import "../external/compound/IPriceOracle.sol";
+import "../external/compound/ICToken.sol";
+import "../external/compound/ICErc20.sol";
 
 import "./BasePriceOracle.sol";
 
@@ -19,7 +19,7 @@ import "./BasePriceOracle.sol";
  * @notice Stores cumulative prices and returns TWAPs for assets on Uniswap V3 pairs.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract UniswapV3TwapPriceOracleV2 is Initializable, PriceOracle, BasePriceOracle {
+contract UniswapV3TwapPriceOracleV2 is Initializable, IPriceOracle, BasePriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
@@ -78,12 +78,12 @@ contract UniswapV3TwapPriceOracleV2 is Initializable, PriceOracle, BasePriceOrac
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(CToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
         // Return 1e18 for ETH
         if (cToken.isCEther()) return 1e18;
 
         // Get underlying ERC20 token address
-        address underlying = CErc20(address(cToken)).underlying();
+        address underlying = ICErc20(address(cToken)).underlying();
 
         // Get price, format, and return
         uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());

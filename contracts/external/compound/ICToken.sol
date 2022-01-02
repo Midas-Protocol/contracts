@@ -6,7 +6,7 @@ pragma solidity >=0.7.0;
  * @notice Abstract base for CTokens
  * @author Compound
  */
-interface CToken {
+interface ICToken {
     function admin() external view returns (address);
     function adminHasRights() external view returns (bool);
     function fuseAdminHasRights() external view returns (bool);

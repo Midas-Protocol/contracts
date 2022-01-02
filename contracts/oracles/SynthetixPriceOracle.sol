@@ -4,8 +4,8 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/PriceOracle.sol";
-import "../external/compound/CErc20.sol";
+import "../external/compound/IPriceOracle.sol";
+import "../external/compound/ICErc20.sol";
 
 import "../external/synthetix/AddressResolver.sol";
 import "../external/synthetix/ExchangeRates.sol";
@@ -19,7 +19,7 @@ import "../external/synthetix/Proxy.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract SynthetixPriceOracle is PriceOracle {
+contract SynthetixPriceOracle is IPriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
@@ -27,8 +27,8 @@ contract SynthetixPriceOracle is PriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(CToken cToken) external override view returns (uint) {
-        address underlying = CErc20(address(cToken)).underlying();
+    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
+        address underlying = ICErc20(address(cToken)).underlying();
         uint256 baseUnit = 10 ** uint(ERC20Upgradeable(underlying).decimals());
         underlying = Proxy(underlying).target(); // For some reason we have to use the logic contract instead of the proxy contract to get `resolver` and `currencyKey`
         ExchangeRates exchangeRates = ExchangeRates(MixinResolver(underlying).resolver().requireAndGetAddress("ExchangeRates", "Failed to get Synthetix's ExchangeRates contract address."));

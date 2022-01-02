@@ -3,8 +3,8 @@ pragma solidity >=0.7.0;
 
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
-import "../external/compound/PriceOracle.sol";
-import "../external/compound/CErc20.sol";
+import "../external/compound/IPriceOracle.sol";
+import "../external/compound/ICErc20.sol";
 
 import "../external/yearn/IVaultV2.sol";
 
@@ -16,7 +16,7 @@ import "./BasePriceOracle.sol";
  * @dev Implements the `PriceOracle` interface.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract YVaultV2PriceOracle is PriceOracle {
+contract YVaultV2PriceOracle is IPriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
@@ -24,9 +24,9 @@ contract YVaultV2PriceOracle is PriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(CToken cToken) external override view returns (uint256) {
+    function getUnderlyingPrice(ICToken cToken) external override view returns (uint256) {
         // Get price of token underlying yVault
-        IVaultV2 yVault = IVaultV2(CErc20(address(cToken)).underlying());
+        IVaultV2 yVault = IVaultV2(ICErc20(address(cToken)).underlying());
         address underlyingToken = yVault.token();
         uint underlyingPrice = underlyingToken == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 ? 1e18 : BasePriceOracle(msg.sender).price(underlyingToken);
 

@@ -3,9 +3,9 @@ pragma solidity >=0.7.0;
 
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
-import "../external/compound/PriceOracle.sol";
-import "../external/compound/CToken.sol";
-import "../external/compound/CErc20.sol";
+import "../external/compound/IPriceOracle.sol";
+import "../external/compound/ICToken.sol";
+import "../external/compound/ICErc20.sol";
 
 import "../external/alpha/Bank.sol";
 
@@ -15,7 +15,7 @@ import "../external/alpha/Bank.sol";
  * @dev Implements the `PriceOracle` interface.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract AlphaHomoraV1PriceOracle is PriceOracle {
+contract AlphaHomoraV1PriceOracle is IPriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
@@ -28,8 +28,8 @@ contract AlphaHomoraV1PriceOracle is PriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(CToken cToken) external override view returns (uint) {
-        require(CErc20(address(cToken)).underlying() == address(IBETH));
+    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
+        require(ICErc20(address(cToken)).underlying() == address(IBETH));
         return IBETH.totalETH().mul(1e18).div(IBETH.totalSupply());
     }
 }

@@ -4,9 +4,9 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/PriceOracle.sol";
-import "../external/compound/CToken.sol";
-import "../external/compound/CErc20.sol";
+import "../external/compound/IPriceOracle.sol";
+import "../external/compound/ICToken.sol";
+import "../external/compound/ICErc20.sol";
 
 import "./BasePriceOracle.sol";
 import "./UniswapTwapPriceOracleRoot.sol";
@@ -17,13 +17,13 @@ import "./UniswapTwapPriceOracleRoot.sol";
  * @dev Implements `PriceOracle` and `BasePriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract UniswapTwapPriceOracle is PriceOracle, BasePriceOracle {
+contract UniswapTwapPriceOracle is IPriceOracle, BasePriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
      * @dev Constructor that sets the UniswapV2Factory.
      */
-    constructor (address _rootOracle, address _uniswapV2Factory) public {
+    constructor (address _rootOracle, address _uniswapV2Factory) {
         rootOracle = UniswapTwapPriceOracleRoot(_rootOracle);
         uniswapV2Factory = _uniswapV2Factory;
     }
@@ -48,12 +48,12 @@ contract UniswapTwapPriceOracle is PriceOracle, BasePriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(CToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
         // Return 1e18 for ETH
         if (cToken.isCEther()) return 1e18;
 
         // Get underlying ERC20 token address
-        address underlying = CErc20(address(cToken)).underlying();
+        address underlying = ICErc20(address(cToken)).underlying();
 
         // Get price, format, and return
         uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());

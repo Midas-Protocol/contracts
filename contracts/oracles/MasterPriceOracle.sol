@@ -3,9 +3,9 @@ pragma solidity >=0.7.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
-import "../external/compound/PriceOracle.sol";
-import "../external/compound/CToken.sol";
-import "../external/compound/CErc20.sol";
+import "../external/compound/IPriceOracle.sol";
+import "../external/compound/ICToken.sol";
+import "../external/compound/ICErc20.sol";
 
 import "./BasePriceOracle.sol";
 
@@ -15,16 +15,16 @@ import "./BasePriceOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract MasterPriceOracle is Initializable, PriceOracle, BasePriceOracle {
+contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
     /**
      * @dev Maps underlying token addresses to `PriceOracle` contracts (can be `BasePriceOracle` contracts too).
      */
-    mapping(address => PriceOracle) public oracles;
+    mapping(address => IPriceOracle) public oracles;
 
     /**
      * @dev Default/fallback `PriceOracle`.
      */
-    PriceOracle public defaultOracle;
+    IPriceOracle public defaultOracle;
 
     /**
      * @dev The administrator of this `MasterPriceOracle`.
@@ -66,14 +66,14 @@ contract MasterPriceOracle is Initializable, PriceOracle, BasePriceOracle {
      * @param _admin The admin who can assign oracles to underlying tokens.
      * @param _canAdminOverwrite Controls if `admin` can overwrite existing assignments of oracles to underlying tokens.
      */
-    function initialize(address[] memory underlyings, PriceOracle[] memory _oracles, PriceOracle _defaultOracle, address _admin, bool _canAdminOverwrite) external initializer {
+    function initialize(address[] memory underlyings, IPriceOracle[] memory _oracles, IPriceOracle _defaultOracle, address _admin, bool _canAdminOverwrite) external initializer {
         // Input validation
         require(underlyings.length == _oracles.length, "Lengths of both arrays must be equal.");
 
         // Initialize state variables
         for (uint256 i = 0; i < underlyings.length; i++) {
             address underlying = underlyings[i];
-            PriceOracle newOracle = _oracles[i];
+            IPriceOracle newOracle = _oracles[i];
             oracles[underlying] = newOracle;
             emit NewOracle(underlying, address(0), address(newOracle));
         }
@@ -86,7 +86,7 @@ contract MasterPriceOracle is Initializable, PriceOracle, BasePriceOracle {
     /**
      * @dev Sets `_oracles` for `underlyings`.
      */
-    function add(address[] calldata underlyings, PriceOracle[] calldata _oracles) external onlyAdmin {
+    function add(address[] calldata underlyings, IPriceOracle[] calldata _oracles) external onlyAdmin {
         // Input validation
         require(underlyings.length > 0 && underlyings.length == _oracles.length, "Lengths of both arrays must be equal and greater than 0.");
 
@@ -95,7 +95,7 @@ contract MasterPriceOracle is Initializable, PriceOracle, BasePriceOracle {
             address underlying = underlyings[i];
             address oldOracle = address(oracles[underlying]);
             if (noAdminOverwrite) require(oldOracle == address(0), "Admin cannot overwrite existing assignments of oracles to underlying tokens.");
-            PriceOracle newOracle = _oracles[i];
+            IPriceOracle newOracle = _oracles[i];
             oracles[underlying] = newOracle;
             emit NewOracle(underlying, oldOracle, address(newOracle));
         }
@@ -104,8 +104,8 @@ contract MasterPriceOracle is Initializable, PriceOracle, BasePriceOracle {
     /**
      * @dev Changes the admin and emits an event.
      */
-    function setDefaultOracle(PriceOracle newOracle) external onlyAdmin {
-        PriceOracle oldOracle = defaultOracle;
+    function setDefaultOracle(IPriceOracle newOracle) external onlyAdmin {
+        IPriceOracle oldOracle = defaultOracle;
         defaultOracle = newOracle;
         emit NewDefaultOracle(address(oldOracle), address(newOracle));
     }
@@ -132,15 +132,15 @@ contract MasterPriceOracle is Initializable, PriceOracle, BasePriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(CToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
         // Get underlying ERC20 token address
-        address underlying = address(CErc20(address(cToken)).underlying());
+        address underlying = address(ICErc20(address(cToken)).underlying());
 
         // Return 1e18 for WETH
         if (underlying == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) return 1e18;
 
         // Get underlying price from assigned oracle
-        PriceOracle oracle = oracles[underlying];
+        IPriceOracle oracle = oracles[underlying];
         if (address(oracle) != address(0)) return oracle.getUnderlyingPrice(cToken);
         if (address(defaultOracle) != address(0)) return defaultOracle.getUnderlyingPrice(cToken);
         revert("Price oracle not found for this underlying token address.");
@@ -154,7 +154,7 @@ contract MasterPriceOracle is Initializable, PriceOracle, BasePriceOracle {
         if (underlying == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) return 1e18;
 
         // Get underlying price from assigned oracle
-        PriceOracle oracle = oracles[underlying];
+        IPriceOracle oracle = oracles[underlying];
         if (address(oracle) != address(0)) return BasePriceOracle(address(oracle)).price(underlying);
         if (address(defaultOracle) != address(0)) return BasePriceOracle(address(defaultOracle)).price(underlying);
         revert("Price oracle not found for this underlying token address.");

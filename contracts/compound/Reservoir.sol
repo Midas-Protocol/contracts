@@ -29,7 +29,7 @@ contract Reservoir {
     * @param token_ The token to drip
     * @param target_ The recipient of dripped tokens
     */
-  constructor(uint dripRate_, EIP20Interface token_, address target_) public {
+  constructor(uint dripRate_, EIP20Interface token_, address target_) {
     dripStart = block.number;
     dripRate = dripRate_;
     token = token_;

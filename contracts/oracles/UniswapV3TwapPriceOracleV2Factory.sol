@@ -30,7 +30,7 @@ contract UniswapV3TwapPriceOracleV2Factory {
      * @notice Constructor that stores the UniswapV3TwapPriceOracleV2 implementation/logic contract.
      * @param _logic The `UniswapV3TwapPriceOracleV2` implementation contract.
      */
-    constructor(address _logic) public {
+    constructor(address _logic) {
         require(_logic != address(0), "UniswapV3TwapPriceOracleV2 implementation/logic contract not defined.");
         logic  = _logic;
     }

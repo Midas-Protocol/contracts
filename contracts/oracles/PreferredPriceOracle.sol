@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0;
 
-import "../external/compound/PriceOracle.sol";
-import "../external/compound/CToken.sol";
-import "../external/compound/CErc20.sol";
+import "../external/compound/IPriceOracle.sol";
+import "../external/compound/ICToken.sol";
+import "../external/compound/ICErc20.sol";
 
 import "./BasePriceOracle.sol";
 import "./MasterPriceOracle.sol";
@@ -15,7 +15,7 @@ import "./ChainlinkPriceOracleV2.sol";
  * @dev Implements `PriceOracle` and `BasePriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract PreferredPriceOracle is PriceOracle, BasePriceOracle {
+contract PreferredPriceOracle is IPriceOracle, BasePriceOracle {
     /**
      * @dev The primary `MasterPriceOracle`.
      */
@@ -29,12 +29,12 @@ contract PreferredPriceOracle is PriceOracle, BasePriceOracle {
     /**
      * @dev The tertiary `PriceOracle`.
      */
-    PriceOracle public tertiaryOracle;
+    IPriceOracle public tertiaryOracle;
     
     /**
      * @dev Constructor to set the primary `MasterPriceOracle`, the secondary `ChainlinkPriceOracleV2`, and the tertiary `PriceOracle`.
      */
-    constructor(MasterPriceOracle _masterOracle, ChainlinkPriceOracleV2 _chainlinkOracleV2, PriceOracle _tertiaryOracle) public {
+    constructor(MasterPriceOracle _masterOracle, ChainlinkPriceOracleV2 _chainlinkOracleV2, IPriceOracle _tertiaryOracle) {
         require(address(_masterOracle) != address(0), "MasterPriceOracle not set.");
         require(address(_chainlinkOracleV2) != address(0), "ChainlinkPriceOracleV2 not set.");
         require(address(_tertiaryOracle) != address(0), "Tertiary price oracle not set.");
@@ -67,12 +67,12 @@ contract PreferredPriceOracle is PriceOracle, BasePriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(CToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
         // Return 1e18 for ETH
         if (cToken.isCEther()) return 1e18;
 
         // Get underlying ERC20 token address
-        address underlying = address(CErc20(address(cToken)).underlying());
+        address underlying = address(ICErc20(address(cToken)).underlying());
 
         // Return 1e18 for WETH
         if (underlying == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) return 1e18;

@@ -4,9 +4,9 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/PriceOracle.sol";
-import "../external/compound/CToken.sol";
-import "../external/compound/CErc20.sol";
+import "../external/compound/IPriceOracle.sol";
+import "../external/compound/ICToken.sol";
+import "../external/compound/ICErc20.sol";
 
 import "../external/alpha/ISafeBox.sol";
 
@@ -18,7 +18,7 @@ import "./BasePriceOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract AlphaHomoraV2PriceOracle is PriceOracle, BasePriceOracle {
+contract AlphaHomoraV2PriceOracle is IPriceOracle, BasePriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
@@ -35,8 +35,8 @@ contract AlphaHomoraV2PriceOracle is PriceOracle, BasePriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(CToken cToken) external override view returns (uint) {
-        address underlying = CErc20(address(cToken)).underlying();
+    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
+        address underlying = ICErc20(address(cToken)).underlying();
         // Comptroller needs prices to be scaled by 1e(36 - decimals)
         // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
         return _price(underlying).mul(1e18).div(10 ** uint256(ERC20Upgradeable(underlying).decimals()));
@@ -48,7 +48,7 @@ contract AlphaHomoraV2PriceOracle is PriceOracle, BasePriceOracle {
      */
     function _price(address safeBox) internal view returns (uint) {
         // Get the cToken's underlying ibToken's underlying cToken
-        CErc20 underlyingCErc20 = CErc20(ISafeBox(safeBox).cToken());
+        ICErc20 underlyingCErc20 = ICErc20(ISafeBox(safeBox).cToken());
 
         // Get the token underlying the underlying cToken
         address baseToken = underlyingCErc20.underlying();

@@ -12,7 +12,7 @@ contract CEtherDelegate is CDelegateInterface, CEther {
     /**
      * @notice Construct an empty delegate
      */
-    constructor() public {}
+    constructor() {}
 
     /**
      * @notice Called by the delegator on a delegate to initialize it for duty

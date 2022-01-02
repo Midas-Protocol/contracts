@@ -3,7 +3,7 @@ pragma solidity >=0.7.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-import "../external/compound/CErc20.sol";
+import "../external/compound/ICErc20.sol";
 
 import "./IRedemptionStrategy.sol";
 
@@ -23,7 +23,7 @@ contract CErc20Liquidator is IRedemptionStrategy {
      */
     function redeem(IERC20Upgradeable inputToken, uint256 inputAmount, bytes memory strategyData) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
         // Redeem cErc20 for underlying ERC20 token (and store output as new collateral)
-        CErc20 cErc20 = CErc20(address(inputToken));
+        ICErc20 cErc20 = ICErc20(address(inputToken));
         uint256 redeemResult = cErc20.redeem(inputAmount);
         require(redeemResult == 0, "Error calling redeeming seized cErc20: error code not equal to 0");
         outputToken = IERC20Upgradeable(cErc20.underlying());

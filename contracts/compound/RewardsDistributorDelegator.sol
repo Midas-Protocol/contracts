@@ -10,7 +10,7 @@ contract RewardsDistributorDelegator is RewardsDistributorDelegatorStorage {
 	constructor(
 			address admin_,
 			address rewardToken_,
-	        address implementation_) public {
+	        address implementation_) {
 
         // Admin set to msg.sender for initialization
         admin = msg.sender;
