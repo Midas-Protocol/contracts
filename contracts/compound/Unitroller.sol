@@ -3,7 +3,6 @@ pragma solidity >=0.7.0;
 
 import "./ErrorReporter.sol";
 import "./ComptrollerStorage.sol";
-import "hardhat/console.sol";
 
 /**
  * @title Unitroller
@@ -164,7 +163,6 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
       */
     function _acceptAdmin() public returns (uint) {
         // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
-        console.log(msg.sender, pendingAdmin, "ADMINS");
         if (msg.sender != pendingAdmin || msg.sender == address(0)) {
             return fail(Error.UNAUTHORIZED, FailureInfo.ACCEPT_ADMIN_PENDING_ADMIN_CHECK);
         }

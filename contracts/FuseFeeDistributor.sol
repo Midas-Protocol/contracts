@@ -9,7 +9,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/Create2Upgradeable.sol";
 import "./compound/CEtherDelegator.sol";
-import "hardhat/console.sol";
 import "./compound/CErc20Delegator.sol";
 
 /**
@@ -121,33 +120,13 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
 
     function deployCEther(bytes calldata constructorData) external returns (address) {
         // Make sure comptroller == msg.sender
-        (
-            address comptroller,
-            address irm,
-            string memory name,
-            string memory symbol,
-            address delegateImpl,
-            bytes memory dat,
-            uint rf,
-            uint adm
-        ) = abi.decode(constructorData, (address, address, string, string, address, bytes, uint256, uint256));
+        (address comptroller) = abi.decode(constructorData[0:32], (address));
         require(comptroller == msg.sender, "Comptroller is not sender.");
-
-        console.log(comptroller);
-        console.log(irm);
-        console.log(delegateImpl);
-        console.log(rf);
-        console.log(adm);
-
-        console.logBytes(dat);
-        console.log("HELLO");
         // Deploy CEtherDelegator using msg.sender, underlying, and block.number as a salt
         bytes32 salt = keccak256(abi.encodePacked(msg.sender, address(0), block.number));
 
         bytes memory cEtherDelegatorCreationCode = abi.encodePacked(type(CEtherDelegator).creationCode, constructorData);
         address proxy = Create2Upgradeable.deploy(0, salt, cEtherDelegatorCreationCode);
-        console.log("PROXY IS:");
-        console.log(proxy);
         return proxy;
     }
 

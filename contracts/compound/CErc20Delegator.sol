@@ -65,7 +65,9 @@ contract CErc20Delegator is CDelegationStorage {
      * @notice Delegates execution to an implementation contract
      * @dev It returns to the external caller whatever the implementation returns or forwards reverts
      */
-    receive() external payable {
+    receive() external payable {}
+
+    fallback() external payable {
         // Cannot send value to CErc20Delegator
         require(msg.value == 0, "CErc20Delegator:fallback: cannot send value to fallback");
 

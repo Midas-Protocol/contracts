@@ -3,12 +3,11 @@ import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
 import { poolAssets } from "./setUp";
 import { cERC20Conf, Fuse } from "../lib/esm";
-import { getContractsConfig } from "./utilities";
+import { ETH_ZERO_ADDRESS, getContractsConfig } from "./utilities";
 import { BigNumber, constants, utils } from "ethers";
+import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 use(solidity);
-
-let deployedPoolAddress: string;
 
 describe("FusePoolDirectory", function () {
   beforeEach(async function () {
@@ -67,6 +66,7 @@ describe("FusePoolDirectory", function () {
       const contractConfig = await getContractsConfig(network.name);
       const sdk = new Fuse(ethers.provider, contractConfig);
       const { comptroller, name: _unfiliteredName } = await sdk.contracts.FusePoolDirectory.pools(0);
+
       expect(comptroller).to.eq(pool.comptroller);
       expect(_unfiliteredName).to.eq("TEST");
 
@@ -116,8 +116,18 @@ describe("FusePoolDirectory", function () {
         deployArgs
       );
       const tx = await comptrollerContract._deployMarket(true, constructorData, collateralFactorBN);
-      const res = await tx.wait();
-      console.log("res: ", res);
+      const receipt: TransactionReceipt = await tx.wait();
+      console.log(`Ether deployed successfully with tx hash: ${receipt.transactionHash}`);
+
+      const [totalSupply, totalBorrow, underlyingTokens, underlyingSymbols, whitelistedAdmin] =
+        await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
+
+      expect(underlyingTokens[0]).to.eq(ETH_ZERO_ADDRESS);
+      expect(underlyingSymbols[0]).to.eq("ETH");
+
+      const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
+
+      console.log(fusePoolData, "FPD");
     });
 
     it("should deploy pool from sdk without whitelist", async function () {
@@ -135,7 +145,7 @@ describe("FusePoolDirectory", function () {
       const bigLiquidationIncentive = utils.parseEther((8 / 100 + 1).toString());
 
       const [poolAddress, implementationAddress, priceOracleAddress] = await sdk.deployPool(
-        "TEST",
+        "TEST_BOB",
         false,
         bigCloseFactor,
         bigLiquidationIncentive,
@@ -145,7 +155,6 @@ describe("FusePoolDirectory", function () {
         [bob.address]
       );
       console.log(`Pool with address: ${poolAddress}, \noracle address: ${priceOracleAddress} deployed`);
-      deployedPoolAddress = poolAddress;
       expect(poolAddress).to.be.ok;
       expect(implementationAddress).to.be.ok;
 
@@ -156,39 +165,10 @@ describe("FusePoolDirectory", function () {
       const comptrollerAt2 = await ethers.getContractAt("Comptroller", comptroller, bob);
       console.log(`Fetched Comptroller: ${comptrollerAt2.address} has admin: ${await comptrollerAt2.admin()}`);
 
-      expect(_unfiliteredName).to.be.equal("TEST");
+      expect(_unfiliteredName).to.be.equal("TEST_BOB");
 
       const jrm = await ethers.getContract("JumpRateModel", bob);
       const assets = poolAssets(jrm.address, implementationAddress);
-
-      const ethConf: cERC20Conf = {
-        underlying: "0x0000000000000000000000000000000000000000",
-        comptroller: comptroller, // this is the defualt deployed comptroller
-        // addres, i.e. this.contractConfig.COMPOUND_CONTRACT_ADDRESSES.Comptroller;
-        // but that is not what we want -- we want to use the newly deployed comptroller
-        interestRateModel: jrm.address,
-        name: "Ethereum",
-        symbol: "ETH",
-        decimals: 8,
-        admin: "true",
-        collateralFactor: 75,
-        reserveFactor: 20,
-        adminFee: 10,
-        bypassPriceFeedCheck: true,
-        initialExchangeRateMantissa: utils.parseEther("0.1"),
-      };
-      const [cEtherDelegatorAddress, cEthImplAddr, receipt] = await sdk.deployCEther(
-        ethConf,
-        { from: bob.address },
-        sdk.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEtherDelegate
-          ? sdk.contractConfig.COMPOUND_CONTRACT_ADDRESSES.CEtherDelegate
-          : null
-      );
-
-      // check the call to _deployMarket: it logs a few things:
-      // if (!hasAdminRights()) {
-      //   console.log(adminHasRights, msg.sender, admin); // true 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc 0x0000000000000000000000000000000000000000
-      //   console.log("NO ADMINS!");
 
       for (const assetConf of assets.assets) {
         const [assetAddress, cTokenImplementationAddress, irmModel, receipt] = await sdk.deployAsset(
@@ -204,9 +184,9 @@ describe("FusePoolDirectory", function () {
         console.log("TX Receipt: ", receipt.transactionHash);
         console.log("-----------------");
       }
-      const t = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(deployedPoolAddress);
-      console.log(t, "pool summary for implementation: ", deployedPoolAddress);
-      const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(deployedPoolAddress);
+      const t = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
+      console.log(t, "pool summary for implementation: ", poolAddress);
+      const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
 
       console.log(fusePoolData, "FPD");
     });
