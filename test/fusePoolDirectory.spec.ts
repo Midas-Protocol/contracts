@@ -25,7 +25,7 @@ describe("FusePoolDirectory", function () {
       console.log("constructorData: ", constructorData);
     });
 
-    it("should deploy the pool via contract", async function () {
+    it.only("should deploy the pool via contract", async function () {
       this.timeout(120_000);
       const { alice } = await ethers.getNamedSigners();
       console.log("alice: ", alice.address);
@@ -64,12 +64,18 @@ describe("FusePoolDirectory", function () {
       const pool = pools[1][0];
       expect(pool.comptroller).to.eq(poolAddress);
 
+      const contractConfig = await getContractsConfig(network.name);
+      const sdk = new Fuse(ethers.provider, contractConfig);
+      const { comptroller, name: _unfiliteredName } = await sdk.contracts.FusePoolDirectory.pools(0);
+      expect(comptroller).to.eq(pool.comptroller);
+      expect(_unfiliteredName).to.eq("TEST");
+
       const unitroller = await ethers.getContractAt("Unitroller", poolAddress, alice);
       const adminTx = await unitroller._acceptAdmin();
       await adminTx.wait();
 
-      const comptroller = await ethers.getContractAt("Comptroller", poolAddress, alice);
-      const admin = await comptroller.admin();
+      const comptrollerContract = await ethers.getContractAt("Comptroller", comptroller, alice);
+      const admin = await comptrollerContract.admin();
       expect(admin).to.eq(alice.address);
 
       //// DEPLOY ASSETS
@@ -77,7 +83,7 @@ describe("FusePoolDirectory", function () {
 
       const ethConf: cERC20Conf = {
         underlying: "0x0000000000000000000000000000000000000000",
-        comptroller: unitroller.address,
+        comptroller: comptroller,
         interestRateModel: jrm.address,
         name: "Ethereum",
         symbol: "ETH",
@@ -89,7 +95,7 @@ describe("FusePoolDirectory", function () {
         bypassPriceFeedCheck: true,
         initialExchangeRateMantissa: constants.One,
       };
-      const delegate = await ethers.getContract("CEtherDelegate");
+      const delegate = await ethers.getContract("CEtherDelegate", alice);
       const reserveFactorBN = utils.parseUnits((ethConf.reserveFactor / 100).toString());
       const adminFeeBN = utils.parseUnits((ethConf.adminFee / 100).toString());
       const collateralFactorBN = utils.parseUnits((ethConf.collateralFactor / 100).toString());
@@ -109,11 +115,7 @@ describe("FusePoolDirectory", function () {
         ["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
         deployArgs
       );
-      const tx = await comptroller._deployMarket(
-        "0x0000000000000000000000000000000000000000",
-        constructorData,
-        collateralFactorBN
-      );
+      const tx = await comptrollerContract._deployMarket(true, constructorData, collateralFactorBN);
       const res = await tx.wait();
       console.log("res: ", res);
     });

@@ -97,6 +97,9 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
   const ethDel = await dep.deploy();
   console.log("CEtherDelegate: ", ethDel.address);
 
+  await fuseFeeDistributor._editCEtherDelegateWhitelist([constants.AddressZero], [ethDel.address], [false], [true]);
+  await fuseFeeDistributor._editCErc20DelegateWhitelist([constants.AddressZero], [erc20Del.address], [false], [true]);
+
   dep = await deployments.deterministic("MasterPriceOracle", {
     from: deployer,
     salt: ethers.utils.keccak256(deployer),

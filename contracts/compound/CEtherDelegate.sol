@@ -20,13 +20,6 @@ contract CEtherDelegate is CDelegateInterface, CEther {
      * @param data The encoded bytes data for any initialization
      */
     function _becomeImplementation(bytes calldata data) override external {
-        // Shh -- currently unused
-        data;
-
-        // Shh -- we don't ever want this hook to be marked pure
-        if (false) {
-            implementation = address(0);
-        }
 
         require(msg.sender == address(this) || hasAdminRights(), "!self");
 

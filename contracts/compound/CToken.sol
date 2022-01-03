@@ -14,7 +14,7 @@ import "./InterestRateModel.sol";
  * @notice Abstract base for CTokens
  * @author Compound
  */
-abstract contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
+contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     /**
      * @notice Returns a boolean indicating if the sender has admin rights
      */
@@ -1532,20 +1532,24 @@ abstract contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      * @dev This excludes the value of the current message, if any
      * @return The quantity of underlying owned by this contract
      */
-    function getCashPrior() virtual internal view returns (uint);
+    function getCashPrior() virtual internal view returns (uint) {
+        return 0;
+    }
 
     /**
      * @dev Performs a transfer in, reverting upon failure. Returns the amount actually transferred to the protocol, in case of a fee.
      *  This may revert due to insufficient balance or insufficient allowance.
      */
-    function doTransferIn(address from, uint amount) virtual internal returns (uint);
+    function doTransferIn(address from, uint amount) virtual internal returns (uint) {
+      return 1;
+    }
 
     /**
      * @dev Performs a transfer out, ideally returning an explanatory error code upon failure tather than reverting.
      *  If caller has not called checked protocol's balance, may revert due to insufficient cash held in the contract.
      *  If caller has checked protocol's balance, and verified it is >= amount, this should not revert in normal conditions.
      */
-    function doTransferOut(address payable to, uint amount) virtual internal;
+    function doTransferOut(address payable to, uint amount) virtual internal {}
 
 
     /*** Reentrancy Guard ***/

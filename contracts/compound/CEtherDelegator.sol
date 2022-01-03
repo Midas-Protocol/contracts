@@ -4,7 +4,7 @@ pragma solidity >=0.7.0;
 import "./ComptrollerInterface.sol";
 import "./InterestRateModel.sol";
 import "./CDelegateInterface.sol";
-
+import "hardhat/console.sol";
 
 /**
  * @title Compound's CEtherDelegator Contract
@@ -29,6 +29,16 @@ contract CEtherDelegator is CDelegationStorage {
                 bytes memory becomeImplementationData,
                 uint256 reserveFactorMantissa_,
                 uint256 adminFeeMantissa_) {
+        console.log("constructing ced");
+        console.log(comptroller_.isComptroller());
+//        console.log(interestRateModel_);
+        console.log(name_);
+        console.log(symbol_);
+        console.log(implementation_);
+//        console.log(becomeImplementationData);
+        console.log(reserveFactorMantissa_);
+        console.log(adminFeeMantissa_);
+
         // First delegate gets to initialize the delegator (i.e. storage contract)
         delegateTo(implementation_, abi.encodeWithSignature("initialize(address,address,string,string,uint256,uint256)",
                                                             comptroller_,

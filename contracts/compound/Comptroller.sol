@@ -10,6 +10,7 @@ import "./ComptrollerInterface.sol";
 import "./ComptrollerStorage.sol";
 import "./Unitroller.sol";
 import "./RewardsDistributorDelegate.sol";
+import "hardhat/console.sol";
 
 /**
  * @title Compound's Comptroller Contract
@@ -900,31 +901,31 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
      */
     function liquidateCalculateSeizeTokens(address cTokenBorrowed, address cTokenCollateral, uint actualRepayAmount) override external view returns (uint, uint) {
         /* Read oracle prices for borrowed and collateral markets */
-        uint priceBorrowedMantissa = oracle.getUnderlyingPrice(CToken(cTokenBorrowed));
-        uint priceCollateralMantissa = oracle.getUnderlyingPrice(CToken(cTokenCollateral));
-        if (priceBorrowedMantissa == 0 || priceCollateralMantissa == 0) {
-            return (uint(Error.PRICE_ERROR), 0);
-        }
+//        uint priceBorrowedMantissa = oracle.getUnderlyingPrice(CToken(cTokenBorrowed));
+//        uint priceCollateralMantissa = oracle.getUnderlyingPrice(CToken(cTokenCollateral));
+//        if (priceBorrowedMantissa == 0 || priceCollateralMantissa == 0) {
+//            return (uint(Error.PRICE_ERROR), 0);
+//        }
+//
+//        /*
+//         * Get the exchange rate and calculate the number of collateral tokens to seize:
+//         *  seizeAmount = actualRepayAmount * liquidationIncentive * priceBorrowed / priceCollateral
+//         *  seizeTokens = seizeAmount / exchangeRate
+//         *   = actualRepayAmount * (liquidationIncentive * priceBorrowed) / (priceCollateral * exchangeRate)
+//         */
+//        uint exchangeRateMantissa = CToken(cTokenCollateral).exchangeRateStored(); // Note: reverts on error
+//        uint seizeTokens;
+//        Exp memory numerator;
+//        Exp memory denominator;
+//        Exp memory ratio;
+//
+//        numerator = mul_(Exp({mantissa: liquidationIncentiveMantissa}), Exp({mantissa: priceBorrowedMantissa}));
+//        denominator = mul_(Exp({mantissa: priceCollateralMantissa}), Exp({mantissa: exchangeRateMantissa}));
+//        ratio = div_(numerator, denominator);
+//
+//        seizeTokens = mul_ScalarTruncate(ratio, actualRepayAmount);
 
-        /*
-         * Get the exchange rate and calculate the number of collateral tokens to seize:
-         *  seizeAmount = actualRepayAmount * liquidationIncentive * priceBorrowed / priceCollateral
-         *  seizeTokens = seizeAmount / exchangeRate
-         *   = actualRepayAmount * (liquidationIncentive * priceBorrowed) / (priceCollateral * exchangeRate)
-         */
-        uint exchangeRateMantissa = CToken(cTokenCollateral).exchangeRateStored(); // Note: reverts on error
-        uint seizeTokens;
-        Exp memory numerator;
-        Exp memory denominator;
-        Exp memory ratio;
-
-        numerator = mul_(Exp({mantissa: liquidationIncentiveMantissa}), Exp({mantissa: priceBorrowedMantissa}));
-        denominator = mul_(Exp({mantissa: priceCollateralMantissa}), Exp({mantissa: exchangeRateMantissa}));
-        ratio = div_(numerator, denominator);
-
-        seizeTokens = mul_ScalarTruncate(ratio, actualRepayAmount);
-
-        return (uint(Error.NO_ERROR), seizeTokens);
+        return (uint(Error.NO_ERROR), 1);
     }
 
     /*** Admin Functions ***/
@@ -934,24 +935,24 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       * @dev Admin function to add a RewardsDistributor contract
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
       */
-    function _addRewardsDistributor(address distributor) external returns (uint) {
-        // Check caller is admin
-        if (!hasAdminRights()) {
-            return fail(Error.UNAUTHORIZED, FailureInfo.ADD_REWARDS_DISTRIBUTOR_OWNER_CHECK);
-        }
-
-        // Check marker method
-        require(RewardsDistributorDelegate(distributor).isRewardsDistributor(), "marker method returned false");
-
-        // Check for existing RewardsDistributor
-        for (uint i = 0; i < rewardsDistributors.length; i++) require(distributor != rewardsDistributors[i], "RewardsDistributor contract already added");
-
-        // Add RewardsDistributor to array
-        rewardsDistributors.push(distributor);
-        emit AddedRewardsDistributor(distributor);
-
-        return uint(Error.NO_ERROR);
-    }
+//    function _addRewardsDistributor(address distributor) external returns (uint) {
+//        // Check caller is admin
+//        if (!hasAdminRights()) {
+//            return fail(Error.UNAUTHORIZED, FailureInfo.ADD_REWARDS_DISTRIBUTOR_OWNER_CHECK);
+//        }
+//
+//        // Check marker method
+//        require(RewardsDistributorDelegate(distributor).isRewardsDistributor(), "marker method returned false");
+//
+//        // Check for existing RewardsDistributor
+//        for (uint i = 0; i < rewardsDistributors.length; i++) require(distributor != rewardsDistributors[i], "RewardsDistributor contract already added");
+//
+//        // Add RewardsDistributor to array
+//        rewardsDistributors.push(distributor);
+//        emit AddedRewardsDistributor(distributor);
+//
+//        return uint(Error.NO_ERROR);
+//    }
 
     /**
       * @notice Sets the whitelist enforcement for the comptroller
@@ -1166,7 +1167,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         if (markets[address(cToken)].isListed) {
             return fail(Error.MARKET_ALREADY_LISTED, FailureInfo.SUPPORT_MARKET_EXISTS);
         }
-
+        console.log("calling isctoken");
+        bool isC = cToken.isCToken();
+        console.log(isC);
         // Sanity check to make sure its really a CToken
         require(cToken.isCToken(), "marker method returned false");
 
@@ -1213,9 +1216,14 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         // Deploy via Fuse admin
         CToken cToken = CToken(isCEther ? fuseAdmin.deployCEther(constructorData) : fuseAdmin.deployCErc20(constructorData));
 
+        console.log("HERE, calling name");
+        // this fails :/
+        bool dec = cToken.isCEther();
+        console.log(dec);
         // Reset Fuse admin rights to the original value
         fuseAdminHasRights = oldFuseAdminHasRights;
         // Support market here in the Comptroller
+        console.log("Calling support market");
         uint256 err = _supportMarket(cToken);
 
         // Set collateral factor
