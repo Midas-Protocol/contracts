@@ -275,11 +275,12 @@ export default class Fuse {
       this.compoundContracts["contracts/Unitroller.sol:Unitroller"].abi,
       this.provider.getSigner(options.from)
     );
+
     // Accept admin status via Unitroller
     try {
       const tx = await unitroller._acceptAdmin();
       const receipt = await tx.wait();
-      console.log(receipt.status, "Accepted admin status for admin: ", await unitroller.admin());
+      console.log(receipt.status, "Accepted admin status for admin: ");
     } catch (error: any) {
       throw Error("Accepting admin status failed: " + (error.message ? error.message : error));
     }
@@ -568,7 +569,6 @@ export default class Fuse {
       constructorData,
       collateralFactorBN
     );
-    console.log("NOT GETTING HERE");
 
     const receipt: TransactionReceipt = await tx.wait();
 

@@ -24,7 +24,7 @@ describe("FusePoolDirectory", function () {
       console.log("constructorData: ", constructorData);
     });
 
-    it.only("should deploy the pool via contract", async function () {
+    it("should deploy the pool via contract", async function () {
       this.timeout(120_000);
       const { alice } = await ethers.getNamedSigners();
       console.log("alice: ", alice.address);
@@ -131,7 +131,7 @@ describe("FusePoolDirectory", function () {
     });
 
     it("should deploy pool from sdk without whitelist", async function () {
-      const { bob, alice } = await ethers.getNamedSigners();
+      const { bob } = await ethers.getNamedSigners();
 
       const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", bob);
       const spo = await spoFactory.deploy([10]);
