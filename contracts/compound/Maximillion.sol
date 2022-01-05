@@ -1,4 +1,5 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.7.0;
 
 import "./CEther.sol";
 
@@ -15,7 +16,7 @@ contract Maximillion {
     /**
      * @notice Construct a Maximillion to repay max in a CEther market
      */
-    constructor(CEther cEther_) public {
+    constructor(CEther cEther_) {
         cEther = cEther_;
     }
 
@@ -38,10 +39,10 @@ contract Maximillion {
         uint received = msg.value;
         uint borrows = cEther_.borrowBalanceCurrent(borrower);
         if (received > borrows) {
-            cEther_.repayBorrowBehalf.value(borrows)(borrower);
+            cEther_.repayBorrowBehalf{value:borrows}(borrower);
             msg.sender.transfer(received - borrows);
         } else {
-            cEther_.repayBorrowBehalf.value(received)(borrower);
+            cEther_.repayBorrowBehalf{value:received}(borrower);
         }
     }
 }

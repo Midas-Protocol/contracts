@@ -4,9 +4,9 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/PriceOracle.sol";
-import "../external/compound/CToken.sol";
-import "../external/compound/CErc20.sol";
+import "../external/compound/IPriceOracle.sol";
+import "../external/compound/ICToken.sol";
+import "../external/compound/ICErc20.sol";
 
 import "../external/chainlink/AggregatorV3Interface.sol";
 
@@ -18,7 +18,7 @@ import "./BasePriceOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract ChainlinkPriceOracleV2 is PriceOracle, BasePriceOracle {
+contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
@@ -63,7 +63,7 @@ contract ChainlinkPriceOracleV2 is PriceOracle, BasePriceOracle {
     /**
      * @dev Constructor to set admin and canAdminOverwrite.
      */
-    constructor (address _admin, bool _canAdminOverwrite) public {
+    constructor (address _admin, bool _canAdminOverwrite) {
         admin = _admin;
         canAdminOverwrite = _canAdminOverwrite;
     }
@@ -153,12 +153,12 @@ contract ChainlinkPriceOracleV2 is PriceOracle, BasePriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(CToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
         // Return 1e18 for ETH
         if (cToken.isCEther()) return 1e18;
 
         // Get underlying token address
-        address underlying = CErc20(address(cToken)).underlying();
+        address underlying = ICErc20(address(cToken)).underlying();
 
         // Get price
         uint256 chainlinkPrice = _price(underlying);

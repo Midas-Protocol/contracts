@@ -1,4 +1,5 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.7.0;
 
 
 contract CDelegationStorage {
@@ -9,7 +10,7 @@ contract CDelegationStorage {
 }
 
 
-contract CDelegateInterface is CDelegationStorage {
+abstract contract CDelegateInterface is CDelegationStorage {
     /**
      * @notice Emitted when implementation is changed
      */
@@ -21,18 +22,18 @@ contract CDelegateInterface is CDelegationStorage {
      * @param allowResign Flag to indicate whether to call _resignImplementation on the old implementation
      * @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation
      */
-    function _setImplementationSafe(address implementation_, bool allowResign, bytes calldata becomeImplementationData) external;
+    function _setImplementationSafe(address implementation_, bool allowResign, bytes calldata becomeImplementationData) virtual external;
 
     /**
      * @notice Called by the delegator on a delegate to initialize it for duty
      * @dev Should revert if any issues arise which make it unfit for delegation
      * @param data The encoded bytes data for any initialization
      */
-    function _becomeImplementation(bytes calldata data) external;
+    function _becomeImplementation(bytes calldata data) virtual external;
 
     /**
      * @notice Function called before all delegator functions
      * @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary
      */
-    function _prepare() external payable;
+    function _prepare() virtual external payable;
 }

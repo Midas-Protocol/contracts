@@ -1,4 +1,5 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.7.0;
 
 import "./CEther.sol";
 import "./CDelegateInterface.sol";
@@ -12,20 +13,13 @@ contract CEtherDelegate is CDelegateInterface, CEther {
     /**
      * @notice Construct an empty delegate
      */
-    constructor() public {}
+    constructor() {}
 
     /**
      * @notice Called by the delegator on a delegate to initialize it for duty
      * @param data The encoded bytes data for any initialization
      */
-    function _becomeImplementation(bytes calldata data) external {
-        // Shh -- currently unused
-        data;
-
-        // Shh -- we don't ever want this hook to be marked pure
-        if (false) {
-            implementation = address(0);
-        }
+    function _becomeImplementation(bytes calldata data) override external {
 
         require(msg.sender == address(this) || hasAdminRights(), "!self");
 
@@ -77,7 +71,7 @@ contract CEtherDelegate is CDelegateInterface, CEther {
      * @param allowResign Flag to indicate whether to call _resignImplementation on the old implementation
      * @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation
      */
-    function _setImplementationSafe(address implementation_, bool allowResign, bytes calldata becomeImplementationData) external {
+    function _setImplementationSafe(address implementation_, bool allowResign, bytes calldata becomeImplementationData) override external {
         // Check admin rights
         require(hasAdminRights(), "!admin");
 
@@ -89,7 +83,7 @@ contract CEtherDelegate is CDelegateInterface, CEther {
      * @notice Function called before all delegator functions
      * @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary
      */
-    function _prepare() external payable {
+    function _prepare() override external payable {
         if (msg.sender != address(this) && ComptrollerV3Storage(address(comptroller)).autoImplementation()) {
             (address latestCEtherDelegate, bool allowResign, bytes memory becomeImplementationData) = fuseAdmin.latestCEtherDelegate(implementation);
             if (implementation != latestCEtherDelegate) _setImplementationInternal(latestCEtherDelegate, allowResign, becomeImplementationData);

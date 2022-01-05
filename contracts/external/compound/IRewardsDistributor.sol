@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: BSD-3-Clause
 pragma solidity >=0.7.0;
 
-import "./CToken.sol";
+import "./ICToken.sol";
 
 /**
  * @title RewardsDistributor
  * @author Compound
  */
-interface RewardsDistributor {
+interface IRewardsDistributor {
     /// @dev The token to reward (i.e., COMP)
     function rewardToken() external view returns (address);
 
@@ -39,5 +39,5 @@ interface RewardsDistributor {
     /**
      * @notice Returns an array of all markets.
      */
-    function getAllMarkets() external view returns (CToken[] memory);
+    function getAllMarkets() external view returns (ICToken[] memory);
 }

@@ -3,7 +3,7 @@ pragma solidity >=0.7.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-import "../external/compound/CEther.sol";
+import "../external/compound/ICEther.sol";
 
 import "../external/aave/IWETH.sol";
 
@@ -30,7 +30,7 @@ contract CEtherLiquidator is IRedemptionStrategy {
      */
     function redeem(IERC20Upgradeable inputToken, uint256 inputAmount, bytes memory strategyData) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
         // Redeem cEther for underlying ETH (and store output as new collateral)
-        CEther cEther = CEther(address(inputToken));
+        ICEther cEther = ICEther(address(inputToken));
         uint256 redeemResult = cEther.redeem(inputAmount);
         require(redeemResult == 0, "Error calling redeeming seized cEther: error code not equal to 0");
         outputToken = IERC20Upgradeable(address(0));

@@ -1,4 +1,5 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.7.0;
 
 import "./CToken.sol";
 
@@ -9,6 +10,9 @@ import "./CToken.sol";
  * @author Compound
  */
 contract CEther is CToken, CEtherInterface {
+
+    bool public constant override isCEther = true;
+
     /**
      * @notice Initialize the new money market
      * @param comptroller_ The address of the Comptroller
@@ -102,7 +106,7 @@ contract CEther is CToken, CEtherInterface {
     /**
      * @notice Send Ether to CEther to mint
      */
-    function () external payable {
+    receive() external payable {
         (uint err,) = mintInternal(msg.value);
         requireNoError(err, "mint failed");
     }
@@ -114,7 +118,7 @@ contract CEther is CToken, CEtherInterface {
      * @dev This excludes the value of the current message, if any
      * @return The quantity of Ether owned by this contract
      */
-    function getCashPrior() internal view returns (uint) {
+    function getCashPrior() override internal view returns (uint) {
         (MathError err, uint startingBalance) = subUInt(address(this).balance, msg.value);
         require(err == MathError.NO_ERROR);
         return startingBalance;
@@ -126,16 +130,16 @@ contract CEther is CToken, CEtherInterface {
      * @param amount Amount of Ether being sent
      * @return The actual amount of Ether transferred
      */
-    function doTransferIn(address from, uint amount) internal returns (uint) {
+    function doTransferIn(address from, uint amount) override internal returns (uint) {
         // Sanity checks
         require(msg.sender == from, "sender mismatch");
         require(msg.value == amount, "value mismatch");
         return amount;
     }
 
-    function doTransferOut(address payable to, uint amount) internal {
+    function doTransferOut(address payable to, uint amount) override internal {
         // Send the Ether and revert on failure
-        (bool success, ) = to.call.value(amount)("");
+        (bool success, ) = to.call{value:amount}("");
         require(success, "doTransferOut failed");
     }
 

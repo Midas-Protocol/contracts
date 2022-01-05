@@ -1,4 +1,5 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.7.0;
 pragma experimental ABIEncoderV2;
 
 contract Comp {
@@ -14,10 +15,10 @@ contract Comp {
     /// @notice Total number of tokens in circulation
     uint public constant totalSupply = 10000000e18; // 10 million Comp
 
-    /// @notice Allowance amounts on behalf of others
+    // Allowance amounts on behalf of others
     mapping (address => mapping (address => uint96)) internal allowances;
 
-    /// @notice Official record of token balances for each account
+    // Official record of token balances for each account
     mapping (address => uint96) internal balances;
 
     /// @notice A record of each accounts delegate
@@ -60,7 +61,7 @@ contract Comp {
      * @notice Construct a new Comp token
      * @param account The initial account to grant all the tokens
      */
-    constructor(address account) public {
+    constructor(address account) {
         balances[account] = uint96(totalSupply);
         emit Transfer(address(0), account, totalSupply);
     }
@@ -165,7 +166,7 @@ contract Comp {
         address signatory = ecrecover(digest, v, r, s);
         require(signatory != address(0), "Comp::delegateBySig: invalid signature");
         require(nonce == nonces[signatory]++, "Comp::delegateBySig: invalid nonce");
-        require(now <= expiry, "Comp::delegateBySig: signature expired");
+        require(block.timestamp <= expiry, "Comp::delegateBySig: signature expired");
         return _delegate(signatory, delegatee);
     }
 

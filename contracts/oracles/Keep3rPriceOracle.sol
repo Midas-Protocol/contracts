@@ -4,9 +4,9 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/PriceOracle.sol";
-import "../external/compound/CToken.sol";
-import "../external/compound/CErc20.sol";
+import "../external/compound/IPriceOracle.sol";
+import "../external/compound/ICToken.sol";
+import "../external/compound/ICErc20.sol";
 
 import "../external/keep3r/Keep3rV1Oracle.sol";
 
@@ -21,13 +21,13 @@ import "./BasePriceOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract Keep3rPriceOracle is PriceOracle, BasePriceOracle {
+contract Keep3rPriceOracle is IPriceOracle, BasePriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
      * @dev Constructor that sets the Keep3rV1Oracle or SushiswapV1Oracle.
      */
-    constructor (bool sushiSwap) public {
+    constructor (bool sushiSwap) {
         Keep3rV1Oracle _rootOracle = Keep3rV1Oracle(sushiSwap ? 0xf67Ab1c914deE06Ba0F264031885Ea7B276a7cDa : 0x73353801921417F465377c8d898c6f4C0270282C);
         rootOracle = _rootOracle;
         uniswapV2Factory = IUniswapV2Factory(_rootOracle.factory());
@@ -131,12 +131,12 @@ contract Keep3rPriceOracle is PriceOracle, BasePriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(CToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
         // Return 1e18 for ETH
         if (cToken.isCEther()) return 1e18;
 
         // Get underlying ERC20 token address
-        address underlying = CErc20(address(cToken)).underlying();
+        address underlying = ICErc20(address(cToken)).underlying();
 
         // Get price, format, and return
         uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());

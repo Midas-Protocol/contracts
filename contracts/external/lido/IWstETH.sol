@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 Lido <info@lido.fi>
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0;
 
 /**

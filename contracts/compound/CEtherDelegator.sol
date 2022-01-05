@@ -1,9 +1,9 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.7.0;
 
 import "./ComptrollerInterface.sol";
 import "./InterestRateModel.sol";
 import "./CDelegateInterface.sol";
-
 
 /**
  * @title Compound's CEtherDelegator Contract
@@ -27,7 +27,7 @@ contract CEtherDelegator is CDelegationStorage {
                 address implementation_,
                 bytes memory becomeImplementationData,
                 uint256 reserveFactorMantissa_,
-                uint256 adminFeeMantissa_) public {
+                uint256 adminFeeMantissa_) {
         // First delegate gets to initialize the delegator (i.e. storage contract)
         delegateTo(implementation_, abi.encodeWithSignature("initialize(address,address,string,string,uint256,uint256)",
                                                             comptroller_,
@@ -52,7 +52,7 @@ contract CEtherDelegator is CDelegationStorage {
         (bool success, bytes memory returnData) = callee.delegatecall(data);
         assembly {
             if eq(success, 0) {
-                revert(add(returnData, 0x20), returndatasize)
+                revert(add(returnData, 0x20), returndatasize())
             }
         }
         return returnData;
@@ -62,7 +62,9 @@ contract CEtherDelegator is CDelegationStorage {
      * @notice Delegates execution to an implementation contract
      * @dev It returns to the external caller whatever the implementation returns or forwards reverts
      */
-    function () external payable {
+    receive() external payable {}
+
+    fallback() external payable {
         // Check for automatic implementation
         delegateTo(implementation, abi.encodeWithSignature("_prepare()"));
 
@@ -71,11 +73,11 @@ contract CEtherDelegator is CDelegationStorage {
 
         assembly {
             let free_mem_ptr := mload(0x40)
-            returndatacopy(free_mem_ptr, 0, returndatasize)
+            returndatacopy(free_mem_ptr, 0, returndatasize())
 
             switch success
-            case 0 { revert(free_mem_ptr, returndatasize) }
-            default { return(free_mem_ptr, returndatasize) }
+            case 0 { revert(free_mem_ptr, returndatasize()) }
+            default { return(free_mem_ptr, returndatasize()) }
         }
     }
 }

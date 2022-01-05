@@ -1,4 +1,5 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.7.0;
 
 import "./CErc20.sol";
 import "./CDelegateInterface.sol";
@@ -12,13 +13,13 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     /**
      * @notice Construct an empty delegate
      */
-    constructor() public {}
+    constructor() {}
 
     /**
      * @notice Called by the delegator on a delegate to initialize it for duty
      * @param data The encoded bytes data for any initialization
      */
-    function _becomeImplementation(bytes calldata data) external {
+    function _becomeImplementation(bytes calldata data) override virtual external {
         // Shh -- currently unused
         data;
 
@@ -38,7 +39,7 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     /**
      * @notice Called by the delegator on a delegate to forfeit its responsibility
      */
-    function _resignImplementation() internal {
+    function _resignImplementation() virtual internal {
         // Shh -- we don't ever want this hook to be marked pure
         if (false) {
             implementation = address(0);
@@ -77,7 +78,7 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
      * @param allowResign Flag to indicate whether to call _resignImplementation on the old implementation
      * @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation
      */
-    function _setImplementationSafe(address implementation_, bool allowResign, bytes calldata becomeImplementationData) external {
+    function _setImplementationSafe(address implementation_, bool allowResign, bytes calldata becomeImplementationData) override external {
         // Check admin rights
         require(hasAdminRights(), "!admin");
 
@@ -89,7 +90,7 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
      * @notice Function called before all delegator functions
      * @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary
      */
-    function _prepare() external payable {
+    function _prepare() override external payable {
         if (msg.sender != address(this) && ComptrollerV3Storage(address(comptroller)).autoImplementation()) {
             (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = fuseAdmin.latestCErc20Delegate(implementation);
             if (implementation != latestCErc20Delegate) _setImplementationInternal(latestCErc20Delegate, allowResign, becomeImplementationData);

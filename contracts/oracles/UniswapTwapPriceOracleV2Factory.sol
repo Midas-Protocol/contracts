@@ -34,7 +34,7 @@ contract UniswapTwapPriceOracleV2Factory {
     /**
      * @dev Constructor that sets the `UniswapTwapPriceOracleV2Root` and `UniswapTwapPriceOracleV2` implementation contract.
      */
-    constructor (address _rootOracle, address _logic) public {
+    constructor (address _rootOracle, address _logic) {
         require(_rootOracle != address(0), "UniswapTwapPriceOracleV2Root not defined.");
         require(_logic != address(0), "UniswapTwapPriceOracleV2 implementation/logic contract not defined.");
         rootOracle = _rootOracle;

@@ -3,10 +3,10 @@ pragma solidity >=0.7.0;
 
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
-import "../external/compound/PriceOracle.sol";
-import "../external/compound/CToken.sol";
-import "../external/compound/CErc20.sol";
-import "../external/compound/Comptroller.sol";
+import "../external/compound/IPriceOracle.sol";
+import "../external/compound/ICToken.sol";
+import "../external/compound/ICErc20.sol";
+import "../external/compound/IComptroller.sol";
 
 import "../external/chainlink/AggregatorV3Interface.sol";
 
@@ -16,7 +16,7 @@ import "../external/chainlink/AggregatorV3Interface.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract RecursivePriceOracle is PriceOracle {
+contract RecursivePriceOracle is IPriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
@@ -39,12 +39,12 @@ contract RecursivePriceOracle is PriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(CToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
         // Get cToken's underlying cToken
-        CToken underlying = CToken(CErc20(address(cToken)).underlying());
+        ICToken underlying = ICToken(ICErc20(address(cToken)).underlying());
 
         // Get Comptroller
-        Comptroller comptroller = Comptroller(underlying.comptroller());
+        IComptroller comptroller = IComptroller(underlying.comptroller());
 
         // Check for Compound Comptroller
         if (address(comptroller) == COMPOUND_COMPTROLLER) {

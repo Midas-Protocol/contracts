@@ -1,8 +1,9 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.7.0;
 
 import "./CToken.sol";
 
-contract PriceOracle {
+abstract contract PriceOracle {
     /// @notice Indicator that this is a PriceOracle contract (for inspection)
     bool public constant isPriceOracle = true;
 
@@ -12,5 +13,5 @@ contract PriceOracle {
       * @return The underlying asset price mantissa (scaled by 1e18).
       *  Zero means the price is unavailable.
       */
-    function getUnderlyingPrice(CToken cToken) external view returns (uint);
+    function getUnderlyingPrice(CToken cToken) virtual external view returns (uint);
 }

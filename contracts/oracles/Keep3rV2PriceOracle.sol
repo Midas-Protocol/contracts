@@ -4,9 +4,9 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/PriceOracle.sol";
-import "../external/compound/CToken.sol";
-import "../external/compound/CErc20.sol";
+import "../external/compound/IPriceOracle.sol";
+import "../external/compound/ICToken.sol";
+import "../external/compound/ICErc20.sol";
 
 import "../external/keep3r/Keep3rV2OracleFactory.sol";
 import "../external/keep3r/Keep3rV2Oracle.sol";
@@ -22,13 +22,13 @@ import "./BasePriceOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract Keep3rV2PriceOracle is PriceOracle, BasePriceOracle {
+contract Keep3rV2PriceOracle is IPriceOracle, BasePriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
      * @dev Constructor that sets the Keep3rV1Oracle or SushiswapV1Oracle.
      */
-    constructor (address _keep3rV2OracleFactory, address _uniswapV2Factory) public {
+    constructor (address _keep3rV2OracleFactory, address _uniswapV2Factory) {
         keep3rV2OracleFactory = Keep3rV2OracleFactory(_keep3rV2OracleFactory);
         uniswapV2Factory = IUniswapV2Factory(_uniswapV2Factory);
     }
@@ -130,12 +130,12 @@ contract Keep3rV2PriceOracle is PriceOracle, BasePriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(CToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
         // Return 1e18 for ETH
         if (cToken.isCEther()) return 1e18;
 
         // Get underlying ERC20 token address
-        address underlying = CErc20(address(cToken)).underlying();
+        address underlying = ICErc20(address(cToken)).underlying();
 
         // Get price, format, and return
         uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());

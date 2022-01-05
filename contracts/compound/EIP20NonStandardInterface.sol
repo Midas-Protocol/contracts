@@ -1,4 +1,5 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.7.0;
 
 /**
  * @title EIP20NonStandardInterface
@@ -16,7 +17,7 @@ interface EIP20NonStandardInterface {
     /**
      * @notice Gets the balance of the specified address
      * @param owner The address from which the balance will be retrieved
-     * @return The balance
+     * @return balance uint256 The balance
      */
     function balanceOf(address owner) external view returns (uint256 balance);
 
@@ -53,7 +54,7 @@ interface EIP20NonStandardInterface {
       *  and is subject to issues noted [here](https://eips.ethereum.org/EIPS/eip-20#approve)
       * @param spender The address of the account which may transfer tokens
       * @param amount The number of tokens that are approved
-      * @return Whether or not the approval succeeded
+      * @return success bool Whether or not the approval succeeded
       */
     function approve(address spender, uint256 amount) external returns (bool success);
 
@@ -61,7 +62,7 @@ interface EIP20NonStandardInterface {
       * @notice Get the current allowance from `owner` for `spender`
       * @param owner The address of the account which owns the tokens to be spent
       * @param spender The address of the account which may transfer tokens
-      * @return The number of tokens allowed to be spent
+      * @return remaining uint256 The number of tokens allowed to be spent
       */
     function allowance(address owner, address spender) external view returns (uint256 remaining);
 

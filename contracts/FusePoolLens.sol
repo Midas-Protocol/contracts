@@ -6,11 +6,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "./external/compound/Comptroller.sol";
-import "./external/compound/PriceOracle.sol";
-import "./external/compound/CToken.sol";
-import "./external/compound/CErc20.sol";
-import "./external/compound/RewardsDistributor.sol";
+import "./external/compound/IComptroller.sol";
+import "./external/compound/IPriceOracle.sol";
+import "./external/compound/ICToken.sol";
+import "./external/compound/ICErc20.sol";
+import "./external/compound/IRewardsDistributor.sol";
 
 import "./external/uniswap/IUniswapV2Pair.sol";
 
@@ -92,7 +92,7 @@ contract FusePoolLens is Initializable {
         bool[] memory errored = new bool[](pools.length);
 
         for (uint256 i = 0; i < pools.length; i++) {
-            try this.getPoolSummary(Comptroller(pools[i].comptroller)) returns (uint256 _totalSupply, uint256 _totalBorrow, address[] memory _underlyingTokens, string[] memory _underlyingSymbols, bool _whitelistedAdmin) {
+            try this.getPoolSummary(IComptroller(pools[i].comptroller)) returns (uint256 _totalSupply, uint256 _totalBorrow, address[] memory _underlyingTokens, string[] memory _underlyingSymbols, bool _whitelistedAdmin) {
                 data[i] = FusePoolData(_totalSupply, _totalBorrow, _underlyingTokens, _underlyingSymbols, _whitelistedAdmin);
             } catch {
                 errored[i] = true;
@@ -105,16 +105,16 @@ contract FusePoolLens is Initializable {
     /**
      * @notice Returns total supply balance (in ETH), total borrow balance (in ETH), underlying token addresses, and underlying token symbols of a Fuse pool.
      */
-    function getPoolSummary(Comptroller comptroller) external returns (uint256, uint256, address[] memory, string[] memory, bool) {
+    function getPoolSummary(IComptroller comptroller) external returns (uint256, uint256, address[] memory, string[] memory, bool) {
         uint256 totalBorrow = 0;
         uint256 totalSupply = 0;
-        CToken[] memory cTokens = comptroller.getAllMarkets();
+        ICToken[] memory cTokens = comptroller.getAllMarkets();
         address[] memory underlyingTokens = new address[](cTokens.length);
         string[] memory underlyingSymbols = new string[](cTokens.length);
-        PriceOracle oracle = comptroller.oracle();
+        IPriceOracle oracle = comptroller.oracle();
 
         for (uint256 i = 0; i < cTokens.length; i++) {
-            CToken cToken = cTokens[i];
+            ICToken cToken = cTokens[i];
             (bool isListed, ) = comptroller.markets(address(cToken));
             if (!isListed) continue;
             uint256 assetTotalBorrow = cToken.totalBorrowsCurrent();
@@ -127,7 +127,7 @@ contract FusePoolLens is Initializable {
                 underlyingTokens[i] = address(0);
                 underlyingSymbols[i] = "ETH";
             } else {
-                underlyingTokens[i] = CErc20(address(cToken)).underlying();
+                underlyingTokens[i] = ICErc20(address(cToken)).underlying();
                 (, underlyingSymbols[i]) = getTokenNameAndSymbol(underlyingTokens[i]);
             }
         }
@@ -173,7 +173,7 @@ contract FusePoolLens is Initializable {
      * @param user The user for which to get account data.
      * @return An array of Fuse pool assets.
      */
-    function getPoolAssetsWithData(Comptroller comptroller, CToken[] memory cTokens, address user) internal returns (FusePoolAsset[] memory) {
+    function getPoolAssetsWithData(IComptroller comptroller, ICToken[] memory cTokens, address user) internal returns (FusePoolAsset[] memory) {
         uint256 arrayLength = 0;
 
         for (uint256 i = 0; i < cTokens.length; i++) {
@@ -183,7 +183,7 @@ contract FusePoolLens is Initializable {
 
         FusePoolAsset[] memory detailedAssets = new FusePoolAsset[](arrayLength);
         uint256 index = 0;
-        PriceOracle oracle = comptroller.oracle();
+        IPriceOracle oracle = comptroller.oracle();
 
         for (uint256 i = 0; i < cTokens.length; i++) {
             // Check if market is listed and get collateral factor
@@ -192,7 +192,7 @@ contract FusePoolLens is Initializable {
 
             // Start adding data to FusePoolAsset
             FusePoolAsset memory asset;
-            CToken cToken = cTokens[i];
+            ICToken cToken = cTokens[i];
             asset.cToken = address(cToken);
 
             // Get underlying asset data
@@ -202,7 +202,7 @@ contract FusePoolLens is Initializable {
                 asset.underlyingDecimals = 18;
                 asset.underlyingBalance = user.balance;
             } else {
-                asset.underlyingToken = CErc20(address(cToken)).underlying();
+                asset.underlyingToken = ICErc20(address(cToken)).underlying();
                 ERC20Upgradeable underlying = ERC20Upgradeable(asset.underlyingToken);
                 (asset.underlyingName, asset.underlyingSymbol) = getTokenNameAndSymbol(asset.underlyingToken);
                 asset.underlyingDecimals = underlying.decimals();
@@ -224,7 +224,7 @@ contract FusePoolLens is Initializable {
             // Get oracle for this cToken
             asset.oracle = address(oracle);
 
-            try MasterPriceOracle(asset.oracle).oracles(asset.underlyingToken) returns (PriceOracle _oracle) {
+            try MasterPriceOracle(asset.oracle).oracles(asset.underlyingToken) returns (IPriceOracle _oracle) {
                 asset.oracle = address(_oracle);
             } catch { }
 
@@ -282,7 +282,7 @@ contract FusePoolLens is Initializable {
      * @param comptroller The Comptroller proxy contract of the Fuse pool.
      * @return An array of Fuse pool assets.
      */
-    function getPoolAssetsWithData(Comptroller comptroller) external returns (FusePoolAsset[] memory) {
+    function getPoolAssetsWithData(IComptroller comptroller) external returns (FusePoolAsset[] memory) {
         return getPoolAssetsWithData(comptroller, comptroller.getAllMarkets(), msg.sender);
     }
 
@@ -305,7 +305,7 @@ contract FusePoolLens is Initializable {
      * @param maxHealth The maximum health (scaled by 1e18) for which to return data.
      * @return An array of Fuse pool users, the pool's close factor, and the pool's liquidation incentive.
      */
-    function getPoolUsersWithData(Comptroller comptroller, uint256 maxHealth) external returns (FusePoolUser[] memory, uint256, uint256) {
+    function getPoolUsersWithData(IComptroller comptroller, uint256 maxHealth) external returns (FusePoolUser[] memory, uint256, uint256) {
         address[] memory users = comptroller.getAllBorrowers();
         uint256 arrayLength = 0;
 
@@ -352,15 +352,15 @@ contract FusePoolLens is Initializable {
      * @param maxHealth The maximum health (scaled by 1e18) for which to return data.
      * @return An array of pools' Comptroller proxy addresses, an array of arrays of Fuse pool users, an array of pools' close factors, an array of pools' liquidation incentives, and an array of booleans indicating if retrieving each pool's data failed.
      */
-    function getPublicPoolUsersWithData(uint256 maxHealth) external returns (Comptroller[] memory, FusePoolUser[][] memory, uint256[] memory, uint256[] memory, bool[] memory) {
+    function getPublicPoolUsersWithData(uint256 maxHealth) external returns (IComptroller[] memory, FusePoolUser[][] memory, uint256[] memory, uint256[] memory, bool[] memory) {
         // Get Comptroller addresses of all public pools
-        Comptroller[] memory comptrollers;
+        IComptroller[] memory comptrollers;
 
         // Scope to avoid "stack too deep" error
         {
             (, FusePoolDirectory.FusePool[] memory publicPools) = directory.getPublicPools();
-            comptrollers = new Comptroller[](publicPools.length);
-            for (uint256 i = 0; i < publicPools.length; i++) comptrollers[i] = Comptroller(publicPools[i].comptroller);
+            comptrollers = new IComptroller[](publicPools.length);
+            for (uint256 i = 0; i < publicPools.length; i++) comptrollers[i] = IComptroller(publicPools[i].comptroller);
         }
 
         // Get all public pools' data
@@ -376,14 +376,14 @@ contract FusePoolLens is Initializable {
      * @param maxHealth The maximum health (scaled by 1e18) for which to return data.
      * @return An array of arrays of Fuse pool users, an array of pools' close factors, an array of pools' liquidation incentives, and an array of booleans indicating if retrieving each pool's data failed.
      */
-    function getPoolUsersWithData(Comptroller[] memory comptrollers, uint256 maxHealth) public returns (FusePoolUser[][] memory, uint256[] memory, uint256[] memory, bool[] memory) {
+    function getPoolUsersWithData(IComptroller[] memory comptrollers, uint256 maxHealth) public returns (FusePoolUser[][] memory, uint256[] memory, uint256[] memory, bool[] memory) {
         FusePoolUser[][] memory users = new FusePoolUser[][](comptrollers.length);
         uint256[] memory closeFactors = new uint256[](comptrollers.length);
         uint256[] memory liquidationIncentives = new uint256[](comptrollers.length);
         bool[] memory errored = new bool[](comptrollers.length);
 
         for (uint256 i = 0; i < comptrollers.length; i++) {
-            try this.getPoolUsersWithData(Comptroller(comptrollers[i]), maxHealth) returns (FusePoolUser[] memory _users, uint256 closeFactor, uint256 liquidationIncentive) {
+            try this.getPoolUsersWithData(IComptroller(comptrollers[i]), maxHealth) returns (FusePoolUser[] memory _users, uint256 closeFactor, uint256 liquidationIncentive) {
                 users[i] = _users;
                 closeFactors[i] = closeFactor;
                 liquidationIncentives[i] = liquidationIncentive;
@@ -404,11 +404,11 @@ contract FusePoolLens is Initializable {
         uint256 arrayLength = 0;
 
         for (uint256 i = 0; i < pools.length; i++) {
-            Comptroller comptroller = Comptroller(pools[i].comptroller);
+            IComptroller comptroller = IComptroller(pools[i].comptroller);
 
             try comptroller.suppliers(account) returns (bool isSupplier) {
                 if (isSupplier) {
-                    CToken[] memory allMarkets = comptroller.getAllMarkets();
+                    ICToken[] memory allMarkets = comptroller.getAllMarkets();
 
                     for (uint256 j = 0; j < allMarkets.length; j++) if (allMarkets[j].balanceOf(account) > 0) {
                         arrayLength++;
@@ -423,11 +423,11 @@ contract FusePoolLens is Initializable {
         uint256 index = 0;
 
         for (uint256 i = 0; i < pools.length; i++) {
-            Comptroller comptroller = Comptroller(pools[i].comptroller);
+            IComptroller comptroller = IComptroller(pools[i].comptroller);
 
             try comptroller.suppliers(account) returns (bool isSupplier) {
                 if (isSupplier) {
-                    CToken[] memory allMarkets = comptroller.getAllMarkets();
+                    ICToken[] memory allMarkets = comptroller.getAllMarkets();
 
                     for (uint256 j = 0; j < allMarkets.length; j++) if (allMarkets[j].balanceOf(account) > 0) {
                         indexes[index] = i;
@@ -465,7 +465,7 @@ contract FusePoolLens is Initializable {
         bool errors = false;
 
         for (uint256 i = 0; i < pools.length; i++) {
-            try this.getPoolUserSummary(Comptroller(pools[i].comptroller), account) returns (uint256 poolSupplyBalance, uint256 poolBorrowBalance) {
+            try this.getPoolUserSummary(IComptroller(pools[i].comptroller), account) returns (uint256 poolSupplyBalance, uint256 poolBorrowBalance) {
                 supplyBalance = supplyBalance.add(poolSupplyBalance);
                 borrowBalance = borrowBalance.add(poolBorrowBalance);
             } catch {
@@ -481,16 +481,16 @@ contract FusePoolLens is Initializable {
      * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
      * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
      */
-    function getPoolUserSummary(Comptroller comptroller, address account) external returns (uint256, uint256) {
+    function getPoolUserSummary(IComptroller comptroller, address account) external returns (uint256, uint256) {
         uint256 borrowBalance = 0;
         uint256 supplyBalance = 0;
 
         if (!comptroller.suppliers(account)) return (0, 0);
-        CToken[] memory cTokens = comptroller.getAllMarkets();
-        PriceOracle oracle = comptroller.oracle();
+        ICToken[] memory cTokens = comptroller.getAllMarkets();
+        IPriceOracle oracle = comptroller.oracle();
 
         for (uint256 i = 0; i < cTokens.length; i++) {
-            CToken cToken = cTokens[i];
+            ICToken cToken = cTokens[i];
             (bool isListed, ) = comptroller.markets(address(cToken));
             if (!isListed) continue;
             uint256 assetSupplyBalance = cToken.balanceOfUnderlying(account);
@@ -513,7 +513,7 @@ contract FusePoolLens is Initializable {
         uint256 arrayLength = 0;
 
         for (uint256 i = 0; i < pools.length; i++) {
-            Comptroller comptroller = Comptroller(pools[i].comptroller);
+            IComptroller comptroller = IComptroller(pools[i].comptroller);
 
             if (comptroller.whitelist(account)) arrayLength++;
         }
@@ -523,7 +523,7 @@ contract FusePoolLens is Initializable {
         uint256 index = 0;
 
         for (uint256 i = 0; i < pools.length; i++) {
-            Comptroller comptroller = Comptroller(pools[i].comptroller);
+            IComptroller comptroller = IComptroller(pools[i].comptroller);
 
             if (comptroller.whitelist(account)) {
                 indexes[index] = i;

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: BSD-3-Clause
 pragma solidity >=0.7.0;
 
-import "./CToken.sol";
+import "./ICToken.sol";
 
 /**
  * @title Compound's CErc20 Contract
  * @notice CTokens which wrap an EIP-20 underlying
  * @author Compound
  */
-interface CErc20 is CToken {
+interface ICErc20 is ICToken {
     function underlying() external view returns (address);
-    function liquidateBorrow(address borrower, uint repayAmount, CToken cTokenCollateral) external returns (uint);
+    function liquidateBorrow(address borrower, uint repayAmount, ICToken cTokenCollateral) external returns (uint);
 }

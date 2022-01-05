@@ -1,14 +1,15 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.7.0;
 
 import "./IFuseFeeDistributor.sol";
 import "./CToken.sol";
 import "./PriceOracle.sol";
 
 contract UnitrollerAdminStorage {
-    /**
-     * @notice Administrator for Fuse
+    /*
+     * Administrator for Fuse
      */
-    IFuseFeeDistributor internal constant fuseAdmin = IFuseFeeDistributor(0x530b8A1c84594a730B8FbebD9C3a4696dDDe97Ff);
+    IFuseFeeDistributor internal constant fuseAdmin = IFuseFeeDistributor(0xBcb0D746ee1d4c0ff67fC720006214568ef669D9);
 
     /**
     * @notice Administrator for this contract
@@ -64,8 +65,8 @@ contract ComptrollerV1Storage is UnitrollerAdminStorage {
      */
     uint public liquidationIncentiveMantissa;
 
-    /**
-     * @notice UNUSED AFTER UPGRADE: Max number of assets a single account can participate in (borrow or use as collateral)
+    /*
+     * UNUSED AFTER UPGRADE: Max number of assets a single account can participate in (borrow or use as collateral)
      */
     uint internal maxAssets;
 
@@ -78,21 +79,15 @@ contract ComptrollerV1Storage is UnitrollerAdminStorage {
 
 contract ComptrollerV2Storage is ComptrollerV1Storage {
     struct Market {
-        /**
-         * @notice Whether or not this market is listed
-         */
+        // Whether or not this market is listed
         bool isListed;
 
-        /**
-         * @notice Multiplier representing the most one can borrow against their collateral in this market.
-         *  For instance, 0.9 to allow borrowing 90% of collateral value.
-         *  Must be between 0 and 1, and stored as a mantissa.
-         */
+        // Multiplier representing the most one can borrow against their collateral in this market.
+        // For instance, 0.9 to allow borrowing 90% of collateral value.
+        // Must be between 0 and 1, and stored as a mantissa.
         uint collateralFactorMantissa;
 
-        /**
-         * @notice Per-market mapping of "accounts in this asset"
-         */
+        // Per-market mapping of "accounts in this asset"
         mapping(address => bool) accountMembership;
     }
 
@@ -113,7 +108,7 @@ contract ComptrollerV2Storage is ComptrollerV1Storage {
     /// @notice A list of all borrowers who have entered markets
     address[] public allBorrowers;
 
-    /// @notice Indexes of borrower account addresses in the `allBorrowers` array
+    // Indexes of borrower account addresses in the `allBorrowers` array
     mapping(address => uint256) internal borrowerIndexes;
 
     /**
@@ -133,7 +128,7 @@ contract ComptrollerV2Storage is ComptrollerV1Storage {
     /// @notice An array of all whitelisted accounts
     address[] public whitelistArray;
 
-    /// @notice Indexes of account addresses in the `whitelistArray` array
+    // Indexes of account addresses in the `whitelistArray` array
     mapping(address => uint256) internal whitelistIndexes;
 
     /**

@@ -1,4 +1,5 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.7.0;
 
 interface IFuseFeeDistributor {
     function minBorrowEth() external view returns (uint256);
@@ -13,5 +14,5 @@ interface IFuseFeeDistributor {
     function latestCEtherDelegate(address oldImplementation) external view returns (address cEtherDelegate, bool allowResign, bytes memory becomeImplementationData);
     function deployCEther(bytes calldata constructorData) external returns (address);
     function deployCErc20(bytes calldata constructorData) external returns (address);
-    function () external payable;
+    fallback () external payable;
 }

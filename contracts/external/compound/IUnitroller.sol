@@ -6,7 +6,7 @@ pragma solidity >=0.7.0;
  * @dev Storage for the comptroller is at this address, while execution is delegated to the `comptrollerImplementation`.
  * CTokens should reference this contract as their comptroller.
  */
-interface Unitroller {
+interface IUnitroller {
     function _setPendingImplementation(address newPendingImplementation) external returns (uint);
     function _setPendingAdmin(address newPendingAdmin) external returns (uint);
 }

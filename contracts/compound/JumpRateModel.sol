@@ -1,4 +1,5 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.7.0;
 
 import "./InterestRateModel.sol";
 import "./SafeMath.sol";
@@ -44,7 +45,7 @@ contract JumpRateModel is InterestRateModel {
      * @param jumpMultiplierPerYear The multiplierPerBlock after hitting a specified utilization point
      * @param kink_ The utilization point at which the jump multiplier is applied
      */
-    constructor(uint baseRatePerYear, uint multiplierPerYear, uint jumpMultiplierPerYear, uint kink_) public {
+    constructor(uint baseRatePerYear, uint multiplierPerYear, uint jumpMultiplierPerYear, uint kink_) {
         baseRatePerBlock = baseRatePerYear.div(blocksPerYear);
         multiplierPerBlock = multiplierPerYear.div(blocksPerYear);
         jumpMultiplierPerBlock = jumpMultiplierPerYear.div(blocksPerYear);
@@ -76,7 +77,7 @@ contract JumpRateModel is InterestRateModel {
      * @param reserves The amount of reserves in the market
      * @return The borrow rate percentage per block as a mantissa (scaled by 1e18)
      */
-    function getBorrowRate(uint cash, uint borrows, uint reserves) public view returns (uint) {
+    function getBorrowRate(uint cash, uint borrows, uint reserves) public view override returns (uint) {
         uint util = utilizationRate(cash, borrows, reserves);
 
         if (util <= kink) {
@@ -96,7 +97,7 @@ contract JumpRateModel is InterestRateModel {
      * @param reserveFactorMantissa The current reserve factor for the market
      * @return The supply rate percentage per block as a mantissa (scaled by 1e18)
      */
-    function getSupplyRate(uint cash, uint borrows, uint reserves, uint reserveFactorMantissa) public view returns (uint) {
+    function getSupplyRate(uint cash, uint borrows, uint reserves, uint reserveFactorMantissa) public view override virtual returns (uint) {
         uint oneMinusReserveFactor = uint(1e18).sub(reserveFactorMantissa);
         uint borrowRate = getBorrowRate(cash, borrows, reserves);
         uint rateToPool = borrowRate.mul(oneMinusReserveFactor).div(1e18);

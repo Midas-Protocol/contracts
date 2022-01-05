@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0;
 
-import "../external/compound/PriceOracle.sol";
+import "../external/compound/IPriceOracle.sol";
 
 /**
  * @title BasePriceOracle
@@ -9,7 +9,7 @@ import "../external/compound/PriceOracle.sol";
  * @dev Implements the `PriceOracle` interface.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-interface BasePriceOracle is PriceOracle {
+interface BasePriceOracle is IPriceOracle {
     /**
      * @notice Get the price of an underlying asset.
      * @param underlying The underlying asset to get the price of.
