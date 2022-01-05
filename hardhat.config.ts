@@ -1,6 +1,7 @@
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-waffle";
-// import "@typechain/hardhat";
+import "@tenderly/hardhat-tenderly";
+import "@typechain/hardhat";
 
 import { config as dotEnvConfig } from "dotenv";
 import { HardhatUserConfig } from "hardhat/types";
@@ -15,6 +16,10 @@ const mnemonic =
   "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
 
 const config: HardhatUserConfig = {
+  tenderly: {
+    username: "carlomazzaferro",
+    project: "midas-contracts",
+  },
   solidity: {
     compilers: [
       {
