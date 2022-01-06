@@ -1,8 +1,8 @@
 import { deployments } from "hardhat";
-import { createPool, poolAssets } from "./utils";
+import { createPool } from "./utils";
 import { deployAssets, getAssetsConf } from "./utils/pool";
 
-describe("PriceOracle deployment", function () {
+describe("Deposit flow tests", function () {
   beforeEach(async function () {
     await deployments.fixture(); // ensure you start from a fresh deployments
   });
