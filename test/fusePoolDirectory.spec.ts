@@ -1,11 +1,12 @@
 import { deployments, ethers, network } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-import { poolAssets } from "./setUp";
-import { cERC20Conf, Fuse } from "../lib/esm";
-import { ETH_ZERO_ADDRESS, getContractsConfig } from "./utilities";
-import { BigNumber, constants, utils } from "ethers";
+import { Fuse, cERC20Conf } from "../lib/esm";
+import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
+import { getContractsConfig } from "./utils";
+import { ETH_ZERO_ADDRESS } from "./utils";
+import { poolAssets } from "./utils";
 
 use(solidity);
 
@@ -89,8 +90,8 @@ describe("FusePoolDirectory", function () {
         symbol: "ETH",
         decimals: 8,
         admin: "true",
-        collateralFactor: 0.75,
-        reserveFactor: 0.2,
+        collateralFactor: 75,
+        reserveFactor: 20,
         adminFee: 0,
         bypassPriceFeedCheck: true,
         initialExchangeRateMantissa: constants.One,
@@ -152,7 +153,7 @@ describe("FusePoolDirectory", function () {
         spo.address,
         {},
         { from: bob.address },
-        [bob.address]
+        []
       );
       console.log(`Pool with address: ${poolAddress}, \noracle address: ${priceOracleAddress} deployed`);
       expect(poolAddress).to.be.ok;

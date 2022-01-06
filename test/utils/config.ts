@@ -1,25 +1,8 @@
+import path from "path";
+import fs from "fs";
+
+import { ContractConfig } from "../../lib/esm";
 import { ethers } from "hardhat";
-import { ContractConfig } from "../lib/esm";
-import * as fs from "fs";
-import * as path from "path";
-
-export const ETH_ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-
-export async function prepare(thisObject, contracts) {
-  thisObject.signers = await ethers.getSigners();
-  thisObject.deployer = thisObject.signers[0];
-  thisObject.alice = thisObject.signers[1];
-  thisObject.bob = thisObject.signers[2];
-  thisObject.carol = thisObject.signers[3];
-
-  for (let i in contracts) {
-    let contract = contracts[i];
-    thisObject[contract[0]] = await ethers.getContractFactory(
-      contract[0],
-      contract[1] ? thisObject[contract[1]] : thisObject.deployer
-    );
-  }
-}
 
 export async function deploy(thisObject, contracts) {
   for (let i in contracts) {
@@ -27,20 +10,6 @@ export async function deploy(thisObject, contracts) {
     thisObject[contract[0]] = await contract[1].deploy(...(contract[2] || []));
     await thisObject[contract[0]].deployed();
   }
-}
-
-export async function initializeWithWhitelist(thisObject, accounts?: Array<string>) {
-  if (accounts == null) {
-    accounts = thisObject.signers.slice(1, 4).map((d) => d.address);
-  }
-
-  const tx = await thisObject.fpd.initialize(true, accounts);
-  await tx.wait();
-  const isWhitelisted = await Promise.all(accounts.map(async (d) => await thisObject.fpd.deployerWhitelist(d)));
-  console.log(
-    "Whitelisted addresses: ",
-    isWhitelisted.map((v, i) => `${accounts[i]}: ${v}`)
-  );
 }
 
 export function getNetworkPath(basePath: string | null, network: string, extension: string | null = "json"): string {

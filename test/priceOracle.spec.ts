@@ -1,7 +1,7 @@
 import { deployments, ethers, network } from "hardhat";
-import { getContractsConfig } from "./utilities";
 import { expect } from "chai";
 import { Fuse } from "../lib/esm";
+import { getContractsConfig } from "./utils";
 
 describe("PriceOracle deployment", function () {
   beforeEach(async function () {

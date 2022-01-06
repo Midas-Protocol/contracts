@@ -22,7 +22,11 @@ export type MinifiedCompoundContracts = {
 export type MinifiedOraclesContracts = MinifiedCompoundContracts;
 
 export interface InterestRateModel {
-  init(interestRateModelAddress: string, assetAddress: string, provider: providers.Web3Provider | providers.JsonRpcProvider): Promise<void>;
+  init(
+    interestRateModelAddress: string,
+    assetAddress: string,
+    provider: providers.Web3Provider | providers.JsonRpcProvider
+  ): Promise<void>;
 
   _init(
     interestRateModelAddress: string,
@@ -47,7 +51,6 @@ export interface InterestRateModel {
   getSupplyRate(utilizationRate: BigNumber): BigNumber;
 }
 
-
 export type InterestRateModelType =
   | JumpRateModel
   | JumpRateModelV2
@@ -56,11 +59,11 @@ export type InterestRateModelType =
   | undefined;
 
 export type cERC20Conf = {
-  delegateContractName?: any;
+  delegateContractName?: string;
+  initialExchangeRateMantissa?: BigNumber; // Initial exchange rate scaled by 1e18
   underlying: string; // underlying ERC20
   comptroller: string; // Address of the comptroller
   interestRateModel: string; // Address of the IRM
-  initialExchangeRateMantissa: BigNumber; // Initial exchange rate scaled by 1e18
   name: string; // ERC20 name of this token
   symbol: string; // ERC20 Symbol
   decimals: number; // decimal precision
