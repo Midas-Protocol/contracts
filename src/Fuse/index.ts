@@ -1,8 +1,7 @@
 // Ethers
 import { BigNumber, constants, Contract, ContractFactory, providers, utils } from "ethers";
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
-
-// Axios
+import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import axios from "axios";
 
 // ABIs
@@ -24,6 +23,8 @@ import JumpRateModelV2 from "./irm/JumpRateModelV2";
 import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
 
+import Deployments from "../../deployments.json"
+
 // Types
 import {
   cERC20Conf,
@@ -35,7 +36,7 @@ import {
   MinifiedOraclesContracts,
   OracleConf,
 } from "./types";
-
+import { deployMasterPriceOracle, getDeployArgs, getOracleConf, simpleDeploy } from "./ops/oracles";
 import {
   COMPTROLLER_ERROR_CODES,
   CTOKEN_ERROR_CODES,
@@ -43,9 +44,7 @@ import {
   ORACLES,
   SIMPLE_DEPLOY_ORACLES,
 } from "./config";
-import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
-import { deployMasterPriceOracle, getDeployArgs, getOracleConf, simpleDeploy } from "./ops/oracles";
 
 export declare type ContractConfig = {
   COMPOUND_CONTRACT_ADDRESSES: {
@@ -161,7 +160,7 @@ export default class Fuse {
   static CTOKEN_ERROR_CODES = CTOKEN_ERROR_CODES;
   static JumpRateModelConf: InterestRateModelConf = JUMP_RATE_MODEL_CONF;
 
-  constructor(web3Provider: JsonRpcProvider | Web3Provider, contractConfig: ContractConfig) {
+  constructor(web3Provider: JsonRpcProvider | Web3Provider, contractConfig: ContractConfig, chainId: number) {
     this.contractConfig = contractConfig;
     this.provider = web3Provider;
     this.compoundContracts = CompoundMini.contracts;
