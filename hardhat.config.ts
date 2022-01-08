@@ -1,7 +1,7 @@
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-waffle";
 import "@tenderly/hardhat-tenderly";
-import "@typechain/hardhat";
+// import "@typechain/hardhat";
 
 import { config as dotEnvConfig } from "dotenv";
 import { HardhatUserConfig } from "hardhat/types";
@@ -79,6 +79,7 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
       chainId: 1337,
       url: "http://localhost:8545",
+      saveDeployments: true,
     },
     rinkeby: {
       accounts: { mnemonic },
@@ -101,6 +102,10 @@ const config: HardhatUserConfig = {
       url: "https://eth-mainnet.alchemyapi.io/v2/2Mt-6brbJvTA4w9cpiDtnbTo6qOoySnN",
     },
   },
+  // TODO: this doesnt work for me
+  // typechain: {
+  //   outDir: "./typechain"
+  // }
 };
 
 export default config;
