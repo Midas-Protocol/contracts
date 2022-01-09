@@ -3,6 +3,8 @@ import { Web3Provider } from "@ethersproject/providers";
 
 import contracts from "../contracts/compound-protocol.json";
 import { InterestRateModel } from "../types";
+import WhitePaperInterestRateModelArtifact from "../../../artifacts/contracts/compound/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json";
+import CTokenInterfacesArtifact from "../../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json";
 
 export default class WhitePaperInterestRateModel implements InterestRateModel {
   static RUNTIME_BYTECODE_HASH = "0x3290dd1cc5cb57a6423c6bef1f7e59b902fd1484409bf5b51fc6a25326306d03";
@@ -14,7 +16,7 @@ export default class WhitePaperInterestRateModel implements InterestRateModel {
   async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
     const whitePaperModelContract = new Contract(
       interestRateModelAddress,
-      contracts.contracts["contracts/WhitePaperInterestRateModel.sol:WhitePaperInterestRateModel"].abi,
+      WhitePaperInterestRateModelArtifact.abi,
       provider
     );
 
@@ -23,7 +25,7 @@ export default class WhitePaperInterestRateModel implements InterestRateModel {
 
     const cTokenContract = new Contract(
       assetAddress,
-      JSON.parse(contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi),
+      CTokenInterfacesArtifact.abi,
       provider
     );
     this.reserveFactorMantissa = BigNumber.from(await cTokenContract.callStatic.reserveFactorMantissa());
@@ -53,7 +55,7 @@ export default class WhitePaperInterestRateModel implements InterestRateModel {
     );
     const whitePaperModelContract = new Contract(
       interestRateModelAddress,
-      contracts.contracts["contracts/WhitePaperInterestRateModel.sol:WhitePaperInterestRateModel"].abi,
+      WhitePaperInterestRateModelArtifact.abi,
       provider
     );
 

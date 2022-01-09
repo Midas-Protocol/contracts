@@ -1,8 +1,9 @@
 import { BigNumber, BigNumberish, Contract } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
 
-import contracts from "../contracts/compound-protocol.json";
 import { InterestRateModel } from "../types";
+import JumpRateModelArtifact from "../../../artifacts/contracts/compound/JumpRateModel.sol/JumpRateModel.json";
+import CTokenInterfacesArtifact from "../../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json";
 
 export default class JumpRateModelV2 implements InterestRateModel {
   static RUNTIME_BYTECODE_HASH = "0xc6df64d77d18236fa0e3a1bb939e979d14453af5c8287891decfb67710972c3c";
@@ -17,7 +18,7 @@ export default class JumpRateModelV2 implements InterestRateModel {
   async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
     const jumpRateModelContract = new Contract(
       interestRateModelAddress,
-      contracts.contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
+      JumpRateModelArtifact.abi,
       provider
     );
 
@@ -28,7 +29,7 @@ export default class JumpRateModelV2 implements InterestRateModel {
 
     const cTokenContract = new Contract(
       assetAddress,
-      contracts.contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi,
+      CTokenInterfacesArtifact.abi,
       provider
     );
     this.reserveFactorMantissa = BigNumber.from(await cTokenContract.callStatic.reserveFactorMantissa());
@@ -50,7 +51,7 @@ export default class JumpRateModelV2 implements InterestRateModel {
   ) {
     const jumpRateModelContract = new Contract(
       interestRateModelAddress,
-      contracts.contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
+      JumpRateModelArtifact.abi,
       provider
     );
     this.baseRatePerBlock = BigNumber.from(await jumpRateModelContract.callStatic.baseRatePerBlock());

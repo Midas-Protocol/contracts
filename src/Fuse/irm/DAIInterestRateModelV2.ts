@@ -2,7 +2,8 @@ import JumpRateModel from "./JumpRateModel.js";
 import { BigNumberish, Contract, BigNumber } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
 
-import contracts from "../contracts/compound-protocol.json";
+import DAIInterestRateModelV2Artifact from "../../../artifacts/contracts/compound/DAIInterestRateModelV2.sol/DAIInterestRateModelV2.json";
+import CTokenInterfacesArtifact from "../../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json";
 
 export default class DAIInterestRateModelV2 extends JumpRateModel {
   static RUNTIME_BYTECODE_HASH = "0x4b4c4f6386fd72d3f041a03e9eee3945189457fcf4299e99098d360a9f619539";
@@ -19,7 +20,7 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
 
     const interestRateContract = new Contract(
       interestRateModelAddress,
-      contracts.contracts["contracts/DAIInterestRateModelV2.sol:DAIInterestRateModelV2"].abi,
+      DAIInterestRateModelV2Artifact.abi,
       provider
     );
 
@@ -27,7 +28,7 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
 
     const cTokenContract = new Contract(
       assetAddress,
-      contracts.contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi,
+      CTokenInterfacesArtifact.abi,
       provider
     );
 
@@ -47,7 +48,7 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
 
     const interestRateContract = new Contract(
       interestRateModelAddress,
-      contracts.contracts["contracts/DAIInterestRateModelV2.sol:DAIInterestRateModelV2"].abi,
+      DAIInterestRateModelV2Artifact.abi,
       provider
     );
     this.dsrPerBlock = BigNumber.from(await interestRateContract.callStatic.dsrPerBlock());

@@ -168,6 +168,19 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
 
   const wprm = await dep.deploy();
   console.log("WhitePaperInterestRateModel: ", wprm.address);
+
+  //
+  dep = await deployments.deterministic("RewardsDistributorDelegate", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [
+      constants.AddressZero, // _rewardToken
+    ],
+    log: true,
+  });
+
+  const rewards = await dep.deploy();
+  console.log("RewardsDistributorDelegate: ", rewards.address);
 };
 
 export default func;
