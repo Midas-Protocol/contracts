@@ -1,10 +1,10 @@
 import { Contract, ContractFactory } from "ethers";
 import { Interface } from "@ethersproject/abi";
 
-import initializableClonesAbi from "../abi/InitializableClones.json";
+import initializableClonesContract from "../../../artifacts/contracts/utils/InitializableClones.sol/InitializableClones.json";
 import { OracleConf } from "../types";
 import Fuse from "../index";
-import MasterPriceOracle from "../../../artifacts/contracts/oracles/MasterPriceOracle.sol/MasterPriceOracle.json"
+import MasterPriceOracle from "../../../artifacts/contracts/oracles/MasterPriceOracle.sol/MasterPriceOracle.json";
 
 export const getOracleConf = (fuse: Fuse, model: string, conf: OracleConf): OracleConf => {
   switch (model) {
@@ -72,7 +72,7 @@ export const simpleDeploy = async (factory: ContractFactory, deployArgs: string[
 export const deployMasterPriceOracle = async (fuse: Fuse, conf: OracleConf, deployArgs: string[], options: any) => {
   const initializableClones = new Contract(
     fuse.contractConfig.COMPOUND_CONTRACT_ADDRESSES.InitializableClones,
-    initializableClonesAbi,
+    initializableClonesContract.abi,
     fuse.provider.getSigner()
   );
   const masterPriceOracle = new Interface(MasterPriceOracle.abi);

@@ -173,13 +173,13 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
   dep = await deployments.deterministic("RewardsDistributorDelegate", {
     from: deployer,
     salt: ethers.utils.keccak256(deployer),
-    args: [
-      constants.AddressZero, // _rewardToken
-    ],
+    args: [],
     log: true,
   });
 
   const rewards = await dep.deploy();
+  // const rewardsDistributorDelegate = await ethers.getContract("RewardsDistributorDelegate", deployer);
+  // await rewardsDistributorDelegate.initialize(constants.AddressZero);
   console.log("RewardsDistributorDelegate: ", rewards.address);
 };
 

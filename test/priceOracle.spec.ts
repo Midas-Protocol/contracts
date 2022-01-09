@@ -4,10 +4,6 @@ import { expect } from "chai";
 import { Fuse } from "../lib/esm";
 
 describe("PriceOracle deployment", function () {
-  beforeEach(async function () {
-    await deployments.fixture(); // ensure you start from a fresh deployments
-  });
-
   describe("Deploy ChainLinkPriceOracle", async function () {
     it("should deploy the price oracle via sdk", async function () {
       const { alice } = await ethers.getNamedSigners();

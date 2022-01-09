@@ -159,9 +159,9 @@ export default class Fuse {
     FuseFeeDistributor: Contract;
   };
   public contractConfig: ContractConfig;
-  public compoundContracts: MinifiedCompoundContracts;
-  public openOracleContracts: MinifiedContracts;
-  public oracleContracts: MinifiedOraclesContracts;
+  // public compoundContracts: MinifiedCompoundContracts;
+  // public openOracleContracts: MinifiedContracts;
+  // public oracleContracts: MinifiedOraclesContracts;
 
   static ORACLES = ORACLES;
   static SIMPLE_DEPLOY_ORACLES = SIMPLE_DEPLOY_ORACLES;
@@ -340,52 +340,6 @@ export default class Fuse {
     }
   }
 
-  async deployComptroller(
-    closeFactor: number,
-    maxAssets: number,
-    liquidationIncentive: number,
-    priceOracle: string, // Contract address
-    implementationAddress: string, // Address of comptroller if its already deployed
-    options: any
-  ) {
-    let deployedComptroller: Contract;
-    // 1. Deploy comptroller if necessary
-    if (!implementationAddress) {
-      const comptrollerContract = new ContractFactory(
-        ComptrollerArtifact.abi,
-        ComptrollerArtifact.bytecode,
-        this.provider.getSigner(options.from)
-      );
-      deployedComptroller = await comptrollerContract.deploy();
-      implementationAddress = deployedComptroller.options.address;
-    }
-
-    // 2. Get Unitroller to set the comptroller implementation address for the pool
-    const unitrollerContract = new ContractFactory(
-      UnitrollerArtifact.abi,
-      UnitrollerArtifact.bytecode,
-      this.provider.getSigner(options.from)
-    );
-
-    const deployedUnitroller = await unitrollerContract.deploy();
-    await deployedUnitroller._setPendingImplementation(deployedComptroller.options.address, { ...options });
-
-    // Comptroller becomes unitroller.
-    await deployedComptroller._become(deployedUnitroller.address, { ...options });
-
-    // TODO: this line is erroring, do we need this? weird to set this property this way...
-    // deployedComptroller.address = deployedUnitroller.address;
-
-    // Set comptroller configuration
-    if (closeFactor) await deployedComptroller._setCloseFactor(closeFactor, { ...options });
-    if (maxAssets) await deployedComptroller._setMaxAssets(maxAssets, { ...options });
-    if (liquidationIncentive)
-      await deployedComptroller.methods._setLiquidationIncentive(liquidationIncentive, { ...options });
-    if (priceOracle) await deployedComptroller._setPriceOracle(priceOracle, { ...options });
-
-    return [deployedUnitroller.options.address, implementationAddress];
-  }
-
   async deployAsset(
     irmConf: InterestRateModelConf,
     cTokenConf: cERC20Conf,
@@ -432,7 +386,7 @@ export default class Fuse {
 
     // Get deployArgs
     let deployArgs: any[] = [];
-    let modelArtifact: { abi: any; bytecode: any;};
+    let modelArtifact: { abi: any; bytecode: any };
 
     switch (model) {
       case "JumpRateModel":
@@ -446,7 +400,6 @@ export default class Fuse {
         deployArgs = [conf.baseRatePerYear, conf.multiplierPerYear, conf.jumpMultiplierPerYear, conf.kink];
         modelArtifact = JumpRateModelArtifact;
         break;
-      // TODO: remove this?
       case "DAIInterestRateModelV2":
         if (!conf)
           conf = {
@@ -470,6 +423,8 @@ export default class Fuse {
         deployArgs = [conf.baseRatePerYear, conf.multiplierPerYear];
         modelArtifact = WhitePaperInterestRateModelArtifact;
         break;
+      default:
+        throw "IRM model specified is invalid";
     }
 
     // Deploy InterestRateModel
@@ -517,16 +472,12 @@ export default class Fuse {
       ? await this.deployCErc20(
           conf,
           options,
-          this.chainDeployment.CErc20Delegate.address
-            ? this.chainDeployment.CErc20Delegate.address
-            : null
+          this.chainDeployment.CErc20Delegate.address ? this.chainDeployment.CErc20Delegate.address : null
         )
       : await this.deployCEther(
           conf,
           options,
-          this.chainDeployment.CEtherDelegate.address
-            ? this.chainDeployment.CErc20Delegate.address
-            : null
+          this.chainDeployment.CEtherDelegate.address ? this.chainDeployment.CErc20Delegate.address : null
         );
   }
 
@@ -803,7 +754,7 @@ export default class Fuse {
 
     // TODO: find this contract and fix this!
     if (chainlinkPriceFeed === undefined || !chainlinkPriceFeed) {
-      throw new Error("FIX THE UNISWAP ORACLE ANCHORED VIEW")
+      throw new Error("FIX THE UNISWAP ORACLE ANCHORED VIEW");
     }
     /*
     if (chainlinkPriceFeed === undefined || !chainlinkPriceFeed) {
@@ -1111,7 +1062,7 @@ export default class Fuse {
     }
   }
 
-  async deployRewardsDistributor(rewardToken: any, options: { from: any; }) {
+  async deployRewardsDistributor(rewardToken: any, options: { from: any }) {
     const distributor = new ContractFactory(
       RewardsDistributorDelegatorArtifact.abi,
       RewardsDistributorDelegatorArtifact.bytecode,
@@ -1121,11 +1072,7 @@ export default class Fuse {
 
     // const rdAddress = distributor.options.address;
     return await distributor.deploy({
-      arguments: [
-        options.from,
-        rewardToken,
-        this.chainDeployment.RewardsDistributorDelegate.address,
-      ],
+      arguments: [options.from, rewardToken, this.chainDeployment.RewardsDistributorDelegate.address],
     });
   }
 
