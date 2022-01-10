@@ -6,7 +6,7 @@ import JumpRateModelArtifact from "../../../artifacts/contracts/compound/JumpRat
 import CTokenInterfacesArtifact from "../../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json";
 
 export default class JumpRateModel implements InterestRateModel {
-  static RUNTIME_BYTECODE_HASHES = [utils.keccak256(JumpRateModelArtifact.bytecode)];
+  static RUNTIME_BYTECODE_HASH = utils.keccak256(JumpRateModelArtifact.bytecode);
 
   initialized: boolean | undefined;
   baseRatePerBlock: BigNumber | undefined;
@@ -14,7 +14,6 @@ export default class JumpRateModel implements InterestRateModel {
   jumpMultiplierPerBlock: BigNumber | undefined;
   kink: BigNumber | undefined;
   reserveFactorMantissa: BigNumber | undefined;
-  RUNTIME_BYTECODE_HASHES: Array<string>;
 
   async init(interestRateModelAddress: string, assetAddress: string, provider: Web3Provider): Promise<void> {
     const jumpRateModelContract = new Contract(interestRateModelAddress, JumpRateModelArtifact.abi, provider);

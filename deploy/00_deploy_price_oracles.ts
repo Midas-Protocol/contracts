@@ -22,8 +22,11 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
   console.log("MockPriceOracle: ", mockPO.address);
 
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
+
+  // if chain id 1337
   const mockPriceOracle = await ethers.getContract("MockPriceOracle", deployer);
 
+  // get the ERC20 address of deployed cERC20
   const underlyings = [
     "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9", // AAVE
     "0x8a12Be339B0cD1829b91Adc01977caa5E9ac121e", // CRV
@@ -39,6 +42,34 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
     true
   );
   await tx.wait();
+
+  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [],
+    log: true,
+  });
+  const utpor = await dep.deploy();
+  console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
+
+  dep = await deployments.deterministic("UniswapTwapPriceOracleV2", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [],
+    log: true,
+  });
+  const utpo = await dep.deploy();
+  console.log("UniswapTwapPriceOracleV2: ", utpo.address);
+
+  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Factory", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [utpor.address, utpo.address],
+    log: true,
+  });
+  const utpof = await dep.deploy();
+  console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
 };
+
 func.tags = ["Oracles"];
 export default func;

@@ -84,7 +84,17 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
     [false],
     [true]
   );
+
+  dep = await deployments.deterministic("InitializableClones", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [],
+    log: true,
+  });
+  const ic = await dep.deploy();
+  console.log("InitializableClones: ", ic.address);
 };
+
 func.tags = ["Fuse"];
 func.dependencies = ["Compound", "IRM", "Oracles"];
 export default func;

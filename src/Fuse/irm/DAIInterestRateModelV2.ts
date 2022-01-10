@@ -7,7 +7,7 @@ import CTokenInterfacesArtifact from "../../../artifacts/contracts/compound/CTok
 import { utils } from "ethers/lib.esm";
 
 export default class DAIInterestRateModelV2 extends JumpRateModel {
-  static RUNTIME_BYTECODE_HASH = [utils.keccak256(DAIInterestRateModelV2Artifact.bytecode)];
+  static RUNTIME_BYTECODE_HASH = utils.keccak256(DAIInterestRateModelV2Artifact.bytecode);
 
   initialized: boolean | undefined;
   dsrPerBlock: BigNumber | undefined;

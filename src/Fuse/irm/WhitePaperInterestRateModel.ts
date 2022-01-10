@@ -7,7 +7,7 @@ import CTokenInterfacesArtifact from "../../../artifacts/contracts/compound/CTok
 import { utils } from "ethers/lib.esm";
 
 export default class WhitePaperInterestRateModel implements InterestRateModel {
-  static RUNTIME_BYTECODE_HASH = [utils.keccak256(WhitePaperInterestRateModelArtifact.bytecode)];
+  static RUNTIME_BYTECODE_HASH = utils.keccak256(WhitePaperInterestRateModelArtifact.bytecode);
 
   initialized: boolean | undefined;
   baseRatePerBlock: BigNumber | undefined;
