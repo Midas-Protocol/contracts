@@ -6,10 +6,7 @@ import JumpRateModelArtifact from "../../../artifacts/contracts/compound/JumpRat
 import CTokenInterfacesArtifact from "../../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json";
 
 export default class JumpRateModel implements InterestRateModel {
-  static RUNTIME_BYTECODE_HASHES = [
-    "0x94ca8bfbe00d07bbf758f8066d48c98aee997ab66422192fc05d550be0837f60",
-    "0x47d7a0e70c9e049792bb96abf3c7527c7543154450c6267f31b52e2c379badc7",
-  ];
+  static RUNTIME_BYTECODE_HASHES = [utils.keccak256(JumpRateModelArtifact.bytecode)];
 
   initialized: boolean | undefined;
   baseRatePerBlock: BigNumber | undefined;
@@ -17,24 +14,16 @@ export default class JumpRateModel implements InterestRateModel {
   jumpMultiplierPerBlock: BigNumber | undefined;
   kink: BigNumber | undefined;
   reserveFactorMantissa: BigNumber | undefined;
-  RUNTIME_BYTECODE_HASHES: any;
+  RUNTIME_BYTECODE_HASHES: Array<string>;
 
   async init(interestRateModelAddress: string, assetAddress: string, provider: Web3Provider): Promise<void> {
-    const jumpRateModelContract = new Contract(
-      interestRateModelAddress,
-      JumpRateModelArtifact.abi,
-      provider
-    );
+    const jumpRateModelContract = new Contract(interestRateModelAddress, JumpRateModelArtifact.abi, provider);
     this.baseRatePerBlock = BigNumber.from(await jumpRateModelContract.callStatic.baseRatePerBlock());
     this.multiplierPerBlock = BigNumber.from(await jumpRateModelContract.callStatic.multiplierPerBlock());
     this.jumpMultiplierPerBlock = BigNumber.from(await jumpRateModelContract.callStatic.jumpMultiplierPerBlock());
     this.kink = BigNumber.from(await jumpRateModelContract.callStatic.kink());
 
-    const cTokenContract = new Contract(
-      assetAddress,
-      CTokenInterfacesArtifact.abi,
-      provider
-    );
+    const cTokenContract = new Contract(assetAddress, CTokenInterfacesArtifact.abi, provider);
     this.reserveFactorMantissa = BigNumber.from(await cTokenContract.callStatic.reserveFactorMantissa());
     this.reserveFactorMantissa = this.reserveFactorMantissa.add(
       BigNumber.from(await cTokenContract.callStatic.adminFeeMantissa())
@@ -52,19 +41,7 @@ export default class JumpRateModel implements InterestRateModel {
     fuseFeeMantissa: BigNumberish,
     provider: Web3Provider
   ): Promise<void> {
-    console.log(
-      interestRateModelAddress,
-      reserveFactorMantissa,
-      adminFeeMantissa,
-      fuseFeeMantissa,
-      provider,
-      "IRMMMMMM PARAMS JRM"
-    );
-    const jumpRateModelContract = new Contract(
-      interestRateModelAddress,
-      JumpRateModelArtifact.abi,
-      provider
-    );
+    const jumpRateModelContract = new Contract(interestRateModelAddress, JumpRateModelArtifact.abi, provider);
     this.baseRatePerBlock = BigNumber.from(await jumpRateModelContract.callStatic.baseRatePerBlock());
     this.multiplierPerBlock = BigNumber.from(await jumpRateModelContract.callStatic.multiplierPerBlock());
     this.jumpMultiplierPerBlock = BigNumber.from(await jumpRateModelContract.callStatic.jumpMultiplierPerBlock());

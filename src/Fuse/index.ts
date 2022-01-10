@@ -9,7 +9,6 @@ import uniswapV3PoolAbiSlim from "./abi/UniswapV3Pool.slim.json";
 
 // InterestRate Models
 import JumpRateModel from "./irm/JumpRateModel";
-import JumpRateModelV2 from "./irm/JumpRateModelV2";
 import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
 
@@ -29,16 +28,7 @@ import PreferredPriceOracleArtifact from "../../artifacts/contracts/oracles/Pref
 import ChainlinkPriceOracleArtifact from "../../artifacts/contracts/oracles/ChainlinkPriceOracle.sol/ChainlinkPriceOracle.json";
 
 // Types
-import {
-  cERC20Conf,
-  InterestRateModel,
-  InterestRateModelConf,
-  InterestRateModelParams,
-  MinifiedCompoundContracts,
-  MinifiedContracts,
-  MinifiedOraclesContracts,
-  OracleConf,
-} from "./types";
+import { cERC20Conf, InterestRateModel, InterestRateModelConf, InterestRateModelParams, OracleConf } from "./types";
 import { deployMasterPriceOracle, getDeployArgs, getOracleConf, simpleDeploy } from "./ops/oracles";
 import {
   COMPTROLLER_ERROR_CODES,
@@ -47,6 +37,7 @@ import {
   ORACLES,
   SIMPLE_DEPLOY_ORACLES,
 } from "./config";
+import { oracleConfig } from "../network";
 
 export declare type ContractConfig = {
   COMPOUND_CONTRACT_ADDRESSES: {
@@ -142,6 +133,10 @@ export declare type ContractConfig = {
   };
 };
 
+type OracleBytecodes = {
+  [contractName: string]: string;
+};
+
 type ChainDeployment = {
   [contractName: string]: {
     abi: any;
@@ -170,6 +165,7 @@ export default class Fuse {
   static JumpRateModelConf: InterestRateModelConf = JUMP_RATE_MODEL_CONF;
 
   public chainDeployment: ChainDeployment;
+  private oracleBytecodeHashes: OracleBytecodes;
 
   constructor(web3Provider: JsonRpcProvider | Web3Provider, contractConfig: ContractConfig, chainId: number) {
     this.contractConfig = contractConfig;
@@ -179,6 +175,7 @@ export default class Fuse {
     if (!this.chainDeployment) {
       throw new Error(`Chain deployment not found for chainId ${chainId}`);
     }
+    this.oracleBytecodeHashes = oracleConfig[chainId].DEPLOYED_ORACLES;
 
     this.contracts = {
       FusePoolDirectory: new Contract(
@@ -350,13 +347,8 @@ export default class Fuse {
     let receipt: providers.TransactionReceipt;
     // Deploy new interest rate model via SDK if requested
     if (
-      [
-        "WhitePaperInterestRateModel",
-        "JumpRateModel",
-        "JumpRateModelV2",
-        "ReactiveJumpRateModelV2",
-        "DAIInterestRateModelV2",
-      ].indexOf(irmConf.interestRateModel!) >= 0
+      ["WhitePaperInterestRateModel", "JumpRateModel", "DAIInterestRateModelV2"].indexOf(irmConf.interestRateModel!) >=
+      0
     ) {
       try {
         irmConf.interestRateModel = await this.deployInterestRateModel(
@@ -637,8 +629,8 @@ export default class Fuse {
     // Get PriceOracle type from runtime bytecode hash
     const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(priceOracleAddress));
 
-    for (const oracleContractName of Object.keys(this.contractConfig.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES)) {
-      const valueOrArr = this.contractConfig.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES[oracleContractName];
+    for (const oracleContractName of Object.keys(this.oracleBytecodeHashes)) {
+      const valueOrArr = this.oracleBytecodeHashes[oracleContractName];
 
       if (Array.isArray(valueOrArr)) {
         for (const potentialHash of valueOrArr) if (runtimeBytecodeHash == potentialHash) return oracleContractName;
@@ -654,7 +646,6 @@ export default class Fuse {
     // Get interest rate model type from runtime bytecode hash and init class
     const interestRateModels: { [key: string]: any } = {
       JumpRateModel: JumpRateModel,
-      JumpRateModelV2: JumpRateModelV2,
       DAIInterestRateModelV2: DAIInterestRateModelV2,
       WhitePaperInterestRateModel: WhitePaperInterestRateModel,
     };

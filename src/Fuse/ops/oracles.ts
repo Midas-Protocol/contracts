@@ -77,9 +77,6 @@ export const deployMasterPriceOracle = async (fuse: Fuse, conf: OracleConf, depl
   );
   const masterPriceOracle = new Interface(MasterPriceOracle.abi);
   const initializerData = masterPriceOracle.encodeDeploy(deployArgs);
-  const receipt = await initializableClones.clone(
-    fuse.contractConfig.FUSE_CONTRACT_ADDRESSES.MasterPriceOracleImplementation,
-    initializerData
-  );
+  const receipt = await initializableClones.clone(fuse.chainDeployment.MasterPriceOracle.address, initializerData);
   return new Contract(receipt.events["Deployed"].returnValues.instance, MasterPriceOracle.abi);
 };

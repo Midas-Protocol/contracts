@@ -1,7 +1,6 @@
 import { BigNumber, BigNumberish, providers } from "ethers";
 
 import JumpRateModel from "./irm/JumpRateModel";
-import JumpRateModelV2 from "./irm/JumpRateModelV2";
 import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
 
@@ -22,7 +21,11 @@ export type MinifiedCompoundContracts = {
 export type MinifiedOraclesContracts = MinifiedCompoundContracts;
 
 export interface InterestRateModel {
-  init(interestRateModelAddress: string, assetAddress: string, provider: providers.Web3Provider | providers.JsonRpcProvider): Promise<void>;
+  init(
+    interestRateModelAddress: string,
+    assetAddress: string,
+    provider: providers.Web3Provider | providers.JsonRpcProvider
+  ): Promise<void>;
 
   _init(
     interestRateModelAddress: string,
@@ -47,13 +50,7 @@ export interface InterestRateModel {
   getSupplyRate(utilizationRate: BigNumber): BigNumber;
 }
 
-
-export type InterestRateModelType =
-  | JumpRateModel
-  | JumpRateModelV2
-  | DAIInterestRateModelV2
-  | WhitePaperInterestRateModel
-  | undefined;
+export type InterestRateModelType = JumpRateModel | DAIInterestRateModelV2 | WhitePaperInterestRateModel | undefined;
 
 export type cERC20Conf = {
   delegateContractName?: any;

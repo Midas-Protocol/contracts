@@ -4,9 +4,11 @@ import { Web3Provider } from "@ethersproject/providers";
 import { InterestRateModel } from "../types";
 import WhitePaperInterestRateModelArtifact from "../../../artifacts/contracts/compound/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json";
 import CTokenInterfacesArtifact from "../../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json";
+import { utils } from "ethers/lib.esm";
 
 export default class WhitePaperInterestRateModel implements InterestRateModel {
-  static RUNTIME_BYTECODE_HASH = "0x3290dd1cc5cb57a6423c6bef1f7e59b902fd1484409bf5b51fc6a25326306d03";
+  static RUNTIME_BYTECODE_HASH = [utils.keccak256(WhitePaperInterestRateModelArtifact.bytecode)];
+
   initialized: boolean | undefined;
   baseRatePerBlock: BigNumber | undefined;
   multiplierPerBlock: BigNumber | undefined;
