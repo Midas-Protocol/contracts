@@ -10,10 +10,6 @@ import { TransactionReceipt } from "@ethersproject/abstract-provider";
 use(solidity);
 
 describe("FusePoolDirectory", function () {
-  beforeEach(async function () {
-    await deployments.fixture(); // ensure you start from a fresh deployments
-  });
-
   describe("Deploy pool", async function () {
     it("should decode", async function () {
       const abiCoder = new utils.AbiCoder();
@@ -161,7 +157,7 @@ describe("FusePoolDirectory", function () {
       const comptrollerAt = await ethers.getContractAt("Comptroller", poolAddress, bob);
       console.log(`ComptrollerAt: ${comptrollerAt.address} has admin: ${await comptrollerAt.admin()}`);
 
-      const { comptroller, name: _unfiliteredName } = await sdk.contracts.FusePoolDirectory.pools(0);
+      const { comptroller, name: _unfiliteredName } = await sdk.contracts.FusePoolDirectory.pools(1);
       const comptrollerAt2 = await ethers.getContractAt("Comptroller", comptroller, bob);
       console.log(`Fetched Comptroller: ${comptrollerAt2.address} has admin: ${await comptrollerAt2.admin()}`);
 

@@ -1,11 +1,14 @@
 import { BigNumber, BigNumberish, Contract } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
 
-import contracts from "../contracts/compound-protocol.json";
 import { InterestRateModel } from "../types";
+import WhitePaperInterestRateModelArtifact from "../../../artifacts/contracts/compound/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json";
+import CTokenInterfacesArtifact from "../../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json";
+import { utils } from "ethers/lib.esm";
 
 export default class WhitePaperInterestRateModel implements InterestRateModel {
-  static RUNTIME_BYTECODE_HASH = "0x3290dd1cc5cb57a6423c6bef1f7e59b902fd1484409bf5b51fc6a25326306d03";
+  static RUNTIME_BYTECODE_HASH = utils.keccak256(WhitePaperInterestRateModelArtifact.bytecode);
+
   initialized: boolean | undefined;
   baseRatePerBlock: BigNumber | undefined;
   multiplierPerBlock: BigNumber | undefined;
@@ -14,18 +17,14 @@ export default class WhitePaperInterestRateModel implements InterestRateModel {
   async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
     const whitePaperModelContract = new Contract(
       interestRateModelAddress,
-      contracts.contracts["contracts/WhitePaperInterestRateModel.sol:WhitePaperInterestRateModel"].abi,
+      WhitePaperInterestRateModelArtifact.abi,
       provider
     );
 
     this.baseRatePerBlock = BigNumber.from(await whitePaperModelContract.callStatic.baseRatePerBlock());
     this.multiplierPerBlock = BigNumber.from(await whitePaperModelContract.callStatic.multiplierPerBlock());
 
-    const cTokenContract = new Contract(
-      assetAddress,
-      JSON.parse(contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi),
-      provider
-    );
+    const cTokenContract = new Contract(assetAddress, CTokenInterfacesArtifact.abi, provider);
     this.reserveFactorMantissa = BigNumber.from(await cTokenContract.callStatic.reserveFactorMantissa());
     this.reserveFactorMantissa = this.reserveFactorMantissa.add(
       BigNumber.from(await cTokenContract.callStatic.adminFeeMantissa())
@@ -53,7 +52,7 @@ export default class WhitePaperInterestRateModel implements InterestRateModel {
     );
     const whitePaperModelContract = new Contract(
       interestRateModelAddress,
-      contracts.contracts["contracts/WhitePaperInterestRateModel.sol:WhitePaperInterestRateModel"].abi,
+      WhitePaperInterestRateModelArtifact.abi,
       provider
     );
 

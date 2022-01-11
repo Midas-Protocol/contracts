@@ -1,5 +1,4 @@
 import Fuse from "./Fuse";
-export type { ContractConfig } from "./Fuse";
 export { Fuse };
 export {
   cERC20Conf,
