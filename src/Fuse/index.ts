@@ -80,10 +80,11 @@ export default class Fuse {
   private irms: IrmConfig;
   private tokenAddresses: TokenAddresses;
 
-  constructor(web3Provider: JsonRpcProvider | Web3Provider, chainId: number) {
+  constructor(web3Provider: JsonRpcProvider | Web3Provider, chainId: string) {
     this.provider = web3Provider;
 
-    this.chainDeployment = Deployments[chainId] && Deployments[chainId][0]?.contracts;
+    this.chainDeployment =
+      Deployments[chainId] && Deployments[chainId][Object.keys(Deployments[chainId])[0]]?.contracts;
     if (!this.chainDeployment) {
       throw new Error(`Chain deployment not found for chainId ${chainId}`);
     }
@@ -545,7 +546,7 @@ export default class Fuse {
     return null;
   }
 
-  async identifyInterestRateModel(interestRateModelAddress: string): Promise<InterestRateModel> {
+  async identifyInterestRateModel(interestRateModelAddress: string): Promise<InterestRateModel | null> {
     // Get interest rate model type from runtime bytecode hash and init class
     const interestRateModels: { [key: string]: any } = {
       JumpRateModel: JumpRateModel,
@@ -555,9 +556,11 @@ export default class Fuse {
     const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(interestRateModelAddress));
     console.log(runtimeBytecodeHash, "deployed contract bytecode hash");
 
-    let irmModel;
+    let irmModel = null;
 
     for (const irm of Object.values(interestRateModels)) {
+      console.log(irm.RUNTIME_BYTECODE_HASH, "BCHASH1");
+      console.log(runtimeBytecodeHash, "BCHASH2");
       if (runtimeBytecodeHash === irm.RUNTIME_BYTECODE_HASH) {
         irmModel = new irm();
         break;
@@ -567,13 +570,15 @@ export default class Fuse {
     return irmModel;
   }
 
-  async getInterestRateModel(assetAddress: string): Promise<any | undefined> {
+  async getInterestRateModel(assetAddress: string): Promise<any | undefined | null> {
     // Get interest rate model address from asset address
     const assetContract = new Contract(assetAddress, CTokenInterfacesArtifact.abi, this.provider);
     const interestRateModelAddress: string = await assetContract.callStatic.interestRateModel();
 
     const interestRateModel = await this.identifyInterestRateModel(interestRateModelAddress);
-
+    if (interestRateModel === null) {
+      return null;
+    }
     await interestRateModel.init(interestRateModelAddress, assetAddress, this.provider);
     return interestRateModel;
   }

@@ -2,10 +2,12 @@
   "name": "midasprotocol",
   "version": "1.0.0",
   "description": "",
-  "main": "./lib/cjs/index.js",
-  "module": "./lib/esm/index.js",
+  "main": "./lib/cjs/src/index.js",
+  "module": "./lib/esm/src/index.js",
   "files": [
-    "/lib/"
+    "/lib/",
+    "/artifacts",
+    "deployments.json"
   ],
   "scripts": {
     "test": "hardhat test",

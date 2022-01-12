@@ -1,13 +1,12 @@
 import JumpRateModel from "./JumpRateModel.js";
-import { BigNumberish, Contract, BigNumber } from "ethers";
+import { BigNumberish, Contract, BigNumber, utils } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
 
 import DAIInterestRateModelV2Artifact from "../../../artifacts/contracts/compound/DAIInterestRateModelV2.sol/DAIInterestRateModelV2.json";
 import CTokenInterfacesArtifact from "../../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json";
-import { utils } from "ethers/lib.esm";
 
 export default class DAIInterestRateModelV2 extends JumpRateModel {
-  static RUNTIME_BYTECODE_HASH = utils.keccak256(DAIInterestRateModelV2Artifact.bytecode);
+  static RUNTIME_BYTECODE_HASH = utils.keccak256(DAIInterestRateModelV2Artifact.deployedBytecode);
 
   initialized: boolean | undefined;
   dsrPerBlock: BigNumber | undefined;

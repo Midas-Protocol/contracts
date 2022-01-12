@@ -6,7 +6,7 @@ import JumpRateModelArtifact from "../../../artifacts/contracts/compound/JumpRat
 import CTokenInterfacesArtifact from "../../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json";
 
 export default class JumpRateModel implements InterestRateModel {
-  static RUNTIME_BYTECODE_HASH = utils.keccak256(JumpRateModelArtifact.bytecode);
+  static RUNTIME_BYTECODE_HASH = utils.keccak256(JumpRateModelArtifact.deployedBytecode);
 
   initialized: boolean | undefined;
   baseRatePerBlock: BigNumber | undefined;

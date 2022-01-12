@@ -3,7 +3,16 @@ import { DeployFunction } from "hardhat-deploy/types";
 const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { bob, deployer } = await getNamedAccounts();
 
-  let dep = await deployments.deterministic("MasterPriceOracle", {
+  let dep = await deployments.deterministic("ChainlinkPriceOracle", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [10],
+    log: true,
+  });
+  const cpo = await dep.deploy();
+  console.log("ChainlinkPriceOracle: ", cpo.address);
+
+  dep = await deployments.deterministic("MasterPriceOracle", {
     from: deployer,
     salt: ethers.utils.keccak256(deployer),
     args: [],

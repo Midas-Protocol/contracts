@@ -3,7 +3,6 @@ import MockPriceOracleArtifact from "../artifacts/contracts/oracles/MockPriceOra
 import ChainlinkPriceOracleArtifact from "../artifacts/contracts/oracles/ChainlinkPriceOracle.sol/ChainlinkPriceOracle.json";
 
 import JumpRateModelArtifact from "../artifacts/contracts/compound/JumpRateModel.sol/JumpRateModel.json";
-import DAIInterestRateModelV2Artifact from "../artifacts/contracts/compound/DAIInterestRateModelV2.sol/DAIInterestRateModelV2.json";
 import WhitePaperInterestRateModelArtifact from "../artifacts/contracts/compound/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json";
 
 export const tokenAddresses = {
@@ -26,15 +25,15 @@ export const oracleConfig = (deployments) => {
     1337: {
       MockPriceOracle: {
         artifact: MockPriceOracleArtifact,
-        address: deployments.MockPriceOracle.addresss,
+        address: deployments.MockPriceOracle.address,
       },
       MasterPriceOracle: {
         artifact: MasterPriceOracleArtifact,
-        address: deployments.MasterPriceOracle.addresss,
+        address: deployments.MasterPriceOracle.address,
       },
       ChainlinkPriceOracle: {
         artifact: ChainlinkPriceOracleArtifact,
-        address: deployments.ChainlinkPriceOracle.addresss,
+        address: deployments.ChainlinkPriceOracle.address,
       },
     },
   };
@@ -45,10 +44,6 @@ export const irmConfig = (deployments) => {
     JumpRateModel: {
       artifact: JumpRateModelArtifact,
       address: deployments.JumpRateModel.address,
-    },
-    DAIInterestRateModelV2: {
-      artifact: DAIInterestRateModelV2Artifact,
-      address: deployments.DAIInterestRateModelV2.address,
     },
     WhitePaperInterestRateModel: {
       artifact: WhitePaperInterestRateModelArtifact,

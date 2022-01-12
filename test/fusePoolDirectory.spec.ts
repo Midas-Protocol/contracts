@@ -1,10 +1,10 @@
-import { deployments, ethers, network } from "hardhat";
+import { deployments, ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
 import { poolAssets } from "./setUp";
-import { cERC20Conf, Fuse } from "../lib/esm";
-import { ETH_ZERO_ADDRESS, getContractsConfig } from "./utilities";
-import { BigNumber, constants, utils } from "ethers";
+import { cERC20Conf, Fuse } from "../lib/esm/src";
+import { ETH_ZERO_ADDRESS } from "./utilities";
+import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 use(solidity);
@@ -59,8 +59,7 @@ describe("FusePoolDirectory", function () {
       const pool = pools[1][0];
       expect(pool.comptroller).to.eq(poolAddress);
 
-      const contractConfig = await getContractsConfig(network.name);
-      const sdk = new Fuse(ethers.provider, contractConfig);
+      const sdk = new Fuse(ethers.provider, "1337");
       const { comptroller, name: _unfiliteredName } = await sdk.contracts.FusePoolDirectory.pools(0);
 
       expect(comptroller).to.eq(pool.comptroller);
@@ -132,8 +131,7 @@ describe("FusePoolDirectory", function () {
       const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", bob);
       const spo = await spoFactory.deploy([10]);
 
-      const contractConfig = await getContractsConfig(network.name);
-      const sdk = new Fuse(ethers.provider, contractConfig);
+      const sdk = new Fuse(ethers.provider, "1337");
 
       // 50% -> 0.5 * 1e18
       const bigCloseFactor = utils.parseEther((50 / 100).toString());
