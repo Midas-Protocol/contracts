@@ -1,9 +1,8 @@
 // pool utilities used across downstream tests
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
-import { ethers, network } from "hardhat";
-import { Fuse, cERC20Conf } from "../../lib/esm";
-import { providers, utils } from "ethers";
-import { getContractsConfig } from "./config";
+import { ethers } from "hardhat";
+import { Fuse, cERC20Conf } from "../../lib/esm/src";
+import { utils } from "ethers";
 
 export async function createPool(
   closeFactor: number = 50,
@@ -26,8 +25,7 @@ export async function createPool(
   if (enforceWhitelist && whitelist.length === 0) {
     throw "If enforcing whitelist, a whitelist array of addresses must be provided";
   }
-  const contractConfig = await getContractsConfig(network.name);
-  const sdk = new Fuse(ethers.provider, contractConfig);
+  const sdk = new Fuse(ethers.provider, "1337");
 
   // 50% -> 0.5 * 1e18
   const bigCloseFactor = utils.parseEther((closeFactor / 100).toString());
@@ -51,8 +49,7 @@ export async function deployAssets(assets: cERC20Conf[], signer: SignerWithAddre
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
   }
-  const contractConfig = await getContractsConfig(network.name);
-  const sdk = new Fuse(ethers.provider, contractConfig);
+  const sdk = new Fuse(ethers.provider, "1337");
 
   for (const assetConf of assets) {
     const [, , , receipt] = await sdk.deployAsset(Fuse.JumpRateModelConf, assetConf, { from: signer.address });
