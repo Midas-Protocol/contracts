@@ -1,18 +1,12 @@
-import { deployments, ethers, network } from "hardhat";
+import { ethers } from "hardhat";
 import { expect } from "chai";
-import { Fuse } from "../lib/esm";
-import { getContractsConfig } from "./utils";
+import { Fuse } from "../lib/esm/src";
 
 describe("PriceOracle deployment", function () {
-  beforeEach(async function () {
-    await deployments.fixture(); // ensure you start from a fresh deployments
-  });
-
   describe("Deploy ChainLinkPriceOracle", async function () {
     it("should deploy the price oracle via sdk", async function () {
       const { alice } = await ethers.getNamedSigners();
-      const contractConfig = await getContractsConfig(network.name);
-      const sdk = new Fuse(ethers.provider, contractConfig);
+      const sdk = new Fuse(ethers.provider, "1337");
 
       const deployedOracle = await sdk.deployPriceOracle("ChainlinkPriceOracle", {}, { from: alice.address });
       expect(deployedOracle).to.be.ok;

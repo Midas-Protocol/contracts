@@ -1,20 +1,15 @@
 import { deployments, ethers, network } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-import { Fuse, cERC20Conf } from "../lib/esm";
+import { Fuse, cERC20Conf } from "../lib/esm/src";
 import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { getContractsConfig } from "./utils";
 import { ETH_ZERO_ADDRESS } from "./utils";
 import { poolAssets } from "./utils";
 
 use(solidity);
 
 describe("FusePoolDirectory", function () {
-  beforeEach(async function () {
-    await deployments.fixture(); // ensure you start from a fresh deployments
-  });
-
   describe("Deploy pool", async function () {
     it("should decode", async function () {
       const abiCoder = new utils.AbiCoder();
@@ -64,8 +59,7 @@ describe("FusePoolDirectory", function () {
       const pool = pools[1][0];
       expect(pool.comptroller).to.eq(poolAddress);
 
-      const contractConfig = await getContractsConfig(network.name);
-      const sdk = new Fuse(ethers.provider, contractConfig);
+      const sdk = new Fuse(ethers.provider, "1337");
       const { comptroller, name: _unfiliteredName } = await sdk.contracts.FusePoolDirectory.pools(0);
 
       expect(comptroller).to.eq(pool.comptroller);
@@ -137,8 +131,7 @@ describe("FusePoolDirectory", function () {
       const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", bob);
       const spo = await spoFactory.deploy([10]);
 
-      const contractConfig = await getContractsConfig(network.name);
-      const sdk = new Fuse(ethers.provider, contractConfig);
+      const sdk = new Fuse(ethers.provider, "1337");
 
       // 50% -> 0.5 * 1e18
       const bigCloseFactor = utils.parseEther((50 / 100).toString());
@@ -162,7 +155,7 @@ describe("FusePoolDirectory", function () {
       const comptrollerAt = await ethers.getContractAt("Comptroller", poolAddress, bob);
       console.log(`ComptrollerAt: ${comptrollerAt.address} has admin: ${await comptrollerAt.admin()}`);
 
-      const { comptroller, name: _unfiliteredName } = await sdk.contracts.FusePoolDirectory.pools(0);
+      const { comptroller, name: _unfiliteredName } = await sdk.contracts.FusePoolDirectory.pools(1);
       const comptrollerAt2 = await ethers.getContractAt("Comptroller", comptroller, bob);
       console.log(`Fetched Comptroller: ${comptrollerAt2.address} has admin: ${await comptrollerAt2.admin()}`);
 

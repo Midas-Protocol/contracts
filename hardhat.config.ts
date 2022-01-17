@@ -75,12 +75,6 @@ const config: HardhatUserConfig = {
       saveDeployments: true,
       chainId: 1337,
     },
-    ganache: {
-      accounts: { mnemonic },
-      chainId: 1337,
-      url: "http://localhost:8545",
-      saveDeployments: true,
-    },
     rinkeby: {
       accounts: { mnemonic },
       chainId: 4,
