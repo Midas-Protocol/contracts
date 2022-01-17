@@ -12,11 +12,11 @@
   "scripts": {
     "test": "hardhat test",
     "export": "hardhat export --export-all ./deployments.json",
-    "build": "npm run build:sdk && npm run build:cjs && npm run build:contracts",
+    "build": "npm run build:contracts && npm run build:sdk && npm run build:cjs",
     "build:sdk": "tsc -p tsconfig-sdk.json",
     "build:cjs": "tsc -p tsconfig-cjs.json",
     "build:contracts": "hardhat compile",
-    "prepublish": "npm run build:sdk && npm run build:cjs",
+    "postinstall": "npm run build",
     "clean": "rm -rf lib"
   },
   "keywords": [],
