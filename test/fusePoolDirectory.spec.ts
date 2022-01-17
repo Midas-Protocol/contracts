@@ -32,10 +32,11 @@ describe("FusePoolDirectory", function () {
       const implementationComptroller = await ethers.getContract("Comptroller");
 
       //// DEPLOY POOL
+      const POOL_NAME = "TEST";
       const bigCloseFactor = utils.parseEther((50 / 100).toString());
       const bigLiquidationIncentive = utils.parseEther((8 / 100 + 1).toString());
       const deployedPool = await fpdWithSigner.deployPool(
-        "TEST",
+        POOL_NAME,
         implementationComptroller.address,
         true,
         bigCloseFactor,
@@ -49,7 +50,7 @@ describe("FusePoolDirectory", function () {
       // Confirm Unitroller address
       const saltsHash = utils.solidityKeccak256(
         ["address", "string", "uint"],
-        [alice.address, "TEST", depReceipt.blockNumber]
+        [alice.address, POOL_NAME, depReceipt.blockNumber]
       );
       const byteCodeHash = utils.keccak256((await deployments.getArtifact("Unitroller")).bytecode);
       let poolAddress = utils.getCreate2Address(fpdWithSigner.address, saltsHash, byteCodeHash);
@@ -60,10 +61,11 @@ describe("FusePoolDirectory", function () {
       expect(pool.comptroller).to.eq(poolAddress);
 
       const sdk = new Fuse(ethers.provider, "1337");
-      const { comptroller, name: _unfiliteredName } = await sdk.contracts.FusePoolDirectory.pools(0);
+      const allPools = await sdk.contracts.FusePoolDirectory.callStatic.getAllPools();
+      const { comptroller, name: _unfiliteredName } = await allPools.filter((p) => p.creator === alice.address)[0];
 
       expect(comptroller).to.eq(pool.comptroller);
-      expect(_unfiliteredName).to.eq("TEST");
+      expect(_unfiliteredName).to.eq(POOL_NAME);
 
       const unitroller = await ethers.getContractAt("Unitroller", poolAddress, alice);
       const adminTx = await unitroller._acceptAdmin();
@@ -121,11 +123,11 @@ describe("FusePoolDirectory", function () {
       expect(underlyingSymbols[0]).to.eq("ETH");
 
       const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
-
-      console.log(fusePoolData, "FPD");
+      expect(fusePoolData[0][1]).to.eq(ETH_ZERO_ADDRESS);
     });
 
     it("should deploy pool from sdk without whitelist", async function () {
+      const POOL_NAME = "TEST_BOB";
       const { bob } = await ethers.getNamedSigners();
 
       const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", bob);
@@ -139,7 +141,7 @@ describe("FusePoolDirectory", function () {
       const bigLiquidationIncentive = utils.parseEther((8 / 100 + 1).toString());
 
       const [poolAddress, implementationAddress, priceOracleAddress] = await sdk.deployPool(
-        "TEST_BOB",
+        POOL_NAME,
         false,
         bigCloseFactor,
         bigLiquidationIncentive,
@@ -155,11 +157,10 @@ describe("FusePoolDirectory", function () {
       const comptrollerAt = await ethers.getContractAt("Comptroller", poolAddress, bob);
       console.log(`ComptrollerAt: ${comptrollerAt.address} has admin: ${await comptrollerAt.admin()}`);
 
-      const { comptroller, name: _unfiliteredName } = await sdk.contracts.FusePoolDirectory.pools(1);
-      const comptrollerAt2 = await ethers.getContractAt("Comptroller", comptroller, bob);
-      console.log(`Fetched Comptroller: ${comptrollerAt2.address} has admin: ${await comptrollerAt2.admin()}`);
+      const allPools = await sdk.contracts.FusePoolDirectory.callStatic.getAllPools();
+      const { name: _unfiliteredName } = await allPools.filter((p) => p.name === POOL_NAME)[0];
 
-      expect(_unfiliteredName).to.be.equal("TEST_BOB");
+      expect(_unfiliteredName).to.be.equal(POOL_NAME);
 
       const jrm = await ethers.getContract("JumpRateModel", bob);
       const assets = poolAssets(jrm.address, implementationAddress);
