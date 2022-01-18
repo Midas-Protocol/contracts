@@ -6,6 +6,8 @@ be found in `../midas-sdk` w.r.t. this project.
 2. Install deps, including `midas-sdk`
 ```shell
 >>> npm install
+>>> npm run build
+>>> npm run export
 ```
 
 3. Run local node:

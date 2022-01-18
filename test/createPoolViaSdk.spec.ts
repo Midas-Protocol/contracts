@@ -10,6 +10,7 @@ use(solidity);
 describe("FusePoolDirectory", function () {
   describe("Deploy pool", async function () {
     it("should deploy pool from sdk without whitelist", async function () {
+      this.timeout(120_000);
       const POOL_NAME = "TEST_BOB";
       const { bob } = await ethers.getNamedSigners();
 
