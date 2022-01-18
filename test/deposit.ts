@@ -6,7 +6,7 @@ describe("Deposit flow tests", function () {
     it("should deposit asset to pool", async function () {
       const [, implementationAddress] = await createPool();
       const assets = await getAssetsConf(implementationAddress);
-      await deployAssets(assets);
+      await deployAssets(assets.assets);
     });
   });
 });

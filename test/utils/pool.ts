@@ -1,7 +1,7 @@
 // pool utilities used across downstream tests
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { ethers } from "hardhat";
-import { Fuse, cERC20Conf } from "../../lib/esm/src";
+import { cERC20Conf, Fuse } from "../../lib/esm/src";
 import { utils } from "ethers";
 
 export async function createPool(
@@ -61,19 +61,23 @@ export async function deployAssets(assets: cERC20Conf[], signer: SignerWithAddre
   }
 }
 
-export async function getAssetsConf(comptroller: string, interestRateModelAddress?: string): Promise<cERC20Conf[]> {
+export async function getAssetsConf(
+  comptroller: string,
+  interestRateModelAddress?: string
+): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> {
+  const { bob } = await ethers.getNamedSigners();
   if (!interestRateModelAddress) {
-    const { bob } = await ethers.getNamedSigners();
     const jrm = await ethers.getContract("JumpRateModel", bob);
     interestRateModelAddress = jrm.address;
   }
-  return poolAssets(interestRateModelAddress, comptroller).assets;
+  return await poolAssets(interestRateModelAddress, comptroller, bob);
 }
 
-export const poolAssets = (
+export const poolAssets = async (
   interestRateModelAddress: string,
-  comptroller: string
-): { shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] } => {
+  comptroller: string,
+  signer: SignerWithAddress
+): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> => {
   const ethConf: cERC20Conf = {
     underlying: "0x0000000000000000000000000000000000000000",
     comptroller,
@@ -87,12 +91,12 @@ export const poolAssets = (
     adminFee: 0,
     bypassPriceFeedCheck: true,
   };
-  const daiConf: cERC20Conf = {
-    underlying: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+  const rgtConf: cERC20Conf = {
+    underlying: await ethers.getContract("AAVEToken", signer).then((c) => c.address),
     comptroller,
     interestRateModel: interestRateModelAddress,
-    name: "Dai",
-    symbol: "DAI",
+    name: "AAVE Token",
+    symbol: "AAVE",
     decimals: 18,
     admin: "true",
     collateralFactor: 75,
@@ -100,8 +104,8 @@ export const poolAssets = (
     adminFee: 0,
     bypassPriceFeedCheck: true,
   };
-  const rgtConf: cERC20Conf = {
-    underlying: "0xD291E7a03283640FDc51b121aC401383A46cC623",
+  const aaveConf: cERC20Conf = {
+    underlying: await ethers.getContract("RGTToken", signer).then((c) => c.address),
     comptroller,
     interestRateModel: interestRateModelAddress,
     name: "Rari Governance Token",
@@ -118,6 +122,6 @@ export const poolAssets = (
     shortName: "Fuse R1",
     longName: "Rari DAO Fuse Pool R1 (Base)",
     assetSymbolPrefix: "fr1",
-    assets: [ethConf, daiConf, rgtConf],
+    assets: [ethConf, aaveConf, rgtConf],
   };
 };
