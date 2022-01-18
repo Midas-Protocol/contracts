@@ -57,7 +57,7 @@ export type cERC20Conf = {
   underlying: string; // underlying ERC20
   comptroller: string; // Address of the comptroller
   interestRateModel: string; // Address of the IRM
-  initialExchangeRateMantissa: BigNumber; // Initial exchange rate scaled by 1e18
+  initialExchangeRateMantissa?: BigNumber; // Initial exchange rate scaled by 1e18
   name: string; // ERC20 name of this token
   symbol: string; // ERC20 Symbol
   decimals: number; // decimal precision

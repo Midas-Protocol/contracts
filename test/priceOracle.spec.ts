@@ -1,4 +1,4 @@
-import { ethers, network } from "hardhat";
+import { ethers } from "hardhat";
 import { expect } from "chai";
 import { Fuse } from "../lib/esm/src";
 

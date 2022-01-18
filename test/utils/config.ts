@@ -1,8 +1,6 @@
 import { ethers } from "hardhat";
 import * as fs from "fs";
 
-export const ETH_ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-
 export async function prepare(thisObject, contracts) {
   thisObject.signers = await ethers.getSigners();
   thisObject.deployer = thisObject.signers[0];

@@ -20,13 +20,6 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
      * @param data The encoded bytes data for any initialization
      */
     function _becomeImplementation(bytes calldata data) override virtual external {
-        // Shh -- currently unused
-        data;
-
-        // Shh -- we don't ever want this hook to be marked pure
-        if (false) {
-            implementation = address(0);
-        }
 
         require(msg.sender == address(this) || hasAdminRights(), "!self");
 
@@ -35,6 +28,7 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
         __adminHasRights = false;
         __fuseAdminHasRights = false;
     }
+
 
     /**
      * @notice Called by the delegator on a delegate to forfeit its responsibility

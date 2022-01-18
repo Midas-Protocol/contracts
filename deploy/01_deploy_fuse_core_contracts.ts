@@ -41,11 +41,12 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
     ethers.constants.MaxUint256
   );
   const comptroller = await ethers.getContract("Comptroller", deployer);
-  await fuseFeeDistributor._editComptrollerImplementationWhitelist(
+  tx = await fuseFeeDistributor._editComptrollerImplementationWhitelist(
     [constants.AddressZero],
     [comptroller.address],
     [true]
   );
+  await tx.wait();
 
   dep = await deployments.deterministic("FusePoolLens", {
     from: deployer,
@@ -72,18 +73,24 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
   const etherDelegate = await ethers.getContract("CEtherDelegate", deployer);
   const erc20Delegate = await ethers.getContract("CErc20Delegate", deployer);
 
-  await fuseFeeDistributor._editCEtherDelegateWhitelist(
+  tx = await fuseFeeDistributor._editCEtherDelegateWhitelist(
     [constants.AddressZero],
     [etherDelegate.address],
     [false],
     [true]
   );
-  await fuseFeeDistributor._editCErc20DelegateWhitelist(
+
+  let receipt = await tx.wait();
+  console.log("Set whitelist for Ether Delegate with status:", receipt.status);
+
+  tx = await fuseFeeDistributor._editCErc20DelegateWhitelist(
     [constants.AddressZero],
     [erc20Delegate.address],
     [false],
     [true]
   );
+  receipt = await tx.wait();
+  console.log("Set whitelist for ERC20 Delegate with status:", receipt.status);
 
   dep = await deployments.deterministic("InitializableClones", {
     from: deployer,
@@ -96,5 +103,5 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments }): 
 };
 
 func.tags = ["Fuse"];
-func.dependencies = ["Compound", "IRM", "Oracles"];
+func.dependencies = ["Compound", "IRM", "Oracles", "Tokens"];
 export default func;
