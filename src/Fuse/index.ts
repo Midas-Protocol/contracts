@@ -379,7 +379,7 @@ export default class Fuse {
       : await this.deployCEther(
           conf,
           options,
-          this.chainDeployment.CEtherDelegate.address ? this.chainDeployment.CErc20Delegate.address : null
+          this.chainDeployment.CEtherDelegate.address ? this.chainDeployment.CEtherDelegate.address : null
         );
   }
 
