@@ -149,7 +149,7 @@ describe("FusePoolDirectory", function () {
       console.log(`${rgtConf.name} deployed successfully with tx hash: ${receipt.transactionHash}`);
 
       fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
-      console.log(fusePoolData);
+      expect(fusePoolData.length).to.eq(2);
     });
   });
 });
