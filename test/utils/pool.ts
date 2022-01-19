@@ -2,7 +2,7 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { ethers } from "hardhat";
 import { cERC20Conf, Fuse } from "../../lib/esm/src";
-import { utils } from "ethers";
+import { providers, utils } from "ethers";
 
 export async function createPool(
   closeFactor: number = 50,
@@ -44,21 +44,44 @@ export async function createPool(
   );
 }
 
-export async function deployAssets(assets: cERC20Conf[], signer: SignerWithAddress | null = null) {
+export type DeployedAsset = {
+  symbol: string;
+  underlying: string;
+  assetAddress: string;
+  implementationAddress: string;
+  interestRateModel: string;
+  receipt: providers.TransactionReceipt;
+};
+export async function deployAssets(assets: cERC20Conf[], signer?: SignerWithAddress): Promise<DeployedAsset[]> {
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
   }
   const sdk = new Fuse(ethers.provider, "1337");
 
+  const deployed: DeployedAsset[] = [];
   for (const assetConf of assets) {
-    const [, , , receipt] = await sdk.deployAsset(Fuse.JumpRateModelConf, assetConf, { from: signer.address });
+    const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
+      Fuse.JumpRateModelConf,
+      assetConf,
+      { from: signer.address }
+    );
     if (receipt.status !== 1) {
       throw `Failed to deploy asset: ${receipt.logs}`;
     }
     console.log("deployed asset: ", assetConf.name);
     console.log("-----------------");
+    deployed.push({
+      symbol: assetConf.symbol,
+      underlying: assetConf.underlying,
+      assetAddress,
+      implementationAddress,
+      interestRateModel,
+      receipt,
+    });
   }
+
+  return deployed;
 }
 
 export async function getAssetsConf(
