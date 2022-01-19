@@ -9,9 +9,9 @@ export async function createPool(
   liquidationIncentive: number = 8,
   poolName: string = "TEST",
   enforceWhitelist: boolean = false,
-  whitelist: Array<string> | null = null,
-  priceOracleAddress: string | null = null,
-  signer: SignerWithAddress | null = null
+  whitelist: Array<string> = [],
+  priceOracleAddress?: string,
+  signer?: SignerWithAddress
 ): Promise<[string, string, string]> {
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
