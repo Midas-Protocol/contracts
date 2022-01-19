@@ -24,6 +24,11 @@ import EIP20InterfaceArtifact from "../../artifacts/contracts/compound/EIP20Inte
 import RewardsDistributorDelegatorArtifact from "../../artifacts/contracts/compound/RewardsDistributorDelegator.sol/RewardsDistributorDelegator.json";
 import PreferredPriceOracleArtifact from "../../artifacts/contracts/oracles/PreferredPriceOracle.sol/PreferredPriceOracle.json";
 
+// Oracle Artifacts
+import MasterPriceOracleArtifact from "../../artifacts/contracts/oracles/MasterPriceOracle.sol/MasterPriceOracle.json";
+import MockPriceOracleArtifact from "../../artifacts/contracts/oracles/MockPriceOracle.sol/MockPriceOracle.json";
+import ChainlinkPriceOracleArtifact from "../../artifacts/contracts/oracles/ChainlinkPriceOracle.sol/ChainlinkPriceOracle.json";
+
 // IRM Artifacts
 import JumpRateModelArtifact from "../../artifacts/contracts/compound/JumpRateModel.sol/JumpRateModel.json";
 import DAIInterestRateModelV2Artifact from "../../artifacts/contracts/compound/DAIInterestRateModelV2.sol/DAIInterestRateModelV2.json";
@@ -77,10 +82,10 @@ export default class Fuse {
   static JumpRateModelConf: InterestRateModelConf = JUMP_RATE_MODEL_CONF;
 
   public chainDeployment: ChainDeployment;
-  private oracles: OracleConfig;
-  private irms: IrmConfig;
+  public oracles: OracleConfig;
+  private readonly irms: IrmConfig;
   private tokenAddresses: TokenAddresses;
-  private artifacts: {
+  public artifacts: {
     [contractName: string]: {
       contractName: string;
       sourceName: string;
@@ -141,6 +146,9 @@ export default class Fuse {
       JumpRateModel: JumpRateModelArtifact,
       DAIInterestRateModelV2: DAIInterestRateModelV2Artifact,
       WhitePaperInterestRateModel: WhitePaperInterestRateModelArtifact,
+      ChainlinkPriceOracle: ChainlinkPriceOracleArtifact,
+      MasterPriceOracle: MasterPriceOracleArtifact,
+      MockPriceOracle: MockPriceOracleArtifact,
     };
     this.irms = irmConfig(this.chainDeployment, this.artifacts);
     this.oracles = oracleConfig(this.chainDeployment, this.artifacts)[chainId];

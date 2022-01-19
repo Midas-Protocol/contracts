@@ -1,10 +1,8 @@
 import { Contract, ContractFactory } from "ethers";
 import { Interface } from "@ethersproject/abi";
 
-import initializableClonesContract from "../../../artifacts/contracts/utils/InitializableClones.sol/InitializableClones.json";
 import { OracleConf } from "../types";
-import Fuse from "../index";
-import MasterPriceOracle from "../../../artifacts/contracts/oracles/MasterPriceOracle.sol/MasterPriceOracle.json";
+import { Fuse } from "../../index";
 
 export const getOracleConf = (fuse: Fuse, model: string, conf: OracleConf): OracleConf => {
   switch (model) {
@@ -51,11 +49,11 @@ export const simpleDeploy = async (factory: ContractFactory, deployArgs: string[
 export const deployMasterPriceOracle = async (fuse: Fuse, conf: OracleConf, deployArgs: string[], options: any) => {
   const initializableClones = new Contract(
     fuse.chainDeployment.InitializableClones.address,
-    initializableClonesContract.abi,
+    fuse.artifacts.initializableClones.abi,
     fuse.provider.getSigner()
   );
-  const masterPriceOracle = new Interface(MasterPriceOracle.abi);
+  const masterPriceOracle = new Interface(fuse.artifacts.MasterPriceOracle.abi.toString());
   const initializerData = masterPriceOracle.encodeDeploy(deployArgs);
   const receipt = await initializableClones.clone(fuse.chainDeployment.MasterPriceOracle.address, initializerData);
-  return new Contract(receipt.events["Deployed"].returnValues.instance, MasterPriceOracle.abi);
+  return new Contract(receipt.events["Deployed"].returnValues.instance, fuse.artifacts.MasterPriceOracle.abi);
 };
