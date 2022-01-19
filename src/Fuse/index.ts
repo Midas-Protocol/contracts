@@ -97,8 +97,7 @@ export default class Fuse {
     if (!this.chainDeployment) {
       throw new Error(`Chain deployment not found for chainId ${chainId}`);
     }
-    this.oracles = oracleConfig(this.chainDeployment)[chainId];
-    this.irms = irmConfig(this.chainDeployment);
+
     this.tokenAddresses = tokenAddresses[chainId];
 
     this.contracts = {
@@ -143,6 +142,8 @@ export default class Fuse {
       DAIInterestRateModelV2: DAIInterestRateModelV2Artifact,
       WhitePaperInterestRateModel: WhitePaperInterestRateModelArtifact,
     };
+    this.irms = irmConfig(this.chainDeployment, this.artifacts);
+    this.oracles = oracleConfig(this.chainDeployment, this.artifacts)[chainId];
   }
 
   // TODO: probably should determine this by chain
