@@ -14,7 +14,7 @@ describe("Deposit flow tests", function () {
       const assets = await getAssetsConf(poolComptrollerAddress);
       deployedAssets = await deployAssets(assets.assets);
     });
-    
+
     it.only("should enable native asset as collateral into pool and supply", async function () {
       const { bob } = await ethers.getNamedSigners();
       const pool = await ethers.getContractAt("Comptroller", poolComptrollerAddress, bob);
@@ -27,6 +27,10 @@ describe("Deposit flow tests", function () {
       res = await cToken.mint({ value: 12345 });
       rec = await res.wait();
       expect(rec.status).to.eq(1);
+
+      const lens = await ethers.getContract("FusePoolLens");
+      const data = await lens.callStatic.getPoolSummary(poolComptrollerAddress);
+      console.log('data: ', data);
     });
   });
 });

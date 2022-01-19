@@ -1,9 +1,10 @@
+pragma solidity ^0.7.6;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract AAVEToken is ERC20
+contract TOUCHToken is ERC20
 {
-    constructor(string memory name, string memory symbol, uint256 initialSupply) ERC20(name, symbol) {
+    constructor(uint256 initialSupply) ERC20("Midas TOUCH Token", "TOUCH") {
         _mint(msg.sender, initialSupply);
     }
 

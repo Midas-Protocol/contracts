@@ -115,11 +115,11 @@ describe("FusePoolDirectory", function () {
       expect(fusePoolData[0][1]).to.eq(ETH_ZERO_ADDRESS);
 
       const rgtConf: cERC20Conf = {
-        underlying: await ethers.getContract("RGTToken", alice).then((c) => c.address),
+        underlying: await ethers.getContract("TRIBEToken", alice).then((c) => c.address),
         comptroller: comptroller,
         interestRateModel: jrm.address,
-        name: "Rari Governance Token",
-        symbol: "RGT",
+        name: "Tribe Governance Token",
+        symbol: "TRIBE",
         decimals: 18,
         admin: "true",
         collateralFactor: 65,
