@@ -1,5 +1,5 @@
 // Ethers
-import { BigNumber, constants, Contract, ContractFactory, providers, utils } from "ethers";
+import { BigNumber, constants, Contract, ContractFactory, ContractInterface, providers, utils } from "ethers";
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import axios from "axios";
@@ -20,6 +20,7 @@ import CEtherDelegatorArtifact from "../../artifacts/contracts/compound/CEtherDe
 import CErc20DelegateArtifact from "../../artifacts/contracts/compound/CErc20Delegate.sol/CErc20Delegate.json";
 import CErc20DelegatorArtifact from "../../artifacts/contracts/compound/CErc20Delegator.sol/CErc20Delegator.json";
 import CTokenInterfacesArtifact from "../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json";
+import EIP20InterfaceArtifact from "../../artifacts/contracts/compound/EIP20Interface.sol/EIP20Interface.json";
 import RewardsDistributorDelegatorArtifact from "../../artifacts/contracts/compound/RewardsDistributorDelegator.sol/RewardsDistributorDelegator.json";
 import PreferredPriceOracleArtifact from "../../artifacts/contracts/oracles/PreferredPriceOracle.sol/PreferredPriceOracle.json";
 
@@ -79,6 +80,14 @@ export default class Fuse {
   private oracles: OracleConfig;
   private irms: IrmConfig;
   private tokenAddresses: TokenAddresses;
+  private artifacts: {
+    [contractName: string]: {
+      contractName: string;
+      sourceName: string;
+      abi: ContractInterface;
+      bytecode: string;
+    };
+  };
 
   constructor(web3Provider: JsonRpcProvider | Web3Provider, chainId: string) {
     this.provider = web3Provider;
@@ -119,6 +128,21 @@ export default class Fuse {
         this.provider
       ),
     };
+    this.artifacts = {
+      Comptroller: ComptrollerArtifact,
+      Unitroller: UnitrollerArtifact,
+      CEtherDelegate: CEtherDelegateArtifact,
+      CEtherDelegator: CEtherDelegatorArtifact,
+      CErc20Delegate: CErc20DelegateArtifact,
+      CErc20Delegator: CErc20DelegatorArtifact,
+      CTokenInterfaces: CTokenInterfacesArtifact,
+      EIP20Interface: EIP20InterfaceArtifact,
+      RewardsDistributorDelegator: RewardsDistributorDelegatorArtifact,
+      PreferredPriceOracle: PreferredPriceOracleArtifact,
+      JumpRateModel: JumpRateModelArtifact,
+      DAIInterestRateModelV2: DAIInterestRateModelV2Artifact,
+      WhitePaperInterestRateModel: WhitePaperInterestRateModelArtifact,
+    };
   }
 
   // TODO: probably should determine this by chain
@@ -157,8 +181,8 @@ export default class Fuse {
 
     if (!implementationAddress) {
       const comptrollerContract = new ContractFactory(
-        ComptrollerArtifact.abi,
-        ComptrollerArtifact.bytecode,
+        this.artifacts.Comptroller.abi,
+        this.artifacts.Comptroller.bytecode,
         this.provider.getSigner(options.from)
       );
       const deployedComptroller = await comptrollerContract.deploy();
@@ -187,7 +211,7 @@ export default class Fuse {
       ["address", "string", "uint"],
       [options.from, poolName, receipt.blockNumber]
     );
-    const byteCodeHash = utils.keccak256(UnitrollerArtifact.bytecode);
+    const byteCodeHash = utils.keccak256(this.artifacts.Unitroller.bytecode);
 
     const poolAddress = utils.getCreate2Address(
       this.chainDeployment.FusePoolDirectory.address,
@@ -195,7 +219,7 @@ export default class Fuse {
       byteCodeHash
     );
 
-    const unitroller = new Contract(poolAddress, UnitrollerArtifact.abi, this.provider.getSigner(options.from));
+    const unitroller = new Contract(poolAddress, this.artifacts.Unitroller.abi, this.provider.getSigner(options.from));
 
     // Accept admin status via Unitroller
     try {
@@ -209,7 +233,11 @@ export default class Fuse {
     // Whitelist
     console.log("enforceWhitelist: ", enforceWhitelist);
     if (enforceWhitelist) {
-      let comptroller = new Contract(poolAddress, ComptrollerArtifact.abi, this.provider.getSigner(options.from));
+      let comptroller = new Contract(
+        poolAddress,
+        this.artifacts.Comptroller.abi,
+        this.provider.getSigner(options.from)
+      );
 
       // Already enforced so now we just need to add the addresses
       console.log("whitelist: ", whitelist);
@@ -305,7 +333,7 @@ export default class Fuse {
             kink: "900000000000000000",
           };
         deployArgs = [conf.baseRatePerYear, conf.multiplierPerYear, conf.jumpMultiplierPerYear, conf.kink];
-        modelArtifact = JumpRateModelArtifact;
+        modelArtifact = this.artifacts.JumpRateModel;
         break;
       case "DAIInterestRateModelV2":
         if (!conf)
@@ -314,7 +342,7 @@ export default class Fuse {
             kink: "900000000000000000",
           };
         deployArgs = [conf.jumpMultiplierPerYear, conf.kink, this.tokenAddresses.DAI_POT, this.tokenAddresses.DAI_JUG];
-        modelArtifact = DAIInterestRateModelV2Artifact;
+        modelArtifact = this.artifacts.DAIInterestRateModelV2;
         break;
       case "WhitePaperInterestRateModel":
         if (!conf)
@@ -323,7 +351,7 @@ export default class Fuse {
             multiplierPerYear: "200000000000000000",
           };
         deployArgs = [conf.baseRatePerYear, conf.multiplierPerYear];
-        modelArtifact = WhitePaperInterestRateModelArtifact;
+        modelArtifact = this.artifacts.WhitePaperInterestRateModel;
         break;
       default:
         throw "IRM model specified is invalid";
@@ -395,8 +423,8 @@ export default class Fuse {
     // Deploy CEtherDelegate implementation contract if necessary
     if (!implementationAddress) {
       const cEtherDelegateFactory = new ContractFactory(
-        CEtherDelegateArtifact.abi,
-        CEtherDelegateArtifact.bytecode,
+        this.artifacts.CEtherDelegate.abi,
+        this.artifacts.CEtherDelegate.bytecode,
         this.provider.getSigner(options.from)
       );
 
@@ -419,7 +447,11 @@ export default class Fuse {
       ["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
       deployArgs
     );
-    const comptroller = new Contract(conf.comptroller, ComptrollerArtifact.abi, this.provider.getSigner(options.from));
+    const comptroller = new Contract(
+      conf.comptroller,
+      this.artifacts.Comptroller.abi,
+      this.provider.getSigner(options.from)
+    );
     console.log("Comptroller's with address: ", comptroller.address, "has admin of", await comptroller.admin());
     const comptrollerWithSigner = comptroller.connect(this.provider.getSigner(options.from));
     // const errorCode = await comptroller.callStatic._deployMarket(
@@ -449,7 +481,7 @@ export default class Fuse {
       [conf.comptroller, "0x0000000000000000000000000000000000000000", receipt.blockNumber]
     );
 
-    const byteCodeHash = utils.keccak256(CEtherDelegatorArtifact.bytecode);
+    const byteCodeHash = utils.keccak256(this.artifacts.CEtherDelegator.bytecode);
 
     const cEtherDelegatorAddress = utils.getCreate2Address(
       this.chainDeployment.FuseFeeDistributor.address,
@@ -471,7 +503,11 @@ export default class Fuse {
     const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
 
     // Get Comptroller
-    const comptroller = new Contract(conf.comptroller, ComptrollerArtifact.abi, this.provider.getSigner(options.from));
+    const comptroller = new Contract(
+      conf.comptroller,
+      this.artifacts.Comptroller.abi,
+      this.provider.getSigner(options.from)
+    );
 
     // Check for price feed assuming !bypassPriceFeedCheck
     if (!conf.bypassPriceFeedCheck) await this.checkForCErc20PriceFeed(comptroller, conf);
@@ -481,9 +517,9 @@ export default class Fuse {
       if (!conf.delegateContractName) conf.delegateContractName = "CErc20Delegate";
       let delegateContractArtifact: { abi: any; bytecode: any };
       if (conf.delegateContractName === "CErc20Delegate") {
-        delegateContractArtifact = CErc20DelegateArtifact;
+        delegateContractArtifact = this.artifacts.CErc20Delegate;
       } else {
-        delegateContractArtifact = CEtherDelegateArtifact;
+        delegateContractArtifact = this.artifacts.CEtherDelegate;
       }
       const cErc20Delegate = new ContractFactory(
         delegateContractArtifact.abi,
@@ -523,7 +559,7 @@ export default class Fuse {
       ["address", "address", "uint"],
       [conf.comptroller, conf.underlying, receipt.blockNumber]
     );
-    const byteCodeHash = utils.keccak256(CErc20DelegatorArtifact.bytecode);
+    const byteCodeHash = utils.keccak256(this.artifacts.CErc20Delegator.bytecode);
 
     const cErc20DelegatorAddress = utils.getCreate2Address(
       this.chainDeployment.FuseFeeDistributor.address,
@@ -572,7 +608,7 @@ export default class Fuse {
 
   async getInterestRateModel(assetAddress: string): Promise<any | undefined | null> {
     // Get interest rate model address from asset address
-    const assetContract = new Contract(assetAddress, CTokenInterfacesArtifact.abi, this.provider);
+    const assetContract = new Contract(assetAddress, this.artifacts.CTokenInterfaces.abi, this.provider);
     const interestRateModelAddress: string = await assetContract.callStatic.interestRateModel();
 
     const interestRateModel = await this.identifyInterestRateModel(interestRateModelAddress);
@@ -621,7 +657,7 @@ export default class Fuse {
     }
 
     if (chainlinkPriceFeed === undefined || !chainlinkPriceFeed) {
-      const preferredPriceOracle = new Contract(priceOracle, PreferredPriceOracleArtifact.abi, this.provider);
+      const preferredPriceOracle = new Contract(priceOracle, this.artifacts.PreferredPriceOracle.abi, this.provider);
 
       try {
         // Get the underlying ChainlinkOracle address of the PreferredPriceOracle
@@ -952,8 +988,8 @@ export default class Fuse {
 
   async deployRewardsDistributor(rewardToken: any, options: { from: any }) {
     const distributor = new ContractFactory(
-      RewardsDistributorDelegatorArtifact.abi,
-      RewardsDistributorDelegatorArtifact.bytecode,
+      this.artifacts.RewardsDistributorDelegator.abi,
+      this.artifacts.RewardsDistributorDelegator.bytecode,
       this.provider.getSigner()
     );
     console.log({ options, rewardToken });
