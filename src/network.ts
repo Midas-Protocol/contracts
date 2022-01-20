@@ -1,10 +1,3 @@
-import MasterPriceOracleArtifact from "../artifacts/contracts/oracles/MasterPriceOracle.sol/MasterPriceOracle.json";
-import MockPriceOracleArtifact from "../artifacts/contracts/oracles/MockPriceOracle.sol/MockPriceOracle.json";
-import ChainlinkPriceOracleArtifact from "../artifacts/contracts/oracles/ChainlinkPriceOracle.sol/ChainlinkPriceOracle.json";
-
-import JumpRateModelArtifact from "../artifacts/contracts/compound/JumpRateModel.sol/JumpRateModel.json";
-import WhitePaperInterestRateModelArtifact from "../artifacts/contracts/compound/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json";
-
 export const tokenAddresses = {
   1337: {
     DAI_POT: "0x197e90f9fad81970ba7976f33cbd77088e5d7cf7",
@@ -20,33 +13,33 @@ export const tokenAddresses = {
   },
 };
 
-export const oracleConfig = (deployments) => {
+export const oracleConfig = (deployments, artifacts) => {
   return {
     1337: {
       MockPriceOracle: {
-        artifact: MockPriceOracleArtifact,
+        artifact: artifacts.MockPriceOracle,
         address: deployments.MockPriceOracle.address,
       },
       MasterPriceOracle: {
-        artifact: MasterPriceOracleArtifact,
+        artifact: artifacts.MasterPriceOracle,
         address: deployments.MasterPriceOracle.address,
       },
       ChainlinkPriceOracle: {
-        artifact: ChainlinkPriceOracleArtifact,
+        artifact: artifacts.ChainlinkPriceOracle,
         address: deployments.ChainlinkPriceOracle.address,
       },
     },
   };
 };
 
-export const irmConfig = (deployments) => {
+export const irmConfig = (deployments, artifacts) => {
   return {
     JumpRateModel: {
-      artifact: JumpRateModelArtifact,
+      artifact: artifacts.JumpRateModel,
       address: deployments.JumpRateModel.address,
     },
     WhitePaperInterestRateModel: {
-      artifact: WhitePaperInterestRateModelArtifact,
+      artifact: artifacts.WhitePaperInterestRateModel,
       address: deployments.WhitePaperInterestRateModel.address,
     },
   };
