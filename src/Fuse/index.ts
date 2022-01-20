@@ -155,7 +155,7 @@ export default class Fuse {
   }
 
   // TODO: probably should determine this by chain
-  async getEthUsdPriceBN(asBigNumber: bool = false) {
+  async getEthUsdPriceBN(asBigNumber: boolean = false) {
     // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
     const UsdPrice: number = (
       await axios.get("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=ethereum")
