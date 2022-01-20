@@ -155,15 +155,17 @@ export default class Fuse {
   }
 
   // TODO: probably should determine this by chain
-  async getEthUsdPriceBN() {
+  async getEthUsdPriceBN(asBigNumber: boolean = false) {
     // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
     const UsdPrice: number = (
       await axios.get("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=ethereum")
     ).data.ethereum.usd;
 
-    // Now we turn it into a big number
-    // To parse this back into USD usdPriceBN.div(constants.WeiPerEther).toString()
-    return utils.parseUnits(UsdPrice.toString(), 18);
+    if (asBigNumber) {
+        return utils.parseUnits(UsdPrice.toString(), 18);
+    } 
+    
+    return UsdPrice;
   }
 
   async deployPool(
