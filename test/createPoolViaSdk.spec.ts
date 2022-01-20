@@ -107,14 +107,12 @@ describe("FusePoolDirectory", function () {
       console.log("deployer", deployer.address);
 
       const tokenContract = await ethers.getContract("TRIBEToken", deployer);
-      const supply = await tokenContract.totalSupply();
-      console.log("supply: ", supply);
       const balance = await tokenContract.balanceOf(bob.address);
-      console.log("balance: ", balance.toString());
+      console.log("balanceStart: ", balance.toString());
 
       // this doesnt error even though nothing is approved, i dont have balance
       const cToken = await ethers.getContractAt("CErc20", token.assetAddress, bob);
-      await tokenContract.approve(cToken.address, utils.parseEther("12345"));
+      // await tokenContract.approve(cToken.address, utils.parseEther("12345"));
       res = await cToken.mint(utils.parseEther("12345")); // WHY DOESNT THIS ERROR
       rec = await res.wait();
       expect(rec.status).to.eq(1);
