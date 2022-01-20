@@ -13,7 +13,7 @@ describe("FusePoolDirectory", function () {
     it.only("should deploy pool from sdk without whitelist", async function () {
       this.timeout(120_000);
       const POOL_NAME = "TEST_BOB";
-      const { bob, deployer } = await ethers.getNamedSigners();
+      const { alice, bob, deployer } = await ethers.getNamedSigners();
 
       const spoFactory = await ethers.getContractFactory("MockPriceOracle", bob);
       const spo = await spoFactory.deploy([10]);
@@ -49,7 +49,7 @@ describe("FusePoolDirectory", function () {
       expect(_unfiliteredName).to.be.equal(POOL_NAME);
 
       const jrm = await ethers.getContract("JumpRateModel", bob);
-      const assets = await poolAssets(jrm.address, comptroller, bob);
+      const assets = await poolAssets(jrm.address, poolAddress, bob);
 
       const deployedAssets: DeployedAsset[] = [];
       for (const assetConf of assets.assets) {
@@ -74,8 +74,7 @@ describe("FusePoolDirectory", function () {
           underlying: assetConf.underlying,
         });
       }
-      const [totalSupply, totalBorrow, underlyingTokens, underlyingSymbols, whitelistedAdmin] =
-        await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
+      const [, , , underlyingSymbols] = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
 
       expect(underlyingSymbols).to.have.members(["ETH", "TOUCH", "TRIBE"]);
 
@@ -92,16 +91,27 @@ describe("FusePoolDirectory", function () {
       // look in AmountSelect.tsx to see how this is supposed to work
 
       // SILENTLY SEEMS TO FAIL?
-      const cEther = await ethers.getContractAt("CEther", native.assetAddress, bob);
+      const balAlStart = await alice.getBalance();
+      console.log('balAlStart: ', balAlStart.toString());
+      const cEther = await ethers.getContractAt("CEther", native.assetAddress, alice);
       res = await cEther.mint({ value: 12345 });
       rec = await res.wait();
       expect(rec.status).to.eq(1);
+      const balAlEnd = await alice.getBalance();
+      console.log('balAlEnd: ', balAlEnd.toString());
+      const diff = balAlStart.sub(balAlEnd).toString();
+      console.log('diff: ', diff);
+      console.log("bob", bob.address);
+      console.log("alice", alice.address);
+      console.log("deployer", deployer.address);
 
       const token = deployedAssets.find((asset) => asset.symbol === "TRIBE");
       expect(token).to.be.ok;
-      const tokenContract = await ethers.getContract("TRIBEToken", bob);
-      const balance = await tokenContract.balanceOf(deployer.address);
-      console.log('balance: ', balance);
+      const tokenContract = await ethers.getContract("TRIBEToken", deployer);
+      const supply = await tokenContract.totalSupply();
+      console.log("supply: ", supply);
+      const balance = await tokenContract.balanceOf("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266");
+      console.log("balance: ", balance);
 
       // this doesnt error even though nothing is approved, i dont have balance
       const cToken = await ethers.getContractAt("CErc20", token.assetAddress, bob);
