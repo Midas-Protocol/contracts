@@ -110,14 +110,18 @@ describe("FusePoolDirectory", function () {
       const tokenContract = await ethers.getContract("TRIBEToken", deployer);
       const supply = await tokenContract.totalSupply();
       console.log("supply: ", supply);
-      const balance = await tokenContract.balanceOf("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266");
-      console.log("balance: ", balance);
+      const balance = await tokenContract.balanceOf(bob.address);
+      console.log("balance: ", balance.toString());
 
       // this doesnt error even though nothing is approved, i dont have balance
       const cToken = await ethers.getContractAt("CErc20", token.assetAddress, bob);
       res = await cToken.mint(12345); // WHY DOESNT THIS ERROR
       rec = await res.wait();
       expect(rec.status).to.eq(1);
+      const balanceEnd = await tokenContract.balanceOf(bob.address);
+      console.log("balanceEnd: ", balanceEnd.toString());
+      const diffTok = balance.sub(balanceEnd).toString();
+      console.log('diffTok: ', diffTok);
 
       const data = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
       console.log("data: ", data);
