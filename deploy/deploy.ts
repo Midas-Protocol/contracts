@@ -180,12 +180,62 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   console.log("InitializableClones: ", ic.address);
   ////
 
+  ////
+  //// ORACLES
+  dep = await deployments.deterministic("MasterPriceOracle", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [],
+    log: true,
+  });
+  const masterPO = await dep.deploy();
+  console.log("MasterPriceOracle: ", masterPO.address);
+
+  dep = await deployments.deterministic("ChainlinkPriceOracle", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [10],
+    log: true,
+  });
+  const cpo = await dep.deploy();
+  console.log("ChainlinkPriceOracle: ", cpo.address);
+
+  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [],
+    log: true,
+  });
+  const utpor = await dep.deploy();
+  console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
+
+  dep = await deployments.deterministic("UniswapTwapPriceOracleV2", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [],
+    log: true,
+  });
+  const utpo = await dep.deploy();
+  console.log("UniswapTwapPriceOracleV2: ", utpo.address);
+
+  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Factory", {
+    from: deployer,
+    salt: ethers.utils.keccak256(deployer),
+    args: [utpor.address, utpo.address],
+    log: true,
+  });
+  const utpof = await dep.deploy();
+  console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
+  ////
+
+  //// 
   //// CHAIN SPECIFIC DEPLOYMENT
   const chainId = await getChainId();
   console.log("Running deployment for chain: ", chainId);
   if (chainId === "1337") {
     await deploy1337({ethers, getNamedAccounts, deployments})
   }
+  ////
 };
 
 export default func;

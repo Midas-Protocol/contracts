@@ -91,12 +91,12 @@ export const poolAssets = async (
     adminFee: 0,
     bypassPriceFeedCheck: true,
   };
-  const rgtConf: cERC20Conf = {
-    underlying: await ethers.getContract("AAVEToken", signer).then((c) => c.address),
+  const tribeConf: cERC20Conf = {
+    underlying: await ethers.getContract("TRIBEToken", signer).then((c) => c.address),
     comptroller,
     interestRateModel: interestRateModelAddress,
-    name: "AAVE Token",
-    symbol: "AAVE",
+    name: "TRIBE Token",
+    symbol: "TRIBE",
     decimals: 18,
     admin: "true",
     collateralFactor: 75,
@@ -104,12 +104,12 @@ export const poolAssets = async (
     adminFee: 0,
     bypassPriceFeedCheck: true,
   };
-  const aaveConf: cERC20Conf = {
-    underlying: await ethers.getContract("RGTToken", signer).then((c) => c.address),
+  const touchConf: cERC20Conf = {
+    underlying: await ethers.getContract("TOUCHToken", signer).then((c) => c.address),
     comptroller,
     interestRateModel: interestRateModelAddress,
-    name: "Rari Governance Token",
-    symbol: "RGT",
+    name: "Midas TOUCH Token",
+    symbol: "TOUCH",
     decimals: 18,
     admin: "true",
     collateralFactor: 65,
@@ -122,6 +122,6 @@ export const poolAssets = async (
     shortName: "Fuse R1",
     longName: "Rari DAO Fuse Pool R1 (Base)",
     assetSymbolPrefix: "fr1",
-    assets: [ethConf, aaveConf, rgtConf],
+    assets: [ethConf, touchConf, tribeConf],
   };
 };
