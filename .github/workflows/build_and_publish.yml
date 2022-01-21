@@ -23,6 +23,7 @@ jobs:
         env:
           GITHUB_TOKEN: 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
         with:
+          token: ${{env.GITHUB_TOKEN}}
           registry: https://npm.pkg.github.com
           tag: ${{env.GITHUB_REF_NAME == 'main' && 'latest' || 'beta'}}
           dry-run: true
