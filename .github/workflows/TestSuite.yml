@@ -23,5 +23,5 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }}
           registry: https://npm.pkg.github.com
-          tag: ${{env.GITHUB_REF_NAME == 'feat/public-package' && "beta"}}
+          tag: ${{env.GITHUB_REF_NAME == 'feat/public-package' && 'beta'}}
           dry-run: true
