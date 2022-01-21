@@ -20,6 +20,8 @@ jobs:
           cache: "npm"
       - run: npm install
       - uses: JS-DevTools/npm-publish@v1.4.3
+        env:
+          GITHUB_TOKEN: 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
         with:
           token: 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
           registry: https://npm.pkg.github.com
