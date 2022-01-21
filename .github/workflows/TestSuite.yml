@@ -19,7 +19,7 @@ jobs:
           node-version: 16.x
           cache: "npm"
       - run: npm install
-      - uses: JS-DevTools/npm-publish@v1
+      - uses: JS-DevTools/npm-publish@v1.4.3
         with:
           token: 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
           registry: https://npm.pkg.github.com
