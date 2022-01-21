@@ -19,10 +19,10 @@ jobs:
           node-version: 16.x
           cache: "npm"
       - run: npm install
-      - uses: JS-DevTools/npm-publish@v1.4.3
+      - uses: JS-DevTools/npm-publish@v1
         env:
           GITHUB_TOKEN: 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
         with:
           token: ${{env.GITHUB_TOKEN}}
           registry: https://npm.pkg.github.com
-          # tag: ${{env.GITHUB_REF_NAME == 'main' && 'latest' || 'beta'}}
+          tag: ${{env.GITHUB_REF_NAME == 'main' && 'latest' || 'beta'}}
