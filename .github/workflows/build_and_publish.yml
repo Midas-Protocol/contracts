@@ -25,4 +25,4 @@ jobs:
         with:
           token: ${{env.GITHUB_TOKEN}}
           registry: https://npm.pkg.github.com
-          tag: ${{env.GITHUB_REF_NAME == 'main' && 'latest' || 'beta'}}
+          # tag: ${{env.GITHUB_REF_NAME == 'main' && 'latest' || 'beta'}}
