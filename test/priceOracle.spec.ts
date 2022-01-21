@@ -8,7 +8,7 @@ describe("PriceOracle deployment", function () {
       const { alice } = await ethers.getNamedSigners();
       const sdk = new Fuse(ethers.provider, "1337");
 
-      const deployedOracle = await sdk.deployPriceOracle("ChainlinkPriceOracle", {}, { from: alice.address });
+      const deployedOracle = await sdk.deployPriceOracle("ChainlinkPriceOracleV2", {}, { from: alice.address });
       expect(deployedOracle).to.be.ok;
     });
   });

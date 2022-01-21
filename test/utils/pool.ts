@@ -18,7 +18,7 @@ export async function createPool(
     signer = bob;
   }
   if (!priceOracleAddress) {
-    const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", signer);
+    const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracleV2", signer);
     const spo = await spoFactory.deploy([10]);
     priceOracleAddress = spo.address;
   }

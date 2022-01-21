@@ -2850,19 +2850,43 @@
             }
           ]
         },
-        "ChainlinkPriceOracle": {
-          "address": "0xf191e27B986a08E6C0FA215731130FE466FcEc4B",
+        "ChainlinkPriceOracleV2": {
+          "address": "0xBF600E2043D0f174C2ed7E69d78aE84e4b76Ed78",
           "abi": [
             {
               "inputs": [
                 {
-                  "internalType": "uint256",
-                  "name": "_maxSecondsBeforePriceIsStale",
-                  "type": "uint256"
+                  "internalType": "address",
+                  "name": "_admin",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "_canAdminOverwrite",
+                  "type": "bool"
                 }
               ],
               "stateMutability": "nonpayable",
               "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "oldAdmin",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "NewAdmin",
+              "type": "event"
             },
             {
               "inputs": [],
@@ -2891,22 +2915,42 @@
               "type": "function"
             },
             {
-              "inputs": [
+              "inputs": [],
+              "name": "admin",
+              "outputs": [
                 {
                   "internalType": "address",
                   "name": "",
                   "type": "address"
                 }
               ],
-              "name": "btcPriceFeeds",
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "canAdminOverwrite",
               "outputs": [
                 {
-                  "internalType": "contract AggregatorV3Interface",
+                  "internalType": "bool",
                   "name": "",
-                  "type": "address"
+                  "type": "bool"
                 }
               ],
               "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "changeAdmin",
+              "outputs": [],
+              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -2917,12 +2961,12 @@
                   "type": "address"
                 }
               ],
-              "name": "ethPriceFeeds",
+              "name": "feedBaseCurrencies",
               "outputs": [
                 {
-                  "internalType": "contract AggregatorV3Interface",
+                  "internalType": "enum ChainlinkPriceOracleV2.FeedBaseCurrency",
                   "name": "",
-                  "type": "address"
+                  "type": "uint8"
                 }
               ],
               "stateMutability": "view",
@@ -2937,38 +2981,6 @@
                 }
               ],
               "name": "getUnderlyingPrice",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "underlying",
-                  "type": "address"
-                }
-              ],
-              "name": "hasPriceFeed",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "maxSecondsBeforePriceIsStale",
               "outputs": [
                 {
                   "internalType": "uint256",
@@ -3006,7 +3018,7 @@
                   "type": "address"
                 }
               ],
-              "name": "usdPriceFeeds",
+              "name": "priceFeeds",
               "outputs": [
                 {
                   "internalType": "contract AggregatorV3Interface",
@@ -3015,6 +3027,29 @@
                 }
               ],
               "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "underlyings",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "contract AggregatorV3Interface[]",
+                  "name": "feeds",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "enum ChainlinkPriceOracleV2.FeedBaseCurrency",
+                  "name": "baseCurrency",
+                  "type": "uint8"
+                }
+              ],
+              "name": "setPriceFeeds",
+              "outputs": [],
+              "stateMutability": "nonpayable",
               "type": "function"
             }
           ]

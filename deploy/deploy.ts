@@ -191,14 +191,14 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   const masterPO = await dep.deploy();
   console.log("MasterPriceOracle: ", masterPO.address);
 
-  dep = await deployments.deterministic("ChainlinkPriceOracle", {
+  dep = await deployments.deterministic("ChainlinkPriceOracleV2", {
     from: deployer,
     salt: ethers.utils.keccak256(deployer),
-    args: [10],
+    args: [deployer, true],
     log: true,
   });
   const cpo = await dep.deploy();
-  console.log("ChainlinkPriceOracle: ", cpo.address);
+  console.log("ChainlinkPriceOracleV2: ", cpo.address);
 
   dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
     from: deployer,
