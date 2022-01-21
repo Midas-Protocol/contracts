@@ -2,7 +2,10 @@ name: Working Repo
 
 on:
   push:
-    branches: [main, development]
+    branches:
+      - main
+      - development
+      - feat/publish-**
   pull_request:
     branches: [main, development]
 
@@ -16,4 +19,9 @@ jobs:
           node-version: 16.x
           cache: "npm"
       - run: npm install
-      # - run: npm run test
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          registry: https://npm.pkg.github.com
+          tag: ${{env.GITHUB_REF_NAME == 'feat/public-package' && "beta"}}
+          dry-run: true
