@@ -53,7 +53,7 @@ import {
   SIMPLE_DEPLOY_ORACLES,
 } from "./config";
 import { irmConfig, oracleConfig, tokenAddresses } from "../network";
-import {filterOnlyObjectProperties, filterPoolName} from "./utils";
+import { filterOnlyObjectProperties, filterPoolName } from "./utils";
 
 type OracleConfig = {
   [contractName: string]: {
