@@ -27,7 +27,7 @@ import PreferredPriceOracleArtifact from "../../artifacts/contracts/oracles/Pref
 // Oracle Artifacts
 import MasterPriceOracleArtifact from "../../artifacts/contracts/oracles/MasterPriceOracle.sol/MasterPriceOracle.json";
 import MockPriceOracleArtifact from "../../artifacts/contracts/oracles/MockPriceOracle.sol/MockPriceOracle.json";
-import ChainlinkPriceOracleArtifact from "../../artifacts/contracts/oracles/ChainlinkPriceOracle.sol/ChainlinkPriceOracle.json";
+import ChainlinkPriceOracleV2Artifact from "../../artifacts/contracts/oracles/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json";
 
 // IRM Artifacts
 import JumpRateModelArtifact from "../../artifacts/contracts/compound/JumpRateModel.sol/JumpRateModel.json";
@@ -35,7 +35,15 @@ import DAIInterestRateModelV2Artifact from "../../artifacts/contracts/compound/D
 import WhitePaperInterestRateModelArtifact from "../../artifacts/contracts/compound/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json";
 
 // Types
-import { cERC20Conf, InterestRateModel, InterestRateModelConf, InterestRateModelParams, OracleConf } from "./types";
+import {
+  cERC20Conf,
+  FusePoolData,
+  InterestRateModel,
+  InterestRateModelConf,
+  InterestRateModelParams,
+  OracleConf,
+  USDPricedFuseAsset,
+} from "./types";
 import { deployMasterPriceOracle, getDeployArgs, getOracleConf, simpleDeploy } from "./ops/oracles";
 import {
   COMPTROLLER_ERROR_CODES,
@@ -45,6 +53,7 @@ import {
   SIMPLE_DEPLOY_ORACLES,
 } from "./config";
 import { irmConfig, oracleConfig, tokenAddresses } from "../network";
+import { filterOnlyObjectProperties, filterPoolName } from "./utils";
 
 type OracleConfig = {
   [contractName: string]: {
@@ -146,7 +155,7 @@ export default class Fuse {
       JumpRateModel: JumpRateModelArtifact,
       DAIInterestRateModelV2: DAIInterestRateModelV2Artifact,
       WhitePaperInterestRateModel: WhitePaperInterestRateModelArtifact,
-      ChainlinkPriceOracle: ChainlinkPriceOracleArtifact,
+      ChainlinkPriceOracleV2: ChainlinkPriceOracleV2Artifact,
       MasterPriceOracle: MasterPriceOracleArtifact,
       MockPriceOracle: MockPriceOracleArtifact,
     };
@@ -155,16 +164,15 @@ export default class Fuse {
   }
 
   // TODO: probably should determine this by chain
-  async getEthUsdPriceBN(asBigNumber: boolean = false) {
+  async getEthUsdPriceBN(asBigNumber: boolean = false): Promise<number | BigNumber> {
     // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
-    const UsdPrice: number = (
-      await axios.get("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=ethereum")
-    ).data.ethereum.usd;
+    const UsdPrice = (await axios.get("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=ethereum"))
+      .data.ethereum.usd;
 
     if (asBigNumber) {
-        return utils.parseUnits(UsdPrice.toString(), 18);
-    } 
-    
+      return utils.parseUnits(UsdPrice.toString(), 18);
+    }
+
     return UsdPrice;
   }
 
@@ -261,8 +269,8 @@ export default class Fuse {
   private async getOracleContractFactory(contractName: string, signer?: string): Promise<ContractFactory> {
     let oracleArtifact: { abi: any; bytecode: any };
     switch (contractName) {
-      case "ChainlinkPriceOracle": {
-        oracleArtifact = this.oracles.ChainlinkPriceOracle.artifact;
+      case "ChainlinkPriceOracleV2": {
+        oracleArtifact = this.oracles.ChainlinkPriceOracleV2.artifact;
         break;
       }
       default:
@@ -276,11 +284,12 @@ export default class Fuse {
     conf: OracleConf, // This conf depends on which comptroller model we're deploying
     options: any
   ): Promise<Contract> {
-    if (!model) model = "ChainlinkPriceOracle";
+    if (!model) model = "ChainlinkPriceOracleV2";
     if (!conf) conf = {};
 
     const oracleConf = getOracleConf(this, model, conf);
     const deployArgs = getDeployArgs(this, model, oracleConf, options);
+    console.log("deployArgs: ", deployArgs);
 
     if (Fuse.SIMPLE_DEPLOY_ORACLES.indexOf(model) >= 0) {
       const factory = await this.getOracleContractFactory(model, options.from ?? null);
@@ -314,7 +323,6 @@ export default class Fuse {
         throw Error("Deployment of interest rate model failed: " + (error.message ? error.message : error));
       }
     }
-
     // Deploy new asset to existing pool via SDK
     try {
       [assetAddress, implementationAddress, receipt] = await this.deployCToken(cTokenConf, options);
@@ -640,8 +648,8 @@ export default class Fuse {
     // Get price feed
     // 1. Get priceOracle's address used by the comprtroller. PriceOracle can have multiple implementations so:
     // 1.1 We try to figure out which implementation it is, by (practically) bruteforcing it.
-    //1.1.2 We first assume its a ChainlinkPriceOracle.
-    //1.1.3 We then try with PrefferedOracle's primary oracle i.e ChainlinkPriceOracle
+    //1.1.2 We first assume its a ChainlinkPriceOracleV2.
+    //1.1.3 We then try with PrefferedOracle's primary oracle i.e ChainlinkPriceOracleV2
     //1.1.4 We try with UniswapAnchoredView
     //1.1.5 We try with UniswapView
     //1.1.6 We try with PrefferedOracle's secondary oracle i.e UniswapAnchoredView or UniswapView
@@ -652,11 +660,11 @@ export default class Fuse {
     // Get address of the priceOracle used by the comptroller
     const priceOracle: string = await comptroller.callStatic.oracle();
 
-    // Check for a ChainlinkPriceOracle with a feed for the ERC20 Token
+    // Check for a ChainlinkPriceOracleV2 with a feed for the ERC20 Token
     let chainlinkPriceOracle: Contract;
     let chainlinkPriceFeed: boolean | undefined = undefined; // will be true if chainlink has a price feed for underlying Erc20 token
 
-    chainlinkPriceOracle = new Contract(priceOracle, this.oracles.ChainlinkPriceOracle.artifact.abi, this.provider);
+    chainlinkPriceOracle = new Contract(priceOracle, this.oracles.ChainlinkPriceOracleV2.artifact.abi, this.provider);
 
     // If underlying Erc20 is WETH use chainlinkPriceFeed, otherwise check if Chainlink supports it.
     if (conf.underlying.toLowerCase() === this.tokenAddresses.W_TOKEN.toLowerCase()) {
@@ -677,7 +685,7 @@ export default class Fuse {
         // Initiate ChainlinkOracle
         chainlinkPriceOracle = new Contract(
           chainlinkPriceOracleAddress,
-          this.oracles.ChainlinkPriceOracle.artifact.abi,
+          this.oracles.ChainlinkPriceOracleV2.artifact.abi,
           this.provider
         );
 
@@ -742,7 +750,7 @@ export default class Fuse {
               await uniswapOrUniswapAnchoredViewContract.methods.IS_UNISWAP_VIEW();
             } catch {
               throw Error(
-                "Underlying token price not available via ChainlinkPriceOracle, and no UniswapAnchoredView or UniswapView was found."
+                "Underlying token price not available via ChainlinkPriceOracleV2, and no UniswapAnchoredView or UniswapView was found."
               );
             }
           }
@@ -1030,5 +1038,100 @@ export default class Fuse {
       }
     }
     return irmName;
+  };
+
+  fetchFusePoolData = async (poolId: string | undefined, address: string): Promise<FusePoolData | undefined> => {
+    if (!poolId) return undefined;
+
+    const {
+      comptroller,
+      name: _unfiliteredName,
+      isPrivate,
+    } = await this.contracts.FusePoolDirectory.pools(Number(poolId));
+
+    const name = filterPoolName(_unfiliteredName);
+
+    const assets: USDPricedFuseAsset[] = (
+      await this.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(comptroller, {
+        from: address,
+      })
+    ).map(filterOnlyObjectProperties);
+
+    let totalLiquidityUSD = 0;
+
+    let totalSupplyBalanceUSD = 0;
+    let totalBorrowBalanceUSD = 0;
+
+    let totalSuppliedUSD = 0;
+    let totalBorrowedUSD = 0;
+
+    const ethPrice: number = utils.formatEther(
+      // prefer rari because it has caching
+      await this.getEthUsdPriceBN(true)
+    ) as any;
+
+    const promises: Promise<boolean>[] = [];
+
+    const comptrollerContract = new Contract(
+      comptroller,
+      this.chainDeployment.Comptroller.abi,
+      this.provider.getSigner()
+    );
+    for (let i = 0; i < assets.length; i++) {
+      const asset = assets[i];
+
+      // @todo aggregate the borrow/supply guardian paused into 1
+      promises.push(
+        comptrollerContract.callStatic
+          .borrowGuardianPaused(asset.cToken)
+          .then((isPaused: boolean) => (asset.isPaused = isPaused))
+      );
+      promises.push(
+        comptrollerContract.callStatic
+          .mintGuardianPaused(asset.cToken)
+          .then((isPaused: boolean) => (asset.isSupplyPaused = isPaused))
+      );
+
+      asset.supplyBalanceUSD =
+        asset.supplyBalance.mul(asset.underlyingPrice).div(BigNumber.from(10).pow(36)).toNumber() * ethPrice;
+
+      asset.borrowBalanceUSD =
+        asset.borrowBalance.mul(asset.underlyingPrice).div(BigNumber.from(10).pow(36)).toNumber() * ethPrice;
+
+      totalSupplyBalanceUSD += asset.supplyBalanceUSD;
+      totalBorrowBalanceUSD += asset.borrowBalanceUSD;
+
+      asset.totalSupplyUSD =
+        asset.totalSupply.mul(asset.underlyingPrice).div(BigNumber.from(10).pow(36)).toNumber() * ethPrice;
+
+      asset.totalBorrowUSD =
+        asset.totalBorrow.mul(asset.underlyingPrice).div(BigNumber.from(10).pow(36)).toNumber() * ethPrice;
+
+      totalSuppliedUSD += asset.totalSupplyUSD;
+      totalBorrowedUSD += asset.totalBorrowUSD;
+
+      asset.liquidityUSD =
+        asset.liquidity.mul(asset.underlyingPrice).div(BigNumber.from(10).pow(36)).toNumber() * ethPrice;
+
+      totalLiquidityUSD += asset.liquidityUSD;
+    }
+
+    await Promise.all(promises);
+
+    return {
+      assets: assets.sort((a, b) => (b.liquidityUSD > a.liquidityUSD ? 1 : -1)),
+      comptroller,
+      name,
+      isPrivate,
+      totalLiquidityUSD,
+      totalSuppliedUSD,
+      totalBorrowedUSD,
+      totalSupplyBalanceUSD,
+      totalBorrowBalanceUSD,
+      oracle: "",
+      oracleModel: "",
+      admin: "",
+      isAdminWhitelisted: true,
+    };
   };
 }

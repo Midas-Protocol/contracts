@@ -2,23 +2,34 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { ethers } from "hardhat";
 import { cERC20Conf, Fuse } from "../../lib/esm/src";
-import { utils } from "ethers";
+import { constants, providers, utils } from "ethers";
+import { FusePoolData, USDPricedFuseAsset } from "../../lib/esm/src/Fuse/types";
 
-export async function createPool(
-  closeFactor: number = 50,
-  liquidationIncentive: number = 8,
-  poolName: string = "TEST",
-  enforceWhitelist: boolean = false,
-  whitelist: Array<string> | null = null,
-  priceOracleAddress: string | null = null,
-  signer: SignerWithAddress | null = null
-): Promise<[string, string, string]> {
+interface PoolCreationParams {
+  closeFactor?: number;
+  liquidationIncentive?: number;
+  poolName: string;
+  enforceWhitelist?: boolean;
+  whitelist?: Array<string>;
+  priceOracleAddress?: string | null;
+  signer?: SignerWithAddress | null;
+}
+
+export async function createPool({
+  closeFactor = 50,
+  liquidationIncentive = 8,
+  poolName = "TEST",
+  enforceWhitelist = false,
+  whitelist = [],
+  priceOracleAddress = null,
+  signer = null,
+}: PoolCreationParams): Promise<[string, string, string]> {
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
   }
   if (!priceOracleAddress) {
-    const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", signer);
+    const spoFactory = await ethers.getContractFactory("MockPriceOracle", signer);
     const spo = await spoFactory.deploy([10]);
     priceOracleAddress = spo.address;
   }
@@ -44,21 +55,44 @@ export async function createPool(
   );
 }
 
-export async function deployAssets(assets: cERC20Conf[], signer: SignerWithAddress | null = null) {
+export type DeployedAsset = {
+  symbol: string;
+  underlying: string;
+  assetAddress: string;
+  implementationAddress: string;
+  interestRateModel: string;
+  receipt: providers.TransactionReceipt;
+};
+export async function deployAssets(assets: cERC20Conf[], signer?: SignerWithAddress): Promise<DeployedAsset[]> {
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
   }
   const sdk = new Fuse(ethers.provider, "1337");
 
+  const deployed: DeployedAsset[] = [];
   for (const assetConf of assets) {
-    const [, , , receipt] = await sdk.deployAsset(Fuse.JumpRateModelConf, assetConf, { from: signer.address });
+    const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
+      Fuse.JumpRateModelConf,
+      assetConf,
+      { from: signer.address }
+    );
     if (receipt.status !== 1) {
       throw `Failed to deploy asset: ${receipt.logs}`;
     }
     console.log("deployed asset: ", assetConf.name);
     console.log("-----------------");
+    deployed.push({
+      symbol: assetConf.symbol,
+      underlying: assetConf.underlying,
+      assetAddress,
+      implementationAddress,
+      interestRateModel,
+      receipt,
+    });
   }
+
+  return deployed;
 }
 
 export async function getAssetsConf(
@@ -91,12 +125,12 @@ export const poolAssets = async (
     adminFee: 0,
     bypassPriceFeedCheck: true,
   };
-  const rgtConf: cERC20Conf = {
-    underlying: await ethers.getContract("AAVEToken", signer).then((c) => c.address),
+  const tribeConf: cERC20Conf = {
+    underlying: await ethers.getContract("TRIBEToken", signer).then((c) => c.address),
     comptroller,
     interestRateModel: interestRateModelAddress,
-    name: "AAVE Token",
-    symbol: "AAVE",
+    name: "TRIBE Token",
+    symbol: "TRIBE",
     decimals: 18,
     admin: "true",
     collateralFactor: 75,
@@ -104,12 +138,12 @@ export const poolAssets = async (
     adminFee: 0,
     bypassPriceFeedCheck: true,
   };
-  const aaveConf: cERC20Conf = {
-    underlying: await ethers.getContract("RGTToken", signer).then((c) => c.address),
+  const touchConf: cERC20Conf = {
+    underlying: await ethers.getContract("TOUCHToken", signer).then((c) => c.address),
     comptroller,
     interestRateModel: interestRateModelAddress,
-    name: "Rari Governance Token",
-    symbol: "RGT",
+    name: "Midas TOUCH Token",
+    symbol: "TOUCH",
     decimals: 18,
     admin: "true",
     collateralFactor: 65,
@@ -122,6 +156,25 @@ export const poolAssets = async (
     shortName: "Fuse R1",
     longName: "Rari DAO Fuse Pool R1 (Base)",
     assetSymbolPrefix: "fr1",
-    assets: [ethConf, aaveConf, rgtConf],
+    assets: [ethConf, touchConf, tribeConf],
   };
+};
+
+export const ethAssetInPool = async (
+  poolId: string,
+  sdk: Fuse,
+  signer: SignerWithAddress
+): Promise<USDPricedFuseAsset> => {
+  const fetchedAssetsInPoolAfterBorrow: FusePoolData = await sdk.fetchFusePoolData(poolId, signer.address);
+  return fetchedAssetsInPoolAfterBorrow.assets.filter((a) => a.underlyingToken === constants.AddressZero)[0];
+};
+
+export const getPoolIndex = async (poolAddress: string, creatorAddress: string, sdk: Fuse) => {
+  const [indexes, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPoolsByAccountWithData(creatorAddress);
+  for (let j = 0; j < publicPools.length; j++) {
+    if (publicPools[j].comptroller === poolAddress) {
+      return indexes[j];
+    }
+  }
+  return null;
 };

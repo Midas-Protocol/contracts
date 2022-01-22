@@ -1,4 +1,6 @@
 import Fuse from "./Fuse";
+import ERC20Abi from "./Fuse/abi/ERC20.json";
+
 export { Fuse };
 export {
   cERC20Conf,
@@ -9,6 +11,9 @@ export {
   MinifiedOraclesContracts,
   OracleConf,
   InterestRateModel,
+  FusePoolData,
+  USDPricedFuseAsset,
+  FuseAsset,
 } from "./Fuse/types";
-import ERC20Abi from "./Fuse/abi/ERC20.json";
+export { filterOnlyObjectProperties } from "./Fuse/utils";
 export { ERC20Abi };
