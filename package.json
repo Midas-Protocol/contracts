@@ -21,7 +21,6 @@
     "build:sdk": "tsc -p tsconfig-sdk.json",
     "build:cjs": "tsc -p tsconfig-cjs.json",
     "build:contracts": "hardhat compile",
-    "postinstall": "npm run build",
     "clean": "rm -rf lib"
   },
   "keywords": [],
