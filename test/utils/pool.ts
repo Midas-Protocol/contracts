@@ -1,9 +1,8 @@
 // pool utilities used across downstream tests
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { ethers } from "hardhat";
-import { cERC20Conf, Fuse } from "../../lib/esm/src";
+import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../lib/esm/src";
 import { constants, providers, utils } from "ethers";
-import { FusePoolData, USDPricedFuseAsset } from "../../lib/esm/src/Fuse/types";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 interface PoolCreationParams {
   closeFactor?: number;
