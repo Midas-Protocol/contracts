@@ -11,7 +11,6 @@ import "../external/compound/ICErc20.sol";
 import "../external/chainlink/AggregatorV3Interface.sol";
 
 import "./BasePriceOracle.sol";
-import "hardhat/console.sol";
 
 /**
  * @title MockPriceOracle
@@ -84,8 +83,6 @@ contract MockPriceOracle is IPriceOracle, BasePriceOracle {
 
         int256 tokenEthPrice = 1;
         uint r = random();
-        console.log(r);
-
         return uint256(tokenEthPrice).mul(1e18).div(r).div(1e18);
 
     }
