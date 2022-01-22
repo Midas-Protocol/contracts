@@ -1,46 +1,69 @@
 import { expect } from "chai";
-import { constants } from "ethers";
+import { constants, Contract, utils } from "ethers";
 import { ethers } from "hardhat";
 import { createPool } from "./utils";
-import { deployAssets, DeployedAsset, getAssetsConf } from "./utils/pool";
+import { deployAssets, ethAssetInPool, getAssetsConf, getPoolIndex } from "./utils/pool";
+import { Fuse } from "../lib/esm/src";
+import { FusePoolData, USDPricedFuseAsset } from "../lib/esm/src/Fuse/types";
 
 describe("Deposit flow tests", function () {
   describe("Deposit flow", async function () {
     let poolImplementationAddress: string;
-    let poolAddress: string
-    let deployedAssets: DeployedAsset[]; 
+    let poolAddress: string;
+    const POOL_NAME = "test pool bob";
 
     beforeEach(async () => {
-      [poolAddress, poolImplementationAddress] = await createPool();
-      console.log('poolImplementationAddress: ', poolImplementationAddress);
-      console.log('poolAddress: ', poolAddress);
-      const comptroller = await ethers.getContract("Comptroller");
-      console.log('comptroller: ', comptroller.address);
-      
-      const assets = await getAssetsConf(poolImplementationAddress);
-      deployedAssets = await deployAssets(assets.assets);
+      this.timeout(120_000);
+      const { bob } = await ethers.getNamedSigners();
+      [poolAddress, poolImplementationAddress] = await createPool({ poolName: POOL_NAME, signer: bob });
+      const sdk = new Fuse(ethers.provider, "1337");
+      const assets = await getAssetsConf(poolAddress);
+      await deployAssets(assets.assets, bob);
+      const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
+      expect(fusePoolData.length).to.eq(3);
+      expect(fusePoolData.at(-1)[3]).to.eq("TRIBE");
     });
 
     it("should enable native asset as collateral into pool and supply", async function () {
+      let tx;
+      let rec;
+      let cToken: Contract;
+      let ethAsset: USDPricedFuseAsset;
+      let ethAssetAfterBorrow: USDPricedFuseAsset;
       const { bob } = await ethers.getNamedSigners();
-      const pool = await ethers.getContractAt("Comptroller", poolImplementationAddress, bob);
-      const native = deployedAssets.find((asset) => asset.underlying === constants.AddressZero);
-      let res = await pool.enterMarkets([native.assetAddress]);
-      let rec = await res.wait();
+
+      const sdk = new Fuse(ethers.provider, "1337");
+
+      const poolId = (await getPoolIndex(poolAddress, bob.address, sdk)).toString();
+      const assetsInPool: FusePoolData = await sdk.fetchFusePoolData(poolId, bob.address);
+
+      for (const asset of assetsInPool.assets) {
+        if (asset.underlyingToken === constants.AddressZero) {
+          cToken = new Contract(asset.cToken, sdk.chainDeployment.CEtherDelegate.abi, bob);
+          const pool = await ethers.getContractAt("Comptroller", poolAddress, bob);
+          tx = await pool.enterMarkets([asset.cToken]);
+          await tx.wait();
+          tx = await cToken.mint({ value: utils.parseUnits("2", 18) });
+          rec = await tx.wait();
+          expect(rec.status).to.eq(1);
+        } else {
+          cToken = new Contract(asset.cToken, sdk.chainDeployment.CErc20Delegate.abi, bob);
+        }
+      }
+
+      ethAsset = await ethAssetInPool(poolId, sdk, bob);
+      const cEther = new Contract(ethAsset.cToken, sdk.chainDeployment.CEtherDelegate.abi, bob);
+      tx = await cEther.callStatic.borrow(utils.parseUnits("1.5", 18));
+      expect(tx).to.eq(0);
+      tx = await cEther.callStatic.borrow(utils.parseUnits("0.5", 18));
+      expect(tx).to.eq(1019);
+      tx = await cEther.borrow(utils.parseUnits("1.5", 18));
+      rec = await tx.wait();
       expect(rec.status).to.eq(1);
-
-      const fpd = await ethers.getContract("FusePoolDirectory", bob);
-      const allPools = await fpd.callStatic.getAllPools();
-      console.log('allPools: ', allPools);
-
-      const cToken = await ethers.getContractAt("CEther", native.assetAddress, bob);
-      res = await cToken.mint({ value: 12345 });
-      rec = await res.wait();
-      expect(rec.status).to.eq(1);
-
-      const lens = await ethers.getContract("FusePoolLens");
-      const data = await lens.callStatic.getPoolSummary(poolAddress);
-      console.log('data: ', data);
+      ethAssetAfterBorrow = await ethAssetInPool(poolId, sdk, bob);
+      expect(ethAsset.borrowBalance.lt(ethAssetAfterBorrow.borrowBalance)).to.eq(true);
+      console.log(ethAssetAfterBorrow.borrowBalanceUSD, "Borrow Balance USD: AFTER mint & borrow");
+      console.log(ethAssetAfterBorrow.supplyBalanceUSD, "Supply Balance USD: AFTER mint & borrow");
     });
   });
 });

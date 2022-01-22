@@ -2,23 +2,34 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { ethers } from "hardhat";
 import { cERC20Conf, Fuse } from "../../lib/esm/src";
-import { providers, utils } from "ethers";
+import { constants, providers, utils } from "ethers";
+import { FusePoolData, USDPricedFuseAsset } from "../../lib/esm/src/Fuse/types";
 
-export async function createPool(
-  closeFactor: number = 50,
-  liquidationIncentive: number = 8,
-  poolName: string = "TEST",
-  enforceWhitelist: boolean = false,
-  whitelist: Array<string> = [],
-  priceOracleAddress?: string,
-  signer?: SignerWithAddress
-): Promise<[string, string, string]> {
+interface PoolCreationParams {
+  closeFactor?: number;
+  liquidationIncentive?: number;
+  poolName: string;
+  enforceWhitelist?: boolean;
+  whitelist?: Array<string>;
+  priceOracleAddress?: string | null;
+  signer?: SignerWithAddress | null;
+}
+
+export async function createPool({
+  closeFactor = 50,
+  liquidationIncentive = 8,
+  poolName = "TEST",
+  enforceWhitelist = false,
+  whitelist = [],
+  priceOracleAddress = null,
+  signer = null,
+}: PoolCreationParams): Promise<[string, string, string]> {
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
   }
   if (!priceOracleAddress) {
-    const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", signer);
+    const spoFactory = await ethers.getContractFactory("MockPriceOracle", signer);
     const spo = await spoFactory.deploy([10]);
     priceOracleAddress = spo.address;
   }
@@ -147,4 +158,23 @@ export const poolAssets = async (
     assetSymbolPrefix: "fr1",
     assets: [ethConf, aaveConf, rgtConf],
   };
+};
+
+export const ethAssetInPool = async (
+  poolId: string,
+  sdk: Fuse,
+  signer: SignerWithAddress
+): Promise<USDPricedFuseAsset> => {
+  const fetchedAssetsInPoolAfterBorrow: FusePoolData = await sdk.fetchFusePoolData(poolId, signer.address);
+  return fetchedAssetsInPoolAfterBorrow.assets.filter((a) => a.underlyingToken === constants.AddressZero)[0];
+};
+
+export const getPoolIndex = async (poolAddress: string, creatorAddress: string, sdk: Fuse) => {
+  const [indexes, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPoolsByAccountWithData(creatorAddress);
+  for (let j = 0; j < publicPools.length; j++) {
+    if (publicPools[j].comptroller === poolAddress) {
+      return indexes[j];
+    }
+  }
+  return null;
 };
