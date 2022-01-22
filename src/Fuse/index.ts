@@ -289,7 +289,7 @@ export default class Fuse {
 
     const oracleConf = getOracleConf(this, model, conf);
     const deployArgs = getDeployArgs(this, model, oracleConf, options);
-    console.log('deployArgs: ', deployArgs);
+    console.log("deployArgs: ", deployArgs);
 
     if (Fuse.SIMPLE_DEPLOY_ORACLES.indexOf(model) >= 0) {
       const factory = await this.getOracleContractFactory(model, options.from ?? null);
@@ -313,7 +313,6 @@ export default class Fuse {
       ["WhitePaperInterestRateModel", "JumpRateModel", "DAIInterestRateModelV2"].indexOf(irmConf.interestRateModel!) >=
       0
     ) {
-      console.log("hfdkfjdkfjdkjfkjdjk");
       try {
         irmConf.interestRateModel = await this.deployInterestRateModel(
           options,
@@ -324,9 +323,6 @@ export default class Fuse {
         throw Error("Deployment of interest rate model failed: " + (error.message ? error.message : error));
       }
     }
-
-    console.log("jsfkdsfujd,jfkdfkj");
-
     // Deploy new asset to existing pool via SDK
     try {
       [assetAddress, implementationAddress, receipt] = await this.deployCToken(cTokenConf, options);
