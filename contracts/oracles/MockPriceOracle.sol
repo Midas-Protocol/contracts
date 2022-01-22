@@ -83,6 +83,7 @@ contract MockPriceOracle is IPriceOracle, BasePriceOracle {
 
         int256 tokenEthPrice = 1;
         uint r = random();
+
         return uint256(tokenEthPrice).mul(1e18).div(r).div(1e18);
 
     }
