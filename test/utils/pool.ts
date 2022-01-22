@@ -2,30 +2,37 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { ethers } from "hardhat";
 import { cERC20Conf, Fuse } from "../../lib/esm/src";
-import { utils } from "ethers";
+import { constants, providers, utils } from "ethers";
+import { FusePoolData, USDPricedFuseAsset } from "../../lib/esm/src/Fuse/types";
 
-export async function createPool(
-  closeFactor: number = 50,
-  liquidationIncentive: number = 8,
-  poolName: string = "TEST",
-  enforceWhitelist: boolean = false,
-  whitelist?: Array<string>,
-  priceOracleAddress?: string,
-  signer?: SignerWithAddress
-): Promise<[string, string, string]> {
+interface PoolCreationParams {
+  closeFactor?: number;
+  liquidationIncentive?: number;
+  poolName: string;
+  enforceWhitelist?: boolean;
+  whitelist?: Array<string>;
+  priceOracleAddress?: string | null;
+  signer?: SignerWithAddress | null;
+}
+
+export async function createPool({
+  closeFactor = 50,
+  liquidationIncentive = 8,
+  poolName = "TEST",
+  enforceWhitelist = false,
+  whitelist = [],
+  priceOracleAddress = null,
+  signer = null,
+}: PoolCreationParams): Promise<[string, string, string]> {
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
   }
-  const signerAddress = signer.address;
-  console.log('signerAddress: ', signerAddress);
-  console.log("qwertyu");
   if (!priceOracleAddress) {
-    const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracleV2", signer);
-    const spo = await spoFactory.deploy(signerAddress, true);
+    const spoFactory = await ethers.getContractFactory("MockPriceOracle", signer);
+    const spo = await spoFactory.deploy([10]);
     priceOracleAddress = spo.address;
   }
-  console.log("sdfghj");
   if (enforceWhitelist && whitelist.length === 0) {
     throw "If enforcing whitelist, a whitelist array of addresses must be provided";
   }
@@ -36,7 +43,6 @@ export async function createPool(
   // 8% -> 1.08 * 1e8
   const bigLiquidationIncentive = utils.parseEther((liquidationIncentive / 100 + 1).toString());
 
-  console.log("xcvbnm");
   return await sdk.deployPool(
     poolName,
     enforceWhitelist,
@@ -49,21 +55,44 @@ export async function createPool(
   );
 }
 
-export async function deployAssets(assets: cERC20Conf[], signer: SignerWithAddress | null = null) {
+export type DeployedAsset = {
+  symbol: string;
+  underlying: string;
+  assetAddress: string;
+  implementationAddress: string;
+  interestRateModel: string;
+  receipt: providers.TransactionReceipt;
+};
+export async function deployAssets(assets: cERC20Conf[], signer?: SignerWithAddress): Promise<DeployedAsset[]> {
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
   }
   const sdk = new Fuse(ethers.provider, "1337");
 
+  const deployed: DeployedAsset[] = [];
   for (const assetConf of assets) {
-    const [, , , receipt] = await sdk.deployAsset(Fuse.JumpRateModelConf, assetConf, { from: signer.address });
+    const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
+      Fuse.JumpRateModelConf,
+      assetConf,
+      { from: signer.address }
+    );
     if (receipt.status !== 1) {
       throw `Failed to deploy asset: ${receipt.logs}`;
     }
     console.log("deployed asset: ", assetConf.name);
     console.log("-----------------");
+    deployed.push({
+      symbol: assetConf.symbol,
+      underlying: assetConf.underlying,
+      assetAddress,
+      implementationAddress,
+      interestRateModel,
+      receipt,
+    });
   }
+
+  return deployed;
 }
 
 export async function getAssetsConf(
@@ -129,4 +158,23 @@ export const poolAssets = async (
     assetSymbolPrefix: "fr1",
     assets: [ethConf, touchConf, tribeConf],
   };
+};
+
+export const ethAssetInPool = async (
+  poolId: string,
+  sdk: Fuse,
+  signer: SignerWithAddress
+): Promise<USDPricedFuseAsset> => {
+  const fetchedAssetsInPoolAfterBorrow: FusePoolData = await sdk.fetchFusePoolData(poolId, signer.address);
+  return fetchedAssetsInPoolAfterBorrow.assets.filter((a) => a.underlyingToken === constants.AddressZero)[0];
+};
+
+export const getPoolIndex = async (poolAddress: string, creatorAddress: string, sdk: Fuse) => {
+  const [indexes, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPoolsByAccountWithData(creatorAddress);
+  for (let j = 0; j < publicPools.length; j++) {
+    if (publicPools[j].comptroller === poolAddress) {
+      return indexes[j];
+    }
+  }
+  return null;
 };

@@ -2,8 +2,9 @@ import { ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
 import { Fuse } from "../lib/esm/src";
+import { DeployedAsset, poolAssets } from "./utils/pool";
 import { utils } from "ethers";
-import { poolAssets, setupTest } from "./utils";
+import { setupTest } from "./utils";
 
 use(solidity);
 
@@ -11,7 +12,7 @@ describe("FusePoolDirectory", function () {
   this.beforeEach(async () => {
     await setupTest();
   });
-  
+
   describe("Deploy pool", async function () {
     it("should deploy pool from sdk without whitelist", async function () {
       this.timeout(120_000);
@@ -52,6 +53,7 @@ describe("FusePoolDirectory", function () {
       const jrm = await ethers.getContract("JumpRateModel", bob);
       const assets = await poolAssets(jrm.address, comptroller, bob);
 
+      const deployedAssets: DeployedAsset[] = [];
       for (const assetConf of assets.assets) {
         const [assetAddress, cTokenImplementationAddress, irmModel, receipt] = await sdk.deployAsset(
           Fuse.JumpRateModelConf,
@@ -65,11 +67,19 @@ describe("FusePoolDirectory", function () {
         console.log("Implementation Address: ", cTokenImplementationAddress);
         console.log("TX Receipt: ", receipt.transactionHash);
         console.log("-----------------");
+        deployedAssets.push({
+          assetAddress,
+          implementationAddress: cTokenImplementationAddress,
+          interestRateModel: irmModel,
+          receipt,
+          symbol: assetConf.symbol,
+          underlying: assetConf.underlying,
+        });
       }
       const [totalSupply, totalBorrow, underlyingTokens, underlyingSymbols, whitelistedAdmin] =
         await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
 
-      expect(underlyingSymbols).to.have.members(["ETH", "TOUCH", "TRIBE"]);
+      expect(underlyingSymbols).to.have.members(deployedAssets.map((d) => d.symbol));
 
       const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
       expect(fusePoolData.length).to.eq(3);

@@ -103,3 +103,62 @@ export type InterestRateModelConf = {
   interestRateModel?: string;
   interestRateModelParams?: InterestRateModelParams;
 };
+
+export interface FuseAsset {
+  cToken: string;
+
+  borrowBalance: BigNumber;
+  supplyBalance: BigNumber;
+  liquidity: BigNumber;
+
+  membership: boolean;
+
+  underlyingName: string;
+  underlyingSymbol: string;
+  underlyingToken: string;
+  underlyingDecimals: BigNumber;
+  underlyingPrice: BigNumber;
+  underlyingBalance: BigNumber;
+
+  collateralFactor: BigNumber;
+  reserveFactor: BigNumber;
+
+  adminFee: BigNumber;
+  fuseFee: BigNumber;
+
+  borrowRatePerBlock: BigNumber;
+  supplyRatePerBlock: BigNumber;
+
+  totalBorrow: BigNumber;
+  totalSupply: BigNumber;
+}
+
+export interface USDPricedFuseAsset extends FuseAsset {
+  supplyBalanceUSD: number;
+  borrowBalanceUSD: number;
+
+  totalSupplyUSD: number;
+  totalBorrowUSD: number;
+
+  liquidityUSD: number;
+
+  isPaused: boolean;
+  isSupplyPaused: boolean;
+}
+
+export interface FusePoolData {
+  assets: USDPricedFuseAsset[];
+  comptroller: string;
+  name: string;
+  isPrivate: boolean;
+  totalLiquidityUSD: number;
+  totalSuppliedUSD: number;
+  totalBorrowedUSD: number;
+  totalSupplyBalanceUSD: number;
+  totalBorrowBalanceUSD: number;
+  oracle: string;
+  oracleModel: string | undefined;
+  id?: number;
+  admin: string;
+  isAdminWhitelisted: boolean;
+}
