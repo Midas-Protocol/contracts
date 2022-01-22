@@ -53,7 +53,7 @@ import {
   SIMPLE_DEPLOY_ORACLES,
 } from "./config";
 import { irmConfig, oracleConfig, tokenAddresses } from "../network";
-import { filterOnlyObjectProperties } from "./utils";
+import { filterOnlyObjectProperties, filterPoolName } from "./utils";
 
 type OracleConfig = {
   [contractName: string]: {
@@ -1049,13 +1049,7 @@ export default class Fuse {
       isPrivate,
     } = await this.contracts.FusePoolDirectory.pools(Number(poolId));
 
-    // const {
-    //   comptroller,
-    //   name: _unfiliteredName,
-    //   isPrivate,
-    // } = await fuse.contracts.FusePoolDirectory.pools(0);
-    // Remove any profanity from the pool name
-    const name = _unfiliteredName;
+    const name = filterPoolName(_unfiliteredName);
 
     const assets: USDPricedFuseAsset[] = (
       await this.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(comptroller, {
