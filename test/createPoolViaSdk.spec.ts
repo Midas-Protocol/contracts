@@ -3,11 +3,15 @@ import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
 import { Fuse } from "../lib/esm/src";
 import { utils } from "ethers";
-import { poolAssets } from "./utils";
+import { poolAssets, setupTest } from "./utils";
 
 use(solidity);
 
 describe("FusePoolDirectory", function () {
+  this.beforeEach(async () => {
+    await setupTest();
+  });
+  
   describe("Deploy pool", async function () {
     it("should deploy pool from sdk without whitelist", async function () {
       this.timeout(120_000);
@@ -65,11 +69,11 @@ describe("FusePoolDirectory", function () {
       const [totalSupply, totalBorrow, underlyingTokens, underlyingSymbols, whitelistedAdmin] =
         await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
 
-      expect(underlyingSymbols).to.have.members(["ETH", "AAVE", "RGT"]);
+      expect(underlyingSymbols).to.have.members(["ETH", "TOUCH", "TRIBE"]);
 
       const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
       expect(fusePoolData.length).to.eq(3);
-      expect(fusePoolData.at(-1)[3]).to.eq("RGT");
+      expect(fusePoolData.at(-1)[3]).to.eq("TRIBE");
     });
   });
 });

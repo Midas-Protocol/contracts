@@ -9,19 +9,23 @@ export async function createPool(
   liquidationIncentive: number = 8,
   poolName: string = "TEST",
   enforceWhitelist: boolean = false,
-  whitelist: Array<string> | null = null,
-  priceOracleAddress: string | null = null,
-  signer: SignerWithAddress | null = null
+  whitelist?: Array<string>,
+  priceOracleAddress?: string,
+  signer?: SignerWithAddress
 ): Promise<[string, string, string]> {
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
   }
+  const signerAddress = signer.address;
+  console.log('signerAddress: ', signerAddress);
+  console.log("qwertyu");
   if (!priceOracleAddress) {
-    const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracle", signer);
-    const spo = await spoFactory.deploy([10]);
+    const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracleV2", signer);
+    const spo = await spoFactory.deploy(signerAddress, true);
     priceOracleAddress = spo.address;
   }
+  console.log("sdfghj");
   if (enforceWhitelist && whitelist.length === 0) {
     throw "If enforcing whitelist, a whitelist array of addresses must be provided";
   }
@@ -32,6 +36,7 @@ export async function createPool(
   // 8% -> 1.08 * 1e8
   const bigLiquidationIncentive = utils.parseEther((liquidationIncentive / 100 + 1).toString());
 
+  console.log("xcvbnm");
   return await sdk.deployPool(
     poolName,
     enforceWhitelist,
@@ -91,12 +96,12 @@ export const poolAssets = async (
     adminFee: 0,
     bypassPriceFeedCheck: true,
   };
-  const rgtConf: cERC20Conf = {
-    underlying: await ethers.getContract("AAVEToken", signer).then((c) => c.address),
+  const tribeConf: cERC20Conf = {
+    underlying: await ethers.getContract("TRIBEToken", signer).then((c) => c.address),
     comptroller,
     interestRateModel: interestRateModelAddress,
-    name: "AAVE Token",
-    symbol: "AAVE",
+    name: "TRIBE Token",
+    symbol: "TRIBE",
     decimals: 18,
     admin: "true",
     collateralFactor: 75,
@@ -104,12 +109,12 @@ export const poolAssets = async (
     adminFee: 0,
     bypassPriceFeedCheck: true,
   };
-  const aaveConf: cERC20Conf = {
-    underlying: await ethers.getContract("RGTToken", signer).then((c) => c.address),
+  const touchConf: cERC20Conf = {
+    underlying: await ethers.getContract("TOUCHToken", signer).then((c) => c.address),
     comptroller,
     interestRateModel: interestRateModelAddress,
-    name: "Rari Governance Token",
-    symbol: "RGT",
+    name: "Midas TOUCH Token",
+    symbol: "TOUCH",
     decimals: 18,
     admin: "true",
     collateralFactor: 65,
@@ -122,6 +127,6 @@ export const poolAssets = async (
     shortName: "Fuse R1",
     longName: "Rari DAO Fuse Pool R1 (Base)",
     assetSymbolPrefix: "fr1",
-    assets: [ethConf, aaveConf, rgtConf],
+    assets: [ethConf, touchConf, tribeConf],
   };
 };

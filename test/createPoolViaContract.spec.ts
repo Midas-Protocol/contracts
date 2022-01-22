@@ -4,11 +4,15 @@ import { solidity } from "ethereum-waffle";
 import { cERC20Conf, Fuse } from "../lib/esm/src";
 import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { ETH_ZERO_ADDRESS } from "./utils";
+import { setupTest } from "./utils";
 
 use(solidity);
 
 describe("FusePoolDirectory", function () {
+  this.beforeEach(async () => {
+    await setupTest();
+  });
+
   describe("Deploy pool", async function () {
     it("should deploy the pool via contract", async function () {
       this.timeout(120_000);
@@ -108,18 +112,18 @@ describe("FusePoolDirectory", function () {
       const [totalSupply, totalBorrow, underlyingTokens, underlyingSymbols, whitelistedAdmin] =
         await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
 
-      expect(underlyingTokens[0]).to.eq(ETH_ZERO_ADDRESS);
+      expect(underlyingTokens[0]).to.eq(constants.AddressZero);
       expect(underlyingSymbols[0]).to.eq("ETH");
 
       let fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
-      expect(fusePoolData[0][1]).to.eq(ETH_ZERO_ADDRESS);
+      expect(fusePoolData[0][1]).to.eq(constants.AddressZero);
 
-      const rgtConf: cERC20Conf = {
-        underlying: await ethers.getContract("RGTToken", alice).then((c) => c.address),
+      const touchConf: cERC20Conf = {
+        underlying: await ethers.getContract("TOUCHToken", alice).then((c) => c.address),
         comptroller: comptroller,
         interestRateModel: jrm.address,
-        name: "Rari Governance Token",
-        symbol: "RGT",
+        name: "Midas TOUCH Token",
+        symbol: "TOUCH",
         decimals: 18,
         admin: "true",
         collateralFactor: 65,
@@ -128,11 +132,11 @@ describe("FusePoolDirectory", function () {
         bypassPriceFeedCheck: true,
       };
       deployArgs = [
-        rgtConf.underlying,
-        rgtConf.comptroller,
-        rgtConf.interestRateModel,
-        rgtConf.name,
-        rgtConf.symbol,
+        touchConf.underlying,
+        touchConf.comptroller,
+        touchConf.interestRateModel,
+        touchConf.name,
+        touchConf.symbol,
         sdk.chainDeployment.CErc20Delegate.address,
         "0x00",
         reserveFactorBN,
@@ -146,7 +150,7 @@ describe("FusePoolDirectory", function () {
       );
       tx = await comptrollerContract._deployMarket(false, constructorData, collateralFactorBN);
       receipt = await tx.wait();
-      console.log(`${rgtConf.name} deployed successfully with tx hash: ${receipt.transactionHash}`);
+      console.log(`${touchConf.name} deployed successfully with tx hash: ${receipt.transactionHash}`);
 
       fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
       expect(fusePoolData.length).to.eq(2);
