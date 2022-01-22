@@ -8,7 +8,6 @@ import "./Exponential.sol";
 import "./EIP20Interface.sol";
 import "./EIP20NonStandardInterface.sol";
 import "./InterestRateModel.sol";
-import "hardhat/console.sol";
 
 /**
  * @title Compound's CToken Contract
@@ -485,12 +484,10 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      */
     function mintInternal(uint mintAmount) internal nonReentrant(false) returns (uint, uint) {
         uint error = accrueInterest();
-        console.log(1);
         if (error != uint(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
             return (fail(Error(error), FailureInfo.MINT_ACCRUE_INTEREST_FAILED), 0);
         }
-        console.log(2);
         // mintFresh emits the actual Mint event if successful and logs on errors, so we don't need to
         return mintFresh(msg.sender, mintAmount);
     }
@@ -518,13 +515,11 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         if (allowed != 0) {
             return (failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.MINT_COMPTROLLER_REJECTION, allowed), 0);
         }
-        console.log(3);
 
         /* Verify market's block number equals current block number */
         if (accrualBlockNumber != getBlockNumber()) {
             return (fail(Error.MARKET_NOT_FRESH, FailureInfo.MINT_FRESHNESS_CHECK), 0);
         }
-        console.log(4);
 
         MintLocalVars memory vars;
 
@@ -532,7 +527,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         if (vars.mathErr != MathError.NO_ERROR) {
             return (failOpaque(Error.MATH_ERROR, FailureInfo.MINT_EXCHANGE_RATE_READ_FAILED, uint(vars.mathErr)), 0);
         }
-        console.log(5);
 
         // Check max supply
         // unused function
@@ -562,7 +556,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
         (vars.mathErr, vars.mintTokens) = divScalarByExpTruncate(vars.actualMintAmount, Exp({mantissa: vars.exchangeRateMantissa}));
         require(vars.mathErr == MathError.NO_ERROR, "MINT_EXCHANGE_CALCULATION_FAILED");
-        console.log(6);
+
         /*
          * We calculate the new total supply of cTokens and minter token balance, checking for overflow:
          *  totalSupplyNew = totalSupply + mintTokens
@@ -582,7 +576,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
         /* We call the defense hook */
         comptroller.mintVerify(address(this), minter, vars.actualMintAmount, vars.mintTokens);
-        console.log(7);
+
         return (uint(Error.NO_ERROR), vars.actualMintAmount);
     }
 
