@@ -1049,13 +1049,6 @@ export default class Fuse {
       isPrivate,
     } = await this.contracts.FusePoolDirectory.pools(Number(poolId));
 
-    // const {
-    //   comptroller,
-    //   name: _unfiliteredName,
-    //   isPrivate,
-    // } = await fuse.contracts.FusePoolDirectory.pools(0);
-    // Remove any profanity from the pool name
-
     const name = filterPoolName(_unfiliteredName);
 
     const assets: USDPricedFuseAsset[] = (
