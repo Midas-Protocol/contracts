@@ -1,5 +1,7 @@
 pragma solidity ^0.7.6;
 
+// SPDX-License-Identifier: UNLICENSED
+
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract TOUCHToken is ERC20

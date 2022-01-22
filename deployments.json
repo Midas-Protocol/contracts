@@ -5,7 +5,7 @@
       "chainId": "1337",
       "contracts": {
         "CErc20Delegate": {
-          "address": "0x298254b5347F4ed6C508bEB6ED92ED292e434c47",
+          "address": "0xA11FA108f875D2EeF8C5182008b4dA41897E96F0",
           "abi": [
             {
               "inputs": [],
@@ -1458,7 +1458,7 @@
           ]
         },
         "CEtherDelegate": {
-          "address": "0xBCBc000992A35f7073e89546d451A529Bc432B46",
+          "address": "0xF93805a37aedE6Dc7001ADcf422770186C044AF0",
           "abi": [
             {
               "inputs": [],
@@ -2850,19 +2850,43 @@
             }
           ]
         },
-        "ChainlinkPriceOracle": {
-          "address": "0xf191e27B986a08E6C0FA215731130FE466FcEc4B",
+        "ChainlinkPriceOracleV2": {
+          "address": "0xBF600E2043D0f174C2ed7E69d78aE84e4b76Ed78",
           "abi": [
             {
               "inputs": [
                 {
-                  "internalType": "uint256",
-                  "name": "_maxSecondsBeforePriceIsStale",
-                  "type": "uint256"
+                  "internalType": "address",
+                  "name": "_admin",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "_canAdminOverwrite",
+                  "type": "bool"
                 }
               ],
               "stateMutability": "nonpayable",
               "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "oldAdmin",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "NewAdmin",
+              "type": "event"
             },
             {
               "inputs": [],
@@ -2891,22 +2915,42 @@
               "type": "function"
             },
             {
-              "inputs": [
+              "inputs": [],
+              "name": "admin",
+              "outputs": [
                 {
                   "internalType": "address",
                   "name": "",
                   "type": "address"
                 }
               ],
-              "name": "btcPriceFeeds",
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "canAdminOverwrite",
               "outputs": [
                 {
-                  "internalType": "contract AggregatorV3Interface",
+                  "internalType": "bool",
                   "name": "",
-                  "type": "address"
+                  "type": "bool"
                 }
               ],
               "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "changeAdmin",
+              "outputs": [],
+              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -2917,12 +2961,12 @@
                   "type": "address"
                 }
               ],
-              "name": "ethPriceFeeds",
+              "name": "feedBaseCurrencies",
               "outputs": [
                 {
-                  "internalType": "contract AggregatorV3Interface",
+                  "internalType": "enum ChainlinkPriceOracleV2.FeedBaseCurrency",
                   "name": "",
-                  "type": "address"
+                  "type": "uint8"
                 }
               ],
               "stateMutability": "view",
@@ -2937,38 +2981,6 @@
                 }
               ],
               "name": "getUnderlyingPrice",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "underlying",
-                  "type": "address"
-                }
-              ],
-              "name": "hasPriceFeed",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "maxSecondsBeforePriceIsStale",
               "outputs": [
                 {
                   "internalType": "uint256",
@@ -3006,7 +3018,7 @@
                   "type": "address"
                 }
               ],
-              "name": "usdPriceFeeds",
+              "name": "priceFeeds",
               "outputs": [
                 {
                   "internalType": "contract AggregatorV3Interface",
@@ -3016,11 +3028,34 @@
               ],
               "stateMutability": "view",
               "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "underlyings",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "contract AggregatorV3Interface[]",
+                  "name": "feeds",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "enum ChainlinkPriceOracleV2.FeedBaseCurrency",
+                  "name": "baseCurrency",
+                  "type": "uint8"
+                }
+              ],
+              "name": "setPriceFeeds",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
             }
           ]
         },
         "Comptroller": {
-          "address": "0x6e031471a16C2665D25ec5f7792767AC78f8F1af",
+          "address": "0xCF555c85998aF6f5741A54B2E6d193c7Fa27B162",
           "abi": [
             {
               "anonymous": false,
@@ -5674,7 +5709,7 @@
           ]
         },
         "FusePoolDirectory": {
-          "address": "0x706AAC57374b7f8c1B30F5b085bCEBF0005fE0b3",
+          "address": "0xDAD9559AA96509c7ad576dceFd84Fe06C2D4707b",
           "abi": [
             {
               "anonymous": false,
@@ -6258,7 +6293,7 @@
           ]
         },
         "FusePoolLens": {
-          "address": "0x15C4e51e22Cd5A2236d845370d57a88d1641D4d7",
+          "address": "0x0402349A589F3Cec1E0dfa5D98617511e9107b1a",
           "abi": [
             {
               "inputs": [],
@@ -7582,7 +7617,7 @@
           ]
         },
         "FusePoolLensSecondary": {
-          "address": "0x1C89480Ac69F1fDB2807aF8Ee8DBEcD4E78a7f9d",
+          "address": "0xF3694c039f01FE5F90ed325FD4f5239849b4BbFa",
           "abi": [
             {
               "inputs": [],
@@ -8705,7 +8740,7 @@
           ]
         },
         "MockPriceOracle": {
-          "address": "0xC37F102a1D2Ec85eD9dCD89c7d384D406B4b705B",
+          "address": "0x9C9051d74AFAdE358444989C96afA1BC150D97d4",
           "abi": [
             {
               "inputs": [
@@ -8874,7 +8909,7 @@
           ]
         },
         "RewardsDistributorDelegate": {
-          "address": "0x5E330a58B0263BE61E982fe273b3cA189a6b4337",
+          "address": "0xE8f1991Fd5B3e01351ECed5b04EA393e01507Ea9",
           "abi": [
             {
               "anonymous": false,
@@ -9628,7 +9663,7 @@
           ]
         },
         "TOUCHToken": {
-          "address": "0x1cf41F789C64F097C2927c804f41a0fE71429744",
+          "address": "0xF671e52834420949C6E183D7dA8C28AFad9Ec902",
           "abi": [
             {
               "inputs": [
@@ -9919,7 +9954,7 @@
           ]
         },
         "TRIBEToken": {
-          "address": "0x98Ddc41f5E8F63300E2795D39775FD0F11989514",
+          "address": "0x405a90ae0C7EBF9daE6009BF2eb6d3b4963448e6",
           "abi": [
             {
               "inputs": [

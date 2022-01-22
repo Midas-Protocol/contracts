@@ -1,12 +1,16 @@
 import { expect } from "chai";
 import { constants, Contract, utils } from "ethers";
 import { ethers } from "hardhat";
-import { createPool } from "./utils";
+import { createPool, setupTest } from "./utils";
 import { deployAssets, ethAssetInPool, getAssetsConf, getPoolIndex } from "./utils/pool";
 import { Fuse } from "../lib/esm/src";
 import { FusePoolData, USDPricedFuseAsset } from "../lib/esm/src/Fuse/types";
 
 describe("Deposit flow tests", function () {
+  this.beforeEach(async () => {
+    await setupTest();
+  });
+
   describe("Deposit flow", async function () {
     let poolImplementationAddress: string;
     let poolAddress: string;

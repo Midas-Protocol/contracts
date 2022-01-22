@@ -4,10 +4,15 @@ import { solidity } from "ethereum-waffle";
 import { Fuse } from "../lib/esm/src";
 import { DeployedAsset, poolAssets } from "./utils/pool";
 import { utils } from "ethers";
+import { setupTest } from "./utils";
 
 use(solidity);
 
 describe("FusePoolDirectory", function () {
+  this.beforeEach(async () => {
+    await setupTest();
+  });
+
   describe("Deploy pool", async function () {
     it("should deploy pool from sdk without whitelist", async function () {
       this.timeout(120_000);
@@ -41,9 +46,7 @@ describe("FusePoolDirectory", function () {
       expect(implementationAddress).to.be.ok;
 
       const allPools = await sdk.contracts.FusePoolDirectory.callStatic.getAllPools();
-      const { comptroller, name: _unfiliteredName } = await allPools
-        .filter((p: { name: string }) => p.name === POOL_NAME)
-        .at(-1);
+      const { comptroller, name: _unfiliteredName } = await allPools.filter((p) => p.name === POOL_NAME).at(-1);
 
       expect(_unfiliteredName).to.be.equal(POOL_NAME);
 
@@ -73,11 +76,11 @@ describe("FusePoolDirectory", function () {
           underlying: assetConf.underlying,
         });
       }
-      const [tSupply, tBorrow, underlyingTokens, underlyingSymbols, whitelistedAdmin] =
+      const [totalSupply, totalBorrow, underlyingTokens, underlyingSymbols, whitelistedAdmin] =
         await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
 
       expect(underlyingSymbols).to.have.members(deployedAssets.map((d) => d.symbol));
-      //
+
       const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
       expect(fusePoolData.length).to.eq(3);
       expect(fusePoolData.at(-1)[3]).to.eq("TRIBE");
