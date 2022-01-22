@@ -4,11 +4,15 @@ import { solidity } from "ethereum-waffle";
 import { cERC20Conf, Fuse } from "../lib/esm/src";
 import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { ETH_ZERO_ADDRESS } from "./utils";
+import { setupTest } from "./utils";
 
 use(solidity);
 
 describe("FusePoolDirectory", function () {
+  this.beforeEach(async () => {
+    await setupTest();
+  });
+
   describe("Deploy pool", async function () {
     it("should deploy the pool via contract", async function () {
       this.timeout(120_000);
@@ -108,11 +112,11 @@ describe("FusePoolDirectory", function () {
       const [totalSupply, totalBorrow, underlyingTokens, underlyingSymbols, whitelistedAdmin] =
         await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
 
-      expect(underlyingTokens[0]).to.eq(ETH_ZERO_ADDRESS);
+      expect(underlyingTokens[0]).to.eq(constants.AddressZero);
       expect(underlyingSymbols[0]).to.eq("ETH");
 
       let fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
-      expect(fusePoolData[0][1]).to.eq(ETH_ZERO_ADDRESS);
+      expect(fusePoolData[0][1]).to.eq(constants.AddressZero);
 
       const touchConf: cERC20Conf = {
         underlying: await ethers.getContract("TOUCHToken", alice).then((c) => c.address),

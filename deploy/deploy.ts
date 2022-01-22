@@ -200,6 +200,15 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   const cpo = await dep.deploy();
   console.log("ChainlinkPriceOracleV2: ", cpo.address);
 
+  const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
+  tx = await masterPriceOracle.initialize(
+    [],
+    [],
+    cpo.address,
+    deployer,
+    true
+  );
+
   dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
     from: deployer,
     salt: ethers.utils.keccak256(deployer),

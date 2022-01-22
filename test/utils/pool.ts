@@ -9,19 +9,23 @@ export async function createPool(
   liquidationIncentive: number = 8,
   poolName: string = "TEST",
   enforceWhitelist: boolean = false,
-  whitelist: Array<string> | null = null,
-  priceOracleAddress: string | null = null,
-  signer: SignerWithAddress | null = null
+  whitelist?: Array<string>,
+  priceOracleAddress?: string,
+  signer?: SignerWithAddress
 ): Promise<[string, string, string]> {
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
   }
+  const signerAddress = signer.address;
+  console.log('signerAddress: ', signerAddress);
+  console.log("qwertyu");
   if (!priceOracleAddress) {
     const spoFactory = await ethers.getContractFactory("ChainlinkPriceOracleV2", signer);
-    const spo = await spoFactory.deploy([10]);
+    const spo = await spoFactory.deploy(signerAddress, true);
     priceOracleAddress = spo.address;
   }
+  console.log("sdfghj");
   if (enforceWhitelist && whitelist.length === 0) {
     throw "If enforcing whitelist, a whitelist array of addresses must be provided";
   }
@@ -32,6 +36,7 @@ export async function createPool(
   // 8% -> 1.08 * 1e8
   const bigLiquidationIncentive = utils.parseEther((liquidationIncentive / 100 + 1).toString());
 
+  console.log("xcvbnm");
   return await sdk.deployPool(
     poolName,
     enforceWhitelist,

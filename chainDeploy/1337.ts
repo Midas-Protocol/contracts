@@ -55,14 +55,11 @@ export const deploy1337 = async ({ ethers, getNamedAccounts, deployments }): Pro
     touch.address,
   ];
 
-  tx = await masterPriceOracle.initialize(
+  tx = await masterPriceOracle.add(
     underlyings,
     Array(underlyings.length).fill(mockPriceOracle.address),
-    mockPriceOracle.address,
-    deployer,
-    true
   );
   await tx.wait();
-  console.log("Initialized MasterPriceOracle for chain 1337");
+  console.log("Added oracles to MasterPriceOracle for chain 1337");
   ////
 };

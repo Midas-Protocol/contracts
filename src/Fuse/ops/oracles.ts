@@ -41,7 +41,7 @@ export const getDeployArgs = (fuse: Fuse, model: string, conf: OracleConf, optio
 };
 
 export const simpleDeploy = async (factory: ContractFactory, deployArgs: string[]) => {
-  return await factory.deploy(deployArgs);
+  return await factory.deploy(...deployArgs);
 };
 
 export const deployMasterPriceOracle = async (fuse: Fuse, conf: OracleConf, deployArgs: string[], options: any) => {
