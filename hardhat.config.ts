@@ -1,9 +1,9 @@
-import "hardhat-deploy";
+import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-waffle";
 import "@tenderly/hardhat-tenderly";
-// import "@typechain/hardhat";
-
+import "@typechain/hardhat";
 import { config as dotEnvConfig } from "dotenv";
+import "hardhat-deploy";
 import { HardhatUserConfig } from "hardhat/types";
 
 dotEnvConfig();
@@ -119,10 +119,9 @@ const config: HardhatUserConfig = {
       url: "https://eth-mainnet.alchemyapi.io/v2/2Mt-6brbJvTA4w9cpiDtnbTo6qOoySnN",
     },
   },
-  // TODO: this doesnt work for me
-  // typechain: {
-  //   outDir: "./typechain"
-  // }
+  typechain: {
+    outDir: "./typechain",
+  },
 };
 
 export default config;
