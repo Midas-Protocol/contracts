@@ -1,6 +1,6 @@
 import { constants } from "ethers";
 import { DeployFunction } from "hardhat-deploy/types";
-import { deploy1337 } from "../chainDeploy/1337";
+import { deploy1337, deploy97 } from "../chainDeploy";
 
 const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
   const { deployer, alice, bob } = await getNamedAccounts();
@@ -191,23 +191,8 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   const masterPO = await dep.deploy();
   console.log("MasterPriceOracle: ", masterPO.address);
 
-  dep = await deployments.deterministic("ChainlinkPriceOracleV2", {
-    from: deployer,
-    salt: ethers.utils.keccak256(deployer),
-    args: [deployer, true],
-    log: true,
-  });
-  const cpo = await dep.deploy();
-  console.log("ChainlinkPriceOracleV2: ", cpo.address);
-
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
-  tx = await masterPriceOracle.initialize(
-    [],
-    [],
-    cpo.address,
-    deployer,
-    true
-  );
+  tx = await masterPriceOracle.initialize([], [], ethers.constants.AddressZero, deployer, true);
 
   dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
     from: deployer,
@@ -237,12 +222,14 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
   ////
 
-  //// 
+  ////
   //// CHAIN SPECIFIC DEPLOYMENT
   const chainId = await getChainId();
   console.log("Running deployment for chain: ", chainId);
   if (chainId === "1337") {
-    await deploy1337({ethers, getNamedAccounts, deployments})
+    await deploy1337({ ethers, getNamedAccounts, deployments });
+  } else if (chainId === "97") {
+    await deploy97({ ethers, getNamedAccounts, deployments });
   }
   ////
 };
