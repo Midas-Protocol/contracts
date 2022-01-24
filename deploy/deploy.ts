@@ -1,9 +1,10 @@
-import { constants } from "ethers";
+import { constants, providers } from "ethers";
 import { DeployFunction } from "hardhat-deploy/types";
 import { deploy1337, deploy97 } from "../chainDeploy";
 
 const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
   const { deployer, alice, bob } = await getNamedAccounts();
+  console.log("deployer: ", deployer);
 
   ////
   //// COMPOUND CORE CONTRACTS
@@ -91,8 +92,15 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   const fpd = await dep.deploy();
   console.log("FusePoolDirectory: ", fpd.address);
   const fusePoolDirectory = await ethers.getContract("FusePoolDirectory", deployer);
-  let tx = await fusePoolDirectory.initialize(true, [deployer, alice, bob]);
-  await tx.wait();
+  let owner = await fusePoolDirectory.owner();
+  let tx: providers.TransactionResponse;
+  if (owner === ethers.constants.AddressZero) {
+    tx = await fusePoolDirectory.initialize(true, [deployer, alice, bob]);
+    await tx.wait();
+    console.log("FusePoolDirectory initialized");
+  } else {
+    console.log("FusePoolDirectory already initialized");
+  }
 
   dep = await deployments.deterministic("FuseSafeLiquidator", {
     from: deployer,
@@ -112,12 +120,23 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   const ffd = await dep.deploy();
   console.log("FuseFeeDistributor: ", ffd.address);
   const fuseFeeDistributor = await ethers.getContract("FuseFeeDistributor", deployer);
-  await fuseFeeDistributor.initialize(ethers.utils.parseEther("0.1"));
-  await fuseFeeDistributor._setPoolLimits(
+  owner = await fuseFeeDistributor.owner();
+  if (owner === ethers.constants.AddressZero) {
+    tx = await fuseFeeDistributor.initialize(ethers.utils.parseEther("0.1"));
+    await tx.wait();
+    console.log("FuseFeeDistributor initialized");
+  } else {
+    console.log("FuseFeeDistributor already initialized");
+  }
+
+  tx = await fuseFeeDistributor._setPoolLimits(
     ethers.utils.parseEther("1"),
     ethers.constants.MaxUint256,
     ethers.constants.MaxUint256
   );
+  await tx.wait();
+  console.log("FuseFeeDistributor pool limits set");
+
   const comptroller = await ethers.getContract("Comptroller", deployer);
   tx = await fuseFeeDistributor._editComptrollerImplementationWhitelist(
     [constants.AddressZero],
@@ -135,7 +154,14 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   const fpl = await dep.deploy();
   console.log("FusePoolLens: ", fpl.address);
   const fusePoolLens = await ethers.getContract("FusePoolLens", deployer);
-  await fusePoolLens.initialize(fusePoolDirectory.address);
+  let directory = await fusePoolLens.directory();
+  if (directory === constants.AddressZero) {
+    tx = await fusePoolLens.initialize(fusePoolDirectory.address);
+    await tx.wait();
+    console.log("FusePoolLens initialized");
+  } else {
+    console.log("FusePoolLens already initialized");
+  }
 
   dep = await deployments.deterministic("FusePoolLensSecondary", {
     from: deployer,
@@ -145,8 +171,16 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   });
   const fpls = await dep.deploy();
   console.log("FusePoolLensSecondary: ", fpls.address);
+
   const fusePoolLensSecondary = await ethers.getContract("FusePoolLensSecondary", deployer);
-  await fusePoolLensSecondary.initialize(fusePoolDirectory.address);
+  directory = await fusePoolLensSecondary.directory();
+  if (directory === constants.AddressZero) {
+    tx = await fusePoolLensSecondary.initialize(fusePoolDirectory.address);
+    await tx.wait();
+    console.log("FusePoolLensSecondary initialized");
+  } else {
+    console.log("FusePoolLensSecondary already initialized");
+  }
 
   const etherDelegate = await ethers.getContract("CEtherDelegate", deployer);
   const erc20Delegate = await ethers.getContract("CErc20Delegate", deployer);
@@ -192,7 +226,14 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   console.log("MasterPriceOracle: ", masterPO.address);
 
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
-  tx = await masterPriceOracle.initialize([], [], ethers.constants.AddressZero, deployer, true);
+  const admin = await masterPriceOracle.admin();
+  if (admin === constants.AddressZero) {
+    tx = await masterPriceOracle.initialize([], [], ethers.constants.AddressZero, deployer, true);
+    await tx.wait();
+    console.log("MasterPriceOracle initialized");
+  } else {
+    console.log("MasterPriceOracle already initialized");
+  }
 
   dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
     from: deployer,
