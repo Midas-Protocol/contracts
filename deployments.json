@@ -2851,7 +2851,7 @@
           ]
         },
         "ChainlinkPriceOracleV2": {
-          "address": "0x1c689D918d56eC8f6e77913bc91897113a68dBF0",
+          "address": "0xc55C51719492bb043b556fF0a118eFCfE50524d5",
           "abi": [
             {
               "inputs": [
@@ -2867,12 +2867,12 @@
                 },
                 {
                   "internalType": "address",
-                  "name": "_weth",
+                  "name": "_wtoken",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "ethUsd",
+                  "name": "nativeTokenUsd",
                   "type": "address"
                 }
               ],
@@ -2900,7 +2900,7 @@
             },
             {
               "inputs": [],
-              "name": "ETH_USD_PRICE_FEED",
+              "name": "NATIVE_TOKEN_USD_PRICE_FEED",
               "outputs": [
                 {
                   "internalType": "contract AggregatorV3Interface",
@@ -3051,7 +3051,7 @@
             },
             {
               "inputs": [],
-              "name": "weth",
+              "name": "wtoken",
               "outputs": [
                 {
                   "internalType": "address",
