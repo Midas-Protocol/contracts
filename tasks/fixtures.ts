@@ -1,44 +1,94 @@
 import { task } from "hardhat/config";
-import { Comptroller, FusePoolDirectory } from "../typechain";
-import { Fuse } from "../lib/esm/src";
+import { cERC20Conf, Fuse } from "../lib/esm/src";
+import { JumpRateModel } from "../typechain";
 
 task("fixtures", "Deploys demo fixture pools").setAction(async (_, hre) => {
+  // Setup
   if (hre.network.name != "localhost") {
     console.log(`This task is build for localhost use only.\nContext: ${hre.network.name}`);
     return;
   }
   const { ethers } = hre;
   const { utils } = ethers;
+  const sdk = new Fuse(ethers.provider, "1337");
 
   const { alice } = await ethers.getNamedSigners();
 
-  const cpoFactory = await ethers.getContractFactory("MockPriceOracle", alice);
-  const cpo = await cpoFactory.deploy([10]);
-
-  const fpdWithSigner = await ethers.getContract<FusePoolDirectory>("FusePoolDirectory", alice);
-  const implementationComptroller = await ethers.getContract<Comptroller>("Comptroller");
-
-  //// DEPLOY POOL
-  const POOL_NAME = "Fixture Pool 01";
+  // Deploy Pol
+  const spoFactory = await ethers.getContractFactory("MockPriceOracle", alice);
+  const spo = await spoFactory.deploy([10]);
+  // 50% -> 0.5 * 1e18
   const bigCloseFactor = utils.parseEther((50 / 100).toString());
+  // 8% -> 1.08 * 1e8
   const bigLiquidationIncentive = utils.parseEther((8 / 100 + 1).toString());
-  const deployPoolTx = await fpdWithSigner.deployPool(
+
+  const POOL_NAME = "Fixture Pool of Alice";
+  const [poolAddress, implementationAddress, priceOracleAddress] = await sdk.deployPool(
     POOL_NAME,
-    implementationComptroller.address,
-    true,
+    false,
     bigCloseFactor,
     bigLiquidationIncentive,
-    cpo.address
+    spo.address,
+    {},
+    { from: alice.address },
+    []
   );
-  await deployPoolTx.wait();
-  console.log("Deployed pool");
+  console.log(
+    `Pool with address: ${poolAddress}, \noracle address: ${priceOracleAddress} deployed\nimplementation address: ${implementationAddress}`
+  );
 
-  const pools = await fpdWithSigner.getPoolsByAccount(alice.address);
-  const pool = pools[1].at(-1);
-  console.log({ pools, pool });
-
-  const sdk = new Fuse(ethers.provider, "1337");
-
+  // Deploy Assets
   const allPools = await sdk.contracts.FusePoolDirectory.callStatic.getAllPools();
-  const { comptroller, name: _unfiliteredName } = await allPools.filter((p) => p.creator === alice.address).at(-1);
+  const { comptroller } = await allPools.filter((p) => p.name === POOL_NAME).at(-1);
+
+  const jrm = await ethers.getContract<JumpRateModel>("JumpRateModel", alice);
+
+  const touchConf: cERC20Conf = {
+    underlying: await ethers.getContract("TOUCHToken", alice).then((c) => c.address),
+    comptroller,
+    interestRateModel: jrm.address,
+    name: "Midas TOUCH Token",
+    symbol: "TOUCH",
+    decimals: 18,
+    admin: "true",
+    collateralFactor: 65,
+    reserveFactor: 20,
+    adminFee: 0,
+    bypassPriceFeedCheck: true,
+  };
+
+  const ethConf: cERC20Conf = {
+    underlying: "0x0000000000000000000000000000000000000000",
+    comptroller,
+    interestRateModel: jrm.address,
+    name: "Ethereum",
+    symbol: "ETH",
+    decimals: 8,
+    admin: "true",
+    collateralFactor: 75,
+    reserveFactor: 20,
+    adminFee: 0,
+    bypassPriceFeedCheck: true,
+  };
+
+  const tribeConf: cERC20Conf = {
+    underlying: await ethers.getContract("TRIBEToken", alice).then((c) => c.address),
+    comptroller,
+    interestRateModel: jrm.address,
+    name: "TRIBE Token",
+    symbol: "TRIBE",
+    decimals: 18,
+    admin: "true",
+    collateralFactor: 75,
+    reserveFactor: 15,
+    adminFee: 0,
+    bypassPriceFeedCheck: true,
+  };
+
+  [ethConf, touchConf, tribeConf].forEach(
+    async (conf) => await sdk.deployAsset(Fuse.JumpRateModelConf, conf, { from: alice.address })
+  );
+
+  // TODO enter market
+  // TODO abstract and create two pools with different owners and assets and models
 });
