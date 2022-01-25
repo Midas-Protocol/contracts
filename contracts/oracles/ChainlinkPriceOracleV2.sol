@@ -36,19 +36,13 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
      */
     enum FeedBaseCurrency {
         ETH,
-        USD,
-        BTC
+        USD
     }
 
     /**
      * @notice Chainlink ETH/USD price feed contracts.
      */
-    AggregatorV3Interface public constant ETH_USD_PRICE_FEED = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
-
-    /**
-     * @notice Chainlink BTC/ETH price feed contracts.
-     */
-    AggregatorV3Interface public constant BTC_ETH_PRICE_FEED = AggregatorV3Interface(0xdeb288F737066589598e9214E782fa5A8eD689e8);
+    AggregatorV3Interface public immutable NATIVE_TOKEN_USD_PRICE_FEED;
 
     /**
      * @dev The administrator of this `MasterPriceOracle`.
@@ -59,13 +53,20 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
      * @dev Controls if `admin` can overwrite existing assignments of oracles to underlying tokens.
      */
     bool public canAdminOverwrite;
+
+    /**
+     * @dev The Wrapped native asset address.
+     */
+    address public immutable wtoken;
     
     /**
      * @dev Constructor to set admin and canAdminOverwrite.
      */
-    constructor (address _admin, bool _canAdminOverwrite) {
+    constructor (address _admin, bool _canAdminOverwrite, address _wtoken, address nativeTokenUsd) {
         admin = _admin;
         canAdminOverwrite = _canAdminOverwrite;
+        wtoken = _wtoken;
+        NATIVE_TOKEN_USD_PRICE_FEED = AggregatorV3Interface(nativeTokenUsd);
     }
 
     /**
@@ -117,8 +118,8 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
      * @dev Internal function returning the price in ETH of `underlying`.
      */
     function _price(address underlying) internal view returns (uint) {
-        // Return 1e18 for WETH
-        if (underlying == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) return 1e18;
+        // Return 1e18 for WTOKEN
+        if (underlying == wtoken || underlying == address(0)) return 1e18;
 
         // Get token/ETH price from Chainlink
         AggregatorV3Interface feed = priceFeeds[underlying];
@@ -129,15 +130,10 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
             (, int256 tokenEthPrice, , , ) = feed.latestRoundData();
             return tokenEthPrice >= 0 ? uint256(tokenEthPrice).mul(1e18).div(10 ** uint256(feed.decimals())) : 0;
         } else if (baseCurrency == FeedBaseCurrency.USD) {
-            (, int256 ethUsdPrice, , , ) = ETH_USD_PRICE_FEED.latestRoundData();
-            if (ethUsdPrice <= 0) return 0;
+            (, int256 nativeTokenUsdPrice, , , ) = NATIVE_TOKEN_USD_PRICE_FEED.latestRoundData();
+            if (nativeTokenUsdPrice <= 0) return 0;
             (, int256 tokenUsdPrice, , , ) = feed.latestRoundData();
-            return tokenUsdPrice >= 0 ? uint256(tokenUsdPrice).mul(1e26).div(10 ** uint256(feed.decimals())).div(uint256(ethUsdPrice)) : 0;
-        } else if (baseCurrency == FeedBaseCurrency.BTC) {
-            (, int256 btcEthPrice, , , ) = BTC_ETH_PRICE_FEED.latestRoundData();
-            if (btcEthPrice <= 0) return 0;
-            (, int256 tokenBtcPrice, , , ) = feed.latestRoundData();
-            return tokenBtcPrice >= 0 ? uint256(tokenBtcPrice).mul(uint256(btcEthPrice)).div(10 ** uint256(feed.decimals())) : 0;
+            return tokenUsdPrice >= 0 ? uint256(tokenUsdPrice).mul(1e26).div(10 ** uint256(feed.decimals())).div(uint256(nativeTokenUsdPrice)) : 0;
         }
     }
 
