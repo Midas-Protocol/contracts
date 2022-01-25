@@ -33,6 +33,10 @@ export const oracleConfig = (deployments, artifacts) => {
         artifact: artifacts.MasterPriceOracle,
         address: deployments.MasterPriceOracle.address,
       },
+      ChainlinkPriceOracleV2: {
+        artifact: artifacts.ChainlinkPriceOracleV2,
+        address: deployments.ChainlinkPriceOracleV2?.address,
+      },
     },
     97: {
       MasterPriceOracle: {
@@ -41,7 +45,7 @@ export const oracleConfig = (deployments, artifacts) => {
       },
       ChainlinkPriceOracleV2: {
         artifact: artifacts.ChainlinkPriceOracleV2,
-        address: deployments.ChainlinkPriceOracleV2.address,
+        address: deployments.ChainlinkPriceOracleV2?.address,
       },
       UniswapTwapPriceOracleV2: {
         artifact: artifacts.UniswapTwapPriceOracleV2,
