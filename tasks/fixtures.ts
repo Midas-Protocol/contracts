@@ -85,9 +85,9 @@ task("fixtures", "Deploys demo fixture pools").setAction(async (_, hre) => {
     bypassPriceFeedCheck: true,
   };
 
-  [ethConf, touchConf, tribeConf].forEach(
-    async (conf) => await sdk.deployAsset(Fuse.JumpRateModelConf, conf, { from: alice.address })
-  );
+  for (const assetConf of [ethConf, touchConf, tribeConf]) {
+    await sdk.deployAsset(Fuse.JumpRateModelConf, assetConf, { from: alice.address });
+  }
 
   // TODO enter market
   // TODO abstract and create two pools with different owners and assets and models
