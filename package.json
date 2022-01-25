@@ -21,8 +21,8 @@
     "build:sdk": "tsc -p tsconfig-sdk.json",
     "build:cjs": "tsc -p tsconfig-cjs.json",
     "build:contracts": "hardhat compile",
-    "clean": "rm -rf lib",
-    "fixtures": "npx hardhat fixtures --network localhost"
+    "fixtures": "npx hardhat fixtures --network localhost",
+    "clean": "rm -rf lib"
   },
   "keywords": [],
   "author": "Midas Capital",
