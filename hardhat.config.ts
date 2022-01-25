@@ -6,6 +6,8 @@ import { config as dotEnvConfig } from "dotenv";
 import "hardhat-deploy";
 import { HardhatUserConfig } from "hardhat/types";
 
+require("./tasks/fixtures");
+
 dotEnvConfig();
 
 const urlOverride = process.env.ETH_PROVIDER_URL;
