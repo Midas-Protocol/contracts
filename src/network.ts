@@ -26,7 +26,7 @@ export const oracleConfig = (deployments, artifacts) => {
       },
       ChainlinkPriceOracleV2: {
         artifact: artifacts.ChainlinkPriceOracleV2,
-        address: deployments.ChainlinkPriceOracleV2.address,
+        address: deployments.ChainlinkPriceOracleV2?.address,
       },
     },
   };

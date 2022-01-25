@@ -182,7 +182,7 @@ export default class Fuse {
     closeFactor: BigNumber,
     liquidationIncentive: BigNumber,
     priceOracle: string, // Contract address
-    priceOracleConf: any,
+    priceOracleConf: OracleConf,
     options: any, // We might need to add sender as argument. Getting address from options will colide with the override arguments in ethers contract method calls. It doesnt take address.
     whitelist: string[] // An array of whitelisted addresses
   ): Promise<[string, string, string]> {
