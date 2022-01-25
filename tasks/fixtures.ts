@@ -1,6 +1,5 @@
 import { task } from "hardhat/config";
-import { cERC20Conf, Fuse } from "../lib/esm/src";
-import { JumpRateModel } from "../typechain";
+import { cERC20Conf, Fuse } from "../src";
 
 task("fixtures", "Deploys demo fixture pools").setAction(async (_, hre) => {
   // Setup
@@ -41,7 +40,7 @@ task("fixtures", "Deploys demo fixture pools").setAction(async (_, hre) => {
   const allPools = await sdk.contracts.FusePoolDirectory.callStatic.getAllPools();
   const { comptroller } = await allPools.filter((p) => p.name === POOL_NAME).at(-1);
 
-  const jrm = await ethers.getContract<JumpRateModel>("JumpRateModel", alice);
+  const jrm = await ethers.getContract("JumpRateModel", alice);
 
   const touchConf: cERC20Conf = {
     underlying: await ethers.getContract("TOUCHToken", alice).then((c) => c.address),
