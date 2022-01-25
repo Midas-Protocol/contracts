@@ -27,7 +27,7 @@ export const oracleConfig = (deployments, artifacts) => {
     1337: {
       MockPriceOracle: {
         artifact: artifacts.MockPriceOracle,
-        address: deployments.MockPriceOracle.address,
+        address: deployments.MockPriceOracle?.address,
       },
       MasterPriceOracle: {
         artifact: artifacts.MasterPriceOracle,
