@@ -44,7 +44,6 @@ import {
   OracleConf,
   USDPricedFuseAsset,
 } from "./types";
-import { deployMasterPriceOracle, getDeployArgs, getOracleConf, simpleDeploy } from "./ops/oracles";
 import {
   COMPTROLLER_ERROR_CODES,
   CTOKEN_ERROR_CODES,
@@ -52,7 +51,7 @@ import {
   ORACLES,
   SIMPLE_DEPLOY_ORACLES,
 } from "./config";
-import { irmConfig, oracleConfig, tokenAddresses } from "../network";
+import { chainSpecificAddresses, irmConfig, oracleConfig } from "../network";
 import { filterOnlyObjectProperties, filterPoolName } from "./utils";
 
 type OracleConfig = {
@@ -64,7 +63,7 @@ type OracleConfig = {
 
 type IrmConfig = OracleConfig;
 
-type TokenAddresses = {
+type ChainSpecificAddresses = {
   [tokenName: string]: string;
 };
 
@@ -90,10 +89,11 @@ export default class Fuse {
   static CTOKEN_ERROR_CODES = CTOKEN_ERROR_CODES;
   static JumpRateModelConf: InterestRateModelConf = JUMP_RATE_MODEL_CONF;
 
+  public chainId: string;
   public chainDeployment: ChainDeployment;
   public oracles: OracleConfig;
   private readonly irms: IrmConfig;
-  private tokenAddresses: TokenAddresses;
+  public chainSpecificAddresses: ChainSpecificAddresses;
   public artifacts: {
     [contractName: string]: {
       contractName: string;
@@ -105,14 +105,14 @@ export default class Fuse {
 
   constructor(web3Provider: JsonRpcProvider | Web3Provider, chainId: string) {
     this.provider = web3Provider;
-
+    this.chainId = chainId;
     this.chainDeployment =
       Deployments[chainId] && Deployments[chainId][Object.keys(Deployments[chainId])[0]]?.contracts;
     if (!this.chainDeployment) {
       throw new Error(`Chain deployment not found for chainId ${chainId}`);
     }
 
-    this.tokenAddresses = tokenAddresses[chainId];
+    this.chainSpecificAddresses = chainSpecificAddresses[chainId];
 
     this.contracts = {
       FusePoolDirectory: new Contract(
@@ -186,15 +186,6 @@ export default class Fuse {
     options: any, // We might need to add sender as argument. Getting address from options will colide with the override arguments in ethers contract method calls. It doesnt take address.
     whitelist: string[] // An array of whitelisted addresses
   ): Promise<[string, string, string]> {
-    // 1. Deploy new price oracle via SDK if requested
-    if (Fuse.ORACLES.indexOf(priceOracle) >= 0) {
-      try {
-        priceOracle = (await this.deployPriceOracle(priceOracle, priceOracleConf, options)).address; // TODO: anchorMantissa / anchorPeriod
-      } catch (error: any) {
-        throw Error("Deployment of price oracle failed: " + (error.message ? error.message : error));
-      }
-    }
-
     // 2. Deploy Comptroller implementation if necessary
     let implementationAddress = this.chainDeployment.Comptroller.address;
 
@@ -279,27 +270,6 @@ export default class Fuse {
     return new ContractFactory(oracleArtifact.abi, oracleArtifact.bytecode, this.provider.getSigner(signer));
   }
 
-  async deployPriceOracle(
-    model: string, // TODO: find a way to use this.ORACLES
-    conf: OracleConf, // This conf depends on which comptroller model we're deploying
-    options: any
-  ): Promise<Contract> {
-    if (!model) model = "ChainlinkPriceOracleV2";
-    if (!conf) conf = {};
-
-    const oracleConf = getOracleConf(this, model, conf);
-    const deployArgs = getDeployArgs(this, model, oracleConf, options);
-    console.log("deployArgs: ", deployArgs);
-
-    if (Fuse.SIMPLE_DEPLOY_ORACLES.indexOf(model) >= 0) {
-      const factory = await this.getOracleContractFactory(model, options.from ?? null);
-
-      return await simpleDeploy(factory, deployArgs);
-    } else {
-      return await deployMasterPriceOracle(this, oracleConf, deployArgs, options);
-    }
-  }
-
   async deployAsset(
     irmConf: InterestRateModelConf,
     cTokenConf: cERC20Conf,
@@ -360,7 +330,12 @@ export default class Fuse {
             jumpMultiplierPerYear: "2000000000000000000",
             kink: "900000000000000000",
           };
-        deployArgs = [conf.jumpMultiplierPerYear, conf.kink, this.tokenAddresses.DAI_POT, this.tokenAddresses.DAI_JUG];
+        deployArgs = [
+          conf.jumpMultiplierPerYear,
+          conf.kink,
+          this.chainSpecificAddresses.DAI_POT,
+          this.chainSpecificAddresses.DAI_JUG,
+        ];
         modelArtifact = this.artifacts.DAIInterestRateModelV2;
         break;
       case "WhitePaperInterestRateModel":
@@ -667,7 +642,7 @@ export default class Fuse {
     chainlinkPriceOracle = new Contract(priceOracle, this.oracles.ChainlinkPriceOracleV2.artifact.abi, this.provider);
 
     // If underlying Erc20 is WETH use chainlinkPriceFeed, otherwise check if Chainlink supports it.
-    if (conf.underlying.toLowerCase() === this.tokenAddresses.W_TOKEN.toLowerCase()) {
+    if (conf.underlying.toLowerCase() === this.chainSpecificAddresses.W_TOKEN.toLowerCase()) {
       chainlinkPriceFeed = true;
     } else {
       try {
