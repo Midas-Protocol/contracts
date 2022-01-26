@@ -79,7 +79,6 @@ const config: HardhatUserConfig = {
       gasPrice: 20e9,
       gas: 25e6,
       allowUnlimitedContractSize: true,
-      accounts: { mnemonic },
     },
     localhost: {
       url: urlOverride || "http://localhost:8545",
