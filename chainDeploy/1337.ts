@@ -1,11 +1,14 @@
+import { utils } from "ethers";
+import { SALT } from "../deploy/deploy";
+
 export const deploy1337 = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer, alice, bob } = await getNamedAccounts();
 
-  //// 
+  ////
   //// TOKENS
   let dep = await deployments.deterministic("TRIBEToken", {
     from: deployer,
-    salt: ethers.utils.keccak256(deployer),
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [ethers.utils.parseEther("1250000000"), deployer],
     log: true,
   });
@@ -17,10 +20,9 @@ export const deploy1337 = async ({ ethers, getNamedAccounts, deployments }): Pro
 
   tx = await tribeToken.transfer(bob, ethers.utils.parseEther("100000"), { from: deployer });
   await tx.wait();
-
   dep = await deployments.deterministic("TOUCHToken", {
     from: deployer,
-    salt: ethers.utils.keccak256(deployer),
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [ethers.utils.parseEther("2250000000"), deployer],
     log: true,
   });
@@ -37,7 +39,7 @@ export const deploy1337 = async ({ ethers, getNamedAccounts, deployments }): Pro
   //// ORACLES
   dep = await deployments.deterministic("MockPriceOracle", {
     from: bob,
-    salt: ethers.utils.keccak256(deployer),
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [100],
     log: true,
   });
@@ -50,15 +52,9 @@ export const deploy1337 = async ({ ethers, getNamedAccounts, deployments }): Pro
   const mockPriceOracle = await ethers.getContract("MockPriceOracle", deployer);
 
   // get the ERC20 address of deployed cERC20
-  const underlyings = [
-    tribe.address,
-    touch.address,
-  ];
+  const underlyings = [tribe.address, touch.address];
 
-  tx = await masterPriceOracle.add(
-    underlyings,
-    Array(underlyings.length).fill(mockPriceOracle.address),
-  );
+  tx = await masterPriceOracle.add(underlyings, Array(underlyings.length).fill(mockPriceOracle.address));
   await tx.wait();
   console.log("Added oracles to MasterPriceOracle for chain 1337");
   ////
