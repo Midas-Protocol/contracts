@@ -1,3 +1,4 @@
+import { SALT } from "../deploy/deploy";
 import { ChainlinkFeedBaseCurrency } from "./helper";
 
 export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
@@ -33,7 +34,7 @@ export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promi
 
   let dep = await deployments.deterministic("ChainlinkPriceOracleV2", {
     from: deployer,
-    salt: ethers.utils.keccak256(deployer),
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [deployer, true, "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd", "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526"],
     log: true,
   });
