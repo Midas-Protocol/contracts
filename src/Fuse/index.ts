@@ -56,7 +56,7 @@ import { filterOnlyObjectProperties, filterPoolName } from "./utils";
 
 type OracleConfig = {
   [contractName: string]: {
-    artifact: { abi: any; bytecode: string; sourceName: string; contractName: string };
+    artifact: { abi: any; bytecode: string; sourceName: string; contractName: string; deployedBytecode: string };
     address: string;
   };
 };
@@ -974,7 +974,7 @@ export default class Fuse {
     // Get price oracle contract name from runtime bytecode hash
     const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(oracleAddress));
     for (const [name, oracle] of Object.entries(this.oracles)) {
-      const value = utils.keccak256(oracle.artifact.bytecode);
+      const value = utils.keccak256(oracle.artifact.deployedBytecode);
       if (runtimeBytecodeHash === value) return name;
     }
     return null;
