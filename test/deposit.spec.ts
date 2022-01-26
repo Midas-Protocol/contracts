@@ -2,9 +2,8 @@ import { expect } from "chai";
 import { constants, Contract, utils } from "ethers";
 import { ethers } from "hardhat";
 import { createPool, setupTest } from "./utils";
-import { deployAssets, ethAssetInPool, getAssetsConf, getPoolIndex } from "./utils/pool";
-import { Fuse } from "../lib/esm/src";
-import { FusePoolData, USDPricedFuseAsset } from "../lib/esm/src/Fuse/types";
+import { assetInPool, deployAssets, getAssetsConf, getPoolIndex } from "./utils/pool";
+import { Fuse, USDPricedFuseAsset } from "../lib/esm/src";
 
 describe("Deposit flow tests", function () {
   this.beforeEach(async () => {
@@ -19,10 +18,10 @@ describe("Deposit flow tests", function () {
     beforeEach(async () => {
       this.timeout(120_000);
       const { bob } = await ethers.getNamedSigners();
-      [poolAddress, poolImplementationAddress] = await createPool({ poolName: POOL_NAME, signer: bob });
+      [poolAddress, poolImplementationAddress] = await createPool({ ethers, poolName: POOL_NAME, signer: bob });
       const sdk = new Fuse(ethers.provider, "1337");
-      const assets = await getAssetsConf(poolAddress);
-      await deployAssets(assets.assets, bob);
+      const assets = await getAssetsConf(ethers, poolAddress);
+      await deployAssets(ethers, assets.assets, bob);
       const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
       expect(fusePoolData.length).to.eq(3);
       expect(fusePoolData.at(-1)[3]).to.eq("TRIBE");
@@ -39,7 +38,7 @@ describe("Deposit flow tests", function () {
       const sdk = new Fuse(ethers.provider, "1337");
 
       const poolId = (await getPoolIndex(poolAddress, bob.address, sdk)).toString();
-      const assetsInPool: FusePoolData = await sdk.fetchFusePoolData(poolId, bob.address);
+      const assetsInPool = await sdk.fetchFusePoolData(poolId, bob.address);
 
       for (const asset of assetsInPool.assets) {
         if (asset.underlyingToken === constants.AddressZero) {
@@ -55,7 +54,7 @@ describe("Deposit flow tests", function () {
         }
       }
 
-      ethAsset = await ethAssetInPool(poolId, sdk, bob);
+      ethAsset = await assetInPool(poolId, sdk, bob, "ETH");
       const cEther = new Contract(ethAsset.cToken, sdk.chainDeployment.CEtherDelegate.abi, bob);
       tx = await cEther.callStatic.borrow(utils.parseUnits("1.5", 18));
       expect(tx).to.eq(0);
@@ -64,7 +63,7 @@ describe("Deposit flow tests", function () {
       tx = await cEther.borrow(utils.parseUnits("1.5", 18));
       rec = await tx.wait();
       expect(rec.status).to.eq(1);
-      ethAssetAfterBorrow = await ethAssetInPool(poolId, sdk, bob);
+      ethAssetAfterBorrow = await assetInPool(poolId, sdk, bob, "ETH");
       expect(ethAsset.borrowBalance.lt(ethAssetAfterBorrow.borrowBalance)).to.eq(true);
       console.log(ethAssetAfterBorrow.borrowBalanceUSD, "Borrow Balance USD: AFTER mint & borrow");
       console.log(ethAssetAfterBorrow.supplyBalanceUSD, "Supply Balance USD: AFTER mint & borrow");

@@ -1,10 +1,11 @@
 // pool utilities used across downstream tests
-import { ethers } from "hardhat";
 import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../lib/esm/src";
-import { constants, providers, utils } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { HardhatEthersHelpers } from "@nomiclabs/hardhat-ethers/types";
+import { providers, utils } from "ethers";
 
 interface PoolCreationParams {
+  ethers: HardhatEthersHelpers;
   closeFactor?: number;
   liquidationIncentive?: number;
   poolName: string;
@@ -15,6 +16,7 @@ interface PoolCreationParams {
 }
 
 export async function createPool({
+  ethers,
   closeFactor = 50,
   liquidationIncentive = 8,
   poolName = "TEST",
@@ -62,7 +64,11 @@ export type DeployedAsset = {
   interestRateModel: string;
   receipt: providers.TransactionReceipt;
 };
-export async function deployAssets(assets: cERC20Conf[], signer?: SignerWithAddress): Promise<DeployedAsset[]> {
+export async function deployAssets(
+  ethers: HardhatEthersHelpers,
+  assets: cERC20Conf[],
+  signer?: SignerWithAddress
+): Promise<DeployedAsset[]> {
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
@@ -95,6 +101,7 @@ export async function deployAssets(assets: cERC20Conf[], signer?: SignerWithAddr
 }
 
 export async function getAssetsConf(
+  ethers: HardhatEthersHelpers,
   comptroller: string,
   interestRateModelAddress?: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> {
@@ -103,10 +110,11 @@ export async function getAssetsConf(
     const jrm = await ethers.getContract("JumpRateModel", bob);
     interestRateModelAddress = jrm.address;
   }
-  return await poolAssets(interestRateModelAddress, comptroller, bob);
+  return await poolAssets(ethers, interestRateModelAddress, comptroller, bob);
 }
 
 export const poolAssets = async (
+  ethers: HardhatEthersHelpers,
   interestRateModelAddress: string,
   comptroller: string,
   signer: SignerWithAddress
@@ -159,13 +167,14 @@ export const poolAssets = async (
   };
 };
 
-export const ethAssetInPool = async (
+export const assetInPool = async (
   poolId: string,
   sdk: Fuse,
-  signer: SignerWithAddress
+  signer: SignerWithAddress,
+  underlyingSymbol: string
 ): Promise<USDPricedFuseAsset> => {
-  const fetchedAssetsInPoolAfterBorrow: FusePoolData = await sdk.fetchFusePoolData(poolId, signer.address);
-  return fetchedAssetsInPoolAfterBorrow.assets.filter((a) => a.underlyingToken === constants.AddressZero)[0];
+  const fetchedAssetsInPool: FusePoolData = await sdk.fetchFusePoolData(poolId, signer.address);
+  return fetchedAssetsInPool.assets.filter((a) => a.underlyingSymbol === underlyingSymbol)[0];
 };
 
 export const getPoolIndex = async (poolAddress: string, creatorAddress: string, sdk: Fuse) => {

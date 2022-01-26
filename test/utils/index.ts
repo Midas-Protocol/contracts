@@ -1,3 +1,3 @@
-export { poolAssets, createPool, deployAssets, getAssetsConf } from "./pool";
+export { createPool, deployAssets } from "./pool";
 
 export { setupTest } from "./setup";
