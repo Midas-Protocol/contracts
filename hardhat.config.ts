@@ -8,6 +8,7 @@ import { HardhatUserConfig } from "hardhat/types";
 
 require("./tasks/editDeployers");
 require("./tasks/createPoolsWithAssets");
+require("./tasks/sendTestTokens");
 
 dotEnvConfig();
 
