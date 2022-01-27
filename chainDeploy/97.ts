@@ -14,7 +14,7 @@ export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promi
     {
       symbol: "BUSD",
       aggregator: "0x9331b55D9830EF609A2aBCfAc0FBCE050A52fdEa",
-      underlying: "0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47",
+      underlying: "0xed24fc36d5ee211ea25a80239fb8c4cfd80f12ee",
       feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
     },
     {

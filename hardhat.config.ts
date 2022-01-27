@@ -7,6 +7,7 @@ import "hardhat-deploy";
 import { HardhatUserConfig } from "hardhat/types";
 
 import "./tasks/editDeployers";
+import "./tasks/addChainlinkFeeds";
 
 dotEnvConfig();
 
