@@ -1,4 +1,3 @@
-import { utils } from "ethers";
 import { SALT } from "../deploy/deploy";
 
 export const deploy1337 = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
@@ -37,25 +36,25 @@ export const deploy1337 = async ({ ethers, getNamedAccounts, deployments }): Pro
 
   ////
   //// ORACLES
-  dep = await deployments.deterministic("MockPriceOracle", {
+  dep = await deployments.deterministic("SimplePriceOracle", {
     from: bob,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [100],
+    args: [],
     log: true,
   });
-  const mockPO = await dep.deploy();
-  console.log("MockPriceOracle: ", mockPO.address);
+  const simplePO = await dep.deploy();
+  console.log("SimplePriceOracle: ", simplePO.address);
 
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
 
   // if chain id 1337
-  const mockPriceOracle = await ethers.getContract("MockPriceOracle", deployer);
+  const simplePriceOracle = await ethers.getContract("SimplePriceOracle", deployer);
 
   // get the ERC20 address of deployed cERC20
   const underlyings = [tribe.address, touch.address];
 
-  tx = await masterPriceOracle.add(underlyings, Array(underlyings.length).fill(mockPriceOracle.address));
+  tx = await masterPriceOracle.add(underlyings, Array(underlyings.length).fill(simplePriceOracle.address));
   await tx.wait();
-  console.log("Added oracles to MasterPriceOracle for chain 1337");
+  console.log("Added oracles to SimplePriceOracle for chain 1337");
   ////
 };
