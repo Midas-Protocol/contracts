@@ -11,9 +11,9 @@ const logPoolData = async (poolAddress, creatorAddress, sdk) => {
 
 export default task("create-pools", "Create Testing Pools")
   .addParam("name", "Name of the pool to be created")
-  .addOptionalParam("depositAmount", "Amount to deposit", 0, types.string)
+  .addOptionalParam("depositAmount", "Amount to deposit", 0, types.int)
   .addOptionalParam("depositSymbol", "Amount to deposit", "ETH")
-  .addOptionalParam("borrowAmount", "Amount to deposit", 0, types.string)
+  .addOptionalParam("borrowAmount", "Amount to deposit", 0, types.int)
   .addOptionalParam("borrowSymbol", "Amount to deposit", "ETH")
   .setAction(
     async (
