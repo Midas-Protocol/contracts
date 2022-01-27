@@ -1,5 +1,4 @@
 import { task, types } from "hardhat/config";
-import { getPoolByName } from "../test/utils/pool";
 
 const logPoolData = async (poolAddress, creatorAddress, sdk) => {
   const poolModule = await import("../test/utils/pool");
@@ -34,7 +33,7 @@ export default task("create-pools", "Create Testing Pools")
       const sdk = new sdkModule.Fuse(ethers.provider, "1337");
       const { bob } = await ethers.getNamedSigners();
 
-      const existingPool = await getPoolByName(_name, bob.address, sdk);
+      const existingPool = await poolModule.getPoolByName(_name, bob.address, sdk);
 
       let poolAddress: string;
       if (existingPool !== null) {
