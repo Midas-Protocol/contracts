@@ -3,7 +3,7 @@ import { task } from "hardhat/config";
 export default task("edit-deployers", "Edit deployers")
   .addParam("deployers", "Comma-separated deployers")
   .addOptionalParam("status", "Add or remove deployer")
-  .setAction(async ({ deployers: _deployers, status: _status }, { deployments, getNamedAccounts, ethers }) => {
+  .setAction(async ({ deployers: _deployers, status: _status }, { getNamedAccounts, ethers }) => {
     const status = _status ?? true;
     console.log("status: ", status);
     const deployers = _deployers.split(",");

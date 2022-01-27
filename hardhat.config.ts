@@ -6,9 +6,11 @@ import { config as dotEnvConfig } from "dotenv";
 import "hardhat-deploy";
 import { HardhatUserConfig } from "hardhat/types";
 
-require("./tasks/editDeployers");
-require("./tasks/createPoolsWithAssets");
-require("./tasks/sendTestTokens");
+import "./tasks/editDeployers";
+import "./tasks/addChainlinkFeeds";
+import "./tasks/editDeployers";
+import "./tasks/createPoolsWithAssets";
+import "./tasks/sendTestTokens";
 
 dotEnvConfig();
 
