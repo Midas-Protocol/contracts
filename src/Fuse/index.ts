@@ -1,5 +1,5 @@
 // Ethers
-import { BigNumber, constants, Contract, ContractFactory, ContractInterface, providers, utils } from "ethers";
+import { BigNumber, constants, Contract, ContractFactory, providers, utils } from "ethers";
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import axios from "axios";
@@ -26,7 +26,7 @@ import PreferredPriceOracleArtifact from "../../artifacts/contracts/oracles/Pref
 
 // Oracle Artifacts
 import MasterPriceOracleArtifact from "../../artifacts/contracts/oracles/MasterPriceOracle.sol/MasterPriceOracle.json";
-import MockPriceOracleArtifact from "../../artifacts/contracts/oracles/MockPriceOracle.sol/MockPriceOracle.json";
+import SimplePriceOracleArtifact from "../../artifacts/contracts/compound/SimplePriceOracle.sol/SimplePriceOracle.json";
 import ChainlinkPriceOracleV2Artifact from "../../artifacts/contracts/oracles/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json";
 
 // IRM Artifacts
@@ -36,7 +36,10 @@ import WhitePaperInterestRateModelArtifact from "../../artifacts/contracts/compo
 
 // Types
 import {
+  Artifact,
+  Artifacts,
   cERC20Conf,
+  ChainDeployment,
   FusePoolData,
   InterestRateModel,
   InterestRateModelConf,
@@ -44,19 +47,13 @@ import {
   OracleConf,
   USDPricedFuseAsset,
 } from "./types";
-import {
-  COMPTROLLER_ERROR_CODES,
-  CTOKEN_ERROR_CODES,
-  JUMP_RATE_MODEL_CONF,
-  ORACLES,
-  SIMPLE_DEPLOY_ORACLES,
-} from "./config";
-import { chainSpecificAddresses, irmConfig, oracleConfig } from "../network";
+import { COMPTROLLER_ERROR_CODES, CTOKEN_ERROR_CODES, JUMP_RATE_MODEL_CONF, SIMPLE_DEPLOY_ORACLES } from "./config";
+import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig } from "../network";
 import { filterOnlyObjectProperties, filterPoolName } from "./utils";
 
 type OracleConfig = {
   [contractName: string]: {
-    artifact: { abi: any; bytecode: string; sourceName: string; contractName: string; deployedBytecode: string };
+    artifact: Artifact;
     address: string;
   };
 };
@@ -65,13 +62,6 @@ type IrmConfig = OracleConfig;
 
 type ChainSpecificAddresses = {
   [tokenName: string]: string;
-};
-
-type ChainDeployment = {
-  [contractName: string]: {
-    abi: any;
-    address: string;
-  };
 };
 
 export default class Fuse {
@@ -83,29 +73,23 @@ export default class Fuse {
     FuseSafeLiquidator: Contract;
     FuseFeeDistributor: Contract;
   };
-  static ORACLES = ORACLES;
   static SIMPLE_DEPLOY_ORACLES = SIMPLE_DEPLOY_ORACLES;
   static COMPTROLLER_ERROR_CODES = COMPTROLLER_ERROR_CODES;
   static CTOKEN_ERROR_CODES = CTOKEN_ERROR_CODES;
   static JumpRateModelConf: InterestRateModelConf = JUMP_RATE_MODEL_CONF;
 
+  public availableOracles: Array<string>;
   public chainId: string;
   public chainDeployment: ChainDeployment;
   public oracles: OracleConfig;
   private readonly irms: IrmConfig;
   public chainSpecificAddresses: ChainSpecificAddresses;
-  public artifacts: {
-    [contractName: string]: {
-      contractName: string;
-      sourceName: string;
-      abi: ContractInterface;
-      bytecode: string;
-    };
-  };
+  public artifacts: Artifacts;
 
   constructor(web3Provider: JsonRpcProvider | Web3Provider, chainId: string) {
     this.provider = web3Provider;
     this.chainId = chainId;
+    this.availableOracles = chainOracles[chainId];
     this.chainDeployment =
       Deployments[chainId] && Deployments[chainId][Object.keys(Deployments[chainId])[0]]?.contracts;
     if (!this.chainDeployment) {
@@ -157,10 +141,10 @@ export default class Fuse {
       WhitePaperInterestRateModel: WhitePaperInterestRateModelArtifact,
       ChainlinkPriceOracleV2: ChainlinkPriceOracleV2Artifact,
       MasterPriceOracle: MasterPriceOracleArtifact,
-      MockPriceOracle: MockPriceOracleArtifact,
+      SimplePriceOracle: SimplePriceOracleArtifact,
     };
     this.irms = irmConfig(this.chainDeployment, this.artifacts);
-    this.oracles = oracleConfig(this.chainDeployment, this.artifacts)[chainId];
+    this.oracles = oracleConfig(this.chainDeployment, this.artifacts, this.availableOracles);
   }
 
   // TODO: probably should determine this by chain

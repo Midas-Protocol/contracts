@@ -8,6 +8,9 @@ import { HardhatUserConfig } from "hardhat/types";
 
 import "./tasks/editDeployers";
 import "./tasks/addChainlinkFeeds";
+import "./tasks/editDeployers";
+import "./tasks/createPoolsWithAssets";
+import "./tasks/sendTestTokens";
 
 dotEnvConfig();
 

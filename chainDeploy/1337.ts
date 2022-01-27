@@ -36,18 +36,18 @@ export const deploy1337 = async ({ ethers, getNamedAccounts, deployments }): Pro
 
   ////
   //// ORACLES
-  dep = await deployments.deterministic("MockPriceOracle", {
+  dep = await deployments.deterministic("SimplePriceOracle", {
     from: bob,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [100],
+    args: [],
     log: true,
   });
-  const mockPO = await dep.deploy();
-  console.log("MockPriceOracle: ", mockPO.address);
+  const simplePO = await dep.deploy();
+  console.log("SimplePriceOracle: ", simplePO.address);
 
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
 
-  const mockPriceOracle = await ethers.getContract("MockPriceOracle", deployer);
+  const simplePriceOracle = await ethers.getContract("SimplePriceOracle", deployer);
 
   // get the ERC20 address of deployed cERC20
   const underlyings = [tribe.address, touch.address];
@@ -56,8 +56,8 @@ export const deploy1337 = async ({ ethers, getNamedAccounts, deployments }): Pro
   if (admin === ethers.constants.AddressZero) {
     tx = await masterPriceOracle.initialize(
       underlyings,
-      Array(underlyings.length).fill(mockPriceOracle.address),
-      mockPO.address,
+      Array(underlyings.length).fill(simplePriceOracle.address),
+        simplePO.address,
       deployer,
       true,
       ethers.constants.AddressZero,

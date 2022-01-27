@@ -1,3 +1,5 @@
+import { Artifacts, ChainDeployment } from "./Fuse/types";
+
 export const chainSpecificAddresses = {
   1337: {
     DAI_POT: "0x197e90f9fad81970ba7976f33cbd77088e5d7cf7",
@@ -22,40 +24,24 @@ export const chainSpecificAddresses = {
   },
 };
 
-export const oracleConfig = (deployments, artifacts) => {
-  return {
-    1337: {
-      MockPriceOracle: {
-        artifact: artifacts.MockPriceOracle,
-        address: deployments.MockPriceOracle?.address,
-      },
-      MasterPriceOracle: {
-        artifact: artifacts.MasterPriceOracle,
-        address: deployments.MasterPriceOracle.address,
-      },
-      ChainlinkPriceOracleV2: {
-        artifact: artifacts.ChainlinkPriceOracleV2,
-        address: deployments.ChainlinkPriceOracleV2?.address,
-      },
-    },
-    97: {
-      MasterPriceOracle: {
-        artifact: artifacts.MasterPriceOracle,
-        address: deployments.MasterPriceOracle.address,
-      },
-      ChainlinkPriceOracleV2: {
-        artifact: artifacts.ChainlinkPriceOracleV2,
-        address: deployments.ChainlinkPriceOracleV2?.address,
-      },
-      UniswapTwapPriceOracleV2: {
-        artifact: artifacts.UniswapTwapPriceOracleV2,
-        address: deployments.UniswapTwapPriceOracleV2.address,
-      },
-    },
-  };
+const OracleTypes = {
+  MasterPriceOracle: "MasterPriceOracle",
+  SimplePriceOracle: "SimplePriceOracle",
+  ChainlinkPriceOracleV2: "ChainlinkPriceOracleV2",
+  UniswapTwapPriceOracleV2: "UniswapTwapPriceOracleV2",
+} as const;
+
+export const chainOracles = {
+  1337: [OracleTypes.SimplePriceOracle, OracleTypes.MasterPriceOracle],
+  97: [OracleTypes.MasterPriceOracle, OracleTypes.ChainlinkPriceOracleV2, OracleTypes.UniswapTwapPriceOracleV2],
 };
 
-export const irmConfig = (deployments, artifacts) => {
+export const oracleConfig = (deployments: ChainDeployment, artifacts: Artifacts, availableOracles: Array<string>) => {
+  const asMap = new Map(availableOracles.map((o) => [o, { artifact: artifacts[o], address: deployments[o].address }]));
+  return Object.fromEntries(asMap);
+};
+
+export const irmConfig = (deployments: ChainDeployment, artifacts: Artifacts) => {
   return {
     JumpRateModel: {
       artifact: artifacts.JumpRateModel,

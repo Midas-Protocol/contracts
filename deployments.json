@@ -18703,175 +18703,6 @@
             }
           ]
         },
-        "MockPriceOracle": {
-          "address": "0x7FD78574354b1D3E3AB1e1Caca729551FA00Ed5D",
-          "abi": [
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "_maxSecondsBeforePriceIsStale",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "constructor"
-            },
-            {
-              "inputs": [],
-              "name": "BTC_ETH_PRICE_FEED",
-              "outputs": [
-                {
-                  "internalType": "contract AggregatorV3Interface",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "ETH_USD_PRICE_FEED",
-              "outputs": [
-                {
-                  "internalType": "contract AggregatorV3Interface",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "name": "btcPriceFeeds",
-              "outputs": [
-                {
-                  "internalType": "contract AggregatorV3Interface",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "name": "ethPriceFeeds",
-              "outputs": [
-                {
-                  "internalType": "contract AggregatorV3Interface",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "contract ICToken",
-                  "name": "cToken",
-                  "type": "address"
-                }
-              ],
-              "name": "getUnderlyingPrice",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "underlying",
-                  "type": "address"
-                }
-              ],
-              "name": "hasPriceFeed",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "maxSecondsBeforePriceIsStale",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "underlying",
-                  "type": "address"
-                }
-              ],
-              "name": "price",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "name": "usdPriceFeeds",
-              "outputs": [
-                {
-                  "internalType": "contract AggregatorV3Interface",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            }
-          ]
-        },
         "RewardsDistributorDelegate": {
           "address": "0x427273a0725D94A824C182a79E247942D0FB8B84",
           "abi": [
@@ -19620,6 +19451,129 @@
                 }
               ],
               "name": "updateContributorRewards",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "SimplePriceOracle": {
+          "address": "0x17E49587E68AfF3b7C6aa1B1BFe244847a39D18D",
+          "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "asset",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "previousPriceMantissa",
+                  "type": "uint256"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "requestedPriceMantissa",
+                  "type": "uint256"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "newPriceMantissa",
+                  "type": "uint256"
+                }
+              ],
+              "name": "PricePosted",
+              "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "asset",
+                  "type": "address"
+                }
+              ],
+              "name": "assetPrices",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract CToken",
+                  "name": "cToken",
+                  "type": "address"
+                }
+              ],
+              "name": "getUnderlyingPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "isPriceOracle",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "asset",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "price",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setDirectPrice",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract CToken",
+                  "name": "cToken",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "underlyingPriceMantissa",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setUnderlyingPrice",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
