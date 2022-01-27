@@ -186,3 +186,14 @@ export const getPoolIndex = async (poolAddress: string, creatorAddress: string, 
   }
   return null;
 };
+
+export const getPoolByName = async (name: string, creatorAddress: string, sdk: Fuse): Promise<FusePoolData> => {
+  const [indexes, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPoolsByAccountWithData(creatorAddress);
+  for (let j = 0; j < publicPools.length; j++) {
+    if (publicPools[j].name === name) {
+      const poolIndex = await getPoolIndex(publicPools[j].comptroller, creatorAddress, sdk);
+      return sdk.fetchFusePoolData(poolIndex, publicPools[j].comptroller);
+    }
+  }
+  return null;
+};
