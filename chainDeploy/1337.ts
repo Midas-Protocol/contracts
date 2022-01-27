@@ -47,14 +47,25 @@ export const deploy1337 = async ({ ethers, getNamedAccounts, deployments }): Pro
 
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
 
-  // if chain id 1337
   const simplePriceOracle = await ethers.getContract("SimplePriceOracle", deployer);
 
   // get the ERC20 address of deployed cERC20
   const underlyings = [tribe.address, touch.address];
 
-  tx = await masterPriceOracle.add(underlyings, Array(underlyings.length).fill(simplePriceOracle.address));
-  await tx.wait();
-  console.log("Added oracles to SimplePriceOracle for chain 1337");
+  const admin = await masterPriceOracle.admin();
+  if (admin === ethers.constants.AddressZero) {
+    tx = await masterPriceOracle.initialize(
+      underlyings,
+      Array(underlyings.length).fill(simplePriceOracle.address),
+        simplePO.address,
+      deployer,
+      true,
+      ethers.constants.AddressZero,
+    );
+    await tx.wait();
+    console.log("MasterPriceOracle initialized", tx.hash);
+  } else {
+    console.log("MasterPriceOracle already initialized");
+  }
   ////
 };

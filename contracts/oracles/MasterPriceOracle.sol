@@ -37,6 +37,11 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
     bool internal noAdminOverwrite;
 
     /**
+     * @dev The Wrapped native asset address.
+     */
+    address public wtoken;
+
+    /**
      * @dev Returns a boolean indicating if `admin` can overwrite existing assignments of oracles to underlying tokens.
      */
     function canAdminOverwrite() external view returns (bool) {
@@ -66,7 +71,14 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
      * @param _admin The admin who can assign oracles to underlying tokens.
      * @param _canAdminOverwrite Controls if `admin` can overwrite existing assignments of oracles to underlying tokens.
      */
-    function initialize(address[] memory underlyings, IPriceOracle[] memory _oracles, IPriceOracle _defaultOracle, address _admin, bool _canAdminOverwrite) external initializer {
+    function initialize(
+        address[] memory underlyings, 
+        IPriceOracle[] memory _oracles, 
+        IPriceOracle _defaultOracle, 
+        address _admin, 
+        bool _canAdminOverwrite, 
+        address _wtoken
+    ) external initializer {
         // Input validation
         require(underlyings.length == _oracles.length, "Lengths of both arrays must be equal.");
 
@@ -81,6 +93,7 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
         defaultOracle = _defaultOracle;
         admin = _admin;
         noAdminOverwrite = !_canAdminOverwrite;
+        wtoken = _wtoken;
     }
 
     /**

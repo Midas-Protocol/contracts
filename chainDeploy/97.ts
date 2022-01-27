@@ -1,5 +1,10 @@
 import { SALT } from "../deploy/deploy";
-import { ChainlinkFeedBaseCurrency } from "./helper";
+import { ChainDeployConfig, ChainlinkFeedBaseCurrency } from "./helper";
+
+const deployConfig97: ChainDeployConfig = {
+  wtoken: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
+  nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526"
+}
 
 export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
@@ -35,7 +40,7 @@ export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promi
   let dep = await deployments.deterministic("ChainlinkPriceOracleV2", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [deployer, true, "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd", "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526"],
+    args: [deployer, true, deployConfig97.wtoken, deployConfig97.nativeTokenUsdChainlinkFeed],
     log: true,
   });
   const cpo = await dep.deploy();
@@ -49,12 +54,20 @@ export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promi
   );
 
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
-
-  let tx = await masterPriceOracle.add(
-    chainlinkMappingUsd.map((c) => c.underlying),
-    Array(chainlinkMappingUsd.length).fill(chainLinkv2.address)
-  );
-  await tx.wait();
-  console.log("Added oracles to MasterPriceOracle for chain 97");
+  const admin = await masterPriceOracle.admin();
+  if (admin === ethers.constants.AddressZero) {
+    let tx = await masterPriceOracle.initialize(
+      chainlinkMappingUsd.map((c) => c.underlying),
+      Array(chainlinkMappingUsd.length).fill(chainLinkv2.address),
+      cpo.address,
+      deployer,
+      true,
+      deployConfig97.wtoken,
+    );
+    await tx.wait();
+    console.log("MasterPriceOracle initialized", tx.hash);
+  } else {
+    console.log("MasterPriceOracle already initialized");
+  }
   ////
 };
