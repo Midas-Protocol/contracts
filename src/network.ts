@@ -24,9 +24,16 @@ export const chainSpecificAddresses = {
   },
 };
 
+const OracleTypes = {
+  MasterPriceOracle: "MasterPriceOracle",
+  SimplePriceOracle: "SimplePriceOracle",
+  ChainlinkPriceOracleV2: "ChainlinkPriceOracleV2",
+  UniswapTwapPriceOracleV2: "UniswapTwapPriceOracleV2",
+} as const;
+
 export const chainOracles = {
-  1337: ["MasterPriceOracle", "SimplePriceOracle"],
-  97: ["MasterPriceOracle", "ChainlinkPriceOracleV2", "UniswapTwapPriceOracleV2"],
+  1337: [OracleTypes.SimplePriceOracle, OracleTypes.MasterPriceOracle],
+  97: [OracleTypes.MasterPriceOracle, OracleTypes.ChainlinkPriceOracleV2, OracleTypes.UniswapTwapPriceOracleV2],
 };
 
 export const oracleConfig = (deployments: ChainDeployment, artifacts: Artifacts, availableOracles: Array<string>) => {
