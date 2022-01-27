@@ -6303,7 +6303,7 @@
           ]
         },
         "FusePoolLens": {
-          "address": "0xCc2AaF13A22968425Ee8214934196Daf78D9b224",
+          "address": "0x60B7623a83ea46c1650bEa40ABC5eCd23dE03bD4",
           "abi": [
             {
               "inputs": [],
@@ -7627,7 +7627,7 @@
           ]
         },
         "FusePoolLensSecondary": {
-          "address": "0xa970D48fF56106028bA0086194a840483164db64",
+          "address": "0x7F9c365Ee4fA9022794066A1ce14EA06Ecdbf158",
           "abi": [
             {
               "inputs": [],
@@ -8509,7 +8509,7 @@
           ]
         },
         "MasterPriceOracle": {
-          "address": "0x319D3690Ff65306C68eb2737D53109994333c528",
+          "address": "0xe60EB95F1Cd737c007FaC08717D4838aF37C43Bb",
           "abi": [
             {
               "anonymous": false,
@@ -8689,6 +8689,11 @@
                   "internalType": "bool",
                   "name": "_canAdminOverwrite",
                   "type": "bool"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_wtoken",
+                  "type": "address"
                 }
               ],
               "name": "initialize",
@@ -8745,6 +8750,19 @@
               "name": "setDefaultOracle",
               "outputs": [],
               "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "wtoken",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
               "type": "function"
             }
           ]
@@ -16221,7 +16239,7 @@
           ]
         },
         "FusePoolLens": {
-          "address": "0xCc2AaF13A22968425Ee8214934196Daf78D9b224",
+          "address": "0x60B7623a83ea46c1650bEa40ABC5eCd23dE03bD4",
           "abi": [
             {
               "inputs": [],
@@ -17545,7 +17563,7 @@
           ]
         },
         "FusePoolLensSecondary": {
-          "address": "0xa970D48fF56106028bA0086194a840483164db64",
+          "address": "0x7F9c365Ee4fA9022794066A1ce14EA06Ecdbf158",
           "abi": [
             {
               "inputs": [],
@@ -18427,7 +18445,7 @@
           ]
         },
         "MasterPriceOracle": {
-          "address": "0x319D3690Ff65306C68eb2737D53109994333c528",
+          "address": "0xe60EB95F1Cd737c007FaC08717D4838aF37C43Bb",
           "abi": [
             {
               "anonymous": false,
@@ -18607,6 +18625,11 @@
                   "internalType": "bool",
                   "name": "_canAdminOverwrite",
                   "type": "bool"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_wtoken",
+                  "type": "address"
                 }
               ],
               "name": "initialize",
@@ -18663,6 +18686,19 @@
               "name": "setDefaultOracle",
               "outputs": [],
               "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "wtoken",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
               "type": "function"
             }
           ]

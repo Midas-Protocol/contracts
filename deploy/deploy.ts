@@ -99,7 +99,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   if (owner === ethers.constants.AddressZero) {
     tx = await fusePoolDirectory.initialize(true, [deployer, alice, bob]);
     await tx.wait();
-    console.log("FusePoolDirectory initialized");
+    console.log("FusePoolDirectory initialized", tx.hash);
   } else {
     console.log("FusePoolDirectory already initialized");
   }
@@ -126,7 +126,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   if (owner === ethers.constants.AddressZero) {
     tx = await fuseFeeDistributor.initialize(ethers.utils.parseEther("0.1"));
     await tx.wait();
-    console.log("FuseFeeDistributor initialized");
+    console.log("FuseFeeDistributor initialized", tx.hash);
   } else {
     console.log("FuseFeeDistributor already initialized");
   }
@@ -137,7 +137,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     ethers.constants.MaxUint256
   );
   await tx.wait();
-  console.log("FuseFeeDistributor pool limits set");
+  console.log("FuseFeeDistributor pool limits set", tx.hash);
 
   const comptroller = await ethers.getContract("Comptroller", deployer);
   tx = await fuseFeeDistributor._editComptrollerImplementationWhitelist(
@@ -160,7 +160,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   if (directory === constants.AddressZero) {
     tx = await fusePoolLens.initialize(fusePoolDirectory.address);
     await tx.wait();
-    console.log("FusePoolLens initialized");
+    console.log("FusePoolLens initialized", tx.hash);
   } else {
     console.log("FusePoolLens already initialized");
   }
@@ -179,7 +179,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   if (directory === constants.AddressZero) {
     tx = await fusePoolLensSecondary.initialize(fusePoolDirectory.address);
     await tx.wait();
-    console.log("FusePoolLensSecondary initialized");
+    console.log("FusePoolLensSecondary initialized", tx.hash);
   } else {
     console.log("FusePoolLensSecondary already initialized");
   }
@@ -195,7 +195,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   );
 
   let receipt = await tx.wait();
-  console.log("Set whitelist for Ether Delegate with status:", receipt.status);
+  console.log("Set whitelist for Ether Delegate with status:", receipt.status, tx.hash);
 
   tx = await fuseFeeDistributor._editCErc20DelegateWhitelist(
     [constants.AddressZero],
@@ -226,16 +226,6 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   });
   const masterPO = await dep.deploy();
   console.log("MasterPriceOracle: ", masterPO.address);
-
-  const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
-  const admin = await masterPriceOracle.admin();
-  if (admin === constants.AddressZero) {
-    tx = await masterPriceOracle.initialize([], [], ethers.constants.AddressZero, deployer, true);
-    await tx.wait();
-    console.log("MasterPriceOracle initialized");
-  } else {
-    console.log("MasterPriceOracle already initialized");
-  }
 
   dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
     from: deployer,
