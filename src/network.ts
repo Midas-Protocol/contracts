@@ -30,7 +30,7 @@ export const chainOracles = {
 };
 
 export const oracleConfig = (deployments: ChainDeployment, artifacts: Artifacts, availableOracles: Array<string>) => {
-  const asMap = new Map(availableOracles.map((o) => [o, { artifact: artifacts[o], address: deployments[0].address }]));
+  const asMap = new Map(availableOracles.map((o) => [o, { artifact: artifacts[o], address: deployments[o].address }]));
   return Object.fromEntries(asMap);
 };
 
