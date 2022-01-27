@@ -49,6 +49,24 @@ export interface InterestRateModel {
 
   getSupplyRate(utilizationRate: BigNumber): BigNumber;
 }
+export type Artifact = {
+  contractName: string;
+  sourceName: string;
+  abi: any;
+  bytecode: string;
+  deployedBytecode: string;
+};
+
+export type Artifacts = {
+  [contractName: string]: Artifact;
+};
+
+export type ChainDeployment = {
+  [contractName: string]: {
+    abi: any;
+    address: string;
+  };
+};
 
 export type InterestRateModelType = JumpRateModel | DAIInterestRateModelV2 | WhitePaperInterestRateModel | undefined;
 
@@ -161,4 +179,12 @@ export interface FusePoolData {
   id?: number;
   admin: string;
   isAdminWhitelisted: boolean;
+}
+
+export interface FusePool {
+  name: string;
+  creator: string;
+  comptroller: string;
+  blockPosted: number;
+  timestampPosted: number;
 }
