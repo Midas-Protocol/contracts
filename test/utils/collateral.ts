@@ -12,8 +12,8 @@ async function getAsset(
   deployerAddress: string,
   underlyingSymbol: string
 ): Promise<USDPricedFuseAsset> {
-  const poolId = (await getPoolIndex(poolAddress, sdk)).toString();
-  const assetsInPool = await sdk.fetchFusePoolData(poolId);
+  const poolId = (await getPoolIndex(poolAddress, deployerAddress, sdk)).toString();
+  const assetsInPool = await sdk.fetchFusePoolData(poolId, deployerAddress);
   return assetsInPool.assets.filter((a) => a.underlyingSymbol === underlyingSymbol)[0];
 }
 
@@ -66,8 +66,8 @@ export async function borrowCollateral(
   tx = await cToken.borrow(utils.parseUnits(amount, 18));
   rec = await tx.wait();
   expect(rec.status).to.eq(1);
-  const poolId = await getPoolIndex(poolAddress, sdk);
-  const assetAfterBorrow = await assetInPool(poolId, sdk, assetToDeploy.underlyingSymbol);
+  const poolId = await getPoolIndex(poolAddress, deployerAddress, sdk);
+  const assetAfterBorrow = await assetInPool(poolId, sdk, signer, assetToDeploy.underlyingSymbol);
   console.log(assetAfterBorrow.borrowBalanceUSD, "Borrow Balance USD: AFTER mint & borrow");
   console.log(assetAfterBorrow.supplyBalanceUSD, "Supply Balance USD: AFTER mint & borrow");
 }

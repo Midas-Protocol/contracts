@@ -999,7 +999,7 @@ export default class Fuse {
     return irmName;
   };
 
-  fetchFusePoolData = async (poolId: string | undefined): Promise<FusePoolData | undefined> => {
+  fetchFusePoolData = async (poolId: string | undefined, address: string): Promise<FusePoolData | undefined> => {
     if (!poolId) return undefined;
 
     const {
@@ -1011,7 +1011,9 @@ export default class Fuse {
     const name = filterPoolName(_unfiliteredName);
 
     const assets: USDPricedFuseAsset[] = (
-      await this.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(comptroller)
+      await this.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(comptroller, {
+        from: address,
+      })
     ).map(filterOnlyObjectProperties);
 
     let totalLiquidityUSD = 0;

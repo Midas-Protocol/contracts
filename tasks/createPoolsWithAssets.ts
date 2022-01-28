@@ -1,138 +1,68 @@
 import { task, types } from "hardhat/config";
 
-const logPoolData = async (poolAddress, sdk) => {
+const logPoolData = async (poolAddress, creatorAddress, sdk) => {
   const poolModule = await import("../test/utils/pool");
-  const poolIndex = await poolModule.getPoolIndex(poolAddress, sdk);
+  const poolIndex = await poolModule.getPoolIndex(poolAddress, creatorAddress, sdk);
   const fusePoolData = await sdk.fetchFusePoolData(poolIndex, poolAddress);
 
   const poolAssets = fusePoolData.assets.map((a) => a.underlyingSymbol).join(", ");
-  console.log(`Operating on pool with address ${poolAddress},  name: ${fusePoolData.name}, assets ${poolAssets}`);
+  console.log(`Operating on pool with address ${poolAddress},  mame: ${fusePoolData.name}, assets ${poolAssets}`);
 };
 
-export default task("pools", "Create Testing Pools")
+export default task("create-pools", "Create Testing Pools")
   .addParam("name", "Name of the pool to be created")
-  .addOptionalParam("creator", "Named account from which to create the pool", "bob", types.string)
   .addOptionalParam("depositAmount", "Amount to deposit", 0, types.int)
-  .addOptionalParam("depositSymbol", "Symbol of token to deposit", "ETH")
-  .addOptionalParam("depositAccount", "Named account from which to deposit collateral", "bob", types.string)
-  .addOptionalParam("borrowAmount", "Amount to borrow", 0, types.int)
-  .addOptionalParam("borrowSymbol", "Symbol of token to borrow", "ETH")
-  .addOptionalParam("borrowAccount", "Named account from which to borrow collateral", "bob", types.string)
-  .setAction(async (taskArgs, hre) => {
-    const poolAddress = await hre.run("pools:create", { name: taskArgs.name, creator: taskArgs.creator });
-    if (taskArgs.depositAmount != 0) {
-      await hre.run("pools:deposit", {
-        amount: taskArgs.depositAmount,
-        symbol: taskArgs.depositSymbol,
-        account: taskArgs.depositAccount,
-        poolAddress,
-      });
+  .addOptionalParam("depositSymbol", "Amount to deposit", "ETH")
+  .addOptionalParam("borrowAmount", "Amount to deposit", 0, types.int)
+  .addOptionalParam("borrowSymbol", "Amount to deposit", "ETH")
+  .setAction(
+    async (
+      {
+        name: _name,
+        depositAmount: _depositAmount,
+        depositSymbol: _depositSymbol,
+        borrowAmount: _borrowAmount,
+        borrowSymbol: _borrowSymbol,
+      },
+      { ethers }
+    ) => {
+      const poolModule = await import("../test/utils/pool");
+      // @ts-ignore
+      const sdkModule = await import("../lib/esm/src");
+      const collateralModule = await import("../test/utils/collateral");
+      const sdk = new sdkModule.Fuse(ethers.provider, "1337");
+      const { bob } = await ethers.getNamedSigners();
+
+      const existingPool = await poolModule.getPoolByName(_name, bob.address, sdk);
+
+      let poolAddress: string;
+      if (existingPool !== null) {
+        console.log(`Pool with name ${existingPool.name} exists already, will operate on it`);
+        poolAddress = existingPool.comptroller;
+      } else {
+        [poolAddress] = await poolModule.createPool({ ethers, poolName: _name, signer: bob });
+        const assets = await poolModule.getAssetsConf(ethers, poolAddress);
+        await poolModule.deployAssets(ethers, assets.assets, bob);
+      }
+
+      await logPoolData(poolAddress, bob.address, sdk);
+      if (_depositAmount != 0) {
+        await collateralModule.addCollateral(
+          ethers,
+          poolAddress,
+          bob.address,
+          _depositSymbol,
+          _depositAmount.toString()
+        );
+      }
+      if (_borrowAmount != 0) {
+        await collateralModule.borrowCollateral(
+          ethers,
+          poolAddress,
+          bob.address,
+          _borrowSymbol,
+          _borrowAmount.toString()
+        );
+      }
     }
-    if (taskArgs.borrowAmount != 0) {
-      await hre.run("pools:borrow", {
-        amount: taskArgs.borrowAmount,
-        symbol: taskArgs.borrowSymbol,
-        account: taskArgs.borrowAccount,
-        poolAddress,
-      });
-    }
-  });
-
-task("pools:create", "Create pool if does not exist")
-  .addParam("name", "Name of the pool to be created")
-  .addParam("creator", "Named account from which to create the pool", "bob", types.string)
-  .setAction(async (taskArgs, hre) => {
-    const poolModule = await import("../test/utils/pool");
-    // @ts-ignore
-    const sdkModule = await import("../lib/esm/src");
-
-    const sdk = new sdkModule.Fuse(hre.ethers.provider, "1337");
-    const account = await hre.ethers.getNamedSigner(taskArgs.creator);
-    const existingPool = await poolModule.getPoolByName(taskArgs.name, sdk);
-
-    let poolAddress: string;
-    if (existingPool !== null) {
-      console.log(`Pool with name ${existingPool.name} exists already, will operate on it`);
-      poolAddress = existingPool.comptroller;
-    } else {
-      [poolAddress] = await poolModule.createPool({ ethers: hre.ethers, poolName: taskArgs.name, signer: account });
-      const assets = await poolModule.getAssetsConf(hre.ethers, poolAddress);
-      await poolModule.deployAssets(hre.ethers, assets.assets, account);
-    }
-    await logPoolData(poolAddress, sdk);
-    return poolAddress;
-  });
-
-task("pools:borrow", "Borrow collateral")
-  .addParam("account", "Account from which to borrow", "bob", types.string)
-  .addParam("amount", "Amount to borrow", 0, types.int)
-  .addParam("symbol", "Symbol of token to be borrowed", "ETH")
-  .addParam("poolAddress", "Address of the poll")
-  .setAction(async (taskArgs, hre) => {
-    const collateralModule = await import("../test/utils/collateral");
-    const account = await hre.ethers.getNamedSigner(taskArgs.account);
-    await collateralModule.borrowCollateral(
-      hre.ethers,
-      taskArgs.poolAddress,
-      account.address,
-      taskArgs.borrowSymbol,
-      taskArgs.amount.toString()
-    );
-  });
-
-task("pools:deposit", "Deposit collateral")
-  .addParam("account", "Account from which to borrow", "bob", types.string)
-  .addParam("amount", "Amount to deposit", 0, types.int)
-  .addParam("symbol", "Symbol of token to be deposited", "ETH")
-  .addParam("poolAddress", "Address of the poll")
-  .setAction(async (taskArgs, hre) => {
-    const collateralModule = await import("../test/utils/collateral");
-    const account = await hre.ethers.getNamedSigner(taskArgs.account);
-    await collateralModule.addCollateral(
-      hre.ethers,
-      taskArgs.poolAddress,
-      account.address,
-      taskArgs.symbol,
-      taskArgs.amount.toString()
-    );
-  });
-
-task("pools:create-unhealthy", "Deposit collateral")
-  .addParam("name", "Name of the pool to be created if does not exist")
-  .addParam("supplyAccount", "Account from which to supply", "bob", types.string)
-  .addParam("borrowAccount", "Account from which to borrow", "alice", types.string)
-  .addParam("borrowToken", "Token used to borrow", "ETH")
-  .addParam("collateralToken", "Name used as collateral", "TOUCH")
-  .setAction(async (taskArgs, hre) => {
-    const poolAddress = await hre.run("pools:create", { name: taskArgs.name });
-
-    await hre.run("set-price", { token: "ETH", price: "1", poolAddress });
-    await hre.run("set-price", { token: "TOUCH", price: "1", poolAddress });
-    // Supply ETH collateral from bob
-    await hre.run("pools:deposit", {
-      account: taskArgs.supplyAccount,
-      amount: 5,
-      symbol: "ETH",
-      poolAddress,
-    });
-    console.log("ETH deposited from ");
-
-    // Supply TOUCH collateral from alice
-    await hre.run("pools:deposit", {
-      account: taskArgs.borrowAccount,
-      amount: 5,
-      symbol: "TOUCH",
-      poolAddress,
-    });
-    console.log("TOUCH deposited");
-
-    // Borrow TOUCH with ETH as collateral from bob
-    await hre.run("pools:borrow", {
-      account: taskArgs.supplyAccount,
-      amount: 3,
-      symbol: "TOUCH",
-      poolAddress,
-    });
-
-    await hre.run("set-price", { token: "ETH", price: "0.1", poolAddress });
-  });
+  );

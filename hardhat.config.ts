@@ -8,21 +8,9 @@ import { HardhatUserConfig } from "hardhat/types";
 
 import "./tasks/editDeployers";
 import "./tasks/addChainlinkFeeds";
+import "./tasks/editDeployers";
 import "./tasks/createPoolsWithAssets";
 import "./tasks/sendTestTokens";
-import "./tasks/setOraclePrice";
-
-import { task } from "hardhat/config";
-
-task("hello-world", "Prints a hello world message").setAction(async (taskArgs, hre) => {
-  await hre.run("hello-world:print", { message: "Hello, World!" });
-});
-
-task("hello-world:print", "Prints a message")
-  .addParam("message", "The message to print")
-  .setAction(async (taskArgs) => {
-    console.log(taskArgs.message);
-  });
 
 dotEnvConfig();
 
