@@ -30,8 +30,7 @@ export async function createPool({
     signer = bob;
   }
   if (!priceOracleAddress) {
-    const spoFactory = await ethers.getContractFactory("MockPriceOracle", signer);
-    const spo = await spoFactory.deploy([10]);
+    const spo = await ethers.getContract("MasterPriceOracle", signer);
     priceOracleAddress = spo.address;
   }
   if (enforceWhitelist && whitelist.length === 0) {
