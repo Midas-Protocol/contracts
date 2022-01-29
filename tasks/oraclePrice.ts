@@ -21,6 +21,7 @@ export default task("set-price", "Set price of token")
     const [tokenAddress, oracle] = await setUpOracleWithToken(_token, ethers, getNamedAccounts);
     const tx = await oracle.setDirectPrice(tokenAddress, ethers.utils.parseEther(_price));
     await tx.wait();
+    console.log(`Set price of ${_token} to ${_price}`);
   });
 
 task("get-price", "Get price of token")
@@ -28,6 +29,6 @@ task("get-price", "Get price of token")
   .setAction(async ({ token: _token }, { getNamedAccounts, ethers }) => {
     const [tokenAddress, oracle] = await setUpOracleWithToken(_token, ethers, getNamedAccounts);
     const tokenPrice = await oracle.callStatic.assetPrices(tokenAddress);
-    console.log(ethers.utils.formatEther(tokenPrice));
+    console.log(`Price ${_token}: ${tokenPrice}`);
     return tokenPrice;
   });

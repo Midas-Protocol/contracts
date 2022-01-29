@@ -99,7 +99,7 @@ export async function borrowCollateral(
   rec = await tx.wait();
   expect(rec.status).to.eq(1);
   const poolId = await getPoolIndex(poolAddress, sdk);
-  const assetAfterBorrow = await assetInPool(poolId, sdk, assetToDeploy.underlyingSymbol);
+  const assetAfterBorrow = await assetInPool(poolId, sdk, assetToDeploy.underlyingSymbol, signer.address);
   console.log(assetAfterBorrow.borrowBalanceUSD, "Borrow Balance USD: AFTER mint & borrow");
   console.log(assetAfterBorrow.supplyBalanceUSD, "Supply Balance USD: AFTER mint & borrow");
 }

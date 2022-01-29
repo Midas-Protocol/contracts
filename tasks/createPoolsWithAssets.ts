@@ -106,8 +106,8 @@ task("pools:create-unhealthy", "Deposit collateral")
   .setAction(async (taskArgs, hre) => {
     const poolAddress = await hre.run("pools:create", { name: taskArgs.name });
 
-    await hre.run("set-price", { token: "ETH", price: "1", poolAddress });
-    await hre.run("set-price", { token: "TOUCH", price: "1", poolAddress });
+    await hre.run("set-price", { token: "ETH", price: "1" });
+    await hre.run("set-price", { token: "TOUCH", price: "1" });
     // Supply ETH collateral from bob
     await hre.run("pools:deposit", {
       account: taskArgs.supplyAccount,

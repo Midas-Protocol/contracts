@@ -54,7 +54,7 @@ describe("Deposit flow tests", function () {
         }
       }
 
-      ethAsset = await assetInPool(poolId, sdk, "ETH");
+      ethAsset = await assetInPool(poolId, sdk, "ETH", bob.address);
       const cEther = new Contract(ethAsset.cToken, sdk.chainDeployment.CEtherDelegate.abi, bob);
       tx = await cEther.callStatic.borrow(utils.parseUnits("1.5", 18));
       expect(tx).to.eq(0);
@@ -63,7 +63,7 @@ describe("Deposit flow tests", function () {
       tx = await cEther.borrow(utils.parseUnits("1.5", 18));
       rec = await tx.wait();
       expect(rec.status).to.eq(1);
-      ethAssetAfterBorrow = await assetInPool(poolId, sdk, "ETH");
+      ethAssetAfterBorrow = await assetInPool(poolId, sdk, "ETH", bob.address);
       expect(ethAsset.borrowBalance.lt(ethAssetAfterBorrow.borrowBalance)).to.eq(true);
       console.log(ethAssetAfterBorrow.borrowBalanceUSD, "Borrow Balance USD: AFTER mint & borrow");
       console.log(ethAssetAfterBorrow.supplyBalanceUSD, "Supply Balance USD: AFTER mint & borrow");
