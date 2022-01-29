@@ -11,13 +11,13 @@ const logPoolData = async (poolAddress, sdk) => {
 
 export default task("pools", "Create Testing Pools")
   .addParam("name", "Name of the pool to be created")
-  .addOptionalParam("creator", "Named account from which to create the pool", "bob", types.string)
+  .addOptionalParam("creator", "Named account from which to create the pool", "deployer", types.string)
   .addOptionalParam("depositAmount", "Amount to deposit", 0, types.int)
   .addOptionalParam("depositSymbol", "Symbol of token to deposit", "ETH")
-  .addOptionalParam("depositAccount", "Named account from which to deposit collateral", "bob", types.string)
+  .addOptionalParam("depositAccount", "Named account from which to deposit collateral", "deployer", types.string)
   .addOptionalParam("borrowAmount", "Amount to borrow", 0, types.int)
   .addOptionalParam("borrowSymbol", "Symbol of token to borrow", "ETH")
-  .addOptionalParam("borrowAccount", "Named account from which to borrow collateral", "bob", types.string)
+  .addOptionalParam("borrowAccount", "Named account from which to borrow collateral", "deployer", types.string)
   .setAction(async (taskArgs, hre) => {
     const poolAddress = await hre.run("pools:create", { name: taskArgs.name, creator: taskArgs.creator });
     if (taskArgs.depositAmount != 0) {
@@ -40,7 +40,7 @@ export default task("pools", "Create Testing Pools")
 
 task("pools:create", "Create pool if does not exist")
   .addParam("name", "Name of the pool to be created")
-  .addParam("creator", "Named account from which to create the pool", "bob", types.string)
+  .addParam("creator", "Named account from which to create the pool", "deployer", types.string)
   .setAction(async (taskArgs, hre) => {
     const poolModule = await import("../test/utils/pool");
     // @ts-ignore
@@ -64,7 +64,7 @@ task("pools:create", "Create pool if does not exist")
   });
 
 task("pools:borrow", "Borrow collateral")
-  .addParam("account", "Account from which to borrow", "bob", types.string)
+  .addParam("account", "Account from which to borrow", "deployer", types.string)
   .addParam("amount", "Amount to borrow", 0, types.int)
   .addParam("symbol", "Symbol of token to be borrowed", "ETH")
   .addParam("poolAddress", "Address of the poll")
@@ -75,13 +75,13 @@ task("pools:borrow", "Borrow collateral")
       hre.ethers,
       taskArgs.poolAddress,
       account.address,
-      taskArgs.borrowSymbol,
+      taskArgs.symbol,
       taskArgs.amount.toString()
     );
   });
 
 task("pools:deposit", "Deposit collateral")
-  .addParam("account", "Account from which to borrow", "bob", types.string)
+  .addParam("account", "Account from which to borrow", "deployer", types.string)
   .addParam("amount", "Amount to deposit", 0, types.int)
   .addParam("symbol", "Symbol of token to be deposited", "ETH")
   .addParam("poolAddress", "Address of the poll")
@@ -99,7 +99,7 @@ task("pools:deposit", "Deposit collateral")
 
 task("pools:create-unhealthy", "Deposit collateral")
   .addParam("name", "Name of the pool to be created if does not exist")
-  .addParam("supplyAccount", "Account from which to supply", "bob", types.string)
+  .addParam("supplyAccount", "Account from which to supply", "deployer", types.string)
   .addParam("borrowAccount", "Account from which to borrow", "alice", types.string)
   .addParam("borrowToken", "Token used to borrow", "ETH")
   .addParam("collateralToken", "Name used as collateral", "TOUCH")
@@ -115,12 +115,12 @@ task("pools:create-unhealthy", "Deposit collateral")
       symbol: "ETH",
       poolAddress,
     });
-    console.log("ETH deposited from ");
+    console.log("ETH deposited");
 
     // Supply TOUCH collateral from alice
     await hre.run("pools:deposit", {
       account: taskArgs.borrowAccount,
-      amount: 5,
+      amount: 1000,
       symbol: "TOUCH",
       poolAddress,
     });
