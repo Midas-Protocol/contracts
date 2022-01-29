@@ -568,19 +568,15 @@ export default class Fuse {
       WhitePaperInterestRateModel: WhitePaperInterestRateModel,
     };
     const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(interestRateModelAddress));
-    console.log(runtimeBytecodeHash, "deployed contract bytecode hash");
 
     let irmModel = null;
 
     for (const irm of Object.values(interestRateModels)) {
-      console.log(irm.RUNTIME_BYTECODE_HASH, "BCHASH1");
-      console.log(runtimeBytecodeHash, "BCHASH2");
       if (runtimeBytecodeHash === irm.RUNTIME_BYTECODE_HASH) {
         irmModel = new irm();
         break;
       }
     }
-    console.log(irmModel, "WHY");
     return irmModel;
   }
 
