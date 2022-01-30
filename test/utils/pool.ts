@@ -30,8 +30,7 @@ export async function createPool({
     signer = bob;
   }
   if (!priceOracleAddress) {
-    const spoFactory = await ethers.getContractFactory("MockPriceOracle", signer);
-    const spo = await spoFactory.deploy([10]);
+    const spo = await ethers.getContract("MasterPriceOracle", signer);
     priceOracleAddress = spo.address;
   }
   if (enforceWhitelist && whitelist.length === 0) {
@@ -170,15 +169,15 @@ export const poolAssets = async (
 export const assetInPool = async (
   poolId: string,
   sdk: Fuse,
-  signer: SignerWithAddress,
-  underlyingSymbol: string
+  underlyingSymbol: string,
+  address?: string
 ): Promise<USDPricedFuseAsset> => {
-  const fetchedAssetsInPool: FusePoolData = await sdk.fetchFusePoolData(poolId, signer.address);
+  const fetchedAssetsInPool: FusePoolData = await sdk.fetchFusePoolData(poolId, address);
   return fetchedAssetsInPool.assets.filter((a) => a.underlyingSymbol === underlyingSymbol)[0];
 };
 
-export const getPoolIndex = async (poolAddress: string, creatorAddress: string, sdk: Fuse) => {
-  const [indexes, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPoolsByAccountWithData(creatorAddress);
+export const getPoolIndex = async (poolAddress: string, sdk: Fuse) => {
+  const [indexes, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPublicPoolsWithData();
   for (let j = 0; j < publicPools.length; j++) {
     if (publicPools[j].comptroller === poolAddress) {
       return indexes[j];
@@ -187,12 +186,12 @@ export const getPoolIndex = async (poolAddress: string, creatorAddress: string, 
   return null;
 };
 
-export const getPoolByName = async (name: string, creatorAddress: string, sdk: Fuse): Promise<FusePoolData> => {
-  const [indexes, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPoolsByAccountWithData(creatorAddress);
+export const getPoolByName = async (name: string, sdk: Fuse, address?: string): Promise<FusePoolData> => {
+  const [indexes, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPublicPoolsWithData();
   for (let j = 0; j < publicPools.length; j++) {
     if (publicPools[j].name === name) {
-      const poolIndex = await getPoolIndex(publicPools[j].comptroller, creatorAddress, sdk);
-      return sdk.fetchFusePoolData(poolIndex, publicPools[j].comptroller);
+      const poolIndex = await getPoolIndex(publicPools[j].comptroller, sdk);
+      return sdk.fetchFusePoolData(poolIndex, address);
     }
   }
   return null;

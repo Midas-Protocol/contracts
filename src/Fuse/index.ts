@@ -430,14 +430,16 @@ export default class Fuse {
       this.artifacts.Comptroller.abi,
       this.provider.getSigner(options.from)
     );
-    console.log("Comptroller's with address: ", comptroller.address, "has admin of", await comptroller.admin());
+
     const comptrollerWithSigner = comptroller.connect(this.provider.getSigner(options.from));
-    // const errorCode = await comptroller.callStatic._deployMarket(
-    //   "0x0000000000000000000000000000000000000000",
-    //   constructorData,
-    //   collateralFactorBN
-    // );
-    // console.log(errorCode.toNumber(), Fuse.COMPTROLLER_ERROR_CODES[errorCode.toNumber()], "ERROR CODE!");
+    const errorCode = await comptroller.callStatic._deployMarket(
+      "0x0000000000000000000000000000000000000000",
+      constructorData,
+      collateralFactorBN
+    );
+    if (errorCode.toNumber() == !0) {
+      throw `Failed to _deployMarket: ${Fuse.COMPTROLLER_ERROR_CODES[errorCode.toNumber()]}`;
+    }
 
     const tx = await comptrollerWithSigner._deployMarket(
       "0x0000000000000000000000000000000000000000",
@@ -450,9 +452,6 @@ export default class Fuse {
     if (receipt.status != constants.One.toNumber()) {
       throw "Failed to deploy market ";
     }
-
-    // Carlo Mazzaferro: double check this -> In FFD, the create2 address is created differently:
-    // bytes32 salt = keccak256(abi.encodePacked(msg.sender, address(0), block.number));
 
     const saltsHash = utils.solidityKeccak256(
       ["address", "address", "uint"],
@@ -568,19 +567,15 @@ export default class Fuse {
       WhitePaperInterestRateModel: WhitePaperInterestRateModel,
     };
     const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(interestRateModelAddress));
-    console.log(runtimeBytecodeHash, "deployed contract bytecode hash");
 
     let irmModel = null;
 
     for (const irm of Object.values(interestRateModels)) {
-      console.log(irm.RUNTIME_BYTECODE_HASH, "BCHASH1");
-      console.log(runtimeBytecodeHash, "BCHASH2");
       if (runtimeBytecodeHash === irm.RUNTIME_BYTECODE_HASH) {
         irmModel = new irm();
         break;
       }
     }
-    console.log(irmModel, "WHY");
     return irmModel;
   }
 
@@ -999,7 +994,7 @@ export default class Fuse {
     return irmName;
   };
 
-  fetchFusePoolData = async (poolId: string | undefined, address: string): Promise<FusePoolData | undefined> => {
+  fetchFusePoolData = async (poolId: string | undefined, address?: string): Promise<FusePoolData | undefined> => {
     if (!poolId) return undefined;
 
     const {

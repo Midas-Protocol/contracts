@@ -469,10 +469,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
         /* We emit an AccrueInterest event */
         emit AccrueInterest(cashPrior, interestAccumulated, borrowIndexNew, totalBorrowsNew);
-
-        // Attempt to add interest checkpoint
-        address(interestRateModel).call(abi.encodeWithSignature("checkpointInterest(uint256)", borrowRateMantissa));
-
         return uint(Error.NO_ERROR);
     }
 
