@@ -105,7 +105,7 @@ describe("FusePoolDirectory", function () {
         deployArgs
       );
 
-      const errorCode = await comptroller.callStatic._deployMarket(false, constructorData, collateralFactorBN);
+      const errorCode = await comptrollerContract.callStatic._deployMarket(false, constructorData, collateralFactorBN);
       expect(errorCode.toNumber()).to.eq(0);
 
       let tx = await comptrollerContract._deployMarket(true, constructorData, collateralFactorBN);
