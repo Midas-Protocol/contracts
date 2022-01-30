@@ -19,8 +19,7 @@ describe("FusePoolDirectory", function () {
       const POOL_NAME = "TEST_BOB";
       const { bob } = await ethers.getNamedSigners();
 
-      const spoFactory = await ethers.getContractFactory("MockPriceOracle", bob);
-      const spo = await spoFactory.deploy([10]);
+      const spo = await ethers.getContract("SimplePriceOracle", bob);
 
       const sdk = new Fuse(ethers.provider, "1337");
 

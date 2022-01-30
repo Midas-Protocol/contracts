@@ -19,8 +19,7 @@ describe("FusePoolDirectory", function () {
       const { alice } = await ethers.getNamedSigners();
       console.log("alice: ", alice.address);
 
-      const cpoFactory = await ethers.getContractFactory("MockPriceOracle", alice);
-      const cpo = await cpoFactory.deploy([10]);
+      const spo = await ethers.getContract("SimplePriceOracle", alice);
 
       const fpdWithSigner = await ethers.getContract("FusePoolDirectory", alice);
       const implementationComptroller = await ethers.getContract("Comptroller");
@@ -35,7 +34,7 @@ describe("FusePoolDirectory", function () {
         true,
         bigCloseFactor,
         bigLiquidationIncentive,
-        cpo.address
+        spo.address
       );
       expect(deployedPool).to.be.ok;
       const depReceipt = await deployedPool.wait();
@@ -105,6 +104,10 @@ describe("FusePoolDirectory", function () {
         ["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
         deployArgs
       );
+
+      const errorCode = await comptroller.callStatic._deployMarket(false, constructorData, collateralFactorBN);
+      expect(errorCode.toNumber()).to.eq(0);
+
       let tx = await comptrollerContract._deployMarket(true, constructorData, collateralFactorBN);
       let receipt: TransactionReceipt = await tx.wait();
       console.log(`Ether deployed successfully with tx hash: ${receipt.transactionHash}`);
