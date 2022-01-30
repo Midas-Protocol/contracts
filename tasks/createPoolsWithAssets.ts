@@ -6,7 +6,7 @@ const logPoolData = async (poolAddress, sdk) => {
   const fusePoolData = await sdk.fetchFusePoolData(poolIndex, poolAddress);
 
   const poolAssets = fusePoolData.assets.map((a) => a.underlyingSymbol).join(", ");
-  console.log(`Operating on pool with address ${poolAddress},  name: ${fusePoolData.name}, assets ${poolAssets}`);
+  console.log(`Operating on pool with address ${poolAddress}, name: ${fusePoolData.name}, assets ${poolAssets}`);
 };
 
 export default task("pools", "Create Testing Pools")
@@ -102,12 +102,14 @@ task("pools:create-unhealthy", "Deposit collateral")
   .addParam("supplyAccount", "Account from which to supply", "deployer", types.string)
   .addParam("borrowAccount", "Account from which to borrow", "alice", types.string)
   .addParam("borrowToken", "Token used to borrow", "ETH")
-  .addParam("collateralToken", "Name used as collateral", "TOUCH")
+  .addParam("collateralToken", "name used as collateral", "TOUCH")
   .setAction(async (taskArgs, hre) => {
+    await hre.run("set-price", { token: "ETH", price: "1" });
+    await hre.run("set-price", { token: "TOUCH", price: "0.1" });
+    await hre.run("set-price", { token: "TRIBE", price: "0.2" });
+
     const poolAddress = await hre.run("pools:create", { name: taskArgs.name });
 
-    await hre.run("set-price", { token: "ETH", price: "1" });
-    await hre.run("set-price", { token: "TOUCH", price: "1" });
     // Supply ETH collateral from bob
     await hre.run("pools:deposit", {
       account: taskArgs.supplyAccount,
@@ -120,7 +122,7 @@ task("pools:create-unhealthy", "Deposit collateral")
     // Supply TOUCH collateral from alice
     await hre.run("pools:deposit", {
       account: taskArgs.borrowAccount,
-      amount: 1000,
+      amount: 50,
       symbol: "TOUCH",
       poolAddress,
     });
@@ -129,7 +131,7 @@ task("pools:create-unhealthy", "Deposit collateral")
     // Borrow TOUCH with ETH as collateral from bob
     await hre.run("pools:borrow", {
       account: taskArgs.supplyAccount,
-      amount: 3,
+      amount: 20,
       symbol: "TOUCH",
       poolAddress,
     });

@@ -29,6 +29,6 @@ task("get-price", "Get price of token")
   .setAction(async ({ token: _token }, { getNamedAccounts, ethers }) => {
     const [tokenAddress, oracle] = await setUpOracleWithToken(_token, ethers, getNamedAccounts);
     const tokenPrice = await oracle.callStatic.assetPrices(tokenAddress);
-    console.log(`Price ${_token}: ${tokenPrice}`);
+    console.log(`Price ${_token}: ${ethers.utils.formatEther(tokenPrice)}`);
     return tokenPrice;
   });
