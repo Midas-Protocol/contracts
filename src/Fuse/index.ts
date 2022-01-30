@@ -437,7 +437,7 @@ export default class Fuse {
       constructorData,
       collateralFactorBN
     );
-    if (errorCode.toNumber() == !0) {
+    if (errorCode.toNumber() !== 0) {
       throw `Failed to _deployMarket: ${Fuse.COMPTROLLER_ERROR_CODES[errorCode.toNumber()]}`;
     }
 
@@ -525,6 +525,12 @@ export default class Fuse {
       ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
       deployArgs
     );
+
+    const errorCode = await comptroller.callStatic._deployMarket(false, constructorData, collateralFactorBN);
+    if (errorCode.toNumber() !== 0) {
+      throw `Failed to _deployMarket: ${Fuse.COMPTROLLER_ERROR_CODES[errorCode.toNumber()]}`;
+    }
+
     const tx = await comptroller._deployMarket(false, constructorData, collateralFactorBN);
     const receipt: TransactionReceipt = await tx.wait();
 
