@@ -1,14 +1,13 @@
 // pool utilities used across downstream tests
 import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../lib/esm/src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { HardhatEthersHelpers } from "@nomiclabs/hardhat-ethers/types";
 import { providers, utils } from "ethers";
+import { ethers } from "hardhat";
 
 interface PoolCreationParams {
-  ethers: HardhatEthersHelpers;
   closeFactor?: number;
   liquidationIncentive?: number;
-  poolName: string;
+  poolName?: string;
   enforceWhitelist?: boolean;
   whitelist?: Array<string>;
   priceOracleAddress?: string | null;
@@ -16,10 +15,9 @@ interface PoolCreationParams {
 }
 
 export async function createPool({
-  ethers,
   closeFactor = 50,
   liquidationIncentive = 8,
-  poolName = "TEST",
+  poolName = `TEST - ${Math.random()}`,
   enforceWhitelist = false,
   whitelist = [],
   priceOracleAddress = null,
@@ -64,7 +62,6 @@ export type DeployedAsset = {
   receipt: providers.TransactionReceipt;
 };
 export async function deployAssets(
-  ethers: HardhatEthersHelpers,
   assets: cERC20Conf[],
   signer?: SignerWithAddress
 ): Promise<DeployedAsset[]> {
@@ -100,7 +97,6 @@ export async function deployAssets(
 }
 
 export async function getAssetsConf(
-  ethers: HardhatEthersHelpers,
   comptroller: string,
   interestRateModelAddress?: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> {
@@ -109,11 +105,10 @@ export async function getAssetsConf(
     const jrm = await ethers.getContract("JumpRateModel", bob);
     interestRateModelAddress = jrm.address;
   }
-  return await poolAssets(ethers, interestRateModelAddress, comptroller, bob);
+  return await poolAssets(interestRateModelAddress, comptroller, bob);
 }
 
 export const poolAssets = async (
-  ethers: HardhatEthersHelpers,
   interestRateModelAddress: string,
   comptroller: string,
   signer: SignerWithAddress

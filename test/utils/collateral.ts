@@ -1,12 +1,12 @@
-import { BigNumber, constants, Contract, utils } from "ethers";
+import { BigNumber, constants, Contract, providers, utils } from "ethers";
 import { ERC20Abi, Fuse, USDPricedFuseAsset } from "../../lib/esm/src";
 import { assetInPool, getPoolIndex } from "./pool";
 import { HardhatEthersHelpers } from "@nomiclabs/hardhat-ethers/types";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { ethers } from "hardhat";
 
 async function getAsset(
-  ethers: HardhatEthersHelpers,
   sdk: Fuse,
   poolAddress: string,
   underlyingSymbol: string
@@ -25,7 +25,6 @@ function getCToken(asset: USDPricedFuseAsset, sdk: Fuse, signer: SignerWithAddre
 }
 
 export async function addCollateral(
-  ethers: HardhatEthersHelpers,
   poolAddress: string,
   depositorAddress: string,
   underlyingSymbol: string,
@@ -38,7 +37,7 @@ export async function addCollateral(
   const signer = await ethers.getSigner(depositorAddress);
   const sdk = new Fuse(ethers.provider, "1337");
 
-  const assetToDeploy = await getAsset(ethers, sdk, poolAddress, underlyingSymbol);
+  const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol);
   // const assetCtc = new Contract(assetToDeploy.underlyingToken, ERC20Abi, signer);
   // tx = await assetCtc.approve(assetToDeploy.cToken, BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One));
 
@@ -56,7 +55,7 @@ export async function approveAndMint(
   underlyingToken: string,
   signer: SignerWithAddress
 ) {
-  let tx;
+  let tx: providers.TransactionResponse;
 
   if (underlyingToken === constants.AddressZero) {
     tx = await cTokenContract.approve(signer.address, BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One));
@@ -81,12 +80,12 @@ export async function borrowCollateral(
   underlyingSymbol: string,
   amount: string
 ) {
-  let tx;
-  let rec;
+  let tx: providers.TransactionResponse;
+  let rec: providers.TransactionReceipt;
 
   const signer = await ethers.getSigner(borrowerAddress);
   const sdk = new Fuse(ethers.provider, "1337");
-  const assetToDeploy = await getAsset(ethers, sdk, poolAddress, underlyingSymbol);
+  const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol);
 
   const pool = await ethers.getContractAt("Comptroller", poolAddress, signer);
   tx = await pool.enterMarkets([assetToDeploy.cToken]);
