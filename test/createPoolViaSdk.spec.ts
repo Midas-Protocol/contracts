@@ -49,8 +49,8 @@ describe("FusePoolDirectory", function () {
 
       expect(_unfiliteredName).to.be.equal(POOL_NAME);
 
-      const jrm = await ethers.getContract("JumpRateModel", bob);
-      const assets = await poolAssets(jrm.address, comptroller, bob);
+      const jrm = await ethers.getContract("JumpRateModel");
+      const assets = await poolAssets(jrm.address, comptroller);
 
       const deployedAssets: DeployedAsset[] = [];
       for (const assetConf of assets.assets) {

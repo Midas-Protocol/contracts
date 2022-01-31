@@ -81,7 +81,7 @@ export async function deployAssets(
     if (receipt.status !== 1) {
       throw `Failed to deploy asset: ${receipt.logs}`;
     }
-    console.log("deployed asset: ", assetConf.name);
+    console.log("deployed asset: ", assetConf.name, assetAddress);
     console.log("-----------------");
     deployed.push({
       symbol: assetConf.symbol,
@@ -100,18 +100,16 @@ export async function getAssetsConf(
   comptroller: string,
   interestRateModelAddress?: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> {
-  const { bob } = await ethers.getNamedSigners();
   if (!interestRateModelAddress) {
-    const jrm = await ethers.getContract("JumpRateModel", bob);
+    const jrm = await ethers.getContract("JumpRateModel");
     interestRateModelAddress = jrm.address;
   }
-  return await poolAssets(interestRateModelAddress, comptroller, bob);
+  return await poolAssets(interestRateModelAddress, comptroller);
 }
 
 export const poolAssets = async (
   interestRateModelAddress: string,
   comptroller: string,
-  signer: SignerWithAddress
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> => {
   const ethConf: cERC20Conf = {
     underlying: "0x0000000000000000000000000000000000000000",
@@ -127,7 +125,7 @@ export const poolAssets = async (
     bypassPriceFeedCheck: true,
   };
   const tribeConf: cERC20Conf = {
-    underlying: await ethers.getContract("TRIBEToken", signer).then((c) => c.address),
+    underlying: await ethers.getContract("TRIBEToken").then((c) => c.address),
     comptroller,
     interestRateModel: interestRateModelAddress,
     name: "TRIBE Token",
@@ -140,7 +138,7 @@ export const poolAssets = async (
     bypassPriceFeedCheck: true,
   };
   const touchConf: cERC20Conf = {
-    underlying: await ethers.getContract("TOUCHToken", signer).then((c) => c.address),
+    underlying: await ethers.getContract("TOUCHToken").then((c) => c.address),
     comptroller,
     interestRateModel: interestRateModelAddress,
     name: "Midas TOUCH Token",

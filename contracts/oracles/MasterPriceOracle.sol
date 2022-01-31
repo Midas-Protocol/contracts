@@ -150,7 +150,7 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
         address underlying = address(ICErc20(address(cToken)).underlying());
 
         // Return 1e18 for WETH
-        if (underlying == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) return 1e18;
+        if (underlying == wtoken) return 1e18;
 
         // Get underlying price from assigned oracle
         IPriceOracle oracle = oracles[underlying];
@@ -164,7 +164,7 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
      */
     function price(address underlying) external override view returns (uint) {
         // Return 1e18 for WETH
-        if (underlying == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) return 1e18;
+        if (underlying == wtoken) return 1e18;
 
         // Get underlying price from assigned oracle
         IPriceOracle oracle = oracles[underlying];

@@ -1,16 +1,11 @@
 import { BigNumber, constants, Contract, providers, utils } from "ethers";
 import { ERC20Abi, Fuse, USDPricedFuseAsset } from "../../lib/esm/src";
 import { assetInPool, getPoolIndex } from "./pool";
-import { HardhatEthersHelpers } from "@nomiclabs/hardhat-ethers/types";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 
-async function getAsset(
-  sdk: Fuse,
-  poolAddress: string,
-  underlyingSymbol: string
-): Promise<USDPricedFuseAsset> {
+async function getAsset(sdk: Fuse, poolAddress: string, underlyingSymbol: string): Promise<USDPricedFuseAsset> {
   const poolId = (await getPoolIndex(poolAddress, sdk)).toString();
   const assetsInPool = await sdk.fetchFusePoolData(poolId);
   return assetsInPool.assets.filter((a) => a.underlyingSymbol === underlyingSymbol)[0];
@@ -28,11 +23,12 @@ export async function addCollateral(
   poolAddress: string,
   depositorAddress: string,
   underlyingSymbol: string,
-  amount: string
+  amount: string,
+  useAsCollateral: boolean
 ) {
-  let tx;
-  let amountBN;
-  let cToken;
+  let tx: providers.TransactionResponse;
+  let amountBN: BigNumber;
+  let cToken: Contract;
 
   const signer = await ethers.getSigner(depositorAddress);
   const sdk = new Fuse(ethers.provider, "1337");
@@ -43,8 +39,10 @@ export async function addCollateral(
 
   cToken = getCToken(assetToDeploy, sdk, signer);
   const pool = await ethers.getContractAt("Comptroller", poolAddress, signer);
-  tx = await pool.enterMarkets([assetToDeploy.cToken]);
-  await tx.wait();
+  if (useAsCollateral) {
+    tx = await pool.enterMarkets([assetToDeploy.cToken]);
+    await tx.wait();
+  }
   amountBN = utils.parseUnits(amount, 18);
   await approveAndMint(amountBN, cToken, assetToDeploy.underlyingToken, signer);
 }
@@ -74,7 +72,6 @@ export async function approveAndMint(
 }
 
 export async function borrowCollateral(
-  ethers: HardhatEthersHelpers,
   poolAddress: string,
   borrowerAddress: string,
   underlyingSymbol: string,
