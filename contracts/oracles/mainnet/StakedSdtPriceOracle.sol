@@ -4,31 +4,21 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "../external/harvest/IFarmVault.sol";
+import "../../external/stakedao/Sanctuary.sol";
 
-import "./BasePriceOracle.sol";
+import "../BasePriceOracle.sol";
 
 /**
- * @title HarvestPriceOracle
- * @notice Returns prices for iFARM.
+ * @title StakedSdtPriceOracle
+ * @notice Returns prices for Staked SDT (xSDT).
  * @dev Implements `PriceOracle` and `BasePriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract HarvestPriceOracle is IPriceOracle, BasePriceOracle {
+contract StakedSdtPriceOracle is IPriceOracle, BasePriceOracle {
     using SafeMathUpgradeable for uint256;
-
-    /**
-     * @dev FARM ERC20 token contract.
-     */
-    address constant public FARM = 0xa0246c9032bC3A600820415aE600c6388619A14D;
-
-    /**
-     * @dev iFARM ERC20 token contract.
-     */
-    IFarmVault constant public IFARM = IFarmVault(0x1571eD0bed4D987fe2b498DdBaE7DFA19519F651);
 
     /**
      * @notice Fetches the token/ETH price, with 18 decimals of precision.
@@ -55,7 +45,9 @@ contract HarvestPriceOracle is IPriceOracle, BasePriceOracle {
      * @notice Fetches the token/ETH price, with 18 decimals of precision.
      */
     function _price(address token) internal view returns (uint) {
-        if (token == address(IFARM)) return BasePriceOracle(msg.sender).price(FARM).mul(IFARM.getPricePerFullShare()).div(1e18);
-        else revert("Invalid token address passed to HarvestPriceOracle.");
+        Sanctuary sanctuary = Sanctuary(token);
+        IERC20Upgradeable sdt = sanctuary.sdt();
+        uint256 sdtEthPrice = BasePriceOracle(msg.sender).price(address(sdt));
+        return sdt.balanceOf(token).mul(sdtEthPrice).div(sanctuary.totalSupply());
     }
 }

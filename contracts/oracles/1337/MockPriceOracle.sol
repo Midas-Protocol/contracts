@@ -4,13 +4,13 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICToken.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICToken.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "../external/chainlink/AggregatorV3Interface.sol";
+import "../../external/chainlink/AggregatorV3Interface.sol";
 
-import "./BasePriceOracle.sol";
+import "../BasePriceOracle.sol";
 
 /**
  * @title MockPriceOracle
@@ -20,31 +20,6 @@ import "./BasePriceOracle.sol";
  */
 contract MockPriceOracle is IPriceOracle, BasePriceOracle {
     using SafeMathUpgradeable for uint256;
-
-    /**
-     * @notice Maps ERC20 token addresses to ETH-based Chainlink price feed contracts.
-     */
-    mapping(address => AggregatorV3Interface) public ethPriceFeeds;
-
-    /**
-     * @notice Maps ERC20 token addresses to USD-based Chainlink price feed contracts.
-     */
-    mapping(address => AggregatorV3Interface) public usdPriceFeeds;
-
-    /**
-     * @notice Maps ERC20 token addresses to BTC-based Chainlink price feed contracts.
-     */
-    mapping(address => AggregatorV3Interface) public btcPriceFeeds;
-
-    /**
-     * @notice Chainlink ETH/USD price feed contracts.
-     */
-    AggregatorV3Interface public constant ETH_USD_PRICE_FEED = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
-
-    /**
-     * @notice Chainlink BTC/ETH price feed contracts.
-     */
-    AggregatorV3Interface public constant BTC_ETH_PRICE_FEED = AggregatorV3Interface(0xdeb288F737066589598e9214E782fa5A8eD689e8);
 
     /**
      * @notice The maxmimum number of seconds elapsed since the round was last updated before the price is considered stale. If set to 0, no limit is enforced.

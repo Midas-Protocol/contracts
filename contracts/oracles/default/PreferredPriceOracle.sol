@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0;
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICToken.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICToken.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "./BasePriceOracle.sol";
-import "./MasterPriceOracle.sol";
-import "./default/ChainlinkPriceOracleV2.sol";
+import "../BasePriceOracle.sol";
+import "../MasterPriceOracle.sol";
+import "../default/ChainlinkPriceOracleV2.sol";
 
 /**
  * @title PreferredPriceOracle
@@ -30,17 +30,23 @@ contract PreferredPriceOracle is IPriceOracle, BasePriceOracle {
      * @dev The tertiary `PriceOracle`.
      */
     IPriceOracle public tertiaryOracle;
-    
+
+    /**
+    * @dev The Wrapped native asset address.
+     */
+    address public wtoken;
+
     /**
      * @dev Constructor to set the primary `MasterPriceOracle`, the secondary `ChainlinkPriceOracleV2`, and the tertiary `PriceOracle`.
      */
-    constructor(MasterPriceOracle _masterOracle, ChainlinkPriceOracleV2 _chainlinkOracleV2, IPriceOracle _tertiaryOracle) {
+    constructor(MasterPriceOracle _masterOracle, ChainlinkPriceOracleV2 _chainlinkOracleV2, IPriceOracle _tertiaryOracle, address _wtoken) {
         require(address(_masterOracle) != address(0), "MasterPriceOracle not set.");
         require(address(_chainlinkOracleV2) != address(0), "ChainlinkPriceOracleV2 not set.");
         require(address(_tertiaryOracle) != address(0), "Tertiary price oracle not set.");
         masterOracle = _masterOracle;
         chainlinkOracleV2 = _chainlinkOracleV2;
         tertiaryOracle = _tertiaryOracle;
+        wtoken = _wtoken;
     }
 
     /**
@@ -49,8 +55,8 @@ contract PreferredPriceOracle is IPriceOracle, BasePriceOracle {
      * @return Price denominated in ETH (scaled by 1e18)
      */
     function price(address underlying) external override view returns (uint) {
-        // Return 1e18 for WETH
-        if (underlying == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) return 1e18;
+        // Return 1e18 for wtoken
+        if (underlying == wtoken) return 1e18;
 
         // Try to get MasterPriceOracle price
         if (address(masterOracle.oracles(underlying)) != address(0)) return masterOracle.price(underlying);
@@ -74,8 +80,8 @@ contract PreferredPriceOracle is IPriceOracle, BasePriceOracle {
         // Get underlying ERC20 token address
         address underlying = address(ICErc20(address(cToken)).underlying());
 
-        // Return 1e18 for WETH
-        if (underlying == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) return 1e18;
+        // Return 1e18 for wtoken
+        if (underlying == wtoken) return 1e18;
 
         // Try to get MasterPriceOracle price
         if (address(masterOracle.oracles(underlying)) != address(0)) return masterOracle.getUnderlyingPrice(cToken);

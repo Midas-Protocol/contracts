@@ -4,20 +4,20 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "../external/tokemak/ILiquidityPool.sol";
+import "../../external/sushi/SushiBar.sol";
 
-import "./BasePriceOracle.sol";
+import "../BasePriceOracle.sol";
 
 /**
- * @title TokemakPoolTAssetPriceOracle
- * @notice Returns prices for Tokenmak pools (tAssets).
+ * @title SushiBarPriceOracle
+ * @notice Returns prices for SushiBar (xSUSHI).
  * @dev Implements `PriceOracle` and `BasePriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract TokemakPoolTAssetPriceOracle is IPriceOracle, BasePriceOracle {
+contract SushiBarPriceOracle is IPriceOracle, BasePriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
@@ -45,6 +45,9 @@ contract TokemakPoolTAssetPriceOracle is IPriceOracle, BasePriceOracle {
      * @notice Fetches the token/ETH price, with 18 decimals of precision.
      */
     function _price(address token) internal view returns (uint) {
-        return BasePriceOracle(msg.sender).price(address(ILiquidityPool(token).underlyer()));
+        SushiBar sushiBar = SushiBar(token);
+        IERC20Upgradeable sushi = sushiBar.sushi();
+        uint256 sushiEthPrice = BasePriceOracle(msg.sender).price(address(sushi));
+        return sushi.balanceOf(token).mul(sushiEthPrice).div(sushiBar.totalSupply());
     }
 }

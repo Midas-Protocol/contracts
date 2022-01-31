@@ -4,31 +4,31 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "./BasePriceOracle.sol";
+import "../../external/harvest/IFarmVault.sol";
+
+import "../BasePriceOracle.sol";
 
 /**
- * @title FixedTokenPriceOracle
- * @notice Returns token prices using the prices for another token.
+ * @title HarvestPriceOracle
+ * @notice Returns prices for iFARM.
  * @dev Implements `PriceOracle` and `BasePriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract FixedTokenPriceOracle is IPriceOracle, BasePriceOracle {
+contract HarvestPriceOracle is IPriceOracle, BasePriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
-     * @dev The token to base prices on.
+     * @dev FARM ERC20 token contract.
      */
-    address public immutable baseToken;
+    address constant public FARM = 0xa0246c9032bC3A600820415aE600c6388619A14D;
 
     /**
-     * @dev Sets the token to base prices on.
+     * @dev iFARM ERC20 token contract.
      */
-    constructor(address _baseToken) {
-        baseToken = _baseToken;
-    }
+    IFarmVault constant public IFARM = IFarmVault(0x1571eD0bed4D987fe2b498DdBaE7DFA19519F651);
 
     /**
      * @notice Fetches the token/ETH price, with 18 decimals of precision.
@@ -55,6 +55,7 @@ contract FixedTokenPriceOracle is IPriceOracle, BasePriceOracle {
      * @notice Fetches the token/ETH price, with 18 decimals of precision.
      */
     function _price(address token) internal view returns (uint) {
-        return BasePriceOracle(msg.sender).price(baseToken);
+        if (token == address(IFARM)) return BasePriceOracle(msg.sender).price(FARM).mul(IFARM.getPricePerFullShare()).div(1e18);
+        else revert("Invalid token address passed to HarvestPriceOracle.");
     }
 }

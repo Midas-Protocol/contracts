@@ -4,20 +4,20 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "../external/stakedao/Sanctuary.sol";
+import "../../external/tokemak/ILiquidityPool.sol";
 
-import "./BasePriceOracle.sol";
+import "../BasePriceOracle.sol";
 
 /**
- * @title StakedSdtPriceOracle
- * @notice Returns prices for Staked SDT (xSDT).
+ * @title TokemakPoolTAssetPriceOracle
+ * @notice Returns prices for Tokenmak pools (tAssets).
  * @dev Implements `PriceOracle` and `BasePriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract StakedSdtPriceOracle is IPriceOracle, BasePriceOracle {
+contract TokemakPoolTAssetPriceOracle is IPriceOracle, BasePriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
@@ -45,9 +45,6 @@ contract StakedSdtPriceOracle is IPriceOracle, BasePriceOracle {
      * @notice Fetches the token/ETH price, with 18 decimals of precision.
      */
     function _price(address token) internal view returns (uint) {
-        Sanctuary sanctuary = Sanctuary(token);
-        IERC20Upgradeable sdt = sanctuary.sdt();
-        uint256 sdtEthPrice = BasePriceOracle(msg.sender).price(address(sdt));
-        return sdt.balanceOf(token).mul(sdtEthPrice).div(sanctuary.totalSupply());
+        return BasePriceOracle(msg.sender).price(address(ILiquidityPool(token).underlyer()));
     }
 }

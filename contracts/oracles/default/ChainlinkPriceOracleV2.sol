@@ -40,7 +40,7 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
     }
 
     /**
-     * @notice Chainlink ETH/USD price feed contracts.
+     * @notice Chainlink NATIVE/USD price feed contracts.
      */
     AggregatorV3Interface public immutable NATIVE_TOKEN_USD_PRICE_FEED;
 

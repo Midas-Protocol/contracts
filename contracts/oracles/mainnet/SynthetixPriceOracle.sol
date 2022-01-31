@@ -4,14 +4,14 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "../external/synthetix/AddressResolver.sol";
-import "../external/synthetix/ExchangeRates.sol";
-import "../external/synthetix/ISynth.sol";
-import "../external/synthetix/MixinResolver.sol";
-import "../external/synthetix/Proxy.sol";
+import "../../external/synthetix/AddressResolver.sol";
+import "../../external/synthetix/ExchangeRates.sol";
+import "../../external/synthetix/ISynth.sol";
+import "../../external/synthetix/MixinResolver.sol";
+import "../../external/synthetix/Proxy.sol";
 
 /**
  * @title SynthetixPriceOracle

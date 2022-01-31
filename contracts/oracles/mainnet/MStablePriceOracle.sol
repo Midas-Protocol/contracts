@@ -5,14 +5,14 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICToken.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICToken.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "../external/mstable/IMasset.sol";
-import "../external/mstable/ISavingsContractV2.sol";
+import "../../external/mstable/IMasset.sol";
+import "../../external/mstable/ISavingsContractV2.sol";
 
-import "./BasePriceOracle.sol";
+import "../BasePriceOracle.sol";
 
 /**
  * @title MStablePriceOracle

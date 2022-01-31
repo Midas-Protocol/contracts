@@ -4,16 +4,16 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICToken.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICToken.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "../external/keep3r/Keep3rV1Oracle.sol";
+import "../../external/keep3r/Keep3rV1Oracle.sol";
 
-import "../external/uniswap/IUniswapV2Pair.sol";
-import "../external/uniswap/IUniswapV2Factory.sol";
+import "../../external/uniswap/IUniswapV2Pair.sol";
+import "../../external/uniswap/IUniswapV2Factory.sol";
 
-import "./BasePriceOracle.sol";
+import "../BasePriceOracle.sol";
 
 /**
  * @title Keep3rPriceOracle

@@ -4,27 +4,25 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICToken.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICToken.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "../external/curve/ICurveLiquidityGaugeV2.sol";
+import "../../external/alpha/ISafeBox.sol";
 
-import "./BasePriceOracle.sol";
+import "../BasePriceOracle.sol";
 
 /**
- * @title CurveLiquidityGaugeV2PriceOracle
+ * @title AlphaHomoraV2PriceOracle
+ * @notice Returns prices from Alpha Homora v2 "ibTokenV2" tokens (e.g., ibETHv2, ibDAIv2).
+ * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
- * @notice CurveLiquidityGaugeV2PriceOracle is a price oracle for Curve LiquidityGaugeV2 tokens (using the sender as a root oracle).
- * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
- * This contract is expected to be called by a `MasterPriceOracle` with the necessary `CurveLpTokenPriceOracle` configured.
- * The price of a Curve LiquidityGaugeV2 token is the same as the price of its underlying Curve LP token.
  */
-contract CurveLiquidityGaugeV2PriceOracle is IPriceOracle, BasePriceOracle {
+contract AlphaHomoraV2PriceOracle is IPriceOracle, BasePriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
-     * @notice Get the LiquidityGaugeV2 price price for an underlying token address.
+     * @dev Fetches the fair ibTokenV2/ETH price, with 18 decimals of precision.
      * @param underlying The underlying token address for which to get the price (set to zero address for ETH).
      * @return Price denominated in ETH (scaled by 1e18).
      */
@@ -45,10 +43,17 @@ contract CurveLiquidityGaugeV2PriceOracle is IPriceOracle, BasePriceOracle {
     }
 
     /**
-     * @dev Fetches the fair LiquidityGaugeV2/ETH price from Curve, with 18 decimals of precision.
-     * @param gauge The LiquidityGaugeV2 contract address for price retrieval.
+     * @dev Fetches the fair ibTokenV2/ETH price, with 18 decimals of precision.
+     * @param safeBox The SafeBox (or SafeBoxETH) contract address for price retrieval.
      */
-    function _price(address gauge) internal view returns (uint) {
-        return BasePriceOracle(msg.sender).price(ICurveLiquidityGaugeV2(gauge).lp_token());
+    function _price(address safeBox) internal view returns (uint) {
+        // Get the cToken's underlying ibToken's underlying cToken
+        ICErc20 underlyingCErc20 = ICErc20(ISafeBox(safeBox).cToken());
+
+        // Get the token underlying the underlying cToken
+        address baseToken = underlyingCErc20.underlying();
+
+        // ibTokenV2/ETH price = underlying cToken/ETH price = underlying cToken/token price * base token/ETH price
+        return underlyingCErc20.exchangeRateStored().mul(BasePriceOracle(msg.sender).price(baseToken)).div(1e18);
     }
 }

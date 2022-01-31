@@ -3,11 +3,11 @@ pragma solidity >=0.7.0;
 
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICToken.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICToken.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "../external/alpha/Bank.sol";
+import "../../external/alpha/Bank.sol";
 
 /**
  * @title AlphaHomoraV1PriceOracle

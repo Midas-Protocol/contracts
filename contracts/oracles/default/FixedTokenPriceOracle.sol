@@ -4,21 +4,31 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "../external/sushi/SushiBar.sol";
-
-import "./BasePriceOracle.sol";
+import "../BasePriceOracle.sol";
 
 /**
- * @title SushiBarPriceOracle
- * @notice Returns prices for SushiBar (xSUSHI).
+ * @title FixedTokenPriceOracle
+ * @notice Returns token prices using the prices for another token.
  * @dev Implements `PriceOracle` and `BasePriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract SushiBarPriceOracle is IPriceOracle, BasePriceOracle {
+contract FixedTokenPriceOracle is IPriceOracle, BasePriceOracle {
     using SafeMathUpgradeable for uint256;
+
+    /**
+     * @dev The token to base prices on.
+     */
+    address public immutable baseToken;
+
+    /**
+     * @dev Sets the token to base prices on.
+     */
+    constructor(address _baseToken) {
+        baseToken = _baseToken;
+    }
 
     /**
      * @notice Fetches the token/ETH price, with 18 decimals of precision.
@@ -45,9 +55,6 @@ contract SushiBarPriceOracle is IPriceOracle, BasePriceOracle {
      * @notice Fetches the token/ETH price, with 18 decimals of precision.
      */
     function _price(address token) internal view returns (uint) {
-        SushiBar sushiBar = SushiBar(token);
-        IERC20Upgradeable sushi = sushiBar.sushi();
-        uint256 sushiEthPrice = BasePriceOracle(msg.sender).price(address(sushi));
-        return sushi.balanceOf(token).mul(sushiEthPrice).div(sushiBar.totalSupply());
+        return BasePriceOracle(msg.sender).price(baseToken);
     }
 }

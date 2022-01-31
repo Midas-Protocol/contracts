@@ -4,16 +4,16 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "../external/chainlink/AggregatorV3Interface.sol";
+import "../../external/chainlink/AggregatorV3Interface.sol";
 
-import "../external/badger/IXToken.sol";
-import "../external/badger/IDigg.sol";
-import "../external/badger/DiggSett.sol";
+import "../../external/badger/IXToken.sol";
+import "../../external/badger/IDigg.sol";
+import "../../external/badger/DiggSett.sol";
 
-import "./BasePriceOracle.sol";
+import "../BasePriceOracle.sol";
 
 /**
  * @title BadgerPriceOracle
