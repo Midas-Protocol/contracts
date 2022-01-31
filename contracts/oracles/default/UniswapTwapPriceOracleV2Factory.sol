@@ -14,7 +14,7 @@ contract UniswapTwapPriceOracleV2Factory {
     /**
      * @dev WETH token contract address.
      */
-    address constant public WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address immutable public wtoken;
 
     /**
      * @dev `UniswapTwapPriceOracleV2Root` contract address.
@@ -34,11 +34,12 @@ contract UniswapTwapPriceOracleV2Factory {
     /**
      * @dev Constructor that sets the `UniswapTwapPriceOracleV2Root` and `UniswapTwapPriceOracleV2` implementation contract.
      */
-    constructor (address _rootOracle, address _logic) {
+    constructor (address _rootOracle, address _logic, address _wtoken) {
         require(_rootOracle != address(0), "UniswapTwapPriceOracleV2Root not defined.");
         require(_logic != address(0), "UniswapTwapPriceOracleV2 implementation/logic contract not defined.");
         rootOracle = _rootOracle;
         logic = _logic;
+        wtoken = _wtoken;
     }
 
     /**
@@ -48,7 +49,7 @@ contract UniswapTwapPriceOracleV2Factory {
      */
     function deploy(address uniswapV2Factory, address baseToken) external returns (address) {
         // Input validation
-        if (baseToken == address(0)) baseToken = address(WETH);
+        if (baseToken == address(0)) baseToken = address(wtoken);
 
         // Return existing oracle if present
         address currentOracle = address(oracles[uniswapV2Factory][baseToken]);
@@ -57,7 +58,7 @@ contract UniswapTwapPriceOracleV2Factory {
         // Deploy oracle
         bytes32 salt = keccak256(abi.encodePacked(uniswapV2Factory, baseToken));
         address oracle = ClonesUpgradeable.cloneDeterministic(logic, salt);
-        UniswapTwapPriceOracleV2(oracle).initialize(rootOracle, uniswapV2Factory, baseToken);
+        UniswapTwapPriceOracleV2(oracle).initialize(rootOracle, uniswapV2Factory, baseToken, wtoken);
 
         // Set oracle in state
         oracles[uniswapV2Factory][baseToken] = UniswapTwapPriceOracleV2(oracle);

@@ -4,13 +4,13 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICToken.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICToken.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "../external/uniswap/IUniswapV2Pair.sol";
+import "../../external/uniswap/IUniswapV2Pair.sol";
 
-import "./BasePriceOracle.sol";
+import "../BasePriceOracle.sol";
 
 /**
  * @title UniswapLpTokenPriceOracle
@@ -22,9 +22,17 @@ contract UniswapLpTokenPriceOracle is IPriceOracle {
     using SafeMathUpgradeable for uint256;
 
     /**
-     * @dev WETH contract address.
+     * @dev wtoken contract address.
      */
-    address constant private WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public immutable wtoken;
+
+
+    /**
+     * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
+     */
+    constructor (address _wtoken) {
+        wtoken = _wtoken;
+    }
 
     /**
      * @notice Get the LP token price price for an underlying token address.
@@ -59,8 +67,8 @@ contract UniswapLpTokenPriceOracle is IPriceOracle {
         address token1 = pair.token1();
 
         // Get fair price of non-WETH token (underlying the pair) in terms of ETH
-        uint token0FairPrice = token0 == WETH_ADDRESS ? 1e18 : BasePriceOracle(msg.sender).price(token0).mul(1e18).div(10 ** uint256(ERC20Upgradeable(token0).decimals()));
-        uint token1FairPrice = token1 == WETH_ADDRESS ? 1e18 : BasePriceOracle(msg.sender).price(token1).mul(1e18).div(10 ** uint256(ERC20Upgradeable(token1).decimals()));
+        uint token0FairPrice = token0 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token0).mul(1e18).div(10 ** uint256(ERC20Upgradeable(token0).decimals()));
+        uint token1FairPrice = token1 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token1).mul(1e18).div(10 ** uint256(ERC20Upgradeable(token1).decimals()));
 
         // Implementation from https://github.com/AlphaFinanceLab/homora-v2/blob/e643392d582c81f6695136971cff4b685dcd2859/contracts/oracle/UniswapV2Oracle.sol#L18
         uint256 sqrtK = sqrt(reserve0.mul(reserve1)).mul(2 ** 112).div(totalSupply);

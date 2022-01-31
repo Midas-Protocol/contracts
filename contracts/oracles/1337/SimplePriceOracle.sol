@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0;
 
-import "./PriceOracle.sol";
-import "./CErc20.sol";
+import "../../compound/PriceOracle.sol";
+import "../../compound/CErc20.sol";
 
 contract SimplePriceOracle is PriceOracle {
     mapping(address => uint) prices;

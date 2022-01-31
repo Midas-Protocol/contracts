@@ -4,8 +4,8 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/uniswap/IUniswapV2Pair.sol";
-import "../external/uniswap/IUniswapV2Factory.sol";
+import "../../external/uniswap/IUniswapV2Pair.sol";
+import "../../external/uniswap/IUniswapV2Factory.sol";
 
 /**
  * @title UniswapTwapPriceOracleV2Root
@@ -16,14 +16,21 @@ contract UniswapTwapPriceOracleV2Root {
     using SafeMathUpgradeable for uint256;
 
     /**
-     * @dev WETH token contract address.
+     * @dev wtoken token contract address.
      */
-    address constant public WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public immutable wtoken;
 
     /**
      * @dev Minimum TWAP interval.
      */
     uint256 public constant MIN_TWAP_TIME = 15 minutes;
+
+    /**
+    * @dev Constructor to set wtoken address
+     */
+    constructor (address _wtoken) {
+        wtoken = _wtoken;
+    }
 
     /**
      * @dev Return the TWAP value price0. Revert if TWAP time range is not within the threshold.

@@ -7,7 +7,7 @@ import "../external/compound/ICErc20.sol";
 
 import "./BasePriceOracle.sol";
 import "./MasterPriceOracle.sol";
-import "./ChainlinkPriceOracleV2.sol";
+import "./default/ChainlinkPriceOracleV2.sol";
 
 /**
  * @title PreferredPriceOracle

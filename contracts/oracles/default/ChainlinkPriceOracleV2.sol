@@ -4,13 +4,13 @@ pragma solidity >=0.7.0;
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICToken.sol";
-import "../external/compound/ICErc20.sol";
+import "../../external/compound/IPriceOracle.sol";
+import "../../external/compound/ICToken.sol";
+import "../../external/compound/ICErc20.sol";
 
-import "../external/chainlink/AggregatorV3Interface.sol";
+import "../../external/chainlink/AggregatorV3Interface.sol";
 
-import "./BasePriceOracle.sol";
+import "../BasePriceOracle.sol";
 
 /**
  * @title ChainlinkPriceOracleV2
@@ -58,9 +58,9 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
      * @dev The Wrapped native asset address.
      */
     address public immutable wtoken;
-    
+
     /**
-     * @dev Constructor to set admin and canAdminOverwrite.
+     * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
      */
     constructor (address _admin, bool _canAdminOverwrite, address _wtoken, address nativeTokenUsd) {
         admin = _admin;
