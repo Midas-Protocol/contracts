@@ -3,8 +3,8 @@ import { ChainDeployConfig, ChainlinkFeedBaseCurrency } from "./helper";
 
 const deployConfig97: ChainDeployConfig = {
   wtoken: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
-  nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526"
-}
+  nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
+};
 
 export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
@@ -34,7 +34,7 @@ export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promi
       aggregator: "0x143db3CEEfbdfe5631aDD3E50f7614B6ba708BA7",
       underlying: "0x76A20e5DC5721f5ddc9482af689ee12624E01313",
       feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
-    }
+    },
   ];
 
   let dep = await deployments.deterministic("ChainlinkPriceOracleV2", {
@@ -62,12 +62,38 @@ export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promi
       cpo.address,
       deployer,
       true,
-      deployConfig97.wtoken,
+      deployConfig97.wtoken
     );
     await tx.wait();
     console.log("MasterPriceOracle initialized", tx.hash);
   } else {
     console.log("MasterPriceOracle already initialized");
   }
+  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [deployConfig97.wtoken],
+    log: true,
+  });
+  const utpor = await dep.deploy();
+  console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
+
+  dep = await deployments.deterministic("UniswapTwapPriceOracleV2", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [],
+    log: true,
+  });
+  const utpo = await dep.deploy();
+  console.log("UniswapTwapPriceOracleV2: ", utpo.address);
+
+  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Factory", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [utpor.address, utpo.address, deployConfig97.wtoken],
+    log: true,
+  });
+  const utpof = await dep.deploy();
+  console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
   ////
 };

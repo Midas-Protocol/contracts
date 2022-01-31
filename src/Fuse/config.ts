@@ -22,7 +22,7 @@ export const ORACLES: Array<string> = [
   "ChainlinkPriceOracleV2",
   "CurveLpTokenPriceOracle",
   "CurveLiquidityGaugeV2PriceOracle",
-  "FixedEthPriceOracle",
+  "FixedNativePriceOracle",
   "FixedEurPriceOracle",
   "FixedTokenPriceOracle",
   "WSTEthPriceOracle",
