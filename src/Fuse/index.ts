@@ -458,7 +458,7 @@ export default class Fuse {
       [conf.comptroller, "0x0000000000000000000000000000000000000000", receipt.blockNumber]
     );
 
-    const byteCodeHash = utils.keccak256(this.artifacts.CEtherDelegator.bytecode);
+    const byteCodeHash = utils.keccak256(this.artifacts.CEtherDelegator.bytecode + constructorData.substring(2));
 
     const cEtherDelegatorAddress = utils.getCreate2Address(
       this.chainDeployment.FuseFeeDistributor.address,
