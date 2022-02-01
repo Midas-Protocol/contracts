@@ -542,7 +542,7 @@ export default class Fuse {
       ["address", "address", "uint"],
       [conf.comptroller, conf.underlying, receipt.blockNumber]
     );
-    const byteCodeHash = utils.keccak256(this.artifacts.CErc20Delegator.bytecode);
+    const byteCodeHash = utils.keccak256(this.artifacts.CErc20Delegator.bytecode + constructorData.substring(2));
 
     const cErc20DelegatorAddress = utils.getCreate2Address(
       this.chainDeployment.FuseFeeDistributor.address,
