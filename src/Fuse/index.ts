@@ -22,12 +22,12 @@ import CErc20DelegatorArtifact from "../../artifacts/contracts/compound/CErc20De
 import CTokenInterfacesArtifact from "../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json";
 import EIP20InterfaceArtifact from "../../artifacts/contracts/compound/EIP20Interface.sol/EIP20Interface.json";
 import RewardsDistributorDelegatorArtifact from "../../artifacts/contracts/compound/RewardsDistributorDelegator.sol/RewardsDistributorDelegator.json";
-import PreferredPriceOracleArtifact from "../../artifacts/contracts/oracles/PreferredPriceOracle.sol/PreferredPriceOracle.json";
+import PreferredPriceOracleArtifact from "../../artifacts/contracts/oracles/default/PreferredPriceOracle.sol/PreferredPriceOracle.json";
 
 // Oracle Artifacts
 import MasterPriceOracleArtifact from "../../artifacts/contracts/oracles/MasterPriceOracle.sol/MasterPriceOracle.json";
-import SimplePriceOracleArtifact from "../../artifacts/contracts/compound/SimplePriceOracle.sol/SimplePriceOracle.json";
-import ChainlinkPriceOracleV2Artifact from "../../artifacts/contracts/oracles/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json";
+import SimplePriceOracleArtifact from "../../artifacts/contracts/oracles/1337/SimplePriceOracle.sol/SimplePriceOracle.json";
+import ChainlinkPriceOracleV2Artifact from "../../artifacts/contracts/oracles/default/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json";
 
 // IRM Artifacts
 import JumpRateModelArtifact from "../../artifacts/contracts/compound/JumpRateModel.sol/JumpRateModel.json";

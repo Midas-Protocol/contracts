@@ -57,10 +57,10 @@ export const deploy1337 = async ({ ethers, getNamedAccounts, deployments }): Pro
     tx = await masterPriceOracle.initialize(
       underlyings,
       Array(underlyings.length).fill(simplePriceOracle.address),
-        simplePO.address,
+      simplePO.address,
       deployer,
       true,
-      ethers.constants.AddressZero,
+      ethers.constants.AddressZero
     );
     await tx.wait();
     console.log("MasterPriceOracle initialized", tx.hash);

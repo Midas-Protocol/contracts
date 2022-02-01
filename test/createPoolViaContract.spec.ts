@@ -104,8 +104,12 @@ describe("FusePoolDirectory", function () {
         ["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
         deployArgs
       );
-
-      const errorCode = await comptroller.callStatic._deployMarket(false, constructorData, collateralFactorBN);
+      let errorCode;
+      errorCode = await comptrollerContract.callStatic._deployMarket(
+        constants.AddressZero,
+        constructorData,
+        collateralFactorBN
+      );
       expect(errorCode.toNumber()).to.eq(0);
 
       let tx = await comptrollerContract._deployMarket(true, constructorData, collateralFactorBN);
@@ -151,6 +155,10 @@ describe("FusePoolDirectory", function () {
         ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
         deployArgs
       );
+
+      errorCode = await comptrollerContract.callStatic._deployMarket(false, constructorData, collateralFactorBN);
+      expect(errorCode.toNumber()).to.eq(0);
+
       tx = await comptrollerContract._deployMarket(false, constructorData, collateralFactorBN);
       receipt = await tx.wait();
       console.log(`${touchConf.name} deployed successfully with tx hash: ${receipt.transactionHash}`);

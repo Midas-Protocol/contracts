@@ -227,34 +227,6 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   const masterPO = await dep.deploy();
   console.log("MasterPriceOracle: ", masterPO.address);
 
-  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [],
-    log: true,
-  });
-  const utpor = await dep.deploy();
-  console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
-
-  dep = await deployments.deterministic("UniswapTwapPriceOracleV2", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [],
-    log: true,
-  });
-  const utpo = await dep.deploy();
-  console.log("UniswapTwapPriceOracleV2: ", utpo.address);
-
-  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Factory", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [utpor.address, utpo.address],
-    log: true,
-  });
-  const utpof = await dep.deploy();
-  console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
-  ////
-
   ////
   //// CHAIN SPECIFIC DEPLOYMENT
   const chainId = await getChainId();

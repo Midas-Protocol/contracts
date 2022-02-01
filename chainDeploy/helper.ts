@@ -5,5 +5,5 @@ export enum ChainlinkFeedBaseCurrency {
 
 export type ChainDeployConfig = {
   wtoken: string;
-  nativeTokenUsdChainlinkFeed: string;  
-}
+  nativeTokenUsdChainlinkFeed?: string;
+};
