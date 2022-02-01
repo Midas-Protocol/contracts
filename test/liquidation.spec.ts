@@ -3,8 +3,8 @@ import { ethers } from "hardhat";
 import { createPool, deployAssets, setupTest } from "./utils";
 import { Fuse } from "../lib/esm/src";
 import { getAssetsConf } from "./utils/pool";
-import { addCollateral, borrowCollateral } from "./utils/collateral";
-import { CErc20, CToken, MasterPriceOracle, SimplePriceOracle } from "../typechain";
+import { addCollateral, borrowCollateral, getAsset, getCToken } from "./utils/collateral";
+import { CErc20, CEther, CToken, FuseSafeLiquidator, MasterPriceOracle, SimplePriceOracle } from "../typechain";
 
 // async function setupUnhealthyEthBorrowWithTokenCollateral(tokenCollateral) {
 //   // Default token collateral to DAI
@@ -48,31 +48,28 @@ describe("#safeLiquidate", () => {
     this.timeout(120_000);
     let tx: providers.TransactionResponse;
     const sdk = new Fuse(ethers.provider, "1337");
-    const { alice, bob } = await ethers.getNamedSigners();
+    const { alice, bob, rando } = await ethers.getNamedSigners();
     const [poolAddress] = await createPool({});
     const assets = await getAssetsConf(poolAddress);
     const deployedAssets = await deployAssets(assets.assets, bob);
 
-    const c = await ethers.getContract("TRIBEToken");
-    let bal = await c.balanceOf(bob.address);
-    console.log("bob: ", bal.toString());
-    bal = await c.balanceOf(alice.address);
-    console.log("alice: ", bal.toString());
     const tribe = deployedAssets.find((a) => a.symbol === "TRIBE");
     const touch = deployedAssets.find((a) => a.symbol === "TOUCH");
+    const eth = deployedAssets.find((a) => a.underlying === constants.AddressZero);
 
     const simpleOracle = (await ethers.getContract("SimplePriceOracle")) as SimplePriceOracle;
     tx = await simpleOracle.setDirectPrice(tribe.underlying, "421407501053518");
-    console.log('tribe.implementationAddress: ', tribe.implementationAddress);
-    console.log('touch.implementationAddress: ', touch.implementationAddress);
     await tx.wait();
+    
+    console.log("tribe.assetAddress: ", tribe.assetAddress);
+    console.log("touch.assetAddress: ", touch.assetAddress);
+    console.log("eth.assetAddress: ", eth.assetAddress);
 
-    const ct = (await ethers.getContractAt("CErc20", tribe.assetAddress)) as CErc20;
-    console.log('ct: ', await ct.underlying());
+    const ceth = (await ethers.getContractAt("CEther", eth.assetAddress) ) as CEther;
+    const under = await ceth.underlying();
+    console.log('under: ', under);
 
     const oracle = (await ethers.getContract("MasterPriceOracle")) as MasterPriceOracle;
-    const direct = await oracle.price(tribe.underlying);
-    console.log('direct: ', direct.toString());
     const originalPrice = await oracle.getUnderlyingPrice(tribe.assetAddress);
     console.log("originalPrice: ", originalPrice.toString());
 
@@ -88,15 +85,37 @@ describe("#safeLiquidate", () => {
     await addCollateral(poolAddress, alice.address, "ETH", "0.001", false);
 
     let summary = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
-    console.log("summary: ", summary);
-
-    // summary = await sdk.contracts.FusePoolLensSecondary.callStatic.getMaxBorrow(bob.address, tribe.implementationAddress);
-    // console.log("getMaxBorrow: ", summary);
 
     // Borrow 0.0001 ETH using token collateral
     await borrowCollateral(poolAddress, bob.address, "ETH", "0.0001");
 
-    console.log("sdk.contracts.FusePoolLens: ", sdk.contracts.FusePoolLens.address);
+    summary = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
+    console.log("summary: ", summary);
+
+    // Set price of token collateral to 1/10th of what it was
+    await simpleOracle.setDirectPrice(tribe.underlying, BigNumber.from(originalPrice).div(10));
+    summary = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
+
+    const tokenCollateral = await ethers.getContractAt("EIP20Interface", tribe.underlying);
+    const liquidatorBalanceBeforeLiquidation = await tokenCollateral.balanceOf(rando.address);
+    console.log("liquidatorBalanceBeforeLiquidation: ", liquidatorBalanceBeforeLiquidation.toString());
+    const repayAmount = utils.parseEther("0.0001");
+    console.log("repayAmount: ", repayAmount.toString());
+
+    const liquidator = (await ethers.getContract("FuseSafeLiquidator", rando)) as FuseSafeLiquidator;
+    tx = await liquidator["safeLiquidate(address,address,address,uint256,address,address,address[],bytes[])"](
+      bob.address,
+      eth.assetAddress,
+      tribe.assetAddress,
+      0,
+      tribe.assetAddress,
+      constants.AddressZero,
+      [],
+      [],
+      { value: repayAmount }
+    );
+    await tx.wait();
+    console.log("tx: ", tx);
     summary = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
     console.log("summary: ", summary);
   });

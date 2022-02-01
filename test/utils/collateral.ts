@@ -5,13 +5,13 @@ import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 
-async function getAsset(sdk: Fuse, poolAddress: string, underlyingSymbol: string): Promise<USDPricedFuseAsset> {
+export async function getAsset(sdk: Fuse, poolAddress: string, underlyingSymbol: string): Promise<USDPricedFuseAsset> {
   const poolId = (await getPoolIndex(poolAddress, sdk)).toString();
   const assetsInPool = await sdk.fetchFusePoolData(poolId);
   return assetsInPool.assets.filter((a) => a.underlyingSymbol === underlyingSymbol)[0];
 }
 
-function getCToken(asset: USDPricedFuseAsset, sdk: Fuse, signer: SignerWithAddress) {
+export function getCToken(asset: USDPricedFuseAsset, sdk: Fuse, signer: SignerWithAddress) {
   if (asset.underlyingToken === constants.AddressZero) {
     return new Contract(asset.cToken, sdk.chainDeployment.CEtherDelegate.abi, signer);
   } else {
