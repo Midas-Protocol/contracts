@@ -2851,7 +2851,7 @@
           ]
         },
         "ChainlinkPriceOracleV2": {
-          "address": "0x2Aa74ee55e89909D82d4dAA8b764359dAf8891a5",
+          "address": "0x3bFd2d136F4CCd00Ae8718c92ad3cf1EA4a9CFDA",
           "abi": [
             {
               "inputs": [
@@ -6303,7 +6303,7 @@
           ]
         },
         "FusePoolLens": {
-          "address": "0x6490ea7B5d906eb40F713E76036e82Bf8da4Ee82",
+          "address": "0xeDd23aED19005a7c910F497463a5Ad3696b3D410",
           "abi": [
             {
               "inputs": [],
@@ -7627,7 +7627,7 @@
           ]
         },
         "FusePoolLensSecondary": {
-          "address": "0xa4ee1eED650FD44e378c0ae3f0c1e7f8b4C5Bd5c",
+          "address": "0x4Bf3701aa734fcbe8C771Ae1834a6fD903342a65",
           "abi": [
             {
               "inputs": [],
@@ -8509,7 +8509,7 @@
           ]
         },
         "MasterPriceOracle": {
-          "address": "0xe60EB95F1Cd737c007FaC08717D4838aF37C43Bb",
+          "address": "0x937D91554E8Ca566438d5b07f2d019CAc6290c4E",
           "abi": [
             {
               "anonymous": false,
@@ -9522,21 +9522,8 @@
           ]
         },
         "UniswapTwapPriceOracleV2": {
-          "address": "0x4DE5d2F7A3FeC252Acc0B30Fb7426219991cc818",
+          "address": "0x34F7A9e88253E428Cc7dBFE694bAd96613f0fD58",
           "abi": [
-            {
-              "inputs": [],
-              "name": "WETH",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
             {
               "inputs": [],
               "name": "baseToken",
@@ -9584,6 +9571,11 @@
                 {
                   "internalType": "address",
                   "name": "_baseToken",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_wtoken",
                   "type": "address"
                 }
               ],
@@ -9636,11 +9628,24 @@
               ],
               "stateMutability": "view",
               "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "wtoken",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
             }
           ]
         },
         "UniswapTwapPriceOracleV2Factory": {
-          "address": "0xe535D1f234cC68032DC0E545630641F4C80e6867",
+          "address": "0xf03e3B72c22EAeBaed8897bC7e94ae43E6E868eE",
           "abi": [
             {
               "inputs": [
@@ -9653,23 +9658,15 @@
                   "internalType": "address",
                   "name": "_logic",
                   "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_wtoken",
+                  "type": "address"
                 }
               ],
               "stateMutability": "nonpayable",
               "type": "constructor"
-            },
-            {
-              "inputs": [],
-              "name": "WETH",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
             },
             {
               "inputs": [
@@ -9744,12 +9741,36 @@
               ],
               "stateMutability": "view",
               "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "wtoken",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
             }
           ]
         },
         "UniswapTwapPriceOracleV2Root": {
-          "address": "0x8F54F45c3C8336f0336EA4A857CAE23f6225A6A6",
+          "address": "0x92AECcd506395CAd0dc7276125a691fee8a8B341",
           "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_wtoken",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
             {
               "inputs": [],
               "name": "MIN_TWAP_TIME",
@@ -9771,19 +9792,6 @@
                   "internalType": "uint8",
                   "name": "",
                   "type": "uint8"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "WETH",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
                 }
               ],
               "stateMutability": "view",
@@ -9955,6 +9963,19 @@
                   "internalType": "bool[]",
                   "name": "",
                   "type": "bool[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "wtoken",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
                 }
               ],
               "stateMutability": "view",
