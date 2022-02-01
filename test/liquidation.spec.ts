@@ -59,10 +59,12 @@ describe("#safeLiquidate", () => {
     bal = await c.balanceOf(alice.address);
     console.log("alice: ", bal.toString());
     const tribe = deployedAssets.find((a) => a.symbol === "TRIBE");
+    const touch = deployedAssets.find((a) => a.symbol === "TOUCH");
 
     const simpleOracle = (await ethers.getContract("SimplePriceOracle")) as SimplePriceOracle;
     tx = await simpleOracle.setDirectPrice(tribe.underlying, "421407501053518");
-    console.log('tribe.underlying: ', tribe.underlying);
+    console.log('tribe.implementationAddress: ', tribe.implementationAddress);
+    console.log('touch.implementationAddress: ', touch.implementationAddress);
     await tx.wait();
 
     const ct = (await ethers.getContractAt("CErc20", tribe.assetAddress)) as CErc20;
@@ -71,7 +73,7 @@ describe("#safeLiquidate", () => {
     const oracle = (await ethers.getContract("MasterPriceOracle")) as MasterPriceOracle;
     const direct = await oracle.price(tribe.underlying);
     console.log('direct: ', direct.toString());
-    const originalPrice = await oracle.getUnderlyingPrice(tribe.implementationAddress);
+    const originalPrice = await oracle.getUnderlyingPrice(tribe.assetAddress);
     console.log("originalPrice: ", originalPrice.toString());
 
     await addCollateral(
