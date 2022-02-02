@@ -1,10 +1,14 @@
 import { BigNumber, constants, providers, utils } from "ethers";
 import { ethers } from "hardhat";
 import { createPool, deployAssets, setupTest } from "./utils";
-import { getAssetsConf } from "./utils/pool";
+import { DeployedAsset, getAssetsConf } from "./utils/pool";
 import { addCollateral, borrowCollateral } from "./utils/collateral";
 import {
+  CErc20,
+  CEther,
   CToken,
+  EIP20Interface,
+  FusePoolLensSecondary,
   FuseSafeLiquidator,
   MasterPriceOracle,
   SimplePriceOracle,
@@ -45,26 +49,42 @@ import { expect } from "chai";
 // }
 
 describe("#safeLiquidate", () => {
+  let tribe: DeployedAsset;
+  let eth: DeployedAsset;
+  let poolAddress: string;
+  let simpleOracle: SimplePriceOracle;
+  let oracle: MasterPriceOracle;
+  let liquidator: FuseSafeLiquidator;
+  let ethCToken: CEther;
+  let tribeCToken: CErc20;
+  let tribeUnderlying: EIP20Interface;
+  let tx: providers.TransactionResponse;
+
   beforeEach(async () => {
     await setupTest();
+    const { bob, deployer, rando } = await ethers.getNamedSigners();
+    [poolAddress] = await createPool({});
+    const assets = await getAssetsConf(poolAddress);
+    const deployedAssets = await deployAssets(assets.assets, bob);
+
+    tribe = deployedAssets.find((a) => a.symbol === "TRIBE");
+    eth = deployedAssets.find((a) => a.underlying === constants.AddressZero);
+
+    simpleOracle = (await ethers.getContract("SimplePriceOracle", deployer)) as SimplePriceOracle;
+    const tx = await simpleOracle.setDirectPrice(tribe.underlying, "421407501053518");
+    await tx.wait();
+
+    oracle = (await ethers.getContract("MasterPriceOracle")) as MasterPriceOracle;
+    liquidator = (await ethers.getContract("FuseSafeLiquidator", rando)) as FuseSafeLiquidator;
+    ethCToken = (await ethers.getContractAt("CEther", eth.assetAddress)) as CEther;
+    tribeCToken = (await ethers.getContractAt("CErc20", tribe.assetAddress)) as CErc20;
+    tribeUnderlying = (await ethers.getContractAt("EIP20Interface", tribe.underlying)) as EIP20Interface;
   });
 
   it("should liquidate an ETH borrow for token collateral", async function () {
     this.timeout(120_000);
-    let tx: providers.TransactionResponse;
     const { alice, bob, rando } = await ethers.getNamedSigners();
-    const [poolAddress] = await createPool({});
-    const assets = await getAssetsConf(poolAddress);
-    const deployedAssets = await deployAssets(assets.assets, bob);
 
-    const tribe = deployedAssets.find((a) => a.symbol === "TRIBE");
-    const eth = deployedAssets.find((a) => a.underlying === constants.AddressZero);
-
-    const simpleOracle = (await ethers.getContract("SimplePriceOracle")) as SimplePriceOracle;
-    tx = await simpleOracle.setDirectPrice(tribe.underlying, "421407501053518");
-    await tx.wait();
-
-    const oracle = (await ethers.getContract("MasterPriceOracle")) as MasterPriceOracle;
     const originalPrice = await oracle.getUnderlyingPrice(tribe.assetAddress);
 
     await addCollateral(
@@ -87,9 +107,7 @@ describe("#safeLiquidate", () => {
 
     const repayAmount = utils.parseEther(borrowAmount).div(10);
 
-    const collateralContract = (await ethers.getContractAt("CToken", tribe.assetAddress)) as CToken;
-    const balBefore = await collateralContract.balanceOf(rando.address);
-    const liquidator = (await ethers.getContract("FuseSafeLiquidator", rando)) as FuseSafeLiquidator;
+    const balBefore = await tribeCToken.balanceOf(rando.address);
 
     tx = await liquidator["safeLiquidate(address,address,address,uint256,address,address,address[],bytes[])"](
       bob.address,
@@ -104,7 +122,54 @@ describe("#safeLiquidate", () => {
     );
     await tx.wait();
 
-    const balAfter = await collateralContract.balanceOf(rando.address);
+    const balAfter = await tribeCToken.balanceOf(rando.address);
     expect(balAfter).to.be.gt(balBefore);
   });
+
+  // Safe liquidate token borrows
+  it.only("should liquidate a token borrow for ETH collateral", async () => {
+    const { alice, bob, rando } = await ethers.getNamedSigners();
+
+    // Supply ETH collateral
+    await addCollateral(poolAddress, bob.address, "ETH", "0.0001", true);
+
+    // Supply TRIBE from other account
+    await addCollateral(poolAddress, alice.address, "TRIBE", "0.5", true);
+
+    // Borrow TRIBE using ETH as collateral
+    const borrowAmount = "0.1";
+    await borrowCollateral(poolAddress, bob.address, "TRIBE", borrowAmount);
+
+    // Set price of ETH collateral to 1/10th of what it was
+    await simpleOracle.setDirectPrice("0x0000000000000000000000000000000000000000", utils.parseUnits("1", 17));
+
+    const balBefore = await ethCToken.balanceOf(rando.address);
+    const repayAmount = utils.parseEther(borrowAmount).div(10);
+    console.log('repayAmount: ', repayAmount.toString());
+
+    tx = await tribeUnderlying.connect(alice).transfer(rando.address, repayAmount);
+    const bal = await tribeUnderlying.balanceOf(rando.address);
+    console.log('bal: ', bal.toString());
+    tx = await tribeUnderlying.connect(rando).approve(liquidator.address, constants.MaxUint256);
+    await tx.wait();
+
+    tx = await liquidator["safeLiquidate(address,uint256,address,address,uint256,address,address,address[],bytes[])"](
+      bob.address,
+      repayAmount,
+      tribe.assetAddress,
+      eth.assetAddress,
+      0,
+      eth.assetAddress,
+      constants.AddressZero,
+      [],
+      []
+    );
+    await tx.wait();
+
+    const balAfter = await ethCToken.balanceOf(rando.address);
+    expect(balAfter).to.be.gt(balBefore);
+  });
+  // it("should liquidate a token borrow for token collateral", async () => {
+  //   await setupAndLiquidateUnhealthyTokenBorrowWithTokenCollateral();
+  // });
 });
