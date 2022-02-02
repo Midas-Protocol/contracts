@@ -14,6 +14,7 @@ export {
   FusePoolData,
   USDPricedFuseAsset,
   FuseAsset,
+  InterestRateModelType,
 } from "./Fuse/types";
 export { filterOnlyObjectProperties } from "./Fuse/utils";
 export { ERC20Abi };

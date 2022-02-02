@@ -68,7 +68,7 @@ export type ChainDeployment = {
   };
 };
 
-export type InterestRateModelType = JumpRateModel | DAIInterestRateModelV2 | WhitePaperInterestRateModel | undefined;
+export type InterestRateModelType = JumpRateModel | DAIInterestRateModelV2 | WhitePaperInterestRateModel;
 
 export type cERC20Conf = {
   delegateContractName?: any;
