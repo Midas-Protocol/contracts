@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { constants, Contract, utils } from "ethers";
+import { constants, Contract, providers, utils } from "ethers";
 import { ethers } from "hardhat";
 import { createPool, setupTest } from "./utils";
 import { assetInPool, deployAssets, getAssetsConf, getPoolIndex } from "./utils/pool";
@@ -28,8 +28,8 @@ describe("Deposit flow tests", function () {
     });
 
     it("should enable native asset as collateral into pool and supply", async function () {
-      let tx;
-      let rec;
+      let tx: providers.TransactionResponse;
+      let rec: providers.TransactionReceipt;
       let cToken: Contract;
       let ethAsset: USDPricedFuseAsset;
       let ethAssetAfterBorrow: USDPricedFuseAsset;
@@ -58,7 +58,7 @@ describe("Deposit flow tests", function () {
       const cEther = new Contract(ethAsset.cToken, sdk.chainDeployment.CEtherDelegate.abi, bob);
       tx = await cEther.callStatic.borrow(utils.parseUnits("1.5", 18));
       expect(tx).to.eq(0);
-      tx = await cEther.callStatic.borrow(utils.parseUnits("0.5", 18));
+      tx = await cEther.callStatic.borrow(1);
       expect(tx).to.eq(1019);
       tx = await cEther.borrow(utils.parseUnits("1.5", 18));
       rec = await tx.wait();
