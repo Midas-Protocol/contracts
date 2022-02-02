@@ -1,5 +1,5 @@
 import { task, types } from "hardhat/config";
-import { BigNumber, constants } from "ethers";
+import { BigNumber, constants, providers } from "ethers";
 
 export default task("send-tokens", "Edit deployers")
   .addParam("tokens", "Comma-separated symbols")
@@ -11,7 +11,7 @@ export default task("send-tokens", "Edit deployers")
     // const sdk = new sdkModule.Fuse(ethers.provider, "1337");
     const { deployer } = await getNamedAccounts();
     const tokens = _tokens.split(",");
-    let tx;
+    let tx: providers.TransactionResponse;
     for (const tokenName of tokens) {
       const token = await ethers.getContract(`${tokenName}Token`, await ethers.getSigner(deployer));
       tx = await token.approve(deployer, BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One));

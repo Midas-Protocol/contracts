@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { constants, Contract, utils } from "ethers";
+import { constants, Contract, providers, utils } from "ethers";
 import { ethers } from "hardhat";
 import { createPool, setupTest } from "./utils";
 import { assetInPool, deployAssets, getAssetsConf, getPoolIndex } from "./utils/pool";
@@ -18,18 +18,18 @@ describe("Deposit flow tests", function () {
     beforeEach(async () => {
       this.timeout(120_000);
       const { bob } = await ethers.getNamedSigners();
-      [poolAddress, poolImplementationAddress] = await createPool({ ethers, poolName: POOL_NAME, signer: bob });
+      [poolAddress, poolImplementationAddress] = await createPool({ poolName: POOL_NAME, signer: bob });
       const sdk = new Fuse(ethers.provider, "1337");
-      const assets = await getAssetsConf(ethers, poolAddress);
-      await deployAssets(ethers, assets.assets, bob);
+      const assets = await getAssetsConf(poolAddress);
+      await deployAssets(assets.assets, bob);
       const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
       expect(fusePoolData.length).to.eq(3);
       expect(fusePoolData.at(-1)[3]).to.eq("TRIBE");
     });
 
     it("should enable native asset as collateral into pool and supply", async function () {
-      let tx;
-      let rec;
+      let tx: providers.TransactionResponse;
+      let rec: providers.TransactionReceipt;
       let cToken: Contract;
       let ethAsset: USDPricedFuseAsset;
       let ethAssetAfterBorrow: USDPricedFuseAsset;
@@ -58,7 +58,7 @@ describe("Deposit flow tests", function () {
       const cEther = new Contract(ethAsset.cToken, sdk.chainDeployment.CEtherDelegate.abi, bob);
       tx = await cEther.callStatic.borrow(utils.parseUnits("1.5", 18));
       expect(tx).to.eq(0);
-      tx = await cEther.callStatic.borrow(utils.parseUnits("0.5", 18));
+      tx = await cEther.callStatic.borrow(1);
       expect(tx).to.eq(1019);
       tx = await cEther.borrow(utils.parseUnits("1.5", 18));
       rec = await tx.wait();

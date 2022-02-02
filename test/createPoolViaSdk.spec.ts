@@ -49,8 +49,8 @@ describe("FusePoolDirectory", function () {
 
       expect(_unfiliteredName).to.be.equal(POOL_NAME);
 
-      const jrm = await ethers.getContract("JumpRateModel", bob);
-      const assets = await poolAssets(ethers, jrm.address, comptroller, bob);
+      const jrm = await ethers.getContract("JumpRateModel");
+      const assets = await poolAssets(jrm.address, comptroller);
 
       const deployedAssets: DeployedAsset[] = [];
       for (const assetConf of assets.assets) {
@@ -75,8 +75,7 @@ describe("FusePoolDirectory", function () {
           underlying: assetConf.underlying,
         });
       }
-      const [totalSupply, totalBorrow, underlyingTokens, underlyingSymbols, whitelistedAdmin] =
-        await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
+      const [, , , underlyingSymbols] = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
 
       expect(underlyingSymbols).to.have.members(deployedAssets.map((d) => d.symbol));
 

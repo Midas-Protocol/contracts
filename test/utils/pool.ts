@@ -1,14 +1,13 @@
 // pool utilities used across downstream tests
 import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../lib/esm/src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { HardhatEthersHelpers } from "@nomiclabs/hardhat-ethers/types";
 import { providers, utils } from "ethers";
+import { ethers } from "hardhat";
 
 interface PoolCreationParams {
-  ethers: HardhatEthersHelpers;
   closeFactor?: number;
   liquidationIncentive?: number;
-  poolName: string;
+  poolName?: string;
   enforceWhitelist?: boolean;
   whitelist?: Array<string>;
   priceOracleAddress?: string | null;
@@ -16,10 +15,9 @@ interface PoolCreationParams {
 }
 
 export async function createPool({
-  ethers,
   closeFactor = 50,
   liquidationIncentive = 8,
-  poolName = "TEST",
+  poolName = `TEST - ${Math.random()}`,
   enforceWhitelist = false,
   whitelist = [],
   priceOracleAddress = null,
@@ -64,7 +62,6 @@ export type DeployedAsset = {
   receipt: providers.TransactionReceipt;
 };
 export async function deployAssets(
-  ethers: HardhatEthersHelpers,
   assets: cERC20Conf[],
   signer?: SignerWithAddress
 ): Promise<DeployedAsset[]> {
@@ -84,7 +81,7 @@ export async function deployAssets(
     if (receipt.status !== 1) {
       throw `Failed to deploy asset: ${receipt.logs}`;
     }
-    console.log("deployed asset: ", assetConf.name);
+    console.log("deployed asset: ", assetConf.name, assetAddress);
     console.log("-----------------");
     deployed.push({
       symbol: assetConf.symbol,
@@ -100,23 +97,19 @@ export async function deployAssets(
 }
 
 export async function getAssetsConf(
-  ethers: HardhatEthersHelpers,
   comptroller: string,
   interestRateModelAddress?: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> {
-  const { bob } = await ethers.getNamedSigners();
   if (!interestRateModelAddress) {
-    const jrm = await ethers.getContract("JumpRateModel", bob);
+    const jrm = await ethers.getContract("JumpRateModel");
     interestRateModelAddress = jrm.address;
   }
-  return await poolAssets(ethers, interestRateModelAddress, comptroller, bob);
+  return await poolAssets(interestRateModelAddress, comptroller);
 }
 
 export const poolAssets = async (
-  ethers: HardhatEthersHelpers,
   interestRateModelAddress: string,
   comptroller: string,
-  signer: SignerWithAddress
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> => {
   const ethConf: cERC20Conf = {
     underlying: "0x0000000000000000000000000000000000000000",
@@ -132,7 +125,7 @@ export const poolAssets = async (
     bypassPriceFeedCheck: true,
   };
   const tribeConf: cERC20Conf = {
-    underlying: await ethers.getContract("TRIBEToken", signer).then((c) => c.address),
+    underlying: await ethers.getContract("TRIBEToken").then((c) => c.address),
     comptroller,
     interestRateModel: interestRateModelAddress,
     name: "TRIBE Token",
@@ -145,7 +138,7 @@ export const poolAssets = async (
     bypassPriceFeedCheck: true,
   };
   const touchConf: cERC20Conf = {
-    underlying: await ethers.getContract("TOUCHToken", signer).then((c) => c.address),
+    underlying: await ethers.getContract("TOUCHToken").then((c) => c.address),
     comptroller,
     interestRateModel: interestRateModelAddress,
     name: "Midas TOUCH Token",

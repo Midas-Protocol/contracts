@@ -2,8 +2,10 @@ import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-waffle";
 import "@tenderly/hardhat-tenderly";
 import "@typechain/hardhat";
-import { config as dotEnvConfig } from "dotenv";
 import "hardhat-deploy";
+import "hardhat-abi-exporter";
+import "hardhat-tracer";
+import { config as dotEnvConfig } from "dotenv";
 import { HardhatUserConfig } from "hardhat/types";
 
 import "./tasks/editDeployers";
