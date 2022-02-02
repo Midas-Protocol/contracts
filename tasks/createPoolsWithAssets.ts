@@ -116,6 +116,7 @@ task("pools:create-unhealthy", "Deposit collateral")
       amount: 5,
       symbol: "ETH",
       poolAddress,
+      enableCollateral: true,
     });
     console.log("ETH deposited");
 
@@ -125,6 +126,7 @@ task("pools:create-unhealthy", "Deposit collateral")
       amount: 50,
       symbol: "TOUCH",
       poolAddress,
+      enableCollateral: true,
     });
     console.log("TOUCH deposited");
 
