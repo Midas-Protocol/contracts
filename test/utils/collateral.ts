@@ -1,5 +1,5 @@
 import { BigNumber, constants, Contract, providers, utils } from "ethers";
-import { ERC20Abi, Fuse, USDPricedFuseAsset } from "../../lib/esm/src";
+import { ERC20Abi, Fuse, SupportedChains, USDPricedFuseAsset } from "../../lib/esm/src";
 import { assetInPool, getPoolIndex } from "./pool";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -31,7 +31,7 @@ export async function addCollateral(
   let cToken: Contract;
 
   const signer = await ethers.getSigner(depositorAddress);
-  const sdk = new Fuse(ethers.provider, "1337");
+  const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
 
   const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol);
   // const assetCtc = new Contract(assetToDeploy.underlyingToken, ERC20Abi, signer);
@@ -81,7 +81,7 @@ export async function borrowCollateral(
   let rec: providers.TransactionReceipt;
 
   const signer = await ethers.getSigner(borrowerAddress);
-  const sdk = new Fuse(ethers.provider, "1337");
+  const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
   const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol);
 
   const pool = await ethers.getContractAt("Comptroller", poolAddress, signer);
