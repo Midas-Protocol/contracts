@@ -7,8 +7,6 @@ export default task("send-tokens", "Edit deployers")
   .addOptionalParam("sendAmount", "Amount to be sent", "10", types.string)
   .setAction(async ({ tokens: _tokens, sendTo: _sendTo, sendAmount: _sendAmount }, { getNamedAccounts, ethers }) => {
     // @ts-ignore
-    // const sdkModule = await import("../lib/esm/src");
-    // const sdk = new sdkModule.Fuse(ethers.provider, "1337");
     const { deployer } = await getNamedAccounts();
     const tokens = _tokens.split(",");
     let tx: providers.TransactionResponse;

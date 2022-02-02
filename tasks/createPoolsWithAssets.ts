@@ -46,7 +46,7 @@ task("pools:create", "Create pool if does not exist")
     // @ts-ignore
     const sdkModule = await import("../lib/esm/src");
 
-    const sdk = new sdkModule.Fuse(hre.ethers.provider, "1337");
+    const sdk = new sdkModule.Fuse(hre.ethers.provider, sdkModule.SupportedChains.ganache);
     const account = await hre.ethers.getNamedSigner(taskArgs.creator);
     const existingPool = await poolModule.getPoolByName(taskArgs.name, sdk);
 

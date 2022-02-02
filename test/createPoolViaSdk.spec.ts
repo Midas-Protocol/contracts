@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-import { Fuse } from "../lib/esm/src";
+import { Fuse, SupportedChains } from "../lib/esm/src";
 import { DeployedAsset, poolAssets } from "./utils/pool";
 import { utils } from "ethers";
 import { setupTest } from "./utils";
@@ -21,7 +21,7 @@ describe("FusePoolDirectory", function () {
 
       const spo = await ethers.getContract("SimplePriceOracle", bob);
 
-      const sdk = new Fuse(ethers.provider, "1337");
+      const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
 
       // 50% -> 0.5 * 1e18
       const bigCloseFactor = utils.parseEther((50 / 100).toString());

@@ -48,7 +48,7 @@ import {
   USDPricedFuseAsset,
 } from "./types";
 import { COMPTROLLER_ERROR_CODES, CTOKEN_ERROR_CODES, JUMP_RATE_MODEL_CONF, SIMPLE_DEPLOY_ORACLES } from "./config";
-import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig } from "../network";
+import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig, SupportedChains } from "../network";
 import { filterOnlyObjectProperties, filterPoolName } from "./utils";
 
 type OracleConfig = {
@@ -79,19 +79,20 @@ export default class Fuse {
   static JumpRateModelConf: InterestRateModelConf = JUMP_RATE_MODEL_CONF;
 
   public availableOracles: Array<string>;
-  public chainId: string;
+  public chainId: SupportedChains;
   public chainDeployment: ChainDeployment;
   public oracles: OracleConfig;
   private readonly irms: IrmConfig;
   public chainSpecificAddresses: ChainSpecificAddresses;
   public artifacts: Artifacts;
 
-  constructor(web3Provider: JsonRpcProvider | Web3Provider, chainId: string) {
+  constructor(web3Provider: JsonRpcProvider | Web3Provider, chainId: SupportedChains) {
     this.provider = web3Provider;
     this.chainId = chainId;
     this.availableOracles = chainOracles[chainId];
     this.chainDeployment =
-      Deployments[chainId] && Deployments[chainId][Object.keys(Deployments[chainId])[0]]?.contracts;
+      Deployments[chainId.toString()] &&
+      Deployments[chainId.toString()][Object.keys(Deployments[chainId.toString()])[0]]?.contracts;
     if (!this.chainDeployment) {
       throw new Error(`Chain deployment not found for chainId ${chainId}`);
     }

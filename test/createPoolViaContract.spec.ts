@@ -1,7 +1,7 @@
 import { deployments, ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-import { cERC20Conf, Fuse } from "../lib/esm/src";
+import { cERC20Conf, Fuse, SupportedChains } from "../lib/esm/src";
 import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { setupTest } from "./utils";
@@ -53,7 +53,7 @@ describe("FusePoolDirectory", function () {
       const pool = pools[1].at(-1);
       expect(pool.comptroller).to.eq(poolAddress);
 
-      const sdk = new Fuse(ethers.provider, "1337");
+      const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
       const allPools = await sdk.contracts.FusePoolDirectory.callStatic.getAllPools();
       const { comptroller, name: _unfiliteredName } = await allPools.filter((p) => p.creator === alice.address).at(-1);
 

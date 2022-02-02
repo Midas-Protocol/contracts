@@ -16,5 +16,6 @@ export {
   FuseAsset,
   InterestRateModelType,
 } from "./Fuse/types";
+export { SupportedChains } from "./network";
 export { filterOnlyObjectProperties } from "./Fuse/utils";
 export { ERC20Abi };

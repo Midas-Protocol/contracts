@@ -3,7 +3,7 @@ import { constants, Contract, providers, utils } from "ethers";
 import { ethers } from "hardhat";
 import { createPool, setupTest } from "./utils";
 import { assetInPool, deployAssets, getAssetsConf, getPoolIndex } from "./utils/pool";
-import { Fuse, USDPricedFuseAsset } from "../lib/esm/src";
+import { Fuse, SupportedChains, USDPricedFuseAsset } from "../lib/esm/src";
 
 describe("Deposit flow tests", function () {
   this.beforeEach(async () => {
@@ -19,7 +19,7 @@ describe("Deposit flow tests", function () {
       this.timeout(120_000);
       const { bob } = await ethers.getNamedSigners();
       [poolAddress, poolImplementationAddress] = await createPool({ poolName: POOL_NAME, signer: bob });
-      const sdk = new Fuse(ethers.provider, "1337");
+      const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
       const assets = await getAssetsConf(poolAddress);
       await deployAssets(assets.assets, bob);
       const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
@@ -35,7 +35,7 @@ describe("Deposit flow tests", function () {
       let ethAssetAfterBorrow: USDPricedFuseAsset;
       const { bob } = await ethers.getNamedSigners();
 
-      const sdk = new Fuse(ethers.provider, "1337");
+      const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
 
       const poolId = (await getPoolIndex(poolAddress, sdk)).toString();
       const assetsInPool = await sdk.fetchFusePoolData(poolId);
