@@ -49,7 +49,7 @@ describe("#safeLiquidate", () => {
     await setupTest();
   });
 
-  it.only("should liquidate an ETH borrow for token collateral", async function () {
+  it("should liquidate an ETH borrow for token collateral", async function () {
     this.timeout(120_000);
     let tx: providers.TransactionResponse;
     const { alice, bob, rando } = await ethers.getNamedSigners();
