@@ -5,6 +5,7 @@ export default task("get-pool-data", "Get pools data")
   .addOptionalParam("creator", "Named account that created the pool", undefined, types.string)
   .addOptionalParam("address", "Address of the pool", undefined, types.string)
   .setAction(async (taskArgs, hre) => {
+    // @ts-ignore
     const sdkModule = await import("../lib/esm/src");
     const poolModule = await import("../test/utils/pool");
 
