@@ -16,6 +16,7 @@ import { expect } from "chai";
 
 describe("#safeLiquidate", () => {
   let tribe: DeployedAsset;
+  let touch: DeployedAsset;
   let eth: DeployedAsset;
   let poolAddress: string;
   let simpleOracle: SimplePriceOracle;
@@ -24,6 +25,7 @@ describe("#safeLiquidate", () => {
   let ethCToken: CEther;
   let tribeCToken: CErc20;
   let tribeUnderlying: EIP20Interface;
+  let touchUnderlying: EIP20Interface;
   let tx: providers.TransactionResponse;
 
   beforeEach(async () => {
@@ -34,16 +36,22 @@ describe("#safeLiquidate", () => {
     const deployedAssets = await deployAssets(assets.assets, bob);
 
     tribe = deployedAssets.find((a) => a.symbol === "TRIBE");
+    touch = deployedAssets.find((a) => a.symbol === "TOUCH");
     eth = deployedAssets.find((a) => a.underlying === constants.AddressZero);
 
     simpleOracle = (await ethers.getContract("SimplePriceOracle", deployer)) as SimplePriceOracle;
-    const tx = await simpleOracle.setDirectPrice(tribe.underlying, "421407501053518");
+    tx = await simpleOracle.setDirectPrice(tribe.underlying, "421407501053518");
+    await tx.wait();
+
+    tx = await simpleOracle.setDirectPrice(touch.underlying, "421407501053518000000000000");
     await tx.wait();
 
     oracle = (await ethers.getContract("MasterPriceOracle")) as MasterPriceOracle;
     liquidator = (await ethers.getContract("FuseSafeLiquidator", rando)) as FuseSafeLiquidator;
     ethCToken = (await ethers.getContractAt("CEther", eth.assetAddress)) as CEther;
     tribeCToken = (await ethers.getContractAt("CErc20", tribe.assetAddress)) as CErc20;
+    touchUnderlying = (await ethers.getContractAt("EIP20Interface", touch.underlying)) as EIP20Interface;
+    touchCToken = (await ethers.getContractAt("CErc20", touch.assetAddress)) as CErc20;
     tribeUnderlying = (await ethers.getContractAt("EIP20Interface", tribe.underlying)) as EIP20Interface;
   });
 
@@ -94,7 +102,8 @@ describe("#safeLiquidate", () => {
   });
 
   // Safe liquidate token borrows
-  it("should liquidate a token borrow for ETH collateral", async () => {
+  it("should liquidate a token borrow for ETH collateral", async function() {
+    this.timeout(120_000);
     const { alice, bob, rando } = await ethers.getNamedSigners();
 
     // Supply ETH collateral
@@ -109,7 +118,7 @@ describe("#safeLiquidate", () => {
 
     const originalPrice = await oracle.getUnderlyingPrice(tribe.assetAddress);
 
-    // Set price of token collateral to 10x of what it was
+    // Set price of borrowed token to 10x of what it was
     tx = await simpleOracle.setDirectPrice(tribe.underlying, BigNumber.from(originalPrice).mul(10));
     await tx.wait();
 
@@ -136,7 +145,54 @@ describe("#safeLiquidate", () => {
     const balAfter = await ethCToken.balanceOf(rando.address);
     expect(balAfter).to.be.gt(balBefore);
   });
-  // it("should liquidate a token borrow for token collateral", async () => {
-  //   await setupAndLiquidateUnhealthyTokenBorrowWithTokenCollateral();
-  // });
+  
+  it("should liquidate a token borrow for token collateral", async function() {
+    this.timeout(120_000);
+    const { alice, bob, rando } = await ethers.getNamedSigners();
+
+    const originalPrice = await oracle.getUnderlyingPrice(tribe.assetAddress);
+
+    // Supply token collateral
+    await addCollateral(
+      poolAddress,
+      bob.address,
+      "TRIBE",
+      utils.formatEther(BigNumber.from(1e14).mul(constants.WeiPerEther.div(originalPrice))),
+      true
+    );
+
+    // Supply TOUCH from other account
+    await addCollateral(poolAddress, alice.address, "TOUCH", utils.formatEther(1e6), false);
+
+    // Borrow TOUCH using token collateral
+    const borrowAmount = utils.formatEther(1e5);
+    await borrowCollateral(poolAddress, bob.address, "TOUCH", borrowAmount);
+
+    // Set price of token collateral to 1/10th of what it was
+    tx = await simpleOracle.setDirectPrice(tribe.underlying, BigNumber.from(originalPrice).div(10));
+    await tx.wait();
+
+    const repayAmount = utils.parseEther(borrowAmount).div(10);
+
+    const balBefore = await tribeCToken.balanceOf(rando.address);
+
+    tx = await touchUnderlying.connect(alice).transfer(rando.address, repayAmount);
+    tx = await touchUnderlying.connect(rando).approve(liquidator.address, constants.MaxUint256);
+    await tx.wait();
+
+    tx = await liquidator["safeLiquidate(address,uint256,address,address,uint256,address,address,address[],bytes[])"](
+      bob.address,
+      repayAmount,
+      touch.assetAddress,
+      tribe.assetAddress,
+      0,
+      tribe.assetAddress,
+      constants.AddressZero,
+      [],
+      []
+    );
+
+    const balAfter = await tribeCToken.balanceOf(rando.address);
+    expect(balAfter).to.be.gt(balBefore);
+  });
 });
