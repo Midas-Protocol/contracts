@@ -6,6 +6,7 @@ import { addCollateral, borrowCollateral } from "./utils/collateral";
 import {
   CErc20,
   CEther,
+  Comptroller,
   CToken,
   EIP20Interface,
   FusePoolLensSecondary,
@@ -144,14 +145,21 @@ describe("#safeLiquidate", () => {
     await simpleOracle.setDirectPrice("0x0000000000000000000000000000000000000000", utils.parseUnits("1", 17));
 
     const balBefore = await ethCToken.balanceOf(rando.address);
-    const repayAmount = utils.parseEther(borrowAmount).div(10);
-    console.log('repayAmount: ', repayAmount.toString());
+    const repayAmount = utils.parseEther(borrowAmount).div(100);
+    console.log("repayAmount: ", repayAmount.toString());
 
     tx = await tribeUnderlying.connect(alice).transfer(rando.address, repayAmount);
     const bal = await tribeUnderlying.balanceOf(rando.address);
-    console.log('bal: ', bal.toString());
+    console.log("bal: ", bal.toString());
     tx = await tribeUnderlying.connect(rando).approve(liquidator.address, constants.MaxUint256);
     await tx.wait();
+
+    tx = await tribeCToken.accrueInterest();
+    const pool = (await ethers.getContractAt("Comptroller", poolAddress) as Comptroller)
+    const liq = await pool.callStatic.liquidateBorrowAllowed(tribeCToken.address, ethCToken.address, rando.address, bob.address, repayAmount)
+    console.log('liq: ', liq.toString());
+    const l = await pool.getHypotheticalAccountLiquidity(bob.address, constants.AddressZero, 0, 0)
+    console.log('getHypotheticalAccountLiquidity: ', l.map(c => c.toString()));
 
     tx = await liquidator["safeLiquidate(address,uint256,address,address,uint256,address,address,address[],bytes[])"](
       bob.address,
