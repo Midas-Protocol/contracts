@@ -1,14 +1,5 @@
 import { task, types } from "hardhat/config";
 
-const logPoolData = async (poolAddress, sdk) => {
-  const poolModule = await import("../test/utils/pool");
-  const poolIndex = await poolModule.getPoolIndex(poolAddress, sdk);
-  const fusePoolData = await sdk.fetchFusePoolData(poolIndex, poolAddress);
-
-  const poolAssets = fusePoolData.assets.map((a) => a.underlyingSymbol).join(", ");
-  console.log(`Operating on pool with address ${poolAddress}, name: ${fusePoolData.name}, assets ${poolAssets}`);
-};
-
 export default task("pools", "Create Testing Pools")
   .addParam("name", "Name of the pool to be created")
   .addOptionalParam("creator", "Named account from which to create the pool", "deployer", types.string)
@@ -59,7 +50,7 @@ task("pools:create", "Create pool if does not exist")
       const assets = await poolModule.getAssetsConf(poolAddress);
       await poolModule.deployAssets(assets.assets, account);
     }
-    await logPoolData(poolAddress, sdk);
+    await poolModule.logPoolData(poolAddress, sdk);
     return poolAddress;
   });
 

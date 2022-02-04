@@ -13,6 +13,7 @@ import "./tasks/addChainlinkFeeds";
 import "./tasks/createPoolsWithAssets";
 import "./tasks/sendTestTokens";
 import "./tasks/oraclePrice";
+import "./tasks/getPoolData";
 
 dotEnvConfig();
 
