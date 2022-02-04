@@ -3,15 +3,7 @@ import { ethers } from "hardhat";
 import { createPool, deployAssets, setupTest } from "./utils";
 import { DeployedAsset, getAssetsConf } from "./utils/pool";
 import { addCollateral, borrowCollateral } from "./utils/collateral";
-import {
-  CErc20,
-  CEther,
-  Comptroller,
-  EIP20Interface,
-  FuseSafeLiquidator,
-  MasterPriceOracle,
-  SimplePriceOracle,
-} from "../typechain";
+import { CErc20, CEther, EIP20Interface, FuseSafeLiquidator, MasterPriceOracle, SimplePriceOracle } from "../typechain";
 import { expect } from "chai";
 
 describe("#safeLiquidate", () => {
@@ -23,6 +15,7 @@ describe("#safeLiquidate", () => {
   let oracle: MasterPriceOracle;
   let liquidator: FuseSafeLiquidator;
   let ethCToken: CEther;
+  let touchCToken: CErc20;
   let tribeCToken: CErc20;
   let tribeUnderlying: EIP20Interface;
   let touchUnderlying: EIP20Interface;
@@ -102,7 +95,7 @@ describe("#safeLiquidate", () => {
   });
 
   // Safe liquidate token borrows
-  it("should liquidate a token borrow for ETH collateral", async function() {
+  it("should liquidate a token borrow for ETH collateral", async function () {
     this.timeout(120_000);
     const { alice, bob, rando } = await ethers.getNamedSigners();
 
@@ -145,8 +138,8 @@ describe("#safeLiquidate", () => {
     const balAfter = await ethCToken.balanceOf(rando.address);
     expect(balAfter).to.be.gt(balBefore);
   });
-  
-  it("should liquidate a token borrow for token collateral", async function() {
+
+  it("should liquidate a token borrow for token collateral", async function () {
     this.timeout(120_000);
     const { alice, bob, rando } = await ethers.getNamedSigners();
 
