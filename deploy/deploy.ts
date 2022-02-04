@@ -132,7 +132,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   }
 
   tx = await fuseFeeDistributor._setPoolLimits(
-    ethers.utils.parseEther("0.000001"),
+    10,
     ethers.constants.MaxUint256,
     ethers.constants.MaxUint256
   );
