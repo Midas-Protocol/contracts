@@ -131,11 +131,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     console.log("FuseFeeDistributor already initialized");
   }
 
-  tx = await fuseFeeDistributor._setPoolLimits(
-    10,
-    ethers.constants.MaxUint256,
-    ethers.constants.MaxUint256
-  );
+  tx = await fuseFeeDistributor._setPoolLimits(10, ethers.constants.MaxUint256, ethers.constants.MaxUint256);
   await tx.wait();
   console.log("FuseFeeDistributor pool limits set", tx.hash);
 
@@ -236,7 +232,17 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   } else if (chainId === "97") {
     await deploy97({ ethers, getNamedAccounts, deployments });
   }
+
   ////
+  //// Deploy CErc20PluginDelegate
+  dep = await deployments.deterministic("CErc20PluginDelegate", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [],
+    log: true,
+  });
+  const pluginDelegate = await dep.deploy();
+  console.log("pluginDelegate:", pluginDelegate.address);
 };
 
 export default func;
