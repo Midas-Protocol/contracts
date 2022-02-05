@@ -38,7 +38,7 @@ describe("Protocol Liquidation Seizing", () => {
     tribeCToken = (await ethers.getContractAt("CErc20", tribe.assetAddress)) as CErc20;
   });
 
-  it.only("should calculate the right amounts of protocol, fee, total supply after liquidation", async function () {
+  it("should calculate the right amounts of protocol, fee, total supply after liquidation", async function () {
     this.timeout(120_000);
     const { bob, rando } = await ethers.getNamedSigners();
 
