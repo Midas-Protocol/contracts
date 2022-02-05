@@ -1,11 +1,20 @@
-import { constants, providers, utils } from "ethers";
+import { BigNumber, constants, providers, utils } from "ethers";
 import { ethers } from "hardhat";
 import { createPool, deployAssets, setupTest } from "./utils";
 import { DeployedAsset, getAssetsConf } from "./utils/pool";
-import { setupLiquidatablePool } from "./utils/collateral";
-import { CErc20, FuseFeeDistributor, FuseSafeLiquidator, MasterPriceOracle, SimplePriceOracle } from "../typechain";
+import { setupAndLiquidatePool, setupLiquidatablePool } from "./utils/collateral";
+import {
+  CErc20,
+  CEther,
+  ERC20,
+  FuseFeeDistributor,
+  FuseSafeLiquidator,
+  MasterPriceOracle,
+  SimplePriceOracle,
+} from "../typechain";
 import { expect } from "chai";
 import { FUSE_LIQUIDATION_PROTOCOL_FEE_PER_THOUSAND, FUSE_LIQUIDATION_SEIZE_FEE_PER_THOUSAND } from "./utils/config";
+import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 describe("Protocol Liquidation Seizing", () => {
   let tribe: DeployedAsset;
@@ -15,6 +24,7 @@ describe("Protocol Liquidation Seizing", () => {
   let oracle: MasterPriceOracle;
   let liquidator: FuseSafeLiquidator;
   let tribeCToken: CErc20;
+  let ethCToken: CEther;
   let fuseFeeDistributor: FuseFeeDistributor;
   let tx: providers.TransactionResponse;
 
@@ -36,6 +46,7 @@ describe("Protocol Liquidation Seizing", () => {
     fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
     liquidator = (await ethers.getContract("FuseSafeLiquidator", rando)) as FuseSafeLiquidator;
     tribeCToken = (await ethers.getContractAt("CErc20", tribe.assetAddress)) as CErc20;
+    ethCToken = (await ethers.getContractAt("CEther", eth.assetAddress)) as CEther;
   });
 
   it("should calculate the right amounts of protocol, fee, total supply after liquidation", async function () {
@@ -110,5 +121,26 @@ describe("Protocol Liquidation Seizing", () => {
     const reservesDiffAmount = totalSupplyBefore.sub(totalReservesAfter);
     // gt because reserves get added on interest rate accrual
     expect(reservesDiffAmount).to.be.gt(protocolSeizeTokens);
+  });
+  it("should be able to withdraw fees to fuseFeeDistributor", async function () {
+    this.timeout(120_000);
+    const borrowAmount = "0.0001";
+    await setupAndLiquidatePool(oracle, tribe, eth, poolAddress, simpleOracle, borrowAmount, liquidator);
+
+    const feesAfterLiquidation = await tribeCToken.totalFuseFees();
+    expect(feesAfterLiquidation).to.be.gt(BigNumber.from(0));
+    console.log(feesAfterLiquidation.toString(), "FEES AFTER");
+
+    tx = await tribeCToken._withdrawFuseFees(feesAfterLiquidation);
+    const receipt: TransactionReceipt = await tx.wait();
+    expect(receipt.status).to.eq(1);
+
+    const feesAfterWithdrawal = await tribeCToken.totalFuseFees();
+    expect(feesAfterLiquidation).to.be.gt(feesAfterWithdrawal);
+    expect(feesAfterWithdrawal).to.eq(BigNumber.from(0));
+
+    const tribeToken = (await ethers.getContract("TRIBEToken")) as ERC20;
+    const fuseFeeDistributorBalance = await tribeToken.balanceOf(fuseFeeDistributor.address);
+    expect(fuseFeeDistributorBalance).to.eq(feesAfterLiquidation);
   });
 });

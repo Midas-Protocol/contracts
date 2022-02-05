@@ -123,3 +123,23 @@ export async function setupLiquidatablePool(oracle, tribe, poolAddress, simpleOr
   tx = await simpleOracle.setDirectPrice(tribe.underlying, BigNumber.from(originalPrice).div(10));
   await tx.wait();
 }
+
+export async function setupAndLiquidatePool(oracle, tribe, eth, poolAddress, simpleOracle, borrowAmount, liquidator) {
+  const { bob } = await ethers.getNamedSigners();
+  await setupLiquidatablePool(oracle, tribe, poolAddress, simpleOracle, borrowAmount);
+
+  const repayAmount = utils.parseEther(borrowAmount).div(10);
+
+  const tx = await liquidator["safeLiquidate(address,address,address,uint256,address,address,address[],bytes[])"](
+    bob.address,
+    eth.assetAddress,
+    tribe.assetAddress,
+    0,
+    tribe.assetAddress,
+    constants.AddressZero,
+    [],
+    [],
+    { value: repayAmount, gasLimit: 10000000, gasPrice: utils.parseUnits("10", "gwei") }
+  );
+  await tx.wait();
+}
