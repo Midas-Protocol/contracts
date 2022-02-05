@@ -99,3 +99,27 @@ export async function borrowCollateral(
   console.log(assetAfterBorrow.borrowBalanceUSD, "Borrow Balance USD: AFTER mint & borrow");
   console.log(assetAfterBorrow.supplyBalanceUSD, "Supply Balance USD: AFTER mint & borrow");
 }
+
+export async function setupLiquidatablePool(oracle, tribe, poolAddress, simpleOracle, borrowAmount) {
+  const { alice, bob } = await ethers.getNamedSigners();
+  let tx: providers.TransactionResponse;
+  const originalPrice = await oracle.getUnderlyingPrice(tribe.assetAddress);
+
+  await addCollateral(
+    poolAddress,
+    bob.address,
+    "TRIBE",
+    utils.formatEther(BigNumber.from(3e14).mul(constants.WeiPerEther.div(originalPrice))),
+    true
+  );
+
+  // Supply 0.001 ETH from other account
+  await addCollateral(poolAddress, alice.address, "ETH", "0.001", false);
+
+  // Borrow 0.0001 ETH using token collateral
+  await borrowCollateral(poolAddress, bob.address, "ETH", borrowAmount);
+
+  // Set price of token collateral to 1/10th of what it was
+  tx = await simpleOracle.setDirectPrice(tribe.underlying, BigNumber.from(originalPrice).div(10));
+  await tx.wait();
+}
