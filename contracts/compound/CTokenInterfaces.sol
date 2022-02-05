@@ -162,7 +162,7 @@ contract CTokenStorage is CTokenAdminStorage {
     /*
      * Share of seized collateral taken as fees
      */
-    uint public constant feeSeizeShareMantissa = 1e15; //10%
+    uint public constant feeSeizeShareMantissa = 1e17; //10%
 }
 
 abstract contract CTokenInterface is CTokenStorage {

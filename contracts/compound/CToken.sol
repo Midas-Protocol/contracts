@@ -1109,8 +1109,8 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         }
 
         vars.protocolSeizeTokens = mul_(seizeTokens, Exp({mantissa: protocolSeizeShareMantissa}));
-        vars.liquidatorSeizeTokens = sub_(seizeTokens, vars.protocolSeizeTokens);
         vars.feeSeizeTokens = mul_(seizeTokens, Exp({mantissa: feeSeizeShareMantissa}));
+        vars.liquidatorSeizeTokens = sub_(sub_(seizeTokens, vars.protocolSeizeTokens), vars.feeSeizeTokens);
 
         (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateStoredInternal();
         require(vars.mathErr == MathError.NO_ERROR, "exchange rate math error");
