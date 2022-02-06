@@ -5,10 +5,15 @@ import { cERC20Conf, Fuse, SupportedChains } from "../lib/esm/src";
 import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { setupTest } from "./utils";
+import { Comptroller, FusePoolDirectory, SimplePriceOracle } from "../typechain";
 
 use(solidity);
 
 describe("FusePoolDirectory", function () {
+  let spo: SimplePriceOracle;
+  let fpdWithSigner: FusePoolDirectory;
+  let implementationComptroller: Comptroller;
+
   this.beforeEach(async () => {
     await setupTest();
   });
@@ -19,10 +24,10 @@ describe("FusePoolDirectory", function () {
       const { alice } = await ethers.getNamedSigners();
       console.log("alice: ", alice.address);
 
-      const spo = await ethers.getContract("SimplePriceOracle", alice);
+      spo = await ethers.getContract("SimplePriceOracle", alice);
 
-      const fpdWithSigner = await ethers.getContract("FusePoolDirectory", alice);
-      const implementationComptroller = await ethers.getContract("Comptroller");
+      fpdWithSigner = await ethers.getContract("FusePoolDirectory", alice);
+      implementationComptroller = await ethers.getContract("Comptroller");
 
       //// DEPLOY POOL
       const POOL_NAME = "TEST";

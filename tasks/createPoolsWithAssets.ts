@@ -124,10 +124,10 @@ task("pools:create-unhealthy", "Deposit collateral")
     // Borrow TOUCH with ETH as collateral from bob
     await hre.run("pools:borrow", {
       account: taskArgs.supplyAccount,
-      amount: 20,
+      amount: 10,
       symbol: "TOUCH",
       poolAddress,
     });
 
-    await hre.run("set-price", { token: "ETH", price: "0.1", poolAddress });
+    await hre.run("set-price", { token: "TOUCH", price: "1", poolAddress });
   });

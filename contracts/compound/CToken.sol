@@ -1068,7 +1068,10 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         uint protocolSeizeAmount;
         uint exchangeRateMantissa;
         uint totalReservesNew;
+        uint totalFuseFeeNew;
         uint totalSupplyNew;
+        uint feeSeizeTokens;
+        uint feeSeizeAmount;
     }
 
     /**
@@ -1106,15 +1109,18 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         }
 
         vars.protocolSeizeTokens = mul_(seizeTokens, Exp({mantissa: protocolSeizeShareMantissa}));
-        vars.liquidatorSeizeTokens = sub_(seizeTokens, vars.protocolSeizeTokens);
+        vars.feeSeizeTokens = mul_(seizeTokens, Exp({mantissa: feeSeizeShareMantissa}));
+        vars.liquidatorSeizeTokens = sub_(sub_(seizeTokens, vars.protocolSeizeTokens), vars.feeSeizeTokens);
 
         (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateStoredInternal();
         require(vars.mathErr == MathError.NO_ERROR, "exchange rate math error");
 
         vars.protocolSeizeAmount = mul_ScalarTruncate(Exp({mantissa: vars.exchangeRateMantissa}), vars.protocolSeizeTokens);
+        vars.feeSeizeAmount = mul_ScalarTruncate(Exp({mantissa: vars.exchangeRateMantissa}), vars.feeSeizeTokens);
 
         vars.totalReservesNew = add_(totalReserves, vars.protocolSeizeAmount);
-        vars.totalSupplyNew = sub_(totalSupply, vars.protocolSeizeTokens);
+        vars.totalSupplyNew = sub_(sub_(totalSupply, vars.protocolSeizeTokens), vars.feeSeizeTokens);
+        vars.totalFuseFeeNew = add_(totalFuseFees, vars.feeSeizeAmount);
 
         (vars.mathErr, vars.liquidatorTokensNew) = addUInt(accountTokens[liquidator], vars.liquidatorSeizeTokens);
         if (vars.mathErr != MathError.NO_ERROR) {
@@ -1128,6 +1134,8 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         /* We write the previously calculated values into storage */
         totalReserves = vars.totalReservesNew;
         totalSupply = vars.totalSupplyNew;
+        totalFuseFees = vars.totalFuseFeeNew;
+
         accountTokens[borrower] = vars.borrowerTokensNew;
         accountTokens[liquidator] = vars.liquidatorTokensNew;
 
