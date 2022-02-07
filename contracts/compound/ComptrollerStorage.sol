@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
 import "./IFuseFeeDistributor.sol";
 import "./CToken.sol";
@@ -9,7 +9,7 @@ contract UnitrollerAdminStorage {
     /*
      * Administrator for Fuse
      */
-    IFuseFeeDistributor internal constant fuseAdmin = IFuseFeeDistributor(0x374aDc9EC5a177694AC805cB57E5a2A61217C1AB);
+    IFuseFeeDistributor internal constant fuseAdmin = IFuseFeeDistributor(payable(0x374aDc9EC5a177694AC805cB57E5a2A61217C1AB));
 
     /**
     * @notice Administrator for this contract

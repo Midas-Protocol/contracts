@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 pragma experimental ABIEncoderV2;
 
 import "../CErc20.sol";
@@ -79,7 +79,7 @@ contract CompoundLens {
         uint tokenAllowance;
     }
 
-    function cTokenBalances(CToken cToken, address payable account) public returns (CTokenBalances memory) {
+    function cTokenBalances(CToken cToken, address account) public returns (CTokenBalances memory) {
         uint balanceOf = cToken.balanceOf(account);
         uint borrowBalanceCurrent = cToken.borrowBalanceCurrent(account);
         uint balanceOfUnderlying = cToken.balanceOfUnderlying(account);
@@ -106,7 +106,7 @@ contract CompoundLens {
         });
     }
 
-    function cTokenBalancesAll(CToken[] calldata cTokens, address payable account) external returns (CTokenBalances[] memory) {
+    function cTokenBalancesAll(CToken[] calldata cTokens, address account) external returns (CTokenBalances[] memory) {
         uint cTokenCount = cTokens.length;
         CTokenBalances[] memory res = new CTokenBalances[](cTokenCount);
         for (uint i = 0; i < cTokenCount; i++) {

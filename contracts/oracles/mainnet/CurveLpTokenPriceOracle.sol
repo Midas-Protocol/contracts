@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -52,7 +52,7 @@ contract CurveLpTokenPriceOracle is IPriceOracle, BasePriceOracle {
         address pool = poolOf[lpToken];
         require(pool != address(0), "LP token is not registered.");
         address[] memory tokens = underlyingTokens[lpToken];
-        uint256 minPx = uint256(-1);
+        uint256 minPx = type(uint256).max;
         uint256 n = tokens.length;
 
         for (uint256 i = 0; i < n; i++) {
@@ -61,7 +61,7 @@ contract CurveLpTokenPriceOracle is IPriceOracle, BasePriceOracle {
             if (tokenPx < minPx) minPx = tokenPx;
         }
 
-        require(minPx != uint256(-1), "No minimum underlying token price found.");      
+        require(minPx != type(uint256).max, "No minimum underlying token price found.");
         return minPx.mul(ICurvePool(pool).get_virtual_price()).div(1e18); // Use min underlying token prices
     }
 

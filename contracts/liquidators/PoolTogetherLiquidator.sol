@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
@@ -26,7 +26,7 @@ contract PoolTogetherLiquidator is IRedemptionStrategy {
         // Redeem PcToken (and store output as new collateral)
         ControlledTokenInterface token = ControlledTokenInterface(address(inputToken));
         PrizePoolInterface controller = PrizePoolInterface(token.controller());
-        controller.withdrawInstantlyFrom(address(this), inputAmount, address(token), uint256(-1));
+        controller.withdrawInstantlyFrom(address(this), inputAmount, address(token), type(uint256).max);
         outputToken = IERC20Upgradeable(controller.token());
         outputAmount = inputAmount;
     }

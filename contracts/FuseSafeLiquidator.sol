@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 import "./liquidators/IRedemptionStrategy.sol";
 
@@ -41,7 +41,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
 
         if (allowance < minAmount) {
             if (allowance > 0) token.safeApprove(to, 0);
-            token.safeApprove(to, uint256(-1));
+            token.safeApprove(to, type(uint256).max);
         }
     }
 
@@ -339,7 +339,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
      * Requires that `msg.sender` is WETH, a CToken, or a Uniswap V2 Router, or another contract.
      */
     receive() external payable {
-        require(msg.sender.isContract(), "Sender is not a contract.");
+        require(payable(msg.sender).isContract(), "Sender is not a contract.");
     }
 
     /**

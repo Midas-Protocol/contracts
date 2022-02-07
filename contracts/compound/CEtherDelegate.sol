@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
 import "./CEther.sol";
 import "./CDelegateInterface.sol";
@@ -24,7 +24,7 @@ contract CEtherDelegate is CDelegateInterface, CEther {
         require(msg.sender == address(this) || hasAdminRights(), "!self");
 
         // Make sure admin storage is set up correctly
-        __admin = address(0);
+        __admin = payable(0);
         __adminHasRights = false;
         __fuseAdminHasRights = false;
     }

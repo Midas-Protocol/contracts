@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 pragma experimental ABIEncoderV2;
 
 import "./RewardsDistributorStorage.sol";
@@ -54,11 +54,26 @@ contract RewardsDistributorDelegator is RewardsDistributorDelegatorStorage {
     }
 
 	/**
-     * @dev Delegates execution to an implementation contract.
+     * @dev Delegates the value transfer to an implementation contract.
      * It returns to the external caller whatever the implementation returns
      * or forwards reverts.
      */
     receive() external payable {
+        // TODO determine if call is enough or delegatecall should be used instead
+        (bool success, bytes memory returnData) = payable(implementation).call{value: msg.value}("");
+        assembly {
+            if eq(success, 0) {
+                revert(add(returnData, 0x20), returndatasize())
+            }
+        }
+    }
+
+    /**
+     * @dev Delegates execution to an implementation contract.
+     * It returns to the external caller whatever the implementation returns
+     * or forwards reverts.
+     */
+    fallback() external payable {
         // delegate all other functions to current implementation
         (bool success, ) = implementation.delegatecall(msg.data);
 
