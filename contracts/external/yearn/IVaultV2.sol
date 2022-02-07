@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.7.0;
+pragma solidity ^0.7.0;
 
 interface IVaultV2 {
     function pricePerShare() external view returns (uint);

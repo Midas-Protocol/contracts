@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.7.0;
+pragma solidity ^0.7.0;
 
 abstract contract Keep3rV1Oracle {
     struct Observation {
