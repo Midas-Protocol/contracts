@@ -1,7 +1,7 @@
 import { deployments, ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-import { cERC20Conf, Fuse, SupportedChains } from "../lib/esm/src";
+import { cERC20Conf, Fuse, SupportedChains } from "../dist/esm/src";
 import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { setupTest } from "./utils";

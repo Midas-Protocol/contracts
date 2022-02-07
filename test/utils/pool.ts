@@ -1,5 +1,5 @@
 // pool utilities used across downstream tests
-import { cERC20Conf, Fuse, FusePoolData, SupportedChains, USDPricedFuseAsset } from "../../lib/esm/src";
+import { cERC20Conf, Fuse, FusePoolData, SupportedChains, USDPricedFuseAsset } from "../../dist/esm/src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { providers, utils } from "ethers";
 import { ethers } from "hardhat";
