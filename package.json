@@ -7,15 +7,16 @@
     "access": "public"
   },
   "description": "",
-  "main": "./lib/cjs/src/index.js",
-  "module": "./lib/esm/src/index.js",
+  "main": "./dist/cjs/src/index.js",
+  "module": "./dist/esm/src/index.js",
   "files": [
-    "/lib/",
+    "/dist/",
     "/artifacts",
     "deployments.json"
   ],
   "scripts": {
     "test": "hardhat test",
+    "test:forge": "forge test --hh",
     "export": "hardhat export --export-all ./deployments.json",
     "build": "hardhat compile && npm run build:sdk",
     "build:sdk": "tsc -p tsconfig-sdk.json && tsc -p tsconfig-cjs.json",
