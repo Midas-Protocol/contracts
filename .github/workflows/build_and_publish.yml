@@ -15,11 +15,13 @@ jobs:
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: Install Foundry
         uses: onbjerg/foundry-toolchain@v1
         with:
           version: nightly
-      - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
           node-version: 16.x
