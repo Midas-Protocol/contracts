@@ -6,7 +6,7 @@ import "ds-test/test.sol";
 import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
-import "./FusePoolDirectory.sol";
+import "../contracts/FusePoolDirectory.sol";
 
 contract FusePoolDirectoryTest is DSTest {
   using stdStorage for StdStorage;
