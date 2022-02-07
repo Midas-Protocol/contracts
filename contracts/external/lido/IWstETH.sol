@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity ^0.7.0;
 
 /**
  * @title StETH token wrapper with static balances.

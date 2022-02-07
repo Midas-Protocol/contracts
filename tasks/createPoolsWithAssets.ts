@@ -35,7 +35,7 @@ task("pools:create", "Create pool if does not exist")
   .setAction(async (taskArgs, hre) => {
     const poolModule = await import("../test/utils/pool");
     // @ts-ignore
-    const sdkModule = await import("../lib/esm/src");
+    const sdkModule = await import("../dist/esm/src");
 
     const sdk = new sdkModule.Fuse(hre.ethers.provider, sdkModule.SupportedChains.ganache);
     const account = await hre.ethers.getNamedSigner(taskArgs.creator);
@@ -124,10 +124,10 @@ task("pools:create-unhealthy", "Deposit collateral")
     // Borrow TOUCH with ETH as collateral from bob
     await hre.run("pools:borrow", {
       account: taskArgs.supplyAccount,
-      amount: 20,
+      amount: 10,
       symbol: "TOUCH",
       poolAddress,
     });
 
-    await hre.run("set-price", { token: "ETH", price: "0.1", poolAddress });
+    await hre.run("set-price", { token: "TOUCH", price: "1", poolAddress });
   });

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity ^0.7.0;
 
 interface ICurveLiquidityGaugeV2 {
     function lp_token() external view returns (address);

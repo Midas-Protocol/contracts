@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity ^0.7.0;
 
 abstract contract ComptrollerInterface {
     /// @notice Indicator that this is a Comptroller contract (for inspection)

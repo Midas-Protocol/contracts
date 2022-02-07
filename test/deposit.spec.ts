@@ -3,7 +3,7 @@ import { constants, Contract, providers, utils } from "ethers";
 import { ethers } from "hardhat";
 import { createPool, setupTest } from "./utils";
 import { assetInPool, deployAssets, getAssetsConf, getPoolIndex } from "./utils/pool";
-import { Fuse, SupportedChains, USDPricedFuseAsset } from "../lib/esm/src";
+import { Fuse, SupportedChains, USDPricedFuseAsset } from "../dist/esm/src";
 
 describe("Deposit flow tests", function () {
   this.beforeEach(async () => {

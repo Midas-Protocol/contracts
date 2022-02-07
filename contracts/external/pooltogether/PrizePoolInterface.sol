@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.7.0;
+pragma solidity ^0.7.0;
 
 /// @title Escrows assets and deposits them into a yield source.  Exposes interest to Prize Strategy.  Users deposit and withdraw from this contract to participate in Prize Pool.
 /// @notice Accounting is managed using Controlled Tokens, whose mint and burn functions can only be called by this contract.

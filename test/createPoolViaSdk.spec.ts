@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-import { Fuse, SupportedChains } from "../lib/esm/src";
+import { Fuse, SupportedChains } from "../dist/esm/src";
 import { DeployedAsset, poolAssets } from "./utils/pool";
 import { utils } from "ethers";
 import { setupTest } from "./utils";
