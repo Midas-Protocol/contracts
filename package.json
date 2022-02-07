@@ -16,9 +16,9 @@
   ],
   "scripts": {
     "test": "hardhat test",
-    "test:forge": "forge test --hh",
+    "test:forge": "forge test",
     "export": "hardhat export --export-all ./deployments.json",
-    "build": "hardhat compile && npm run build:sdk",
+    "build": "hardhat compile && npm run build:sdk && forge build",
     "build:sdk": "tsc -p tsconfig-sdk.json && tsc -p tsconfig-cjs.json",
     "clean": "hardhat clean && rm -rf lib"
   },
