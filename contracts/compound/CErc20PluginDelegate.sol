@@ -70,6 +70,10 @@ contract CErc20PluginDelegate is CErc20Delegate {
     return amount;
   }
 
+  /**
+   * @notice Deposit the underlying in the plugin
+   * @param amount Amount of underlying to deposit
+   */
   function deposit(uint256 amount) internal {
     EIP20Interface(underlying).approve(address(plugin), amount);
 
