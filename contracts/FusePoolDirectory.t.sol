@@ -1,4 +1,4 @@
-// pragma solidity ^0.7.6;
+pragma solidity ^0.7.6;
 
 // SPDX-License-Identifier: UNLICENSED
 
@@ -6,7 +6,7 @@ import "ds-test/test.sol";
 import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
-// import "./FusePoolDirectory.sol";
+import "./FusePoolDirectory.sol";
 
 contract FusePoolDirectoryTest is DSTest {
   using stdStorage for StdStorage;
@@ -15,13 +15,16 @@ contract FusePoolDirectoryTest is DSTest {
 
   StdStorage stdstore;
 
-  // FusePoolDirectory fusePoolDirectory;
+  FusePoolDirectory fusePoolDirectory;
 
   function setUp() public {
-    // fusePoolDirectory = new FusePoolDirectory();
+    fusePoolDirectory = new FusePoolDirectory();
   }
 
   function testInitialize() public {
-    // fusePoolDirectory.initialize(true, [address(1), address(2)]);
+    address[] memory addresses = new address[](2); 
+    addresses[0] = address(0); 
+    addresses[1] = address(1);
+    fusePoolDirectory.initialize(true, addresses);
   }
 }
