@@ -50,7 +50,14 @@ contract AutofarmERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    return autofarmStrat.balanceOf(address(this));
+    return autofarmStrat.wantLockedTotal();
+  }
+
+  /// @notice Calculates the total amount of underlying tokens the Vault holds.
+  /// @return The total amount of underlying tokens the Vault holds.
+  function balanceOfUnderlying(address _x) public view returns (uint256) {
+    _x;
+    return autofarmStrat.wantLockedTotal();
   }
 
   /* ========== INTERNAL FUNCTIONS ========== */
