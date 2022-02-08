@@ -6,6 +6,7 @@ import "forge-std/Vm.sol";
 
 import "../contracts/compound/strategies/BeefyERC4626.sol";
 import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
+import {MockERC20} from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
 
 contract BeefyERC4626Test is DSTest {
   using stdStorage for StdStorage;
@@ -17,8 +18,9 @@ contract BeefyERC4626Test is DSTest {
   BeefyERC4626 beefyERC4626;
 
   function setUp() public {
+    ERC20 test = new MockERC20("test", "TST", 18);
     beefyERC4626 = new BeefyERC4626(
-      ERC20(0x0000000000000000000000000000000000000000),
+      test,
       "test",
       "test",
       IBeefyVault(0x0000000000000000000000000000000000000000)
