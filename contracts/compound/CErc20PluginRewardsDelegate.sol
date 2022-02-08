@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./CErc20PluginDelegate.sol";
@@ -8,7 +8,7 @@ contract CErc20PluginRewardsDelegate is CErc20PluginDelegate {
    * @notice Delegate interface to become the implementation
    * @param data The encoded arguments for becoming
    */
-  function _becomeImplementation(bytes calldata data) external {
+  function _becomeImplementation(bytes calldata data) external override {
     require(msg.sender == address(this) || hasAdminRights());
 
     (address _plugin, address _rewardsDistributor, address _rewardToken) = abi.decode(

@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./CErc20Delegate.sol";
@@ -25,7 +25,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @notice Delegate interface to become the implementation
    * @param data The encoded arguments for becoming
    */
-  function _becomeImplementation(bytes calldata data) external {
+  function _becomeImplementation(bytes calldata data) external virtual override {
     require(msg.sender == address(this) || hasAdminRights());
 
     address _plugin = abi.decode(data, (address));
@@ -52,7 +52,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @notice Gets balance of the plugin in terms of the underlying
    * @return The quantity of underlying tokens owned by this contract
    */
-  function getCashPrior() internal view returns (uint256) {
+  function getCashPrior() internal view override returns (uint256) {
     return plugin.balanceOfUnderlying(address(this));
   }
 
@@ -62,7 +62,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @param amount Amount of underlying to transfer
    * @return The actual amount that is transferred
    */
-  function doTransferIn(address from, uint256 amount) internal returns (uint256) {
+  function doTransferIn(address from, uint256 amount) internal override returns (uint256) {
     // Perform the EIP-20 transfer in
     require(EIP20Interface(underlying).transferFrom(from, address(this), amount), "send fail");
 
@@ -85,7 +85,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @param to Address to transfer funds to
    * @param amount Amount of underlying to transfer
    */
-  function doTransferOut(address payable to, uint256 amount) internal {
+  function doTransferOut(address payable to, uint256 amount) internal override {
     plugin.withdraw(address(this), to, amount);
   }
 }
