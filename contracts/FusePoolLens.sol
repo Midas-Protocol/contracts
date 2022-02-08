@@ -25,13 +25,19 @@ import "./oracles/MasterPriceOracle.sol";
 contract FusePoolLens is Initializable {
     using SafeMathUpgradeable for uint256;
 
+
     /**
      * @notice Constructor to set the `FusePoolDirectory` contract object.
      */
-    function initialize(FusePoolDirectory _directory) public initializer {
+    function initialize(FusePoolDirectory _directory, string memory _name, string memory _symbol) public initializer {
         require(address(_directory) != address(0), "FusePoolDirectory instance cannot be the zero address.");
         directory = _directory;
+        name = _name;
+        symbol = _symbol;
     }
+
+    string public name;
+    string public symbol;
 
     /**
      * @notice `FusePoolDirectory` contract object.
@@ -197,8 +203,8 @@ contract FusePoolLens is Initializable {
 
             // Get underlying asset data
             if (cToken.isCEther()) {
-                asset.underlyingName = "Ethereum";
-                asset.underlyingSymbol = "ETH";
+                asset.underlyingName = name;
+                asset.underlyingSymbol = symbol;
                 asset.underlyingDecimals = 18;
                 asset.underlyingBalance = user.balance;
             } else {
