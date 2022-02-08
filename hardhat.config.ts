@@ -35,7 +35,10 @@ const config: HardhatUserConfig = {
         version: "0.8.11",
         settings: {
           optimizer: {
-            enabled: true,
+            // TODO figure out why the compiler throws
+            // CompilerError: Stack too deep when compiling inline assembly: Variable headStart is 1 slot(s) too deep inside the stack
+            // when enabled is true
+            enabled: false,
             runs: 200,
           },
         },
