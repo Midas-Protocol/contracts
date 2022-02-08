@@ -4,7 +4,7 @@ import { ChainDeployConfig } from "./helper";
 export const deployConfig1337: ChainDeployConfig = {
   wtoken: "",
   nativeTokenName: "Ethereum (Local)",
-  nativeTokenSymbol: "LETH",
+  nativeTokenSymbol: "ETH",
 };
 
 export const deploy1337 = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
