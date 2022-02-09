@@ -5,32 +5,30 @@ import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
 import {ERC4626} from "../../utils/ERC4626.sol";
 import {SafeTransferLib} from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
 
-interface IBeefyVault {
-  function deposit(uint256 _amount) external;
+interface IAlpacaVault {
+  /// @notice Return the total ERC20 entitled to the token holders. Be careful of unaccrued interests.
+  function totalToken() external view returns (uint256);
 
-  function withdraw(uint256 _shares) external;
+  /// @notice Add more ERC20 to the bank. Hope to get some good returns.
+  function deposit(uint256 amountToken) external payable;
 
-  function balanceOf(address _account) external view returns (uint256);
-
-  //Returns total balance of underlying token in the vault and its strategies
-  function balance() external view returns (uint256);
-
-  function totalSupply() external view returns (uint256);
+  /// @notice Withdraw ERC20 from the bank by burning the share tokens.
+  function withdraw(uint256 share) external;
 }
 
 /**
- * @title Beefy ERC4626 Contract
- * @notice ERC4626 wrapper for beefy vaults
+ * @title Alpaca Finance ERC4626 Contract
+ * @notice ERC4626 wrapper for Alpaca Finance Vaults
  * @author RedVeil
  *
- * Wraps https://github.com/beefyfinance/beefy-contracts/blob/master/contracts/BIFI/vaults/BeefyVaultV6.sol
+ * Wraps https://github.com/alpaca-finance/bsc-alpaca-contract/blob/main/contracts/6/protocol/Vault.sol
  */
-contract BeefyERC4626 is ERC4626 {
+contract AlpacaERC4626 is ERC4626 {
   using SafeTransferLib for ERC20;
 
   /* ========== STATE VARIABLES ========== */
 
-  IBeefyVault public immutable beefyVault;
+  IAlpacaVault public immutable alpacaVault;
 
   /* ========== CONSTRUCTOR ========== */
 
@@ -39,15 +37,15 @@ contract BeefyERC4626 is ERC4626 {
      @param _asset The ERC20 compliant token the Vault should accept.
      @param _name The name for the vault token.
      @param _symbol The symbol for the vault token.
-     @param _beefyVault The Beefy Vault contract.
+     @param _alpacaVault The Alpaca Vault contract.
     */
   constructor(
     ERC20 _asset,
     string memory _name,
     string memory _symbol,
-    IBeefyVault _beefyVault
+    IAlpacaVault _alpacaVault
   ) ERC4626(_asset, _name, _symbol) {
-    beefyVault = _beefyVault;
+    alpacaVault = _alpacaVault;
   }
 
   /* ========== VIEWS ========== */
@@ -55,11 +53,11 @@ contract BeefyERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    return beefyVault.balanceOf(address(this)).mulDivDown(beefyVault.balance(), beefyVault.totalSupply());
+    return alpacaVault.balanceOf(address(this)).mulDivDown(alpacaVault.totalToken(), alpacaVault.totalSupply());
   }
 
-  /// @notice Calculates the total amount of underlying tokens the account holds.
-  /// @return The total amount of underlying tokens the account holds.
+  /// @notice Calculates the total amount of underlying tokens the user holds.
+  /// @return The total amount of underlying tokens the user holds.
   function balanceOfUnderlying(address account) public view returns (uint256) {
     return balanceOf(account).mulDivDown(totalAssets(), totalSupply());
   }
@@ -67,11 +65,11 @@ contract BeefyERC4626 is ERC4626 {
   /* ========== INTERNAL FUNCTIONS ========== */
 
   function afterDeposit(uint256 amount, uint256) internal override {
-    asset.approve(address(beefyVault), amount);
-    beefyVault.deposit(amount);
+    asset.approve(address(alpacaVault), amount);
+    alpacaVault.deposit(amount);
   }
 
   function beforeWithdraw(uint256, uint256 shares) internal override {
-    beefyVault.withdraw(shares);
+    alpacaVault.withdraw(shares);
   }
 }
