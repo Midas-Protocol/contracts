@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
 import {ERC4626} from "../../utils/ERC4626.sol";
 import {SafeTransferLib} from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
+import {FixedPointMathLib} from "../../utils/FixedPointMathLib.sol";
 
 interface IBeefyVault {
   function deposit(uint256 _amount) external;
@@ -27,6 +28,7 @@ interface IBeefyVault {
  */
 contract BeefyERC4626 is ERC4626 {
   using SafeTransferLib for ERC20;
+  using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
 
@@ -61,7 +63,7 @@ contract BeefyERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the account holds.
   /// @return The total amount of underlying tokens the account holds.
   function balanceOfUnderlying(address account) public view returns (uint256) {
-    return balanceOf(account).mulDivDown(totalAssets(), totalSupply());
+    return this.balanceOf(account).mulDivDown(totalAssets(), this.totalSupply());
   }
 
   /* ========== INTERNAL FUNCTIONS ========== */

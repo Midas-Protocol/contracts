@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
 import {ERC4626} from "../../utils/ERC4626.sol";
 import {SafeTransferLib} from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
+import {FixedPointMathLib} from "../../utils/FixedPointMathLib.sol";
 
 interface IAlpacaVault {
   /// @notice Return the total ERC20 entitled to the token holders. Be careful of unaccrued interests.
@@ -14,6 +15,10 @@ interface IAlpacaVault {
 
   /// @notice Withdraw ERC20 from the bank by burning the share tokens.
   function withdraw(uint256 share) external;
+
+  function totalSupply() external view returns (uint256);
+
+  function balanceOf(address account) external view returns (uint256);
 }
 
 /**
@@ -25,6 +30,7 @@ interface IAlpacaVault {
  */
 contract AlpacaERC4626 is ERC4626 {
   using SafeTransferLib for ERC20;
+  using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
 
@@ -59,7 +65,7 @@ contract AlpacaERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the user holds.
   /// @return The total amount of underlying tokens the user holds.
   function balanceOfUnderlying(address account) public view returns (uint256) {
-    return balanceOf(account).mulDivDown(totalAssets(), totalSupply());
+    return this.balanceOf(account).mulDivDown(totalAssets(), this.totalSupply());
   }
 
   /* ========== INTERNAL FUNCTIONS ========== */
