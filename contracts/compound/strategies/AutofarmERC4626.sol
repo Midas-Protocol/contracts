@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
 import {ERC4626} from "../../utils/ERC4626.sol";
 import {SafeTransferLib} from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
+import {FixedPointMathLib} from "../../utils/FixedPointMathLib.sol";
 
 interface IAutofarmV2 {
   function deposit(uint256 _pid, uint256 _wantAmt) external returns (uint256);
@@ -24,6 +25,7 @@ interface IAutofarmV2 {
  */
 contract AutofarmERC4626 is ERC4626 {
   using SafeTransferLib for ERC20;
+  using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
   uint256 public immutable poolId;
@@ -60,7 +62,7 @@ contract AutofarmERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the user holds.
   /// @return The total amount of underlying tokens the user holds.
   function balanceOfUnderlying(address account) public view returns (uint256) {
-    return balanceOf(account).mulDivDown(totalAssets(), totalSupply());
+    return this.balanceOf(account).mulDivDown(totalAssets(), this.totalSupply());
   }
 
   /* ========== INTERNAL FUNCTIONS ========== */
