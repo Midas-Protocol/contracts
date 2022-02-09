@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
+pragma solidity 0.8.10;
 
 import "ds-test/test.sol";
 import "forge-std/stdlib.sol";
@@ -19,12 +20,7 @@ contract BeefyERC4626Test is DSTest {
 
   function setUp() public {
     ERC20 test = new MockERC20("test", "TST", 18);
-    beefyERC4626 = new BeefyERC4626(
-      test,
-      "test",
-      "test",
-      IBeefyVault(0x0000000000000000000000000000000000000000)
-    );
+    beefyERC4626 = new BeefyERC4626(test, "test", "test", IBeefyVault(0x0000000000000000000000000000000000000000));
   }
 
   function testName() public {
