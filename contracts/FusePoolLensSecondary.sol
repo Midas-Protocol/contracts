@@ -3,7 +3,6 @@ pragma solidity >=0.8.0;
 pragma abicoder v2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "./external/compound/IComptroller.sol";
@@ -22,8 +21,6 @@ import "./oracles/MasterPriceOracle.sol";
  * @notice FusePoolLensSecondary returns data on Fuse interest rate pools in mass for viewing by dApps, bots, etc.
  */
 contract FusePoolLensSecondary is Initializable {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @notice Constructor to set the `FusePoolDirectory` contract object.
      */
@@ -179,11 +176,11 @@ contract FusePoolLensSecondary is Initializable {
         // Pre-compute a conversion factor from tokens -> ether (normalized price value)
         if (!isBorrow) {
             (, uint256 collateralFactorMantissa) = comptroller.markets(address(cTokenModify));
-            conversionFactor = collateralFactorMantissa.mul(conversionFactor).div(1e18);
+            conversionFactor = (collateralFactorMantissa * conversionFactor) / 1e18;
         }
 
         // Get max borrow or redeem considering excess account liquidity
-        return liquidity.mul(1e18).div(conversionFactor);
+        return (liquidity * 1e18) / conversionFactor;
     }
 
     /**
@@ -248,12 +245,12 @@ contract FusePoolLensSecondary is Initializable {
         // Get unaccrued supply rewards
         uint256 compAccruedPrior = distributor.compAccrued(holder);
         distributor.flywheelPreSupplierAction(address(cToken), holder);
-        uint256 supplyRewardsUnaccrued = distributor.compAccrued(holder).sub(compAccruedPrior);
+        uint256 supplyRewardsUnaccrued = distributor.compAccrued(holder) - compAccruedPrior;
 
         // Get unaccrued borrow rewards
         compAccruedPrior = distributor.compAccrued(holder);
         distributor.flywheelPreBorrowerAction(address(cToken), holder);
-        uint256 borrowRewardsUnaccrued = distributor.compAccrued(holder).sub(compAccruedPrior);
+        uint256 borrowRewardsUnaccrued = distributor.compAccrued(holder) - compAccruedPrior;
 
         // Return both
         return (supplyRewardsUnaccrued, borrowRewardsUnaccrued);

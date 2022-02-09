@@ -3,7 +3,6 @@ pragma solidity >=0.8.0;
 pragma abicoder v2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "./external/compound/IComptroller.sol";
@@ -23,8 +22,6 @@ import "./oracles/MasterPriceOracle.sol";
  * @notice FusePoolLens returns data on Fuse interest rate pools in mass for viewing by dApps, bots, etc.
  */
 contract FusePoolLens is Initializable {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @notice Constructor to set the `FusePoolDirectory` contract object.
      */
@@ -118,10 +115,10 @@ contract FusePoolLens is Initializable {
             (bool isListed, ) = comptroller.markets(address(cToken));
             if (!isListed) continue;
             uint256 assetTotalBorrow = cToken.totalBorrowsCurrent();
-            uint256 assetTotalSupply = cToken.getCash().add(assetTotalBorrow).sub(cToken.totalReserves().add(cToken.totalAdminFees()).add(cToken.totalFuseFees()));
+            uint256 assetTotalSupply = cToken.getCash() + assetTotalBorrow - (cToken.totalReserves() + cToken.totalAdminFees() + cToken.totalFuseFees());
             uint256 underlyingPrice = oracle.getUnderlyingPrice(cToken);
-            totalBorrow = totalBorrow.add(assetTotalBorrow.mul(underlyingPrice).div(1e18));
-            totalSupply = totalSupply.add(assetTotalSupply.mul(underlyingPrice).div(1e18));
+            totalBorrow = totalBorrow + (assetTotalBorrow * underlyingPrice) / 1e18;
+            totalSupply = totalSupply + (assetTotalSupply * underlyingPrice) / 1e18;
 
             if (cToken.isCEther()) {
                 underlyingTokens[i] = address(0);
@@ -214,7 +211,7 @@ contract FusePoolLens is Initializable {
             asset.borrowRatePerBlock = cToken.borrowRatePerBlock();
             asset.liquidity = cToken.getCash();
             asset.totalBorrow = cToken.totalBorrowsCurrent();
-            asset.totalSupply = asset.liquidity.add(asset.totalBorrow).sub(cToken.totalReserves().add(cToken.totalAdminFees()).add(cToken.totalFuseFees()));
+            asset.totalSupply = asset.liquidity + asset.totalBorrow - (cToken.totalReserves() + cToken.totalAdminFees() + cToken.totalFuseFees());
             asset.supplyBalance = cToken.balanceOfUnderlying(user);
             asset.borrowBalance = cToken.borrowBalanceStored(user); // We would use borrowBalanceCurrent but we already accrue interest above
             asset.membership = comptroller.checkMembership(user, cToken);
@@ -315,11 +312,11 @@ contract FusePoolLens is Initializable {
             FusePoolAsset[] memory assets = getPoolAssetsWithData(comptroller, comptroller.getAssetsIn(users[i]), users[i]);
 
             for (uint256 j = 0; j < assets.length; j++) {
-                totalBorrow = totalBorrow.add(assets[j].borrowBalance.mul(assets[j].underlyingPrice).div(1e18));
-                if (assets[j].membership) totalCollateral = totalCollateral.add(assets[j].supplyBalance.mul(assets[j].underlyingPrice).div(1e18).mul(assets[j].collateralFactor).div(1e18));
+                totalBorrow = totalBorrow + (assets[j].borrowBalance * assets[j].underlyingPrice) / 1e18;
+                if (assets[j].membership) totalCollateral = totalCollateral + (((assets[j].supplyBalance * assets[j].underlyingPrice) / 1e18) * assets[j].collateralFactor) / 1e18;
             }
 
-            uint256 health = totalBorrow > 0 ? totalCollateral.mul(1e18).div(totalBorrow) : 1e36;
+            uint256 health = totalBorrow > 0 ? (totalCollateral * 1e18) / totalBorrow : 1e36;
             if (health <= maxHealth) arrayLength++;
         }
 
@@ -332,11 +329,11 @@ contract FusePoolLens is Initializable {
             FusePoolAsset[] memory assets = getPoolAssetsWithData(comptroller, comptroller.getAssetsIn(users[i]), users[i]);
 
             for (uint256 j = 0; j < assets.length; j++) {
-                totalBorrow = totalBorrow.add(assets[j].borrowBalance.mul(assets[j].underlyingPrice).div(1e18));
-                if (assets[j].membership) totalCollateral = totalCollateral.add(assets[j].supplyBalance.mul(assets[j].underlyingPrice).div(1e18).mul(assets[j].collateralFactor).div(1e18));
+                totalBorrow = totalBorrow + (assets[j].borrowBalance * assets[j].underlyingPrice) / 1e18;
+                if (assets[j].membership) totalCollateral = totalCollateral + (((assets[j].supplyBalance * assets[j].underlyingPrice) / 1e18) * assets[j].collateralFactor) / 1e18;
             }
 
-            uint256 health = totalBorrow > 0 ? totalCollateral.mul(1e18).div(totalBorrow) : 1e36;
+            uint256 health = totalBorrow > 0 ? (totalCollateral * 1e18) / totalBorrow : 1e36;
             if (health > maxHealth) continue;
             detailedUsers[index] = FusePoolUser(users[i], totalBorrow, totalCollateral, health, assets);
             index++;
@@ -466,8 +463,8 @@ contract FusePoolLens is Initializable {
 
         for (uint256 i = 0; i < pools.length; i++) {
             try this.getPoolUserSummary(IComptroller(pools[i].comptroller), account) returns (uint256 poolSupplyBalance, uint256 poolBorrowBalance) {
-                supplyBalance = supplyBalance.add(poolSupplyBalance);
-                borrowBalance = borrowBalance.add(poolBorrowBalance);
+                supplyBalance = supplyBalance + poolSupplyBalance;
+                borrowBalance = borrowBalance + poolBorrowBalance;
             } catch {
                 errors = true;
             }
@@ -496,8 +493,8 @@ contract FusePoolLens is Initializable {
             uint256 assetSupplyBalance = cToken.balanceOfUnderlying(account);
             uint256 assetBorrowBalance = cToken.borrowBalanceStored(account); // We would use borrowBalanceCurrent but we already accrue interest above
             uint256 underlyingPrice = oracle.getUnderlyingPrice(cToken);
-            borrowBalance = borrowBalance.add(assetBorrowBalance.mul(underlyingPrice).div(1e18));
-            supplyBalance = supplyBalance.add(assetSupplyBalance.mul(underlyingPrice).div(1e18));
+            borrowBalance = borrowBalance + (assetBorrowBalance * underlyingPrice) / 1e18;
+            supplyBalance = supplyBalance + (assetSupplyBalance * underlyingPrice) / 1e18;
         }
 
         return (supplyBalance, borrowBalance);

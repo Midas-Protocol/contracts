@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -22,8 +21,6 @@ import "../BasePriceOracle.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract Keep3rPriceOracle is IPriceOracle, BasePriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @dev Constructor that sets the Keep3rV1Oracle or SushiswapV1Oracle.
      */
@@ -140,7 +137,7 @@ contract Keep3rPriceOracle is IPriceOracle, BasePriceOracle {
 
         // Get price, format, and return
         uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
-        return _price(underlying).mul(1e18).div(baseUnit);
+        return (_price(underlying) * 1e18) / baseUnit;
     }
     
     /**
@@ -153,7 +150,7 @@ contract Keep3rPriceOracle is IPriceOracle, BasePriceOracle {
         // Call Keep3r for ERC20/ETH price and return
         address pair = uniswapV2Factory.getPair(underlying, WETH_ADDRESS);
         uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
-        return (underlying < WETH_ADDRESS ? price0TWAP(pair) : price1TWAP(pair)).div(2 ** 56).mul(baseUnit).div(2 ** 56); // Scaled by 1e18, not 2 ** 112
+        return (((underlying < WETH_ADDRESS ? price0TWAP(pair) : price1TWAP(pair)) / (2 ** 56)) * baseUnit) / (2 ** 56); // Scaled by 1e18, not 2 ** 112
     }
 
     /**

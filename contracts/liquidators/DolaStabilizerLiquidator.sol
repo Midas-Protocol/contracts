@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
@@ -15,7 +14,6 @@ import "./IRedemptionStrategy.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract DolaStabilizerLiquidator is IRedemptionStrategy {
-    using SafeMathUpgradeable for uint256;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     /**
@@ -58,7 +56,7 @@ contract DolaStabilizerLiquidator is IRedemptionStrategy {
 
         if (address(inputToken) == reserve) {
             // Buy DOLA with DAI
-            outputAmount = inputAmount.mul(FEE_DENOMINATOR).div(FEE_DENOMINATOR.add(STABILIZER.buyFee()));
+            outputAmount = (inputAmount * FEE_DENOMINATOR) / (FEE_DENOMINATOR + STABILIZER.buyFee());
             STABILIZER.buy(outputAmount);
             outputToken = IERC20Upgradeable(synth);
         } else if (address(inputToken) == synth) {

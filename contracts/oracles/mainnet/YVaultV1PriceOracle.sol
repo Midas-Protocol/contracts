@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
 import "../../external/compound/ICErc20.sol";
@@ -17,8 +16,6 @@ import "../BasePriceOracle.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract YVaultV1PriceOracle is IPriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @notice Returns the price in ETH of the token underlying `cToken`.
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
@@ -36,6 +33,6 @@ contract YVaultV1PriceOracle is IPriceOracle {
         // `underlyingPrice` = token/ETH scaled by 1e18
         // Return value = `pricePerShare` * `underlyingPrice` / 1e(yVault decimals)
         uint256 baseUnit = 10 ** uint256(yVault.decimals());
-        return yVault.getPricePerFullShare().mul(underlyingPrice).div(baseUnit); // getPricePerFullShare is scaled by 1e18
+        return (yVault.getPricePerFullShare() * underlyingPrice) / baseUnit; // getPricePerFullShare is scaled by 1e18
     }
 }

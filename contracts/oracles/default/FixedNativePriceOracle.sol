@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -17,8 +16,6 @@ import "../BasePriceOracle.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract FixedNativePriceOracle is IPriceOracle, BasePriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @dev Returns the price in native token of `underlying` (implements `BasePriceOracle`).
      */
@@ -36,6 +33,6 @@ contract FixedNativePriceOracle is IPriceOracle, BasePriceOracle {
         address underlying = ICErc20(address(cToken)).underlying();
 
         // Format and return price
-        return uint256(1e36).div(10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return uint256(1e36) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
     }
 }

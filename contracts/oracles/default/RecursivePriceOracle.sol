@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
 import "../../external/compound/ICToken.sol";
@@ -15,7 +14,6 @@ import "../../external/compound/IComptroller.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract RecursivePriceOracle is IPriceOracle {
-    using SafeMathUpgradeable for uint256;
     /**
      * @notice Returns the price in ETH of the token underlying `cToken`.
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
@@ -34,7 +32,7 @@ contract RecursivePriceOracle is IPriceOracle {
         }
 
         // Fuse cTokens: cToken/token price * token/ETH price = cToken/ETH price
-        return underlying.exchangeRateStored().mul(comptroller.oracle().getUnderlyingPrice(underlying)).div(1e18);
+        return (underlying.exchangeRateStored() * comptroller.oracle().getUnderlyingPrice(underlying)) / 1e18;
     }
 
 }

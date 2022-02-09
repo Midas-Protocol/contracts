@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -19,8 +18,6 @@ import "../BasePriceOracle.sol";
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
 contract GelatoGUniPriceOracle is IPriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @dev WETH contract address.
      */
@@ -44,7 +41,7 @@ contract GelatoGUniPriceOracle is IPriceOracle {
         address underlying = ICErc20(address(cToken)).underlying();
         // Comptroller needs prices to be scaled by 1e(36 - decimals)
         // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-        return _price(underlying).mul(1e18).div(10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
     }
 
     /**
@@ -79,14 +76,14 @@ contract GelatoGUniPriceOracle is IPriceOracle {
         // = sqrt((p0 * 10^dec1) / (p1 * 10^dec0)) * 2^96
         // = sqrt((p0 * 10^dec1) / (p1 * 10^dec0)) * 2^48 * 2^48
         // = sqrt((p0 * 10^dec1 * 2^96) / (p1 * 10^dec0)) * 2^48
-        uint160 sqrtPriceX96 = toUint160(sqrt(p0.mul(10 ** dec1).mul(1 << 96).div(p1.mul(10 ** dec0))) << 48);
+        uint160 sqrtPriceX96 = toUint160(sqrt((p0 * (10 ** dec1) * (1 << 96)) / (p1 * (10 ** dec0))) << 48);
 
         // Get balances of the tokens in the pool given fair underlying token prices
         (uint256 r0, uint256 r1) = pool.getUnderlyingBalancesAtPrice(sqrtPriceX96);
         require(r0 > 0 || r1 > 0, "G-UNI underlying token balances not both greater than 0.");
 
         // Add the total value of each token together and divide by the totalSupply to get the unit price
-        return p0.mul(r0.mul(to18Dec0)).add(p1.mul(r1.mul(to18Dec1))).div(ERC20Upgradeable(token).totalSupply());
+        return (p0 * r0 * to18Dec0 + p1 * r1 * to18Dec1) / ERC20Upgradeable(token).totalSupply();
     }
 
     /**

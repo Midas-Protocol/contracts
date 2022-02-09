@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -22,8 +21,6 @@ import "../BasePriceOracle.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract BadgerPriceOracle is IPriceOracle, BasePriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @dev BADGER/ETH Chainlink price feed.
      */
@@ -72,7 +69,7 @@ contract BadgerPriceOracle is IPriceOracle, BasePriceOracle {
         address underlying = ICErc20(address(cToken)).underlying();
         // Comptroller needs prices to be scaled by 1e(36 - decimals)
         // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-        return _price(underlying).mul(1e18).div(10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
     }
 
     /**
@@ -82,7 +79,7 @@ contract BadgerPriceOracle is IPriceOracle, BasePriceOracle {
         if (token == address(BBADGER)) {
             (uint80 roundId, int256 badgerEthPrice, , , uint80 answeredInRound) = BADGER_ETH_FEED.latestRoundData();
             require(answeredInRound == roundId, "Chainlink round timed out.");
-            return badgerEthPrice > 0 ? uint256(badgerEthPrice).mul(BBADGER.getPricePerFullShare()).div(1e18) : 0;
+            return badgerEthPrice > 0 ? (uint256(badgerEthPrice) * BBADGER.getPricePerFullShare()) / 1e18 : 0;
         } else if (token == address(BDIGG)) {
             (uint80 roundId, int256 diggBtcPrice, , , uint80 answeredInRound) = DIGG_BTC_FEED.latestRoundData();
             require(answeredInRound == roundId, "Chainlink round timed out.");
@@ -91,14 +88,15 @@ contract BadgerPriceOracle is IPriceOracle, BasePriceOracle {
             (roundId, btcEthPrice, , , answeredInRound) = BTC_ETH_FEED.latestRoundData();
             require(answeredInRound == roundId, "Chainlink round timed out.");
             if (btcEthPrice < 0) return 0;
-            uint256 bDiggDiggPrice = IDigg(BDIGG.token()).sharesToFragments(BDIGG.shares().div(BDIGG.totalSupply()).mul(1e18));
+            // SafeMath removal refactoring: multiplication before division for higher precision
+            uint256 bDiggDiggPrice = IDigg(BDIGG.token()).sharesToFragments((BDIGG.shares() * 1e18) / BDIGG.totalSupply());
             // bDIGG/ETH price = (bDIGG/DIGG price / 1e9) * (DIGG/BTC price / 1e8) * BTC/ETH price
             // Divide by BTC base unit 1e8 (BTC has 8 decimals) and DIGG base unit 1e9 (DIGG has 9 decimals)
-            return bDiggDiggPrice > 0 ? uint256(diggBtcPrice).mul(uint256(btcEthPrice)).div(1e8).mul(bDiggDiggPrice).div(1e9) : 0;
+            return bDiggDiggPrice > 0 ? ((((uint256(diggBtcPrice) * uint256(btcEthPrice)) / 1e8) * bDiggDiggPrice) / 1e9) : 0;
         } else if (token == address(IBBTC)) {
             (uint80 roundId, int256 btcEthPrice, , , uint80 answeredInRound) = BTC_ETH_FEED.latestRoundData();
             require(answeredInRound == roundId, "Chainlink round timed out.");
-            return btcEthPrice > 0 ? uint256(btcEthPrice).mul(IBBTC.pricePerShare()).div(1e18) : 0;
+            return btcEthPrice > 0 ? (uint256(btcEthPrice) * IBBTC.pricePerShare()) / 1e18 : 0;
         } else revert("Invalid token address passed to BadgerPriceOracle.");
     }
 }
