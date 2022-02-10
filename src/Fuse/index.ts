@@ -149,10 +149,10 @@ export default class Fuse {
   }
 
   // TODO: probably should determine this by chain
-  async getEthUsdPriceBN(asBigNumber: boolean = false): Promise<number | BigNumber> {
+  async getUsdPriceBN(coingeckoId: string = 'ethereum', asBigNumber: boolean = false): Promise<number | BigNumber> {
     // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
-    const UsdPrice = (await axios.get("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=ethereum"))
-      .data.ethereum.usd;
+    const UsdPrice = (await axios.get(`https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=${coingeckoId}`))
+      .data[coingeckoId].usd;
 
     if (asBigNumber) {
       return utils.parseUnits(UsdPrice.toString(), 18);
@@ -1001,7 +1001,7 @@ export default class Fuse {
     return irmName;
   };
 
-  fetchFusePoolData = async (poolId: string | undefined, address?: string): Promise<FusePoolData | undefined> => {
+  fetchFusePoolData = async (poolId: string | undefined, address?: string, coingeckoId?: string): Promise<FusePoolData | undefined> => {
     if (!poolId) return undefined;
 
     const {
@@ -1026,9 +1026,9 @@ export default class Fuse {
     let totalSuppliedUSD = 0;
     let totalBorrowedUSD = 0;
 
-    const ethPrice: number = utils.formatEther(
+    const price: number = utils.formatEther(
       // prefer rari because it has caching
-      await this.getEthUsdPriceBN(true)
+      await this.getUsdPriceBN(coingeckoId, true)
     ) as any;
 
     const promises: Promise<boolean>[] = [];
@@ -1053,26 +1053,20 @@ export default class Fuse {
           .then((isPaused: boolean) => (asset.isSupplyPaused = isPaused))
       );
 
-      asset.supplyBalanceUSD =
-        asset.supplyBalance.mul(asset.underlyingPrice).div(BigNumber.from(10).pow(36)).toNumber() * ethPrice;
+      asset.supplyBalanceUSD = Number(utils.formatUnits(asset.supplyBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
 
-      asset.borrowBalanceUSD =
-        asset.borrowBalance.mul(asset.underlyingPrice).div(BigNumber.from(10).pow(36)).toNumber() * ethPrice;
+      asset.borrowBalanceUSD = Number(utils.formatUnits(asset.borrowBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
 
       totalSupplyBalanceUSD += asset.supplyBalanceUSD;
       totalBorrowBalanceUSD += asset.borrowBalanceUSD;
 
-      asset.totalSupplyUSD =
-        asset.totalSupply.mul(asset.underlyingPrice).div(BigNumber.from(10).pow(36)).toNumber() * ethPrice;
-
-      asset.totalBorrowUSD =
-        asset.totalBorrow.mul(asset.underlyingPrice).div(BigNumber.from(10).pow(36)).toNumber() * ethPrice;
+      asset.totalSupplyUSD = Number(utils.formatUnits(asset.totalSupply)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+      asset.totalBorrowUSD = Number(utils.formatUnits(asset.totalBorrow)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
 
       totalSuppliedUSD += asset.totalSupplyUSD;
       totalBorrowedUSD += asset.totalBorrowUSD;
 
-      asset.liquidityUSD =
-        asset.liquidity.mul(asset.underlyingPrice).div(BigNumber.from(10).pow(36)).toNumber() * ethPrice;
+      asset.liquidityUSD = Number(utils.formatUnits(asset.liquidity)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
 
       totalLiquidityUSD += asset.liquidityUSD;
     }
