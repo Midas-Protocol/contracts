@@ -3,6 +3,6 @@
 set -e
 
 ./wait-for-hh.sh
-sleep 120
+sleep 30
 
 pm2-runtime ecosystem.config.js --env development
