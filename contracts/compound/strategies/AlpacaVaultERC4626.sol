@@ -65,7 +65,7 @@ contract AlpacaERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the user holds.
   /// @return The total amount of underlying tokens the user holds.
   function balanceOfUnderlying(address account) public view returns (uint256) {
-    return this.balanceOf(account).mulDivDown(totalAssets(), this.totalSupply());
+    return this.balanceOf(account).mulDivDown(totalAssets(), totalSupply);
   }
 
   /* ========== INTERNAL FUNCTIONS ========== */
