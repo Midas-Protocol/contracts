@@ -7,9 +7,9 @@ import {SafeTransferLib} from "@rari-capital/solmate/src/utils/SafeTransferLib.s
 import {FixedPointMathLib} from "../../utils/FixedPointMathLib.sol";
 
 interface IAutofarmV2 {
-  function deposit(uint256 _pid, uint256 _wantAmt) external returns (uint256);
+  function deposit(uint256 _pid, uint256 _wantAmt) external;
 
-  function withdraw(uint256 _pid, uint256 _wantAmt) external returns (uint256);
+  function withdraw(uint256 _pid, uint256 _wantAmt) external;
 
   //Returns underlying balance in strategies
   function stakedWantTokens(uint256 _pid, address _user) external view returns (uint256);
