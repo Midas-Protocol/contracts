@@ -92,7 +92,13 @@ contract BadgerPriceOracle is IPriceOracle, BasePriceOracle {
             uint256 bDiggDiggPrice = IDigg(BDIGG.token()).sharesToFragments((BDIGG.shares() * 1e18) / BDIGG.totalSupply());
             // bDIGG/ETH price = (bDIGG/DIGG price / 1e9) * (DIGG/BTC price / 1e8) * BTC/ETH price
             // Divide by BTC base unit 1e8 (BTC has 8 decimals) and DIGG base unit 1e9 (DIGG has 9 decimals)
-            return bDiggDiggPrice > 0 ? ((((uint256(diggBtcPrice) * uint256(btcEthPrice)) / 1e8) * bDiggDiggPrice) / 1e9) : 0;
+            return bDiggDiggPrice > 0 ?
+                (
+                    (
+                        (uint256(diggBtcPrice) * uint256(btcEthPrice)) / 1e8
+                    ) * bDiggDiggPrice
+                ) / 1e9
+                : 0;
         } else if (token == address(IBBTC)) {
             (uint80 roundId, int256 btcEthPrice, , , uint80 answeredInRound) = BTC_ETH_FEED.latestRoundData();
             require(answeredInRound == roundId, "Chainlink round timed out.");

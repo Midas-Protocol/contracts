@@ -76,7 +76,14 @@ contract GelatoGUniPriceOracle is IPriceOracle {
         // = sqrt((p0 * 10^dec1) / (p1 * 10^dec0)) * 2^96
         // = sqrt((p0 * 10^dec1) / (p1 * 10^dec0)) * 2^48 * 2^48
         // = sqrt((p0 * 10^dec1 * 2^96) / (p1 * 10^dec0)) * 2^48
-        uint160 sqrtPriceX96 = toUint160(sqrt((p0 * (10 ** dec1) * (1 << 96)) / (p1 * (10 ** dec0))) << 48);
+        uint160 sqrtPriceX96 =
+            toUint160(
+                sqrt(
+                    (
+                        p0 * (10 ** dec1) * (1 << 96)
+                    ) / (p1 * (10 ** dec0))
+                ) << 48
+            );
 
         // Get balances of the tokens in the pool given fair underlying token prices
         (uint256 r0, uint256 r1) = pool.getUnderlyingBalancesAtPrice(sqrtPriceX96);

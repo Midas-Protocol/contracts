@@ -313,7 +313,14 @@ contract FusePoolLens is Initializable {
 
             for (uint256 j = 0; j < assets.length; j++) {
                 totalBorrow = totalBorrow + (assets[j].borrowBalance * assets[j].underlyingPrice) / 1e18;
-                if (assets[j].membership) totalCollateral = totalCollateral + (((assets[j].supplyBalance * assets[j].underlyingPrice) / 1e18) * assets[j].collateralFactor) / 1e18;
+                if (assets[j].membership) {
+                    totalCollateral = totalCollateral +
+                        (
+                            (
+                                (assets[j].supplyBalance * assets[j].underlyingPrice) / 1e18
+                            ) * assets[j].collateralFactor
+                        ) / 1e18;
+                }
             }
 
             uint256 health = totalBorrow > 0 ? (totalCollateral * 1e18) / totalBorrow : 1e36;
@@ -330,7 +337,14 @@ contract FusePoolLens is Initializable {
 
             for (uint256 j = 0; j < assets.length; j++) {
                 totalBorrow = totalBorrow + (assets[j].borrowBalance * assets[j].underlyingPrice) / 1e18;
-                if (assets[j].membership) totalCollateral = totalCollateral + (((assets[j].supplyBalance * assets[j].underlyingPrice) / 1e18) * assets[j].collateralFactor) / 1e18;
+                if (assets[j].membership) {
+                    totalCollateral = totalCollateral +
+                        (
+                            (
+                                (assets[j].supplyBalance * assets[j].underlyingPrice) / 1e18
+                            ) * assets[j].collateralFactor
+                        ) / 1e18;
+                }
             }
 
             uint256 health = totalBorrow > 0 ? (totalCollateral * 1e18) / totalBorrow : 1e36;

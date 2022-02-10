@@ -104,7 +104,11 @@ contract UniswapTwapPriceOracleV2Root {
         // Return ERC20/ETH TWAP
         address pair = IUniswapV2Factory(factory).getPair(underlying, baseToken);
         uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
-        return (((underlying < baseToken ? price0TWAP(pair) : price1TWAP(pair)) / (2 ** 56)) * baseUnit) / (2 ** 56); // Scaled by 1e18, not 2 ** 112
+        return  (
+                    (
+                        (underlying < baseToken ? price0TWAP(pair) : price1TWAP(pair)) / (2 ** 56)
+                    ) * baseUnit
+                ) / (2 ** 56); // Scaled by 1e18, not 2 ** 112
     }
 
     /**
@@ -169,7 +173,11 @@ contract UniswapTwapPriceOracleV2Root {
         uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
 
         // Get TWAP price
-        uint256 twapPrice = (((useToken0Price ? price0TWAP(pair) : price1TWAP(pair)) / (2 ** 56)) * baseUnit) / (2 ** 56); // Scaled by 1e18, not 2 ** 112
+        uint256 twapPrice = (
+                                (
+                                    (useToken0Price ? price0TWAP(pair) : price1TWAP(pair)) / (2 ** 56)
+                                ) * baseUnit
+                            ) / (2 ** 56); // Scaled by 1e18, not 2 ** 112
     
         // Get spot price
         (uint reserve0, uint reserve1, ) = IUniswapV2Pair(pair).getReserves();

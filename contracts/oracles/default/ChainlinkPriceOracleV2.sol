@@ -130,7 +130,11 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
             (, int256 nativeTokenUsdPrice, , , ) = NATIVE_TOKEN_USD_PRICE_FEED.latestRoundData();
             if (nativeTokenUsdPrice <= 0) return 0;
             (, int256 tokenUsdPrice, , , ) = feed.latestRoundData();
-            return tokenUsdPrice >= 0 ? ((uint256(tokenUsdPrice) * 1e26) / (10 ** uint256(feed.decimals()))) / uint256(nativeTokenUsdPrice) : 0;
+            return tokenUsdPrice >= 0 ?
+                (
+                    (uint256(tokenUsdPrice) * 1e26) / (10 ** uint256(feed.decimals()))
+                ) / uint256(nativeTokenUsdPrice)
+                : 0;
         }
     }
 
@@ -158,6 +162,8 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
 
         // Format and return price
         uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
-        return underlyingDecimals <= 18 ? uint256(chainlinkPrice) * (10 ** (18 - underlyingDecimals)) : uint256(chainlinkPrice) / (10 ** (underlyingDecimals - 18));
+        return underlyingDecimals <= 18 ?
+            uint256(chainlinkPrice) * (10 ** (18 - underlyingDecimals))
+            : uint256(chainlinkPrice) / (10 ** (underlyingDecimals - 18));
     }
 }

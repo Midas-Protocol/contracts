@@ -69,7 +69,11 @@ contract UniswapLpTokenPriceOracle is IPriceOracle {
 
         // Implementation from https://github.com/AlphaFinanceLab/homora-v2/blob/e643392d582c81f6695136971cff4b685dcd2859/contracts/oracle/UniswapV2Oracle.sol#L18
         uint256 sqrtK = (sqrt(reserve0 * reserve1) * (2 ** 112)) / totalSupply;
-        return (((sqrtK * 2 * sqrt(token0FairPrice)) / (2 ** 56)) * sqrt(token1FairPrice)) / (2 ** 56);
+        return  (
+                    (
+                        (sqrtK * 2 * sqrt(token0FairPrice)) / (2 ** 56)
+                    ) * sqrt(token1FairPrice)
+                ) / (2 ** 56);
     }
 
     /**

@@ -82,7 +82,17 @@ contract MStablePriceOracle is IPriceOracle, BasePriceOracle {
     function getMAssetEthPrice(IMasset mAsset) internal view returns (uint256) {
         (IMasset.BassetPersonal[] memory bAssetPersonal, IMasset.BassetData[] memory bAssetData) = mAsset.getBassets();
         uint256 underlyingValueInEthScaled = 0;
-        for (uint256 i = 0; i < bAssetData.length; i++) underlyingValueInEthScaled = underlyingValueInEthScaled + (((uint256(bAssetData[i].vaultBalance) * uint256(bAssetData[i].ratio)) / 1e8) * BasePriceOracle(msg.sender).price(bAssetPersonal[i].addr));
+        for (uint256 i = 0; i < bAssetData.length; i++) {
+            underlyingValueInEthScaled =
+                underlyingValueInEthScaled +
+                (
+                    (
+                        (
+                            uint256(bAssetData[i].vaultBalance) * uint256(bAssetData[i].ratio)
+                        ) / 1e8
+                    ) * BasePriceOracle(msg.sender).price(bAssetPersonal[i].addr)
+                );
+        }
         return underlyingValueInEthScaled / ERC20Upgradeable(address(mAsset)).totalSupply();
     }
 }
