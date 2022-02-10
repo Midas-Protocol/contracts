@@ -1,12 +1,20 @@
 import { constants, providers } from "ethers";
 import { DeployFunction } from "hardhat-deploy/types";
-import { deploy1337, deploy97 } from "../chainDeploy";
+import { chainDeployConfig, deploy1337, deploy97 } from "../chainDeploy";
+import { ChainDeployConfig } from "../chainDeploy/helper";
 
 export const SALT = "ilovemidas";
 
 const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
+  const chainId = await getChainId();
   const { deployer, alice, bob } = await getNamedAccounts();
   console.log("deployer: ", deployer);
+
+  const chainDeployParams: ChainDeployConfig = chainDeployConfig[chainId];
+  console.log('chainDeployParams: ', chainDeployParams);
+  if (!chainDeployConfig) {
+    throw new Error(`Config invalid for ${chainId}`);
+  }
 
   ////
   //// COMPOUND CORE CONTRACTS
@@ -131,11 +139,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     console.log("FuseFeeDistributor already initialized");
   }
 
-  tx = await fuseFeeDistributor._setPoolLimits(
-    10,
-    ethers.constants.MaxUint256,
-    ethers.constants.MaxUint256
-  );
+  tx = await fuseFeeDistributor._setPoolLimits(10, ethers.constants.MaxUint256, ethers.constants.MaxUint256);
   await tx.wait();
   console.log("FuseFeeDistributor pool limits set", tx.hash);
 
@@ -158,7 +162,11 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   const fusePoolLens = await ethers.getContract("FusePoolLens", deployer);
   let directory = await fusePoolLens.directory();
   if (directory === constants.AddressZero) {
-    tx = await fusePoolLens.initialize(fusePoolDirectory.address);
+    tx = await fusePoolLens.initialize(
+      fusePoolDirectory.address,
+      chainDeployParams.nativeTokenName,
+      chainDeployParams.nativeTokenSymbol
+    );
     await tx.wait();
     console.log("FusePoolLens initialized", tx.hash);
   } else {
@@ -229,7 +237,6 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
 
   ////
   //// CHAIN SPECIFIC DEPLOYMENT
-  const chainId = await getChainId();
   console.log("Running deployment for chain: ", chainId);
   if (chainId === "1337") {
     await deploy1337({ ethers, getNamedAccounts, deployments });
