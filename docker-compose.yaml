@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  hardhat:
+    image: contracts-local
+    env_file:
+      - .env
+    build:
+      dockerfile: docker/Dockerfile.hardhat
+      context: .
+    entrypoint: ./start-node.sh
+    ports:
+      - "0.0.0.0:8545:8545/tcp"
+  liqudation-bot:
+    build:
+      dockerfile: docker/Dockerfile.liquidation
+      context: .
+    entrypoint: ./liquidation.sh
+    network_mode: host
+
+  e2e:
+    image: contracts-local
+    env_file:
+      - .env
+    entrypoint: ./e2e.sh
+    depends_on:
+      - hardhat
+    network_mode: host
