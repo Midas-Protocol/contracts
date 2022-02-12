@@ -2,4 +2,4 @@
 
 set -e
 
-npx hardhat node --no-deploy
+npx hardhat node

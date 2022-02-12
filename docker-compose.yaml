@@ -11,6 +11,8 @@ services:
     entrypoint: ./start-node.sh
     ports:
       - "0.0.0.0:8545:8545/tcp"
+    volumes:
+      - app-volume:/usr/src/app/deployments
 
   liquidation-bot:
     env_file:
@@ -29,3 +31,8 @@ services:
     depends_on:
       - hardhat
     network_mode: host
+    volumes:
+      - app-volume:/usr/src/app/deployments
+
+volumes:
+  app-volume:

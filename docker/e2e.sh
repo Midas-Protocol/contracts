@@ -4,4 +4,6 @@ set -e
 
 ./wait-for-hh.sh
 
-npx hardhat deploy --network localhost && npx hardhat pools:create-unhealthy --name "test unhealthy" --network localhost
+sleep 30
+
+npx hardhat pools:create-unhealthy --name "test unhealthy" --network localhost
