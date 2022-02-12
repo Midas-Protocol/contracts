@@ -57,3 +57,27 @@ Main repository for Midas Capital's contracts and SDK for interacting with those
 # must have the local hardhat node running in another shell
 >>> npx hardhat test --network localhost
 ```
+
+## Running local node + liquidation bot
+
+1. Edit the `liquidation.env` file, add the account and private key from any of the
+signer's accounts
+
+2. Edit desired parameters, if needed
+```shell
+>>> docker-compose up
+```
+
+This will spin up the bot and a local node, and create an unhealthy pool. The bot
+will act on it and liquidate it. 
+
+3. Further test liquidations:
+
+In another shell:
+
+```shell
+>>> npx hardhat pools:create-unhealthy --name "test unhealthy" --network localhost
+```
+
+Check the logs from the bot and ensure it is performing the liquidations appropriately.
+You can also run the UI and check the "test unhealthy", as it gets liquidated. 

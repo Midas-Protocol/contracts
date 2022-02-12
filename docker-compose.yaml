@@ -23,8 +23,8 @@ services:
 
   e2e:
     image: contracts-local
-    environment:
-      - MNEMONIC=$MNEMONIC
+    env_file:
+      - .env
     entrypoint: ./e2e.sh
     depends_on:
       - hardhat

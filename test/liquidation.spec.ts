@@ -95,7 +95,7 @@ describe("#safeLiquidate", () => {
   });
 
   // Safe liquidate token borrows
-  it("should liquidate a token borrow for ETH collateral", async function () {
+  it.only("should liquidate a token borrow for ETH collateral", async function () {
     this.timeout(120_000);
     const { alice, bob, rando } = await ethers.getNamedSigners();
 
@@ -112,28 +112,46 @@ describe("#safeLiquidate", () => {
     const originalPrice = await oracle.getUnderlyingPrice(tribe.assetAddress);
 
     // Set price of borrowed token to 10x of what it was
-    tx = await simpleOracle.setDirectPrice(tribe.underlying, BigNumber.from(originalPrice).mul(10));
+    tx = await simpleOracle.setUnderlyingPrice(tribe.assetAddress, BigNumber.from(originalPrice).mul(10));
     await tx.wait();
 
     const balBefore = await ethCToken.balanceOf(rando.address);
-    const repayAmount = utils.parseEther(borrowAmount).div(100);
 
-    tx = await tribeUnderlying.connect(alice).transfer(rando.address, repayAmount);
-    tx = await tribeUnderlying.connect(rando).approve(liquidator.address, constants.MaxUint256);
-    await tx.wait();
+    for (const r of ["0.0219", "0.02191", "0.02192", "0.02195", "0.02197", "0.02199"]) {
+      const repayAmount = utils.parseEther(r);
+      console.log(repayAmount.toString(), r);
+      tx = await tribeUnderlying.connect(alice).transfer(rando.address, repayAmount);
+      tx = await tribeUnderlying.connect(rando).approve(liquidator.address, constants.MaxUint256);
+      await tx.wait();
 
-    tx = await liquidator["safeLiquidate(address,uint256,address,address,uint256,address,address,address[],bytes[])"](
-      bob.address,
-      repayAmount,
-      tribe.assetAddress,
-      eth.assetAddress,
-      0,
-      eth.assetAddress,
-      constants.AddressZero,
-      [],
-      []
-    );
-    await tx.wait();
+      const resp = await liquidator.callStatic[
+        "safeLiquidate(address,uint256,address,address,uint256,address,address,address[],bytes[])"
+      ](
+        bob.address,
+        repayAmount,
+        tribe.assetAddress,
+        eth.assetAddress,
+        0,
+        eth.assetAddress,
+        constants.AddressZero,
+        [],
+        []
+      );
+      console.log(resp.toNumber());
+      //
+      // tx = await liquidator["safeLiquidate(address,uint256,address,address,uint256,address,address,address[],bytes[])"](
+      //   bob.address,
+      //   repayAmount,
+      //   tribe.assetAddress,
+      //   eth.assetAddress,
+      //   0,
+      //   eth.assetAddress,
+      //   constants.AddressZero,
+      //   [],
+      //   []
+      // );
+      // await tx.wait();
+    }
 
     const balAfter = await ethCToken.balanceOf(rando.address);
     expect(balAfter).to.be.gt(balBefore);
