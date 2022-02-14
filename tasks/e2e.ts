@@ -37,6 +37,7 @@ task("e2e:unhealthy-pools-became-healthy", "e2e: check pools are healthy").setAc
 });
 
 task("e2e:admin-fees-are-seized", "e2e: check fees are seized").setAction(async (taskArgs, hre) => {
+  // @ts-ignore
   const sdkModule = await import("../lib/esm/src");
   const poolModule = await import("../test/utils/pool");
 
