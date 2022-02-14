@@ -146,7 +146,6 @@ task("pools:create-unhealthy-eth-borrow-token-collateral", "Borrow ETH against T
   .setAction(async (taskArgs, hre) => {
     await hre.run("set-price", { token: "ETH", price: "1" });
     await hre.run("set-price", { token: "TRIBE", price: "0.1" });
-    await hre.run("set-price", { token: "TOUCH", price: "0.1" });
 
     const poolAddress = await hre.run("pools:create", { name: taskArgs.name });
 
@@ -193,7 +192,7 @@ task("pools:create-unhealthy-token-borrow-token-collateral", "Borrow ETH against
   .setAction(async (taskArgs, hre) => {
     await hre.run("set-price", { token: "ETH", price: "1" });
     await hre.run("set-price", { token: "TOUCH", price: "0.1" });
-    await hre.run("set-price", { token: "TRIBE", price: "0.2" });
+    await hre.run("set-price", { token: "TRIBE", price: "0.01" });
 
     const poolAddress = await hre.run("pools:create", { name: taskArgs.name });
 
@@ -210,7 +209,7 @@ task("pools:create-unhealthy-token-borrow-token-collateral", "Borrow ETH against
     // Supply TOUCH collateral from alice
     await hre.run("pools:deposit", {
       account: taskArgs.borrowAccount,
-      amount: 20,
+      amount: 5,
       symbol: "TOUCH",
       poolAddress,
       enableCollateral: false,
@@ -220,10 +219,10 @@ task("pools:create-unhealthy-token-borrow-token-collateral", "Borrow ETH against
     // Borrow TOUCH with TRIBE as collateral from deployer
     await hre.run("pools:borrow", {
       account: taskArgs.supplyAccount,
-      amount: 10,
+      amount: 1,
       symbol: "TOUCH",
       poolAddress,
     });
     console.log(`borrowed TOUCH using TRIBE as collateral`);
-    await hre.run("set-price", { token: "TRIBE", price: "0.02", poolAddress });
+    await hre.run("set-price", { token: "TOUCH", price: "1", poolAddress });
   });
