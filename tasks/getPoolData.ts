@@ -38,3 +38,55 @@ export default task("get-pool-data", "Get pools data")
       return;
     }
   });
+
+task("get-position-ratio", "Get unhealthy po data")
+  .addOptionalParam("name", "Name of the pool", undefined, types.string)
+  .addOptionalParam("poolId", "Id of the pool", undefined, types.int)
+  .addOptionalParam("namedUser", "Named account for which to query unhealhty positions", undefined, types.string)
+  .addOptionalParam(
+    "userAddress",
+    "Account address of the user for which to query unhealhty positions",
+    undefined,
+    types.string
+  )
+  .addOptionalParam("cgId", "Coingecko id for the native asset", "ethereum", types.string)
+  .setAction(async (taskArgs, hre) => {
+    // @ts-ignore
+    const sdkModule = await import("../lib/esm/src");
+    const poolModule = await import("../test/utils/pool");
+
+    const chainId = parseInt(await hre.getChainId());
+    if (!(chainId in sdkModule.SupportedChains)) {
+      throw "Invalid chain provided";
+    }
+    const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId);
+
+    if (!taskArgs.namedUser && !taskArgs.userAddress) {
+      throw "Must provide either a named user or an account address";
+    }
+    if (!taskArgs.poolId && !taskArgs.name) {
+      throw "Must provide either a pool name or a pool id";
+    }
+
+    let poolUser: string;
+    let fusePoolData;
+
+    if (taskArgs.namedUser) {
+      poolUser = (await hre.ethers.getNamedSigner(taskArgs.namedUser)).address;
+    } else {
+      poolUser = taskArgs.userAddress;
+    }
+
+    fusePoolData = taskArgs.name
+      ? await poolModule.getPoolByName(taskArgs.name, sdk, poolUser)
+      : await sdk.fetchFusePoolData(taskArgs.poolId.toString(), poolUser, taskArgs.cgId);
+
+    const maxBorrow = fusePoolData.assets
+      .map(
+        (a) => a.supplyBalanceUSD * parseFloat(hre.ethers.utils.formatUnits(a.collateralFactor, a.underlyingDecimals))
+      )
+      .reduce((a, b) => a + b, 0);
+    const ratio = (fusePoolData.totalBorrowBalanceUSD / maxBorrow) * 100;
+    console.log(`Ratio of total borrow / max borrow: ${ratio} %`);
+    return ratio;
+  });
