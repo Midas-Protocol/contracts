@@ -4,8 +4,6 @@ set -e
 
 ./wait-for-hh.sh
 
-echo "${ETHEREUM_ADMIN_ACCOUNT}"
-
 while ping -c1 e2e &>/dev/null
 do echo "Pools are being set up"; sleep 1;
 done;
