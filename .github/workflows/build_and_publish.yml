@@ -10,7 +10,37 @@ on:
     branches: [main, development]
 
 jobs:
+  e2e-liquidation-tests:
+    runs-on: ubuntu-latest
+    env:
+      ETHEREUM_ADMIN_ACCOUNT: ${{ secrets.ETHEREUM_ADMIN_ACCOUNT }}
+      ETHEREUM_ADMIN_PRIVATE_KEY: ${{ secrets.ETHEREUM_ADMIN_PRIVATE_KEY }}
+    steps:
+      - uses: actions/checkout@v2
+      - run:
+          docker-compose up --build liquidation-bot e2e
+          docker-compose run verify-liquidations
+          docker-compose down
+
   test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: "npm"
+      - run: npm install
+      - run: npm run build
+      - run: npm run test
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: ${{env.GITHUB_REF_NAME == 'main' && 'latest' || 'beta'}}
+          access: "public"
+
+  release:
+    needs: [e2e-liquidation-tests, test-and-build]
     runs-on: ubuntu-latest
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -22,7 +52,6 @@ jobs:
           cache: "npm"
       - run: npm install
       - run: npm run build
-      - run: npm run test
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
