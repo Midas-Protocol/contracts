@@ -3,8 +3,8 @@ version: '3.8'
 services:
   hardhat:
     image: contracts-local
-    env_file:
-      - .env
+    environment:
+      - MNEMONIC
     build:
       dockerfile: docker/Dockerfile.hardhat
       context: .
@@ -29,8 +29,7 @@ services:
     image: contracts-local
     environment:
       - ETH_PROVIDER_URL=http://hardhat:8545
-    env_file:
-      - .env
+      - MNEMONIC
     entrypoint: ./setup-pools.sh
     depends_on:
       - hardhat
@@ -41,8 +40,7 @@ services:
     image: contracts-local
     environment:
       - ETH_PROVIDER_URL=http://hardhat:8545
-    env_file:
-      - .env
+      - MNEMONIC
     entrypoint: ./e2e.sh
     depends_on:
       - hardhat

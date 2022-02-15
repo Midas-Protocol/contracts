@@ -15,6 +15,7 @@ jobs:
     env:
       ETHEREUM_ADMIN_ACCOUNT: ${{ secrets.ETHEREUM_ADMIN_ACCOUNT }}
       ETHEREUM_ADMIN_PRIVATE_KEY: ${{ secrets.ETHEREUM_ADMIN_PRIVATE_KEY }}
+      MNEMONIC: ${{ secrets.MNEMONIC }}
     steps:
       - uses: actions/checkout@v2
       - run:
@@ -33,11 +34,6 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: npm run test
-      - uses: JS-DevTools/npm-publish@v1
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-          tag: ${{env.GITHUB_REF_NAME == 'main' && 'latest' || 'beta'}}
-          access: "public"
 
   release:
     needs: [e2e-liquidation-tests, test-and-build]
