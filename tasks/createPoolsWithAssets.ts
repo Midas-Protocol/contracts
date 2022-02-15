@@ -100,6 +100,7 @@ task("pools:create-unhealthy-token-borrow-eth-collateral", "Borrow TOUCH against
   .setAction(async (taskArgs, hre) => {
     await hre.run("set-price", { token: "ETH", price: "1" });
     await hre.run("set-price", { token: "TOUCH", price: "0.1" });
+    await hre.run("set-price", { token: "TRIBE", price: "0.01" });
 
     const poolAddress = await hre.run("pools:create", { name: taskArgs.name });
 
@@ -145,6 +146,7 @@ task("pools:create-unhealthy-eth-borrow-token-collateral", "Borrow ETH against T
   .addParam("borrowAccount", "Account from which to borrow", "alice", types.string)
   .setAction(async (taskArgs, hre) => {
     await hre.run("set-price", { token: "ETH", price: "1" });
+    await hre.run("set-price", { token: "TOUCH", price: "1" });
     await hre.run("set-price", { token: "TRIBE", price: "0.1" });
 
     const poolAddress = await hre.run("pools:create", { name: taskArgs.name });
