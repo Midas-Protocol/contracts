@@ -59,9 +59,9 @@ task("e2e:admin-fees-are-seized", "e2e: check fees are seized").setAction(async 
 
     const feesAfterLiquidation = await assetCtoken.totalFuseFees();
     console.log(
-      `Fees for ${poolAsset.underlyingSymbol} (cToken: ${poolAsset.cToken}): ${hre.ethers.utils.formatEther(
-        feesAfterLiquidation
-      )}`
+      `Fees for pool ${pool}, ${poolAsset.underlyingSymbol} (cToken: ${
+        poolAsset.cToken
+      }): ${hre.ethers.utils.formatEther(feesAfterLiquidation)}`
     );
     expect(feesAfterLiquidation).to.be.gt(hre.ethers.BigNumber.from(0));
     let tx = await assetCtoken._withdrawFuseFees(feesAfterLiquidation);
