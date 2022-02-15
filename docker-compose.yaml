@@ -39,6 +39,7 @@ services:
   verify-liquidations:
     image: contracts-local
     environment:
+      - ETH_PROVIDER_URL=http://0.0.0.0:8545
       - MNEMONIC
     entrypoint: ./e2e.sh
     network_mode: "host"
