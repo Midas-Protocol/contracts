@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: |
           docker pull ghcr.io/midas-protocol/fuse-liquidator-bot:main
-          docker-compose up --build -d liquidation-bot e2e && \
+          docker-compose up --build liquidation-bot e2e && \
           docker-compose run verify-liquidations && \
           docker-compose down
 
