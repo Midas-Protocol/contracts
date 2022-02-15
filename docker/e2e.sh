@@ -9,8 +9,12 @@ do
 done;
 
 until npx hardhat e2e:unhealthy-pools-became-healthy --network localhost &>/dev/null; do
-  sleep 10;
   echo "Pools are still being liquidated...";
+  echo "Status of pools: ";
+  npx hardhat get-position-ratio --name unhealthy-eth-borrow-token-collateral --named-user deployer --network localhost;
+  npx hardhat get-position-ratio --name unhealthy-token-borrow-token-collateral --named-user deployer --network localhost;
+  npx hardhat get-position-ratio --name unhealthy-token-borrow-eth-collateral --named-user deployer --network localhost;
+  sleep 10;
 done
 
 echo "Ensuring fees are seized..."
