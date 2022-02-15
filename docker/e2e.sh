@@ -10,7 +10,9 @@ done;
 
 until npx hardhat e2e:unhealthy-pools-became-healthy --network localhost &>/dev/null; do
   echo "Pools are still being liquidated...";
-  sleep 5;
+  echo "Status of pools: ";
+  npx hardhat e2e:unhealthy-pools-exist --network localhost;
+  sleep 10;
 done
 
 echo "Ensuring fees are seized..."

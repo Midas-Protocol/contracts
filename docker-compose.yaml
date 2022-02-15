@@ -39,9 +39,9 @@ services:
   verify-liquidations:
     image: contracts-local
     environment:
-      - ETH_PROVIDER_URL=http://hardhat:8545
       - MNEMONIC
     entrypoint: ./e2e.sh
+    network_mode: "host"
     depends_on:
       - hardhat
       - liquidation-bot
