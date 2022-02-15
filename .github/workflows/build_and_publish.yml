@@ -19,8 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: |
-          docker-compose up --build -d liquidation-bot e2e
-          docker-compose run verify-liquidations
+          docker-compose up --build liquidation-bot e2e && \
+          docker-compose run verify-liquidations && \
           docker-compose down
 
   test-and-build:
