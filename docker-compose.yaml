@@ -10,29 +10,46 @@ services:
       context: .
     entrypoint: ./start-node.sh
     ports:
-      - "0.0.0.0:8545:8545/tcp"
+      - "8545:8545"
     volumes:
       - app-volume:/usr/src/app/deployments
 
   liquidation-bot:
     env_file:
       - docker/liquidation.env
+    environment:
+      - ETHEREUM_ADMIN_ACCOUNT
+      - ETHEREUM_ADMIN_PRIVATE_KEY
     build:
       dockerfile: docker/Dockerfile.liquidation
       context: .
     entrypoint: ./liquidation.sh
-    network_mode: host
 
   e2e:
     image: contracts-local
+    environment:
+      - ETH_PROVIDER_URL=http://hardhat:8545
+    env_file:
+      - .env
+    entrypoint: ./setup-pools.sh
+    depends_on:
+      - hardhat
+    volumes:
+      - app-volume:/usr/src/app/deployments
+
+  verify-liquidations:
+    image: contracts-local
+    environment:
+      - ETH_PROVIDER_URL=http://hardhat:8545
     env_file:
       - .env
     entrypoint: ./e2e.sh
     depends_on:
       - hardhat
-    network_mode: host
+      - liquidation-bot
     volumes:
       - app-volume:/usr/src/app/deployments
+
 
 volumes:
   app-volume:
