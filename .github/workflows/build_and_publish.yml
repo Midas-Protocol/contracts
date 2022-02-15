@@ -15,7 +15,7 @@ jobs:
     env:
       ETHEREUM_ADMIN_ACCOUNT: "${{ secrets.ETHEREUM_ADMIN_ACCOUNT }}"
       ETHEREUM_ADMIN_PRIVATE_KEY: "${{ secrets.ETHEREUM_ADMIN_PRIVATE_KEY }}"
-      MNEMONIC: ${{ secrets.MNEMONIC }}
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
     steps:
       - uses: actions/checkout@v2
       - run: |
