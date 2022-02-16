@@ -1,13 +1,16 @@
 import { SALT } from "../deploy/deploy";
 import { ChainDeployConfig, ChainlinkFeedBaseCurrency } from "./helper";
 
-const deployConfig97: ChainDeployConfig = {
+export const deployConfig97: ChainDeployConfig = {
   wtoken: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
   nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
+  nativeTokenName: "Binance Network Token (Testnet)",
+  nativeTokenSymbol: "TBNB",
 };
 
 export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
+
   ////
   //// ORACLES
   const chainlinkMappingUsd = [
