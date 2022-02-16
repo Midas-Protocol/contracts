@@ -15,4 +15,5 @@ interface IFuseFeeDistributor {
     function deployCEther(bytes calldata constructorData) external returns (address);
     function deployCErc20(bytes calldata constructorData) external returns (address);
     fallback () external payable;
+    receive () external payable;
 }

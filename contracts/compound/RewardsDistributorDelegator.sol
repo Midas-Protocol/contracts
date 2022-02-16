@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
-pragma abicoder v2;
 
 import "./RewardsDistributorStorage.sol";
 
@@ -54,18 +53,12 @@ contract RewardsDistributorDelegator is RewardsDistributorDelegatorStorage {
     }
 
 	/**
-     * @dev Delegates the value transfer to an implementation contract.
+     * @dev Delegates the empty call data execution to an implementation contract.
      * It returns to the external caller whatever the implementation returns
      * or forwards reverts.
      */
     receive() external payable {
-        // TODO determine if call is enough or delegatecall should be used instead
-        (bool success, bytes memory returnData) = payable(implementation).call{value: msg.value}("");
-        assembly {
-            if eq(success, 0) {
-                revert(add(returnData, 0x20), returndatasize())
-            }
-        }
+        _fallback("");
     }
 
     /**
@@ -74,16 +67,20 @@ contract RewardsDistributorDelegator is RewardsDistributorDelegatorStorage {
      * or forwards reverts.
      */
     fallback() external payable {
+        _fallback(msg.data);
+    }
+
+    function _fallback(bytes memory data) internal {
         // delegate all other functions to current implementation
-        (bool success, ) = implementation.delegatecall(msg.data);
+        (bool success, ) = implementation.delegatecall(data);
 
         assembly {
-              let free_mem_ptr := mload(0x40)
-              returndatacopy(free_mem_ptr, 0, returndatasize())
+            let free_mem_ptr := mload(0x40)
+            returndatacopy(free_mem_ptr, 0, returndatasize())
 
-              switch success
-              case 0 { revert(free_mem_ptr, returndatasize()) }
-              default { return(free_mem_ptr, returndatasize()) }
+            switch success
+            case 0 { revert(free_mem_ptr, returndatasize()) }
+            default { return(free_mem_ptr, returndatasize()) }
         }
     }
 }
