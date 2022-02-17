@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -20,8 +19,6 @@ import "../BasePriceOracle.sol";
  * @author David Lucid <david@rari.capital>
  */
 contract MStablePriceOracle is IPriceOracle, BasePriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @dev mStable mUSD ERC20 token contract object.
      */
@@ -60,7 +57,7 @@ contract MStablePriceOracle is IPriceOracle, BasePriceOracle {
         address underlying = ICErc20(address(cToken)).underlying();
         // Comptroller needs prices to be scaled by 1e(36 - decimals)
         // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-        return _price(underlying).mul(1e18).div(10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
     }
 
     /**
@@ -70,11 +67,11 @@ contract MStablePriceOracle is IPriceOracle, BasePriceOracle {
         if (underlying == address(MUSD))
             return getMAssetEthPrice(MUSD);
         else if (underlying == address(IMUSD))
-            return IMUSD.exchangeRate().mul(getMAssetEthPrice(MUSD)).div(1e18);
+            return (IMUSD.exchangeRate() * getMAssetEthPrice(MUSD)) / 1e18;
         else if (underlying == address(MBTC))
             return getMAssetEthPrice(MBTC);
         else if (underlying == address(IMBTC))
-            return IMBTC.exchangeRate().mul(getMAssetEthPrice(MBTC)).div(1e18);
+            return (IMBTC.exchangeRate() * getMAssetEthPrice(MBTC)) / 1e18;
         else revert("Invalid token passed to MStablePriceOracle.");
     }
 
@@ -84,7 +81,17 @@ contract MStablePriceOracle is IPriceOracle, BasePriceOracle {
     function getMAssetEthPrice(IMasset mAsset) internal view returns (uint256) {
         (IMasset.BassetPersonal[] memory bAssetPersonal, IMasset.BassetData[] memory bAssetData) = mAsset.getBassets();
         uint256 underlyingValueInEthScaled = 0;
-        for (uint256 i = 0; i < bAssetData.length; i++) underlyingValueInEthScaled = underlyingValueInEthScaled.add(uint256(bAssetData[i].vaultBalance).mul(uint256(bAssetData[i].ratio)).div(1e8).mul(BasePriceOracle(msg.sender).price(bAssetPersonal[i].addr)));
-        return underlyingValueInEthScaled.div(ERC20Upgradeable(address(mAsset)).totalSupply());
+        for (uint256 i = 0; i < bAssetData.length; i++) {
+            underlyingValueInEthScaled =
+                underlyingValueInEthScaled +
+                (
+                    (
+                        (
+                            uint256(bAssetData[i].vaultBalance) * uint256(bAssetData[i].ratio)
+                        ) / 1e8
+                    ) * BasePriceOracle(msg.sender).price(bAssetPersonal[i].addr)
+                );
+        }
+        return underlyingValueInEthScaled / ERC20Upgradeable(address(mAsset)).totalSupply();
     }
 }

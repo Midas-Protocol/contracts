@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -19,8 +18,6 @@ import "../BasePriceOracle.sol";
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
 contract UniswapLpTokenPriceOracle is IPriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @dev wtoken contract address.
      */
@@ -52,7 +49,7 @@ contract UniswapLpTokenPriceOracle is IPriceOracle {
         address underlying = ICErc20(address(cToken)).underlying();
         // Comptroller needs prices to be scaled by 1e(36 - decimals)
         // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-        return _price(underlying).mul(1e18).div(10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
     }
 
     /**
@@ -67,12 +64,16 @@ contract UniswapLpTokenPriceOracle is IPriceOracle {
         address token1 = pair.token1();
 
         // Get fair price of non-WETH token (underlying the pair) in terms of ETH
-        uint token0FairPrice = token0 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token0).mul(1e18).div(10 ** uint256(ERC20Upgradeable(token0).decimals()));
-        uint token1FairPrice = token1 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token1).mul(1e18).div(10 ** uint256(ERC20Upgradeable(token1).decimals()));
+        uint token0FairPrice = token0 == wtoken ? 1e18 : (BasePriceOracle(msg.sender).price(token0) * 1e18) / (10 ** uint256(ERC20Upgradeable(token0).decimals()));
+        uint token1FairPrice = token1 == wtoken ? 1e18 : (BasePriceOracle(msg.sender).price(token1) * 1e18) / (10 ** uint256(ERC20Upgradeable(token1).decimals()));
 
         // Implementation from https://github.com/AlphaFinanceLab/homora-v2/blob/e643392d582c81f6695136971cff4b685dcd2859/contracts/oracle/UniswapV2Oracle.sol#L18
-        uint256 sqrtK = sqrt(reserve0.mul(reserve1)).mul(2 ** 112).div(totalSupply);
-        return sqrtK.mul(2).mul(sqrt(token0FairPrice)).div(2 ** 56).mul(sqrt(token1FairPrice)).div(2 ** 56);
+        uint256 sqrtK = (sqrt(reserve0 * reserve1) * (2 ** 112)) / totalSupply;
+        return  (
+                    (
+                        (sqrtK * 2 * sqrt(token0FairPrice)) / (2 ** 56)
+                    ) * sqrt(token1FairPrice)
+                ) / (2 ** 56);
     }
 
     /**

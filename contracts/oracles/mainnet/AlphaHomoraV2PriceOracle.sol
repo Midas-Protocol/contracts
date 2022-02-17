@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -19,8 +18,6 @@ import "../BasePriceOracle.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract AlphaHomoraV2PriceOracle is IPriceOracle, BasePriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @dev Fetches the fair ibTokenV2/ETH price, with 18 decimals of precision.
      * @param underlying The underlying token address for which to get the price (set to zero address for ETH).
@@ -39,7 +36,7 @@ contract AlphaHomoraV2PriceOracle is IPriceOracle, BasePriceOracle {
         address underlying = ICErc20(address(cToken)).underlying();
         // Comptroller needs prices to be scaled by 1e(36 - decimals)
         // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-        return _price(underlying).mul(1e18).div(10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
     }
 
     /**
@@ -54,6 +51,6 @@ contract AlphaHomoraV2PriceOracle is IPriceOracle, BasePriceOracle {
         address baseToken = underlyingCErc20.underlying();
 
         // ibTokenV2/ETH price = underlying cToken/ETH price = underlying cToken/token price * base token/ETH price
-        return underlyingCErc20.exchangeRateStored().mul(BasePriceOracle(msg.sender).price(baseToken)).div(1e18);
+        return (underlyingCErc20.exchangeRateStored() * BasePriceOracle(msg.sender).price(baseToken)) / 1e18;
     }
 }

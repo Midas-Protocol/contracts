@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -20,8 +19,6 @@ import "../BasePriceOracle.sol";
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
 contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @notice Get the LP token price price for an underlying token address.
      * @param underlying The underlying token address for which to get the price (set to zero address for ETH).
@@ -40,7 +37,7 @@ contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
         address underlying = ICErc20(address(cToken)).underlying();
         // Comptroller needs prices to be scaled by 1e(36 - decimals)
         // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-        return _price(underlying).mul(1e18).div(10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
     }
 
     /**
@@ -57,10 +54,10 @@ contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
         uint256 pxB = BasePriceOracle(msg.sender).price(tokenB);
         uint8 decimalsA = ERC20Upgradeable(tokenA).decimals();
         uint8 decimalsB = ERC20Upgradeable(tokenB).decimals();
-        if (decimalsA < 18) pxA = pxA.mul(10 ** (18 - uint256(decimalsA)));
-        if (decimalsA > 18) pxA = pxA.div(10 ** (uint256(decimalsA) - 18));
-        if (decimalsB < 18) pxB = pxB.mul(10 ** (18 - uint256(decimalsB)));
-        if (decimalsB > 18) pxB = pxB.div(10 ** (uint256(decimalsB) - 18));
+        if (decimalsA < 18) pxA = pxA * (10 ** (18 - uint256(decimalsA)));
+        if (decimalsA > 18) pxA = pxA / (10 ** (uint256(decimalsA) - 18));
+        if (decimalsB < 18) pxB = pxB * (10 ** (18 - uint256(decimalsB)));
+        if (decimalsB > 18) pxB = pxB / (10 ** (uint256(decimalsB) - 18));
         (uint256 fairResA, uint256 fairResB) = computeFairReserves(
             pool.getBalance(tokenA),
             pool.getBalance(tokenB),
@@ -71,7 +68,7 @@ contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
         );
         // use fairReserveA and fairReserveB to compute LP token price
         // LP price = (fairResA * pxA + fairResB * pxB) / totalLPSupply
-        return fairResA.mul(pxA).add(fairResB.mul(pxB)).div(pool.totalSupply());
+        return (fairResA * pxA + fairResB * pxB) / pool.totalSupply();
     }
 
     /**

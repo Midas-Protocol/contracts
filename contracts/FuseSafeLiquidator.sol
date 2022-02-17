@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -28,7 +27,6 @@ import "./external/uniswap/UniswapV2Library.sol";
  * @dev Do not transfer ETH or tokens directly to this address. Only send ETH here when using a method, and only approve tokens for transfer to here when using a method. Direct ETH transfers will be rejected and direct token transfers will be lost.
  */
 contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
-    using SafeMathUpgradeable for uint256;
     using AddressUpgradeable for address payable;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -311,7 +309,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     function distributeProfit(address exchangeProfitTo, uint256 minProfitAmount, uint256 ethToCoinbase) private returns (uint256) {
         if (exchangeProfitTo == address(0)) {
             // Exchange profit if necessary
-            exchangeAllEthOrTokens(_liquidatorProfitExchangeSource, exchangeProfitTo, minProfitAmount.add(ethToCoinbase), UNISWAP_V2_ROUTER_02);
+            exchangeAllEthOrTokens(_liquidatorProfitExchangeSource, exchangeProfitTo, minProfitAmount + ethToCoinbase, UNISWAP_V2_ROUTER_02);
 
             // Transfer ETH to block.coinbase if requested
             if (ethToCoinbase > 0) block.coinbase.call{value: ethToCoinbase}("");
@@ -326,7 +324,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
             }
 
             // Exchange profit if necessary
-            exchangeAllEthOrTokens(_liquidatorProfitExchangeSource, exchangeProfitTo, minProfitAmount.add(ethToCoinbase), UNISWAP_V2_ROUTER_02);
+            exchangeAllEthOrTokens(_liquidatorProfitExchangeSource, exchangeProfitTo, minProfitAmount + ethToCoinbase, UNISWAP_V2_ROUTER_02);
 
             // Transfer profit to msg.sender
             return transferSeizedFunds(exchangeProfitTo, minProfitAmount);
@@ -353,8 +351,8 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
             (address borrower, uint256 repayAmount, , address cTokenCollateral, uint256 minProfitAmount, address exchangeProfitTo, IUniswapV2Router02 uniswapV2Router, address[] memory redemptionStrategies, bytes[] memory strategyData) = abi.decode(data[4:], (address, uint256, address, address, uint256, address, IUniswapV2Router02, address[], bytes[]));
 
             // Calculate flashloan return amount
-            uint256 flashLoanReturnAmount = repayAmount.mul(1000).div(997);
-            if (repayAmount.mul(1000).mod(997) > 0) flashLoanReturnAmount++; // Round up if division resulted in a remainder
+            uint256 flashLoanReturnAmount = (repayAmount * 1000) / 997;
+            if ((repayAmount * 1000) % 997 > 0) flashLoanReturnAmount++; // Round up if division resulted in a remainder
 
             // Post WETH flashloan
             // Cache liquidation profit token (or the zero address for ETH) for use as source for exchange later
@@ -365,8 +363,8 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
             (address borrower, uint256 repayAmount, , address cTokenCollateral, uint256 minProfitAmount, address exchangeProfitTo, IUniswapV2Router02 uniswapV2RouterForBorrow, IUniswapV2Router02 uniswapV2RouterForCollateral, address[] memory redemptionStrategies, bytes[] memory strategyData) = abi.decode(data[4:], (address, uint256, address, address, uint256, address, IUniswapV2Router02, IUniswapV2Router02, address[], bytes[]));
 
             // Calculate flashloan return amount
-            uint256 flashLoanReturnAmount = repayAmount.mul(1000).div(997);
-            if (repayAmount.mul(1000).mod(997) > 0) flashLoanReturnAmount++; // Round up if division resulted in a remainder
+            uint256 flashLoanReturnAmount = (repayAmount * 1000) / 997;
+            if ((repayAmount * 1000) % 997 > 0) flashLoanReturnAmount++; // Round up if division resulted in a remainder
 
             // Post token flashloan
             // Cache liquidation profit token (or the zero address for ETH) for use as source for exchange later
