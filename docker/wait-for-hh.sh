@@ -4,7 +4,7 @@ set -e
 
 function wait_for_hh() {
     local attempt=1
-    until curl -f --max-time 1 'http://127.0.0.1:8545/' &>/dev/null; do
+    until curl -f --max-time 1 'http://hardhat:8545/' &>/dev/null; do
         sleep ${attempt}
         attempt=$((attempt + 1))
         if [[ ${attempt} == 12 ]]
