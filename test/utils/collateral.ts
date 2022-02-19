@@ -34,8 +34,6 @@ export async function addCollateral(
   const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
 
   const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol);
-  // const assetCtc = new Contract(assetToDeploy.underlyingToken, ERC20Abi, signer);
-  // tx = await assetCtc.approve(assetToDeploy.cToken, BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One));
 
   cToken = getCToken(assetToDeploy, sdk, signer);
   const pool = await ethers.getContractAt("Comptroller", poolAddress, signer);
