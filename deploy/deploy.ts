@@ -11,7 +11,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   console.log("deployer: ", deployer);
 
   const chainDeployParams: ChainDeployConfig = chainDeployConfig[chainId];
-  console.log('chainDeployParams: ', chainDeployParams);
+  console.log("chainDeployParams: ", chainDeployParams);
   if (!chainDeployConfig) {
     throw new Error(`Config invalid for ${chainId}`);
   }
@@ -156,6 +156,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    gasLimit: 12000000,
   });
   const fpl = await dep.deploy();
   console.log("FusePoolLens: ", fpl.address);
