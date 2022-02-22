@@ -4,6 +4,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { providers, utils } from "ethers";
 import { ethers } from "hardhat";
 
+import { assets as BSCAssets } from "../../chainDeploy/56";
+
 interface PoolCreationParams {
   closeFactor?: number;
   liquidationIncentive?: number;
@@ -95,18 +97,20 @@ export async function deployAssets(assets: cERC20Conf[], signer?: SignerWithAddr
 
 export async function getAssetsConf(
   comptroller: string,
+  chainId: number,
   interestRateModelAddress?: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> {
   if (!interestRateModelAddress) {
     const jrm = await ethers.getContract("JumpRateModel");
     interestRateModelAddress = jrm.address;
   }
-  return await poolAssets(interestRateModelAddress, comptroller);
+  return await poolAssets(interestRateModelAddress, comptroller, chainId);
 }
 
 export const poolAssets = async (
   interestRateModelAddress: string,
-  comptroller: string
+  comptroller: string,
+  chainId: number
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> => {
   const ethConf: cERC20Conf = {
     underlying: "0x0000000000000000000000000000000000000000",
@@ -121,38 +125,62 @@ export const poolAssets = async (
     adminFee: 0,
     bypassPriceFeedCheck: true,
   };
-  const tribeConf: cERC20Conf = {
-    underlying: await ethers.getContract("TRIBEToken").then((c) => c.address),
-    comptroller,
-    interestRateModel: interestRateModelAddress,
-    name: "TRIBE Token",
-    symbol: "TRIBE",
-    decimals: 18,
-    admin: "true",
-    collateralFactor: 75,
-    reserveFactor: 15,
-    adminFee: 0,
-    bypassPriceFeedCheck: true,
-  };
-  const touchConf: cERC20Conf = {
-    underlying: await ethers.getContract("TOUCHToken").then((c) => c.address),
-    comptroller,
-    interestRateModel: interestRateModelAddress,
-    name: "Midas TOUCH Token",
-    symbol: "TOUCH",
-    decimals: 18,
-    admin: "true",
-    collateralFactor: 65,
-    reserveFactor: 20,
-    adminFee: 0,
-    bypassPriceFeedCheck: true,
-  };
+
+  let assets = [ethConf];
+
+  if (chainId === 31337) {
+    const tribeConf: cERC20Conf = {
+      underlying: await ethers.getContract("TRIBEToken").then((c) => c.address),
+      comptroller,
+      interestRateModel: interestRateModelAddress,
+      name: "TRIBE Token",
+      symbol: "TRIBE",
+      decimals: 18,
+      admin: "true",
+      collateralFactor: 75,
+      reserveFactor: 15,
+      adminFee: 0,
+      bypassPriceFeedCheck: true,
+    };
+    const touchConf: cERC20Conf = {
+      underlying: await ethers.getContract("TOUCHToken").then((c) => c.address),
+      comptroller,
+      interestRateModel: interestRateModelAddress,
+      name: "Midas TOUCH Token",
+      symbol: "TOUCH",
+      decimals: 18,
+      admin: "true",
+      collateralFactor: 65,
+      reserveFactor: 20,
+      adminFee: 0,
+      bypassPriceFeedCheck: true,
+    };
+    assets = assets.concat([tribeConf, touchConf]);
+  } else if (chainId === 56) { // bsc
+    ethConf.name = "Binance Token";
+    ethConf.symbol = "BNB";
+    const busd = BSCAssets.find(b => b.symbol === "BUSD")
+    const busdConfig: cERC20Conf = {
+      underlying: busd.underlying,
+      comptroller,
+      interestRateModel: interestRateModelAddress,
+      name: busd.name,
+      symbol: busd.symbol,
+      decimals: busd.decimals,
+      admin: "true",
+      collateralFactor: 75,
+      reserveFactor: 15,
+      adminFee: 0,
+      bypassPriceFeedCheck: true,
+    };
+    assets = assets.concat([busdConfig]);
+  }
 
   return {
     shortName: "Fuse R1",
     longName: "Rari DAO Fuse Pool R1 (Base)",
     assetSymbolPrefix: "fr1",
-    assets: [ethConf, touchConf, tribeConf],
+    assets,
   };
 };
 

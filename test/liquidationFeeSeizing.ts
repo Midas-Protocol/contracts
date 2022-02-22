@@ -31,8 +31,9 @@ describe("Protocol Liquidation Seizing", () => {
   beforeEach(async () => {
     await setupTest();
     const { bob, deployer, rando } = await ethers.getNamedSigners();
+    const { chainId } = await ethers.provider.getNetwork();
     [poolAddress] = await createPool({});
-    const assets = await getAssetsConf(poolAddress);
+    const assets = await getAssetsConf(poolAddress, chainId);
     const deployedAssets = await deployAssets(assets.assets, bob);
 
     tribe = deployedAssets.find((a) => a.symbol === "TRIBE");

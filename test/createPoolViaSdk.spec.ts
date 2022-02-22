@@ -18,6 +18,7 @@ describe("FusePoolDirectory", function () {
       this.timeout(120_000);
       const POOL_NAME = "TEST_BOB";
       const { bob } = await ethers.getNamedSigners();
+      const { chainId } = await ethers.provider.getNetwork();
 
       const spo = await ethers.getContract("SimplePriceOracle", bob);
 
@@ -50,7 +51,7 @@ describe("FusePoolDirectory", function () {
       expect(_unfiliteredName).to.be.equal(POOL_NAME);
 
       const jrm = await ethers.getContract("JumpRateModel");
-      const assets = await poolAssets(jrm.address, comptroller);
+      const assets = await poolAssets(jrm.address, comptroller, chainId);
 
       const deployedAssets: DeployedAsset[] = [];
       for (const assetConf of assets.assets) {

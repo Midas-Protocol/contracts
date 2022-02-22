@@ -20,10 +20,9 @@ dotEnvConfig();
 
 const urlOverride = process.env.ETH_PROVIDER_URL;
 
-const mnemonic =
-  process.env.SUGAR_DADDY ||
-  process.env.MNEMONIC ||
-  "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
+const sugarDaddy = "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
+
+const mnemonic = process.env.SUGAR_DADDY || process.env.MNEMONIC || sugarDaddy;
 
 const config: HardhatUserConfig = {
   tenderly: {
@@ -88,11 +87,14 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       saveDeployments: true,
-      chainId: 1337,
+      chainId: 56,
       gasPrice: 20e9,
       gas: 25e6,
       allowUnlimitedContractSize: true,
-      accounts: { mnemonic },
+      accounts: { mnemonic: sugarDaddy },
+      forking: {
+        url: "https://bsc-dataseed.binance.org",
+      },
     },
     localhost: {
       url: urlOverride || "http://localhost:8545",
@@ -112,6 +114,11 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
       chainId: 56,
       url: urlOverride || process.env.BSC_PROVIDER_URL || "https://bsc-dataseed.binance.org/",
+    },
+    bscfork: {
+      accounts: { mnemonic: sugarDaddy },
+      chainId: 56,
+      url: "http://localhost:8545",
     },
     chapel: {
       accounts: { mnemonic },

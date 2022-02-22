@@ -2,11 +2,38 @@ import { SALT } from "../deploy/deploy";
 import { ChainDeployConfig, ChainlinkFeedBaseCurrency } from "./helper";
 
 export const deployConfig: ChainDeployConfig = {
-  wtoken: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
+  wtoken: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
   nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
-  nativeTokenName: "Binance Network Token (Testnet)",
-  nativeTokenSymbol: "TBNB",
+  nativeTokenName: "Binance Network Token",
+  nativeTokenSymbol: "BNB",
 };
+
+export const assets = [
+  {
+    symbol: "BUSD",
+    underlying: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+    name: "Binance USD",
+    decimals: 18
+  },
+  {
+    symbol: "BTC",
+    underlying: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+    name: "Binance BTC",
+    decimals: 18
+  },
+  {
+    symbol: "DAI",
+    underlying: "0x132d3C0B1D2cEa0BC552588063bdBb210FDeecfA",
+    name: "Binance DAI",
+    decimals: 18
+  },
+  {
+    symbol: "ETH",
+    underlying: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+    name: "Binance ETH",
+    decimals: 18
+  },
+];
 
 export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
@@ -16,26 +43,22 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
   const chainlinkMappingUsd = [
     {
       symbol: "BUSD",
-      aggregator: "0x9331b55D9830EF609A2aBCfAc0FBCE050A52fdEa",
-      underlying: "0xed24fc36d5ee211ea25a80239fb8c4cfd80f12ee",
+      aggregator: "0xcBb98864Ef56E9042e7d2efef76141f15731B82f",
       feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
     },
     {
       symbol: "BTC",
       aggregator: "0x5741306c21795FdCBb9b265Ea0255F499DFe515C",
-      underlying: "0x6ce8da28e2f864420840cf74474eff5fd80e65b8",
       feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
     },
     {
       symbol: "DAI",
       aggregator: "0xE4eE17114774713d2De0eC0f035d4F7665fc025D",
-      underlying: "0xEC5dCb5Dbf4B114C9d0F65BcCAb49EC54F6A0867",
       feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
     },
     {
       symbol: "ETH",
-      aggregator: "0x143db3CEEfbdfe5631aDD3E50f7614B6ba708BA7",
-      underlying: "0x76A20e5DC5721f5ddc9482af689ee12624E01313",
+      aggregator: "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e",
       feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
     },
   ];
@@ -51,7 +74,7 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
 
   const chainLinkv2 = await ethers.getContract("ChainlinkPriceOracleV2", deployer);
   await chainLinkv2.setPriceFeeds(
-    chainlinkMappingUsd.map((c) => c.underlying),
+    chainlinkMappingUsd.map((c) => assets.find((a) => a.symbol === c.symbol).underlying),
     chainlinkMappingUsd.map((c) => c.aggregator),
     ChainlinkFeedBaseCurrency.USD
   );
@@ -60,7 +83,7 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
   const admin = await masterPriceOracle.admin();
   if (admin === ethers.constants.AddressZero) {
     let tx = await masterPriceOracle.initialize(
-      chainlinkMappingUsd.map((c) => c.underlying),
+      chainlinkMappingUsd.map((c) => assets.find((a) => a.symbol === c.symbol).underlying),
       Array(chainlinkMappingUsd.length).fill(chainLinkv2.address),
       cpo.address,
       deployer,
