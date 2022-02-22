@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/uniswap/IUniswapV2Pair.sol";
@@ -13,8 +12,6 @@ import "../../external/uniswap/IUniswapV2Factory.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract UniswapTwapPriceOracleV2Root {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @dev wtoken token contract address.
      */
@@ -107,7 +104,11 @@ contract UniswapTwapPriceOracleV2Root {
         // Return ERC20/ETH TWAP
         address pair = IUniswapV2Factory(factory).getPair(underlying, baseToken);
         uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
-        return (underlying < baseToken ? price0TWAP(pair) : price1TWAP(pair)).div(2 ** 56).mul(baseUnit).div(2 ** 56); // Scaled by 1e18, not 2 ** 112
+        return  (
+                    (
+                        (underlying < baseToken ? price0TWAP(pair) : price1TWAP(pair)) / (2 ** 56)
+                    ) * baseUnit
+                ) / (2 ** 56); // Scaled by 1e18, not 2 ** 112
     }
 
     /**
@@ -172,14 +173,18 @@ contract UniswapTwapPriceOracleV2Root {
         uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
 
         // Get TWAP price
-        uint256 twapPrice = (useToken0Price ? price0TWAP(pair) : price1TWAP(pair)).div(2 ** 56).mul(baseUnit).div(2 ** 56); // Scaled by 1e18, not 2 ** 112
+        uint256 twapPrice = (
+                                (
+                                    (useToken0Price ? price0TWAP(pair) : price1TWAP(pair)) / (2 ** 56)
+                                ) * baseUnit
+                            ) / (2 ** 56); // Scaled by 1e18, not 2 ** 112
     
         // Get spot price
         (uint reserve0, uint reserve1, ) = IUniswapV2Pair(pair).getReserves();
-        uint256 spotPrice = useToken0Price ? reserve1.mul(baseUnit).div(reserve0) : reserve0.mul(baseUnit).div(reserve1);
+        uint256 spotPrice = useToken0Price ? (reserve1 * baseUnit) / reserve0 : (reserve0 * baseUnit) / reserve1;
 
         // Get ratio and return deviation
-        uint256 ratio = spotPrice.mul(1e18).div(twapPrice);
+        uint256 ratio = (spotPrice * 1e18) / twapPrice;
         return ratio >= 1e18 ? ratio - 1e18 : 1e18 - ratio;
     }
     

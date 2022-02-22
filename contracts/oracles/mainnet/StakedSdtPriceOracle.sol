@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -18,8 +17,6 @@ import "../BasePriceOracle.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract StakedSdtPriceOracle is IPriceOracle, BasePriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @notice Fetches the token/ETH price, with 18 decimals of precision.
      * @param underlying The underlying token address for which to get the price.
@@ -38,7 +35,7 @@ contract StakedSdtPriceOracle is IPriceOracle, BasePriceOracle {
         address underlying = ICErc20(address(cToken)).underlying();
         // Comptroller needs prices to be scaled by 1e(36 - decimals)
         // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-        return _price(underlying).mul(1e18).div(10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
     }
 
     /**
@@ -48,6 +45,6 @@ contract StakedSdtPriceOracle is IPriceOracle, BasePriceOracle {
         Sanctuary sanctuary = Sanctuary(token);
         IERC20Upgradeable sdt = sanctuary.sdt();
         uint256 sdtEthPrice = BasePriceOracle(msg.sender).price(address(sdt));
-        return sdt.balanceOf(token).mul(sdtEthPrice).div(sanctuary.totalSupply());
+        return (sdt.balanceOf(token) * sdtEthPrice) / sanctuary.totalSupply();
     }
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
 import "../../external/compound/IPriceOracle.sol";
 import "../../external/compound/ICToken.sol";

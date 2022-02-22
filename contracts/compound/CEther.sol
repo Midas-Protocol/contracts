@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
 import "./CToken.sol";
 
@@ -137,7 +137,7 @@ contract CEther is CToken, CEtherInterface {
         return amount;
     }
 
-    function doTransferOut(address payable to, uint amount) override internal {
+    function doTransferOut(address to, uint amount) override internal {
         // Send the Ether and revert on failure
         (bool success, ) = to.call{value:amount}("");
         require(success, "doTransferOut failed");
@@ -155,13 +155,13 @@ contract CEther is CToken, CEtherInterface {
             fullMessage[i] = bytes(message)[i];
         }
 
-        fullMessage[i+0] = byte(uint8(32));
-        fullMessage[i+1] = byte(uint8(40));
-        fullMessage[i+2] = byte(uint8(48 + ( errCode / 1000 )));
-        fullMessage[i+3] = byte(uint8(48 + ( errCode / 100 % 10 )));
-        fullMessage[i+4] = byte(uint8(48 + ( errCode / 10 % 10 )));
-        fullMessage[i+5] = byte(uint8(48 + ( errCode % 10 )));
-        fullMessage[i+6] = byte(uint8(41));
+        fullMessage[i+0] = bytes1(uint8(32));
+        fullMessage[i+1] = bytes1(uint8(40));
+        fullMessage[i+2] = bytes1(uint8(48 + ( errCode / 1000 )));
+        fullMessage[i+3] = bytes1(uint8(48 + ( errCode / 100 % 10 )));
+        fullMessage[i+4] = bytes1(uint8(48 + ( errCode / 10 % 10 )));
+        fullMessage[i+5] = bytes1(uint8(48 + ( errCode % 10 )));
+        fullMessage[i+6] = bytes1(uint8(41));
 
         require(errCode == uint(Error.NO_ERROR), string(fullMessage));
     }

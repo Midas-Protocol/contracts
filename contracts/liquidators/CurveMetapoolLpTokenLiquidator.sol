@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
@@ -32,7 +32,7 @@ contract CurveMetaPoolLpTokenLiquidator is IRedemptionStrategy {
         // Remove liquidity from Curve pool in the form of one coin only (and store output as new collateral)
         ICurveStableSwap curvePool = ICurveStableSwap(address(inputToken));
         (uint8 curveCoinIndex, address underlying) = abi.decode(strategyData, (uint8, address));
-        curvePool.remove_liquidity_one_coin(inputAmount, int128(curveCoinIndex), 1);
+        curvePool.remove_liquidity_one_coin(inputAmount, int128(int8(curveCoinIndex)), 1);
         outputToken = IERC20Upgradeable(underlying == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE ? address(0) : underlying);
         outputAmount = address(outputToken) == address(0) ? address(this).balance : outputToken.balanceOf(address(this));
 

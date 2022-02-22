@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -20,8 +19,6 @@ import "../../external/synthetix/Proxy.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract SynthetixPriceOracle is IPriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @notice Returns the price in ETH of the token underlying `cToken`.
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
@@ -32,6 +29,6 @@ contract SynthetixPriceOracle is IPriceOracle {
         uint256 baseUnit = 10 ** uint(ERC20Upgradeable(underlying).decimals());
         underlying = Proxy(underlying).target(); // For some reason we have to use the logic contract instead of the proxy contract to get `resolver` and `currencyKey`
         ExchangeRates exchangeRates = ExchangeRates(MixinResolver(underlying).resolver().requireAndGetAddress("ExchangeRates", "Failed to get Synthetix's ExchangeRates contract address."));
-        return exchangeRates.effectiveValue(ISynth(underlying).currencyKey(), baseUnit, "ETH").mul(1e18).div(baseUnit);
+        return (exchangeRates.effectiveValue(ISynth(underlying).currencyKey(), baseUnit, "ETH") * 1e18) / baseUnit;
     }
 }

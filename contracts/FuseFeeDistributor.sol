@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/Create2Upgradeable.sol";
 import "./compound/CEtherDelegator.sol";
 import "./compound/CErc20Delegator.sol";
@@ -28,8 +27,8 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
         require(_defaultInterestFeeRate <= 1e18, "Interest fee rate cannot be more than 100%.");
         __Ownable_init();
         defaultInterestFeeRate = _defaultInterestFeeRate;
-        maxSupplyEth = uint256(-1);
-        maxUtilizationRate = uint256(-1);
+        maxSupplyEth = type(uint256).max;
+        maxUtilizationRate = type(uint256).max;
     }
 
     /**

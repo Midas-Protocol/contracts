@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
 import "../../external/compound/ICToken.sol";
@@ -16,8 +15,6 @@ import "../../external/alpha/Bank.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract AlphaHomoraV1PriceOracle is IPriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @dev Alpha Homora ibETH token contract object.
      */
@@ -30,6 +27,6 @@ contract AlphaHomoraV1PriceOracle is IPriceOracle {
      */
     function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
         require(ICErc20(address(cToken)).underlying() == address(IBETH));
-        return IBETH.totalETH().mul(1e18).div(IBETH.totalSupply());
+        return (IBETH.totalETH() * 1e18) / IBETH.totalSupply();
     }
 }

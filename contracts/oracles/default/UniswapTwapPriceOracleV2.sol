@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -19,8 +18,6 @@ import "./UniswapTwapPriceOracleV2Root.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract UniswapTwapPriceOracleV2 is Initializable, IPriceOracle, BasePriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @dev wtoken token contract address.
      */
@@ -67,7 +64,7 @@ contract UniswapTwapPriceOracleV2 is Initializable, IPriceOracle, BasePriceOracl
 
         // Get price, format, and return
         uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
-        return _price(underlying).mul(1e18).div(baseUnit);
+        return (_price(underlying) * 1e18) / baseUnit;
     }
     
     /**
@@ -79,7 +76,7 @@ contract UniswapTwapPriceOracleV2 is Initializable, IPriceOracle, BasePriceOracl
 
         // Return root oracle ERC20/ETH TWAP
         uint256 twap = rootOracle.price(underlying, baseToken, uniswapV2Factory);
-        return baseToken == address(wtoken) ? twap : twap.mul(BasePriceOracle(msg.sender).price(baseToken)).div(10 ** uint256(ERC20Upgradeable(baseToken).decimals()));
+        return baseToken == address(wtoken) ? twap : (twap * BasePriceOracle(msg.sender).price(baseToken)) / (10 ** uint256(ERC20Upgradeable(baseToken).decimals()));
     }
 
     /**
