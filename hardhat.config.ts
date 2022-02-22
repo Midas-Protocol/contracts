@@ -113,12 +113,6 @@ const config: HardhatUserConfig = {
       chainId: 56,
       url: urlOverride || process.env.BSC_PROVIDER_URL || "https://bsc-dataseed.binance.org/",
     },
-    "bsc-fork": {
-      forking: {
-        url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
-        blockNumber: 15466050,
-      },
-    },
     chapel: {
       accounts: { mnemonic },
       chainId: 97,
