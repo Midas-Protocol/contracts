@@ -37,7 +37,7 @@ jobs:
       - run: npm run test
 
   release:
-    needs: [test-and-build]
+    needs: [e2e-liquidation-tests, test-and-build]
     runs-on: ubuntu-latest
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
