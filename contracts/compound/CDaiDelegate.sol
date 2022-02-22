@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
 import "./CErc20Delegate.sol";
 
@@ -55,7 +55,7 @@ contract CDaiDelegate is CErc20Delegate {
         vatAddress = address(vat);
 
         // Approve moving our DAI into the vat through daiJoin
-        dai.approve(daiJoinAddress, uint(-1));
+        dai.approve(daiJoinAddress, type(uint).max);
 
         // Approve the pot to transfer our funds within the vat
         vat.hope(potAddress);
@@ -154,7 +154,7 @@ contract CDaiDelegate is CErc20Delegate {
      * @param to Address to transfer funds to
      * @param amount Amount of underlying to transfer
      */
-    function doTransferOut(address payable to, uint amount) override internal {
+    function doTransferOut(address to, uint amount) override internal {
         DaiJoinLike daiJoin = DaiJoinLike(daiJoinAddress);
         PotLike pot = PotLike(potAddress);
 
