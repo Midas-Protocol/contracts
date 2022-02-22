@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -19,8 +18,6 @@ import "../BasePriceOracle.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @notice Maps ERC20 token addresses to ETH-based Chainlink price feed contracts.
      */
@@ -128,12 +125,16 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
 
         if (baseCurrency == FeedBaseCurrency.ETH) {
             (, int256 tokenEthPrice, , , ) = feed.latestRoundData();
-            return tokenEthPrice >= 0 ? uint256(tokenEthPrice).mul(1e18).div(10 ** uint256(feed.decimals())) : 0;
+            return tokenEthPrice >= 0 ? (uint256(tokenEthPrice) * 1e18) / (10 ** uint256(feed.decimals())) : 0;
         } else if (baseCurrency == FeedBaseCurrency.USD) {
             (, int256 nativeTokenUsdPrice, , , ) = NATIVE_TOKEN_USD_PRICE_FEED.latestRoundData();
             if (nativeTokenUsdPrice <= 0) return 0;
             (, int256 tokenUsdPrice, , , ) = feed.latestRoundData();
-            return tokenUsdPrice >= 0 ? uint256(tokenUsdPrice).mul(1e26).div(10 ** uint256(feed.decimals())).div(uint256(nativeTokenUsdPrice)) : 0;
+            return tokenUsdPrice >= 0 ?
+                (
+                    (uint256(tokenUsdPrice) * 1e26) / (10 ** uint256(feed.decimals()))
+                ) / uint256(nativeTokenUsdPrice)
+                : 0;
         }
     }
 
@@ -161,6 +162,8 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
 
         // Format and return price
         uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
-        return underlyingDecimals <= 18 ? uint256(chainlinkPrice).mul(10 ** (18 - underlyingDecimals)) : uint256(chainlinkPrice).div(10 ** (underlyingDecimals - 18));
+        return underlyingDecimals <= 18 ?
+            uint256(chainlinkPrice) * (10 ** (18 - underlyingDecimals))
+            : uint256(chainlinkPrice) / (10 ** (underlyingDecimals - 18));
     }
 }

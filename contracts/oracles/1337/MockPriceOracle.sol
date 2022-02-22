@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -19,8 +18,6 @@ import "../BasePriceOracle.sol";
  * @author Carlo Mazzaferro <carlo.mazzaferro@gmail.com> (https://github.com/carlomazzaferro)
  */
 contract MockPriceOracle is IPriceOracle, BasePriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @notice The maxmimum number of seconds elapsed since the round was last updated before the price is considered stale. If set to 0, no limit is enforced.
      */
@@ -59,7 +56,7 @@ contract MockPriceOracle is IPriceOracle, BasePriceOracle {
         int256 tokenEthPrice = 1;
         uint r = random();
 
-        return uint256(tokenEthPrice).mul(1e18).div(r).div(1e18);
+        return ((uint256(tokenEthPrice) * 1e18) / r) / 1e18;
 
     }
 
@@ -87,6 +84,6 @@ contract MockPriceOracle is IPriceOracle, BasePriceOracle {
 
         // Format and return price
         uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
-        return underlyingDecimals <= 18 ? uint256(chainlinkPrice).mul(10 ** (18 - underlyingDecimals)) : uint256(chainlinkPrice).div(10 ** (underlyingDecimals - 18));
+        return underlyingDecimals <= 18 ? uint256(chainlinkPrice) * (10 ** (18 - underlyingDecimals)) : uint256(chainlinkPrice) / (10 ** (underlyingDecimals - 18));
     }
 }

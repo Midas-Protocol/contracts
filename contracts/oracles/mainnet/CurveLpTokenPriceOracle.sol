@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -20,8 +19,6 @@ import "../BasePriceOracle.sol";
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
 contract CurveLpTokenPriceOracle is IPriceOracle, BasePriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @notice Get the LP token price price for an underlying token address.
      * @param underlying The underlying token address for which to get the price (set to zero address for ETH).
@@ -40,7 +37,7 @@ contract CurveLpTokenPriceOracle is IPriceOracle, BasePriceOracle {
         address underlying = ICErc20(address(cToken)).underlying();
         // Comptroller needs prices to be scaled by 1e(36 - decimals)
         // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-        return _price(underlying).mul(1e18).div(10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
     }
 
     /**
@@ -62,7 +59,7 @@ contract CurveLpTokenPriceOracle is IPriceOracle, BasePriceOracle {
         }
 
         require(minPx != type(uint256).max, "No minimum underlying token price found.");
-        return minPx.mul(ICurvePool(pool).get_virtual_price()).div(1e18); // Use min underlying token prices
+        return (minPx * ICurvePool(pool).get_virtual_price()) / 1e18; // Use min underlying token prices
     }
 
     /**
