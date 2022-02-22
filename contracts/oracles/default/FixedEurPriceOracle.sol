@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -19,8 +18,6 @@ import "../BasePriceOracle.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract FixedEurPriceOracle is IPriceOracle, BasePriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @notice The maximum number of seconds elapsed since the round was last updated before the price is considered stale. If set to 0, no limit is enforced.
      */
@@ -62,7 +59,7 @@ contract FixedEurPriceOracle is IPriceOracle, BasePriceOracle {
         if (eurUsdPrice <= 0) return 0;
 
         // Return EUR/NATIVE price = EUR/USD price / NATIVE/USD price
-        return uint256(eurUsdPrice).mul(1e18).div(uint256(nativeUsdPrice));
+        return (uint256(eurUsdPrice) * 1e18) / uint256(nativeUsdPrice);
     }
 
     /**
@@ -84,6 +81,6 @@ contract FixedEurPriceOracle is IPriceOracle, BasePriceOracle {
         // Format and return price
         // Comptroller needs prices to be scaled by 1e(36 - decimals)
         // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-        return _price(underlying).mul(1e18).div(10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
     }
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
 import "./CToken.sol";
 import "./CErc20.sol";
@@ -786,7 +786,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
      *          account shortfall below collateral requirements)
      */
     function getAccountLiquidity(address account) public view returns (uint, uint, uint) {
-        (Error err, uint liquidity, uint shortfall) = getHypotheticalAccountLiquidityInternal(account, CToken(0), 0, 0);
+        (Error err, uint liquidity, uint shortfall) = getHypotheticalAccountLiquidityInternal(account, CToken(address(0)), 0, 0);
 
         return (uint(err), liquidity, shortfall);
     }
@@ -798,7 +798,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
      *          account shortfall below collateral requirements)
      */
     function getAccountLiquidityInternal(address account) internal view returns (Error, uint, uint) {
-        return getHypotheticalAccountLiquidityInternal(account, CToken(0), 0, 0);
+        return getHypotheticalAccountLiquidityInternal(account, CToken(address(0)), 0, 0);
     }
 
     /**

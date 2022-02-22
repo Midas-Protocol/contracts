@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -18,8 +17,6 @@ import "../BasePriceOracle.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract HarvestPriceOracle is IPriceOracle, BasePriceOracle {
-    using SafeMathUpgradeable for uint256;
-
     /**
      * @dev FARM ERC20 token contract.
      */
@@ -48,14 +45,14 @@ contract HarvestPriceOracle is IPriceOracle, BasePriceOracle {
         address underlying = ICErc20(address(cToken)).underlying();
         // Comptroller needs prices to be scaled by 1e(36 - decimals)
         // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-        return _price(underlying).mul(1e18).div(10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
     }
 
     /**
      * @notice Fetches the token/ETH price, with 18 decimals of precision.
      */
     function _price(address token) internal view returns (uint) {
-        if (token == address(IFARM)) return BasePriceOracle(msg.sender).price(FARM).mul(IFARM.getPricePerFullShare()).div(1e18);
+        if (token == address(IFARM)) return (BasePriceOracle(msg.sender).price(FARM) * IFARM.getPricePerFullShare()) / 1e18;
         else revert("Invalid token address passed to HarvestPriceOracle.");
     }
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
 import "./ComptrollerInterface.sol";
 import "./CTokenInterfaces.sol";
@@ -106,7 +106,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         /* Get the allowance, infinite for the account owner */
         uint startingAllowance = 0;
         if (spender == src) {
-            startingAllowance = uint(-1);
+            startingAllowance = type(uint).max;
         } else {
             startingAllowance = transferAllowances[src][spender];
         }
@@ -140,7 +140,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         accountTokens[dst] = dstTokensNew;
 
         /* Eat some of the allowance (if necessary) */
-        if (startingAllowance != uint(-1)) {
+        if (startingAllowance != type(uint).max) {
             transferAllowances[src][spender] = allowanceNew;
         }
 
@@ -626,7 +626,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      * @param redeemAmountIn The number of underlying tokens to receive from redeeming cTokens (only one of redeemTokensIn or redeemAmountIn may be non-zero)
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function redeemFresh(address payable redeemer, uint redeemTokensIn, uint redeemAmountIn) internal returns (uint) {
+    function redeemFresh(address redeemer, uint redeemTokensIn, uint redeemAmountIn) internal returns (uint) {
         require(redeemTokensIn == 0 || redeemAmountIn == 0, "one of redeemTokensIn or redeemAmountIn must be zero");
 
         RedeemLocalVars memory vars;
@@ -749,7 +749,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
       * @param borrowAmount The amount of the underlying asset to borrow
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
       */
-    function borrowFresh(address payable borrower, uint borrowAmount) internal returns (uint) {
+    function borrowFresh(address borrower, uint borrowAmount) internal returns (uint) {
         /* Fail if borrow not allowed */
         uint allowed = comptroller.borrowAllowed(address(this), borrower, borrowAmount);
         if (allowed != 0) {
@@ -896,7 +896,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         }
 
         /* If repayAmount == -1, repayAmount = accountBorrows */
-        if (repayAmount == uint(-1)) {
+        if (repayAmount == type(uint).max) {
             vars.repayAmount = vars.accountBorrows;
         } else {
             vars.repayAmount = repayAmount;
@@ -1003,7 +1003,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         }
 
         /* Fail if repayAmount = -1 */
-        if (repayAmount == uint(-1)) {
+        if (repayAmount == type(uint).max) {
             return (fail(Error.INVALID_CLOSE_AMOUNT_REQUESTED, FailureInfo.LIQUIDATE_CLOSE_AMOUNT_IS_UINT_MAX), 0);
         }
 
@@ -1200,7 +1200,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         }
 
         // Sanitize newAdminFeeMantissa
-        if (newAdminFeeMantissa == uint(-1)) newAdminFeeMantissa = adminFeeMantissa;
+        if (newAdminFeeMantissa == type(uint).max) newAdminFeeMantissa = adminFeeMantissa;
 
         // Get latest Fuse fee
         uint newFuseFeeMantissa = getPendingFuseFeeFromAdmin();
@@ -1553,7 +1553,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      *  If caller has not called checked protocol's balance, may revert due to insufficient cash held in the contract.
      *  If caller has checked protocol's balance, and verified it is >= amount, this should not revert in normal conditions.
      */
-    function doTransferOut(address payable to, uint amount) virtual internal {}
+    function doTransferOut(address to, uint amount) virtual internal {}
 
 
     /*** Reentrancy Guard ***/

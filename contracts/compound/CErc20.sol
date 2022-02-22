@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
 import "./CToken.sol";
 
@@ -155,7 +155,7 @@ contract CErc20 is CToken, CErc20Interface {
      *      Note: This wrapper safely handles non-standard ERC-20 tokens that do not return a value.
      *            See here: https://medium.com/coinmonks/missing-return-value-bug-at-least-130-tokens-affected-d67bf08521ca
      */
-    function doTransferOut(address payable to, uint amount) override virtual internal {
+    function doTransferOut(address to, uint amount) override virtual internal {
         _callOptionalReturn(abi.encodeWithSelector(EIP20NonStandardInterface(underlying).transfer.selector, to, amount), "TOKEN_TRANSFER_OUT_FAILED");
     }
 

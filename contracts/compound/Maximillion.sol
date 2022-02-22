@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
 import "./CEther.sol";
 
@@ -40,7 +40,7 @@ contract Maximillion {
         uint borrows = cEther_.borrowBalanceCurrent(borrower);
         if (received > borrows) {
             cEther_.repayBorrowBehalf{value:borrows}(borrower);
-            msg.sender.transfer(received - borrows);
+            payable(msg.sender).transfer(received - borrows);
         } else {
             cEther_.repayBorrowBehalf{value:received}(borrower);
         }
