@@ -13,6 +13,9 @@ import {MockAutofarmV2} from "./mocks/autofarm/MockAutofarmV2.sol";
 import {IStrategy} from "./mocks/autofarm/IStrategy.sol";
 import {FlywheelCore} from "../contracts/flywheel/FlywheelCore.sol";
 import {FlywheelDynamicRewards} from "../contracts/flywheel/rewards/FlywheelDynamicRewards.sol";
+import {IFlywheelBooster} from "../contracts/flywheel/interfaces/IFlywheelBooster.sol";
+import {IFlywheelCore} from "../contracts/flywheel/interfaces/IFlywheelCore.sol";
+import {Authority} from "@rari-capital/solmate/src/auth/Auth.sol";
 
 contract AutofarmERC4626Test is DSTest {
   using stdStorage for StdStorage;
@@ -22,8 +25,8 @@ contract AutofarmERC4626Test is DSTest {
   StdStorage stdstore;
 
   AutofarmERC4626 autofarmERC4626;
-  FlywheelCore flywheelCore;
-  FlywheelDynamicRewards flywheelDynamicRewards;
+  FlywheelCore flywheel;
+  FlywheelDynamicRewards flywheelRewards;
 
   MockERC20 testToken;
   MockERC20 autoToken;
@@ -31,6 +34,8 @@ contract AutofarmERC4626Test is DSTest {
   MockAutofarmV2 mockAutofarm;
 
   uint256 depositAmount = 100e18;
+  ERC20 marketKey;
+  address tester = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
 
   function setUp() public {
     testToken = new MockERC20("TestToken", "TST", 18);
@@ -46,14 +51,22 @@ contract AutofarmERC4626Test is DSTest {
       Authority(address(0))
     );
 
-    rewards = new FlywheelDynamicRewards(rewardToken, address(flywheel));
+    flywheelRewards = new FlywheelDynamicRewards(autoToken, address(flywheel));
 
-    flywheel.setFlywheelRewards(rewards);
+    autofarmERC4626 = new AutofarmERC4626(
+      testToken,
+      "TestVault",
+      "TSTV",
+      0,
+      IAutofarmV2(address(mockAutofarm)),
+      IFlywheelCore(address(flywheel))
+    );
+    marketKey = ERC20(address(autofarmERC4626));
+    flywheel.setFlywheelRewards(flywheelRewards);
+    flywheel.addMarketForRewards(marketKey);
 
     // Add mockStrategy to Autofarm
-    mockAutofarm.add(ERC20(address(testToken)), 0, address(mockStrategy));
-
-    autofarmERC4626 = new AutofarmERC4626(testToken, "TestVault", "TSTV", 0, IAutofarmV2(address(mockAutofarm)));
+    mockAutofarm.add(ERC20(address(testToken)), 1, address(mockStrategy));
   }
 
   function testInitalizedValues() public {
@@ -61,7 +74,7 @@ contract AutofarmERC4626Test is DSTest {
     assertEq(autofarmERC4626.symbol(), "TSTV");
     assertEq(address(autofarmERC4626.asset()), address(testToken));
     assertEq(address(autofarmERC4626.autofarm()), address(mockAutofarm));
-    //assertEq(mockAutofarm.poolLength(), 1);
+    assertEq(address(marketKey), address(autofarmERC4626));
   }
 
   function deposit() public {
@@ -104,9 +117,61 @@ contract AutofarmERC4626Test is DSTest {
     assertEq(autofarmERC4626.balanceOf(address(this)), 0);
   }
 
-  function testAccrueAutoOnDeposit() public {
+  function testAccumulatingAutoRewardsOnDeposit() public {
+    vm.roll(1);
     deposit();
     assertEq(autoToken.balanceOf(address(mockAutofarm)), 0);
     assertEq(autoToken.balanceOf(address(autofarmERC4626)), 0);
+    assertEq(autoToken.balanceOf(address(flywheel)), 0);
+    assertEq(autoToken.balanceOf(address(flywheelRewards)), 0);
+
+    vm.roll(2);
+    deposit();
+    assertEq(autoToken.balanceOf(address(mockAutofarm)), 0);
+    assertEq(autoToken.balanceOf(address(autofarmERC4626)), 0);
+    assertEq(autoToken.balanceOf(address(flywheel)), 8e15);
+    assertEq(autoToken.balanceOf(address(flywheelRewards)), 0);
+  }
+
+  function testAccumulatingAutoRewardsOnWithdrawal() public {
+    vm.roll(1);
+    deposit();
+    assertEq(autoToken.balanceOf(address(mockAutofarm)), 0);
+    assertEq(autoToken.balanceOf(address(autofarmERC4626)), 0);
+    assertEq(autoToken.balanceOf(address(flywheel)), 0);
+    assertEq(autoToken.balanceOf(address(flywheelRewards)), 0);
+
+    vm.roll(3);
+    autofarmERC4626.withdraw(depositAmount, address(this), address(this));
+    assertEq(autoToken.balanceOf(address(mockAutofarm)), 0);
+    assertEq(autoToken.balanceOf(address(autofarmERC4626)), 0);
+    assertEq(autoToken.balanceOf(address(flywheel)), 16e15);
+    assertEq(autoToken.balanceOf(address(flywheelRewards)), 0);
+  }
+
+  function testClaimRewards() public {
+    vm.roll(1);
+    deposit();
+    vm.roll(3);
+    autofarmERC4626.withdraw(depositAmount, address(this), address(this));
+    flywheel.claim(address(this));
+    assertEq(autoToken.balanceOf(address(this)), 16e15);
+  }
+
+  function testClaimForMultipleUser() public {
+    vm.roll(1);
+    deposit();
+    vm.startPrank(tester);
+    testToken.mint(tester, depositAmount);
+    testToken.approve(address(autofarmERC4626), depositAmount);
+    autofarmERC4626.deposit(depositAmount, tester);
+    vm.stopPrank();
+
+    vm.roll(3);
+    autofarmERC4626.withdraw(depositAmount, address(this), address(this));
+    flywheel.claim(address(this));
+    flywheel.claim(tester);
+    assertEq(autoToken.balanceOf(address(this)), 8e15);
+    assertEq(autoToken.balanceOf(address(this)), 8e15);
   }
 }
