@@ -8,6 +8,9 @@ import "../external/compound/ICToken.sol";
 import "../external/compound/ICErc20.sol";
 
 import "./BasePriceOracle.sol";
+import "./keydonix/UniswapOracle.sol";
+import "../../../uniswap-oracle/contracts/source/UniswapOracle.sol";
+import "./default/KeydonixUniswapTWAPPriceOracleV2.sol";
 
 /**
  * @title MasterPriceOracle
@@ -156,6 +159,24 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
         IPriceOracle oracle = oracles[underlying];
         if (address(oracle) != address(0)) return oracle.getUnderlyingPrice(cToken);
         if (address(defaultOracle) != address(0)) return defaultOracle.getUnderlyingPrice(cToken);
+        revert("Price oracle not found for this underlying token address.");
+    }
+
+    /**
+     * @notice Returns the price in ETH of the token underlying `cToken` by verifiying a user supplied proof of the price.
+     * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
+     * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
+     */
+    function getUnderlyingPrice(ICToken cToken, UniswapOracle.ProofData proofData) external override view returns (uint) {
+        // Get underlying ERC20 token address
+        address underlying = address(ICErc20(address(cToken)).underlying());
+
+        // Return 1e18 for WETH
+        if (underlying == wtoken) return 1e18;
+
+        // Get underlying price from assigned oracle
+        KeydonixUniswapTwapPriceOracleV2 oracle;
+        if (address(oracle) != address(0)) return oracle.getUnderlyingPrice(cToken, proofData);
         revert("Price oracle not found for this underlying token address.");
     }
 

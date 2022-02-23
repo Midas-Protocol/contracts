@@ -70,6 +70,21 @@ contract KeydonixUniswapTwapPriceOracleV2 is Initializable, IPriceOracle, BasePr
         return (_price(underlying) * 1e18) / baseUnit;
     }
 
+    function getUnderlyingPrice(ICToken cToken, UniswapOracle.ProofData proofData) external view returns (uint) {
+        // Return 1e18 for ETH
+        if (cToken.isCEther()) return 1e18;
+
+        // Get underlying ERC20 token address
+        address pair = IUniswapV2Factory(uniswapV2Factory).getPair(underlying, denominationToken);
+
+        // Get price, format, and return
+        uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
+
+        (uint256 keydonixPrice, uint256 blockNumber) = getPrice(IUniswapV2Pair(pair), denominationToken, minBlocksBack, maxBlocksBack, proofData);
+
+        return 0;
+    }
+
     /**
      * @dev Internal function returning the price in ETH of `underlying`.
      */
