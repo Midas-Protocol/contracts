@@ -1,0 +1,8 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+pragma solidity 0.8.10;
+
+import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
+
+interface IFlywheelCore {
+  function accrue(ERC20 market, address user) external returns (uint256);
+}

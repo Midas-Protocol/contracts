@@ -11,6 +11,8 @@ import {MockERC20} from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.so
 import {MockStrategy} from "./mocks/autofarm/MockStrategy.sol";
 import {MockAutofarmV2} from "./mocks/autofarm/MockAutofarmV2.sol";
 import {IStrategy} from "./mocks/autofarm/IStrategy.sol";
+import {FlywheelCore} from "../contracts/flywheel/FlywheelCore.sol";
+import {FlywheelDynamicRewards} from "../contracts/flywheel/rewards/FlywheelDynamicRewards.sol";
 
 contract AutofarmERC4626Test is DSTest {
   using stdStorage for StdStorage;
@@ -20,8 +22,11 @@ contract AutofarmERC4626Test is DSTest {
   StdStorage stdstore;
 
   AutofarmERC4626 autofarmERC4626;
+  FlywheelCore flywheelCore;
+  FlywheelDynamicRewards flywheelDynamicRewards;
 
   MockERC20 testToken;
+  MockERC20 autoToken;
   MockStrategy mockStrategy;
   MockAutofarmV2 mockAutofarm;
 
@@ -29,8 +34,21 @@ contract AutofarmERC4626Test is DSTest {
 
   function setUp() public {
     testToken = new MockERC20("TestToken", "TST", 18);
-    mockAutofarm = new MockAutofarmV2();
+    autoToken = new MockERC20("autoToken", "AUTO", 18);
+    mockAutofarm = new MockAutofarmV2(address(autoToken));
     mockStrategy = new MockStrategy(address(testToken), address(mockAutofarm));
+
+    flywheel = new FlywheelCore(
+      autoToken,
+      FlywheelDynamicRewards(address(0)),
+      IFlywheelBooster(address(0)),
+      address(this),
+      Authority(address(0))
+    );
+
+    rewards = new FlywheelDynamicRewards(rewardToken, address(flywheel));
+
+    flywheel.setFlywheelRewards(rewards);
 
     // Add mockStrategy to Autofarm
     mockAutofarm.add(ERC20(address(testToken)), 0, address(mockStrategy));
@@ -84,5 +102,11 @@ contract AutofarmERC4626Test is DSTest {
 
     // //Test that we burned the correct amount of token
     assertEq(autofarmERC4626.balanceOf(address(this)), 0);
+  }
+
+  function testAccrueAutoOnDeposit() public {
+    deposit();
+    assertEq(autoToken.balanceOf(address(mockAutofarm)), 0);
+    assertEq(autoToken.balanceOf(address(autofarmERC4626)), 0);
   }
 }

@@ -4,6 +4,7 @@ pragma solidity >=0.8.0;
 
 import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
 import {IStrategy} from "./IStrategy.sol";
+import {MockERC20} from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
 
 contract MockAutofarmV2 {
   struct UserInfo {
@@ -21,9 +22,16 @@ contract MockAutofarmV2 {
 
   PoolInfo[] public poolInfo; // Info of each pool.
   mapping(uint256 => mapping(address => UserInfo)) public userInfo; // Info of each user that stakes LP tokens.
-  uint256 public totalAllocPoint = 0; // Total allocation points. Must be the sum of all allocation points in all pools.
+  uint256 public totalAllocPoint; // Total allocation points. Must be the sum of all allocation points in all pools.
+  uint256 public AUTOMaxSupply = 80000e18;
+  uint256 public AUTOPerBlock = 8000000000000000; // AUTO tokens created per block
+  uint256 public startBlock = 3888888; //https://bscscan.com/block/countdown/3888888
 
-  constructor() {}
+  address public AUTO;
+
+  constructor(address _AUTO) {
+    AUTO = _AUTO;
+  }
 
   function poolLength() external view returns (uint256) {
     return poolInfo.length;
@@ -45,6 +53,37 @@ contract MockAutofarmV2 {
     );
   }
 
+  // Return reward multiplier over the given _from to _to block.
+  function getMultiplier(uint256 _from, uint256 _to) public view returns (uint256) {
+    if (ERC20(AUTO).totalSupply() >= AUTOMaxSupply) {
+      return 0;
+    }
+    return _to - _from;
+  }
+
+  // Update reward variables of the given pool to be up-to-date.
+  function updatePool(uint256 _pid) public {
+    PoolInfo storage pool = poolInfo[_pid];
+    if (block.number <= pool.lastRewardBlock) {
+      return;
+    }
+    uint256 sharesTotal = IStrategy(pool.strat).sharesTotal();
+    if (sharesTotal == 0) {
+      pool.lastRewardBlock = block.number;
+      return;
+    }
+    uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
+    if (multiplier <= 0) {
+      return;
+    }
+    uint256 AUTOReward = (multiplier * AUTOPerBlock * pool.allocPoint) / totalAllocPoint;
+
+    MockERC20(AUTO).mint(address(this), AUTOReward);
+
+    pool.accAUTOPerShare = pool.accAUTOPerShare + ((AUTOReward * 1e12) / sharesTotal);
+    pool.lastRewardBlock = block.number;
+  }
+
   function stakedWantTokens(uint256 _pid, address _user) external view returns (uint256) {
     PoolInfo storage pool = poolInfo[_pid];
     UserInfo storage user = userInfo[_pid][_user];
@@ -59,14 +98,15 @@ contract MockAutofarmV2 {
 
   // Want tokens moved from user -> AUTOFarm (AUTO allocation) -> Strat (compounding)
   function deposit(uint256 _pid, uint256 _wantAmt) public {
+    updatePool(_pid);
     PoolInfo storage pool = poolInfo[_pid];
     UserInfo storage user = userInfo[_pid][msg.sender];
 
     if (user.shares > 0) {
-      //   uint256 pending = user.shares.mul(pool.accAUTOPerShare).div(1e12).sub(user.rewardDebt);
-      //   if (pending > 0) {
-      //      safeAUTOTransfer(msg.sender, pending);
-      //   }
+      uint256 pending = ((user.shares * pool.accAUTOPerShare) / 1e12) - user.rewardDebt;
+      if (pending > 0) {
+        ERC20(AUTO).transfer(address(msg.sender), pending);
+      }
     }
     if (_wantAmt > 0) {
       ERC20(pool.want).transferFrom(address(msg.sender), address(this), _wantAmt);
@@ -79,6 +119,7 @@ contract MockAutofarmV2 {
   }
 
   function withdraw(uint256 _pid, uint256 _wantAmt) public {
+    updatePool(_pid);
     PoolInfo storage pool = poolInfo[_pid];
     UserInfo storage user = userInfo[_pid][msg.sender];
 
@@ -89,10 +130,10 @@ contract MockAutofarmV2 {
     require(sharesTotal > 0, "sharesTotal is 0");
 
     // Withdraw pending AUTO
-    // uint256 pending = user.shares.mul(pool.accAUTOPerShare).div(1e12).sub(user.rewardDebt);
-    // if (pending > 0) {
-    //   safeAUTOTransfer(msg.sender, pending);
-    // }
+    uint256 pending = ((user.shares * pool.accAUTOPerShare) / 1e12) - user.rewardDebt;
+    if (pending > 0) {
+      ERC20(AUTO).transfer(address(msg.sender), pending);
+    }
 
     // Withdraw want tokens
     uint256 amount = (user.shares * wantLockedTotal) / sharesTotal;
