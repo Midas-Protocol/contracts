@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.7.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.0;
 
 import "./CToken.sol";
 
 contract RewardsDistributorDelegatorStorage {
-    /// @notice Administrator for this contract
-    address public admin;
+  /// @notice Administrator for this contract
+  address public admin;
 
-    /// @notice Pending administrator for this contract
-    address public pendingAdmin;
+  /// @notice Pending administrator for this contract
+  address public pendingAdmin;
 
-    /// @notice Active brains of RewardsDistributor
-    address public implementation;
+  /// @notice Active brains of RewardsDistributor
+  address public implementation;
 }
 
 /**
@@ -22,44 +21,43 @@ contract RewardsDistributorDelegatorStorage {
  * RewardsDistributorDelegateStorageVX.
  */
 contract RewardsDistributorDelegateStorageV1 is RewardsDistributorDelegatorStorage {
-    /// @dev The token to reward (i.e., COMP)
-    address public rewardToken;
+  /// @dev The token to reward (i.e., COMP)
+  address public rewardToken;
 
-    struct CompMarketState {
-        // The market's last updated compBorrowIndex or compSupplyIndex
-        uint224 index;
+  struct CompMarketState {
+    // The market's last updated compBorrowIndex or compSupplyIndex
+    uint224 index;
+    // The block number the index was last updated at
+    uint32 block;
+  }
 
-        // The block number the index was last updated at
-        uint32 block;
-    }
+  /// @notice A list of all markets
+  CToken[] public allMarkets;
 
-    /// @notice A list of all markets
-    CToken[] public allMarkets;
+  /// @notice The portion of compRate that each market currently receives
+  mapping(address => uint256) public compSupplySpeeds;
 
-    /// @notice The portion of compRate that each market currently receives
-    mapping(address => uint) public compSupplySpeeds;
+  /// @notice The portion of compRate that each market currently receives
+  mapping(address => uint256) public compBorrowSpeeds;
 
-    /// @notice The portion of compRate that each market currently receives
-    mapping(address => uint) public compBorrowSpeeds;
+  /// @notice The COMP market supply state for each market
+  mapping(address => CompMarketState) public compSupplyState;
 
-    /// @notice The COMP market supply state for each market
-    mapping(address => CompMarketState) public compSupplyState;
+  /// @notice The COMP market borrow state for each market
+  mapping(address => CompMarketState) public compBorrowState;
 
-    /// @notice The COMP market borrow state for each market
-    mapping(address => CompMarketState) public compBorrowState;
+  /// @notice The COMP borrow index for each market for each supplier as of the last time they accrued COMP
+  mapping(address => mapping(address => uint256)) public compSupplierIndex;
 
-    /// @notice The COMP borrow index for each market for each supplier as of the last time they accrued COMP
-    mapping(address => mapping(address => uint)) public compSupplierIndex;
+  /// @notice The COMP borrow index for each market for each borrower as of the last time they accrued COMP
+  mapping(address => mapping(address => uint256)) public compBorrowerIndex;
 
-    /// @notice The COMP borrow index for each market for each borrower as of the last time they accrued COMP
-    mapping(address => mapping(address => uint)) public compBorrowerIndex;
+  /// @notice The COMP accrued but not yet transferred to each user
+  mapping(address => uint256) public compAccrued;
 
-    /// @notice The COMP accrued but not yet transferred to each user
-    mapping(address => uint) public compAccrued;
+  /// @notice The portion of COMP that each contributor receives per block
+  mapping(address => uint256) public compContributorSpeeds;
 
-    /// @notice The portion of COMP that each contributor receives per block
-    mapping(address => uint) public compContributorSpeeds;
-
-    /// @notice Last block at which a contributor's COMP rewards have been allocated
-    mapping(address => uint) public lastContributorBlock;
+  /// @notice Last block at which a contributor's COMP rewards have been allocated
+  mapping(address => uint256) public lastContributorBlock;
 }

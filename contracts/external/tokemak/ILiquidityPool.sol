@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity >=0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
@@ -9,6 +9,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 /// @notice Holders of fTokens earn rewards based on duration their tokens were deployed and the demand for that asset.
 /// @notice Holders of fTokens can redeem for underlying asset after issuing requestWithdrawal and waiting for the next cycle.
 interface ILiquidityPool {
-    /// @return Reference to the underlying ERC-20 contract
-    function underlyer() external view returns (ERC20Upgradeable);
+  /// @return Reference to the underlying ERC-20 contract
+  function underlyer() external view returns (ERC20Upgradeable);
 }

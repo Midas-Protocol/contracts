@@ -1,79 +1,138 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.7.0;
+pragma solidity >=0.8.0;
 
 abstract contract ComptrollerInterface {
-    /// @notice Indicator that this is a Comptroller contract (for inspection)
-    bool public constant isComptroller = true;
+  /// @notice Indicator that this is a Comptroller contract (for inspection)
+  bool public constant isComptroller = true;
 
-    /*** Assets You Are In ***/
+  /*** Assets You Are In ***/
 
-    function enterMarkets(address[] calldata cTokens) virtual external returns (uint[] memory);
-    function exitMarket(address cToken) virtual external returns (uint);
+  function enterMarkets(address[] calldata cTokens) external virtual returns (uint256[] memory);
 
-    /*** Policy Hooks ***/
+  function exitMarket(address cToken) external virtual returns (uint256);
 
-    function mintAllowed(address cToken, address minter, uint mintAmount) virtual external returns (uint);
-    function mintWithinLimits(address cToken, uint exchangeRateMantissa, uint accountTokens, uint mintAmount) virtual external returns (uint);
-    function mintVerify(address cToken, address minter, uint mintAmount, uint mintTokens) virtual external;
+  /*** Policy Hooks ***/
 
-    function redeemAllowed(address cToken, address redeemer, uint redeemTokens) virtual external returns (uint);
-    function redeemVerify(address cToken, address redeemer, uint redeemAmount, uint redeemTokens) virtual external;
+  function mintAllowed(
+    address cToken,
+    address minter,
+    uint256 mintAmount
+  ) external virtual returns (uint256);
 
-    function borrowAllowed(address cToken, address borrower, uint borrowAmount) virtual external returns (uint);
-    function borrowWithinLimits(address cToken, uint accountBorrowsNew) virtual external returns (uint);
-    function borrowVerify(address cToken, address borrower, uint borrowAmount) virtual external;
+  function mintWithinLimits(
+    address cToken,
+    uint256 exchangeRateMantissa,
+    uint256 accountTokens,
+    uint256 mintAmount
+  ) external virtual returns (uint256);
 
-    function repayBorrowAllowed(
-        address cToken,
-        address payer,
-        address borrower,
-        uint repayAmount) virtual external returns (uint);
-    function repayBorrowVerify(
-        address cToken,
-        address payer,
-        address borrower,
-        uint repayAmount,
-        uint borrowerIndex) virtual external;
+  function mintVerify(
+    address cToken,
+    address minter,
+    uint256 mintAmount,
+    uint256 mintTokens
+  ) external virtual;
 
-    function liquidateBorrowAllowed(
-        address cTokenBorrowed,
-        address cTokenCollateral,
-        address liquidator,
-        address borrower,
-        uint repayAmount) virtual external returns (uint);
-    function liquidateBorrowVerify(
-        address cTokenBorrowed,
-        address cTokenCollateral,
-        address liquidator,
-        address borrower,
-        uint repayAmount,
-        uint seizeTokens) virtual external;
+  function redeemAllowed(
+    address cToken,
+    address redeemer,
+    uint256 redeemTokens
+  ) external virtual returns (uint256);
 
-    function seizeAllowed(
-        address cTokenCollateral,
-        address cTokenBorrowed,
-        address liquidator,
-        address borrower,
-        uint seizeTokens) virtual external returns (uint);
-    function seizeVerify(
-        address cTokenCollateral,
-        address cTokenBorrowed,
-        address liquidator,
-        address borrower,
-        uint seizeTokens) virtual external;
+  function redeemVerify(
+    address cToken,
+    address redeemer,
+    uint256 redeemAmount,
+    uint256 redeemTokens
+  ) external virtual;
 
-    function transferAllowed(address cToken, address src, address dst, uint transferTokens) virtual external returns (uint);
-    function transferVerify(address cToken, address src, address dst, uint transferTokens) virtual external;
+  function borrowAllowed(
+    address cToken,
+    address borrower,
+    uint256 borrowAmount
+  ) external virtual returns (uint256);
 
-    /*** Liquidity/Liquidation Calculations ***/
+  function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external virtual returns (uint256);
 
-    function liquidateCalculateSeizeTokens(
-        address cTokenBorrowed,
-        address cTokenCollateral,
-        uint repayAmount) virtual external view returns (uint, uint);
-    
-    /*** Pool-Wide/Cross-Asset Reentrancy Prevention ***/
+  function borrowVerify(
+    address cToken,
+    address borrower,
+    uint256 borrowAmount
+  ) external virtual;
 
-    function _beforeNonReentrant() virtual external;
-    function _afterNonReentrant() virtual external;
+  function repayBorrowAllowed(
+    address cToken,
+    address payer,
+    address borrower,
+    uint256 repayAmount
+  ) external virtual returns (uint256);
+
+  function repayBorrowVerify(
+    address cToken,
+    address payer,
+    address borrower,
+    uint256 repayAmount,
+    uint256 borrowerIndex
+  ) external virtual;
+
+  function liquidateBorrowAllowed(
+    address cTokenBorrowed,
+    address cTokenCollateral,
+    address liquidator,
+    address borrower,
+    uint256 repayAmount
+  ) external virtual returns (uint256);
+
+  function liquidateBorrowVerify(
+    address cTokenBorrowed,
+    address cTokenCollateral,
+    address liquidator,
+    address borrower,
+    uint256 repayAmount,
+    uint256 seizeTokens
+  ) external virtual;
+
+  function seizeAllowed(
+    address cTokenCollateral,
+    address cTokenBorrowed,
+    address liquidator,
+    address borrower,
+    uint256 seizeTokens
+  ) external virtual returns (uint256);
+
+  function seizeVerify(
+    address cTokenCollateral,
+    address cTokenBorrowed,
+    address liquidator,
+    address borrower,
+    uint256 seizeTokens
+  ) external virtual;
+
+  function transferAllowed(
+    address cToken,
+    address src,
+    address dst,
+    uint256 transferTokens
+  ) external virtual returns (uint256);
+
+  function transferVerify(
+    address cToken,
+    address src,
+    address dst,
+    uint256 transferTokens
+  ) external virtual;
+
+  /*** Liquidity/Liquidation Calculations ***/
+
+  function liquidateCalculateSeizeTokens(
+    address cTokenBorrowed,
+    address cTokenCollateral,
+    uint256 repayAmount
+  ) external view virtual returns (uint256, uint256);
+
+  /*** Pool-Wide/Cross-Asset Reentrancy Prevention ***/
+
+  function _beforeNonReentrant() external virtual;
+
+  function _afterNonReentrant() external virtual;
 }

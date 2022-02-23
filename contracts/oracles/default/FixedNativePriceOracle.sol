@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.7.0;
+pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
@@ -17,25 +16,23 @@ import "../BasePriceOracle.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract FixedNativePriceOracle is IPriceOracle, BasePriceOracle {
-    using SafeMathUpgradeable for uint256;
+  /**
+   * @dev Returns the price in native token of `underlying` (implements `BasePriceOracle`).
+   */
+  function price(address underlying) external view override returns (uint256) {
+    return 1e18;
+  }
 
-    /**
-     * @dev Returns the price in native token of `underlying` (implements `BasePriceOracle`).
-     */
-    function price(address underlying) external override view returns (uint) {
-        return 1e18;
-    }
+  /**
+   * @notice Returns the price in native token of the token underlying `cToken`.
+   * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
+   * @return Price in native token of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
+   */
+  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
+    // Get underlying token address
+    address underlying = ICErc20(address(cToken)).underlying();
 
-    /**
-     * @notice Returns the price in native token of the token underlying `cToken`.
-     * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
-     * @return Price in native token of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
-     */
-    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
-        // Get underlying token address
-        address underlying = ICErc20(address(cToken)).underlying();
-
-        // Format and return price
-        return uint256(1e36).div(10 ** uint256(ERC20Upgradeable(underlying).decimals()));
-    }
+    // Format and return price
+    return uint256(1e36) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
+  }
 }

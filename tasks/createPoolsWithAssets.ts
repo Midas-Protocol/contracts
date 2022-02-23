@@ -88,20 +88,23 @@ task("pools:deposit", "Deposit collateral")
     );
   });
 
-task("pools:create-unhealthy", "Deposit collateral")
-  .addParam("name", "Name of the pool to be created if does not exist")
+task("pools:create-unhealthy-token-borrow-eth-collateral", "Borrow TOUCH against ETH")
+  .addParam(
+    "name",
+    "Name of the pool to be created if does not exist",
+    "unhealthy-token-borrow-eth-collateral",
+    types.string
+  )
   .addParam("supplyAccount", "Account from which to supply", "deployer", types.string)
   .addParam("borrowAccount", "Account from which to borrow", "alice", types.string)
-  .addParam("borrowToken", "Token used to borrow", "ETH")
-  .addParam("collateralToken", "name used as collateral", "TOUCH")
   .setAction(async (taskArgs, hre) => {
     await hre.run("set-price", { token: "ETH", price: "1" });
     await hre.run("set-price", { token: "TOUCH", price: "0.1" });
-    await hre.run("set-price", { token: "TRIBE", price: "0.2" });
+    await hre.run("set-price", { token: "TRIBE", price: "0.01" });
 
     const poolAddress = await hre.run("pools:create", { name: taskArgs.name });
 
-    // Supply ETH collateral from bob
+    // Supply ETH collateral from deployer
     await hre.run("pools:deposit", {
       account: taskArgs.supplyAccount,
       amount: 5,
@@ -121,13 +124,107 @@ task("pools:create-unhealthy", "Deposit collateral")
     });
     console.log("TOUCH deposited");
 
-    // Borrow TOUCH with ETH as collateral from bob
+    // Borrow TOUCH with ETH as collateral from deployer
     await hre.run("pools:borrow", {
       account: taskArgs.supplyAccount,
       amount: 10,
       symbol: "TOUCH",
       poolAddress,
     });
+    console.log(`borrowed TOUCH using ETH as collateral`);
+    await hre.run("set-price", { token: "TOUCH", price: "1", poolAddress });
+  });
 
+task("pools:create-unhealthy-eth-borrow-token-collateral", "Borrow ETH against TRIBE")
+  .addParam(
+    "name",
+    "Name of the pool to be created if does not exist",
+    "unhealthy-eth-borrow-token-collateral",
+    types.string
+  )
+  .addParam("supplyAccount", "Account from which to supply", "deployer", types.string)
+  .addParam("borrowAccount", "Account from which to borrow", "alice", types.string)
+  .setAction(async (taskArgs, hre) => {
+    await hre.run("set-price", { token: "ETH", price: "1" });
+    await hre.run("set-price", { token: "TOUCH", price: "1" });
+    await hre.run("set-price", { token: "TRIBE", price: "0.1" });
+
+    const poolAddress = await hre.run("pools:create", { name: taskArgs.name });
+
+    // Supply TRIBE collateral from bob
+    await hre.run("pools:deposit", {
+      account: taskArgs.supplyAccount,
+      amount: 50,
+      symbol: "TRIBE",
+      poolAddress,
+      enableCollateral: true,
+    });
+    console.log("TRIBE deposited");
+
+    // Supply ETH collateral from alice
+    await hre.run("pools:deposit", {
+      account: taskArgs.borrowAccount,
+      amount: 5,
+      symbol: "ETH",
+      poolAddress,
+      enableCollateral: false,
+    });
+    console.log("ETH deposited");
+
+    // Borrow ETH with TRIBE as collateral from bob
+    await hre.run("pools:borrow", {
+      account: taskArgs.supplyAccount,
+      amount: 1,
+      symbol: "ETH",
+      poolAddress,
+    });
+    console.log(`borrowed ETH using TRIBE as collateral`);
+    await hre.run("set-price", { token: "TRIBE", price: "0.01", poolAddress });
+  });
+
+task("pools:create-unhealthy-token-borrow-token-collateral", "Borrow ETH against TRIBE")
+  .addParam(
+    "name",
+    "Name of the pool to be created if does not exist",
+    "unhealthy-token-borrow-token-collateral",
+    types.string
+  )
+  .addParam("supplyAccount", "Account from which to supply", "deployer", types.string)
+  .addParam("borrowAccount", "Account from which to borrow", "alice", types.string)
+  .setAction(async (taskArgs, hre) => {
+    await hre.run("set-price", { token: "ETH", price: "1" });
+    await hre.run("set-price", { token: "TOUCH", price: "0.1" });
+    await hre.run("set-price", { token: "TRIBE", price: "0.01" });
+
+    const poolAddress = await hre.run("pools:create", { name: taskArgs.name });
+
+    // Supply TRIBE collateral from deployer
+    await hre.run("pools:deposit", {
+      account: taskArgs.supplyAccount,
+      amount: 50,
+      symbol: "TRIBE",
+      poolAddress,
+      enableCollateral: true,
+    });
+    console.log("TRIBE deposited");
+
+    // Supply TOUCH collateral from alice
+    await hre.run("pools:deposit", {
+      account: taskArgs.borrowAccount,
+      amount: 5,
+      symbol: "TOUCH",
+      poolAddress,
+      enableCollateral: false,
+    });
+    console.log("TOUCH deposited");
+
+    // Borrow TOUCH with TRIBE as collateral from deployer
+    await hre.run("pools:borrow", {
+      account: taskArgs.supplyAccount,
+      amount: 1,
+      symbol: "TOUCH",
+      poolAddress,
+    });
+    console.log(`borrowed TOUCH using TRIBE as collateral`);
     await hre.run("set-price", { token: "TOUCH", price: "1", poolAddress });
   });

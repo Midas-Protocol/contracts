@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-pragma solidity ^0.7.0;
+pragma solidity >=0.8.0;
 
 import "./ICToken.sol";
 
@@ -9,5 +9,5 @@ import "./ICToken.sol";
  * @author Compound
  */
 interface ICEther is ICToken {
-    function liquidateBorrow(address borrower, ICToken cTokenCollateral) external payable;
+  function liquidateBorrow(address borrower, ICToken cTokenCollateral) external payable;
 }

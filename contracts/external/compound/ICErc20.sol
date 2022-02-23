@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-pragma solidity ^0.7.0;
+pragma solidity >=0.8.0;
 
 import "./ICToken.sol";
 
@@ -9,6 +9,11 @@ import "./ICToken.sol";
  * @author Compound
  */
 interface ICErc20 is ICToken {
-    function underlying() external view returns (address);
-    function liquidateBorrow(address borrower, uint repayAmount, ICToken cTokenCollateral) external returns (uint);
+  function underlying() external view returns (address);
+
+  function liquidateBorrow(
+    address borrower,
+    uint256 repayAmount,
+    ICToken cTokenCollateral
+  ) external returns (uint256);
 }

@@ -14,6 +14,7 @@ import "./tasks/createPoolsWithAssets";
 import "./tasks/sendTestTokens";
 import "./tasks/oraclePrice";
 import "./tasks/getPoolData";
+import "./tasks/e2e";
 
 dotEnvConfig();
 
@@ -32,16 +33,7 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.8.10",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
-      },
-      {
-        version: "0.8.0",
+        version: "0.8.11",
         settings: {
           optimizer: {
             enabled: true,
@@ -58,25 +50,21 @@ const config: HardhatUserConfig = {
           },
         },
       },
-      {
-        version: "0.6.12",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
-      },
-      {
-        version: "0.5.16",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
-      },
     ],
+    overrides: {
+      "contracts/FusePoolLens.sol": {
+        version: "0.8.11",
+        settings: {
+          optimizer: {
+            // TODO when the subgraphs are implemented, remove the FusePoolAsset struct that makes the compiler throw
+            // CompilerError: Stack too deep when compiling inline assembly: Variable headStart is 1 slot(s) too deep inside the stack
+            // when enabled is true
+            enabled: false,
+            runs: 200,
+          },
+        },
+      },
+    },
   },
   external: {
     contracts: [

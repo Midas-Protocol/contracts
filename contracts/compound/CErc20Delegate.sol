@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.7.0;
+pragma solidity >=0.8.0;
 
 import "./CErc20.sol";
 import "./CDelegateInterface.sol";
@@ -10,31 +10,23 @@ import "./CDelegateInterface.sol";
  * @author Compound
  */
 contract CErc20Delegate is CDelegateInterface, CErc20 {
-  /**
-   * @notice Construct an empty delegate
-   */
-  constructor() {}
+    /**
+     * @notice Construct an empty delegate
+     */
+    constructor() {}
 
-  /**
-   * @notice Called by the delegator on a delegate to initialize it for duty
-   * @param data The encoded bytes data for any initialization
-   */
-  function _becomeImplementation(bytes calldata data) external virtual override {
-    require(msg.sender == address(this) || hasAdminRights(), "!self");
+    /**
+     * @notice Called by the delegator on a delegate to initialize it for duty
+     * @param data The encoded bytes data for any initialization
+     */
+    function _becomeImplementation(bytes calldata data) override virtual external {
 
-    // Make sure admin storage is set up correctly
-    __admin = address(0);
-    __adminHasRights = false;
-    __fuseAdminHasRights = false;
-  }
+        require(msg.sender == address(this) || hasAdminRights(), "!self");
 
-  /**
-   * @notice Called by the delegator on a delegate to forfeit its responsibility
-   */
-  function _resignImplementation() internal virtual {
-    // Shh -- we don't ever want this hook to be marked pure
-    if (false) {
-      implementation = address(0);
+        // Make sure admin storage is set up correctly
+        __admin = payable(0);
+        __adminHasRights = false;
+        __fuseAdminHasRights = false;
     }
   }
 

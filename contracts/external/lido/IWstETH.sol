@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.7.0;
+pragma solidity >=0.8.0;
 
 /**
  * @title StETH token wrapper with static balances.
@@ -19,21 +19,21 @@ pragma solidity ^0.7.0;
  *
  */
 interface IWstETH {
-    function stETH() external view returns (address);
+  function stETH() external view returns (address);
 
-    /**
-     * @notice Get amount of wstETH for a one stETH
-     * @return Amount of stETH for 1 wstETH
-     */
-    function stEthPerToken() external view returns (uint256);
+  /**
+   * @notice Get amount of wstETH for a one stETH
+   * @return Amount of stETH for 1 wstETH
+   */
+  function stEthPerToken() external view returns (uint256);
 
-    /**
-     * @notice Exchanges wstETH to stETH
-     * @param _wstETHAmount amount of wstETH to uwrap in exchange for stETH
-     * @dev Requirements:
-     *  - `_wstETHAmount` must be non-zero
-     *  - msg.sender must have at least `_wstETHAmount` wstETH.
-     * @return Amount of stETH user receives after unwrap
-     */
-    function unwrap(uint256 _wstETHAmount) external returns (uint256);
+  /**
+   * @notice Exchanges wstETH to stETH
+   * @param _wstETHAmount amount of wstETH to uwrap in exchange for stETH
+   * @dev Requirements:
+   *  - `_wstETHAmount` must be non-zero
+   *  - msg.sender must have at least `_wstETHAmount` wstETH.
+   * @return Amount of stETH user receives after unwrap
+   */
+  function unwrap(uint256 _wstETHAmount) external returns (uint256);
 }
