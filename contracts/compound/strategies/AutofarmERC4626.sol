@@ -5,6 +5,7 @@ import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
 import {ERC4626} from "../../utils/ERC4626.sol";
 import {SafeTransferLib} from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
 import {FixedPointMathLib} from "../../utils/FixedPointMathLib.sol";
+import {IFlywheelCore} from "../../flywheel/interfaces/IFlywheelCore.sol";
 
 interface IAutofarmV2 {
   function deposit(uint256 _pid, uint256 _wantAmt) external;
@@ -30,6 +31,7 @@ contract AutofarmERC4626 is ERC4626 {
   /* ========== STATE VARIABLES ========== */
   uint256 public immutable poolId;
   IAutofarmV2 public immutable autofarm;
+  IFlywheelCore public immutable flywheel;
 
   /* ========== CONSTRUCTOR ========== */
 
@@ -45,10 +47,12 @@ contract AutofarmERC4626 is ERC4626 {
     string memory _name,
     string memory _symbol,
     uint256 _poolId,
-    IAutofarmV2 _autofarm
+    IAutofarmV2 _autofarm,
+    IFlywheelCore _flywheel
   ) ERC4626(_asset, _name, _symbol) {
     poolId = _poolId;
     autofarm = _autofarm;
+    flywheel = _flywheel;
   }
 
   /* ========== VIEWS ========== */
@@ -70,10 +74,12 @@ contract AutofarmERC4626 is ERC4626 {
   function afterDeposit(uint256 amount, uint256) internal override {
     asset.approve(address(autofarm), amount);
     autofarm.deposit(poolId, amount);
+    flywheel.accrue(ERC20(address(this)), msg.sender);
   }
 
   /// @notice withdraws specified amount of underlying token if possible
   function beforeWithdraw(uint256 amount, uint256) internal override {
     autofarm.withdraw(poolId, amount);
+    flywheel.accrue(ERC20(address(this)), msg.sender);
   }
 }
