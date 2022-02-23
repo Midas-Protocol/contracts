@@ -8,6 +8,8 @@ import {FixedPointMathLib} from "../../utils/FixedPointMathLib.sol";
 import {IFlywheelCore} from "../../flywheel/interfaces/IFlywheelCore.sol";
 
 interface IAutofarmV2 {
+  function AUTO() external view returns (address);
+
   function deposit(uint256 _pid, uint256 _wantAmt) external;
 
   function withdraw(uint256 _pid, uint256 _wantAmt) external;
@@ -74,12 +76,16 @@ contract AutofarmERC4626 is ERC4626 {
   function afterDeposit(uint256 amount, uint256) internal override {
     asset.approve(address(autofarm), amount);
     autofarm.deposit(poolId, amount);
+    ERC20 AUTO = ERC20(autofarm.AUTO());
+    AUTO.approve(address(flywheel.flywheelRewards()), AUTO.balanceOf(address(this)));
     flywheel.accrue(ERC20(address(this)), msg.sender);
   }
 
   /// @notice withdraws specified amount of underlying token if possible
   function beforeWithdraw(uint256 amount, uint256) internal override {
     autofarm.withdraw(poolId, amount);
+    ERC20 AUTO = ERC20(autofarm.AUTO());
+    AUTO.approve(address(flywheel.flywheelRewards()), AUTO.balanceOf(address(this)));
     flywheel.accrue(ERC20(address(this)), msg.sender);
   }
 }

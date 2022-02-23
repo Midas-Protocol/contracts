@@ -4,5 +4,7 @@ pragma solidity 0.8.10;
 import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
 
 interface IFlywheelCore {
+  function flywheelRewards() external view returns (address);
+
   function accrue(ERC20 market, address user) external returns (uint256);
 }

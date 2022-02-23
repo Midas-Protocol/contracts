@@ -42,14 +42,9 @@ contract MockAutofarmV2 {
     uint256 _allocPoint,
     address _strat
   ) public {
+    totalAllocPoint = _allocPoint;
     poolInfo.push(
-      PoolInfo({
-        want: _want,
-        allocPoint: _allocPoint,
-        lastRewardBlock: block.timestamp,
-        accAUTOPerShare: 0,
-        strat: _strat
-      })
+      PoolInfo({want: _want, allocPoint: _allocPoint, lastRewardBlock: block.number, accAUTOPerShare: 0, strat: _strat})
     );
   }
 
@@ -58,6 +53,7 @@ contract MockAutofarmV2 {
     if (ERC20(AUTO).totalSupply() >= AUTOMaxSupply) {
       return 0;
     }
+
     return _to - _from;
   }
 
