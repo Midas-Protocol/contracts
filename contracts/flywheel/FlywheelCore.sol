@@ -3,6 +3,7 @@ pragma solidity 0.8.10;
 
 import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
 import {Auth, Authority} from "@rari-capital/solmate/src/auth/Auth.sol";
+import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
 import {IFlywheelRewards} from "./interfaces/IFlywheelRewards.sol";
 import {IFlywheelBooster} from "./interfaces/IFlywheelBooster.sol";
@@ -19,6 +20,8 @@ import {IFlywheelBooster} from "./interfaces/IFlywheelBooster.sol";
          Accrue should be called any time tokens are transferred, minted, or burned.
  */
 contract FlywheelCore is Auth {
+  using SafeTransferLib for ERC20;
+
   event AddMarket(address indexed newMarket);
 
   event FlywheelRewardsUpdate(address indexed oldFlywheelRewards, address indexed newFlywheelRewards);
@@ -113,13 +116,13 @@ contract FlywheelCore is Auth {
   }
 
   /// @notice claim rewards for a given owner
-  function claim(address owner) external {
+  function claimRewards(address owner) external {
     uint256 accrued = rewardsAccrued[owner];
 
     if (accrued != 0) {
       rewardsAccrued[owner] = 0;
 
-      rewardToken.transfer(owner, accrued);
+      rewardToken.safeTransfer(owner, accrued);
 
       emit ClaimRewards(owner, accrued);
     }

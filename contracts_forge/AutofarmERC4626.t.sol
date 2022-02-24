@@ -154,7 +154,7 @@ contract AutofarmERC4626Test is DSTest {
     deposit();
     vm.roll(3);
     autofarmERC4626.withdraw(depositAmount, address(this), address(this));
-    flywheel.claim(address(this));
+    flywheel.claimRewards(address(this));
     assertEq(autoToken.balanceOf(address(this)), 16e15);
   }
 
@@ -169,8 +169,8 @@ contract AutofarmERC4626Test is DSTest {
 
     vm.roll(3);
     autofarmERC4626.withdraw(depositAmount, address(this), address(this));
-    flywheel.claim(address(this));
-    flywheel.claim(tester);
+    flywheel.claimRewards(address(this));
+    flywheel.claimRewards(tester);
     assertEq(autoToken.balanceOf(address(this)), 8e15);
     assertEq(autoToken.balanceOf(address(this)), 8e15);
   }

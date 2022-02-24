@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.10;
 
-import "./FlywheelCore.sol";
+import "../FlywheelCore.sol";
 
 contract FuseFlywheelCore is FlywheelCore {
   bool public constant isRewardsDistributor = true;
+
+  bool public constant isFlywheel = true;
 
   constructor(
     ERC20 _rewardToken,
@@ -26,5 +28,9 @@ contract FuseFlywheelCore is FlywheelCore {
     address dst
   ) external {
     accrue(market, src, dst);
+  }
+
+  function compAccrued(address user) external view returns (uint256) {
+    return rewardsAccrued[user];
   }
 }
