@@ -85,7 +85,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @param to Address to transfer funds to
    * @param amount Amount of underlying to transfer
    */
-  function doTransferOut(address payable to, uint256 amount) internal override {
+  function doTransferOut(address payable to, uint256 amount) internal {
     plugin.withdraw(address(this), to, amount);
   }
 }
