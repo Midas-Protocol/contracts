@@ -10,23 +10,31 @@ import "./CDelegateInterface.sol";
  * @author Compound
  */
 contract CErc20Delegate is CDelegateInterface, CErc20 {
-    /**
-     * @notice Construct an empty delegate
-     */
-    constructor() {}
+  /**
+   * @notice Construct an empty delegate
+   */
+  constructor() {}
 
-    /**
-     * @notice Called by the delegator on a delegate to initialize it for duty
-     * @param data The encoded bytes data for any initialization
-     */
-    function _becomeImplementation(bytes calldata data) override virtual external {
+  /**
+   * @notice Called by the delegator on a delegate to initialize it for duty
+   * @param data The encoded bytes data for any initialization
+   */
+  function _becomeImplementation(bytes calldata data) external virtual override {
+    require(msg.sender == address(this) || hasAdminRights(), "!self");
 
-        require(msg.sender == address(this) || hasAdminRights(), "!self");
+    // Make sure admin storage is set up correctly
+    __admin = payable(0);
+    __adminHasRights = false;
+    __fuseAdminHasRights = false;
+  }
 
-        // Make sure admin storage is set up correctly
-        __admin = payable(0);
-        __adminHasRights = false;
-        __fuseAdminHasRights = false;
+  /**
+   * @notice Called by the delegator on a delegate to forfeit its responsibility
+   */
+  function _resignImplementation() internal virtual {
+    // Shh -- we don't ever want this hook to be marked pure
+    if (false) {
+      implementation = address(0);
     }
   }
 
