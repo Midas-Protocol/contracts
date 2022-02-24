@@ -24,7 +24,6 @@ describe("#safeLiquidate", () => {
     await deployments.fixture(); // ensure you start from a fresh deployments
     const { bob, deployer, rando } = await ethers.getNamedSigners();
     [poolAddress] = await createPool({});
-    const { chainId } = await ethers.provider.getNetwork();
     const assets = await getAssetsConf(poolAddress);
     const deployedAssets = await deployAssets(assets.assets, bob);
 

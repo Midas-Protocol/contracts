@@ -75,6 +75,7 @@ export async function deployAssets(assets: cERC20Conf[], signer?: SignerWithAddr
 
   const deployed: DeployedAsset[] = [];
   for (const assetConf of assets) {
+    console.log("deploying asset: ", assetConf);
     const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
       Fuse.JumpRateModelConf,
       assetConf,
@@ -102,7 +103,6 @@ export async function getAssetsConf(
   comptroller: string,
   interestRateModelAddress?: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> {
-  const { chainId } = await ethers.provider.getNetwork();
   if (!interestRateModelAddress) {
     const jrm = await ethers.getContract("JumpRateModel");
     interestRateModelAddress = jrm.address;
@@ -121,7 +121,7 @@ export const poolAssets = async (
     interestRateModel: interestRateModelAddress,
     name: "Ethereum",
     symbol: "ETH",
-    decimals: 8,
+    decimals: 18,
     admin: "true",
     collateralFactor: 75,
     reserveFactor: 20,
