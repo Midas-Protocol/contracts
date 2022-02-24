@@ -3,7 +3,7 @@ pragma solidity 0.8.10;
 
 import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
 import {Auth, Authority} from "@rari-capital/solmate/src/auth/Auth.sol";
-import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
+import {SafeTransferLib} from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
 
 import {IFlywheelRewards} from "./interfaces/IFlywheelRewards.sol";
 import {IFlywheelBooster} from "./interfaces/IFlywheelBooster.sol";
