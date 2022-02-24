@@ -25,6 +25,7 @@ describe("FusePoolDirectory", function () {
       console.log("alice: ", alice.address);
 
       spo = await ethers.getContract("SimplePriceOracle", alice);
+      const { chainId } = await ethers.provider.getNetwork();
 
       fpdWithSigner = await ethers.getContract("FusePoolDirectory", alice);
       implementationComptroller = await ethers.getContract("Comptroller");
@@ -58,7 +59,7 @@ describe("FusePoolDirectory", function () {
       const pool = pools[1].at(-1);
       expect(pool.comptroller).to.eq(poolAddress);
 
-      const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
+      const sdk = new Fuse(ethers.provider, chainId);
       const allPools = await sdk.contracts.FusePoolDirectory.callStatic.getAllPools();
       const { comptroller, name: _unfiliteredName } = await allPools.filter((p) => p.creator === alice.address).at(-1);
 

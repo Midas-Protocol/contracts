@@ -1,13 +1,13 @@
 import { SALT } from "../deploy/deploy";
 import { ChainDeployConfig } from "./helper";
 
-export const deployConfig1337: ChainDeployConfig = {
+export const deployConfig: ChainDeployConfig = {
   wtoken: "",
   nativeTokenName: "Ethereum (Local)",
   nativeTokenSymbol: "ETH",
 };
 
-export const deploy1337 = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
+export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer, alice, bob } = await getNamedAccounts();
 
   ////

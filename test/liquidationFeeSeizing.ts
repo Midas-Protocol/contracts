@@ -52,6 +52,7 @@ describe("Protocol Liquidation Seizing", () => {
   it("should calculate the right amounts of protocol, fee, total supply after liquidation", async function () {
     this.timeout(120_000);
     const { bob, rando } = await ethers.getNamedSigners();
+    const { chainId } = await ethers.provider.getNetwork();
 
     const borrowAmount = "0.0001";
     const repayAmount = utils.parseEther(borrowAmount).div(10);
@@ -125,6 +126,7 @@ describe("Protocol Liquidation Seizing", () => {
   it("should be able to withdraw fees to fuseFeeDistributor", async function () {
     this.timeout(120_000);
     const borrowAmount = "0.0001";
+    const { chainId } = await ethers.provider.getNetwork();
     await setupAndLiquidatePool(oracle, tribe, eth, poolAddress, simpleOracle, borrowAmount, liquidator);
 
     const feesAfterLiquidation = await tribeCToken.totalFuseFees();

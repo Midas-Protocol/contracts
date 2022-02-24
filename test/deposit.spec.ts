@@ -18,8 +18,9 @@ describe("Deposit flow tests", function () {
     beforeEach(async () => {
       this.timeout(120_000);
       const { bob } = await ethers.getNamedSigners();
+      const { chainId } = await ethers.provider.getNetwork();
       [poolAddress, poolImplementationAddress] = await createPool({ poolName: POOL_NAME, signer: bob });
-      const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
+      const sdk = new Fuse(ethers.provider, chainId);
       const assets = await getAssetsConf(poolAddress);
       await deployAssets(assets.assets, bob);
       const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
@@ -34,8 +35,9 @@ describe("Deposit flow tests", function () {
       let ethAsset: USDPricedFuseAsset;
       let ethAssetAfterBorrow: USDPricedFuseAsset;
       const { bob } = await ethers.getNamedSigners();
+      const { chainId } = await ethers.provider.getNetwork();
 
-      const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
+      const sdk = new Fuse(ethers.provider, chainId);
 
       const poolId = (await getPoolIndex(poolAddress, sdk)).toString();
       const assetsInPool = await sdk.fetchFusePoolData(poolId);

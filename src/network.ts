@@ -46,9 +46,16 @@ export const chainOracles = {
     OracleTypes.ChainlinkPriceOracleV2,
     OracleTypes.UniswapTwapPriceOracleV2,
   ],
+  [SupportedChains.bsc]: [
+    OracleTypes.MasterPriceOracle,
+    OracleTypes.ChainlinkPriceOracleV2,
+    OracleTypes.UniswapTwapPriceOracleV2,
+    OracleTypes.SimplePriceOracle,
+  ],
 };
 
 export const oracleConfig = (deployments: ChainDeployment, artifacts: Artifacts, availableOracles: Array<string>) => {
+  console.log('deployments: ', deployments);
   const asMap = new Map(availableOracles.map((o) => [o, { artifact: artifacts[o], address: deployments[o].address }]));
   return Object.fromEntries(asMap);
 };

@@ -18,10 +18,11 @@ describe("FusePoolDirectory", function () {
       this.timeout(120_000);
       const POOL_NAME = "TEST_BOB";
       const { bob } = await ethers.getNamedSigners();
+      const { chainId } = await ethers.provider.getNetwork();
 
       const spo = await ethers.getContract("SimplePriceOracle", bob);
 
-      const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
+      const sdk = new Fuse(ethers.provider, chainId);
 
       // 50% -> 0.5 * 1e18
       const bigCloseFactor = utils.parseEther((50 / 100).toString());

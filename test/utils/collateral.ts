@@ -4,6 +4,7 @@ import { assetInPool, getPoolIndex } from "./pool";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
+import { MasterPriceOracle, SimplePriceOracle } from "../../typechain";
 
 export async function getAsset(sdk: Fuse, poolAddress: string, underlyingSymbol: string): Promise<USDPricedFuseAsset> {
   const poolId = (await getPoolIndex(poolAddress, sdk)).toString();
@@ -30,8 +31,9 @@ export async function addCollateral(
   let amountBN: BigNumber;
   let cToken: Contract;
 
+  const { chainId } = await ethers.provider.getNetwork();
   const signer = await ethers.getSigner(depositorAddress);
-  const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
+  const sdk = new Fuse(ethers.provider, chainId);
 
   const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol);
 
@@ -78,8 +80,9 @@ export async function borrowCollateral(
   let tx: providers.TransactionResponse;
   let rec: providers.TransactionReceipt;
 
+  const { chainId } = await ethers.provider.getNetwork();
   const signer = await ethers.getSigner(borrowerAddress);
-  const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
+  const sdk = new Fuse(ethers.provider, chainId);
   const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol);
 
   const pool = await ethers.getContractAt("Comptroller", poolAddress, signer);
@@ -98,8 +101,15 @@ export async function borrowCollateral(
   console.log(assetAfterBorrow.supplyBalanceUSD, "Supply Balance USD: AFTER mint & borrow");
 }
 
-export async function setupLiquidatablePool(oracle, tribe, poolAddress, simpleOracle, borrowAmount) {
+export async function setupLiquidatablePool(
+  oracle: MasterPriceOracle,
+  tribe: any,
+  poolAddress: string,
+  simpleOracle: SimplePriceOracle,
+  borrowAmount: string
+) {
   const { alice, bob } = await ethers.getNamedSigners();
+  const { chainId } = await ethers.provider.getNetwork();
   let tx: providers.TransactionResponse;
   const originalPrice = await oracle.getUnderlyingPrice(tribe.assetAddress);
 
@@ -122,7 +132,15 @@ export async function setupLiquidatablePool(oracle, tribe, poolAddress, simpleOr
   await tx.wait();
 }
 
-export async function setupAndLiquidatePool(oracle, tribe, eth, poolAddress, simpleOracle, borrowAmount, liquidator) {
+export async function setupAndLiquidatePool(
+  oracle: MasterPriceOracle,
+  tribe: any,
+  eth: any,
+  poolAddress: string,
+  simpleOracle: SimplePriceOracle,
+  borrowAmount: string,
+  liquidator: any
+) {
   const { bob } = await ethers.getNamedSigners();
   await setupLiquidatablePool(oracle, tribe, poolAddress, simpleOracle, borrowAmount);
 
