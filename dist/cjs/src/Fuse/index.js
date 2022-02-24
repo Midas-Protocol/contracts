@@ -1,0 +1,858 @@
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+// Ethers
+const ethers_1 = require("ethers");
+const axios_1 = __importDefault(require("axios"));
+// ABIs
+const UniswapV3Pool_slim_json_1 = __importDefault(require("./abi/UniswapV3Pool.slim.json"));
+// InterestRate Models
+const JumpRateModel_1 = __importDefault(require("./irm/JumpRateModel"));
+const DAIInterestRateModelV2_1 = __importDefault(require("./irm/DAIInterestRateModelV2"));
+const WhitePaperInterestRateModel_1 = __importDefault(require("./irm/WhitePaperInterestRateModel"));
+const deployments_json_1 = __importDefault(require("../../deployments.json"));
+const Comptroller_json_1 = __importDefault(require("../../artifacts/contracts/compound/Comptroller.sol/Comptroller.json"));
+const Unitroller_json_1 = __importDefault(require("../../artifacts/contracts/compound/Unitroller.sol/Unitroller.json"));
+const CEtherDelegate_json_1 = __importDefault(require("../../artifacts/contracts/compound/CEtherDelegate.sol/CEtherDelegate.json"));
+const CEtherDelegator_json_1 = __importDefault(require("../../artifacts/contracts/compound/CEtherDelegator.sol/CEtherDelegator.json"));
+const CErc20Delegate_json_1 = __importDefault(require("../../artifacts/contracts/compound/CErc20Delegate.sol/CErc20Delegate.json"));
+const CErc20Delegator_json_1 = __importDefault(require("../../artifacts/contracts/compound/CErc20Delegator.sol/CErc20Delegator.json"));
+const CTokenInterface_json_1 = __importDefault(require("../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json"));
+const EIP20Interface_json_1 = __importDefault(require("../../artifacts/contracts/compound/EIP20Interface.sol/EIP20Interface.json"));
+const RewardsDistributorDelegator_json_1 = __importDefault(require("../../artifacts/contracts/compound/RewardsDistributorDelegator.sol/RewardsDistributorDelegator.json"));
+const PreferredPriceOracle_json_1 = __importDefault(require("../../artifacts/contracts/oracles/default/PreferredPriceOracle.sol/PreferredPriceOracle.json"));
+// Oracle Artifacts
+const MasterPriceOracle_json_1 = __importDefault(require("../../artifacts/contracts/oracles/MasterPriceOracle.sol/MasterPriceOracle.json"));
+const SimplePriceOracle_json_1 = __importDefault(require("../../artifacts/contracts/oracles/1337/SimplePriceOracle.sol/SimplePriceOracle.json"));
+const ChainlinkPriceOracleV2_json_1 = __importDefault(require("../../artifacts/contracts/oracles/default/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json"));
+// IRM Artifacts
+const JumpRateModel_json_1 = __importDefault(require("../../artifacts/contracts/compound/JumpRateModel.sol/JumpRateModel.json"));
+const DAIInterestRateModelV2_json_1 = __importDefault(require("../../artifacts/contracts/compound/DAIInterestRateModelV2.sol/DAIInterestRateModelV2.json"));
+const WhitePaperInterestRateModel_json_1 = __importDefault(require("../../artifacts/contracts/compound/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json"));
+const config_1 = require("./config");
+const network_1 = require("../network");
+const utils_1 = require("./utils");
+class Fuse {
+    constructor(web3Provider, chainId) {
+        var _a;
+        this.identifyInterestRateModelName = (irmAddress) => {
+            let irmName = null;
+            for (const [name, irm] of Object.entries(this.irms)) {
+                if (irm.address === irmAddress) {
+                    irmName = name;
+                    return irmName;
+                }
+            }
+            return irmName;
+        };
+        this.fetchFusePoolData = (poolId, address, coingeckoId) => __awaiter(this, void 0, void 0, function* () {
+            if (!poolId)
+                return undefined;
+            const { comptroller, name: _unfiliteredName, isPrivate, } = yield this.contracts.FusePoolDirectory.pools(Number(poolId));
+            const name = (0, utils_1.filterPoolName)(_unfiliteredName);
+            const assets = (yield this.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(comptroller, {
+                from: address,
+            })).map(utils_1.filterOnlyObjectProperties);
+            let totalLiquidityUSD = 0;
+            let totalSupplyBalanceUSD = 0;
+            let totalBorrowBalanceUSD = 0;
+            let totalSuppliedUSD = 0;
+            let totalBorrowedUSD = 0;
+            const price = ethers_1.utils.formatEther(
+            // prefer rari because it has caching
+            yield this.getUsdPriceBN(coingeckoId, true));
+            const promises = [];
+            const comptrollerContract = new ethers_1.Contract(comptroller, this.chainDeployment.Comptroller.abi, this.provider.getSigner());
+            for (let i = 0; i < assets.length; i++) {
+                const asset = assets[i];
+                // @todo aggregate the borrow/supply guardian paused into 1
+                promises.push(comptrollerContract.callStatic
+                    .borrowGuardianPaused(asset.cToken)
+                    .then((isPaused) => (asset.isPaused = isPaused)));
+                promises.push(comptrollerContract.callStatic
+                    .mintGuardianPaused(asset.cToken)
+                    .then((isPaused) => (asset.isSupplyPaused = isPaused)));
+                asset.supplyBalanceUSD = Number(ethers_1.utils.formatUnits(asset.supplyBalance)) * Number(ethers_1.utils.formatUnits(asset.underlyingPrice)) * price;
+                asset.borrowBalanceUSD = Number(ethers_1.utils.formatUnits(asset.borrowBalance)) * Number(ethers_1.utils.formatUnits(asset.underlyingPrice)) * price;
+                totalSupplyBalanceUSD += asset.supplyBalanceUSD;
+                totalBorrowBalanceUSD += asset.borrowBalanceUSD;
+                asset.totalSupplyUSD = Number(ethers_1.utils.formatUnits(asset.totalSupply)) * Number(ethers_1.utils.formatUnits(asset.underlyingPrice)) * price;
+                asset.totalBorrowUSD = Number(ethers_1.utils.formatUnits(asset.totalBorrow)) * Number(ethers_1.utils.formatUnits(asset.underlyingPrice)) * price;
+                totalSuppliedUSD += asset.totalSupplyUSD;
+                totalBorrowedUSD += asset.totalBorrowUSD;
+                asset.liquidityUSD = Number(ethers_1.utils.formatUnits(asset.liquidity)) * Number(ethers_1.utils.formatUnits(asset.underlyingPrice)) * price;
+                totalLiquidityUSD += asset.liquidityUSD;
+            }
+            yield Promise.all(promises);
+            return {
+                assets: assets.sort((a, b) => (b.liquidityUSD > a.liquidityUSD ? 1 : -1)),
+                comptroller,
+                name,
+                isPrivate,
+                totalLiquidityUSD,
+                totalSuppliedUSD,
+                totalBorrowedUSD,
+                totalSupplyBalanceUSD,
+                totalBorrowBalanceUSD,
+                oracle: "",
+                oracleModel: "",
+                admin: "",
+                isAdminWhitelisted: true,
+            };
+        });
+        this.provider = web3Provider;
+        this.chainId = chainId;
+        this.availableOracles = network_1.chainOracles[chainId];
+        this.chainDeployment =
+            deployments_json_1.default[chainId.toString()] &&
+                ((_a = deployments_json_1.default[chainId.toString()][Object.keys(deployments_json_1.default[chainId.toString()])[0]]) === null || _a === void 0 ? void 0 : _a.contracts);
+        if (!this.chainDeployment) {
+            throw new Error(`Chain deployment not found for chainId ${chainId}`);
+        }
+        this.chainSpecificAddresses = network_1.chainSpecificAddresses[chainId];
+        this.contracts = {
+            FusePoolDirectory: new ethers_1.Contract(this.chainDeployment.FusePoolDirectory.address, this.chainDeployment.FusePoolDirectory.abi, this.provider),
+            FusePoolLens: new ethers_1.Contract(this.chainDeployment.FusePoolLens.address, this.chainDeployment.FusePoolLens.abi, this.provider),
+            FusePoolLensSecondary: new ethers_1.Contract(this.chainDeployment.FusePoolLensSecondary.address, this.chainDeployment.FusePoolLensSecondary.abi, this.provider),
+            FuseSafeLiquidator: new ethers_1.Contract(this.chainDeployment.FuseSafeLiquidator.address, this.chainDeployment.FuseSafeLiquidator.abi, this.provider),
+            FuseFeeDistributor: new ethers_1.Contract(this.chainDeployment.FuseFeeDistributor.address, this.chainDeployment.FuseFeeDistributor.abi, this.provider),
+        };
+        this.artifacts = {
+            Comptroller: Comptroller_json_1.default,
+            Unitroller: Unitroller_json_1.default,
+            CEtherDelegate: CEtherDelegate_json_1.default,
+            CEtherDelegator: CEtherDelegator_json_1.default,
+            CErc20Delegate: CErc20Delegate_json_1.default,
+            CErc20Delegator: CErc20Delegator_json_1.default,
+            CTokenInterfaces: CTokenInterface_json_1.default,
+            EIP20Interface: EIP20Interface_json_1.default,
+            RewardsDistributorDelegator: RewardsDistributorDelegator_json_1.default,
+            PreferredPriceOracle: PreferredPriceOracle_json_1.default,
+            JumpRateModel: JumpRateModel_json_1.default,
+            DAIInterestRateModelV2: DAIInterestRateModelV2_json_1.default,
+            WhitePaperInterestRateModel: WhitePaperInterestRateModel_json_1.default,
+            ChainlinkPriceOracleV2: ChainlinkPriceOracleV2_json_1.default,
+            MasterPriceOracle: MasterPriceOracle_json_1.default,
+            SimplePriceOracle: SimplePriceOracle_json_1.default,
+        };
+        this.irms = (0, network_1.irmConfig)(this.chainDeployment, this.artifacts);
+        this.oracles = (0, network_1.oracleConfig)(this.chainDeployment, this.artifacts, this.availableOracles);
+    }
+    // TODO: probably should determine this by chain
+    getUsdPriceBN(coingeckoId = 'ethereum', asBigNumber = false) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
+            const UsdPrice = (yield axios_1.default.get(`https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=${coingeckoId}`))
+                .data[coingeckoId].usd;
+            if (asBigNumber) {
+                return ethers_1.utils.parseUnits(UsdPrice.toString(), 18);
+            }
+            return UsdPrice;
+        });
+    }
+    deployPool(poolName, enforceWhitelist, closeFactor, liquidationIncentive, priceOracle, // Contract address
+    priceOracleConf, options, // We might need to add sender as argument. Getting address from options will colide with the override arguments in ethers contract method calls. It doesnt take address.
+    whitelist // An array of whitelisted addresses
+    ) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // 2. Deploy Comptroller implementation if necessary
+            let implementationAddress = this.chainDeployment.Comptroller.address;
+            if (!implementationAddress) {
+                const comptrollerContract = new ethers_1.ContractFactory(this.artifacts.Comptroller.abi, this.artifacts.Comptroller.bytecode, this.provider.getSigner(options.from));
+                const deployedComptroller = yield comptrollerContract.deploy();
+                implementationAddress = deployedComptroller.address;
+            }
+            //3. Register new pool with FusePoolDirectory
+            let receipt;
+            try {
+                const contract = this.contracts.FusePoolDirectory.connect(this.provider.getSigner(options.from));
+                const tx = yield contract.deployPool(poolName, implementationAddress, enforceWhitelist, closeFactor, liquidationIncentive, priceOracle);
+                receipt = yield tx.wait();
+                console.log(`Deployment of pool ${poolName} succeeded!`);
+            }
+            catch (error) {
+                throw Error("Deployment and registration of new Fuse pool failed: " + (error.message ? error.message : error));
+            }
+            //4. Compute Unitroller address
+            const saltsHash = ethers_1.utils.solidityKeccak256(["address", "string", "uint"], [options.from, poolName, receipt.blockNumber]);
+            const byteCodeHash = ethers_1.utils.keccak256(this.artifacts.Unitroller.bytecode);
+            const poolAddress = ethers_1.utils.getCreate2Address(this.chainDeployment.FusePoolDirectory.address, saltsHash, byteCodeHash);
+            const unitroller = new ethers_1.Contract(poolAddress, this.artifacts.Unitroller.abi, this.provider.getSigner(options.from));
+            // Accept admin status via Unitroller
+            try {
+                const tx = yield unitroller._acceptAdmin();
+                const receipt = yield tx.wait();
+                console.log(receipt.status, "Accepted admin status for admin: ");
+            }
+            catch (error) {
+                throw Error("Accepting admin status failed: " + (error.message ? error.message : error));
+            }
+            // Whitelist
+            console.log("enforceWhitelist: ", enforceWhitelist);
+            if (enforceWhitelist) {
+                let comptroller = new ethers_1.Contract(poolAddress, this.artifacts.Comptroller.abi, this.provider.getSigner(options.from));
+                // Already enforced so now we just need to add the addresses
+                console.log("whitelist: ", whitelist);
+                yield comptroller._setWhitelistStatuses(whitelist, Array(whitelist.length).fill(true));
+            }
+            return [poolAddress, implementationAddress, priceOracle];
+        });
+    }
+    getOracleContractFactory(contractName, signer) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let oracleArtifact;
+            switch (contractName) {
+                case "ChainlinkPriceOracleV2": {
+                    oracleArtifact = this.oracles.ChainlinkPriceOracleV2.artifact;
+                    break;
+                }
+                default:
+                    throw Error(`Oracle contract ${contractName} not found`);
+            }
+            return new ethers_1.ContractFactory(oracleArtifact.abi, oracleArtifact.bytecode, this.provider.getSigner(signer));
+        });
+    }
+    deployAsset(irmConf, cTokenConf, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let assetAddress;
+            let implementationAddress;
+            let receipt;
+            // Deploy new interest rate model via SDK if requested
+            if (["WhitePaperInterestRateModel", "JumpRateModel", "DAIInterestRateModelV2"].indexOf(irmConf.interestRateModel) >=
+                0) {
+                try {
+                    irmConf.interestRateModel = yield this.deployInterestRateModel(options, irmConf.interestRateModel, irmConf.interestRateModelParams); // TODO: anchorMantissa
+                }
+                catch (error) {
+                    throw Error("Deployment of interest rate model failed: " + (error.message ? error.message : error));
+                }
+            }
+            // Deploy new asset to existing pool via SDK
+            try {
+                [assetAddress, implementationAddress, receipt] = yield this.deployCToken(cTokenConf, options);
+            }
+            catch (error) {
+                throw Error("Deployment of asset to Fuse pool failed: " + (error.message ? error.message : error));
+            }
+            return [assetAddress, implementationAddress, irmConf.interestRateModel, receipt];
+        });
+    }
+    deployInterestRateModel(options, model, conf) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Default model = JumpRateModel
+            if (!model) {
+                model = "JumpRateModel";
+            }
+            // Get deployArgs
+            let deployArgs = [];
+            let modelArtifact;
+            switch (model) {
+                case "JumpRateModel":
+                    if (!conf)
+                        conf = {
+                            baseRatePerYear: "20000000000000000",
+                            multiplierPerYear: "200000000000000000",
+                            jumpMultiplierPerYear: "2000000000000000000",
+                            kink: "900000000000000000",
+                        };
+                    deployArgs = [conf.baseRatePerYear, conf.multiplierPerYear, conf.jumpMultiplierPerYear, conf.kink];
+                    modelArtifact = this.artifacts.JumpRateModel;
+                    break;
+                case "DAIInterestRateModelV2":
+                    if (!conf)
+                        conf = {
+                            jumpMultiplierPerYear: "2000000000000000000",
+                            kink: "900000000000000000",
+                        };
+                    deployArgs = [
+                        conf.jumpMultiplierPerYear,
+                        conf.kink,
+                        this.chainSpecificAddresses.DAI_POT,
+                        this.chainSpecificAddresses.DAI_JUG,
+                    ];
+                    modelArtifact = this.artifacts.DAIInterestRateModelV2;
+                    break;
+                case "WhitePaperInterestRateModel":
+                    if (!conf)
+                        conf = {
+                            baseRatePerYear: "20000000000000000",
+                            multiplierPerYear: "200000000000000000",
+                        };
+                    deployArgs = [conf.baseRatePerYear, conf.multiplierPerYear];
+                    modelArtifact = this.artifacts.WhitePaperInterestRateModel;
+                    break;
+                default:
+                    throw "IRM model specified is invalid";
+            }
+            // Deploy InterestRateModel
+            const interestRateModelContract = new ethers_1.ContractFactory(modelArtifact.abi, modelArtifact.bytecode, this.provider.getSigner(options.from));
+            const deployedInterestRateModel = yield interestRateModelContract.deploy(...deployArgs);
+            return deployedInterestRateModel.address;
+        });
+    }
+    deployCToken(conf, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // BigNumbers
+            // 10% -> 0.1 * 1e18
+            const reserveFactorBN = ethers_1.utils.parseEther((conf.reserveFactor / 100).toString());
+            // 5% -> 0.05 * 1e18
+            const adminFeeBN = ethers_1.utils.parseEther((conf.adminFee / 100).toString());
+            // 50% -> 0.5 * 1e18
+            // TODO: find out if this is a number or string. If its a number, parseEther will not work. Also parse Units works if number is between 0 - 0.9
+            const collateralFactorBN = ethers_1.utils.parseEther((conf.collateralFactor / 100).toString());
+            // Check collateral factor
+            if (!collateralFactorBN.gte(ethers_1.constants.Zero) || collateralFactorBN.gt(ethers_1.utils.parseEther("0.9")))
+                throw Error("Collateral factor must range from 0 to 0.9.");
+            // Check reserve factor + admin fee + Fuse fee
+            if (!reserveFactorBN.gte(ethers_1.constants.Zero))
+                throw Error("Reserve factor cannot be negative.");
+            if (!adminFeeBN.gte(ethers_1.constants.Zero))
+                throw Error("Admin fee cannot be negative.");
+            // If reserveFactor or adminFee is greater than zero, we get fuse fee.
+            // Sum of reserveFactor and adminFee should not be greater than fuse fee. ? i think
+            if (reserveFactorBN.gt(ethers_1.constants.Zero) || adminFeeBN.gt(ethers_1.constants.Zero)) {
+                const fuseFee = yield this.contracts.FuseFeeDistributor.interestFeeRate();
+                if (reserveFactorBN.add(adminFeeBN).add(ethers_1.BigNumber.from(fuseFee)).gt(ethers_1.constants.WeiPerEther))
+                    throw Error("Sum of reserve factor and admin fee should range from 0 to " + (1 - parseInt(fuseFee) / 1e18) + ".");
+            }
+            return conf.underlying !== undefined &&
+                conf.underlying !== null &&
+                conf.underlying.length > 0 &&
+                !ethers_1.BigNumber.from(conf.underlying).isZero()
+                ? yield this.deployCErc20(conf, options, this.chainDeployment.CErc20Delegate.address ? this.chainDeployment.CErc20Delegate.address : null)
+                : yield this.deployCEther(conf, options, this.chainDeployment.CEtherDelegate.address ? this.chainDeployment.CEtherDelegate.address : null);
+        });
+    }
+    deployCEther(conf, options, implementationAddress) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const reserveFactorBN = ethers_1.utils.parseUnits((conf.reserveFactor / 100).toString());
+            const adminFeeBN = ethers_1.utils.parseUnits((conf.adminFee / 100).toString());
+            const collateralFactorBN = ethers_1.utils.parseUnits((conf.collateralFactor / 100).toString());
+            // Deploy CEtherDelegate implementation contract if necessary
+            if (!implementationAddress) {
+                const cEtherDelegateFactory = new ethers_1.ContractFactory(this.artifacts.CEtherDelegate.abi, this.artifacts.CEtherDelegate.bytecode, this.provider.getSigner(options.from));
+                const cEtherDelegateDeployed = yield cEtherDelegateFactory.deploy();
+                implementationAddress = cEtherDelegateDeployed.address;
+            }
+            let deployArgs = [
+                conf.comptroller,
+                conf.interestRateModel,
+                conf.name,
+                conf.symbol,
+                implementationAddress,
+                "0x00",
+                reserveFactorBN,
+                adminFeeBN,
+            ];
+            const abiCoder = new ethers_1.utils.AbiCoder();
+            const constructorData = abiCoder.encode(["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"], deployArgs);
+            const comptroller = new ethers_1.Contract(conf.comptroller, this.artifacts.Comptroller.abi, this.provider.getSigner(options.from));
+            const comptrollerWithSigner = comptroller.connect(this.provider.getSigner(options.from));
+            const errorCode = yield comptroller.callStatic._deployMarket("0x0000000000000000000000000000000000000000", constructorData, collateralFactorBN);
+            if (errorCode.toNumber() !== 0) {
+                throw `Failed to _deployMarket: ${Fuse.COMPTROLLER_ERROR_CODES[errorCode.toNumber()]}`;
+            }
+            const tx = yield comptrollerWithSigner._deployMarket("0x0000000000000000000000000000000000000000", constructorData, collateralFactorBN);
+            const receipt = yield tx.wait();
+            if (receipt.status != ethers_1.constants.One.toNumber()) {
+                throw "Failed to deploy market ";
+            }
+            const saltsHash = ethers_1.utils.solidityKeccak256(["address", "address", "uint"], [conf.comptroller, "0x0000000000000000000000000000000000000000", receipt.blockNumber]);
+            const byteCodeHash = ethers_1.utils.keccak256(this.artifacts.CEtherDelegator.bytecode + constructorData.substring(2));
+            const cEtherDelegatorAddress = ethers_1.utils.getCreate2Address(this.chainDeployment.FuseFeeDistributor.address, saltsHash, byteCodeHash);
+            // Return cToken proxy and implementation contract addresses
+            return [cEtherDelegatorAddress, implementationAddress, receipt];
+        });
+    }
+    deployCErc20(conf, options, implementationAddress // cERC20Delegate implementation
+    ) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const reserveFactorBN = ethers_1.utils.parseUnits((conf.reserveFactor / 100).toString());
+            const adminFeeBN = ethers_1.utils.parseUnits((conf.adminFee / 100).toString());
+            const collateralFactorBN = ethers_1.utils.parseUnits((conf.collateralFactor / 100).toString());
+            // Get Comptroller
+            const comptroller = new ethers_1.Contract(conf.comptroller, this.artifacts.Comptroller.abi, this.provider.getSigner(options.from));
+            // Check for price feed assuming !bypassPriceFeedCheck
+            if (!conf.bypassPriceFeedCheck)
+                yield this.checkForCErc20PriceFeed(comptroller, conf);
+            // Deploy CErc20Delegate implementation contract if necessary
+            if (!implementationAddress) {
+                if (!conf.delegateContractName)
+                    conf.delegateContractName = "CErc20Delegate";
+                let delegateContractArtifact;
+                if (conf.delegateContractName === "CErc20Delegate") {
+                    delegateContractArtifact = this.artifacts.CErc20Delegate;
+                }
+                else {
+                    delegateContractArtifact = this.artifacts.CEtherDelegate;
+                }
+                const cErc20Delegate = new ethers_1.ContractFactory(delegateContractArtifact.abi, delegateContractArtifact.bytecode, this.provider.getSigner(options.from));
+                const cErc20DelegateDeployed = yield cErc20Delegate.deploy();
+                implementationAddress = cErc20DelegateDeployed.address;
+            }
+            // Deploy CEtherDelegator proxy contract
+            let deployArgs = [
+                conf.underlying,
+                conf.comptroller,
+                conf.interestRateModel,
+                conf.name,
+                conf.symbol,
+                implementationAddress,
+                "0x00",
+                reserveFactorBN,
+                adminFeeBN,
+            ];
+            const abiCoder = new ethers_1.utils.AbiCoder();
+            const constructorData = abiCoder.encode(["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"], deployArgs);
+            const errorCode = yield comptroller.callStatic._deployMarket(false, constructorData, collateralFactorBN);
+            if (errorCode.toNumber() !== 0) {
+                throw `Failed to _deployMarket: ${Fuse.COMPTROLLER_ERROR_CODES[errorCode.toNumber()]}`;
+            }
+            const tx = yield comptroller._deployMarket(false, constructorData, collateralFactorBN);
+            const receipt = yield tx.wait();
+            if (receipt.status != ethers_1.constants.One.toNumber())
+                // throw "Failed to deploy market with error code: " + Fuse.COMPTROLLER_ERROR_CODES[errorCode];
+                throw "Failed to deploy market ";
+            const saltsHash = ethers_1.utils.solidityKeccak256(["address", "address", "uint"], [conf.comptroller, conf.underlying, receipt.blockNumber]);
+            const byteCodeHash = ethers_1.utils.keccak256(this.artifacts.CErc20Delegator.bytecode + constructorData.substring(2));
+            const cErc20DelegatorAddress = ethers_1.utils.getCreate2Address(this.chainDeployment.FuseFeeDistributor.address, saltsHash, byteCodeHash);
+            // Return cToken proxy and implementation contract addresses
+            return [cErc20DelegatorAddress, implementationAddress, receipt];
+        });
+    }
+    identifyPriceOracle(priceOracleAddress) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Get PriceOracle type from runtime bytecode hash
+            const runtimeBytecodeHash = ethers_1.utils.keccak256(yield this.provider.getCode(priceOracleAddress));
+            for (const [name, oracle] of Object.entries(this.oracles)) {
+                const value = ethers_1.utils.keccak256(oracle.artifact.bytecode);
+                if (runtimeBytecodeHash == value)
+                    return name;
+            }
+            return null;
+        });
+    }
+    identifyInterestRateModel(interestRateModelAddress) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Get interest rate model type from runtime bytecode hash and init class
+            const interestRateModels = {
+                JumpRateModel: JumpRateModel_1.default,
+                DAIInterestRateModelV2: DAIInterestRateModelV2_1.default,
+                WhitePaperInterestRateModel: WhitePaperInterestRateModel_1.default,
+            };
+            const runtimeBytecodeHash = ethers_1.utils.keccak256(yield this.provider.getCode(interestRateModelAddress));
+            let irmModel = null;
+            for (const irm of Object.values(interestRateModels)) {
+                if (runtimeBytecodeHash === irm.RUNTIME_BYTECODE_HASH) {
+                    irmModel = new irm();
+                    break;
+                }
+            }
+            return irmModel;
+        });
+    }
+    getInterestRateModel(assetAddress) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Get interest rate model address from asset address
+            const assetContract = new ethers_1.Contract(assetAddress, this.artifacts.CTokenInterfaces.abi, this.provider);
+            const interestRateModelAddress = yield assetContract.callStatic.interestRateModel();
+            const interestRateModel = yield this.identifyInterestRateModel(interestRateModelAddress);
+            if (interestRateModel === null) {
+                return null;
+            }
+            yield interestRateModel.init(interestRateModelAddress, assetAddress, this.provider);
+            return interestRateModel;
+        });
+    }
+    checkForCErc20PriceFeed(comptroller, conf, options = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Get price feed
+            // 1. Get priceOracle's address used by the comprtroller. PriceOracle can have multiple implementations so:
+            // 1.1 We try to figure out which implementation it is, by (practically) bruteforcing it.
+            //1.1.2 We first assume its a ChainlinkPriceOracleV2.
+            //1.1.3 We then try with PrefferedOracle's primary oracle i.e ChainlinkPriceOracleV2
+            //1.1.4 We try with UniswapAnchoredView
+            //1.1.5 We try with UniswapView
+            //1.1.6 We try with PrefferedOracle's secondary oracle i.e UniswapAnchoredView or UniswapView
+            //1.1.6
+            // 2. Check
+            // Get address of the priceOracle used by the comptroller
+            const priceOracle = yield comptroller.callStatic.oracle();
+            // Check for a ChainlinkPriceOracleV2 with a feed for the ERC20 Token
+            let chainlinkPriceOracle;
+            let chainlinkPriceFeed = undefined; // will be true if chainlink has a price feed for underlying Erc20 token
+            chainlinkPriceOracle = new ethers_1.Contract(priceOracle, this.oracles.ChainlinkPriceOracleV2.artifact.abi, this.provider);
+            // If underlying Erc20 is WETH use chainlinkPriceFeed, otherwise check if Chainlink supports it.
+            if (conf.underlying.toLowerCase() === this.chainSpecificAddresses.W_TOKEN.toLowerCase()) {
+                chainlinkPriceFeed = true;
+            }
+            else {
+                try {
+                    chainlinkPriceFeed = yield chainlinkPriceOracle.hasPriceFeed(conf.underlying);
+                }
+                catch (_a) { }
+            }
+            if (chainlinkPriceFeed === undefined || !chainlinkPriceFeed) {
+                const preferredPriceOracle = new ethers_1.Contract(priceOracle, this.artifacts.PreferredPriceOracle.abi, this.provider);
+                try {
+                    // Get the underlying ChainlinkOracle address of the PreferredPriceOracle
+                    const chainlinkPriceOracleAddress = yield preferredPriceOracle.chainlinkOracle();
+                    // Initiate ChainlinkOracle
+                    chainlinkPriceOracle = new ethers_1.Contract(chainlinkPriceOracleAddress, this.oracles.ChainlinkPriceOracleV2.artifact.abi, this.provider);
+                    // Check if chainlink has an available price feed for the Erc20Token
+                    chainlinkPriceFeed = yield chainlinkPriceOracle.hasPriceFeed(conf.underlying);
+                }
+                catch (_b) { }
+            }
+            // TODO: find this contract and fix this!
+            if (chainlinkPriceFeed === undefined || !chainlinkPriceFeed) {
+                throw new Error("FIX THE UNISWAP ORACLE ANCHORED VIEW");
+            }
+            /*
+            if (chainlinkPriceFeed === undefined || !chainlinkPriceFeed) {
+              // Check if we can get a UniswapAnchoredView
+              var isUniswapAnchoredView = false;
+        
+              let uniswapOrUniswapAnchoredViewContract: Contract;
+              try {
+                uniswapOrUniswapAnchoredViewContract = new Contract(
+                  priceOracle,
+                  JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapAnchoredView.sol:UniswapAnchoredView"].abi),
+                  this.provider
+                );
+                await uniswapOrUniswapAnchoredViewContract.IS_UNISWAP_ANCHORED_VIEW();
+                isUniswapAnchoredView = true;
+              } catch {
+                try {
+                  uniswapOrUniswapAnchoredViewContract = new Contract(
+                    priceOracle,
+                    JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapView.sol:UniswapView"].abi),
+                    this.provider
+                  );
+                  await uniswapOrUniswapAnchoredViewContract.IS_UNISWAP_VIEW();
+                } catch {
+                  // Check for PreferredPriceOracle's secondary oracle.
+                  const preferredPriceOracle = new Contract(priceOracle, PreferredPriceOracleArtifact.abi, this.provider);
+        
+                  let uniswapOrUniswapAnchoredViewAddress;
+        
+                  try {
+                    uniswapOrUniswapAnchoredViewAddress = await preferredPriceOracle.secondaryOracle();
+                  } catch {
+                    throw Error("Underlying token price for this asset is not available via this oracle.");
+                  }
+        
+                  try {
+                    uniswapOrUniswapAnchoredViewContract = new Contract(
+                      uniswapOrUniswapAnchoredViewAddress,
+                      JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapAnchoredView.sol:UniswapAnchoredView"].abi),
+                      this.provider
+                    );
+                    await uniswapOrUniswapAnchoredViewContract.IS_UNISWAP_ANCHORED_VIEW();
+                    isUniswapAnchoredView = true;
+                  } catch {
+                    try {
+                      uniswapOrUniswapAnchoredViewContract = new Contract(
+                        uniswapOrUniswapAnchoredViewAddress,
+                        JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapView.sol:UniswapView"].abi),
+                        this.provider
+                      );
+                      await uniswapOrUniswapAnchoredViewContract.methods.IS_UNISWAP_VIEW();
+                    } catch {
+                      throw Error(
+                        "Underlying token price not available via ChainlinkPriceOracleV2, and no UniswapAnchoredView or UniswapView was found."
+                      );
+                    }
+                  }
+                }
+        
+                // Check if the token already exists
+                try {
+                  await uniswapOrUniswapAnchoredViewContract.getTokenConfigByUnderlying(conf.underlying);
+                } catch {
+                  // If not, add it!
+                  const underlyingToken = new Contract(conf.underlying, EIP20InterfaceArtifact.abi, this.provider);
+        
+                  const underlyingSymbol: string = await underlyingToken.symbol();
+                  const underlyingDecimals: number = await underlyingToken.decimals();
+        
+                  const PriceSource = {
+                    FIXED_ETH: 0,
+                    FIXED_USD: 1,
+                    REPORTER: 2,
+                    TWAP: 3,
+                  };
+        
+                  if (conf.underlying.toLowerCase() === this.contractConfig.TOKEN_ADDRESS.W_TOKEN.toLowerCase()) {
+                    // WETH
+                    await uniswapOrUniswapAnchoredViewContract.add(
+                      [
+                        {
+                          underlying: conf.underlying,
+                          symbolHash: utils.solidityKeccak256(["string"], [underlyingSymbol]),
+                          baseUnit: BigNumber.from(10).pow(BigNumber.from(underlyingDecimals)).toString(),
+                          priceSource: PriceSource.FIXED_ETH,
+                          fixedPrice: constants.WeiPerEther.toString(),
+                          uniswapMarket: "0x0000000000000000000000000000000000000000",
+                          isUniswapReversed: false,
+                        },
+                      ],
+                      { ...options }
+                    );
+                  } else if (conf.underlying === this.contractConfig.TOKEN_ADDRESS.USDC) {
+                    // USDC
+                    if (isUniswapAnchoredView) {
+                      await uniswapOrUniswapAnchoredViewContract.add(
+                        [
+                          {
+                            underlying: this.contractConfig.TOKEN_ADDRESS.USDC,
+                            symbolHash: utils.solidityKeccak256(["string"], ["USDC"]),
+                            baseUnit: BigNumber.from(1e6).toString(),
+                            priceSource: PriceSource.FIXED_USD,
+                            fixedPrice: 1e6,
+                            uniswapMarket: "0x0000000000000000000000000000000000000000",
+                            isUniswapReversed: false,
+                          },
+                        ],
+                        { ...options }
+                      );
+                    } else {
+                      await uniswapOrUniswapAnchoredViewContract.add(
+                        [
+                          {
+                            underlying: this.contractConfig.TOKEN_ADDRESS.USDC,
+                            symbolHash: utils.solidityKeccak256(["string"], ["USDC"]),
+                            baseUnit: BigNumber.from(1e6).toString(),
+                            priceSource: PriceSource.TWAP,
+                            fixedPrice: 0,
+                            uniswapMarket: "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc",
+                            isUniswapReversed: false,
+                          },
+                        ],
+                        { ...options }
+                      );
+                      await uniswapOrUniswapAnchoredViewContract.postPrices([this.contractConfig.TOKEN_ADDRESS.USDC], {
+                        ...options,
+                      });
+                    }
+                  } else {
+                    // Ask about fixed prices if UniswapAnchoredView or if UniswapView is not public; otherwise, prompt for Uniswap V2 pair
+                    if (isUniswapAnchoredView || !(await uniswapOrUniswapAnchoredViewContract.isPublic())) {
+                      // Check for fixed ETH
+                      const fixedEth = confirm("Should the price of this token be fixed to 1 ETH?");
+        
+                      if (fixedEth) {
+                        await uniswapOrUniswapAnchoredViewContract.add(
+                          [
+                            {
+                              underlying: conf.underlying,
+                              symbolHash: utils.solidityKeccak256(["string"], [underlyingSymbol]),
+                              baseUnit: BigNumber.from(10)
+                                .pow(underlyingDecimals === 18 ? constants.WeiPerEther : BigNumber.from(underlyingDecimals))
+                                .toString(),
+                              priceSource: PriceSource.FIXED_ETH,
+                              fixedPrice: constants.WeiPerEther.toString(),
+                              uniswapMarket: "0x0000000000000000000000000000000000000000",
+                              isUniswapReversed: false,
+                            },
+                          ],
+                          { ...options }
+                        );
+                      } else {
+                        // Check for fixed USD
+                        let msg = "Should the price of this token be fixed to 1 USD?";
+                        if (!isUniswapAnchoredView)
+                          msg +=
+                            " If so, please note that you will need to run postPrices on your UniswapView for USDC instead of " +
+                            underlyingSymbol +
+                            " (as technically, the " +
+                            underlyingSymbol +
+                            " price would be fixed to 1 USDC).";
+                        const fixedUsd = confirm(msg);
+        
+                        if (fixedUsd) {
+                          const tokenConfigs = [
+                            {
+                              underlying: conf.underlying,
+                              symbolHash: utils.solidityKeccak256(["string"], [underlyingSymbol]),
+                              baseUnit: BigNumber.from(10)
+                                .pow(underlyingDecimals === 18 ? constants.WeiPerEther : BigNumber.from(underlyingDecimals))
+                                .toString(),
+                              priceSource: PriceSource.FIXED_USD,
+                              fixedPrice: BigNumber.from(1e6).toString(),
+                              uniswapMarket: "0x0000000000000000000000000000000000000000",
+                              isUniswapReversed: false,
+                            },
+                          ];
+        
+                          // UniswapView only: add USDC token config if not present so price oracle can convert from USD to ETH
+                          if (!isUniswapAnchoredView) {
+                            try {
+                              await uniswapOrUniswapAnchoredViewContract.getTokenConfigByUnderlying(
+                                this.contractConfig.TOKEN_ADDRESS.USDC
+                              );
+                            } catch (error) {
+                              tokenConfigs.push({
+                                underlying: this.contractConfig.TOKEN_ADDRESS.USDC,
+                                symbolHash: utils.solidityKeccak256(["string"], ["USDC"]),
+                                baseUnit: BigNumber.from(1e6).toString(),
+                                priceSource: PriceSource.TWAP,
+                                fixedPrice: "0",
+                                uniswapMarket: "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc",
+                                isUniswapReversed: false,
+                              });
+                            }
+                          }
+        
+                          // Add token config(s)
+                          await uniswapOrUniswapAnchoredViewContract.add(tokenConfigs, { ...options });
+        
+                          // UniswapView only: post USDC price
+                          if (!isUniswapAnchoredView)
+                            await uniswapOrUniswapAnchoredViewContract.postPrices([this.contractConfig.TOKEN_ADDRESS.USDC], {
+                              ...options,
+                            });
+                        } else await promptForUniswapV2Pair(this); // Prompt for Uniswap V2 pair
+                      }
+                    } else await promptForUniswapV2Pair(this);
+                  } // Prompt for Uniswap V2 pair
+        
+                  // @ts-ignore
+                  async function promptForUniswapV2Pair(self: Fuse) {
+                    // Predict correct Uniswap V2 pair
+                    let isNotReversed = conf.underlying.toLowerCase() < self.contractConfig.TOKEN_ADDRESS.W_TOKEN.toLowerCase();
+                    const salt = utils.solidityKeccak256(
+                      ["string", "string"],
+                      [conf.underlying, self.contractConfig.TOKEN_ADDRESS.W_TOKEN]
+                    );
+        
+                    let uniswapV2Pair = utils.getCreate2Address(
+                      self.contractConfig.FACTORY.UniswapV2_Factory,
+                      salt,
+                      self.contractConfig.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES.UniswapV2_PairInit
+                    );
+        
+                    // Double-check with user that pair is correct
+                    const correctUniswapV2Pair = confirm(
+                      "We have determined that the correct Uniswap V2 pair for " +
+                        (isNotReversed ? underlyingSymbol + "/ETH" : "ETH/" + underlyingSymbol) +
+                        " is " +
+                        uniswapV2Pair +
+                        ". Is this correct?"
+                    );
+        
+                    if (!correctUniswapV2Pair) {
+                      let uniswapV2Pair = prompt("Please enter the underlying token's ETH-based Uniswap V2 pair address:");
+                      if (uniswapV2Pair && uniswapV2Pair.length === 0)
+                        throw Error(
+                          isUniswapAnchoredView
+                            ? "Reported prices must have a Uniswap V2 pair as an anchor!"
+                            : "Non-fixed prices must have a Uniswap V2 pair from which to source prices!"
+                        );
+                      isNotReversed = confirm(
+                        "Press OK if the Uniswap V2 pair is " +
+                          underlyingSymbol +
+                          "/ETH. If it is reversed (ETH/" +
+                          underlyingSymbol +
+                          "), press Cancel."
+                      );
+                    }
+        
+                    // Add asset to oracle
+                    await uniswapOrUniswapAnchoredViewContract.add(
+                      [
+                        {
+                          underlying: conf.underlying,
+                          symbolHash: utils.solidityKeccak256(["string"], [underlyingSymbol]),
+                          baseUnit: BigNumber.from(10)
+                            .pow(underlyingDecimals === 18 ? constants.WeiPerEther : BigNumber.from(underlyingDecimals))
+                            .toString(),
+                          priceSource: isUniswapAnchoredView ? PriceSource.REPORTER : PriceSource.TWAP,
+                          fixedPrice: 0,
+                          uniswapMarket: uniswapV2Pair,
+                          isUniswapReversed: !isNotReversed,
+                        },
+                      ],
+                      { ...options }
+                    );
+        
+                    // Post first price
+                    if (isUniswapAnchoredView) {
+                      // Post reported price or (if price has never been reported) have user report and post price
+                      const priceData = new Contract(
+                        await uniswapOrUniswapAnchoredViewContract.priceData(),
+                        JSON.parse(self.openOracleContracts["contracts/OpenOraclePriceData.sol:OpenOraclePriceData"].abi),
+                        self.provider
+                      );
+                      var reporter = await uniswapOrUniswapAnchoredViewContract.methods.reporter();
+                      if (BigNumber.from(await priceData.getPrice(reporter, underlyingSymbol)).gt(constants.Zero))
+                        await uniswapOrUniswapAnchoredViewContract.postPrices([], [], [underlyingSymbol], { ...options });
+                      else
+                        prompt(
+                          "It looks like prices have never been reported for " +
+                            underlyingSymbol +
+                            ". Please click OK once you have reported and posted prices for" +
+                            underlyingSymbol +
+                            "."
+                        );
+                    } else {
+                      await uniswapOrUniswapAnchoredViewContract.postPrices([conf.underlying], { ...options });
+                    }
+                  }
+                }
+              }
+            }
+            */
+        });
+    }
+    getPriceOracle(oracleAddress) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Get price oracle contract name from runtime bytecode hash
+            const runtimeBytecodeHash = ethers_1.utils.keccak256(yield this.provider.getCode(oracleAddress));
+            for (const [name, oracle] of Object.entries(this.oracles)) {
+                const value = ethers_1.utils.keccak256(oracle.artifact.deployedBytecode);
+                if (runtimeBytecodeHash === value)
+                    return name;
+            }
+            return null;
+        });
+    }
+    deployRewardsDistributor(rewardToken, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const distributor = new ethers_1.ContractFactory(this.artifacts.RewardsDistributorDelegator.abi, this.artifacts.RewardsDistributorDelegator.bytecode, this.provider.getSigner());
+            console.log({ options, rewardToken });
+            // const rdAddress = distributor.options.address;
+            return yield distributor.deploy({
+                arguments: [options.from, rewardToken, this.chainDeployment.RewardsDistributorDelegate.address],
+            });
+        });
+    }
+    checkCardinality(uniswapV3Pool) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const uniswapV3PoolContract = new ethers_1.Contract(uniswapV3Pool, UniswapV3Pool_slim_json_1.default);
+            return (yield uniswapV3PoolContract.methods.slot0().call()).observationCardinalityNext < 64;
+        });
+    }
+    primeUniswapV3Oracle(uniswapV3Pool, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const uniswapV3PoolContract = new ethers_1.Contract(uniswapV3Pool, UniswapV3Pool_slim_json_1.default);
+            yield uniswapV3PoolContract.methods.increaseObservationCardinalityNext(64).send(options);
+        });
+    }
+}
+exports.default = Fuse;
+Fuse.SIMPLE_DEPLOY_ORACLES = config_1.SIMPLE_DEPLOY_ORACLES;
+Fuse.COMPTROLLER_ERROR_CODES = config_1.COMPTROLLER_ERROR_CODES;
+Fuse.CTOKEN_ERROR_CODES = config_1.CTOKEN_ERROR_CODES;
+Fuse.JumpRateModelConf = config_1.JUMP_RATE_MODEL_CONF;
