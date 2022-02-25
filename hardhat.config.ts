@@ -51,20 +51,6 @@ const config: HardhatUserConfig = {
         },
       },
     ],
-    overrides: {
-      "contracts/FusePoolLens.sol": {
-        version: "0.8.11",
-        settings: {
-          optimizer: {
-            // TODO when the subgraphs are implemented, remove the FusePoolAsset struct that makes the compiler throw
-            // CompilerError: Stack too deep when compiling inline assembly: Variable headStart is 1 slot(s) too deep inside the stack
-            // when enabled is true
-            enabled: false,
-            runs: 200,
-          },
-        },
-      },
-    },
   },
   external: {
     contracts: [
