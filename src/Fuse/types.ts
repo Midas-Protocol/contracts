@@ -111,6 +111,7 @@ export type OracleConf = {
 };
 
 export type InterestRateModelParams = {
+  blocksPerYear?: BigNumber;
   baseRatePerYear?: string;
   multiplierPerYear?: string;
   jumpMultiplierPerYear?: string;
