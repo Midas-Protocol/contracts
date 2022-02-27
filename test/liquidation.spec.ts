@@ -80,12 +80,15 @@ describe("#safeLiquidate", () => {
     erc20OneUnderlying = (await ethers.getContractAt("EIP20Interface", erc20One.underlying)) as EIP20Interface;
   });
 
-  it.only("should liquidate a BNB borrow for token collateral", async function () {
+  it.only("should liquidate a native borrow for token collateral", async function () {
     this.timeout(120_000);
     const { alice, bob, rando } = await ethers.getNamedSigners();
-    const { chainId } = await ethers.provider.getNetwork();
 
-    whale = await whaleSigner(ethers);
+    // either use configured whale acct or bob
+    whale = await whaleSigner();
+    if (!whale) {
+      whale = bob;
+    }
 
     const originalPrice = await oracle.getUnderlyingPrice(deployedErc20One.assetAddress);
 
@@ -97,13 +100,13 @@ describe("#safeLiquidate", () => {
     let assetAfterDeposit = await assetInPool(poolId, sdk, erc20One.symbol, whale.address);
     console.log(assetAfterDeposit);
 
-    // Supply 0.001 BNB from other account
+    // Supply 0.001 native from other account
     await addCollateral(poolAddress, alice, eth.symbol, "0.001", false);
-    console.log("Added BNB collateral");
+    console.log("Added native collateral");
     assetAfterDeposit = await assetInPool(poolId, sdk, eth.symbol, whale.address);
     console.log(assetAfterDeposit);
 
-    // Borrow 0.0001 BNB using token collateral
+    // Borrow 0.0001 native using token collateral
     const borrowAmount = "0.0001";
     await borrowCollateral(poolAddress, whale.address, eth.symbol, borrowAmount);
 
