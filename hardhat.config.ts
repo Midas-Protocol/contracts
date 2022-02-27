@@ -26,6 +26,9 @@ const mnemonic =
   "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
 
 const config: HardhatUserConfig = {
+  mocha: {
+    timeout: 120_000,
+  },
   tenderly: {
     username: "carlomazzaferro",
     project: "midas-contracts",
@@ -51,20 +54,6 @@ const config: HardhatUserConfig = {
         },
       },
     ],
-    overrides: {
-      "contracts/FusePoolLens.sol": {
-        version: "0.8.11",
-        settings: {
-          optimizer: {
-            // TODO when the subgraphs are implemented, remove the FusePoolAsset struct that makes the compiler throw
-            // CompilerError: Stack too deep when compiling inline assembly: Variable headStart is 1 slot(s) too deep inside the stack
-            // when enabled is true
-            enabled: false,
-            runs: 200,
-          },
-        },
-      },
-    },
   },
   external: {
     contracts: [
@@ -94,13 +83,13 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
       accounts: { mnemonic },
       forking: {
-        url: "https://bsc-dataseed.binance.org/",
+        url: "https://speedy-nodes-nyc.moralis.io/2d2926c3e761369208fba31f/bsc/mainnet/archive",
       },
     },
     localhost: {
       url: urlOverride || "http://localhost:8545",
       saveDeployments: true,
-      chainId: 1337,
+      chainId: 56,
       gasPrice: 20e9,
       gas: 25e6,
       allowUnlimitedContractSize: true,
