@@ -1,13 +1,13 @@
 import { expect } from "chai";
 import { constants, Contract, providers, utils } from "ethers";
 import { ethers } from "hardhat";
-import { createPool, setupTest } from "./utils";
+import { createPool, setupLocalOraclePrices } from "./utils";
 import { assetInPool, deployAssets, getAssetsConf, getPoolIndex } from "./utils/pool";
-import { Fuse, SupportedChains, USDPricedFuseAsset } from "../lib/esm/src";
+import { Fuse, USDPricedFuseAsset } from "../lib/esm/src";
 
 describe("Deposit flow tests", function () {
   this.beforeEach(async () => {
-    await setupTest();
+    await setupLocalOraclePrices();
   });
 
   describe("Deposit flow", async function () {

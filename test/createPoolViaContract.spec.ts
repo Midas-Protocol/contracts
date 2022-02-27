@@ -1,11 +1,11 @@
 import { deployments, ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-import { cERC20Conf, Fuse, SupportedChains } from "../lib/esm/src";
+import { cERC20Conf, Fuse } from "../lib/esm/src";
 import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { setupTest } from "./utils";
 import { Comptroller, FusePoolDirectory, SimplePriceOracle } from "../typechain";
+import { setupLocalOraclePrices } from "./utils";
 
 use(solidity);
 
@@ -15,7 +15,7 @@ describe("FusePoolDirectory", function () {
   let implementationComptroller: Comptroller;
 
   this.beforeEach(async () => {
-    await setupTest();
+    await setupLocalOraclePrices();
   });
 
   describe("Deploy pool", async function () {

@@ -1,16 +1,16 @@
 import { ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-import { Fuse, SupportedChains } from "../lib/esm/src";
+import { Fuse } from "../lib/esm/src";
 import { DeployedAsset, poolAssets } from "./utils/pool";
 import { utils } from "ethers";
-import { setupTest } from "./utils";
+import { setupLocalOraclePrices } from "./utils";
 
 use(solidity);
 
 describe("FusePoolDirectory", function () {
   this.beforeEach(async () => {
-    await setupTest();
+    await setupLocalOraclePrices();
   });
 
   describe("Deploy pool", async function () {
