@@ -1,15 +1,47 @@
 import { SALT } from "../deploy/deploy";
 import { ChainDeployConfig, ChainlinkFeedBaseCurrency } from "./helper";
+import { BigNumber } from "ethers";
 
 export const deployConfig97: ChainDeployConfig = {
   wtoken: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
   nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
   nativeTokenName: "Binance Network Token (Testnet)",
   nativeTokenSymbol: "TBNB",
+  blocksPerYear: BigNumber.from((20 * 24 * 365 * 60).toString()),
 };
 
 export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
+  ////
+  //// IRM MODELS|
+  let dep = await deployments.deterministic("JumpRateModel", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [
+      deployConfig97.blocksPerYear,
+      "20000000000000000", // baseRatePerYear
+      "180000000000000000", // multiplierPerYear
+      "4000000000000000000", //jumpMultiplierPerYear
+      "800000000000000000", // kink
+    ],
+    log: true,
+  });
+
+  const jrm = await dep.deploy();
+  console.log("JumpRateModel: ", jrm.address);
+
+  // taken from WhitePaperInterestRateModel used for cETH
+  // https://etherscan.io/address/0x0c3f8df27e1a00b47653fde878d68d35f00714c0#code
+  dep = await deployments.deterministic("WhitePaperInterestRateModel", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [
+      deployConfig97.blocksPerYear,
+      "20000000000000000", // baseRatePerYear
+      "100000000000000000", // multiplierPerYear
+    ],
+    log: true,
+  });
 
   ////
   //// ORACLES
@@ -40,7 +72,7 @@ export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promi
     },
   ];
 
-  let dep = await deployments.deterministic("ChainlinkPriceOracleV2", {
+  dep = await deployments.deterministic("ChainlinkPriceOracleV2", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [deployer, true, deployConfig97.wtoken, deployConfig97.nativeTokenUsdChainlinkFeed],
