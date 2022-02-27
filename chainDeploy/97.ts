@@ -109,6 +109,7 @@ export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promi
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [deployConfig97.wtoken],
     log: true,
+    proxy: true,
   });
   const utpor = await dep.deploy();
   console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
@@ -118,6 +119,7 @@ export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promi
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: true,
   });
   const utpo = await dep.deploy();
   console.log("UniswapTwapPriceOracleV2: ", utpo.address);
@@ -127,6 +129,7 @@ export const deploy97 = async ({ ethers, getNamedAccounts, deployments }): Promi
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [utpor.address, utpo.address, deployConfig97.wtoken],
     log: true,
+    proxy: true,
   });
   const utpof = await dep.deploy();
   console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);

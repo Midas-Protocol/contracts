@@ -64,6 +64,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: true,
   });
   const fpd = await dep.deploy();
   console.log("FusePoolDirectory: ", fpd.address);
@@ -83,6 +84,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: true,
   });
   const fsl = await dep.deploy();
   console.log("FuseSafeLiquidator: ", fsl.address);
@@ -92,6 +94,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: true,
   });
   const ffd = await dep.deploy();
   console.log("FuseFeeDistributor: ", ffd.address);
@@ -122,6 +125,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: true,
   });
   const fpl = await dep.deploy();
   console.log("FusePoolLens: ", fpl.address);
@@ -144,6 +148,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: true,
   });
   const fpls = await dep.deploy();
   console.log("FusePoolLensSecondary: ", fpls.address);
@@ -197,6 +202,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: true,
   });
   const masterPO = await dep.deploy();
   console.log("MasterPriceOracle: ", masterPO.address);
