@@ -1,7 +1,7 @@
 {
   "56": {
-    "bsc": {
-      "name": "bsc",
+    "localhost": {
+      "name": "localhost",
       "chainId": "56",
       "contracts": {
         "CErc20Delegate": {
@@ -6329,7 +6329,7 @@
           ]
         },
         "FusePoolLens": {
-          "address": "0x30e6DDb46759D3dCFF620C133d92C1791133d4ef",
+          "address": "0xdEC1DcA21384902d9FA6E00ec3874e8A07D6e8d6",
           "abi": [
             {
               "inputs": [],
@@ -8066,10 +8066,15 @@
           ]
         },
         "JumpRateModel": {
-          "address": "0xA0a0A9Db507a583aA6EC4207b2E93934304a3307",
+          "address": "0x6BD71DB611FE410Ed5a6375364C1BdB1Feb179Fc",
           "abi": [
             {
               "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_blocksPerYear",
+                  "type": "uint256"
+                },
                 {
                   "internalType": "uint256",
                   "name": "baseRatePerYear",
@@ -9896,10 +9901,15 @@
           ]
         },
         "WhitePaperInterestRateModel": {
-          "address": "0x620DD9455489fb4161bF542Bdc593836eCc4740b",
+          "address": "0x79452f62FA47f7C0587e5489C5e83D843a52b85D",
           "abi": [
             {
               "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_blocksPerYear",
+                  "type": "uint256"
+                },
                 {
                   "internalType": "uint256",
                   "name": "baseRatePerYear",
@@ -16417,7 +16427,7 @@
           ]
         },
         "FusePoolLens": {
-          "address": "0x30e6DDb46759D3dCFF620C133d92C1791133d4ef",
+          "address": "0xdEC1DcA21384902d9FA6E00ec3874e8A07D6e8d6",
           "abi": [
             {
               "inputs": [],
@@ -18154,15 +18164,10 @@
           ]
         },
         "JumpRateModel": {
-          "address": "0x5BbF1Aa06815aC33A37AD17189c8B35F6C8ba6dd",
+          "address": "0xA0a0A9Db507a583aA6EC4207b2E93934304a3307",
           "abi": [
             {
               "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "_blocksPerYear",
-                  "type": "uint256"
-                },
                 {
                   "internalType": "uint256",
                   "name": "baseRatePerYear",
@@ -19866,15 +19871,10 @@
           ]
         },
         "WhitePaperInterestRateModel": {
-          "address": "0xD7BC60A268581BA5bC63342a6c8ED36F587bd6D4",
+          "address": "0x620DD9455489fb4161bF542Bdc593836eCc4740b",
           "abi": [
             {
               "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "_blocksPerYear",
-                  "type": "uint256"
-                },
                 {
                   "internalType": "uint256",
                   "name": "baseRatePerYear",
