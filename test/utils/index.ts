@@ -1,3 +1,3 @@
 export { createPool, deployAssets } from "./pool";
 
-export { setupTest } from "./setup";
+export { setUpBscOraclePrices, setupLocalOraclePrices } from "./setup";
