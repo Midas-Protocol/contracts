@@ -1,6 +1,12 @@
-import { SALT } from "../deploy/deploy";
-import { ChainDeployConfig, ChainlinkFeedBaseCurrency } from "./helper";
+import {
+  ChainDeployConfig,
+  ChainlinkFeedBaseCurrency,
+  deployChainlinkOracle,
+  deployIRMs,
+  deployUniswapOracle,
+} from "./helpers";
 import { BigNumber } from "ethers";
+import { assets } from "./bsc";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
@@ -13,35 +19,9 @@ export const deployConfig: ChainDeployConfig = {
 export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   ////
-  //// IRM MODELS|
-  let dep = await deployments.deterministic("JumpRateModel", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [
-      deployConfig97.blocksPerYear,
-      "20000000000000000", // baseRatePerYear
-      "180000000000000000", // multiplierPerYear
-      "4000000000000000000", //jumpMultiplierPerYear
-      "800000000000000000", // kink
-    ],
-    log: true,
-  });
-
-  const jrm = await dep.deploy();
-  console.log("JumpRateModel: ", jrm.address);
-
-  // taken from WhitePaperInterestRateModel used for cETH
-  // https://etherscan.io/address/0x0c3f8df27e1a00b47653fde878d68d35f00714c0#code
-  dep = await deployments.deterministic("WhitePaperInterestRateModel", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [
-      deployConfig97.blocksPerYear,
-      "20000000000000000", // baseRatePerYear
-      "100000000000000000", // multiplierPerYear
-    ],
-    log: true,
-  });
+  //// IRM MODELS
+  await deployIRMs({ ethers, getNamedAccounts, deployments, deployConfig });
+  ////
 
   ////
   //// ORACLES
@@ -53,7 +33,7 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
       feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
     },
     {
-      symbol: "BTC",
+      symbol: "BTCB",
       aggregator: "0x5741306c21795FdCBb9b265Ea0255F499DFe515C",
       underlying: "0x6ce8da28e2f864420840cf74474eff5fd80e65b8",
       feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
@@ -72,21 +52,16 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
     },
   ];
 
-  dep = await deployments.deterministic("ChainlinkPriceOracleV2", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [deployer, true, deployConfig.wtoken, deployConfig.nativeTokenUsdChainlinkFeed],
-    log: true,
+  //// ChainLinkV2 Oracle
+  const { cpo, chainLinkv2 } = await deployChainlinkOracle({
+    ethers,
+    getNamedAccounts,
+    deployments,
+    deployConfig,
+    assets,
+    chainlinkMappingUsd,
   });
-  const cpo = await dep.deploy();
-  console.log("ChainlinkPriceOracleV2: ", cpo.address);
-
-  const chainLinkv2 = await ethers.getContract("ChainlinkPriceOracleV2", deployer);
-  await chainLinkv2.setPriceFeeds(
-    chainlinkMappingUsd.map((c) => c.underlying),
-    chainlinkMappingUsd.map((c) => c.aggregator),
-    ChainlinkFeedBaseCurrency.USD
-  );
+  ////
 
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
   const admin = await masterPriceOracle.admin();
@@ -104,31 +79,7 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
   } else {
     console.log("MasterPriceOracle already initialized");
   }
-  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [deployConfig.wtoken],
-    log: true,
-  });
-  const utpor = await dep.deploy();
-  console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
-
-  dep = await deployments.deterministic("UniswapTwapPriceOracleV2", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [],
-    log: true,
-  });
-  const utpo = await dep.deploy();
-  console.log("UniswapTwapPriceOracleV2: ", utpo.address);
-
-  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Factory", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [utpor.address, utpo.address, deployConfig.wtoken],
-    log: true,
-  });
-  const utpof = await dep.deploy();
-  console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
+  //// Uniswap Oracle
+  await deployUniswapOracle({ ethers, getNamedAccounts, deployments, deployConfig });
   ////
 };

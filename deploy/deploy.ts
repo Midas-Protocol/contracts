@@ -2,7 +2,7 @@ import { constants, providers } from "ethers";
 import { DeployFunction } from "hardhat-deploy/types";
 
 import { chainDeployConfig } from "../chainDeploy";
-import { ChainDeployConfig } from "../chainDeploy/helper";
+import { ChainDeployConfig } from "../chainDeploy/helpers";
 
 export const SALT = "ilovemidas";
 

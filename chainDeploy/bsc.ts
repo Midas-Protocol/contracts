@@ -1,11 +1,19 @@
 import { SALT } from "../deploy/deploy";
-import { ChainDeployConfig, ChainlinkFeedBaseCurrency } from "./helper";
+import {
+  ChainDeployConfig,
+  ChainlinkFeedBaseCurrency,
+  deployChainlinkOracle,
+  deployIRMs,
+  deployUniswapOracle,
+} from "./helpers";
+import { BigNumber } from "ethers";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
   nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
   nativeTokenName: "Binance Network Token",
   nativeTokenSymbol: "BNB",
+  blocksPerYear: BigNumber.from((20 * 24 * 365 * 60).toString()),
 };
 
 export const assets = [
@@ -16,7 +24,7 @@ export const assets = [
     decimals: 18,
   },
   {
-    symbol: "BTC",
+    symbol: "BTCB",
     underlying: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
     name: "Binance BTC",
     decimals: 18,
@@ -39,6 +47,11 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
   const { deployer } = await getNamedAccounts();
 
   ////
+  //// IRM MODELS
+  await deployIRMs({ ethers, getNamedAccounts, deployments, deployConfig });
+  ////
+
+  ////
   //// ORACLES
   const chainlinkMappingUsd = [
     {
@@ -47,7 +60,7 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
       feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
     },
     {
-      symbol: "BTC",
+      symbol: "BTCB",
       aggregator: "0x5741306c21795FdCBb9b265Ea0255F499DFe515C",
       feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
     },
@@ -63,21 +76,16 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
     },
   ];
 
-  let dep = await deployments.deterministic("ChainlinkPriceOracleV2", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [deployer, true, deployConfig.wtoken, deployConfig.nativeTokenUsdChainlinkFeed],
-    log: true,
+  //// ChainLinkV2 Oracle
+  const { cpo, chainLinkv2 } = await deployChainlinkOracle({
+    ethers,
+    getNamedAccounts,
+    deployments,
+    deployConfig,
+    assets,
+    chainlinkMappingUsd,
   });
-  const cpo = await dep.deploy();
-  console.log("ChainlinkPriceOracleV2: ", cpo.address);
-
-  const chainLinkv2 = await ethers.getContract("ChainlinkPriceOracleV2", deployer);
-  await chainLinkv2.setPriceFeeds(
-    chainlinkMappingUsd.map((c) => assets.find((a) => a.symbol === c.symbol).underlying),
-    chainlinkMappingUsd.map((c) => c.aggregator),
-    ChainlinkFeedBaseCurrency.USD
-  );
+  ////
 
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
   const admin = await masterPriceOracle.admin();
@@ -95,34 +103,12 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
   } else {
     console.log("MasterPriceOracle already initialized");
   }
-  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [deployConfig.wtoken],
-    log: true,
-  });
-  const utpor = await dep.deploy();
-  console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
 
-  dep = await deployments.deterministic("UniswapTwapPriceOracleV2", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [],
-    log: true,
-  });
-  const utpo = await dep.deploy();
-  console.log("UniswapTwapPriceOracleV2: ", utpo.address);
+  //// Uniswap Oracle
+  await deployUniswapOracle({ ethers, getNamedAccounts, deployments, deployConfig });
+  ////
 
-  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Factory", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [utpor.address, utpo.address, deployConfig.wtoken],
-    log: true,
-  });
-  const utpof = await dep.deploy();
-  console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
-
-  dep = await deployments.deterministic("SimplePriceOracle", {
+  let dep = await deployments.deterministic("SimplePriceOracle", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
