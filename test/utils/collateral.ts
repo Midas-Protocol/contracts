@@ -1,5 +1,5 @@
 import { BigNumber, constants, Contract, providers, utils } from "ethers";
-import { ERC20Abi, Fuse, SupportedChains, USDPricedFuseAsset } from "../../lib/esm/src";
+import { ERC20Abi, Fuse, USDPricedFuseAsset } from "../../lib/esm/src";
 import { assetInPool, getPoolIndex } from "./pool";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -22,7 +22,7 @@ export function getCToken(asset: USDPricedFuseAsset, sdk: Fuse, signer: SignerWi
 
 export async function addCollateral(
   poolAddress: string,
-  depositorAddress: string,
+  depositor: SignerWithAddress,
   underlyingSymbol: string,
   amount: string,
   useAsCollateral: boolean
@@ -32,19 +32,19 @@ export async function addCollateral(
   let cToken: Contract;
 
   const { chainId } = await ethers.provider.getNetwork();
-  const signer = await ethers.getSigner(depositorAddress);
+
   const sdk = new Fuse(ethers.provider, chainId);
 
   const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol);
 
-  cToken = getCToken(assetToDeploy, sdk, signer);
-  const pool = await ethers.getContractAt("Comptroller", poolAddress, signer);
+  cToken = getCToken(assetToDeploy, sdk, depositor);
+  const pool = await ethers.getContractAt("Comptroller", poolAddress, depositor);
   if (useAsCollateral) {
     tx = await pool.enterMarkets([assetToDeploy.cToken]);
     await tx.wait();
   }
   amountBN = utils.parseUnits(amount, 18);
-  await approveAndMint(amountBN, cToken, assetToDeploy.underlyingToken, signer);
+  await approveAndMint(amountBN, cToken, assetToDeploy.underlyingToken, depositor);
 }
 
 export async function approveAndMint(
@@ -115,14 +115,14 @@ export async function setupLiquidatablePool(
 
   await addCollateral(
     poolAddress,
-    bob.address,
+    bob,
     "TRIBE",
     utils.formatEther(BigNumber.from(3e14).mul(constants.WeiPerEther.div(originalPrice))),
     true
   );
 
   // Supply 0.001 ETH from other account
-  await addCollateral(poolAddress, alice.address, "ETH", "0.001", false);
+  await addCollateral(poolAddress, alice, "ETH", "0.001", false);
 
   // Borrow 0.0001 ETH using token collateral
   await borrowCollateral(poolAddress, bob.address, "ETH", borrowAmount);

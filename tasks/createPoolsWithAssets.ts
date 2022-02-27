@@ -83,7 +83,7 @@ task("pools:deposit", "Deposit collateral")
     const { chainId } = await hre.ethers.provider.getNetwork();
     await collateralModule.addCollateral(
       taskArgs.poolAddress,
-      account.address,
+      account,
       taskArgs.symbol,
       taskArgs.amount.toString(),
       taskArgs.enableCollateral
