@@ -1,4 +1,5 @@
 import { Artifacts, ChainDeployment } from "./Fuse/types";
+import { BigNumber } from "ethers";
 
 export enum SupportedChains {
   bsc = 56,
@@ -7,6 +8,18 @@ export enum SupportedChains {
   aurora = 1313161555,
   harmony = 1666600000,
 }
+
+export const chainSpecificParams = {
+  [SupportedChains.ganache]: {
+    blocksPerYear: BigNumber.from((4 * 24 * 365 * 60).toString()),
+  },
+  [SupportedChains.chapel]: {
+    blocksPerYear: BigNumber.from((4 * 24 * 365 * 60).toString()),
+  },
+  [SupportedChains.bsc]: {
+    blocksPerYear: BigNumber.from((4 * 24 * 365 * 60).toString()),
+  },
+};
 
 export const chainSpecificAddresses = {
   [SupportedChains.ganache]: {
