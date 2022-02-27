@@ -1,4 +1,4 @@
-import { ChainDeployConfig } from "./helper";
+import { ChainDeployConfig } from "./helpers";
 import { BigNumber } from "ethers";
 
 // see https://gov.near.org/t/evm-runtime-base-token/340/24

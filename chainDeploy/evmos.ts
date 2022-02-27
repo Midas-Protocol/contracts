@@ -1,4 +1,4 @@
-import { ChainDeployConfig } from "./helper";
+import { ChainDeployConfig } from "./helpers";
 import { BigNumber } from "ethers";
 
 export const deployConfig9001: ChainDeployConfig = {
