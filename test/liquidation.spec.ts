@@ -3,7 +3,15 @@ import { deployments, ethers } from "hardhat";
 import { createPool, deployAssets, setUpBscOraclePrices } from "./utils";
 import { assetInPool, DeployedAsset, getAssetsConf, getPoolIndex } from "./utils/pool";
 import { addCollateral, borrowCollateral } from "./utils/collateral";
-import { CErc20, CEther, EIP20Interface, FuseSafeLiquidator, MasterPriceOracle, SimplePriceOracle } from "../typechain";
+import {
+  CErc20,
+  CEther,
+  EIP20Interface,
+  FusePoolLens,
+  FuseSafeLiquidator,
+  MasterPriceOracle,
+  SimplePriceOracle,
+} from "../typechain";
 import { expect } from "chai";
 import { cERC20Conf, Fuse } from "../lib/esm/src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -91,6 +99,11 @@ describe("#safeLiquidate", () => {
     }
 
     const originalPrice = await oracle.getUnderlyingPrice(deployedErc20One.assetAddress);
+    console.log("originalPrice: ", originalPrice.toString());
+    console.log(
+      "utils.formatEther(BigNumber.from(3e14).mul(constants.WeiPerEther.div(originalPrice))): ",
+      utils.formatEther(BigNumber.from(3e14).mul(constants.WeiPerEther.div(originalPrice)))
+    );
 
     await addCollateral(poolAddress, whale, erc20One.symbol, "0.6", true);
     const sdk = new Fuse(ethers.provider, await ethers.provider.getNetwork().then((a) => a.chainId));
@@ -111,10 +124,16 @@ describe("#safeLiquidate", () => {
     await borrowCollateral(poolAddress, whale.address, eth.symbol, borrowAmount);
 
     // Set price of token collateral to 1/10th of what it was
-    tx = await simpleOracle.setDirectPrice(erc20One.underlying, BigNumber.from(originalPrice).div(10));
+    const fpl = (await ethers.getContract("FusePoolLens", rando)) as FusePoolLens;
+    const summaryBefore = await fpl.callStatic.getPoolSummary(poolAddress);
+    console.log(`summaryBefore: supply - ${summaryBefore[0].toString()} borrow - ${summaryBefore[1].toString()}`);
+    tx = await simpleOracle.setDirectPrice(erc20One.underlying, 1_000_000);
     await tx.wait();
+    const summaryAfter = await fpl.callStatic.getPoolSummary(poolAddress);
+    console.log(`summaryAfter: supply - ${summaryAfter[0].toString()} borrow - ${summaryAfter[1].toString()}`);
 
-    const repayAmount = utils.parseEther(borrowAmount).div(10);
+    // const repayAmount = utils.parseEther(borrowAmount).div(10);
+    const repayAmount = 1;
 
     const balBefore = await erc20OneCToken.balanceOf(rando.address);
 
