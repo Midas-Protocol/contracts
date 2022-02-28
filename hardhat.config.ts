@@ -84,6 +84,7 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
       forking: {
         url: "https://speedy-nodes-nyc.moralis.io/2d2926c3e761369208fba31f/bsc/mainnet/archive",
+        blockNumber: 15641803
       },
     },
     localhost: {
