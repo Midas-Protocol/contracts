@@ -7,6 +7,7 @@ import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { Comptroller, FusePoolDirectory, SimplePriceOracle } from "../typechain";
 import { setUpPriceOraclePrices } from "./utils";
 import { getAssetsConf } from "./utils/assets";
+import { chainDeployConfig } from "../chainDeploy";
 
 use(solidity);
 
@@ -114,11 +115,13 @@ describe("FusePoolDirectory", function () {
       let receipt: TransactionReceipt = await tx.wait();
       console.log(`Ether deployed successfully with tx hash: ${receipt.transactionHash}`);
 
-      const [totalSupply, totalBorrow, underlyingTokens, underlyingSymbols, whitelistedAdmin] =
-        await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
+      const [, , underlyingTokens, underlyingSymbols] = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(
+        poolAddress
+      );
 
       expect(underlyingTokens[0]).to.eq(constants.AddressZero);
-      expect(underlyingSymbols[0]).to.eq("ETH");
+      
+      expect(underlyingSymbols[0]).to.eq(chainDeployConfig[chainId].config.nativeTokenSymbol);
 
       let fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
       expect(fusePoolData[0][1]).to.eq(constants.AddressZero);

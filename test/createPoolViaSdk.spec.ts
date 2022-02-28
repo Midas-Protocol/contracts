@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { deployments, ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
 import { Fuse } from "../lib/esm/src";
@@ -10,6 +10,7 @@ use(solidity);
 
 describe("FusePoolDirectory", function () {
   this.beforeEach(async () => {
+    await deployments.fixture();
     await setUpPriceOraclePrices();
   });
 
@@ -82,7 +83,7 @@ describe("FusePoolDirectory", function () {
 
       const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
       expect(fusePoolData.length).to.eq(3);
-      expect(fusePoolData.map((f: any[]) => f[3])).to.contain("TRIBE");
+      expect(fusePoolData.map((f: any[]) => f[3])).to.have.members(deployedAssets.map((d) => d.symbol));
     });
   });
 });
