@@ -1,7 +1,7 @@
 import { BigNumber, constants, providers, utils } from "ethers";
 import { deployments, ethers } from "hardhat";
-import { createPool, deployAssets, setUpBscOraclePrices } from "./utils";
-import { DeployedAsset, getAssetsConf } from "./utils/pool";
+import { createPool, deployAssets, setUpPriceOraclePrices } from "./utils";
+import { DeployedAsset, getPoolAssets } from "./utils/pool";
 import { addCollateral, borrowCollateral } from "./utils/collateral";
 import { CErc20, CEther, EIP20Interface, FuseSafeLiquidator, MasterPriceOracle, SimplePriceOracle } from "../typechain";
 import { expect } from "chai";
@@ -35,14 +35,14 @@ describe("#safeLiquidate", () => {
 
   beforeEach(async () => {
     await deployments.fixture(); // ensure you start from a fresh deployments
-    await setUpBscOraclePrices();
+    await setUpPriceOraclePrices();
     const { bob, deployer, rando } = await ethers.getNamedSigners();
 
     simpleOracle = (await ethers.getContract("SimplePriceOracle", deployer)) as SimplePriceOracle;
     oracle = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
 
     [poolAddress] = await createPool({});
-    const assets = await getAssetsConf(poolAddress);
+    const assets = await getPoolAssets(poolAddress);
 
     erc20One = assets.assets.find((a) => a.underlying !== constants.AddressZero); // find first one
     expect(erc20One.underlying).to.be.ok;

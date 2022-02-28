@@ -1,7 +1,7 @@
 import { BigNumber, constants, providers, utils } from "ethers";
 import { ethers } from "hardhat";
-import { createPool, deployAssets, setupLocalOraclePrices } from "./utils";
-import { DeployedAsset, getAssetsConf } from "./utils/pool";
+import { createPool, deployAssets, setUpPriceOraclePrices } from "./utils";
+import { DeployedAsset, getPoolAssets } from "./utils/pool";
 import { setupAndLiquidatePool, setupLiquidatablePool } from "./utils/collateral";
 import {
   CErc20,
@@ -29,10 +29,10 @@ describe("Protocol Liquidation Seizing", () => {
   let tx: providers.TransactionResponse;
 
   beforeEach(async () => {
-    await setupLocalOraclePrices();
+    await setUpPriceOraclePrices();
     const { bob, deployer, rando } = await ethers.getNamedSigners();
     [poolAddress] = await createPool({});
-    const assets = await getAssetsConf(poolAddress);
+    const assets = await getPoolAssets(poolAddress);
     const deployedAssets = await deployAssets(assets.assets, bob);
 
     tribe = deployedAssets.find((a) => a.symbol === "TRIBE");

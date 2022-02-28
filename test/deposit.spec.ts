@@ -1,13 +1,13 @@
 import { expect } from "chai";
 import { constants, Contract, providers, utils } from "ethers";
 import { ethers } from "hardhat";
-import { createPool, setupLocalOraclePrices } from "./utils";
-import { assetInPool, deployAssets, getAssetsConf, getPoolIndex } from "./utils/pool";
+import { createPool, setUpPriceOraclePrices } from "./utils";
+import { assetInPool, deployAssets, getPoolAssets, getPoolIndex } from "./utils/pool";
 import { Fuse, USDPricedFuseAsset } from "../lib/esm/src";
 
 describe("Deposit flow tests", function () {
   this.beforeEach(async () => {
-    await setupLocalOraclePrices();
+    await setUpPriceOraclePrices();
   });
 
   describe("Deposit flow", async function () {
@@ -21,7 +21,7 @@ describe("Deposit flow tests", function () {
       const { chainId } = await ethers.provider.getNetwork();
       [poolAddress, poolImplementationAddress] = await createPool({ poolName: POOL_NAME, signer: bob });
       const sdk = new Fuse(ethers.provider, chainId);
-      const assets = await getAssetsConf(poolAddress);
+      const assets = await getPoolAssets(poolAddress);
       await deployAssets(assets.assets, bob);
       const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
       expect(fusePoolData.length).to.eq(3);

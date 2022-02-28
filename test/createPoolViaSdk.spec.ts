@@ -4,13 +4,13 @@ import { solidity } from "ethereum-waffle";
 import { Fuse } from "../lib/esm/src";
 import { DeployedAsset, poolAssets } from "./utils/pool";
 import { utils } from "ethers";
-import { setupLocalOraclePrices } from "./utils";
+import { setUpPriceOraclePrices } from "./utils";
 
 use(solidity);
 
 describe("FusePoolDirectory", function () {
   this.beforeEach(async () => {
-    await setupLocalOraclePrices();
+    await setUpPriceOraclePrices();
   });
 
   describe("Deploy pool", async function () {
