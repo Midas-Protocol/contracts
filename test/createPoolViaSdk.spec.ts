@@ -82,7 +82,7 @@ describe("FusePoolDirectory", function () {
 
       const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
       expect(fusePoolData.length).to.eq(3);
-      expect(fusePoolData.at(-1)[3]).to.eq("TRIBE");
+      expect(fusePoolData.map((f: any[]) => f[3])).to.contain("TRIBE");
     });
   });
 });

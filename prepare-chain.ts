@@ -3,11 +3,13 @@ import fs from "fs";
 type ChainConfig = {
   url: string;
   blockNumber: number;
+  chainId: number;
 };
 const config: Record<string, ChainConfig> = {
   bsc: {
     url: "https://speedy-nodes-nyc.moralis.io/2d2926c3e761369208fba31f/bsc/mainnet/archive",
     blockNumber: 15641803,
+    chainId: 56,
   },
 };
 
@@ -27,7 +29,7 @@ const start = () => {
         blockNumber: ${chainConfig.blockNumber}
       },
       saveDeployments: true,
-      chainId: 56,
+      chainId: ${chainConfig.chainId},
       gasPrice: 20e9,
       gas: 25e6,
       allowUnlimitedContractSize: true,

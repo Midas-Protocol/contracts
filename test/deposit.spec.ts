@@ -25,7 +25,7 @@ describe("Deposit flow tests", function () {
       await deployAssets(assets.assets, bob);
       const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
       expect(fusePoolData.length).to.eq(3);
-      expect(fusePoolData.at(-1)[3]).to.eq("TRIBE");
+      expect(fusePoolData.map((f: any[]) => f[3])).to.contain("TRIBE");
     });
 
     it("should enable native asset as collateral into pool and supply", async function () {
