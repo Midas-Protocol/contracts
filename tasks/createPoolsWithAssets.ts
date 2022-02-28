@@ -47,7 +47,7 @@ task("pools:create", "Create pool if does not exist")
       poolAddress = existingPool.comptroller;
     } else {
       [poolAddress] = await poolModule.createPool({ poolName: taskArgs.name, signer: account });
-      const assets = await poolModule.getAssetsConf(poolAddress);
+      const assets = await poolModule.getPoolAssets(poolAddress);
       await poolModule.deployAssets(assets.assets, account);
     }
     await poolModule.logPoolData(poolAddress, sdk);
