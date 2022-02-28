@@ -1,10 +1,12 @@
 import { BigNumber, constants, providers, utils } from "ethers";
-import { ethers } from "hardhat";
+import { deployments, ethers } from "hardhat";
 import { createPool, deployAssets, setUpPriceOraclePrices } from "./utils";
 import { DeployedAsset, getPoolAssets } from "./utils/pool";
 import { setupAndLiquidatePool, setupLiquidatablePool } from "./utils/collateral";
 import {
   CErc20,
+  CEther,
+  EIP20Interface,
   ERC20,
   FuseFeeDistributor,
   FuseSafeLiquidator,
@@ -15,12 +17,19 @@ import { expect } from "chai";
 import { FUSE_LIQUIDATION_PROTOCOL_FEE_PER_THOUSAND, FUSE_LIQUIDATION_SEIZE_FEE_PER_THOUSAND } from "./utils/config";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { cERC20Conf } from "../src";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { whaleSigner } from "./utils/accounts";
 
 describe("Protocol Liquidation Seizing", () => {
+  let whale: SignerWithAddress;
+
   let eth: cERC20Conf;
+  let erc20One: cERC20Conf;
+  let erc20Two: cERC20Conf;
 
   let deployedEth: DeployedAsset;
   let deployedErc20One: DeployedAsset;
+  let deployedErc20Two: DeployedAsset;
 
   let poolAddress: string;
   let simpleOracle: SimplePriceOracle;
@@ -28,30 +37,37 @@ describe("Protocol Liquidation Seizing", () => {
   let liquidator: FuseSafeLiquidator;
   let fuseFeeDistributor: FuseFeeDistributor;
 
+  let ethCToken: CEther;
   let erc20OneCToken: CErc20;
+  let erc20TwoCToken: CErc20;
 
+  let erc20OneUnderlying: EIP20Interface;
+  let erc20TwoUnderlying: EIP20Interface;
   let tx: providers.TransactionResponse;
 
   beforeEach(async () => {
+    await deployments.fixture(); // ensure you start from a fresh deployments
     await setUpPriceOraclePrices();
     const { bob, deployer, rando } = await ethers.getNamedSigners();
+
+    simpleOracle = (await ethers.getContract("SimplePriceOracle", deployer)) as SimplePriceOracle;
+    oracle = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
+
     [poolAddress] = await createPool({});
     const assets = await getPoolAssets(poolAddress);
-    const deployedAssets = await deployAssets(assets.assets, bob);
 
-    const erc20One = assets.assets.find((a) => a.underlying !== constants.AddressZero); // find first one
+    erc20One = assets.assets.find((a) => a.underlying !== constants.AddressZero); // find first one
     expect(erc20One.underlying).to.be.ok;
-    const erc20Two = assets.assets.find(
+    erc20Two = assets.assets.find(
       (a) => a.underlying !== constants.AddressZero && a.underlying !== erc20One.underlying
     ); // find second one
 
-    oracle = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
     expect(erc20Two.underlying).to.be.ok;
-    const eth = assets.assets.find((a) => a.underlying === constants.AddressZero);
+    eth = assets.assets.find((a) => a.underlying === constants.AddressZero);
 
     await oracle.add([eth.underlying, erc20One.underlying, erc20Two.underlying], Array(3).fill(simpleOracle.address));
 
-    let tx = await simpleOracle.setDirectPrice(eth.underlying, utils.parseEther("1"));
+    tx = await simpleOracle.setDirectPrice(eth.underlying, utils.parseEther("1"));
     await tx.wait();
 
     tx = await simpleOracle.setDirectPrice(erc20One.underlying, utils.parseEther("10"));
@@ -60,27 +76,37 @@ describe("Protocol Liquidation Seizing", () => {
     tx = await simpleOracle.setDirectPrice(erc20Two.underlying, utils.parseEther("0.0001"));
     await tx.wait();
 
-    simpleOracle = (await ethers.getContract("SimplePriceOracle", deployer)) as SimplePriceOracle;
-    tx = await simpleOracle.setDirectPrice(erc20One.underlying, "421407501053518");
-    await tx.wait();
+    const deployedAssets = await deployAssets(assets.assets, bob);
 
     deployedEth = deployedAssets.find((a) => a.underlying === constants.AddressZero);
     deployedErc20One = deployedAssets.find((a) => a.underlying === erc20One.underlying);
+    deployedErc20Two = deployedAssets.find((a) => a.underlying === erc20Two.underlying);
 
-    fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
     liquidator = (await ethers.getContract("FuseSafeLiquidator", rando)) as FuseSafeLiquidator;
+    fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
 
+    ethCToken = (await ethers.getContractAt("CEther", deployedEth.assetAddress)) as CEther;
     erc20OneCToken = (await ethers.getContractAt("CErc20", deployedErc20One.assetAddress)) as CErc20;
+    erc20TwoCToken = (await ethers.getContractAt("CErc20", deployedErc20Two.assetAddress)) as CErc20;
+
+    erc20TwoUnderlying = (await ethers.getContractAt("EIP20Interface", erc20Two.underlying)) as EIP20Interface;
+    erc20OneUnderlying = (await ethers.getContractAt("EIP20Interface", erc20One.underlying)) as EIP20Interface;
   });
 
-  it("should calculate the right amounts of protocol, fee, total supply after liquidation", async function () {
+  it.only("should calculate the right amounts of protocol, fee, total supply after liquidation", async function () {
     this.timeout(120_000);
     const { bob, rando } = await ethers.getNamedSigners();
 
-    const borrowAmount = "0.0001";
+    const borrowAmount = "0.5";
     const repayAmount = utils.parseEther(borrowAmount).div(10);
 
-    await setupLiquidatablePool(oracle, deployedErc20One, poolAddress, simpleOracle, borrowAmount);
+    // either use configured whale acct or bob
+    whale = await whaleSigner();
+    if (!whale) {
+      whale = bob;
+    }
+
+    await setupLiquidatablePool(oracle, deployedErc20One, poolAddress, simpleOracle, borrowAmount, whale);
 
     const liquidatorBalanceBefore = await erc20OneCToken.balanceOf(rando.address);
     const borrowerBalanceBefore = await erc20OneCToken.balanceOf(bob.address);
@@ -149,8 +175,24 @@ describe("Protocol Liquidation Seizing", () => {
 
   it("should be able to withdraw fees to fuseFeeDistributor", async function () {
     this.timeout(120_000);
+    const { bob } = await ethers.getNamedSigners();
+    // either use configured whale acct or bob
+    whale = await whaleSigner();
+    if (!whale) {
+      whale = bob;
+    }
+
     const borrowAmount = "0.0001";
-    await setupAndLiquidatePool(oracle, deployedErc20One, eth, poolAddress, simpleOracle, borrowAmount, liquidator);
+    await setupAndLiquidatePool(
+      oracle,
+      deployedErc20One,
+      deployedEth,
+      poolAddress,
+      simpleOracle,
+      borrowAmount,
+      liquidator,
+      whale
+    );
 
     const feesAfterLiquidation = await erc20OneCToken.totalFuseFees();
     expect(feesAfterLiquidation).to.be.gt(BigNumber.from(0));
