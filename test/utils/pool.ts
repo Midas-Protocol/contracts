@@ -4,8 +4,7 @@ import { providers, utils } from "ethers";
 import { ethers } from "hardhat";
 
 import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../lib/esm/src";
-import { bscAssets } from "../../chainDeploy";
-import { getBscAssetsConf, getLocalAssetsConf } from "./assets";
+import { getAssetsConf } from "./assets";
 
 interface PoolCreationParams {
   closeFactor?: number;
@@ -99,7 +98,7 @@ export async function deployAssets(assets: cERC20Conf[], signer?: SignerWithAddr
   return deployed;
 }
 
-export async function getAssetsConf(
+export async function getPoolAssets(
   comptroller: string,
   interestRateModelAddress?: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> {
@@ -114,15 +113,7 @@ export const poolAssets = async (
   interestRateModelAddress: string,
   comptroller: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> => {
-  const { chainId } = await ethers.provider.getNetwork();
-
-  let assets: cERC20Conf[];
-
-  if (chainId === 31337 || chainId === 1337) {
-    assets = await getLocalAssetsConf(comptroller, interestRateModelAddress, ethers);
-  } else if (chainId === 56) {
-    assets = await getBscAssetsConf(comptroller, interestRateModelAddress, bscAssets);
-  }
+  const assets = await getAssetsConf(comptroller, interestRateModelAddress, ethers);
   return {
     shortName: "Fuse R1",
     longName: "Rari DAO Fuse Pool R1 (Base)",

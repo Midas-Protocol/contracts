@@ -1,8 +1,23 @@
 import { cERC20Conf } from "../../lib/esm/src";
+import { bscAssets } from "../../chainDeploy";
+import { constants } from "ethers";
+
+export const getAssetsConf = async (comptroller, interestRateModelAddress, ethers): Promise<cERC20Conf[]> => {
+  const { chainId } = await ethers.provider.getNetwork();
+
+  let assets: cERC20Conf[];
+
+  if (chainId === 31337 || chainId === 1337) {
+    assets = await getLocalAssetsConf(comptroller, interestRateModelAddress, ethers);
+  } else if (chainId === 56) {
+    assets = await getBscAssetsConf(comptroller, interestRateModelAddress, bscAssets);
+  }
+  return assets;
+};
 
 export const getLocalAssetsConf = async (comptroller, interestRateModelAddress, ethers) => {
   const ethConf: cERC20Conf = {
-    underlying: "0x0000000000000000000000000000000000000000",
+    underlying: constants.AddressZero,
     comptroller,
     interestRateModel: interestRateModelAddress,
     name: "Ethereum",
@@ -48,7 +63,7 @@ export const getBscAssetsConf = async (comptroller, interestRateModelAddress, bs
   const btc = bscAssets.find((b) => b.symbol === "BTCB");
   const busd = bscAssets.find((b) => b.symbol === "BUSD");
   const bnbConf: cERC20Conf = {
-    underlying: "0x0000000000000000000000000000000000000000",
+    underlying: constants.AddressZero,
     comptroller,
     interestRateModel: interestRateModelAddress,
     name: "Binance Coin",
