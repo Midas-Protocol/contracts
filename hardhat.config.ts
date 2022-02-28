@@ -82,10 +82,6 @@ const config: HardhatUserConfig = {
       gas: 25e6,
       allowUnlimitedContractSize: true,
       accounts: { mnemonic },
-      forking: {
-        url: "https://speedy-nodes-nyc.moralis.io/2d2926c3e761369208fba31f/bsc/mainnet/archive",
-        blockNumber: 15641803
-      },
     },
     localhost: {
       url: urlOverride || "http://localhost:8545",

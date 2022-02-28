@@ -16,6 +16,7 @@
   ],
   "scripts": {
     "test": "hardhat test",
+    "test:bsc": "ts-node prepare-chain bsc && hardhat test",
     "export": "hardhat export --export-all ./deployments.json",
     "build": "hardhat compile && npm run build:sdk",
     "build:sdk": "tsc -p tsconfig-sdk.json && tsc -p tsconfig-cjs.json",
