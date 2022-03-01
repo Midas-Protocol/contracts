@@ -50,7 +50,7 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     bytes memory becomeImplementationData
   ) internal {
     // Check whitelist
-    require(fuseAdmin.cErc20DelegateWhitelist(implementation, implementation_, allowResign), "!impl");
+    //require(fuseAdmin.cErc20DelegateWhitelist(implementation, implementation_, allowResign), "!impl");
 
     // Call _resignImplementation internally (this delegate's code)
     if (allowResign) _resignImplementation();

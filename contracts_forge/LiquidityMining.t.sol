@@ -7,6 +7,7 @@ import "forge-std/Vm.sol";
 
 import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
 import {CErc20} from "../contracts/compound/CErc20.sol";
+import {CToken} from "../contracts/compound/CToken.sol";
 import {MockERC20} from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
 import {WhitePaperInterestRateModel} from "../contracts/compound/WhitePaperInterestRateModel.sol";
 import {Unitroller} from "../contracts/compound/Unitroller.sol";
@@ -17,6 +18,9 @@ import {RewardsDistributorDelegate} from "../contracts/compound/RewardsDistribut
 import {RewardsDistributorDelegator} from "../contracts/compound/RewardsDistributorDelegator.sol";
 import {ComptrollerInterface} from "../contracts/compound/ComptrollerInterface.sol";
 import {InterestRateModel} from "../contracts/compound/InterestRateModel.sol";
+import {FuseFeeDistributor} from "../contracts/FuseFeeDistributor.sol";
+import {FusePoolDirectory} from "../contracts/FusePoolDirectory.sol";
+import {MockPriceOracle} from "../contracts/oracles/1337/MockPriceOracle.sol";
 
 contract LiquidityMiningTest is DSTest {
   using stdStorage for StdStorage;
@@ -34,39 +38,64 @@ contract LiquidityMiningTest is DSTest {
   CErc20 cErc20;
   RewardsDistributorDelegate rewardsDistributorDelegate;
   RewardsDistributorDelegate rewardsDistributor;
-
+  FuseFeeDistributor fuseAdmin;
+  FusePoolDirectory fusePoolDirectory;
   uint256 depositAmount = 100e18;
   uint256 supplyRewardPerBlock = 10e18;
   uint256 borrowRewardPerBlocK = 1e18;
 
+  address fuseOwner = 0x5eA4A9a7592683bF0Bc187d6Da706c6c4770976F;
+
   address[] markets;
+  address[] emptyAddresses;
+  address[] newUnitroller;
+  bool[] boolArray;
+  address[] newImplementation;
 
   function setUp() public {
     underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
     rewardsToken = new MockERC20("RewardsToken", "RT", 18);
     interestModel = new WhitePaperInterestRateModel(100e18, 100e18);
-    Unitroller tempUnitroller = new Unitroller();
+    fuseAdmin = FuseFeeDistributor(payable(0xa731585ab05fC9f83555cf9Bff8F58ee94e18F85));
+    fusePoolDirectory = FusePoolDirectory(0x835482FE0532f169024d5E9410199369aAD5C77E);
     Comptroller tempComptroller = new Comptroller();
     cErc20Delegate = new CErc20Delegate();
+
     rewardsDistributorDelegate = new RewardsDistributorDelegate();
     rewardsDistributor = RewardsDistributorDelegate(
       address(
         new RewardsDistributorDelegator(address(this), address(rewardsToken), address(rewardsDistributorDelegate))
       )
     );
+    MockPriceOracle priceOracle = new MockPriceOracle(10);
 
-    tempUnitroller._setPendingImplementation(address(tempComptroller));
-    /*tempUnitroller._acceptImplementation();
+    emptyAddresses.push(address(0));
+    newUnitroller.push(address(tempComptroller));
+    boolArray.push(true);
 
-    comptroller = Comptroller(address(tempUnitroller));
+    vm.startPrank(fuseOwner);
+    fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, boolArray);
+    (uint256 index, address comptrollerAddress) = fusePoolDirectory.deployPool(
+      "TestPool",
+      address(tempComptroller),
+      false,
+      0.1e18,
+      1.1e18,
+      address(priceOracle)
+    );
 
-    markets.push(address(cErc20));
+    Unitroller(payable(comptrollerAddress))._acceptAdmin();
+    comptroller = Comptroller(comptrollerAddress);
 
+    newImplementation.push(address(cErc20Delegate));
+    fuseAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, boolArray, boolArray);
+
+    //markets.push(address(cErc20));
     comptroller._deployMarket(
       false,
-      abi.encodePacked(
+      abi.encode(
         address(underlyingToken),
-        ComptrollerInterface(address(comptroller)),
+        ComptrollerInterface(comptrollerAddress),
         InterestRateModel(address(interestModel)),
         "CUnderlyingToken",
         "CUT",
@@ -77,10 +106,11 @@ contract LiquidityMiningTest is DSTest {
       ),
       90e18
     );
+    //CToken[] memory allMarkets = comptroller.getAllMarkets();
+    //cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
+    vm.stopPrank();
 
-    cErc20 = CErc20(address(comptroller.cTokensByUnderlying(address(underlyingToken))));
-
-    rewardsDistributor._setCompSupplySpeed(cErc20, supplyRewardPerBlock);
+    /*rewardsDistributor._setCompSupplySpeed(cErc20, supplyRewardPerBlock);
     rewardsDistributor._setCompBorrowSpeed(cErc20, borrowRewardPerBlocK);
 
     rewardsToken.mint(address(this), depositAmount);
