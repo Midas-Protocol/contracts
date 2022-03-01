@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 import "../external/alpha/Bank.sol";
 
-import "../external/aave/IWETH.sol";
+import "../external/aave/IW_NATIVE.sol";
 
 import "./IRedemptionStrategy.sol";
 
@@ -16,9 +16,9 @@ import "./IRedemptionStrategy.sol";
  */
 contract AlphaHomoraV1BankLiquidator is IRedemptionStrategy {
     /**
-     * @dev WETH contract object.
+     * @dev W_NATIVE contract object.
      */
-    IWETH constant private WETH = IWETH(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+    IW_NATIVE constant private W_NATIVE = IW_NATIVE(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
 
     /**
      * @notice Redeems custom collateral `token` for an underlying token.
@@ -35,8 +35,8 @@ contract AlphaHomoraV1BankLiquidator is IRedemptionStrategy {
         outputToken = IERC20Upgradeable(address(0));
         outputAmount = address(this).balance;
 
-        // Convert to WETH because `FuseSafeLiquidator.repayTokenFlashLoan` only supports tokens (not ETH) as output from redemptions (reverts on line 24 because `underlyingCollateral` is the zero address) 
-        WETH.deposit{value: outputAmount}();
-        return (IERC20Upgradeable(address(WETH)), outputAmount);
+        // Convert to W_NATIVE because `FuseSafeLiquidator.repayTokenFlashLoan` only supports tokens (not ETH) as output from redemptions (reverts on line 24 because `underlyingCollateral` is the zero address)
+        W_NATIVE.deposit{value: outputAmount}();
+        return (IERC20Upgradeable(address(W_NATIVE)), outputAmount);
     }
 }
