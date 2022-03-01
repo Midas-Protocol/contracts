@@ -64,7 +64,7 @@ contract FusePoolLens is Initializable {
     struct UniswapData {
         string name; // ie "Uniswap V2" or "SushiSwap LP Token"
         string symbol; // ie "UNI-V2" or "SLP"
-        string displayName; // ie "SushiSwap" or "Uniswap" (must include the space)
+        string displayName; // ie "SushiSwap" or "Uniswap"
     }
     UniswapData[] uniswapData;
 

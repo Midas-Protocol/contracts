@@ -18,6 +18,8 @@ export const deployConfig: ChainDeployConfig = {
   stableToken: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
   wBTCToken: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
   blocksPerYear: BigNumber.from((20 * 24 * 365 * 60).toString()),
+  hardcoded: [],
+  uniswapData: []
 };
 
 export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {

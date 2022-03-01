@@ -14,4 +14,6 @@ export type ChainDeployConfig = {
   stableToken: string;
   wBTCToken: string;
   blocksPerYear: BigNumber;
+  hardcoded: { name: string; symbol: string; address: string }[];
+  uniswapData: { lpName: string; lpSymbol: string; lpDisplayName: string }[];
 };

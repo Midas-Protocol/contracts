@@ -18,6 +18,8 @@ export const deployConfig: ChainDeployConfig = {
   stableToken: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
   wBTCToken: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
   blocksPerYear: BigNumber.from((20 * 24 * 365 * 60).toString()),
+  hardcoded: [],
+  uniswapData: [{ lpDisplayName: "PancakeSwap", lpName: "Pancake LPs", lpSymbol: "Cake-LP" }],
 };
 
 export const assets = [

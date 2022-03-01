@@ -9,4 +9,6 @@ export const deployConfig9001: ChainDeployConfig = {
   uniswapV2RouterAddress: "",
   stableToken: "",
   wBTCToken: "",
+  hardcoded: [],
+  uniswapData: []
 };
