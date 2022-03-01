@@ -109,13 +109,13 @@ describe("Protocol Liquidation Seizing", () => {
     await setupLiquidatablePool(oracle, deployedErc20One, poolAddress, simpleOracle, borrowAmount, whale);
 
     const liquidatorBalanceBefore = await erc20OneCToken.balanceOf(rando.address);
-    const borrowerBalanceBefore = await erc20OneCToken.balanceOf(bob.address);
+    const borrowerBalanceBefore = await erc20OneCToken.balanceOf(whale.address);
     const totalReservesBefore = await erc20OneCToken.totalReserves();
     const totalSupplyBefore = await erc20OneCToken.totalSupply();
     const feesBefore = await erc20OneCToken.totalFuseFees();
 
     tx = await liquidator["safeLiquidate(address,address,address,uint256,address,address,address[],bytes[])"](
-      bob.address,
+      whale.address,
       deployedEth.assetAddress,
       deployedErc20One.assetAddress,
       0,
@@ -127,7 +127,7 @@ describe("Protocol Liquidation Seizing", () => {
     );
 
     const exchangeRate = await erc20OneCToken.exchangeRateStored();
-    const borrowerBalanceAfter = await erc20OneCToken.balanceOf(bob.address);
+    const borrowerBalanceAfter = await erc20OneCToken.balanceOf(whale.address);
     const liquidatorBalanceAfter = await erc20OneCToken.balanceOf(rando.address);
     const totalReservesAfter = await erc20OneCToken.totalReserves();
     const totalSupplyAfter = await erc20OneCToken.totalSupply();
