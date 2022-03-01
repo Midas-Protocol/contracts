@@ -10,5 +10,8 @@ export type ChainDeployConfig = {
   nativeTokenUsdChainlinkFeed?: string;
   nativeTokenName: string;
   nativeTokenSymbol: string;
+  uniswapV2RouterAddress: string;
+  stableToken: string;
+  wBTCToken: string;
   blocksPerYear: BigNumber;
 };

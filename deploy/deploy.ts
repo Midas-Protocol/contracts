@@ -81,15 +81,6 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     console.log("FusePoolDirectory already initialized");
   }
 
-  dep = await deployments.deterministic("FuseSafeLiquidator", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [],
-    log: true,
-  });
-  const fsl = await dep.deploy();
-  console.log("FuseSafeLiquidator: ", fsl.address);
-
   dep = await deployments.deterministic("FuseFeeDistributor", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),

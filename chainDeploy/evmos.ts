@@ -6,4 +6,7 @@ export const deployConfig9001: ChainDeployConfig = {
   nativeTokenName: "EMVOS",
   nativeTokenSymbol: "PHO",
   blocksPerYear: BigNumber.from((8.6 * 24 * 365 * 60).toString()),
+  uniswapV2RouterAddress: "",
+  stableToken: "",
+  wBTCToken: "",
 };

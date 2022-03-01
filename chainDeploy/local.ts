@@ -1,11 +1,15 @@
 import { SALT } from "../deploy/deploy";
 import { ChainDeployConfig, deployIRMs } from "./helpers";
 import { BigNumber } from "ethers";
+import { deployFuseSafeLiquidator } from "./helpers/liquidator";
 
 export const deployConfig: ChainDeployConfig = {
-  wtoken: "",
+  wtoken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
   nativeTokenName: "Ethereum (Local)",
   nativeTokenSymbol: "ETH",
+  uniswapV2RouterAddress: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+  stableToken: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  wBTCToken: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
   blocksPerYear: BigNumber.from((4 * 24 * 365 * 60).toString()),
 };
 
@@ -82,4 +86,8 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
     console.log("MasterPriceOracle already initialized");
   }
   ////
+
+  //// Liquidator
+  await deployFuseSafeLiquidator({ ethers, getNamedAccounts, deployments, deployConfig });
+  ///
 };

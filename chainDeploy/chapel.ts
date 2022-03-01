@@ -7,12 +7,16 @@ import {
 } from "./helpers";
 import { BigNumber } from "ethers";
 import { assets } from "./bsc";
+import { deployFuseSafeLiquidator } from "./helpers/liquidator";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
   nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
   nativeTokenName: "Binance Network Token (Testnet)",
   nativeTokenSymbol: "TBNB",
+  uniswapV2RouterAddress: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
+  stableToken: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
+  wBTCToken: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
   blocksPerYear: BigNumber.from((20 * 24 * 365 * 60).toString()),
 };
 
@@ -82,4 +86,8 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
   //// Uniswap Oracle
   await deployUniswapOracle({ ethers, getNamedAccounts, deployments, deployConfig });
   ////
+
+  //// Liquidator
+  await deployFuseSafeLiquidator({ ethers, getNamedAccounts, deployments, deployConfig });
+  ///
 };

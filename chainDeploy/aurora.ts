@@ -7,4 +7,7 @@ export const deployConfig1313161554: ChainDeployConfig = {
   nativeTokenName: "ETH",
   nativeTokenSymbol: "Ethereum",
   blocksPerYear: BigNumber.from((50 * 24 * 365 * 60).toString()),
+  uniswapV2RouterAddress: "",
+  stableToken: "",
+  wBTCToken: "",
 };

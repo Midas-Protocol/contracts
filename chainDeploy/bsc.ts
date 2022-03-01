@@ -7,12 +7,16 @@ import {
   deployUniswapOracle,
 } from "./helpers";
 import { BigNumber } from "ethers";
+import { deployFuseSafeLiquidator } from "./helpers/liquidator";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
   nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
   nativeTokenName: "Binance Network Token",
   nativeTokenSymbol: "BNB",
+  uniswapV2RouterAddress: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
+  stableToken: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+  wBTCToken: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
   blocksPerYear: BigNumber.from((20 * 24 * 365 * 60).toString()),
 };
 
@@ -117,4 +121,8 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
   const simplePO = await dep.deploy();
   console.log("SimplePriceOracle: ", simplePO.address);
   ////
+
+  //// Liquidator
+  await deployFuseSafeLiquidator({ ethers, getNamedAccounts, deployments, deployConfig });
+  ///
 };
