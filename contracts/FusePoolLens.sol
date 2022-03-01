@@ -126,7 +126,7 @@ contract FusePoolLens is Initializable {
 
             if (cToken.isCEther()) {
                 underlyingTokens[i] = address(0);
-                underlyingSymbols[i] = "ETH";
+                underlyingSymbols[i] = symbol;
             } else {
                 underlyingTokens[i] = ICErc20(address(cToken)).underlying();
                 (, underlyingSymbols[i]) = getTokenNameAndSymbol(underlyingTokens[i]);
@@ -257,23 +257,23 @@ contract FusePoolLens is Initializable {
 
         // Get name and symbol from token contract
         ERC20Upgradeable tokenContract = ERC20Upgradeable(token);
-        string memory name = tokenContract.name();
-        string memory symbol = tokenContract.symbol();
+        string memory _name = tokenContract.name();
+        string memory _symbol = tokenContract.symbol();
 
         // Check for Uniswap V2/SushiSwap pair
         try IUniswapV2Pair(token).token0() returns (address _token0) {
-            bool isUniswapToken = keccak256(abi.encodePacked(name)) == keccak256(abi.encodePacked("Uniswap V2")) && keccak256(abi.encodePacked(symbol)) == keccak256(abi.encodePacked("UNI-V2"));
-            bool isSushiSwapToken = !isUniswapToken && keccak256(abi.encodePacked(name)) == keccak256(abi.encodePacked("SushiSwap LP Token")) && keccak256(abi.encodePacked(symbol)) == keccak256(abi.encodePacked("SLP"));
+            bool isUniswapToken = keccak256(abi.encodePacked(_name)) == keccak256(abi.encodePacked("Uniswap V2")) && keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked("UNI-V2"));
+            bool isSushiSwapToken = !isUniswapToken && keccak256(abi.encodePacked(_name)) == keccak256(abi.encodePacked("SushiSwap LP Token")) && keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked("SLP"));
 
             if (isUniswapToken || isSushiSwapToken) {
                 ERC20Upgradeable token0 = ERC20Upgradeable(_token0);
                 ERC20Upgradeable token1 = ERC20Upgradeable(IUniswapV2Pair(token).token1());
-                name = string(abi.encodePacked(isSushiSwapToken ? "SushiSwap " : "Uniswap ", token0.symbol(), "/", token1.symbol(), " LP"));
-                symbol = string(abi.encodePacked(token0.symbol(), "-", token1.symbol()));
+                _name = string(abi.encodePacked(isSushiSwapToken ? "SushiSwap " : "Uniswap ", token0.symbol(), "/", token1.symbol(), " LP"));
+                _symbol = string(abi.encodePacked(token0.symbol(), "-", token1.symbol()));
             }
         } catch { }
 
-        return (name, symbol);
+        return (_name, _symbol);
     }
 
     /**
