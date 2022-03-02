@@ -182,7 +182,7 @@ describe("Protocol Liquidation Seizing", () => {
       whale = bob;
     }
 
-    const borrowAmount = "0.0001";
+    const borrowAmount = "0.5";
     await setupAndLiquidatePool(
       oracle,
       deployedErc20One,
