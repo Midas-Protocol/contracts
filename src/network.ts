@@ -59,6 +59,12 @@ export const chainOracles = {
     OracleTypes.ChainlinkPriceOracleV2,
     OracleTypes.UniswapTwapPriceOracleV2,
   ],
+  [SupportedChains.bsc]: [
+    OracleTypes.MasterPriceOracle,
+    OracleTypes.ChainlinkPriceOracleV2,
+    OracleTypes.UniswapTwapPriceOracleV2,
+    OracleTypes.SimplePriceOracle,
+  ],
 };
 
 export const oracleConfig = (deployments: ChainDeployment, artifacts: Artifacts, availableOracles: Array<string>) => {

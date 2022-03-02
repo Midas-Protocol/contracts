@@ -1,4 +1,4 @@
-import { ChainDeployConfig } from "./helper";
+import { ChainDeployConfig } from "./helpers";
 import { BigNumber } from "ethers";
 
 // see https://gov.near.org/t/evm-runtime-base-token/340/24
@@ -7,4 +7,10 @@ export const deployConfig1313161554: ChainDeployConfig = {
   nativeTokenName: "ETH",
   nativeTokenSymbol: "Ethereum",
   blocksPerYear: BigNumber.from((50 * 24 * 365 * 60).toString()),
+  uniswapV2RouterAddress: "",
+  stableToken: "",
+  wBTCToken: "",
+  hardcoded: [],
+  uniswapData: [],
+  pairInitHashCode: "0x"
 };
