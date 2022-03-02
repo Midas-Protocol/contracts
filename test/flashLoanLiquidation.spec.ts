@@ -24,7 +24,7 @@ const UNISWAP_V2_PROTOCOLS = {
   },
 };
 
-describe("#safeLiquidate", () => {
+describe.skip("#safeLiquidate", () => {
   let whale: SignerWithAddress;
 
   let eth: cERC20Conf;
@@ -95,7 +95,7 @@ describe("#safeLiquidate", () => {
     erc20OneUnderlying = (await ethers.getContractAt("EIP20Interface", erc20One.underlying)) as EIP20Interface;
   });
 
-  it.only("should liquidate a native borrow for token collateral", async function () {
+  it("should liquidate a native borrow for token collateral", async function () {
     const { alice, bob, rando } = await ethers.getNamedSigners();
 
     // either use configured whale acct or bob
