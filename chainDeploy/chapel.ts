@@ -19,7 +19,8 @@ export const deployConfig: ChainDeployConfig = {
   wBTCToken: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
   blocksPerYear: BigNumber.from((20 * 24 * 365 * 60).toString()),
   hardcoded: [],
-  uniswapData: []
+  uniswapData: [],
+  pairInitHashCode: "0x"
 };
 
 export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {

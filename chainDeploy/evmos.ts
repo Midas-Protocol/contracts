@@ -10,5 +10,6 @@ export const deployConfig9001: ChainDeployConfig = {
   stableToken: "",
   wBTCToken: "",
   hardcoded: [],
-  uniswapData: []
+  uniswapData: [],
+  pairInitHashCode: "0x"
 };

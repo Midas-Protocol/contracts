@@ -13,7 +13,7 @@ export type ChainDeployConfig = {
   uniswapV2RouterAddress: string;
   stableToken: string;
   wBTCToken: string;
-  pairInitHashCode?: string;
+  pairInitHashCode: string;
   blocksPerYear: BigNumber;
   hardcoded: { name: string; symbol: string; address: string }[];
   uniswapData: { lpName: string; lpSymbol: string; lpDisplayName: string }[];
