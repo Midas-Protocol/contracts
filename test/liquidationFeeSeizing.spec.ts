@@ -125,6 +125,7 @@ describe("Protocol Liquidation Seizing", () => {
       [],
       { value: repayAmount, gasLimit: 10000000, gasPrice: utils.parseUnits("10", "gwei") }
     );
+    await tx.wait();
 
     const exchangeRate = await erc20OneCToken.exchangeRateStored();
     const borrowerBalanceAfter = await erc20OneCToken.balanceOf(whale.address);
@@ -173,7 +174,7 @@ describe("Protocol Liquidation Seizing", () => {
     expect(reservesDiffAmount).to.be.gt(protocolSeizeTokens);
   });
 
-  it.only("should be able to withdraw fees to fuseFeeDistributor", async function () {
+  it("should be able to withdraw fees to fuseFeeDistributor", async function () {
     this.timeout(120_000);
     const { bob } = await ethers.getNamedSigners();
     // either use configured whale acct or bob

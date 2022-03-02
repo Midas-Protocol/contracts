@@ -132,7 +132,7 @@ export async function setupLiquidatablePool(
 
 export async function setupAndLiquidatePool(
   oracle: MasterPriceOracle,
-  tribe: DeployedAsset,
+  erc20: DeployedAsset,
   eth: DeployedAsset,
   poolAddress: string,
   simpleOracle: SimplePriceOracle,
@@ -140,17 +140,16 @@ export async function setupAndLiquidatePool(
   liquidator: any,
   signer: SignerWithAddress
 ) {
-  const { bob } = await ethers.getNamedSigners();
-  await setupLiquidatablePool(oracle, tribe, poolAddress, simpleOracle, borrowAmount, signer);
+  await setupLiquidatablePool(oracle, erc20, poolAddress, simpleOracle, borrowAmount, signer);
 
   const repayAmount = utils.parseEther(borrowAmount).div(10);
 
   const tx = await liquidator["safeLiquidate(address,address,address,uint256,address,address,address[],bytes[])"](
-    bob.address,
+    signer.address,
     eth.assetAddress,
-    tribe.assetAddress,
+    erc20.assetAddress,
     0,
-    tribe.assetAddress,
+    erc20.assetAddress,
     constants.AddressZero,
     [],
     [],
