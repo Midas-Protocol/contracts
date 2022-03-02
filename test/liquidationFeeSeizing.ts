@@ -93,7 +93,7 @@ describe("Protocol Liquidation Seizing", () => {
     erc20OneUnderlying = (await ethers.getContractAt("EIP20Interface", erc20One.underlying)) as EIP20Interface;
   });
 
-  it.only("should calculate the right amounts of protocol, fee, total supply after liquidation", async function () {
+  it("should calculate the right amounts of protocol, fee, total supply after liquidation", async function () {
     this.timeout(120_000);
     const { bob, rando } = await ethers.getNamedSigners();
 

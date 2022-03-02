@@ -352,7 +352,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
 
         console.log(repayAmount);
 //        pair.swap(repayAmount, 0, address(0x18c1d6471EE332e9E2141c86807572FB7f6B3921), msg.data);
-        pair.swap(repayAmount * 1e7, 0, address(this), "");
+        pair.swap(repayAmount * 1e6, 0, address(this), "");
 
         // Exchange profit, send NATIVE to coinbase if necessary, and transfer seized funds
         return distributeProfit(exchangeProfitTo, minProfitAmount, ethToCoinbase);

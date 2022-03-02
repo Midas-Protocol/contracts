@@ -1,11 +1,11 @@
-import { BigNumber, constants, providers, utils } from "ethers";
+import { BigNumber, constants, Contract, providers, utils } from "ethers";
 import { deployments, ethers } from "hardhat";
 import { createPool, deployAssets, setUpPriceOraclePrices } from "./utils";
 import { DeployedAsset, getPoolAssets } from "./utils/pool";
 import { addCollateral, borrowCollateral } from "./utils/collateral";
 import { CErc20, CEther, EIP20Interface, FuseSafeLiquidator, MasterPriceOracle, SimplePriceOracle } from "../typechain";
 import { expect } from "chai";
-import { cERC20Conf } from "../lib/esm/src";
+import { cERC20Conf, ERC20Abi } from "../lib/esm/src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { whaleSigner } from "./utils/accounts";
 
@@ -136,6 +136,13 @@ describe("#safeLiquidate", () => {
         : await ((await ethers.getContractAt("EIP20Interface", erc20Two.underlying)) as EIP20Interface).balanceOf(
             rando.address
           );
+    const assetContract = new Contract(deployedEth.assetAddress, ERC20Abi, whale);
+    tx = await assetContract.approve(whale.address, BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One));
+    await tx.wait();
+
+    const assetOneContract = new Contract(deployedErc20One.assetAddress, ERC20Abi, whale);
+    tx = await assetOneContract.approve(whale.address, BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One));
+    await tx.wait();
 
     // Liquidate borrow
     tx = await liquidator[

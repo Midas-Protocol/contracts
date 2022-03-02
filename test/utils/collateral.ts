@@ -116,11 +116,12 @@ export async function setupLiquidatablePool(
   const originalPrice = await oracle.getUnderlyingPrice(token.assetAddress);
 
   await addCollateral(poolAddress, signer, token.symbol, "0.1", true);
+  console.log(`Added ${token.symbol} collateral`);
 
   const native = chainDeployConfig[chainId].config.nativeTokenSymbol;
   // Supply 0.001 ETH from other account
-  await addCollateral(poolAddress, alice, native, "0.001", false);
-
+  await addCollateral(poolAddress, alice, native, "1", false);
+  console.log(`Added ${native} collateral`);
   // Borrow 0.0001 ETH using token collateral
   await borrowCollateral(poolAddress, signer.address, native, borrowAmount);
 
