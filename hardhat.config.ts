@@ -86,7 +86,7 @@ const config: HardhatUserConfig = {
     localhost: {
       url: urlOverride || "http://localhost:8545",
       saveDeployments: true,
-      chainId: 56,
+      chainId: 1337,
       gasPrice: 20e9,
       gas: 25e6,
       allowUnlimitedContractSize: true,
