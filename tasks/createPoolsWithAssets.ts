@@ -47,7 +47,7 @@ task("pools:create", "Create pool if does not exist")
       poolAddress = existingPool.comptroller;
     } else {
       [poolAddress] = await poolModule.createPool({ poolName: taskArgs.name, signer: account });
-      const assets = await poolModule.getAssetsConf(poolAddress);
+      const assets = await poolModule.getPoolAssets(poolAddress);
       await poolModule.deployAssets(assets.assets, account);
     }
     await poolModule.logPoolData(poolAddress, sdk);
@@ -60,6 +60,7 @@ task("pools:borrow", "Borrow collateral")
   .addParam("symbol", "Symbol of token to be borrowed", "ETH")
   .addParam("poolAddress", "Address of the poll")
   .setAction(async (taskArgs, hre) => {
+    const { chainId } = await hre.ethers.provider.getNetwork();
     const collateralModule = await import("../test/utils/collateral");
     const account = await hre.ethers.getNamedSigner(taskArgs.account);
     await collateralModule.borrowCollateral(
@@ -79,9 +80,10 @@ task("pools:deposit", "Deposit collateral")
   .setAction(async (taskArgs, hre) => {
     const collateralModule = await import("../test/utils/collateral");
     const account = await hre.ethers.getNamedSigner(taskArgs.account);
+    const { chainId } = await hre.ethers.provider.getNetwork();
     await collateralModule.addCollateral(
       taskArgs.poolAddress,
-      account.address,
+      account,
       taskArgs.symbol,
       taskArgs.amount.toString(),
       taskArgs.enableCollateral

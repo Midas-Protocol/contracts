@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "../external/uniswap/IUniswapV1Exchange.sol";
 import "../external/uniswap/IUniswapV1Factory.sol";
 
-import "../external/aave/IWETH.sol";
+import "../external/aave/IW_NATIVE.sol";
 
 import "./IRedemptionStrategy.sol";
 
@@ -25,9 +25,9 @@ contract UniswapV1Liquidator is IRedemptionStrategy {
     IUniswapV1Factory constant private UNISWAP_V1_FACTORY = IUniswapV1Factory(0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95);
 
     /**
-     * @dev WETH contract object.
+     * @dev W_NATIVE contract object.
      */
-    IWETH constant private WETH = IWETH(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+    IW_NATIVE constant private W_NATIVE = IW_NATIVE(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
 
     /**
      * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
@@ -59,7 +59,7 @@ contract UniswapV1Liquidator is IRedemptionStrategy {
 
         // Get new collateral
         outputAmount = address(this).balance;
-        WETH.deposit{value: outputAmount}();
-        return (IERC20Upgradeable(address(WETH)), outputAmount);
+        W_NATIVE.deposit{value: outputAmount}();
+        return (IERC20Upgradeable(address(W_NATIVE)), outputAmount);
     }
 }
