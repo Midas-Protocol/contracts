@@ -54,11 +54,12 @@ contract WhitePaperInterestRateModel is InterestRateModel {
     uint256 reserves
   ) public pure returns (uint256) {
     // Utilization rate is 0 when there are no borrows
-    if (borrows == 0) {
-      return 0;
-    }
+    // if (borrows == 0) {
+    //   return 0;
+    // }
 
-    return borrows.mul(1e18).div(cash.add(borrows).sub(reserves));
+    // return borrows.mul(1e18).div(cash.add(borrows).sub(reserves));
+    return 0;
   }
 
   /**

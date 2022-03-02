@@ -49,13 +49,14 @@ contract LiquidityMiningTest is DSTest {
   address[] markets;
   address[] emptyAddresses;
   address[] newUnitroller;
-  bool[] boolArray;
+  bool[] falseBoolArray;
+  bool[] trueBoolArray;
   address[] newImplementation;
 
   function setUp() public {
     underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
     rewardsToken = new MockERC20("RewardsToken", "RT", 18);
-    interestModel = new WhitePaperInterestRateModel(100e18, 100e18);
+    interestModel = new WhitePaperInterestRateModel(1e18, 1e18);
     fuseAdmin = FuseFeeDistributor(payable(0xa731585ab05fC9f83555cf9Bff8F58ee94e18F85));
     fusePoolDirectory = FusePoolDirectory(0x835482FE0532f169024d5E9410199369aAD5C77E);
     Comptroller tempComptroller = new Comptroller();
@@ -71,10 +72,11 @@ contract LiquidityMiningTest is DSTest {
 
     emptyAddresses.push(address(0));
     newUnitroller.push(address(tempComptroller));
-    boolArray.push(true);
+    trueBoolArray.push(true);
+    falseBoolArray.push(false);
 
     vm.startPrank(fuseOwner);
-    fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, boolArray);
+    fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
     (uint256 index, address comptrollerAddress) = fusePoolDirectory.deployPool(
       "TestPool",
       address(tempComptroller),
@@ -87,8 +89,10 @@ contract LiquidityMiningTest is DSTest {
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
     comptroller = Comptroller(comptrollerAddress);
 
+    comptroller._addRewardsDistributor(address(rewardsDistributor));
+
     newImplementation.push(address(cErc20Delegate));
-    fuseAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, boolArray, boolArray);
+    fuseAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);
 
     //markets.push(address(cErc20));
     comptroller._deployMarket(
@@ -104,33 +108,30 @@ contract LiquidityMiningTest is DSTest {
         uint256(1),
         uint256(0)
       ),
-      90e18
+      0.9e18
     );
-    //CToken[] memory allMarkets = comptroller.getAllMarkets();
-    //cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
+
+    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
     vm.stopPrank();
 
-    /*rewardsDistributor._setCompSupplySpeed(cErc20, supplyRewardPerBlock);
+    rewardsDistributor._setCompSupplySpeed(cErc20, supplyRewardPerBlock);
     rewardsDistributor._setCompBorrowSpeed(cErc20, borrowRewardPerBlocK);
 
     rewardsToken.mint(address(this), depositAmount);
-    rewardsToken.mint(address(this), depositAmount);*/
+    rewardsToken.mint(address(this), depositAmount);
   }
 
   function deposit() public {
     underlyingToken.mint(address(this), depositAmount);
     underlyingToken.approve(address(cErc20), depositAmount);
+    comptroller.enterMarkets(markets);
     cErc20.mint(depositAmount);
   }
 
-  function supplyReward() public {
+  function testSupplyReward() public {
     deposit();
-    vm.roll(1);
     rewardsDistributor.claimRewards(address(this));
-    assertEq(rewardsToken.balanceOf(address(this)), supplyRewardPerBlock);
-  }
-
-  function testInit() public {
-    vm.roll(1);
+    assertEq(rewardsToken.balanceOf(address(this)), supplyRewardPerBlock * 20);
   }
 }
