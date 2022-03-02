@@ -120,6 +120,11 @@ const config: HardhatUserConfig = {
       chainId: 1,
       url: "https://eth-mainnet.alchemyapi.io/v2/2Mt-6brbJvTA4w9cpiDtnbTo6qOoySnN",
     },
+    evmostestnet: {
+      accounts: { mnemonic },
+      chainId: 9000,
+      url: "https://evmos-archive-testnet.api.bdnodes.net:8545",
+    },
   },
   typechain: {
     outDir: "./typechain",

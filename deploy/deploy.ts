@@ -1,8 +1,9 @@
 import { constants, providers } from "ethers";
 import { DeployFunction } from "hardhat-deploy/types";
 
-import { chainDeployConfig } from "../chainDeploy";
-import { ChainDeployConfig } from "../chainDeploy/helpers";
+import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
+import { deployIRMs } from "../chainDeploy/helpers";
+import { deployFuseSafeLiquidator } from "../chainDeploy/helpers/liquidator";
 
 export const SALT = "ilovemidas";
 
@@ -12,12 +13,12 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   const { deployer, alice, bob } = await getNamedAccounts();
   console.log("deployer: ", deployer);
 
+  if (!chainDeployConfig[chainId]) {
+    throw new Error(`Config invalid for ${chainId}`);
+  }
   const { config: chainDeployParams, deployFunc }: { config: ChainDeployConfig; deployFunc: any } =
     chainDeployConfig[chainId];
   console.log("chainDeployParams: ", chainDeployParams);
-  if (!chainDeployConfig) {
-    throw new Error(`Config invalid for ${chainId}`);
-  }
 
   ////
   //// COMPOUND CORE CONTRACTS
@@ -201,6 +202,15 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   });
   const masterPO = await dep.deploy();
   console.log("MasterPriceOracle: ", masterPO.address);
+
+  ////
+  //// IRM MODELS
+  await deployIRMs({ ethers, getNamedAccounts, deployments, deployConfig: chainDeployParams });
+  ////
+
+  //// Liquidator
+  await deployFuseSafeLiquidator({ ethers, getNamedAccounts, deployments, deployConfig: chainDeployParams });
+  ///
 
   ////
   //// CHAIN SPECIFIC DEPLOYMENT

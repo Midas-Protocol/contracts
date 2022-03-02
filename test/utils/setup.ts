@@ -1,5 +1,5 @@
 import { deployments } from "hardhat";
-import { assets as bscAssets } from "../../chainDeploy/bsc";
+import { assets as bscAssets } from "../../chainDeploy/mainnets/bsc";
 import { constants } from "ethers";
 
 export const setUpPriceOraclePrices = deployments.createFixture(async ({ run, getChainId }, options) => {
