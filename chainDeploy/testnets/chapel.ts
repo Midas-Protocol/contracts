@@ -2,12 +2,9 @@ import {
   ChainDeployConfig,
   ChainlinkFeedBaseCurrency,
   deployChainlinkOracle,
-  deployIRMs,
   deployUniswapOracle,
-} from "./helpers";
-import { BigNumber } from "ethers";
-import { assets } from "./bsc";
-import { deployFuseSafeLiquidator } from "./helpers/liquidator";
+} from "../helpers";
+import { assets } from "../mainnets/bsc";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
@@ -17,7 +14,7 @@ export const deployConfig: ChainDeployConfig = {
   uniswapV2RouterAddress: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
   stableToken: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
   wBTCToken: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
-  blocksPerYear: BigNumber.from((20 * 24 * 365 * 60).toString()),
+  blocksPerYear: 20 * 24 * 365 * 60,
   hardcoded: [],
   uniswapData: [],
   pairInitHashCode: "0x"
@@ -25,11 +22,6 @@ export const deployConfig: ChainDeployConfig = {
 
 export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
-  ////
-  //// IRM MODELS
-  await deployIRMs({ ethers, getNamedAccounts, deployments, deployConfig });
-  ////
-
   ////
   //// ORACLES
   const chainlinkMappingUsd = [
@@ -89,8 +81,4 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
   //// Uniswap Oracle
   await deployUniswapOracle({ ethers, getNamedAccounts, deployments, deployConfig });
   ////
-
-  //// Liquidator
-  await deployFuseSafeLiquidator({ ethers, getNamedAccounts, deployments, deployConfig });
-  ///
 };

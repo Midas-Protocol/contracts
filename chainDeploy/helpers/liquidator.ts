@@ -21,10 +21,10 @@ export const deployFuseSafeLiquidator = async ({
   if (uniswapRouterAddress === constants.AddressZero) {
     let tx = await fuseSafeLiquidator.initialize(
       deployConfig.wtoken,
-      deployConfig.uniswapV2RouterAddress,
-      deployConfig.stableToken,
-      deployConfig.wBTCToken,
-      deployConfig.pairInitHashCode
+      deployConfig.uniswapV2RouterAddress ?? constants.AddressZero,
+      deployConfig.stableToken ?? constants.AddressZero,
+      deployConfig.wBTCToken ?? constants.AddressZero,
+      deployConfig.pairInitHashCode ?? "0x"
     );
     await tx.wait();
     console.log("FuseSafeLiquidator initialized", tx.hash);

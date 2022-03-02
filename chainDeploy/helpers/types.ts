@@ -10,11 +10,11 @@ export type ChainDeployConfig = {
   nativeTokenUsdChainlinkFeed?: string;
   nativeTokenName: string;
   nativeTokenSymbol: string;
-  uniswapV2RouterAddress: string;
-  stableToken: string;
-  wBTCToken: string;
-  pairInitHashCode: string;
-  blocksPerYear: BigNumber;
+  uniswapV2RouterAddress?: string;
+  stableToken?: string;
+  wBTCToken?: string;
+  pairInitHashCode?: string;
+  blocksPerYear: number;
   hardcoded: { name: string; symbol: string; address: string }[];
   uniswapData: { lpName: string; lpSymbol: string; lpDisplayName: string }[];
 };
