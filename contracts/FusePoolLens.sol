@@ -36,6 +36,7 @@ contract FusePoolLens is Initializable {
         string[] memory _uniswapLPTokenDisplayNames
     ) public initializer {
         require(address(_directory) != address(0), "FusePoolDirectory instance cannot be the zero address.");
+
         directory = _directory;
         name = _name;
         symbol = _symbol;
@@ -44,11 +45,13 @@ contract FusePoolLens is Initializable {
         }
 
         for (uint i = 0; i < _uniswapLPTokenNames.length; i++) {
-            uniswapData[i] = UniswapData({ 
-                name: _uniswapLPTokenNames[i], 
-                symbol: _uniswapLPTokenSymbols[i], 
-                displayName: _uniswapLPTokenDisplayNames[i] 
-            });
+            uniswapData.push(
+                UniswapData({ 
+                    name: _uniswapLPTokenNames[i], 
+                    symbol: _uniswapLPTokenSymbols[i], 
+                    displayName: _uniswapLPTokenDisplayNames[i] 
+                })
+            );
         }
     }
 
