@@ -16563,7 +16563,7 @@
           ]
         },
         "FusePoolLens": {
-          "address": "0xdEC1DcA21384902d9FA6E00ec3874e8A07D6e8d6",
+          "address": "0x2616eBF2EA17a2ebD5ec2036144e74D99F1f185a",
           "abi": [
             {
               "inputs": [],
@@ -17614,6 +17614,36 @@
                   "internalType": "string",
                   "name": "_symbol",
                   "type": "string"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "_hardcodedAddresses",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "string[]",
+                  "name": "_hardcodedNames",
+                  "type": "string[]"
+                },
+                {
+                  "internalType": "string[]",
+                  "name": "_hardcodedSymbols",
+                  "type": "string[]"
+                },
+                {
+                  "internalType": "string[]",
+                  "name": "_uniswapLPTokenNames",
+                  "type": "string[]"
+                },
+                {
+                  "internalType": "string[]",
+                  "name": "_uniswapLPTokenSymbols",
+                  "type": "string[]"
+                },
+                {
+                  "internalType": "string[]",
+                  "name": "_uniswapLPTokenDisplayNames",
+                  "type": "string[]"
                 }
               ],
               "name": "initialize",
@@ -17936,8 +17966,119 @@
           ]
         },
         "FuseSafeLiquidator": {
-          "address": "0x1705853Ca13129DD267F3fb4d56bbE3D724DE7cd",
+          "address": "0x7Cd637C9F54f5c4C7d385467E4C33Eb0c958164e",
           "abi": [
+            {
+              "inputs": [],
+              "name": "BTC_TOKEN",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "STABLE_TOKEN",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "UNISWAP_V2_ROUTER_02",
+              "outputs": [
+                {
+                  "internalType": "contract IUniswapV2Router02",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "UNISWAP_V2_ROUTER_02_ADDRESS",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "W_NATIVE",
+              "outputs": [
+                {
+                  "internalType": "contract IW_NATIVE",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "W_NATIVE_ADDRESS",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_wtoken",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_uniswapV2router",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_stableToken",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_btcToken",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "_uniswapPairInitHashCode",
+                  "type": "bytes"
+                }
+              ],
+              "name": "initialize",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
             {
               "inputs": [
                 {
@@ -18300,10 +18441,15 @@
           ]
         },
         "JumpRateModel": {
-          "address": "0xA0a0A9Db507a583aA6EC4207b2E93934304a3307",
+          "address": "0x6BD71DB611FE410Ed5a6375364C1BdB1Feb179Fc",
           "abi": [
             {
               "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_blocksPerYear",
+                  "type": "uint256"
+                },
                 {
                   "internalType": "uint256",
                   "name": "baseRatePerYear",
@@ -20007,10 +20153,15 @@
           ]
         },
         "WhitePaperInterestRateModel": {
-          "address": "0x620DD9455489fb4161bF542Bdc593836eCc4740b",
+          "address": "0x79452f62FA47f7C0587e5489C5e83D843a52b85D",
           "abi": [
             {
               "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_blocksPerYear",
+                  "type": "uint256"
+                },
                 {
                   "internalType": "uint256",
                   "name": "baseRatePerYear",
