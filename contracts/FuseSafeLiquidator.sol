@@ -334,24 +334,14 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
         // Flashloan via Uniswap
         // Use STABLE_TOKEN unless collateral is STABLE_TOKEN, in which case we use WBTC to avoid a reentrancy error
         // when exchanging the collateral to repay the borrow
-//        console.log(pairAddress);
 
         IPancakePair pair = IPancakePair(PancakeLibrary.pairFor(
-                UNISWAP_V2_ROUTER_02.factory(),
-                address(uniswapV2RouterForCollateral) == UNISWAP_V2_ROUTER_02_ADDRESS && cErc20Collateral.underlying() == STABLE_TOKEN ? BTC_TOKEN : STABLE_TOKEN,
-                W_NATIVE_ADDRESS,
-                PAIR_INIT_HASH_CODE
-            ));
+            UNISWAP_V2_ROUTER_02.factory(),
+            address(uniswapV2RouterForCollateral) == UNISWAP_V2_ROUTER_02_ADDRESS && cErc20Collateral.underlying() == STABLE_TOKEN ? BTC_TOKEN : STABLE_TOKEN,
+            W_NATIVE_ADDRESS,
+            PAIR_INIT_HASH_CODE
+        ));
 
-        address token0 = pair.token0();
-//        pair.swap(token0 == W_NATIVE_ADDRESS ? repayAmount : 0, token0 != W_NATIVE_ADDRESS ? repayAmount : 0, address(this), msg.data);
-
-        console.log(address(this));
-        console.log(pair.factory());
-        console.logBytes(msg.data);
-
-        console.log(repayAmount);
-//        pair.swap(repayAmount, 0, address(0x18c1d6471EE332e9E2141c86807572FB7f6B3921), msg.data);
         pair.swap(repayAmount * 1e6, 0, address(this), "");
 
         // Exchange profit, send NATIVE to coinbase if necessary, and transfer seized funds
