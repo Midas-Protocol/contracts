@@ -15,4 +15,6 @@ export type ChainDeployConfig = {
   wBTCToken: string;
   pairInitHashCode?: string;
   blocksPerYear: BigNumber;
+  hardcoded: { name: string; symbol: string; address: string }[];
+  uniswapData: { lpName: string; lpSymbol: string; lpDisplayName: string }[];
 };

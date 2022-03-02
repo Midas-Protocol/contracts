@@ -126,7 +126,13 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     tx = await fusePoolLens.initialize(
       fusePoolDirectory.address,
       chainDeployParams.nativeTokenName,
-      chainDeployParams.nativeTokenSymbol
+      chainDeployParams.nativeTokenSymbol,
+      chainDeployParams.hardcoded.map((h) => h.address),
+      chainDeployParams.hardcoded.map((h) => h.name),
+      chainDeployParams.hardcoded.map((h) => h.symbol),
+      chainDeployParams.uniswapData.map((u) => u.lpName),
+      chainDeployParams.uniswapData.map((u) => u.lpSymbol),
+      chainDeployParams.uniswapData.map((u) => u.lpDisplayName)
     );
     await tx.wait();
     console.log("FusePoolLens initialized", tx.hash);
