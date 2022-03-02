@@ -8,6 +8,7 @@ export const deployConfig: ChainDeployConfig = {
   hardcoded: [],
   uniswapData: [],
   pairInitHashCode: "0x",
+  uniswapV2RouterAddress: "0x638771E1eE3c85242D811e9eEd89C71A4F8F4F73"
 };
 
 export const deploy = async ({ getNamedAccounts }): Promise<void> => {
