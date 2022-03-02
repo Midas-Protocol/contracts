@@ -23,7 +23,8 @@ export const deployFuseSafeLiquidator = async ({
       deployConfig.wtoken,
       deployConfig.uniswapV2RouterAddress,
       deployConfig.stableToken,
-      deployConfig.wBTCToken
+      deployConfig.wBTCToken,
+      deployConfig.pairInitHashCode
     );
     await tx.wait();
     console.log("FuseSafeLiquidator initialized", tx.hash);

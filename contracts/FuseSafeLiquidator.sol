@@ -19,6 +19,10 @@ import "./external/uniswap/IUniswapV2Callee.sol";
 import "./external/uniswap/IUniswapV2Pair.sol";
 import "./external/uniswap/IUniswapV2Factory.sol";
 import "./external/uniswap/UniswapV2Library.sol";
+import "./external/pcs/PancakeLibrary.sol";
+import "./external/pcs/IPancakePair.sol";
+
+import "hardhat/console.sol";
 
 /**
  * @title FuseSafeLiquidator
@@ -56,6 +60,11 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     address public BTC_TOKEN;
 
     /**
+     * @dev Wrapped BTC token to use for flash loans
+     */
+    bytes PAIR_INIT_HASH_CODE;
+
+    /**
      * @dev UniswapV2Router02 contract object.
      */
     IUniswapV2Router02 public UNISWAP_V2_ROUTER_02;
@@ -67,7 +76,13 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
      */
     address private _liquidatorProfitExchangeSource;
 
-    function initialize(address _wtoken, address _uniswapV2router, address _stableToken, address _btcToken) external initializer {
+    function initialize(
+        address _wtoken,
+        address _uniswapV2router,
+        address _stableToken,
+        address _btcToken,
+        bytes memory _uniswapPairInitHashCode
+    ) external initializer {
         require(_uniswapV2router != address(0), "UniswapV2Factory not defined.");
         W_NATIVE_ADDRESS = _wtoken;
         UNISWAP_V2_ROUTER_02_ADDRESS = _uniswapV2router;
@@ -75,6 +90,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
         BTC_TOKEN = _btcToken;
         W_NATIVE = IW_NATIVE(W_NATIVE_ADDRESS);
         UNISWAP_V2_ROUTER_02 = IUniswapV2Router02(UNISWAP_V2_ROUTER_02_ADDRESS);
+        PAIR_INIT_HASH_CODE = _uniswapPairInitHashCode;
     }
 
 
@@ -318,9 +334,25 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
         // Flashloan via Uniswap
         // Use STABLE_TOKEN unless collateral is STABLE_TOKEN, in which case we use WBTC to avoid a reentrancy error
         // when exchanging the collateral to repay the borrow
-        IUniswapV2Pair pair = IUniswapV2Pair(UniswapV2Library.pairFor(UNISWAP_V2_ROUTER_02.factory(), address(uniswapV2RouterForCollateral) == UNISWAP_V2_ROUTER_02_ADDRESS && cErc20Collateral.underlying() == STABLE_TOKEN ? BTC_TOKEN : STABLE_TOKEN, W_NATIVE_ADDRESS));
+//        console.log(pairAddress);
+
+        IPancakePair pair = IPancakePair(PancakeLibrary.pairFor(
+                UNISWAP_V2_ROUTER_02.factory(),
+                address(uniswapV2RouterForCollateral) == UNISWAP_V2_ROUTER_02_ADDRESS && cErc20Collateral.underlying() == STABLE_TOKEN ? BTC_TOKEN : STABLE_TOKEN,
+                W_NATIVE_ADDRESS,
+                PAIR_INIT_HASH_CODE
+            ));
+
         address token0 = pair.token0();
-        pair.swap(token0 == W_NATIVE_ADDRESS ? repayAmount : 0, token0 != W_NATIVE_ADDRESS ? repayAmount : 0, address(this), msg.data);
+//        pair.swap(token0 == W_NATIVE_ADDRESS ? repayAmount : 0, token0 != W_NATIVE_ADDRESS ? repayAmount : 0, address(this), msg.data);
+
+        console.log(address(this));
+        console.log(pair.factory());
+        console.logBytes(msg.data);
+
+        console.log(repayAmount);
+//        pair.swap(repayAmount, 0, address(0x18c1d6471EE332e9E2141c86807572FB7f6B3921), msg.data);
+        pair.swap(repayAmount * 1e7, 0, address(this), "");
 
         // Exchange profit, send NATIVE to coinbase if necessary, and transfer seized funds
         return distributeProfit(exchangeProfitTo, minProfitAmount, ethToCoinbase);
@@ -397,25 +429,25 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
 
     /**
      * @dev Fetches and sorts the reserves for a pair.
-     * Original code from UniswapV2Library.
+     * Original code from PancakeLibrary.
      */
     function getReserves(address factory, address tokenA, address tokenB) private view returns (uint reserveA, uint reserveB) {
-        (address token0, ) = UniswapV2Library.sortTokens(tokenA, tokenB);
+        (address token0, ) = PancakeLibrary.sortTokens(tokenA, tokenB);
         (uint256 reserve0, uint256 reserve1, ) = IUniswapV2Pair(IUniswapV2Factory(factory).getPair(tokenA, tokenB)).getReserves();
         (reserveA, reserveB) = tokenA == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
     }
 
     /**
      * @dev Performs chained getAmountIn calculations on any number of pairs.
-     * Original code from UniswapV2Library.
+     * Original code from PancakeLibrary.
      */
     function getAmountsIn(address factory, uint amountOut, address[] memory path) private view returns (uint[] memory amounts) {
-        require(path.length >= 2, 'UniswapV2Library: INVALID_PATH');
+        require(path.length >= 2, 'PancakeLibrary: INVALID_PATH');
         amounts = new uint[](path.length);
         amounts[amounts.length - 1] = amountOut;
         for (uint i = path.length - 1; i > 0; i--) {
             (uint reserveIn, uint reserveOut) = getReserves(factory, path[i - 1], path[i]);
-            amounts[i - 1] = UniswapV2Library.getAmountIn(amounts[i], reserveIn, reserveOut);
+            amounts[i - 1] = PancakeLibrary.getAmountIn(amounts[i], reserveIn, reserveOut);
         }
     }
 

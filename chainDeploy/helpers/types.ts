@@ -13,5 +13,6 @@ export type ChainDeployConfig = {
   uniswapV2RouterAddress: string;
   stableToken: string;
   wBTCToken: string;
+  pairInitHashCode?: string;
   blocksPerYear: BigNumber;
 };
