@@ -979,12 +979,7 @@ export default class Fuse {
       this.artifacts.RewardsDistributorDelegator.bytecode,
       this.provider.getSigner()
     );
-    console.log({ options, rewardToken });
-
-    // const rdAddress = distributor.options.address;
-    return await distributor.deploy({
-      arguments: [options.from, rewardToken, this.chainDeployment.RewardsDistributorDelegate.address],
-    });
+    return await distributor.deploy(options.from, rewardToken, this.chainDeployment.RewardsDistributorDelegate.address);
   }
 
   async checkCardinality(uniswapV3Pool: string) {

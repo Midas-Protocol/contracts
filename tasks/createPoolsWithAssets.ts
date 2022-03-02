@@ -33,6 +33,10 @@ task("pools:create", "Create pool if does not exist")
   .addParam("name", "Name of the pool to be created")
   .addParam("creator", "Named account from which to create the pool", "deployer", types.string)
   .setAction(async (taskArgs, hre) => {
+    await hre.run("set-price", { token: "ETH", price: "1" });
+    await hre.run("set-price", { token: "TOUCH", price: "0.1" });
+    await hre.run("set-price", { token: "TRIBE", price: "0.01" });
+
     const poolModule = await import("../test/utils/pool");
     // @ts-ignore
     const sdkModule = await import("../lib/esm/src");
