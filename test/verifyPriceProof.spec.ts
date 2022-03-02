@@ -1,6 +1,6 @@
 import { constants, Contract, providers, utils } from "ethers";
 import {ethers} from "hardhat";
-import {createPool, deployAssets, setupTest} from "./utils";
+import {createPool, deployAssets, setUpPriceOraclePrices} from "./utils";
 import {expect} from "chai";
 import {
     KeydonixUniswapTwapPriceOracle,
@@ -9,9 +9,10 @@ import {
 } from '../typechain';
 import * as OracleSdkAdapter from "@keydonix/uniswap-oracle-sdk-adapter";
 import * as OracleSdk from "@keydonix/uniswap-oracle-sdk";
-import {DeployedAsset, getAssetsConf} from "./utils/pool";
+import { DeployedAsset } from "./utils/pool";
+import { getAssetsConf } from "./utils/assets";
 
-describe.only( "Verify price proof tests",  () => {
+describe( "Verify price proof tests",  () => {
     let keydonixOracle: KeydonixUniswapTwapPriceOracle;
     let ethCToken: CEther;
     let eth: DeployedAsset;
@@ -19,7 +20,7 @@ describe.only( "Verify price proof tests",  () => {
     let comptroller: Comptroller;
 
     beforeEach(async () => {
-        await setupTest();
+        await setUpPriceOraclePrices();
         const { bob } = await ethers.getNamedSigners();
         // [poolAddress] = await createPool({});
         // const assets = await getAssetsConf(poolAddress);

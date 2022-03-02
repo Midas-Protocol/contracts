@@ -57,7 +57,7 @@ describe("FusePoolDirectory", function () {
       const deployedAssets: DeployedAsset[] = [];
       for (const assetConf of assets.assets) {
         const [assetAddress, cTokenImplementationAddress, irmModel, receipt] = await sdk.deployAsset(
-          sdk.JumpRateModelConf,
+          Fuse.JumpRateModelConf,
           assetConf,
           { from: bob.address }
         );
