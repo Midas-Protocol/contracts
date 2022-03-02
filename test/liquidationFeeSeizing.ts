@@ -173,7 +173,7 @@ describe("Protocol Liquidation Seizing", () => {
     expect(reservesDiffAmount).to.be.gt(protocolSeizeTokens);
   });
 
-  it("should be able to withdraw fees to fuseFeeDistributor", async function () {
+  it.only("should be able to withdraw fees to fuseFeeDistributor", async function () {
     this.timeout(120_000);
     const { bob } = await ethers.getNamedSigners();
     // either use configured whale acct or bob
@@ -206,8 +206,8 @@ describe("Protocol Liquidation Seizing", () => {
     expect(feesAfterLiquidation).to.be.gt(feesAfterWithdrawal);
     expect(feesAfterWithdrawal).to.eq(BigNumber.from(0));
 
-    const tribeToken = (await ethers.getContract("TRIBEToken")) as ERC20;
-    const fuseFeeDistributorBalance = await tribeToken.balanceOf(fuseFeeDistributor.address);
+    const erc20One = (await ethers.getContractAt("TRIBEToken", deployedErc20One.underlying)) as ERC20;
+    const fuseFeeDistributorBalance = await erc20One.balanceOf(fuseFeeDistributor.address);
     expect(fuseFeeDistributorBalance).to.eq(feesAfterLiquidation);
   });
 });
