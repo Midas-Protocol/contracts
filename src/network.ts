@@ -73,8 +73,14 @@ export const chainOracles = {
     OracleTypes.ChainlinkPriceOracleV2,
     OracleTypes.UniswapTwapPriceOracleV2,
   ],
+  [SupportedChains.bsc]: [
+    OracleTypes.MasterPriceOracle,
+    OracleTypes.ChainlinkPriceOracleV2,
+    OracleTypes.UniswapTwapPriceOracleV2,
+    OracleTypes.SimplePriceOracle,
+  ],
   // TODO: not sure if this is correct
-  [SupportedChains.evmos_testnet]: [OracleTypes.MasterPriceOracle],
+  [SupportedChains.evmos_testnet]: [OracleTypes.MasterPriceOracle]
 };
 
 export const oracleConfig = (deployments: ChainDeployment, artifacts: Artifacts, availableOracles: Array<string>) => {

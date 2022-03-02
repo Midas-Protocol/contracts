@@ -1,16 +1,17 @@
-import { ethers } from "hardhat";
+import { deployments, ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-import { Fuse, SupportedChains } from "../lib/esm/src";
+import { Fuse } from "../lib/esm/src";
 import { DeployedAsset, poolAssets } from "./utils/pool";
 import { utils } from "ethers";
-import { setupTest } from "./utils";
+import { setUpPriceOraclePrices } from "./utils";
 
 use(solidity);
 
 describe("FusePoolDirectory", function () {
   this.beforeEach(async () => {
-    await setupTest();
+    await deployments.fixture();
+    await setUpPriceOraclePrices();
   });
 
   describe("Deploy pool", async function () {
@@ -18,10 +19,11 @@ describe("FusePoolDirectory", function () {
       this.timeout(120_000);
       const POOL_NAME = "TEST_BOB";
       const { bob } = await ethers.getNamedSigners();
+      const { chainId } = await ethers.provider.getNetwork();
 
       const spo = await ethers.getContract("SimplePriceOracle", bob);
 
-      const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
+      const sdk = new Fuse(ethers.provider, chainId);
 
       // 50% -> 0.5 * 1e18
       const bigCloseFactor = utils.parseEther((50 / 100).toString());
@@ -81,7 +83,7 @@ describe("FusePoolDirectory", function () {
 
       const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
       expect(fusePoolData.length).to.eq(3);
-      expect(fusePoolData.at(-1)[3]).to.eq("TRIBE");
+      expect(fusePoolData.map((f: any[]) => f[3])).to.have.members(deployedAssets.map((d) => d.symbol));
     });
   });
 });

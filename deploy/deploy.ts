@@ -1,16 +1,19 @@
 import { constants, providers } from "ethers";
 import { DeployFunction } from "hardhat-deploy/types";
-import { chainDeployConfig, deploy1337, deploy97 } from "../chainDeploy";
-import { ChainDeployConfig } from "../chainDeploy/helper";
+
+import { chainDeployConfig } from "../chainDeploy";
+import { ChainDeployConfig } from "../chainDeploy/helpers";
 
 export const SALT = "ilovemidas";
 
 const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
   const chainId = await getChainId();
+  console.log("chainId: ", chainId);
   const { deployer, alice, bob } = await getNamedAccounts();
   console.log("deployer: ", deployer);
 
-  const chainDeployParams: ChainDeployConfig = chainDeployConfig[chainId];
+  const { config: chainDeployParams, deployFunc }: { config: ChainDeployConfig; deployFunc: any } =
+    chainDeployConfig[chainId];
   console.log("chainDeployParams: ", chainDeployParams);
   if (!chainDeployConfig) {
     throw new Error(`Config invalid for ${chainId}`);
@@ -78,15 +81,6 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     console.log("FusePoolDirectory already initialized");
   }
 
-  dep = await deployments.deterministic("FuseSafeLiquidator", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [],
-    log: true,
-  });
-  const fsl = await dep.deploy();
-  console.log("FuseSafeLiquidator: ", fsl.address);
-
   dep = await deployments.deterministic("FuseFeeDistributor", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
@@ -116,6 +110,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     [true]
   );
   await tx.wait();
+  console.log("FuseFeeDistributor comptroller whitelist set", tx.hash);
 
   dep = await deployments.deterministic("FusePoolLens", {
     from: deployer,
@@ -131,7 +126,13 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     tx = await fusePoolLens.initialize(
       fusePoolDirectory.address,
       chainDeployParams.nativeTokenName,
-      chainDeployParams.nativeTokenSymbol
+      chainDeployParams.nativeTokenSymbol,
+      chainDeployParams.hardcoded.map((h) => h.address),
+      chainDeployParams.hardcoded.map((h) => h.name),
+      chainDeployParams.hardcoded.map((h) => h.symbol),
+      chainDeployParams.uniswapData.map((u) => u.lpName),
+      chainDeployParams.uniswapData.map((u) => u.lpSymbol),
+      chainDeployParams.uniswapData.map((u) => u.lpDisplayName)
     );
     await tx.wait();
     console.log("FusePoolLens initialized", tx.hash);
@@ -204,10 +205,8 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   ////
   //// CHAIN SPECIFIC DEPLOYMENT
   console.log("Running deployment for chain: ", chainId);
-  if (chainId === "1337") {
-    await deploy1337({ ethers, getNamedAccounts, deployments });
-  } else if (chainId === "97") {
-    await deploy97({ ethers, getNamedAccounts, deployments });
+  if (deployFunc) {
+    await deployFunc({ ethers, getNamedAccounts, deployments });
   }
   ////
 };

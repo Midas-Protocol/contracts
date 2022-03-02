@@ -1,15 +1,30 @@
-import { BigNumber, constants, providers, utils } from "ethers";
+import { BigNumber, constants, Contract, providers, utils } from "ethers";
 import { deployments, ethers } from "hardhat";
 import { createPool, deployAssets, setUpPriceOraclePrices } from "./utils";
 import { DeployedAsset, getPoolAssets } from "./utils/pool";
 import { addCollateral, borrowCollateral } from "./utils/collateral";
 import { CErc20, CEther, EIP20Interface, FuseSafeLiquidator, MasterPriceOracle, SimplePriceOracle } from "../typechain";
 import { expect } from "chai";
-import { cERC20Conf } from "../lib/esm/src";
+import { cERC20Conf, ERC20Abi } from "../lib/esm/src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { whaleSigner } from "./utils/accounts";
 
-describe("#safeLiquidate", () => {
+const UNISWAP_V2_PROTOCOLS = {
+  Uniswap: {
+    router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+    factory: "0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f",
+  },
+  SushiSwap: {
+    router: "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f",
+    factory: "0xc0aee478e3658e2610c5f7a4a2e1777ce9e4f2ac",
+  },
+  PancakeSwap: {
+    router: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
+    factory: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
+  },
+};
+
+describe.skip("#safeLiquidate", () => {
   let whale: SignerWithAddress;
 
   let eth: cERC20Conf;
@@ -107,18 +122,65 @@ describe("#safeLiquidate", () => {
     const repayAmount = utils.parseEther(borrowAmount).div(10);
     const balBefore = await erc20OneCToken.balanceOf(rando.address);
 
-    tx = await liquidator["safeLiquidate(address,address,address,uint256,address,address,address[],bytes[])"](
+    // Defaults
+    // const exchangeTo = tokenCollateral;
+    const exchangeTo = constants.AddressZero;
+
+    const uniswapV2RouterForCollateral = UNISWAP_V2_PROTOCOLS.PancakeSwap.router;
+
+    // Check balance before liquidation
+
+    const liquidatorBalanceBeforeLiquidation =
+      exchangeTo === "0x0000000000000000000000000000000000000000"
+        ? await ethers.provider.getBalance(rando.address)
+        : await ((await ethers.getContractAt("EIP20Interface", erc20Two.underlying)) as EIP20Interface).balanceOf(
+            rando.address
+          );
+    const assetContract = new Contract(deployedEth.assetAddress, ERC20Abi, whale);
+    tx = await assetContract.approve(whale.address, BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One));
+    await tx.wait();
+
+    const assetOneContract = new Contract(deployedErc20One.assetAddress, ERC20Abi, whale);
+    tx = await assetOneContract.approve(whale.address, BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One));
+    await tx.wait();
+
+    // Liquidate borrow
+    tx = await liquidator[
+      "safeLiquidateToEthWithFlashLoan(address,uint256,address,address,uint256,address,address,address[],bytes[],uint256)"
+    ](
       whale.address,
+      repayAmount,
       deployedEth.assetAddress,
       deployedErc20One.assetAddress,
       0,
-      deployedErc20One.assetAddress,
-      constants.AddressZero,
+      exchangeTo,
+      uniswapV2RouterForCollateral,
       [],
       [],
-      { value: repayAmount, gasLimit: 10000000, gasPrice: utils.parseUnits("10", "gwei") }
+      0
     );
-    await tx.wait();
+    // Assert balance after liquidation > balance before liquidation
+    const liquidatorBalanceAfterLiquidation =
+      exchangeTo === "0x0000000000000000000000000000000000000000"
+        ? await ethers.provider.getBalance(rando.address)
+        : await ((await ethers.getContractAt("EIP20Interface", erc20Two.underlying)) as EIP20Interface).balanceOf(
+            rando.address
+          );
+
+    expect(liquidatorBalanceAfterLiquidation.gt(liquidatorBalanceBeforeLiquidation));
+
+    // tx = await liquidator["safeLiquidate(address,address,address,uint256,address,address,address[],bytes[])"](
+    //   whale.address,
+    //   deployedEth.assetAddress,
+    //   deployedErc20One.assetAddress,
+    //   0,
+    //   deployedErc20One.assetAddress,
+    //   constants.AddressZero,
+    //   [],
+    //   [],
+    //   { value: repayAmount, gasLimit: 10000000, gasPrice: utils.parseUnits("10", "gwei") }
+    // );
+    // await tx.wait();
 
     const balAfter = await erc20OneCToken.balanceOf(rando.address);
     expect(balAfter).to.be.gt(balBefore);
