@@ -48,7 +48,13 @@ import {
   OracleConf,
   USDPricedFuseAsset,
 } from "./types";
-import { COMPTROLLER_ERROR_CODES, CTOKEN_ERROR_CODES, JUMP_RATE_MODEL_CONF, SIMPLE_DEPLOY_ORACLES } from "./config";
+import {
+  COMPTROLLER_ERROR_CODES,
+  CTOKEN_ERROR_CODES,
+  JUMP_RATE_MODEL_CONF,
+  SIMPLE_DEPLOY_ORACLES,
+  WHITE_PAPER_RATE_MODEL_CONF,
+} from "./config";
 import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig, SupportedChains } from "../network";
 import { filterOnlyObjectProperties, filterPoolName } from "./utils";
 
@@ -77,7 +83,8 @@ export default class Fuse {
   static SIMPLE_DEPLOY_ORACLES = SIMPLE_DEPLOY_ORACLES;
   static COMPTROLLER_ERROR_CODES = COMPTROLLER_ERROR_CODES;
   static CTOKEN_ERROR_CODES = CTOKEN_ERROR_CODES;
-  static JumpRateModelConf: InterestRateModelConf = JUMP_RATE_MODEL_CONF;
+  public JumpRateModelConf: InterestRateModelConf;
+  public WhitePaperRateModelConf: InterestRateModelConf;
 
   public availableOracles: Array<string>;
   public chainId: SupportedChains;
@@ -97,7 +104,8 @@ export default class Fuse {
     if (!this.chainDeployment) {
       throw new Error(`Chain deployment not found for chainId ${chainId}`);
     }
-
+    this.WhitePaperRateModelConf = WHITE_PAPER_RATE_MODEL_CONF(chainId);
+    this.JumpRateModelConf = JUMP_RATE_MODEL_CONF(chainId);
     this.chainSpecificAddresses = chainSpecificAddresses[chainId];
 
     this.contracts = {
@@ -151,10 +159,11 @@ export default class Fuse {
   }
 
   // TODO: probably should determine this by chain
-  async getUsdPriceBN(coingeckoId: string = 'ethereum', asBigNumber: boolean = false): Promise<number | BigNumber> {
+  async getUsdPriceBN(coingeckoId: string = "ethereum", asBigNumber: boolean = false): Promise<number | BigNumber> {
     // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
-    const UsdPrice = (await axios.get(`https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=${coingeckoId}`))
-      .data[coingeckoId].usd;
+    const UsdPrice = (
+      await axios.get(`https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=${coingeckoId}`)
+    ).data[coingeckoId].usd;
 
     if (asBigNumber) {
       return utils.parseUnits(UsdPrice.toString(), 18);
@@ -305,23 +314,20 @@ export default class Fuse {
 
     switch (model) {
       case "JumpRateModel":
-        if (!conf)
-          conf = {
-            baseRatePerYear: "20000000000000000",
-            multiplierPerYear: "200000000000000000",
-            jumpMultiplierPerYear: "2000000000000000000",
-            kink: "900000000000000000",
-          };
-        deployArgs = [conf.baseRatePerYear, conf.multiplierPerYear, conf.jumpMultiplierPerYear, conf.kink];
+        if (!conf) conf = JUMP_RATE_MODEL_CONF(this.chainId).interestRateModelParams;
+        deployArgs = [
+          conf.blocksPerYear,
+          conf.baseRatePerYear,
+          conf.multiplierPerYear,
+          conf.jumpMultiplierPerYear,
+          conf.kink,
+        ];
         modelArtifact = this.artifacts.JumpRateModel;
         break;
       case "DAIInterestRateModelV2":
-        if (!conf)
-          conf = {
-            jumpMultiplierPerYear: "2000000000000000000",
-            kink: "900000000000000000",
-          };
+        if (!conf) conf = JUMP_RATE_MODEL_CONF(this.chainId).interestRateModelParams;
         deployArgs = [
+          conf.blocksPerYear,
           conf.jumpMultiplierPerYear,
           conf.kink,
           this.chainSpecificAddresses.DAI_POT,
@@ -330,12 +336,13 @@ export default class Fuse {
         modelArtifact = this.artifacts.DAIInterestRateModelV2;
         break;
       case "WhitePaperInterestRateModel":
-        if (!conf)
-          conf = {
-            baseRatePerYear: "20000000000000000",
-            multiplierPerYear: "200000000000000000",
-          };
-        deployArgs = [conf.baseRatePerYear, conf.multiplierPerYear];
+        if (!conf) conf = WHITE_PAPER_RATE_MODEL_CONF(this.chainId).interestRateModelParams;
+        conf = {
+          blocksPerYear: conf.blocksPerYear,
+          baseRatePerYear: conf.baseRatePerYear,
+          multiplierPerYear: conf.multiplierPerYear,
+        };
+        deployArgs = [conf.blocksPerYear, conf.baseRatePerYear, conf.multiplierPerYear];
         modelArtifact = this.artifacts.WhitePaperInterestRateModel;
         break;
       default:
@@ -978,12 +985,7 @@ export default class Fuse {
       this.artifacts.RewardsDistributorDelegator.bytecode,
       this.provider.getSigner()
     );
-    console.log({ options, rewardToken });
-
-    // const rdAddress = distributor.options.address;
-    return await distributor.deploy({
-      arguments: [options.from, rewardToken, this.chainDeployment.RewardsDistributorDelegate.address],
-    });
+    return await distributor.deploy(options.from, rewardToken, this.chainDeployment.RewardsDistributorDelegate.address);
   }
 
   async checkCardinality(uniswapV3Pool: string) {
@@ -1007,7 +1009,11 @@ export default class Fuse {
     return irmName;
   };
 
-  fetchFusePoolData = async (poolId: string | undefined, address?: string, coingeckoId?: string): Promise<FusePoolData | undefined> => {
+  fetchFusePoolData = async (
+    poolId: string | undefined,
+    address?: string,
+    coingeckoId?: string
+  ): Promise<FusePoolData | undefined> => {
     if (!poolId) return undefined;
 
     const {
@@ -1059,20 +1065,25 @@ export default class Fuse {
           .then((isPaused: boolean) => (asset.isSupplyPaused = isPaused))
       );
 
-      asset.supplyBalanceUSD = Number(utils.formatUnits(asset.supplyBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+      asset.supplyBalanceUSD =
+        Number(utils.formatUnits(asset.supplyBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
 
-      asset.borrowBalanceUSD = Number(utils.formatUnits(asset.borrowBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+      asset.borrowBalanceUSD =
+        Number(utils.formatUnits(asset.borrowBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
 
       totalSupplyBalanceUSD += asset.supplyBalanceUSD;
       totalBorrowBalanceUSD += asset.borrowBalanceUSD;
 
-      asset.totalSupplyUSD = Number(utils.formatUnits(asset.totalSupply)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
-      asset.totalBorrowUSD = Number(utils.formatUnits(asset.totalBorrow)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+      asset.totalSupplyUSD =
+        Number(utils.formatUnits(asset.totalSupply)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+      asset.totalBorrowUSD =
+        Number(utils.formatUnits(asset.totalBorrow)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
 
       totalSuppliedUSD += asset.totalSupplyUSD;
       totalBorrowedUSD += asset.totalBorrowUSD;
 
-      asset.liquidityUSD = Number(utils.formatUnits(asset.liquidity)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+      asset.liquidityUSD =
+        Number(utils.formatUnits(asset.liquidity)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
 
       totalLiquidityUSD += asset.liquidityUSD;
     }

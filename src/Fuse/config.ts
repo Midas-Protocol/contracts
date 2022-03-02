@@ -1,3 +1,5 @@
+import { chainSpecificParams, SupportedChains } from "../network";
+
 export const SIMPLE_DEPLOY_ORACLES: Array<string> = [
   "UniswapLpTokenPriceOracle",
   "UniswapTwapPriceOracle",
@@ -79,12 +81,26 @@ export const CTOKEN_ERROR_CODES: Array<string> = [
   "UTILIZATION_ABOVE_MAX",
 ];
 
-export const JUMP_RATE_MODEL_CONF = {
-  interestRateModel: "JumpRateModel",
-  interestRateModelParams: {
-    baseRatePerYear: "20000000000000000",
-    multiplierPerYear: "200000000000000000",
-    jumpMultiplierPerYear: "2000000000000000000",
-    kink: "900000000000000000",
-  },
+export const JUMP_RATE_MODEL_CONF = (chainId: SupportedChains) => {
+  return {
+    interestRateModel: "JumpRateModel",
+    interestRateModelParams: {
+      blocksPerYear: chainSpecificParams[chainId].blocksPerYear,
+      baseRatePerYear: "20000000000000000",
+      multiplierPerYear: "200000000000000000",
+      jumpMultiplierPerYear: "2000000000000000000",
+      kink: "900000000000000000",
+    },
+  };
+};
+
+export const WHITE_PAPER_RATE_MODEL_CONF = (chainId: SupportedChains) => {
+  return {
+    interestRateModel: "WhitePaperRateModel",
+    interestRateModelParams: {
+      blocksPerYear: chainSpecificParams[chainId].blocksPerYear,
+      baseRatePerYear: "20000000000000000",
+      multiplierPerYear: "200000000000000000",
+    },
+  };
 };

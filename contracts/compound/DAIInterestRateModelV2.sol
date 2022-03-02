@@ -19,7 +19,7 @@ contract DAIInterestRateModelV2 is JumpRateModel {
      * @notice The additional margin per block separating the base borrow rate from the roof (2% / block).
      * Note that this value has been increased from the original value of 0.05% per block.
      */
-    uint public constant gapPerBlock = 2e16 / blocksPerYear;
+    uint public gapPerBlock = 2e16 / blocksPerYear;
 
     /**
      * @notice The assumed (1 - reserve factor) used to calculate the minimum borrow rate (reserve factor = 0.05)
@@ -31,12 +31,14 @@ contract DAIInterestRateModelV2 is JumpRateModel {
 
     /**
      * @notice Construct an interest rate model
+     * @param _blocksPerYear The approximate number of blocks per year
      * @param jumpMultiplierPerYear The multiplierPerBlock after hitting a specified utilization point
      * @param kink_ The utilization point at which the jump multiplier is applied
      * @param pot_ The address of the Dai pot (where DSR is earned)
      * @param jug_ The address of the Dai jug (where SF is kept)
      */
-    constructor(uint jumpMultiplierPerYear, uint kink_, address pot_, address jug_) JumpRateModel(0, 0, jumpMultiplierPerYear, kink_) {
+    constructor(uint _blocksPerYear, uint jumpMultiplierPerYear, uint kink_, address pot_, address jug_) JumpRateModel(_blocksPerYear, 0, 0, jumpMultiplierPerYear, kink_) {
+        blocksPerYear = _blocksPerYear;
         pot = PotLike(pot_);
         jug = JugLike(jug_);
         poke();

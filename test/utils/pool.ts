@@ -1,8 +1,10 @@
 // pool utilities used across downstream tests
-import { cERC20Conf, Fuse, FusePoolData, SupportedChains, USDPricedFuseAsset } from "../../lib/esm/src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { providers, utils } from "ethers";
 import { ethers } from "hardhat";
+
+import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../lib/esm/src";
+import { getAssetsConf } from "./assets";
 
 interface PoolCreationParams {
   closeFactor?: number;
@@ -23,6 +25,7 @@ export async function createPool({
   priceOracleAddress = null,
   signer = null,
 }: PoolCreationParams): Promise<[string, string, string]> {
+  const { chainId } = await ethers.provider.getNetwork();
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
@@ -34,7 +37,8 @@ export async function createPool({
   if (enforceWhitelist && whitelist.length === 0) {
     throw "If enforcing whitelist, a whitelist array of addresses must be provided";
   }
-  const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
+  console.log("chainId: ", chainId);
+  const sdk = new Fuse(ethers.provider, chainId);
 
   // 50% -> 0.5 * 1e18
   const bigCloseFactor = utils.parseEther((closeFactor / 100).toString());
@@ -62,16 +66,17 @@ export type DeployedAsset = {
   receipt: providers.TransactionReceipt;
 };
 export async function deployAssets(assets: cERC20Conf[], signer?: SignerWithAddress): Promise<DeployedAsset[]> {
+  const { chainId } = await ethers.provider.getNetwork();
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
   }
-  const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
+  const sdk = new Fuse(ethers.provider, chainId);
 
   const deployed: DeployedAsset[] = [];
   for (const assetConf of assets) {
     const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
-      Fuse.JumpRateModelConf,
+      sdk.JumpRateModelConf,
       assetConf,
       { from: signer.address }
     );
@@ -93,7 +98,7 @@ export async function deployAssets(assets: cERC20Conf[], signer?: SignerWithAddr
   return deployed;
 }
 
-export async function getAssetsConf(
+export async function getPoolAssets(
   comptroller: string,
   interestRateModelAddress?: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> {
@@ -108,51 +113,12 @@ export const poolAssets = async (
   interestRateModelAddress: string,
   comptroller: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> => {
-  const ethConf: cERC20Conf = {
-    underlying: "0x0000000000000000000000000000000000000000",
-    comptroller,
-    interestRateModel: interestRateModelAddress,
-    name: "Ethereum",
-    symbol: "ETH",
-    decimals: 8,
-    admin: "true",
-    collateralFactor: 75,
-    reserveFactor: 20,
-    adminFee: 0,
-    bypassPriceFeedCheck: true,
-  };
-  const tribeConf: cERC20Conf = {
-    underlying: await ethers.getContract("TRIBEToken").then((c) => c.address),
-    comptroller,
-    interestRateModel: interestRateModelAddress,
-    name: "TRIBE Token",
-    symbol: "TRIBE",
-    decimals: 18,
-    admin: "true",
-    collateralFactor: 75,
-    reserveFactor: 15,
-    adminFee: 0,
-    bypassPriceFeedCheck: true,
-  };
-  const touchConf: cERC20Conf = {
-    underlying: await ethers.getContract("TOUCHToken").then((c) => c.address),
-    comptroller,
-    interestRateModel: interestRateModelAddress,
-    name: "Midas TOUCH Token",
-    symbol: "TOUCH",
-    decimals: 18,
-    admin: "true",
-    collateralFactor: 65,
-    reserveFactor: 20,
-    adminFee: 0,
-    bypassPriceFeedCheck: true,
-  };
-
+  const assets = await getAssetsConf(comptroller, interestRateModelAddress, ethers);
   return {
     shortName: "Fuse R1",
     longName: "Rari DAO Fuse Pool R1 (Base)",
     assetSymbolPrefix: "fr1",
-    assets: [ethConf, touchConf, tribeConf],
+    assets,
   };
 };
 
