@@ -13,14 +13,14 @@ import "../keydonix/UniswapOracle.sol";
 import "../../external/uniswap/IUniswapV2Factory.sol";
 
 /**
- * @title KeydonixUniswapTwapPriceOracleV2
+ * @title KeydonixUniswapTwapPriceOracle
  * @notice Stores cumulative prices and returns TWAPs for assets on Uniswap V2 pairs.
  * @dev Implements `PriceOracle` and `BasePriceOracle`.
  * @author vminkov
  */
-contract KeydonixUniswapTwapPriceOracleV2 is Initializable, IPriceOracle, BasePriceOracle, UniswapOracle {
-
-    event Price(uint256 price);
+contract KeydonixUniswapTwapPriceOracle is Initializable, IPriceOracle, BasePriceOracle, UniswapOracle {
+    event PriceAlreadyVerified(address indexed token, uint256 price, uint256 block);
+    event PriceVerified(address indexed token, uint256 price, uint256 block);
 
     /**
      * @dev wtoken token contract address.
@@ -37,15 +37,35 @@ contract KeydonixUniswapTwapPriceOracleV2 is Initializable, IPriceOracle, BasePr
      */
     address public denominationToken;
 
+    /**
+    * @dev the minimum blocks back for the price proof to be accepted;
+    * used to take the mean of the current price and the past price
+    */
     uint8 public minBlocksBack;
 
+    /**
+    * @dev the minimum blocks back for the price proof to be accepted;
+    * used to take the mean of the current price and the past price
+    */
     uint8 public maxBlocksBack;
 
+    mapping(address => PriceVerification) public priceVerifications;
+
+    struct PriceVerification {
+        uint256 blockNumber;
+        uint256 price;
+    }
 
     /**
      * @dev Constructor that sets the UniswapV2Factory, denomination token and min/max blocks back.
      */
-    function initialize(address _uniswapV2Factory, address _denominationToken, address _wtoken, uint8 _minBlocksBack, uint8 _maxBlocksBack) external initializer {
+    function initialize(
+        address _uniswapV2Factory,
+        address _denominationToken,
+        address _wtoken,
+        uint8 _minBlocksBack,
+        uint8 _maxBlocksBack
+    ) external initializer {
         require(_uniswapV2Factory != address(0), "UniswapV2Factory not defined.");
         uniswapV2Factory = _uniswapV2Factory;
         wtoken = _wtoken;
@@ -53,6 +73,7 @@ contract KeydonixUniswapTwapPriceOracleV2 is Initializable, IPriceOracle, BasePr
         minBlocksBack = _minBlocksBack;
         maxBlocksBack = _maxBlocksBack;
     }
+
     /**
      * @notice Returns the price in ETH of the token underlying `cToken`.
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
@@ -70,19 +91,23 @@ contract KeydonixUniswapTwapPriceOracleV2 is Initializable, IPriceOracle, BasePr
         return (_price(underlying) * 1e18) / baseUnit;
     }
 
-    function getUnderlyingPrice(ICToken cToken, UniswapOracle.ProofData proofData) external view returns (uint) {
-        // Return 1e18 for ETH
-        if (cToken.isCEther()) return 1e18;
+    function verifyPrice(ICToken cToken, ProofData memory proofData) public {
+        address underlying = ICErc20(address(cToken)).underlying();
+        PriceVerification storage priceVerification = priceVerifications[underlying];
+        if (priceVerification.blockNumber == block.number) {
+            emit PriceAlreadyVerified(underlying, priceVerification.price, priceVerification.blockNumber);
+            return;
+        }
 
-        // Get underlying ERC20 token address
-        address pair = IUniswapV2Factory(uniswapV2Factory).getPair(underlying, denominationToken);
+//        address pair = IUniswapV2Factory(uniswapV2Factory).getPair(underlying, denominationToken);
+//        (uint256 keydonixPrice, uint256 blockNumber) = getPrice(IUniswapV2Pair(pair), denominationToken, minBlocksBack, maxBlocksBack, proofData);
+        (uint256 keydonixPrice, uint256 blockNumber) = (123, block.number);
+        priceVerifications[underlying] = PriceVerification(
+                blockNumber,
+                keydonixPrice
+        );
 
-        // Get price, format, and return
-        uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
-
-        (uint256 keydonixPrice, uint256 blockNumber) = getPrice(IUniswapV2Pair(pair), denominationToken, minBlocksBack, maxBlocksBack, proofData);
-
-        return 0;
+        emit PriceVerified(underlying, priceVerification.price, priceVerification.blockNumber);
     }
 
     /**
@@ -92,21 +117,14 @@ contract KeydonixUniswapTwapPriceOracleV2 is Initializable, IPriceOracle, BasePr
         // Return 1e18 for wtoken
         if (underlying == wtoken) return 1e18;
 
-        // block: Uint8Array
-        // accountProofNodesRlp: Uint8Array
-        // reserveAndTimestampProofNodesRlp: Uint8Array
-        // priceAccumulatorProofNodesRlp: Uint8Array
-        UniswapOracle.ProofData memory proofData = UniswapOracle.ProofData(new bytes(0) , new bytes(0), new bytes(0), new bytes(0));
-
-        // Get underlying ERC20 token address
-        address pair = IUniswapV2Factory(uniswapV2Factory).getPair(underlying, denominationToken);
-
-        // Get price, format, and return
-        uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
-
-        (uint256 keydonixPrice, uint256 blockNumber) = getPrice(IUniswapV2Pair(pair), denominationToken, minBlocksBack, maxBlocksBack, proofData);
-
-        return 0;
+        PriceVerification memory priceVerification = priceVerifications[underlying];
+        if (priceVerification.blockNumber != 0 &&
+            priceVerification.blockNumber >= block.number - maxBlocksBack
+            && priceVerification.blockNumber <= block.number - minBlocksBack) {
+            return priceVerification.price;
+        } else {
+            require(false, 'No valid proof provided for the range [minBlocksBack; maxBlocksBack]');
+        }
     }
 
     /**

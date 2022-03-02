@@ -12,7 +12,6 @@ import "./external/compound/IRewardsDistributor.sol";
 import "./external/uniswap/IUniswapV2Pair.sol";
 
 import "./FusePoolDirectory.sol";
-import "./oracles/MasterPriceOracle.sol";
 
 /**
  * @title FusePoolLensSecondary

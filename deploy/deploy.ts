@@ -235,6 +235,31 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   const masterPO = await dep.deploy();
   console.log("MasterPriceOracle: ", masterPO.address);
 
+  dep = await deployments.deterministic("KeydonixUniswapTwapPriceOracle", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [],
+    log: true,
+  });
+  const kPO = await dep.deploy();
+  console.log("Keydonix Price Oracle: ", kPO.address);
+  const keydonixPriceOracle = await ethers.getContract("KeydonixUniswapTwapPriceOracle", deployer);
+  if ((await keydonixPriceOracle.denominationToken()) == constants.AddressZero) {
+    let dummyAddress = '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd';
+    tx = await keydonixPriceOracle.initialize(
+        dummyAddress, // uniswapFactory,
+        dummyAddress, // denominationTokenAddress,
+        dummyAddress, // wtoken
+      3, // min blocks back
+      10 // max blocks back
+    );
+    await tx.wait();
+    console.log("Keydonix Price Oracle initialized", tx.hash);
+  } else {
+    console.log(`${await keydonixPriceOracle.denominationToken()}`);
+    console.log("Keydonix Price Oracle already initialized");
+  }
+
   ////
   //// CHAIN SPECIFIC DEPLOYMENT
   console.log("Running deployment for chain: ", chainId);

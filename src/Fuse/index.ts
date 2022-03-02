@@ -28,6 +28,7 @@ import PreferredPriceOracleArtifact from "../../artifacts/contracts/oracles/defa
 import MasterPriceOracleArtifact from "../../artifacts/contracts/oracles/MasterPriceOracle.sol/MasterPriceOracle.json";
 import SimplePriceOracleArtifact from "../../artifacts/contracts/oracles/1337/SimplePriceOracle.sol/SimplePriceOracle.json";
 import ChainlinkPriceOracleV2Artifact from "../../artifacts/contracts/oracles/default/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json";
+import KeydonixUniswapTwapPriceOracleArtifact from "../../artifacts/contracts/oracles/default/KeydonixUniswapTwapPriceOracle.sol/KeydonixUniswapTwapPriceOracle.json";
 
 // IRM Artifacts
 import JumpRateModelArtifact from "../../artifacts/contracts/compound/JumpRateModel.sol/JumpRateModel.json";
@@ -143,6 +144,7 @@ export default class Fuse {
       ChainlinkPriceOracleV2: ChainlinkPriceOracleV2Artifact,
       MasterPriceOracle: MasterPriceOracleArtifact,
       SimplePriceOracle: SimplePriceOracleArtifact,
+      KeydonixUniswapTwapPriceOracle: KeydonixUniswapTwapPriceOracleArtifact,
     };
     this.irms = irmConfig(this.chainDeployment, this.artifacts);
     this.oracles = oracleConfig(this.chainDeployment, this.artifacts, this.availableOracles);
@@ -247,6 +249,10 @@ export default class Fuse {
     switch (contractName) {
       case "ChainlinkPriceOracleV2": {
         oracleArtifact = this.oracles.ChainlinkPriceOracleV2.artifact;
+        break;
+      }
+      case "KeydonixUniswapTwapPriceOracle": {
+        oracleArtifact = this.oracles.KeydonixUniswapTwapPriceOracle.artifact;
         break;
       }
       default:

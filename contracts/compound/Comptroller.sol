@@ -11,6 +11,10 @@ import "./ComptrollerStorage.sol";
 import "./Unitroller.sol";
 import "./RewardsDistributorDelegate.sol";
 
+import "../oracles/default/KeydonixUniswapTwapPriceOracle.sol";
+import "../oracles/keydonix/UniswapOracle.sol";
+
+
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
@@ -365,6 +369,17 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         if (redeemTokens == 0 && redeemAmount > 0) {
             revert("redeemTokens zero");
         }
+    }
+
+    function borrowAllowedWithPriceProof(
+        address cToken,
+        address borrower,
+        uint borrowAmount,
+        UniswapOracle.ProofData memory proofData,
+        address _keydonixPriceOracle
+    ) external returns (uint) {
+        KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cToken), proofData);
+        return 1;
     }
 
     /**

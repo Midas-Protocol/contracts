@@ -3,8 +3,8 @@ pragma solidity >=0.8.0;
 import { BlockVerifier } from "./BlockVerifier.sol";
 import { MerklePatriciaVerifier } from "./MerklePatriciaVerifier.sol";
 import { Rlp } from "./Rlp.sol";
-import { IUniswapV2Pair } from "./IUniswapV2Pair.sol";
 import { UQ112x112 } from "./UQ112x112.sol";
+import { IUniswapV2Pair } from "../../external/uniswap/IUniswapV2Pair.sol";
 
 contract UniswapOracle {
 	using UQ112x112 for uint224;
