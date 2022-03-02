@@ -206,8 +206,7 @@ describe("Protocol Liquidation Seizing", () => {
     expect(feesAfterLiquidation).to.be.gt(feesAfterWithdrawal);
     expect(feesAfterWithdrawal).to.eq(BigNumber.from(0));
 
-    const erc20One = (await ethers.getContractAt("TRIBEToken", deployedErc20One.underlying)) as ERC20;
-    const fuseFeeDistributorBalance = await erc20One.balanceOf(fuseFeeDistributor.address);
+    const fuseFeeDistributorBalance = await erc20OneUnderlying.balanceOf(fuseFeeDistributor.address);
     expect(fuseFeeDistributorBalance).to.eq(feesAfterLiquidation);
   });
 });
