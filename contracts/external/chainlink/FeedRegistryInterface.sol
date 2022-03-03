@@ -4,173 +4,173 @@ pragma solidity >=0.8.0;
 import "./AggregatorV2V3Interface.sol";
 
 interface FeedRegistryInterface {
-    struct Phase {
-        uint16 phaseId;
-        uint80 startingAggregatorRoundId;
-        uint80 endingAggregatorRoundId;
-    }
+  struct Phase {
+    uint16 phaseId;
+    uint80 startingAggregatorRoundId;
+    uint80 endingAggregatorRoundId;
+  }
 
-    event FeedProposed(
-        address indexed asset,
-        address indexed denomination,
-        address indexed proposedAggregator,
-        address currentAggregator,
-        address sender
+  event FeedProposed(
+    address indexed asset,
+    address indexed denomination,
+    address indexed proposedAggregator,
+    address currentAggregator,
+    address sender
+  );
+  event FeedConfirmed(
+    address indexed asset,
+    address indexed denomination,
+    address indexed latestAggregator,
+    address previousAggregator,
+    uint16 nextPhaseId,
+    address sender
+  );
+
+  // V3 AggregatorV3Interface
+
+  function decimals(address base, address quote) external view returns (uint8);
+
+  function description(address base, address quote) external view returns (string memory);
+
+  function version(address base, address quote) external view returns (uint256);
+
+  function latestRoundData(address base, address quote)
+    external
+    view
+    returns (
+      uint80 roundId,
+      int256 answer,
+      uint256 startedAt,
+      uint256 updatedAt,
+      uint80 answeredInRound
     );
-    event FeedConfirmed(
-        address indexed asset,
-        address indexed denomination,
-        address indexed latestAggregator,
-        address previousAggregator,
-        uint16 nextPhaseId,
-        address sender
+
+  function getRoundData(
+    address base,
+    address quote,
+    uint80 _roundId
+  )
+    external
+    view
+    returns (
+      uint80 roundId,
+      int256 answer,
+      uint256 startedAt,
+      uint256 updatedAt,
+      uint80 answeredInRound
     );
 
-    // V3 AggregatorV3Interface
+  // V2 AggregatorInterface
 
-    function decimals(address base, address quote) external view returns (uint8);
+  function latestAnswer(address base, address quote) external view returns (int256 answer);
 
-    function description(address base, address quote) external view returns (string memory);
+  function latestTimestamp(address base, address quote) external view returns (uint256 timestamp);
 
-    function version(address base, address quote) external view returns (uint256);
+  function latestRound(address base, address quote) external view returns (uint256 roundId);
 
-    function latestRoundData(address base, address quote)
-        external
-        view
-        returns (
-            uint80 roundId,
-            int256 answer,
-            uint256 startedAt,
-            uint256 updatedAt,
-            uint80 answeredInRound
-        );
+  function getAnswer(
+    address base,
+    address quote,
+    uint256 roundId
+  ) external view returns (int256 answer);
 
-    function getRoundData(
-        address base,
-        address quote,
-        uint80 _roundId
-    )
-        external
-        view
-        returns (
-            uint80 roundId,
-            int256 answer,
-            uint256 startedAt,
-            uint256 updatedAt,
-            uint80 answeredInRound
-        );
+  function getTimestamp(
+    address base,
+    address quote,
+    uint256 roundId
+  ) external view returns (uint256 timestamp);
 
-    // V2 AggregatorInterface
+  // Registry getters
 
-    function latestAnswer(address base, address quote) external view returns (int256 answer);
+  function getFeed(address base, address quote) external view returns (AggregatorV2V3Interface aggregator);
 
-    function latestTimestamp(address base, address quote) external view returns (uint256 timestamp);
+  function getPhaseFeed(
+    address base,
+    address quote,
+    uint16 phaseId
+  ) external view returns (AggregatorV2V3Interface aggregator);
 
-    function latestRound(address base, address quote) external view returns (uint256 roundId);
+  function isFeedEnabled(address aggregator) external view returns (bool);
 
-    function getAnswer(
-        address base,
-        address quote,
-        uint256 roundId
-    ) external view returns (int256 answer);
+  function getPhase(
+    address base,
+    address quote,
+    uint16 phaseId
+  ) external view returns (Phase memory phase);
 
-    function getTimestamp(
-        address base,
-        address quote,
-        uint256 roundId
-    ) external view returns (uint256 timestamp);
+  // Round helpers
 
-    // Registry getters
+  function getRoundFeed(
+    address base,
+    address quote,
+    uint80 roundId
+  ) external view returns (AggregatorV2V3Interface aggregator);
 
-    function getFeed(address base, address quote) external view returns (AggregatorV2V3Interface aggregator);
+  function getPhaseRange(
+    address base,
+    address quote,
+    uint16 phaseId
+  ) external view returns (uint80 startingRoundId, uint80 endingRoundId);
 
-    function getPhaseFeed(
-        address base,
-        address quote,
-        uint16 phaseId
-    ) external view returns (AggregatorV2V3Interface aggregator);
+  function getPreviousRoundId(
+    address base,
+    address quote,
+    uint80 roundId
+  ) external view returns (uint80 previousRoundId);
 
-    function isFeedEnabled(address aggregator) external view returns (bool);
+  function getNextRoundId(
+    address base,
+    address quote,
+    uint80 roundId
+  ) external view returns (uint80 nextRoundId);
 
-    function getPhase(
-        address base,
-        address quote,
-        uint16 phaseId
-    ) external view returns (Phase memory phase);
+  // Feed management
 
-    // Round helpers
+  function proposeFeed(
+    address base,
+    address quote,
+    address aggregator
+  ) external;
 
-    function getRoundFeed(
-        address base,
-        address quote,
-        uint80 roundId
-    ) external view returns (AggregatorV2V3Interface aggregator);
+  function confirmFeed(
+    address base,
+    address quote,
+    address aggregator
+  ) external;
 
-    function getPhaseRange(
-        address base,
-        address quote,
-        uint16 phaseId
-    ) external view returns (uint80 startingRoundId, uint80 endingRoundId);
+  // Proposed aggregator
 
-    function getPreviousRoundId(
-        address base,
-        address quote,
-        uint80 roundId
-    ) external view returns (uint80 previousRoundId);
+  function getProposedFeed(address base, address quote)
+    external
+    view
+    returns (AggregatorV2V3Interface proposedAggregator);
 
-    function getNextRoundId(
-        address base,
-        address quote,
-        uint80 roundId
-    ) external view returns (uint80 nextRoundId);
+  function proposedGetRoundData(
+    address base,
+    address quote,
+    uint80 roundId
+  )
+    external
+    view
+    returns (
+      uint80 id,
+      int256 answer,
+      uint256 startedAt,
+      uint256 updatedAt,
+      uint80 answeredInRound
+    );
 
-    // Feed management
+  function proposedLatestRoundData(address base, address quote)
+    external
+    view
+    returns (
+      uint80 id,
+      int256 answer,
+      uint256 startedAt,
+      uint256 updatedAt,
+      uint80 answeredInRound
+    );
 
-    function proposeFeed(
-        address base,
-        address quote,
-        address aggregator
-    ) external;
-
-    function confirmFeed(
-        address base,
-        address quote,
-        address aggregator
-    ) external;
-
-    // Proposed aggregator
-
-    function getProposedFeed(address base, address quote)
-        external
-        view
-        returns (AggregatorV2V3Interface proposedAggregator);
-
-    function proposedGetRoundData(
-        address base,
-        address quote,
-        uint80 roundId
-    )
-        external
-        view
-        returns (
-            uint80 id,
-            int256 answer,
-            uint256 startedAt,
-            uint256 updatedAt,
-            uint80 answeredInRound
-        );
-
-    function proposedLatestRoundData(address base, address quote)
-        external
-        view
-        returns (
-            uint80 id,
-            int256 answer,
-            uint256 startedAt,
-            uint256 updatedAt,
-            uint80 answeredInRound
-        );
-
-    // Phases
-    function getCurrentPhaseId(address base, address quote) external view returns (uint16 currentPhaseId);
+  // Phases
+  function getCurrentPhaseId(address base, address quote) external view returns (uint16 currentPhaseId);
 }

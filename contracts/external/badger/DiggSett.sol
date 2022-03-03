@@ -4,5 +4,5 @@ pragma solidity >=0.8.0;
 import "./Sett.sol";
 
 interface DiggSett is Sett {
-    function shares() external view returns (uint256);
+  function shares() external view returns (uint256);
 }

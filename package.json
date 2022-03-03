@@ -22,7 +22,8 @@
     "build:sdk": "tsc -p tsconfig-sdk.json && tsc -p tsconfig-cjs.json",
     "clean": "hardhat clean && rm -rf lib",
     "prettierSol": "prettier --write 'contracts/**/*.sol'",
-    "prettierTs": "prettier --write 'chainDeploy/**/*.ts' 'deploy/**/*.ts' 'tasks/**/*.ts' 'test/**/*.ts'"
+    "prettierTs": "prettier --write 'chainDeploy/**/*.ts' 'deploy/**/*.ts' 'tasks/**/*.ts' 'test/**/*.ts'",
+    "prettierAll": "npm run prettierSol && npm run prettierTs"
   },
   "keywords": [],
   "author": "Midas Capital",
