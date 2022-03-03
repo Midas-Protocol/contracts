@@ -1,5 +1,5 @@
 import { constants, Contract, providers, utils } from "ethers";
-import {ethers} from "hardhat";
+import {deployments, ethers} from "hardhat";
 import {createPool, deployAssets, setUpPriceOraclePrices} from "./utils";
 import {expect} from "chai";
 import {
@@ -11,8 +11,9 @@ import * as OracleSdkAdapter from "@keydonix/uniswap-oracle-sdk-adapter";
 import * as OracleSdk from "@keydonix/uniswap-oracle-sdk";
 import { DeployedAsset } from "./utils/pool";
 import { getAssetsConf } from "./utils/assets";
+import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
 
-describe( "Verify price proof tests",  () => {
+describe.only( "Verify price proof tests",  () => {
     let keydonixOracle: KeydonixUniswapTwapPriceOracle;
     let ethCToken: CEther;
     let eth: DeployedAsset;
@@ -20,6 +21,7 @@ describe( "Verify price proof tests",  () => {
     let comptroller: Comptroller;
 
     beforeEach(async () => {
+        await deployments.fixture(); // ensure you start from a fresh deployments
         await setUpPriceOraclePrices();
         const { bob } = await ethers.getNamedSigners();
         // [poolAddress] = await createPool({});
@@ -37,42 +39,48 @@ describe( "Verify price proof tests",  () => {
     it("should verify an OracleSDK generated proof", async function () {
         let tx: providers.TransactionResponse;
         let rec: providers.TransactionReceipt;
-        const { bob } = await ethers.getNamedSigners();
 
-        const proof = {
-            block: [1],
-            accountProofNodesRlp: [1],
-            reserveAndTimestampProofNodesRlp: [1],
-            priceAccumulatorProofNodesRlp: [1],
-        };
-
-        tx = await keydonixOracle.verifyPrice(ethCToken.address, proof);
-        rec = await tx.wait();
-        expect(rec.status).to.eq(1);
-
-        let borrowTx = await comptroller.borrowAllowedWithPriceProof(ethCToken.address, bob.address, 1, proof, keydonixOracle.address);
-        let borrowRec = await borrowTx.wait();
+        const { chainId } = await ethers.provider.getNetwork();
+        const { config: chainDeployParams }: { config: ChainDeployConfig } =
+            chainDeployConfig[chainId];
 
         // let denominationTokenAddress: string = await keydonixOracle.callStatic.denominationToken();
-        // let uniswapExchangeAddress = BigInt(1);
-        // const latestBlockNumber = BigInt(1);
-        //
-        // const getStorageAt = OracleSdkAdapter.getStorageAtFactory(ethers.provider)
-        // const getProof = OracleSdkAdapter.getProofFactory(ethers.provider)
-        // const getBlockByNumber = OracleSdkAdapter.getBlockByNumberFactory(ethers.provider)
-        // const estimatedPrice = await OracleSdk.getPrice(
-        //     getStorageAt,
-        //     getBlockByNumber,
-        //     uniswapExchangeAddress,
-        //     BigInt(denominationTokenAddress),
-        //     latestBlockNumber
-        // );
-        //
-        // console.log(`estimated price ${estimatedPrice}`);
+        let denominationTokenAddress: string = chainDeployParams.wBTCToken;
+        let tokenAddress = chainDeployParams.wtoken;
+        // pancake swap WBNB-BTCB pair
+        let uniswapExchangeAddress = BigInt('0x61eb789d75a95caa3ff50ed7e47b96c132fec082');
 
-        // const proof = await OracleSdk.getProof(getStorageAt, getProof, getBlockByNumber,
-        //     uniswapExchangeAddress, tokenAddress, latestBlockNumber);
-        // console.log(`proof: ${JSON.stringify(proof)}`);
+        const getStorageAt = OracleSdkAdapter.getStorageAtFactory(ethers.provider)
+        const getProof = OracleSdkAdapter.getProofFactory(ethers.provider)
+        const getBlockByNumber = OracleSdkAdapter.getBlockByNumberFactory(ethers.provider)
 
+
+        let latestBlockNumber = ethers.provider.blockNumber;
+
+        let latestMinusTen = BigInt(latestBlockNumber - 10);
+        const estimatedPrice = await OracleSdk.getPrice(
+            getStorageAt,
+            getBlockByNumber,
+            uniswapExchangeAddress,
+            BigInt(denominationTokenAddress),
+            latestMinusTen
+        );
+
+        console.log(`estimated price ${estimatedPrice}`);
+
+        // const proof = {
+        //     block: [1],
+        //     accountProofNodesRlp: [1],
+        //     reserveAndTimestampProofNodesRlp: [1],
+        //     priceAccumulatorProofNodesRlp: [1],
+        // };
+        const proof = await OracleSdk.getProof(getStorageAt, getProof, getBlockByNumber,
+            uniswapExchangeAddress, BigInt(tokenAddress), latestMinusTen);
+
+        console.log(`proof: ${JSON.stringify(proof)}`);
+
+        tx = await keydonixOracle.verifyPrice(tokenAddress, proof);
+        rec = await tx.wait();
+        expect(rec.status).to.eq(1);
     });
 });

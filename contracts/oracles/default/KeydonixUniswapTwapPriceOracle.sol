@@ -93,21 +93,27 @@ contract KeydonixUniswapTwapPriceOracle is Initializable, IPriceOracle, BasePric
 
     function verifyPrice(ICToken cToken, ProofData memory proofData) public {
         address underlying = ICErc20(address(cToken)).underlying();
-        PriceVerification storage priceVerification = priceVerifications[underlying];
-        if (priceVerification.blockNumber == block.number) {
-            emit PriceAlreadyVerified(underlying, priceVerification.price, priceVerification.blockNumber);
+        PriceVerification storage latestPriceVerification = priceVerifications[underlying];
+        if (latestPriceVerification.blockNumber == block.number) {
+            emit PriceAlreadyVerified(underlying, latestPriceVerification.price, latestPriceVerification.blockNumber);
             return;
         }
 
-//        address pair = IUniswapV2Factory(uniswapV2Factory).getPair(underlying, denominationToken);
-//        (uint256 keydonixPrice, uint256 blockNumber) = getPrice(IUniswapV2Pair(pair), denominationToken, minBlocksBack, maxBlocksBack, proofData);
-        (uint256 keydonixPrice, uint256 blockNumber) = (123, block.number);
+        address pair = IUniswapV2Factory(uniswapV2Factory).getPair(underlying, denominationToken);
+        (uint256 keydonixPrice, uint256 blockNumber) = getPrice(IUniswapV2Pair(pair), denominationToken, minBlocksBack, maxBlocksBack, proofData);
+//        (uint256 keydonixPrice, uint256 blockNumber) = (123, block.number);
+
+        if (blockNumber < latestPriceVerification.blockNumber) {
+            emit PriceAlreadyVerified(underlying, latestPriceVerification.price, latestPriceVerification.blockNumber);
+            return;
+        }
+
         priceVerifications[underlying] = PriceVerification(
-                blockNumber,
-                keydonixPrice
+            blockNumber,
+            keydonixPrice
         );
 
-        emit PriceVerified(underlying, priceVerification.price, priceVerification.blockNumber);
+        emit PriceVerified(underlying, keydonixPrice, blockNumber);
     }
 
     /**
