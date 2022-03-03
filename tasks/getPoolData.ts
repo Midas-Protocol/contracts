@@ -42,10 +42,10 @@ export default task("get-pool-data", "Get pools data")
 task("get-position-ratio", "Get unhealthy po data")
   .addOptionalParam("name", "Name of the pool", undefined, types.string)
   .addOptionalParam("poolId", "Id of the pool", undefined, types.int)
-  .addOptionalParam("namedUser", "Named account for which to query unhealhty positions", undefined, types.string)
+  .addOptionalParam("namedUser", "Named account for which to query unhealthy positions", undefined, types.string)
   .addOptionalParam(
     "userAddress",
-    "Account address of the user for which to query unhealhty positions",
+    "Account address of the user for which to query unhealthy positions",
     undefined,
     types.string
   )
