@@ -1,7 +1,5 @@
-import { SALT } from "../deploy/deploy";
-import { ChainDeployConfig, deployIRMs } from "./helpers";
-import { BigNumber } from "ethers";
-import { deployFuseSafeLiquidator } from "./helpers/liquidator";
+import { SALT } from "../../deploy/deploy";
+import { ChainDeployConfig } from "../helpers";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -11,18 +9,13 @@ export const deployConfig: ChainDeployConfig = {
   stableToken: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
   wBTCToken: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
   pairInitHashCode: "0x",
-  blocksPerYear: BigNumber.from((4 * 24 * 365 * 60).toString()),
+  blocksPerYear: 4 * 24 * 365 * 60,
   hardcoded: [],
   uniswapData: [],
 };
 
 export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer, alice, bob } = await getNamedAccounts();
-
-  ////
-  //// IRM MODELS
-  await deployIRMs({ ethers, getNamedAccounts, deployments, deployConfig });
-  ////
 
   ////
   //// TOKENS
@@ -89,8 +82,4 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
     console.log("MasterPriceOracle already initialized");
   }
   ////
-
-  //// Liquidator
-  await deployFuseSafeLiquidator({ ethers, getNamedAccounts, deployments, deployConfig });
-  ///
 };

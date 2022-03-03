@@ -1,13 +1,11 @@
-import { SALT } from "../deploy/deploy";
+import { SALT } from "../../deploy/deploy";
 import {
   ChainDeployConfig,
   ChainlinkFeedBaseCurrency,
   deployChainlinkOracle,
-  deployIRMs,
   deployUniswapOracle,
-} from "./helpers";
-import { BigNumber, ethers } from "ethers";
-import { deployFuseSafeLiquidator } from "./helpers/liquidator";
+} from "../helpers";
+import { ethers } from "ethers";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
@@ -18,7 +16,7 @@ export const deployConfig: ChainDeployConfig = {
   stableToken: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
   wBTCToken: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
   pairInitHashCode: ethers.utils.hexlify("0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5"),
-  blocksPerYear: BigNumber.from((20 * 24 * 365 * 60).toString()),
+  blocksPerYear: 20 * 24 * 365 * 60,
   hardcoded: [],
   uniswapData: [{ lpDisplayName: "PancakeSwap", lpName: "Pancake LPs", lpSymbol: "Cake-LP" }],
 };
@@ -52,12 +50,6 @@ export const assets = [
 
 export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
-
-  ////
-  //// IRM MODELS
-  await deployIRMs({ ethers, getNamedAccounts, deployments, deployConfig });
-  ////
-
   ////
   //// ORACLES
   const chainlinkMappingUsd = [
@@ -124,8 +116,4 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
   const simplePO = await dep.deploy();
   console.log("SimplePriceOracle: ", simplePO.address);
   ////
-
-  //// Liquidator
-  await deployFuseSafeLiquidator({ ethers, getNamedAccounts, deployments, deployConfig });
-  ///
 };
