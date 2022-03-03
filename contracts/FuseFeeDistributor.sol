@@ -53,7 +53,7 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
         if (erc20Contract == address(0)) {
             uint256 balance = address(this).balance;
             require(balance > 0, "No balance available to withdraw.");
-            (bool success, ) = owner().call{value: balance}("");
+            (bool success, ) = owner().call{ value: balance }("");
             require(success, "Failed to transfer ETH balance to msg.sender.");
         } else {
             IERC20Upgradeable token = IERC20Upgradeable(erc20Contract);
@@ -86,7 +86,11 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
      * @param _maxSupplyEth Maximum supply balance (in ETH) per user per Fuse pool asset.
      * @param _maxUtilizationRate Maximum utilization rate (scaled by 1e18) for Fuse pool assets (only checked on new borrows, not redemptions).
      */
-    function _setPoolLimits(uint256 _minBorrowEth, uint256 _maxSupplyEth, uint256 _maxUtilizationRate) external onlyOwner {
+    function _setPoolLimits(
+        uint256 _minBorrowEth,
+        uint256 _maxSupplyEth,
+        uint256 _maxUtilizationRate
+    ) external onlyOwner {
         minBorrowEth = _minBorrowEth;
         maxSupplyEth = _maxSupplyEth;
         maxUtilizationRate = _maxUtilizationRate;
@@ -95,7 +99,7 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
     /**
      * @dev Receives ETH fees.
      */
-    receive() external payable { }
+    receive() external payable {}
 
     /**
      * @dev Sends data to a contract.
@@ -119,12 +123,15 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
 
     function deployCEther(bytes calldata constructorData) external returns (address) {
         // Make sure comptroller == msg.sender
-        (address comptroller) = abi.decode(constructorData[0:32], (address));
+        address comptroller = abi.decode(constructorData[0:32], (address));
         require(comptroller == msg.sender, "Comptroller is not sender.");
         // Deploy CEtherDelegator using msg.sender, underlying, and block.number as a salt
         bytes32 salt = keccak256(abi.encodePacked(msg.sender, address(0), block.number));
 
-        bytes memory cEtherDelegatorCreationCode = abi.encodePacked(type(CEtherDelegator).creationCode, constructorData);
+        bytes memory cEtherDelegatorCreationCode = abi.encodePacked(
+            type(CEtherDelegator).creationCode,
+            constructorData
+        );
         address proxy = Create2Upgradeable.deploy(0, salt, cEtherDelegatorCreationCode);
         return proxy;
     }
@@ -137,7 +144,10 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
         // Deploy CErc20Delegator using msg.sender, underlying, and block.number as a salt
         bytes32 salt = keccak256(abi.encodePacked(msg.sender, underlying, block.number));
 
-        bytes memory cErc20DelegatorCreationCode = abi.encodePacked(type(CErc20Delegator).creationCode, constructorData);
+        bytes memory cErc20DelegatorCreationCode = abi.encodePacked(
+            type(CErc20Delegator).creationCode,
+            constructorData
+        );
         address proxy = Create2Upgradeable.deploy(0, salt, cErc20DelegatorCreationCode);
 
         return proxy;
@@ -154,9 +164,19 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
      * @param newImplementations Array of `Comptroller` implementations to be whitelisted/unwhitelisted.
      * @param statuses Array of whitelist statuses corresponding to `implementations`.
      */
-    function _editComptrollerImplementationWhitelist(address[] calldata oldImplementations, address[] calldata newImplementations, bool[] calldata statuses) external onlyOwner {
-        require(newImplementations.length > 0 && newImplementations.length == oldImplementations.length && newImplementations.length == statuses.length, "No Comptroller implementations supplied or array lengths not equal.");
-        for (uint256 i = 0; i < newImplementations.length; i++) comptrollerImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
+    function _editComptrollerImplementationWhitelist(
+        address[] calldata oldImplementations,
+        address[] calldata newImplementations,
+        bool[] calldata statuses
+    ) external onlyOwner {
+        require(
+            newImplementations.length > 0 &&
+                newImplementations.length == oldImplementations.length &&
+                newImplementations.length == statuses.length,
+            "No Comptroller implementations supplied or array lengths not equal."
+        );
+        for (uint256 i = 0; i < newImplementations.length; i++)
+            comptrollerImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
     }
 
     /**
@@ -171,9 +191,21 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
      * @param allowResign Array of `allowResign` values corresponding to `newImplementations` to be whitelisted/unwhitelisted.
      * @param statuses Array of whitelist statuses corresponding to `newImplementations`.
      */
-    function _editCErc20DelegateWhitelist(address[] calldata oldImplementations, address[] calldata newImplementations, bool[] calldata allowResign, bool[] calldata statuses) external onlyOwner {
-        require(newImplementations.length > 0 && newImplementations.length == oldImplementations.length && newImplementations.length == allowResign.length && newImplementations.length == statuses.length, "No CErc20Delegate implementations supplied or array lengths not equal.");
-        for (uint256 i = 0; i < newImplementations.length; i++) cErc20DelegateWhitelist[oldImplementations[i]][newImplementations[i]][allowResign[i]] = statuses[i];
+    function _editCErc20DelegateWhitelist(
+        address[] calldata oldImplementations,
+        address[] calldata newImplementations,
+        bool[] calldata allowResign,
+        bool[] calldata statuses
+    ) external onlyOwner {
+        require(
+            newImplementations.length > 0 &&
+                newImplementations.length == oldImplementations.length &&
+                newImplementations.length == allowResign.length &&
+                newImplementations.length == statuses.length,
+            "No CErc20Delegate implementations supplied or array lengths not equal."
+        );
+        for (uint256 i = 0; i < newImplementations.length; i++)
+            cErc20DelegateWhitelist[oldImplementations[i]][newImplementations[i]][allowResign[i]] = statuses[i];
     }
 
     /**
@@ -188,9 +220,21 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
      * @param allowResign Array of `allowResign` values corresponding to `newImplementations` to be whitelisted/unwhitelisted.
      * @param statuses Array of whitelist statuses corresponding to `newImplementations`.
      */
-    function _editCEtherDelegateWhitelist(address[] calldata oldImplementations, address[] calldata newImplementations, bool[] calldata allowResign, bool[] calldata statuses) external onlyOwner {
-        require(newImplementations.length > 0 && newImplementations.length == oldImplementations.length && newImplementations.length == allowResign.length && newImplementations.length == statuses.length, "No CEtherDelegate implementations supplied or array lengths not equal.");
-        for (uint256 i = 0; i < newImplementations.length; i++) cEtherDelegateWhitelist[oldImplementations[i]][newImplementations[i]][allowResign[i]] = statuses[i];
+    function _editCEtherDelegateWhitelist(
+        address[] calldata oldImplementations,
+        address[] calldata newImplementations,
+        bool[] calldata allowResign,
+        bool[] calldata statuses
+    ) external onlyOwner {
+        require(
+            newImplementations.length > 0 &&
+                newImplementations.length == oldImplementations.length &&
+                newImplementations.length == allowResign.length &&
+                newImplementations.length == statuses.length,
+            "No CEtherDelegate implementations supplied or array lengths not equal."
+        );
+        for (uint256 i = 0; i < newImplementations.length; i++)
+            cEtherDelegateWhitelist[oldImplementations[i]][newImplementations[i]][allowResign[i]] = statuses[i];
     }
 
     /**
@@ -202,7 +246,10 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
      * @dev Latest Comptroller implementation for each existing implementation.
      */
     function latestComptrollerImplementation(address oldImplementation) external view returns (address) {
-        return _latestComptrollerImplementation[oldImplementation] != address(0) ? _latestComptrollerImplementation[oldImplementation] : oldImplementation;
+        return
+            _latestComptrollerImplementation[oldImplementation] != address(0)
+                ? _latestComptrollerImplementation[oldImplementation]
+                : oldImplementation;
     }
 
     /**
@@ -210,7 +257,10 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
      * @param oldImplementation The old `Comptroller` implementation address to upgrade from.
      * @param newImplementation Latest `Comptroller` implementation address.
      */
-    function _setLatestComptrollerImplementation(address oldImplementation, address newImplementation) external onlyOwner {
+    function _setLatestComptrollerImplementation(address oldImplementation, address newImplementation)
+        external
+        onlyOwner
+    {
         _latestComptrollerImplementation[oldImplementation] = newImplementation;
     }
 
@@ -233,19 +283,41 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
     /**
      * @dev Latest CErc20Delegate implementation for each existing implementation.
      */
-    function latestCErc20Delegate(address oldImplementation) external view returns (address, bool, bytes memory) {
+    function latestCErc20Delegate(address oldImplementation)
+        external
+        view
+        returns (
+            address,
+            bool,
+            bytes memory
+        )
+    {
         CDelegateUpgradeData memory data = _latestCErc20Delegate[oldImplementation];
         bytes memory emptyBytes;
-        return data.implementation != address(0) ? (data.implementation, data.allowResign, data.becomeImplementationData) : (oldImplementation, false, emptyBytes);
+        return
+            data.implementation != address(0)
+                ? (data.implementation, data.allowResign, data.becomeImplementationData)
+                : (oldImplementation, false, emptyBytes);
     }
 
     /**
      * @dev Latest CEtherDelegate implementation for each existing implementation.
      */
-    function latestCEtherDelegate(address oldImplementation) external view returns (address, bool, bytes memory) {
+    function latestCEtherDelegate(address oldImplementation)
+        external
+        view
+        returns (
+            address,
+            bool,
+            bytes memory
+        )
+    {
         CDelegateUpgradeData memory data = _latestCEtherDelegate[oldImplementation];
         bytes memory emptyBytes;
-        return data.implementation != address(0) ? (data.implementation, data.allowResign, data.becomeImplementationData) : (oldImplementation, false, emptyBytes);
+        return
+            data.implementation != address(0)
+                ? (data.implementation, data.allowResign, data.becomeImplementationData)
+                : (oldImplementation, false, emptyBytes);
     }
 
     /**
@@ -255,8 +327,17 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
      * @param allowResign Whether or not `resignImplementation` should be called on the old implementation before upgrade.
      * @param becomeImplementationData Data passed to the new implementation via `becomeImplementation` after upgrade.
      */
-    function _setLatestCEtherDelegate(address oldImplementation, address newImplementation, bool allowResign, bytes calldata becomeImplementationData) external onlyOwner {
-        _latestCEtherDelegate[oldImplementation] = CDelegateUpgradeData(newImplementation, allowResign, becomeImplementationData);
+    function _setLatestCEtherDelegate(
+        address oldImplementation,
+        address newImplementation,
+        bool allowResign,
+        bytes calldata becomeImplementationData
+    ) external onlyOwner {
+        _latestCEtherDelegate[oldImplementation] = CDelegateUpgradeData(
+            newImplementation,
+            allowResign,
+            becomeImplementationData
+        );
     }
 
     /**
@@ -266,8 +347,17 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
      * @param allowResign Whether or not `resignImplementation` should be called on the old implementation before upgrade.
      * @param becomeImplementationData Data passed to the new implementation via `becomeImplementation` after upgrade.
      */
-    function _setLatestCErc20Delegate(address oldImplementation, address newImplementation, bool allowResign, bytes calldata becomeImplementationData) external onlyOwner {
-        _latestCErc20Delegate[oldImplementation] = CDelegateUpgradeData(newImplementation, allowResign, becomeImplementationData);
+    function _setLatestCErc20Delegate(
+        address oldImplementation,
+        address newImplementation,
+        bool allowResign,
+        bytes calldata becomeImplementationData
+    ) external onlyOwner {
+        _latestCErc20Delegate[oldImplementation] = CDelegateUpgradeData(
+            newImplementation,
+            allowResign,
+            becomeImplementationData
+        );
     }
 
     /**
@@ -283,7 +373,7 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable {
         (bool success, bytes memory data) = msg.sender.staticcall(abi.encodeWithSignature("comptroller()"));
 
         if (success && data.length == 32) {
-            (address comptroller) = abi.decode(data, (address));
+            address comptroller = abi.decode(data, (address));
             int256 customRate = customInterestFeeRates[comptroller];
             if (customRate > 0) return uint256(customRate);
             if (customRate < 0) return 0;

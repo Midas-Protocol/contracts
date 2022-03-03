@@ -41,7 +41,12 @@ contract UniswapTwapPriceOracleV2 is Initializable, IPriceOracle, BasePriceOracl
     /**
      * @dev Constructor that sets the UniswapTwapPriceOracleV2Root, UniswapV2Factory, and base token.
      */
-    function initialize(address _rootOracle, address _uniswapV2Factory, address _baseToken, address _wtoken) external initializer {
+    function initialize(
+        address _rootOracle,
+        address _uniswapV2Factory,
+        address _baseToken,
+        address _wtoken
+    ) external initializer {
         require(_rootOracle != address(0), "UniswapTwapPriceOracleV2Root not defined.");
         require(_uniswapV2Factory != address(0), "UniswapV2Factory not defined.");
         rootOracle = UniswapTwapPriceOracleV2Root(_rootOracle);
@@ -49,13 +54,13 @@ contract UniswapTwapPriceOracleV2 is Initializable, IPriceOracle, BasePriceOracl
         wtoken = _wtoken;
         baseToken = _baseToken == address(0) ? address(wtoken) : _baseToken;
     }
-    
+
     /**
      * @notice Returns the price in ETH of the token underlying `cToken`.
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
         // Return 1e18 for ETH
         if (cToken.isCEther()) return 1e18;
 
@@ -63,26 +68,30 @@ contract UniswapTwapPriceOracleV2 is Initializable, IPriceOracle, BasePriceOracl
         address underlying = ICErc20(address(cToken)).underlying();
 
         // Get price, format, and return
-        uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
+        uint256 baseUnit = 10**uint256(ERC20Upgradeable(underlying).decimals());
         return (_price(underlying) * 1e18) / baseUnit;
     }
-    
+
     /**
      * @dev Internal function returning the price in ETH of `underlying`.
      */
-    function _price(address underlying) internal view returns (uint) {
+    function _price(address underlying) internal view returns (uint256) {
         // Return 1e18 for wtoken
         if (underlying == wtoken) return 1e18;
 
         // Return root oracle ERC20/ETH TWAP
         uint256 twap = rootOracle.price(underlying, baseToken, uniswapV2Factory);
-        return baseToken == address(wtoken) ? twap : (twap * BasePriceOracle(msg.sender).price(baseToken)) / (10 ** uint256(ERC20Upgradeable(baseToken).decimals()));
+        return
+            baseToken == address(wtoken)
+                ? twap
+                : (twap * BasePriceOracle(msg.sender).price(baseToken)) /
+                    (10**uint256(ERC20Upgradeable(baseToken).decimals()));
     }
 
     /**
      * @dev Returns the price in ETH of `underlying` (implements `BasePriceOracle`).
      */
-    function price(address underlying) external override view returns (uint) {
+    function price(address underlying) external view override returns (uint256) {
         return _price(underlying);
     }
 }

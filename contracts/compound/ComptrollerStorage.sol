@@ -9,16 +9,17 @@ contract UnitrollerAdminStorage {
     /*
      * Administrator for Fuse
      */
-    IFuseFeeDistributor internal constant fuseAdmin = IFuseFeeDistributor(payable(0x8425bd497b6519bb2C8DC5Bb40c1b0C8DCD6dDf6));
+    IFuseFeeDistributor internal constant fuseAdmin =
+        IFuseFeeDistributor(payable(0x8425bd497b6519bb2C8DC5Bb40c1b0C8DCD6dDf6));
 
     /**
-    * @notice Administrator for this contract
-    */
+     * @notice Administrator for this contract
+     */
     address public admin;
 
     /**
-    * @notice Pending administrator for this contract
-    */
+     * @notice Pending administrator for this contract
+     */
     address public pendingAdmin;
 
     /**
@@ -39,13 +40,13 @@ contract UnitrollerAdminStorage {
     }
 
     /**
-    * @notice Active brains of Unitroller
-    */
+     * @notice Active brains of Unitroller
+     */
     address public comptrollerImplementation;
 
     /**
-    * @notice Pending brains of Unitroller
-    */
+     * @notice Pending brains of Unitroller
+     */
     address public pendingComptrollerImplementation;
 }
 
@@ -58,35 +59,32 @@ contract ComptrollerV1Storage is UnitrollerAdminStorage {
     /**
      * @notice Multiplier used to calculate the maximum repayAmount when liquidating a borrow
      */
-    uint public closeFactorMantissa;
+    uint256 public closeFactorMantissa;
 
     /**
      * @notice Multiplier representing the discount on collateral that a liquidator receives
      */
-    uint public liquidationIncentiveMantissa;
+    uint256 public liquidationIncentiveMantissa;
 
     /*
      * UNUSED AFTER UPGRADE: Max number of assets a single account can participate in (borrow or use as collateral)
      */
-    uint internal maxAssets;
+    uint256 internal maxAssets;
 
     /**
      * @notice Per-account mapping of "assets you are in", capped by maxAssets
      */
     mapping(address => CToken[]) public accountAssets;
-
 }
 
 contract ComptrollerV2Storage is ComptrollerV1Storage {
     struct Market {
         // Whether or not this market is listed
         bool isListed;
-
         // Multiplier representing the most one can borrow against their collateral in this market.
         // For instance, 0.9 to allow borrowing 90% of collateral value.
         // Must be between 0 and 1, and stored as a mantissa.
-        uint collateralFactorMantissa;
-
+        uint256 collateralFactorMantissa;
         // Per-market mapping of "accounts in this asset"
         mapping(address => bool) accountMembership;
     }
@@ -155,10 +153,10 @@ contract ComptrollerV3Storage is ComptrollerV2Storage {
     address public borrowCapGuardian;
 
     /// @notice Borrow caps enforced by borrowAllowed for each cToken address. Defaults to zero which corresponds to unlimited borrowing.
-    mapping(address => uint) public borrowCaps;
+    mapping(address => uint256) public borrowCaps;
 
     /// @notice Supply caps enforced by mintAllowed for each cToken address. Defaults to zero which corresponds to unlimited supplying.
-    mapping(address => uint) public supplyCaps;
+    mapping(address => uint256) public supplyCaps;
 
     /// @notice RewardsDistributor contracts to notify of flywheel changes.
     address[] public rewardsDistributors;

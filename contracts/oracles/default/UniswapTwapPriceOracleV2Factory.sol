@@ -14,17 +14,17 @@ contract UniswapTwapPriceOracleV2Factory {
     /**
      * @dev WETH token contract address.
      */
-    address immutable public wtoken;
+    address public immutable wtoken;
 
     /**
      * @dev `UniswapTwapPriceOracleV2Root` contract address.
      */
-    address immutable public rootOracle;
+    address public immutable rootOracle;
 
     /**
      * @dev Implementation address for the `UniswapV3TwapPriceOracleV2`.
      */
-    address immutable public logic;
+    address public immutable logic;
 
     /**
      * @notice Maps `UniswapV2Factory` contracts to base tokens to `UniswapTwapPriceOracleV2` contract addresses.
@@ -34,7 +34,11 @@ contract UniswapTwapPriceOracleV2Factory {
     /**
      * @dev Constructor that sets the `UniswapTwapPriceOracleV2Root` and `UniswapTwapPriceOracleV2` implementation contract.
      */
-    constructor (address _rootOracle, address _logic, address _wtoken) {
+    constructor(
+        address _rootOracle,
+        address _logic,
+        address _wtoken
+    ) {
         require(_rootOracle != address(0), "UniswapTwapPriceOracleV2Root not defined.");
         require(_logic != address(0), "UniswapTwapPriceOracleV2 implementation/logic contract not defined.");
         rootOracle = _rootOracle;

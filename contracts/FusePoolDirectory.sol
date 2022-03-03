@@ -5,7 +5,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/Create2Upgradeable.sol";
 
-
 import "./external/compound/IComptroller.sol";
 import "./external/compound/IUnitroller.sol";
 import "./external/compound/IPriceOracle.sol";
@@ -115,16 +114,23 @@ contract FusePoolDirectory is OwnableUpgradeable {
      * @param priceOracle The pool's PriceOracle contract address.
      * @return The index of the registered Fuse pool and the Unitroller proxy address.
      */
-    function deployPool(string memory name, address implementation, bool enforceWhitelist, uint256 closeFactor, uint256 liquidationIncentive, address priceOracle) external returns (uint256, address) {
+    function deployPool(
+        string memory name,
+        address implementation,
+        bool enforceWhitelist,
+        uint256 closeFactor,
+        uint256 liquidationIncentive,
+        address priceOracle
+    ) external returns (uint256, address) {
         // Input validation
         require(implementation != address(0), "No Comptroller implementation contract address specified.");
         require(priceOracle != address(0), "No PriceOracle contract address specified.");
 
         // Deploy CEtherDelegator using msg.sender, underlying, and block.number as a salt
-//        bytes32 salt = keccak256(abi.encodePacked(msg.sender, address(0), block.number));
-//
+        //        bytes32 salt = keccak256(abi.encodePacked(msg.sender, address(0), block.number));
+        //
 
-//        address proxy = Create2Upgradeable.deploy(0, salt, cEtherDelegatorCreationCode);
+        //        address proxy = Create2Upgradeable.deploy(0, salt, cEtherDelegatorCreationCode);
 
         // Deploy Unitroller using msg.sender, name, and block.number as a salt
         bytes32 salt = keccak256(abi.encodePacked(msg.sender, name, block.number));
@@ -133,18 +139,28 @@ contract FusePoolDirectory is OwnableUpgradeable {
 
         // Setup Unitroller
         IUnitroller unitroller = IUnitroller(proxy);
-        require(unitroller._setPendingImplementation(implementation) == 0, "Failed to set pending implementation on Unitroller."); // Checks Comptroller implementation whitelist
+        require(
+            unitroller._setPendingImplementation(implementation) == 0,
+            "Failed to set pending implementation on Unitroller."
+        ); // Checks Comptroller implementation whitelist
         IComptroller comptrollerImplementation = IComptroller(implementation);
         comptrollerImplementation._become(unitroller);
         IComptroller comptrollerProxy = IComptroller(proxy);
 
         // Set pool parameters
         require(comptrollerProxy._setCloseFactor(closeFactor) == 0, "Failed to set pool close factor.");
-        require(comptrollerProxy._setLiquidationIncentive(liquidationIncentive) == 0, "Failed to set pool liquidation incentive.");
+        require(
+            comptrollerProxy._setLiquidationIncentive(liquidationIncentive) == 0,
+            "Failed to set pool liquidation incentive."
+        );
         require(comptrollerProxy._setPriceOracle(IPriceOracle(priceOracle)) == 0, "Failed to set pool price oracle.");
 
         // Whitelist
-        if (enforceWhitelist) require(comptrollerProxy._setWhitelistEnforcement(true) == 0, "Failed to enforce supplier/borrower whitelist.");
+        if (enforceWhitelist)
+            require(
+                comptrollerProxy._setWhitelistEnforcement(true) == 0,
+                "Failed to enforce supplier/borrower whitelist."
+            );
 
         // Enable auto-implementation
         require(comptrollerProxy._toggleAutoImplementations(true) == 0, "Failed to enable pool auto implementations.");
@@ -174,7 +190,7 @@ contract FusePoolDirectory is OwnableUpgradeable {
         for (uint256 i = 0; i < pools.length; i++) {
             try IComptroller(pools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
                 if (enforceWhitelist) continue;
-            } catch { }
+            } catch {}
 
             arrayLength++;
         }
@@ -186,7 +202,7 @@ contract FusePoolDirectory is OwnableUpgradeable {
         for (uint256 i = 0; i < pools.length; i++) {
             try IComptroller(pools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
                 if (enforceWhitelist) continue;
-            } catch { }
+            } catch {}
 
             indexes[index] = i;
             publicPools[index] = pools[i];
@@ -235,7 +251,7 @@ contract FusePoolDirectory is OwnableUpgradeable {
      */
     function setPoolName(uint256 index, string calldata name) external {
         IComptroller _comptroller = IComptroller(pools[index].comptroller);
-        require(msg.sender == _comptroller.admin() && _comptroller.adminHasRights() || msg.sender == owner());
+        require((msg.sender == _comptroller.admin() && _comptroller.adminHasRights()) || msg.sender == owner());
         pools[index].name = name;
     }
 
@@ -264,7 +280,11 @@ contract FusePoolDirectory is OwnableUpgradeable {
      * @notice Returns arrays of all public Fuse pool indexes and data with whitelisted admins.
      * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
      */
-    function getPublicPoolsByVerification(bool whitelistedAdmin) external view returns (uint256[] memory, FusePool[] memory) {
+    function getPublicPoolsByVerification(bool whitelistedAdmin)
+        external
+        view
+        returns (uint256[] memory, FusePool[] memory)
+    {
         uint256 arrayLength = 0;
 
         for (uint256 i = 0; i < pools.length; i++) {
@@ -275,8 +295,8 @@ contract FusePoolDirectory is OwnableUpgradeable {
 
                 try comptroller.admin() returns (address admin) {
                     if (whitelistedAdmin != adminWhitelist[admin]) continue;
-                } catch { }
-            } catch { }
+                } catch {}
+            } catch {}
 
             arrayLength++;
         }
@@ -293,8 +313,8 @@ contract FusePoolDirectory is OwnableUpgradeable {
 
                 try comptroller.admin() returns (address admin) {
                     if (whitelistedAdmin != adminWhitelist[admin]) continue;
-                } catch { }
-            } catch { }
+                } catch {}
+            } catch {}
 
             indexes[index] = i;
             publicPools[index] = pools[i];

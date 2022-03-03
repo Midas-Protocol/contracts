@@ -18,10 +18,15 @@ import "./IRedemptionStrategy.sol";
  */
 contract GelatoGUniLiquidator is IRedemptionStrategy {
     using SafeERC20Upgradeable for IERC20Upgradeable;
+
     /**
      * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
      */
-    function safeApprove(IERC20Upgradeable token, address to, uint256 minAmount) private {
+    function safeApprove(
+        IERC20Upgradeable token,
+        address to,
+        uint256 minAmount
+    ) private {
         uint256 allowance = token.allowance(address(this), to);
 
         if (allowance < minAmount) {
@@ -38,16 +43,25 @@ contract GelatoGUniLiquidator is IRedemptionStrategy {
      * @return outputToken The underlying ERC20 token outputted.
      * @return outputAmount The quantity of underlying tokens outputted.
      */
-    function redeem(IERC20Upgradeable inputToken, uint256 inputAmount, bytes memory strategyData) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    function redeem(
+        IERC20Upgradeable inputToken,
+        uint256 inputAmount,
+        bytes memory strategyData
+    ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
         // Exit GUni pool
         GUniPool pool = GUniPool(address(inputToken));
         address token0 = pool.token0();
         address token1 = pool.token1();
-        (uint amount0, uint amount1, ) = pool.burn(inputAmount, address(this));
+        (uint256 amount0, uint256 amount1, ) = pool.burn(inputAmount, address(this));
 
         // Swap underlying tokens
-        (IUniswapV2Router02 uniswapV2Router, address[] memory swapToken0Path, address[] memory swapToken1Path) = abi.decode(strategyData, (IUniswapV2Router02, address[], address[]));
-        require((swapToken0Path.length > 0 ? swapToken0Path[swapToken0Path.length - 1] : token0) == (swapToken1Path.length > 0 ? swapToken1Path[swapToken1Path.length - 1] : token1), "Output of token0 swap path must equal output of token1 swap path.");
+        (IUniswapV2Router02 uniswapV2Router, address[] memory swapToken0Path, address[] memory swapToken1Path) = abi
+            .decode(strategyData, (IUniswapV2Router02, address[], address[]));
+        require(
+            (swapToken0Path.length > 0 ? swapToken0Path[swapToken0Path.length - 1] : token0) ==
+                (swapToken1Path.length > 0 ? swapToken1Path[swapToken1Path.length - 1] : token1),
+            "Output of token0 swap path must equal output of token1 swap path."
+        );
 
         if (swapToken0Path.length > 0 && swapToken0Path[swapToken0Path.length - 1] != token0) {
             safeApprove(IERC20Upgradeable(token0), address(uniswapV2Router), amount0);

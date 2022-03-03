@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "./CToken.sol";
 
 interface CompLike {
-  function delegate(address delegatee) external;
+    function delegate(address delegatee) external;
 }
 
 /**
@@ -22,17 +22,28 @@ contract CErc20 is CToken, CErc20Interface {
      * @param name_ ERC-20 name of this token
      * @param symbol_ ERC-20 symbol of this token
      */
-    function initialize(address underlying_,
-                        ComptrollerInterface comptroller_,
-                        InterestRateModel interestRateModel_,
-                        string memory name_,
-                        string memory symbol_,
-                        uint256 reserveFactorMantissa_,
-                        uint256 adminFeeMantissa_) public {
+    function initialize(
+        address underlying_,
+        ComptrollerInterface comptroller_,
+        InterestRateModel interestRateModel_,
+        string memory name_,
+        string memory symbol_,
+        uint256 reserveFactorMantissa_,
+        uint256 adminFeeMantissa_
+    ) public {
         // CToken initialize does the bulk of the work
         uint256 initialExchangeRateMantissa_ = 0.2e18;
         uint8 decimals_ = EIP20Interface(underlying_).decimals();
-        super.initialize(comptroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_, reserveFactorMantissa_, adminFeeMantissa_);
+        super.initialize(
+            comptroller_,
+            interestRateModel_,
+            initialExchangeRateMantissa_,
+            name_,
+            symbol_,
+            decimals_,
+            reserveFactorMantissa_,
+            adminFeeMantissa_
+        );
 
         // Set underlying and sanity check it
         underlying = underlying_;
@@ -47,8 +58,8 @@ contract CErc20 is CToken, CErc20Interface {
      * @param mintAmount The amount of the underlying asset to supply
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function mint(uint mintAmount) override external returns (uint) {
-        (uint err,) = mintInternal(mintAmount);
+    function mint(uint256 mintAmount) external override returns (uint256) {
+        (uint256 err, ) = mintInternal(mintAmount);
         return err;
     }
 
@@ -58,7 +69,7 @@ contract CErc20 is CToken, CErc20Interface {
      * @param redeemTokens The number of cTokens to redeem into underlying
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function redeem(uint redeemTokens) override external returns (uint) {
+    function redeem(uint256 redeemTokens) external override returns (uint256) {
         return redeemInternal(redeemTokens);
     }
 
@@ -68,16 +79,16 @@ contract CErc20 is CToken, CErc20Interface {
      * @param redeemAmount The amount of underlying to redeem
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function redeemUnderlying(uint redeemAmount) override external returns (uint) {
+    function redeemUnderlying(uint256 redeemAmount) external override returns (uint256) {
         return redeemUnderlyingInternal(redeemAmount);
     }
 
     /**
-      * @notice Sender borrows assets from the protocol to their own address
-      * @param borrowAmount The amount of the underlying asset to borrow
-      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-      */
-    function borrow(uint borrowAmount) override external returns (uint) {
+     * @notice Sender borrows assets from the protocol to their own address
+     * @param borrowAmount The amount of the underlying asset to borrow
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function borrow(uint256 borrowAmount) external override returns (uint256) {
         return borrowInternal(borrowAmount);
     }
 
@@ -86,8 +97,8 @@ contract CErc20 is CToken, CErc20Interface {
      * @param repayAmount The amount to repay
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function repayBorrow(uint repayAmount) override external returns (uint) {
-        (uint err,) = repayBorrowInternal(repayAmount);
+    function repayBorrow(uint256 repayAmount) external override returns (uint256) {
+        (uint256 err, ) = repayBorrowInternal(repayAmount);
         return err;
     }
 
@@ -97,8 +108,8 @@ contract CErc20 is CToken, CErc20Interface {
      * @param repayAmount The amount to repay
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function repayBorrowBehalf(address borrower, uint repayAmount) override external returns (uint) {
-        (uint err,) = repayBorrowBehalfInternal(borrower, repayAmount);
+    function repayBorrowBehalf(address borrower, uint256 repayAmount) external override returns (uint256) {
+        (uint256 err, ) = repayBorrowBehalfInternal(borrower, repayAmount);
         return err;
     }
 
@@ -110,8 +121,12 @@ contract CErc20 is CToken, CErc20Interface {
      * @param cTokenCollateral The market in which to seize collateral from the borrower
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function liquidateBorrow(address borrower, uint repayAmount, CTokenInterface cTokenCollateral) override external returns (uint) {
-        (uint err,) = liquidateBorrowInternal(borrower, repayAmount, cTokenCollateral);
+    function liquidateBorrow(
+        address borrower,
+        uint256 repayAmount,
+        CTokenInterface cTokenCollateral
+    ) external override returns (uint256) {
+        (uint256 err, ) = liquidateBorrowInternal(borrower, repayAmount, cTokenCollateral);
         return err;
     }
 
@@ -122,7 +137,7 @@ contract CErc20 is CToken, CErc20Interface {
      * @dev This excludes the value of the current message, if any
      * @return The quantity of underlying tokens owned by this contract
      */
-    function getCashPrior() override virtual internal view returns (uint) {
+    function getCashPrior() internal view virtual override returns (uint256) {
         EIP20Interface token = EIP20Interface(underlying);
         return token.balanceOf(address(this));
     }
@@ -136,14 +151,22 @@ contract CErc20 is CToken, CErc20Interface {
      *      Note: This wrapper safely handles non-standard ERC-20 tokens that do not return a value.
      *            See here: https://medium.com/coinmonks/missing-return-value-bug-at-least-130-tokens-affected-d67bf08521ca
      */
-    function doTransferIn(address from, uint amount) override virtual internal returns (uint) {
-        uint balanceBefore = EIP20Interface(underlying).balanceOf(address(this));
-        _callOptionalReturn(abi.encodeWithSelector(EIP20NonStandardInterface(underlying).transferFrom.selector, from, address(this), amount), "TOKEN_TRANSFER_IN_FAILED");
+    function doTransferIn(address from, uint256 amount) internal virtual override returns (uint256) {
+        uint256 balanceBefore = EIP20Interface(underlying).balanceOf(address(this));
+        _callOptionalReturn(
+            abi.encodeWithSelector(
+                EIP20NonStandardInterface(underlying).transferFrom.selector,
+                from,
+                address(this),
+                amount
+            ),
+            "TOKEN_TRANSFER_IN_FAILED"
+        );
 
         // Calculate the amount that was *actually* transferred
-        uint balanceAfter = EIP20Interface(underlying).balanceOf(address(this));
+        uint256 balanceAfter = EIP20Interface(underlying).balanceOf(address(this));
         require(balanceAfter >= balanceBefore, "TOKEN_TRANSFER_IN_OVERFLOW");
-        return balanceAfter - balanceBefore;   // underflow already checked above, just subtract
+        return balanceAfter - balanceBefore; // underflow already checked above, just subtract
     }
 
     /**
@@ -155,8 +178,11 @@ contract CErc20 is CToken, CErc20Interface {
      *      Note: This wrapper safely handles non-standard ERC-20 tokens that do not return a value.
      *            See here: https://medium.com/coinmonks/missing-return-value-bug-at-least-130-tokens-affected-d67bf08521ca
      */
-    function doTransferOut(address to, uint amount) override virtual internal {
-        _callOptionalReturn(abi.encodeWithSelector(EIP20NonStandardInterface(underlying).transfer.selector, to, amount), "TOKEN_TRANSFER_OUT_FAILED");
+    function doTransferOut(address to, uint256 amount) internal virtual override {
+        _callOptionalReturn(
+            abi.encodeWithSelector(EIP20NonStandardInterface(underlying).transfer.selector, to, amount),
+            "TOKEN_TRANSFER_OUT_FAILED"
+        );
     }
 
     /**
@@ -171,10 +197,10 @@ contract CErc20 is CToken, CErc20Interface {
     }
 
     /**
-    * @notice Admin call to delegate the votes of the COMP-like underlying
-    * @param compLikeDelegatee The address to delegate votes to
-    * @dev CTokens whose underlying are not CompLike should revert here
-    */
+     * @notice Admin call to delegate the votes of the COMP-like underlying
+     * @param compLikeDelegatee The address to delegate votes to
+     * @dev CTokens whose underlying are not CompLike should revert here
+     */
     function _delegateCompLikeTo(address compLikeDelegatee) external {
         require(hasAdminRights(), "only the admin may set the comp-like delegate");
         CompLike(underlying).delegate(compLikeDelegatee);

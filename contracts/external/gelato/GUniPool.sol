@@ -3,6 +3,7 @@ pragma solidity >=0.8.0;
 
 interface GUniPool {
     function token0() external view returns (address);
+
     function token1() external view returns (address);
 
     /// @notice compute total underlying holdings of the G-UNI token supply

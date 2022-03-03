@@ -21,14 +21,14 @@ contract GelatoGUniPriceOracle is IPriceOracle {
     /**
      * @dev WETH contract address.
      */
-    address constant private WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address private constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     /**
      * @notice Get the LP token price price for an underlying token address.
      * @param underlying The underlying token address for which to get the price (set to zero address for ETH)
      * @return Price denominated in ETH (scaled by 1e18)
      */
-    function price(address underlying) external view returns (uint) {
+    function price(address underlying) external view returns (uint256) {
         return _price(underlying);
     }
 
@@ -37,17 +37,17 @@ contract GelatoGUniPriceOracle is IPriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
         address underlying = ICErc20(address(cToken)).underlying();
         // Comptroller needs prices to be scaled by 1e(36 - decimals)
         // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-        return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
     }
 
     /**
      * @dev Fetches the fair LP token/ETH price from Uniswap, with 18 decimals of precision.
      */
-    function _price(address token) internal view virtual returns (uint) {
+    function _price(address token) internal view virtual returns (uint256) {
         // Get G-UNI pool and underlying tokens
         GUniPool pool = GUniPool(token);
         address token0 = pool.token0();
@@ -62,28 +62,21 @@ contract GelatoGUniPriceOracle is IPriceOracle {
         // Get conversion factors
         uint256 dec0 = uint256(ERC20Upgradeable(token0).decimals());
         require(dec0 <= 18, "G-UNI underlying token0 decimals greater than 18.");
-        uint256 to18Dec0 = 10 ** (18 - dec0);
+        uint256 to18Dec0 = 10**(18 - dec0);
         uint256 dec1 = uint256(ERC20Upgradeable(token1).decimals());
         require(dec1 <= 18, "G-UNI underlying token1 decimals greater than 18.");
-        uint256 to18Dec1 = 10 ** (18 - dec1);
-        
+        uint256 to18Dec1 = 10**(18 - dec1);
+
         // Get square root of underlying token prices
-        // token1/token0 
-        // = (p0 / 10^dec0) / (p1 / 10^dec1) 
+        // token1/token0
+        // = (p0 / 10^dec0) / (p1 / 10^dec1)
         // = (p0 * 10^dec1) / (p1 * 10^dec0)
         // [From Uniswap's definition] sqrtPriceX96
         // = sqrt(token1/token0) * 2^96
         // = sqrt((p0 * 10^dec1) / (p1 * 10^dec0)) * 2^96
         // = sqrt((p0 * 10^dec1) / (p1 * 10^dec0)) * 2^48 * 2^48
         // = sqrt((p0 * 10^dec1 * 2^96) / (p1 * 10^dec0)) * 2^48
-        uint160 sqrtPriceX96 =
-            toUint160(
-                sqrt(
-                    (
-                        p0 * (10 ** dec1) * (1 << 96)
-                    ) / (p1 * (10 ** dec0))
-                ) << 48
-            );
+        uint160 sqrtPriceX96 = toUint160(sqrt((p0 * (10**dec1) * (1 << 96)) / (p1 * (10**dec0))) << 48);
 
         // Get balances of the tokens in the pool given fair underlying token prices
         (uint256 r0, uint256 r1) = pool.getUnderlyingBalancesAtPrice(sqrtPriceX96);
@@ -98,10 +91,10 @@ contract GelatoGUniPriceOracle is IPriceOracle {
      * Implementation from: https://github.com/Uniswap/uniswap-lib/commit/99f3f28770640ba1bb1ff460ac7c5292fb8291a0
      * Original implementation: https://github.com/abdk-consulting/abdk-libraries-solidity/blob/master/ABDKMath64x64.sol#L687
      */
-    function sqrt(uint x) internal pure returns (uint) {
+    function sqrt(uint256 x) internal pure returns (uint256) {
         if (x == 0) return 0;
-        uint xx = x;
-        uint r = 1;
+        uint256 xx = x;
+        uint256 r = 1;
 
         if (xx >= 0x100000000000000000000000000000000) {
             xx >>= 128;
@@ -138,7 +131,7 @@ contract GelatoGUniPriceOracle is IPriceOracle {
         r = (r + x / r) >> 1;
         r = (r + x / r) >> 1;
         r = (r + x / r) >> 1; // Seven iterations should be enough
-        uint r1 = x / r;
+        uint256 r1 = x / r;
         return (r < r1 ? r : r1);
     }
 

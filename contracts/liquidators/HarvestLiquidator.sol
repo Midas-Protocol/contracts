@@ -16,12 +16,12 @@ contract HarvestLiquidator is IRedemptionStrategy {
     /**
      * @dev FARM ERC20 token contract.
      */
-    IERC20Upgradeable constant public FARM = IERC20Upgradeable(0xa0246c9032bC3A600820415aE600c6388619A14D);
+    IERC20Upgradeable public constant FARM = IERC20Upgradeable(0xa0246c9032bC3A600820415aE600c6388619A14D);
 
     /**
      * @dev iFARM ERC20 token contract.
      */
-    IFarmVault constant public IFARM = IFarmVault(0x1571eD0bed4D987fe2b498DdBaE7DFA19519F651);
+    IFarmVault public constant IFARM = IFarmVault(0x1571eD0bed4D987fe2b498DdBaE7DFA19519F651);
 
     /**
      * @notice Redeems custom collateral `token` for an underlying token.
@@ -31,7 +31,11 @@ contract HarvestLiquidator is IRedemptionStrategy {
      * @return outputToken The underlying ERC20 token outputted.
      * @return outputAmount The quantity of underlying tokens outputted.
      */
-    function redeem(IERC20Upgradeable inputToken, uint256 inputAmount, bytes memory strategyData) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    function redeem(
+        IERC20Upgradeable inputToken,
+        uint256 inputAmount,
+        bytes memory strategyData
+    ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
         if (address(inputToken) == address(IFARM)) {
             IFARM.withdrawAll();
             outputToken = FARM;

@@ -72,11 +72,11 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
      * @param _canAdminOverwrite Controls if `admin` can overwrite existing assignments of oracles to underlying tokens.
      */
     function initialize(
-        address[] memory underlyings, 
-        IPriceOracle[] memory _oracles, 
-        IPriceOracle _defaultOracle, 
-        address _admin, 
-        bool _canAdminOverwrite, 
+        address[] memory underlyings,
+        IPriceOracle[] memory _oracles,
+        IPriceOracle _defaultOracle,
+        address _admin,
+        bool _canAdminOverwrite,
         address _wtoken
     ) external initializer {
         // Input validation
@@ -101,13 +101,20 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
      */
     function add(address[] calldata underlyings, IPriceOracle[] calldata _oracles) external onlyAdmin {
         // Input validation
-        require(underlyings.length > 0 && underlyings.length == _oracles.length, "Lengths of both arrays must be equal and greater than 0.");
+        require(
+            underlyings.length > 0 && underlyings.length == _oracles.length,
+            "Lengths of both arrays must be equal and greater than 0."
+        );
 
         // Assign oracles to underlying tokens
         for (uint256 i = 0; i < underlyings.length; i++) {
             address underlying = underlyings[i];
             address oldOracle = address(oracles[underlying]);
-            if (noAdminOverwrite) require(oldOracle == address(0), "Admin cannot overwrite existing assignments of oracles to underlying tokens.");
+            if (noAdminOverwrite)
+                require(
+                    oldOracle == address(0),
+                    "Admin cannot overwrite existing assignments of oracles to underlying tokens."
+                );
             IPriceOracle newOracle = _oracles[i];
             oracles[underlying] = newOracle;
             emit NewOracle(underlying, oldOracle, address(newOracle));
@@ -135,7 +142,7 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
     /**
      * @dev Modifier that checks if `msg.sender == admin`.
      */
-    modifier onlyAdmin {
+    modifier onlyAdmin() {
         require(msg.sender == admin, "Sender is not the admin.");
         _;
     }
@@ -145,7 +152,7 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
         // Get underlying ERC20 token address
         address underlying = address(ICErc20(address(cToken)).underlying());
 
@@ -162,7 +169,7 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
     /**
      * @dev Attempts to return the price in ETH of `underlying` (implements `BasePriceOracle`).
      */
-    function price(address underlying) external override view returns (uint) {
+    function price(address underlying) external view override returns (uint256) {
         // Return 1e18 for WETH
         if (underlying == wtoken) return 1e18;
 

@@ -20,7 +20,11 @@ contract SOhmLiquidator is IRedemptionStrategy {
     /**
      * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
      */
-    function safeApprove(IERC20Upgradeable token, address to, uint256 minAmount) private {
+    function safeApprove(
+        IERC20Upgradeable token,
+        address to,
+        uint256 minAmount
+    ) private {
         uint256 allowance = token.allowance(address(this), to);
 
         if (allowance < minAmount) {
@@ -37,7 +41,11 @@ contract SOhmLiquidator is IRedemptionStrategy {
      * @return outputToken The underlying ERC20 token outputted.
      * @return outputAmount The quantity of underlying tokens outputted.
      */
-    function redeem(IERC20Upgradeable inputToken, uint256 inputAmount, bytes memory strategyData) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    function redeem(
+        IERC20Upgradeable inputToken,
+        uint256 inputAmount,
+        bytes memory strategyData
+    ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
         // Unstake sOHM (and store output OHM as new collateral)
         sOlympus token = sOlympus(address(inputToken));
         OlympusStaking staking = OlympusStaking(token.stakingContract());

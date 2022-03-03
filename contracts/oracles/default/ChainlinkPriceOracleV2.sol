@@ -59,7 +59,12 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
     /**
      * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
      */
-    constructor (address _admin, bool _canAdminOverwrite, address _wtoken, address nativeTokenUsd) {
+    constructor(
+        address _admin,
+        bool _canAdminOverwrite,
+        address _wtoken,
+        address nativeTokenUsd
+    ) {
         admin = _admin;
         canAdminOverwrite = _canAdminOverwrite;
         wtoken = _wtoken;
@@ -83,7 +88,7 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
     /**
      * @dev Modifier that checks if `msg.sender == admin`.
      */
-    modifier onlyAdmin {
+    modifier onlyAdmin() {
         require(msg.sender == admin, "Sender is not the admin.");
         _;
     }
@@ -94,16 +99,27 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
      * @param feeds The Chainlink price feed contract addresses for each of `underlyings`.
      * @param baseCurrency The currency in which `feeds` are based.
      */
-    function setPriceFeeds(address[] memory underlyings, AggregatorV3Interface[] memory feeds, FeedBaseCurrency baseCurrency) external onlyAdmin {
+    function setPriceFeeds(
+        address[] memory underlyings,
+        AggregatorV3Interface[] memory feeds,
+        FeedBaseCurrency baseCurrency
+    ) external onlyAdmin {
         // Input validation
-        require(underlyings.length > 0 && underlyings.length == feeds.length, "Lengths of both arrays must be equal and greater than 0.");
+        require(
+            underlyings.length > 0 && underlyings.length == feeds.length,
+            "Lengths of both arrays must be equal and greater than 0."
+        );
 
         // For each token/feed
         for (uint256 i = 0; i < underlyings.length; i++) {
             address underlying = underlyings[i];
 
             // Check for existing oracle if !canAdminOverwrite
-            if (!canAdminOverwrite) require(address(priceFeeds[underlying]) == address(0), "Admin cannot overwrite existing assignments of price feeds to underlying tokens.");
+            if (!canAdminOverwrite)
+                require(
+                    address(priceFeeds[underlying]) == address(0),
+                    "Admin cannot overwrite existing assignments of price feeds to underlying tokens."
+                );
 
             // Set feed and base currency
             priceFeeds[underlying] = feeds[i];
@@ -114,7 +130,7 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
     /**
      * @dev Internal function returning the price in ETH of `underlying`.
      */
-    function _price(address underlying) internal view returns (uint) {
+    function _price(address underlying) internal view returns (uint256) {
         // Return 1e18 for WTOKEN
         if (underlying == wtoken || underlying == address(0)) return 1e18;
 
@@ -125,23 +141,22 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
 
         if (baseCurrency == FeedBaseCurrency.ETH) {
             (, int256 tokenEthPrice, , , ) = feed.latestRoundData();
-            return tokenEthPrice >= 0 ? (uint256(tokenEthPrice) * 1e18) / (10 ** uint256(feed.decimals())) : 0;
+            return tokenEthPrice >= 0 ? (uint256(tokenEthPrice) * 1e18) / (10**uint256(feed.decimals())) : 0;
         } else if (baseCurrency == FeedBaseCurrency.USD) {
             (, int256 nativeTokenUsdPrice, , , ) = NATIVE_TOKEN_USD_PRICE_FEED.latestRoundData();
             if (nativeTokenUsdPrice <= 0) return 0;
             (, int256 tokenUsdPrice, , , ) = feed.latestRoundData();
-            return tokenUsdPrice >= 0 ?
-                (
-                    (uint256(tokenUsdPrice) * 1e26) / (10 ** uint256(feed.decimals()))
-                ) / uint256(nativeTokenUsdPrice)
-                : 0;
+            return
+                tokenUsdPrice >= 0
+                    ? ((uint256(tokenUsdPrice) * 1e26) / (10**uint256(feed.decimals()))) / uint256(nativeTokenUsdPrice)
+                    : 0;
         }
     }
 
     /**
      * @dev Returns the price in ETH of `underlying` (implements `BasePriceOracle`).
      */
-    function price(address underlying) external override view returns (uint) {
+    function price(address underlying) external view override returns (uint256) {
         return _price(underlying);
     }
 
@@ -150,7 +165,7 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
         // Return 1e18 for ETH
         if (cToken.isCEther()) return 1e18;
 
@@ -162,8 +177,9 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
 
         // Format and return price
         uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
-        return underlyingDecimals <= 18 ?
-            uint256(chainlinkPrice) * (10 ** (18 - underlyingDecimals))
-            : uint256(chainlinkPrice) / (10 ** (underlyingDecimals - 18));
+        return
+            underlyingDecimals <= 18
+                ? uint256(chainlinkPrice) * (10**(18 - underlyingDecimals))
+                : uint256(chainlinkPrice) / (10**(underlyingDecimals - 18));
     }
 }

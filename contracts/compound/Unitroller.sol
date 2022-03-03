@@ -11,33 +11,33 @@ import "./ComptrollerStorage.sol";
  */
 contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
     /**
-      * @notice Emitted when pendingComptrollerImplementation is changed
-      */
+     * @notice Emitted when pendingComptrollerImplementation is changed
+     */
     event NewPendingImplementation(address oldPendingImplementation, address newPendingImplementation);
 
     /**
-      * @notice Emitted when pendingComptrollerImplementation is accepted, which means comptroller implementation is updated
-      */
+     * @notice Emitted when pendingComptrollerImplementation is accepted, which means comptroller implementation is updated
+     */
     event NewImplementation(address oldImplementation, address newImplementation);
 
     /**
-      * @notice Event emitted when the Fuse admin rights are changed
-      */
+     * @notice Event emitted when the Fuse admin rights are changed
+     */
     event FuseAdminRightsToggled(bool hasRights);
 
     /**
-      * @notice Event emitted when the admin rights are changed
-      */
+     * @notice Event emitted when the admin rights are changed
+     */
     event AdminRightsToggled(bool hasRights);
 
     /**
-      * @notice Emitted when pendingAdmin is changed
-      */
+     * @notice Emitted when pendingAdmin is changed
+     */
     event NewPendingAdmin(address oldPendingAdmin, address newPendingAdmin);
 
     /**
-      * @notice Emitted when pendingAdmin is accepted, which means admin is updated
-      */
+     * @notice Emitted when pendingAdmin is accepted, which means admin is updated
+     */
     event NewAdmin(address oldAdmin, address newAdmin);
 
     constructor() {
@@ -47,7 +47,7 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
 
     /*** Admin Functions ***/
 
-    function _setPendingImplementation(address newPendingImplementation) public returns (uint) {
+    function _setPendingImplementation(address newPendingImplementation) public returns (uint256) {
         if (!hasAdminRights()) {
             return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_OWNER_CHECK);
         }
@@ -58,15 +58,15 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
         pendingComptrollerImplementation = newPendingImplementation;
         emit NewPendingImplementation(oldPendingImplementation, pendingComptrollerImplementation);
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
     /**
-    * @notice Accepts new implementation of comptroller. msg.sender must be pendingImplementation
-    * @dev Admin function for new implementation to accept it's role as implementation
-    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-    */
-    function _acceptImplementation() public returns (uint) {
+     * @notice Accepts new implementation of comptroller. msg.sender must be pendingImplementation
+     * @dev Admin function for new implementation to accept it's role as implementation
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function _acceptImplementation() public returns (uint256) {
         // Check caller is pendingImplementation and pendingImplementation ≠ address(0)
         if (msg.sender != pendingComptrollerImplementation || pendingComptrollerImplementation == address(0)) {
             return fail(Error.UNAUTHORIZED, FailureInfo.ACCEPT_PENDING_IMPLEMENTATION_ADDRESS_CHECK);
@@ -83,22 +83,22 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
         emit NewImplementation(oldImplementation, comptrollerImplementation);
         emit NewPendingImplementation(oldPendingImplementation, pendingComptrollerImplementation);
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
     /**
-      * @notice Toggles Fuse admin rights.
-      * @param hasRights Boolean indicating if the Fuse admin is to have rights.
-      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-      */
-    function _toggleFuseAdminRights(bool hasRights) external returns (uint) {
+     * @notice Toggles Fuse admin rights.
+     * @param hasRights Boolean indicating if the Fuse admin is to have rights.
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function _toggleFuseAdminRights(bool hasRights) external returns (uint256) {
         // Check caller = admin
         if (!hasAdminRights()) {
             return fail(Error.UNAUTHORIZED, FailureInfo.TOGGLE_ADMIN_RIGHTS_OWNER_CHECK);
         }
 
         // Check that rights have not already been set to the desired value
-        if (fuseAdminHasRights == hasRights) return uint(Error.NO_ERROR);
+        if (fuseAdminHasRights == hasRights) return uint256(Error.NO_ERROR);
 
         // Set fuseAdminHasRights
         fuseAdminHasRights = hasRights;
@@ -106,22 +106,22 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
         // Emit FuseAdminRightsToggled()
         emit FuseAdminRightsToggled(fuseAdminHasRights);
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
     /**
-      * @notice Toggles admin rights.
-      * @param hasRights Boolean indicating if the admin is to have rights.
-      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-      */
-    function _toggleAdminRights(bool hasRights) external returns (uint) {
+     * @notice Toggles admin rights.
+     * @param hasRights Boolean indicating if the admin is to have rights.
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function _toggleAdminRights(bool hasRights) external returns (uint256) {
         // Check caller = admin
         if (!hasAdminRights()) {
             return fail(Error.UNAUTHORIZED, FailureInfo.TOGGLE_ADMIN_RIGHTS_OWNER_CHECK);
         }
 
         // Check that rights have not already been set to the desired value
-        if (adminHasRights == hasRights) return uint(Error.NO_ERROR);
+        if (adminHasRights == hasRights) return uint256(Error.NO_ERROR);
 
         // Set adminHasRights
         adminHasRights = hasRights;
@@ -129,16 +129,16 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
         // Emit AdminRightsToggled()
         emit AdminRightsToggled(hasRights);
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
     /**
-      * @notice Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
-      * @dev Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
-      * @param newPendingAdmin New pending admin.
-      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-      */
-    function _setPendingAdmin(address newPendingAdmin) public returns (uint) {
+     * @notice Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
+     * @dev Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
+     * @param newPendingAdmin New pending admin.
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function _setPendingAdmin(address newPendingAdmin) public returns (uint256) {
         // Check caller = admin
         if (!hasAdminRights()) {
             return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_ADMIN_OWNER_CHECK);
@@ -153,15 +153,15 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
         // Emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin)
         emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin);
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
     /**
-      * @notice Accepts transfer of admin rights. msg.sender must be pendingAdmin
-      * @dev Admin function for pending admin to accept role and update admin
-      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-      */
-    function _acceptAdmin() public returns (uint) {
+     * @notice Accepts transfer of admin rights. msg.sender must be pendingAdmin
+     * @dev Admin function for pending admin to accept role and update admin
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function _acceptAdmin() public returns (uint256) {
         // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
         if (msg.sender != pendingAdmin || msg.sender == address(0)) {
             return fail(Error.UNAUTHORIZED, FailureInfo.ACCEPT_ADMIN_PENDING_ADMIN_CHECK);
@@ -180,7 +180,7 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
         emit NewAdmin(oldAdmin, admin);
         emit NewPendingAdmin(oldPendingAdmin, pendingAdmin);
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
     /**
@@ -188,15 +188,19 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
      * It returns to the external caller whatever the implementation returns
      * or forwards reverts.
      */
-    fallback () payable external {
+    fallback() external payable {
         // Check for automatic implementation
         if (msg.sender != address(this)) {
-            (bool callSuccess, bytes memory data) = address(this).staticcall(abi.encodeWithSignature("autoImplementation()"));
+            (bool callSuccess, bytes memory data) = address(this).staticcall(
+                abi.encodeWithSignature("autoImplementation()")
+            );
             bool autoImplementation;
             if (callSuccess) (autoImplementation) = abi.decode(data, (bool));
 
             if (autoImplementation) {
-                address latestComptrollerImplementation = fuseAdmin.latestComptrollerImplementation(comptrollerImplementation);
+                address latestComptrollerImplementation = fuseAdmin.latestComptrollerImplementation(
+                    comptrollerImplementation
+                );
 
                 if (comptrollerImplementation != latestComptrollerImplementation) {
                     address oldImplementation = comptrollerImplementation; // Save current value for inclusion in log
@@ -210,12 +214,16 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
         (bool success, ) = comptrollerImplementation.delegatecall(msg.data);
 
         assembly {
-              let free_mem_ptr := mload(0x40)
-              returndatacopy(free_mem_ptr, 0, returndatasize())
+            let free_mem_ptr := mload(0x40)
+            returndatacopy(free_mem_ptr, 0, returndatasize())
 
-              switch success
-              case 0 { revert(free_mem_ptr, returndatasize()) }
-              default { return(free_mem_ptr, returndatasize()) }
+            switch success
+            case 0 {
+                revert(free_mem_ptr, returndatasize())
+            }
+            default {
+                return(free_mem_ptr, returndatasize())
+            }
         }
     }
 }

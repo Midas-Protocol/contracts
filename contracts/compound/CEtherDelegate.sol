@@ -19,8 +19,7 @@ contract CEtherDelegate is CDelegateInterface, CEther {
      * @notice Called by the delegator on a delegate to initialize it for duty
      * @param data The encoded bytes data for any initialization
      */
-    function _becomeImplementation(bytes calldata data) override external {
-
+    function _becomeImplementation(bytes calldata data) external override {
         require(msg.sender == address(this) || hasAdminRights(), "!self");
 
         // Make sure admin storage is set up correctly
@@ -45,7 +44,11 @@ contract CEtherDelegate is CDelegateInterface, CEther {
      * @param allowResign Flag to indicate whether to call _resignImplementation on the old implementation
      * @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation
      */
-    function _setImplementationInternal(address implementation_, bool allowResign, bytes memory becomeImplementationData) internal {
+    function _setImplementationInternal(
+        address implementation_,
+        bool allowResign,
+        bytes memory becomeImplementationData
+    ) internal {
         // Check whitelist
         require(fuseAdmin.cEtherDelegateWhitelist(implementation, implementation_, allowResign), "!impl");
 
@@ -59,7 +62,11 @@ contract CEtherDelegate is CDelegateInterface, CEther {
         implementation = implementation_;
 
         // Call _becomeImplementation externally (delegating to new delegate's code)
-        _functionCall(address(this), abi.encodeWithSignature("_becomeImplementation(bytes)", becomeImplementationData), "!become");
+        _functionCall(
+            address(this),
+            abi.encodeWithSignature("_becomeImplementation(bytes)", becomeImplementationData),
+            "!become"
+        );
 
         // Emit event
         emit NewImplementation(oldImplementation, implementation);
@@ -71,7 +78,11 @@ contract CEtherDelegate is CDelegateInterface, CEther {
      * @param allowResign Flag to indicate whether to call _resignImplementation on the old implementation
      * @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation
      */
-    function _setImplementationSafe(address implementation_, bool allowResign, bytes calldata becomeImplementationData) override external {
+    function _setImplementationSafe(
+        address implementation_,
+        bool allowResign,
+        bytes calldata becomeImplementationData
+    ) external override {
         // Check admin rights
         require(hasAdminRights(), "!admin");
 
@@ -83,10 +94,12 @@ contract CEtherDelegate is CDelegateInterface, CEther {
      * @notice Function called before all delegator functions
      * @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary
      */
-    function _prepare() override external payable {
+    function _prepare() external payable override {
         if (msg.sender != address(this) && ComptrollerV3Storage(address(comptroller)).autoImplementation()) {
-            (address latestCEtherDelegate, bool allowResign, bytes memory becomeImplementationData) = fuseAdmin.latestCEtherDelegate(implementation);
-            if (implementation != latestCEtherDelegate) _setImplementationInternal(latestCEtherDelegate, allowResign, becomeImplementationData);
+            (address latestCEtherDelegate, bool allowResign, bytes memory becomeImplementationData) = fuseAdmin
+                .latestCEtherDelegate(implementation);
+            if (implementation != latestCEtherDelegate)
+                _setImplementationInternal(latestCEtherDelegate, allowResign, becomeImplementationData);
         }
     }
 }

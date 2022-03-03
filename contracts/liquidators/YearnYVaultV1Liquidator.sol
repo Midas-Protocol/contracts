@@ -21,7 +21,11 @@ contract YearnYVaultV1Liquidator is IRedemptionStrategy {
      * @return outputToken The underlying ERC20 token outputted.
      * @return outputAmount The quantity of underlying tokens outputted.
      */
-    function redeem(IERC20Upgradeable inputToken, uint256 inputAmount, bytes memory strategyData) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    function redeem(
+        IERC20Upgradeable inputToken,
+        uint256 inputAmount,
+        bytes memory strategyData
+    ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
         // Redeem yVault token for underlying token (and store output as new collateral)
         IVault yVault = IVault(address(inputToken));
         yVault.withdraw(inputAmount);

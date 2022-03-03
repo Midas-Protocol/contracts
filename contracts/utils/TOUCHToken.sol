@@ -4,8 +4,7 @@ pragma solidity ^0.7.6;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract TOUCHToken is ERC20
-{
+contract TOUCHToken is ERC20 {
     constructor(uint256 initialSupply, address tokenOwner) ERC20("Midas TOUCH Token", "TOUCH") {
         _mint(tokenOwner, initialSupply);
     }

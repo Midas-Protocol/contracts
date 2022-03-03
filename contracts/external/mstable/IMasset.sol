@@ -25,10 +25,7 @@ interface IMasset is MassetStructs {
         address _recipient
     ) external returns (uint256 mintOutput);
 
-    function getMintOutput(address _input, uint256 _inputQuantity)
-        external
-        view
-        returns (uint256 mintOutput);
+    function getMintOutput(address _input, uint256 _inputQuantity) external view returns (uint256 mintOutput);
 
     function getMintMultiOutput(address[] calldata _inputs, uint256[] calldata _inputQuantities)
         external
@@ -71,37 +68,26 @@ interface IMasset is MassetStructs {
         address _recipient
     ) external returns (uint256 mAssetRedeemed);
 
-    function getRedeemOutput(address _output, uint256 _mAssetQuantity)
+    function getRedeemOutput(address _output, uint256 _mAssetQuantity) external view returns (uint256 bAssetOutput);
+
+    function getRedeemExactBassetsOutput(address[] calldata _outputs, uint256[] calldata _outputQuantities)
         external
         view
-        returns (uint256 bAssetOutput);
-
-    function getRedeemExactBassetsOutput(
-        address[] calldata _outputs,
-        uint256[] calldata _outputQuantities
-    ) external view returns (uint256 mAssetAmount);
+        returns (uint256 mAssetAmount);
 
     // Views
     function getBasket() external view returns (bool, bool);
 
-    function getBasset(address _token)
-        external
-        view
-        returns (BassetPersonal memory personal, BassetData memory data);
+    function getBasset(address _token) external view returns (BassetPersonal memory personal, BassetData memory data);
 
-    function getBassets()
-        external
-        view
-        returns (BassetPersonal[] memory personal, BassetData[] memory data);
+    function getBassets() external view returns (BassetPersonal[] memory personal, BassetData[] memory data);
 
     function bAssetIndexes(address) external view returns (uint8);
 
     // SavingsManager
     function collectInterest() external returns (uint256 swapFeesGained, uint256 newSupply);
 
-    function collectPlatformInterest()
-        external
-        returns (uint256 mintAmount, uint256 newSupply);
+    function collectPlatformInterest() external returns (uint256 mintAmount, uint256 newSupply);
 
     // Admin
     function setCacheSize(uint256 _cacheSize) external;

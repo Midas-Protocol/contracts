@@ -22,17 +22,22 @@ contract UniswapV1Liquidator is IRedemptionStrategy {
     /**
      * @dev The V1 Uniswap factory contract.
      */
-    IUniswapV1Factory constant private UNISWAP_V1_FACTORY = IUniswapV1Factory(0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95);
+    IUniswapV1Factory private constant UNISWAP_V1_FACTORY =
+        IUniswapV1Factory(0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95);
 
     /**
      * @dev W_NATIVE contract object.
      */
-    IW_NATIVE constant private W_NATIVE = IW_NATIVE(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+    IW_NATIVE private constant W_NATIVE = IW_NATIVE(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
 
     /**
      * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
      */
-    function safeApprove(IERC20Upgradeable token, address to, uint256 minAmount) private {
+    function safeApprove(
+        IERC20Upgradeable token,
+        address to,
+        uint256 minAmount
+    ) private {
         uint256 allowance = token.allowance(address(this), to);
 
         if (allowance < minAmount) {
@@ -49,7 +54,11 @@ contract UniswapV1Liquidator is IRedemptionStrategy {
      * @return outputToken The underlying ERC20 token outputted.
      * @return outputAmount The quantity of underlying tokens outputted.
      */
-    function redeem(IERC20Upgradeable inputToken, uint256 inputAmount, bytes memory strategyData) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    function redeem(
+        IERC20Upgradeable inputToken,
+        uint256 inputAmount,
+        bytes memory strategyData
+    ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
         // Get Uniswap exchange
         IUniswapV1Exchange uniswapV1Exchange = IUniswapV1Exchange(UNISWAP_V1_FACTORY.getExchange(address(inputToken)));
 
@@ -59,7 +68,7 @@ contract UniswapV1Liquidator is IRedemptionStrategy {
 
         // Get new collateral
         outputAmount = address(this).balance;
-        W_NATIVE.deposit{value: outputAmount}();
+        W_NATIVE.deposit{ value: outputAmount }();
         return (IERC20Upgradeable(address(W_NATIVE)), outputAmount);
     }
 }

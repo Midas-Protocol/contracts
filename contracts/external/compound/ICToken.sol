@@ -8,29 +8,48 @@ pragma solidity >=0.8.0;
  */
 interface ICToken {
     function admin() external view returns (address);
+
     function adminHasRights() external view returns (bool);
+
     function fuseAdminHasRights() external view returns (bool);
+
     function symbol() external view returns (string memory);
+
     function comptroller() external view returns (address);
+
     function adminFeeMantissa() external view returns (uint256);
+
     function fuseFeeMantissa() external view returns (uint256);
+
     function reserveFactorMantissa() external view returns (uint256);
-    function totalReserves() external view returns (uint);
-    function totalAdminFees() external view returns (uint);
-    function totalFuseFees() external view returns (uint);
+
+    function totalReserves() external view returns (uint256);
+
+    function totalAdminFees() external view returns (uint256);
+
+    function totalFuseFees() external view returns (uint256);
 
     function isCToken() external view returns (bool);
+
     function isCEther() external view returns (bool);
 
-    function balanceOf(address owner) external view returns (uint);
-    function balanceOfUnderlying(address owner) external returns (uint);
-    function borrowRatePerBlock() external view returns (uint);
-    function supplyRatePerBlock() external view returns (uint);
-    function totalBorrowsCurrent() external returns (uint);
-    function borrowBalanceStored(address account) external view returns (uint);
-    function exchangeRateStored() external view returns (uint);
-    function getCash() external view returns (uint);
+    function balanceOf(address owner) external view returns (uint256);
 
-    function redeem(uint redeemTokens) external returns (uint);
-    function redeemUnderlying(uint redeemAmount) external returns (uint);
+    function balanceOfUnderlying(address owner) external returns (uint256);
+
+    function borrowRatePerBlock() external view returns (uint256);
+
+    function supplyRatePerBlock() external view returns (uint256);
+
+    function totalBorrowsCurrent() external returns (uint256);
+
+    function borrowBalanceStored(address account) external view returns (uint256);
+
+    function exchangeRateStored() external view returns (uint256);
+
+    function getCash() external view returns (uint256);
+
+    function redeem(uint256 redeemTokens) external returns (uint256);
+
+    function redeemUnderlying(uint256 redeemAmount) external returns (uint256);
 }

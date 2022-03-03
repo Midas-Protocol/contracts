@@ -21,27 +21,42 @@ contract CErc20Delegator is CDelegationStorage {
      * @param implementation_ The address of the implementation the contract delegates to
      * @param becomeImplementationData The encoded args for becomeImplementation
      */
-    constructor(address underlying_,
-                ComptrollerInterface comptroller_,
-                InterestRateModel interestRateModel_,
-                string memory name_,
-                string memory symbol_,
-                address implementation_,
-                bytes memory becomeImplementationData,
-                uint256 reserveFactorMantissa_,
-                uint256 adminFeeMantissa_) public {
+    constructor(
+        address underlying_,
+        ComptrollerInterface comptroller_,
+        InterestRateModel interestRateModel_,
+        string memory name_,
+        string memory symbol_,
+        address implementation_,
+        bytes memory becomeImplementationData,
+        uint256 reserveFactorMantissa_,
+        uint256 adminFeeMantissa_
+    ) public {
         // First delegate gets to initialize the delegator (i.e. storage contract)
-        delegateTo(implementation_, abi.encodeWithSignature("initialize(address,address,address,string,string,uint256,uint256)",
-                                                            underlying_,
-                                                            comptroller_,
-                                                            interestRateModel_,
-                                                            name_,
-                                                            symbol_,
-                                                            reserveFactorMantissa_,
-                                                            adminFeeMantissa_));
+        delegateTo(
+            implementation_,
+            abi.encodeWithSignature(
+                "initialize(address,address,address,string,string,uint256,uint256)",
+                underlying_,
+                comptroller_,
+                interestRateModel_,
+                name_,
+                symbol_,
+                reserveFactorMantissa_,
+                adminFeeMantissa_
+            )
+        );
 
         // New implementations always get set via the settor (post-initialize)
-        delegateTo(implementation_, abi.encodeWithSignature("_setImplementationSafe(address,bool,bytes)", implementation_, false, becomeImplementationData));
+        delegateTo(
+            implementation_,
+            abi.encodeWithSignature(
+                "_setImplementationSafe(address,bool,bytes)",
+                implementation_,
+                false,
+                becomeImplementationData
+            )
+        );
     }
 
     /**
@@ -82,8 +97,12 @@ contract CErc20Delegator is CDelegationStorage {
             returndatacopy(free_mem_ptr, 0, returndatasize())
 
             switch success
-            case 0 { revert(free_mem_ptr, returndatasize()) }
-            default { return(free_mem_ptr, returndatasize()) }
+            case 0 {
+                revert(free_mem_ptr, returndatasize())
+            }
+            default {
+                return(free_mem_ptr, returndatasize())
+            }
         }
     }
 }

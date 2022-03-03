@@ -16,5 +16,5 @@ interface BasePriceOracle is IPriceOracle {
      * @return The underlying asset price in ETH as a mantissa (scaled by 1e18).
      * Zero means the price is unavailable.
      */
-    function price(address underlying) external view returns (uint);
+    function price(address underlying) external view returns (uint256);
 }

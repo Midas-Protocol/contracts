@@ -32,14 +32,19 @@ contract PreferredPriceOracle is IPriceOracle, BasePriceOracle {
     IPriceOracle public tertiaryOracle;
 
     /**
-    * @dev The Wrapped native asset address.
+     * @dev The Wrapped native asset address.
      */
     address public wtoken;
 
     /**
      * @dev Constructor to set the primary `MasterPriceOracle`, the secondary `ChainlinkPriceOracleV2`, and the tertiary `PriceOracle`.
      */
-    constructor(MasterPriceOracle _masterOracle, ChainlinkPriceOracleV2 _chainlinkOracleV2, IPriceOracle _tertiaryOracle, address _wtoken) {
+    constructor(
+        MasterPriceOracle _masterOracle,
+        ChainlinkPriceOracleV2 _chainlinkOracleV2,
+        IPriceOracle _tertiaryOracle,
+        address _wtoken
+    ) {
         require(address(_masterOracle) != address(0), "MasterPriceOracle not set.");
         require(address(_chainlinkOracleV2) != address(0), "ChainlinkPriceOracleV2 not set.");
         require(address(_tertiaryOracle) != address(0), "Tertiary price oracle not set.");
@@ -54,7 +59,7 @@ contract PreferredPriceOracle is IPriceOracle, BasePriceOracle {
      * @param underlying The underlying token address for which to get the price.
      * @return Price denominated in ETH (scaled by 1e18)
      */
-    function price(address underlying) external override view returns (uint) {
+    function price(address underlying) external view override returns (uint256) {
         // Return 1e18 for wtoken
         if (underlying == wtoken) return 1e18;
 
@@ -73,7 +78,7 @@ contract PreferredPriceOracle is IPriceOracle, BasePriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
         // Return 1e18 for ETH
         if (cToken.isCEther()) return 1e18;
 
@@ -87,7 +92,8 @@ contract PreferredPriceOracle is IPriceOracle, BasePriceOracle {
         if (address(masterOracle.oracles(underlying)) != address(0)) return masterOracle.getUnderlyingPrice(cToken);
 
         // Try to get ChainlinkPriceOracleV2 price
-        if (address(chainlinkOracleV2.priceFeeds(underlying)) != address(0)) return chainlinkOracleV2.getUnderlyingPrice(cToken);
+        if (address(chainlinkOracleV2.priceFeeds(underlying)) != address(0))
+            return chainlinkOracleV2.getUnderlyingPrice(cToken);
 
         // Otherwise, get price from tertiary oracle
         return tertiaryOracle.getUnderlyingPrice(cToken);

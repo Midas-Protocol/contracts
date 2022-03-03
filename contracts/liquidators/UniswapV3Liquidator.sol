@@ -19,7 +19,11 @@ contract UniswapV3Liquidator is IRedemptionStrategy {
     /**
      * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
      */
-    function safeApprove(IERC20Upgradeable token, address to, uint256 minAmount) private {
+    function safeApprove(
+        IERC20Upgradeable token,
+        address to,
+        uint256 minAmount
+    ) private {
         uint256 allowance = token.allowance(address(this), to);
 
         if (allowance < minAmount) {
@@ -36,13 +40,31 @@ contract UniswapV3Liquidator is IRedemptionStrategy {
      * @return outputToken The underlying ERC20 token outputted.
      * @return outputAmount The quantity of underlying tokens outputted.
      */
-    function redeem(IERC20Upgradeable inputToken, uint256 inputAmount, bytes memory strategyData) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    function redeem(
+        IERC20Upgradeable inputToken,
+        uint256 inputAmount,
+        bytes memory strategyData
+    ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
         // Get Uniswap router, output token, and fee
-        (ISwapRouter swapRouter, address _outputToken, uint24 fee) = abi.decode(strategyData, (ISwapRouter, address, uint24));
+        (ISwapRouter swapRouter, address _outputToken, uint24 fee) = abi.decode(
+            strategyData,
+            (ISwapRouter, address, uint24)
+        );
 
         // Swap underlying tokens
         safeApprove(inputToken, address(swapRouter), inputAmount);
-        outputAmount = swapRouter.exactInputSingle(ISwapRouter.ExactInputSingleParams(address(inputToken), _outputToken, fee, address(this), block.timestamp, inputAmount, 0, 0));
+        outputAmount = swapRouter.exactInputSingle(
+            ISwapRouter.ExactInputSingleParams(
+                address(inputToken),
+                _outputToken,
+                fee,
+                address(this),
+                block.timestamp,
+                inputAmount,
+                0,
+                0
+            )
+        );
         outputToken = IERC20Upgradeable(_outputToken);
     }
 }

@@ -28,7 +28,11 @@ contract SynthetixSynthLiquidator is IRedemptionStrategy {
      * @return outputToken The underlying ERC20 token outputted.
      * @return outputAmount The quantity of underlying tokens outputted.
      */
-    function redeem(IERC20Upgradeable inputToken, uint256 inputAmount, bytes memory strategyData) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    function redeem(
+        IERC20Upgradeable inputToken,
+        uint256 inputAmount,
+        bytes memory strategyData
+    ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
         // Swap Synth token for other Synth token (and store output as new collateral)
         (outputToken) = abi.decode(strategyData, (IERC20Upgradeable));
         address inputSynthLogic = Proxy(address(inputToken)).target(); // For some reason we have to use the logic contract instead of the proxy contract to get `currencyKey`

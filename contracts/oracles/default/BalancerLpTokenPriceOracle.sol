@@ -24,7 +24,7 @@ contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
      * @param underlying The underlying token address for which to get the price (set to zero address for ETH).
      * @return Price denominated in ETH (scaled by 1e18).
      */
-    function price(address underlying) external override view returns (uint) {
+    function price(address underlying) external view override returns (uint256) {
         return _price(underlying);
     }
 
@@ -33,18 +33,18 @@ contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
         address underlying = ICErc20(address(cToken)).underlying();
         // Comptroller needs prices to be scaled by 1e(36 - decimals)
         // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-        return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
     }
 
     /**
      * @dev Fetches the fair LP token/ETH price from Balancer, with 18 decimals of precision.
      * Source: https://github.com/AlphaFinanceLab/homora-v2/blob/master/contracts/oracle/BalancerPairOracle.sol
      */
-    function _price(address underlying) internal view virtual returns (uint) {
+    function _price(address underlying) internal view virtual returns (uint256) {
         IBalancerPool pool = IBalancerPool(underlying);
         require(pool.getNumTokens() == 2, "Balancer pool must have exactly 2 tokens.");
         address[] memory tokens = pool.getFinalTokens();
@@ -54,10 +54,10 @@ contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
         uint256 pxB = BasePriceOracle(msg.sender).price(tokenB);
         uint8 decimalsA = ERC20Upgradeable(tokenA).decimals();
         uint8 decimalsB = ERC20Upgradeable(tokenB).decimals();
-        if (decimalsA < 18) pxA = pxA * (10 ** (18 - uint256(decimalsA)));
-        if (decimalsA > 18) pxA = pxA / (10 ** (uint256(decimalsA) - 18));
-        if (decimalsB < 18) pxB = pxB * (10 ** (18 - uint256(decimalsB)));
-        if (decimalsB > 18) pxB = pxB / (10 ** (uint256(decimalsB) - 18));
+        if (decimalsA < 18) pxA = pxA * (10**(18 - uint256(decimalsA)));
+        if (decimalsA > 18) pxA = pxA / (10**(uint256(decimalsA) - 18));
+        if (decimalsB < 18) pxB = pxB * (10**(18 - uint256(decimalsB)));
+        if (decimalsB > 18) pxB = pxB / (10**(uint256(decimalsB) - 18));
         (uint256 fairResA, uint256 fairResB) = computeFairReserves(
             pool.getBalance(tokenA),
             pool.getBalance(tokenB),
@@ -81,7 +81,14 @@ contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
      * @param pxA Fair price of the first asset
      * @param pxB Fair price of the second asset
      */
-    function computeFairReserves(uint256 resA, uint256 resB, uint256 wA, uint256 wB, uint256 pxA, uint256 pxB) internal pure returns (uint256 fairResA, uint256 fairResB) {
+    function computeFairReserves(
+        uint256 resA,
+        uint256 resB,
+        uint256 wA,
+        uint256 wB,
+        uint256 pxA,
+        uint256 pxB
+    ) internal pure returns (uint256 fairResA, uint256 fairResB) {
         // NOTE: wA + wB = 1 (normalize weights)
         // constant product = resA^wA * resB^wB
         // constraints:

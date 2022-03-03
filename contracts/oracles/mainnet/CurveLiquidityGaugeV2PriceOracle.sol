@@ -25,7 +25,7 @@ contract CurveLiquidityGaugeV2PriceOracle is IPriceOracle, BasePriceOracle {
      * @param underlying The underlying token address for which to get the price (set to zero address for ETH).
      * @return Price denominated in ETH (scaled by 1e18).
      */
-    function price(address underlying) external override view returns (uint) {
+    function price(address underlying) external view override returns (uint256) {
         return _price(underlying);
     }
 
@@ -34,18 +34,18 @@ contract CurveLiquidityGaugeV2PriceOracle is IPriceOracle, BasePriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
         address underlying = ICErc20(address(cToken)).underlying();
         // Comptroller needs prices to be scaled by 1e(36 - decimals)
         // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-        return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
     }
 
     /**
      * @dev Fetches the fair LiquidityGaugeV2/ETH price from Curve, with 18 decimals of precision.
      * @param gauge The LiquidityGaugeV2 contract address for price retrieval.
      */
-    function _price(address gauge) internal view returns (uint) {
+    function _price(address gauge) internal view returns (uint256) {
         return BasePriceOracle(msg.sender).price(ICurveLiquidityGaugeV2(gauge).lp_token());
     }
 }

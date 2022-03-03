@@ -10,7 +10,6 @@ import "./CToken.sol";
  * @author Compound
  */
 contract CEther is CToken, CEtherInterface {
-
     bool public constant override isCEther = true;
 
     /**
@@ -20,16 +19,27 @@ contract CEther is CToken, CEtherInterface {
      * @param name_ ERC-20 name of this token
      * @param symbol_ ERC-20 symbol of this token
      */
-    function initialize(ComptrollerInterface comptroller_,
-                        InterestRateModel interestRateModel_,
-                        string memory name_,
-                        string memory symbol_,
-                        uint256 reserveFactorMantissa_,
-                        uint256 adminFeeMantissa_) public {
+    function initialize(
+        ComptrollerInterface comptroller_,
+        InterestRateModel interestRateModel_,
+        string memory name_,
+        string memory symbol_,
+        uint256 reserveFactorMantissa_,
+        uint256 adminFeeMantissa_
+    ) public {
         // CToken initialize does the bulk of the work
         uint256 initialExchangeRateMantissa_ = 0.2e18;
         uint8 decimals_ = 18;
-        super.initialize(comptroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_, reserveFactorMantissa_, adminFeeMantissa_);
+        super.initialize(
+            comptroller_,
+            interestRateModel_,
+            initialExchangeRateMantissa_,
+            name_,
+            symbol_,
+            decimals_,
+            reserveFactorMantissa_,
+            adminFeeMantissa_
+        );
     }
 
     /*** User Interface ***/
@@ -39,7 +49,7 @@ contract CEther is CToken, CEtherInterface {
      * @dev Reverts upon any failure
      */
     function mint() external payable {
-        (uint err,) = mintInternal(msg.value);
+        (uint256 err, ) = mintInternal(msg.value);
         requireNoError(err, "mint failed");
     }
 
@@ -49,7 +59,7 @@ contract CEther is CToken, CEtherInterface {
      * @param redeemTokens The number of cTokens to redeem into underlying
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function redeem(uint redeemTokens) external returns (uint) {
+    function redeem(uint256 redeemTokens) external returns (uint256) {
         return redeemInternal(redeemTokens);
     }
 
@@ -59,16 +69,16 @@ contract CEther is CToken, CEtherInterface {
      * @param redeemAmount The amount of underlying to redeem
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function redeemUnderlying(uint redeemAmount) external returns (uint) {
+    function redeemUnderlying(uint256 redeemAmount) external returns (uint256) {
         return redeemUnderlyingInternal(redeemAmount);
     }
 
     /**
-      * @notice Sender borrows assets from the protocol to their own address
-      * @param borrowAmount The amount of the underlying asset to borrow
-      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-      */
-    function borrow(uint borrowAmount) external returns (uint) {
+     * @notice Sender borrows assets from the protocol to their own address
+     * @param borrowAmount The amount of the underlying asset to borrow
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function borrow(uint256 borrowAmount) external returns (uint256) {
         return borrowInternal(borrowAmount);
     }
 
@@ -77,7 +87,7 @@ contract CEther is CToken, CEtherInterface {
      * @dev Reverts upon any failure
      */
     function repayBorrow() external payable {
-        (uint err,) = repayBorrowInternal(msg.value);
+        (uint256 err, ) = repayBorrowInternal(msg.value);
         requireNoError(err, "repayBorrow failed");
     }
 
@@ -87,7 +97,7 @@ contract CEther is CToken, CEtherInterface {
      * @param borrower the account with the debt being payed off
      */
     function repayBorrowBehalf(address borrower) external payable {
-        (uint err,) = repayBorrowBehalfInternal(borrower, msg.value);
+        (uint256 err, ) = repayBorrowBehalfInternal(borrower, msg.value);
         requireNoError(err, "repayBorrowBehalf failed");
     }
 
@@ -99,7 +109,7 @@ contract CEther is CToken, CEtherInterface {
      * @param cTokenCollateral The market in which to seize collateral from the borrower
      */
     function liquidateBorrow(address borrower, CToken cTokenCollateral) external payable {
-        (uint err,) = liquidateBorrowInternal(borrower, msg.value, cTokenCollateral);
+        (uint256 err, ) = liquidateBorrowInternal(borrower, msg.value, cTokenCollateral);
         requireNoError(err, "liquidateBorrow failed");
     }
 
@@ -107,7 +117,7 @@ contract CEther is CToken, CEtherInterface {
      * @notice Send Ether to CEther to mint
      */
     receive() external payable {
-        (uint err,) = mintInternal(msg.value);
+        (uint256 err, ) = mintInternal(msg.value);
         requireNoError(err, "mint failed");
     }
 
@@ -118,8 +128,8 @@ contract CEther is CToken, CEtherInterface {
      * @dev This excludes the value of the current message, if any
      * @return The quantity of Ether owned by this contract
      */
-    function getCashPrior() override internal view returns (uint) {
-        (MathError err, uint startingBalance) = subUInt(address(this).balance, msg.value);
+    function getCashPrior() internal view override returns (uint256) {
+        (MathError err, uint256 startingBalance) = subUInt(address(this).balance, msg.value);
         require(err == MathError.NO_ERROR);
         return startingBalance;
     }
@@ -130,39 +140,39 @@ contract CEther is CToken, CEtherInterface {
      * @param amount Amount of Ether being sent
      * @return The actual amount of Ether transferred
      */
-    function doTransferIn(address from, uint amount) override internal returns (uint) {
+    function doTransferIn(address from, uint256 amount) internal override returns (uint256) {
         // Sanity checks
         require(msg.sender == from, "sender mismatch");
         require(msg.value == amount, "value mismatch");
         return amount;
     }
 
-    function doTransferOut(address to, uint amount) override internal {
+    function doTransferOut(address to, uint256 amount) internal override {
         // Send the Ether and revert on failure
-        (bool success, ) = to.call{value:amount}("");
+        (bool success, ) = to.call{ value: amount }("");
         require(success, "doTransferOut failed");
     }
 
-    function requireNoError(uint errCode, string memory message) internal pure {
-        if (errCode == uint(Error.NO_ERROR)) {
+    function requireNoError(uint256 errCode, string memory message) internal pure {
+        if (errCode == uint256(Error.NO_ERROR)) {
             return;
         }
 
         bytes memory fullMessage = new bytes(bytes(message).length + 7);
-        uint i;
+        uint256 i;
 
         for (i = 0; i < bytes(message).length; i++) {
             fullMessage[i] = bytes(message)[i];
         }
 
-        fullMessage[i+0] = bytes1(uint8(32));
-        fullMessage[i+1] = bytes1(uint8(40));
-        fullMessage[i+2] = bytes1(uint8(48 + ( errCode / 1000 )));
-        fullMessage[i+3] = bytes1(uint8(48 + ( errCode / 100 % 10 )));
-        fullMessage[i+4] = bytes1(uint8(48 + ( errCode / 10 % 10 )));
-        fullMessage[i+5] = bytes1(uint8(48 + ( errCode % 10 )));
-        fullMessage[i+6] = bytes1(uint8(41));
+        fullMessage[i + 0] = bytes1(uint8(32));
+        fullMessage[i + 1] = bytes1(uint8(40));
+        fullMessage[i + 2] = bytes1(uint8(48 + (errCode / 1000)));
+        fullMessage[i + 3] = bytes1(uint8(48 + ((errCode / 100) % 10)));
+        fullMessage[i + 4] = bytes1(uint8(48 + ((errCode / 10) % 10)));
+        fullMessage[i + 5] = bytes1(uint8(48 + (errCode % 10)));
+        fullMessage[i + 6] = bytes1(uint8(41));
 
-        require(errCode == uint(Error.NO_ERROR), string(fullMessage));
+        require(errCode == uint256(Error.NO_ERROR), string(fullMessage));
     }
 }

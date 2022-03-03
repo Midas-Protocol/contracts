@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-
 import "../../external/compound/IPriceOracle.sol";
 import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
@@ -19,7 +18,7 @@ contract RecursivePriceOracle is IPriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
         // Get cToken's underlying cToken
         ICToken underlying = ICToken(ICErc20(address(cToken)).underlying());
 
@@ -34,5 +33,4 @@ contract RecursivePriceOracle is IPriceOracle {
         // Fuse cTokens: cToken/token price * token/ETH price = cToken/ETH price
         return (underlying.exchangeRateStored() * comptroller.oracle().getUnderlyingPrice(underlying)) / 1e18;
     }
-
 }

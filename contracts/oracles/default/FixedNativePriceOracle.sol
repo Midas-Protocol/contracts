@@ -19,7 +19,7 @@ contract FixedNativePriceOracle is IPriceOracle, BasePriceOracle {
     /**
      * @dev Returns the price in native token of `underlying` (implements `BasePriceOracle`).
      */
-    function price(address underlying) external override view returns (uint) {
+    function price(address underlying) external view override returns (uint256) {
         return 1e18;
     }
 
@@ -28,11 +28,11 @@ contract FixedNativePriceOracle is IPriceOracle, BasePriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in native token of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
         // Get underlying token address
         address underlying = ICErc20(address(cToken)).underlying();
 
         // Format and return price
-        return uint256(1e36) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+        return uint256(1e36) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
     }
 }

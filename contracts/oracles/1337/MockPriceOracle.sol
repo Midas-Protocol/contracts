@@ -43,27 +43,26 @@ contract MockPriceOracle is IPriceOracle, BasePriceOracle {
      * @dev Internal function returning the price in ETH of `underlying`.
      */
 
-    function random() private view returns (uint) {
-        uint r = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 99;
+    function random() private view returns (uint256) {
+        uint256 r = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 99;
         r = r + 1;
         return r;
     }
 
-    function _price(address underlying) internal view returns (uint) {
+    function _price(address underlying) internal view returns (uint256) {
         // Return 1e18 for WETH
         if (underlying == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) return 1e18;
 
         int256 tokenEthPrice = 1;
-        uint r = random();
+        uint256 r = random();
 
         return ((uint256(tokenEthPrice) * 1e18) / r) / 1e18;
-
     }
 
     /**
      * @dev Returns the price in ETH of `underlying` (implements `BasePriceOracle`).
      */
-    function price(address underlying) external override view returns (uint) {
+    function price(address underlying) external view override returns (uint256) {
         return _price(underlying);
     }
 
@@ -72,7 +71,7 @@ contract MockPriceOracle is IPriceOracle, BasePriceOracle {
      * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
      * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
      */
-    function getUnderlyingPrice(ICToken cToken) external override view returns (uint) {
+    function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
         // Return 1e18 for ETH
         if (cToken.isCEther()) return 1e18;
 
@@ -84,6 +83,9 @@ contract MockPriceOracle is IPriceOracle, BasePriceOracle {
 
         // Format and return price
         uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
-        return underlyingDecimals <= 18 ? uint256(chainlinkPrice) * (10 ** (18 - underlyingDecimals)) : uint256(chainlinkPrice) / (10 ** (underlyingDecimals - 18));
+        return
+            underlyingDecimals <= 18
+                ? uint256(chainlinkPrice) * (10**(18 - underlyingDecimals))
+                : uint256(chainlinkPrice) / (10**(underlyingDecimals - 18));
     }
 }

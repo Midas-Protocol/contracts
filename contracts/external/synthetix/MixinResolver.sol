@@ -6,4 +6,3 @@ import "./AddressResolver.sol";
 contract MixinResolver {
     AddressResolver public resolver;
 }
-
