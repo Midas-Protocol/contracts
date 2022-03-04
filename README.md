@@ -29,8 +29,6 @@ Main repository for Midas Capital's contracts and SDK for interacting with those
  └── hardhat.config.ts                <- hardhat confing
 ```
 
-
-
 ## Dev Workflow
 
 0. Install dependencies
@@ -60,7 +58,6 @@ Main repository for Midas Capital's contracts and SDK for interacting with those
 
 ```
 
-
 ### Gotchas
 
 If you're developing against the contracts, and you're getting errors such as
@@ -87,6 +84,28 @@ This requires a few-step approach:
 4. Re run the node / deployment and export / build
 
 Then, your tests should pass (assuming no other failures)
+
+### Running BSC mainnet fork locally
+
+1. Prepare hardhat config
+
+```shell
+>>> ts-node prepare-chain bsc
+```
+**NOTE**: this command is not idempotent, so running it twice will fail. Do not commit the changes to the hh config 
+
+2. Run node
+
+```shell
+>>> npx hardhat node
+```
+ 
+You can then generate the deployments for bsc (chain id 56)
+
+```shell
+>>> npm run export
+```
+ 
 
 ## Running local node + liquidation bot
 
