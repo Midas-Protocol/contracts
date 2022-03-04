@@ -5,10 +5,10 @@ import "ds-test/test.sol";
 import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
-import {AlpacaERC4626, IAlpacaVault} from "../contracts/compound/strategies/AlpacaERC4626.sol";
-import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
-import {MockERC20} from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
-import {MockVault} from "./mocks/alpaca/MockVault.sol";
+import { AlpacaERC4626, IAlpacaVault } from "../contracts/compound/strategies/AlpacaERC4626.sol";
+import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
+import { MockERC20 } from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
+import { MockVault } from "./mocks/alpaca/MockVault.sol";
 
 contract AlpacaERC4626Test is DSTest {
   using stdStorage for StdStorage;

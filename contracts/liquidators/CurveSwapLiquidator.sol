@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "../external/curve/ICurveRegistry.sol";
 import "../external/curve/ICurvePool.sol";
 
-import "../external/aave/IWETH.sol";
+import "../external/aave/IW_NATIVE.sol";
 
 import "./IRedemptionStrategy.sol";
 
@@ -20,9 +20,9 @@ contract CurveSwapLiquidator is IRedemptionStrategy {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
   /**
-   * @dev WETH contract object.
+   * @dev W_NATIVE contract object.
    */
-  IWETH private constant WETH = IWETH(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+  IW_NATIVE private constant W_NATIVE = IW_NATIVE(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
 
   /**
    * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
@@ -62,10 +62,10 @@ contract CurveSwapLiquidator is IRedemptionStrategy {
     safeApprove(inputToken, address(curvePool), inputAmount);
     outputAmount = curvePool.exchange(i, j, inputAmount, 0);
 
-    // Convert to WETH if ETH because `FuseSafeLiquidator.repayTokenFlashLoan` only supports tokens (not ETH) as output from redemptions (reverts on line 24 because `underlyingCollateral` is the zero address)
+    // Convert to W_NATIVE if ETH because `FuseSafeLiquidator.repayTokenFlashLoan` only supports tokens (not ETH) as output from redemptions (reverts on line 24 because `underlyingCollateral` is the zero address)
     if (address(outputToken) == address(0)) {
-      WETH.deposit{value: outputAmount}();
-      return (IERC20Upgradeable(address(WETH)), outputAmount);
+      W_NATIVE.deposit{ value: outputAmount }();
+      return (IERC20Upgradeable(address(W_NATIVE)), outputAmount);
     }
   }
 }

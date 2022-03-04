@@ -5,17 +5,17 @@ import "ds-test/test.sol";
 import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
-import {AutofarmERC4626, IAutofarmV2} from "../contracts/compound/strategies/AutofarmERC4626.sol";
-import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
-import {MockERC20} from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
-import {MockStrategy} from "./mocks/autofarm/MockStrategy.sol";
-import {MockAutofarmV2} from "./mocks/autofarm/MockAutofarmV2.sol";
-import {IStrategy} from "./mocks/autofarm/IStrategy.sol";
-import {FlywheelCore} from "../contracts/flywheel/FlywheelCore.sol";
-import {FlywheelDynamicRewards} from "../contracts/flywheel/rewards/FlywheelDynamicRewards.sol";
-import {IFlywheelBooster} from "../contracts/flywheel/interfaces/IFlywheelBooster.sol";
-import {IFlywheelCore} from "../contracts/flywheel/interfaces/IFlywheelCore.sol";
-import {Authority} from "@rari-capital/solmate/src/auth/Auth.sol";
+import { AutofarmERC4626, IAutofarmV2 } from "../contracts/compound/strategies/AutofarmERC4626.sol";
+import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
+import { MockERC20 } from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
+import { MockStrategy } from "./mocks/autofarm/MockStrategy.sol";
+import { MockAutofarmV2 } from "./mocks/autofarm/MockAutofarmV2.sol";
+import { IStrategy } from "./mocks/autofarm/IStrategy.sol";
+import { FlywheelCore } from "../contracts/flywheel/FlywheelCore.sol";
+import { FlywheelDynamicRewards } from "../contracts/flywheel/rewards/FlywheelDynamicRewards.sol";
+import { IFlywheelBooster } from "../contracts/flywheel/interfaces/IFlywheelBooster.sol";
+import { IFlywheelCore } from "../contracts/flywheel/interfaces/IFlywheelCore.sol";
+import { Authority } from "@rari-capital/solmate/src/auth/Auth.sol";
 
 contract AutofarmERC4626Test is DSTest {
   using stdStorage for StdStorage;

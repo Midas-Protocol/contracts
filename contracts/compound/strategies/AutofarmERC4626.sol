@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.11;
 
-import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
-import {ERC4626} from "../../utils/ERC4626.sol";
-import {SafeTransferLib} from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
-import {FixedPointMathLib} from "../../utils/FixedPointMathLib.sol";
-import {IFlywheelCore} from "../../flywheel/interfaces/IFlywheelCore.sol";
+import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
+import { ERC4626 } from "../../utils/ERC4626.sol";
+import { SafeTransferLib } from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
+import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { IFlywheelCore } from "../../flywheel/interfaces/IFlywheelCore.sol";
 
 interface IAutofarmV2 {
   function AUTO() external view returns (address);

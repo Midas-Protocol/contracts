@@ -1,11 +1,13 @@
 import { deployments, ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-import { cERC20Conf, Fuse, SupportedChains } from "../dist/esm/src";
+import { Fuse } from "../lib/esm/src";
 import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { setupTest } from "./utils";
 import { Comptroller, FusePoolDirectory, SimplePriceOracle } from "../typechain";
+import { setUpPriceOraclePrices } from "./utils";
+import { getAssetsConf } from "./utils/assets";
+import { chainDeployConfig } from "../chainDeploy";
 
 use(solidity);
 
@@ -15,7 +17,8 @@ describe("FusePoolDirectory", function () {
   let implementationComptroller: Comptroller;
 
   this.beforeEach(async () => {
-    await setupTest();
+    await deployments.fixture(); // ensure you start from a fresh deployments
+    await setUpPriceOraclePrices();
   });
 
   describe("Deploy pool", async function () {
@@ -25,6 +28,7 @@ describe("FusePoolDirectory", function () {
       console.log("alice: ", alice.address);
 
       spo = await ethers.getContract("SimplePriceOracle", alice);
+      const { chainId } = await ethers.provider.getNetwork();
 
       fpdWithSigner = await ethers.getContract("FusePoolDirectory", alice);
       implementationComptroller = await ethers.getContract("Comptroller");
@@ -58,7 +62,7 @@ describe("FusePoolDirectory", function () {
       const pool = pools[1].at(-1);
       expect(pool.comptroller).to.eq(poolAddress);
 
-      const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
+      const sdk = new Fuse(ethers.provider, chainId);
       const allPools = await sdk.contracts.FusePoolDirectory.callStatic.getAllPools();
       const { comptroller, name: _unfiliteredName } = await allPools.filter((p) => p.creator === alice.address).at(-1);
 
@@ -76,29 +80,19 @@ describe("FusePoolDirectory", function () {
       //// DEPLOY ASSETS
       const jrm = await ethers.getContract("JumpRateModel", alice);
 
-      const ethConf: cERC20Conf = {
-        underlying: "0x0000000000000000000000000000000000000000",
-        comptroller: comptroller,
-        interestRateModel: jrm.address,
-        name: "Ethereum",
-        symbol: "ETH",
-        decimals: 8,
-        admin: "true",
-        collateralFactor: 75,
-        reserveFactor: 20,
-        adminFee: 0,
-        bypassPriceFeedCheck: true,
-        initialExchangeRateMantissa: constants.One,
-      };
-      const reserveFactorBN = utils.parseUnits((ethConf.reserveFactor / 100).toString());
-      const adminFeeBN = utils.parseUnits((ethConf.adminFee / 100).toString());
-      const collateralFactorBN = utils.parseUnits((ethConf.collateralFactor / 100).toString());
+      const assets = await getAssetsConf(comptroller, jrm.address, ethers);
+      const nativeAsset = assets.find((a) => a.underlying === constants.AddressZero);
+      const erc20Asset = assets.find((a) => a.underlying != constants.AddressZero);
+
+      const reserveFactorBN = utils.parseUnits((nativeAsset.reserveFactor / 100).toString());
+      const adminFeeBN = utils.parseUnits((nativeAsset.adminFee / 100).toString());
+      const collateralFactorBN = utils.parseUnits((nativeAsset.collateralFactor / 100).toString());
 
       let deployArgs = [
-        ethConf.comptroller,
-        ethConf.interestRateModel,
-        ethConf.name,
-        ethConf.symbol,
+        nativeAsset.comptroller,
+        nativeAsset.interestRateModel,
+        nativeAsset.name,
+        nativeAsset.symbol,
         sdk.chainDeployment.CEtherDelegate.address,
         "0x00",
         reserveFactorBN,
@@ -121,34 +115,23 @@ describe("FusePoolDirectory", function () {
       let receipt: TransactionReceipt = await tx.wait();
       console.log(`Ether deployed successfully with tx hash: ${receipt.transactionHash}`);
 
-      const [totalSupply, totalBorrow, underlyingTokens, underlyingSymbols, whitelistedAdmin] =
-        await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
+      const [, , underlyingTokens, underlyingSymbols] = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(
+        poolAddress
+      );
 
       expect(underlyingTokens[0]).to.eq(constants.AddressZero);
-      expect(underlyingSymbols[0]).to.eq("ETH");
+
+      expect(underlyingSymbols[0]).to.eq(chainDeployConfig[chainId].config.nativeTokenSymbol);
 
       let fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
       expect(fusePoolData[0][1]).to.eq(constants.AddressZero);
 
-      const touchConf: cERC20Conf = {
-        underlying: await ethers.getContract("TOUCHToken", alice).then((c) => c.address),
-        comptroller: comptroller,
-        interestRateModel: jrm.address,
-        name: "Midas TOUCH Token",
-        symbol: "TOUCH",
-        decimals: 18,
-        admin: "true",
-        collateralFactor: 65,
-        reserveFactor: 20,
-        adminFee: 0,
-        bypassPriceFeedCheck: true,
-      };
       deployArgs = [
-        touchConf.underlying,
-        touchConf.comptroller,
-        touchConf.interestRateModel,
-        touchConf.name,
-        touchConf.symbol,
+        erc20Asset.underlying,
+        erc20Asset.comptroller,
+        erc20Asset.interestRateModel,
+        erc20Asset.name,
+        erc20Asset.symbol,
         sdk.chainDeployment.CErc20Delegate.address,
         "0x00",
         reserveFactorBN,
@@ -166,7 +149,7 @@ describe("FusePoolDirectory", function () {
 
       tx = await comptrollerContract._deployMarket(false, constructorData, collateralFactorBN);
       receipt = await tx.wait();
-      console.log(`${touchConf.name} deployed successfully with tx hash: ${receipt.transactionHash}`);
+      console.log(`${erc20Asset.name} deployed successfully with tx hash: ${receipt.transactionHash}`);
 
       fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
       expect(fusePoolData.length).to.eq(2);

@@ -486,7 +486,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       uint256 oraclePriceMantissa = oracle.getUnderlyingPrice(CToken(cToken));
       if (oraclePriceMantissa == 0) return uint256(Error.PRICE_ERROR);
       (MathError mathErr, uint256 borrowBalanceEth) = mulScalarTruncate(
-        Exp({mantissa: oraclePriceMantissa}),
+        Exp({ mantissa: oraclePriceMantissa }),
         accountBorrowsNew
       );
       if (mathErr != MathError.NO_ERROR) return uint256(Error.MATH_ERROR);
@@ -636,7 +636,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       }
 
       /* The liquidator may not repay more than what is allowed by the closeFactor */
-      uint256 maxClose = mul_ScalarTruncate(Exp({mantissa: closeFactorMantissa}), borrowBalance);
+      uint256 maxClose = mul_ScalarTruncate(Exp({ mantissa: closeFactorMantissa }), borrowBalance);
       if (repayAmount > maxClose) {
         return uint256(Error.TOO_MUCH_REPAY);
       }
@@ -970,15 +970,15 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         // semi-opaque error code, we assume NO_ERROR == 0 is invariant between upgrades
         return (Error.SNAPSHOT_ERROR, 0, 0);
       }
-      vars.collateralFactor = Exp({mantissa: markets[address(asset)].collateralFactorMantissa});
-      vars.exchangeRate = Exp({mantissa: vars.exchangeRateMantissa});
+      vars.collateralFactor = Exp({ mantissa: markets[address(asset)].collateralFactorMantissa });
+      vars.exchangeRate = Exp({ mantissa: vars.exchangeRateMantissa });
 
       // Get the normalized price of the asset
       vars.oraclePriceMantissa = oracle.getUnderlyingPrice(asset);
       if (vars.oraclePriceMantissa == 0) {
         return (Error.PRICE_ERROR, 0, 0);
       }
-      vars.oraclePrice = Exp({mantissa: vars.oraclePriceMantissa});
+      vars.oraclePrice = Exp({ mantissa: vars.oraclePriceMantissa });
 
       // Pre-compute a conversion factor from tokens -> ether (normalized price value)
       vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
@@ -1053,8 +1053,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     Exp memory denominator;
     Exp memory ratio;
 
-    numerator = mul_(Exp({mantissa: liquidationIncentiveMantissa}), Exp({mantissa: priceBorrowedMantissa}));
-    denominator = mul_(Exp({mantissa: priceCollateralMantissa}), Exp({mantissa: exchangeRateMantissa}));
+    numerator = mul_(Exp({ mantissa: liquidationIncentiveMantissa }), Exp({ mantissa: priceBorrowedMantissa }));
+    denominator = mul_(Exp({ mantissa: priceCollateralMantissa }), Exp({ mantissa: exchangeRateMantissa }));
     ratio = div_(numerator, denominator);
 
     seizeTokens = mul_ScalarTruncate(ratio, actualRepayAmount);
@@ -1186,13 +1186,13 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
 
     // Check limits
-    Exp memory newCloseFactorExp = Exp({mantissa: newCloseFactorMantissa});
-    Exp memory lowLimit = Exp({mantissa: closeFactorMinMantissa});
+    Exp memory newCloseFactorExp = Exp({ mantissa: newCloseFactorMantissa });
+    Exp memory lowLimit = Exp({ mantissa: closeFactorMinMantissa });
     if (lessThanOrEqualExp(newCloseFactorExp, lowLimit)) {
       return fail(Error.INVALID_CLOSE_FACTOR, FailureInfo.SET_CLOSE_FACTOR_VALIDATION);
     }
 
-    Exp memory highLimit = Exp({mantissa: closeFactorMaxMantissa});
+    Exp memory highLimit = Exp({ mantissa: closeFactorMaxMantissa });
     if (lessThanExp(highLimit, newCloseFactorExp)) {
       return fail(Error.INVALID_CLOSE_FACTOR, FailureInfo.SET_CLOSE_FACTOR_VALIDATION);
     }
@@ -1226,10 +1226,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return fail(Error.MARKET_NOT_LISTED, FailureInfo.SET_COLLATERAL_FACTOR_NO_EXISTS);
     }
 
-    Exp memory newCollateralFactorExp = Exp({mantissa: newCollateralFactorMantissa});
+    Exp memory newCollateralFactorExp = Exp({ mantissa: newCollateralFactorMantissa });
 
     // Check collateral factor <= 0.9
-    Exp memory highLimit = Exp({mantissa: collateralFactorMaxMantissa});
+    Exp memory highLimit = Exp({ mantissa: collateralFactorMaxMantissa });
     if (lessThanExp(highLimit, newCollateralFactorExp)) {
       return fail(Error.INVALID_COLLATERAL_FACTOR, FailureInfo.SET_COLLATERAL_FACTOR_VALIDATION);
     }
@@ -1262,13 +1262,13 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
 
     // Check de-scaled min <= newLiquidationIncentive <= max
-    Exp memory newLiquidationIncentive = Exp({mantissa: newLiquidationIncentiveMantissa});
-    Exp memory minLiquidationIncentive = Exp({mantissa: liquidationIncentiveMinMantissa});
+    Exp memory newLiquidationIncentive = Exp({ mantissa: newLiquidationIncentiveMantissa });
+    Exp memory minLiquidationIncentive = Exp({ mantissa: liquidationIncentiveMinMantissa });
     if (lessThanExp(newLiquidationIncentive, minLiquidationIncentive)) {
       return fail(Error.INVALID_LIQUIDATION_INCENTIVE, FailureInfo.SET_LIQUIDATION_INCENTIVE_VALIDATION);
     }
 
-    Exp memory maxLiquidationIncentive = Exp({mantissa: liquidationIncentiveMaxMantissa});
+    Exp memory maxLiquidationIncentive = Exp({ mantissa: liquidationIncentiveMaxMantissa });
     if (lessThanExp(maxLiquidationIncentive, newLiquidationIncentive)) {
       return fail(Error.INVALID_LIQUIDATION_INCENTIVE, FailureInfo.SET_LIQUIDATION_INCENTIVE_VALIDATION);
     }

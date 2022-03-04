@@ -229,7 +229,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
    * @return The amount of underlying owned by `owner`
    */
   function balanceOfUnderlying(address owner) external override returns (uint256) {
-    Exp memory exchangeRate = Exp({mantissa: exchangeRateCurrent()});
+    Exp memory exchangeRate = Exp({ mantissa: exchangeRateCurrent() });
     (MathError mErr, uint256 balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
     require(mErr == MathError.NO_ERROR, "balance could not be calculated");
     return balance;
@@ -494,21 +494,21 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      *  borrowIndexNew = simpleInterestFactor * borrowIndex + borrowIndex
      */
 
-    Exp memory simpleInterestFactor = mul_(Exp({mantissa: borrowRateMantissa}), blockDelta);
+    Exp memory simpleInterestFactor = mul_(Exp({ mantissa: borrowRateMantissa }), blockDelta);
     uint256 interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, totalBorrows);
     uint256 totalBorrowsNew = add_(interestAccumulated, totalBorrows);
     uint256 totalReservesNew = mul_ScalarTruncateAddUInt(
-      Exp({mantissa: reserveFactorMantissa}),
+      Exp({ mantissa: reserveFactorMantissa }),
       interestAccumulated,
       totalReserves
     );
     uint256 totalFuseFeesNew = mul_ScalarTruncateAddUInt(
-      Exp({mantissa: fuseFeeMantissa}),
+      Exp({ mantissa: fuseFeeMantissa }),
       interestAccumulated,
       totalFuseFees
     );
     uint256 totalAdminFeesNew = mul_ScalarTruncateAddUInt(
-      Exp({mantissa: adminFeeMantissa}),
+      Exp({ mantissa: adminFeeMantissa }),
       interestAccumulated,
       totalAdminFees
     );
@@ -611,7 +611,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
     (vars.mathErr, vars.mintTokens) = divScalarByExpTruncate(
       vars.actualMintAmount,
-      Exp({mantissa: vars.exchangeRateMantissa})
+      Exp({ mantissa: vars.exchangeRateMantissa })
     );
     require(vars.mathErr == MathError.NO_ERROR, "MINT_EXCHANGE_CALCULATION_FAILED");
 
@@ -712,7 +712,10 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
        */
       vars.redeemTokens = redeemTokensIn;
 
-      (vars.mathErr, vars.redeemAmount) = mulScalarTruncate(Exp({mantissa: vars.exchangeRateMantissa}), redeemTokensIn);
+      (vars.mathErr, vars.redeemAmount) = mulScalarTruncate(
+        Exp({ mantissa: vars.exchangeRateMantissa }),
+        redeemTokensIn
+      );
       if (vars.mathErr != MathError.NO_ERROR) {
         return
           failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_EXCHANGE_TOKENS_CALCULATION_FAILED, uint256(vars.mathErr));
@@ -726,7 +729,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
       (vars.mathErr, vars.redeemTokens) = divScalarByExpTruncate(
         redeemAmountIn,
-        Exp({mantissa: vars.exchangeRateMantissa})
+        Exp({ mantissa: vars.exchangeRateMantissa })
       );
       if (vars.mathErr != MathError.NO_ERROR) {
         return
@@ -1230,15 +1233,18 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
       return failOpaque(Error.MATH_ERROR, FailureInfo.LIQUIDATE_SEIZE_BALANCE_DECREMENT_FAILED, uint256(vars.mathErr));
     }
 
-    vars.protocolSeizeTokens = mul_(seizeTokens, Exp({mantissa: protocolSeizeShareMantissa}));
-    vars.feeSeizeTokens = mul_(seizeTokens, Exp({mantissa: feeSeizeShareMantissa}));
+    vars.protocolSeizeTokens = mul_(seizeTokens, Exp({ mantissa: protocolSeizeShareMantissa }));
+    vars.feeSeizeTokens = mul_(seizeTokens, Exp({ mantissa: feeSeizeShareMantissa }));
     vars.liquidatorSeizeTokens = sub_(sub_(seizeTokens, vars.protocolSeizeTokens), vars.feeSeizeTokens);
 
     (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateStoredInternal();
     require(vars.mathErr == MathError.NO_ERROR, "exchange rate math error");
 
-    vars.protocolSeizeAmount = mul_ScalarTruncate(Exp({mantissa: vars.exchangeRateMantissa}), vars.protocolSeizeTokens);
-    vars.feeSeizeAmount = mul_ScalarTruncate(Exp({mantissa: vars.exchangeRateMantissa}), vars.feeSeizeTokens);
+    vars.protocolSeizeAmount = mul_ScalarTruncate(
+      Exp({ mantissa: vars.exchangeRateMantissa }),
+      vars.protocolSeizeTokens
+    );
+    vars.feeSeizeAmount = mul_ScalarTruncate(Exp({ mantissa: vars.exchangeRateMantissa }), vars.feeSeizeTokens);
 
     vars.totalReservesNew = add_(totalReserves, vars.protocolSeizeAmount);
     vars.totalSupplyNew = sub_(sub_(totalSupply, vars.protocolSeizeTokens), vars.feeSeizeTokens);

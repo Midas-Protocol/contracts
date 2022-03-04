@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.11;
 
-import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
-import {Auth, Authority} from "@rari-capital/solmate/src/auth/Auth.sol";
-import {SafeTransferLib} from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
+import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
+import { Auth, Authority } from "@rari-capital/solmate/src/auth/Auth.sol";
+import { SafeTransferLib } from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
 
-import {IFlywheelRewards} from "./interfaces/IFlywheelRewards.sol";
-import {IFlywheelBooster} from "./interfaces/IFlywheelBooster.sol";
+import { IFlywheelRewards } from "./interfaces/IFlywheelRewards.sol";
+import { IFlywheelBooster } from "./interfaces/IFlywheelBooster.sol";
 
 /**
  @title Flywheel Core Incentives Manager
@@ -77,7 +77,7 @@ contract FlywheelCore is Auth {
 
   /// @notice initialize a new market
   function addMarketForRewards(ERC20 market) external requiresAuth {
-    marketState[market] = RewardsState({index: ONE, lastUpdatedTimestamp: uint32(block.timestamp)});
+    marketState[market] = RewardsState({ index: ONE, lastUpdatedTimestamp: uint32(block.timestamp) });
 
     emit AddMarket(address(market));
   }
