@@ -97,6 +97,11 @@ const config: HardhatUserConfig = {
       chainId: 4,
       url: urlOverride || process.env.RINKEBY_ETH_PROVIDER_URL || "http://localhost:8545",
     },
+    kovan: {
+      accounts: { mnemonic },
+      chainId: 42,
+      url: "https://kovan.infura.io/v3/10bc2717e7f14941a3ab5bea569da361",
+    },
     bsc: {
       accounts: { mnemonic },
       chainId: 56,
