@@ -1,7 +1,15 @@
 {
-  "printWidth": 120,
-  "tabWidth": 2,
-  "semicolons": true,
-  "singleQuote": false,
-  "jsxBracketSameLine": false
+  "overrides": [
+    {
+      "files": ["*.sol", "*.ts", "*.tsx", ".js"],
+      "options": {
+        "printWidth": 120,
+        "tabWidth": 2,
+        "useTabs": false,
+        "singleQuote": false,
+        "bracketSpacing": true,
+        "explicitTypes": "always"
+      }
+    }
+  ]
 }

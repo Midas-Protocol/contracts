@@ -36,7 +36,11 @@ contract CurveLpTokenPriceOracleNoRegistry is IPriceOracle, BasePriceOracle, Own
    * @param _lpTokens Array of LP token addresses.
    * @param _pools Array of pool addresses.
    */
-  function initialize(address[] memory _lpTokens, address[] memory _pools, address[][] memory _poolUnderlyings) public initializer {
+  function initialize(
+    address[] memory _lpTokens,
+    address[] memory _pools,
+    address[][] memory _poolUnderlyings
+  ) public initializer {
     __Ownable_init();
     for (uint256 i = 0; i < _lpTokens.length; i++) {
       poolOf[_lpTokens[i]] = _pools[i];
@@ -93,7 +97,11 @@ contract CurveLpTokenPriceOracleNoRegistry is IPriceOracle, BasePriceOracle, Own
    * @param _pool Pool address.
    * @param _underlyings Underlying addresses.
    */
-  function registerPool(address _lpToken, address _pool, address[] memory _underlyings) external onlyOwner {
+  function registerPool(
+    address _lpToken,
+    address _pool,
+    address[] memory _underlyings
+  ) external onlyOwner {
     address pool = poolOf[_lpToken];
     require(pool == address(0), "This LP token is already registered.");
     poolOf[_lpToken] = _pool;
