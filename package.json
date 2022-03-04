@@ -20,7 +20,10 @@
     "export": "hardhat export --export-all ./deployments.json",
     "build": "hardhat compile && npm run build:sdk",
     "build:sdk": "tsc -p tsconfig-sdk.json && tsc -p tsconfig-cjs.json",
-    "clean": "hardhat clean && rm -rf lib"
+    "clean": "hardhat clean && rm -rf lib",
+    "prettier:sol": "prettier --write 'contracts/**/*.sol'",
+    "prettier:ts": "prettier --write 'chainDeploy/**/*.ts' 'deploy/**/*.ts' 'tasks/**/*.ts' 'test/**/*.ts'",
+    "prettier": "npm run prettier:sol && npm run prettier:ts"
   },
   "keywords": [],
   "author": "Midas Capital",
@@ -53,6 +56,9 @@
     "@types/bad-words": "^3.0.1",
     "@uniswap/v3-core": "^1.0.0",
     "@uniswap/v3-periphery": "github:Uniswap/uniswap-v3-periphery#pull/96/head",
-    "bad-words": "^3.0.4"
+    "bad-words": "^3.0.4",
+    "prettier": "2.5.1",
+    "prettier-plugin-solidity": "1.0.0-beta.19",
+    "lint-staged": "12.2.1"
   }
 }

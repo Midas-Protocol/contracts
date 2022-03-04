@@ -7,6 +7,7 @@ pragma solidity >=0.8.0;
  * CTokens should reference this contract as their comptroller.
  */
 interface IUnitroller {
-    function _setPendingImplementation(address newPendingImplementation) external returns (uint);
-    function _setPendingAdmin(address newPendingAdmin) external returns (uint);
+  function _setPendingImplementation(address newPendingImplementation) external returns (uint256);
+
+  function _setPendingAdmin(address newPendingAdmin) external returns (uint256);
 }
