@@ -3,7 +3,7 @@ import { constants, Contract, providers, utils } from "ethers";
 import { deployments, ethers } from "hardhat";
 import { createPool, setUpPriceOraclePrices } from "./utils";
 import { assetInPool, deployAssets, getPoolAssets, getPoolIndex } from "./utils/pool";
-import { Fuse, USDPricedFuseAsset } from "../lib/esm/src";
+import { Fuse, USDPricedFuseAsset } from "../dist/esm/src";
 import { MasterPriceOracle, SimplePriceOracle } from "../typechain";
 import { chainDeployConfig } from "../chainDeploy";
 
