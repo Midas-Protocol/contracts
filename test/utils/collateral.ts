@@ -1,5 +1,5 @@
 import { BigNumber, constants, Contract, providers, utils } from "ethers";
-import { ERC20Abi, Fuse, USDPricedFuseAsset } from "../../lib/esm/src";
+import { ERC20Abi, Fuse, USDPricedFuseAsset } from "../../dist/esm/src";
 import { assetInPool, DeployedAsset, getPoolIndex } from "./pool";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
