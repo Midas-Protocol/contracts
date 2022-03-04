@@ -71,8 +71,8 @@ contract PluginRewardsDistributorDelegate is RewardsDistributorDelegateStorageV1
     if (compAccrued_ > 0) {
       comp.transferFrom(cToken, address(this), compAccrued_);
       uint256 supplyTokens = CToken(cToken).totalSupply();
-      Double memory ratio = supplyTokens > 0 ? fraction(compAccrued_, supplyTokens) : Double({mantissa: 0});
-      Double memory index = add_(Double({mantissa: supplyState.index}), ratio);
+      Double memory ratio = supplyTokens > 0 ? fraction(compAccrued_, supplyTokens) : Double({ mantissa: 0 });
+      Double memory index = add_(Double({ mantissa: supplyState.index }), ratio);
       compSupplyState[cToken] = CompMarketState({
         index: safe224(index.mantissa, "new index exceeds 224 bits"),
         block: 0
@@ -86,7 +86,7 @@ contract PluginRewardsDistributorDelegate is RewardsDistributorDelegateStorageV1
    */
   function _addMarketForRewards(address cToken) public {
     require(msg.sender == admin, "only admin can set comp speed");
-    compSupplyState[cToken] = CompMarketState({index: compInitialIndex, block: 0});
+    compSupplyState[cToken] = CompMarketState({ index: compInitialIndex, block: 0 });
 
     // Add to allMarkets array
     allMarkets.push(CToken(cToken));
@@ -99,8 +99,8 @@ contract PluginRewardsDistributorDelegate is RewardsDistributorDelegateStorageV1
    */
   function distributeSupplierComp(address cToken, address supplier) internal {
     CompMarketState storage supplyState = compSupplyState[cToken];
-    Double memory supplyIndex = Double({mantissa: supplyState.index});
-    Double memory supplierIndex = Double({mantissa: compSupplierIndex[cToken][supplier]});
+    Double memory supplyIndex = Double({ mantissa: supplyState.index });
+    Double memory supplierIndex = Double({ mantissa: compSupplierIndex[cToken][supplier] });
     compSupplierIndex[cToken][supplier] = supplyIndex.mantissa;
 
     if (supplierIndex.mantissa == 0 && supplyIndex.mantissa > 0) {

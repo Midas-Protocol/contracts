@@ -1,20 +1,24 @@
 import { constants, providers } from "ethers";
 import { DeployFunction } from "hardhat-deploy/types";
-import { chainDeployConfig, deploy1337, deploy97 } from "../chainDeploy";
-import { ChainDeployConfig } from "../chainDeploy/helper";
+
+import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
+import { deployIRMs } from "../chainDeploy/helpers";
+import { deployFuseSafeLiquidator } from "../chainDeploy/helpers/liquidator";
 
 export const SALT = "ilovemidas";
 
 const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
   const chainId = await getChainId();
+  console.log("chainId: ", chainId);
   const { deployer, alice, bob } = await getNamedAccounts();
   console.log("deployer: ", deployer);
 
-  const chainDeployParams: ChainDeployConfig = chainDeployConfig[chainId];
-  console.log("chainDeployParams: ", chainDeployParams);
-  if (!chainDeployConfig) {
+  if (!chainDeployConfig[chainId]) {
     throw new Error(`Config invalid for ${chainId}`);
   }
+  const { config: chainDeployParams, deployFunc }: { config: ChainDeployConfig; deployFunc: any } =
+    chainDeployConfig[chainId];
+  console.log("chainDeployParams: ", chainDeployParams);
 
   ////
   //// COMPOUND CORE CONTRACTS
@@ -58,40 +62,6 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   ////
 
   ////
-  //// IRM MODELS
-  //  https://etherscan.io/address/0xd956188795ca6F4A74092ddca33E0Ea4cA3a1395#code
-  dep = await deployments.deterministic("JumpRateModel", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [
-      "20000000000000000", // baseRatePerYear
-      "180000000000000000", // multiplierPerYear
-      "4000000000000000000", //jumpMultiplierPerYear
-      "800000000000000000", // kink
-    ],
-    log: true,
-  });
-
-  const jrm = await dep.deploy();
-  console.log("JumpRateModel: ", jrm.address);
-
-  // taken from WhitePaperInterestRateModel used for cETH
-  // https://etherscan.io/address/0x0c3f8df27e1a00b47653fde878d68d35f00714c0#code
-  dep = await deployments.deterministic("WhitePaperInterestRateModel", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [
-      "20000000000000000", // baseRatePerYear
-      "100000000000000000", // multiplierPerYear
-    ],
-    log: true,
-  });
-
-  const wprm = await dep.deploy();
-  console.log("WhitePaperInterestRateModel: ", wprm.address);
-  ////
-
-  ////
   //// FUSE CORE CONTRACTS
   dep = await deployments.deterministic("FusePoolDirectory", {
     from: deployer,
@@ -111,15 +81,6 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   } else {
     console.log("FusePoolDirectory already initialized");
   }
-
-  dep = await deployments.deterministic("FuseSafeLiquidator", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [],
-    log: true,
-  });
-  const fsl = await dep.deploy();
-  console.log("FuseSafeLiquidator: ", fsl.address);
 
   dep = await deployments.deterministic("FuseFeeDistributor", {
     from: deployer,
@@ -150,12 +111,13 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     [true]
   );
   await tx.wait();
+  console.log("FuseFeeDistributor comptroller whitelist set", tx.hash);
 
   dep = await deployments.deterministic("FusePoolLens", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
-    log: true
+    log: true,
   });
   const fpl = await dep.deploy();
   console.log("FusePoolLens: ", fpl.address);
@@ -165,7 +127,13 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     tx = await fusePoolLens.initialize(
       fusePoolDirectory.address,
       chainDeployParams.nativeTokenName,
-      chainDeployParams.nativeTokenSymbol
+      chainDeployParams.nativeTokenSymbol,
+      chainDeployParams.hardcoded.map((h) => h.address),
+      chainDeployParams.hardcoded.map((h) => h.name),
+      chainDeployParams.hardcoded.map((h) => h.symbol),
+      chainDeployParams.uniswapData.map((u) => u.lpName),
+      chainDeployParams.uniswapData.map((u) => u.lpSymbol),
+      chainDeployParams.uniswapData.map((u) => u.lpDisplayName)
     );
     await tx.wait();
     console.log("FusePoolLens initialized", tx.hash);
@@ -236,24 +204,21 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   console.log("MasterPriceOracle: ", masterPO.address);
 
   ////
-  //// CHAIN SPECIFIC DEPLOYMENT
-  console.log("Running deployment for chain: ", chainId);
-  if (chainId === "1337") {
-    await deploy1337({ ethers, getNamedAccounts, deployments });
-  } else if (chainId === "97") {
-    await deploy97({ ethers, getNamedAccounts, deployments });
-  }
+  //// IRM MODELS
+  await deployIRMs({ ethers, getNamedAccounts, deployments, deployConfig: chainDeployParams });
+  ////
+
+  //// Liquidator
+  await deployFuseSafeLiquidator({ ethers, getNamedAccounts, deployments, deployConfig: chainDeployParams });
+  ///
 
   ////
-  //// Deploy CErc20PluginDelegate
-  dep = await deployments.deterministic("CErc20PluginDelegate", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [],
-    log: true,
-  });
-  const pluginDelegate = await dep.deploy();
-  console.log("pluginDelegate:", pluginDelegate.address);
+  //// CHAIN SPECIFIC DEPLOYMENT
+  console.log("Running deployment for chain: ", chainId);
+  if (deployFunc) {
+    await deployFunc({ ethers, getNamedAccounts, deployments });
+  }
+  ////
 };
 
 export default func;

@@ -54,9 +54,58 @@ Main repository for Midas Capital's contracts and SDK for interacting with those
 4. Run tests
 
 ```shell
-# must have the local hardhat node running in another shell
->>> npx hardhat test --network localhost
+>>> npx hardhat test
+
 ```
+
+### Gotchas
+
+If you're developing against the contracts, and you're getting errors such as
+
+```shell
+ Error: Deployment and registration of new Fuse pool failed: Transaction reverted: function returned an unexpected amount of data
+```
+
+It is likely because the address of the `FuseFeeDistributor` has changed. Since it is hardcoded into one of the main 
+contracts that many others inherit from (all the Comptroller stuff), any calls to the old contract address will fail.
+
+Bottom line: whenever you make changes to the `FuseFeeDistributor`, make sure that this contract address is updated in the two
+main files that hardcode it:
+
+- `ComptrollerStorage.sol`
+- `CTokenInterfaces.sol`
+
+
+This requires a few-step approach:
+
+1. Make your desired changes to the contracts
+2. Deploy them locally and run export
+3. Get the new FFD address and replace it where needed (if it all changed -- if its source code changed, so will its bytecode, and thus its deployed contract address)
+4. Re run the node / deployment and export / build
+
+Then, your tests should pass (assuming no other failures)
+
+### Running BSC mainnet fork locally
+
+1. Prepare hardhat config
+
+```shell
+>>> ts-node prepare-chain bsc
+```
+**NOTE**: this command is not idempotent, so running it twice will fail. Do not commit the changes to the hh config 
+
+2. Run node
+
+```shell
+>>> npx hardhat node
+```
+ 
+You can then generate the deployments for bsc (chain id 56)
+
+```shell
+>>> npm run export
+```
+ 
 
 ## Running local node + liquidation bot
 

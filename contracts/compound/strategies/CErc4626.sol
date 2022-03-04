@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.11;
 
-import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
-import {ERC4626} from "../../utils/ERC4626.sol";
-import {SafeTransferLib} from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
+import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
+import { ERC4626 } from "../../utils/ERC4626.sol";
+import { SafeTransferLib } from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
 
-import {LibFuse} from "../../utils/libcompound/LibFuse.sol";
-import {CERC20} from "../../utils/libcompound/interfaces/CERC20.sol";
+import { LibFuse } from "../../utils/libcompound/LibFuse.sol";
+import { CERC20 } from "../../utils/libcompound/interfaces/CERC20.sol";
 
 contract CompoundERC4626 is ERC4626 {
   using LibFuse for CERC20;

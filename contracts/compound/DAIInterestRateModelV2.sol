@@ -19,7 +19,7 @@ contract DAIInterestRateModelV2 is JumpRateModel {
    * @notice The additional margin per block separating the base borrow rate from the roof (2% / block).
    * Note that this value has been increased from the original value of 0.05% per block.
    */
-  uint256 public constant gapPerBlock = 2e16 / blocksPerYear;
+  uint256 public gapPerBlock = 2e16 / blocksPerYear;
 
   /**
    * @notice The assumed (1 - reserve factor) used to calculate the minimum borrow rate (reserve factor = 0.05)
@@ -31,17 +31,20 @@ contract DAIInterestRateModelV2 is JumpRateModel {
 
   /**
    * @notice Construct an interest rate model
+   * @param _blocksPerYear The approximate number of blocks per year
    * @param jumpMultiplierPerYear The multiplierPerBlock after hitting a specified utilization point
    * @param kink_ The utilization point at which the jump multiplier is applied
    * @param pot_ The address of the Dai pot (where DSR is earned)
    * @param jug_ The address of the Dai jug (where SF is kept)
    */
   constructor(
+    uint256 _blocksPerYear,
     uint256 jumpMultiplierPerYear,
     uint256 kink_,
     address pot_,
     address jug_
-  ) JumpRateModel(0, 0, jumpMultiplierPerYear, kink_) {
+  ) JumpRateModel(_blocksPerYear, 0, 0, jumpMultiplierPerYear, kink_) {
+    blocksPerYear = _blocksPerYear;
     pot = PotLike(pot_);
     jug = JugLike(jug_);
     poke();
@@ -77,11 +80,7 @@ contract DAIInterestRateModelV2 is JumpRateModel {
    * @return The Dai savings rate per block (as a percentage, and scaled by 1e18)
    */
   function dsrPerBlock() public view returns (uint256) {
-    return
-      pot
-      .dsr()
-      .sub(1e27) // scaled 1e27 aka RAY, and includes an extra "ONE" before subraction
-      .div(1e9).mul(15); // descale to 1e18 // 15 seconds per block
+    return pot.dsr().sub(1e27).div(1e9).mul(15); // scaled 1e27 aka RAY, and includes an extra "ONE" before subraction // descale to 1e18 // 15 seconds per block
   }
 
   /**

@@ -90,11 +90,11 @@ contract ExponentialNoError {
   }
 
   function add_(Exp memory a, Exp memory b) internal pure returns (Exp memory) {
-    return Exp({mantissa: add_(a.mantissa, b.mantissa)});
+    return Exp({ mantissa: add_(a.mantissa, b.mantissa) });
   }
 
   function add_(Double memory a, Double memory b) internal pure returns (Double memory) {
-    return Double({mantissa: add_(a.mantissa, b.mantissa)});
+    return Double({ mantissa: add_(a.mantissa, b.mantissa) });
   }
 
   function add_(uint256 a, uint256 b) internal pure returns (uint256) {
@@ -112,11 +112,11 @@ contract ExponentialNoError {
   }
 
   function sub_(Exp memory a, Exp memory b) internal pure returns (Exp memory) {
-    return Exp({mantissa: sub_(a.mantissa, b.mantissa)});
+    return Exp({ mantissa: sub_(a.mantissa, b.mantissa) });
   }
 
   function sub_(Double memory a, Double memory b) internal pure returns (Double memory) {
-    return Double({mantissa: sub_(a.mantissa, b.mantissa)});
+    return Double({ mantissa: sub_(a.mantissa, b.mantissa) });
   }
 
   function sub_(uint256 a, uint256 b) internal pure returns (uint256) {
@@ -133,11 +133,11 @@ contract ExponentialNoError {
   }
 
   function mul_(Exp memory a, Exp memory b) internal pure returns (Exp memory) {
-    return Exp({mantissa: mul_(a.mantissa, b.mantissa) / expScale});
+    return Exp({ mantissa: mul_(a.mantissa, b.mantissa) / expScale });
   }
 
   function mul_(Exp memory a, uint256 b) internal pure returns (Exp memory) {
-    return Exp({mantissa: mul_(a.mantissa, b)});
+    return Exp({ mantissa: mul_(a.mantissa, b) });
   }
 
   function mul_(uint256 a, Exp memory b) internal pure returns (uint256) {
@@ -145,11 +145,11 @@ contract ExponentialNoError {
   }
 
   function mul_(Double memory a, Double memory b) internal pure returns (Double memory) {
-    return Double({mantissa: mul_(a.mantissa, b.mantissa) / doubleScale});
+    return Double({ mantissa: mul_(a.mantissa, b.mantissa) / doubleScale });
   }
 
   function mul_(Double memory a, uint256 b) internal pure returns (Double memory) {
-    return Double({mantissa: mul_(a.mantissa, b)});
+    return Double({ mantissa: mul_(a.mantissa, b) });
   }
 
   function mul_(uint256 a, Double memory b) internal pure returns (uint256) {
@@ -174,11 +174,11 @@ contract ExponentialNoError {
   }
 
   function div_(Exp memory a, Exp memory b) internal pure returns (Exp memory) {
-    return Exp({mantissa: div_(mul_(a.mantissa, expScale), b.mantissa)});
+    return Exp({ mantissa: div_(mul_(a.mantissa, expScale), b.mantissa) });
   }
 
   function div_(Exp memory a, uint256 b) internal pure returns (Exp memory) {
-    return Exp({mantissa: div_(a.mantissa, b)});
+    return Exp({ mantissa: div_(a.mantissa, b) });
   }
 
   function div_(uint256 a, Exp memory b) internal pure returns (uint256) {
@@ -186,11 +186,11 @@ contract ExponentialNoError {
   }
 
   function div_(Double memory a, Double memory b) internal pure returns (Double memory) {
-    return Double({mantissa: div_(mul_(a.mantissa, doubleScale), b.mantissa)});
+    return Double({ mantissa: div_(mul_(a.mantissa, doubleScale), b.mantissa) });
   }
 
   function div_(Double memory a, uint256 b) internal pure returns (Double memory) {
-    return Double({mantissa: div_(a.mantissa, b)});
+    return Double({ mantissa: div_(a.mantissa, b) });
   }
 
   function div_(uint256 a, Double memory b) internal pure returns (uint256) {
@@ -211,6 +211,6 @@ contract ExponentialNoError {
   }
 
   function fraction(uint256 a, uint256 b) internal pure returns (Double memory) {
-    return Double({mantissa: div_(mul_(a, doubleScale), b)});
+    return Double({ mantissa: div_(mul_(a, doubleScale), b) });
   }
 }

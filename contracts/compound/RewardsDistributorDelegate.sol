@@ -170,7 +170,7 @@ contract RewardsDistributorDelegate is RewardsDistributorDelegateStorageV1, Expo
     uint256 currentCompSpeed = compBorrowSpeeds[address(cToken)];
     if (currentCompSpeed != 0) {
       // note that COMP speed could be set to 0 to halt liquidity rewards for a market
-      Exp memory borrowIndex = Exp({mantissa: cToken.borrowIndex()});
+      Exp memory borrowIndex = Exp({ mantissa: cToken.borrowIndex() });
       updateCompBorrowIndex(address(cToken), borrowIndex);
     } else if (compSpeed != 0) {
       // Make sure cToken is listed and distributor is added
@@ -211,8 +211,8 @@ contract RewardsDistributorDelegate is RewardsDistributorDelegateStorageV1, Expo
     if (deltaBlocks > 0 && supplySpeed > 0) {
       uint256 supplyTokens = CToken(cToken).totalSupply();
       uint256 compAccrued_ = mul_(deltaBlocks, supplySpeed);
-      Double memory ratio = supplyTokens > 0 ? fraction(compAccrued_, supplyTokens) : Double({mantissa: 0});
-      Double memory index = add_(Double({mantissa: supplyState.index}), ratio);
+      Double memory ratio = supplyTokens > 0 ? fraction(compAccrued_, supplyTokens) : Double({ mantissa: 0 });
+      Double memory index = add_(Double({ mantissa: supplyState.index }), ratio);
       compSupplyState[cToken] = CompMarketState({
         index: safe224(index.mantissa, "new index exceeds 224 bits"),
         block: safe32(blockNumber, "block number exceeds 32 bits")
@@ -234,8 +234,8 @@ contract RewardsDistributorDelegate is RewardsDistributorDelegateStorageV1, Expo
     if (deltaBlocks > 0 && borrowSpeed > 0) {
       uint256 borrowAmount = div_(CToken(cToken).totalBorrows(), marketBorrowIndex);
       uint256 compAccrued_ = mul_(deltaBlocks, borrowSpeed);
-      Double memory ratio = borrowAmount > 0 ? fraction(compAccrued_, borrowAmount) : Double({mantissa: 0});
-      Double memory index = add_(Double({mantissa: borrowState.index}), ratio);
+      Double memory ratio = borrowAmount > 0 ? fraction(compAccrued_, borrowAmount) : Double({ mantissa: 0 });
+      Double memory index = add_(Double({ mantissa: borrowState.index }), ratio);
       compBorrowState[cToken] = CompMarketState({
         index: safe224(index.mantissa, "new index exceeds 224 bits"),
         block: safe32(blockNumber, "block number exceeds 32 bits")
@@ -252,8 +252,8 @@ contract RewardsDistributorDelegate is RewardsDistributorDelegateStorageV1, Expo
    */
   function distributeSupplierComp(address cToken, address supplier) internal {
     CompMarketState storage supplyState = compSupplyState[cToken];
-    Double memory supplyIndex = Double({mantissa: supplyState.index});
-    Double memory supplierIndex = Double({mantissa: compSupplierIndex[cToken][supplier]});
+    Double memory supplyIndex = Double({ mantissa: supplyState.index });
+    Double memory supplierIndex = Double({ mantissa: compSupplierIndex[cToken][supplier] });
     compSupplierIndex[cToken][supplier] = supplyIndex.mantissa;
 
     if (supplierIndex.mantissa == 0 && supplyIndex.mantissa > 0) {
@@ -280,8 +280,8 @@ contract RewardsDistributorDelegate is RewardsDistributorDelegateStorageV1, Expo
     Exp memory marketBorrowIndex
   ) internal {
     CompMarketState storage borrowState = compBorrowState[cToken];
-    Double memory borrowIndex = Double({mantissa: borrowState.index});
-    Double memory borrowerIndex = Double({mantissa: compBorrowerIndex[cToken][borrower]});
+    Double memory borrowIndex = Double({ mantissa: borrowState.index });
+    Double memory borrowerIndex = Double({ mantissa: compBorrowerIndex[cToken][borrower] });
     compBorrowerIndex[cToken][borrower] = borrowIndex.mantissa;
 
     if (borrowerIndex.mantissa > 0) {
@@ -315,7 +315,7 @@ contract RewardsDistributorDelegate is RewardsDistributorDelegateStorageV1, Expo
    */
   function flywheelPreBorrowerAction(address cToken, address borrower) external {
     if (compBorrowState[cToken].index > 0) {
-      Exp memory borrowIndex = Exp({mantissa: CToken(cToken).borrowIndex()});
+      Exp memory borrowIndex = Exp({ mantissa: CToken(cToken).borrowIndex() });
       updateCompBorrowIndex(cToken, borrowIndex);
       distributeBorrowerComp(cToken, borrower, borrowIndex);
     }
@@ -392,7 +392,7 @@ contract RewardsDistributorDelegate is RewardsDistributorDelegateStorageV1, Expo
     for (uint256 i = 0; i < cTokens.length; i++) {
       CToken cToken = cTokens[i];
       if (borrowers == true && compBorrowState[address(cToken)].index > 0) {
-        Exp memory borrowIndex = Exp({mantissa: cToken.borrowIndex()});
+        Exp memory borrowIndex = Exp({ mantissa: cToken.borrowIndex() });
         updateCompBorrowIndex(address(cToken), borrowIndex);
         for (uint256 j = 0; j < holders.length; j++) {
           distributeBorrowerComp(address(cToken), holders[j], borrowIndex);

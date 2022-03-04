@@ -5,12 +5,12 @@ import "ds-test/test.sol";
 import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
-import {BeefyERC4626, IBeefyVault} from "../contracts/compound/strategies/BeefyERC4626.sol";
-import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
-import {MockERC20} from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
-import {MockStrategy} from "./mocks/beefy/MockStrategy.sol";
-import {MockVault} from "./mocks/beefy/MockVault.sol";
-import {IStrategy} from "./mocks/beefy/IStrategy.sol";
+import { BeefyERC4626, IBeefyVault } from "../contracts/compound/strategies/BeefyERC4626.sol";
+import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
+import { MockERC20 } from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
+import { MockStrategy } from "./mocks/beefy/MockStrategy.sol";
+import { MockVault } from "./mocks/beefy/MockVault.sol";
+import { IStrategy } from "./mocks/beefy/IStrategy.sol";
 
 contract BeefyERC4626Test is DSTest {
   using stdStorage for StdStorage;

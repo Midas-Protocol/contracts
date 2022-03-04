@@ -27,16 +27,49 @@ contract FusePoolLens is Initializable {
   function initialize(
     FusePoolDirectory _directory,
     string memory _name,
-    string memory _symbol
+    string memory _symbol,
+    address[] memory _hardcodedAddresses,
+    string[] memory _hardcodedNames,
+    string[] memory _hardcodedSymbols,
+    string[] memory _uniswapLPTokenNames,
+    string[] memory _uniswapLPTokenSymbols,
+    string[] memory _uniswapLPTokenDisplayNames
   ) public initializer {
     require(address(_directory) != address(0), "FusePoolDirectory instance cannot be the zero address.");
+
     directory = _directory;
     name = _name;
     symbol = _symbol;
+    for (uint256 i = 0; i < _hardcodedAddresses.length; i++) {
+      hardcoded[_hardcodedAddresses[i]] = TokenData({ name: _hardcodedNames[i], symbol: _hardcodedSymbols[i] });
+    }
+
+    for (uint256 i = 0; i < _uniswapLPTokenNames.length; i++) {
+      uniswapData.push(
+        UniswapData({
+          name: _uniswapLPTokenNames[i],
+          symbol: _uniswapLPTokenSymbols[i],
+          displayName: _uniswapLPTokenDisplayNames[i]
+        })
+      );
+    }
   }
 
   string public name;
   string public symbol;
+
+  struct TokenData {
+    string name;
+    string symbol;
+  }
+  mapping(address => TokenData) hardcoded;
+
+  struct UniswapData {
+    string name; // ie "Uniswap V2" or "SushiSwap LP Token"
+    string symbol; // ie "UNI-V2" or "SLP"
+    string displayName; // ie "SushiSwap" or "Uniswap"
+  }
+  UniswapData[] uniswapData;
 
   /**
    * @notice `FusePoolDirectory` contract object.
@@ -175,7 +208,7 @@ contract FusePoolLens is Initializable {
 
       if (cToken.isCEther()) {
         underlyingTokens[i] = address(0);
-        underlyingSymbols[i] = "ETH";
+        underlyingSymbols[i] = symbol;
       } else {
         underlyingTokens[i] = ICErc20(address(cToken)).underlying();
         (, underlyingSymbols[i]) = getTokenNameAndSymbol(underlyingTokens[i]);
@@ -307,34 +340,34 @@ contract FusePoolLens is Initializable {
    * @return The `name` and `symbol`.
    */
   function getTokenNameAndSymbol(address token) internal view returns (string memory, string memory) {
-    // MKR is a DSToken and uses bytes32
-    if (token == 0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2) return ("Maker", "MKR");
-    if (token == 0xB8c77482e45F1F44dE1745F52C74426C631bDD52) return ("BNB", "BNB");
+    // i.e. MKR is a DSToken and uses bytes32
+    if (bytes(hardcoded[token].symbol).length != 0) {
+      return (hardcoded[token].name, hardcoded[token].symbol);
+    }
 
     // Get name and symbol from token contract
     ERC20Upgradeable tokenContract = ERC20Upgradeable(token);
-    string memory name = tokenContract.name();
-    string memory symbol = tokenContract.symbol();
+    string memory _name = tokenContract.name();
+    string memory _symbol = tokenContract.symbol();
 
     // Check for Uniswap V2/SushiSwap pair
-    try IUniswapV2Pair(token).token0() returns (address _token0) {
-      bool isUniswapToken = keccak256(abi.encodePacked(name)) == keccak256(abi.encodePacked("Uniswap V2")) &&
-        keccak256(abi.encodePacked(symbol)) == keccak256(abi.encodePacked("UNI-V2"));
-      bool isSushiSwapToken = !isUniswapToken &&
-        keccak256(abi.encodePacked(name)) == keccak256(abi.encodePacked("SushiSwap LP Token")) &&
-        keccak256(abi.encodePacked(symbol)) == keccak256(abi.encodePacked("SLP"));
+    for (uint256 i = 0; i < uniswapData.length; i++) {
+      try IUniswapV2Pair(token).token0() returns (address _token0) {
+        UniswapData memory ud = uniswapData[i];
+        bool isUniswapToken = keccak256(abi.encodePacked(_name)) == keccak256(abi.encodePacked(ud.name)) &&
+          keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked(ud.symbol));
 
-      if (isUniswapToken || isSushiSwapToken) {
-        ERC20Upgradeable token0 = ERC20Upgradeable(_token0);
-        ERC20Upgradeable token1 = ERC20Upgradeable(IUniswapV2Pair(token).token1());
-        name = string(
-          abi.encodePacked(isSushiSwapToken ? "SushiSwap " : "Uniswap ", token0.symbol(), "/", token1.symbol(), " LP")
-        );
-        symbol = string(abi.encodePacked(token0.symbol(), "-", token1.symbol()));
-      }
-    } catch {}
+        if (isUniswapToken) {
+          ERC20Upgradeable token0 = ERC20Upgradeable(_token0);
+          ERC20Upgradeable token1 = ERC20Upgradeable(IUniswapV2Pair(token).token1());
+          _name = string(abi.encodePacked(ud.displayName, " ", token0.symbol(), "/", token1.symbol(), " LP")); // add space
+          _symbol = string(abi.encodePacked(token0.symbol(), "-", token1.symbol()));
+          return (_name, _symbol);
+        }
+      } catch {}
+    }
 
-    return (name, symbol);
+    return (_name, _symbol);
   }
 
   /**

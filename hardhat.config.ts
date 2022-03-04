@@ -26,6 +26,9 @@ const mnemonic =
   "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
 
 const config: HardhatUserConfig = {
+  mocha: {
+    timeout: 120_000,
+  },
   tenderly: {
     username: "carlomazzaferro",
     project: "midas-contracts",
@@ -51,20 +54,6 @@ const config: HardhatUserConfig = {
         },
       },
     ],
-    overrides: {
-      "contracts/FusePoolLens.sol": {
-        version: "0.8.11",
-        settings: {
-          optimizer: {
-            // TODO when the subgraphs are implemented, remove the FusePoolAsset struct that makes the compiler throw
-            // CompilerError: Stack too deep when compiling inline assembly: Variable headStart is 1 slot(s) too deep inside the stack
-            // when enabled is true
-            enabled: false,
-            runs: 200,
-          },
-        },
-      },
-    },
   },
   external: {
     contracts: [
@@ -113,6 +102,14 @@ const config: HardhatUserConfig = {
       chainId: 56,
       url: urlOverride || process.env.BSC_PROVIDER_URL || "https://bsc-dataseed.binance.org/",
     },
+    bscfork: {
+      accounts: { mnemonic },
+      chainId: 56,
+      gasPrice: 20e9,
+      gas: 7500000,
+      allowUnlimitedContractSize: true,
+      url: "http://localhost:8545",
+    },
     chapel: {
       accounts: { mnemonic },
       chainId: 97,
@@ -122,6 +119,11 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
       chainId: 1,
       url: "https://eth-mainnet.alchemyapi.io/v2/2Mt-6brbJvTA4w9cpiDtnbTo6qOoySnN",
+    },
+    evmostestnet: {
+      accounts: { mnemonic },
+      chainId: 9000,
+      url: "https://evmos-archive-testnet.api.bdnodes.net:8545",
     },
   },
   typechain: {
