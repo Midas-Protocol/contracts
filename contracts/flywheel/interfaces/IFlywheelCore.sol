@@ -7,4 +7,10 @@ interface IFlywheelCore {
   function flywheelRewards() external view returns (address);
 
   function accrue(ERC20 market, address user) external returns (uint256);
+
+  function accrue(
+    ERC20 market,
+    address src,
+    address dest
+  ) external returns (uint256);
 }

@@ -83,6 +83,22 @@ contract AutofarmERC4626Test is DSTest {
     autofarmERC4626.deposit(depositAmount, address(this));
   }
 
+  function testTransfer() public {
+    deposit();
+    autofarmERC4626.transfer(tester, depositAmount);
+    assertEq(autofarmERC4626.balanceOf(address(this)), 0);
+    assertEq(autofarmERC4626.balanceOf(tester), depositAmount);
+  }
+
+  function testTransferFrom() public {
+    deposit();
+    autofarmERC4626.approve(tester, depositAmount);
+    vm.startPrank(tester);
+    autofarmERC4626.transferFrom(address(this), tester, depositAmount);
+    assertEq(autofarmERC4626.balanceOf(address(this)), 0);
+    assertEq(autofarmERC4626.balanceOf(tester), depositAmount);
+  }
+
   function testDeposit() public {
     deposit();
     //Test that the actual transfers worked
@@ -136,10 +152,6 @@ contract AutofarmERC4626Test is DSTest {
   function testAccumulatingAutoRewardsOnWithdrawal() public {
     vm.roll(1);
     deposit();
-    assertEq(autoToken.balanceOf(address(mockAutofarm)), 0);
-    assertEq(autoToken.balanceOf(address(autofarmERC4626)), 0);
-    assertEq(autoToken.balanceOf(address(flywheel)), 0);
-    assertEq(autoToken.balanceOf(address(flywheelRewards)), 0);
 
     vm.roll(3);
     autofarmERC4626.withdraw(depositAmount, address(this), address(this));
@@ -147,6 +159,44 @@ contract AutofarmERC4626Test is DSTest {
     assertEq(autoToken.balanceOf(address(autofarmERC4626)), 0);
     assertEq(autoToken.balanceOf(address(flywheel)), 16e15);
     assertEq(autoToken.balanceOf(address(flywheelRewards)), 0);
+  }
+
+  function testAccumulatingAutoRewardsOnTransfer() public {
+    vm.roll(1);
+    deposit();
+    vm.roll(2);
+
+    vm.startPrank(tester);
+    testToken.mint(tester, depositAmount);
+    testToken.approve(address(autofarmERC4626), depositAmount);
+    autofarmERC4626.deposit(depositAmount, tester);
+    vm.stopPrank();
+
+    vm.roll(3);
+    autofarmERC4626.transfer(tester, depositAmount);
+    flywheel.claimRewards(address(this));
+    assertEq(autoToken.balanceOf(address(this)), 4e15);
+    flywheel.claimRewards(tester);
+    assertEq(autoToken.balanceOf(tester), 4e15);
+  }
+
+  function testAccumulatingAutoRewardsOnTransferFrom() public {
+    vm.roll(1);
+    deposit();
+    autofarmERC4626.approve(tester, depositAmount);
+    vm.roll(2);
+
+    vm.startPrank(tester);
+    testToken.mint(tester, depositAmount);
+    testToken.approve(address(autofarmERC4626), depositAmount);
+    autofarmERC4626.deposit(depositAmount, tester);
+    vm.roll(3);
+    autofarmERC4626.transferFrom(address(this), tester, depositAmount);
+    vm.stopPrank();
+    flywheel.claimRewards(address(this));
+    assertEq(autoToken.balanceOf(address(this)), 4e15);
+    flywheel.claimRewards(tester);
+    assertEq(autoToken.balanceOf(tester), 4e15);
   }
 
   function testClaimRewards() public {

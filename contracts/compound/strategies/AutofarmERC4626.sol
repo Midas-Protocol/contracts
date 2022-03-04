@@ -71,6 +71,50 @@ contract AutofarmERC4626 is ERC4626 {
     return this.balanceOf(account).mulDivDown(totalAssets(), totalSupply);
   }
 
+  /* ========== MUTATIVE FUNCTIONS ========== */
+
+  function transfer(address to, uint256 amount) public override returns (bool) {
+    //Accrue flywheel rewards for sender and receiver
+    flywheel.accrue(ERC20(address(this)), msg.sender, to);
+
+    balanceOf[msg.sender] -= amount;
+
+    // Cannot overflow because the sum of all user
+    // balances can't exceed the max uint256 value.
+    unchecked {
+      balanceOf[to] += amount;
+    }
+
+    emit Transfer(msg.sender, to, amount);
+
+    return true;
+  }
+
+  function transferFrom(
+    address from,
+    address to,
+    uint256 amount
+  ) public override returns (bool) {
+    //Accrue flywheel rewards for sender and receiver
+    flywheel.accrue(ERC20(address(this)), from, to);
+
+    uint256 allowed = allowance[from][msg.sender]; // Saves gas for limited approvals.
+
+    if (allowed != type(uint256).max) allowance[from][msg.sender] = allowed - amount;
+
+    balanceOf[from] -= amount;
+
+    // Cannot overflow because the sum of all user
+    // balances can't exceed the max uint256 value.
+    unchecked {
+      balanceOf[to] += amount;
+    }
+
+    emit Transfer(from, to, amount);
+
+    return true;
+  }
+
   /* ========== INTERNAL FUNCTIONS ========== */
 
   function afterDeposit(uint256 amount, uint256) internal override {
