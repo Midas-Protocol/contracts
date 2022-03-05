@@ -2,6 +2,9 @@
 pragma solidity >=0.8.0;
 
 import "./CToken.sol";
+import "../external/compound/ICToken.sol";
+import "../oracles/default/KeydonixUniswapTwapPriceOracle.sol";
+import "../oracles/keydonix/UniswapOracle.sol";
 
 interface CompLike {
   function delegate(address delegatee) external;
@@ -102,6 +105,22 @@ contract CErc20 is CToken, CErc20Interface {
         return err;
     }
 
+    function liquidateBorrowWithPriceProof(
+        address borrower,
+        uint repayAmount,
+        CTokenInterface cTokenCollateral,
+        UniswapOracle.ProofData calldata repaidProofData,
+        UniswapOracle.ProofData calldata collateralProofData,
+        address _keydonixPriceOracle
+    ) external returns (uint) {
+        ICToken repaidAsInterface = ICToken(address(this));
+        ICToken collateralAsInterface = ICToken(address(cTokenCollateral));
+        KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(repaidAsInterface, repaidProofData);
+        KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(collateralAsInterface, collateralProofData);
+
+        return liquidateBorrow(borrower, repayAmount, cTokenCollateral);
+    }
+
     /**
      * @notice The sender liquidates the borrowers collateral.
      *  The collateral seized is transferred to the liquidator.
@@ -110,7 +129,7 @@ contract CErc20 is CToken, CErc20Interface {
      * @param cTokenCollateral The market in which to seize collateral from the borrower
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function liquidateBorrow(address borrower, uint repayAmount, CTokenInterface cTokenCollateral) override external returns (uint) {
+    function liquidateBorrow(address borrower, uint repayAmount, CTokenInterface cTokenCollateral) override public returns (uint) {
         (uint err,) = liquidateBorrowInternal(borrower, repayAmount, cTokenCollateral);
         return err;
     }

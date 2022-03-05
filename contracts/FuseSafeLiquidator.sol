@@ -9,6 +9,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "./liquidators/IRedemptionStrategy.sol";
 
 import "./external/compound/ICToken.sol";
+import "./oracles/default/KeydonixUniswapTwapPriceOracle.sol";
+import "./oracles/keydonix/UniswapOracle.sol";
+
 import "./external/compound/ICErc20.sol";
 import "./external/compound/ICEther.sol";
 
@@ -164,6 +167,28 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
         }
     }
 
+    function safeLiquidateWithPriceProof(
+        address borrower,
+        uint256 repayAmount,
+        ICErc20 cErc20,
+        ICToken cTokenCollateral,
+        uint256 minOutputAmount,
+        address exchangeSeizedTo,
+        IUniswapV2Router02 uniswapV2Router,
+        IRedemptionStrategy[] memory redemptionStrategies,
+        bytes[] memory strategyData,
+        UniswapOracle.ProofData calldata repaidProofData,
+        UniswapOracle.ProofData calldata collateralProofData,
+        address _keydonixPriceOracle
+    ) external returns (uint256) {
+        ICToken repaidAsInterface = ICToken(address(cErc20));
+        ICToken collateralAsInterface = ICToken(address(cTokenCollateral));
+        KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(repaidAsInterface, repaidProofData);
+        KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(collateralAsInterface, collateralProofData);
+
+        return safeLiquidate(borrower, repayAmount, cErc20, cTokenCollateral, minOutputAmount, exchangeSeizedTo, uniswapV2Router, redemptionStrategies, strategyData);
+    }
+
     /**
      * @notice Safely liquidate an unhealthy loan (using capital from the sender), confirming that at least `minOutputAmount` in collateral is seized (or outputted by exchange if applicable).
      * @param borrower The borrower's Ethereum address.
@@ -176,7 +201,17 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
      * @param redemptionStrategies The IRedemptionStrategy contracts to use, if any, to redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
      * @param strategyData The data for the chosen IRedemptionStrategy contracts, if any.
      */
-    function safeLiquidate(address borrower, uint256 repayAmount, ICErc20 cErc20, ICToken cTokenCollateral, uint256 minOutputAmount, address exchangeSeizedTo, IUniswapV2Router02 uniswapV2Router, IRedemptionStrategy[] memory redemptionStrategies, bytes[] memory strategyData) external returns (uint256) {
+    function safeLiquidate(
+        address borrower,
+        uint256 repayAmount,
+        ICErc20 cErc20,
+        ICToken cTokenCollateral,
+        uint256 minOutputAmount,
+        address exchangeSeizedTo,
+        IUniswapV2Router02 uniswapV2Router,
+        IRedemptionStrategy[] memory redemptionStrategies,
+        bytes[] memory strategyData
+    ) public returns (uint256) {
         // Transfer tokens in, approve to cErc20, and liquidate borrow
         require(repayAmount > 0, "Repay amount (transaction value) must be greater than 0.");
         IERC20Upgradeable underlying = IERC20Upgradeable(cErc20.underlying());

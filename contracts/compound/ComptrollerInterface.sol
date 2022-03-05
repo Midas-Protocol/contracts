@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
+import "../oracles/keydonix/UniswapOracle.sol";
+
 abstract contract ComptrollerInterface {
     /// @notice Indicator that this is a Comptroller contract (for inspection)
     bool public constant isComptroller = true;
@@ -8,7 +10,12 @@ abstract contract ComptrollerInterface {
     /*** Assets You Are In ***/
 
     function enterMarkets(address[] calldata cTokens) virtual external returns (uint[] memory);
-    function exitMarket(address cToken) virtual external returns (uint);
+    function exitMarket(address cToken) virtual public returns (uint);
+    function exitMarketWithPriceProof(
+        address cToken,
+        UniswapOracle.ProofData[] calldata proofData,
+        address _keydonixPriceOracle
+    ) virtual external returns (uint);
 
     /*** Policy Hooks ***/
 
@@ -16,11 +23,31 @@ abstract contract ComptrollerInterface {
     function mintWithinLimits(address cToken, uint exchangeRateMantissa, uint accountTokens, uint mintAmount) virtual external returns (uint);
     function mintVerify(address cToken, address minter, uint mintAmount, uint mintTokens) virtual external;
 
-    function redeemAllowed(address cToken, address redeemer, uint redeemTokens) virtual external returns (uint);
+    function redeemAllowed(address cToken, address redeemer, uint redeemTokens) virtual public returns (uint);
+    function redeemAllowedWithPriceProof(
+        address cToken,
+        address redeemer,
+        uint redeemTokens,
+        UniswapOracle.ProofData[] calldata proofData,
+        address _keydonixPriceOracle
+    ) virtual external returns (uint);
     function redeemVerify(address cToken, address redeemer, uint redeemAmount, uint redeemTokens) virtual external;
 
-    function borrowAllowed(address cToken, address borrower, uint borrowAmount) virtual external returns (uint);
-    function borrowWithinLimits(address cToken, uint accountBorrowsNew) virtual external returns (uint);
+    function borrowAllowed(address cToken, address borrower, uint borrowAmount) virtual public returns (uint);
+    function borrowAllowedWithPriceProof(
+        address cToken,
+        address borrower,
+        uint borrowAmount,
+        UniswapOracle.ProofData calldata proofData,
+        address _keydonixPriceOracle
+    ) virtual external returns (uint);
+    function borrowWithinLimits(address cToken, uint accountBorrowsNew) virtual public returns (uint);
+    function borrowWithinLimitsWithPriceProof(
+        address cToken,
+        uint accountBorrowsNew,
+        UniswapOracle.ProofData calldata proofData,
+        address _keydonixPriceOracle
+    ) virtual external returns (uint);
     function borrowVerify(address cToken, address borrower, uint borrowAmount) virtual external;
 
     function repayBorrowAllowed(
@@ -40,7 +67,17 @@ abstract contract ComptrollerInterface {
         address cTokenCollateral,
         address liquidator,
         address borrower,
-        uint repayAmount) virtual external returns (uint);
+        uint repayAmount) virtual public returns (uint);
+    function liquidateBorrowAllowedWithPriceProof(
+        address cTokenBorrowed,
+        address cTokenCollateral,
+        address liquidator,
+        address borrower,
+        uint repayAmount,
+        UniswapOracle.ProofData calldata borrowedProofData,
+        UniswapOracle.ProofData calldata collateralProofData,
+        address _keydonixPriceOracle
+    ) virtual external returns (uint);
     function liquidateBorrowVerify(
         address cTokenBorrowed,
         address cTokenCollateral,
@@ -62,7 +99,15 @@ abstract contract ComptrollerInterface {
         address borrower,
         uint seizeTokens) virtual external;
 
-    function transferAllowed(address cToken, address src, address dst, uint transferTokens) virtual external returns (uint);
+    function transferAllowed(address cToken, address src, address dst, uint transferTokens) virtual public returns (uint);
+    function transferAllowedWithPriceProof(
+        address cToken,
+        address src,
+        address dst,
+        uint transferTokens,
+        UniswapOracle.ProofData[] calldata proofData,
+        address _keydonixPriceOracle
+    ) virtual external returns (uint);
     function transferVerify(address cToken, address src, address dst, uint transferTokens) virtual external;
 
     /*** Liquidity/Liquidation Calculations ***/
@@ -70,8 +115,8 @@ abstract contract ComptrollerInterface {
     function liquidateCalculateSeizeTokens(
         address cTokenBorrowed,
         address cTokenCollateral,
-        uint repayAmount) virtual external view returns (uint, uint);
-    
+        uint repayAmount) virtual public view returns (uint, uint);
+
     /*** Pool-Wide/Cross-Asset Reentrancy Prevention ***/
 
     function _beforeNonReentrant() virtual external;

@@ -2,6 +2,8 @@
 pragma solidity >=0.8.0;
 
 import "./CToken.sol";
+import "../oracles/default/KeydonixUniswapTwapPriceOracle.sol";
+import "../oracles/keydonix/UniswapOracle.sol";
 
 /**
  * @title Compound's CEther Contract
@@ -91,6 +93,18 @@ contract CEther is CToken, CEtherInterface {
         requireNoError(err, "repayBorrowBehalf failed");
     }
 
+    function liquidateBorrowWithPriceProof(
+        address borrower,
+        CTokenInterface cTokenCollateral,
+        UniswapOracle.ProofData calldata collateralProofData,
+        address _keydonixPriceOracle
+    ) external payable {
+        ICToken collateralAsInterface = ICToken(address(cTokenCollateral));
+        KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(collateralAsInterface, collateralProofData);
+
+        return liquidateBorrow(borrower, cTokenCollateral);
+    }
+
     /**
      * @notice The sender liquidates the borrowers collateral.
      *  The collateral seized is transferred to the liquidator.
@@ -98,7 +112,7 @@ contract CEther is CToken, CEtherInterface {
      * @param borrower The borrower of this cToken to be liquidated
      * @param cTokenCollateral The market in which to seize collateral from the borrower
      */
-    function liquidateBorrow(address borrower, CToken cTokenCollateral) external payable {
+    function liquidateBorrow(address borrower, CTokenInterface cTokenCollateral) public payable {
         (uint err,) = liquidateBorrowInternal(borrower, msg.value, cTokenCollateral);
         requireNoError(err, "liquidateBorrow failed");
     }

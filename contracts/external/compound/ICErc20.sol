@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./ICToken.sol";
+import "../../oracles/keydonix/UniswapOracle.sol";
 
 /**
  * @title Compound's CErc20 Contract
@@ -11,4 +12,12 @@ import "./ICToken.sol";
 interface ICErc20 is ICToken {
     function underlying() external view returns (address);
     function liquidateBorrow(address borrower, uint repayAmount, ICToken cTokenCollateral) external returns (uint);
+    function liquidateBorrowWithPriceProof(
+        address borrower,
+        uint repayAmount,
+        ICToken cTokenCollateral,
+        UniswapOracle.ProofData calldata repaidProofData,
+        UniswapOracle.ProofData calldata collateralProofData,
+        address _keydonixPriceOracle
+    ) external returns (uint);
 }

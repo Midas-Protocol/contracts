@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./ICToken.sol";
+import "../../oracles/keydonix/UniswapOracle.sol";
 
 /**
  * @title Compound's CEther Contract
@@ -10,4 +11,10 @@ import "./ICToken.sol";
  */
 interface ICEther is ICToken {
     function liquidateBorrow(address borrower, ICToken cTokenCollateral) external payable;
+    function liquidateBorrowWithPriceProof(
+        address borrower,
+        ICToken cTokenCollateral,
+        UniswapOracle.ProofData calldata collateralProofData,
+        address _keydonixPriceOracle
+    ) external payable;
 }
