@@ -18,12 +18,12 @@ interface ICErc20 is ICToken {
     ICToken cTokenCollateral
   ) external returns (uint256);
 
-  function liquidateBorrowWithPriceProof(
-    address borrower,
-    uint256 repayAmount,
-    ICToken cTokenCollateral,
-    UniswapOracle.ProofData calldata repaidProofData,
-    UniswapOracle.ProofData calldata collateralProofData,
-    address _keydonixPriceOracle
-  ) external returns (uint256);
+//  function liquidateBorrowWithPriceProof(
+//    address borrower,
+//    uint256 repayAmount,
+//    ICToken cTokenCollateral,
+//    UniswapOracle.ProofData calldata repaidProofData,
+//    UniswapOracle.ProofData calldata collateralProofData,
+//    address _keydonixPriceOracle
+//  ) external returns (uint256);
 }

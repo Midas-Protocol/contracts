@@ -24,6 +24,7 @@ import "./external/uniswap/IUniswapV2Factory.sol";
 import "./external/uniswap/UniswapV2Library.sol";
 import "./external/pcs/PancakeLibrary.sol";
 import "./external/pcs/IPancakePair.sol";
+import "./utils/Multicall.sol";
 
 import "hardhat/console.sol";
 
@@ -33,7 +34,7 @@ import "hardhat/console.sol";
  * @notice FuseSafeLiquidator safely liquidates unhealthy borrowers (with flashloan support).
  * @dev Do not transfer NATIVE or tokens directly to this address. Only send NATIVE here when using a method, and only approve tokens for transfer to here when using a method. Direct NATIVE transfers will be rejected and direct token transfers will be lost.
  */
-contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
+contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
   using AddressUpgradeable for address payable;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -1012,6 +1013,10 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     );
     return abi.decode(returndata, (IERC20Upgradeable, uint256));
   }
+
+//  function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
+//    return KeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
+//  }
 
   /**
    * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`], but performing a delegate call.

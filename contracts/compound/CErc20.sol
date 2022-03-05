@@ -5,6 +5,7 @@ import "./CToken.sol";
 import "../external/compound/ICToken.sol";
 import "../oracles/default/KeydonixUniswapTwapPriceOracle.sol";
 import "../oracles/keydonix/UniswapOracle.sol";
+import "../utils/Multicall.sol";
 
 interface CompLike {
   function delegate(address delegatee) external;
@@ -16,7 +17,7 @@ interface CompLike {
  * @dev This contract should not to be deployed on its own; instead, deploy `CErc20Delegator` (proxy contract) and `CErc20Delegate` (logic/implementation contract).
  * @author Compound
  */
-contract CErc20 is CToken, CErc20Interface {
+contract CErc20 is CToken, CErc20Interface, Multicall {
   /**
    * @notice Initialize the new money market
    * @param underlying_ The address of the underlying asset
@@ -116,21 +117,21 @@ contract CErc20 is CToken, CErc20Interface {
     return err;
   }
 
-  function liquidateBorrowWithPriceProof(
-    address borrower,
-    uint256 repayAmount,
-    CTokenInterface cTokenCollateral,
-    UniswapOracle.ProofData calldata repaidProofData,
-    UniswapOracle.ProofData calldata collateralProofData,
-    address _keydonixPriceOracle
-  ) external returns (uint256) {
-    ICToken repaidAsInterface = ICToken(address(this));
-    ICToken collateralAsInterface = ICToken(address(cTokenCollateral));
-    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(repaidAsInterface, repaidProofData);
-    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(collateralAsInterface, collateralProofData);
-
-    return liquidateBorrow(borrower, repayAmount, cTokenCollateral);
-  }
+//  function liquidateBorrowWithPriceProof(
+//    address borrower,
+//    uint256 repayAmount,
+//    CTokenInterface cTokenCollateral,
+//    UniswapOracle.ProofData calldata repaidProofData,
+//    UniswapOracle.ProofData calldata collateralProofData,
+//    address _keydonixPriceOracle
+//  ) external returns (uint256) {
+//    ICToken repaidAsInterface = ICToken(address(this));
+//    ICToken collateralAsInterface = ICToken(address(cTokenCollateral));
+//    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(repaidAsInterface, repaidProofData);
+//    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(collateralAsInterface, collateralProofData);
+//
+//    return liquidateBorrow(borrower, repayAmount, cTokenCollateral);
+//  }
 
   /**
    * @notice The sender liquidates the borrowers collateral.
@@ -144,7 +145,7 @@ contract CErc20 is CToken, CErc20Interface {
     address borrower,
     uint256 repayAmount,
     CTokenInterface cTokenCollateral
-  ) public override returns (uint256) {
+  ) external override returns (uint256) {
     (uint256 err, ) = liquidateBorrowInternal(borrower, repayAmount, cTokenCollateral);
     return err;
   }
@@ -218,5 +219,9 @@ contract CErc20 is CToken, CErc20Interface {
   function _delegateCompLikeTo(address compLikeDelegatee) external {
     require(hasAdminRights(), "only the admin may set the comp-like delegate");
     CompLike(underlying).delegate(compLikeDelegatee);
+  }
+
+  function verifyPrice(address cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
+    return comptroller.verifyPrice(cToken, proofData);
   }
 }

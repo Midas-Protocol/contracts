@@ -91,7 +91,7 @@ contract KeydonixUniswapTwapPriceOracle is Initializable, IPriceOracle, BasePric
     return (_price(underlying) * 1e18) / baseUnit;
   }
 
-  function verifyPrice(ICToken cToken, ProofData memory proofData) public returns (uint256, uint256){
+  function verifyPrice(ICToken cToken, ProofData memory proofData) public returns (uint256, uint256) {
 //    address underlying = ICErc20(address(cToken)).underlying();
     address underlying = address(cToken);
     PriceVerification storage latestPriceVerification = priceVerifications[underlying];

@@ -14,12 +14,14 @@ import "./RewardsDistributorDelegate.sol";
 import "../oracles/default/KeydonixUniswapTwapPriceOracle.sol";
 import "../oracles/keydonix/UniswapOracle.sol";
 
+import "../utils/Multicall.sol";
+
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
  * @dev This contract should not to be deployed alone; instead, deploy `Unitroller` (proxy contract) on top of this `Comptroller` (logic/implementation contract).
  */
-contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerErrorReporter, Exponential {
+contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerErrorReporter, Exponential, Multicall {
   /// @notice Emitted when an admin supports a market
   event MarketListed(CToken cToken);
 
@@ -166,20 +168,20 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     return Error.NO_ERROR;
   }
 
-  function exitMarketWithPriceProof(
-    address cTokenAddress,
-    UniswapOracle.ProofData[] calldata proofData,
-    address _keydonixPriceOracle
-  ) external override returns (uint256) {
-    CToken[] memory assets = accountAssets[msg.sender];
-    require(assets.length == proofData.length, "invalid price proof data size");
-    for (uint256 i = 0; i < assets.length; i++) {
-      ICToken asInterface = ICToken(address(assets[i]));
-      KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(asInterface, proofData[i]);
-    }
-
-    return exitMarket(cTokenAddress);
-  }
+//  function exitMarketWithPriceProof(
+//    address cTokenAddress,
+//    UniswapOracle.ProofData[] calldata proofData,
+//    address _keydonixPriceOracle
+//  ) external override returns (uint256) {
+//    CToken[] memory assets = accountAssets[msg.sender];
+//    require(assets.length == proofData.length, "invalid price proof data size");
+//    for (uint256 i = 0; i < assets.length; i++) {
+//      ICToken asInterface = ICToken(address(assets[i]));
+//      KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(asInterface, proofData[i]);
+//    }
+//
+//    return exitMarket(cTokenAddress);
+//  }
 
   /**
    * @notice Removes asset from sender's account liquidity calculation
@@ -188,7 +190,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    * @param cTokenAddress The address of the asset to be removed
    * @return Whether or not the account successfully exited the market
    */
-  function exitMarket(address cTokenAddress) public override returns (uint256) {
+  function exitMarket(address cTokenAddress) external override returns (uint256) {
     CToken cToken = CToken(cTokenAddress);
     /* Get sender tokensHeld and amountOwed underlying from the cToken */
     (uint256 oErr, uint256 tokensHeld, uint256 amountOwed, ) = cToken.getAccountSnapshot(msg.sender);
@@ -339,22 +341,22 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     suppliers[minter] = true;
   }
 
-  function redeemAllowedWithPriceProof(
-    address cToken,
-    address redeemer,
-    uint256 redeemTokens,
-    UniswapOracle.ProofData[] calldata proofData,
-    address _keydonixPriceOracle
-  ) external override returns (uint256) {
-    CToken[] memory assets = accountAssets[redeemer];
-    require(assets.length == proofData.length, "invalid price proof data size");
-    for (uint256 i = 0; i < assets.length; i++) {
-      ICToken asInterface = ICToken(address(assets[i]));
-      KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(asInterface, proofData[i]);
-    }
-
-    return redeemAllowed(cToken, redeemer, redeemTokens);
-  }
+//  function redeemAllowedWithPriceProof(
+//    address cToken,
+//    address redeemer,
+//    uint256 redeemTokens,
+//    UniswapOracle.ProofData[] calldata proofData,
+//    address _keydonixPriceOracle
+//  ) external override returns (uint256) {
+//    CToken[] memory assets = accountAssets[redeemer];
+//    require(assets.length == proofData.length, "invalid price proof data size");
+//    for (uint256 i = 0; i < assets.length; i++) {
+//      ICToken asInterface = ICToken(address(assets[i]));
+//      KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(asInterface, proofData[i]);
+//    }
+//
+//    return redeemAllowed(cToken, redeemer, redeemTokens);
+//  }
 
   /**
    * @notice Checks if the account should be allowed to redeem tokens in the given market
@@ -367,7 +369,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address cToken,
     address redeemer,
     uint256 redeemTokens
-  ) public override returns (uint256) {
+  ) external override returns (uint256) {
     uint256 allowed = redeemAllowedInternal(cToken, redeemer, redeemTokens);
     if (allowed != uint256(Error.NO_ERROR)) {
       return allowed;
@@ -433,17 +435,17 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
   }
 
-  function borrowAllowedWithPriceProof(
-    address cToken,
-    address borrower,
-    uint256 borrowAmount,
-    UniswapOracle.ProofData calldata proofData,
-    address _keydonixPriceOracle
-  ) external override returns (uint256) {
-    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cToken), proofData);
-
-    return borrowAllowed(cToken, borrower, borrowAmount);
-  }
+//  function borrowAllowedWithPriceProof(
+//    address cToken,
+//    address borrower,
+//    uint256 borrowAmount,
+//    UniswapOracle.ProofData calldata proofData,
+//    address _keydonixPriceOracle
+//  ) external override returns (uint256) {
+//    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cToken), proofData);
+//
+//    return borrowAllowed(cToken, borrower, borrowAmount);
+//  }
 
   /**
    * @notice Checks if the account should be allowed to borrow the underlying asset of the given market
@@ -456,7 +458,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address cToken,
     address borrower,
     uint256 borrowAmount
-  ) public override returns (uint256) {
+  ) external override returns (uint256) {
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!borrowGuardianPaused[cToken], "borrow is paused");
 
@@ -519,23 +521,23 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     return uint256(Error.NO_ERROR);
   }
 
-  function borrowWithinLimitsWithPriceProof(
-    address cToken,
-    uint256 accountBorrowsNew,
-    UniswapOracle.ProofData calldata proofData,
-    address _keydonixPriceOracle
-  ) external override returns (uint256) {
-    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cToken), proofData);
-
-    return borrowWithinLimits(cToken, accountBorrowsNew);
-  }
+//  function borrowWithinLimitsWithPriceProof(
+//    address cToken,
+//    uint256 accountBorrowsNew,
+//    UniswapOracle.ProofData calldata proofData,
+//    address _keydonixPriceOracle
+//  ) external override returns (uint256) {
+//    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cToken), proofData);
+//
+//    return borrowWithinLimits(cToken, accountBorrowsNew);
+//  }
 
   /**
    * @notice Checks if the account should be allowed to borrow the underlying asset of the given market
    * @param cToken Asset whose underlying is being borrowed
    * @param accountBorrowsNew The user's new borrow balance of the underlying asset
    */
-  function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) public override returns (uint256) {
+  function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external override returns (uint256) {
     // Check if min borrow exists
     uint256 minBorrowEth = fuseAdmin.minBorrowEth();
 
@@ -653,21 +655,21 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
   }
 
-  function liquidateBorrowAllowedWithPriceProof(
-    address cTokenBorrowed,
-    address cTokenCollateral,
-    address liquidator,
-    address borrower,
-    uint256 repayAmount,
-    UniswapOracle.ProofData calldata borrowedProofData,
-    UniswapOracle.ProofData calldata collateralProofData,
-    address _keydonixPriceOracle
-  ) external override returns (uint256) {
-    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cTokenBorrowed), borrowedProofData);
-    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cTokenCollateral), collateralProofData);
-
-    return liquidateBorrowAllowed(cTokenBorrowed, cTokenCollateral, liquidator, borrower, repayAmount);
-  }
+//  function liquidateBorrowAllowedWithPriceProof(
+//    address cTokenBorrowed,
+//    address cTokenCollateral,
+//    address liquidator,
+//    address borrower,
+//    uint256 repayAmount,
+//    UniswapOracle.ProofData calldata borrowedProofData,
+//    UniswapOracle.ProofData calldata collateralProofData,
+//    address _keydonixPriceOracle
+//  ) external override returns (uint256) {
+//    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cTokenBorrowed), borrowedProofData);
+//    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cTokenCollateral), collateralProofData);
+//
+//    return liquidateBorrowAllowed(cTokenBorrowed, cTokenCollateral, liquidator, borrower, repayAmount);
+//  }
 
   /**
    * @notice Checks if the liquidation should be allowed to occur
@@ -683,7 +685,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address liquidator,
     address borrower,
     uint256 repayAmount
-  ) public override returns (uint256) {
+  ) external override returns (uint256) {
     // Shh - currently unused
     liquidator;
 
@@ -816,23 +818,23 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
   }
 
-  function transferAllowedWithPriceProof(
-    address cToken,
-    address src,
-    address dst,
-    uint256 transferTokens,
-    UniswapOracle.ProofData[] calldata proofData,
-    address _keydonixPriceOracle
-  ) external override returns (uint256) {
-    CToken[] memory assets = accountAssets[src];
-    require(assets.length == proofData.length, "invalid price proof data size");
-    for (uint256 i = 0; i < assets.length; i++) {
-      ICToken asInterface = ICToken(address(assets[i]));
-      KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(asInterface, proofData[i]);
-    }
-
-    return transferAllowed(cToken, src, dst, transferTokens);
-  }
+//  function transferAllowedWithPriceProof(
+//    address cToken,
+//    address src,
+//    address dst,
+//    uint256 transferTokens,
+//    UniswapOracle.ProofData[] calldata proofData,
+//    address _keydonixPriceOracle
+//  ) external override returns (uint256) {
+//    CToken[] memory assets = accountAssets[src];
+//    require(assets.length == proofData.length, "invalid price proof data size");
+//    for (uint256 i = 0; i < assets.length; i++) {
+//      ICToken asInterface = ICToken(address(assets[i]));
+//      KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(asInterface, proofData[i]);
+//    }
+//
+//    return transferAllowed(cToken, src, dst, transferTokens);
+//  }
 
   /**
    * @notice Checks if the account should be allowed to transfer tokens in the given market
@@ -847,7 +849,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address src,
     address dst,
     uint256 transferTokens
-  ) public override returns (uint256) {
+  ) external override returns (uint256) {
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!transferGuardianPaused, "transfer is paused");
 
@@ -1742,5 +1744,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   function _afterNonReentrant() external override {
     require(markets[msg.sender].isListed, "Comptroller:_afterNonReentrant: caller not listed as market");
     _notEntered = true; // get a gas-refund post-Istanbul
+  }
+
+  function verifyPrice(address cToken, UniswapOracle.ProofData calldata proofData) public override returns (uint256, uint256) {
+    return KeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(ICToken(cToken), proofData);
   }
 }
