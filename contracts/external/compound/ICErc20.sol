@@ -11,10 +11,16 @@ import "../../oracles/keydonix/UniswapOracle.sol";
  */
 interface ICErc20 is ICToken {
   function underlying() external view returns (address);
-  function liquidateBorrow(address borrower, uint repayAmount, ICToken cTokenCollateral) external returns (uint256);
+
+  function liquidateBorrow(
+    address borrower,
+    uint256 repayAmount,
+    ICToken cTokenCollateral
+  ) external returns (uint256);
+
   function liquidateBorrowWithPriceProof(
     address borrower,
-    uint repayAmount,
+    uint256 repayAmount,
     ICToken cTokenCollateral,
     UniswapOracle.ProofData calldata repaidProofData,
     UniswapOracle.ProofData calldata collateralProofData,

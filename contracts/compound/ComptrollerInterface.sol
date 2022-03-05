@@ -19,7 +19,7 @@ abstract contract ComptrollerInterface {
     address _keydonixPriceOracle
   ) external virtual returns (uint256);
 
-/*** Policy Hooks ***/
+  /*** Policy Hooks ***/
 
   function mintAllowed(
     address cToken,
@@ -50,7 +50,7 @@ abstract contract ComptrollerInterface {
   function redeemAllowedWithPriceProof(
     address cToken,
     address redeemer,
-    uint redeemTokens,
+    uint256 redeemTokens,
     UniswapOracle.ProofData[] calldata proofData,
     address _keydonixPriceOracle
   ) external virtual returns (uint256);
@@ -71,7 +71,7 @@ abstract contract ComptrollerInterface {
   function borrowAllowedWithPriceProof(
     address cToken,
     address borrower,
-    uint borrowAmount,
+    uint256 borrowAmount,
     UniswapOracle.ProofData calldata proofData,
     address _keydonixPriceOracle
   ) external virtual returns (uint256);
@@ -80,7 +80,7 @@ abstract contract ComptrollerInterface {
 
   function borrowWithinLimitsWithPriceProof(
     address cToken,
-    uint accountBorrowsNew,
+    uint256 accountBorrowsNew,
     UniswapOracle.ProofData calldata proofData,
     address _keydonixPriceOracle
   ) external virtual returns (uint256);
@@ -119,7 +119,7 @@ abstract contract ComptrollerInterface {
     address cTokenCollateral,
     address liquidator,
     address borrower,
-    uint repayAmount,
+    uint256 repayAmount,
     UniswapOracle.ProofData calldata borrowedProofData,
     UniswapOracle.ProofData calldata collateralProofData,
     address _keydonixPriceOracle
@@ -161,7 +161,7 @@ abstract contract ComptrollerInterface {
     address cToken,
     address src,
     address dst,
-    uint transferTokens,
+    uint256 transferTokens,
     UniswapOracle.ProofData[] calldata proofData,
     address _keydonixPriceOracle
   ) external virtual returns (uint256);

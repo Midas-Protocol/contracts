@@ -10,11 +10,12 @@ import "../../oracles/keydonix/UniswapOracle.sol";
  * @author Compound
  */
 interface ICEther is ICToken {
-    function liquidateBorrow(address borrower, ICToken cTokenCollateral) external payable;
-    function liquidateBorrowWithPriceProof(
-        address borrower,
-        ICToken cTokenCollateral,
-        UniswapOracle.ProofData calldata collateralProofData,
-        address _keydonixPriceOracle
-    ) external payable;
+  function liquidateBorrow(address borrower, ICToken cTokenCollateral) external payable;
+
+  function liquidateBorrowWithPriceProof(
+    address borrower,
+    ICToken cTokenCollateral,
+    UniswapOracle.ProofData calldata collateralProofData,
+    address _keydonixPriceOracle
+  ) external payable;
 }

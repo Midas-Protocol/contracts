@@ -134,18 +134,18 @@ contract CErc20 is CToken, CErc20Interface {
 
   /**
    * @notice The sender liquidates the borrowers collateral.
-     *  The collateral seized is transferred to the liquidator.
-     * @param borrower The borrower of this cToken to be liquidated
-     * @param repayAmount The amount of the underlying borrowed asset to repay
-     * @param cTokenCollateral The market in which to seize collateral from the borrower
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
+   *  The collateral seized is transferred to the liquidator.
+   * @param borrower The borrower of this cToken to be liquidated
+   * @param repayAmount The amount of the underlying borrowed asset to repay
+   * @param cTokenCollateral The market in which to seize collateral from the borrower
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
   function liquidateBorrow(
     address borrower,
     uint256 repayAmount,
     CTokenInterface cTokenCollateral
   ) public override returns (uint256) {
-    (uint256 err,) = liquidateBorrowInternal(borrower, repayAmount, cTokenCollateral);
+    (uint256 err, ) = liquidateBorrowInternal(borrower, repayAmount, cTokenCollateral);
     return err;
   }
 

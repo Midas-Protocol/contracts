@@ -221,7 +221,18 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(cErc20, repaidProofData);
     KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(cTokenCollateral, collateralProofData);
 
-    return safeLiquidate(borrower, repayAmount, cErc20, cTokenCollateral, minOutputAmount, exchangeSeizedTo, uniswapV2Router, redemptionStrategies, strategyData);
+    return
+      safeLiquidate(
+        borrower,
+        repayAmount,
+        cErc20,
+        cTokenCollateral,
+        minOutputAmount,
+        exchangeSeizedTo,
+        uniswapV2Router,
+        redemptionStrategies,
+        strategyData
+      );
   }
 
   /**
@@ -309,7 +320,17 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
   ) external returns (uint256) {
     KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(cErc20Collateral, collateralProofData);
 
-    return safeLiquidate(borrower, cEther, cErc20Collateral, minOutputAmount, exchangeSeizedTo, uniswapV2Router, redemptionStrategies, strategyData);
+    return
+      safeLiquidate(
+        borrower,
+        cEther,
+        cErc20Collateral,
+        minOutputAmount,
+        exchangeSeizedTo,
+        uniswapV2Router,
+        redemptionStrategies,
+        strategyData
+      );
   }
 
   /**
