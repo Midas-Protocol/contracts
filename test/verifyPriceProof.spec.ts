@@ -92,7 +92,24 @@ describe.only( "Verify price proof tests",  () => {
             latestMinusSome
         );
         console.log(`estimated price ${estimatedPrice}`);
+        console.log(`fetching block 0x${latestMinusSome.toString(16)}`)
+        const block = await getBlockByNumber(latestMinusSome);
+        console.log(`block ${block}`)
 
+        let exchangeAddress = BigInt(uniswapExchangeAddress);
+        let positions = [BigInt(8), BigInt(9)];
+        const encodedAddress = bigintToHexAddress(exchangeAddress)
+        const encodedPositions = positions.map(bigintToHexQuantity)
+        const encodedBlockTag = bigintToHex(latestMinusSome)
+
+        console.log(`get proof params encodedAddress ${encodedAddress} encodedPositions ${encodedPositions} encodedBlockTag ${encodedBlockTag}`)
+        const result = await ethers.provider.send('eth_getProof', [
+            encodedAddress, encodedPositions, encodedBlockTag
+        ]);
+        console.log(`result ${result}`)
+
+        const proof1 = await getProof(exchangeAddress, positions, latestMinusSome)
+        console.log(`proof1 ${proof1}`)
         // const proof = {
         //     block: [1],
         //     accountProofNodesRlp: [1],
@@ -113,4 +130,17 @@ describe.only( "Verify price proof tests",  () => {
         rec = await tx.wait();
         expect(rec.status).to.eq(1);
     });
+
+    function bigintToHexAddress(value: bigint): string {
+        return `0x${value.toString(16).padStart(40, '0')}`
+    }
+
+    function bigintToHexQuantity(value: bigint): string {
+        return `0x${value.toString(16).padStart(64, '0')}`
+    }
+
+    function bigintToHex(value: bigint): string {
+        return `0x${value.toString(16)}`
+    }
+
 });

@@ -101,6 +101,7 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
       chainId: 42,
       url: "https://kovan.infura.io/v3/10bc2717e7f14941a3ab5bea569da361",
+      httpHeaders: {name: ''}
     },
     bsc: {
       accounts: { mnemonic },
