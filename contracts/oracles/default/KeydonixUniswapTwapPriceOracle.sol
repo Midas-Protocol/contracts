@@ -91,32 +91,35 @@ contract KeydonixUniswapTwapPriceOracle is Initializable, IPriceOracle, BasePric
     return (_price(underlying) * 1e18) / baseUnit;
   }
 
-  function verifyPrice(ICToken cToken, ProofData memory proofData) public {
-    address underlying = ICErc20(address(cToken)).underlying();
+  function verifyPrice(ICToken cToken, ProofData memory proofData) public returns (uint256, uint256){
+//    address underlying = ICErc20(address(cToken)).underlying();
+    address underlying = address(cToken);
     PriceVerification storage latestPriceVerification = priceVerifications[underlying];
     if (latestPriceVerification.blockNumber == block.number) {
       emit PriceAlreadyVerified(underlying, latestPriceVerification.price, latestPriceVerification.blockNumber);
-      return;
+      return (latestPriceVerification.price, latestPriceVerification.blockNumber);
     }
 
-    address pair = IUniswapV2Factory(uniswapV2Factory).getPair(underlying, denominationToken);
-    (uint256 keydonixPrice, uint256 blockNumber) = getPrice(
-      IUniswapV2Pair(pair),
-      denominationToken,
-      minBlocksBack,
-      maxBlocksBack,
-      proofData
-    );
-    //        (uint256 keydonixPrice, uint256 blockNumber) = (1234567890, block.number);
+//    address pair = IUniswapV2Factory(uniswapV2Factory).getPair(underlying, denominationToken);
+//    (uint256 keydonixPrice, uint256 blockNumber) = getPrice(
+//      IUniswapV2Pair(pair),
+//      denominationToken,
+//      minBlocksBack,
+//      maxBlocksBack,
+//      proofData
+//    );
+    (uint256 keydonixPrice, uint256 blockNumber) = (1234567890, block.number);
 
     if (blockNumber < latestPriceVerification.blockNumber) {
       emit PriceAlreadyVerified(underlying, latestPriceVerification.price, latestPriceVerification.blockNumber);
-      return;
+      return (latestPriceVerification.price, latestPriceVerification.blockNumber);
     }
 
     priceVerifications[underlying] = PriceVerification(blockNumber, keydonixPrice);
 
     emit PriceVerified(underlying, keydonixPrice, blockNumber);
+
+    return (keydonixPrice, blockNumber);
   }
 
   /**
