@@ -10,19 +10,19 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
  * @notice Deploys minimal proxy contracts (known as "clones") and initializes them.
  */
 contract InitializableClones {
-    using AddressUpgradeable for address;
+  using AddressUpgradeable for address;
 
-    /**
-     * @dev Event emitted when a clone is deployed.
-     */
-    event Deployed(address instance);
+  /**
+   * @dev Event emitted when a clone is deployed.
+   */
+  event Deployed(address instance);
 
-    /**
-     * @dev Deploys, initializes, and returns the address of a clone that mimics the behaviour of `master`.
-     */
-    function clone(address master, bytes memory initializer) external returns (address instance) {
-        instance = ClonesUpgradeable.clone(master);
-        instance.functionCall(initializer, "Failed to initialize clone.");
-        emit Deployed(instance);
-    }
+  /**
+   * @dev Deploys, initializes, and returns the address of a clone that mimics the behaviour of `master`.
+   */
+  function clone(address master, bytes memory initializer) external returns (address instance) {
+    instance = ClonesUpgradeable.clone(master);
+    instance.functionCall(initializer, "Failed to initialize clone.");
+    emit Deployed(instance);
+  }
 }

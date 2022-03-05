@@ -1,7 +1,7 @@
 import { deployments, ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-import { Fuse } from "../lib/esm/src";
+import { Fuse } from "../dist/esm/src";
 import { DeployedAsset, poolAssets } from "./utils/pool";
 import { utils } from "ethers";
 import { setUpPriceOraclePrices } from "./utils";

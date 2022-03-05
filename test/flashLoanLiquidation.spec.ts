@@ -5,7 +5,7 @@ import { DeployedAsset, getPoolAssets } from "./utils/pool";
 import { addCollateral, borrowCollateral } from "./utils/collateral";
 import { CErc20, CEther, EIP20Interface, FuseSafeLiquidator, MasterPriceOracle, SimplePriceOracle } from "../typechain";
 import { expect } from "chai";
-import { cERC20Conf, ERC20Abi } from "../lib/esm/src";
+import { cERC20Conf, ERC20Abi } from "../dist/esm/src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { whaleSigner } from "./utils/accounts";
 

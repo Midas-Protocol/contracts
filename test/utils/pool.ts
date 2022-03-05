@@ -3,7 +3,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { providers, utils } from "ethers";
 import { ethers } from "hardhat";
 
-import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../lib/esm/src";
+import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../dist/esm/src";
 import { getAssetsConf } from "./assets";
 
 interface PoolCreationParams {

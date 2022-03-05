@@ -1,10 +1,5 @@
 import { SALT } from "../../deploy/deploy";
-import {
-  ChainDeployConfig,
-  ChainlinkFeedBaseCurrency,
-  deployChainlinkOracle,
-  deployUniswapOracle,
-} from "../helpers";
+import { ChainDeployConfig, ChainlinkFeedBaseCurrency, deployChainlinkOracle, deployUniswapOracle } from "../helpers";
 import { ethers } from "ethers";
 
 export const deployConfig: ChainDeployConfig = {

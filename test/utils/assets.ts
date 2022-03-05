@@ -1,4 +1,4 @@
-import { cERC20Conf } from "../../lib/esm/src";
+import { cERC20Conf } from "../../dist/esm/src";
 import { bscAssets } from "../../chainDeploy";
 import { constants } from "ethers";
 

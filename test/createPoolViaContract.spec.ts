@@ -1,7 +1,7 @@
 import { deployments, ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-import { Fuse } from "../lib/esm/src";
+import { Fuse } from "../dist/esm/src";
 import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { Comptroller, FusePoolDirectory, SimplePriceOracle } from "../typechain";
@@ -120,7 +120,7 @@ describe("FusePoolDirectory", function () {
       );
 
       expect(underlyingTokens[0]).to.eq(constants.AddressZero);
-      
+
       expect(underlyingSymbols[0]).to.eq(chainDeployConfig[chainId].config.nativeTokenSymbol);
 
       let fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);

@@ -81,7 +81,7 @@ export const chainOracles = {
     OracleTypes.SimplePriceOracle,
   ],
   // TODO: not sure if this is correct
-  [SupportedChains.evmos_testnet]: [OracleTypes.MasterPriceOracle]
+  [SupportedChains.evmos_testnet]: [OracleTypes.MasterPriceOracle],
 };
 
 export const oracleConfig = (deployments: ChainDeployment, artifacts: Artifacts, availableOracles: Array<string>) => {

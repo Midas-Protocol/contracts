@@ -1,9 +1,4 @@
-import {
-  ChainDeployConfig,
-  ChainlinkFeedBaseCurrency,
-  deployChainlinkOracle,
-  deployUniswapOracle,
-} from "../helpers";
+import { ChainDeployConfig, ChainlinkFeedBaseCurrency, deployChainlinkOracle, deployUniswapOracle } from "../helpers";
 import { assets } from "../mainnets/bsc";
 
 export const deployConfig: ChainDeployConfig = {
@@ -17,7 +12,7 @@ export const deployConfig: ChainDeployConfig = {
   blocksPerYear: 20 * 24 * 365 * 60,
   hardcoded: [],
   uniswapData: [],
-  pairInitHashCode: "0x"
+  pairInitHashCode: "0x",
 };
 
 export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {

@@ -10,5 +10,5 @@ export const deployConfig: ChainDeployConfig = {
   wBTCToken: "",
   hardcoded: [],
   uniswapData: [],
-  pairInitHashCode: "0x"
+  pairInitHashCode: "0x",
 };
