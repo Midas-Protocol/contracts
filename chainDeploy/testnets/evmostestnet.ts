@@ -66,9 +66,7 @@ export const deploy = async ({ getNamedAccounts, deployments, ethers }): Promise
   }
 
   for (const pool of curvePools) {
-    console.log("pool.lpToken, pool.pool, pool.underlyings: ", pool.lpToken, pool.pool, pool.underlyings);
     const registered = await curveOracle.poolOf(pool.lpToken);
-    console.log("registered: ", registered);
     if (registered !== constants.AddressZero) {
       console.log("Pool already registered", pool);
       continue;
