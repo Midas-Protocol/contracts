@@ -5,12 +5,13 @@ import { ChainDeployConfig } from "../helpers";
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xA30404AFB4c43D25542687BCF4367F59cc77b5d2",
   nativeTokenName: "Evmos (Testnet)",
+  uniswapV2RouterAddress: "0x638771E1eE3c85242D811e9eEd89C71A4F8F4F73",
+  uniswapV2FactoryAddress: "0xBB86C1332f54afb6509CB599BF88980f7b389403",
   nativeTokenSymbol: "TEVMOS",
   blocksPerYear: 12 * 24 * 365 * 60, // 5 second blocks, 12 blocks per minute
   hardcoded: [],
   uniswapData: [],
   pairInitHashCode: "0x",
-  uniswapV2RouterAddress: "0x638771E1eE3c85242D811e9eEd89C71A4F8F4F73",
 };
 
 export const deploy = async ({ getNamedAccounts, deployments, ethers }): Promise<void> => {
@@ -65,9 +66,7 @@ export const deploy = async ({ getNamedAccounts, deployments, ethers }): Promise
   }
 
   for (const pool of curvePools) {
-    console.log("pool.lpToken, pool.pool, pool.underlyings: ", pool.lpToken, pool.pool, pool.underlyings);
     const registered = await curveOracle.poolOf(pool.lpToken);
-    console.log("registered: ", registered);
     if (registered !== constants.AddressZero) {
       console.log("Pool already registered", pool);
       continue;

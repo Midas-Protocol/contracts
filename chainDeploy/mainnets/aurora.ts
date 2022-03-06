@@ -7,6 +7,7 @@ export const deployConfig1313161554: ChainDeployConfig = {
   nativeTokenSymbol: "Ethereum",
   blocksPerYear: 50 * 24 * 365 * 60,
   uniswapV2RouterAddress: "",
+  uniswapV2FactoryAddress: "",
   stableToken: "",
   wBTCToken: "",
   hardcoded: [],

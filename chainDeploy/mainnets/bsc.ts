@@ -8,6 +8,7 @@ export const deployConfig: ChainDeployConfig = {
   nativeTokenName: "Binance Network Token",
   nativeTokenSymbol: "BNB",
   uniswapV2RouterAddress: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
+  uniswapV2FactoryAddress: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
   stableToken: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
   wBTCToken: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
   pairInitHashCode: ethers.utils.hexlify("0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5"),
