@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish, Contract, utils } from "ethers";
+import { BigNumber, BigNumberish, constants, Contract, utils } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
 
 import { InterestRateModel } from "../types";
@@ -84,15 +84,15 @@ export default class WhitePaperInterestRateModel implements InterestRateModel {
   getBorrowRate(utilizationRate: BigNumber) {
     if (!this.initialized || !this.multiplierPerBlock || !this.baseRatePerBlock)
       throw new Error("Interest rate model class not initialized.");
-    return utilizationRate.mul(this.multiplierPerBlock).div(BigNumber.from(1e18)).add(this.baseRatePerBlock);
+    return utilizationRate.mul(this.multiplierPerBlock).div(constants.WeiPerEther).add(this.baseRatePerBlock);
   }
 
   getSupplyRate(utilizationRate: BigNumber): BigNumber {
     if (!this.initialized || !this.reserveFactorMantissa) throw new Error("Interest rate model class not initialized.");
 
-    const oneMinusReserveFactor = BigNumber.from(1e18).sub(this.reserveFactorMantissa);
+    const oneMinusReserveFactor = constants.WeiPerEther.sub(this.reserveFactorMantissa);
     const borrowRate = this.getBorrowRate(utilizationRate);
-    const rateToPool = borrowRate.mul(oneMinusReserveFactor).div(BigNumber.from(1e18));
-    return utilizationRate.mul(rateToPool).div(BigNumber.from(1e18));
+    const rateToPool = borrowRate.mul(oneMinusReserveFactor).div(constants.WeiPerEther);
+    return utilizationRate.mul(rateToPool).div(constants.WeiPerEther);
   }
 }
