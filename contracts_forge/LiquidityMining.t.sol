@@ -42,7 +42,7 @@ contract LiquidityMiningTest is DSTest {
   FusePoolDirectory fusePoolDirectory;
   uint256 depositAmount = 100e18;
   uint256 supplyRewardPerBlock = 10e18;
-  uint256 borrowRewardPerBlocK = 1e18;
+  uint256 borrowRewardPerBlock = 1e18;
 
   address fuseOwner = 0x5eA4A9a7592683bF0Bc187d6Da706c6c4770976F;
 
@@ -93,7 +93,7 @@ contract LiquidityMiningTest is DSTest {
 
     newImplementation.push(address(cErc20Delegate));
     fuseAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);
-
+    vm.roll(1);
     //markets.push(address(cErc20));
     comptroller._deployMarket(
       false,
@@ -114,12 +114,8 @@ contract LiquidityMiningTest is DSTest {
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
     vm.stopPrank();
-
-    rewardsDistributor._setCompSupplySpeed(cErc20, supplyRewardPerBlock);
-    rewardsDistributor._setCompBorrowSpeed(cErc20, borrowRewardPerBlocK);
-
-    rewardsToken.mint(address(this), depositAmount);
-    rewardsToken.mint(address(this), depositAmount);
+    vm.roll(1);
+    rewardsToken.mint(address(rewardsDistributor), depositAmount);
   }
 
   function deposit() public {
@@ -130,8 +126,22 @@ contract LiquidityMiningTest is DSTest {
   }
 
   function testSupplyReward() public {
+    vm.roll(2);
+    rewardsDistributor._setCompSupplySpeed(cErc20, supplyRewardPerBlock);
     deposit();
+    vm.roll(3);
     rewardsDistributor.claimRewards(address(this));
-    assertEq(rewardsToken.balanceOf(address(this)), supplyRewardPerBlock * 20);
+    assertEq(rewardsToken.balanceOf(address(this)), supplyRewardPerBlock);
+  }
+
+  function testBorrowReward() public {
+    vm.roll(2);
+    deposit();
+    rewardsDistributor._setCompBorrowSpeed(cErc20, borrowRewardPerBlock);
+    vm.roll(3);
+    cErc20.borrow(1e18);
+    vm.roll(4);
+    rewardsDistributor.claimRewards(address(this));
+    assertEq(rewardsToken.balanceOf(address(this)), borrowRewardPerBlock - 1);
   }
 }
