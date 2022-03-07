@@ -1,4 +1,4 @@
-import { constants, providers } from "ethers";
+import { constants, ethers, providers } from "ethers";
 import { SALT } from "../../deploy/deploy";
 import { ChainDeployConfig } from "../helpers";
 
@@ -11,7 +11,7 @@ export const deployConfig: ChainDeployConfig = {
   blocksPerYear: 12 * 24 * 365 * 60, // 5 second blocks, 12 blocks per minute
   hardcoded: [],
   uniswapData: [],
-  pairInitHashCode: "0x",
+  pairInitHashCode: ethers.utils.hexlify("0xa192c894487128ec7b68781ed7bd7e3141d1718df9e4e051e0124b7671d9a6ef"),
 };
 
 export const deploy = async ({ getNamedAccounts, deployments, ethers }): Promise<void> => {

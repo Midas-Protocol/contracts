@@ -44,8 +44,12 @@ export const deployUniswapOracle = async ({ ethers, getNamedAccounts, deployment
   if (existingOracle == constants.AddressZero) {
     const tx = await uniTwapOracleFactory.deploy(deployConfig.uniswapV2FactoryAddress, deployConfig.wtoken);
     await tx.wait();
-    console.log("UniswapTwapFactory deployed", tx.hash);
+    const deployedTwapPriceOracleV2 = await uniTwapOracleFactory.callStatic.oracles(
+      deployConfig.uniswapV2FactoryAddress,
+      deployConfig.wtoken
+    );
+    console.log("UniswapTwapPriceOracleV2 deployed", tx.hash, "address: ", deployedTwapPriceOracleV2);
   } else {
-    console.log("UniswapTwapFactory already deployed");
+    console.log("UniswapTwapPriceOracleV2 already deployed at: ", existingOracle);
   }
 };

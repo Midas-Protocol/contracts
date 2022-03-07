@@ -1,5 +1,6 @@
 import { SALT } from "../../deploy/deploy";
 import { ChainDeployConfig } from "../helpers";
+import { ethers } from "ethers";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -9,7 +10,7 @@ export const deployConfig: ChainDeployConfig = {
   uniswapV2FactoryAddress: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
   stableToken: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
   wBTCToken: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-  pairInitHashCode: "0x",
+  pairInitHashCode: ethers.utils.hexlify("0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f"),
   blocksPerYear: 4 * 24 * 365 * 60,
   hardcoded: [],
   uniswapData: [],
