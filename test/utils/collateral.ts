@@ -1,9 +1,11 @@
 import { BigNumber, constants, Contract, providers, utils } from "ethers";
-import { ERC20Abi, Fuse, SupportedChains, USDPricedFuseAsset } from "../../dist/esm/src";
-import { assetInPool, getPoolIndex } from "./pool";
+import { ERC20Abi, Fuse, USDPricedFuseAsset } from "../../dist/esm/src";
+import { assetInPool, DeployedAsset, getPoolIndex } from "./pool";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
+import { MasterPriceOracle, SimplePriceOracle } from "../../typechain";
+import { chainDeployConfig } from "../../chainDeploy";
 
 export async function getAsset(sdk: Fuse, poolAddress: string, underlyingSymbol: string): Promise<USDPricedFuseAsset> {
   const poolId = (await getPoolIndex(poolAddress, sdk)).toString();
@@ -21,7 +23,7 @@ export function getCToken(asset: USDPricedFuseAsset, sdk: Fuse, signer: SignerWi
 
 export async function addCollateral(
   poolAddress: string,
-  depositorAddress: string,
+  depositor: SignerWithAddress,
   underlyingSymbol: string,
   amount: string,
   useAsCollateral: boolean
@@ -30,19 +32,20 @@ export async function addCollateral(
   let amountBN: BigNumber;
   let cToken: Contract;
 
-  const signer = await ethers.getSigner(depositorAddress);
-  const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
+  const { chainId } = await ethers.provider.getNetwork();
+
+  const sdk = new Fuse(ethers.provider, chainId);
 
   const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol);
 
-  cToken = getCToken(assetToDeploy, sdk, signer);
-  const pool = await ethers.getContractAt("Comptroller", poolAddress, signer);
+  cToken = getCToken(assetToDeploy, sdk, depositor);
+  const pool = await ethers.getContractAt("Comptroller", poolAddress, depositor);
   if (useAsCollateral) {
     tx = await pool.enterMarkets([assetToDeploy.cToken]);
     await tx.wait();
   }
   amountBN = utils.parseUnits(amount, 18);
-  await approveAndMint(amountBN, cToken, assetToDeploy.underlyingToken, signer);
+  await approveAndMint(amountBN, cToken, assetToDeploy.underlyingToken, depositor);
 }
 
 export async function approveAndMint(
@@ -78,8 +81,9 @@ export async function borrowCollateral(
   let tx: providers.TransactionResponse;
   let rec: providers.TransactionReceipt;
 
+  const { chainId } = await ethers.provider.getNetwork();
   const signer = await ethers.getSigner(borrowerAddress);
-  const sdk = new Fuse(ethers.provider, SupportedChains.ganache);
+  const sdk = new Fuse(ethers.provider, chainId);
   const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol);
 
   const pool = await ethers.getContractAt("Comptroller", poolAddress, signer);
@@ -98,42 +102,54 @@ export async function borrowCollateral(
   console.log(assetAfterBorrow.supplyBalanceUSD, "Supply Balance USD: AFTER mint & borrow");
 }
 
-export async function setupLiquidatablePool(oracle, tribe, poolAddress, simpleOracle, borrowAmount) {
-  const { alice, bob } = await ethers.getNamedSigners();
+export async function setupLiquidatablePool(
+  oracle: MasterPriceOracle,
+  token: DeployedAsset,
+  poolAddress: string,
+  simpleOracle: SimplePriceOracle,
+  borrowAmount: string,
+  signer: SignerWithAddress
+) {
+  const { chainId } = await ethers.provider.getNetwork();
+  const { alice } = await ethers.getNamedSigners();
   let tx: providers.TransactionResponse;
-  const originalPrice = await oracle.getUnderlyingPrice(tribe.assetAddress);
+  const originalPrice = await oracle.getUnderlyingPrice(token.assetAddress);
 
-  await addCollateral(
-    poolAddress,
-    bob.address,
-    "TRIBE",
-    utils.formatEther(BigNumber.from(3e14).mul(constants.WeiPerEther.div(originalPrice))),
-    true
-  );
+  await addCollateral(poolAddress, signer, token.symbol, "0.1", true);
+  console.log(`Added ${token.symbol} collateral`);
 
+  const native = chainDeployConfig[chainId].config.nativeTokenSymbol;
   // Supply 0.001 ETH from other account
-  await addCollateral(poolAddress, alice.address, "ETH", "0.001", false);
-
+  await addCollateral(poolAddress, alice, native, "1", false);
+  console.log(`Added ${native} collateral`);
   // Borrow 0.0001 ETH using token collateral
-  await borrowCollateral(poolAddress, bob.address, "ETH", borrowAmount);
+  await borrowCollateral(poolAddress, signer.address, native, borrowAmount);
 
   // Set price of token collateral to 1/10th of what it was
-  tx = await simpleOracle.setDirectPrice(tribe.underlying, BigNumber.from(originalPrice).div(10));
+  tx = await simpleOracle.setDirectPrice(token.underlying, BigNumber.from(originalPrice).div(10));
   await tx.wait();
 }
 
-export async function setupAndLiquidatePool(oracle, tribe, eth, poolAddress, simpleOracle, borrowAmount, liquidator) {
-  const { bob } = await ethers.getNamedSigners();
-  await setupLiquidatablePool(oracle, tribe, poolAddress, simpleOracle, borrowAmount);
+export async function setupAndLiquidatePool(
+  oracle: MasterPriceOracle,
+  erc20: DeployedAsset,
+  eth: DeployedAsset,
+  poolAddress: string,
+  simpleOracle: SimplePriceOracle,
+  borrowAmount: string,
+  liquidator: any,
+  signer: SignerWithAddress
+) {
+  await setupLiquidatablePool(oracle, erc20, poolAddress, simpleOracle, borrowAmount, signer);
 
   const repayAmount = utils.parseEther(borrowAmount).div(10);
 
   const tx = await liquidator["safeLiquidate(address,address,address,uint256,address,address,address[],bytes[])"](
-    bob.address,
+    signer.address,
     eth.assetAddress,
-    tribe.assetAddress,
+    erc20.assetAddress,
     0,
-    tribe.assetAddress,
+    erc20.assetAddress,
     constants.AddressZero,
     [],
     [],

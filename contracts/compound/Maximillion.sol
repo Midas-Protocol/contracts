@@ -39,10 +39,10 @@ contract Maximillion {
     uint256 received = msg.value;
     uint256 borrows = cEther_.borrowBalanceCurrent(borrower);
     if (received > borrows) {
-      cEther_.repayBorrowBehalf{value: borrows}(borrower);
+      cEther_.repayBorrowBehalf{ value: borrows }(borrower);
       payable(msg.sender).transfer(received - borrows);
     } else {
-      cEther_.repayBorrowBehalf{value: received}(borrower);
+      cEther_.repayBorrowBehalf{ value: received }(borrower);
     }
   }
 }

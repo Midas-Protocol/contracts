@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.11;
 
-import {FixedPointMathLib} from "../FixedPointMathLib.sol";
+import { FixedPointMathLib } from "../FixedPointMathLib.sol";
 
-import {CERC20} from "./interfaces/CERC20.sol";
+import { CERC20 } from "./interfaces/CERC20.sol";
 
 /// @notice Get up to date cToken data without mutating state.
 /// @author Transmissions11 (https://github.com/transmissions11/libcompound)

@@ -17,7 +17,7 @@ contract WhitePaperInterestRateModel is InterestRateModel {
   /**
    * @notice The approximate number of blocks per year that is assumed by the interest rate model
    */
-  uint256 public constant blocksPerYear = 2102400;
+  uint256 public blocksPerYear;
 
   /**
    * @notice The multiplier of utilization rate that gives the slope of the interest rate
@@ -34,7 +34,12 @@ contract WhitePaperInterestRateModel is InterestRateModel {
    * @param baseRatePerYear The approximate target base APR, as a mantissa (scaled by 1e18)
    * @param multiplierPerYear The rate of increase in interest rate wrt utilization (scaled by 1e18)
    */
-  constructor(uint256 baseRatePerYear, uint256 multiplierPerYear) {
+  constructor(
+    uint256 _blocksPerYear,
+    uint256 baseRatePerYear,
+    uint256 multiplierPerYear
+  ) {
+    blocksPerYear = _blocksPerYear;
     baseRatePerBlock = baseRatePerYear.div(blocksPerYear);
     multiplierPerBlock = multiplierPerYear.div(blocksPerYear);
 

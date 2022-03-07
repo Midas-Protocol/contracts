@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.11;
 
-import {SafeTransferLib, ERC20} from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
-import {IFlywheelRewards} from "../interfaces/IFlywheelRewards.sol";
+import { SafeTransferLib, ERC20 } from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
+import { IFlywheelRewards } from "../interfaces/IFlywheelRewards.sol";
 
 /** 
  @title Flywheel Dynamic Reward Stream

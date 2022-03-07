@@ -2,8 +2,8 @@
 
 pragma solidity >=0.8.0;
 
-import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
-import {IStrategy} from "./IStrategy.sol";
+import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
+import { IStrategy } from "./IStrategy.sol";
 
 contract MockVault is ERC20 {
   IStrategy public strategy;

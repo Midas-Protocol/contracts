@@ -245,7 +245,7 @@ contract GovernorAlpha {
     Proposal storage proposal = proposals[proposalId];
     proposal.executed = true;
     for (uint256 i = 0; i < proposal.targets.length; i++) {
-      timelock.executeTransaction{value: proposal.values[i]}(
+      timelock.executeTransaction{ value: proposal.values[i] }(
         proposal.targets[i],
         proposal.values[i],
         proposal.signatures[i],

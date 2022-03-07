@@ -1,7 +1,7 @@
 pragma solidity >=0.8.0;
 pragma experimental ABIEncoderV2;
 
-import {EIP20Interface} from "./EIP20Interface.sol";
+import { EIP20Interface } from "./EIP20Interface.sol";
 
 interface IERC4626 is EIP20Interface {
   /*///////////////////////////////////////////////////////////////

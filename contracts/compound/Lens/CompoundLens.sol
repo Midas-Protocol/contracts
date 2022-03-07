@@ -125,7 +125,7 @@ contract CompoundLens {
     Comptroller comptroller = Comptroller(address(cToken.comptroller()));
     PriceOracle priceOracle = comptroller.oracle();
 
-    return CTokenUnderlyingPrice({cToken: address(cToken), underlyingPrice: priceOracle.getUnderlyingPrice(cToken)});
+    return CTokenUnderlyingPrice({ cToken: address(cToken), underlyingPrice: priceOracle.getUnderlyingPrice(cToken) });
   }
 
   function cTokenUnderlyingPriceAll(CToken[] calldata cTokens) external returns (CTokenUnderlyingPrice[] memory) {
@@ -147,7 +147,7 @@ contract CompoundLens {
     (uint256 errorCode, uint256 liquidity, uint256 shortfall) = comptroller.getAccountLiquidity(account);
     require(errorCode == 0);
 
-    return AccountLimits({markets: comptroller.getAssetsIn(account), liquidity: liquidity, shortfall: shortfall});
+    return AccountLimits({ markets: comptroller.getAssetsIn(account), liquidity: liquidity, shortfall: shortfall });
   }
 
   struct GovReceipt {

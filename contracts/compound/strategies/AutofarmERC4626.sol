@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.11;
 
-import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
-import {ERC4626} from "../../utils/ERC4626.sol";
-import {SafeTransferLib} from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
-import {FixedPointMathLib} from "../../utils/FixedPointMathLib.sol";
-import {IFlywheelCore} from "../../flywheel/interfaces/IFlywheelCore.sol";
+import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
+import { ERC4626 } from "../../utils/ERC4626.sol";
+import { SafeTransferLib } from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
+import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { IFlywheelCore } from "../../flywheel/interfaces/IFlywheelCore.sol";
 
 interface IAutofarmV2 {
   function AUTO() external view returns (address);
@@ -69,6 +69,50 @@ contract AutofarmERC4626 is ERC4626 {
   /// @return The total amount of underlying tokens the user holds.
   function balanceOfUnderlying(address account) public view returns (uint256) {
     return this.balanceOf(account).mulDivDown(totalAssets(), totalSupply);
+  }
+
+  /* ========== MUTATIVE FUNCTIONS ========== */
+
+  function transfer(address to, uint256 amount) public override returns (bool) {
+    //Accrue flywheel rewards for sender and receiver
+    flywheel.accrue(ERC20(address(this)), msg.sender, to);
+
+    balanceOf[msg.sender] -= amount;
+
+    // Cannot overflow because the sum of all user
+    // balances can't exceed the max uint256 value.
+    unchecked {
+      balanceOf[to] += amount;
+    }
+
+    emit Transfer(msg.sender, to, amount);
+
+    return true;
+  }
+
+  function transferFrom(
+    address from,
+    address to,
+    uint256 amount
+  ) public override returns (bool) {
+    //Accrue flywheel rewards for sender and receiver
+    flywheel.accrue(ERC20(address(this)), from, to);
+
+    uint256 allowed = allowance[from][msg.sender]; // Saves gas for limited approvals.
+
+    if (allowed != type(uint256).max) allowance[from][msg.sender] = allowed - amount;
+
+    balanceOf[from] -= amount;
+
+    // Cannot overflow because the sum of all user
+    // balances can't exceed the max uint256 value.
+    unchecked {
+      balanceOf[to] += amount;
+    }
+
+    emit Transfer(from, to, amount);
+
+    return true;
   }
 
   /* ========== INTERNAL FUNCTIONS ========== */
