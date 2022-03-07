@@ -68,6 +68,9 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
   const fpd = await dep.deploy();
   console.log("FusePoolDirectory: ", fpd.address);
@@ -87,6 +90,9 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
   const ffd = await dep.deploy();
   console.log("FuseFeeDistributor: ", ffd.address);
@@ -118,6 +124,9 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
   const fpl = await dep.deploy();
   console.log("FusePoolLens: ", fpl.address);
@@ -146,6 +155,9 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
   const fpls = await dep.deploy();
   console.log("FusePoolLensSecondary: ", fpls.address);
