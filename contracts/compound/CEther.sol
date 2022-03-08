@@ -21,6 +21,7 @@ contract CEther is CToken, CEtherInterface {
    */
   function initialize(
     ComptrollerInterface comptroller_,
+    address fuseAdmin_,
     InterestRateModel interestRateModel_,
     string memory name_,
     string memory symbol_,
@@ -32,6 +33,7 @@ contract CEther is CToken, CEtherInterface {
     uint8 decimals_ = 18;
     super.initialize(
       comptroller_,
+      fuseAdmin_,
       interestRateModel_,
       initialExchangeRateMantissa_,
       name_,

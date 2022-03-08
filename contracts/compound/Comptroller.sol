@@ -10,6 +10,7 @@ import "./ComptrollerInterface.sol";
 import "./ComptrollerStorage.sol";
 import "./Unitroller.sol";
 import "./RewardsDistributorDelegate.sol";
+import "./IFuseFeeDistributor.sol";
 
 /**
  * @title Compound's Comptroller Contract
@@ -82,6 +83,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
   // liquidationIncentiveMantissa must be no greater than this value
   uint256 internal constant liquidationIncentiveMaxMantissa = 1.5e18; // 1.5
+
+  constructor(address _fuseAdmin) {
+    fuseAdmin = IFuseFeeDistributor(payable(_fuseAdmin));
+  }
 
   /*** Assets You Are In ***/
 

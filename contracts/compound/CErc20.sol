@@ -25,6 +25,7 @@ contract CErc20 is CToken, CErc20Interface {
   function initialize(
     address underlying_,
     ComptrollerInterface comptroller_,
+    address fuseAdmin_,
     InterestRateModel interestRateModel_,
     string memory name_,
     string memory symbol_,
@@ -36,6 +37,7 @@ contract CErc20 is CToken, CErc20Interface {
     uint8 decimals_ = EIP20Interface(underlying_).decimals();
     super.initialize(
       comptroller_,
+      fuseAdmin_,
       interestRateModel_,
       initialExchangeRateMantissa_,
       name_,

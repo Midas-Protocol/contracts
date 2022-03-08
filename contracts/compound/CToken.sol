@@ -36,6 +36,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
    */
   function initialize(
     ComptrollerInterface comptroller_,
+    address fuseAdmin_,
     InterestRateModel interestRateModel_,
     uint256 initialExchangeRateMantissa_,
     string memory name_,
@@ -44,8 +45,10 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     uint256 reserveFactorMantissa_,
     uint256 adminFeeMantissa_
   ) public {
-    require(msg.sender == address(fuseAdmin), "only Fuse admin may initialize the market");
+    require(msg.sender == fuseAdmin_, "only Fuse admin may initialize the market");
     require(accrualBlockNumber == 0 && borrowIndex == 0, "market may only be initialized once");
+
+    fuseAdmin = IFuseFeeDistributor(payable(fuseAdmin_));
 
     // Set initial exchange rate
     initialExchangeRateMantissa = initialExchangeRateMantissa_;

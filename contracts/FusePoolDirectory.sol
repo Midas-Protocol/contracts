@@ -116,6 +116,7 @@ contract FusePoolDirectory is OwnableUpgradeable {
    */
   function deployPool(
     string memory name,
+    address fuseAdmin,
     address implementation,
     bool enforceWhitelist,
     uint256 closeFactor,
@@ -123,6 +124,7 @@ contract FusePoolDirectory is OwnableUpgradeable {
     address priceOracle
   ) external returns (uint256, address) {
     // Input validation
+    require(fuseAdmin != address(0), "No fuseAdmin address specified.");
     require(implementation != address(0), "No Comptroller implementation contract address specified.");
     require(priceOracle != address(0), "No PriceOracle contract address specified.");
 
@@ -134,7 +136,7 @@ contract FusePoolDirectory is OwnableUpgradeable {
 
     // Deploy Unitroller using msg.sender, name, and block.number as a salt
     bytes32 salt = keccak256(abi.encodePacked(msg.sender, name, block.number));
-    bytes memory unitrollerCreationCode = abi.encodePacked(type(Unitroller).creationCode);
+    bytes memory unitrollerCreationCode = abi.encodePacked(type(Unitroller).creationCode, fuseAdmin);
     address proxy = Create2Upgradeable.deploy(0, salt, unitrollerCreationCode);
 
     // Setup Unitroller

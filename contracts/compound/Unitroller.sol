@@ -3,6 +3,7 @@ pragma solidity >=0.8.0;
 
 import "./ErrorReporter.sol";
 import "./ComptrollerStorage.sol";
+import "./Comptroller.sol";
 
 /**
  * @title Unitroller
@@ -40,9 +41,11 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
    */
   event NewAdmin(address oldAdmin, address newAdmin);
 
-  constructor() {
+  constructor(address _fuseAdmin) {
     // Set admin to caller
     admin = msg.sender;
+
+    fuseAdmin = IFuseFeeDistributor(payable(_fuseAdmin));
   }
 
   /*** Admin Functions ***/
@@ -54,6 +57,8 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
     if (!fuseAdmin.comptrollerImplementationWhitelist(comptrollerImplementation, newPendingImplementation)) {
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_CONTRACT_CHECK);
     }
+    require(Comptroller(newPendingImplementation).fuseAdmin() == fuseAdmin, "fuseAdmin not matching");
+
     address oldPendingImplementation = pendingComptrollerImplementation;
     pendingComptrollerImplementation = newPendingImplementation;
     emit NewPendingImplementation(oldPendingImplementation, pendingComptrollerImplementation);
