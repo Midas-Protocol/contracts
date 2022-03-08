@@ -7,6 +7,7 @@ export const deployConfig: ChainDeployConfig = {
   nativeTokenName: "Binance Network Token (Testnet)",
   nativeTokenSymbol: "TBNB",
   uniswapV2RouterAddress: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
+  uniswapV2FactoryAddress: "0x6725F303b657a9451d8BA641348b6761A6CC7a17",
   stableToken: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
   wBTCToken: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
   blocksPerYear: 20 * 24 * 365 * 60,

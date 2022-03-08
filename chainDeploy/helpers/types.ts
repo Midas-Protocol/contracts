@@ -9,6 +9,7 @@ export type ChainDeployConfig = {
   nativeTokenName: string;
   nativeTokenSymbol: string;
   uniswapV2RouterAddress: string;
+  uniswapV2FactoryAddress: string;
   stableToken?: string;
   wBTCToken?: string;
   pairInitHashCode?: string;
