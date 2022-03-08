@@ -6,6 +6,7 @@ export const deployConfig: ChainDeployConfig = {
   nativeTokenSymbol: "PHO",
   blocksPerYear: 8.6 * 24 * 365 * 60,
   uniswapV2RouterAddress: "",
+  uniswapV2FactoryAddress: "",
   stableToken: "",
   wBTCToken: "",
   hardcoded: [],

@@ -1,4 +1,6 @@
 import { SALT } from "../../deploy/deploy";
+import { UniswapTwapPriceOracleV2Factory } from "../../typechain";
+import { constants } from "ethers";
 
 export const deployUniswapOracle = async ({ ethers, getNamedAccounts, deployments, deployConfig }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
@@ -27,6 +29,23 @@ export const deployUniswapOracle = async ({ ethers, getNamedAccounts, deployment
     args: [utpor.address, utpo.address, deployConfig.wtoken],
     log: true,
   });
-  const utpof = await dep.deploy();
+  const utpof: UniswapTwapPriceOracleV2Factory = await dep.deploy();
   console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
+
+  const uniTwapOracleFactory = (await ethers.getContract(
+    "UniswapTwapPriceOracleV2Factory",
+    deployer
+  )) as UniswapTwapPriceOracleV2Factory;
+
+  const existingOracle = await uniTwapOracleFactory.callStatic.oracles(
+    deployConfig.uniswapV2FactoryAddress,
+    deployConfig.wtoken
+  );
+  if (existingOracle == constants.AddressZero) {
+    const tx = await uniTwapOracleFactory.deploy(deployConfig.uniswapV2FactoryAddress, deployConfig.wtoken);
+    await tx.wait();
+    console.log("UniswapTwapFactory deployed", tx.hash);
+  } else {
+    console.log("UniswapTwapFactory already deployed");
+  }
 };
