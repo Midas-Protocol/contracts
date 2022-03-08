@@ -25,6 +25,8 @@ import "./external/uniswap/UniswapV2Library.sol";
 import "./external/pcs/PancakeLibrary.sol";
 import "./external/pcs/IPancakePair.sol";
 import "./utils/Multicall.sol";
+import "./external/compound/IComptroller.sol";
+
 
 import "hardhat/console.sol";
 
@@ -1014,9 +1016,10 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
     return abi.decode(returndata, (IERC20Upgradeable, uint256));
   }
 
-//  function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
-//    return KeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
-//  }
+  function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
+    IPriceOracle oracle = IComptroller(cToken.comptroller()).oracle();
+    return KeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
+  }
 
   /**
    * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`], but performing a delegate call.

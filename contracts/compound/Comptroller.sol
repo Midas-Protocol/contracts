@@ -442,8 +442,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 //    UniswapOracle.ProofData calldata proofData,
 //    address _keydonixPriceOracle
 //  ) external override returns (uint256) {
+//    // call 1
 //    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cToken), proofData);
 //
+//    // call 2
 //    return borrowAllowed(cToken, borrower, borrowAmount);
 //  }
 

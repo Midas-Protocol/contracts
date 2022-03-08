@@ -1,13 +1,14 @@
-import { constants, providers } from "ethers";
+import {constants, providers, utils} from "ethers";
 import {deployments, ethers} from "hardhat";
 import {expect} from "chai";
-import { KeydonixUniswapTwapPriceOracle } from '../typechain';
+import { KeydonixUniswapTwapPriceOracle, Comptroller } from '../typechain';
 import * as OracleSdkAdapter from "@keydonix/uniswap-oracle-sdk-adapter";
 import * as OracleSdk from "@keydonix/uniswap-oracle-sdk";
 import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
 
 describe.only( "Verify price proof tests",  () => {
     let keydonixOracle: KeydonixUniswapTwapPriceOracle;
+    let comptroller: Comptroller;
     let denominationTokenAddress: string;
     let wtoken: string;
     let uniswapExchangeAddress = "0xbB0F21795d19bc297FfA6F771Cca5055D59a35eC";
@@ -67,6 +68,37 @@ describe.only( "Verify price proof tests",  () => {
         }
 
         keydonixOracle = await ethers.getContract("KeydonixUniswapTwapPriceOracle", bob);
+        // comptroller = await ethers.getContract("Comptroller", bob);
+    });
+
+    it.only("should be able to verify the price with proof and make another action in a single tx", async function () {
+        let verifyPriceCall: Uint8Array = new Uint8Array();
+        let verifyPriceSignature = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("verifyPrice(address,(bytes,bytes,bytes,bytes))"))
+            .substring(0, 10);
+
+        console.log(`signature ${verifyPriceSignature}`);
+        const proof = {
+            block: [1],
+            accountProofNodesRlp: [1],
+            reserveAndTimestampProofNodesRlp: [1],
+            priceAccumulatorProofNodesRlp: [1],
+        };
+
+        let proofScheme = "";
+
+        let args = [denominationTokenAddress, proof];
+        const abiCoder = new utils.AbiCoder();
+        let encodedParams = abiCoder.encode(["address", "(bytes block,bytes accountProofNodesRlp,bytes reserveAndTimestampProofNodesRlp,bytes priceAccumulatorProofNodesRlp)"], args);
+        let data = ethers.utils.hexConcat([verifyPriceSignature, encodedParams]);
+
+        console.log(` data is ${data}`);
+
+        let tx: providers.TransactionResponse;
+        let rec: providers.TransactionReceipt;
+
+        // tx = keydonixOracle.multicall(data);
+        // rec = await tx.wait();
+        // expect(rec.status).to.eq(1);
     });
 
     it("should verify an OracleSDK generated proof", async function () {
@@ -137,6 +169,7 @@ describe.only( "Verify price proof tests",  () => {
         console.log(`got price ${price}`);
     });
 
+    // package.json : "file:../../uniswap-oracle/sdk-adapter",
     function bigintToHexAddress(value: bigint): string {
         return `0x${value.toString(16).padStart(40, '0')}`
     }
