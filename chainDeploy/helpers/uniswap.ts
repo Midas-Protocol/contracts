@@ -2,7 +2,13 @@ import { SALT } from "../../deploy/deploy";
 import { UniswapTwapPriceOracleV2Factory } from "../../typechain";
 import { constants } from "ethers";
 
-export const deployUniswapOracle = async ({ ethers, getNamedAccounts, deployments, deployConfig }): Promise<void> => {
+export const deployUniswapOracle = async ({
+  run,
+  ethers,
+  getNamedAccounts,
+  deployments,
+  deployConfig,
+}): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   //// Uniswap Oracle
   let dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
@@ -38,17 +44,34 @@ export const deployUniswapOracle = async ({ ethers, getNamedAccounts, deployment
   )) as UniswapTwapPriceOracleV2Factory;
 
   const existingOracle = await uniTwapOracleFactory.callStatic.oracles(
-    deployConfig.uniswapV2FactoryAddress,
+    deployConfig.uniswap.uniswapV2FactoryAddress,
     deployConfig.wtoken
   );
   if (existingOracle == constants.AddressZero) {
-    const tx = await uniTwapOracleFactory.deploy(deployConfig.uniswapV2FactoryAddress, deployConfig.wtoken);
+    // deploy oracle with wtoken as base token
+    let tx = await uniTwapOracleFactory.deploy(deployConfig.uniswap.uniswapV2FactoryAddress, deployConfig.wtoken);
     await tx.wait();
-    const deployedTwapPriceOracleV2 = await uniTwapOracleFactory.callStatic.oracles(
-      deployConfig.uniswapV2FactoryAddress,
+
+    const nativeOracle = await uniTwapOracleFactory.callStatic.oracles(
+      deployConfig.uniswap.uniswapV2FactoryAddress,
       deployConfig.wtoken
     );
-    console.log("UniswapTwapPriceOracleV2 deployed", tx.hash, "address: ", deployedTwapPriceOracleV2);
+
+    const underlyings = deployConfig.uniswap.uniswapOracleInitialDeployTokens.join(",");
+    const oracles = Array(deployConfig.uniswap.uniswapOracleInitialDeployTokens.length).fill(nativeOracle).join(",");
+
+    console.log(underlyings, oracles, "underlyings, oracles");
+
+    run("oracle:add-tokens", { underlyings, oracles });
+
+    console.log(
+      "UniswapTwapPriceOracleV2 oracle deployed",
+      tx.hash,
+      "address: ",
+      nativeOracle,
+      "tokens: ",
+      underlyings
+    );
   } else {
     console.log("UniswapTwapPriceOracleV2 already deployed at: ", existingOracle);
   }

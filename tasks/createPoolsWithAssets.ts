@@ -37,9 +37,9 @@ task("pools:create", "Create pool if does not exist")
     const { chainId } = await hre.ethers.provider.getNetwork();
     const account = await hre.ethers.getNamedSigner(taskArgs.creator);
     if (!taskArgs.priceOracle) {
-      await hre.run("set-price", { token: "ETH", price: "1" });
-      await hre.run("set-price", { token: "TOUCH", price: "0.1" });
-      await hre.run("set-price", { token: "TRIBE", price: "0.01" });
+      await hre.run("oracle:set-price", { token: "ETH", price: "1" });
+      await hre.run("oracle:set-price", { token: "TOUCH", price: "0.1" });
+      await hre.run("oracle:set-price", { token: "TRIBE", price: "0.01" });
       taskArgs.priceOracle = (await hre.ethers.getContract("MasterPriceOracle", account)).address;
     }
 
@@ -73,7 +73,6 @@ task("pools:borrow", "Borrow collateral")
   .addParam("symbol", "Symbol of token to be borrowed", "ETH")
   .addParam("poolAddress", "Address of the poll")
   .setAction(async (taskArgs, hre) => {
-    const { chainId } = await hre.ethers.provider.getNetwork();
     const collateralModule = await import("../test/utils/collateral");
     const account = await hre.ethers.getNamedSigner(taskArgs.account);
     await collateralModule.borrowCollateral(
@@ -93,7 +92,6 @@ task("pools:deposit", "Deposit collateral")
   .setAction(async (taskArgs, hre) => {
     const collateralModule = await import("../test/utils/collateral");
     const account = await hre.ethers.getNamedSigner(taskArgs.account);
-    const { chainId } = await hre.ethers.provider.getNetwork();
     await collateralModule.addCollateral(
       taskArgs.poolAddress,
       account,
@@ -113,9 +111,9 @@ task("pools:create-unhealthy-token-borrow-eth-collateral", "Borrow TOUCH against
   .addParam("supplyAccount", "Account from which to supply", "deployer", types.string)
   .addParam("borrowAccount", "Account from which to borrow", "alice", types.string)
   .setAction(async (taskArgs, hre) => {
-    await hre.run("set-price", { token: "ETH", price: "1" });
-    await hre.run("set-price", { token: "TOUCH", price: "0.1" });
-    await hre.run("set-price", { token: "TRIBE", price: "0.01" });
+    await hre.run("oracle:set-price", { token: "ETH", price: "1" });
+    await hre.run("oracle:set-price", { token: "TOUCH", price: "0.1" });
+    await hre.run("oracle:set-price", { token: "TRIBE", price: "0.01" });
 
     const poolAddress = await hre.run("pools:create", { name: taskArgs.name });
 
@@ -147,7 +145,7 @@ task("pools:create-unhealthy-token-borrow-eth-collateral", "Borrow TOUCH against
       poolAddress,
     });
     console.log(`borrowed TOUCH using ETH as collateral`);
-    await hre.run("set-price", { token: "TOUCH", price: "1", poolAddress });
+    await hre.run("oracle:set-price", { token: "TOUCH", price: "1", poolAddress });
   });
 
 task("pools:create-unhealthy-eth-borrow-token-collateral", "Borrow ETH against TRIBE")
@@ -160,9 +158,9 @@ task("pools:create-unhealthy-eth-borrow-token-collateral", "Borrow ETH against T
   .addParam("supplyAccount", "Account from which to supply", "deployer", types.string)
   .addParam("borrowAccount", "Account from which to borrow", "alice", types.string)
   .setAction(async (taskArgs, hre) => {
-    await hre.run("set-price", { token: "ETH", price: "1" });
-    await hre.run("set-price", { token: "TOUCH", price: "1" });
-    await hre.run("set-price", { token: "TRIBE", price: "0.1" });
+    await hre.run("oracle:set-price", { token: "ETH", price: "1" });
+    await hre.run("oracle:set-price", { token: "TOUCH", price: "1" });
+    await hre.run("oracle:set-price", { token: "TRIBE", price: "0.1" });
 
     const poolAddress = await hre.run("pools:create", { name: taskArgs.name });
 
@@ -194,7 +192,7 @@ task("pools:create-unhealthy-eth-borrow-token-collateral", "Borrow ETH against T
       poolAddress,
     });
     console.log(`borrowed ETH using TRIBE as collateral`);
-    await hre.run("set-price", { token: "TRIBE", price: "0.01", poolAddress });
+    await hre.run("oracle:set-price", { token: "TRIBE", price: "0.01", poolAddress });
   });
 
 task("pools:create-unhealthy-token-borrow-token-collateral", "Borrow ETH against TRIBE")
@@ -207,9 +205,9 @@ task("pools:create-unhealthy-token-borrow-token-collateral", "Borrow ETH against
   .addParam("supplyAccount", "Account from which to supply", "deployer", types.string)
   .addParam("borrowAccount", "Account from which to borrow", "alice", types.string)
   .setAction(async (taskArgs, hre) => {
-    await hre.run("set-price", { token: "ETH", price: "1" });
-    await hre.run("set-price", { token: "TOUCH", price: "0.1" });
-    await hre.run("set-price", { token: "TRIBE", price: "0.01" });
+    await hre.run("oracle:set-price", { token: "ETH", price: "1" });
+    await hre.run("oracle:set-price", { token: "TOUCH", price: "0.1" });
+    await hre.run("oracle:set-price", { token: "TRIBE", price: "0.01" });
 
     const poolAddress = await hre.run("pools:create", { name: taskArgs.name });
 
@@ -241,5 +239,5 @@ task("pools:create-unhealthy-token-borrow-token-collateral", "Borrow ETH against
       poolAddress,
     });
     console.log(`borrowed TOUCH using TRIBE as collateral`);
-    await hre.run("set-price", { token: "TOUCH", price: "1", poolAddress });
+    await hre.run("oracle:set-price", { token: "TOUCH", price: "1", poolAddress });
   });

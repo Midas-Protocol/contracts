@@ -7,14 +7,21 @@ export const deployConfig: ChainDeployConfig = {
   nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
   nativeTokenName: "Binance Network Token",
   nativeTokenSymbol: "BNB",
-  uniswapV2RouterAddress: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
-  uniswapV2FactoryAddress: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
   stableToken: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
   wBTCToken: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
-  pairInitHashCode: ethers.utils.hexlify("0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5"),
   blocksPerYear: 20 * 24 * 365 * 60,
-  hardcoded: [],
-  uniswapData: [{ lpDisplayName: "PancakeSwap", lpName: "Pancake LPs", lpSymbol: "Cake-LP" }],
+  uniswap: {
+    hardcoded: [],
+    uniswapData: [{ lpDisplayName: "PancakeSwap", lpName: "Pancake LPs", lpSymbol: "Cake-LP" }],
+    pairInitHashCode: ethers.utils.hexlify("0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5"),
+    uniswapV2RouterAddress: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
+    uniswapV2FactoryAddress: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
+    uniswapOracleInitialDeployTokens: [
+      "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56", // BUSD
+      "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", // BTCB
+      "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", // ETH
+    ],
+  },
 };
 
 export const assets = [
@@ -44,7 +51,7 @@ export const assets = [
   },
 ];
 
-export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
+export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   ////
   //// ORACLES
@@ -100,7 +107,7 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
   }
 
   //// Uniswap Oracle
-  await deployUniswapOracle({ ethers, getNamedAccounts, deployments, deployConfig });
+  await deployUniswapOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
   ////
 
   let dep = await deployments.deterministic("SimplePriceOracle", {

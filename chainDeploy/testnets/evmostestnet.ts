@@ -5,16 +5,19 @@ import { ChainDeployConfig } from "../helpers";
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xA30404AFB4c43D25542687BCF4367F59cc77b5d2",
   nativeTokenName: "Evmos (Testnet)",
-  uniswapV2RouterAddress: "0x638771E1eE3c85242D811e9eEd89C71A4F8F4F73",
-  uniswapV2FactoryAddress: "0xBB86C1332f54afb6509CB599BF88980f7b389403",
   nativeTokenSymbol: "TEVMOS",
   blocksPerYear: 12 * 24 * 365 * 60, // 5 second blocks, 12 blocks per minute
-  hardcoded: [],
-  uniswapData: [],
-  pairInitHashCode: ethers.utils.hexlify("0xa192c894487128ec7b68781ed7bd7e3141d1718df9e4e051e0124b7671d9a6ef"),
+  uniswap: {
+    hardcoded: [],
+    uniswapData: [],
+    pairInitHashCode: ethers.utils.hexlify("0xa192c894487128ec7b68781ed7bd7e3141d1718df9e4e051e0124b7671d9a6ef"),
+    uniswapV2RouterAddress: "0x638771E1eE3c85242D811e9eEd89C71A4F8F4F73",
+    uniswapV2FactoryAddress: "0xBB86C1332f54afb6509CB599BF88980f7b389403",
+    uniswapOracleInitialDeployTokens: [],
+  },
 };
 
-export const deploy = async ({ getNamedAccounts, deployments, ethers }): Promise<void> => {
+export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   console.log("deployer: ", deployer);
   let tx: providers.TransactionResponse;

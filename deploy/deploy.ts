@@ -7,7 +7,7 @@ import { deployFuseSafeLiquidator } from "../chainDeploy/helpers/liquidator";
 
 export const SALT = "ilovemidas";
 
-const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
+const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
   const chainId = await getChainId();
   console.log("chainId: ", chainId);
   const { deployer, alice, bob } = await getNamedAccounts();
@@ -128,12 +128,12 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
       fusePoolDirectory.address,
       chainDeployParams.nativeTokenName,
       chainDeployParams.nativeTokenSymbol,
-      chainDeployParams.hardcoded.map((h) => h.address),
-      chainDeployParams.hardcoded.map((h) => h.name),
-      chainDeployParams.hardcoded.map((h) => h.symbol),
-      chainDeployParams.uniswapData.map((u) => u.lpName),
-      chainDeployParams.uniswapData.map((u) => u.lpSymbol),
-      chainDeployParams.uniswapData.map((u) => u.lpDisplayName)
+      chainDeployParams.uniswap.hardcoded.map((h) => h.address),
+      chainDeployParams.uniswap.hardcoded.map((h) => h.name),
+      chainDeployParams.uniswap.hardcoded.map((h) => h.symbol),
+      chainDeployParams.uniswap.uniswapData.map((u) => u.lpName),
+      chainDeployParams.uniswap.uniswapData.map((u) => u.lpSymbol),
+      chainDeployParams.uniswap.uniswapData.map((u) => u.lpDisplayName)
     );
     await tx.wait();
     console.log("FusePoolLens initialized", tx.hash);
@@ -216,7 +216,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   //// CHAIN SPECIFIC DEPLOYMENT
   console.log("Running deployment for chain: ", chainId);
   if (deployFunc) {
-    await deployFunc({ ethers, getNamedAccounts, deployments });
+    await deployFunc({ run, ethers, getNamedAccounts, deployments });
   }
   ////
 };

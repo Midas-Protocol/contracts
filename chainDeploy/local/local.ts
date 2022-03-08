@@ -6,17 +6,20 @@ export const deployConfig: ChainDeployConfig = {
   wtoken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
   nativeTokenName: "Ethereum (Local)",
   nativeTokenSymbol: "ETH",
-  uniswapV2RouterAddress: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
-  uniswapV2FactoryAddress: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
   stableToken: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
   wBTCToken: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-  pairInitHashCode: ethers.utils.hexlify("0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f"),
   blocksPerYear: 4 * 24 * 365 * 60,
-  hardcoded: [],
-  uniswapData: [],
+  uniswap: {
+    uniswapV2RouterAddress: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+    uniswapV2FactoryAddress: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+    pairInitHashCode: ethers.utils.hexlify("0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f"),
+    hardcoded: [],
+    uniswapData: [],
+    uniswapOracleInitialDeployTokens: [],
+  },
 };
 
-export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
+export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer, alice, bob } = await getNamedAccounts();
 
   ////
