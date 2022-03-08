@@ -35,11 +35,13 @@ describe("FusePoolDirectory", function () {
 
       //// DEPLOY POOL
       const POOL_NAME = "TEST";
+      const FUSE_ADMIN_ADDRESS = (await ethers.getContract("FuseFeeDistributor")).address;
       const bigCloseFactor = utils.parseEther((50 / 100).toString());
       const bigLiquidationIncentive = utils.parseEther((8 / 100 + 1).toString());
       const deployedPool = await fpdWithSigner.deployPool(
         POOL_NAME,
         implementationComptroller.address,
+        FUSE_ADMIN_ADDRESS,
         true,
         bigCloseFactor,
         bigLiquidationIncentive,
@@ -80,7 +82,7 @@ describe("FusePoolDirectory", function () {
       //// DEPLOY ASSETS
       const jrm = await ethers.getContract("JumpRateModel", alice);
 
-      const assets = await getAssetsConf(comptroller, jrm.address, ethers);
+      const assets = await getAssetsConf(comptroller, FUSE_ADMIN_ADDRESS, jrm.address, ethers);
       const nativeAsset = assets.find((a) => a.underlying === constants.AddressZero);
       const erc20Asset = assets.find((a) => a.underlying != constants.AddressZero);
 
@@ -90,6 +92,7 @@ describe("FusePoolDirectory", function () {
 
       let deployArgs = [
         nativeAsset.comptroller,
+        FUSE_ADMIN_ADDRESS,
         nativeAsset.interestRateModel,
         nativeAsset.name,
         nativeAsset.symbol,
@@ -100,7 +103,7 @@ describe("FusePoolDirectory", function () {
       ];
       let abiCoder = new utils.AbiCoder();
       let constructorData = abiCoder.encode(
-        ["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
+        ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
         deployArgs
       );
       let errorCode;
@@ -129,6 +132,7 @@ describe("FusePoolDirectory", function () {
       deployArgs = [
         erc20Asset.underlying,
         erc20Asset.comptroller,
+        FUSE_ADMIN_ADDRESS,
         erc20Asset.interestRateModel,
         erc20Asset.name,
         erc20Asset.symbol,
@@ -140,7 +144,7 @@ describe("FusePoolDirectory", function () {
 
       abiCoder = new utils.AbiCoder();
       constructorData = abiCoder.encode(
-        ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
+        ["address", "address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
         deployArgs
       );
 

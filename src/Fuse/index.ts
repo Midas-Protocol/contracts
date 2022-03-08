@@ -200,6 +200,7 @@ export default class Fuse {
       const tx = await contract.deployPool(
         poolName,
         implementationAddress,
+        this.chainDeployment.FuseFeeDistributor.address,
         enforceWhitelist,
         closeFactor,
         liquidationIncentive,
@@ -420,6 +421,7 @@ export default class Fuse {
 
     let deployArgs = [
       conf.comptroller,
+      conf.fuseFeeDistributor,
       conf.interestRateModel,
       conf.name,
       conf.symbol,
@@ -430,7 +432,7 @@ export default class Fuse {
     ];
     const abiCoder = new utils.AbiCoder();
     const constructorData = abiCoder.encode(
-      ["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
+      ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
       deployArgs
     );
     const comptroller = new Contract(
