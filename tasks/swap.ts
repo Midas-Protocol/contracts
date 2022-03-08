@@ -1,5 +1,4 @@
 import { task, types } from "hardhat/config";
-import { ERC20 } from "../typechain";
 
 export default task("swap-wtoken-for-token", "Swap WNATIVE for token")
   .addParam("token", "token address", undefined, types.string)
@@ -11,7 +10,7 @@ export default task("swap-wtoken-for-token", "Swap WNATIVE for token")
     const sdk = new sdkModule.Fuse(ethers.provider, (await ethers.provider.getNetwork()).chainId);
     const account = await ethers.getNamedSigner(_account);
 
-    const tokenContract = new ethers.Contract(_token, sdkModule.ERC20Abi, account) as ERC20;
+    const tokenContract = new ethers.Contract(_token, sdkModule.ERC20Abi, account);
     await tokenContract.approve(
       sdk.chainSpecificAddresses.UNISWAP_V2_ROUTER,
       ethers.BigNumber.from(2).pow(ethers.BigNumber.from(256)).sub(ethers.constants.One),
