@@ -15,6 +15,7 @@ import "./external/uniswap/IUniswapV2Pair.sol";
 import "./FusePoolDirectory.sol";
 import "./oracles/MasterPriceOracle.sol";
 import "./utils/Multicall.sol";
+import "./oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
 
 /**
  * @title FusePoolLens
@@ -674,6 +675,6 @@ contract FusePoolLens is Initializable, Multicall {
 
   function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
     IPriceOracle oracle = IComptroller(cToken.comptroller()).oracle();
-    return KeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
+    return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
   }
 }

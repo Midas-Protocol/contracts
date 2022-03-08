@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "./liquidators/IRedemptionStrategy.sol";
 
 import "./external/compound/ICToken.sol";
-import "./oracles/default/KeydonixUniswapTwapPriceOracle.sol";
+import "./oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
 import "./oracles/keydonix/UniswapOracle.sol";
 
 import "./external/compound/ICErc20.sol";
@@ -221,8 +221,8 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
     UniswapOracle.ProofData calldata collateralProofData,
     address _keydonixPriceOracle
   ) external returns (uint256) {
-    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(cErc20, repaidProofData);
-    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(cTokenCollateral, collateralProofData);
+    IKeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(cErc20, repaidProofData);
+    IKeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(cTokenCollateral, collateralProofData);
 
     return
       safeLiquidate(
@@ -321,7 +321,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
     UniswapOracle.ProofData calldata collateralProofData,
     address _keydonixPriceOracle
   ) external returns (uint256) {
-    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(cErc20Collateral, collateralProofData);
+    IKeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(cErc20Collateral, collateralProofData);
 
     return
       safeLiquidate(
@@ -1018,7 +1018,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
 
   function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
     IPriceOracle oracle = IComptroller(cToken.comptroller()).oracle();
-    return KeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
+    return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
   }
 
   /**

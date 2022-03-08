@@ -11,7 +11,7 @@ import "./ComptrollerStorage.sol";
 import "./Unitroller.sol";
 import "./RewardsDistributorDelegate.sol";
 
-import "../oracles/default/KeydonixUniswapTwapPriceOracle.sol";
+import "../oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
 import "../oracles/keydonix/UniswapOracle.sol";
 
 import "../utils/Multicall.sol";
@@ -167,21 +167,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     return Error.NO_ERROR;
   }
-
-//  function exitMarketWithPriceProof(
-//    address cTokenAddress,
-//    UniswapOracle.ProofData[] calldata proofData,
-//    address _keydonixPriceOracle
-//  ) external override returns (uint256) {
-//    CToken[] memory assets = accountAssets[msg.sender];
-//    require(assets.length == proofData.length, "invalid price proof data size");
-//    for (uint256 i = 0; i < assets.length; i++) {
-//      ICToken asInterface = ICToken(address(assets[i]));
-//      KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(asInterface, proofData[i]);
-//    }
-//
-//    return exitMarket(cTokenAddress);
-//  }
 
   /**
    * @notice Removes asset from sender's account liquidity calculation
@@ -341,23 +326,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     suppliers[minter] = true;
   }
 
-//  function redeemAllowedWithPriceProof(
-//    address cToken,
-//    address redeemer,
-//    uint256 redeemTokens,
-//    UniswapOracle.ProofData[] calldata proofData,
-//    address _keydonixPriceOracle
-//  ) external override returns (uint256) {
-//    CToken[] memory assets = accountAssets[redeemer];
-//    require(assets.length == proofData.length, "invalid price proof data size");
-//    for (uint256 i = 0; i < assets.length; i++) {
-//      ICToken asInterface = ICToken(address(assets[i]));
-//      KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(asInterface, proofData[i]);
-//    }
-//
-//    return redeemAllowed(cToken, redeemer, redeemTokens);
-//  }
-
   /**
    * @notice Checks if the account should be allowed to redeem tokens in the given market
    * @param cToken The market to verify the redeem against
@@ -435,20 +403,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
   }
 
-//  function borrowAllowedWithPriceProof(
-//    address cToken,
-//    address borrower,
-//    uint256 borrowAmount,
-//    UniswapOracle.ProofData calldata proofData,
-//    address _keydonixPriceOracle
-//  ) external override returns (uint256) {
-//    // call 1
-//    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cToken), proofData);
-//
-//    // call 2
-//    return borrowAllowed(cToken, borrower, borrowAmount);
-//  }
-
   /**
    * @notice Checks if the account should be allowed to borrow the underlying asset of the given market
    * @param cToken The market to verify the borrow against
@@ -522,17 +476,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     return uint256(Error.NO_ERROR);
   }
-
-//  function borrowWithinLimitsWithPriceProof(
-//    address cToken,
-//    uint256 accountBorrowsNew,
-//    UniswapOracle.ProofData calldata proofData,
-//    address _keydonixPriceOracle
-//  ) external override returns (uint256) {
-//    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cToken), proofData);
-//
-//    return borrowWithinLimits(cToken, accountBorrowsNew);
-//  }
 
   /**
    * @notice Checks if the account should be allowed to borrow the underlying asset of the given market
@@ -656,22 +599,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       maxAssets = maxAssets;
     }
   }
-
-//  function liquidateBorrowAllowedWithPriceProof(
-//    address cTokenBorrowed,
-//    address cTokenCollateral,
-//    address liquidator,
-//    address borrower,
-//    uint256 repayAmount,
-//    UniswapOracle.ProofData calldata borrowedProofData,
-//    UniswapOracle.ProofData calldata collateralProofData,
-//    address _keydonixPriceOracle
-//  ) external override returns (uint256) {
-//    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cTokenBorrowed), borrowedProofData);
-//    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cTokenCollateral), collateralProofData);
-//
-//    return liquidateBorrowAllowed(cTokenBorrowed, cTokenCollateral, liquidator, borrower, repayAmount);
-//  }
 
   /**
    * @notice Checks if the liquidation should be allowed to occur
@@ -819,24 +746,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       maxAssets = maxAssets;
     }
   }
-
-//  function transferAllowedWithPriceProof(
-//    address cToken,
-//    address src,
-//    address dst,
-//    uint256 transferTokens,
-//    UniswapOracle.ProofData[] calldata proofData,
-//    address _keydonixPriceOracle
-//  ) external override returns (uint256) {
-//    CToken[] memory assets = accountAssets[src];
-//    require(assets.length == proofData.length, "invalid price proof data size");
-//    for (uint256 i = 0; i < assets.length; i++) {
-//      ICToken asInterface = ICToken(address(assets[i]));
-//      KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(asInterface, proofData[i]);
-//    }
-//
-//    return transferAllowed(cToken, src, dst, transferTokens);
-//  }
 
   /**
    * @notice Checks if the account should be allowed to transfer tokens in the given market
@@ -1116,20 +1025,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return (Error.NO_ERROR, 0, vars.sumBorrowPlusEffects - vars.sumCollateral);
     }
   }
-
-  //    function liquidateCalculateSeizeTokensWithPriceProof(
-  //        address cTokenBorrowed,
-  //        address cTokenCollateral,
-  //        uint256 actualRepayAmount,
-  //        UniswapOracle.ProofData calldata borrowedProofData,
-  //        UniswapOracle.ProofData calldata collateralProofData,
-  //        address _keydonixPriceOracle
-  //    ) override external view returns (uint256, uint256) {
-  //        KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cTokenBorrowed), borrowedProofData);
-  //        KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(ICToken(cTokenCollateral), collateralProofData);
-  //
-  //        return liquidateCalculateSeizeTokens(cTokenBorrowed, cTokenCollateral, actualRepayAmount);
-  //    }
 
   /**
    * @notice Calculate number of tokens of collateral asset to seize given an underlying amount
@@ -1749,6 +1644,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   }
 
   function verifyPrice(address cToken, UniswapOracle.ProofData calldata proofData) public override returns (uint256, uint256) {
-    return KeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(ICToken(cToken), proofData);
+    return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(ICToken(cToken), proofData);
   }
 }

@@ -10,7 +10,7 @@ import "./external/compound/ICToken.sol";
 import "./external/compound/IRewardsDistributor.sol";
 import "./external/uniswap/IUniswapV2Pair.sol";
 
-import "./oracles/default/KeydonixUniswapTwapPriceOracle.sol";
+import "./oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
 
 import "./FusePoolDirectory.sol";
 import "./utils/Multicall.sol";
@@ -404,6 +404,6 @@ contract FusePoolLensSecondary is Initializable, Multicall {
 
   function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
     IPriceOracle oracle = IComptroller(cToken.comptroller()).oracle();
-    return KeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
+    return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
   }
 }

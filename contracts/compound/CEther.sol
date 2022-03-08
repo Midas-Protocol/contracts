@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./CToken.sol";
-import "../oracles/default/KeydonixUniswapTwapPriceOracle.sol";
+import "../oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
 import "../oracles/keydonix/UniswapOracle.sol";
 import "../utils/Multicall.sol";
 
@@ -103,18 +103,6 @@ contract CEther is CToken, CEtherInterface, Multicall {
     (uint256 err, ) = repayBorrowBehalfInternal(borrower, msg.value);
     requireNoError(err, "repayBorrowBehalf failed");
   }
-
-//  function liquidateBorrowWithPriceProof(
-//    address borrower,
-//    CTokenInterface cTokenCollateral,
-//    UniswapOracle.ProofData calldata collateralProofData,
-//    address _keydonixPriceOracle
-//  ) external payable {
-//    ICToken collateralAsInterface = ICToken(address(cTokenCollateral));
-//    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(collateralAsInterface, collateralProofData);
-//
-//    return liquidateBorrow(borrower, cTokenCollateral);
-//  }
 
   /**
    * @notice The sender liquidates the borrowers collateral.

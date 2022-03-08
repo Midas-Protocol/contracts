@@ -8,8 +8,6 @@ import "../external/compound/ICToken.sol";
 import "../external/compound/ICErc20.sol";
 
 import "./BasePriceOracle.sol";
-import "./keydonix/UniswapOracle.sol";
-import "./default/KeydonixUniswapTwapPriceOracle.sol";
 
 /**
  * @title MasterPriceOracle

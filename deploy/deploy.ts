@@ -213,13 +213,13 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   console.log("Keydonix Price Oracle: ", kPO.address);
   const keydonixPriceOracle = await ethers.getContract("KeydonixUniswapTwapPriceOracle", deployer);
   if ((await keydonixPriceOracle.denominationToken()) == constants.AddressZero) {
-    let dummyAddress = '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd';
+    chainDeployParams.uniswapV2FactoryAddress;
     tx = await keydonixPriceOracle.initialize(
-        dummyAddress, // uniswapFactory,
-        dummyAddress, // denominationTokenAddress,
-        dummyAddress, // wtoken
-      3, // min blocks back
-      10 // max blocks back
+        chainDeployParams.uniswapV2FactoryAddress, // uniswapFactory,
+        chainDeployParams.wtoken, // TODO denominationTokenAddress,
+        chainDeployParams.wtoken, // wtoken
+      3, // TODO min blocks back
+      Math.max(chainDeployParams.blocksPerYear / (365 * 24 * 3), 255) // max blocks back = 20 mins back
     );
     await tx.wait();
     console.log("Keydonix Price Oracle initialized", tx.hash);

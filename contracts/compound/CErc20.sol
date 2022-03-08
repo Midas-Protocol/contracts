@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import "./CToken.sol";
 import "../external/compound/ICToken.sol";
-import "../oracles/default/KeydonixUniswapTwapPriceOracle.sol";
+import "../oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
 import "../oracles/keydonix/UniswapOracle.sol";
 import "../utils/Multicall.sol";
 
@@ -116,22 +116,6 @@ contract CErc20 is CToken, CErc20Interface, Multicall {
     (uint256 err, ) = repayBorrowBehalfInternal(borrower, repayAmount);
     return err;
   }
-
-//  function liquidateBorrowWithPriceProof(
-//    address borrower,
-//    uint256 repayAmount,
-//    CTokenInterface cTokenCollateral,
-//    UniswapOracle.ProofData calldata repaidProofData,
-//    UniswapOracle.ProofData calldata collateralProofData,
-//    address _keydonixPriceOracle
-//  ) external returns (uint256) {
-//    ICToken repaidAsInterface = ICToken(address(this));
-//    ICToken collateralAsInterface = ICToken(address(cTokenCollateral));
-//    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(repaidAsInterface, repaidProofData);
-//    KeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(collateralAsInterface, collateralProofData);
-//
-//    return liquidateBorrow(borrower, repayAmount, cTokenCollateral);
-//  }
 
   /**
    * @notice The sender liquidates the borrowers collateral.

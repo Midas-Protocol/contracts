@@ -13,12 +13,6 @@ abstract contract ComptrollerInterface {
 
   function exitMarket(address cToken) external virtual returns (uint256);
 
-//  function exitMarketWithPriceProof(
-//    address cToken,
-//    UniswapOracle.ProofData[] calldata proofData,
-//    address _keydonixPriceOracle
-//  ) external virtual returns (uint256);
-
   /*** Policy Hooks ***/
 
   function mintAllowed(
@@ -47,14 +41,6 @@ abstract contract ComptrollerInterface {
     uint256 redeemTokens
   ) external virtual returns (uint256);
 
-//  function redeemAllowedWithPriceProof(
-//    address cToken,
-//    address redeemer,
-//    uint256 redeemTokens,
-//    UniswapOracle.ProofData[] calldata proofData,
-//    address _keydonixPriceOracle
-//  ) external virtual returns (uint256);
-
   function redeemVerify(
     address cToken,
     address redeemer,
@@ -68,22 +54,7 @@ abstract contract ComptrollerInterface {
     uint256 borrowAmount
   ) external virtual returns (uint256);
 
-//  function borrowAllowedWithPriceProof(
-//    address cToken,
-//    address borrower,
-//    uint256 borrowAmount,
-//    UniswapOracle.ProofData calldata proofData,
-//    address _keydonixPriceOracle
-//  ) external virtual returns (uint256);
-
   function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external virtual returns (uint256);
-
-//  function borrowWithinLimitsWithPriceProof(
-//    address cToken,
-//    uint256 accountBorrowsNew,
-//    UniswapOracle.ProofData calldata proofData,
-//    address _keydonixPriceOracle
-//  ) external virtual returns (uint256);
 
   function borrowVerify(
     address cToken,
@@ -113,17 +84,6 @@ abstract contract ComptrollerInterface {
     address borrower,
     uint256 repayAmount
   ) external virtual returns (uint256);
-
-//  function liquidateBorrowAllowedWithPriceProof(
-//    address cTokenBorrowed,
-//    address cTokenCollateral,
-//    address liquidator,
-//    address borrower,
-//    uint256 repayAmount,
-//    UniswapOracle.ProofData calldata borrowedProofData,
-//    UniswapOracle.ProofData calldata collateralProofData,
-//    address _keydonixPriceOracle
-//  ) external virtual returns (uint256);
 
   function liquidateBorrowVerify(
     address cTokenBorrowed,
@@ -156,15 +116,6 @@ abstract contract ComptrollerInterface {
     address dst,
     uint256 transferTokens
   ) external virtual returns (uint256);
-
-//  function transferAllowedWithPriceProof(
-//    address cToken,
-//    address src,
-//    address dst,
-//    uint256 transferTokens,
-//    UniswapOracle.ProofData[] calldata proofData,
-//    address _keydonixPriceOracle
-//  ) external virtual returns (uint256);
 
   function transferVerify(
     address cToken,

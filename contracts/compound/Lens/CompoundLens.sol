@@ -7,6 +7,7 @@ import "../Comptroller.sol";
 import "../EIP20Interface.sol";
 import "../Governance/GovernorAlpha.sol";
 import "../Governance/Comp.sol";
+import "../../oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
 
 contract CompoundLens is Multicall {
   struct CTokenMetadata {
@@ -293,6 +294,6 @@ contract CompoundLens is Multicall {
 
   function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
     PriceOracle oracle = Comptroller(cToken.comptroller()).oracle();
-    return KeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
+    return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
   }
 }
