@@ -35,6 +35,7 @@ task("oracle:add-tokens", "Initalize MasterPriceOracle with underlying oracle fo
   .addOptionalParam("oracles", "Token address for which to set the price", undefined, types.string)
   .setAction(async ({ underlyings: _underlyings, oracles: _oracles }, { ethers }) => {
     const { deployer } = await ethers.getNamedSigners();
+    // @ts-ignore
     const sdkModule = await import("../dist/esm/src");
     const { chainId } = await ethers.provider.getNetwork();
     const sdk = new sdkModule.Fuse(ethers.provider, chainId);
@@ -67,6 +68,8 @@ task("oracle:update-twap", "Call update on twap oracle to update the last price 
   .addParam("pair", "pair address for which to run the update", undefined, types.string)
   .setAction(async ({ pair: _pair }, { run, ethers }) => {
     const { deployer } = await ethers.getNamedSigners();
+
+    // @ts-ignore
     const sdkModule = await import("../dist/esm/src");
     const { chainId } = await ethers.provider.getNetwork();
     const sdk = new sdkModule.Fuse(ethers.provider, chainId);
