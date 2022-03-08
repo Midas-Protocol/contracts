@@ -1,4 +1,1 @@
-
-describe( "Verify price proof tests",  () => {
-
-});
+describe("Verify price proof tests", () => {});

@@ -1643,7 +1643,11 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     _notEntered = true; // get a gas-refund post-Istanbul
   }
 
-  function verifyPrice(address cToken, UniswapOracle.ProofData calldata proofData) public override returns (uint256, uint256) {
+  function verifyPrice(address cToken, UniswapOracle.ProofData calldata proofData)
+    public
+    override
+    returns (uint256, uint256)
+  {
     return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(ICToken(cToken), proofData);
   }
 }

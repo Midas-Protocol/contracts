@@ -215,9 +215,9 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   if ((await keydonixPriceOracle.denominationToken()) == constants.AddressZero) {
     chainDeployParams.uniswapV2FactoryAddress;
     tx = await keydonixPriceOracle.initialize(
-        chainDeployParams.uniswapV2FactoryAddress, // uniswapFactory,
-        chainDeployParams.wtoken, // TODO denominationTokenAddress,
-        chainDeployParams.wtoken, // wtoken
+      chainDeployParams.uniswapV2FactoryAddress, // uniswapFactory,
+      chainDeployParams.wtoken, // denominationTokenAddress,
+      chainDeployParams.wtoken, // wtoken
       3, // TODO min blocks back
       Math.max(chainDeployParams.blocksPerYear / (365 * 24 * 3), 255) // max blocks back = 20 mins back
     );

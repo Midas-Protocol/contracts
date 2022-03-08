@@ -68,7 +68,11 @@ const OracleTypes = {
 } as const;
 
 export const chainOracles = {
-  [SupportedChains.ganache]: [OracleTypes.SimplePriceOracle, OracleTypes.MasterPriceOracle, OracleTypes.KeydonixUniswapTwapPriceOracle],
+  [SupportedChains.ganache]: [
+    OracleTypes.SimplePriceOracle,
+    OracleTypes.MasterPriceOracle,
+    OracleTypes.KeydonixUniswapTwapPriceOracle,
+  ],
   [SupportedChains.chapel]: [
     OracleTypes.MasterPriceOracle,
     OracleTypes.ChainlinkPriceOracleV2,
