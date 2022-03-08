@@ -207,37 +207,6 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
     }
   }
 
-  function safeLiquidateWithPriceProof(
-    address borrower,
-    uint256 repayAmount,
-    ICErc20 cErc20,
-    ICToken cTokenCollateral,
-    uint256 minOutputAmount,
-    address exchangeSeizedTo,
-    IUniswapV2Router02 uniswapV2Router,
-    IRedemptionStrategy[] memory redemptionStrategies,
-    bytes[] memory strategyData,
-    UniswapOracle.ProofData calldata repaidProofData,
-    UniswapOracle.ProofData calldata collateralProofData,
-    address _keydonixPriceOracle
-  ) external returns (uint256) {
-    IKeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(cErc20, repaidProofData);
-    IKeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(cTokenCollateral, collateralProofData);
-
-    return
-      safeLiquidate(
-        borrower,
-        repayAmount,
-        cErc20,
-        cTokenCollateral,
-        minOutputAmount,
-        exchangeSeizedTo,
-        uniswapV2Router,
-        redemptionStrategies,
-        strategyData
-      );
-  }
-
   /**
    * @notice Safely liquidate an unhealthy loan (using capital from the sender), confirming that at least `minOutputAmount` in collateral is seized (or outputted by exchange if applicable).
    * @param borrower The borrower's Ethereum address.
@@ -260,7 +229,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
     IUniswapV2Router02 uniswapV2Router,
     IRedemptionStrategy[] memory redemptionStrategies,
     bytes[] memory strategyData
-  ) public returns (uint256) {
+  ) external returns (uint256) {
     // Transfer tokens in, approve to cErc20, and liquidate borrow
     require(repayAmount > 0, "Repay amount (transaction value) must be greater than 0.");
     IERC20Upgradeable underlying = IERC20Upgradeable(cErc20.underlying());
@@ -309,33 +278,6 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
     return transferSeizedFunds(exchangeSeizedTo, minOutputAmount);
   }
 
-  function safeLiquidateWithPriceProof(
-    address borrower,
-    ICEther cEther,
-    ICErc20 cErc20Collateral,
-    uint256 minOutputAmount,
-    address exchangeSeizedTo,
-    IUniswapV2Router02 uniswapV2Router,
-    IRedemptionStrategy[] memory redemptionStrategies,
-    bytes[] memory strategyData,
-    UniswapOracle.ProofData calldata collateralProofData,
-    address _keydonixPriceOracle
-  ) external returns (uint256) {
-    IKeydonixUniswapTwapPriceOracle(_keydonixPriceOracle).verifyPrice(cErc20Collateral, collateralProofData);
-
-    return
-      safeLiquidate(
-        borrower,
-        cEther,
-        cErc20Collateral,
-        minOutputAmount,
-        exchangeSeizedTo,
-        uniswapV2Router,
-        redemptionStrategies,
-        strategyData
-      );
-  }
-
   /**
    * @notice Safely liquidate an unhealthy loan (using capital from the sender), confirming that at least `minOutputAmount` in collateral is seized (or outputted by exchange if applicable).
    * @param borrower The borrower's Ethereum address.
@@ -356,7 +298,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
     IUniswapV2Router02 uniswapV2Router,
     IRedemptionStrategy[] memory redemptionStrategies,
     bytes[] memory strategyData
-  ) public payable returns (uint256) {
+  ) external payable returns (uint256) {
     // Liquidate NATIVE borrow
     require(msg.value > 0, "Repay amount (transaction value) must be greater than 0.");
     cEther.liquidateBorrow{ value: msg.value }(borrower, ICToken(cErc20Collateral));
