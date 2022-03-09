@@ -1,1 +1,1 @@
-describe("Verify price proof tests", () => {});
+describe.skip("Verify price proof tests", () => {});

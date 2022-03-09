@@ -8,10 +8,14 @@ export const deployConfig: ChainDeployConfig = {
   // wBTCToken: "0x7a15c3867E3f911C5d4f9810E415E0590EcbEbe4", // WBTC
   wBTCToken: "0x1Fef22c58Cb4aD1832F5Aaae1b1A1a3EDBCC1E0B", // TT2
   // uniswapV2Pair: "0xbB0F21795d19bc297FfA6F771Cca5055D59a35eC", TT2/WETH
-  hardcoded: [],
-  uniswapData: [],
-  pairInitHashCode: "0x",
-  uniswapV2RouterAddress: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+  uniswap: {
+    hardcoded: [],
+    uniswapData: [],
+    pairInitHashCode: "0x",
+    uniswapV2RouterAddress: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+    uniswapV2FactoryAddress: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+    uniswapOracleInitialDeployTokens: []
+  },
 };
 
 export const deploy = async ({ getNamedAccounts, deployments, ethers }): Promise<void> => {
