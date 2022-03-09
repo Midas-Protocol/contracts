@@ -51,6 +51,7 @@ task("pools:create", "Create pool if does not exist")
 
     const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId);
     const existingPool = await poolModule.getPoolByName(taskArgs.name, sdk);
+    const fuseFeeDistributor = (await hre.ethers.getContract("FuseFeeDistributor")).address;
 
     let poolAddress: string;
     if (existingPool) {
@@ -63,7 +64,7 @@ task("pools:create", "Create pool if does not exist")
         priceOracleAddress: taskArgs.priceOracle,
       });
       // Deploy Assets
-      const assets = await poolModule.getPoolAssets(poolAddress);
+      const assets = await poolModule.getPoolAssets(poolAddress, fuseFeeDistributor);
       const deployedAssets = await poolModule.deployAssets(assets.assets, signer);
 
       // Add Reward Distributer for TOUCH

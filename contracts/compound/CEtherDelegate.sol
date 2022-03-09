@@ -50,7 +50,10 @@ contract CEtherDelegate is CDelegateInterface, CEther {
     bytes memory becomeImplementationData
   ) internal {
     // Check whitelist
-    require(fuseAdmin.cEtherDelegateWhitelist(implementation, implementation_, allowResign), "!impl");
+    require(
+      IFuseFeeDistributor(fuseAdmin).cEtherDelegateWhitelist(implementation, implementation_, allowResign),
+      "!impl"
+    );
 
     // Call _resignImplementation internally (this delegate's code)
     if (allowResign) _resignImplementation();
@@ -96,8 +99,9 @@ contract CEtherDelegate is CDelegateInterface, CEther {
    */
   function _prepare() external payable override {
     if (msg.sender != address(this) && ComptrollerV3Storage(address(comptroller)).autoImplementation()) {
-      (address latestCEtherDelegate, bool allowResign, bytes memory becomeImplementationData) = fuseAdmin
-        .latestCEtherDelegate(implementation);
+      (address latestCEtherDelegate, bool allowResign, bytes memory becomeImplementationData) = IFuseFeeDistributor(
+        fuseAdmin
+      ).latestCEtherDelegate(implementation);
       if (implementation != latestCEtherDelegate)
         _setImplementationInternal(latestCEtherDelegate, allowResign, becomeImplementationData);
     }

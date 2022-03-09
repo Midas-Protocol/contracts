@@ -29,7 +29,6 @@ describe("FusePoolDirectory", function () {
       const bigCloseFactor = utils.parseEther((50 / 100).toString());
       // 8% -> 1.08 * 1e8
       const bigLiquidationIncentive = utils.parseEther((8 / 100 + 1).toString());
-
       const [poolAddress, implementationAddress, priceOracleAddress] = await sdk.deployPool(
         POOL_NAME,
         false,
@@ -52,8 +51,7 @@ describe("FusePoolDirectory", function () {
       expect(_unfiliteredName).to.be.equal(POOL_NAME);
 
       const jrm = await ethers.getContract("JumpRateModel");
-      const assets = await poolAssets(jrm.address, comptroller);
-
+      const assets = await poolAssets(jrm.address, comptroller, sdk.contracts.FuseFeeDistributor.address);
       const deployedAssets: DeployedAsset[] = [];
       for (const assetConf of assets.assets) {
         const [assetAddress, cTokenImplementationAddress, irmModel, receipt] = await sdk.deployAsset(
@@ -78,7 +76,6 @@ describe("FusePoolDirectory", function () {
         });
       }
       const [, , , underlyingSymbols] = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(poolAddress);
-
       expect(underlyingSymbols).to.have.members(deployedAssets.map((d) => d.symbol));
 
       const fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);

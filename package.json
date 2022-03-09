@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "test": "hardhat test",
-    "test:forge": "forge test",
+    "test:forge": "forge test --no-match-contract LiquidityMining",
     "test:bsc": "ts-node prepare-chain bsc && hardhat test",
     "export": "hardhat export --export-all ./deployments.json",
     "build": "hardhat compile && forge build && npm run build:sdk",

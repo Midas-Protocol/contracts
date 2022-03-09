@@ -18,6 +18,7 @@ contract CErc20 is CToken, CErc20Interface {
    * @notice Initialize the new money market
    * @param underlying_ The address of the underlying asset
    * @param comptroller_ The address of the Comptroller
+   * @param fuseAdmin_ The FuseFeeDistributor contract address.
    * @param interestRateModel_ The address of the interest rate model
    * @param name_ ERC-20 name of this token
    * @param symbol_ ERC-20 symbol of this token
@@ -25,6 +26,7 @@ contract CErc20 is CToken, CErc20Interface {
   function initialize(
     address underlying_,
     ComptrollerInterface comptroller_,
+    address payable fuseAdmin_,
     InterestRateModel interestRateModel_,
     string memory name_,
     string memory symbol_,
@@ -36,6 +38,7 @@ contract CErc20 is CToken, CErc20Interface {
     uint8 decimals_ = EIP20Interface(underlying_).decimals();
     super.initialize(
       comptroller_,
+      fuseAdmin_,
       interestRateModel_,
       initialExchangeRateMantissa_,
       name_,
