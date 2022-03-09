@@ -1,6 +1,4 @@
 import { task, types } from "hardhat/config";
-import { cERC20Conf } from "../dist/esm/src";
-import { DeployedAsset } from "../test/utils/pool";
 
 export default task("pools", "Create Testing Pools")
   .addParam("name", "Name of the pool to be created")
