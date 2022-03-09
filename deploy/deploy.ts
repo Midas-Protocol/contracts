@@ -7,7 +7,7 @@ import { deployFuseSafeLiquidator } from "../chainDeploy/helpers/liquidator";
 
 export const SALT = "ilovemidas";
 
-const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
+const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
   const chainId = await getChainId();
   console.log("chainId: ", chainId);
   const { deployer, alice, bob } = await getNamedAccounts();
@@ -22,10 +22,34 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
 
   ////
   //// COMPOUND CORE CONTRACTS
-  let dep = await deployments.deterministic("Comptroller", {
+  let tx: providers.TransactionResponse;
+
+  let dep = await deployments.deterministic("FuseFeeDistributor", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
+    log: true,
+  });
+  const ffd = await dep.deploy();
+  console.log("FuseFeeDistributor: ", ffd.address);
+  const fuseFeeDistributor = await ethers.getContract("FuseFeeDistributor", deployer);
+  let owner = await fuseFeeDistributor.owner();
+  if (owner === ethers.constants.AddressZero) {
+    let tx = await fuseFeeDistributor.initialize(ethers.utils.parseEther("0.1"));
+    await tx.wait();
+    console.log("FuseFeeDistributor initialized", tx.hash);
+  } else {
+    console.log("FuseFeeDistributor already initialized");
+  }
+
+  tx = await fuseFeeDistributor._setPoolLimits(10, ethers.constants.MaxUint256, ethers.constants.MaxUint256);
+  await tx.wait();
+  console.log("FuseFeeDistributor pool limits set", tx.hash);
+
+  dep = await deployments.deterministic("Comptroller", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [ffd.address],
     log: true,
   });
   const comp = await dep.deploy();
@@ -72,8 +96,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   const fpd = await dep.deploy();
   console.log("FusePoolDirectory: ", fpd.address);
   const fusePoolDirectory = await ethers.getContract("FusePoolDirectory", deployer);
-  let owner = await fusePoolDirectory.owner();
-  let tx: providers.TransactionResponse;
+  owner = await fusePoolDirectory.owner();
   if (owner === ethers.constants.AddressZero) {
     tx = await fusePoolDirectory.initialize(true, [deployer, alice, bob]);
     await tx.wait();
@@ -81,28 +104,6 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   } else {
     console.log("FusePoolDirectory already initialized");
   }
-
-  dep = await deployments.deterministic("FuseFeeDistributor", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [],
-    log: true,
-  });
-  const ffd = await dep.deploy();
-  console.log("FuseFeeDistributor: ", ffd.address);
-  const fuseFeeDistributor = await ethers.getContract("FuseFeeDistributor", deployer);
-  owner = await fuseFeeDistributor.owner();
-  if (owner === ethers.constants.AddressZero) {
-    tx = await fuseFeeDistributor.initialize(ethers.utils.parseEther("0.1"));
-    await tx.wait();
-    console.log("FuseFeeDistributor initialized", tx.hash);
-  } else {
-    console.log("FuseFeeDistributor already initialized");
-  }
-
-  tx = await fuseFeeDistributor._setPoolLimits(10, ethers.constants.MaxUint256, ethers.constants.MaxUint256);
-  await tx.wait();
-  console.log("FuseFeeDistributor pool limits set", tx.hash);
 
   const comptroller = await ethers.getContract("Comptroller", deployer);
   tx = await fuseFeeDistributor._editComptrollerImplementationWhitelist(
@@ -128,12 +129,12 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
       fusePoolDirectory.address,
       chainDeployParams.nativeTokenName,
       chainDeployParams.nativeTokenSymbol,
-      chainDeployParams.hardcoded.map((h) => h.address),
-      chainDeployParams.hardcoded.map((h) => h.name),
-      chainDeployParams.hardcoded.map((h) => h.symbol),
-      chainDeployParams.uniswapData.map((u) => u.lpName),
-      chainDeployParams.uniswapData.map((u) => u.lpSymbol),
-      chainDeployParams.uniswapData.map((u) => u.lpDisplayName)
+      chainDeployParams.uniswap.hardcoded.map((h) => h.address),
+      chainDeployParams.uniswap.hardcoded.map((h) => h.name),
+      chainDeployParams.uniswap.hardcoded.map((h) => h.symbol),
+      chainDeployParams.uniswap.uniswapData.map((u) => u.lpName),
+      chainDeployParams.uniswap.uniswapData.map((u) => u.lpSymbol),
+      chainDeployParams.uniswap.uniswapData.map((u) => u.lpDisplayName)
     );
     await tx.wait();
     console.log("FusePoolLens initialized", tx.hash);
@@ -216,7 +217,7 @@ const func: DeployFunction = async ({ ethers, getNamedAccounts, deployments, get
   //// CHAIN SPECIFIC DEPLOYMENT
   console.log("Running deployment for chain: ", chainId);
   if (deployFunc) {
-    await deployFunc({ ethers, getNamedAccounts, deployments });
+    await deployFunc({ run, ethers, getNamedAccounts, deployments });
   }
   ////
 };

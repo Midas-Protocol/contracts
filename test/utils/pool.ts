@@ -100,20 +100,22 @@ export async function deployAssets(assets: cERC20Conf[], signer?: SignerWithAddr
 
 export async function getPoolAssets(
   comptroller: string,
+  fuseFeeDistributor: string,
   interestRateModelAddress?: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> {
   if (!interestRateModelAddress) {
     const jrm = await ethers.getContract("JumpRateModel");
     interestRateModelAddress = jrm.address;
   }
-  return await poolAssets(interestRateModelAddress, comptroller);
+  return await poolAssets(interestRateModelAddress, comptroller, fuseFeeDistributor);
 }
 
 export const poolAssets = async (
   interestRateModelAddress: string,
-  comptroller: string
+  comptroller: string,
+  fuseFeeDistributor: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> => {
-  const assets = await getAssetsConf(comptroller, interestRateModelAddress, ethers);
+  const assets = await getAssetsConf(comptroller, fuseFeeDistributor, interestRateModelAddress, ethers);
   return {
     shortName: "Fuse R1",
     longName: "Rari DAO Fuse Pool R1 (Base)",

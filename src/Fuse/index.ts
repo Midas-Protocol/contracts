@@ -200,6 +200,7 @@ export default class Fuse {
       const tx = await contract.deployPool(
         poolName,
         implementationAddress,
+        new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]),
         enforceWhitelist,
         closeFactor,
         liquidationIncentive,
@@ -215,7 +216,10 @@ export default class Fuse {
       ["address", "string", "uint"],
       [options.from, poolName, receipt.blockNumber]
     );
-    const byteCodeHash = utils.keccak256(this.artifacts.Unitroller.bytecode);
+    const byteCodeHash = utils.keccak256(
+      this.artifacts.Unitroller.bytecode +
+        new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]).slice(2)
+    );
 
     const poolAddress = utils.getCreate2Address(
       this.chainDeployment.FusePoolDirectory.address,
@@ -420,6 +424,7 @@ export default class Fuse {
 
     let deployArgs = [
       conf.comptroller,
+      conf.fuseFeeDistributor,
       conf.interestRateModel,
       conf.name,
       conf.symbol,
@@ -430,7 +435,7 @@ export default class Fuse {
     ];
     const abiCoder = new utils.AbiCoder();
     const constructorData = abiCoder.encode(
-      ["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
+      ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
       deployArgs
     );
     const comptroller = new Contract(
@@ -519,6 +524,7 @@ export default class Fuse {
     let deployArgs = [
       conf.underlying,
       conf.comptroller,
+      conf.fuseFeeDistributor,
       conf.interestRateModel,
       conf.name,
       conf.symbol,
@@ -530,7 +536,7 @@ export default class Fuse {
 
     const abiCoder = new utils.AbiCoder();
     const constructorData = abiCoder.encode(
-      ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
+      ["address", "address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
       deployArgs
     );
 
