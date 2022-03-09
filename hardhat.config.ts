@@ -84,7 +84,7 @@ const config: HardhatUserConfig = {
           }
         : undefined,
       saveDeployments: true,
-      chainId: 56,
+      chainId: process.env.FORK_CHAIN_ID ? Number(process.env.FORK_CHAIN_ID) : 1337,
       gasPrice: 20e9,
       gas: 25e6,
       allowUnlimitedContractSize: true,

@@ -17,7 +17,7 @@
   "scripts": {
     "test": "hardhat test",
     "test:forge": "forge test --no-match-contract LiquidityMining",
-    "test:bsc": "FORK_URL=https://speedy-nodes-nyc.moralis.io/2d2926c3e761369208fba31f/bsc/mainnet/archive FORK_BLOCK_NUMBER=15641803 hardhat test",
+    "test:bsc": "FORK_URL=https://speedy-nodes-nyc.moralis.io/2d2926c3e761369208fba31f/bsc/mainnet/archive FORK_BLOCK_NUMBER=15641803 FORK_CHAIN_ID=56 hardhat test",
     "export": "hardhat export --export-all ./deployments.json",
     "build": "hardhat compile && forge build && npm run build:sdk",
     "build:sdk": "tsc -p tsconfig-sdk.json && tsc -p tsconfig-cjs.json",
