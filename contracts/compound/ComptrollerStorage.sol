@@ -9,7 +9,7 @@ contract UnitrollerAdminStorage {
   /*
    * Administrator for Fuse
    */
-  IFuseFeeDistributor public fuseAdmin;
+  address payable public fuseAdmin;
 
   /**
    * @notice Administrator for this contract

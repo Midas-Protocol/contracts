@@ -10,7 +10,7 @@ contract CTokenAdminStorage {
   /*
    * Administrator for Fuse
    */
-  IFuseFeeDistributor public fuseAdmin;
+  address payable public fuseAdmin;
 
   /**
    * @dev LEGACY USE ONLY: Administrator for this contract

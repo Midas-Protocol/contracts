@@ -41,11 +41,10 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
    */
   event NewAdmin(address oldAdmin, address newAdmin);
 
-  constructor(address _fuseAdmin) {
+  constructor(address payable _fuseAdmin) {
     // Set admin to caller
     admin = msg.sender;
-
-    fuseAdmin = IFuseFeeDistributor(payable(_fuseAdmin));
+    fuseAdmin = _fuseAdmin;
   }
 
   /*** Admin Functions ***/
@@ -54,10 +53,15 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
     if (!hasAdminRights()) {
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_OWNER_CHECK);
     }
-    if (!fuseAdmin.comptrollerImplementationWhitelist(comptrollerImplementation, newPendingImplementation)) {
+    if (
+      !IFuseFeeDistributor(fuseAdmin).comptrollerImplementationWhitelist(
+        comptrollerImplementation,
+        newPendingImplementation
+      )
+    ) {
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_CONTRACT_CHECK);
     }
-    require(Comptroller(newPendingImplementation).fuseAdmin() == fuseAdmin, "fuseAdmin not matching");
+    //require(Comptroller(newPendingImplementation).fuseAdmin() == fuseAdmin, "fuseAdmin not matching");
 
     address oldPendingImplementation = pendingComptrollerImplementation;
     pendingComptrollerImplementation = newPendingImplementation;
@@ -201,7 +205,9 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
       if (callSuccess) (autoImplementation) = abi.decode(data, (bool));
 
       if (autoImplementation) {
-        address latestComptrollerImplementation = fuseAdmin.latestComptrollerImplementation(comptrollerImplementation);
+        address latestComptrollerImplementation = IFuseFeeDistributor(fuseAdmin).latestComptrollerImplementation(
+          comptrollerImplementation
+        );
 
         if (comptrollerImplementation != latestComptrollerImplementation) {
           address oldImplementation = comptrollerImplementation; // Save current value for inclusion in log

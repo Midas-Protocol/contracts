@@ -84,8 +84,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   // liquidationIncentiveMantissa must be no greater than this value
   uint256 internal constant liquidationIncentiveMaxMantissa = 1.5e18; // 1.5
 
-  constructor(address _fuseAdmin) {
-    fuseAdmin = IFuseFeeDistributor(payable(_fuseAdmin));
+  constructor(address payable _fuseAdmin) {
+    fuseAdmin = _fuseAdmin;
   }
 
   /*** Assets You Are In ***/
@@ -484,7 +484,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    */
   function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external override returns (uint256) {
     // Check if min borrow exists
-    uint256 minBorrowEth = fuseAdmin.minBorrowEth();
+    uint256 minBorrowEth = IFuseFeeDistributor(fuseAdmin).minBorrowEth();
 
     if (minBorrowEth > 0) {
       // Get new underlying borrow balance of account for this cToken
@@ -1351,7 +1351,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     // Deploy via Fuse admin
     CToken cToken = CToken(
-      isCEther ? fuseAdmin.deployCEther(constructorData) : fuseAdmin.deployCErc20(constructorData)
+      isCEther
+        ? IFuseFeeDistributor(fuseAdmin).deployCEther(constructorData)
+        : IFuseFeeDistributor(fuseAdmin).deployCErc20(constructorData)
     );
     // Reset Fuse admin rights to the original value
     fuseAdminHasRights = oldFuseAdminHasRights;
