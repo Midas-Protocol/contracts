@@ -4,7 +4,7 @@ import { solidity } from "ethereum-waffle";
 import { Fuse } from "../dist/esm/src";
 import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { Comptroller, FusePoolDirectory, SimplePriceOracle } from "../typechain";
+import { Comptroller, FusePoolDirectory, SimplePriceOracle, Unitroller } from "../typechain";
 import { setUpPriceOraclePrices } from "./utils";
 import { getAssetsConf } from "./utils/assets";
 import { chainDeployConfig } from "../chainDeploy";
@@ -33,7 +33,6 @@ describe("FusePoolDirectory", function () {
 
       fpdWithSigner = await ethers.getContract("FusePoolDirectory", alice);
       implementationComptroller = await ethers.getContract("Comptroller");
-      console.log("comptroller: ", implementationComptroller.address);
 
       //// DEPLOY POOL
       const POOL_NAME = "TEST";
@@ -51,7 +50,6 @@ describe("FusePoolDirectory", function () {
         bigLiquidationIncentive,
         spo.address
       );
-      console.log("got here 2");
       expect(deployedPool).to.be.ok;
       const depReceipt = await deployedPool.wait();
       console.log("Deployed pool");
@@ -68,6 +66,7 @@ describe("FusePoolDirectory", function () {
 
       const pools = await fpdWithSigner.getPoolsByAccount(alice.address);
       const pool = pools[1].at(-1);
+      console.log("comptroller: ", pool.comptroller);
       //expect(pool.comptroller).to.eq(poolAddress);
       // --------------------
 
@@ -80,7 +79,7 @@ describe("FusePoolDirectory", function () {
       expect(_unfiliteredName).to.eq(POOL_NAME);
       // ---------------------
 
-      const unitroller = await ethers.getContractAt("Unitroller", poolAddress, alice);
+      const unitroller = (await ethers.getContractAt("Unitroller", pool.comptroller, alice)) as Unitroller;
       const adminTx = await unitroller._acceptAdmin();
       await adminTx.wait();
 
@@ -127,14 +126,14 @@ describe("FusePoolDirectory", function () {
       console.log(`Ether deployed successfully with tx hash: ${receipt.transactionHash}`);
 
       const [, , underlyingTokens, underlyingSymbols] = await sdk.contracts.FusePoolLens.callStatic.getPoolSummary(
-        poolAddress
+        pool.comptroller
       );
 
       expect(underlyingTokens[0]).to.eq(constants.AddressZero);
 
       expect(underlyingSymbols[0]).to.eq(chainDeployConfig[chainId].config.nativeTokenSymbol);
 
-      let fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
+      let fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(pool.comptroller);
       expect(fusePoolData[0][1]).to.eq(constants.AddressZero);
 
       deployArgs = [
@@ -163,7 +162,7 @@ describe("FusePoolDirectory", function () {
       receipt = await tx.wait();
       console.log(`${erc20Asset.name} deployed successfully with tx hash: ${receipt.transactionHash}`);
 
-      fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(poolAddress);
+      fusePoolData = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(pool.comptroller);
       expect(fusePoolData.length).to.eq(2);
     });
   });
