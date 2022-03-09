@@ -111,7 +111,7 @@ contract CEther is CToken, CEtherInterface, Multicall {
    * @param borrower The borrower of this cToken to be liquidated
    * @param cTokenCollateral The market in which to seize collateral from the borrower
    */
-  function liquidateBorrow(address borrower, CTokenInterface cTokenCollateral) external payable {
+  function liquidateBorrow(address borrower, CToken cTokenCollateral) external payable {
     (uint256 err, ) = liquidateBorrowInternal(borrower, msg.value, cTokenCollateral);
     requireNoError(err, "liquidateBorrow failed");
   }

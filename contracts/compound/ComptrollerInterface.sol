@@ -139,5 +139,8 @@ abstract contract ComptrollerInterface {
   function _afterNonReentrant() external virtual;
 
   /*** Oracle related ***/
-  function verifyPrice(address cToken, UniswapOracle.ProofData calldata proofData) external virtual returns (uint256, uint256);
+  function verifyPrice(address cToken, UniswapOracle.ProofData calldata proofData)
+    external
+    virtual
+    returns (uint256, uint256);
 }
