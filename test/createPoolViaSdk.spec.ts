@@ -21,7 +21,7 @@ describe("FusePoolDirectory", function () {
       const { bob } = await ethers.getNamedSigners();
       const { chainId } = await ethers.provider.getNetwork();
 
-      const spo = await ethers.getContract("SimplePriceOracle", bob);
+      const spo = await ethers.getContract("MasterPriceOracle", bob);
 
       const sdk = new Fuse(ethers.provider, chainId);
 
