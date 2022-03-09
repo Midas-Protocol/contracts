@@ -8,7 +8,6 @@ import { Comptroller, FusePoolDirectory, SimplePriceOracle, Unitroller } from ".
 import { setUpPriceOraclePrices } from "./utils";
 import { getAssetsConf } from "./utils/assets";
 import { chainDeployConfig } from "../chainDeploy";
-import { AbiCoder } from "@ethersproject/abi";
 
 use(solidity);
 
@@ -58,7 +57,6 @@ describe("FusePoolDirectory", function () {
         ["address", "string", "uint"],
         [alice.address, POOL_NAME, depReceipt.blockNumber]
       );
-      // This test doesnt work
       const deployCode = utils.keccak256(
         (await deployments.getArtifact("Unitroller")).bytecode +
           abiCoder.encode(["address"], [FUSE_ADMIN_ADDRESS]).slice(2)
@@ -69,16 +67,13 @@ describe("FusePoolDirectory", function () {
       const pools = await fpdWithSigner.getPoolsByAccount(alice.address);
       const pool = pools[1].at(-1);
       expect(pool.comptroller).to.eq(poolAddress);
-      // --------------------
 
-      // This test works
       const sdk = new Fuse(ethers.provider, chainId);
       const allPools = await sdk.contracts.FusePoolDirectory.callStatic.getAllPools();
       const { comptroller, name: _unfiliteredName } = await allPools.filter((p) => p.creator === alice.address).at(-1);
 
       expect(comptroller).to.eq(poolAddress);
       expect(_unfiliteredName).to.eq(POOL_NAME);
-      // ---------------------
 
       const unitroller = (await ethers.getContractAt("Unitroller", poolAddress, alice)) as Unitroller;
       const adminTx = await unitroller._acceptAdmin();
