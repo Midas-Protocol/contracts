@@ -1,4 +1,4 @@
-import { deployments } from "hardhat";
+import { deployments, ethers } from "hardhat";
 import { assets as bscAssets } from "../../chainDeploy/mainnets/bsc";
 import { constants } from "ethers";
 
@@ -12,14 +12,19 @@ export const setUpPriceOraclePrices = deployments.createFixture(async ({ run, ge
 });
 
 const setupLocalOraclePrices = deployments.createFixture(async ({ run }, options) => {
-  await run("set-price", { token: "ETH", price: "1" });
-  await run("set-price", { token: "TOUCH", price: "0.1" });
-  await run("set-price", { token: "TRIBE", price: "0.2" });
+  await run("oracle:set-price", { token: "ETH", price: "1" });
+  await run("oracle:set-price", { token: "TOUCH", price: "0.1" });
+  await run("oracle:set-price", { token: "TRIBE", price: "0.2" });
 });
 
 const setUpBscOraclePrices = deployments.createFixture(async ({ run }, options) => {
+  const { deployer } = await ethers.getNamedSigners();
+  const oracle = await ethers.getContract("SimplePriceOracle", deployer);
+
   for (const asset of bscAssets) {
-    await run("set-price", { address: asset.underlying, price: "1" });
+    await run("oracle:add-tokens", { underlyings: asset.underlying, oracles: oracle.address });
+    await run("oracle:set-price", { address: asset.underlying, price: "1" });
   }
-  await run("set-price", { address: constants.AddressZero, price: "1" });
+  await run("oracle:add-tokens", { underlyings: constants.AddressZero, oracles: oracle.address });
+  await run("oracle:set-price", { address: constants.AddressZero, price: "1" });
 });

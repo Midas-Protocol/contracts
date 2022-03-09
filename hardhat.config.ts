@@ -12,9 +12,10 @@ import "./tasks/editDeployers";
 import "./tasks/addChainlinkFeeds";
 import "./tasks/createPoolsWithAssets";
 import "./tasks/sendTestTokens";
-import "./tasks/oraclePrice";
+import "./tasks/oracle";
 import "./tasks/getPoolData";
 import "./tasks/e2e";
+import "./tasks/swap";
 
 dotEnvConfig();
 
