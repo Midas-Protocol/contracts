@@ -24,7 +24,7 @@ const UNISWAP_V2_PROTOCOLS = {
   },
 };
 
-describe.skip("#safeLiquidate", () => {
+describe("#safeLiquidate", () => {
   let whale: SignerWithAddress;
 
   let eth: cERC20Conf;
@@ -51,6 +51,7 @@ describe.skip("#safeLiquidate", () => {
   beforeEach(async () => {
     await deployments.fixture(); // ensure you start from a fresh deployments
     await setUpPriceOraclePrices();
+
     const { bob, deployer, rando } = await ethers.getNamedSigners();
 
     simpleOracle = (await ethers.getContract("SimplePriceOracle", deployer)) as SimplePriceOracle;
@@ -85,7 +86,7 @@ describe.skip("#safeLiquidate", () => {
     deployedErc20One = deployedAssets.find((a) => a.underlying === erc20One.underlying);
     deployedErc20Two = deployedAssets.find((a) => a.underlying === erc20Two.underlying);
 
-    liquidator = (await ethers.getContract("FuseSafeLiquidator", rando)) as FuseSafeLiquidator;
+    liquidator = (await ethers.getContract("FuseSafeLiquidator", deployer)) as FuseSafeLiquidator;
 
     ethCToken = (await ethers.getContractAt("CEther", deployedEth.assetAddress)) as CEther;
     erc20OneCToken = (await ethers.getContractAt("CErc20", deployedErc20One.assetAddress)) as CErc20;
@@ -95,7 +96,7 @@ describe.skip("#safeLiquidate", () => {
     erc20OneUnderlying = (await ethers.getContractAt("EIP20Interface", erc20One.underlying)) as EIP20Interface;
   });
 
-  it("should liquidate a native borrow for token collateral", async function () {
+  it.only("should liquidate a native borrow for token collateral", async function () {
     const { alice, bob, rando } = await ethers.getNamedSigners();
 
     // either use configured whale acct or bob
@@ -105,18 +106,18 @@ describe.skip("#safeLiquidate", () => {
     }
 
     // Supply 0.1 tokenOne from other account
-    await addCollateral(poolAddress, whale, erc20One.symbol, "0.1", true);
+    await addCollateral(poolAddress, whale, erc20One.symbol, "1", true);
     console.log(`Added ${erc20One.symbol} collateral`);
 
     // Supply 1 native from other account
-    await addCollateral(poolAddress, alice, eth.symbol, "1", false);
+    await addCollateral(poolAddress, alice, eth.symbol, "10", false);
 
     // Borrow 0.5 native using token collateral
-    const borrowAmount = "0.5";
+    const borrowAmount = "5";
     await borrowCollateral(poolAddress, whale.address, eth.symbol, borrowAmount);
 
     // Set price of tokenOne collateral to 1/10th of what it was
-    tx = await simpleOracle.setDirectPrice(erc20One.underlying, utils.parseEther("1"));
+    tx = await simpleOracle.setDirectPrice(erc20One.underlying, utils.parseEther("10"));
     await tx.wait();
 
     const repayAmount = utils.parseEther(borrowAmount).div(10);

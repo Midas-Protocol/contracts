@@ -420,6 +420,42 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
    * @param redemptionStrategies The IRedemptionStrategy contracts to use, if any, to redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
    * @param strategyData The data for the chosen IRedemptionStrategy contracts, if any.
    */
+//
+//  function safeLiquidateToEthWithFlashLoan(
+//    address borrower,
+//    uint256 repayAmount,
+//    CEther cEther,
+//    CErc20 cErc20Collateral,
+//    uint256 minProfitAmount,
+//    address exchangeProfitTo,
+//    IUniswapV2Router02 uniswapV2RouterForCollateral,
+//    IRedemptionStrategy[] memory redemptionStrategies,
+//    bytes[] memory strategyData,
+//    uint256 ethToCoinbase
+//  ) external returns (uint256) {
+//
+//    // Input validation
+//    require(repayAmount > 0, "Repay amount must be greater than 0.");
+//
+//    // Flashloan via Uniswap
+//    IUniswapV2Pair pair = IUniswapV2Pair(
+//      UniswapV2Library.pairFor(
+//        UNISWAP_V2_ROUTER_02.factory(),
+//          address(uniswapV2RouterForCollateral) == UNISWAP_V2_ROUTER_02_ADDRESS && cErc20Collateral.underlying() == 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 ? 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599 : 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48,
+//          WETH_ADDRESS)
+//    ); // Use USDC unless collateral is USDC, in which case we use WBTC to avoid a reentrancy error when exchanging the collateral to repay the borrow
+//    address token0 = pair.token0();
+//    pair.swap(
+//      token0 == WETH_ADDRESS ? repayAmount : 0,
+//        token0 != WETH_ADDRESS ? repayAmount : 0,
+//        address(this),
+//        msg.data
+//    );
+//
+//    // Exchange profit, send ETH to coinbase if necessary, and transfer seized funds
+//    return distributeProfit(exchangeProfitTo, minProfitAmount, ethToCoinbase);
+//  }
+
   function safeLiquidateToEthWithFlashLoan(
     address borrower,
     uint256 repayAmount,
@@ -439,6 +475,12 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     // Use STABLE_TOKEN unless collateral is STABLE_TOKEN, in which case we use WBTC to avoid a reentrancy error
     // when exchanging the collateral to repay the borrow
 
+    console.log(UNISWAP_V2_ROUTER_02_ADDRESS);
+    console.log(cErc20Collateral.underlying());
+    console.log(BTC_TOKEN);
+    console.log(STABLE_TOKEN);
+    console.log(UNISWAP_V2_ROUTER_02.factory());
+
     IPancakePair pair = IPancakePair(
       PancakeLibrary.pairFor(
         UNISWAP_V2_ROUTER_02.factory(),
@@ -451,7 +493,17 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
       )
     );
 
-    pair.swap(repayAmount * 1e6, 0, address(this), "");
+
+    console.log(address(pair));
+    address token0 = pair.token0();
+    console.log(token0);
+
+    pair.swap(
+      token0 == W_NATIVE_ADDRESS ? repayAmount : 0,
+        token0 != W_NATIVE_ADDRESS ? repayAmount : 0,
+        address(this),
+        msg.data
+    );
 
     // Exchange profit, send NATIVE to coinbase if necessary, and transfer seized funds
     return distributeProfit(exchangeProfitTo, minProfitAmount, ethToCoinbase);
