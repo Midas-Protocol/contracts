@@ -27,7 +27,7 @@ describe("FusePoolDirectory", function () {
       const { alice } = await ethers.getNamedSigners();
       console.log("alice: ", alice.address);
 
-      spo = await ethers.getContract("SimplePriceOracle", alice);
+      spo = await ethers.getContract("MasterPriceOracle", alice);
       const { chainId } = await ethers.provider.getNetwork();
 
       fpdWithSigner = await ethers.getContract("FusePoolDirectory", alice);

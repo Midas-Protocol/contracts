@@ -21,14 +21,14 @@ export const deployFuseSafeLiquidator = async ({
   if (uniswapRouterAddress === constants.AddressZero) {
     let tx = await fuseSafeLiquidator.initialize(
       deployConfig.wtoken,
-      deployConfig.uniswapV2RouterAddress,
+      deployConfig.uniswap.uniswapV2RouterAddress,
       deployConfig.stableToken ?? constants.AddressZero,
       deployConfig.wBTCToken ?? constants.AddressZero,
-      deployConfig.pairInitHashCode ?? "0x"
+      deployConfig.uniswap.pairInitHashCode ?? "0x"
     );
     await tx.wait();
     console.log("FuseSafeLiquidator initialized", tx.hash);
   } else {
-    console.log("FusePoolLensSecondary already initialized");
+    console.log("FuseSafeLiquidator already initialized");
   }
 };
