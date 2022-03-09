@@ -20,7 +20,7 @@ describe("Deposit flow tests", function () {
       this.timeout(120_000);
       const { bob, deployer } = await ethers.getNamedSigners();
       [poolAddress] = await createPool({});
-      const assets = await getPoolAssets(poolAddress);
+      const assets = await getPoolAssets(poolAddress, (await ethers.getContract("FuseFeeDistributor")).address);
 
       const erc20One = assets.assets.find((a) => a.underlying !== constants.AddressZero); // find first one
       expect(erc20One.underlying).to.be.ok;

@@ -108,6 +108,7 @@ contract FusePoolDirectory is OwnableUpgradeable {
    * @dev Deploys a new Fuse pool and adds to the directory.
    * @param name The name of the pool.
    * @param implementation The Comptroller implementation contract address.
+   * @param constructorData The FuseFeeDistributor contract address.
    * @param enforceWhitelist Boolean indicating if the pool's supplier/borrower whitelist is to be enforced.
    * @param closeFactor The pool's close factor (scaled by 1e18).
    * @param liquidationIncentive The pool's liquidation incentive (scaled by 1e18).
@@ -117,6 +118,7 @@ contract FusePoolDirectory is OwnableUpgradeable {
   function deployPool(
     string memory name,
     address implementation,
+    bytes calldata constructorData,
     bool enforceWhitelist,
     uint256 closeFactor,
     uint256 liquidationIncentive,
@@ -133,9 +135,12 @@ contract FusePoolDirectory is OwnableUpgradeable {
     //        address proxy = Create2Upgradeable.deploy(0, salt, cEtherDelegatorCreationCode);
 
     // Deploy Unitroller using msg.sender, name, and block.number as a salt
-    bytes32 salt = keccak256(abi.encodePacked(msg.sender, name, block.number));
-    bytes memory unitrollerCreationCode = abi.encodePacked(type(Unitroller).creationCode);
-    address proxy = Create2Upgradeable.deploy(0, salt, unitrollerCreationCode);
+    bytes memory unitrollerCreationCode = abi.encodePacked(type(Unitroller).creationCode, constructorData);
+    address proxy = Create2Upgradeable.deploy(
+      0,
+      keccak256(abi.encodePacked(msg.sender, name, block.number)),
+      unitrollerCreationCode
+    );
 
     // Setup Unitroller
     IUnitroller unitroller = IUnitroller(proxy);

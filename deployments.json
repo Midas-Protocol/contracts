@@ -10116,7 +10116,7 @@
       "chainId": "1337",
       "contracts": {
         "CErc20Delegate": {
-          "address": "0x9926B993d7A3425AE941A27F735B48523aAAf8d7",
+          "address": "0x2FeeDb3E5F688B3399fF816D4950eA0BE707EF71",
           "abi": [
             {
               "inputs": [],
@@ -11011,6 +11011,19 @@
             },
             {
               "inputs": [],
+              "name": "fuseAdmin",
+              "outputs": [
+                {
+                  "internalType": "address payable",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
               "name": "fuseFeeMantissa",
               "outputs": [
                 {
@@ -11085,8 +11098,61 @@
             {
               "inputs": [
                 {
+                  "internalType": "address",
+                  "name": "underlying_",
+                  "type": "address"
+                },
+                {
                   "internalType": "contract ComptrollerInterface",
                   "name": "comptroller_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address payable",
+                  "name": "fuseAdmin_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract InterestRateModel",
+                  "name": "interestRateModel_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "string",
+                  "name": "name_",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "symbol_",
+                  "type": "string"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "reserveFactorMantissa_",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "adminFeeMantissa_",
+                  "type": "uint256"
+                }
+              ],
+              "name": "initialize",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract ComptrollerInterface",
+                  "name": "comptroller_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address payable",
+                  "name": "fuseAdmin_",
                   "type": "address"
                 },
                 {
@@ -11113,49 +11179,6 @@
                   "internalType": "uint8",
                   "name": "decimals_",
                   "type": "uint8"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "reserveFactorMantissa_",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "adminFeeMantissa_",
-                  "type": "uint256"
-                }
-              ],
-              "name": "initialize",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "underlying_",
-                  "type": "address"
-                },
-                {
-                  "internalType": "contract ComptrollerInterface",
-                  "name": "comptroller_",
-                  "type": "address"
-                },
-                {
-                  "internalType": "contract InterestRateModel",
-                  "name": "interestRateModel_",
-                  "type": "address"
-                },
-                {
-                  "internalType": "string",
-                  "name": "name_",
-                  "type": "string"
-                },
-                {
-                  "internalType": "string",
-                  "name": "symbol_",
-                  "type": "string"
                 },
                 {
                   "internalType": "uint256",
@@ -11582,7 +11605,7 @@
           ]
         },
         "CEtherDelegate": {
-          "address": "0x0d2cba8e00d6d2dbe3D0142F4B2ed322590D8324",
+          "address": "0x7B96bFd6Beefc5155835C5CB320A05a29f4424a4",
           "abi": [
             {
               "inputs": [],
@@ -12464,6 +12487,19 @@
             },
             {
               "inputs": [],
+              "name": "fuseAdmin",
+              "outputs": [
+                {
+                  "internalType": "address payable",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
               "name": "fuseFeeMantissa",
               "outputs": [
                 {
@@ -12543,6 +12579,11 @@
                   "type": "address"
                 },
                 {
+                  "internalType": "address payable",
+                  "name": "fuseAdmin_",
+                  "type": "address"
+                },
+                {
                   "internalType": "contract InterestRateModel",
                   "name": "interestRateModel_",
                   "type": "address"
@@ -12588,6 +12629,11 @@
                 {
                   "internalType": "contract ComptrollerInterface",
                   "name": "comptroller_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address payable",
+                  "name": "fuseAdmin_",
                   "type": "address"
                 },
                 {
@@ -12988,8 +13034,19 @@
           ]
         },
         "Comptroller": {
-          "address": "0xd6109cFc09DD4666c17E8496B1e755aE18A16528",
+          "address": "0xB67c3C3E643f3237d97AB77EDFeEE6cC0B66FB57",
           "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address payable",
+                  "name": "_fuseAdmin",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
             {
               "anonymous": false,
               "inputs": [
@@ -14094,6 +14151,19 @@
             },
             {
               "inputs": [],
+              "name": "fuseAdmin",
+              "outputs": [
+                {
+                  "internalType": "address payable",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
               "name": "fuseAdminHasRights",
               "outputs": [
                 {
@@ -14973,7 +15043,7 @@
           ]
         },
         "FuseFeeDistributor": {
-          "address": "0x0B1638cE0c7Dc434b2Ad41fFBc016690A24933d2",
+          "address": "0xf05DFB925280127614FfcFE765f9a6BB0BFfE5E5",
           "abi": [
             {
               "anonymous": false,
@@ -15642,7 +15712,7 @@
           ]
         },
         "FusePoolDirectory": {
-          "address": "0x1877053EfA62d216314034d3bcD01084f8643C1C",
+          "address": "0xAbaB289Bd486bEBe0CF92c3fFf42e1BcDf1b00D9",
           "abi": [
             {
               "anonymous": false,
@@ -15820,6 +15890,11 @@
                   "internalType": "address",
                   "name": "implementation",
                   "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "constructorData",
+                  "type": "bytes"
                 },
                 {
                   "internalType": "bool",
@@ -16226,7 +16301,7 @@
           ]
         },
         "FusePoolLens": {
-          "address": "0x2c01a47589be980900Af9c46CD1d7ACFD80e9ba6",
+          "address": "0x2B196A2eC5E6Ba19c920Bb7d0dA3f193a38dc104",
           "abi": [
             {
               "inputs": [],
@@ -17343,7 +17418,7 @@
           ]
         },
         "FusePoolLensSecondary": {
-          "address": "0x9DBAffBbCD5a73D50062442b3FEa26cD734241C1",
+          "address": "0x88f0be4D7e71D25D805476e6214EAdF8B1D68a6c",
           "abi": [
             {
               "inputs": [],
@@ -18600,7 +18675,7 @@
           ]
         },
         "RewardsDistributorDelegate": {
-          "address": "0x33Fe96199E267750ba6470cB34fDbBe94ddFfef2",
+          "address": "0x1bBC5cf7868e34231B9F8467233083d848E57a14",
           "abi": [
             {
               "anonymous": false,
@@ -19354,7 +19429,7 @@
           ]
         },
         "SimplePriceOracle": {
-          "address": "0x2449a8DEe5651F111A9661c4DE9B0AB5d01762E1",
+          "address": "0x2a12b6ADe8115dAE7bC056089A452e699EE4f602",
           "abi": [
             {
               "anonymous": false,

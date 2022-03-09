@@ -24,6 +24,7 @@ contract CErc20Delegator is CDelegationStorage {
   constructor(
     address underlying_,
     ComptrollerInterface comptroller_,
+    address payable fuseAdmin_,
     InterestRateModel interestRateModel_,
     string memory name_,
     string memory symbol_,
@@ -36,9 +37,10 @@ contract CErc20Delegator is CDelegationStorage {
     delegateTo(
       implementation_,
       abi.encodeWithSignature(
-        "initialize(address,address,address,string,string,uint256,uint256)",
+        "initialize(address,address,address,address,string,string,uint256,uint256)",
         underlying_,
         comptroller_,
+        fuseAdmin_,
         interestRateModel_,
         name_,
         symbol_,

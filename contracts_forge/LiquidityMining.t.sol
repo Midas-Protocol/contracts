@@ -57,9 +57,11 @@ contract LiquidityMiningTest is DSTest {
     underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
     rewardsToken = new MockERC20("RewardsToken", "RT", 18);
     interestModel = new WhitePaperInterestRateModel(2343665, 1e18, 1e18);
-    fuseAdmin = FuseFeeDistributor(payable(0xa731585ab05fC9f83555cf9Bff8F58ee94e18F85));
-    fusePoolDirectory = FusePoolDirectory(0x835482FE0532f169024d5E9410199369aAD5C77E);
-    Comptroller tempComptroller = new Comptroller();
+    fuseAdmin = new FuseFeeDistributor();
+    fuseAdmin.initialize(1e16);
+    fusePoolDirectory = new FusePoolDirectory();
+    fusePoolDirectory.initialize(false, emptyAddresses);
+    Comptroller tempComptroller = new Comptroller(payable(fuseAdmin));
     cErc20Delegate = new CErc20Delegate();
 
     rewardsDistributorDelegate = new RewardsDistributorDelegate();
@@ -75,11 +77,11 @@ contract LiquidityMiningTest is DSTest {
     trueBoolArray.push(true);
     falseBoolArray.push(false);
 
-    vm.startPrank(fuseOwner);
     fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
     (uint256 index, address comptrollerAddress) = fusePoolDirectory.deployPool(
       "TestPool",
       address(tempComptroller),
+      abi.encode(payable(address(fuseAdmin))),
       false,
       0.1e18,
       1.1e18,
@@ -94,12 +96,12 @@ contract LiquidityMiningTest is DSTest {
     newImplementation.push(address(cErc20Delegate));
     fuseAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);
     vm.roll(1);
-    //markets.push(address(cErc20));
     comptroller._deployMarket(
       false,
       abi.encode(
         address(underlyingToken),
         ComptrollerInterface(comptrollerAddress),
+        payable(address(fuseAdmin)),
         InterestRateModel(address(interestModel)),
         "CUnderlyingToken",
         "CUT",
@@ -113,7 +115,6 @@ contract LiquidityMiningTest is DSTest {
 
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
-    vm.stopPrank();
     vm.roll(1);
     rewardsToken.mint(address(rewardsDistributor), depositAmount);
   }

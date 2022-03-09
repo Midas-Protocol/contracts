@@ -49,6 +49,7 @@ task("pools:create", "Create pool if does not exist")
 
     const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId);
     const existingPool = await poolModule.getPoolByName(taskArgs.name, sdk);
+    const fuseFeeDistributor = (await hre.ethers.getContract("FuseFeeDistributor")).address;
 
     let poolAddress: string;
     if (existingPool !== null) {
@@ -60,7 +61,7 @@ task("pools:create", "Create pool if does not exist")
         signer: account,
         priceOracleAddress: taskArgs.priceOracle,
       });
-      const assets = await poolModule.getPoolAssets(poolAddress);
+      const assets = await poolModule.getPoolAssets(poolAddress, fuseFeeDistributor);
       await poolModule.deployAssets(assets.assets, account);
     }
     await poolModule.logPoolData(poolAddress, sdk);

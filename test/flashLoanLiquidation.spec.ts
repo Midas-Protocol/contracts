@@ -57,7 +57,7 @@ describe.skip("#safeLiquidate", () => {
     oracle = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
 
     [poolAddress] = await createPool({});
-    const assets = await getPoolAssets(poolAddress);
+    const assets = await getPoolAssets(poolAddress, (await ethers.getContract("FuseFeeDistributor")).address);
 
     erc20One = assets.assets.find((a) => a.underlying !== constants.AddressZero); // find first one
     expect(erc20One.underlying).to.be.ok;
