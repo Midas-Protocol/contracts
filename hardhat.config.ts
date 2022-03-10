@@ -77,8 +77,14 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
+      forking: process.env.FORK_URL
+        ? {
+            url: process.env.FORK_URL,
+            blockNumber: Number(process.env.FORK_BLOCK_NUMBER),
+          }
+        : undefined,
       saveDeployments: true,
-      chainId: 1337,
+      chainId: process.env.FORK_CHAIN_ID ? Number(process.env.FORK_CHAIN_ID) : 1337,
       gasPrice: 20e9,
       gas: 25e6,
       allowUnlimitedContractSize: true,
