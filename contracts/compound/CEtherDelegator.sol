@@ -14,6 +14,7 @@ contract CEtherDelegator is CDelegationStorage {
   /**
    * @notice Construct a new CEther money market
    * @param comptroller_ The address of the Comptroller
+   * @param fuseAdmin_ The FuseFeeDistributor contract address.
    * @param interestRateModel_ The address of the interest rate model
    * @param name_ ERC-20 name of this token
    * @param symbol_ ERC-20 symbol of this token
@@ -22,6 +23,7 @@ contract CEtherDelegator is CDelegationStorage {
    */
   constructor(
     ComptrollerInterface comptroller_,
+    address payable fuseAdmin_,
     InterestRateModel interestRateModel_,
     string memory name_,
     string memory symbol_,
@@ -34,8 +36,9 @@ contract CEtherDelegator is CDelegationStorage {
     delegateTo(
       implementation_,
       abi.encodeWithSignature(
-        "initialize(address,address,string,string,uint256,uint256)",
+        "initialize(address,address,address,string,string,uint256,uint256)",
         comptroller_,
+        fuseAdmin_,
         interestRateModel_,
         name_,
         symbol_,

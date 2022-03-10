@@ -6,17 +6,24 @@ export const deployConfig: ChainDeployConfig = {
   nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
   nativeTokenName: "Binance Network Token (Testnet)",
   nativeTokenSymbol: "TBNB",
-  uniswapV2RouterAddress: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
-  uniswapV2FactoryAddress: "0x6725F303b657a9451d8BA641348b6761A6CC7a17",
   stableToken: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
   wBTCToken: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
   blocksPerYear: 20 * 24 * 365 * 60,
-  hardcoded: [],
-  uniswapData: [],
-  pairInitHashCode: "0x",
+  uniswap: {
+    hardcoded: [],
+    uniswapData: [],
+    pairInitHashCode: "0x",
+    uniswapV2RouterAddress: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
+    uniswapV2FactoryAddress: "0x6725F303b657a9451d8BA641348b6761A6CC7a17",
+    uniswapOracleInitialDeployTokens: [
+      "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee", // BUSD
+      "0x6ce8da28e2f864420840cf74474eff5fd80e65b8", // BTCB
+      "0xd66c6B4F0be8CE5b39D52E0Fd1344c389929B378", // ETH
+    ],
+  },
 };
 
-export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
+export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   ////
   //// ORACLES
@@ -75,6 +82,6 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
     console.log("MasterPriceOracle already initialized");
   }
   //// Uniswap Oracle
-  await deployUniswapOracle({ ethers, getNamedAccounts, deployments, deployConfig });
+  await deployUniswapOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
   ////
 };

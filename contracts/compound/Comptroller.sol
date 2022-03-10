@@ -10,13 +10,19 @@ import "./ComptrollerInterface.sol";
 import "./ComptrollerStorage.sol";
 import "./Unitroller.sol";
 import "./RewardsDistributorDelegate.sol";
+import "./IFuseFeeDistributor.sol";
+
+import "../oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
+import "../oracles/keydonix/UniswapOracle.sol";
+
+import "../utils/Multicall.sol";
 
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
  * @dev This contract should not to be deployed alone; instead, deploy `Unitroller` (proxy contract) on top of this `Comptroller` (logic/implementation contract).
  */
-contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerErrorReporter, Exponential {
+contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerErrorReporter, Exponential, Multicall {
   /// @notice Emitted when an admin supports a market
   event MarketListed(CToken cToken);
 
@@ -82,6 +88,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
   // liquidationIncentiveMantissa must be no greater than this value
   uint256 internal constant liquidationIncentiveMaxMantissa = 1.5e18; // 1.5
+
+  constructor(address payable _fuseAdmin) {
+    fuseAdmin = _fuseAdmin;
+  }
 
   /*** Assets You Are In ***/
 
@@ -479,7 +489,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    */
   function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external override returns (uint256) {
     // Check if min borrow exists
-    uint256 minBorrowEth = fuseAdmin.minBorrowEth();
+    uint256 minBorrowEth = IFuseFeeDistributor(fuseAdmin).minBorrowEth();
 
     if (minBorrowEth > 0) {
       // Get new underlying borrow balance of account for this cToken
@@ -1346,7 +1356,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     // Deploy via Fuse admin
     CToken cToken = CToken(
-      isCEther ? fuseAdmin.deployCEther(constructorData) : fuseAdmin.deployCErc20(constructorData)
+      isCEther
+        ? IFuseFeeDistributor(fuseAdmin).deployCEther(constructorData)
+        : IFuseFeeDistributor(fuseAdmin).deployCErc20(constructorData)
     );
     // Reset Fuse admin rights to the original value
     fuseAdminHasRights = oldFuseAdminHasRights;
@@ -1636,5 +1648,13 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   function _afterNonReentrant() external override {
     require(markets[msg.sender].isListed, "Comptroller:_afterNonReentrant: caller not listed as market");
     _notEntered = true; // get a gas-refund post-Istanbul
+  }
+
+  function verifyPrice(address cToken, UniswapOracle.ProofData calldata proofData)
+    public
+    override
+    returns (uint256, uint256)
+  {
+    return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(ICToken(cToken), proofData);
   }
 }

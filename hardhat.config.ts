@@ -12,9 +12,10 @@ import "./tasks/editDeployers";
 import "./tasks/addChainlinkFeeds";
 import "./tasks/createPoolsWithAssets";
 import "./tasks/sendTestTokens";
-import "./tasks/oraclePrice";
+import "./tasks/oracle";
 import "./tasks/getPoolData";
 import "./tasks/e2e";
+import "./tasks/swap";
 
 dotEnvConfig();
 
@@ -76,8 +77,14 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
+      forking: process.env.FORK_URL
+        ? {
+            url: process.env.FORK_URL,
+            blockNumber: Number(process.env.FORK_BLOCK_NUMBER),
+          }
+        : undefined,
       saveDeployments: true,
-      chainId: 1337,
+      chainId: process.env.FORK_CHAIN_ID ? Number(process.env.FORK_CHAIN_ID) : 1337,
       gasPrice: 20e9,
       gas: 25e6,
       allowUnlimitedContractSize: true,
@@ -96,6 +103,11 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
       chainId: 4,
       url: urlOverride || process.env.RINKEBY_ETH_PROVIDER_URL || "http://localhost:8545",
+    },
+    kovan: {
+      accounts: { mnemonic },
+      chainId: 42,
+      url: "https://kovan.infura.io/v3/10bc2717e7f14941a3ab5bea569da361",
     },
     bsc: {
       accounts: { mnemonic },

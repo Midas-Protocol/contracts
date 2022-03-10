@@ -1,5 +1,5 @@
 // Ethers
-import { BigNumber, constants, Contract, ContractFactory, providers, utils } from "ethers";
+import { BigNumber, BigNumberish, constants, Contract, ContractFactory, providers, utils } from "ethers";
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import axios from "axios";
@@ -15,6 +15,7 @@ import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
 import Deployments from "../../deployments.json";
 import ComptrollerArtifact from "../../artifacts/contracts/compound/Comptroller.sol/Comptroller.json";
 import UnitrollerArtifact from "../../artifacts/contracts/compound/Unitroller.sol/Unitroller.json";
+import ERC20Artifact from "../../artifacts/@rari-capital/solmate/src/tokens/ERC20.sol/ERC20.json";
 import CEtherDelegateArtifact from "../../artifacts/contracts/compound/CEtherDelegate.sol/CEtherDelegate.json";
 import CEtherDelegatorArtifact from "../../artifacts/contracts/compound/CEtherDelegator.sol/CEtherDelegator.json";
 import CErc20DelegateArtifact from "../../artifacts/contracts/compound/CErc20Delegate.sol/CErc20Delegate.json";
@@ -137,6 +138,7 @@ export default class Fuse {
     this.artifacts = {
       Comptroller: ComptrollerArtifact,
       Unitroller: UnitrollerArtifact,
+      ERC20: ERC20Artifact,
       CEtherDelegate: CEtherDelegateArtifact,
       CEtherDelegator: CEtherDelegatorArtifact,
       CErc20Delegate: CErc20DelegateArtifact,
@@ -200,6 +202,7 @@ export default class Fuse {
       const tx = await contract.deployPool(
         poolName,
         implementationAddress,
+        new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]),
         enforceWhitelist,
         closeFactor,
         liquidationIncentive,
@@ -215,7 +218,10 @@ export default class Fuse {
       ["address", "string", "uint"],
       [options.from, poolName, receipt.blockNumber]
     );
-    const byteCodeHash = utils.keccak256(this.artifacts.Unitroller.bytecode);
+    const byteCodeHash = utils.keccak256(
+      this.artifacts.Unitroller.bytecode +
+        new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]).slice(2)
+    );
 
     const poolAddress = utils.getCreate2Address(
       this.chainDeployment.FusePoolDirectory.address,
@@ -256,6 +262,10 @@ export default class Fuse {
     switch (contractName) {
       case "ChainlinkPriceOracleV2": {
         oracleArtifact = this.oracles.ChainlinkPriceOracleV2.artifact;
+        break;
+      }
+      case "KeydonixUniswapTwapPriceOracle": {
+        oracleArtifact = this.oracles.KeydonixUniswapTwapPriceOracle.artifact;
         break;
       }
       default:
@@ -420,6 +430,7 @@ export default class Fuse {
 
     let deployArgs = [
       conf.comptroller,
+      conf.fuseFeeDistributor,
       conf.interestRateModel,
       conf.name,
       conf.symbol,
@@ -430,7 +441,7 @@ export default class Fuse {
     ];
     const abiCoder = new utils.AbiCoder();
     const constructorData = abiCoder.encode(
-      ["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
+      ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
       deployArgs
     );
     const comptroller = new Contract(
@@ -519,6 +530,7 @@ export default class Fuse {
     let deployArgs = [
       conf.underlying,
       conf.comptroller,
+      conf.fuseFeeDistributor,
       conf.interestRateModel,
       conf.name,
       conf.symbol,
@@ -530,7 +542,7 @@ export default class Fuse {
 
     const abiCoder = new utils.AbiCoder();
     const constructorData = abiCoder.encode(
-      ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
+      ["address", "address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
       deployArgs
     );
 
@@ -973,13 +985,79 @@ export default class Fuse {
     return null;
   }
 
-  async deployRewardsDistributor(rewardToken: any, options: { from: any }) {
-    const distributor = new ContractFactory(
+  async deployRewardsDistributor(rewardToken: string, options: { from: string }) {
+    const rewardDistributorFactory = new ContractFactory(
       this.artifacts.RewardsDistributorDelegator.abi,
       this.artifacts.RewardsDistributorDelegator.bytecode,
       this.provider.getSigner()
     );
-    return await distributor.deploy(options.from, rewardToken, this.chainDeployment.RewardsDistributorDelegate.address);
+    return await rewardDistributorFactory.deploy(
+      options.from,
+      rewardToken,
+      this.chainDeployment.RewardsDistributorDelegate.address
+    );
+  }
+
+  addRewardDistributer(comptrollerAddress: string, distributorAddress: string, options: { from: string }) {
+    const comptrollerInstance = new Contract(
+      comptrollerAddress,
+      this.artifacts.Comptroller.abi,
+      this.provider.getSigner(options.from)
+    );
+    return comptrollerInstance.functions._addRewardsDistributor(distributorAddress);
+  }
+
+  fundRewardDistributer(
+    distributorAddress: string,
+    tokenAddress: string,
+    amount: BigNumberish,
+    options: { from: any }
+  ) {
+    const tokenInstance = new Contract(tokenAddress, this.artifacts.ERC20.abi, this.provider.getSigner(options.from));
+    return tokenInstance.functions.transfer(distributorAddress, amount);
+  }
+
+  updateDistributionSpeedSuppliers(
+    distributorAddress: string,
+    cTokenAddress: string,
+    amount: BigNumberish,
+    options: { from: any }
+  ) {
+    const rewardDistributerInstance = new Contract(
+      distributorAddress,
+      this.chainDeployment.RewardsDistributorDelegate.abi,
+      this.provider.getSigner(options.from)
+    );
+    return rewardDistributerInstance._setCompSupplySpeed(cTokenAddress, amount);
+  }
+
+  updateDistributionSpeedBorrowers(
+    distributorAddress: string,
+    cTokenAddress: string,
+    amount: BigNumberish,
+    options: { from: any }
+  ) {
+    const rewardDistributerInstance = new Contract(
+      distributorAddress,
+      this.chainDeployment.RewardsDistributorDelegate.abi,
+      this.provider.getSigner(options.from)
+    );
+    return rewardDistributerInstance._setCompBorrowSpeed(cTokenAddress, amount);
+  }
+
+  updateDistributionSpeed(
+    distributorAddress: string,
+    cTokenAddress: string,
+    amountSuppliers: BigNumberish,
+    amountBorrowers: BigNumberish,
+    options: { from: any }
+  ) {
+    const rewardDistributerInstance = new Contract(
+      distributorAddress,
+      this.chainDeployment.RewardsDistributorDelegate.abi,
+      this.provider.getSigner(options.from)
+    );
+    return rewardDistributerInstance._setCompSpeeds(cTokenAddress, amountSuppliers, amountBorrowers);
   }
 
   async checkCardinality(uniswapV3Pool: string) {

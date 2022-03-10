@@ -4,7 +4,7 @@ import { solidity } from "ethereum-waffle";
 import { Fuse } from "../dist/esm/src";
 import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { Comptroller, FusePoolDirectory, SimplePriceOracle } from "../typechain";
+import { Comptroller, FusePoolDirectory, SimplePriceOracle, Unitroller } from "../typechain";
 import { setUpPriceOraclePrices } from "./utils";
 import { getAssetsConf } from "./utils/assets";
 import { chainDeployConfig } from "../chainDeploy";
@@ -27,7 +27,7 @@ describe("FusePoolDirectory", function () {
       const { alice } = await ethers.getNamedSigners();
       console.log("alice: ", alice.address);
 
-      spo = await ethers.getContract("SimplePriceOracle", alice);
+      spo = await ethers.getContract("MasterPriceOracle", alice);
       const { chainId } = await ethers.provider.getNetwork();
 
       fpdWithSigner = await ethers.getContract("FusePoolDirectory", alice);
@@ -35,11 +35,14 @@ describe("FusePoolDirectory", function () {
 
       //// DEPLOY POOL
       const POOL_NAME = "TEST";
+      const FUSE_ADMIN_ADDRESS = (await ethers.getContract("FuseFeeDistributor")).address;
       const bigCloseFactor = utils.parseEther((50 / 100).toString());
       const bigLiquidationIncentive = utils.parseEther((8 / 100 + 1).toString());
+      let abiCoder = new utils.AbiCoder();
       const deployedPool = await fpdWithSigner.deployPool(
         POOL_NAME,
         implementationComptroller.address,
+        abiCoder.encode(["address"], [FUSE_ADMIN_ADDRESS]),
         true,
         bigCloseFactor,
         bigLiquidationIncentive,
@@ -54,8 +57,11 @@ describe("FusePoolDirectory", function () {
         ["address", "string", "uint"],
         [alice.address, POOL_NAME, depReceipt.blockNumber]
       );
-      const byteCodeHash = utils.keccak256((await deployments.getArtifact("Unitroller")).bytecode);
-      let poolAddress = utils.getCreate2Address(fpdWithSigner.address, saltsHash, byteCodeHash);
+      const deployCode = utils.keccak256(
+        (await deployments.getArtifact("Unitroller")).bytecode +
+          abiCoder.encode(["address"], [FUSE_ADMIN_ADDRESS]).slice(2)
+      );
+      let poolAddress = utils.getCreate2Address(fpdWithSigner.address, saltsHash, deployCode);
       console.log("poolAddress: ", poolAddress);
 
       const pools = await fpdWithSigner.getPoolsByAccount(alice.address);
@@ -64,12 +70,12 @@ describe("FusePoolDirectory", function () {
 
       const sdk = new Fuse(ethers.provider, chainId);
       const allPools = await sdk.contracts.FusePoolDirectory.callStatic.getAllPools();
-      const { comptroller, name: _unfiliteredName } = await allPools.filter((p) => p.creator === alice.address).at(-1);
+      const { comptroller, name: _unfilteredName } = await allPools.filter((p) => p.creator === alice.address).at(-1);
 
-      expect(comptroller).to.eq(pool.comptroller);
-      expect(_unfiliteredName).to.eq(POOL_NAME);
+      expect(comptroller).to.eq(poolAddress);
+      expect(_unfilteredName).to.eq(POOL_NAME);
 
-      const unitroller = await ethers.getContractAt("Unitroller", poolAddress, alice);
+      const unitroller = (await ethers.getContractAt("Unitroller", poolAddress, alice)) as Unitroller;
       const adminTx = await unitroller._acceptAdmin();
       await adminTx.wait();
 
@@ -80,7 +86,7 @@ describe("FusePoolDirectory", function () {
       //// DEPLOY ASSETS
       const jrm = await ethers.getContract("JumpRateModel", alice);
 
-      const assets = await getAssetsConf(comptroller, jrm.address, ethers);
+      const assets = await getAssetsConf(comptroller, FUSE_ADMIN_ADDRESS, jrm.address, ethers);
       const nativeAsset = assets.find((a) => a.underlying === constants.AddressZero);
       const erc20Asset = assets.find((a) => a.underlying != constants.AddressZero);
 
@@ -90,6 +96,7 @@ describe("FusePoolDirectory", function () {
 
       let deployArgs = [
         nativeAsset.comptroller,
+        FUSE_ADMIN_ADDRESS,
         nativeAsset.interestRateModel,
         nativeAsset.name,
         nativeAsset.symbol,
@@ -98,9 +105,8 @@ describe("FusePoolDirectory", function () {
         reserveFactorBN,
         adminFeeBN,
       ];
-      let abiCoder = new utils.AbiCoder();
       let constructorData = abiCoder.encode(
-        ["address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
+        ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
         deployArgs
       );
       let errorCode;
@@ -129,6 +135,7 @@ describe("FusePoolDirectory", function () {
       deployArgs = [
         erc20Asset.underlying,
         erc20Asset.comptroller,
+        FUSE_ADMIN_ADDRESS,
         erc20Asset.interestRateModel,
         erc20Asset.name,
         erc20Asset.symbol,
@@ -140,7 +147,7 @@ describe("FusePoolDirectory", function () {
 
       abiCoder = new utils.AbiCoder();
       constructorData = abiCoder.encode(
-        ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
+        ["address", "address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
         deployArgs
       );
 

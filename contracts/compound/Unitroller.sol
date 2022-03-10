@@ -3,6 +3,7 @@ pragma solidity >=0.8.0;
 
 import "./ErrorReporter.sol";
 import "./ComptrollerStorage.sol";
+import "./Comptroller.sol";
 
 /**
  * @title Unitroller
@@ -40,9 +41,10 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
    */
   event NewAdmin(address oldAdmin, address newAdmin);
 
-  constructor() {
+  constructor(address payable _fuseAdmin) {
     // Set admin to caller
     admin = msg.sender;
+    fuseAdmin = _fuseAdmin;
   }
 
   /*** Admin Functions ***/
@@ -51,9 +53,16 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
     if (!hasAdminRights()) {
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_OWNER_CHECK);
     }
-    if (!fuseAdmin.comptrollerImplementationWhitelist(comptrollerImplementation, newPendingImplementation)) {
+    if (
+      !IFuseFeeDistributor(fuseAdmin).comptrollerImplementationWhitelist(
+        comptrollerImplementation,
+        newPendingImplementation
+      )
+    ) {
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_CONTRACT_CHECK);
     }
+    //require(Comptroller(newPendingImplementation).fuseAdmin() == fuseAdmin, "fuseAdmin not matching");
+
     address oldPendingImplementation = pendingComptrollerImplementation;
     pendingComptrollerImplementation = newPendingImplementation;
     emit NewPendingImplementation(oldPendingImplementation, pendingComptrollerImplementation);
@@ -196,7 +205,9 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
       if (callSuccess) (autoImplementation) = abi.decode(data, (bool));
 
       if (autoImplementation) {
-        address latestComptrollerImplementation = fuseAdmin.latestComptrollerImplementation(comptrollerImplementation);
+        address latestComptrollerImplementation = IFuseFeeDistributor(fuseAdmin).latestComptrollerImplementation(
+          comptrollerImplementation
+        );
 
         if (comptrollerImplementation != latestComptrollerImplementation) {
           address oldImplementation = comptrollerImplementation; // Save current value for inclusion in log
