@@ -7,7 +7,7 @@ import * as OracleSdk from "@keydonix/uniswap-oracle-sdk";
 import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
 import {Proof} from "@keydonix/uniswap-oracle-sdk";
 
-describe.skip("Verify price proof tests", () => {
+describe.only("Verify price proof tests", () => {
   let keydonixOracle: KeydonixUniswapTwapPriceOracle;
   let uniswapFactory;
   let denominationTokenAddress: string;
@@ -244,11 +244,58 @@ describe.skip("Verify price proof tests", () => {
     let pricePair = await uniswapFactory.callStatic.getPair(token1, denominationTokenAddress);
     console.log(`found pair ${pricePair}`);
 
-    console.log(`verifying the price`)
-    // await keydonixOracle.callStatic.verifyPriceUnderlying(token1, proof, {gasLimit: 1e7});
-    tx = await keydonixOracle.verifyPriceUnderlying(token1, proof, {gasLimit: 31e6, gasPrice: 1});
-    rec = await tx.wait();
-    expect(rec.status).to.eq(1);
+
+    const proofBlockPart = {
+      block: proof.block,
+      accountProofNodesRlp: [],
+      reserveAndTimestampProofNodesRlp: [],
+      priceAccumulatorProofNodesRlp: [],
+    };
+    const proofAccountPart = {
+      block: [],
+      accountProofNodesRlp: proof.accountProofNodesRlp,
+      reserveAndTimestampProofNodesRlp: [],
+      priceAccumulatorProofNodesRlp: [],
+    };
+    const proofReservePart = {
+      block: [],
+      accountProofNodesRlp: [],
+      reserveAndTimestampProofNodesRlp: proof.reserveAndTimestampProofNodesRlp,
+      priceAccumulatorProofNodesRlp: [],
+    };
+    const proofPricePart = {
+      block: [],
+      accountProofNodesRlp: [],
+      reserveAndTimestampProofNodesRlp: [],
+      priceAccumulatorProofNodesRlp: proof.priceAccumulatorProofNodesRlp,
+    };
+
+
+
+    {
+      console.log(`commit the block part`)
+      tx = await keydonixOracle.verifyPriceUnderlying(token1, proofBlockPart, {gasLimit: 29e6, /*gasPrice: 1*/});
+      rec = await tx.wait();
+      expect(rec.status).to.eq(1);
+    }
+    {
+      console.log(`commit the account part`)
+      tx = await keydonixOracle.verifyPriceUnderlying(token1, proofAccountPart, {gasLimit: 29e6, /*gasPrice: 1*/});
+      rec = await tx.wait();
+      expect(rec.status).to.eq(1);
+    }
+    {
+      console.log(`commit the reserve part`)
+      tx = await keydonixOracle.verifyPriceUnderlying(token1, proofReservePart, {gasLimit: 29e6, /*gasPrice: 1*/});
+      rec = await tx.wait();
+      expect(rec.status).to.eq(1);
+    }
+    {
+      console.log(`commit the final part and verify`)
+      tx = await keydonixOracle.verifyPriceUnderlying(token1, proofPricePart, {gasLimit: 29e6, /*gasPrice: 1*/});
+      rec = await tx.wait();
+      expect(rec.status).to.eq(1);
+    }
 
     // let price = await keydonixOracle.callStatic.getPrice(pricePair, denominationTokenAddress, minBB, maxBB, proof);
     // let result = await keydonixOracle.callStatic.getAccountStorageRoot(pricePair, proof);
