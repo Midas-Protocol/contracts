@@ -14,13 +14,15 @@ import "./external/uniswap/IUniswapV2Pair.sol";
 
 import "./FusePoolDirectory.sol";
 import "./oracles/MasterPriceOracle.sol";
+import "./utils/Multicall.sol";
+import "./oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
 
 /**
  * @title FusePoolLens
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FusePoolLens returns data on Fuse interest rate pools in mass for viewing by dApps, bots, etc.
  */
-contract FusePoolLens is Initializable {
+contract FusePoolLens is Initializable, Multicall {
   /**
    * @notice Constructor to set the `FusePoolDirectory` contract object.
    */
@@ -669,5 +671,10 @@ contract FusePoolLens is Initializable {
     );
     (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(accountPools);
     return (indexes, accountPools, data, errored);
+  }
+
+  function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
+    IPriceOracle oracle = IComptroller(cToken.comptroller()).oracle();
+    return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
   }
 }

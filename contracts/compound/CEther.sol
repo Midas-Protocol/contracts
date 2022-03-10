@@ -2,6 +2,9 @@
 pragma solidity >=0.8.0;
 
 import "./CToken.sol";
+import "../oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
+import "../oracles/keydonix/UniswapOracle.sol";
+import "../utils/Multicall.sol";
 
 /**
  * @title Compound's CEther Contract
@@ -9,7 +12,7 @@ import "./CToken.sol";
  * @dev This contract should not to be deployed on its own; instead, deploy `CEtherDelegator` (proxy contract) and `CEtherDelegate` (logic/implementation contract).
  * @author Compound
  */
-contract CEther is CToken, CEtherInterface {
+contract CEther is CToken, CEtherInterface, Multicall {
   bool public constant override isCEther = true;
 
   /**
@@ -177,5 +180,9 @@ contract CEther is CToken, CEtherInterface {
     fullMessage[i + 6] = bytes1(uint8(41));
 
     require(errCode == uint256(Error.NO_ERROR), string(fullMessage));
+  }
+
+  function verifyPrice(address cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
+    return comptroller.verifyPrice(cToken, proofData);
   }
 }

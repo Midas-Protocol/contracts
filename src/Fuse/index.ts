@@ -262,6 +262,10 @@ export default class Fuse {
         oracleArtifact = this.oracles.ChainlinkPriceOracleV2.artifact;
         break;
       }
+      case "KeydonixUniswapTwapPriceOracle": {
+        oracleArtifact = this.oracles.KeydonixUniswapTwapPriceOracle.artifact;
+        break;
+      }
       default:
         throw Error(`Oracle contract ${contractName} not found`);
     }
