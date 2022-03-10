@@ -87,5 +87,5 @@ jobs:
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
-          tag: ${{env.GITHUB_REF_NAME == 'main' && 'latest' || ${{env.GITHUB_REF_NAME == 'development' &&  'beta' || 'preview'}}
+          tag: ${{env.GITHUB_REF_NAME == 'main' && 'latest' || env.GITHUB_REF_NAME == 'development' &&  'beta' || 'preview'}}
           access: "public"
