@@ -20,7 +20,8 @@ jobs:
           node-version: 16.x
           cache: "npm"
       - run: npm install
-      - run: npm run build
+      - run: npm run build:hardhat
+      - run: npm run build:sdk
       - run: npm run test
 
   hh-test-bsc:
@@ -34,7 +35,8 @@ jobs:
           node-version: 16.x
           cache: "npm"
       - run: npm install
-      - run: npm run build
+      - run: npm run build:hardhat
+      - run: npm run build:sdk
       - run: npm run test:bsc
 
   forge-test-local:
@@ -52,7 +54,7 @@ jobs:
         with:
           version: nightly
       - run: npm install
-      - run: npm run build
+      - run: npm run build:forge
       - run: forge test -vvv
 
   e2e-liquidation-tests:
@@ -70,7 +72,7 @@ jobs:
           docker-compose down
 
   release:
-    needs: [hh-test-local]
+    needs: [hh-test-local, forge-test-local]
     runs-on: ubuntu-latest
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -82,6 +84,10 @@ jobs:
         with:
           node-version: 16.x
           cache: "npm"
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
       - run: npm install
       - run: npm run build
       - uses: JS-DevTools/npm-publish@v1
