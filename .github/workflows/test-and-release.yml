@@ -68,3 +68,24 @@ jobs:
           docker-compose up --build -d liquidation-bot e2e && \
           docker-compose run verify-liquidations && \
           docker-compose down
+
+  release:
+    needs: [hh-test-local]
+    runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: "npm"
+      - run: npm install
+      - run: npm run build
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: ${{env.GITHUB_REF_NAME == 'main' && 'latest' || ${{env.GITHUB_REF_NAME == 'development' &&  'beta' || 'preview'}}
+          access: "public"
