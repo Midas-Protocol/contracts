@@ -18,12 +18,14 @@ contract CEther is CToken, CEtherInterface, Multicall {
   /**
    * @notice Initialize the new money market
    * @param comptroller_ The address of the Comptroller
+   * @param fuseAdmin_ The FuseFeeDistributor contract address.
    * @param interestRateModel_ The address of the interest rate model
    * @param name_ ERC-20 name of this token
    * @param symbol_ ERC-20 symbol of this token
    */
   function initialize(
     ComptrollerInterface comptroller_,
+    address payable fuseAdmin_,
     InterestRateModel interestRateModel_,
     string memory name_,
     string memory symbol_,
@@ -35,6 +37,7 @@ contract CEther is CToken, CEtherInterface, Multicall {
     uint8 decimals_ = 18;
     super.initialize(
       comptroller_,
+      fuseAdmin_,
       interestRateModel_,
       initialExchangeRateMantissa_,
       name_,

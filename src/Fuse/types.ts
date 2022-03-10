@@ -74,6 +74,7 @@ export type cERC20Conf = {
   delegateContractName?: any;
   underlying: string; // underlying ERC20
   comptroller: string; // Address of the comptroller
+  fuseFeeDistributor: string;
   interestRateModel: string; // Address of the IRM
   initialExchangeRateMantissa?: BigNumber; // Initial exchange rate scaled by 1e18
   name: string; // ERC20 name of this token
