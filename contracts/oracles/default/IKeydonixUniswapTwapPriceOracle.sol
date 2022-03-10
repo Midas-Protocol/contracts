@@ -10,5 +10,7 @@ interface IKeydonixUniswapTwapPriceOracle {
 
   function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) external returns (uint256, uint256);
 
-  function verifyPriceUnderlying(address underlying, UniswapOracle.ProofData calldata proofData) external returns (uint256, uint256);
+  function verifyPriceUnderlying(address underlying, UniswapOracle.ProofData calldata proofData)
+    external
+    returns (uint256, uint256);
 }
