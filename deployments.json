@@ -30218,7 +30218,7 @@
       "chainId": "1337",
       "contracts": {
         "CErc20Delegate": {
-          "address": "0x2FeeDb3E5F688B3399fF816D4950eA0BE707EF71",
+          "address": "0xb24B4C304f7447B12B69E05001B25d0797EB3a7b",
           "abi": [
             {
               "inputs": [],
@@ -31386,6 +31386,25 @@
               "type": "function"
             },
             {
+              "inputs": [
+                {
+                  "internalType": "bytes[]",
+                  "name": "data",
+                  "type": "bytes[]"
+                }
+              ],
+              "name": "multicall",
+              "outputs": [
+                {
+                  "internalType": "bytes[]",
+                  "name": "results",
+                  "type": "bytes[]"
+                }
+              ],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
               "inputs": [],
               "name": "name",
               "outputs": [
@@ -31703,11 +31722,62 @@
               ],
               "stateMutability": "view",
               "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "cToken",
+                  "type": "address"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "block",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "accountProofNodesRlp",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "reserveAndTimestampProofNodesRlp",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "priceAccumulatorProofNodesRlp",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct UniswapOracle.ProofData",
+                  "name": "proofData",
+                  "type": "tuple"
+                }
+              ],
+              "name": "verifyPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
             }
           ]
         },
         "CEtherDelegate": {
-          "address": "0x7B96bFd6Beefc5155835C5CB320A05a29f4424a4",
+          "address": "0x5400AE40e3f3CE4A2E4f730CF83197fE2f8dC447",
           "abi": [
             {
               "inputs": [],
@@ -32834,6 +32904,25 @@
               "type": "function"
             },
             {
+              "inputs": [
+                {
+                  "internalType": "bytes[]",
+                  "name": "data",
+                  "type": "bytes[]"
+                }
+              ],
+              "name": "multicall",
+              "outputs": [
+                {
+                  "internalType": "bytes[]",
+                  "name": "results",
+                  "type": "bytes[]"
+                }
+              ],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
               "inputs": [],
               "name": "name",
               "outputs": [
@@ -33130,13 +33219,64 @@
               "type": "function"
             },
             {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "cToken",
+                  "type": "address"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "block",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "accountProofNodesRlp",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "reserveAndTimestampProofNodesRlp",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "priceAccumulatorProofNodesRlp",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct UniswapOracle.ProofData",
+                  "name": "proofData",
+                  "type": "tuple"
+                }
+              ],
+              "name": "verifyPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
               "stateMutability": "payable",
               "type": "receive"
             }
           ]
         },
         "Comptroller": {
-          "address": "0xB67c3C3E643f3237d97AB77EDFeEE6cC0B66FB57",
+          "address": "0x21C900a5b05367514c4168753Cce6CE0CAA25669",
           "abi": [
             {
               "inputs": [
@@ -34712,6 +34852,25 @@
               "type": "function"
             },
             {
+              "inputs": [
+                {
+                  "internalType": "bytes[]",
+                  "name": "data",
+                  "type": "bytes[]"
+                }
+              ],
+              "name": "multicall",
+              "outputs": [
+                {
+                  "internalType": "bytes[]",
+                  "name": "results",
+                  "type": "bytes[]"
+                }
+              ],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
               "inputs": [],
               "name": "oracle",
               "outputs": [
@@ -35108,6 +35267,57 @@
               "inputs": [
                 {
                   "internalType": "address",
+                  "name": "cToken",
+                  "type": "address"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "block",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "accountProofNodesRlp",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "reserveAndTimestampProofNodesRlp",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "priceAccumulatorProofNodesRlp",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct UniswapOracle.ProofData",
+                  "name": "proofData",
+                  "type": "tuple"
+                }
+              ],
+              "name": "verifyPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
                   "name": "",
                   "type": "address"
                 }
@@ -35145,7 +35355,7 @@
           ]
         },
         "FuseFeeDistributor": {
-          "address": "0xf05DFB925280127614FfcFE765f9a6BB0BFfE5E5",
+          "address": "0xaD620527D6Eadb000843E27fCcedECab5D12b26A",
           "abi": [
             {
               "anonymous": false,
@@ -35814,7 +36024,7 @@
           ]
         },
         "FusePoolDirectory": {
-          "address": "0xAbaB289Bd486bEBe0CF92c3fFf42e1BcDf1b00D9",
+          "address": "0x1c8399ec7AfA216AEBAE83915ff2F02Ba9B7E3F4",
           "abi": [
             {
               "anonymous": false,
@@ -36403,7 +36613,7 @@
           ]
         },
         "FusePoolLens": {
-          "address": "0x2B196A2eC5E6Ba19c920Bb7d0dA3f193a38dc104",
+          "address": "0xE4FDf9e94d28Ce25741C48a107Eded157102547c",
           "abi": [
             {
               "inputs": [],
@@ -37492,6 +37702,25 @@
               "type": "function"
             },
             {
+              "inputs": [
+                {
+                  "internalType": "bytes[]",
+                  "name": "data",
+                  "type": "bytes[]"
+                }
+              ],
+              "name": "multicall",
+              "outputs": [
+                {
+                  "internalType": "bytes[]",
+                  "name": "results",
+                  "type": "bytes[]"
+                }
+              ],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
               "inputs": [],
               "name": "name",
               "outputs": [
@@ -37516,11 +37745,62 @@
               ],
               "stateMutability": "view",
               "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract ICToken",
+                  "name": "cToken",
+                  "type": "address"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "block",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "accountProofNodesRlp",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "reserveAndTimestampProofNodesRlp",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "priceAccumulatorProofNodesRlp",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct UniswapOracle.ProofData",
+                  "name": "proofData",
+                  "type": "tuple"
+                }
+              ],
+              "name": "verifyPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
             }
           ]
         },
         "FusePoolLensSecondary": {
-          "address": "0x88f0be4D7e71D25D805476e6214EAdF8B1D68a6c",
+          "address": "0x43550794a531794CdC9A924A203eB61c000442fA",
           "abi": [
             {
               "inputs": [],
@@ -37802,11 +38082,81 @@
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes[]",
+                  "name": "data",
+                  "type": "bytes[]"
+                }
+              ],
+              "name": "multicall",
+              "outputs": [
+                {
+                  "internalType": "bytes[]",
+                  "name": "results",
+                  "type": "bytes[]"
+                }
+              ],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract ICToken",
+                  "name": "cToken",
+                  "type": "address"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "block",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "accountProofNodesRlp",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "reserveAndTimestampProofNodesRlp",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "priceAccumulatorProofNodesRlp",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct UniswapOracle.ProofData",
+                  "name": "proofData",
+                  "type": "tuple"
+                }
+              ],
+              "name": "verifyPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
             }
           ]
         },
         "FuseSafeLiquidator": {
-          "address": "0x1F2097477C47428f1b080C26A3b0c1Df40a0788c",
+          "address": "0x5e38821BC82dC29fFd8386a155C2bd523A1A008E",
           "abi": [
             {
               "inputs": [],
@@ -37917,6 +38267,25 @@
               "name": "initialize",
               "outputs": [],
               "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes[]",
+                  "name": "data",
+                  "type": "bytes[]"
+                }
+              ],
+              "name": "multicall",
+              "outputs": [
+                {
+                  "internalType": "bytes[]",
+                  "name": "results",
+                  "type": "bytes[]"
+                }
+              ],
+              "stateMutability": "payable",
               "type": "function"
             },
             {
@@ -38229,6 +38598,57 @@
               ],
               "name": "uniswapV2Call",
               "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract ICToken",
+                  "name": "cToken",
+                  "type": "address"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "block",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "accountProofNodesRlp",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "reserveAndTimestampProofNodesRlp",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "priceAccumulatorProofNodesRlp",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct UniswapOracle.ProofData",
+                  "name": "proofData",
+                  "type": "tuple"
+                }
+              ],
+              "name": "verifyPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
               "stateMutability": "nonpayable",
               "type": "function"
             },
@@ -38777,7 +39197,7 @@
           ]
         },
         "RewardsDistributorDelegate": {
-          "address": "0x1bBC5cf7868e34231B9F8467233083d848E57a14",
+          "address": "0x08e3d7aa05d63462DEa8E98e29d233663ebf85a3",
           "abi": [
             {
               "anonymous": false,
@@ -39531,7 +39951,7 @@
           ]
         },
         "SimplePriceOracle": {
-          "address": "0x2a12b6ADe8115dAE7bC056089A452e699EE4f602",
+          "address": "0x59224C3F33f81C00225723491579d966D0EA6aEf",
           "abi": [
             {
               "anonymous": false,

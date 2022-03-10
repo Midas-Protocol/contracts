@@ -76,14 +76,12 @@ const OracleTypes = {
   SimplePriceOracle: "SimplePriceOracle",
   ChainlinkPriceOracleV2: "ChainlinkPriceOracleV2",
   UniswapTwapPriceOracleV2: "UniswapTwapPriceOracleV2",
-  KeydonixUniswapTwapPriceOracle: "KeydonixUniswapTwapPriceOracle",
 } as const;
 
 export const chainOracles = {
   [SupportedChains.ganache]: [
     OracleTypes.SimplePriceOracle,
     OracleTypes.MasterPriceOracle,
-    OracleTypes.KeydonixUniswapTwapPriceOracle,
   ],
   [SupportedChains.chapel]: [
     OracleTypes.MasterPriceOracle,
