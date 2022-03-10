@@ -12,12 +12,17 @@ import "./Unitroller.sol";
 import "./RewardsDistributorDelegate.sol";
 import "./IFuseFeeDistributor.sol";
 
+import "../oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
+import "../oracles/keydonix/UniswapOracle.sol";
+
+import "../utils/Multicall.sol";
+
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
  * @dev This contract should not to be deployed alone; instead, deploy `Unitroller` (proxy contract) on top of this `Comptroller` (logic/implementation contract).
  */
-contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerErrorReporter, Exponential {
+contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerErrorReporter, Exponential, Multicall {
   /// @notice Emitted when an admin supports a market
   event MarketListed(CToken cToken);
 
@@ -1643,5 +1648,13 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   function _afterNonReentrant() external override {
     require(markets[msg.sender].isListed, "Comptroller:_afterNonReentrant: caller not listed as market");
     _notEntered = true; // get a gas-refund post-Istanbul
+  }
+
+  function verifyPrice(address cToken, UniswapOracle.ProofData calldata proofData)
+    public
+    override
+    returns (uint256, uint256)
+  {
+    return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(ICToken(cToken), proofData);
   }
 }

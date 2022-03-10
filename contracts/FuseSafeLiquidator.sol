@@ -9,6 +9,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "./liquidators/IRedemptionStrategy.sol";
 
 import "./external/compound/ICToken.sol";
+import "./oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
+import "./oracles/keydonix/UniswapOracle.sol";
+
 import "./external/compound/ICErc20.sol";
 import "./external/compound/ICEther.sol";
 
@@ -21,6 +24,8 @@ import "./external/uniswap/IUniswapV2Factory.sol";
 import "./external/uniswap/UniswapV2Library.sol";
 import "./external/pcs/PancakeLibrary.sol";
 import "./external/pcs/IPancakePair.sol";
+import "./utils/Multicall.sol";
+import "./external/compound/IComptroller.sol";
 
 import "hardhat/console.sol";
 
@@ -30,7 +35,7 @@ import "hardhat/console.sol";
  * @notice FuseSafeLiquidator safely liquidates unhealthy borrowers (with flashloan support).
  * @dev Do not transfer NATIVE or tokens directly to this address. Only send NATIVE here when using a method, and only approve tokens for transfer to here when using a method. Direct NATIVE transfers will be rejected and direct token transfers will be lost.
  */
-contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
+contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
   using AddressUpgradeable for address payable;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -950,6 +955,11 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
       abi.encodeWithSelector(strategy.redeem.selector, underlyingCollateral, underlyingCollateralSeized, strategyData)
     );
     return abi.decode(returndata, (IERC20Upgradeable, uint256));
+  }
+
+  function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
+    IPriceOracle oracle = IComptroller(cToken.comptroller()).oracle();
+    return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
   }
 
   /**

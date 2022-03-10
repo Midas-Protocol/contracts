@@ -1,7 +1,7 @@
 {
   "name": "@midas-capital/sdk",
   "repository": "git://github.com:midas-protocol/contracts.git",
-  "version": "0.1.3-beta.23",
+  "version": "0.1.3-beta.24",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
@@ -17,7 +17,7 @@
   "scripts": {
     "test": "hardhat test",
     "test:forge": "forge test --no-match-contract LiquidityMining",
-    "test:bsc": "ts-node prepare-chain bsc && hardhat test",
+    "test:bsc": "FORK_URL=https://speedy-nodes-nyc.moralis.io/2d2926c3e761369208fba31f/bsc/mainnet/archive FORK_BLOCK_NUMBER=15641803 FORK_CHAIN_ID=56 hardhat test",
     "export": "hardhat export --export-all ./deployments.json",
     "build": "hardhat compile && forge build && npm run build:sdk",
     "build:sdk": "tsc -p tsconfig-sdk.json && tsc -p tsconfig-cjs.json",
@@ -52,6 +52,9 @@
     "utf-8-validate": "^5.0.8"
   },
   "dependencies": {
+    "@keydonix/uniswap-oracle-contracts": "^1.0.6",
+    "@keydonix/uniswap-oracle-sdk": "^1.0.7",
+    "@keydonix/uniswap-oracle-sdk-adapter": "file:../../uniswap-oracle/sdk-adapter",
     "@openzeppelin/contracts-upgradeable": "^4.5.0",
     "@rari-capital/solmate": "^6.2.0",
     "@typechain/ethers-v5": "^9.0.0",
