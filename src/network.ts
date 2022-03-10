@@ -82,7 +82,6 @@ export const chainOracles = {
   [SupportedChains.ganache]: [
     OracleTypes.SimplePriceOracle,
     OracleTypes.MasterPriceOracle,
-    OracleTypes.KeydonixUniswapTwapPriceOracle,
   ],
   [SupportedChains.chapel]: [
     OracleTypes.MasterPriceOracle,
