@@ -219,7 +219,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
       chainDeployParams.wtoken, // TODO denominationTokenAddress,
       chainDeployParams.wtoken, // wtoken
       3, // TODO min blocks back
-      Math.max(chainDeployParams.blocksPerYear / (365 * 24 * 3), 255) // max blocks back = 20 mins back
+      Math.min(chainDeployParams.blocksPerYear / (365 * 24 * 3), 255) // max blocks back = 20 mins back
     );
     await tx.wait();
     console.log("Keydonix Price Oracle initialized", tx.hash);

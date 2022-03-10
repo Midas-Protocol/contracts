@@ -17,7 +17,8 @@ export const deployConfig: ChainDeployConfig = {
     uniswapV2FactoryAddress: "0x6725F303b657a9451d8BA641348b6761A6CC7a17",
     uniswapOracleInitialDeployTokens: [
       "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee", // BUSD
-      "0x6ce8da28e2f864420840cf74474eff5fd80e65b8", // BTCB
+      // "0x6ce8da28e2f864420840cf74474eff5fd80e65b8", // BTCB
+      "0x8a9424745056Eb399FD19a0EC26A14316684e274", // DAI
       "0xd66c6B4F0be8CE5b39D52E0Fd1344c389929B378", // ETH
     ],
   },

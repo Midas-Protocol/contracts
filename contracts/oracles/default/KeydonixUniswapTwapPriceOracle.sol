@@ -115,7 +115,11 @@ contract KeydonixUniswapTwapPriceOracle is
 
     PriceVerification storage latestPriceVerification = priceVerifications[underlying];
     if (latestPriceVerification.blockNumber == block.number) {
-      emit PriceAlreadyVerified(underlying, latestPriceVerification.price, latestPriceVerification.blockNumber);
+      emit PriceAlreadyVerified(
+        underlying,
+        latestPriceVerification.price,
+        latestPriceVerification.blockNumber
+      );
       return (latestPriceVerification.price, latestPriceVerification.blockNumber);
     }
 
@@ -129,13 +133,21 @@ contract KeydonixUniswapTwapPriceOracle is
     );
 
     if (blockNumber <= latestPriceVerification.blockNumber) {
-      emit PriceAlreadyVerified(underlying, latestPriceVerification.price, latestPriceVerification.blockNumber);
+      emit PriceAlreadyVerified(
+        underlying,
+        latestPriceVerification.price,
+        latestPriceVerification.blockNumber
+      );
       return (latestPriceVerification.price, latestPriceVerification.blockNumber);
     }
 
     priceVerifications[underlying] = PriceVerification(blockNumber, verifiedPrice);
 
-    emit PriceVerified(underlying, verifiedPrice, blockNumber);
+    emit PriceVerified(
+      underlying,
+      verifiedPrice,
+      blockNumber
+    );
 
     return (verifiedPrice, blockNumber);
   }

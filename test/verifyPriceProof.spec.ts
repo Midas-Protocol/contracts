@@ -5,8 +5,9 @@ import { KeydonixUniswapTwapPriceOracle, Comptroller } from "../typechain";
 import * as OracleSdkAdapter from "@keydonix/uniswap-oracle-sdk-adapter";
 import * as OracleSdk from "@keydonix/uniswap-oracle-sdk";
 import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
+import {Proof} from "@keydonix/uniswap-oracle-sdk";
 
-describe("Verify price proof tests", () => {
+describe.skip("Verify price proof tests", () => {
   let keydonixOracle: KeydonixUniswapTwapPriceOracle;
   let uniswapFactory;
   let denominationTokenAddress: string;
@@ -26,41 +27,83 @@ describe("Verify price proof tests", () => {
     const { alice, bob } = await ethers.getNamedSigners();
     console.log(`bobs address ${bob.address}`);
     console.log(`alices address ${alice.address}`);
-
-    // use in case bob has no funds
-    // let transactionResponse = await bob.sendTransaction({
-    //     to: bob.address,
-    //     value: utils.parseEther("1")
-    // });
-    // console.log(`tx resp ${transactionResponse.value}`);
+    let alicesBalance = await alice.getBalance();
+    console.log(`alices balance ${alicesBalance}`);
     let bobsBalance = await bob.getBalance();
     console.log(`bobs balance ${bobsBalance}`);
 
+    if (alicesBalance.isZero()) {
+      // use in case bob has no funds
+      let transactionResponse = await bob.sendTransaction({
+          to: alice.address,
+          value: bobsBalance.div(2)
+      });
+      console.log(`tx resp ${transactionResponse.value}`);
+    }
+
     const { chainId } = await ethers.provider.getNetwork();
-    const { config: chainDeployParams }: { config: ChainDeployConfig } = chainDeployConfig[chainId];
+
+    let chainDeployParams: ChainDeployConfig;
+    if (chainId == 97) {
+      chainDeployParams = {
+        wtoken: "0x8a9424745056Eb399FD19a0EC26A14316684e274", // DAI
+        //"0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd", // WBNB
+        nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
+        nativeTokenName: "Binance Network Token (Testnet)",
+        nativeTokenSymbol: "TBNB",
+        stableToken: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
+        wBTCToken: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
+        blocksPerYear: 20 * 24 * 365 * 60,
+        uniswap: {
+          hardcoded: [],
+          uniswapData: [],
+          pairInitHashCode: "0x",
+          uniswapV2RouterAddress: "0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3",
+          uniswapV2FactoryAddress: "0xB7926C0430Afb07AA7DEfDE6DA862aE0Bde767bc",
+          uniswapOracleInitialDeployTokens: [
+            "0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7", // BUSD
+            "0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684", // USDT
+            "0x8babbb98678facc7342735486c851abd7a0d17ca", // ETH
+            "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd", // WBNB
+            // "0x6ce8da28e2f864420840cf74474eff5fd80e65b8", // (BTCB)
+            "0x8a9424745056Eb399FD19a0EC26A14316684e274", // DAI
+            "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee", // (BUSD)
+
+            // pool (BTCB)/WBNB/BUSD 0x8871D160E38F083c532f6CC831681C34d8686F20
+            // pair BUSD/ETH 0x6a9D99Db0bD537f3aC57cBC316A9DD8b11A703aC
+            // pair BUSD/USDT 0x5126C1B8b4368c6F07292932451230Ba53a6eB7A
+            // pair ETH/USDT 0x8b4C4cc21865A792eb248AC0dB88859E17697eCe
+          ],
+        },
+      };
+    } else {
+      chainDeployParams = chainDeployConfig[chainId].config;
+    }
+
     console.log(`chainDeployParams ${chainDeployParams}`);
 
-    // console.log(`chainDeployParams.wBTCToken, chainDeployParams.wtoken ${chainDeployParams.wBTCToken} ${chainDeployParams.wtoken}`)
-    denominationTokenAddress = chainDeployParams.wBTCToken;
+    denominationTokenAddress = chainDeployParams.wtoken;
     wtoken = chainDeployParams.wtoken;
 
     uniswapFactory = await ethers.getContractAt(
       "IUniswapV2Factory",
       chainDeployParams.uniswap.uniswapV2FactoryAddress
     );
-    console.log(`uniswap factory ${uniswapFactory.address}`);
+    // let tokens = chainDeployParams.uniswap.uniswapOracleInitialDeployTokens;
+    // await searchPairs(uniswapFactory, tokens);
+    // uniswapFactory = await ethers.getContractAt(
+    //   "IUniswapV2Factory",
+    //   chainDeployConfig[chainId].config.uniswap.uniswapV2FactoryAddress
+    // );
+    // await searchPairs(uniswapFactory, tokens);
 
-    let pair0Address = await uniswapFactory.callStatic.allPairs(1);
-    // let pair0Address = "0xaaeF854894Ae5b79cB396b938b0eB9a13f5510Fc";
-    uniswapExchangeAddress = pair0Address;
-    console.log(`pair0 ${pair0Address}`);
 
-    const pair0 = await ethers.getContractAt("IUniswapV2Pair", pair0Address);
+    token0 = chainDeployParams.uniswap.uniswapOracleInitialDeployTokens[0];
+    token1 = chainDeployParams.uniswap.uniswapOracleInitialDeployTokens[1];
 
-    token0 = await pair0.token0();
-    token1 = await pair0.token1();
-
-    console.log(`token0 ${token0} token1 ${token1} at exchange ${pair0Address}`);
+    uniswapExchangeAddress = await uniswapFactory.callStatic.getPair(token0, token1);
+    // uniswapExchangeAddress = "0xaaeF854894Ae5b79cB396b938b0eB9a13f5510Fc";
+    console.log(`token0 ${token0} token1 ${token1} at exchange ${uniswapExchangeAddress}`);
 
     // deploy it or find the instance
     let dep = await deployments.deterministic("KeydonixUniswapTwapPriceOracle", {
@@ -80,7 +123,7 @@ describe("Verify price proof tests", () => {
         denominationTokenAddress,
         wtoken,
         3, // min blocks back
-        Math.max(chainDeployParams.blocksPerYear / (365 * 24 * 3), 255) // max blocks back = 20 mins back
+        Math.min(chainDeployParams.blocksPerYear / (365 * 24 * 3), 255) // max blocks back = 20 mins back
       );
       await tx.wait();
       console.log("Keydonix Price Oracle initialized", tx.hash);
@@ -131,8 +174,11 @@ describe("Verify price proof tests", () => {
     let tx: providers.TransactionResponse;
     let rec: providers.TransactionReceipt;
 
-    // let dta: string = await keydonixOracle.callStatic.denominationToken();
-    // console.log(`dta ${dta} wBTCToken ${denominationTokenAddress} wtoken ${wtoken}`);
+
+    let maxBB = await keydonixOracle.callStatic.maxBlocksBack();
+    let minBB = await keydonixOracle.callStatic.minBlocksBack();
+
+    console.log(`max ${maxBB} min ${minBB}`);
 
     let latestBlockNumber = await ethers.provider.getBlockNumber();
     console.log(`latestBlockNumber ${latestBlockNumber}`);
@@ -140,8 +186,8 @@ describe("Verify price proof tests", () => {
     let latestMinusSome = BigInt(latestBlockNumber - 10);
     console.log(`latest - 10 = ${latestMinusSome}`);
 
+    console.log(`estimating the price for ${token1} at exchange ${uniswapExchangeAddress}`)
     let exchangeAddress = BigInt(uniswapExchangeAddress);
-
     const getStorageAt = OracleSdkAdapter.getStorageAtFactory(ethers.provider);
     const getProof = OracleSdkAdapter.getProofFactory(ethers.provider);
     const getBlockByNumber = OracleSdkAdapter.getBlockByNumberFactory(ethers.provider);
@@ -176,7 +222,13 @@ describe("Verify price proof tests", () => {
         BigInt(token1),
         latestMinusSome
     );
-    console.log(`proof: ${Object.keys(proof)}`);
+
+    console.log(`proof: 
+    ${ethers.utils.hexlify(proof.block)}
+    ${ethers.utils.hexlify(proof.accountProofNodesRlp)}
+    ${ethers.utils.hexlify(proof.priceAccumulatorProofNodesRlp)}
+    ${ethers.utils.hexlify(proof.reserveAndTimestampProofNodesRlp)}
+    `);
 
     // const proof = {
     //   block: [1],
@@ -185,27 +237,18 @@ describe("Verify price proof tests", () => {
     //   priceAccumulatorProofNodesRlp: [1],
     // };
 
-    let maxBB = await keydonixOracle.callStatic.maxBlocksBack();
-    let minBB = await keydonixOracle.callStatic.minBlocksBack();
-
-    console.log(`max ${maxBB} min ${minBB}`);
-
     let pvBefore = await keydonixOracle.callStatic.priceVerifications(token1);
     console.log(`pvBefore ${pvBefore}`);
 
     console.log(`needs pair ${token1} / ${denominationTokenAddress}`);
     let pricePair = await uniswapFactory.callStatic.getPair(token1, denominationTokenAddress);
-    console.log(`pp ${pricePair}`);
-
-
-    let factory = await keydonixOracle.callStatic.uniswapV2Factory();
-    console.log(`factory ${factory}`);
+    console.log(`found pair ${pricePair}`);
 
     console.log(`verifying the price`)
-    await keydonixOracle.callStatic.verifyPriceUnderlying(token1, proof, {gasLimit: 3e7});
-    // tx = await keydonixOracle.callStatic.verifyPriceUnderlying(token1, proof, {gasLimit: 1e7});
-    // rec = await tx.wait();
-    // expect(rec.status).to.eq(1);
+    // await keydonixOracle.callStatic.verifyPriceUnderlying(token1, proof, {gasLimit: 1e7});
+    tx = await keydonixOracle.verifyPriceUnderlying(token1, proof, {gasLimit: 31e6, gasPrice: 1});
+    rec = await tx.wait();
+    expect(rec.status).to.eq(1);
 
     // let price = await keydonixOracle.callStatic.getPrice(pricePair, denominationTokenAddress, minBB, maxBB, proof);
     // let result = await keydonixOracle.callStatic.getAccountStorageRoot(pricePair, proof);
@@ -232,5 +275,18 @@ describe("Verify price proof tests", () => {
 
   function bigintToHex(value: bigint): string {
     return `0x${value.toString(16)}`;
+  }
+
+  async function searchPairs(factory: any, tokens: string[]) {
+    console.log(`uniswap factory ${factory.address}`);
+    for(let i=0; i < tokens.length - 1; i++) {
+      let t1 = tokens[i];
+      for(let j=i+1; j < tokens.length; j++) {
+        let t2 = tokens[j];
+
+        let exch = await factory.callStatic.getPair(t1, t2);
+        console.log(`t1 ${t1} t2 ${t2} at exchange ${exch}`);
+      }
+    }
   }
 });
