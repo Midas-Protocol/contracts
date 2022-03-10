@@ -97,6 +97,7 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
       chainId: 4,
       url: urlOverride || process.env.RINKEBY_ETH_PROVIDER_URL || "http://localhost:8545",
+      throwOnCallFailures: false,
     },
     kovan: {
       accounts: { mnemonic },

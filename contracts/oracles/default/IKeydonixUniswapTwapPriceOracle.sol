@@ -7,6 +7,8 @@ import "../keydonix/UniswapOracle.sol";
 interface IKeydonixUniswapTwapPriceOracle {
   function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) external returns (uint256, uint256);
 
-  event PriceAlreadyVerified(address indexed cToken, uint256 price, uint256 block);
-  event PriceVerified(address indexed cToken, uint256 price, uint256 block);
+  function verifyPriceUnderlying(address underlying, UniswapOracle.ProofData calldata proofData) external returns (uint256, uint256);
+
+  event PriceAlreadyVerified(address indexed underlying, uint256 price, uint256 block);
+  event PriceVerified(address indexed underlying, uint256 price, uint256 block);
 }
