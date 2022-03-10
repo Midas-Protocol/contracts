@@ -87,13 +87,14 @@ Then, your tests should pass (assuming no other failures)
 
 ### Running BSC mainnet fork locally
 
-1. Prepare hardhat config
+1. Add env vars in .env
 
-```shell
->>> ts-node prepare-chain bsc
+`.env`
 ```
-
-**NOTE**: this command is not idempotent, so running it twice will fail. Do not commit the changes to the hh config
+FORK_URL=https://speedy-nodes-nyc.moralis.io/2d2926c3e761369208fba31f/bsc/mainnet/archive
+FORK_BLOCK_NUMBER=15641803
+FORK_CHAIN_ID=56
+```
 
 2. Run node
 
