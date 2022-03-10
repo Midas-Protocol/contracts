@@ -19,12 +19,15 @@
     "test:forge": "forge test --no-match-contract LiquidityMining",
     "test:bsc": "FORK_URL=https://speedy-nodes-nyc.moralis.io/2d2926c3e761369208fba31f/bsc/mainnet/archive FORK_BLOCK_NUMBER=15641803 FORK_CHAIN_ID=56 hardhat test",
     "export": "hardhat export --export-all ./deployments.json",
-    "build": "hardhat compile && forge build && npm run build:sdk",
+    "build": "npm run build:hardhat && npm run build:sdk && npm run build:forge",
+    "build:forge": "forge build",
+    "build:hardhat": "hardhat compile",
     "build:sdk": "tsc -p tsconfig-sdk.json && tsc -p tsconfig-cjs.json",
     "clean": "hardhat clean && rm -rf lib",
     "prettier:sol": "prettier --write 'contracts/**/*.sol' 'contracts_forge/**/*.sol'",
     "prettier:ts": "prettier --write 'chainDeploy/**/*.ts' 'src/**/*.ts' 'deploy/**/*.ts' 'tasks/**/*.ts' 'test/**/*.ts'",
-    "prettier": "npm run prettier:ts && npm run prettier:sol"
+    "prettier": "npm run prettier:ts && npm run prettier:sol",
+    "postinstall": "forge init --force"
   },
   "keywords": [],
   "author": "Midas Capital",
