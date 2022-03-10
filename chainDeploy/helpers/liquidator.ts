@@ -13,6 +13,9 @@ export const deployFuseSafeLiquidator = async ({
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
   const fsl = await dep.deploy();
   console.log("FuseSafeLiquidator: ", fsl.address);
