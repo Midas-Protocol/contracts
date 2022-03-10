@@ -35,12 +35,12 @@ task("pools:create", "Create pool if does not exist")
   .addOptionalParam("priceOracle", "Which price oracle to use", undefined, types.string)
   .setAction(async (taskArgs, hre) => {
     const { chainId } = await hre.ethers.provider.getNetwork();
-    const account = await hre.ethers.getNamedSigner(taskArgs.creator);
+    const signer = await hre.ethers.getNamedSigner(taskArgs.creator);
     if (!taskArgs.priceOracle) {
       await hre.run("oracle:set-price", { token: "ETH", price: "1" });
       await hre.run("oracle:set-price", { token: "TOUCH", price: "0.1" });
       await hre.run("oracle:set-price", { token: "TRIBE", price: "0.01" });
-      taskArgs.priceOracle = (await hre.ethers.getContract("MasterPriceOracle", account)).address;
+      taskArgs.priceOracle = (await hre.ethers.getContract("MasterPriceOracle", signer)).address;
     }
 
     const poolModule = await import("../test/utils/pool");
@@ -52,18 +52,52 @@ task("pools:create", "Create pool if does not exist")
     const fuseFeeDistributor = (await hre.ethers.getContract("FuseFeeDistributor")).address;
 
     let poolAddress: string;
-    if (existingPool !== null) {
+    if (existingPool) {
       console.log(`Pool with name ${existingPool.name} exists already, will operate on it`);
       poolAddress = existingPool.comptroller;
     } else {
       [poolAddress] = await poolModule.createPool({
         poolName: taskArgs.name,
-        signer: account,
+        signer,
         priceOracleAddress: taskArgs.priceOracle,
       });
+      // Deploy Assets
       const assets = await poolModule.getPoolAssets(poolAddress, fuseFeeDistributor);
-      await poolModule.deployAssets(assets.assets, account);
+      const deployedAssets = await poolModule.deployAssets(assets.assets, signer);
+
+      // Add Reward Distributer for TOUCH
+      const touchInstance = await hre.ethers.getContract("TOUCHToken");
+      const rdInstance = await sdk.deployRewardsDistributor(touchInstance.address, {
+        from: signer.address,
+      });
+      await sdk.addRewardDistributer(poolAddress, rdInstance.address, {
+        from: signer.address,
+      });
+      await sdk.fundRewardDistributer(rdInstance.address, touchInstance.address, hre.ethers.utils.parseUnits("10000"), {
+        from: signer.address,
+      });
+
+      const deployedCTouch = deployedAssets.find((a) => a.symbol === "TOUCH");
+      if (deployedCTouch) {
+        await sdk.updateDistributionSpeedSuppliers(
+          rdInstance.address,
+          deployedCTouch.assetAddress,
+          hre.ethers.utils.parseUnits("2"),
+          {
+            from: signer.address,
+          }
+        );
+        await sdk.updateDistributionSpeedBorrowers(
+          rdInstance.address,
+          deployedCTouch.assetAddress,
+          hre.ethers.utils.parseUnits("1"),
+          {
+            from: signer.address,
+          }
+        );
+      }
     }
+
     await poolModule.logPoolData(poolAddress, sdk);
     return poolAddress;
   });
