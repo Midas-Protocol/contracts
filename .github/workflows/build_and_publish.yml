@@ -25,6 +25,8 @@ jobs:
   #         docker-compose down
 
   build-and-test-local:
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -43,6 +45,8 @@ jobs:
       - run: npm run test
 
   build-and-test-bsc:
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -65,6 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
     steps:
       - uses: actions/checkout@v2
         with:

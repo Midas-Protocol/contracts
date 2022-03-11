@@ -1,3 +1,5 @@
+import { HardhatRuntimeEnvironment, RunTaskFunction } from "hardhat/types";
+
 export enum ChainlinkFeedBaseCurrency {
   ETH,
   USD,
@@ -19,4 +21,45 @@ export type ChainDeployConfig = {
   stableToken?: string;
   wBTCToken?: string;
   blocksPerYear: number;
+};
+
+export type Asset = {
+  symbol: string;
+  underlying: string;
+  name: string;
+  decimals: number;
+};
+
+export type ChainlinkAsset = {
+  symbol: string;
+  aggregator: string;
+  feedBaseCurrency: ChainlinkFeedBaseCurrency;
+};
+
+export type CurvePoolConfig = {
+  lpToken: string;
+  pool: string;
+  underlyings: string[];
+};
+
+export type ChainDeployFnParams = {
+  ethers: HardhatRuntimeEnvironment["ethers"];
+  getNamedAccounts: HardhatRuntimeEnvironment["getNamedAccounts"];
+  deployments: HardhatRuntimeEnvironment["deployments"];
+  run: RunTaskFunction;
+};
+
+export type ChainlinkDeployFnParams = ChainDeployFnParams & {
+  assets: Asset[];
+  chainlinkAssets: ChainlinkAsset[];
+  deployConfig: ChainDeployConfig;
+};
+
+export type UniswapDeployFnParams = ChainDeployFnParams & {
+  deployConfig: ChainDeployConfig;
+};
+
+export type CurveLpFnParams = ChainDeployFnParams & {
+  deployConfig: ChainDeployConfig;
+  curvePools: CurvePoolConfig[];
 };

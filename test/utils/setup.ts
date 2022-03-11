@@ -49,7 +49,7 @@ export const tradeNativeForAsset = deployments.createFixture(async ({ run }, { t
   await run("swap-wtoken-for-token", { token, amount, account });
 });
 
-export const setUpLiquidation = deployments.createFixture(async ({ run }, options) => {
+export const setUpLiquidation = deployments.createFixture(async ({ run }, { poolName }) => {
   let eth: cERC20Conf;
   let erc20One: cERC20Conf;
   let erc20Two: cERC20Conf;
@@ -80,7 +80,7 @@ export const setUpLiquidation = deployments.createFixture(async ({ run }, option
   oracle = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
   fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
 
-  [poolAddress] = await createPool({});
+  [poolAddress] = await createPool({ poolName });
   const assets = await getPoolAssets(poolAddress, fuseFeeDistributor.address);
 
   erc20One = assets.assets.find((a) => a.underlying !== constants.AddressZero); // find first one

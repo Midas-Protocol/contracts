@@ -216,6 +216,25 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   const masterPO = await dep.deploy();
   console.log("MasterPriceOracle: ", masterPO.address);
 
+  const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
+  const admin = await masterPriceOracle.admin();
+
+  // intialize with no assets
+  if (admin === ethers.constants.AddressZero) {
+    let tx = await masterPriceOracle.initialize(
+      [],
+      [],
+      constants.AddressZero,
+      deployer,
+      true,
+      chainDeployParams.wtoken
+    );
+    await tx.wait();
+    console.log("MasterPriceOracle initialized", tx.hash);
+  } else {
+    console.log("MasterPriceOracle already initialized");
+  }
+
   // dep = await deployments.deterministic("KeydonixUniswapTwapPriceOracle", {
   //   from: deployer,
   //   salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
