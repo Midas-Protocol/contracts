@@ -76,7 +76,7 @@ const UNISWAP_V2_PROTOCOLS = {
     } = await setUpLiquidation({ poolName }));
   });
 
-  it.only("should liquidate a native borrow for token collateral", async function () {
+  it("should liquidate a native borrow for token collateral", async function () {
     const { alice, bob, rando } = await ethers.getNamedSigners();
 
     // get some liquidity via Uniswap
