@@ -44,9 +44,9 @@ export const chainSpecificAddresses = {
     USDC: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
     W_TOKEN: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
     W_TOKEN_USD_CHAINLINK_PRICE_FEED: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
-    UNISWAP_V2_ROUTER: "",
-    UNISWAP_V2_FACTORY: "",
-    PAIR_INIT_HASH: "",
+    UNISWAP_V2_ROUTER: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
+    UNISWAP_V2_FACTORY: "0x6725F303b657a9451d8BA641348b6761A6CC7a17",
+    PAIR_INIT_HASH: ethers.utils.hexlify("0xd0d4c4cd0848c93cb4fd1f498d7013ee6bfb25783ea21593d5834f5d250ece66"),
   },
   [SupportedChains.bsc]: {
     DAI_POT: "0x197e90f9fad81970ba7976f33cbd77088e5d7cf7",
@@ -79,10 +79,7 @@ const OracleTypes = {
 } as const;
 
 export const chainOracles = {
-  [SupportedChains.ganache]: [
-    OracleTypes.SimplePriceOracle,
-    OracleTypes.MasterPriceOracle,
-  ],
+  [SupportedChains.ganache]: [OracleTypes.SimplePriceOracle, OracleTypes.MasterPriceOracle],
   [SupportedChains.chapel]: [
     OracleTypes.MasterPriceOracle,
     OracleTypes.ChainlinkPriceOracleV2,
