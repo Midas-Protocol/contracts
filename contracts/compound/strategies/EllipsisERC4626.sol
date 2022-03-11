@@ -7,32 +7,44 @@ import { SafeTransferLib } from "@rari-capital/solmate/src/utils/SafeTransferLib
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { IFlywheelCore } from "../../flywheel/interfaces/IFlywheelCore.sol";
 
-interface IAutofarmV2 {
-  function AUTO() external view returns (address);
+interface ILpTokenStaker {
+  function userInfo(uint256 _pid, address _user) external view returns (uint256, uint256);
 
-  function deposit(uint256 _pid, uint256 _wantAmt) external;
+  // Deposit LP tokens into the contract. Also triggers a claim.
+  function deposit(uint256 _pid, uint256 _amount) external;
 
-  function withdraw(uint256 _pid, uint256 _wantAmt) external;
+  // Withdraw LP tokens. Also triggers a claim.
+  function withdraw(uint256 _pid, uint256 _amount) external;
+}
 
-  //Returns underlying balance in strategies
-  function stakedWantTokens(uint256 _pid, address _user) external view returns (uint256);
+interface IEpsStaker {
+  // Withdraw staked tokens
+  // First withdraws unlocked tokens, then earned tokens. Withdrawing earned tokens
+  // incurs a 50% penalty which is distributed based on locked balances.
+  function withdraw(uint256 amount) external;
+
+  function stakingToken() external returns (address);
+
+  function totalBalance(address user) external view returns (uint256);
 }
 
 /**
- * @title Autofarm ERC4626 Contract
- * @notice ERC4626 wrapper for AutofarmV2
+ * @title Ellipsis ERC4626 Contract
+ * @notice ERC4626 Strategy for Ellipsis LP-Staking
  * @author RedVeil
  *
- * Wraps https://github.com/autofarmnetwork/AutofarmV2_CrossChain/blob/master/AutoFarmV2.sol
+ * Stakes and withdraws deposited LP-Token in/from https://github.com/ellipsis-finance/ellipsis/blob/master/contracts/LpTokenStaker.sol
+ * and claims rewards from https://github.com/ellipsis-finance/ellipsis/blob/master/contracts/EpsStaker.sol
  *
  */
-contract AutofarmERC4626 is ERC4626 {
+contract EllipsisERC4626 is ERC4626 {
   using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
   uint256 public immutable poolId;
-  IAutofarmV2 public immutable autofarm;
+  ILpTokenStaker public immutable lpTokenStaker;
+  IEpsStaker public immutable epsStaker;
   IFlywheelCore public immutable flywheel;
 
   /* ========== CONSTRUCTOR ========== */
@@ -43,20 +55,22 @@ contract AutofarmERC4626 is ERC4626 {
      @param _name The name for the vault token.
      @param _symbol The symbol for the vault token.
      @param _poolId TODO
-     @param _autofarm The autofarm contract.
+     @param _lpTokenStaker TODO
+     @param _epsStaker TODO
      @param _flywheel TODO
-
     */
   constructor(
     ERC20 _asset,
     string memory _name,
     string memory _symbol,
     uint256 _poolId,
-    IAutofarmV2 _autofarm,
+    ILpTokenStaker _lpTokenStaker,
+    IEpsStaker _epsStaker,
     IFlywheelCore _flywheel
   ) ERC4626(_asset, _name, _symbol) {
     poolId = _poolId;
-    autofarm = _autofarm;
+    lpTokenStaker = _lpTokenStaker;
+    epsStaker = _epsStaker;
     flywheel = _flywheel;
   }
 
@@ -65,7 +79,8 @@ contract AutofarmERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    return autofarm.stakedWantTokens(poolId, address(this));
+    (uint256 amount, ) = lpTokenStaker.userInfo(poolId, address(this));
+    return amount;
   }
 
   /// @notice Calculates the total amount of underlying tokens the user holds.
@@ -78,8 +93,8 @@ contract AutofarmERC4626 is ERC4626 {
 
   function transfer(address to, uint256 amount) public override returns (bool) {
     //Accrue flywheel rewards for sender and receiver
-    ERC20 AUTO = ERC20(autofarm.AUTO());
-    AUTO.approve(address(flywheel.flywheelRewards()), AUTO.balanceOf(address(this)));
+    ERC20 EPS = ERC20(epsStaker.stakingToken());
+    EPS.approve(address(flywheel.flywheelRewards()), EPS.balanceOf(address(this)));
     flywheel.accrue(ERC20(address(this)), msg.sender, to);
 
     balanceOf[msg.sender] -= amount;
@@ -101,8 +116,8 @@ contract AutofarmERC4626 is ERC4626 {
     uint256 amount
   ) public override returns (bool) {
     //Accrue flywheel rewards for sender and receiver
-    ERC20 AUTO = ERC20(autofarm.AUTO());
-    AUTO.approve(address(flywheel.flywheelRewards()), AUTO.balanceOf(address(this)));
+    ERC20 EPS = ERC20(epsStaker.stakingToken());
+    EPS.approve(address(flywheel.flywheelRewards()), EPS.balanceOf(address(this)));
     flywheel.accrue(ERC20(address(this)), from, to);
 
     uint256 allowed = allowance[from][msg.sender]; // Saves gas for limited approvals.
@@ -125,18 +140,36 @@ contract AutofarmERC4626 is ERC4626 {
   /* ========== INTERNAL FUNCTIONS ========== */
 
   function afterDeposit(uint256 amount, uint256) internal override {
-    asset.approve(address(autofarm), amount);
-    autofarm.deposit(poolId, amount);
-    ERC20 AUTO = ERC20(autofarm.AUTO());
-    AUTO.approve(address(flywheel.flywheelRewards()), AUTO.balanceOf(address(this)));
-    flywheel.accrue(ERC20(address(this)), msg.sender);
+    asset.approve(address(lpTokenStaker), amount);
+    lpTokenStaker.deposit(poolId, amount);
+
+    //Total Rewarded EPS
+    uint256 totalEPSReward = epsStaker.totalBalance(address(this));
+    if (totalEPSReward > 0) {
+      //Withdraw totalEPSReward minus 50% penalty
+      epsStaker.withdraw(totalEPSReward / 2);
+
+      //Aprove EPS for flywheel and accrue rewards
+      ERC20 EPS = ERC20(epsStaker.stakingToken());
+      EPS.approve(address(flywheel.flywheelRewards()), EPS.balanceOf(address(this)));
+      flywheel.accrue(ERC20(address(this)), msg.sender);
+    }
   }
 
   /// @notice withdraws specified amount of underlying token if possible
   function beforeWithdraw(uint256 amount, uint256) internal override {
-    autofarm.withdraw(poolId, amount);
-    ERC20 AUTO = ERC20(autofarm.AUTO());
-    AUTO.approve(address(flywheel.flywheelRewards()), AUTO.balanceOf(address(this)));
-    flywheel.accrue(ERC20(address(this)), msg.sender);
+    lpTokenStaker.withdraw(poolId, amount);
+
+    //Total Rewarded EPS
+    uint256 totalEPSReward = epsStaker.totalBalance(address(this));
+    if (totalEPSReward > 0) {
+      //Withdraw totalEPSReward minus 50% penalty
+      epsStaker.withdraw(totalEPSReward / 2);
+
+      //Aprove EPS for flywheel and accrue rewards
+      ERC20 EPS = ERC20(epsStaker.stakingToken());
+      EPS.approve(address(flywheel.flywheelRewards()), EPS.balanceOf(address(this)));
+      flywheel.accrue(ERC20(address(this)), msg.sender);
+    }
   }
 }
