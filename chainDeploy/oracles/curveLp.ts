@@ -46,7 +46,7 @@ export const deployCurveLpOracle = async ({
   }
 
   run("oracle:add-tokens", {
-    underlyings: curvePools.map((c) => c.lpToken),
-    oracles: Array(curvePools.length).fill(curveOracle.address),
+    underlyings: curvePools.map((c) => c.lpToken).join(","),
+    oracles: Array(curvePools.length).fill(curveOracle.address).join(","),
   });
 };

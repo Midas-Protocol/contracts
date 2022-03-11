@@ -1,6 +1,6 @@
 import { providers } from "ethers";
 import { SALT } from "../../deploy/deploy";
-import { ChainlinkPriceOracleV2, MasterPriceOracle } from "../../typechain";
+import { ChainlinkPriceOracleV2 } from "../../typechain";
 import { Asset, ChainlinkDeployFnParams, ChainlinkFeedBaseCurrency } from "./types";
 
 export const deployChainlinkOracle = async ({
@@ -35,8 +35,8 @@ export const deployChainlinkOracle = async ({
   await tx.wait();
   console.log(`Set price feeds for ChainlinkPriceOracleV2 mined: ${tx.hash}`);
   run("oracle:add-tokens", {
-    underlyings: chainlinkAssets.map((c) => assets.find((a) => a.symbol === c.symbol).underlying),
-    oracles: Array(chainlinkAssets.length).fill(chainLinkv2.address),
+    underlyings: chainlinkAssets.map((c) => assets.find((a) => a.symbol === c.symbol).underlying).join(","),
+    oracles: Array(chainlinkAssets.length).fill(chainLinkv2.address).join(","),
   });
   return { cpo: cpo, chainLinkv2: chainLinkv2 };
 };
