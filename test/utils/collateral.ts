@@ -7,9 +7,14 @@ import { ethers } from "hardhat";
 import { MasterPriceOracle, SimplePriceOracle } from "../../typechain";
 import { chainDeployConfig } from "../../chainDeploy";
 
-export async function getAsset(sdk: Fuse, poolAddress: string, underlyingSymbol: string): Promise<USDPricedFuseAsset> {
+export async function getAsset(
+  sdk: Fuse,
+  poolAddress: string,
+  underlyingSymbol: string,
+  cgId?: string
+): Promise<USDPricedFuseAsset> {
   const poolId = (await getPoolIndex(poolAddress, sdk)).toString();
-  const assetsInPool = await sdk.fetchFusePoolData(poolId);
+  const assetsInPool = await sdk.fetchFusePoolData(poolId, undefined, cgId);
   return assetsInPool.assets.filter((a) => a.underlyingSymbol === underlyingSymbol)[0];
 }
 
@@ -26,7 +31,8 @@ export async function addCollateral(
   depositor: SignerWithAddress,
   underlyingSymbol: string,
   amount: string,
-  useAsCollateral: boolean
+  useAsCollateral: boolean,
+  cgId?: string
 ) {
   let tx: providers.TransactionResponse;
   let amountBN: BigNumber;
@@ -36,7 +42,7 @@ export async function addCollateral(
 
   const sdk = new Fuse(ethers.provider, chainId);
 
-  const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol);
+  const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol, cgId);
 
   cToken = getCToken(assetToDeploy, sdk, depositor);
   const pool = await ethers.getContractAt("Comptroller", poolAddress, depositor);
@@ -76,7 +82,8 @@ export async function borrowCollateral(
   poolAddress: string,
   borrowerAddress: string,
   underlyingSymbol: string,
-  amount: string
+  amount: string,
+  cgId?: string
 ) {
   let tx: providers.TransactionResponse;
   let rec: providers.TransactionReceipt;
@@ -84,7 +91,7 @@ export async function borrowCollateral(
   const { chainId } = await ethers.provider.getNetwork();
   const signer = await ethers.getSigner(borrowerAddress);
   const sdk = new Fuse(ethers.provider, chainId);
-  const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol);
+  const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol, cgId);
 
   const pool = await ethers.getContractAt("Comptroller", poolAddress, signer);
   tx = await pool.enterMarkets([assetToDeploy.cToken]);
@@ -97,7 +104,7 @@ export async function borrowCollateral(
   rec = await tx.wait();
   expect(rec.status).to.eq(1);
   const poolId = await getPoolIndex(poolAddress, sdk);
-  const assetAfterBorrow = await assetInPool(poolId, sdk, assetToDeploy.underlyingSymbol, signer.address);
+  const assetAfterBorrow = await assetInPool(poolId, sdk, assetToDeploy.underlyingSymbol, signer.address, cgId);
   console.log(assetAfterBorrow.borrowBalanceUSD, "Borrow Balance USD: AFTER mint & borrow");
   console.log(assetAfterBorrow.supplyBalanceUSD, "Supply Balance USD: AFTER mint & borrow");
 }

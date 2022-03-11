@@ -1,3 +1,3 @@
 export { createPool, deployAssets } from "./pool";
 
-export { setUpPriceOraclePrices } from "./setup";
+export { setUpPriceOraclePrices, getPositionRatio, tradeNativeForAsset, setUpLiquidation } from "./setup";

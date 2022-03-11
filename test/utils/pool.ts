@@ -128,9 +128,10 @@ export const assetInPool = async (
   poolId: string,
   sdk: Fuse,
   underlyingSymbol: string,
-  address?: string
+  address?: string,
+  cgId?: string
 ): Promise<USDPricedFuseAsset> => {
-  const fetchedAssetsInPool: FusePoolData = await sdk.fetchFusePoolData(poolId, address);
+  const fetchedAssetsInPool: FusePoolData = await sdk.fetchFusePoolData(poolId, address, cgId);
   return fetchedAssetsInPool.assets.filter((a) => a.underlyingSymbol === underlyingSymbol)[0];
 };
 
@@ -144,12 +145,17 @@ export const getPoolIndex = async (poolAddress: string, sdk: Fuse) => {
   return null;
 };
 
-export const getPoolByName = async (name: string, sdk: Fuse, address?: string): Promise<FusePoolData> => {
+export const getPoolByName = async (
+  name: string,
+  sdk: Fuse,
+  address?: string,
+  cgId?: string
+): Promise<FusePoolData> => {
   const [indexes, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPublicPoolsWithData();
   for (let j = 0; j < publicPools.length; j++) {
     if (publicPools[j].name === name) {
       const poolIndex = await getPoolIndex(publicPools[j].comptroller, sdk);
-      return sdk.fetchFusePoolData(poolIndex, address);
+      return sdk.fetchFusePoolData(poolIndex, address, cgId);
     }
   }
   return null;
