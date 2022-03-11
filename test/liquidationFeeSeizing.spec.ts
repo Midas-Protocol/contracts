@@ -75,12 +75,15 @@ describe("Protocol Liquidation Seizing", () => {
     await tradeNativeForAsset({ account: "bob", token: erc20One.underlying, amount: "300" });
 
     await setupLiquidatablePool(oracle, deployedErc20One, poolAddress, simpleOracle, borrowAmount, bob);
+    console.log("pool set up");
 
     const liquidatorBalanceBefore = await erc20OneCToken.balanceOf(rando.address);
     const borrowerBalanceBefore = await erc20OneCToken.balanceOf(bob.address);
     const totalReservesBefore = await erc20OneCToken.totalReserves();
     const totalSupplyBefore = await erc20OneCToken.totalSupply();
     const feesBefore = await erc20OneCToken.totalFuseFees();
+
+    tx = await erc20OneUnderlying.connect(rando).approve(liquidator.address, constants.MaxUint256);
 
     tx = await liquidator["safeLiquidate(address,address,address,uint256,address,address,address[],bytes[])"](
       bob.address,
