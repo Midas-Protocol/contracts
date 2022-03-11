@@ -42,7 +42,6 @@ describe("Protocol Liquidation Seizing", () => {
 
   beforeEach(async () => {
     await deployments.fixture(); // ensure you start from a fresh deployments
-    await deployments.fixture(); // ensure you start from a fresh deployments
     ({
       poolAddress,
       deployedEth,
@@ -59,6 +58,7 @@ describe("Protocol Liquidation Seizing", () => {
       erc20TwoUnderlying,
       oracle,
       simpleOracle,
+      fuseFeeDistributor,
     } = await setUpLiquidation());
   });
 

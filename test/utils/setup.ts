@@ -5,6 +5,7 @@ import {
   CErc20,
   CEther,
   EIP20Interface,
+  FuseFeeDistributor,
   FuseSafeLiquidator,
   MasterPriceOracle,
   SimplePriceOracle,
@@ -61,6 +62,7 @@ export const setUpLiquidation = deployments.createFixture(async ({ run }, option
   let simpleOracle: SimplePriceOracle;
   let oracle: MasterPriceOracle;
   let liquidator: FuseSafeLiquidator;
+  let fuseFeeDistributor: FuseFeeDistributor;
 
   let ethCToken: CEther;
   let erc20OneCToken: CErc20;
@@ -73,11 +75,13 @@ export const setUpLiquidation = deployments.createFixture(async ({ run }, option
   const { bob, deployer, rando } = await ethers.getNamedSigners();
 
   await setUpPriceOraclePrices();
+
   simpleOracle = (await ethers.getContract("SimplePriceOracle", deployer)) as SimplePriceOracle;
   oracle = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
+  fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
 
   [poolAddress] = await createPool({});
-  const assets = await getPoolAssets(poolAddress, (await ethers.getContract("FuseFeeDistributor")).address);
+  const assets = await getPoolAssets(poolAddress, fuseFeeDistributor.address);
 
   erc20One = assets.assets.find((a) => a.underlying !== constants.AddressZero); // find first one
 
@@ -129,5 +133,6 @@ export const setUpLiquidation = deployments.createFixture(async ({ run }, option
     erc20TwoUnderlying,
     oracle,
     simpleOracle,
+    fuseFeeDistributor,
   };
 });

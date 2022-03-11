@@ -3,7 +3,15 @@ import { deployments, ethers } from "hardhat";
 import { setUpLiquidation } from "./utils";
 import { DeployedAsset } from "./utils/pool";
 import { addCollateral, borrowCollateral } from "./utils/collateral";
-import { CErc20, CEther, EIP20Interface, FuseSafeLiquidator, MasterPriceOracle, SimplePriceOracle } from "../typechain";
+import {
+  CErc20,
+  CEther,
+  EIP20Interface,
+  FuseFeeDistributor,
+  FuseSafeLiquidator,
+  MasterPriceOracle,
+  SimplePriceOracle,
+} from "../typechain";
 import { expect } from "chai";
 import { cERC20Conf } from "../dist/esm/src";
 
@@ -20,6 +28,7 @@ describe("#safeLiquidate", () => {
   let simpleOracle: SimplePriceOracle;
   let oracle: MasterPriceOracle;
   let liquidator: FuseSafeLiquidator;
+  let fuseFeeDistributor: FuseFeeDistributor;
 
   let ethCToken: CEther;
   let erc20OneCToken: CErc20;
@@ -47,6 +56,7 @@ describe("#safeLiquidate", () => {
       erc20TwoUnderlying,
       oracle,
       simpleOracle,
+      fuseFeeDistributor,
     } = await setUpLiquidation());
   });
 

@@ -2,7 +2,14 @@ import { BigNumber, constants, Contract, providers, utils } from "ethers";
 import { deployments, ethers } from "hardhat";
 import { getPositionRatio, setUpLiquidation, tradeNativeForAsset } from "./utils";
 import { addCollateral, borrowCollateral } from "./utils/collateral";
-import { CErc20, CEther, EIP20Interface, FuseSafeLiquidator, SimplePriceOracle } from "../typechain";
+import {
+  CErc20,
+  CEther,
+  EIP20Interface,
+  FuseFeeDistributor,
+  FuseSafeLiquidator,
+  SimplePriceOracle,
+} from "../typechain";
 import { expect } from "chai";
 import { cERC20Conf, ERC20Abi } from "../dist/esm/src";
 import { DeployedAsset } from "./utils/pool";
@@ -36,6 +43,7 @@ const UNISWAP_V2_PROTOCOLS = {
   let poolAddress: string;
   let simpleOracle: SimplePriceOracle;
   let liquidator: FuseSafeLiquidator;
+  let fuseFeeDistributor: FuseFeeDistributor;
 
   let ethCToken: CEther;
   let erc20OneCToken: CErc20;
@@ -64,6 +72,7 @@ const UNISWAP_V2_PROTOCOLS = {
       erc20OneUnderlying,
       erc20TwoUnderlying,
       simpleOracle,
+      fuseFeeDistributor,
     } = await setUpLiquidation());
   });
 
