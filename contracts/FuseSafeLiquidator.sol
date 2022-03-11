@@ -727,9 +727,9 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
       address(uniswapV2Router) == UNISWAP_V2_ROUTER_02_ADDRESS &&
       address(underlyingCollateral) ==
       (
-        cErc20Collateral.underlying() == 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
-          ? 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599
-          : 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+        cErc20Collateral.underlying() == STABLE_TOKEN
+          ? BTC_TOKEN
+          : STABLE_TOKEN
       )
     ) {
       // Get tokens required to repay flashloan and repay flashloan in non-W_NATIVE tokens
