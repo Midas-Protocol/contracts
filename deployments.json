@@ -7,8 +7,8 @@
     }
   },
   "56": {
-    "localhost": {
-      "name": "localhost",
+    "bsc": {
+      "name": "bsc",
       "chainId": "56",
       "contracts": {
         "CErc20Delegate": {
@@ -12194,7 +12194,7 @@
           ]
         },
         "FuseSafeLiquidator": {
-          "address": "0x7B727A28759cB56F9180972ca85c465d5f58F927",
+          "address": "0xd50Aa3F8C2b1b9d78847995Bc69De6650bd3268c",
           "abi": [
             {
               "anonymous": false,
@@ -12434,34 +12434,6 @@
                 }
               ],
               "stateMutability": "payable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "sender",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount0",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount1",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "data",
-                  "type": "bytes"
-                }
-              ],
-              "name": "pancakeCall",
-              "outputs": [],
-              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -12852,7 +12824,7 @@
           ]
         },
         "FuseSafeLiquidator_Implementation": {
-          "address": "0x5D6904e41DdFB4DD7537912a674645E0Dc864290",
+          "address": "0x5e38821BC82dC29fFd8386a155C2bd523A1A008E",
           "abi": [
             {
               "inputs": [],
@@ -12982,34 +12954,6 @@
                 }
               ],
               "stateMutability": "payable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "sender",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount0",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount1",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "data",
-                  "type": "bytes"
-                }
-              ],
-              "name": "pancakeCall",
-              "outputs": [],
-              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -13383,7 +13327,7 @@
           ]
         },
         "FuseSafeLiquidator_Proxy": {
-          "address": "0x7B727A28759cB56F9180972ca85c465d5f58F927",
+          "address": "0xd50Aa3F8C2b1b9d78847995Bc69De6650bd3268c",
           "abi": [
             {
               "inputs": [
@@ -15604,6 +15548,11 @@
           ]
         }
       }
+    },
+    "hardhat": {
+      "name": "hardhat",
+      "chainId": "56",
+      "contracts": {}
     }
   },
   "97": {
@@ -28856,7 +28805,7 @@
           ]
         },
         "Comptroller": {
-          "address": "0x00E4AbB5BE50B85b5BC504c0b1A1C92E4de7DCcD",
+          "address": "0x26c69E8130353134d8CB3da120d03D1b44446feb",
           "abi": [
             {
               "inputs": [
@@ -30935,7 +30884,7 @@
           ]
         },
         "DefaultProxyAdmin": {
-          "address": "0xF9ba226fD0df75ca2e3Bf8AB26D48d0ed0ff53e3",
+          "address": "0x95EB30B37a1cAf55793F526Ef8a924DFAAcf8C42",
           "abi": [
             {
               "inputs": [
@@ -31100,7 +31049,7 @@
           ]
         },
         "FuseFeeDistributor": {
-          "address": "0x53955c36404bE298b709d5cA6dfDC4C53ee6A853",
+          "address": "0x31941c8a2F0687d7Df2073FC3939f754B7964687",
           "abi": [
             {
               "anonymous": false,
@@ -32565,7 +32514,7 @@
           ]
         },
         "FuseFeeDistributor_Proxy": {
-          "address": "0x53955c36404bE298b709d5cA6dfDC4C53ee6A853",
+          "address": "0x31941c8a2F0687d7Df2073FC3939f754B7964687",
           "abi": [
             {
               "inputs": [
@@ -32701,7 +32650,7 @@
           ]
         },
         "FusePoolDirectory": {
-          "address": "0x5916c2360DCd260c93a6945e5906F5f17a0E4EA2",
+          "address": "0x5b03dC6fF82a113536e3BdED8aDbCd25427Dc370",
           "abi": [
             {
               "anonymous": false,
@@ -34010,7 +33959,7 @@
           ]
         },
         "FusePoolDirectory_Proxy": {
-          "address": "0x5916c2360DCd260c93a6945e5906F5f17a0E4EA2",
+          "address": "0x5b03dC6fF82a113536e3BdED8aDbCd25427Dc370",
           "abi": [
             {
               "inputs": [
@@ -34146,7 +34095,7 @@
           ]
         },
         "FusePoolLens": {
-          "address": "0x6EDa15a33385F67Ea6a7B9d66Bd9aec959384261",
+          "address": "0x30Cd251E79d6075CbaD76Ed6982B7713b2725BbA",
           "abi": [
             {
               "anonymous": false,
@@ -35464,7 +35413,7 @@
           ]
         },
         "FusePoolLensSecondary": {
-          "address": "0x48903790A38FDc3542C4a79410578bCc2bAC65B8",
+          "address": "0x22e9dc6E95527468467D023BB48E13132097BA01",
           "abi": [
             {
               "anonymous": false,
@@ -36307,7 +36256,7 @@
           ]
         },
         "FusePoolLensSecondary_Proxy": {
-          "address": "0x48903790A38FDc3542C4a79410578bCc2bAC65B8",
+          "address": "0x22e9dc6E95527468467D023BB48E13132097BA01",
           "abi": [
             {
               "inputs": [
@@ -37630,7 +37579,7 @@
           ]
         },
         "FusePoolLens_Proxy": {
-          "address": "0x6EDa15a33385F67Ea6a7B9d66Bd9aec959384261",
+          "address": "0x30Cd251E79d6075CbaD76Ed6982B7713b2725BbA",
           "abi": [
             {
               "inputs": [
@@ -37766,7 +37715,7 @@
           ]
         },
         "FuseSafeLiquidator": {
-          "address": "0x7B727A28759cB56F9180972ca85c465d5f58F927",
+          "address": "0x49CCe40A782c3126e36237C2Ef9764E10360e2c9",
           "abi": [
             {
               "anonymous": false,
@@ -38006,34 +37955,6 @@
                 }
               ],
               "stateMutability": "payable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "sender",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount0",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount1",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "data",
-                  "type": "bytes"
-                }
-              ],
-              "name": "pancakeCall",
-              "outputs": [],
-              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -38424,7 +38345,7 @@
           ]
         },
         "FuseSafeLiquidator_Implementation": {
-          "address": "0x5D6904e41DdFB4DD7537912a674645E0Dc864290",
+          "address": "0x5e38821BC82dC29fFd8386a155C2bd523A1A008E",
           "abi": [
             {
               "inputs": [],
@@ -38554,34 +38475,6 @@
                 }
               ],
               "stateMutability": "payable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "sender",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount0",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount1",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "data",
-                  "type": "bytes"
-                }
-              ],
-              "name": "pancakeCall",
-              "outputs": [],
-              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -38955,7 +38848,7 @@
           ]
         },
         "FuseSafeLiquidator_Proxy": {
-          "address": "0x7B727A28759cB56F9180972ca85c465d5f58F927",
+          "address": "0x49CCe40A782c3126e36237C2Ef9764E10360e2c9",
           "abi": [
             {
               "inputs": [
@@ -40525,7 +40418,7 @@
           ]
         },
         "TOUCHToken": {
-          "address": "0x91Fe095187Ae95750027Be2fd8D7350b3A5e8800",
+          "address": "0xD39aCca014CdceE9f1C679d899B2DdD22FE21C1E",
           "abi": [
             {
               "inputs": [
@@ -40764,7 +40657,7 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "recipient",
+                  "name": "to",
                   "type": "address"
                 },
                 {
@@ -40788,12 +40681,12 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "from",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "recipient",
+                  "name": "to",
                   "type": "address"
                 },
                 {
@@ -40816,7 +40709,7 @@
           ]
         },
         "TRIBEToken": {
-          "address": "0xF3B21118659BBaef791bB7Bb69aDD6cA0E6eA9D4",
+          "address": "0xdeC632C2950F80BA07D4d90Fd9344248c3248a9f",
           "abi": [
             {
               "inputs": [
@@ -41055,7 +40948,7 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "recipient",
+                  "name": "to",
                   "type": "address"
                 },
                 {
@@ -41079,12 +40972,12 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "from",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "recipient",
+                  "name": "to",
                   "type": "address"
                 },
                 {
@@ -41296,6 +41189,11 @@
           ]
         }
       }
+    },
+    "hardhat": {
+      "name": "hardhat",
+      "chainId": "1337",
+      "contracts": {}
     }
   },
   "9000": {
