@@ -114,7 +114,6 @@ describe.only("Verify price proof tests", () => {
     });
     const kPO = await dep.deploy();
     console.log("Keydonix Price Oracle: ", kPO.address);
-    console.log(`kPO ${kPO}`);
 
     const keydonixPriceOracle = await ethers.getContract("KeydonixUniswapTwapPriceOracle", bob);
     if ((await keydonixPriceOracle.denominationToken()) == constants.AddressZero) {
@@ -128,12 +127,12 @@ describe.only("Verify price proof tests", () => {
       await tx.wait();
       console.log("Keydonix Price Oracle initialized", tx.hash);
     } else {
-      console.log(`${await keydonixPriceOracle.denominationToken()}`);
+      console.log(`denomination token ${await keydonixPriceOracle.denominationToken()}`);
       console.log("Keydonix Price Oracle already initialized");
     }
 
     keydonixOracle = await ethers.getContract("KeydonixUniswapTwapPriceOracle", bob);
-    console.log(`keydonixOracle ${keydonixOracle}`);
+    console.log(`keydonixOracle ${keydonixOracle.address}`);
     // comptroller = await ethers.getContract("Comptroller", bob);
   });
 
@@ -171,13 +170,13 @@ describe.only("Verify price proof tests", () => {
   });
 
   it.only("should verify an OracleSDK generated proof", async function () {
+    this.timeout(220000);
+
     let tx: providers.TransactionResponse;
     let rec: providers.TransactionReceipt;
 
-
     let maxBB = await keydonixOracle.callStatic.maxBlocksBack();
     let minBB = await keydonixOracle.callStatic.minBlocksBack();
-
     console.log(`max ${maxBB} min ${minBB}`);
 
     let latestBlockNumber = await ethers.provider.getBlockNumber();
@@ -200,21 +199,7 @@ describe.only("Verify price proof tests", () => {
     );
     console.log(`estimated price ${estimatedPrice}`);
 
-    let positions = [BigInt(8), BigInt(9)];
-    // const encodedAddress = bigintToHexAddress(exchangeAddress);
-    // const encodedPositions = positions.map(bigintToHexQuantity);
-    // const encodedBlockTag = bigintToHex(latestMinusSome);
-    //
-    // console.log(
-    //   `get proof params encodedAddress ${encodedAddress} encodedPositions ${encodedPositions} encodedBlockTag ${encodedBlockTag}`
-    // );
-    // const result = await ethers.provider.send("eth_getProof", [encodedAddress, encodedPositions, encodedBlockTag]);
-    // console.log(`result ${JSON.stringify(result)}`)
-
-    // const proof1 = await getProof(exchangeAddress, positions, latestMinusSome);
-    // console.log(`proof1 ${proof1}`);
-
-    const proof = await OracleSdk.getProof(
+    let proof = await OracleSdk.getProof(
         getStorageAt,
         getProof,
         getBlockByNumber,
@@ -224,116 +209,61 @@ describe.only("Verify price proof tests", () => {
     );
 
     console.log(`proof: 
-    ${ethers.utils.hexlify(proof.block)}
-    ${ethers.utils.hexlify(proof.accountProofNodesRlp)}
-    ${ethers.utils.hexlify(proof.priceAccumulatorProofNodesRlp)}
-    ${ethers.utils.hexlify(proof.reserveAndTimestampProofNodesRlp)}
+      ${ethers.utils.hexlify(proof.block)}
+      ${ethers.utils.hexlify(proof.accountProofNodesRlp)}
+      ${ethers.utils.hexlify(proof.priceAccumulatorProofNodesRlp)}
+      ${ethers.utils.hexlify(proof.reserveAndTimestampProofNodesRlp)}
     `);
 
-    // const proof = {
-    //   block: [1],
-    //   accountProofNodesRlp: [1],
-    //   reserveAndTimestampProofNodesRlp: [1],
-    //   priceAccumulatorProofNodesRlp: [1],
-    // };
+
+    let rlpDecoded = ethers.utils.RLP.decode(proof.block);
+    if (rlpDecoded.length == 13) {
+      // proof is missing empty fields for mixHash and nonce
+      // add empty mixHash
+      rlpDecoded[rlpDecoded.length] = "0x0000000000000000000000000000000000000000000000000000000000000000";
+      // add empty nonce
+      rlpDecoded[rlpDecoded.length] = "0x0000000000000000";
+      let rlpEncoded = ethers.utils.RLP.encode(rlpDecoded);
+      let derivedBlockHash = ethers.utils.keccak256(rlpEncoded);
+      console.log(`derived block hash ${derivedBlockHash}`);
+      proof = {
+        block: ethers.utils.arrayify(rlpEncoded),
+        accountProofNodesRlp: proof.accountProofNodesRlp,
+        priceAccumulatorProofNodesRlp: proof.priceAccumulatorProofNodesRlp,
+        reserveAndTimestampProofNodesRlp: proof.reserveAndTimestampProofNodesRlp
+      }
+    }
+
+    console.log(`proof block: 
+      ${ethers.utils.hexlify(proof.block)}
+    `);
 
     let pvBefore = await keydonixOracle.callStatic.priceVerifications(token1);
-    console.log(`pvBefore ${pvBefore}`);
+    console.log(`price verification before ${pvBefore}`);
 
     console.log(`needs pair ${token1} / ${denominationTokenAddress}`);
     let pricePair = await uniswapFactory.callStatic.getPair(token1, denominationTokenAddress);
     console.log(`found pair ${pricePair}`);
 
 
-    const proofBlockPart = {
-      block: proof.block,
-      accountProofNodesRlp: [],
-      reserveAndTimestampProofNodesRlp: [],
-      priceAccumulatorProofNodesRlp: [],
-    };
-    const proofAccountPart = {
-      block: [],
-      accountProofNodesRlp: proof.accountProofNodesRlp,
-      reserveAndTimestampProofNodesRlp: [],
-      priceAccumulatorProofNodesRlp: [],
-    };
-    const proofReservePart = {
-      block: [],
-      accountProofNodesRlp: [],
-      reserveAndTimestampProofNodesRlp: proof.reserveAndTimestampProofNodesRlp,
-      priceAccumulatorProofNodesRlp: [],
-    };
-    const proofPricePart = {
-      block: [],
-      accountProofNodesRlp: [],
-      reserveAndTimestampProofNodesRlp: [],
-      priceAccumulatorProofNodesRlp: proof.priceAccumulatorProofNodesRlp,
-    };
+    console.log(`full proof`)
+    // let estimatedGas = await keydonixOracle.estimateGas.verifyPriceUnderlying(token1, proof);
+    // console.log(`estimated gas ${estimatedGas}`);
+    tx = await keydonixOracle.verifyPriceUnderlying(token1, proof, {gasLimit: 2e7, gasPrice: ethers.utils.parseEther("0.00000001")});
+    rec = await tx.wait();
+    expect(rec.status).to.eq(1);
 
 
-
-    {
-      console.log(`commit the block part`)
-      tx = await keydonixOracle.verifyPriceUnderlying(token1, proofBlockPart, {gasLimit: 29e6, /*gasPrice: 1*/});
-      rec = await tx.wait();
-      expect(rec.status).to.eq(1);
-    }
-    {
-      console.log(`commit the account part`)
-      tx = await keydonixOracle.verifyPriceUnderlying(token1, proofAccountPart, {gasLimit: 29e6, /*gasPrice: 1*/});
-      rec = await tx.wait();
-      expect(rec.status).to.eq(1);
-    }
-    {
-      console.log(`commit the reserve part`)
-      tx = await keydonixOracle.verifyPriceUnderlying(token1, proofReservePart, {gasLimit: 29e6, /*gasPrice: 1*/});
-      rec = await tx.wait();
-      expect(rec.status).to.eq(1);
-    }
-    {
-      console.log(`commit the final part and verify`)
-      tx = await keydonixOracle.verifyPriceUnderlying(token1, proofPricePart, {gasLimit: 29e6, /*gasPrice: 1*/});
-      rec = await tx.wait();
-      expect(rec.status).to.eq(1);
-    }
-
-    // let price = await keydonixOracle.callStatic.getPrice(pricePair, denominationTokenAddress, minBB, maxBB, proof);
     // let result = await keydonixOracle.callStatic.getAccountStorageRoot(pricePair, proof);
     // console.log(`getAccountStorageRoot ${result}`);
 
     let pv = await keydonixOracle.callStatic.priceVerifications(token1);
-    console.log(`pv ${pv}`);
+    console.log(`price verification after ${pv}`);
 
     console.log(`asking for the price`);
-    let priceDta = await keydonixOracle.callStatic.price(token1);
+    let priceDta = await keydonixOracle.callStatic.price(token1, {gasLimit: 2e7, gasPrice: ethers.utils.parseEther("0.00000001")});
     console.log(`got price ${priceDta} for ${token1}`);
-    // let pricewtoken = await keydonixOracle.callStatic.price(wtoken);
-    // console.log(`got price ${pricewtoken} for ${wtoken}`);
+    let pricewtoken = await keydonixOracle.callStatic.price(wtoken);
+    console.log(`got price ${pricewtoken} for ${wtoken}`);
   });
-
-  // package.json : "file:../../uniswap-oracle/sdk-adapter",
-  function bigintToHexAddress(value: bigint): string {
-    return `0x${value.toString(16).padStart(40, "0")}`;
-  }
-
-  function bigintToHexQuantity(value: bigint): string {
-    return `0x${value.toString(16).padStart(64, "0")}`;
-  }
-
-  function bigintToHex(value: bigint): string {
-    return `0x${value.toString(16)}`;
-  }
-
-  async function searchPairs(factory: any, tokens: string[]) {
-    console.log(`uniswap factory ${factory.address}`);
-    for(let i=0; i < tokens.length - 1; i++) {
-      let t1 = tokens[i];
-      for(let j=i+1; j < tokens.length; j++) {
-        let t2 = tokens[j];
-
-        let exch = await factory.callStatic.getPair(t1, t2);
-        console.log(`t1 ${t1} t2 ${t2} at exchange ${exch}`);
-      }
-    }
-  }
 });

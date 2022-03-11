@@ -54,13 +54,6 @@ contract KeydonixUniswapTwapPriceOracle is
   uint8 public maxBlocksBack;
 
   mapping(address => PriceVerification) public priceVerifications;
-  mapping(address => PartialProof) public partialProofs;
-
-
-  struct PartialProof {
-    bool constructed;
-    UniswapOracle.ProofData proof;
-  }
 
   struct PriceVerification {
     uint256 blockNumber;
@@ -114,8 +107,8 @@ contract KeydonixUniswapTwapPriceOracle is
   }
 
   function verifyPriceUnderlying(address underlying, UniswapOracle.ProofData calldata proofData)
-    public
-    returns (uint256, uint256)
+  public
+  returns (uint256, uint256)
   {
     // Return 1e18 for wtoken
     if (underlying == wtoken) return (1e18, block.number);
@@ -130,80 +123,33 @@ contract KeydonixUniswapTwapPriceOracle is
       return (latestPriceVerification.price, latestPriceVerification.blockNumber);
     }
 
-    // TODO fix race conditions across different blocks
-    PartialProof storage partialProof = _getOrUpdatePartialProof(underlying, proofData);
-    if (!partialProof.constructed) {
-//      require(
-//        latestPriceVerification.blockNumber != 0 &&
-//        latestPriceVerification.blockNumber >= block.number - maxBlocksBack &&
-//        latestPriceVerification.blockNumber <= block.number - minBlocksBack
-//      , "no valid and fully constructed proof available");
-      return (0, 0);
-    } else {
-//      partialProof.constructed = false;
-//      partialProof.proof.block = "";
-//      partialProof.proof.reserveAndTimestampProofNodesRlp = "";
-//      partialProof.proof.priceAccumulatorProofNodesRlp = "";
-//      partialProof.proof.accountProofNodesRlp = "";
+    address pair = IUniswapV2Factory(uniswapV2Factory).getPair(underlying, denominationToken);
+    (uint256 verifiedPrice, uint256 blockNumber) = getPrice(
+      IUniswapV2Pair(pair),
+      denominationToken,
+      minBlocksBack,
+      maxBlocksBack,
+      proofData
+    );
 
-      address pair = IUniswapV2Factory(uniswapV2Factory).getPair(underlying, denominationToken);
-      (uint256 verifiedPrice, uint256 blockNumber) = getPrice(
-        IUniswapV2Pair(pair),
-        denominationToken,
-        minBlocksBack,
-        maxBlocksBack,
-        partialProof.proof
-      );
-
-      if (blockNumber <= latestPriceVerification.blockNumber) {
-        emit PriceAlreadyVerified(
-          underlying,
-          latestPriceVerification.price,
-          latestPriceVerification.blockNumber
-        );
-        return (latestPriceVerification.price, latestPriceVerification.blockNumber);
-      }
-
-      priceVerifications[underlying] = PriceVerification(blockNumber, verifiedPrice);
-
-      emit PriceVerified(
+    if (blockNumber <= latestPriceVerification.blockNumber) {
+      emit PriceAlreadyVerified(
         underlying,
-        verifiedPrice,
-        blockNumber
+        latestPriceVerification.price,
+        latestPriceVerification.blockNumber
       );
-
-      return (verifiedPrice, blockNumber);
-    }
-  }
-
-  function _getOrUpdatePartialProof(address underlying, UniswapOracle.ProofData calldata proofData)
-    internal returns (PartialProof storage) {
-    PartialProof storage partialProof = partialProofs[underlying];
-    if (partialProof.constructed) {
-      // the old proof should be replaced
-      partialProof.proof = proofData;
-    } else {
-      if (proofData.block.length != 0) {
-        partialProof.proof.block = proofData.block;
-      }
-      if (proofData.accountProofNodesRlp.length != 0) {
-        partialProof.proof.accountProofNodesRlp = proofData.accountProofNodesRlp;
-      }
-      if (proofData.priceAccumulatorProofNodesRlp.length != 0) {
-        partialProof.proof.priceAccumulatorProofNodesRlp = proofData.priceAccumulatorProofNodesRlp;
-      }
-      if (proofData.reserveAndTimestampProofNodesRlp.length != 0) {
-        partialProof.proof.reserveAndTimestampProofNodesRlp = proofData.reserveAndTimestampProofNodesRlp;
-      }
+      return (latestPriceVerification.price, latestPriceVerification.blockNumber);
     }
 
-    partialProof.constructed =
-      partialProof.proof.block.length != 0 &&
-      partialProof.proof.accountProofNodesRlp.length != 0 &&
-      partialProof.proof.priceAccumulatorProofNodesRlp.length != 0 &&
-      partialProof.proof.reserveAndTimestampProofNodesRlp.length != 0;
+    priceVerifications[underlying] = PriceVerification(blockNumber, verifiedPrice);
 
-    return partialProof;
+    emit PriceVerified(
+      underlying,
+      verifiedPrice,
+      blockNumber
+    );
+
+    return (verifiedPrice, blockNumber);
   }
 
   /**
