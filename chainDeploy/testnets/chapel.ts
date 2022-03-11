@@ -1,5 +1,6 @@
 import { ChainDeployConfig, ChainlinkFeedBaseCurrency, deployChainlinkOracle, deployUniswapOracle } from "../helpers";
 import { assets } from "../mainnets/bsc";
+import { ethers } from "ethers";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
@@ -12,7 +13,7 @@ export const deployConfig: ChainDeployConfig = {
   uniswap: {
     hardcoded: [],
     uniswapData: [],
-    pairInitHashCode: "0x",
+    pairInitHashCode: ethers.utils.hexlify("0xd0d4c4cd0848c93cb4fd1f498d7013ee6bfb25783ea21593d5834f5d250ece66"),
     uniswapV2RouterAddress: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
     uniswapV2FactoryAddress: "0x6725F303b657a9451d8BA641348b6761A6CC7a17",
     uniswapOracleInitialDeployTokens: [
