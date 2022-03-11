@@ -7,8 +7,8 @@
     }
   },
   "56": {
-    "bsc": {
-      "name": "bsc",
+    "localhost": {
+      "name": "localhost",
       "chainId": "56",
       "contracts": {
         "CErc20Delegate": {
@@ -12378,7 +12378,7 @@
           ]
         },
         "FuseSafeLiquidator": {
-          "address": "0xd50Aa3F8C2b1b9d78847995Bc69De6650bd3268c",
+          "address": "0x7B727A28759cB56F9180972ca85c465d5f58F927",
           "abi": [
             {
               "anonymous": false,
@@ -12618,6 +12618,34 @@
                 }
               ],
               "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount0",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount1",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "pancakeCall",
+              "outputs": [],
+              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -13008,7 +13036,7 @@
           ]
         },
         "FuseSafeLiquidator_Implementation": {
-          "address": "0x5e38821BC82dC29fFd8386a155C2bd523A1A008E",
+          "address": "0x5D6904e41DdFB4DD7537912a674645E0Dc864290",
           "abi": [
             {
               "inputs": [],
@@ -13138,6 +13166,34 @@
                 }
               ],
               "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount0",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount1",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "pancakeCall",
+              "outputs": [],
+              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -13511,7 +13567,7 @@
           ]
         },
         "FuseSafeLiquidator_Proxy": {
-          "address": "0xd50Aa3F8C2b1b9d78847995Bc69De6650bd3268c",
+          "address": "0x7B727A28759cB56F9180972ca85c465d5f58F927",
           "abi": [
             {
               "inputs": [
@@ -15732,11 +15788,6 @@
           ]
         }
       }
-    },
-    "hardhat": {
-      "name": "hardhat",
-      "chainId": "56",
-      "contracts": {}
     }
   },
   "97": {
