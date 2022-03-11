@@ -6,6 +6,7 @@ import * as OracleSdkAdapter from "@keydonix/uniswap-oracle-sdk-adapter";
 import * as OracleSdk from "@keydonix/uniswap-oracle-sdk";
 import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
 import {Proof} from "@keydonix/uniswap-oracle-sdk";
+import { BaseTrie as Trie } from 'merkle-patricia-tree'
 
 describe.only("Verify price proof tests", () => {
   let keydonixOracle: KeydonixUniswapTwapPriceOracle;
@@ -15,14 +16,7 @@ describe.only("Verify price proof tests", () => {
   let uniswapExchangeAddress: string;
   let token0;
   let token1;
-
-  // pancake swap WBNB-BTCB pair
-  // uniswapExchangeAddress = "0x61eb789d75a95caa3ff50ed7e47b96c132fec082";
-  // kovan uniswap WETH-TT2 pair
-  // uniswapExchangeAddress = "0xbB0F21795d19bc297FfA6F771Cca5055D59a35eC";
-  // some random evmos uniswap pair
-  // uniswapExchangeAddress = "0x11024B5ebF766F889E952874cE1EAA34e1F7dA90";
-
+  
   beforeEach(async () => {
     const { alice, bob } = await ethers.getNamedSigners();
     console.log(`bobs address ${bob.address}`);
@@ -233,10 +227,23 @@ describe.only("Verify price proof tests", () => {
         reserveAndTimestampProofNodesRlp: proof.reserveAndTimestampProofNodesRlp
       }
     }
-
     console.log(`proof block: 
       ${ethers.utils.hexlify(proof.block)}
     `);
+
+    // path = "0xa04c5251912737031e360e1e2a529ce6e3a350c7d5778bf876fda2db303aa3ff"
+    let encodedPath = ethers.utils.solidityKeccak256(["address"], ["0xaF9399F70d896dA0D56A4B2CbF95F4E90a6B99e8"]);
+
+    let block: OracleSdk.Block = await getBlockByNumber(latestMinusSome)
+    // let hex = `0x${block.stateRoot.toString(16)}`;
+    let hex = ethers.utils.hexlify(block.stateRoot);
+    console.log(`roots are 32 bytes ${hex}`)
+    let value = await Trie.verifyProof(
+      Buffer.from(ethers.utils.arrayify(hex)),
+      Buffer.from(ethers.utils.arrayify(encodedPath)),
+      [Buffer.from(ethers.utils.arrayify(proof.accountProofNodesRlp))]
+    );
+    console.log(`verified value ${value}`);
 
     let pvBefore = await keydonixOracle.callStatic.priceVerifications(token1);
     console.log(`price verification before ${pvBefore}`);
