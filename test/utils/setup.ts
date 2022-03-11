@@ -70,14 +70,13 @@ export const setUpLiquidation = deployments.createFixture(async ({ run }, option
   let erc20TwoUnderlying: EIP20Interface;
   let tx: providers.TransactionResponse;
 
-  const { bob, deployer } = await ethers.getNamedSigners();
-  const poolName = "testing";
+  const { bob, deployer, rando } = await ethers.getNamedSigners();
 
   await setUpPriceOraclePrices();
   simpleOracle = (await ethers.getContract("SimplePriceOracle", deployer)) as SimplePriceOracle;
   oracle = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
 
-  [poolAddress] = await createPool({ poolName });
+  [poolAddress] = await createPool({});
   const assets = await getPoolAssets(poolAddress, (await ethers.getContract("FuseFeeDistributor")).address);
 
   erc20One = assets.assets.find((a) => a.underlying !== constants.AddressZero); // find first one
@@ -105,7 +104,7 @@ export const setUpLiquidation = deployments.createFixture(async ({ run }, option
   deployedErc20One = deployedAssets.find((a) => a.underlying === erc20One.underlying);
   deployedErc20Two = deployedAssets.find((a) => a.underlying === erc20Two.underlying);
 
-  liquidator = (await ethers.getContract("FuseSafeLiquidator", deployer)) as FuseSafeLiquidator;
+  liquidator = (await ethers.getContract("FuseSafeLiquidator", rando)) as FuseSafeLiquidator;
 
   ethCToken = (await ethers.getContractAt("CEther", deployedEth.assetAddress)) as CEther;
   erc20OneCToken = (await ethers.getContractAt("CErc20", deployedErc20One.assetAddress)) as CErc20;
@@ -128,6 +127,7 @@ export const setUpLiquidation = deployments.createFixture(async ({ run }, option
     liquidator,
     erc20OneUnderlying,
     erc20TwoUnderlying,
+    oracle,
     simpleOracle,
   };
 });
