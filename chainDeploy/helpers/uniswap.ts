@@ -1,6 +1,7 @@
 import { SALT } from "../../deploy/deploy";
 import { UniswapTwapPriceOracleV2Factory } from "../../typechain";
 import { constants } from "ethers";
+import { UniswapDeployFnParams } from "./types";
 
 export const deployUniswapOracle = async ({
   run,
@@ -8,7 +9,7 @@ export const deployUniswapOracle = async ({
   getNamedAccounts,
   deployments,
   deployConfig,
-}): Promise<void> => {
+}: UniswapDeployFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   //// Uniswap Oracle
   let dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
@@ -35,7 +36,7 @@ export const deployUniswapOracle = async ({
     args: [utpor.address, utpo.address, deployConfig.wtoken],
     log: true,
   });
-  const utpof: UniswapTwapPriceOracleV2Factory = await dep.deploy();
+  const utpof = await dep.deploy();
   console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
 
   const uniTwapOracleFactory = (await ethers.getContract(
