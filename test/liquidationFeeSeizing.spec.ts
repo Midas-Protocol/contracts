@@ -64,7 +64,7 @@ describe("Protocol Liquidation Seizing", () => {
     } = await setUpLiquidation({ poolName }));
   });
 
-  it("should calculate the right amounts of protocol, fee, total supply after liquidation", async function () {
+  it.only("should calculate the right amounts of protocol, fee, total supply after liquidation", async function () {
     this.timeout(120_000);
     const { bob, rando } = await ethers.getNamedSigners();
 
@@ -145,11 +145,18 @@ describe("Protocol Liquidation Seizing", () => {
     expect(reservesDiffAmount).to.be.gt(protocolSeizeTokens);
   });
 
-  it("should be able to withdraw fees to fuseFeeDistributor", async function () {
+  it.only("should be able to withdraw fees to fuseFeeDistributor", async function () {
     this.timeout(120_000);
-    const { bob } = await ethers.getNamedSigners();
+    const { bob, rando } = await ethers.getNamedSigners();
 
     const borrowAmount = "0.5";
+
+    tx = await erc20OneUnderlying.connect(rando).approve(liquidator.address, constants.MaxUint256);
+    await tx.wait();
+
+    // get some liquidity via Uniswap
+    await tradeNativeForAsset({ account: "bob", token: erc20One.underlying, amount: "300" });
+
     await setupAndLiquidatePool(
       oracle,
       deployedErc20One,
