@@ -38,6 +38,8 @@ describe("#safeLiquidate", () => {
   let erc20TwoUnderlying: EIP20Interface;
   let tx: providers.TransactionResponse;
 
+  const poolName = "liquidation - no fl";
+
   beforeEach(async () => {
     await deployments.fixture(); // ensure you start from a fresh deployments
     ({
@@ -57,10 +59,10 @@ describe("#safeLiquidate", () => {
       oracle,
       simpleOracle,
       fuseFeeDistributor,
-    } = await setUpLiquidation());
+    } = await setUpLiquidation({ poolName }));
   });
 
-  it("should liquidate a native borrow for token collateral", async function () {
+  it.only("should liquidate a native borrow for token collateral", async function () {
     const { alice, bob, rando } = await ethers.getNamedSigners();
 
     // get some liquidity via Uniswap
@@ -109,7 +111,7 @@ describe("#safeLiquidate", () => {
   });
 
   // Safe liquidate token borrows
-  it("should liquidate a token borrow for native collateral", async function () {
+  it.only("should liquidate a token borrow for native collateral", async function () {
     const { alice, bob, rando } = await ethers.getNamedSigners();
 
     // get some liquidity via Uniswap
@@ -159,7 +161,7 @@ describe("#safeLiquidate", () => {
     await tx.wait();
   });
 
-  it("should liquidate a token borrow for token collateral", async function () {
+  it.only("should liquidate a token borrow for token collateral", async function () {
     const { alice, bob, rando } = await ethers.getNamedSigners();
 
     // get some liquidity via Uniswap

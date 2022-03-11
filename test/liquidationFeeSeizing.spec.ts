@@ -40,6 +40,8 @@ describe("Protocol Liquidation Seizing", () => {
   let erc20TwoUnderlying: EIP20Interface;
   let tx: providers.TransactionResponse;
 
+  const poolName = "liquidation - fee sizing";
+
   beforeEach(async () => {
     await deployments.fixture(); // ensure you start from a fresh deployments
     ({
@@ -59,7 +61,7 @@ describe("Protocol Liquidation Seizing", () => {
       oracle,
       simpleOracle,
       fuseFeeDistributor,
-    } = await setUpLiquidation());
+    } = await setUpLiquidation({ poolName }));
   });
 
   it("should calculate the right amounts of protocol, fee, total supply after liquidation", async function () {

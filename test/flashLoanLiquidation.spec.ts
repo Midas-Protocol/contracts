@@ -52,7 +52,7 @@ const UNISWAP_V2_PROTOCOLS = {
   let erc20OneUnderlying: EIP20Interface;
   let erc20TwoUnderlying: EIP20Interface;
 
-  const poolName = "testing";
+  const poolName = "liquidation - fl";
   const coingeckoId = "binancecoin";
 
   beforeEach(async () => {
@@ -73,10 +73,10 @@ const UNISWAP_V2_PROTOCOLS = {
       erc20TwoUnderlying,
       simpleOracle,
       fuseFeeDistributor,
-    } = await setUpLiquidation());
+    } = await setUpLiquidation({ poolName }));
   });
 
-  it("should liquidate a native borrow for token collateral", async function () {
+  it.only("should liquidate a native borrow for token collateral", async function () {
     const { alice, bob, rando } = await ethers.getNamedSigners();
 
     // get some liquidity via Uniswap
