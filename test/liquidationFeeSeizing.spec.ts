@@ -1,6 +1,6 @@
 import { BigNumber, constants, providers, utils } from "ethers";
 import { deployments, ethers } from "hardhat";
-import { setUpLiquidation } from "./utils";
+import { setUpLiquidation, tradeNativeForAsset } from "./utils";
 import { DeployedAsset } from "./utils/pool";
 import { setupAndLiquidatePool, setupLiquidatablePool } from "./utils/collateral";
 import {
@@ -68,6 +68,9 @@ describe("Protocol Liquidation Seizing", () => {
 
     const borrowAmount = "0.5";
     const repayAmount = utils.parseEther(borrowAmount).div(10);
+
+    // get some liquidity via Uniswap
+    await tradeNativeForAsset({ account: "bob", token: erc20One.underlying, amount: "300" });
 
     await setupLiquidatablePool(oracle, deployedErc20One, poolAddress, simpleOracle, borrowAmount, bob);
 

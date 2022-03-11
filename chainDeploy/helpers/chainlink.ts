@@ -34,9 +34,15 @@ export const deployChainlinkOracle = async ({
   console.log(`Set price feeds for ChainlinkPriceOracleV2: ${tx.hash}`);
   await tx.wait();
   console.log(`Set price feeds for ChainlinkPriceOracleV2 mined: ${tx.hash}`);
-  run("oracle:add-tokens", {
-    underlyings: chainlinkAssets.map((c) => assets.find((a) => a.symbol === c.symbol).underlying).join(","),
-    oracles: Array(chainlinkAssets.length).fill(chainLinkv2.address).join(","),
-  });
+
+  const underlyings = chainlinkAssets.map((c) => assets.find((a) => a.symbol === c.symbol).underlying);
+  const oracles = Array(chainlinkAssets.length).fill(chainLinkv2.address);
+
+  const spo = await ethers.getContract("MasterPriceOracle", deployer);
+  tx = await spo.add(underlyings, oracles);
+  await tx.wait();
+
+  console.log(`Master Price Oracle updated for tokens ${underlyings.join(", ")}`);
+
   return { cpo: cpo, chainLinkv2: chainLinkv2 };
 };

@@ -1,6 +1,6 @@
 import { BigNumber, constants, providers, utils } from "ethers";
 import { deployments, ethers } from "hardhat";
-import { setUpLiquidation } from "./utils";
+import { setUpLiquidation, tradeNativeForAsset } from "./utils";
 import { DeployedAsset } from "./utils/pool";
 import { addCollateral, borrowCollateral } from "./utils/collateral";
 import {
@@ -63,6 +63,9 @@ describe("#safeLiquidate", () => {
   it("should liquidate a native borrow for token collateral", async function () {
     const { alice, bob, rando } = await ethers.getNamedSigners();
 
+    // get some liquidity via Uniswap
+    await tradeNativeForAsset({ account: "bob", token: erc20One.underlying, amount: "300" });
+
     // either use configured whale acct or bob
     // Supply 0.1 tokenOne from other account
     await addCollateral(poolAddress, bob, erc20One.symbol, "0.1", true);
@@ -109,15 +112,21 @@ describe("#safeLiquidate", () => {
   it("should liquidate a token borrow for native collateral", async function () {
     const { alice, bob, rando } = await ethers.getNamedSigners();
 
+    // get some liquidity via Uniswap
+    await tradeNativeForAsset({ account: "alice", token: erc20One.underlying, amount: "300" });
+
     // Supply native collateral
     await addCollateral(poolAddress, bob, eth.symbol, "1", true);
+    console.log(`Added ${eth.symbol} collateral`);
 
     // Supply tokenOne from other account
     await addCollateral(poolAddress, alice, erc20One.symbol, "0.1", true);
+    console.log(`Added ${erc20One.symbol} collateral`);
 
     // Borrow tokenOne using native as collateral
     const borrowAmount = "0.05";
     await borrowCollateral(poolAddress, bob.address, erc20One.symbol, borrowAmount);
+    console.log(`Borrowed ${erc20One.symbol} collateral`);
 
     const originalPrice = await oracle.getUnderlyingPrice(deployedErc20One.assetAddress);
     const balBefore = await ethCToken.balanceOf(rando.address);
@@ -152,6 +161,10 @@ describe("#safeLiquidate", () => {
 
   it("should liquidate a token borrow for token collateral", async function () {
     const { alice, bob, rando } = await ethers.getNamedSigners();
+
+    // get some liquidity via Uniswap
+    await tradeNativeForAsset({ account: "bob", token: erc20One.underlying, amount: "300" });
+    await tradeNativeForAsset({ account: "alice", token: erc20Two.underlying, amount: "300" });
 
     // send some tokens from alic to bob
     tx = await erc20OneUnderlying.connect(alice).transfer(bob.address, utils.parseEther("1"));

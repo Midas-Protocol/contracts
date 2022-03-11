@@ -58,21 +58,14 @@ export const deployUniswapOracle = async ({
       deployConfig.wtoken
     );
 
-    const underlyings = deployConfig.uniswap.uniswapOracleInitialDeployTokens.join(",");
-    const oracles = Array(deployConfig.uniswap.uniswapOracleInitialDeployTokens.length).fill(nativeOracle).join(",");
+    const underlyings = deployConfig.uniswap.uniswapOracleInitialDeployTokens;
+    const oracles = Array(deployConfig.uniswap.uniswapOracleInitialDeployTokens.length).fill(nativeOracle);
 
-    console.log(underlyings, oracles, "underlyings, oracles");
+    const spo = await ethers.getContract("MasterPriceOracle", deployer);
+    tx = await spo.add(underlyings, oracles);
+    await tx.wait();
 
-    run("oracle:add-tokens", { underlyings, oracles });
-
-    console.log(
-      "UniswapTwapPriceOracleV2 oracle deployed",
-      tx.hash,
-      "address: ",
-      nativeOracle,
-      "tokens: ",
-      underlyings
-    );
+    console.log(`Master Price Oracle updated for tokens ${underlyings.join(", ")}`);
   } else {
     console.log("UniswapTwapPriceOracleV2 already deployed at: ", existingOracle);
   }

@@ -8,7 +8,7 @@ export const deployCurveLpOracle = async ({
   deployments,
   deployConfig,
   curvePools,
-  run
+  run,
 }: CurveLpFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   let tx: providers.TransactionResponse;
@@ -45,8 +45,12 @@ export const deployCurveLpOracle = async ({
     console.log("registerPool mined: ", receipt.transactionHash);
   }
 
-  run("oracle:add-tokens", {
-    underlyings: curvePools.map((c) => c.lpToken).join(","),
-    oracles: Array(curvePools.length).fill(curveOracle.address).join(","),
-  });
+  const underlyings = curvePools.map((c) => c.lpToken);
+  const oracles = Array(curvePools.length).fill(curveOracle.address);
+
+  const spo = await ethers.getContract("MasterPriceOracle", deployer);
+  tx = await spo.add(underlyings, oracles);
+  await tx.wait();
+
+  console.log(`Master Price Oracle updated for tokens ${underlyings.join(", ")}`);
 };
