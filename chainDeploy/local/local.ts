@@ -69,7 +69,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
   const simplePriceOracle = await ethers.getContract("SimplePriceOracle", deployer);
 
   // get the ERC20 address of deployed cERC20
-  const underlyings = [tribe.address, touch.address];
+  const underlyings = [ethers.constants.AddressZero, tribe.address, touch.address];
 
   run("oracle:add-tokens", {
     underlyings: underlyings.join(","),
