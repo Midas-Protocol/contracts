@@ -7,8 +7,8 @@
     }
   },
   "56": {
-    "bsc": {
-      "name": "bsc",
+    "localhost": {
+      "name": "localhost",
       "chainId": "56",
       "contracts": {
         "CErc20Delegate": {
@@ -5350,6 +5350,190 @@
                 }
               ],
               "name": "whitelistArray",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            }
+          ]
+        },
+        "CurveLpTokenPriceOracleNoRegistry": {
+          "address": "0x274F5dFBDB6af889124EFcfA065A247A15243EC2",
+          "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "previousOwner",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnershipTransferred",
+              "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract ICToken",
+                  "name": "cToken",
+                  "type": "address"
+                }
+              ],
+              "name": "getUnderlyingPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "_lpTokens",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "_pools",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "address[][]",
+                  "name": "_poolUnderlyings",
+                  "type": "address[][]"
+                }
+              ],
+              "name": "initialize",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "poolOf",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "underlying",
+                  "type": "address"
+                }
+              ],
+              "name": "price",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_lpToken",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pool",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "_underlyings",
+                  "type": "address[]"
+                }
+              ],
+              "name": "registerPool",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "renounceOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "transferOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "underlyingTokens",
               "outputs": [
                 {
                   "internalType": "address",
@@ -12194,7 +12378,7 @@
           ]
         },
         "FuseSafeLiquidator": {
-          "address": "0xd50Aa3F8C2b1b9d78847995Bc69De6650bd3268c",
+          "address": "0x7B727A28759cB56F9180972ca85c465d5f58F927",
           "abi": [
             {
               "anonymous": false,
@@ -12434,6 +12618,34 @@
                 }
               ],
               "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount0",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount1",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "pancakeCall",
+              "outputs": [],
+              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -12824,7 +13036,7 @@
           ]
         },
         "FuseSafeLiquidator_Implementation": {
-          "address": "0x5e38821BC82dC29fFd8386a155C2bd523A1A008E",
+          "address": "0x5D6904e41DdFB4DD7537912a674645E0Dc864290",
           "abi": [
             {
               "inputs": [],
@@ -12954,6 +13166,34 @@
                 }
               ],
               "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount0",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount1",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "pancakeCall",
+              "outputs": [],
+              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -13327,7 +13567,7 @@
           ]
         },
         "FuseSafeLiquidator_Proxy": {
-          "address": "0xd50Aa3F8C2b1b9d78847995Bc69De6650bd3268c",
+          "address": "0x7B727A28759cB56F9180972ca85c465d5f58F927",
           "abi": [
             {
               "inputs": [
@@ -15548,11 +15788,6 @@
           ]
         }
       }
-    },
-    "hardhat": {
-      "name": "hardhat",
-      "chainId": "56",
-      "contracts": {}
     }
   },
   "97": {
@@ -28805,7 +29040,7 @@
           ]
         },
         "Comptroller": {
-          "address": "0x26c69E8130353134d8CB3da120d03D1b44446feb",
+          "address": "0x00E4AbB5BE50B85b5BC504c0b1A1C92E4de7DCcD",
           "abi": [
             {
               "inputs": [
@@ -30884,7 +31119,7 @@
           ]
         },
         "DefaultProxyAdmin": {
-          "address": "0x95EB30B37a1cAf55793F526Ef8a924DFAAcf8C42",
+          "address": "0xF9ba226fD0df75ca2e3Bf8AB26D48d0ed0ff53e3",
           "abi": [
             {
               "inputs": [
@@ -31049,7 +31284,7 @@
           ]
         },
         "FuseFeeDistributor": {
-          "address": "0x31941c8a2F0687d7Df2073FC3939f754B7964687",
+          "address": "0x53955c36404bE298b709d5cA6dfDC4C53ee6A853",
           "abi": [
             {
               "anonymous": false,
@@ -32514,7 +32749,7 @@
           ]
         },
         "FuseFeeDistributor_Proxy": {
-          "address": "0x31941c8a2F0687d7Df2073FC3939f754B7964687",
+          "address": "0x53955c36404bE298b709d5cA6dfDC4C53ee6A853",
           "abi": [
             {
               "inputs": [
@@ -32650,7 +32885,7 @@
           ]
         },
         "FusePoolDirectory": {
-          "address": "0x5b03dC6fF82a113536e3BdED8aDbCd25427Dc370",
+          "address": "0x5916c2360DCd260c93a6945e5906F5f17a0E4EA2",
           "abi": [
             {
               "anonymous": false,
@@ -33959,7 +34194,7 @@
           ]
         },
         "FusePoolDirectory_Proxy": {
-          "address": "0x5b03dC6fF82a113536e3BdED8aDbCd25427Dc370",
+          "address": "0x5916c2360DCd260c93a6945e5906F5f17a0E4EA2",
           "abi": [
             {
               "inputs": [
@@ -34095,7 +34330,7 @@
           ]
         },
         "FusePoolLens": {
-          "address": "0x30Cd251E79d6075CbaD76Ed6982B7713b2725BbA",
+          "address": "0x6EDa15a33385F67Ea6a7B9d66Bd9aec959384261",
           "abi": [
             {
               "anonymous": false,
@@ -35413,7 +35648,7 @@
           ]
         },
         "FusePoolLensSecondary": {
-          "address": "0x22e9dc6E95527468467D023BB48E13132097BA01",
+          "address": "0x48903790A38FDc3542C4a79410578bCc2bAC65B8",
           "abi": [
             {
               "anonymous": false,
@@ -36256,7 +36491,7 @@
           ]
         },
         "FusePoolLensSecondary_Proxy": {
-          "address": "0x22e9dc6E95527468467D023BB48E13132097BA01",
+          "address": "0x48903790A38FDc3542C4a79410578bCc2bAC65B8",
           "abi": [
             {
               "inputs": [
@@ -37579,7 +37814,7 @@
           ]
         },
         "FusePoolLens_Proxy": {
-          "address": "0x30Cd251E79d6075CbaD76Ed6982B7713b2725BbA",
+          "address": "0x6EDa15a33385F67Ea6a7B9d66Bd9aec959384261",
           "abi": [
             {
               "inputs": [
@@ -37715,7 +37950,7 @@
           ]
         },
         "FuseSafeLiquidator": {
-          "address": "0x49CCe40A782c3126e36237C2Ef9764E10360e2c9",
+          "address": "0x7B727A28759cB56F9180972ca85c465d5f58F927",
           "abi": [
             {
               "anonymous": false,
@@ -37955,6 +38190,34 @@
                 }
               ],
               "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount0",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount1",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "pancakeCall",
+              "outputs": [],
+              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -38345,7 +38608,7 @@
           ]
         },
         "FuseSafeLiquidator_Implementation": {
-          "address": "0x5e38821BC82dC29fFd8386a155C2bd523A1A008E",
+          "address": "0x5D6904e41DdFB4DD7537912a674645E0Dc864290",
           "abi": [
             {
               "inputs": [],
@@ -38475,6 +38738,34 @@
                 }
               ],
               "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount0",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount1",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "pancakeCall",
+              "outputs": [],
+              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -38848,7 +39139,7 @@
           ]
         },
         "FuseSafeLiquidator_Proxy": {
-          "address": "0x49CCe40A782c3126e36237C2Ef9764E10360e2c9",
+          "address": "0x7B727A28759cB56F9180972ca85c465d5f58F927",
           "abi": [
             {
               "inputs": [
@@ -40418,7 +40709,7 @@
           ]
         },
         "TOUCHToken": {
-          "address": "0xD39aCca014CdceE9f1C679d899B2DdD22FE21C1E",
+          "address": "0x42cf7A77E5b420aa44Cf3c8BDb4110220242804B",
           "abi": [
             {
               "inputs": [
@@ -40709,7 +41000,7 @@
           ]
         },
         "TRIBEToken": {
-          "address": "0xdeC632C2950F80BA07D4d90Fd9344248c3248a9f",
+          "address": "0xB24b0E1B1a37a2F45005c52D18e3782E7e6B8797",
           "abi": [
             {
               "inputs": [

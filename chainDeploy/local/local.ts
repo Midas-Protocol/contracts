@@ -1,6 +1,7 @@
 import { SALT } from "../../deploy/deploy";
 import { ChainDeployConfig } from "../helpers";
 import { ethers } from "ethers";
+import { MasterPriceOracle } from "../../typechain";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -64,27 +65,17 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
   const simplePO = await dep.deploy();
   console.log("SimplePriceOracle: ", simplePO.address);
 
-  const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
-
+  const masterPriceOracle = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
   const simplePriceOracle = await ethers.getContract("SimplePriceOracle", deployer);
 
   // get the ERC20 address of deployed cERC20
-  const underlyings = [tribe.address, touch.address];
+  const underlyings = [ethers.constants.AddressZero, tribe.address, touch.address];
 
-  const admin = await masterPriceOracle.admin();
-  if (admin === ethers.constants.AddressZero) {
-    tx = await masterPriceOracle.initialize(
-      underlyings,
-      Array(underlyings.length).fill(simplePriceOracle.address),
-      simplePO.address,
-      deployer,
-      true,
-      ethers.constants.AddressZero
-    );
-    await tx.wait();
-    console.log("MasterPriceOracle initialized", tx.hash);
-  } else {
-    console.log("MasterPriceOracle already initialized");
-  }
+  run("oracle:add-tokens", {
+    underlyings: underlyings.join(","),
+    oracles: Array(underlyings.length).fill(simplePriceOracle.address).join(","),
+  });
+  tx = await masterPriceOracle.setDefaultOracle(simplePriceOracle.address);
+  await tx.wait();
   ////
 };
