@@ -2,6 +2,10 @@
 pragma solidity >=0.8.0;
 
 import "./CToken.sol";
+import "../external/compound/ICToken.sol";
+import "../oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
+import "../oracles/keydonix/UniswapOracle.sol";
+import "../utils/Multicall.sol";
 
 interface CompLike {
   function delegate(address delegatee) external;
@@ -13,7 +17,7 @@ interface CompLike {
  * @dev This contract should not to be deployed on its own; instead, deploy `CErc20Delegator` (proxy contract) and `CErc20Delegate` (logic/implementation contract).
  * @author Compound
  */
-contract CErc20 is CToken, CErc20Interface {
+contract CErc20 is CToken, CErc20Interface, Multicall {
   /**
    * @notice Initialize the new money market
    * @param underlying_ The address of the underlying asset
@@ -202,5 +206,9 @@ contract CErc20 is CToken, CErc20Interface {
   function _delegateCompLikeTo(address compLikeDelegatee) external {
     require(hasAdminRights(), "only the admin may set the comp-like delegate");
     CompLike(underlying).delegate(compLikeDelegatee);
+  }
+
+  function verifyPrice(address cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
+    return comptroller.verifyPrice(cToken, proofData);
   }
 }

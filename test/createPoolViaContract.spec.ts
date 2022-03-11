@@ -70,10 +70,10 @@ describe("FusePoolDirectory", function () {
 
       const sdk = new Fuse(ethers.provider, chainId);
       const allPools = await sdk.contracts.FusePoolDirectory.callStatic.getAllPools();
-      const { comptroller, name: _unfiliteredName } = await allPools.filter((p) => p.creator === alice.address).at(-1);
+      const { comptroller, name: _unfilteredName } = await allPools.filter((p) => p.creator === alice.address).at(-1);
 
       expect(comptroller).to.eq(poolAddress);
-      expect(_unfiliteredName).to.eq(POOL_NAME);
+      expect(_unfilteredName).to.eq(POOL_NAME);
 
       const unitroller = (await ethers.getContractAt("Unitroller", poolAddress, alice)) as Unitroller;
       const adminTx = await unitroller._acceptAdmin();

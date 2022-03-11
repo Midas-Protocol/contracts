@@ -29,6 +29,9 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
   const ffd = await dep.deploy();
   console.log("FuseFeeDistributor: ", ffd.address);
@@ -92,6 +95,9 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
   const fpd = await dep.deploy();
   console.log("FusePoolDirectory: ", fpd.address);
@@ -119,6 +125,9 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
   const fpl = await dep.deploy();
   console.log("FusePoolLens: ", fpl.address);
@@ -147,6 +156,9 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
   const fpls = await dep.deploy();
   console.log("FusePoolLensSecondary: ", fpls.address);
@@ -203,6 +215,30 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   });
   const masterPO = await dep.deploy();
   console.log("MasterPriceOracle: ", masterPO.address);
+
+  // dep = await deployments.deterministic("KeydonixUniswapTwapPriceOracle", {
+  //   from: deployer,
+  //   salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+  //   args: [],
+  //   log: true,
+  // });
+  // const kPO = await dep.deploy();
+  // console.log("Keydonix Price Oracle: ", kPO.address);
+  // const keydonixPriceOracle = await ethers.getContract("KeydonixUniswapTwapPriceOracle", deployer);
+  // if ((await keydonixPriceOracle.denominationToken()) == constants.AddressZero) {
+  //   tx = await keydonixPriceOracle.initialize(
+  //     chainDeployParams.uniswap.uniswapV2FactoryAddress, // uniswapFactory,
+  //     chainDeployParams.wtoken, // denominationTokenAddress,
+  //     chainDeployParams.wtoken, // wtoken
+  //     3, // TODO min blocks back
+  //     Math.max(chainDeployParams.blocksPerYear / (365 * 24 * 3), 255) // max blocks back = 20 mins back
+  //   );
+  //   await tx.wait();
+  //   console.log("Keydonix Price Oracle initialized", tx.hash);
+  // } else {
+  //   console.log(`${await keydonixPriceOracle.denominationToken()}`);
+  //   console.log("Keydonix Price Oracle already initialized");
+  // }
 
   ////
   //// IRM MODELS
