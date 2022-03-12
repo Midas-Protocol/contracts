@@ -1,4 +1,4 @@
-import { deployments, ethers } from "hardhat";
+import { deployments, ethers, run, getChainId } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
 import { Fuse } from "../dist/esm/src";
@@ -10,7 +10,10 @@ use(solidity);
 
 describe("FusePoolDirectory", function () {
   this.beforeEach(async () => {
-    await deployments.fixture();
+    const { chainId } = await ethers.provider.getNetwork();
+    if (chainId === 1337) {
+      await deployments.fixture();
+    }
     await setUpPriceOraclePrices();
   });
 
@@ -21,9 +24,8 @@ describe("FusePoolDirectory", function () {
       const { bob } = await ethers.getNamedSigners();
       const { chainId } = await ethers.provider.getNetwork();
 
-      const spo = await ethers.getContract("MasterPriceOracle", bob);
-
       const sdk = new Fuse(ethers.provider, chainId);
+      const spo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, bob);
 
       // 50% -> 0.5 * 1e18
       const bigCloseFactor = utils.parseEther((50 / 100).toString());
@@ -50,8 +52,11 @@ describe("FusePoolDirectory", function () {
 
       expect(_unfiliteredName).to.be.equal(POOL_NAME);
 
-      const jrm = await ethers.getContract("JumpRateModel");
-      const assets = await poolAssets(jrm.address, comptroller, sdk.contracts.FuseFeeDistributor.address);
+      const assets = await poolAssets(
+        sdk.irms.JumpRateModel.address,
+        comptroller,
+        sdk.contracts.FuseFeeDistributor.address
+      );
       const deployedAssets: DeployedAsset[] = [];
       for (const assetConf of assets.assets) {
         const [assetAddress, cTokenImplementationAddress, irmModel, receipt] = await sdk.deployAsset(

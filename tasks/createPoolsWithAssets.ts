@@ -33,23 +33,29 @@ task("pools:create", "Create pool if does not exist")
   .addParam("name", "Name of the pool to be created")
   .addParam("creator", "Named account from which to create the pool", "deployer", types.string)
   .addOptionalParam("priceOracle", "Which price oracle to use", undefined, types.string)
+  .addOptionalParam("rewardsDistributorToken", "Token address for rewards distributor", undefined, types.string)
   .setAction(async (taskArgs, hre) => {
     const { chainId } = await hre.ethers.provider.getNetwork();
     const signer = await hre.ethers.getNamedSigner(taskArgs.creator);
-    if (!taskArgs.priceOracle) {
-      await hre.run("oracle:set-price", { token: "ETH", price: "1" });
-      await hre.run("oracle:set-price", { token: "TOUCH", price: "0.1" });
-      await hre.run("oracle:set-price", { token: "TRIBE", price: "0.01" });
-      taskArgs.priceOracle = (await hre.ethers.getContract("MasterPriceOracle", signer)).address;
-    }
 
     const poolModule = await import("../test/utils/pool");
     // @ts-ignore
     const sdkModule = await import("../dist/esm/src");
 
     const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId);
+    if (!taskArgs.priceOracle) {
+      await hre.run("oracle:set-price", { token: "ETH", price: "1" });
+      await hre.run("oracle:set-price", { token: "TOUCH", price: "0.1" });
+      await hre.run("oracle:set-price", { token: "TRIBE", price: "0.01" });
+      taskArgs.priceOracle = (
+        await hre.ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, signer)
+      ).address;
+    }
+
     const existingPool = await poolModule.getPoolByName(taskArgs.name, sdk);
-    const fuseFeeDistributor = (await hre.ethers.getContract("FuseFeeDistributor")).address;
+    const fuseFeeDistributor = (
+      await hre.ethers.getContractAt("FuseFeeDistributor", sdk.contracts.FuseFeeDistributor.address)
+    ).address;
 
     let poolAddress: string;
     if (existingPool) {
@@ -65,36 +71,43 @@ task("pools:create", "Create pool if does not exist")
       const assets = await poolModule.getPoolAssets(poolAddress, fuseFeeDistributor);
       const deployedAssets = await poolModule.deployAssets(assets.assets, signer);
 
-      // Add Reward Distributer for TOUCH
-      const touchInstance = await hre.ethers.getContract("TOUCHToken");
-      const rdInstance = await sdk.deployRewardsDistributor(touchInstance.address, {
-        from: signer.address,
-      });
-      await sdk.addRewardDistributer(poolAddress, rdInstance.address, {
-        from: signer.address,
-      });
-      await sdk.fundRewardDistributer(rdInstance.address, touchInstance.address, hre.ethers.utils.parseUnits("10000"), {
-        from: signer.address,
-      });
+      if (taskArgs.rewardsDistributorToken) {
+        // Add Reward Distributer for TOUCH
+        const rewardTokenInstance = await hre.ethers.getContractAt("TOUCHToken", taskArgs.rewardsDistributorToken);
+        const rdInstance = await sdk.deployRewardsDistributor(rewardTokenInstance.address, {
+          from: signer.address,
+        });
+        await sdk.addRewardDistributer(poolAddress, rdInstance.address, {
+          from: signer.address,
+        });
+        await sdk.fundRewardDistributer(
+          rdInstance.address,
+          rewardTokenInstance.address,
+          hre.ethers.utils.parseUnits("10000"),
+          {
+            from: signer.address,
+          }
+        );
 
-      const deployedCTouch = deployedAssets.find((a) => a.symbol === "TOUCH");
-      if (deployedCTouch) {
-        await sdk.updateDistributionSpeedSuppliers(
-          rdInstance.address,
-          deployedCTouch.assetAddress,
-          hre.ethers.utils.parseUnits("2"),
-          {
-            from: signer.address,
-          }
-        );
-        await sdk.updateDistributionSpeedBorrowers(
-          rdInstance.address,
-          deployedCTouch.assetAddress,
-          hre.ethers.utils.parseUnits("1"),
-          {
-            from: signer.address,
-          }
-        );
+        const deployedCToken = deployedAssets.find((a) => a.underlying === rewardTokenInstance.address);
+        if (deployedCToken) {
+          await sdk.updateDistributionSpeedSuppliers(
+            rdInstance.address,
+            deployedCToken.assetAddress,
+            hre.ethers.utils.parseUnits("2"),
+            {
+              from: signer.address,
+            }
+          );
+          await sdk.updateDistributionSpeedBorrowers(
+            rdInstance.address,
+            deployedCToken.assetAddress,
+            hre.ethers.utils.parseUnits("1"),
+            {
+              from: signer.address,
+            }
+          );
+        }
       }
     }
 

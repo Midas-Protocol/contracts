@@ -1,9 +1,13 @@
 import { constants } from "ethers";
+import { getChainId } from "hardhat";
+import { Fuse } from "../../dist/esm/src";
 
 export const setUpOracleWithToken = async (_token, _address, ethers, getNamedAccounts) => {
   const { deployer } = await getNamedAccounts();
   const signer = await ethers.getSigner(deployer);
-  const spo = await ethers.getContract("MasterPriceOracle", signer);
+  const chainId = await getChainId();
+  const sdk = new Fuse(ethers.provider, Number(chainId));
+  const spo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, signer);
 
   if (_address) {
     return [_address, spo];

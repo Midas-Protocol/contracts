@@ -1,4 +1,4 @@
-import { deployments, ethers } from "hardhat";
+import { ethers, run, getChainId } from "hardhat";
 import { assets as bscAssets } from "../../chainDeploy/mainnets/bsc";
 import { constants, providers, utils } from "ethers";
 import {
@@ -13,25 +13,27 @@ import {
 import { createPool, deployAssets, DeployedAsset, getPoolAssets } from "./pool";
 import { expect } from "chai";
 import { cERC20Conf } from "../../dist/esm/src";
+import { Fuse } from "../../dist/cjs/src";
 
-export const setUpPriceOraclePrices = deployments.createFixture(async ({ run, getChainId }, options) => {
+export const setUpPriceOraclePrices = async () => {
   const chainId = parseInt(await getChainId());
   if (chainId === 31337 || chainId === 1337) {
     await setupLocalOraclePrices();
   } else if (chainId === 56) {
     await setUpBscOraclePrices();
   }
-});
+};
 
-const setupLocalOraclePrices = deployments.createFixture(async ({ run }, options) => {
+const setupLocalOraclePrices = async () => {
   await run("oracle:set-price", { token: "ETH", price: "1" });
   await run("oracle:set-price", { token: "TOUCH", price: "0.1" });
   await run("oracle:set-price", { token: "TRIBE", price: "0.2" });
-});
+};
 
-const setUpBscOraclePrices = deployments.createFixture(async ({ run }, options) => {
+const setUpBscOraclePrices = async () => {
   const { deployer } = await ethers.getNamedSigners();
-  const oracle = await ethers.getContract("SimplePriceOracle", deployer);
+  const sdk = new Fuse(ethers.provider, 56);
+  const oracle = await ethers.getContractAt("SimplePriceOracle", sdk.oracles.SimplePriceOracle.address, deployer);
 
   for (const asset of bscAssets) {
     await run("oracle:add-tokens", { underlyings: asset.underlying, oracles: oracle.address });
@@ -39,17 +41,17 @@ const setUpBscOraclePrices = deployments.createFixture(async ({ run }, options) 
   }
   await run("oracle:add-tokens", { underlyings: constants.AddressZero, oracles: oracle.address });
   await run("oracle:set-price", { address: constants.AddressZero, price: "1" });
-});
+};
 
-export const getPositionRatio = deployments.createFixture(async ({ run }, { name, namedUser, userAddress, cgId }) => {
+export const getPositionRatio = async ({ name, namedUser, userAddress, cgId }) => {
   return await run("get-position-ratio", { name, namedUser, userAddress, cgId });
-});
+};
 
-export const tradeNativeForAsset = deployments.createFixture(async ({ run }, { token, amount, account }) => {
+export const tradeNativeForAsset = async ({ token, amount, account }) => {
   await run("swap-wtoken-for-token", { token, amount, account });
-});
+};
 
-export const setUpLiquidation = deployments.createFixture(async ({ run }, { poolName }) => {
+export const setUpLiquidation = async ({ poolName }) => {
   let eth: cERC20Conf;
   let erc20One: cERC20Conf;
   let erc20Two: cERC20Conf;
@@ -75,10 +77,24 @@ export const setUpLiquidation = deployments.createFixture(async ({ run }, { pool
   const { bob, deployer, rando } = await ethers.getNamedSigners();
 
   await setUpPriceOraclePrices();
+  const chainId = await getChainId();
+  const sdk = new Fuse(ethers.provider, Number(chainId));
 
-  simpleOracle = (await ethers.getContract("SimplePriceOracle", deployer)) as SimplePriceOracle;
-  oracle = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
-  fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
+  simpleOracle = (await ethers.getContractAt(
+    "SimplePriceOracle",
+    sdk.oracles.SimplePriceOracle.address,
+    deployer
+  )) as SimplePriceOracle;
+  oracle = (await ethers.getContractAt(
+    "MasterPriceOracle",
+    sdk.oracles.MasterPriceOracle.address,
+    deployer
+  )) as MasterPriceOracle;
+  fuseFeeDistributor = (await ethers.getContractAt(
+    "FuseFeeDistributor",
+    sdk.contracts.FuseFeeDistributor.address,
+    deployer
+  )) as FuseFeeDistributor;
 
   [poolAddress] = await createPool({ poolName });
   const assets = await getPoolAssets(poolAddress, fuseFeeDistributor.address);
@@ -108,7 +124,11 @@ export const setUpLiquidation = deployments.createFixture(async ({ run }, { pool
   deployedErc20One = deployedAssets.find((a) => a.underlying === erc20One.underlying);
   deployedErc20Two = deployedAssets.find((a) => a.underlying === erc20Two.underlying);
 
-  liquidator = (await ethers.getContract("FuseSafeLiquidator", rando)) as FuseSafeLiquidator;
+  liquidator = (await ethers.getContractAt(
+    "FuseSafeLiquidator",
+    sdk.contracts.FuseSafeLiquidator.address,
+    rando
+  )) as FuseSafeLiquidator;
 
   ethCToken = (await ethers.getContractAt("CEther", deployedEth.assetAddress)) as CEther;
   erc20OneCToken = (await ethers.getContractAt("CErc20", deployedErc20One.assetAddress)) as CErc20;
@@ -135,4 +155,4 @@ export const setUpLiquidation = deployments.createFixture(async ({ run }, { pool
     simpleOracle,
     fuseFeeDistributor,
   };
-});
+};

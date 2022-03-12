@@ -1,4 +1,4 @@
-import { deployments, ethers } from "hardhat";
+import { deployments, ethers, run, getChainId } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
 import { Fuse } from "../dist/esm/src";
@@ -11,7 +11,7 @@ import { chainDeployConfig } from "../chainDeploy";
 
 use(solidity);
 
-describe("FusePoolDirectory", function () {
+describe.skip("FusePoolDirectory", function () {
   let spo: SimplePriceOracle;
   let fpdWithSigner: FusePoolDirectory;
   let implementationComptroller: Comptroller;

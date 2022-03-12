@@ -1,5 +1,5 @@
 import { BigNumber, constants, Contract, providers, utils } from "ethers";
-import { deployments, ethers } from "hardhat";
+import { deployments, ethers, getChainId } from "hardhat";
 import { getPositionRatio, setUpLiquidation, tradeNativeForAsset } from "./utils";
 import { addCollateral, borrowCollateral } from "./utils/collateral";
 import {
@@ -56,7 +56,10 @@ const UNISWAP_V2_PROTOCOLS = {
   const coingeckoId = "binancecoin";
 
   beforeEach(async () => {
-    await deployments.fixture(); // ensure you start from a fresh deployments
+    const { chainId } = await ethers.provider.getNetwork();
+    if (chainId === 1337) {
+      await deployments.fixture();
+    }
     ({
       poolAddress,
       deployedEth,
@@ -105,7 +108,12 @@ const UNISWAP_V2_PROTOCOLS = {
     const uniswapV2RouterForCollateral = UNISWAP_V2_PROTOCOLS.PancakeSwap.router;
     // Check balance before liquidation
 
-    const ratioBefore = await getPositionRatio({ name: poolName, userAddress: alice.address, cgId: coingeckoId });
+    const ratioBefore = await getPositionRatio({
+      name: poolName,
+      userAddress: alice.address,
+      cgId: coingeckoId,
+      namedUser: undefined,
+    });
     console.log(`Ratio Before: ${ratioBefore}`);
 
     const liquidatorBalanceBeforeLiquidation = await ethers.provider.getBalance(rando.address);
@@ -140,7 +148,12 @@ const UNISWAP_V2_PROTOCOLS = {
 
     // these aren't right yet
     expect(liquidatorBalanceAfterLiquidation).gte(liquidatorBalanceBeforeLiquidation);
-    const ratioAfter = await getPositionRatio({ name: poolName, userAddress: alice.address, cgId: coingeckoId });
+    const ratioAfter = await getPositionRatio({
+      name: poolName,
+      userAddress: alice.address,
+      cgId: coingeckoId,
+      namedUser: undefined,
+    });
     console.log(`Ratio After: ${ratioAfter}`);
     expect(ratioBefore).to.be.gte(ratioAfter);
   });
