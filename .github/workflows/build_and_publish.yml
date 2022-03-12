@@ -44,25 +44,25 @@ jobs:
       - run: npm run build
       - run: npm run test
 
-  build-and-test-bsc:
-    env:
-      MNEMONIC: "${{ secrets.MNEMONIC }}"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-      - run: npm install
-      - run: npm run build
-      - run: npm run test:bsc
+  # build-and-test-bsc:
+  #   env:
+  #     MNEMONIC: "${{ secrets.MNEMONIC }}"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         submodules: recursive
+  #     - name: Install Foundry
+  #       uses: onbjerg/foundry-toolchain@v1
+  #       with:
+  #         version: nightly
+  #     - uses: actions/setup-node@v2
+  #       with:
+  #         node-version: 16.x
+  #         cache: "npm"
+  #     - run: npm install
+  #     - run: npm run build
+  #     - run: npm run test:bsc
 
   release:
     needs: [build-and-test-local]
