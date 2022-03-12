@@ -43,6 +43,8 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: npm run test
+      - name: Run forge tests
+        run: forge test -vvv
 
   # build-and-test-bsc:
   #   env:
@@ -82,11 +84,6 @@ jobs:
         with:
           node-version: 16.x
           cache: "npm"
-      - run: npm install
-      - run: npm run build
-      - run: npm run test
-      - name: Run forge tests
-        run: forge test -vvv
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
