@@ -284,6 +284,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
     log: true,
   });
   const simplePO = await dep.deploy();
+  await ethers.provider.waitForTransaction(simplePO.transactionHash);
   console.log("SimplePriceOracle: ", simplePO.address);
   ////
 };

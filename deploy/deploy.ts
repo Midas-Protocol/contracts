@@ -65,6 +65,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   const erc20Del = await dep.deploy();
+  await ethers.provider.waitForTransaction(erc20Del.transactionHash);
   console.log("CErc20Delegate: ", erc20Del.address);
 
   dep = await deployments.deterministic("CEtherDelegate", {
@@ -74,6 +75,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   const ethDel = await dep.deploy();
+  await ethers.provider.waitForTransaction(ethDel.transactionHash);
   console.log("CEtherDelegate: ", ethDel.address);
 
   dep = await deployments.deterministic("RewardsDistributorDelegate", {
@@ -83,6 +85,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   const rewards = await dep.deploy();
+  await ethers.provider.waitForTransaction(rewards.transactionHash);
   // const rewardsDistributorDelegate = await ethers.getContract("RewardsDistributorDelegate", deployer);
   // await rewardsDistributorDelegate.initialize(constants.AddressZero);
   console.log("RewardsDistributorDelegate: ", rewards.address);
@@ -100,6 +103,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     },
   });
   const fpd = await dep.deploy();
+  await ethers.provider.waitForTransaction(fpd.transactionHash);
   console.log("FusePoolDirectory: ", fpd.address);
   const fusePoolDirectory = await ethers.getContract("FusePoolDirectory", deployer);
   owner = await fusePoolDirectory.owner();
@@ -130,6 +134,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     },
   });
   const fpl = await dep.deploy();
+  await ethers.provider.waitForTransaction(fpl.transactionHash);
   console.log("FusePoolLens: ", fpl.address);
   const fusePoolLens = await ethers.getContract("FusePoolLens", deployer);
   let directory = await fusePoolLens.directory();
@@ -161,6 +166,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     },
   });
   const fpls = await dep.deploy();
+  await ethers.provider.waitForTransaction(fpls.transactionHash);
   console.log("FusePoolLensSecondary: ", fpls.address);
 
   const fusePoolLensSecondary = await ethers.getContract("FusePoolLensSecondary", deployer);
@@ -202,6 +208,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   const ic = await dep.deploy();
+  await ethers.provider.waitForTransaction(ic.transactionHash);
   console.log("InitializableClones: ", ic.address);
   ////
 
@@ -214,6 +221,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   const masterPO = await dep.deploy();
+  await ethers.provider.waitForTransaction(masterPO.transactionHash);
   console.log("MasterPriceOracle: ", masterPO.address);
 
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
