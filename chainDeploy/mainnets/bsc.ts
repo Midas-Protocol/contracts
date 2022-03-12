@@ -4,29 +4,13 @@ import { ethers } from "ethers";
 import { Asset, ChainDeployFnParams, ChainlinkAsset, CurvePoolConfig } from "../helpers/types";
 import { deployCurveLpOracle } from "../oracles/curveLp";
 
-export const deployConfig: ChainDeployConfig = {
-  wtoken: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-  nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
-  nativeTokenName: "Binance Network Token",
-  nativeTokenSymbol: "BNB",
-  stableToken: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
-  wBTCToken: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
-  blocksPerYear: 20 * 24 * 365 * 60,
-  uniswap: {
-    hardcoded: [],
-    uniswapData: [{ lpDisplayName: "PancakeSwap", lpName: "Pancake LPs", lpSymbol: "Cake-LP" }],
-    pairInitHashCode: ethers.utils.hexlify("0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5"),
-    uniswapV2RouterAddress: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
-    uniswapV2FactoryAddress: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
-    uniswapOracleInitialDeployTokens: [
-      "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56", // BUSD
-      "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", // BTCB
-      "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", // ETH
-    ],
-  },
-};
-
 export const assets: Asset[] = [
+  {
+    symbol: "WBNB",
+    underlying: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+    name: "Wrapped Binance Network Token",
+    decimals: 18,
+  },
   {
     symbol: "BUSD",
     underlying: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
@@ -104,12 +88,6 @@ export const assets: Asset[] = [
   },
   // stables
   {
-    symbol: "BIFI",
-    underlying: "0xCa3F508B8e4Dd382eE878A314789373D80A5190A",
-    name: "beefy.finance",
-    decimals: 18,
-  },
-  {
     symbol: "USDC",
     underlying: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
     name: "Binance-Peg USD Coin",
@@ -148,6 +126,24 @@ export const assets: Asset[] = [
   },
 ];
 
+export const deployConfig: ChainDeployConfig = {
+  wtoken: assets.find((a) => a.symbol === "WBNB")!.underlying,
+  nativeTokenUsdChainlinkFeed: "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE",
+  nativeTokenName: "Binance Network Token",
+  nativeTokenSymbol: "BNB",
+  stableToken: assets.find((a) => a.symbol === "BUSD")!.underlying,
+  wBTCToken: assets.find((a) => a.symbol === "BTCB")!.underlying,
+  blocksPerYear: 20 * 24 * 365 * 60,
+  uniswap: {
+    hardcoded: [],
+    uniswapData: [{ lpDisplayName: "PancakeSwap", lpName: "Pancake LPs", lpSymbol: "Cake-LP" }],
+    pairInitHashCode: ethers.utils.hexlify("0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5"),
+    uniswapV2RouterAddress: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
+    uniswapV2FactoryAddress: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
+    uniswapOracleInitialDeployTokens: [],
+  },
+};
+
 const chainlinkAssets: ChainlinkAsset[] = [
   //
   {
@@ -157,17 +153,17 @@ const chainlinkAssets: ChainlinkAsset[] = [
   },
   {
     symbol: "BTCB",
-    aggregator: "0x5741306c21795FdCBb9b265Ea0255F499DFe515C",
+    aggregator: "0x264990fbd0A4796A3E3d8E37C4d5F87a3aCa5Ebf",
     feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
   },
   {
     symbol: "DAI",
-    aggregator: "0xE4eE17114774713d2De0eC0f035d4F7665fc025D",
+    aggregator: "0x132d3C0B1D2cEa0BC552588063bdBb210FDeecfA",
     feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
   },
   {
     symbol: "ETH",
-    aggregator: "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e",
+    aggregator: "0x63D407F32Aa72E63C7209ce1c2F5dA40b3AaE726",
     feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
   },
   // STONX
@@ -230,40 +226,35 @@ const chainlinkAssets: ChainlinkAsset[] = [
 const curvePools: CurvePoolConfig[] = [
   {
     // 3EPS
-    lpToken: assets.find(a => a.symbol === "3EPS")!.underlying,
+    lpToken: assets.find((a) => a.symbol === "3EPS")!.underlying,
     pool: "0x160CAed03795365F3A589f10C379FfA7d75d4E76",
     underlyings: [
-      assets.find(a => a.symbol === "BUSD")!.underlying,
-      assets.find(a => a.symbol === "USDC")!.underlying,
-      assets.find(a => a.symbol === "USDT")!.underlying,
+      assets.find((a) => a.symbol === "BUSD")!.underlying,
+      assets.find((a) => a.symbol === "USDC")!.underlying,
+      assets.find((a) => a.symbol === "USDT")!.underlying,
     ],
   },
   {
     // dai3EPS metapool
-    lpToken: assets.find(a => a.symbol === "dai3EPS")!.underlying,
+    lpToken: assets.find((a) => a.symbol === "dai3EPS")!.underlying,
     pool: "0xc6a752948627bECaB5474a10821Df73fF4771a49",
     underlyings: [
-      assets.find(a => a.symbol === "DAI")!.underlying,
-      assets.find(a => a.symbol === "3EPS")!.underlying,
+      assets.find((a) => a.symbol === "DAI")!.underlying,
+      assets.find((a) => a.symbol === "3EPS")!.underlying,
     ],
   },
   {
     // UST metapool
-    lpToken: assets.find(a => a.symbol === "ust3EPS")!.underlying,
-    pool: "0x151F1611b2E304DEd36661f65506f9D7D172beba",
+    lpToken: assets.find((a) => a.symbol === "ust3EPS")!.underlying,
+    pool: "0x780de1A0E4613da6b65ceF7F5FB63d14CbDcfB72",
     underlyings: [
-      assets.find(a => a.symbol === "UST")!.underlying,
-      assets.find(a => a.symbol === "3EPS")!.underlying,
+      assets.find((a) => a.symbol === "UST")!.underlying,
+      assets.find((a) => a.symbol === "3EPS")!.underlying,
     ],
   },
 ];
 
-export const deploy = async ({
-  run,
-  ethers,
-  getNamedAccounts,
-  deployments,
-}: ChainDeployFnParams): Promise<void> => {
+export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: ChainDeployFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   ////
   //// ORACLES
@@ -284,7 +275,7 @@ export const deploy = async ({
   await deployUniswapOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
   ////
 
-  await deployCurveLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig, curvePools })
+  await deployCurveLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig, curvePools });
 
   let dep = await deployments.deterministic("SimplePriceOracle", {
     from: deployer,
@@ -293,6 +284,7 @@ export const deploy = async ({
     log: true,
   });
   const simplePO = await dep.deploy();
+  await ethers.provider.waitForTransaction(simplePO.transactionHash);
   console.log("SimplePriceOracle: ", simplePO.address);
   ////
 };

@@ -14,7 +14,6 @@ import "./external/uniswap/IUniswapV2Pair.sol";
 
 import "./FusePoolDirectory.sol";
 import "./oracles/MasterPriceOracle.sol";
-import "./utils/Multicall.sol";
 import "./oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
 
 /**
@@ -22,7 +21,7 @@ import "./oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FusePoolLens returns data on Fuse interest rate pools in mass for viewing by dApps, bots, etc.
  */
-contract FusePoolLens is Initializable, Multicall {
+contract FusePoolLens is Initializable {
   /**
    * @notice Constructor to set the `FusePoolDirectory` contract object.
    */

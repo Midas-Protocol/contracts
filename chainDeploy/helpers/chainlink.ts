@@ -23,6 +23,7 @@ export const deployChainlinkOracle = async ({
     log: true,
   });
   const cpo = await dep.deploy();
+  await ethers.provider.waitForTransaction(cpo.transactionHash);
   console.log("ChainlinkPriceOracleV2: ", cpo.address);
 
   const chainLinkv2 = (await ethers.getContract("ChainlinkPriceOracleV2", deployer)) as ChainlinkPriceOracleV2;
