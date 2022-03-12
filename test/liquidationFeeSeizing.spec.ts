@@ -64,7 +64,7 @@ describe("Protocol Liquidation Seizing", () => {
     } = await setUpLiquidation({ poolName }));
   });
 
-  it.only("should calculate the right amounts of protocol, fee, total supply after liquidation", async function () {
+  it("should calculate the right amounts of protocol, fee, total supply after liquidation", async function () {
     this.timeout(120_000);
     const { bob, rando } = await ethers.getNamedSigners();
 
@@ -145,7 +145,7 @@ describe("Protocol Liquidation Seizing", () => {
     expect(reservesDiffAmount).to.be.gt(protocolSeizeTokens);
   });
 
-  it.only("should be able to withdraw fees to fuseFeeDistributor", async function () {
+  it("should be able to withdraw fees to fuseFeeDistributor", async function () {
     this.timeout(120_000);
     const { bob, rando } = await ethers.getNamedSigners();
 

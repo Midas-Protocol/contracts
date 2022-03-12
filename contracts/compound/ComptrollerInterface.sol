@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../oracles/keydonix/UniswapOracle.sol";
-
 abstract contract ComptrollerInterface {
   /// @notice Indicator that this is a Comptroller contract (for inspection)
   bool public constant isComptroller = true;
@@ -137,10 +135,4 @@ abstract contract ComptrollerInterface {
   function _beforeNonReentrant() external virtual;
 
   function _afterNonReentrant() external virtual;
-
-  /*** Oracle related ***/
-  function verifyPrice(address cToken, UniswapOracle.ProofData calldata proofData)
-    external
-    virtual
-    returns (uint256, uint256);
 }
