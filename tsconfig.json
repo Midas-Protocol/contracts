@@ -2,7 +2,9 @@
   "compilerOptions": {
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "moduleResolution": "node",
     "allowJs": true,
-    "rootDirs": ["./deploy", "./scripts", "./test"]
-  },
+    "target": "ES2015",
+    "rootDirs": ["./deploy", "./scripts", "./test", "./src"]
+  }
 }

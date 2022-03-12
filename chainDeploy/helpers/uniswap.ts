@@ -1,6 +1,7 @@
 import { SALT } from "../../deploy/deploy";
 import { UniswapTwapPriceOracleV2Factory } from "../../typechain";
 import { constants } from "ethers";
+import { UniswapDeployFnParams } from "./types";
 
 export const deployUniswapOracle = async ({
   run,
@@ -8,7 +9,7 @@ export const deployUniswapOracle = async ({
   getNamedAccounts,
   deployments,
   deployConfig,
-}): Promise<void> => {
+}: UniswapDeployFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   //// Uniswap Oracle
   let dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
@@ -18,6 +19,7 @@ export const deployUniswapOracle = async ({
     log: true,
   });
   const utpor = await dep.deploy();
+  await ethers.provider.waitForTransaction(utpor.transactionHash);
   console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
 
   dep = await deployments.deterministic("UniswapTwapPriceOracleV2", {
@@ -27,6 +29,7 @@ export const deployUniswapOracle = async ({
     log: true,
   });
   const utpo = await dep.deploy();
+  await ethers.provider.waitForTransaction(utpo.transactionHash);
   console.log("UniswapTwapPriceOracleV2: ", utpo.address);
 
   dep = await deployments.deterministic("UniswapTwapPriceOracleV2Factory", {
@@ -35,7 +38,8 @@ export const deployUniswapOracle = async ({
     args: [utpor.address, utpo.address, deployConfig.wtoken],
     log: true,
   });
-  const utpof: UniswapTwapPriceOracleV2Factory = await dep.deploy();
+  const utpof = await dep.deploy();
+  await ethers.provider.waitForTransaction(utpof.transactionHash);
   console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
 
   const uniTwapOracleFactory = (await ethers.getContract(
@@ -57,21 +61,15 @@ export const deployUniswapOracle = async ({
       deployConfig.wtoken
     );
 
-    const underlyings = deployConfig.uniswap.uniswapOracleInitialDeployTokens.join(",");
-    const oracles = Array(deployConfig.uniswap.uniswapOracleInitialDeployTokens.length).fill(nativeOracle).join(",");
+    const underlyings = deployConfig.uniswap.uniswapOracleInitialDeployTokens;
+    const oracles = Array(deployConfig.uniswap.uniswapOracleInitialDeployTokens.length).fill(nativeOracle);
 
-    console.log(underlyings, oracles, "underlyings, oracles");
-
-    run("oracle:add-tokens", { underlyings, oracles });
-
-    console.log(
-      "UniswapTwapPriceOracleV2 oracle deployed",
-      tx.hash,
-      "address: ",
-      nativeOracle,
-      "tokens: ",
-      underlyings
-    );
+    const spo = await ethers.getContract("MasterPriceOracle", deployer);
+    if (underlyings.length > 0) {
+      tx = await spo.add(underlyings, oracles);
+      await tx.wait();
+      console.log(`Master Price Oracle updated for tokens ${underlyings.join(", ")}`);
+    }
   } else {
     console.log("UniswapTwapPriceOracleV2 already deployed at: ", existingOracle);
   }

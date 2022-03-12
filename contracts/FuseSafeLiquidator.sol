@@ -9,8 +9,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "./liquidators/IRedemptionStrategy.sol";
 
 import "./external/compound/ICToken.sol";
-import "./oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
-import "./oracles/keydonix/UniswapOracle.sol";
 
 import "./external/compound/ICErc20.sol";
 import "./external/compound/ICEther.sol";
@@ -23,11 +21,7 @@ import "./external/uniswap/IUniswapV2Pair.sol";
 import "./external/uniswap/IUniswapV2Factory.sol";
 import "./external/uniswap/UniswapV2Library.sol";
 import "./external/pcs/PancakeLibrary.sol";
-import "./external/pcs/IPancakePair.sol";
-import "./utils/Multicall.sol";
 import "./external/compound/IComptroller.sol";
-
-import "hardhat/console.sol";
 
 /**
  * @title FuseSafeLiquidator
@@ -35,7 +29,7 @@ import "hardhat/console.sol";
  * @notice FuseSafeLiquidator safely liquidates unhealthy borrowers (with flashloan support).
  * @dev Do not transfer NATIVE or tokens directly to this address. Only send NATIVE here when using a method, and only approve tokens for transfer to here when using a method. Direct NATIVE transfers will be rejected and direct token transfers will be lost.
  */
-contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
+contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
   using AddressUpgradeable for address payable;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -413,18 +407,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
     return distributeProfit(exchangeProfitTo, minProfitAmount, ethToCoinbase);
   }
 
-  /**
-   * @notice Safely liquidate an unhealthy loan, confirming that at least `minProfitAmount` in NATIVE profit is seized.
-   * @param borrower The borrower's Ethereum address.
-   * @param repayAmount The NATIVE amount to repay to liquidate the unhealthy loan.
-   * @param cEther The borrowed CEther contract to repay.
-   * @param cErc20Collateral The CErc20 collateral contract to be liquidated.
-   * @param minProfitAmount The minimum amount of profit required for execution (in terms of `exchangeProfitTo`). Reverts if this condition is not met.
-   * @param exchangeProfitTo If set to an address other than `cErc20Collateral`, exchange seized collateral to this ERC20 token contract address (or the zero address for NATIVE).
-   * @param uniswapV2RouterForCollateral The UniswapV2Router to use to convert the underlying collateral to NATIVE.
-   * @param redemptionStrategies The IRedemptionStrategy contracts to use, if any, to redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
-   * @param strategyData The data for the chosen IRedemptionStrategy contracts, if any.
-   */
+
   function safeLiquidateToEthWithFlashLoan(
     address borrower,
     uint256 repayAmount,
@@ -444,7 +427,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
     // Use STABLE_TOKEN unless collateral is STABLE_TOKEN, in which case we use WBTC to avoid a reentrancy error
     // when exchanging the collateral to repay the borrow
 
-    IPancakePair pair = IPancakePair(
+    IUniswapV2Pair pair = IUniswapV2Pair(
       PancakeLibrary.pairFor(
         UNISWAP_V2_ROUTER_02.factory(),
         address(uniswapV2RouterForCollateral) == UNISWAP_V2_ROUTER_02_ADDRESS &&
@@ -456,7 +439,14 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
       )
     );
 
-    pair.swap(repayAmount * 1e6, 0, address(this), "");
+    address token0 = pair.token0();
+
+    pair.swap(
+      token0 == W_NATIVE_ADDRESS ? repayAmount : 0,
+        token0 != W_NATIVE_ADDRESS ? repayAmount : 0,
+        address(this),
+        msg.data
+    );
 
     // Exchange profit, send NATIVE to coinbase if necessary, and transfer seized funds
     return distributeProfit(exchangeProfitTo, minProfitAmount, ethToCoinbase);
@@ -520,7 +510,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
     uint256 amount0,
     uint256 amount1,
     bytes calldata data
-  ) external override {
+  ) public override {
     address cToken = abi.decode(data[68:100], (address));
 
     // Liquidate unhealthy borrow, exchange seized collateral, return flashloaned funds, and exchange profit
@@ -608,6 +598,18 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
         strategyData
       );
     }
+  }
+
+  /**
+ * @dev Callback function for PCS flashloans.
+   */
+  function pancakeCall(
+    address sender,
+    uint256 amount0,
+    uint256 amount1,
+    bytes calldata data
+  ) external override {
+    uniswapV2Call(sender, amount0, amount1, data);
   }
 
   /**
@@ -719,9 +721,9 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
       address(uniswapV2Router) == UNISWAP_V2_ROUTER_02_ADDRESS &&
       address(underlyingCollateral) ==
       (
-        cErc20Collateral.underlying() == 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
-          ? 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599
-          : 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+        cErc20Collateral.underlying() == STABLE_TOKEN
+          ? BTC_TOKEN
+          : STABLE_TOKEN
       )
     ) {
       // Get tokens required to repay flashloan and repay flashloan in non-W_NATIVE tokens
@@ -955,11 +957,6 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee, Multicall {
       abi.encodeWithSelector(strategy.redeem.selector, underlyingCollateral, underlyingCollateralSeized, strategyData)
     );
     return abi.decode(returndata, (IERC20Upgradeable, uint256));
-  }
-
-  function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
-    IPriceOracle oracle = IComptroller(cToken.comptroller()).oracle();
-    return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
   }
 
   /**

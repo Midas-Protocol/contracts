@@ -42,7 +42,10 @@ contract AutofarmERC4626 is ERC4626 {
      @param _asset The ERC20 compliant token the Vault should accept.
      @param _name The name for the vault token.
      @param _symbol The symbol for the vault token.
+     @param _poolId TODO
      @param _autofarm The autofarm contract.
+     @param _flywheel TODO
+
     */
   constructor(
     ERC20 _asset,
@@ -75,6 +78,8 @@ contract AutofarmERC4626 is ERC4626 {
 
   function transfer(address to, uint256 amount) public override returns (bool) {
     //Accrue flywheel rewards for sender and receiver
+    ERC20 AUTO = ERC20(autofarm.AUTO());
+    AUTO.approve(address(flywheel.flywheelRewards()), AUTO.balanceOf(address(this)));
     flywheel.accrue(ERC20(address(this)), msg.sender, to);
 
     balanceOf[msg.sender] -= amount;
@@ -96,6 +101,8 @@ contract AutofarmERC4626 is ERC4626 {
     uint256 amount
   ) public override returns (bool) {
     //Accrue flywheel rewards for sender and receiver
+    ERC20 AUTO = ERC20(autofarm.AUTO());
+    AUTO.approve(address(flywheel.flywheelRewards()), AUTO.balanceOf(address(this)));
     flywheel.accrue(ERC20(address(this)), from, to);
 
     uint256 allowed = allowance[from][msg.sender]; // Saves gas for limited approvals.

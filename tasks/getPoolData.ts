@@ -78,7 +78,7 @@ task("get-position-ratio", "Get unhealthy po data")
     }
 
     fusePoolData = taskArgs.name
-      ? await poolModule.getPoolByName(taskArgs.name, sdk, poolUser)
+      ? await poolModule.getPoolByName(taskArgs.name, sdk, poolUser, taskArgs.cgId)
       : await sdk.fetchFusePoolData(taskArgs.poolId.toString(), poolUser, taskArgs.cgId);
 
     const maxBorrow = fusePoolData.assets
