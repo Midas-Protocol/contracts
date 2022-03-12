@@ -108,7 +108,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   const fusePoolDirectory = await ethers.getContract("FusePoolDirectory", deployer);
   owner = await fusePoolDirectory.owner();
   if (owner === ethers.constants.AddressZero) {
-    tx = await fusePoolDirectory.initialize(true, [deployer, alice, bob]);
+    tx = await fusePoolDirectory.initialize(false, []);
     await tx.wait();
     console.log("FusePoolDirectory initialized", tx.hash);
   } else {
