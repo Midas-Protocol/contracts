@@ -214,12 +214,22 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
 
   ////
   //// ORACLES
+  dep = await deployments.deterministic("FixedNativePriceOracle", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [],
+    log: true,
+  });
+  const fixedNativePO = await dep.deploy();
+  console.log("FixedNativePriceOracle: ", fixedNativePO.address);
+
   dep = await deployments.deterministic("MasterPriceOracle", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
   });
+
   const masterPO = await dep.deploy();
   await ethers.provider.waitForTransaction(masterPO.transactionHash);
   console.log("MasterPriceOracle: ", masterPO.address);
@@ -230,8 +240,8 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   // intialize with no assets
   if (admin === ethers.constants.AddressZero) {
     let tx = await masterPriceOracle.initialize(
-      [],
-      [],
+      [constants.AddressZero],
+      [fixedNativePO.address],
       constants.AddressZero,
       deployer,
       true,
@@ -240,6 +250,8 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     await tx.wait();
     console.log("MasterPriceOracle initialized", tx.hash);
   } else {
+    tx = await masterPriceOracle.add([constants.AddressZero], [fixedNativePO.address]);
+    await tx.wait();
     console.log("MasterPriceOracle already initialized");
   }
 

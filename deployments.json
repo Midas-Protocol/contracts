@@ -5501,6 +5501,49 @@
             }
           ]
         },
+        "FixedNativePriceOracle": {
+          "address": "0xA6D642169291b7668B8c44AeF6EB85c4E2F5E78c",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "contract ICToken",
+                  "name": "cToken",
+                  "type": "address"
+                }
+              ],
+              "name": "getUnderlyingPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "underlying",
+                  "type": "address"
+                }
+              ],
+              "name": "price",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            }
+          ]
+        },
         "FuseFeeDistributor": {
           "address": "0x53955c36404bE298b709d5cA6dfDC4C53ee6A853",
           "abi": [
@@ -20573,6 +20616,49 @@
             }
           ]
         },
+        "FixedNativePriceOracle": {
+          "address": "0xA6D642169291b7668B8c44AeF6EB85c4E2F5E78c",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "contract ICToken",
+                  "name": "cToken",
+                  "type": "address"
+                }
+              ],
+              "name": "getUnderlyingPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "underlying",
+                  "type": "address"
+                }
+              ],
+              "name": "price",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            }
+          ]
+        },
         "FuseFeeDistributor": {
           "address": "0xf05DFB925280127614FfcFE765f9a6BB0BFfE5E5",
           "abi": [
@@ -35149,6 +35235,49 @@
               "name": "upgradeAndCall",
               "outputs": [],
               "stateMutability": "payable",
+              "type": "function"
+            }
+          ]
+        },
+        "FixedNativePriceOracle": {
+          "address": "0xA6D642169291b7668B8c44AeF6EB85c4E2F5E78c",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "contract ICToken",
+                  "name": "cToken",
+                  "type": "address"
+                }
+              ],
+              "name": "getUnderlyingPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "underlying",
+                  "type": "address"
+                }
+              ],
+              "name": "price",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
               "type": "function"
             }
           ]

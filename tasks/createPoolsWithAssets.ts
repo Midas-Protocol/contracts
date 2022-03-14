@@ -44,7 +44,6 @@ task("pools:create", "Create pool if does not exist")
 
     const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId);
     if (!taskArgs.priceOracle) {
-      await hre.run("oracle:set-price", { token: "ETH", price: "1" });
       await hre.run("oracle:set-price", { token: "TOUCH", price: "0.1" });
       await hre.run("oracle:set-price", { token: "TRIBE", price: "0.01" });
       taskArgs.priceOracle = (

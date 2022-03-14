@@ -29,10 +29,6 @@ contract FixedNativePriceOracle is IPriceOracle, BasePriceOracle {
    * @return Price in native token of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
   function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
-    // Get underlying token address
-    address underlying = ICErc20(address(cToken)).underlying();
-
-    // Format and return price
-    return uint256(1e36) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
+    return 1e18;
   }
 }
