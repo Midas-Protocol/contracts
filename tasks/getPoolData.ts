@@ -90,3 +90,11 @@ task("get-position-ratio", "Get unhealthy po data")
     console.log(`Ratio of total borrow / max borrow: ${ratio} %`);
     return ratio;
   });
+
+task("get-public-pools", "Get public pools").setAction(async ({}, { ethers, getNamedAccounts }) => {
+  const { deployer } = await getNamedAccounts();
+
+  const fpd = await ethers.getContract("FusePoolLens", deployer);
+  const pools = await fpd.callStatic.getPublicPoolsWithData();
+  console.log("pools: ", pools);
+});
