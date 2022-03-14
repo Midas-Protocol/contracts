@@ -1,4 +1,4 @@
-import { ethers, run, getChainId } from "hardhat";
+import { ethers, getChainId, run } from "hardhat";
 import { assets as bscAssets } from "../../chainDeploy/mainnets/bsc";
 import { constants, providers, utils } from "ethers";
 import {
@@ -25,7 +25,6 @@ export const setUpPriceOraclePrices = async () => {
 };
 
 const setupLocalOraclePrices = async () => {
-  await run("oracle:set-price", { token: "ETH", price: "1" });
   await run("oracle:set-price", { token: "TOUCH", price: "0.1" });
   await run("oracle:set-price", { token: "TRIBE", price: "0.2" });
 };
