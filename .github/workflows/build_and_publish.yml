@@ -89,3 +89,6 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           tag: ${{env.GITHUB_REF_NAME == 'main' && 'latest' || 'beta'}}
           access: "public"
+      - run: npm install
+      - run: npm run build:hardhat
+      - run: npm run build:sdk
