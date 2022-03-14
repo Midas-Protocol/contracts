@@ -58,6 +58,7 @@ import {
 import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig, SupportedChains } from "../network";
 import { filterOnlyObjectProperties, filterPoolName } from "./utils";
 import { withRewardDistributer } from "../modules/RewardDistributer";
+import { withFusePoolLens } from "../modules/FusePoolLens";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FusePoolLens } from "../../typechain/FusePoolLens";
 import { FusePoolLensSecondary } from "../../typechain/FusePoolLensSecondary";
@@ -1002,10 +1003,7 @@ export class FuseBase {
   ): Promise<FusePoolData | undefined> => {
     if (!poolId) return undefined;
 
-    const {
-      comptroller,
-      name: _unfiliteredName,
-    } = await this.contracts.FusePoolDirectory.pools(Number(poolId));
+    const { comptroller, name: _unfiliteredName } = await this.contracts.FusePoolDirectory.pools(Number(poolId));
 
     const name = filterPoolName(_unfiliteredName);
 
@@ -1092,5 +1090,5 @@ export class FuseBase {
   };
 }
 
-const FuseBaseWithModules = withRewardDistributer(FuseBase);
+const FuseBaseWithModules = withFusePoolLens(withRewardDistributer(FuseBase));
 export default class Fuse extends FuseBaseWithModules {}
