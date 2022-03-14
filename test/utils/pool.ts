@@ -157,7 +157,7 @@ export const getPoolByName = async (
   for (let j = 0; j < publicPools.length; j++) {
     if (publicPools[j].name === name) {
       const poolIndex = await getPoolIndex(publicPools[j].comptroller, sdk);
-      return sdk.fetchFusePoolData(poolIndex.toString(), address, cgId);
+      return await sdk.fetchFusePoolData(poolIndex.toString(), address, cgId);
     }
   }
   return null;
