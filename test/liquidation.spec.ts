@@ -41,7 +41,10 @@ describe("#safeLiquidate", () => {
   const poolName = "liquidation - no fl";
 
   beforeEach(async () => {
-    await deployments.fixture(); // ensure you start from a fresh deployments
+    const { chainId } = await ethers.provider.getNetwork();
+    if (chainId === 1337) {
+      await deployments.fixture();
+    }
     ({
       poolAddress,
       deployedEth,

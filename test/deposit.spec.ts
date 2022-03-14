@@ -9,7 +9,10 @@ import { chainDeployConfig } from "../chainDeploy";
 
 describe("Deposit flow tests", function () {
   this.beforeEach(async () => {
-    await deployments.fixture();
+    const { chainId } = await ethers.provider.getNetwork();
+    if (chainId === 1337) {
+      await deployments.fixture();
+    }
     await setUpPriceOraclePrices();
   });
 
@@ -19,8 +22,15 @@ describe("Deposit flow tests", function () {
     beforeEach(async () => {
       this.timeout(120_000);
       const { bob, deployer } = await ethers.getNamedSigners();
+      const { chainId } = await ethers.provider.getNetwork();
+
+      const sdk = new Fuse(ethers.provider, chainId);
+
       [poolAddress] = await createPool({});
-      const assets = await getPoolAssets(poolAddress, (await ethers.getContract("FuseFeeDistributor")).address);
+      const assets = await getPoolAssets(
+        poolAddress,
+        sdk.contracts.FuseFeeDistributor.address
+      );
 
       const erc20One = assets.assets.find((a) => a.underlying !== constants.AddressZero); // find first one
       expect(erc20One.underlying).to.be.ok;
@@ -28,8 +38,16 @@ describe("Deposit flow tests", function () {
         (a) => a.underlying !== constants.AddressZero && a.underlying !== erc20One.underlying
       ); // find second one
 
-      const simpleOracle = (await ethers.getContract("SimplePriceOracle", deployer)) as SimplePriceOracle;
-      const oracle = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
+      const simpleOracle = (await ethers.getContractAt(
+        "SimplePriceOracle",
+        sdk.oracles.SimplePriceOracle.address,
+        deployer
+      )) as SimplePriceOracle;
+      const oracle = (await ethers.getContractAt(
+        "MasterPriceOracle",
+        sdk.oracles.MasterPriceOracle.address,
+        deployer
+      )) as MasterPriceOracle;
       expect(erc20Two.underlying).to.be.ok;
       const eth = assets.assets.find((a) => a.underlying === constants.AddressZero);
 

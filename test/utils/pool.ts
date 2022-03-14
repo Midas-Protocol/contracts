@@ -1,7 +1,7 @@
 // pool utilities used across downstream tests
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { providers, utils } from "ethers";
-import { ethers } from "hardhat";
+import { ethers, getChainId } from "hardhat";
 
 import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../dist/esm/src";
 import { getAssetsConf } from "./assets";
@@ -26,19 +26,19 @@ export async function createPool({
   signer = null,
 }: PoolCreationParams): Promise<[string, string, string]> {
   const { chainId } = await ethers.provider.getNetwork();
+  const sdk = new Fuse(ethers.provider, chainId);
+
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
   }
   if (!priceOracleAddress) {
-    const spo = await ethers.getContract("MasterPriceOracle", signer);
+    const spo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, signer);
     priceOracleAddress = spo.address;
   }
   if (enforceWhitelist && whitelist.length === 0) {
     throw "If enforcing whitelist, a whitelist array of addresses must be provided";
   }
-  console.log("chainId: ", chainId);
-  const sdk = new Fuse(ethers.provider, chainId);
 
   // 50% -> 0.5 * 1e18
   const bigCloseFactor = utils.parseEther((closeFactor / 100).toString());
@@ -103,9 +103,11 @@ export async function getPoolAssets(
   fuseFeeDistributor: string,
   interestRateModelAddress?: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> {
+  const chainId = await getChainId();
+  const sdk = new Fuse(ethers.provider, Number(chainId));
+
   if (!interestRateModelAddress) {
-    const jrm = await ethers.getContract("JumpRateModel");
-    interestRateModelAddress = jrm.address;
+    interestRateModelAddress = sdk.irms.JumpRateModel.address;
   }
   return await poolAssets(interestRateModelAddress, comptroller, fuseFeeDistributor);
 }
@@ -151,11 +153,11 @@ export const getPoolByName = async (
   address?: string,
   cgId?: string
 ): Promise<FusePoolData> => {
-  const [indexes, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPublicPoolsWithData();
+  const [, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPublicPoolsWithData();
   for (let j = 0; j < publicPools.length; j++) {
     if (publicPools[j].name === name) {
       const poolIndex = await getPoolIndex(publicPools[j].comptroller, sdk);
-      return sdk.fetchFusePoolData(poolIndex, address, cgId);
+      return await sdk.fetchFusePoolData(poolIndex.toString(), address, cgId);
     }
   }
   return null;

@@ -1,5 +1,5 @@
 // Ethers
-import { BigNumber, BigNumberish, constants, Contract, ContractFactory, providers, utils } from "ethers";
+import { BigNumber, constants, Contract, ContractFactory, providers, utils } from "ethers";
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import axios from "axios";
@@ -58,6 +58,11 @@ import {
 import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig, SupportedChains } from "../network";
 import { filterOnlyObjectProperties, filterPoolName } from "./utils";
 import { withRewardDistributer } from "../modules/RewardDistributer";
+import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
+import { FusePoolLens } from "../../typechain/FusePoolLens";
+import { FusePoolLensSecondary } from "../../typechain/FusePoolLensSecondary";
+import { FuseSafeLiquidator } from "../../typechain/FuseSafeLiquidator";
+import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
 
 type OracleConfig = {
   [contractName: string]: {
@@ -75,11 +80,11 @@ type ChainSpecificAddresses = {
 export class FuseBase {
   public provider: JsonRpcProvider | Web3Provider;
   public contracts: {
-    FusePoolDirectory: Contract;
-    FusePoolLens: Contract;
-    FusePoolLensSecondary: Contract;
-    FuseSafeLiquidator: Contract;
-    FuseFeeDistributor: Contract;
+    FusePoolDirectory: FusePoolDirectory;
+    FusePoolLens: FusePoolLens;
+    FusePoolLensSecondary: FusePoolLensSecondary;
+    FuseSafeLiquidator: FuseSafeLiquidator;
+    FuseFeeDistributor: FuseFeeDistributor;
   };
   static SIMPLE_DEPLOY_ORACLES = SIMPLE_DEPLOY_ORACLES;
   static COMPTROLLER_ERROR_CODES = COMPTROLLER_ERROR_CODES;
@@ -93,7 +98,7 @@ export class FuseBase {
   public oracles: OracleConfig;
   public chainSpecificAddresses: ChainSpecificAddresses;
   public artifacts: Artifacts;
-  #irms: IrmConfig;
+  public irms: IrmConfig;
 
   constructor(web3Provider: JsonRpcProvider | Web3Provider, chainId: SupportedChains) {
     this.provider = web3Provider;
@@ -114,27 +119,27 @@ export class FuseBase {
         this.chainDeployment.FusePoolDirectory.address,
         this.chainDeployment.FusePoolDirectory.abi,
         this.provider
-      ),
+      ) as FusePoolDirectory,
       FusePoolLens: new Contract(
         this.chainDeployment.FusePoolLens.address,
         this.chainDeployment.FusePoolLens.abi,
         this.provider
-      ),
+      ) as FusePoolLens,
       FusePoolLensSecondary: new Contract(
         this.chainDeployment.FusePoolLensSecondary.address,
         this.chainDeployment.FusePoolLensSecondary.abi,
         this.provider
-      ),
+      ) as FusePoolLensSecondary,
       FuseSafeLiquidator: new Contract(
         this.chainDeployment.FuseSafeLiquidator.address,
         this.chainDeployment.FuseSafeLiquidator.abi,
         this.provider
-      ),
+      ) as FuseSafeLiquidator,
       FuseFeeDistributor: new Contract(
         this.chainDeployment.FuseFeeDistributor.address,
         this.chainDeployment.FuseFeeDistributor.abi,
         this.provider
-      ),
+      ) as FuseFeeDistributor,
     };
     this.artifacts = {
       Comptroller: ComptrollerArtifact,
@@ -155,7 +160,7 @@ export class FuseBase {
       MasterPriceOracle: MasterPriceOracleArtifact,
       SimplePriceOracle: SimplePriceOracleArtifact,
     };
-    this.#irms = irmConfig(this.chainDeployment, this.artifacts);
+    this.irms = irmConfig(this.chainDeployment, this.artifacts);
     this.oracles = oracleConfig(this.chainDeployment, this.artifacts, this.availableOracles);
   }
 
@@ -371,7 +376,7 @@ export class FuseBase {
       const fuseFee = await this.contracts.FuseFeeDistributor.interestFeeRate();
       if (reserveFactorBN.add(adminFeeBN).add(BigNumber.from(fuseFee)).gt(constants.WeiPerEther))
         throw Error(
-          "Sum of reserve factor and admin fee should range from 0 to " + (1 - parseInt(fuseFee) / 1e18) + "."
+          "Sum of reserve factor and admin fee should range from 0 to " + (1 - fuseFee.div(1e18).toNumber()) + "."
         );
     }
 
@@ -981,7 +986,7 @@ export class FuseBase {
 
   identifyInterestRateModelName = (irmAddress: string): string | null => {
     let irmName: string | null = null;
-    for (const [name, irm] of Object.entries(this.#irms)) {
+    for (const [name, irm] of Object.entries(this.irms)) {
       if (irm.address === irmAddress) {
         irmName = name;
         return irmName;
@@ -1000,7 +1005,6 @@ export class FuseBase {
     const {
       comptroller,
       name: _unfiliteredName,
-      isPrivate,
     } = await this.contracts.FusePoolDirectory.pools(Number(poolId));
 
     const name = filterPoolName(_unfiliteredName);
@@ -1075,7 +1079,6 @@ export class FuseBase {
       assets: assets.sort((a, b) => (b.liquidityUSD > a.liquidityUSD ? 1 : -1)),
       comptroller,
       name,
-      isPrivate,
       totalLiquidityUSD,
       totalSuppliedUSD,
       totalBorrowedUSD,

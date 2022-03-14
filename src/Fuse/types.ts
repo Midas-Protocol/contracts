@@ -174,7 +174,6 @@ export interface FusePoolData {
   assets: USDPricedFuseAsset[];
   comptroller: string;
   name: string;
-  isPrivate: boolean;
   totalLiquidityUSD: number;
   totalSuppliedUSD: number;
   totalBorrowedUSD: number;
