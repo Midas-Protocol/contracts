@@ -57,7 +57,7 @@ import {
 } from "./config";
 import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig, SupportedChains } from "../network";
 import { filterOnlyObjectProperties, filterPoolName } from "./utils";
-import { withRewardDistributer } from "../modules/RewardDistributer";
+import { withRewardsDistributor } from "../modules/RewardsDistributor";
 import { withFusePoolLens } from "../modules/FusePoolLens";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FusePoolLens } from "../../typechain/FusePoolLens";
@@ -216,6 +216,7 @@ export class FuseBase {
         priceOracle
       );
       receipt = await tx.wait();
+      console.log({ receipt });
       console.log(`Deployment of pool ${poolName} succeeded!`);
     } catch (error: any) {
       throw Error("Deployment and registration of new Fuse pool failed: " + (error.message ? error.message : error));
@@ -1090,5 +1091,5 @@ export class FuseBase {
   };
 }
 
-const FuseBaseWithModules = withFusePoolLens(withRewardDistributer(FuseBase));
+const FuseBaseWithModules = withFusePoolLens(withRewardsDistributor(FuseBase));
 export default class Fuse extends FuseBaseWithModules {}
