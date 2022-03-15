@@ -13,7 +13,7 @@ import {
   SimplePriceOracle,
 } from "../typechain";
 import { expect } from "chai";
-import { cERC20Conf } from "../dist/esm/src";
+import { cERC20Conf } from "../src";
 
 describe("#safeLiquidate", () => {
   let eth: cERC20Conf;

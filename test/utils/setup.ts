@@ -12,7 +12,7 @@ import {
 } from "../../typechain";
 import { createPool, deployAssets, DeployedAsset, getPoolAssets } from "./pool";
 import { expect } from "chai";
-import { cERC20Conf } from "../../dist/esm/src";
+import { cERC20Conf } from "../../src";
 import { Fuse } from "../../dist/cjs/src";
 
 export const setUpPriceOraclePrices = async () => {

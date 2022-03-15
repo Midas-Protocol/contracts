@@ -3,7 +3,7 @@ import { constants, Contract, providers, utils } from "ethers";
 import { deployments, ethers } from "hardhat";
 import { createPool, setUpPriceOraclePrices } from "./utils";
 import { assetInPool, deployAssets, getPoolAssets, getPoolIndex } from "./utils/pool";
-import { Fuse, USDPricedFuseAsset } from "../dist/esm/src";
+import { Fuse, USDPricedFuseAsset } from "../src";
 import { MasterPriceOracle, SimplePriceOracle } from "../typechain";
 import { chainDeployConfig } from "../chainDeploy";
 
@@ -27,10 +27,7 @@ describe("Deposit flow tests", function () {
       const sdk = new Fuse(ethers.provider, chainId);
 
       [poolAddress] = await createPool({});
-      const assets = await getPoolAssets(
-        poolAddress,
-        sdk.contracts.FuseFeeDistributor.address
-      );
+      const assets = await getPoolAssets(poolAddress, sdk.contracts.FuseFeeDistributor.address);
 
       const erc20One = assets.assets.find((a) => a.underlying !== constants.AddressZero); // find first one
       expect(erc20One.underlying).to.be.ok;
