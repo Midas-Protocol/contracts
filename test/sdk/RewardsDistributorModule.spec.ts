@@ -2,7 +2,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { deployments, ethers } from "hardhat";
 import { ERC20 } from "../../typechain";
-import Fuse from "../Fuse";
+import Fuse from "../../src/Fuse";
 import { setUpPriceOraclePrices } from "../utils";
 import * as poolModule from "../utils/pool";
 
@@ -28,8 +28,8 @@ describe.only("RewardsDistributor", function () {
     }
     await setUpPriceOraclePrices();
 
-    let all = await poolModule.createPool({ signer: fuseDeployer, poolName: "SDK-RewardDistributor" });
-    console.log({ all });
+    [poolAddress] = await poolModule.createPool({ signer: fuseDeployer, poolName: "SDK-RewardDistributor" });
+
     await poolModule.createPool({ signer: fuseDeployer, poolName: "SDK-RewardDistributor-2" });
 
     const assets = await poolModule.getPoolAssets(poolAddress, sdk.contracts.FuseFeeDistributor.address);
@@ -45,19 +45,40 @@ describe.only("RewardsDistributor", function () {
   });
 
   it("deployRewardsDistributor", async function () {
-    console.log({ sdk, poolAddress });
-
     // Deploy
     const touchRewardsDistributor = await sdk.deployRewardsDistributor(touchToken.address, {
       from: fuseDeployer.address,
     });
 
+    // Add to Pool
+    await sdk.addRewardsDistributorToPool(touchRewardsDistributor.address, poolAddress, { from: fuseDeployer.address });
+
     // Fund
-    await sdk.fundRewardsDistributor(touchRewardsDistributor.address, 100000, {
+    const fundingAmount = ethers.utils.parseUnits("100", 18);
+    await sdk.fundRewardsDistributor(touchRewardsDistributor.address, fundingAmount, {
       from: fuseDeployer.address,
     });
 
-    // Setup Speed
-    // await sdk.set(rewardDistributor.address, 10, { from: fuseDeployer.address });
+    // Setup Supply Side Speed
+    const supplySpeed = ethers.utils.parseUnits("10", 18);
+    await sdk.updateRewardsDistributorSupplySpeed(touchRewardsDistributor.address, cTouchTokenAddress, supplySpeed, {
+      from: fuseDeployer.address,
+    });
+    expect(
+      await sdk.getRewardsDistributorSupplySpeed(touchRewardsDistributor.address, cTouchTokenAddress, {
+        from: fuseDeployer.address,
+      })
+    ).to.eq(supplySpeed);
+
+    // Setup Borrow Side Speed
+    const borrowSpeed = ethers.utils.parseUnits("1", 18);
+    await sdk.updateRewardsDistributorBorrowSpeed(touchRewardsDistributor.address, cTouchTokenAddress, borrowSpeed, {
+      from: fuseDeployer.address,
+    });
+    expect(
+      await sdk.getRewardsDistributorSupplySpeed(touchRewardsDistributor.address, cTouchTokenAddress, {
+        from: fuseDeployer.address,
+      })
+    ).to.eq(borrowSpeed);
   });
 });

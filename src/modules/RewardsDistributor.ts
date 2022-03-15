@@ -1,12 +1,12 @@
 import { BigNumberish, Contract, ContractFactory } from "ethers";
-import { ERC20, RewardsDistributorDelegate } from "../../typechain";
+import { Comptroller, ERC20, RewardsDistributorDelegate } from "../../typechain";
 import { FuseBaseConstructor } from "../Fuse/types";
 
 export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class RewardsDistributor extends Base {
-    #getRewardsDistributor(distributorAddress: string, options: { from: string }) {
+    #getRewardsDistributor(rewardsDistributorAddress: string, options: { from: string }) {
       return new Contract(
-        distributorAddress,
+        rewardsDistributorAddress,
         this.chainDeployment.RewardsDistributorDelegate.abi,
         this.provider.getSigner(options.from)
       ) as RewardsDistributorDelegate;
@@ -25,22 +25,27 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
       )) as RewardsDistributorDelegate;
     }
 
-    addRewardsDistributor(comptrollerAddress: string, distributorAddress: string, options: { from: string }) {
+    addRewardsDistributorToPool(rewardsDistributorAddress: string, poolAddress: string, options: { from: string }) {
       const comptrollerInstance = new Contract(
-        comptrollerAddress,
+        poolAddress,
         this.artifacts.Comptroller.abi,
         this.provider.getSigner(options.from)
-      );
-      return comptrollerInstance.functions._addRewardsDistributor(distributorAddress);
+      ) as Comptroller;
+      return comptrollerInstance.functions._addRewardsDistributor(rewardsDistributorAddress);
     }
 
-    claimRewards(distributorAddress: string, cTokenAddress: string, amount: BigNumberish, options: { from: string }) {
-      const rewardDistributorInstance = this.#getRewardsDistributor(distributorAddress, options);
+    claimRewardsDistributorRewards(
+      rewardsDistributorAddress: string,
+      cTokenAddress: string,
+      amount: BigNumberish,
+      options: { from: string }
+    ) {
+      const rewardDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
       throw new Error("Not implemented");
     }
 
-    async fundRewardsDistributor(distributorAddress: string, amount: BigNumberish, options: { from: string }) {
-      const rewardDistributorInstance = this.#getRewardsDistributor(distributorAddress, options);
+    async fundRewardsDistributor(rewardsDistributorAddress: string, amount: BigNumberish, options: { from: string }) {
+      const rewardDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
 
       const rewardTokenAddress = await rewardDistributorInstance.rewardToken();
 
@@ -50,39 +55,57 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
         this.provider.getSigner(options.from)
       ) as ERC20;
 
-      return tokenInstance.functions.transfer(distributorAddress, amount);
+      return tokenInstance.functions.transfer(rewardsDistributorAddress, amount);
     }
 
-    updateDistributionSpeedSuppliers(
-      distributorAddress: string,
+    getRewardsDistributorSupplySpeed(
+      rewardsDistributorAddress: string,
+      cTokenAddress: string,
+      options: { from: string }
+    ) {
+      const rewardDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
+      return rewardDistributorInstance.compSupplySpeeds(cTokenAddress);
+    }
+
+    getRewardsDistributorBorrowSpeed(
+      rewardsDistributorAddress: string,
+      cTokenAddress: string,
+      options: { from: string }
+    ) {
+      const rewardDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
+      return rewardDistributorInstance.compSupplySpeeds(cTokenAddress);
+    }
+
+    updateRewardsDistributorSupplySpeed(
+      rewardsDistributorAddress: string,
       cTokenAddress: string,
       amount: BigNumberish,
       options: { from: string }
     ) {
-      const rewardDistributorInstance = this.#getRewardsDistributor(distributorAddress, options);
+      const rewardDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
 
       return rewardDistributorInstance._setCompSupplySpeed(cTokenAddress, amount);
     }
 
-    updateDistributionSpeedBorrowers(
-      distributorAddress: string,
+    updateRewardsDistributorBorrowSpeed(
+      rewardsDistributorAddress: string,
       cTokenAddress: string,
       amount: BigNumberish,
       options: { from: string }
     ) {
-      const rewardDistributorInstance = this.#getRewardsDistributor(distributorAddress, options);
+      const rewardDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
 
       return rewardDistributorInstance._setCompBorrowSpeed(cTokenAddress, amount);
     }
 
-    updateDistributionSpeed(
-      distributorAddress: string,
+    updateRewardsDistributorSpeeds(
+      rewardsDistributorAddress: string,
       cTokenAddress: string[],
       amountSuppliers: BigNumberish[],
       amountBorrowers: BigNumberish[],
       options: { from: string }
     ) {
-      const rewardDistributorInstance = this.#getRewardsDistributor(distributorAddress, options);
+      const rewardDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
 
       return rewardDistributorInstance._setCompSpeeds(cTokenAddress, amountSuppliers, amountBorrowers);
     }
