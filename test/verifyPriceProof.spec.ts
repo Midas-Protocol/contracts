@@ -7,6 +7,7 @@ import * as OracleSdk from "@keydonix/uniswap-oracle-sdk";
 import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
 import {Proof} from "@keydonix/uniswap-oracle-sdk";
 import { BaseTrie as Trie } from 'merkle-patricia-tree'
+import exp from "constants";
 
 describe.only("Verify price proof tests", () => {
   let keydonixOracle: KeydonixUniswapTwapPriceOracle;
@@ -16,7 +17,7 @@ describe.only("Verify price proof tests", () => {
   let uniswapExchangeAddress: string;
   let token0;
   let token1;
-  
+
   beforeEach(async () => {
     const { alice, bob } = await ethers.getNamedSigners();
     console.log(`bobs address ${bob.address}`);
@@ -163,7 +164,7 @@ describe.only("Verify price proof tests", () => {
     // expect(rec.status).to.eq(1);
   });
 
-  it.only("should verify an OracleSDK generated proof", async function () {
+  it("should verify an OracleSDK generated proof", async function () {
     this.timeout(220000);
 
     let tx: providers.TransactionResponse;
@@ -209,7 +210,6 @@ describe.only("Verify price proof tests", () => {
       ${ethers.utils.hexlify(proof.reserveAndTimestampProofNodesRlp)}
     `);
 
-
     let rlpDecoded = ethers.utils.RLP.decode(proof.block);
     if (rlpDecoded.length == 13) {
       // proof is missing empty fields for mixHash and nonce
@@ -227,21 +227,56 @@ describe.only("Verify price proof tests", () => {
         reserveAndTimestampProofNodesRlp: proof.reserveAndTimestampProofNodesRlp
       }
     }
-    console.log(`proof block: 
-      ${ethers.utils.hexlify(proof.block)}
+    console.log(`proof account nodes:
+      ${ethers.utils.hexlify(proof.accountProofNodesRlp)}
     `);
 
     // path = "0xa04c5251912737031e360e1e2a529ce6e3a350c7d5778bf876fda2db303aa3ff"
     let encodedPath = ethers.utils.solidityKeccak256(["address"], ["0xaF9399F70d896dA0D56A4B2CbF95F4E90a6B99e8"]);
+    let encodedPath1 = ethers.utils.solidityPack(["address"], ["0xaF9399F70d896dA0D56A4B2CbF95F4E90a6B99e8"]);
+    let encodedPath2 = ethers.utils.soliditySha256(["address"], ["0xaF9399F70d896dA0D56A4B2CbF95F4E90a6B99e8"]);
 
-    let block: OracleSdk.Block = await getBlockByNumber(latestMinusSome)
+    let accountProofNodes: any[] = ethers.utils.RLP.decode(proof.accountProofNodesRlp);
+    console.log(`
+    accountProofNodes ${accountProofNodes}
+    `);
+    let firstNode = ethers.utils.RLP.encode(accountProofNodes[0]);
+    console.log(`
+    firstNode ${firstNode}
+    `);
+
+    let shouldBeStateRoot = ethers.utils.keccak256(firstNode);
+    console.log(`
+    shouldBeStateRoot ${shouldBeStateRoot}
+    `);
+
+    let block: OracleSdk.Block = await getBlockByNumber(latestMinusSome);
     // let hex = `0x${block.stateRoot.toString(16)}`;
-    let hex = ethers.utils.hexlify(block.stateRoot);
-    console.log(`roots are 32 bytes ${hex}`)
+    let stateRootHex = ethers.utils.hexlify(block.stateRoot);
+    console.log(`
+    encodedPath ${encodedPath}
+    encodedPath1 ${encodedPath1}
+    encodedPath2 ${encodedPath2}
+    `);
+
+
+    // TODO figure out why the BSC API returns proof/state root in a wrong order (not adhering to the path)
+    walkTrie(stateRootHex, encodedPath, ethers.utils.hexlify(proof.accountProofNodesRlp));
+
+    // let proof1 = accountProofNodes.map(node => Buffer.from(node));
+    // let trie = await Trie.fromProof(proof1);
+    // await trie
+    //   .walkTrie(Buffer.from(ethers.utils.arrayify(hex)),
+    //     async (nodeRef, node, key, walkController) => {
+    //       let path = await trie.findPath(nodeRef);
+    //       console.log(path.stack.map(tn => tn.hash).join(" => "));
+    //     }
+    //   );
+
     let value = await Trie.verifyProof(
-      Buffer.from(ethers.utils.arrayify(hex)),
+      Buffer.from(ethers.utils.arrayify(stateRootHex)),
       Buffer.from(ethers.utils.arrayify(encodedPath)),
-      [Buffer.from(ethers.utils.arrayify(proof.accountProofNodesRlp))]
+      accountProofNodes
     );
     console.log(`verified value ${value}`);
 
@@ -273,4 +308,72 @@ describe.only("Verify price proof tests", () => {
     let pricewtoken = await keydonixOracle.callStatic.price(wtoken);
     console.log(`got price ${pricewtoken} for ${wtoken}`);
   });
+
+
+  function walkTrie(expectedRoot: string, path: string, proofNodesRlp: string) {
+    let decode = ethers.utils.RLP.decode;
+    let encode = ethers.utils.RLP.encode;
+    let keccak256 = ethers.utils.keccak256;
+
+
+    let nibblePath: Uint8Array = getNibbleArray(path);
+    console.log(` path ${path} to nibbles ${nibblePath}`);
+    let parentNodes = decode(proofNodesRlp);
+    let nodeKey = expectedRoot;
+    let pathPtr = 0;
+
+    for(let i=0; i < parentNodes.length; i++) {
+      let currentNode = encode(parentNodes[i]);
+      let match = keccak256(currentNode) == nodeKey;
+      console.log(`match ${match}`);
+
+      let currentNodeList: any[] = parentNodes[i];
+      if (currentNodeList.length == 17) {
+        if(pathPtr == nibblePath.length) {
+           return decode(currentNodeList[16]);
+        }
+        let nextPathNibble = nibblePath.at(pathPtr);
+        nodeKey = currentNodeList[nextPathNibble];
+
+        for(let j=0; j<currentNodeList.length; j++){
+          if (i < parentNodes.length - 1 &&
+            currentNodeList[j] == keccak256(encode(parentNodes[i+1]))) {
+            console.log(`match for ${i} is ${j} but nextPathNibble is ${nextPathNibble}`);
+          }
+        }
+        pathPtr++;
+
+        // if (i < parentNodes.length - 1) {
+          // let anyMatch = false;
+          //   currentNodeList.some(node => {
+          //   console.log(`${keccak256(encode(parentNodes[i + 1]))} == ${node}`);
+          //   return keccak256(encode(parentNodes[i + 1])) == node;
+          // })
+          // console.log(`anyMatch ${anyMatch}`);
+        // }
+
+      } else if (currentNodeList.length == 2) {
+        if(pathPtr == nibblePath.length) {
+          return decode(currentNodeList[1]);
+        }
+        nodeKey = currentNodeList[1];
+      }
+    }
+
+    console.log(`return`);
+  }
+
+  function getNibbleArray(path: string): Uint8Array {
+    if (path.startsWith('0x')) {
+      path = path.slice(2);
+    }
+
+    let buff = [path.length];
+    for(let i = 0; i < path.length; i++){
+      let nibbleStr = `0x${path.charAt(i)}`;
+      buff[i] = parseInt(nibbleStr, 16);
+    }
+
+    return new Uint8Array(buff);
+  }
 });
