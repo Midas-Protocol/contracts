@@ -206,6 +206,7 @@ export class FuseBase {
     let receipt: providers.TransactionReceipt;
     try {
       const contract = this.contracts.FusePoolDirectory.connect(this.provider.getSigner(options.from));
+      // TODO deployPool also returns the poolId which comes in handy! We should get that as well.
       const tx = await contract.deployPool(
         poolName,
         implementationAddress,
@@ -216,7 +217,6 @@ export class FuseBase {
         priceOracle
       );
       receipt = await tx.wait();
-      console.log({ receipt });
       console.log(`Deployment of pool ${poolName} succeeded!`);
     } catch (error: any) {
       throw Error("Deployment and registration of new Fuse pool failed: " + (error.message ? error.message : error));

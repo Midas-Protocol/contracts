@@ -109,5 +109,24 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
 
       return rewardDistributorInstance._setCompSpeeds(cTokenAddress, amountSuppliers, amountBorrowers);
     }
+
+    async getRewardsDistributorAccruedAmount(
+      rewardsDistributorAddress: string,
+      account: string,
+      options: { from: string; blockNumber?: number }
+    ) {
+      const rewardDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
+      let claimableRewards = await rewardDistributorInstance.compAccrued(account);
+      const lastUpdated = await rewardDistributorInstance.lastContributorBlock(account);
+      if (options.blockNumber && options.blockNumber > lastUpdated.toNumber()) {
+        const diff = options.blockNumber - lastUpdated.toNumber();
+        console.log({ diff });
+        const rewardsPerBlock = await rewardDistributorInstance.compContributorSpeeds(account);
+        console.log({ rewardsPerBlock });
+        claimableRewards = claimableRewards.add(rewardsPerBlock.mul(diff));
+      }
+      console.log({ claimableRewards });
+      return claimableRewards;
+    }
   };
 }

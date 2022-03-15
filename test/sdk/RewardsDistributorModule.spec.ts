@@ -4,21 +4,25 @@ import { deployments, ethers } from "hardhat";
 import { ERC20 } from "../../typechain";
 import Fuse from "../../src/Fuse";
 import { setUpPriceOraclePrices } from "../utils";
-import * as poolModule from "../utils/pool";
+import * as poolHelpers from "../utils/pool";
+import * as collateralHelpers from "../utils/collateral";
+import * as timeHelpers from "../utils/time";
 
 describe.only("RewardsDistributor", function () {
   let poolAddress: string;
   let sdk: Fuse;
-  let fuseUser: SignerWithAddress;
+  let fuseUserA: SignerWithAddress;
+  let fuseUserB: SignerWithAddress;
   let fuseDeployer: SignerWithAddress;
   let touchToken: ERC20;
-  let cTouchTokenAddress: string;
+  let cTouchToken: ERC20;
 
   this.beforeEach(async () => {
     const { chainId } = await ethers.provider.getNetwork();
 
-    const { deployer, alice } = await ethers.getNamedSigners();
-    fuseUser = alice;
+    const { deployer, alice, bob } = await ethers.getNamedSigners();
+    fuseUserA = alice;
+    fuseUserB = bob;
     fuseDeployer = deployer;
 
     sdk = new Fuse(ethers.provider, chainId);
@@ -28,20 +32,21 @@ describe.only("RewardsDistributor", function () {
     }
     await setUpPriceOraclePrices();
 
-    [poolAddress] = await poolModule.createPool({ signer: fuseDeployer, poolName: "SDK-RewardDistributor" });
+    [poolAddress] = await poolHelpers.createPool({ signer: fuseDeployer, poolName: "SDK-RewardDistributor" });
 
-    await poolModule.createPool({ signer: fuseDeployer, poolName: "SDK-RewardDistributor-2" });
-
-    const assets = await poolModule.getPoolAssets(poolAddress, sdk.contracts.FuseFeeDistributor.address);
-    const deployedAssets = await poolModule.deployAssets(assets.assets, deployer);
+    const assets = await poolHelpers.getPoolAssets(poolAddress, sdk.contracts.FuseFeeDistributor.address);
+    const deployedAssets = await poolHelpers.deployAssets(assets.assets, deployer);
 
     // Make sure we have some TOUCH tokens
     touchToken = await ethers.getContract("TOUCHToken", deployer);
     expect(touchToken.balanceOf(fuseDeployer.address)).to.not.eq(0);
+    expect(touchToken.balanceOf(fuseUserA.address)).to.not.eq(0);
+    expect(touchToken.balanceOf(fuseUserB.address)).to.not.eq(0);
 
     // sdk.getPoolAssets();
-    cTouchTokenAddress = deployedAssets.find((a) => a.underlying === touchToken.address).assetAddress;
+    let cTouchTokenAddress = deployedAssets.find((a) => a.underlying === touchToken.address).assetAddress;
     expect(cTouchTokenAddress).to.be.ok;
+    cTouchToken = new ethers.Contract(cTouchTokenAddress, sdk.artifacts.ERC20.abi, deployer) as ERC20;
   });
 
   it("deployRewardsDistributor", async function () {
@@ -60,25 +65,40 @@ describe.only("RewardsDistributor", function () {
     });
 
     // Setup Supply Side Speed
-    const supplySpeed = ethers.utils.parseUnits("10", 18);
-    await sdk.updateRewardsDistributorSupplySpeed(touchRewardsDistributor.address, cTouchTokenAddress, supplySpeed, {
+    const supplySpeed = ethers.utils.parseUnits("1", 0);
+    await sdk.updateRewardsDistributorSupplySpeed(touchRewardsDistributor.address, cTouchToken.address, supplySpeed, {
       from: fuseDeployer.address,
     });
-    expect(
-      await sdk.getRewardsDistributorSupplySpeed(touchRewardsDistributor.address, cTouchTokenAddress, {
-        from: fuseDeployer.address,
-      })
-    ).to.eq(supplySpeed);
 
     // Setup Borrow Side Speed
-    const borrowSpeed = ethers.utils.parseUnits("1", 18);
-    await sdk.updateRewardsDistributorBorrowSpeed(touchRewardsDistributor.address, cTouchTokenAddress, borrowSpeed, {
+    const borrowSpeed = ethers.utils.parseUnits("1", 0);
+    await sdk.updateRewardsDistributorBorrowSpeed(touchRewardsDistributor.address, cTouchToken.address, borrowSpeed, {
       from: fuseDeployer.address,
     });
+
+    // Enter Market to start earning rewards
+    await collateralHelpers.addCollateral(poolAddress, fuseUserA, "TOUCH", "100", true);
+    let blockEarningFrom = await ethers.provider.getBlockNumber();
+
+    // Get Accrued Reward Tokens for Supplier
     expect(
-      await sdk.getRewardsDistributorSupplySpeed(touchRewardsDistributor.address, cTouchTokenAddress, {
-        from: fuseDeployer.address,
+      await sdk.getRewardsDistributorAccruedAmount(touchRewardsDistributor.address, fuseUserA.address, {
+        from: fuseUserA.address,
       })
-    ).to.eq(borrowSpeed);
+    ).to.eq(0);
+
+    await collateralHelpers.addCollateral(poolAddress, fuseUserB, "TOUCH", "1", true);
+    await collateralHelpers.addCollateral(poolAddress, fuseUserA, "TOUCH", "1", true);
+
+    const currentBlock = await ethers.provider.getBlockNumber();
+    const blocksPassed = currentBlock - blockEarningFrom;
+    const expectedReward = supplySpeed.mul(blocksPassed);
+    console.log({ expectedReward });
+    expect(
+      await sdk.getRewardsDistributorAccruedAmount(touchRewardsDistributor.address, fuseUserA.address, {
+        from: fuseUserA.address,
+        blockNumber: currentBlock,
+      })
+    ).to.eq(expectedReward);
   });
 });

@@ -46,7 +46,7 @@ contract RewardsDistributorDelegateStorageV1 is RewardsDistributorDelegatorStora
   /// @notice The COMP market borrow state for each market
   mapping(address => CompMarketState) public compBorrowState;
 
-  /// @notice The COMP borrow index for each market for each supplier as of the last time they accrued COMP
+  /// @notice The COMP supply index for each market for each supplier as of the last time they accrued COMP
   mapping(address => mapping(address => uint256)) public compSupplierIndex;
 
   /// @notice The COMP borrow index for each market for each borrower as of the last time they accrued COMP
