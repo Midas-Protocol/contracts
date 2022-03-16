@@ -1,5 +1,7 @@
 import { BigNumberish, Contract, ContractFactory } from "ethers";
-import { Comptroller, ERC20, RewardsDistributorDelegate } from "../../typechain";
+import { Comptroller } from "../../typechain/Comptroller";
+import { ERC20 } from "../../typechain/ERC20";
+import { RewardsDistributorDelegate } from "../../typechain/RewardsDistributorDelegate";
 import { FuseBaseConstructor } from "../Fuse/types";
 
 export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: TBase) {
