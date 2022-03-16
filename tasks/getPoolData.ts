@@ -6,7 +6,8 @@ export default task("get-pool-data", "Get pools data")
   .addOptionalParam("address", "Address of the pool", undefined, types.string)
   .setAction(async (taskArgs, hre) => {
     // @ts-ignore
-    const sdkModule = await import("../dist/esm/src");
+    const sdkModule = await import("../src");
+    // @ts-ignore
     const poolModule = await import("../test/utils/pool");
 
     const chainId = parseInt(await hre.getChainId());
@@ -52,7 +53,8 @@ task("get-position-ratio", "Get unhealthy po data")
   .addOptionalParam("cgId", "Coingecko id for the native asset", "ethereum", types.string)
   .setAction(async (taskArgs, hre) => {
     // @ts-ignore
-    const sdkModule = await import("../dist/esm/src");
+    const sdkModule = await import("../src");
+    // @ts-ignore
     const poolModule = await import("../test/utils/pool");
 
     const chainId = parseInt(await hre.getChainId());
