@@ -52,8 +52,9 @@ const UNISWAP_V2_PROTOCOLS = {
   let erc20OneUnderlying: EIP20Interface;
   let erc20TwoUnderlying: EIP20Interface;
 
-  const poolName = "liquidation - fl";
+  const poolName = "liquidation - fl - " + Math.random().toString();
   const coingeckoId = "binancecoin";
+  const uniswapV2RouterForCollateral = UNISWAP_V2_PROTOCOLS.PancakeSwap.router;
 
   beforeEach(async () => {
     const { chainId } = await ethers.provider.getNetwork();
@@ -96,23 +97,23 @@ const UNISWAP_V2_PROTOCOLS = {
     const borrowAmount = "5";
     await borrowCollateral(poolAddress, alice.address, eth.symbol, borrowAmount, coingeckoId);
 
-    // Set price of tokenOne collateral to 1/10th of what it was
-    tx = await simpleOracle.setDirectPrice(erc20One.underlying, utils.parseEther("1"));
+    // Set price of tokenOne collateral to 6/10th of what it was
+    tx = await simpleOracle.setDirectPrice(erc20One.underlying, utils.parseEther("6"));
     await tx.wait();
 
-    const repayAmount = utils.parseEther(borrowAmount).div(10);
+    // account for gas fees
+    const repayAmount = utils.parseEther(borrowAmount).mul(50).div(100);
     // Defaults
     // const exchangeTo = tokenCollateral;
     const exchangeTo = constants.AddressZero;
 
-    const uniswapV2RouterForCollateral = UNISWAP_V2_PROTOCOLS.PancakeSwap.router;
     // Check balance before liquidation
 
     const ratioBefore = await getPositionRatio({
       name: poolName,
-      userAddress: alice.address,
+      userAddress: undefined,
       cgId: coingeckoId,
-      namedUser: undefined,
+      namedUser: "alice",
     });
     console.log(`Ratio Before: ${ratioBefore}`);
 
@@ -148,64 +149,72 @@ const UNISWAP_V2_PROTOCOLS = {
 
     expect(liquidatorBalanceAfterLiquidation).gt(liquidatorBalanceBeforeLiquidation);
 
-    // this isn't quite right -- need to check how the prices are gathered
     const ratioAfter = await getPositionRatio({
       name: poolName,
-      userAddress: alice.address,
+      userAddress: undefined,
       cgId: coingeckoId,
-      namedUser: undefined,
+      namedUser: "alice",
     });
     console.log(`Ratio After: ${ratioAfter}`);
-    // expect(ratioBefore).to.be.gte(ratioAfter);
+    expect(ratioBefore).to.be.gte(ratioAfter);
+    // Set price of tokenOne collateral back to what it was
+    tx = await simpleOracle.setDirectPrice(erc20One.underlying, utils.parseEther("10"));
+    await tx.wait();
   });
 
   // Safe liquidate token borrows
-  // it("should liquidate a token borrow for native collateral", async function () {
-  //   const { alice, bob, rando } = await ethers.getNamedSigners();
-  //   whale = await whaleSigner();
-  //   if (!whale) {
-  //     whale = alice;
-  //   }
-  //
-  //   // Supply native collateral
-  //   await addCollateral(poolAddress, bob, eth.symbol, "0.1", true);
-  //
-  //   // Supply tokenOne from other account
-  //   await addCollateral(poolAddress, whale, erc20One.symbol, "0.01", true);
-  //
-  //   // Borrow tokenOne using native as collateral
-  //   const borrowAmount = "0.005";
-  //   await borrowCollateral(poolAddress, bob.address, erc20One.symbol, borrowAmount);
-  //
-  //   const originalPrice = await oracle.getUnderlyingPrice(deployedErc20One.assetAddress);
-  //
-  //   // Set price of borrowed token to 10x of what it was
-  //   tx = await simpleOracle.setDirectPrice(deployedErc20One.underlying, BigNumber.from(originalPrice).mul(10));
-  //   await tx.wait();
-  //
-  //   const balBefore = await ethCToken.balanceOf(rando.address);
-  //   const repayAmount = utils.parseEther(borrowAmount).div(15);
-  //
-  //   tx = await erc20OneUnderlying.connect(whale).transfer(rando.address, repayAmount);
-  //   tx = await erc20OneUnderlying.connect(rando).approve(liquidator.address, constants.MaxUint256);
-  //   await tx.wait();
-  //
-  //   tx = await liquidator["safeLiquidate(address,uint256,address,address,uint256,address,address,address[],bytes[])"](
-  //     bob.address,
-  //     repayAmount,
-  //     deployedErc20One.assetAddress,
-  //     deployedEth.assetAddress,
-  //     0,
-  //     deployedEth.assetAddress,
-  //     constants.AddressZero,
-  //     [],
-  //     []
-  //   );
-  //   await tx.wait();
-  //
-  //   const balAfter = await ethCToken.balanceOf(rando.address);
-  //   expect(balAfter).to.be.gt(balBefore);
-  // });
+  it.only("should liquidate a token borrow for native collateral", async function () {
+    const { alice, bob, rando } = await ethers.getNamedSigners();
+
+    await tradeNativeForAsset({ account: "alice", token: erc20One.underlying, amount: "50" });
+    // Supply native collateral
+    await addCollateral(poolAddress, bob, eth.symbol, "10", true);
+
+    // Supply tokenOne from other account
+    await addCollateral(poolAddress, alice, erc20One.symbol, "0.1", true);
+
+    // Borrow tokenOne using native as collateral
+    const borrowAmount = "0.05";
+    await borrowCollateral(poolAddress, bob.address, erc20One.symbol, borrowAmount);
+
+    const originalPrice = await simpleOracle.getUnderlyingPrice(deployedErc20One.assetAddress);
+
+    // Set price of borrowed token to 10x of what it was
+    tx = await simpleOracle.setDirectPrice(deployedErc20One.underlying, BigNumber.from(originalPrice).mul(10));
+    await tx.wait();
+
+    const balBefore = await ethCToken.balanceOf(rando.address);
+    const repayAmount = utils.parseEther(borrowAmount).div(10);
+
+    await tx.wait();
+
+    const assetContract = new Contract(deployedEth.assetAddress, ERC20Abi, alice);
+    tx = await assetContract.approve(alice.address, BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One));
+    await tx.wait();
+
+    const assetOneContract = new Contract(deployedErc20One.assetAddress, ERC20Abi, alice);
+    tx = await assetOneContract.approve(alice.address, BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One));
+    await tx.wait();
+
+    // Liquidate borrow
+    tx = await liquidator["safeLiquidateToTokensWithFlashLoan"](
+      bob.address,
+      repayAmount,
+      deployedErc20One.assetAddress,
+      deployedEth.assetAddress,
+      0,
+      constants.AddressZero,
+      uniswapV2RouterForCollateral,
+      uniswapV2RouterForCollateral,
+      [],
+      [],
+      0
+    );
+    await tx.wait();
+
+    const balAfter = await ethCToken.balanceOf(rando.address);
+    expect(balAfter).to.be.gt(balBefore);
+  });
   //
   // it("should liquidate a token borrow for token collateral", async function () {
   //   const { alice, bob, rando } = await ethers.getNamedSigners();
