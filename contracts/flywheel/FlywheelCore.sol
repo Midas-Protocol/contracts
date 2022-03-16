@@ -77,6 +77,7 @@ contract FlywheelCore is Auth {
 
   /// @notice initialize a new market
   function addMarketForRewards(ERC20 market) external requiresAuth {
+    require(marketState[market].index == 0, "market");
     marketState[market] = RewardsState({ index: ONE, lastUpdatedTimestamp: uint32(block.timestamp) });
 
     emit AddMarket(address(market));
@@ -122,7 +123,7 @@ contract FlywheelCore is Auth {
     if (accrued != 0) {
       rewardsAccrued[owner] = 0;
 
-      rewardToken.safeTransfer(owner, accrued);
+      rewardToken.safeTransferFrom(address(flywheelRewards), owner, accrued);
 
       emit ClaimRewards(owner, accrued);
     }

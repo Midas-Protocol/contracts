@@ -83,22 +83,6 @@ contract AutofarmERC4626Test is DSTest {
     autofarmERC4626.deposit(depositAmount, address(this));
   }
 
-  function testTransfer() public {
-    deposit();
-    autofarmERC4626.transfer(tester, depositAmount);
-    assertEq(autofarmERC4626.balanceOf(address(this)), 0);
-    assertEq(autofarmERC4626.balanceOf(tester), depositAmount);
-  }
-
-  function testTransferFrom() public {
-    deposit();
-    autofarmERC4626.approve(tester, depositAmount);
-    vm.startPrank(tester);
-    autofarmERC4626.transferFrom(address(this), tester, depositAmount);
-    assertEq(autofarmERC4626.balanceOf(address(this)), 0);
-    assertEq(autofarmERC4626.balanceOf(tester), depositAmount);
-  }
-
   function testDeposit() public {
     deposit();
     //Test that the actual transfers worked
@@ -142,7 +126,7 @@ contract AutofarmERC4626Test is DSTest {
     assertEq(autoToken.balanceOf(address(flywheelRewards)), 0);
 
     vm.roll(2);
-    deposit();
+    flywheel.accrue(ERC20(autofarmERC4626), address(this));
     assertEq(autoToken.balanceOf(address(mockAutofarm)), 0);
     assertEq(autoToken.balanceOf(address(autofarmERC4626)), 0);
     assertEq(autoToken.balanceOf(address(flywheel)), 8e15);
