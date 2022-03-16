@@ -116,23 +116,18 @@ task("pools:create", "Create pool if does not exist")
 
 task("pools:borrow", "Borrow collateral")
   .addParam("account", "Account from which to borrow", "deployer", types.string)
-  .addParam("amount", "Amount to borrow", 0, types.int)
+  .addParam("amount", "Amount to borrow", "1", types.string)
   .addParam("symbol", "Symbol of token to be borrowed", "ETH")
   .addParam("poolAddress", "Address of the poll")
   .setAction(async (taskArgs, hre) => {
     const collateralModule = await import("../test/utils/collateral");
     const account = await hre.ethers.getNamedSigner(taskArgs.account);
-    await collateralModule.borrowCollateral(
-      taskArgs.poolAddress,
-      account.address,
-      taskArgs.symbol,
-      taskArgs.amount.toString()
-    );
+    await collateralModule.borrowCollateral(taskArgs.poolAddress, account.address, taskArgs.symbol, taskArgs.amount);
   });
 
 task("pools:deposit", "Deposit collateral")
   .addParam("account", "Account from which to borrow", "deployer", types.string)
-  .addParam("amount", "Amount to deposit", 0, types.int)
+  .addParam("amount", "Amount to deposit", "0", types.string)
   .addParam("symbol", "Symbol of token to be deposited", "ETH")
   .addParam("poolAddress", "Address of the poll")
   .addParam("enableCollateral", "Enable the asset as collateral", false, types.boolean)
@@ -143,7 +138,7 @@ task("pools:deposit", "Deposit collateral")
       taskArgs.poolAddress,
       account,
       taskArgs.symbol,
-      taskArgs.amount.toString(),
+      taskArgs.amount,
       taskArgs.enableCollateral
     );
   });
