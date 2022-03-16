@@ -6,8 +6,9 @@ import { ERC20 } from "../../typechain";
 import { setUpPriceOraclePrices } from "../utils";
 import * as collateralHelpers from "../utils/collateral";
 import * as poolHelpers from "../utils/pool";
+import { advanceBlocks } from "../utils/time";
 
-describe("RewardsDistributor", function () {
+describe("RewardsDistributorModule", function () {
   let poolAAddress: string;
   let poolBAddress: string;
   let sdk: Fuse;
@@ -65,13 +66,9 @@ describe("RewardsDistributor", function () {
     cTribeToken = new ethers.Contract(cTribeTokenAddress, sdk.artifacts.ERC20.abi, deployer) as ERC20;
   });
 
-  it("Rewarding TOUCH token", async function () {
+  it("1 Pool, 1 Reward Distributor", async function () {
     // Deploy RewardsDistributors
     const touchRewardsDistributor = await sdk.deployRewardsDistributor(touchToken.address, {
-      from: fuseDeployer.address,
-    });
-
-    const tribeRewardsDistributor = await sdk.deployRewardsDistributor(tribeToken.address, {
       from: fuseDeployer.address,
     });
 
@@ -80,15 +77,9 @@ describe("RewardsDistributor", function () {
     await sdk.fundRewardsDistributor(touchRewardsDistributor.address, fundingAmount, {
       from: fuseDeployer.address,
     });
-    await sdk.fundRewardsDistributor(tribeRewardsDistributor.address, fundingAmount, {
-      from: fuseDeployer.address,
-    });
 
     // Add RewardsDistributor to Pool
     await sdk.addRewardsDistributorToPool(touchRewardsDistributor.address, poolAAddress, {
-      from: fuseDeployer.address,
-    });
-    await sdk.addRewardsDistributorToPool(tribeRewardsDistributor.address, poolAAddress, {
       from: fuseDeployer.address,
     });
 
@@ -104,12 +95,47 @@ describe("RewardsDistributor", function () {
       from: fuseDeployer.address,
     });
 
-    const results = await sdk.getMarketRewardsByPool(poolAAddress, { from: fuseUserA.address });
+    // Check if MarketRewards are correctly returned
+    const marketRewards = await sdk.getMarketRewardsByPool(poolAAddress, { from: fuseUserA.address });
+    const touchMarketRewards = marketRewards.find((mr) => mr.cToken === cTouchToken.address);
+    expect(touchMarketRewards).to.be.ok;
 
-    const perPool = await sdk.getMarketRewardsByPools([poolAAddress, poolBAddress], { from: fuseUserA.address });
-    console.dir(results, { depth: null });
+    const supplyRewardsTouch = touchMarketRewards.supplyRewards.find(
+      (br) => br.distributor === touchRewardsDistributor.address
+    );
+    expect(supplyRewardsTouch).to.be.ok;
+    expect(supplyRewardsTouch.speed).to.eq(supplySpeed);
 
-    // Enter TOUCH Market to start earning rewards
+    const borrowRewardsTouch = touchMarketRewards.borrowRewards.find(
+      (br) => br.distributor === touchRewardsDistributor.address
+    );
+    expect(borrowRewardsTouch).to.be.ok;
+    expect(supplyRewardsTouch.speed).to.eq(borrowSpeed);
+
+    // Check if ClaimableRewards are correctly returned => no rewards yet
+    const claimableRewardsBefore = await sdk.getRewardDistributorClaimableRewards(fuseUserA.address, {
+      from: fuseUserA.address,
+    });
+    expect(claimableRewardsBefore.length).to.eq(0);
+
+    // Enter Rewarded Market, Single User so 100% Rewards from RewardDistributor
     await collateralHelpers.addCollateral(poolAAddress, fuseUserA, "TOUCH", "100", true);
+
+    // Advance Blocks
+    const blocksToAdvance = 250;
+    await advanceBlocks(blocksToAdvance);
+
+    // Check if ClaimableRewards are correctly returned
+    const claimableRewardsAfter250 = await sdk.getRewardDistributorClaimableRewards(fuseUserA.address, {
+      from: fuseUserA.address,
+    });
+    expect(claimableRewardsAfter250[0].amount).to.eq(supplySpeed.mul(blocksToAdvance));
+
+    // Claim Rewards
+    await sdk.claimAllRewardDistributorRewards(touchRewardsDistributor.address, { from: fuseUserA.address });
+    const claimableRewardsAfterClaim = await sdk.getRewardDistributorClaimableRewards(fuseUserA.address, {
+      from: fuseUserA.address,
+    });
+    expect(claimableRewardsAfterClaim.length).to.eq(0);
   });
 });
