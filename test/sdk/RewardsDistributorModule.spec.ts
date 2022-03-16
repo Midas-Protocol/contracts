@@ -19,7 +19,6 @@ describe("RewardsDistributorModule", function () {
   let cTouchToken: ERC20;
   let tribeToken: ERC20;
   let cTribeToken: ERC20;
-
   this.beforeEach(async () => {
     const { chainId } = await ethers.provider.getNetwork();
 
@@ -30,9 +29,10 @@ describe("RewardsDistributorModule", function () {
 
     sdk = new Fuse(ethers.provider, chainId);
 
-    if (chainId === 1337) {
-      await deployments.fixture();
+    if (chainId != 1337) {
+      return;
     }
+    await deployments.fixture();
     await setUpPriceOraclePrices();
 
     [poolAAddress] = await poolHelpers.createPool({ signer: fuseDeployer, poolName: "PoolA-RewardsDistributor-Test" });
@@ -67,6 +67,10 @@ describe("RewardsDistributorModule", function () {
   });
 
   it("1 Pool, 1 Reward Distributor", async function () {
+    const { chainId } = await ethers.provider.getNetwork();
+    if (chainId != 1337) {
+      this.skip();
+    }
     // Deploy RewardsDistributors
     const touchRewardsDistributor = await sdk.deployRewardsDistributor(touchToken.address, {
       from: fuseDeployer.address,
