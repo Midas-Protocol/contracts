@@ -1,8 +1,19 @@
-import { BigNumberish, Contract, ContractFactory } from "ethers";
+import { BigNumber, BigNumberish, Contract, ContractFactory } from "ethers";
 import { Comptroller } from "../../typechain/Comptroller";
 import { ERC20 } from "../../typechain/ERC20";
 import { RewardsDistributorDelegate } from "../../typechain/RewardsDistributorDelegate";
 import { FuseBaseConstructor } from "../Fuse/types";
+
+interface Reward {
+  distributor: string;
+  rewardToken: string;
+  speed: BigNumber;
+}
+interface MarketReward {
+  cToken: string;
+  supplyRewards: Reward[];
+  borrowRewards: Reward[];
+}
 
 export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class RewardsDistributor extends Base {
@@ -129,6 +140,67 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
       }
       console.log({ claimableRewards });
       return claimableRewards;
+    }
+
+    #createMarketRewards(
+      allMarkets: string[],
+      distributors: string[],
+      rewardTokens: string[],
+      supplySpeeds: BigNumber[][],
+      borrowSpeeds: BigNumber[][]
+    ): MarketReward[] {
+      const marketRewards: MarketReward[] = allMarkets.map((market, marketIndex) => ({
+        cToken: market,
+        supplyRewards: supplySpeeds[marketIndex]
+          .filter((speed) => speed.gt(0))
+          .map((speed, speedIndex) => ({
+            distributor: distributors[speedIndex],
+            rewardToken: rewardTokens[speedIndex],
+            speed,
+          })),
+        borrowRewards: borrowSpeeds[marketIndex]
+          .filter((speed) => speed.gt(0))
+          .map((speed, speedIndex) => ({
+            distributor: distributors[speedIndex],
+            rewardToken: rewardTokens[speedIndex],
+            speed,
+          })),
+      }));
+
+      return marketRewards;
+    }
+
+    async getMarketRewardsByPool(pool: string, options: { from: string }): Promise<MarketReward[]> {
+      const rewardSpeedsByPoolResponse = await this.contracts.FusePoolLensSecondary.callStatic.getRewardSpeedsByPool(
+        pool,
+        options
+      );
+      return this.#createMarketRewards(...rewardSpeedsByPoolResponse);
+    }
+
+    async getMarketRewardsByPools(
+      pools: string[],
+      options: { from: string }
+    ): Promise<
+      {
+        pool: string;
+        marketRewards: MarketReward[];
+      }[]
+    > {
+      const [allMarkets, distributors, rewardTokens, supplySpeeds, borrowSpeeds] =
+        await this.contracts.FusePoolLensSecondary.callStatic.getRewardSpeedsByPools(pools, options);
+      const poolsWithMarketRewards = pools.map((pool, index) => ({
+        pool,
+        marketRewards: this.#createMarketRewards(
+          allMarkets[index],
+          distributors[index],
+          rewardTokens[index],
+          supplySpeeds[index],
+          borrowSpeeds[index]
+        ),
+      }));
+
+      return poolsWithMarketRewards;
     }
   };
 }
