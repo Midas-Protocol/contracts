@@ -6,7 +6,7 @@ import { ERC20 } from "../../typechain";
 import { setUpPriceOraclePrices } from "../utils";
 import * as collateralHelpers from "../utils/collateral";
 import * as poolHelpers from "../utils/pool";
-import { advanceBlocks } from "../utils/time";
+import * as timeHelpers from "../utils/time";
 
 describe("RewardsDistributorModule", function () {
   let poolAAddress: string;
@@ -96,7 +96,7 @@ describe("RewardsDistributorModule", function () {
     });
 
     // Check if MarketRewards are correctly returned
-    const marketRewards = await sdk.getMarketRewardsByPool(poolAAddress, { from: fuseUserA.address });
+    const marketRewards = await sdk.getRewardsDistributorMarketRewardsByPool(poolAAddress, { from: fuseUserA.address });
     const touchMarketRewards = marketRewards.find((mr) => mr.cToken === cTouchToken.address);
     expect(touchMarketRewards).to.be.ok;
 
@@ -113,7 +113,7 @@ describe("RewardsDistributorModule", function () {
     expect(supplyRewardsTouch.speed).to.eq(borrowSpeed);
 
     // Check if ClaimableRewards are correctly returned => no rewards yet
-    const claimableRewardsBefore = await sdk.getRewardDistributorClaimableRewards(fuseUserA.address, {
+    const claimableRewardsBefore = await sdk.getRewardsDistributorClaimableRewards(fuseUserA.address, {
       from: fuseUserA.address,
     });
     expect(claimableRewardsBefore.length).to.eq(0);
@@ -123,17 +123,17 @@ describe("RewardsDistributorModule", function () {
 
     // Advance Blocks
     const blocksToAdvance = 250;
-    await advanceBlocks(blocksToAdvance);
+    await timeHelpers.advanceBlocks(blocksToAdvance);
 
     // Check if ClaimableRewards are correctly returned
-    const claimableRewardsAfter250 = await sdk.getRewardDistributorClaimableRewards(fuseUserA.address, {
+    const claimableRewardsAfter250 = await sdk.getRewardsDistributorClaimableRewards(fuseUserA.address, {
       from: fuseUserA.address,
     });
     expect(claimableRewardsAfter250[0].amount).to.eq(supplySpeed.mul(blocksToAdvance));
 
     // Claim Rewards
-    await sdk.claimAllRewardDistributorRewards(touchRewardsDistributor.address, { from: fuseUserA.address });
-    const claimableRewardsAfterClaim = await sdk.getRewardDistributorClaimableRewards(fuseUserA.address, {
+    await sdk.claimAllRewardsDistributorRewards(touchRewardsDistributor.address, { from: fuseUserA.address });
+    const claimableRewardsAfterClaim = await sdk.getRewardsDistributorClaimableRewards(fuseUserA.address, {
       from: fuseUserA.address,
     });
     expect(claimableRewardsAfterClaim.length).to.eq(0);

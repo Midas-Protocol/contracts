@@ -111,7 +111,7 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
       return rewardsDistributorInstance._setCompSpeeds(cTokenAddress, amountSuppliers, amountBorrowers);
     }
 
-    async getMarketRewardsByPool(pool: string, options: { from: string }): Promise<MarketReward[]> {
+    async getRewardsDistributorMarketRewardsByPool(pool: string, options: { from: string }): Promise<MarketReward[]> {
       const rewardSpeedsByPoolResponse = await this.contracts.FusePoolLensSecondary.callStatic.getRewardSpeedsByPool(
         pool,
         options
@@ -119,7 +119,7 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
       return this.#createMarketRewards(...rewardSpeedsByPoolResponse);
     }
 
-    async getMarketRewardsByPools(
+    async getRewardsDistributorMarketRewardsByPools(
       pools: string[],
       options: { from: string }
     ): Promise<
