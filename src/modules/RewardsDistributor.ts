@@ -4,12 +4,12 @@ import { ERC20 } from "../../typechain/ERC20";
 import { RewardsDistributorDelegate } from "../../typechain/RewardsDistributorDelegate";
 import { FuseBaseConstructor } from "../Fuse/types";
 
-interface Reward {
+export interface Reward {
   distributor: string;
   rewardToken: string;
   speed: BigNumber;
 }
-interface MarketReward {
+export interface MarketReward {
   cToken: string;
   supplyRewards: Reward[];
   borrowRewards: Reward[];
@@ -17,14 +17,6 @@ interface MarketReward {
 
 export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class RewardsDistributor extends Base {
-    #getRewardsDistributor(rewardsDistributorAddress: string, options: { from: string }) {
-      return new Contract(
-        rewardsDistributorAddress,
-        this.chainDeployment.RewardsDistributorDelegate.abi,
-        this.provider.getSigner(options.from)
-      ) as RewardsDistributorDelegate;
-    }
-
     async deployRewardsDistributor(rewardTokenAddress: string, options: { from: string }) {
       const rewardDistributorFactory = new ContractFactory(
         this.artifacts.RewardsDistributorDelegator.abi,
@@ -123,53 +115,6 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
       return rewardDistributorInstance._setCompSpeeds(cTokenAddress, amountSuppliers, amountBorrowers);
     }
 
-    async getRewardsDistributorAccruedAmount(
-      rewardsDistributorAddress: string,
-      account: string,
-      options: { from: string; blockNumber?: number }
-    ) {
-      const rewardDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
-      let claimableRewards = await rewardDistributorInstance.compAccrued(account);
-      const lastUpdated = await rewardDistributorInstance.lastContributorBlock(account);
-      if (options.blockNumber && options.blockNumber > lastUpdated.toNumber()) {
-        const diff = options.blockNumber - lastUpdated.toNumber();
-        console.log({ diff });
-        const rewardsPerBlock = await rewardDistributorInstance.compContributorSpeeds(account);
-        console.log({ rewardsPerBlock });
-        claimableRewards = claimableRewards.add(rewardsPerBlock.mul(diff));
-      }
-      console.log({ claimableRewards });
-      return claimableRewards;
-    }
-
-    #createMarketRewards(
-      allMarkets: string[],
-      distributors: string[],
-      rewardTokens: string[],
-      supplySpeeds: BigNumber[][],
-      borrowSpeeds: BigNumber[][]
-    ): MarketReward[] {
-      const marketRewards: MarketReward[] = allMarkets.map((market, marketIndex) => ({
-        cToken: market,
-        supplyRewards: supplySpeeds[marketIndex]
-          .filter((speed) => speed.gt(0))
-          .map((speed, speedIndex) => ({
-            distributor: distributors[speedIndex],
-            rewardToken: rewardTokens[speedIndex],
-            speed,
-          })),
-        borrowRewards: borrowSpeeds[marketIndex]
-          .filter((speed) => speed.gt(0))
-          .map((speed, speedIndex) => ({
-            distributor: distributors[speedIndex],
-            rewardToken: rewardTokens[speedIndex],
-            speed,
-          })),
-      }));
-
-      return marketRewards;
-    }
-
     async getMarketRewardsByPool(pool: string, options: { from: string }): Promise<MarketReward[]> {
       const rewardSpeedsByPoolResponse = await this.contracts.FusePoolLensSecondary.callStatic.getRewardSpeedsByPool(
         pool,
@@ -201,6 +146,42 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
       }));
 
       return poolsWithMarketRewards;
+    }
+
+    #getRewardsDistributor(rewardsDistributorAddress: string, options: { from: string }) {
+      return new Contract(
+        rewardsDistributorAddress,
+        this.chainDeployment.RewardsDistributorDelegate.abi,
+        this.provider.getSigner(options.from)
+      ) as RewardsDistributorDelegate;
+    }
+
+    #createMarketRewards(
+      allMarkets: string[],
+      distributors: string[],
+      rewardTokens: string[],
+      supplySpeeds: BigNumber[][],
+      borrowSpeeds: BigNumber[][]
+    ): MarketReward[] {
+      const marketRewards: MarketReward[] = allMarkets.map((market, marketIndex) => ({
+        cToken: market,
+        supplyRewards: supplySpeeds[marketIndex]
+          .filter((speed) => speed.gt(0))
+          .map((speed, speedIndex) => ({
+            distributor: distributors[speedIndex],
+            rewardToken: rewardTokens[speedIndex],
+            speed,
+          })),
+        borrowRewards: borrowSpeeds[marketIndex]
+          .filter((speed) => speed.gt(0))
+          .map((speed, speedIndex) => ({
+            distributor: distributors[speedIndex],
+            rewardToken: rewardTokens[speedIndex],
+            speed,
+          })),
+      }));
+
+      return marketRewards;
     }
   };
 }
