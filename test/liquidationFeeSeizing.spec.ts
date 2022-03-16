@@ -146,6 +146,12 @@ describe("Protocol Liquidation Seizing", () => {
     const reservesDiffAmount = totalSupplyBefore.sub(totalReservesAfter);
     // gt because reserves get added on interest rate accrual
     expect(reservesDiffAmount).to.be.gt(protocolSeizeTokens);
+    // return price to what it was
+    await tx.wait();
+
+    const tokenPrice = await oracle.getUnderlyingPrice(deployedErc20One.assetAddress);
+    tx = await simpleOracle.setDirectPrice(deployedErc20One.underlying, tokenPrice.mul(10));
+    await tx.wait();
   });
 
   it("should be able to withdraw fees to fuseFeeDistributor", async function () {
