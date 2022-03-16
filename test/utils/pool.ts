@@ -3,7 +3,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { providers, utils } from "ethers";
 import { ethers, getChainId } from "hardhat";
 
-import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../dist/esm/src";
+import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../src";
 import { getAssetsConf } from "./assets";
 
 interface PoolCreationParams {
@@ -24,7 +24,7 @@ export async function createPool({
   whitelist = [],
   priceOracleAddress = null,
   signer = null,
-}: PoolCreationParams): Promise<[string, string, string]> {
+}: PoolCreationParams) {
   const { chainId } = await ethers.provider.getNetwork();
   const sdk = new Fuse(ethers.provider, chainId);
 
