@@ -11,7 +11,7 @@ import {
   SimplePriceOracle,
 } from "../typechain";
 import { expect } from "chai";
-import { cERC20Conf, ERC20Abi } from "../dist/esm/src";
+import { cERC20Conf, ERC20Abi } from "../src";
 import { DeployedAsset } from "./utils/pool";
 
 const UNISWAP_V2_PROTOCOLS = {
