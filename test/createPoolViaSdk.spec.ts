@@ -1,4 +1,4 @@
-import { deployments, ethers, run, getChainId } from "hardhat";
+import { deployments, ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
 import { Fuse } from "../dist/esm/src";

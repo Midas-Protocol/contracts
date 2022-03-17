@@ -27,7 +27,7 @@ Main repository for Midas Capital's contracts and SDK for interacting with those
  ├── scripts                          <- hardhat scripts
  ├── src                              <- midas-sdk main folder
  ├── deployments.json                 <- generated on "npx hardhat export"
- └── hardhat.config.ts                <- hardhat confing
+ └── hardhat.config.ts                <- hardhat config
 ```
 
 ## Dev Workflow

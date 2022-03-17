@@ -47,10 +47,9 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
   });
   const touch = await dep.deploy();
   const touchToken = await ethers.getContractAt("TOUCHToken", touch.address, deployer);
-  tx = await touchToken.transfer(alice, ethers.utils.parseEther("100000"), { from: deployer });
+  tx = await touchToken['transfer(address,uint256)'](alice, ethers.utils.parseEther("100000"), { from: deployer });
   await tx.wait();
-
-  tx = await touchToken.transfer(bob, ethers.utils.parseEther("100000"), { from: deployer });
+  tx = await touchToken['transfer(address,uint256)'](bob, ethers.utils.parseEther("100000"), { from: deployer });
   await tx.wait();
   ////
 
