@@ -12,10 +12,10 @@ contract TOUCHToken is ERC20 {
   }
 
   function transfer(address to, uint256 amount, bytes calldata memo) public returns (bool) {
-    // require redundant since the underlying transfer call returns true or reverts
-//    require(
+    // checking the transfer() return value is redundant since it always reverts on failure
     transfer(to, amount);
-//    , "ERC20 transfer failed");
+
+    // the signature of this Transfer event is different than the standard ERC20 Transfer sig
     emit Transfer(msg.sender, to, amount, memo);
 
     return true;
@@ -27,6 +27,7 @@ contract TOUCHToken is ERC20 {
     uint256 amount,
     bytes calldata memo
   ) public returns (bool) {
+    // checking the transferFrom() return value is redundant since it always reverts on failure
     transferFrom(from, to, amount);
 
     // the signature of this Transfer event is different than the standard ERC20 Transfer sig
