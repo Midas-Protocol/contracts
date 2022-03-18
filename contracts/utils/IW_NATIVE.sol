@@ -4,15 +4,15 @@ pragma solidity >=0.8.0;
 interface IW_NATIVE {
   function deposit() external payable;
 
-  function withdraw(uint256) external;
+  function withdraw(uint256 amount) external;
 
-  function approve(address guy, uint256 wad) external returns (bool);
+  function approve(address spender, uint256 amount) external returns (bool);
 
-  function transfer(address dst, uint256 wad) external returns (bool);
+  function trasfer(address to, uint256 amount) external returns (bool);
 
   function transferFrom(
-    address src,
-    address dst,
-    uint256 wad
+      address from,
+      address to,
+      uint256 amount
   ) external returns (bool);
 }

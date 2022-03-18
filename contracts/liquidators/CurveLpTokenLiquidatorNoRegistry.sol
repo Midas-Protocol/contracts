@@ -7,7 +7,7 @@ import "../external/curve/ICurveRegistry.sol";
 import "../external/curve/ICurvePool.sol";
 import "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 
-import "../utils/IW_NATIVE.sol";
+import {WETH} from "@rari-capital/solmate/src/tokens/WETH.sol";
 
 import "./IRedemptionStrategy.sol";
 
@@ -20,10 +20,10 @@ contract CurveLpTokenLiquidatorNoRegistry is IRedemptionStrategy {
   /**
    * @dev W_NATIVE contract object.
    */
-  IW_NATIVE public immutable W_NATIVE;
+  WETH public immutable W_NATIVE;
   CurveLpTokenPriceOracleNoRegistry public immutable oracle; // oracle contains registry
 
-  constructor(IW_NATIVE wnative, CurveLpTokenPriceOracleNoRegistry _oracle) {
+  constructor(WETH wnative, CurveLpTokenPriceOracleNoRegistry _oracle) {
     W_NATIVE = wnative;
     oracle = _oracle;
   }
