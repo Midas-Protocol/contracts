@@ -1,6 +1,6 @@
 import { BigNumber, constants, providers, utils } from "ethers";
 import { deployments, ethers } from "hardhat";
-import { setUpLiquidation, tradeNativeForAsset } from "./utils";
+import { getPositionRatio, setUpLiquidation, setUpPriceOraclePrices, tradeNativeForAsset } from "./utils";
 import { DeployedAsset } from "./utils/pool";
 import { setupAndLiquidatePool, setupLiquidatablePool } from "./utils/collateral";
 import {
@@ -38,15 +38,22 @@ describe("Protocol Liquidation Seizing", () => {
 
   let erc20OneUnderlying: EIP20Interface;
   let erc20TwoUnderlying: EIP20Interface;
-  let tx: providers.TransactionResponse;
 
-  const poolName = "liquidation - fee sizing";
+  let erc20OneOriginalUnderlyingPrice: BigNumber;
+  let erc20TwoOriginalUnderlyingPrice: BigNumber;
+
+  let tx: providers.TransactionResponse;
+  let chainId: number;
+
+  let poolName: string;
 
   beforeEach(async () => {
-    const { chainId } = await ethers.provider.getNetwork();
+    poolName = "liquidation - fee sizing" + Math.random().toString();
+    ({ chainId } = await ethers.provider.getNetwork());
     if (chainId === 1337) {
       await deployments.fixture();
     }
+    await setUpPriceOraclePrices();
     ({
       poolAddress,
       deployedEth,
@@ -61,6 +68,8 @@ describe("Protocol Liquidation Seizing", () => {
       liquidator,
       erc20OneUnderlying,
       erc20TwoUnderlying,
+      erc20OneOriginalUnderlyingPrice,
+      erc20TwoOriginalUnderlyingPrice,
       oracle,
       simpleOracle,
       fuseFeeDistributor,
@@ -74,8 +83,8 @@ describe("Protocol Liquidation Seizing", () => {
     const borrowAmount = "0.5";
     const repayAmount = utils.parseEther(borrowAmount).div(10);
 
-    // get some liquidity via Uniswap
-    await tradeNativeForAsset({ account: "bob", token: erc20One.underlying, amount: "300" });
+    // get some liquidity via Uniswap, if using mainnet forking
+    if (chainId !== 1337) await tradeNativeForAsset({ account: "bob", token: erc20One.underlying, amount: "300" });
 
     await setupLiquidatablePool(oracle, deployedErc20One, poolAddress, simpleOracle, borrowAmount, bob);
     console.log("pool set up");
@@ -87,6 +96,14 @@ describe("Protocol Liquidation Seizing", () => {
     const feesBefore = await erc20OneCToken.totalFuseFees();
 
     tx = await erc20OneUnderlying.connect(rando).approve(liquidator.address, constants.MaxUint256);
+
+    const ratioBefore = await getPositionRatio({
+      name: poolName,
+      userAddress: undefined,
+      cgId: "ethereum",
+      namedUser: "bob",
+    });
+    console.log(`Ratio Before: ${ratioBefore}`);
 
     tx = await liquidator["safeLiquidate(address,address,address,uint256,address,address,address[],bytes[])"](
       bob.address,
@@ -100,6 +117,14 @@ describe("Protocol Liquidation Seizing", () => {
       { value: repayAmount, gasLimit: 10000000, gasPrice: utils.parseUnits("10", "gwei") }
     );
     await tx.wait();
+
+    const ratioAfter = await getPositionRatio({
+      name: poolName,
+      userAddress: undefined,
+      cgId: "ethereum",
+      namedUser: "bob",
+    });
+    console.log(`Ratio After: ${ratioAfter}`);
 
     const exchangeRate = await erc20OneCToken.exchangeRateStored();
     const borrowerBalanceAfter = await erc20OneCToken.balanceOf(bob.address);
@@ -149,8 +174,7 @@ describe("Protocol Liquidation Seizing", () => {
     // return price to what it was
     await tx.wait();
 
-    const tokenPrice = await oracle.getUnderlyingPrice(deployedErc20One.assetAddress);
-    tx = await simpleOracle.setDirectPrice(deployedErc20One.underlying, tokenPrice.mul(10));
+    tx = await simpleOracle.setDirectPrice(deployedErc20One.underlying, erc20OneOriginalUnderlyingPrice);
     await tx.wait();
   });
 
@@ -191,5 +215,8 @@ describe("Protocol Liquidation Seizing", () => {
 
     const fuseFeeDistributorBalance = await erc20OneUnderlying.balanceOf(fuseFeeDistributor.address);
     expect(fuseFeeDistributorBalance).to.eq(feesAfterLiquidation);
+
+    tx = await simpleOracle.setDirectPrice(deployedErc20One.underlying, erc20OneOriginalUnderlyingPrice);
+    await tx.wait();
   });
 });

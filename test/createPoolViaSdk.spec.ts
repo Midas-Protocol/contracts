@@ -1,9 +1,10 @@
-import { deployments, ethers, run, getChainId } from "hardhat";
+import { deployments, ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
 import { Fuse } from "../dist/esm/src";
 import { DeployedAsset, poolAssets } from "./utils/pool";
 import { utils } from "ethers";
+import { MasterPriceOracle } from "../typechain/MasterPriceOracle";
 import { setUpPriceOraclePrices } from "./utils";
 
 use(solidity);
@@ -25,7 +26,11 @@ describe("FusePoolDirectory", function () {
       const { chainId } = await ethers.provider.getNetwork();
 
       const sdk = new Fuse(ethers.provider, chainId);
-      const spo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, bob);
+      const spo = (await ethers.getContractAt(
+        "MasterPriceOracle",
+        sdk.oracles.MasterPriceOracle.address,
+        bob
+      )) as MasterPriceOracle;
 
       // 50% -> 0.5 * 1e18
       const bigCloseFactor = utils.parseEther((50 / 100).toString());

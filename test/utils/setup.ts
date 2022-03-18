@@ -1,6 +1,6 @@
 import { ethers, getChainId, run } from "hardhat";
 import { assets as bscAssets } from "../../chainDeploy/mainnets/bsc";
-import { constants, providers, utils } from "ethers";
+import { BigNumber, constants, providers } from "ethers";
 import {
   CErc20,
   CEther,
@@ -25,8 +25,8 @@ export const setUpPriceOraclePrices = async () => {
 };
 
 const setupLocalOraclePrices = async () => {
-  await run("oracle:set-price", { token: "TOUCH", price: "0.1" });
-  await run("oracle:set-price", { token: "TRIBE", price: "0.2" });
+  await run("oracle:set-price", { token: "TRIBE", price: "50" });
+  await run("oracle:set-price", { token: "TOUCH", price: "0.0025" });
 };
 
 const setUpBscOraclePrices = async () => {
@@ -71,11 +71,14 @@ export const setUpLiquidation = async ({ poolName }) => {
 
   let erc20OneUnderlying: EIP20Interface;
   let erc20TwoUnderlying: EIP20Interface;
+
+  let erc20OneOriginalUnderlyingPrice: BigNumber;
+  let erc20TwoOriginalUnderlyingPrice: BigNumber;
+
   let tx: providers.TransactionResponse;
 
   const { bob, deployer, rando } = await ethers.getNamedSigners();
 
-  await setUpPriceOraclePrices();
   const chainId = await getChainId();
   const sdk = new Fuse(ethers.provider, Number(chainId));
 
@@ -95,6 +98,12 @@ export const setUpLiquidation = async ({ poolName }) => {
     deployer
   )) as FuseFeeDistributor;
 
+  liquidator = (await ethers.getContractAt(
+    "FuseSafeLiquidator",
+    sdk.contracts.FuseSafeLiquidator.address,
+    rando
+  )) as FuseSafeLiquidator;
+
   [poolAddress] = await createPool({ poolName });
   const assets = await getPoolAssets(poolAddress, fuseFeeDistributor.address);
 
@@ -106,15 +115,15 @@ export const setUpLiquidation = async ({ poolName }) => {
   expect(erc20Two.underlying).to.be.ok;
   eth = assets.assets.find((a) => a.underlying === constants.AddressZero);
 
-  await oracle.add([eth.underlying, erc20One.underlying, erc20Two.underlying], Array(3).fill(simpleOracle.address));
+  erc20OneOriginalUnderlyingPrice = await oracle.callStatic.price(erc20One.underlying);
+  erc20TwoOriginalUnderlyingPrice = await oracle.callStatic.price(erc20Two.underlying);
 
-  tx = await simpleOracle.setDirectPrice(eth.underlying, utils.parseEther("1"));
+  await oracle.add([erc20One.underlying, erc20Two.underlying], Array(2).fill(simpleOracle.address));
+
+  tx = await simpleOracle.setDirectPrice(erc20One.underlying, erc20OneOriginalUnderlyingPrice);
   await tx.wait();
 
-  tx = await simpleOracle.setDirectPrice(erc20One.underlying, utils.parseEther("10"));
-  await tx.wait();
-
-  tx = await simpleOracle.setDirectPrice(erc20Two.underlying, utils.parseEther("0.0001"));
+  tx = await simpleOracle.setDirectPrice(erc20Two.underlying, erc20TwoOriginalUnderlyingPrice);
   await tx.wait();
 
   const deployedAssets = await deployAssets(assets.assets, bob);
@@ -122,12 +131,6 @@ export const setUpLiquidation = async ({ poolName }) => {
   deployedEth = deployedAssets.find((a) => a.underlying === constants.AddressZero);
   deployedErc20One = deployedAssets.find((a) => a.underlying === erc20One.underlying);
   deployedErc20Two = deployedAssets.find((a) => a.underlying === erc20Two.underlying);
-
-  liquidator = (await ethers.getContractAt(
-    "FuseSafeLiquidator",
-    sdk.contracts.FuseSafeLiquidator.address,
-    rando
-  )) as FuseSafeLiquidator;
 
   ethCToken = (await ethers.getContractAt("CEther", deployedEth.assetAddress)) as CEther;
   erc20OneCToken = (await ethers.getContractAt("CErc20", deployedErc20One.assetAddress)) as CErc20;
@@ -150,6 +153,8 @@ export const setUpLiquidation = async ({ poolName }) => {
     liquidator,
     erc20OneUnderlying,
     erc20TwoUnderlying,
+    erc20OneOriginalUnderlyingPrice,
+    erc20TwoOriginalUnderlyingPrice,
     oracle,
     simpleOracle,
     fuseFeeDistributor,
