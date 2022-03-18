@@ -6,7 +6,7 @@ import "./IRedemptionStrategy.sol";
 /**
  * @title XBombLiquidator
  * @notice Exchanges seized xBOMB collateral for underlying BOMB tokens for use as a step in a liquidation.
- * @author Veliko <veliko@rari.capital> (https://github.com/davidlucid)
+ * @author Veliko <veliko@midascapital.xyz>
  */
 contract XBombLiquidator is IRedemptionStrategy {
   function redeem(
