@@ -25,7 +25,7 @@ export const setUpPriceOraclePrices = async () => {
 };
 
 const setupLocalOraclePrices = async () => {
-  await run("oracle:set-price", { token: "TRIBE", price: "100" });
+  await run("oracle:set-price", { token: "TRIBE", price: "50" });
   await run("oracle:set-price", { token: "TOUCH", price: "0.0025" });
 };
 
