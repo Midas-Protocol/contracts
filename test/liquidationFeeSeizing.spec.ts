@@ -45,9 +45,10 @@ describe("Protocol Liquidation Seizing", () => {
   let tx: providers.TransactionResponse;
   let chainId: number;
 
-  const poolName = "liquidation - fee sizing";
+  let poolName: string;
 
   beforeEach(async () => {
+    poolName = "liquidation - fee sizing" + Math.random().toString();
     ({ chainId } = await ethers.provider.getNetwork());
     if (chainId === 1337) {
       await deployments.fixture();
@@ -115,7 +116,7 @@ describe("Protocol Liquidation Seizing", () => {
       [],
       { value: repayAmount, gasLimit: 10000000, gasPrice: utils.parseUnits("10", "gwei") }
     );
-    const recepit = await tx.wait();
+    await tx.wait();
 
     const ratioAfter = await getPositionRatio({
       name: poolName,

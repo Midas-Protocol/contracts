@@ -55,15 +55,20 @@ const UNISWAP_V2_PROTOCOLS = {
   let erc20OneOriginalUnderlyingPrice: BigNumber;
   let erc20TwoOriginalUnderlyingPrice: BigNumber;
 
-  const poolName = "liquidation - fl - " + Math.random().toString();
-  const coingeckoId = "binancecoin";
+  let poolName: string;
+  let coingeckoId: string;
+  let chainId: number;
+
   const uniswapV2RouterForCollateral = UNISWAP_V2_PROTOCOLS.PancakeSwap.router;
 
   beforeEach(async () => {
-    const { chainId } = await ethers.provider.getNetwork();
+    poolName = "liquidation - fl - " + Math.random().toString();
+    ({ chainId } = await ethers.provider.getNetwork());
     if (chainId === 1337) {
       await deployments.fixture();
     }
+    coingeckoId = chainId === 1337 ? "ethereum" : "binancecoin";
+
     await setUpPriceOraclePrices();
     ({
       poolAddress,
