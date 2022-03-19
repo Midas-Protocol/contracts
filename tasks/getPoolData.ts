@@ -50,6 +50,7 @@ task("get-position-ratio", "Get unhealthy po data")
     types.string
   )
   .addOptionalParam("cgId", "Coingecko id for the native asset", "ethereum", types.string)
+  .addOptionalParam("logData", "Verbose logging", false, types.boolean)
   .setAction(async (taskArgs, hre) => {
     // @ts-ignore
     const sdkModule = await import("../dist/esm/src");
@@ -83,21 +84,24 @@ task("get-position-ratio", "Get unhealthy po data")
 
     const maxBorrowR = fusePoolData.assets.map((a) => {
       const mult = parseFloat(hre.ethers.utils.formatUnits(a.collateralFactor, a.underlyingDecimals));
-      console.log(
-        a.underlyingSymbol,
-        "\n supplyBalanceUSD: ",
-        a.supplyBalanceUSD,
-        "\n borrowBalanceUSD: ",
-        a.borrowBalanceUSD,
-        "\n totalSupplyUSD: ",
-        a.totalSupplyUSD,
-        "\n totalBorrowUSD: ",
-        a.totalBorrowUSD,
-        "\n Multiplier: ",
-        mult,
-        "\n Max Borrow Asset: ",
-        mult * a.supplyBalanceUSD
-      );
+      if (taskArgs.logData) {
+        console.log(
+          a.underlyingSymbol,
+          "\n supplyBalanceUSD: ",
+          a.supplyBalanceUSD,
+          "\n borrowBalanceUSD: ",
+          a.borrowBalanceUSD,
+          "\n totalSupplyUSD: ",
+          a.totalSupplyUSD,
+          "\n totalBorrowUSD: ",
+          a.totalBorrowUSD,
+          "\n Multiplier: ",
+          mult,
+          "\n Max Borrow Asset: ",
+          mult * a.supplyBalanceUSD
+        );
+      }
+
       return a.supplyBalanceUSD * parseFloat(hre.ethers.utils.formatUnits(a.collateralFactor, a.underlyingDecimals));
     });
     const maxBorrow = maxBorrowR.reduce((a, b) => a + b, 0);
