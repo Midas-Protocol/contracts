@@ -144,15 +144,19 @@ describe("Protocol Liquidation Seizing", () => {
 
     // seized tokens = borrower balance before - borrower balance after
     const seizedTokens = borrowerBalanceBefore.sub(borrowerBalanceAfter);
-    const seizedAmount = parseFloat(utils.formatEther(seizedTokens.mul(exchangeRate)));
+    const seizedAmount = parseFloat(utils.formatEther(seizedTokens.mul(exchangeRate).div(BigNumber.from(10).pow(18))));
 
     // protocol seized = seized tokens * 2.8%
     const protocolSeizeTokens = seizedTokens.mul(FUSE_LIQUIDATION_PROTOCOL_FEE_PER_THOUSAND).div(1000);
-    const protocolSeizeAmount = parseFloat(utils.formatEther(protocolSeizeTokens.mul(exchangeRate)));
+    const protocolSeizeAmount = parseFloat(
+      utils.formatEther(protocolSeizeTokens.mul(exchangeRate).div(BigNumber.from(10).pow(18)))
+    );
 
     // fees seized = seized tokens * 10%
     const feeSeizeTokens = seizedTokens.mul(FUSE_LIQUIDATION_SEIZE_FEE_PER_THOUSAND).div(1000);
-    const feeSeizeAmount = parseFloat(utils.formatEther(feeSeizeTokens.mul(exchangeRate)));
+    const feeSeizeAmount = parseFloat(
+      utils.formatEther(feeSeizeTokens.mul(exchangeRate).div(BigNumber.from(10).pow(18)))
+    );
 
     // liquidator seized tokens = seized tokens - protocol seize tokens - fee seize tokens
     const liquidatorExpectedSeizeTokens = seizedTokens.sub(protocolSeizeTokens).sub(feeSeizeTokens);
@@ -160,7 +164,9 @@ describe("Protocol Liquidation Seizing", () => {
 
     // same but with amounts using the exchange rate
     const liquidatorExpectedSeizeAmount = seizedAmount - protocolSeizeAmount - feeSeizeAmount;
-    const liquidatorBalanceAfterAmount = parseFloat(utils.formatEther(liquidatorBalanceAfter.mul(exchangeRate)));
+    const liquidatorBalanceAfterAmount = parseFloat(
+      utils.formatEther(liquidatorBalanceAfter.mul(exchangeRate).div(BigNumber.from(10).pow(18)))
+    );
     // approximate
     expect(liquidatorExpectedSeizeAmount - liquidatorBalanceAfterAmount).to.be.lt(10e-9);
 
