@@ -12,7 +12,7 @@ import { chainDeployConfig } from "../chainDeploy";
 use(solidity);
 
 describe.skip("FusePoolDirectory", function () {
-  let spo: SimplePriceOracle;
+  let mpo: SimplePriceOracle;
   let fpdWithSigner: FusePoolDirectory;
   let implementationComptroller: Comptroller;
 
@@ -27,7 +27,7 @@ describe.skip("FusePoolDirectory", function () {
       const { alice } = await ethers.getNamedSigners();
       console.log("alice: ", alice.address);
 
-      spo = await ethers.getContract("MasterPriceOracle", alice);
+      mpo = await ethers.getContract("MasterPriceOracle", alice);
       const { chainId } = await ethers.provider.getNetwork();
 
       fpdWithSigner = await ethers.getContract("FusePoolDirectory", alice);
@@ -46,7 +46,7 @@ describe.skip("FusePoolDirectory", function () {
         true,
         bigCloseFactor,
         bigLiquidationIncentive,
-        spo.address
+        mpo.address
       );
       expect(deployedPool).to.be.ok;
       const depReceipt = await deployedPool.wait();

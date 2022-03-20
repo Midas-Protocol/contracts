@@ -33,8 +33,8 @@ export async function createPool({
     signer = bob;
   }
   if (!priceOracleAddress) {
-    const spo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, signer);
-    priceOracleAddress = spo.address;
+    const mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, signer);
+    priceOracleAddress = mpo.address;
   }
   if (enforceWhitelist && whitelist.length === 0) {
     throw "If enforcing whitelist, a whitelist array of addresses must be provided";

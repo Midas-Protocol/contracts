@@ -124,6 +124,13 @@ export const assets: Asset[] = [
     name: "Ellipsis.finance UST/3EPS",
     decimals: 18,
   },
+  // Bomb
+  {
+    symbol: "xBOMB",
+    underlying: "0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b",
+    name: "xBOMB",
+    decimals: 18,
+  },
 ];
 
 export const deployConfig: ChainDeployConfig = {

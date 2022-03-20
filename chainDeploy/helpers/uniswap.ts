@@ -64,9 +64,9 @@ export const deployUniswapOracle = async ({
     const underlyings = deployConfig.uniswap.uniswapOracleInitialDeployTokens;
     const oracles = Array(deployConfig.uniswap.uniswapOracleInitialDeployTokens.length).fill(nativeOracle);
 
-    const spo = await ethers.getContract("MasterPriceOracle", deployer);
+    const mpo = await ethers.getContract("MasterPriceOracle", deployer);
     if (underlyings.length > 0) {
-      tx = await spo.add(underlyings, oracles);
+      tx = await mpo.add(underlyings, oracles);
       await tx.wait();
       console.log(`Master Price Oracle updated for tokens ${underlyings.join(", ")}`);
     }

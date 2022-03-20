@@ -40,7 +40,7 @@ task("oracle:add-tokens", "Initalize MasterPriceOracle with underlying oracle fo
     const { chainId } = await ethers.provider.getNetwork();
     const sdk = new sdkModule.Fuse(ethers.provider, chainId);
 
-    const spo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, deployer);
+    const mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, deployer);
     const underlyingTokens = _underlyings.split(",");
 
     let underlyingOracles: Array<string>;
@@ -63,7 +63,7 @@ task("oracle:add-tokens", "Initalize MasterPriceOracle with underlying oracle fo
         underlyingOracles = Array(underlyingTokens.length).fill(underlyingOracles[0]);
       }
     }
-    const tx = await spo.add(underlyingTokens, underlyingOracles);
+    const tx = await mpo.add(underlyingTokens, underlyingOracles);
     await tx.wait();
     console.log(`Master Price Oracle updated for tokens ${underlyingTokens.join(", ")}`);
   });
