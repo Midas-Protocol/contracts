@@ -40,7 +40,7 @@ task("pools:create", "Create pool if does not exist")
 
     const poolModule = await import("../test/utils/pool");
     // @ts-ignore
-    const sdkModule = await import("../dist/esm/src");
+    const sdkModule = await import("../src");
 
     const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId);
     if (!taskArgs.priceOracle) {
@@ -76,21 +76,16 @@ task("pools:create", "Create pool if does not exist")
         const rdInstance = await sdk.deployRewardsDistributor(rewardTokenInstance.address, {
           from: signer.address,
         });
-        await sdk.addRewardDistributer(poolAddress, rdInstance.address, {
+        await sdk.addRewardsDistributorToPool(rdInstance.address, poolAddress, {
           from: signer.address,
         });
-        await sdk.fundRewardDistributer(
-          rdInstance.address,
-          rewardTokenInstance.address,
-          hre.ethers.utils.parseUnits("10000"),
-          {
-            from: signer.address,
-          }
-        );
+        await sdk.fundRewardsDistributor(rdInstance.address, hre.ethers.utils.parseUnits("10000"), {
+          from: signer.address,
+        });
 
         const deployedCToken = deployedAssets.find((a) => a.underlying === rewardTokenInstance.address);
         if (deployedCToken) {
-          await sdk.updateDistributionSpeedSuppliers(
+          await sdk.updateRewardsDistributorSupplySpeed(
             rdInstance.address,
             deployedCToken.assetAddress,
             hre.ethers.utils.parseUnits("2"),
@@ -98,7 +93,7 @@ task("pools:create", "Create pool if does not exist")
               from: signer.address,
             }
           );
-          await sdk.updateDistributionSpeedBorrowers(
+          await sdk.updateRewardsDistributorBorrowSpeed(
             rdInstance.address,
             deployedCToken.assetAddress,
             hre.ethers.utils.parseUnits("1"),

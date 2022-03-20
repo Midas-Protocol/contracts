@@ -11,8 +11,8 @@ import {
 } from "../../typechain";
 import { createPool, deployAssets, DeployedAsset, getPoolAssets } from "./pool";
 import { expect } from "chai";
-import { cERC20Conf } from "../../dist/esm/src";
-import { Fuse } from "../../dist/cjs/src";
+import { cERC20Conf } from "../../src";
+import { Fuse } from "../../src";
 
 export const resetPriceOracle = async (erc20One, erc20Two) => {
   const chainId = parseInt(await getChainId());

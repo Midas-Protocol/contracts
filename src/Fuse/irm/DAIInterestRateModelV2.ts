@@ -1,4 +1,4 @@
-import JumpRateModel from "./JumpRateModel.js";
+import JumpRateModel from "./JumpRateModel";
 import { BigNumberish, Contract, BigNumber, utils } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
 

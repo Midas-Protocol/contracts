@@ -1,6 +1,6 @@
 import { constants } from "ethers";
 import { getChainId } from "hardhat";
-import { Fuse } from "../../dist/esm/src";
+import { Fuse } from "../../src";
 
 export const setUpOracleWithToken = async (_token, _address, ethers, getNamedAccounts) => {
   const { deployer } = await getNamedAccounts();

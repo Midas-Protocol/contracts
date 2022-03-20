@@ -1,7 +1,7 @@
 import { deployments, ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-import { Fuse } from "../dist/esm/src";
+import { Fuse } from "../src";
 import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { Comptroller, FusePoolDirectory, SimplePriceOracle, Unitroller } from "../typechain";
