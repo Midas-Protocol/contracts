@@ -16,6 +16,7 @@ import { expect } from "chai";
 import { FUSE_LIQUIDATION_PROTOCOL_FEE_PER_THOUSAND, FUSE_LIQUIDATION_SEIZE_FEE_PER_THOUSAND } from "./utils/config";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { cERC20Conf } from "../src";
+import { resetPriceOracle } from "./utils/setup";
 
 describe("Protocol Liquidation Seizing", () => {
   let eth: cERC20Conf;
@@ -75,13 +76,16 @@ describe("Protocol Liquidation Seizing", () => {
       fuseFeeDistributor,
     } = await setUpLiquidation({ poolName }));
   });
+  afterEach(async () => {
+    await resetPriceOracle(erc20One, erc20Two);
+  });
 
   it("should calculate the right amounts of protocol, fee, total supply after liquidation", async function () {
     this.timeout(120_000);
     const { bob, rando } = await ethers.getNamedSigners();
 
-    const borrowAmount = "0.5";
-    const repayAmount = utils.parseEther(borrowAmount).div(10);
+    const borrowAmount = "5";
+    const repayAmount = utils.parseEther(borrowAmount).div(2);
 
     // get some liquidity via Uniswap, if using mainnet forking
     if (chainId !== 1337) await tradeNativeForAsset({ account: "bob", token: erc20One.underlying, amount: "300" });
@@ -182,7 +186,7 @@ describe("Protocol Liquidation Seizing", () => {
     this.timeout(120_000);
     const { bob, rando } = await ethers.getNamedSigners();
 
-    const borrowAmount = "0.5";
+    const borrowAmount = "5";
 
     tx = await erc20OneUnderlying.connect(rando).approve(liquidator.address, constants.MaxUint256);
     await tx.wait();

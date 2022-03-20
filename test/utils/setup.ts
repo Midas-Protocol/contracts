@@ -1,5 +1,4 @@
 import { ethers, getChainId, run } from "hardhat";
-import { assets as bscAssets } from "../../chainDeploy/mainnets/bsc";
 import { BigNumber, constants, providers } from "ethers";
 import {
   CErc20,
@@ -15,6 +14,25 @@ import { expect } from "chai";
 import { cERC20Conf } from "../../dist/esm/src";
 import { Fuse } from "../../dist/cjs/src";
 
+export const resetPriceOracle = async (erc20One, erc20Two) => {
+  const chainId = parseInt(await getChainId());
+
+  if (chainId !== 31337 && chainId !== 1337) {
+    const { deployer } = await ethers.getNamedSigners();
+    const sdk = new Fuse(ethers.provider, Number(chainId));
+    const spo = (await ethers.getContractAt(
+      "MasterPriceOracle",
+      sdk.oracles.MasterPriceOracle.address,
+      deployer
+    )) as MasterPriceOracle;
+    const tx = await spo.add(
+      [erc20One.underlying, erc20Two.underlying],
+      [sdk.chainDeployment.ChainlinkPriceOracleV2.address, sdk.chainDeployment.ChainlinkPriceOracleV2.address]
+    );
+    await tx.wait();
+  }
+};
+
 export const setUpPriceOraclePrices = async () => {
   const chainId = parseInt(await getChainId());
   if (chainId === 31337 || chainId === 1337) {
@@ -25,19 +43,14 @@ export const setUpPriceOraclePrices = async () => {
 };
 
 const setupLocalOraclePrices = async () => {
-  await run("oracle:set-price", { token: "TRIBE", price: "50" });
-  await run("oracle:set-price", { token: "TOUCH", price: "0.0025" });
+  await run("oracle:set-price", { token: "TRIBE", price: "103.8582" });
+  await run("oracle:set-price", { token: "TOUCH", price: "0.002653" });
 };
 
 const setUpBscOraclePrices = async () => {
   const { deployer } = await ethers.getNamedSigners();
   const sdk = new Fuse(ethers.provider, 56);
   const oracle = await ethers.getContractAt("SimplePriceOracle", sdk.oracles.SimplePriceOracle.address, deployer);
-
-  for (const asset of bscAssets) {
-    await run("oracle:add-tokens", { underlyings: asset.underlying, oracles: oracle.address });
-    await run("oracle:set-price", { address: asset.underlying, price: "1" });
-  }
   await run("oracle:add-tokens", { underlyings: constants.AddressZero, oracles: oracle.address });
   await run("oracle:set-price", { address: constants.AddressZero, price: "1" });
 };
@@ -117,6 +130,10 @@ export const setUpLiquidation = async ({ poolName }) => {
 
   erc20OneOriginalUnderlyingPrice = await oracle.callStatic.price(erc20One.underlying);
   erc20TwoOriginalUnderlyingPrice = await oracle.callStatic.price(erc20Two.underlying);
+
+  console.log("Setting up liquis with prices: ");
+  console.log(`erc20One: ${erc20One.symbol}, price: ${ethers.utils.formatEther(erc20OneOriginalUnderlyingPrice)}`);
+  console.log(`erc20Two: ${erc20Two.symbol}, price: ${ethers.utils.formatEther(erc20TwoOriginalUnderlyingPrice)}`);
 
   await oracle.add([erc20One.underlying, erc20Two.underlying], Array(2).fill(simpleOracle.address));
 
