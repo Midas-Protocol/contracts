@@ -133,13 +133,13 @@ export async function setupLiquidatablePool(
 
   const native = chainDeployConfig[chainId].config.nativeTokenSymbol;
   // Supply 0.001 ETH from other account
-  await addCollateral(poolAddress, alice, native, "1", false);
+  await addCollateral(poolAddress, alice, native, "10", false);
   console.log(`Added ${native} collateral`);
   // Borrow 0.0001 ETH using token collateral
   await borrowCollateral(poolAddress, signer.address, native, borrowAmount);
 
   // Set price of token collateral to 1/10th of what it was
-  tx = await simpleOracle.setDirectPrice(token.underlying, BigNumber.from(originalPrice).div(10));
+  tx = await simpleOracle.setDirectPrice(token.underlying, BigNumber.from(originalPrice).mul(6).div(10));
   await tx.wait();
 }
 

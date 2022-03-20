@@ -4,7 +4,6 @@ import { deployments, ethers } from "hardhat";
 import { createPool, setUpPriceOraclePrices } from "./utils";
 import { assetInPool, deployAssets, getPoolAssets, getPoolIndex } from "./utils/pool";
 import { Fuse, USDPricedFuseAsset } from "../src";
-import { MasterPriceOracle, SimplePriceOracle } from "../typechain";
 import { chainDeployConfig } from "../chainDeploy";
 
 describe("Deposit flow tests", function () {
@@ -21,44 +20,11 @@ describe("Deposit flow tests", function () {
 
     beforeEach(async () => {
       this.timeout(120_000);
-      const { bob, deployer } = await ethers.getNamedSigners();
+      const { bob } = await ethers.getNamedSigners();
       const { chainId } = await ethers.provider.getNetwork();
-
       const sdk = new Fuse(ethers.provider, chainId);
-
       [poolAddress] = await createPool({});
       const assets = await getPoolAssets(poolAddress, sdk.contracts.FuseFeeDistributor.address);
-
-      const erc20One = assets.assets.find((a) => a.underlying !== constants.AddressZero); // find first one
-      expect(erc20One.underlying).to.be.ok;
-      const erc20Two = assets.assets.find(
-        (a) => a.underlying !== constants.AddressZero && a.underlying !== erc20One.underlying
-      ); // find second one
-
-      const simpleOracle = (await ethers.getContractAt(
-        "SimplePriceOracle",
-        sdk.oracles.SimplePriceOracle.address,
-        deployer
-      )) as SimplePriceOracle;
-      const oracle = (await ethers.getContractAt(
-        "MasterPriceOracle",
-        sdk.oracles.MasterPriceOracle.address,
-        deployer
-      )) as MasterPriceOracle;
-      expect(erc20Two.underlying).to.be.ok;
-      const eth = assets.assets.find((a) => a.underlying === constants.AddressZero);
-
-      await oracle.add([eth.underlying, erc20One.underlying, erc20Two.underlying], Array(3).fill(simpleOracle.address));
-
-      let tx = await simpleOracle.setDirectPrice(eth.underlying, utils.parseEther("1"));
-      await tx.wait();
-
-      tx = await simpleOracle.setDirectPrice(erc20One.underlying, utils.parseEther("10"));
-      await tx.wait();
-
-      tx = await simpleOracle.setDirectPrice(erc20Two.underlying, utils.parseEther("0.0001"));
-      await tx.wait();
-
       await deployAssets(assets.assets, bob);
     });
 
