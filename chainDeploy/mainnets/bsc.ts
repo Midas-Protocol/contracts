@@ -131,6 +131,13 @@ export const assets: Asset[] = [
     name: "xBOMB",
     decimals: 18,
   },
+  // Jarvis
+  {
+    symbol: "jBRL",
+    underlying: "0x316622977073BBC3dF32E7d2A9B3c77596a0a603",
+    name: "Jarvis Synthetic Brazilian Real",
+    decimals: 18,
+  }
 ];
 
 export const deployConfig: ChainDeployConfig = {
