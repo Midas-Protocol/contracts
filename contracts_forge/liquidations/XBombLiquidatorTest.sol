@@ -15,7 +15,6 @@ contract XBombLiquidatorTest is DSTest {
   IXBomb xbombToken = IXBomb(0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b);
   address bombTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
 
-
   function setUp() public {
     // impersonate the holder
     vm.startPrank(holder);
