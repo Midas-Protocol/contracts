@@ -51,6 +51,7 @@ task("get-position-ratio", "Get unhealthy po data")
     types.string
   )
   .addOptionalParam("cgId", "Coingecko id for the native asset", "ethereum", types.string)
+  .addOptionalParam("logData", "Verbose logging", false, types.boolean)
   .setAction(async (taskArgs, hre) => {
     // @ts-ignore
     const sdkModule = await import("../src");
@@ -66,7 +67,7 @@ task("get-position-ratio", "Get unhealthy po data")
     if (!taskArgs.namedUser && !taskArgs.userAddress) {
       throw "Must provide either a named user or an account address";
     }
-    if (!taskArgs.poolId && !taskArgs.name) {
+    if (!taskArgs.poolId && !taskArgs.name && taskArgs.poolId !== 0) {
       throw "Must provide either a pool name or a pool id";
     }
 
@@ -83,11 +84,29 @@ task("get-position-ratio", "Get unhealthy po data")
       ? await poolModule.getPoolByName(taskArgs.name, sdk, poolUser, taskArgs.cgId)
       : await sdk.fetchFusePoolData(taskArgs.poolId.toString(), poolUser, taskArgs.cgId);
 
-    const maxBorrow = fusePoolData.assets
-      .map(
-        (a) => a.supplyBalanceUSD * parseFloat(hre.ethers.utils.formatUnits(a.collateralFactor, a.underlyingDecimals))
-      )
-      .reduce((a, b) => a + b, 0);
+    const maxBorrowR = fusePoolData.assets.map((a) => {
+      const mult = parseFloat(hre.ethers.utils.formatUnits(a.collateralFactor, a.underlyingDecimals));
+      if (taskArgs.logData) {
+        console.log(
+          a.underlyingSymbol,
+          "\n supplyBalanceUSD: ",
+          a.supplyBalanceUSD,
+          "\n borrowBalanceUSD: ",
+          a.borrowBalanceUSD,
+          "\n totalSupplyUSD: ",
+          a.totalSupplyUSD,
+          "\n totalBorrowUSD: ",
+          a.totalBorrowUSD,
+          "\n Multiplier: ",
+          mult,
+          "\n Max Borrow Asset: ",
+          mult * a.supplyBalanceUSD
+        );
+      }
+
+      return a.supplyBalanceUSD * parseFloat(hre.ethers.utils.formatUnits(a.collateralFactor, a.underlyingDecimals));
+    });
+    const maxBorrow = maxBorrowR.reduce((a, b) => a + b, 0);
     const ratio = (fusePoolData.totalBorrowBalanceUSD / maxBorrow) * 100;
     console.log(`Ratio of total borrow / max borrow: ${ratio} %`);
     return ratio;
@@ -100,3 +119,16 @@ task("get-public-pools", "Get public pools").setAction(async ({}, { ethers, getN
   const pools = await fpd.callStatic.getPublicPoolsWithData();
   console.log("pools: ", pools);
 });
+
+task("get-balance-of", "Get public pools")
+  .addOptionalParam("name", "Name of the pool", "deployer", types.string)
+  .addOptionalParam("tokenAddress", "Address of token", undefined, types.string)
+  .setAction(async (taskArgs, hre) => {
+    const signer = await hre.ethers.getNamedSigner(taskArgs.name);
+    if (!taskArgs.tokenAddress) {
+      console.log("balance: ", hre.ethers.utils.formatEther(await signer.getBalance()));
+    } else {
+      const token = await hre.ethers.getContractAt("EIP20Interface", taskArgs.tokenAddress);
+      console.log("balance: ", hre.ethers.utils.formatEther(await token.balanceOf(signer.address)));
+    }
+  });

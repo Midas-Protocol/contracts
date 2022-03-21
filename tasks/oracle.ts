@@ -49,7 +49,7 @@ task("oracle:add-tokens", "Initalize MasterPriceOracle with underlying oracle fo
       // by default, get uniswap's twap oracle address
       const uniOracleFactory = await ethers.getContractAt(
         "UniswapTwapPriceOracleV2Factory",
-        sdk.oracles.UniswapTwapPriceOracleV2Factory.address,
+        sdk.chainDeployment.UniswapTwapPriceOracleV2Factory.address,
         deployer
       );
       const underlyingOracle = await uniOracleFactory.callStatic.oracles(
