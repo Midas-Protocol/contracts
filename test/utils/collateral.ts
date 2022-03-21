@@ -1,5 +1,5 @@
 import { BigNumber, constants, Contract, providers, utils } from "ethers";
-import { ERC20Abi, Fuse, USDPricedFuseAsset } from "../../dist/esm/src";
+import { ERC20Abi, Fuse, USDPricedFuseAsset } from "../../src";
 import { assetInPool, DeployedAsset, getPoolIndex } from "./pool";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -104,7 +104,13 @@ export async function borrowCollateral(
   rec = await tx.wait();
   expect(rec.status).to.eq(1);
   const poolId = await getPoolIndex(poolAddress, sdk);
-  const assetAfterBorrow = await assetInPool(poolId.toString(), sdk, assetToDeploy.underlyingSymbol, signer.address, cgId);
+  const assetAfterBorrow = await assetInPool(
+    poolId.toString(),
+    sdk,
+    assetToDeploy.underlyingSymbol,
+    signer.address,
+    cgId
+  );
   console.log(assetAfterBorrow.borrowBalanceUSD, "Borrow Balance USD: AFTER mint & borrow");
   console.log(assetAfterBorrow.supplyBalanceUSD, "Supply Balance USD: AFTER mint & borrow");
 }
@@ -127,13 +133,13 @@ export async function setupLiquidatablePool(
 
   const native = chainDeployConfig[chainId].config.nativeTokenSymbol;
   // Supply 0.001 ETH from other account
-  await addCollateral(poolAddress, alice, native, "1", false);
+  await addCollateral(poolAddress, alice, native, "10", false);
   console.log(`Added ${native} collateral`);
   // Borrow 0.0001 ETH using token collateral
   await borrowCollateral(poolAddress, signer.address, native, borrowAmount);
 
   // Set price of token collateral to 1/10th of what it was
-  tx = await simpleOracle.setDirectPrice(token.underlying, BigNumber.from(originalPrice).div(10));
+  tx = await simpleOracle.setDirectPrice(token.underlying, BigNumber.from(originalPrice).mul(6).div(10));
   await tx.wait();
 }
 

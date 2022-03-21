@@ -57,7 +57,7 @@ import {
 } from "./config";
 import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig, SupportedChains } from "../network";
 import { filterOnlyObjectProperties, filterPoolName } from "./utils";
-import { withRewardDistributer } from "../modules/RewardDistributer";
+import { withRewardsDistributor } from "../modules/RewardsDistributor";
 import { withFusePoolLens } from "../modules/FusePoolLens";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FusePoolLens } from "../../typechain/FusePoolLens";
@@ -206,6 +206,7 @@ export class FuseBase {
     let receipt: providers.TransactionReceipt;
     try {
       const contract = this.contracts.FusePoolDirectory.connect(this.provider.getSigner(options.from));
+      // TODO deployPool also returns the poolId which comes in handy! We should get that as well.
       const tx = await contract.deployPool(
         poolName,
         implementationAddress,
@@ -1090,5 +1091,5 @@ export class FuseBase {
   };
 }
 
-const FuseBaseWithModules = withFusePoolLens(withRewardDistributer(FuseBase));
+const FuseBaseWithModules = withFusePoolLens(withRewardsDistributor(FuseBase));
 export default class Fuse extends FuseBaseWithModules {}
