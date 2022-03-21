@@ -147,7 +147,10 @@ export const deployConfig: ChainDeployConfig = {
     pairInitHashCode: ethers.utils.hexlify("0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5"),
     uniswapV2RouterAddress: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
     uniswapV2FactoryAddress: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
-    uniswapOracleInitialDeployTokens: [],
+    uniswapOracleInitialDeployTokens: [
+      // TODO: not sure if needed to add this here or some other update/deployment script
+      "0x522348779DCb2911539e76A1042aA922F9C47Ee3", // BOMB
+    ],
   },
 };
 

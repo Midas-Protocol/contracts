@@ -4,7 +4,7 @@ import { solidity } from "ethereum-waffle";
 import { Fuse } from "../src";
 import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { Comptroller, FusePoolDirectory, SimplePriceOracle, Unitroller } from "../typechain";
+import { Comptroller, FusePoolDirectory, MasterPriceOracle, Unitroller } from "../typechain";
 import { setUpPriceOraclePrices } from "./utils";
 import { getAssetsConf } from "./utils/assets";
 import { chainDeployConfig } from "../chainDeploy";
@@ -12,7 +12,7 @@ import { chainDeployConfig } from "../chainDeploy";
 use(solidity);
 
 describe.skip("FusePoolDirectory", function () {
-  let mpo: SimplePriceOracle;
+  let mpo: MasterPriceOracle;
   let fpdWithSigner: FusePoolDirectory;
   let implementationComptroller: Comptroller;
 

@@ -15,12 +15,9 @@ contract XBombLiquidator is IRedemptionStrategy {
     bytes memory strategyData
   ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
     IXBomb xBomb = IXBomb(address(inputToken));
-    //    uint256 expectedReward = xBomb.toREWARD(inputAmount);
 
+    // burns the xBOMB and returns the underlying BOMB to the liquidator
     xBomb.leave(inputAmount);
-
-    //    outputAmount = xBomb.reward().balanceOf(address(this));
-    //    require(outputAmount >= expectedReward);
 
     outputToken = IERC20Upgradeable(address(xBomb.reward()));
     outputAmount = xBomb.reward().balanceOf(address(this));
