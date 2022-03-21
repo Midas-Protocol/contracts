@@ -5,18 +5,16 @@ import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "../../contracts/external/bomb/IXBomb.sol";
 import "../../contracts/liquidators/XBombLiquidator.sol";
-import "../../contracts/oracles/MasterPriceOracle.sol";
-import "../../contracts/oracles/default/UniswapTwapPriceOracleV2Factory.sol";
+import "../../contracts/oracles/default/UniswapTwapPriceOracleV2.sol";
 
 contract XBombLiquidatorTest is DSTest {
   Vm public constant vm = Vm(HEVM_ADDRESS);
 
   // the Pancake BOMB/xBOMB pair
   address holder = 0x6aE0Fb5D98911cF5AF6A8CE0AeCE426227d41103;
-
   IXBomb xbombToken = IXBomb(0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b);
-  address underlyingBombTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
-  MasterPriceOracle mpo = MasterPriceOracle(0x37CF9eA8C6Bb6C020D4B5e7C3C462B02313aaFF4);
+  address bombTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
+
 
   function setUp() public {
     // impersonate the holder
@@ -38,7 +36,7 @@ contract XBombLiquidatorTest is DSTest {
     pairs[0] = pairAddress;
     twapOracleRoot.update(pairs);
 
-    assertTrue(twapOracleRoot.price(underlyingBombTokenAddress, wbtc, factoryAddress) > 0);
+    assertTrue(twapOracleRoot.price(bombTokenAddress, wbtc, factoryAddress) > 0);
   }
 
   function testRedeem() public {
@@ -57,7 +55,7 @@ contract XBombLiquidatorTest is DSTest {
       ""
     );
 
-    assertEq(address(outputToken), underlyingBombTokenAddress);
+    assertEq(address(outputToken), bombTokenAddress);
     assertEq(outputAmount, xbombToken.toREWARD(balance));
   }
 }
