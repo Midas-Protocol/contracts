@@ -1,8 +1,8 @@
-import { SALT } from "../../deploy/deploy";
-import { ChainDeployConfig, ChainlinkFeedBaseCurrency, deployChainlinkOracle, deployUniswapOracle } from "../helpers";
-import { ethers } from "ethers";
-import { Asset, ChainDeployFnParams, ChainlinkAsset, CurvePoolConfig } from "../helpers/types";
-import { deployCurveLpOracle } from "../oracles/curveLp";
+import {SALT} from "../../deploy/deploy";
+import {ChainDeployConfig, ChainlinkFeedBaseCurrency, deployChainlinkOracle, deployUniswapOracle} from "../helpers";
+import {ethers} from "ethers";
+import {Asset, ChainDeployFnParams, ChainlinkAsset, CurvePoolConfig} from "../helpers/types";
+import {deployCurveLpOracle} from "../oracles/curveLp";
 
 export const assets: Asset[] = [
   {
@@ -234,6 +234,12 @@ const chainlinkAssets: ChainlinkAsset[] = [
   {
     symbol: "UST",
     aggregator: "0xcbf8518F8727B8582B22837403cDabc53463D462",
+    feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
+  },
+  // Jarvis
+  {
+    symbol: "jBRL",
+    aggregator: "0x5cb1Cb3eA5FB46de1CE1D0F3BaDB3212e8d8eF48",
     feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
   },
 ];

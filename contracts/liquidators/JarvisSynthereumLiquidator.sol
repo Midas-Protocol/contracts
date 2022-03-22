@@ -12,15 +12,22 @@ contract JarvisSynthereumLiquidator is IRedemptionStrategy {
   ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
     ISynthereumLiquidityPool pool = ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49);
 
-    (uint256 collateralRedeemed, uint256 feePaid) = pool.getRedeemTradeInfo(inputAmount);
+    if(pool.emergencyShutdownPrice() > 0) {
+      (, uint256 collateralSettled) = pool.settleEmergencyShutdown();
+      outputAmount = collateralSettled;
+      outputToken = IERC20Upgradeable(address(pool.collateralToken()));
+    } else {
+      // fetch the estimated redeemable collateral in BUSD, less the fee paid
+      (uint256 collateralRedeemed, uint256 feePaid) = pool.getRedeemTradeInfo(inputAmount);
 
-    pool.redeem(
-      ISynthereumLiquidityPool.RedeemParams(
-        inputAmount,
-        collateralRedeemed,
-        block.timestamp + 60*40, // 40 mins forward
-        address(this)
-      )
-    );
+      pool.redeem(
+        ISynthereumLiquidityPool.RedeemParams(
+          inputAmount,
+          collateralRedeemed,
+          block.timestamp + (60 * 40), // 40 mins forward
+          address(this)
+        )
+      );
+    }
   }
 }
