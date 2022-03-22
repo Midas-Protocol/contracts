@@ -8,7 +8,7 @@ interface IW_NATIVE {
 
   function approve(address spender, uint256 amount) external returns (bool);
 
-  function trasfer(address to, uint256 amount) external returns (bool);
+  function transfer(address to, uint256 amount) external returns (bool);
 
   function transferFrom(
       address from,
