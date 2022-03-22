@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 import "../external/alpha/ISafeBoxETH.sol";
 
-import "../external/aave/IW_NATIVE.sol";
+import "../utils/IW_NATIVE.sol";
 
 import "./IRedemptionStrategy.sol";
 
