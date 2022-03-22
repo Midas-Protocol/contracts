@@ -39,12 +39,15 @@ jobs:
           cache: "npm"
       - run: npm install
       - run: npm run build
-      - run: npm run test:hardhat
+      - name: Run hardhat tests
+        run: npm run test:hardhat
       - name: Run forge tests
-        run: forge test -vvv
+        run: npm run test:forge
 
   build-and-test-bsc:
     env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
       MNEMONIC: "${{ secrets.MNEMONIC }}"
     runs-on: ubuntu-latest
     steps:
@@ -61,4 +64,7 @@ jobs:
           cache: "npm"
       - run: npm install
       - run: npm run build
-      - run: npm run test:bsc
+      - name: Run hardhat tests on BSC
+        run: npm run test:bsc
+      - name: Run forge tests on BSC
+        run: npm run test:forge:bsc
