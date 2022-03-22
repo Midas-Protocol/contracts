@@ -47,6 +47,8 @@ jobs:
   build-and-test-bsc:
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
+      FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
