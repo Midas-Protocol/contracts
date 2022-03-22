@@ -46,7 +46,7 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
     }
 
     async fundRewardsDistributor(rewardsDistributorAddress: string, amount: BigNumberish, options: { from: string }) {
-      const rewardsDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
+      const rewardsDistributorInstance = this.#getRewardsDistributorInstance(rewardsDistributorAddress, options);
 
       const rewardTokenAddress = await rewardsDistributorInstance.rewardToken();
 
@@ -64,7 +64,7 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
       cTokenAddress: string,
       options: { from: string }
     ) {
-      const rewardsDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
+      const rewardsDistributorInstance = this.#getRewardsDistributorInstance(rewardsDistributorAddress, options);
       return rewardsDistributorInstance.compSupplySpeeds(cTokenAddress);
     }
 
@@ -73,7 +73,7 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
       cTokenAddress: string,
       options: { from: string }
     ) {
-      const rewardsDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
+      const rewardsDistributorInstance = this.#getRewardsDistributorInstance(rewardsDistributorAddress, options);
       return rewardsDistributorInstance.compSupplySpeeds(cTokenAddress);
     }
 
@@ -83,7 +83,7 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
       amount: BigNumberish,
       options: { from: string }
     ) {
-      const rewardsDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
+      const rewardsDistributorInstance = this.#getRewardsDistributorInstance(rewardsDistributorAddress, options);
 
       return rewardsDistributorInstance._setCompSupplySpeed(cTokenAddress, amount);
     }
@@ -94,7 +94,7 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
       amount: BigNumberish,
       options: { from: string }
     ) {
-      const rewardsDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
+      const rewardsDistributorInstance = this.#getRewardsDistributorInstance(rewardsDistributorAddress, options);
 
       return rewardsDistributorInstance._setCompBorrowSpeed(cTokenAddress, amount);
     }
@@ -106,7 +106,7 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
       amountBorrowers: BigNumberish[],
       options: { from: string }
     ) {
-      const rewardsDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
+      const rewardsDistributorInstance = this.#getRewardsDistributorInstance(rewardsDistributorAddress, options);
 
       return rewardsDistributorInstance._setCompSpeeds(cTokenAddress, amountSuppliers, amountBorrowers);
     }
@@ -170,11 +170,11 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
     }
 
     claimAllRewardsDistributorRewards(rewardsDistributorAddress: string, options: { from: string }) {
-      const rewardsDistributorInstance = this.#getRewardsDistributor(rewardsDistributorAddress, options);
+      const rewardsDistributorInstance = this.#getRewardsDistributorInstance(rewardsDistributorAddress, options);
       return rewardsDistributorInstance.functions["claimRewards(address)"](options.from);
     }
 
-    #getRewardsDistributor(rewardsDistributorAddress: string, options: { from: string }) {
+    #getRewardsDistributorInstance(rewardsDistributorAddress: string, options: { from: string }) {
       return new Contract(
         rewardsDistributorAddress,
         this.chainDeployment.RewardsDistributorDelegate.abi,
