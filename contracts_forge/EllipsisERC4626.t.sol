@@ -59,6 +59,7 @@ contract EllipsisERC4626Test is DSTest {
     );
 
     flywheelRewards = new FlywheelDynamicRewards(epsToken, address(flywheel));
+    flywheel.setFlywheelRewards(flywheelRewards);
 
     ellipsisERC4626 = new EllipsisERC4626(
       testToken,
@@ -70,7 +71,6 @@ contract EllipsisERC4626Test is DSTest {
       IFlywheelCore(address(flywheel))
     );
     marketKey = ERC20(address(ellipsisERC4626));
-    flywheel.setFlywheelRewards(flywheelRewards);
     flywheel.addMarketForRewards(marketKey);
   }
 
@@ -81,6 +81,8 @@ contract EllipsisERC4626Test is DSTest {
     assertEq(address(ellipsisERC4626.lpTokenStaker()), address(mockLpTokenStaker));
     assertEq(address(ellipsisERC4626.epsStaker()), address(mockEpsStaker));
     assertEq(address(marketKey), address(ellipsisERC4626));
+    assertEq(testToken.allowance(address(ellipsisERC4626), address(mockLpTokenStaker)), type(uint256).max);
+    assertEq(epsToken.allowance(address(ellipsisERC4626), address(flywheelRewards)), type(uint256).max);
   }
 
   function deposit() public {
@@ -141,11 +143,12 @@ contract EllipsisERC4626Test is DSTest {
 
     vm.warp(3);
     deposit();
+    flywheel.accrue(ERC20(ellipsisERC4626), address(this));
     assertEq(mockEpsStaker.totalBalance(address(this)), 0);
     assertEq(epsToken.balanceOf(address(mockEpsStaker)), 0.5e18);
     assertEq(epsToken.balanceOf(address(ellipsisERC4626)), 0);
-    assertEq(epsToken.balanceOf(address(flywheel)), 0.5e18);
-    assertEq(epsToken.balanceOf(address(flywheelRewards)), 0);
+    assertEq(epsToken.balanceOf(address(flywheel)), 0);
+    assertEq(epsToken.balanceOf(address(flywheelRewards)), 0.5e18);
   }
 
   function testAccumulatingEPSRewardsOnWithdrawal() public {
@@ -153,59 +156,23 @@ contract EllipsisERC4626Test is DSTest {
     deposit();
 
     vm.warp(3);
-    ellipsisERC4626.withdraw(depositAmount, address(this), address(this));
+    ellipsisERC4626.withdraw(1, address(this), address(this));
+    flywheel.accrue(ERC20(ellipsisERC4626), address(this));
     assertEq(mockEpsStaker.totalBalance(address(this)), 0);
     assertEq(epsToken.balanceOf(address(mockEpsStaker)), 0.5e18);
     assertEq(epsToken.balanceOf(address(ellipsisERC4626)), 0);
-    assertEq(epsToken.balanceOf(address(flywheel)), 0.5e18);
-    assertEq(epsToken.balanceOf(address(flywheelRewards)), 0);
-  }
-
-  function testAccumulatingEPSRewardsOnTransfer() public {
-    vm.warp(2);
-    deposit();
-    vm.warp(3);
-
-    vm.startPrank(tester);
-    testToken.mint(tester, depositAmount);
-    testToken.approve(address(ellipsisERC4626), depositAmount);
-    ellipsisERC4626.deposit(depositAmount, tester);
-    vm.stopPrank();
-
-    vm.warp(4);
-    ellipsisERC4626.transfer(tester, depositAmount);
-    flywheel.claimRewards(address(this));
-    assertEq(epsToken.balanceOf(address(this)), 0.25e18);
-    flywheel.claimRewards(tester);
-    assertEq(epsToken.balanceOf(tester), 0.25e18);
-  }
-
-  function testAccumulatingEPSRewardsOnTransferFrom() public {
-    vm.warp(2);
-    deposit();
-    ellipsisERC4626.approve(tester, depositAmount);
-    vm.warp(3);
-
-    vm.startPrank(tester);
-    testToken.mint(tester, depositAmount);
-    testToken.approve(address(ellipsisERC4626), depositAmount);
-    ellipsisERC4626.deposit(depositAmount, tester);
-    vm.roll(4);
-    ellipsisERC4626.transferFrom(address(this), tester, depositAmount);
-    vm.stopPrank();
-    flywheel.claimRewards(address(this));
-    assertEq(epsToken.balanceOf(address(this)), 0.25e18);
-    flywheel.claimRewards(tester);
-    assertEq(epsToken.balanceOf(tester), 0.25e18);
+    assertEq(epsToken.balanceOf(address(flywheel)), 0);
+    assertEq(epsToken.balanceOf(address(flywheelRewards)), 0.5e18);
   }
 
   function testClaimRewards() public {
     vm.warp(2);
     deposit();
     vm.warp(3);
-    ellipsisERC4626.withdraw(depositAmount, address(this), address(this));
+    ellipsisERC4626.withdraw(1, address(this), address(this));
+    flywheel.accrue(ERC20(ellipsisERC4626), address(this));
     flywheel.claimRewards(address(this));
-    assertEq(epsToken.balanceOf(address(this)), 0.5e18);
+    assertEq(epsToken.balanceOf(address(this)), 499999999999999999);
   }
 
   function testClaimForMultipleUser() public {
@@ -218,10 +185,11 @@ contract EllipsisERC4626Test is DSTest {
     vm.stopPrank();
 
     vm.warp(3);
-    ellipsisERC4626.withdraw(depositAmount, address(this), address(this));
+    ellipsisERC4626.withdraw(1, address(this), address(this));
+    flywheel.accrue(ERC20(ellipsisERC4626), address(this), tester);
     flywheel.claimRewards(address(this));
     flywheel.claimRewards(tester);
-    assertEq(epsToken.balanceOf(address(tester)), 0.25e18);
-    assertEq(epsToken.balanceOf(address(this)), 0.5e18);
+    assertEq(epsToken.balanceOf(address(tester)), 0.5e18);
+    assertEq(epsToken.balanceOf(address(this)), 499999999999999999);
   }
 }

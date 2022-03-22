@@ -43,6 +43,7 @@ contract AutofarmERC4626 is ERC4626 {
      @param _name The name for the vault token.
      @param _symbol The symbol for the vault token.
      @param _poolId TODO
+     @param _autoToken The AUTO token. Used to approve flywheel
      @param _autofarm The autofarm contract.
      @param _flywheel TODO
 
@@ -52,6 +53,7 @@ contract AutofarmERC4626 is ERC4626 {
     string memory _name,
     string memory _symbol,
     uint256 _poolId,
+    ERC20 _autoToken,
     IAutofarmV2 _autofarm,
     IFlywheelCore _flywheel
   ) ERC4626(_asset, _name, _symbol) {
@@ -60,7 +62,7 @@ contract AutofarmERC4626 is ERC4626 {
     flywheel = _flywheel;
 
     asset.approve(address(autofarm), type(uint256).max);
-    ERC20(autofarm.AUTO()).approve(address(flywheel.flywheelRewards()), type(uint256).max);
+    _autoToken.approve(address(flywheel.flywheelRewards()), type(uint256).max);
   }
 
   /* ========== VIEWS ========== */
