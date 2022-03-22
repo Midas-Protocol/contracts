@@ -1,4 +1,3 @@
-// Ethers
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import axios from "axios";
@@ -12,7 +11,6 @@ import ComptrollerArtifact from "../../artifacts/contracts/compound/Comptroller.
 import CTokenInterfacesArtifact from "../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json";
 import DAIInterestRateModelV2Artifact from "../../artifacts/contracts/compound/DAIInterestRateModelV2.sol/DAIInterestRateModelV2.json";
 import EIP20InterfaceArtifact from "../../artifacts/contracts/compound/EIP20Interface.sol/EIP20Interface.json";
-// IRM Artifacts
 import JumpRateModelArtifact from "../../artifacts/contracts/compound/JumpRateModel.sol/JumpRateModel.json";
 import RewardsDistributorDelegatorArtifact from "../../artifacts/contracts/compound/RewardsDistributorDelegator.sol/RewardsDistributorDelegator.json";
 import UnitrollerArtifact from "../../artifacts/contracts/compound/Unitroller.sol/Unitroller.json";
@@ -20,7 +18,6 @@ import WhitePaperInterestRateModelArtifact from "../../artifacts/contracts/compo
 import SimplePriceOracleArtifact from "../../artifacts/contracts/oracles/1337/SimplePriceOracle.sol/SimplePriceOracle.json";
 import ChainlinkPriceOracleV2Artifact from "../../artifacts/contracts/oracles/default/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json";
 import PreferredPriceOracleArtifact from "../../artifacts/contracts/oracles/default/PreferredPriceOracle.sol/PreferredPriceOracle.json";
-// Oracle Artifacts
 import MasterPriceOracleArtifact from "../../artifacts/contracts/oracles/MasterPriceOracle.sol/MasterPriceOracle.json";
 import Deployments from "../../deployments.json";
 import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
@@ -32,7 +29,6 @@ import { withFlywheel } from "../modules/Flywheel";
 import { withFusePoolLens } from "../modules/FusePoolLens";
 import { withRewardsDistributor } from "../modules/RewardsDistributor";
 import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig, SupportedChains } from "../network";
-// ABIs
 import uniswapV3PoolAbiSlim from "./abi/UniswapV3Pool.slim.json";
 import {
   COMPTROLLER_ERROR_CODES,
@@ -42,10 +38,8 @@ import {
   WHITE_PAPER_RATE_MODEL_CONF,
 } from "./config";
 import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
-// InterestRate Models
 import JumpRateModel from "./irm/JumpRateModel";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
-// Types
 import {
   Artifact,
   Artifacts,
