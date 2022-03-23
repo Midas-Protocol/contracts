@@ -30,22 +30,22 @@ contract JarvisSynthereumLiquidatorTest is BscMainnetBaseTest {
     assertEq(outputAmount, redeemableAmount);
   }
 
-    function testEmergencyRedeemToken() public {
-      ISynthereumLiquidityPool pool = liquidator.pool();
-      address manager = pool.synthereumFinder().getImplementationAddress('Manager');
-      vm.prank(manager);
-      pool.emergencyShutdown();
+  function testEmergencyRedeemToken() public {
+    ISynthereumLiquidityPool pool = liquidator.pool();
+    address manager = pool.synthereumFinder().getImplementationAddress("Manager");
+    vm.prank(manager);
+    pool.emergencyShutdown();
 
-      IERC20Upgradeable jBRLToken = chainConfig.coins[1];
-      uint256 whaleBalance = jBRLToken.balanceOf(whale);
-      vm.prank(whale);
-      jBRLToken.transfer(address(liquidator), whaleBalance);
+    IERC20Upgradeable jBRLToken = chainConfig.coins[1];
+    uint256 whaleBalance = jBRLToken.balanceOf(whale);
+    vm.prank(whale);
+    jBRLToken.transfer(address(liquidator), whaleBalance);
 
-      (uint256 redeemableAmount, uint256 fee) = liquidator.pool().getRedeemTradeInfo(whaleBalance);
-      (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(jBRLToken, whaleBalance, "");
+    (uint256 redeemableAmount, uint256 fee) = liquidator.pool().getRedeemTradeInfo(whaleBalance);
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(jBRLToken, whaleBalance, "");
 
-      // should be BUSD
-      assertEq(address(outputToken), address(chainConfig.coins[0]));
-      assertEq(outputAmount, redeemableAmount + fee);
-    }
+    // should be BUSD
+    assertEq(address(outputToken), address(chainConfig.coins[0]));
+    assertEq(outputAmount, redeemableAmount + fee);
+  }
 }
