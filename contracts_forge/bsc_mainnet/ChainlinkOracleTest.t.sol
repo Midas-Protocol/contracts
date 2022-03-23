@@ -4,11 +4,13 @@ pragma solidity >=0.8.0;
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "../../contracts/oracles/default/ChainlinkPriceOracleV2.sol";
-import { BscMainnetBaseTest } from "../config/BaseTest.t.sol";
+import "../config/BaseTest.t.sol";
 
-contract ChainlinkOraclesTest is BscMainnetBaseTest {
+contract ChainlinkOraclesTest is BaseTest {
+  function setUp() public {}
+
   function testPriceFeed(address testedTokenAddress, address aggregatorAddress) internal returns (uint256 price) {
-    ChainlinkPriceOracleV2 oracle = chainConfigs[56].chainlinkOracle;
+    ChainlinkPriceOracleV2 oracle = chainConfig.chainlinkOracle;
 
     address[] memory underlyings = new address[](1);
     underlyings[0] = testedTokenAddress;
@@ -22,7 +24,7 @@ contract ChainlinkOraclesTest is BscMainnetBaseTest {
     price = oracle.price(testedTokenAddress);
   }
 
-  function testJBRLPrice() public {
+  function testJBRLPrice() shouldRun(forChains(BSC_MAINNET)) public {
     address jBRLAddress = 0x316622977073BBC3dF32E7d2A9B3c77596a0a603;
     address jBRLAggregatorAddress = 0x5cb1Cb3eA5FB46de1CE1D0F3BaDB3212e8d8eF48;
 

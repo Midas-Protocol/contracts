@@ -4,19 +4,17 @@ pragma solidity >=0.8.0;
 import "../config/BaseTest.t.sol";
 import "../../contracts/liquidators/JarvisSynthereumLiquidator.sol";
 
-contract JarvisSynthereumLiquidatorTest is BscMainnetBaseTest {
+contract JarvisSynthereumLiquidatorTest is BaseTest {
   JarvisSynthereumLiquidator private liquidator;
-  ChainConfig private chainConfig;
-  address whale = 0xB57c5C22aA7b9Cd25D557f061Df61cBCe1898456;
+  address whale;
 
-  function setUp() public override {
-    super.setUp();
-    chainConfig = chainConfigs[block.chainid];
+  function setUp() public {
+    whale = 0xB57c5C22aA7b9Cd25D557f061Df61cBCe1898456;
     uint64 expirationPeriod = 60 * 40; // 40 mins
     liquidator = new JarvisSynthereumLiquidator(chainConfig.synthereumLiquiditiyPool, expirationPeriod);
   }
 
-  function testRedeemToken() public {
+  function testRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
     IERC20Upgradeable jBRLToken = chainConfig.coins[1];
     uint256 whaleBalance = jBRLToken.balanceOf(whale);
     vm.prank(whale);
@@ -30,7 +28,7 @@ contract JarvisSynthereumLiquidatorTest is BscMainnetBaseTest {
     assertEq(outputAmount, redeemableAmount);
   }
 
-  function testEmergencyRedeemToken() public {
+  function testEmergencyRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
     ISynthereumLiquidityPool pool = liquidator.pool();
     address manager = pool.synthereumFinder().getImplementationAddress("Manager");
     vm.prank(manager);

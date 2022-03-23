@@ -10,15 +10,12 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import { CurveLpTokenLiquidatorNoRegistry } from "../../contracts/liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
 import "../../contracts/utils/IW_NATIVE.sol";
 import "../../contracts/external/curve/ICurvePool.sol";
-import { BscMainnetBaseTest } from "../config/BaseTest.t.sol";
+import "../config/BaseTest.t.sol";
 
-contract CurveLpTokenLiquidatorNoRegistryTest is BscMainnetBaseTest {
+contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
   CurveLpTokenLiquidatorNoRegistry private liquidator;
-  ChainConfig private chainConfig;
 
-  function setUp() public override {
-    super.setUp();
-    chainConfig = chainConfigs[block.chainid];
+  function setUp() public {
     liquidator = new CurveLpTokenLiquidatorNoRegistry(chainConfig.weth, chainConfig.curveLPTokenPriceOracleNoRegistry);
   }
 
