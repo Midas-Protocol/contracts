@@ -204,6 +204,6 @@ contract LiquidityMiningTest is DSTest {
     );
 
     // user balance should accumulate from both rewards
-    require(rewardToken.balanceOf(user) == userRewards + userRewards2, "balance machtes");
+    require(rewardToken.balanceOf(user) == userRewards + userRewards2, "balance mismatch");
   }
 }
