@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import "../../contracts/external/bomb/IXBomb.sol";
 import "../../contracts/liquidators/XBombLiquidator.sol";
-import {BscMainnetBaseTest} from "../config/BaseTest.sol";
+import {BscMainnetBaseTest} from "../config/BaseTest.t.sol";
 
 contract XBombLiquidatorTest is BscMainnetBaseTest {
   // the Pancake BOMB/xBOMB pair

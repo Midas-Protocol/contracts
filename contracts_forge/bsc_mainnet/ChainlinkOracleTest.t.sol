@@ -4,7 +4,7 @@ pragma solidity >=0.4.23;
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "../../contracts/oracles/default/ChainlinkPriceOracleV2.sol";
-import { BscMainnetBaseTest} from "../config/BaseTest.sol";
+import { BscMainnetBaseTest} from "../config/BaseTest.t.sol";
 
 contract ChainlinkOraclesTest is BscMainnetBaseTest {
   function testPriceFeed(address testedTokenAddress, address aggregatorAddress) internal returns (uint256 price) {

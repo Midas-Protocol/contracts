@@ -10,7 +10,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {CurveLpTokenLiquidatorNoRegistry} from "../../contracts/liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
 import "../../contracts/utils/IW_NATIVE.sol";
 import "../../contracts/external/curve/ICurvePool.sol";
-import {BscMainnetBaseTest} from "../config/BaseTest.sol";
+import {BscMainnetBaseTest} from "../config/BaseTest.t.sol";
 
 contract CurveLpTokenLiquidatorNoRegistryTest is BscMainnetBaseTest {
   CurveLpTokenLiquidatorNoRegistry private liquidator;
