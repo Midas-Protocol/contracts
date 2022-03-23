@@ -55,22 +55,27 @@ export const deployUniswapOracle = async ({
     // deploy oracle with wtoken as base token
     let tx = await uniTwapOracleFactory.deploy(deployConfig.uniswap.uniswapV2FactoryAddress, deployConfig.wtoken);
     await tx.wait();
+  } else {
+    console.log("UniswapTwapPriceOracleV2 already deployed at: ", existingOracle);
+  }
 
-    const nativeOracle = await uniTwapOracleFactory.callStatic.oracles(
-      deployConfig.uniswap.uniswapV2FactoryAddress,
-      deployConfig.wtoken
+  const nativeOracle = await uniTwapOracleFactory.callStatic.oracles(
+    deployConfig.uniswap.uniswapV2FactoryAddress,
+    deployConfig.wtoken
+  );
+
+  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const underlyings = deployConfig.uniswap.uniswapOracleInitialDeployTokens;
+  const oracles = Array(deployConfig.uniswap.uniswapOracleInitialDeployTokens.length).fill(nativeOracle);
+
+  if (underlyings.length > 0) {
+    let anyNotAddedYet = underlyings.some(
+      async (underlying) => (await mpo.callStatic.oracles(underlying)) == constants.AddressZero
     );
-
-    const underlyings = deployConfig.uniswap.uniswapOracleInitialDeployTokens;
-    const oracles = Array(deployConfig.uniswap.uniswapOracleInitialDeployTokens.length).fill(nativeOracle);
-
-    const spo = await ethers.getContract("MasterPriceOracle", deployer);
-    if (underlyings.length > 0) {
-      tx = await spo.add(underlyings, oracles);
+    if (anyNotAddedYet) {
+      let tx = await mpo.add(underlyings, oracles);
       await tx.wait();
       console.log(`Master Price Oracle updated for tokens ${underlyings.join(", ")}`);
     }
-  } else {
-    console.log("UniswapTwapPriceOracleV2 already deployed at: ", existingOracle);
   }
 };

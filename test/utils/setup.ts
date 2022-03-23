@@ -20,12 +20,12 @@ export const resetPriceOracle = async (erc20One, erc20Two) => {
   if (chainId !== 31337 && chainId !== 1337) {
     const { deployer } = await ethers.getNamedSigners();
     const sdk = new Fuse(ethers.provider, Number(chainId));
-    const spo = (await ethers.getContractAt(
+    const mpo = (await ethers.getContractAt(
       "MasterPriceOracle",
       sdk.oracles.MasterPriceOracle.address,
       deployer
     )) as MasterPriceOracle;
-    const tx = await spo.add(
+    const tx = await mpo.add(
       [erc20One.underlying, erc20Two.underlying],
       [sdk.chainDeployment.ChainlinkPriceOracleV2.address, sdk.chainDeployment.ChainlinkPriceOracleV2.address]
     );

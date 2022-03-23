@@ -407,7 +407,6 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     return distributeProfit(exchangeProfitTo, minProfitAmount, ethToCoinbase);
   }
 
-
   function safeLiquidateToEthWithFlashLoan(
     address borrower,
     uint256 repayAmount,
@@ -443,9 +442,9 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
 
     pair.swap(
       token0 == W_NATIVE_ADDRESS ? repayAmount : 0,
-        token0 != W_NATIVE_ADDRESS ? repayAmount : 0,
-        address(this),
-        msg.data
+      token0 != W_NATIVE_ADDRESS ? repayAmount : 0,
+      address(this),
+      msg.data
     );
 
     // Exchange profit, send NATIVE to coinbase if necessary, and transfer seized funds
@@ -601,7 +600,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
   }
 
   /**
- * @dev Callback function for PCS flashloans.
+   * @dev Callback function for PCS flashloans.
    */
   function pancakeCall(
     address sender,
@@ -719,12 +718,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     // Check side of the flashloan to repay: if input token (underlying collateral) is part of flashloan, repay it (to avoid reentracy error); otherwise, convert to W_NATIVE and repay W_NATIVE
     if (
       address(uniswapV2Router) == UNISWAP_V2_ROUTER_02_ADDRESS &&
-      address(underlyingCollateral) ==
-      (
-        cErc20Collateral.underlying() == STABLE_TOKEN
-          ? BTC_TOKEN
-          : STABLE_TOKEN
-      )
+      address(underlyingCollateral) == (cErc20Collateral.underlying() == STABLE_TOKEN ? BTC_TOKEN : STABLE_TOKEN)
     ) {
       // Get tokens required to repay flashloan and repay flashloan in non-W_NATIVE tokens
       uint256 tokensRequired = getAmountsIn(
