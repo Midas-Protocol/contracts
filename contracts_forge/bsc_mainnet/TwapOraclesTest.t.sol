@@ -3,13 +3,12 @@ pragma solidity >=0.4.23;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
-import "../contracts/oracles/MasterPriceOracle.sol";
-import "../contracts/oracles/default/UniswapTwapPriceOracleV2Factory.sol";
-import "../contracts/external/uniswap/IUniswapV2Factory.sol";
+import "../../contracts/oracles/MasterPriceOracle.sol";
+import "../../contracts/oracles/default/UniswapTwapPriceOracleV2Factory.sol";
+import "../../contracts/external/uniswap/IUniswapV2Factory.sol";
+import {BscMainnetBaseTest} from "../config/BaseTest.sol";
 
-contract TwapOraclesTest is DSTest {
-  Vm public constant vm = Vm(HEVM_ADDRESS);
-
+contract TwapOraclesTest is BscMainnetBaseTest {
   address masterPriceOracleAddress = 0x37CF9eA8C6Bb6C020D4B5e7C3C462B02313aaFF4;
   address twapOraclesFactoryAddress = 0x98EC86b8d2CbAf5329A032b4F655CF0ff6cc029a;
   address uniswapV2FactoryAddress = 0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73;

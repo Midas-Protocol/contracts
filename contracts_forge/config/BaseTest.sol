@@ -4,9 +4,10 @@ pragma solidity >=0.8.0;
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 
-import {CurveLpTokenPriceOracleNoRegistry} from "../../contracts/oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 import {WETH} from "@rari-capital/solmate/src/tokens/WETH.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {CurveLpTokenPriceOracleNoRegistry} from "../../contracts/oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
+import "../../contracts/oracles/default/ChainlinkPriceOracleV2.sol";
 
 abstract contract BaseTest is DSTest {
   Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -17,19 +18,23 @@ abstract contract BaseTest is DSTest {
     IERC20Upgradeable lpToken;
     IERC20Upgradeable[] coins;
     WETH weth;
-    CurveLpTokenPriceOracleNoRegistry oracle;
+    CurveLpTokenPriceOracleNoRegistry curveLPTokenPriceOracleNoRegistry;
+    ChainlinkPriceOracleV2 chainlinkOracle;
   }
 
   mapping(uint => ChainConfig) public chainConfigs;
+}
 
+abstract contract BscMainnetBaseTest is BaseTest {
   function setUp() virtual public {
     chainConfigs[56] = ChainConfig({
-      pool: IERC20Upgradeable(0x160CAed03795365F3A589f10C379FfA7d75d4E76),
-      lpToken: IERC20Upgradeable(0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452),
-      whale: 0x516E5B72C3fD2D2E59835C82005ba6A2BC5788A4,
-      coins: new IERC20Upgradeable[](1),
-      weth: WETH(payable(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)),
-      oracle: CurveLpTokenPriceOracleNoRegistry(0x274F5dFBDB6af889124EFcfA065A247A15243EC2)
+    pool: IERC20Upgradeable(0x160CAed03795365F3A589f10C379FfA7d75d4E76),
+    lpToken: IERC20Upgradeable(0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452),
+    whale: 0x516E5B72C3fD2D2E59835C82005ba6A2BC5788A4,
+    coins: new IERC20Upgradeable[](1),
+    weth: WETH(payable(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)),
+    curveLPTokenPriceOracleNoRegistry: CurveLpTokenPriceOracleNoRegistry(0x274F5dFBDB6af889124EFcfA065A247A15243EC2),
+    chainlinkOracle: ChainlinkPriceOracleV2(0xb87bC7F78F8c87d37e6FA2abcADF4C6Da0bc124A)
     });
     chainConfigs[56].coins[0] = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
   }
