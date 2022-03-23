@@ -3,15 +3,15 @@ pragma solidity >=0.8.0;
 
 import "../../contracts/external/bomb/IXBomb.sol";
 import "../../contracts/liquidators/XBombLiquidator.sol";
-import "../config/BaseTest.sol";
+import { BscMainnetBaseTest } from "../config/BaseTest.t.sol";
 
-contract XBombLiquidatorTest is BaseTest {
+contract XBombLiquidatorTest is BscMainnetBaseTest {
   // the Pancake BOMB/xBOMB pair
   address holder = 0x6aE0Fb5D98911cF5AF6A8CE0AeCE426227d41103;
   IXBomb xbombToken = IXBomb(0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b);
   address bombTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
 
-  function setUp() override public {
+  function setUp() public override {
     super.setUp();
     // impersonate the holder
     vm.startPrank(holder);

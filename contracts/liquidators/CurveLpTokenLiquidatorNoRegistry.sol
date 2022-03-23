@@ -7,7 +7,7 @@ import "../external/curve/ICurveRegistry.sol";
 import "../external/curve/ICurvePool.sol";
 import "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 
-import {WETH} from "@rari-capital/solmate/src/tokens/WETH.sol";
+import { WETH } from "@rari-capital/solmate/src/tokens/WETH.sol";
 
 import "./IRedemptionStrategy.sol";
 
@@ -44,9 +44,7 @@ contract CurveLpTokenLiquidatorNoRegistry is IRedemptionStrategy {
     (uint8 curveCoinIndex, address underlying) = abi.decode(strategyData, (uint8, address));
 
     // Remove liquidity from Curve pool in the form of one coin only (and store output as new collateral)
-    ICurvePool curvePool = ICurvePool(
-      oracle.poolOf(address(inputToken))
-    );
+    ICurvePool curvePool = ICurvePool(oracle.poolOf(address(inputToken)));
     curvePool.remove_liquidity_one_coin(inputAmount, int128(int8(curveCoinIndex)), 1);
     outputToken = IERC20Upgradeable(underlying == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE ? address(0) : underlying);
     outputAmount = address(outputToken) == address(0) ? address(this).balance : outputToken.balanceOf(address(this));
