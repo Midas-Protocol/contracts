@@ -59,95 +59,39 @@ describe("FlywheelModule", function () {
 
   it.only("1 Pool, 1 Flywheel", async function () {
     const { deployer, alice } = await ethers.getNamedSigners();
-
     const rewardToken = erc20OneUnderlying;
     const market = erc20OneCToken;
+    console.log({ rewardToken: rewardToken.address, market: market.address });
 
+    // 1. Deploy Flywheel Core
     const fwCore = await sdk.deployFlywheelCore(rewardToken.address, {
       from: deployer.address,
     });
-    const fwStaticRewards = await sdk.deployFlywheelStaticRewards(rewardToken.address, {
+    console.log({ fwCore: fwCore.address });
+
+    // 1.1. Enable Market for Flywheel Core
+    await sdk.addMarketForRewardsToFlywheelCore(fwCore.address, market.address, { from: deployer.address });
+
+    // 1.2. Add Flywheel Core to Pool
+    await sdk.addFlywheelCoreToPool(fwCore.address, poolAAddress, { from: deployer.address });
+
+    // 2. Deploy Flywheel Reward: StaticReward
+    const fwStaticRewards = await sdk.deployFlywheelStaticRewards(rewardToken.address, fwCore.address, {
       from: deployer.address,
     });
 
-    // TODO set RewardsInfo and etc.
+    // 2.1 Fund Static Rewards
+    await rewardToken.transfer(fwStaticRewards.address, ethers.utils.parseUnits("100", 18), { from: deployer.address });
 
-    console.log({ fwCore, fwStaticRewards });
-
-    // // Fund RewardsDistributors
-    // const fundingAmount = ethers.utils.parseUnits("100", 18);
-    // await sdk.fundRewardsDistributor(erc20TwoRewardsDistributor.address, fundingAmount, {
-    //   from: deployer.address,
-    // });
-
-    // // Add RewardsDistributor to Pool
-    // await sdk.addRewardsDistributorToPool(erc20TwoRewardsDistributor.address, poolAAddress, {
-    //   from: deployer.address,
-    // });
-
-    // // Setup 'TOUCH' Supply Side Speed
-    // const supplySpeed = ethers.utils.parseUnits("1", 0);
-    // await sdk.updateRewardsDistributorSupplySpeed(
-    //   erc20TwoRewardsDistributor.address,
-    //   erc20TwoCToken.address,
-    //   supplySpeed,
-    //   {
-    //     from: deployer.address,
-    //   }
-    // );
-
-    // // Setup 'TOUCH' Borrow Side Speed
-    // const borrowSpeed = ethers.utils.parseUnits("1", 0);
-    // await sdk.updateRewardsDistributorBorrowSpeed(
-    //   erc20TwoRewardsDistributor.address,
-    //   erc20TwoCToken.address,
-    //   borrowSpeed,
-    //   {
-    //     from: deployer.address,
-    //   }
-    // );
-
-    // // Check if MarketRewards are correctly returned
-    // const marketRewards = await sdk.getRewardsDistributorMarketRewardsByPool(poolAAddress, { from: alice.address });
-    // const erc20TwoMarketRewards = marketRewards.find((mr) => mr.cToken === erc20TwoCToken.address);
-    // expect(erc20TwoMarketRewards).to.be.ok;
-
-    // const supplyRewardsErc20Two = erc20TwoMarketRewards.supplyRewards.find(
-    //   (br) => br.distributor === erc20TwoRewardsDistributor.address
-    // );
-    // expect(supplyRewardsErc20Two).to.be.ok;
-    // expect(supplyRewardsErc20Two.speed).to.eq(supplySpeed);
-
-    // const borrowRewardsErc20Two = erc20TwoMarketRewards.borrowRewards.find(
-    //   (br) => br.distributor === erc20TwoRewardsDistributor.address
-    // );
-    // expect(borrowRewardsErc20Two).to.be.ok;
-    // expect(supplyRewardsErc20Two.speed).to.eq(borrowSpeed);
-
-    // // Check if ClaimableRewards are correctly returned => no rewards yet
-    // const claimableRewardsBefore = await sdk.getRewardsDistributorClaimableRewards(alice.address, {
-    //   from: alice.address,
-    // });
-    // expect(claimableRewardsBefore.length).to.eq(0);
-
-    // // Enter Rewarded Market, Single User so 100% Rewards from RewardDistributor
-    // await collateralHelpers.addCollateral(poolAAddress, alice, await erc20TwoCToken.callStatic.symbol(), "100", true);
-
-    // // Advance Blocks
-    // const blocksToAdvance = 250;
-    // await timeHelpers.advanceBlocks(blocksToAdvance);
-
-    // // Check if ClaimableRewards are correctly returned
-    // const claimableRewardsAfter250 = await sdk.getRewardsDistributorClaimableRewards(alice.address, {
-    //   from: alice.address,
-    // });
-    // expect(claimableRewardsAfter250[0].amount).to.eq(supplySpeed.mul(blocksToAdvance));
-
-    // // Claim Rewards
-    // await sdk.claimAllRewardsDistributorRewards(erc20TwoRewardsDistributor.address, { from: alice.address });
-    // const claimableRewardsAfterClaim = await sdk.getRewardsDistributorClaimableRewards(alice.address, {
-    //   from: alice.address,
-    // });
-    // expect(claimableRewardsAfterClaim.length).to.eq(0);
+    // 2.2 Set Reward Info on Rewards
+    await sdk.setStaticRewardInfo(
+      fwStaticRewards.address,
+      rewardToken.address,
+      {
+        rewardsEndTimestamp: 0,
+        rewardsPerSecond: ethers.utils.parseUnits("0.1", 18),
+      },
+      { from: deployer.address }
+    );
   });
 });
