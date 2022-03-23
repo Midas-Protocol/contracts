@@ -4,7 +4,7 @@ import { solidity } from "ethereum-waffle";
 import { Fuse } from "../src";
 import { constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { Comptroller, FusePoolDirectory, SimplePriceOracle, Unitroller } from "../typechain";
+import { Comptroller, FusePoolDirectory, MasterPriceOracle, Unitroller } from "../typechain";
 import { getAssetsConf } from "./utils/assets";
 import { chainDeployConfig } from "../chainDeploy";
 import { setUpPriceOraclePrices } from "./utils";
@@ -12,7 +12,7 @@ import { setUpPriceOraclePrices } from "./utils";
 use(solidity);
 
 describe("FusePoolDirectory", function () {
-  let spo: SimplePriceOracle;
+  let mpo: MasterPriceOracle;
   let fpdWithSigner: FusePoolDirectory;
   let implementationComptroller: Comptroller;
 
@@ -32,7 +32,7 @@ describe("FusePoolDirectory", function () {
       const { chainId } = await ethers.provider.getNetwork();
 
       const sdk = new Fuse(ethers.provider, chainId);
-      spo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, alice);
+      mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, alice);
 
       fpdWithSigner = await ethers.getContractAt("FusePoolDirectory", sdk.contracts.FusePoolDirectory.address, alice);
       implementationComptroller = await ethers.getContractAt("Comptroller", sdk.chainDeployment.Comptroller.address);
@@ -50,7 +50,7 @@ describe("FusePoolDirectory", function () {
         true,
         bigCloseFactor,
         bigLiquidationIncentive,
-        spo.address
+        mpo.address
       );
       expect(deployedPool).to.be.ok;
       const depReceipt = await deployedPool.wait();

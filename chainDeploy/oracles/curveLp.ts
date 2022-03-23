@@ -49,8 +49,8 @@ export const deployCurveLpOracle = async ({
   const underlyings = curvePools.map((c) => c.lpToken);
   const oracles = Array(curvePools.length).fill(curveOracle.address);
 
-  const spo = await ethers.getContract("MasterPriceOracle", deployer);
-  tx = await spo.add(underlyings, oracles);
+  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  tx = await mpo.add(underlyings, oracles);
   await tx.wait();
 
   console.log(`Master Price Oracle updated for tokens ${underlyings.join(", ")}`);
