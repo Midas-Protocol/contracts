@@ -18,7 +18,7 @@
     "test": "hardhat test",
     "test:hardhat": "hardhat test --parallel",
     "test:forge": "forge test",
-    "test:forge:bsc": "forge test --fork-url ${FORK_URL_BSC} --fork-block-number 16281867 --match-path $INIT_CWD/contracts_forge/bsc_mainnet/",
+    "test:forge:bsc": "forge test --fork-url ${FORK_URL_BSC} --fork-block-number 16281867 -v",
     "test:bsc": "FORK_URL=${FORK_URL_BSC} FORK_BLOCK_NUMBER=16281867 FORK_CHAIN_ID=56 hardhat test",
     "export": "hardhat export --export-all ./deployments.json",
     "build": "npm run build:hardhat && npm run build:sdk && npm run build:forge",
