@@ -8,7 +8,7 @@ contract JarvisSynthereumLiquidatorTest is BscMainnetBaseTest {
   JarvisSynthereumLiquidator private liquidator;
   ChainConfig private chainConfig;
 
-  function setUp() override public {
+  function setUp() public override {
     super.setUp();
     chainConfig = chainConfigs[block.chainid];
     uint64 expirationPeriod = 60 * 40; // 40 mins
@@ -30,11 +30,11 @@ contract JarvisSynthereumLiquidatorTest is BscMainnetBaseTest {
     assertEq(outputAmount, redeemableAmount);
   }
 
-//  function testEmergencyRedeemToken() public {
-//    address manager = liquidator.pool().synthereumFinder().getImplementationAddress('Manager'); //0x4d616e61676572
-//    // manager = 0x43a98e5C4A7F3B7f11080fc9D58b0B8A80cA954e
-//    vm.prank(manager);
-//    // [FAIL. Reason: Caller must be the Synthereum manager]
-//    liquidator.pool().emergencyShutdown();
-//  }
+  //  function testEmergencyRedeemToken() public {
+  //    address manager = liquidator.pool().synthereumFinder().getImplementationAddress('Manager'); //0x4d616e61676572
+  //    // manager = 0x43a98e5C4A7F3B7f11080fc9D58b0B8A80cA954e
+  //    vm.prank(manager);
+  //    // [FAIL. Reason: Caller must be the Synthereum manager]
+  //    liquidator.pool().emergencyShutdown();
+  //  }
 }

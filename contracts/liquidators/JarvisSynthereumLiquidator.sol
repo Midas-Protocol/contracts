@@ -5,11 +5,10 @@ import "./IRedemptionStrategy.sol";
 import "../external/jarvis/ISynthereumLiquidityPool.sol";
 
 contract JarvisSynthereumLiquidator is IRedemptionStrategy {
-
   ISynthereumLiquidityPool public pool;
   uint64 public txExpirationPeriod;
 
-  constructor (ISynthereumLiquidityPool _pool, uint64 _txExpirationPeriod) {
+  constructor(ISynthereumLiquidityPool _pool, uint64 _txExpirationPeriod) {
     pool = _pool;
     // time limit to include the tx in a block as anti-slippage measure
     txExpirationPeriod = _txExpirationPeriod;
@@ -23,7 +22,7 @@ contract JarvisSynthereumLiquidator is IRedemptionStrategy {
     // approve so the pool can pull out the input tokens
     inputToken.approve(address(pool), inputAmount);
 
-    if(pool.emergencyShutdownPrice() > 0) {
+    if (pool.emergencyShutdownPrice() > 0) {
       // emergency shutdowns cannot be reverted, so this corner case must be covered
       (, uint256 collateralSettled) = pool.settleEmergencyShutdown();
       outputAmount = collateralSettled;
@@ -34,15 +33,10 @@ contract JarvisSynthereumLiquidator is IRedemptionStrategy {
       (uint256 redeemableCollateralAmount, ) = pool.getRedeemTradeInfo(inputAmount);
 
       // Expiration time of the transaction
-      uint expirationTime = block.timestamp + txExpirationPeriod;
+      uint256 expirationTime = block.timestamp + txExpirationPeriod;
 
       (uint256 collateralAmountReceived, uint256 feePaid) = pool.redeem(
-        ISynthereumLiquidityPool.RedeemParams(
-          inputAmount,
-          redeemableCollateralAmount,
-          expirationTime,
-          address(this)
-        )
+        ISynthereumLiquidityPool.RedeemParams(inputAmount, redeemableCollateralAmount, expirationTime, address(this))
       );
 
       outputAmount = collateralAmountReceived;

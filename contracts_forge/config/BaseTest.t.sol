@@ -4,9 +4,9 @@ pragma solidity >=0.8.0;
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 
-import {WETH} from "@rari-capital/solmate/src/tokens/WETH.sol";
+import { WETH } from "@rari-capital/solmate/src/tokens/WETH.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import {CurveLpTokenPriceOracleNoRegistry} from "../../contracts/oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
+import { CurveLpTokenPriceOracleNoRegistry } from "../../contracts/oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 import "../../contracts/oracles/default/ChainlinkPriceOracleV2.sol";
 import "../../contracts/external/jarvis/ISynthereumLiquidityPool.sol";
 
@@ -24,11 +24,11 @@ abstract contract BaseTest is DSTest {
     ISynthereumLiquidityPool synthereumLiquiditiyPool;
   }
 
-  mapping(uint => ChainConfig) public chainConfigs;
+  mapping(uint256 => ChainConfig) public chainConfigs;
 }
 
 abstract contract BscMainnetBaseTest is BaseTest {
-  function setUp() virtual public {
+  function setUp() public virtual {
     chainConfigs[56] = ChainConfig({
       pool: IERC20Upgradeable(0x160CAed03795365F3A589f10C379FfA7d75d4E76),
       lpToken: IERC20Upgradeable(0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452),

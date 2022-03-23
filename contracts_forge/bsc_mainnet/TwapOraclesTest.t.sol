@@ -6,7 +6,7 @@ import "forge-std/Vm.sol";
 import "../../contracts/oracles/MasterPriceOracle.sol";
 import "../../contracts/oracles/default/UniswapTwapPriceOracleV2Factory.sol";
 import "../../contracts/external/uniswap/IUniswapV2Factory.sol";
-import {BscMainnetBaseTest} from "../config/BaseTest.t.sol";
+import { BscMainnetBaseTest } from "../config/BaseTest.t.sol";
 
 contract TwapOraclesTest is BscMainnetBaseTest {
   address masterPriceOracleAddress = 0x37CF9eA8C6Bb6C020D4B5e7C3C462B02313aaFF4;

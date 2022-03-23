@@ -13,12 +13,9 @@ import "./ISynthereumLiquidityPoolGeneral.sol";
 /**
  * @title Token Issuer Contract Interface
  */
-interface ISynthereumLiquidityPool
-is
 //ITypology,
 //IEmergencyShutdown,
-ISynthereumLiquidityPoolGeneral
-{
+interface ISynthereumLiquidityPool is ISynthereumLiquidityPoolGeneral {
   struct MintParams {
     // Minimum amount of synthetic tokens that a user wants to mint using collateral (anti-slippage)
     uint256 minNumTokens;
@@ -41,18 +38,18 @@ ISynthereumLiquidityPoolGeneral
     address recipient;
   }
 
-//  struct ExchangeParams {
-//    // Destination pool
-//    ISynthereumLiquidityPoolGeneral destPool;
-//    // Amount of source synthetic tokens that user wants to use for exchanging
-//    uint256 numTokens;
-//    // Minimum Amount of destination synthetic tokens that user wants to receive (anti-slippage)
-//    uint256 minDestNumTokens;
-//    // Expiration time of the transaction
-//    uint256 expiration;
-//    // Address to which send synthetic tokens exchanged
-//    address recipient;
-//  }
+  //  struct ExchangeParams {
+  //    // Destination pool
+  //    ISynthereumLiquidityPoolGeneral destPool;
+  //    // Amount of source synthetic tokens that user wants to use for exchanging
+  //    uint256 numTokens;
+  //    // Minimum Amount of destination synthetic tokens that user wants to receive (anti-slippage)
+  //    uint256 minDestNumTokens;
+  //    // Expiration time of the transaction
+  //    uint256 expiration;
+  //    // Address to which send synthetic tokens exchanged
+  //    address recipient;
+  //  }
 
   /**
    * @notice Mint synthetic tokens using fixed amount of collateral
@@ -62,9 +59,7 @@ ISynthereumLiquidityPoolGeneral
    * @return syntheticTokensMinted Amount of synthetic tokens minted by a user
    * @return feePaid Amount of collateral paid by the user as fee
    */
-  function mint(MintParams calldata mintParams)
-  external
-  returns (uint256 syntheticTokensMinted, uint256 feePaid);
+  function mint(MintParams calldata mintParams) external returns (uint256 syntheticTokensMinted, uint256 feePaid);
 
   /**
    * @notice Redeem amount of collateral using fixed number of synthetic token
@@ -74,21 +69,19 @@ ISynthereumLiquidityPoolGeneral
    * @return collateralRedeemed Amount of collateral redeem by user
    * @return feePaid Amount of collateral paid by user as fee
    */
-  function redeem(RedeemParams calldata redeemParams)
-  external
-  returns (uint256 collateralRedeemed, uint256 feePaid);
+  function redeem(RedeemParams calldata redeemParams) external returns (uint256 collateralRedeemed, uint256 feePaid);
 
-//  /**
-//   * @notice Exchange a fixed amount of synthetic token of this pool, with an amount of synthetic tokens of an another pool
-//   * @notice This calculate the price using on chain price feed
-//   * @notice User must approve synthetic token transfer for the redeem request to succeed
-//   * @param exchangeParams Input parameters for exchanging (see ExchangeParams struct)
-//   * @return destNumTokensMinted Amount of collateral redeem by user
-//   * @return feePaid Amount of collateral paid by user as fee
-//   */
-//  function exchange(ExchangeParams calldata exchangeParams)
-//  external
-//  returns (uint256 destNumTokensMinted, uint256 feePaid);
+  //  /**
+  //   * @notice Exchange a fixed amount of synthetic token of this pool, with an amount of synthetic tokens of an another pool
+  //   * @notice This calculate the price using on chain price feed
+  //   * @notice User must approve synthetic token transfer for the redeem request to succeed
+  //   * @param exchangeParams Input parameters for exchanging (see ExchangeParams struct)
+  //   * @return destNumTokensMinted Amount of collateral redeem by user
+  //   * @return feePaid Amount of collateral paid by user as fee
+  //   */
+  //  function exchange(ExchangeParams calldata exchangeParams)
+  //  external
+  //  returns (uint256 destNumTokensMinted, uint256 feePaid);
 
   /**
    * @notice Withdraw unused deposited collateral by the LP
@@ -96,9 +89,7 @@ ISynthereumLiquidityPoolGeneral
    * @param collateralAmount Collateral to be withdrawn
    * @return remainingLiquidity Remaining unused collateral in the pool
    */
-  function withdrawLiquidity(uint256 collateralAmount)
-  external
-  returns (uint256 remainingLiquidity);
+  function withdrawLiquidity(uint256 collateralAmount) external returns (uint256 remainingLiquidity);
 
   /**
    * @notice Increase collaterallization of Lp position
@@ -107,10 +98,9 @@ ISynthereumLiquidityPoolGeneral
    * @param collateralToIncrease Collateral to be added to the position
    * @return newTotalCollateral New total collateral amount
    */
-  function increaseCollateral(
-    uint256 collateralToTransfer,
-    uint256 collateralToIncrease
-  ) external returns (uint256 newTotalCollateral);
+  function increaseCollateral(uint256 collateralToTransfer, uint256 collateralToIncrease)
+    external
+    returns (uint256 newTotalCollateral);
 
   /**
    * @notice Decrease collaterallization of Lp position
@@ -120,10 +110,9 @@ ISynthereumLiquidityPoolGeneral
    * @param collateralToWithdraw Collateral to be transferred to the LP
    * @return newTotalCollateral New total collateral amount
    */
-  function decreaseCollateral(
-    uint256 collateralToDecrease,
-    uint256 collateralToWithdraw
-  ) external returns (uint256 newTotalCollateral);
+  function decreaseCollateral(uint256 collateralToDecrease, uint256 collateralToWithdraw)
+    external
+    returns (uint256 newTotalCollateral);
 
   /**
    * @notice Withdraw fees gained by the sender
@@ -140,29 +129,27 @@ ISynthereumLiquidityPoolGeneral
    * @return rewardAmount Amount of received collateral as reward for the liquidation
    */
   function liquidate(uint256 numSynthTokens)
-  external
-  returns (
-    uint256 synthTokensLiquidated,
-    uint256 collateralReceived,
-    uint256 rewardAmount
-  );
+    external
+    returns (
+      uint256 synthTokensLiquidated,
+      uint256 collateralReceived,
+      uint256 rewardAmount
+    );
 
   /**
    * @notice Redeem tokens after emergency shutdown
    * @return synthTokensSettled Amount of synthetic tokens liquidated
    * @return collateralSettled Amount of collateral withdrawn after emergency shutdown
    */
-  function settleEmergencyShutdown()
-  external
-  returns (uint256 synthTokensSettled, uint256 collateralSettled);
+  function settleEmergencyShutdown() external returns (uint256 synthTokensSettled, uint256 collateralSettled);
 
-//  /**
-//   * @notice Update the fee percentage, recipients and recipient proportions
-//   * @notice Only the maintainer can call this function
-//   * @param _feeData Fee info (percentage + recipients + weigths)
-//   */
-//  function setFee(ISynthereumLiquidityPoolStorage.FeeData calldata _feeData)
-//  external;
+  //  /**
+  //   * @notice Update the fee percentage, recipients and recipient proportions
+  //   * @notice Only the maintainer can call this function
+  //   * @param _feeData Fee info (percentage + recipients + weigths)
+  //   */
+  //  function setFee(ISynthereumLiquidityPoolStorage.FeeData calldata _feeData)
+  //  external;
 
   /**
    * @notice Update the fee percentage
@@ -177,10 +164,7 @@ ISynthereumLiquidityPoolGeneral
    * @param feeRecipients An array of the addresses of recipients that will receive generated fees
    * @param feeProportions An array of the proportions of fees generated each recipient will receive
    */
-  function setFeeRecipients(
-    address[] calldata feeRecipients,
-    uint32[] calldata feeProportions
-  ) external;
+  function setFeeRecipients(address[] calldata feeRecipients, uint32[] calldata feeProportions) external;
 
   /**
    * @notice Update the overcollateralization percentage
@@ -207,13 +191,13 @@ ISynthereumLiquidityPoolGeneral
    * @return Addresses, weigths and total of weigths
    */
   function feeRecipientsInfo()
-  external
-  view
-  returns (
-    address[] memory,
-    uint32[] memory,
-    uint256
-  );
+    external
+    view
+    returns (
+      address[] memory,
+      uint32[] memory,
+      uint256
+    );
 
   /**
    * @notice Returns total number of synthetic tokens generated by this pool
@@ -278,9 +262,9 @@ ISynthereumLiquidityPoolGeneral
    * @return feePaid Collateral fee will be paid
    */
   function getMintTradeInfo(uint256 inputCollateral)
-  external
-  view
-  returns (uint256 synthTokensReceived, uint256 feePaid);
+    external
+    view
+    returns (uint256 synthTokensReceived, uint256 feePaid);
 
   /**
    * @notice Returns the collateral amount will be received and fees will be paid in exchange for an input amount of synthetic tokens
@@ -290,33 +274,30 @@ ISynthereumLiquidityPoolGeneral
    * @return feePaid Collateral fee will be paid
    */
   function getRedeemTradeInfo(uint256 syntheticTokens)
-  external
-  view
-  returns (uint256 collateralAmountReceived, uint256 feePaid);
+    external
+    view
+    returns (uint256 collateralAmountReceived, uint256 feePaid);
 
-//  /**
-//   * @notice Returns the destination synthetic tokens amount will be received and fees will be paid in exchange for an input amount of synthetic tokens
-//   * @notice This function is only trading-informative, it doesn't check liquidity and collateralization conditions
-//   * @param  syntheticTokens Amount of synthetic tokens to be exchanged
-//   * @param  destinationPool Pool in which mint the destination synthetic token
-//   * @return destSyntheticTokensReceived Synthetic tokens will be received from destination pool
-//   * @return feePaid Collateral fee will be paid
-//   */
-//  function getExchangeTradeInfo(
-//    uint256 syntheticTokens,
-//    ISynthereumLiquidityPoolGeneral destinationPool
-//  )
-//  external
-//  view
-//  returns (uint256 destSyntheticTokensReceived, uint256 feePaid);
+  //  /**
+  //   * @notice Returns the destination synthetic tokens amount will be received and fees will be paid in exchange for an input amount of synthetic tokens
+  //   * @notice This function is only trading-informative, it doesn't check liquidity and collateralization conditions
+  //   * @param  syntheticTokens Amount of synthetic tokens to be exchanged
+  //   * @param  destinationPool Pool in which mint the destination synthetic token
+  //   * @return destSyntheticTokensReceived Synthetic tokens will be received from destination pool
+  //   * @return feePaid Collateral fee will be paid
+  //   */
+  //  function getExchangeTradeInfo(
+  //    uint256 syntheticTokens,
+  //    ISynthereumLiquidityPoolGeneral destinationPool
+  //  )
+  //  external
+  //  view
+  //  returns (uint256 destSyntheticTokensReceived, uint256 feePaid);
   /**
- * @notice Shutdown the pool or self-minting-derivative in case of emergency
+   * @notice Shutdown the pool or self-minting-derivative in case of emergency
    * @notice Only Synthereum manager contract can call this function
    * @return timestamp Timestamp of emergency shutdown transaction
    * @return price Price of the pair at the moment of shutdown execution
    */
-  function emergencyShutdown()
-  external
-  returns (uint256 timestamp, uint256 price);
-
+  function emergencyShutdown() external returns (uint256 timestamp, uint256 price);
 }

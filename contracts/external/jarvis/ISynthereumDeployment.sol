@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.4;
 
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import './ISynthereumFinder.sol';
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./ISynthereumFinder.sol";
 
 /**
  * @title Interface that a pool MUST have in order to be included in the deployer

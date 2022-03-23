@@ -1,8 +1,8 @@
-import {SALT} from "../../deploy/deploy";
-import {ChainDeployConfig, ChainlinkFeedBaseCurrency, deployChainlinkOracle, deployUniswapOracle} from "../helpers";
-import {ethers} from "ethers";
-import {Asset, ChainDeployFnParams, ChainlinkAsset, CurvePoolConfig} from "../helpers/types";
-import {deployCurveLpOracle} from "../oracles/curveLp";
+import { SALT } from "../../deploy/deploy";
+import { ChainDeployConfig, ChainlinkFeedBaseCurrency, deployChainlinkOracle, deployUniswapOracle } from "../helpers";
+import { ethers } from "ethers";
+import { Asset, ChainDeployFnParams, ChainlinkAsset, CurvePoolConfig } from "../helpers/types";
+import { deployCurveLpOracle } from "../oracles/curveLp";
 
 export const assets: Asset[] = [
   {
@@ -137,7 +137,7 @@ export const assets: Asset[] = [
     underlying: "0x316622977073BBC3dF32E7d2A9B3c77596a0a603",
     name: "Jarvis Synthetic Brazilian Real",
     decimals: 18,
-  }
+  },
 ];
 
 export const deployConfig: ChainDeployConfig = {
