@@ -16,6 +16,7 @@ import "./tasks/oracle";
 import "./tasks/getPoolData";
 import "./tasks/e2e";
 import "./tasks/swap";
+import "./tasks/liquidation";
 
 dotEnvConfig();
 
