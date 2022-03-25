@@ -131,6 +131,13 @@ export const assets: Asset[] = [
     name: "xBOMB",
     decimals: 18,
   },
+  // Jarvis
+  {
+    symbol: "jBRL",
+    underlying: "0x316622977073BBC3dF32E7d2A9B3c77596a0a603",
+    name: "Jarvis Synthetic Brazilian Real",
+    decimals: 18,
+  },
 ];
 
 export const deployConfig: ChainDeployConfig = {
@@ -227,6 +234,12 @@ const chainlinkAssets: ChainlinkAsset[] = [
   {
     symbol: "UST",
     aggregator: "0xcbf8518F8727B8582B22837403cDabc53463D462",
+    feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
+  },
+  // Jarvis
+  {
+    symbol: "jBRL",
+    aggregator: "0x5cb1Cb3eA5FB46de1CE1D0F3BaDB3212e8d8eF48",
     feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
   },
 ];
