@@ -10,6 +10,16 @@ import { FlywheelStaticRewards } from "../../typechain/FlywheelStaticRewards";
 import { FuseFlywheelCore } from "../../typechain/FuseFlywheelCore";
 import { FuseBaseConstructor } from "../Fuse/types";
 
+export interface Test {
+  flywheel: string;
+  rewardToken: string;
+  rewards: [
+    {
+      ctoken: string;
+      amount: number;
+    }
+  ];
+}
 export interface FlywheelReward {
   distributor: string;
   rewardToken: string;
@@ -114,78 +124,44 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
       return flywheelCoreInstance.functions["accrue(address,address)"](marketAddress, accountAddress, options);
     }
 
+    async getFlywheelClaimableRewardsForPool(poolAddress: string, account: string, options: { from: string }) {
+      const pool = await this.getComptrollerInstance(poolAddress, options);
+      const marketsOfPool = await pool.getAllMarkets();
+
+      const rewardDistributorsOfPool = await pool.getRewardsDistributors();
+      const flywheels = rewardDistributorsOfPool.map((address) => this.getFlywheelCoreInstance(address, options));
+      const flywheelWithRewards = [];
+      for (const flywheel of flywheels) {
+        const rewards = [];
+        for (const market of marketsOfPool) {
+          const rewardOfMarket = await flywheel.callStatic["accrue(address,address)"](market, account);
+          if (rewardOfMarket.gt(0)) {
+            rewards.push({
+              cToken: market,
+              amount: rewardOfMarket,
+            });
+          }
+        }
+        if (rewards.length > 0) {
+          flywheelWithRewards.push({
+            flywheel: flywheel.address,
+            rewardToken: await flywheel.rewardToken(),
+            rewards,
+          });
+        }
+      }
+      return flywheelWithRewards;
+    }
+
     async getFlywheelClaimableRewards(account: string, options: { from: string }) {
       const [comptrollerIndexes, comptrollers, flywheels] =
         await this.contracts.FusePoolLensSecondary.callStatic.getRewardsDistributorsBySupplier(account, options);
-      console.dir({ comptrollerIndexes, comptrollers, flywheels }, { depth: null });
-      const uniqueFlywheels = flywheels
+
+      return (
+        await Promise.all(comptrollers.map((comp) => this.getFlywheelClaimableRewardsForPool(comp, account, options)))
+      )
         .reduce((acc, curr) => [...acc, ...curr], []) // Flatten Array
-        .filter((value, index, self) => self.indexOf(value) === index); // Unique Array
-
-      console.dir({ uniqueFlywheels }, { depth: null });
-
-      const allMarkets1 = comptrollers.map((compAddress) => this.getComptrollerInstance(compAddress, options));
-      // .map((comptroller) => comptroller.get);
-
-      const compWithWheelsAndMarkets = await Promise.all(
-        comptrollers
-          .map((compAddress) => this.getComptrollerInstance(compAddress, options))
-          .map(async (comptroller, index) => {
-            return {
-              comptroller: comptroller.address,
-              flywheels: flywheels[index],
-              markets: await comptroller.callStatic.getAllMarkets(),
-            };
-          })
-      );
-      console.dir({ compWithWheelsAndMarkets }, { depth: null });
-
-      const rewardTokens1 = await Promise.all(
-        uniqueFlywheels
-          .map((fwAddress) => this.getFlywheelCoreInstance(fwAddress, options))
-          .map((fwCore) => fwCore.functions.rewardToken())
-      );
-      const fwRewards = await Promise.all(
-        uniqueFlywheels
-          .map((fwAddress) => this.getFlywheelCoreInstance(fwAddress, options))
-          .map((fwCore) => fwCore.functions.flywheelRewards())
-      );
-      console.log({ fwRewards, rewardTokens1 });
-
-      const [allMarkets, distributors, rewardTokens, supplySpeeds, borrowSpeeds] =
-        await this.contracts.FusePoolLensSecondary.callStatic.getRewardSpeedsByPools(comptrollers, options);
-      console.dir({ allMarkets, distributors, rewardTokens, supplySpeeds, borrowSpeeds }, { depth: null });
-      return {};
-
-      // {
-      //   distributor: string;
-      //   rewardToken: string;
-      //   amount: BigNumber;
-      // }
-      // return this.contracts.FuseFlywheelLensRouter.callStatic.getUnclaimedRewardsByMarkets(
-      //   account,
-      //   [marketAddress],
-      //   [flywheel],
-      //   [true],
-      //   [false],
-      //   options
-      // );
-
-      // const [rewardTokens, compUnclaimedTotal, allMarkets, rewardsUnaccrued, distributorFunds] =
-      //   await this.contracts.FusePoolLensSecondary.callStatic.getUnclaimedRewardsByDistributors(
-      //     account,
-      //     uniqueRewardsDistributors,
-      //     options
-      //   );
-
-      // const claimableRewards: ClaimableReward[] = uniqueRewardsDistributors
-      //   .filter((_, index) => compUnclaimedTotal[index].gt(0)) // Filter out Distributors without Rewards
-      //   .map((distributor, index) => ({
-      //     distributor,
-      //     rewardToken: rewardTokens[index],
-      //     amount: compUnclaimedTotal[index],
-      //   }));
-      // return claimableRewards;
+        .filter((value, index, self) => self.indexOf(value) === index); // Unique Array;
     }
 
     async getFlywheelMarketRewardsByPool(pool: string, options: { from: string }): Promise<FlywheelMarketReward[]> {
@@ -236,16 +212,21 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
       for (const market of allMarketsOfPool) {
         const supplyRewards = [];
         for (const flywheel of allFlywheelsOfPool) {
-          const rewards = this.getStaticRewardsInstance(await flywheel.flywheelRewards(), options);
-          const rewardsInfoForMarket = await rewards.rewardsInfo(market);
-          if (rewardsInfoForMarket.rewardsPerSecond.gt(0)) {
-            const rewardToken = await rewards.rewardToken();
-            supplyRewards.push({
-              distributor: flywheel.address,
-              rewardToken,
-              rewardsPerSecond: rewardsInfoForMarket.rewardsPerSecond,
-              rewardsEndTimestamp: rewardsInfoForMarket.rewardsEndTimestamp,
-            });
+          // Make sure Market is added to the flywheel
+          const marketState = await flywheel.marketState(market);
+          if (marketState.lastUpdatedTimestamp > 0) {
+            // Get Rewards and only add if greater than 0
+            const rewards = this.getStaticRewardsInstance(await flywheel.flywheelRewards(), options);
+            const rewardsInfoForMarket = await rewards.rewardsInfo(market);
+            if (rewardsInfoForMarket.rewardsPerSecond.gt(0)) {
+              const rewardToken = await rewards.rewardToken();
+              supplyRewards.push({
+                distributor: flywheel.address,
+                rewardToken,
+                rewardsPerSecond: rewardsInfoForMarket.rewardsPerSecond,
+                rewardsEndTimestamp: rewardsInfoForMarket.rewardsEndTimestamp,
+              });
+            }
           }
         }
         if (supplyRewards.length > 0) {

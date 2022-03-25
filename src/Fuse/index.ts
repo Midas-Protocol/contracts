@@ -27,7 +27,6 @@ import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FusePoolLens } from "../../typechain/FusePoolLens";
 import { FusePoolLensSecondary } from "../../typechain/FusePoolLensSecondary";
 import { FuseSafeLiquidator } from "../../typechain/FuseSafeLiquidator";
-import { withComptroller } from "../modules/Comptroller";
 import { withFlywheel } from "../modules/Flywheel";
 import { withFusePoolLens } from "../modules/FusePoolLens";
 import { withRewardsDistributor } from "../modules/RewardsDistributor";

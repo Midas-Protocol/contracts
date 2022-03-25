@@ -36,10 +36,7 @@ describe("FlywheelModule", function () {
     const assetsA = await poolHelpers.getPoolAssets(poolAAddress, sdk.contracts.FuseFeeDistributor.address);
     const deployedAssetsA = await poolHelpers.deployAssets(assetsA.assets, deployer);
 
-    const erc20One = assetsA.assets.find((a) => a.underlying !== constants.AddressZero); // find first one
-    const erc20Two = assetsA.assets.find(
-      (a) => a.underlying !== constants.AddressZero && a.underlying !== erc20One.underlying
-    ); // find second one
+    const [erc20One, erc20Two] = assetsA.assets.filter((a) => a.underlying !== constants.AddressZero);
 
     const deployedErc20One = deployedAssetsA.find((a) => a.underlying === erc20One.underlying);
     const deployedErc20Two = deployedAssetsA.find((a) => a.underlying === erc20Two.underlying);
@@ -60,46 +57,50 @@ describe("FlywheelModule", function () {
     const { deployer, alice } = await ethers.getNamedSigners();
     const rewardToken = erc20OneUnderlying;
     const market = erc20OneCToken;
+    const marketTwo = erc20TwoCToken;
 
-    console.log({ rewardToken: rewardToken.address, market: market.address });
+    console.log({ rewardToken: rewardToken.address, market: market.address, marketTwo: marketTwo.address });
 
     const fwCore = await sdk.deployFlywheelCore(rewardToken.address, {
       from: deployer.address,
     });
-    console.log("FlywheelCore deployed ✅", fwCore.address);
-
     const fwStaticRewards = await sdk.deployFlywheelStaticRewards(rewardToken.address, fwCore.address, {
       from: deployer.address,
     });
-    console.log("Static Rewards Deployed ✅", fwStaticRewards.address);
 
     await sdk.setFlywheelRewards(fwCore.address, fwStaticRewards.address, { from: deployer.address });
-    console.log("Link Rewards to Flywheel core ✅");
-
-    await sdk.addMarketForRewardsToFlywheelCore(fwCore.address, market.address, { from: deployer.address });
-    console.log("Enable Market ✅");
-
     await sdk.addFlywheelCoreToComptroller(fwCore.address, poolAAddress, { from: deployer.address });
-    console.log("Flywheel added to Pool ✅");
 
-    await sdk.addFlywheelCoreToComptroller(fwCore.address, poolBAddress, { from: deployer.address });
-    console.log("Flywheel added to Pool ✅");
-
+    // Funding Static Rewards
     await rewardToken.transfer(fwStaticRewards.address, ethers.utils.parseUnits("100", 18), { from: deployer.address });
     expect(await rewardToken.balanceOf(fwStaticRewards.address)).to.not.eq(0);
-    console.log("Fund Static Rewards ✅");
 
-    // While minting interest is accrued. This breaks. But only if Reward Info is set already!
     await collateralHelpers.addCollateral(poolAAddress, alice, await market.callStatic.symbol(), "100", true);
-    console.log("Second Collateral added ✅");
     expect(await market.functions.totalSupply()).to.not.eq(0);
 
+    await collateralHelpers.addCollateral(poolAAddress, alice, await erc20TwoCToken.callStatic.symbol(), "100", true);
+    expect(await erc20TwoCToken.functions.totalSupply()).to.not.eq(0);
+
+    // Setup Rewards, enable and set RewardInfo
+    await sdk.addMarketForRewardsToFlywheelCore(fwCore.address, market.address, { from: deployer.address });
     await sdk.setStaticRewardInfo(
       fwStaticRewards.address,
       market.address,
       {
         rewardsEndTimestamp: 0,
         rewardsPerSecond: ethers.utils.parseUnits("0.000001", 18),
+      },
+      { from: deployer.address }
+    );
+
+    // Setup Rewards, enable and set RewardInfo
+    await sdk.addMarketForRewardsToFlywheelCore(fwCore.address, marketTwo.address, { from: deployer.address });
+    await sdk.setStaticRewardInfo(
+      fwStaticRewards.address,
+      marketTwo.address,
+      {
+        rewardsEndTimestamp: 0,
+        rewardsPerSecond: ethers.utils.parseUnits("0.000002", 18),
       },
       { from: deployer.address }
     );
@@ -114,7 +115,15 @@ describe("FlywheelModule", function () {
       from: alice.address,
     });
     console.dir({ marketRewards, marketRewardsPoolA }, { depth: null });
+    const claimableRewards = await sdk.getFlywheelClaimableRewards(alice.address, {
+      from: alice.address,
+    });
+    console.dir({ claimableRewards }, { depth: null });
 
+    const claimableRewardsForPool = await sdk.getFlywheelClaimableRewardsForPool(poolAAddress, alice.address, {
+      from: alice.address,
+    });
+    console.dir({ claimableRewardsForPool }, { depth: null });
     // const flywheelLensRouter = sdk.contracts.FuseFlywheelLensRouter;
     // flywheelLensRouter.functions.getUnclaimedRewardsByMarkets();
   });
