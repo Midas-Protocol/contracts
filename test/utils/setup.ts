@@ -1,5 +1,5 @@
 import { ethers, getChainId, run } from "hardhat";
-import { BigNumber, constants, providers } from "ethers";
+import { BigNumber, constants, providers, utils } from "ethers";
 import {
   CErc20,
   CEther,
@@ -11,8 +11,7 @@ import {
 } from "../../typechain";
 import { createPool, deployAssets, DeployedAsset, getPoolAssets } from "./pool";
 import { expect } from "chai";
-import { cERC20Conf } from "../../src";
-import { Fuse } from "../../src";
+import { cERC20Conf, Fuse } from "../../src";
 
 export const resetPriceOracle = async (erc20One, erc20Two) => {
   const chainId = parseInt(await getChainId());
@@ -43,8 +42,8 @@ export const setUpPriceOraclePrices = async () => {
 };
 
 const setupLocalOraclePrices = async () => {
-  await run("oracle:set-price", { token: "TRIBE", price: "103.8582" });
-  await run("oracle:set-price", { token: "TOUCH", price: "0.002653" });
+  await run("oracle:set-price", { token: "TRIBE", price: "105.1761" });
+  await run("oracle:set-price", { token: "TOUCH", price: "0.002446" });
 };
 
 const setUpBscOraclePrices = async () => {
@@ -176,4 +175,78 @@ export const setUpLiquidation = async ({ poolName }) => {
     simpleOracle,
     fuseFeeDistributor,
   };
+};
+
+export const liquidateAndVerify = async (
+  poolName,
+  poolAddress,
+  liquidatedUserName,
+  coingeckoId,
+  liquidator,
+  liquidationConfigOverrides,
+  underlyingCollateral,
+  erc20OneUnderlying
+) => {
+  let tx: providers.TransactionResponse;
+
+  const { chainId } = await ethers.provider.getNetwork();
+  const { rando } = await ethers.getNamedSigners();
+  const sdk = new Fuse(ethers.provider, chainId);
+  const liquidations = await sdk.getPotentialLiquidations();
+  expect(liquidations.length).to.gt(0);
+
+  const desiredLiquidation = liquidations.filter((l) => l.comptroller === poolAddress)[0].liquidations[0];
+
+  // Check balance before liquidation
+  const ratioBefore = await getPositionRatio({
+    name: poolName,
+    userAddress: undefined,
+    cgId: coingeckoId,
+    namedUser: liquidatedUserName,
+  });
+  console.log(`Ratio Before: ${ratioBefore}`);
+
+  let liquidatorBalanceBeforeLiquidation: BigNumber;
+  if (
+    liquidationConfigOverrides.SUPPORTED_OUTPUT_CURRENCIES.includes(underlyingCollateral) &&
+    underlyingCollateral !== constants.AddressZero
+  ) {
+    liquidatorBalanceBeforeLiquidation = await erc20OneUnderlying.balanceOf(rando.address);
+  } else {
+    liquidatorBalanceBeforeLiquidation = await ethers.provider.getBalance(rando.address);
+  }
+
+  tx = await liquidator[desiredLiquidation.method](...desiredLiquidation.args, {
+    value: desiredLiquidation.value,
+  });
+  await tx.wait();
+
+  const receipt = await tx.wait();
+  expect(receipt.status).to.eq(1);
+
+  const ratioAfter = await getPositionRatio({
+    name: poolName,
+    userAddress: undefined,
+    cgId: coingeckoId,
+    namedUser: liquidatedUserName,
+  });
+  console.log(`Ratio After: ${ratioAfter}`);
+  expect(ratioBefore).to.be.gte(ratioAfter);
+
+  // Assert balance after liquidation > balance before liquidation
+  let liquidatorBalanceAfterLiquidation: BigNumber;
+
+  if (
+    liquidationConfigOverrides.SUPPORTED_OUTPUT_CURRENCIES.includes(underlyingCollateral) &&
+    underlyingCollateral !== constants.AddressZero
+  ) {
+    liquidatorBalanceAfterLiquidation = await erc20OneUnderlying.balanceOf(rando.address);
+  } else {
+    liquidatorBalanceAfterLiquidation = await ethers.provider.getBalance(rando.address);
+  }
+  console.log("Liquidator balance before liquidation: ", utils.formatEther(liquidatorBalanceBeforeLiquidation));
+  console.log("Liquidator balance after liquidation: ", utils.formatEther(liquidatorBalanceAfterLiquidation));
+
+  expect(liquidatorBalanceAfterLiquidation).gt(liquidatorBalanceBeforeLiquidation);
+  expect(ratioBefore).to.be.gte(ratioAfter);
 };
