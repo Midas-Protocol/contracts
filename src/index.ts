@@ -17,3 +17,9 @@ export {
 } from "./Fuse/types";
 export { SupportedChains } from "./network";
 export { filterOnlyObjectProperties } from "./Fuse/utils";
+
+export {
+  defaults as liquidationConfigDefaults,
+  ChainLiquidationConfig,
+  LiquidationStrategy,
+} from "./modules/liquidation/config";

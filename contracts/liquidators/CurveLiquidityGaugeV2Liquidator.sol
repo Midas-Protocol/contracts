@@ -7,7 +7,7 @@ import "../external/curve/ICurveRegistry.sol";
 import "../external/curve/ICurvePool.sol";
 import "../external/curve/ICurveLiquidityGaugeV2.sol";
 
-import "../external/aave/IW_NATIVE.sol";
+import "../utils/IW_NATIVE.sol";
 
 import "./IRedemptionStrategy.sol";
 

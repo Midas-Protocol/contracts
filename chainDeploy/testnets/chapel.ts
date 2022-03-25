@@ -85,7 +85,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
     deployConfig,
     assets,
     chainlinkAssets,
-    run
+    run,
   });
   ////
 

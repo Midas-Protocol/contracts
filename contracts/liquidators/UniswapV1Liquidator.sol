@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "../external/uniswap/IUniswapV1Exchange.sol";
 import "../external/uniswap/IUniswapV1Factory.sol";
 
-import "../external/aave/IW_NATIVE.sol";
+import "../utils/IW_NATIVE.sol";
 
 import "./IRedemptionStrategy.sol";
 
