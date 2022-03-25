@@ -78,9 +78,9 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      forking: process.env.FORK_URL
+      forking: process.env.FORK_URL_BSC
         ? {
-            url: process.env.FORK_URL,
+            url: process.env.FORK_URL_BSC,
             blockNumber: Number(process.env.FORK_BLOCK_NUMBER),
           }
         : undefined,
