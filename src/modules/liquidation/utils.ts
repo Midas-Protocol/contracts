@@ -41,34 +41,6 @@ export type PublicPoolUserWithData = {
   liquidationIncentive: BigNumber;
 };
 
-// interface NativeTokenData {
-//   symbol: string;
-//   address: string;
-//   decimals: number;
-//   coingeckoId: string;
-// }
-
-// export const NATIVE_TOKEN_DATA: Record<number, NativeTokenData> = {
-//   [SupportedChains.bsc]: {
-//     symbol: "BNB",
-//     address: "0x0000000000000000000000000000000000000000",
-//     decimals: 18,
-//     coingeckoId: "binancecoin",
-//   },
-//   [SupportedChains.chapel]: {
-//     symbol: "BNB",
-//     address: "0x0000000000000000000000000000000000000000",
-//     decimals: 18,
-//     coingeckoId: "binancecoin",
-//   },
-//   [SupportedChains.ganache]: {
-//     symbol: "ETH",
-//     address: "0x0000000000000000000000000000000000000000",
-//     decimals: 18,
-//     coingeckoId: "ethereum",
-//   },
-// };
-
 export async function fetchGasLimitForTransaction(fuse: FuseBase, method: string, tx: TransactionRequest) {
   try {
     return await fuse.provider.estimateGas(tx);

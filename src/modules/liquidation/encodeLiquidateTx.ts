@@ -33,9 +33,10 @@ export default async function encodeLiquidateTx(
       };
     case LiquidationKind.DEFAULT_TOKEN_BORROW:
       return {
-        method: "safeLiquidate(address,address,address,uint256,address,address,address[],bytes[])",
+        method: "safeLiquidate(address,uint256,address,address,uint256,address,address,address[],bytes[])",
         args: [
           borrower.account,
+          liquidationAmount,
           borrower.debt[0].cToken,
           borrower.collateral[0].cToken,
           0,
@@ -44,7 +45,7 @@ export default async function encodeLiquidateTx(
           strategyAndData.strategyAddress,
           strategyAndData.strategyData,
         ],
-        value: liquidationAmount,
+        value: BigNumber.from(0),
       };
     case LiquidationKind.UNISWAP_NATIVE_BORROW:
       return {

@@ -27,6 +27,7 @@ const tokenToStrategyMapping: TokenToStrategy = {
   9001: {
     "0x -- Kinesis": RedemptionStrategy.CurveLpTokenLiquidatorNoRegistry,
   },
+  1337: {},
 };
 
 export const requiresCustomStrategy = (chainId: number, token: string) => {

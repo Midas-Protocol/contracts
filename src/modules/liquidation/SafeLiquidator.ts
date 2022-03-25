@@ -9,16 +9,18 @@ import liquidateUnhealthyBorrows from "./liquidateUnhealthyBorrows";
 
 export function withSafeLiquidator<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class SafeLiquidator extends Base {
+    public chainLiquidationConfig: ChainLiquidationConfig = getChainLiquidationConfig(this.chainId);
+
     async getPotentialLiquidations(
       supportedComptrollers: Array<string> = [],
       maxHealthFactor: BigNumber = utils.parseEther("1"),
-      chainLiquidationConfig?: ChainLiquidationConfig
+      configOverrides?: ChainLiquidationConfig
     ): Promise<Array<LiquidatablePool>> {
       // Get potential liquidations from public pools
       const [comptrollers, users, closeFactors, liquidationIncentives] =
         await this.contracts.FusePoolLens.callStatic.getPublicPoolUsersWithData(maxHealthFactor);
       if (supportedComptrollers.length === 0) supportedComptrollers = comptrollers;
-      if (!chainLiquidationConfig) chainLiquidationConfig = getChainLiquidationConfig(this.chainId);
+      if (configOverrides) this.chainLiquidationConfig = { ...this.chainLiquidationConfig, ...configOverrides };
       const publicPoolUsersWithData: Array<PublicPoolUserWithData> = comptrollers
         .map((c, i) => {
           return supportedComptrollers.includes(c)
@@ -32,7 +34,7 @@ export function withSafeLiquidator<TBase extends FuseBaseConstructor>(Base: TBas
         })
         .filter((x): x is PublicPoolUserWithData => x !== null);
 
-      return await gatherLiquidations(this, publicPoolUsersWithData, chainLiquidationConfig);
+      return await gatherLiquidations(this, publicPoolUsersWithData, this.chainLiquidationConfig);
     }
     async estimateProfit(liquidation) {}
     async liquidatePositions(positions: Array<LiquidatablePool>) {

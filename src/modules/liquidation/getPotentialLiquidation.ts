@@ -82,8 +82,6 @@ export default async function getPotentialLiquidation(
     liquidationValueWei = seizeAmountWei.div(liquidationIncentive);
     liquidationAmount = liquidationValueWei.mul(SCALE_FACTOR_ONE_18_WEI).div(underlyingDebtPrice);
   }
-  // liquidationAmount = liquidationAmount.mul(5);
-  console.log(utils.formatEther(liquidationAmount));
 
   if (liquidationAmount.lte(BigNumber.from(0))) {
     console.log("Liquidation amount is zero, doing nothing");
@@ -93,7 +91,7 @@ export default async function getPotentialLiquidation(
   const strategyAndData = await getStrategyAndData(fuse, borrower.collateral[0].underlyingToken);
   const liquidationKind = getLiquidationKind(
     chainLiquidationConfig.LIQUIDATION_STRATEGY,
-    borrower.collateral[0].underlyingToken
+    borrower.debt[0].underlyingToken
   );
 
   let expectedGasAmount: BigNumber;
@@ -115,11 +113,13 @@ export default async function getPotentialLiquidation(
 
   // calculate min profits
   const minProfitAmountEth = expectedGasFee.add(chainLiquidationConfig.MINIMUM_PROFIT_NATIVE);
-  const minSeizeAmount = liquidationValueWei.add(minProfitAmountEth).mul(SCALE_FACTOR_ONE_18_WEI).div(outputPrice);
+  // const minSeizeAmount = liquidationValueWei.add(minProfitAmountEth).mul(SCALE_FACTOR_ONE_18_WEI).div(outputPrice);
 
-  if (seizeAmount.lt(minSeizeAmount)) {
+  if (seizeAmountWei.lt(minProfitAmountEth)) {
     console.log(
-      `Seize amount of ${utils.formatEther(seizeAmount)} less than min break even of ${minSeizeAmount}, doing nothing`
+      `Seize amount of ${utils.formatEther(seizeAmountWei)} less than min break even of ${utils.formatEther(
+        minProfitAmountEth
+      )}, doing nothing`
     );
     return null;
   }
