@@ -234,7 +234,6 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   const masterPO = await dep.deploy();
   if (masterPO.transactionHash) await ethers.provider.waitForTransaction(masterPO.transactionHash);
   console.log("MasterPriceOracle: ", masterPO.address);
-  console.log("deployer: ", deployer);
 
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
   const admin = await masterPriceOracle.admin();
