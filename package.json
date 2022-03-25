@@ -26,6 +26,8 @@
     "build:hardhat": "hardhat compile",
     "build:sdk": "tsc -p tsconfig-sdk.json && tsc -p tsconfig-cjs.json",
     "clean": "hardhat clean && rm -rf lib",
+    "deploy:simulate:bsc:mainnet": "FORK_URL=${FORK_URL_BSC} FORK_BLOCK_NUMBER=16281867 FORK_CHAIN_ID=56 hardhat node --tags simulate",
+    "deploy:bsc:mainnet": "hardhat --network bsc deploy --tags prod",
     "prettier:sol": "prettier --write 'contracts/**/*.sol' 'contracts_forge/**/*.sol'",
     "prettier:ts": "prettier --write 'chainDeploy/**/*.ts' 'src/**/*.ts' 'deploy/**/*.ts' 'tasks/**/*.ts' 'test/**/*.ts'",
     "prettier": "npm run prettier:ts && npm run prettier:sol"
