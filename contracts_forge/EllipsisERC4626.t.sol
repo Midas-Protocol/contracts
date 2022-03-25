@@ -71,7 +71,7 @@ contract EllipsisERC4626Test is DSTest {
       IFlywheelCore(address(flywheel))
     );
     marketKey = ERC20(address(ellipsisERC4626));
-    flywheel.addMarketForRewards(marketKey);
+    flywheel.addStrategyForRewards(marketKey);
   }
 
   function testInitalizedValues() public {

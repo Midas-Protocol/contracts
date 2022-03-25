@@ -64,7 +64,7 @@ contract AutofarmERC4626Test is DSTest {
       IFlywheelCore(address(flywheel))
     );
     marketKey = ERC20(address(autofarmERC4626));
-    flywheel.addMarketForRewards(marketKey);
+    flywheel.addStrategyForRewards(marketKey);
 
     // Add mockStrategy to Autofarm
     mockAutofarm.add(ERC20(address(testToken)), 1, address(mockStrategy));

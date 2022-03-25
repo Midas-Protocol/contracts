@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
-import {ERC20} from "solmate/tokens/ERC20.sol";
-import {Auth, Authority} from "solmate/auth/Auth.sol";
-import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
-import {SafeCastLib} from "solmate/utils/SafeCastLib.sol";
+import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
+import {Auth, Authority} from "@rari-capital/solmate/src/auth/Auth.sol";
+import {SafeTransferLib} from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
 
+import {SafeCastLib} from "./SafeCastLib.sol";
 import {IFlywheelRewards} from "./interfaces/IFlywheelRewards.sol";
 import {IFlywheelBooster} from "./interfaces/IFlywheelBooster.sol";
 
