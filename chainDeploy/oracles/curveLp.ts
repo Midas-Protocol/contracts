@@ -49,9 +49,7 @@ export const deployCurveLpOracle = async ({
   const underlyings = curvePools.map((c) => c.lpToken);
   const oracles = Array(curvePools.length).fill(curveOracle.address);
 
-  let mpo = await ethers.getContract("MasterPriceOracle", deployer);
-  const admin = await mpo.admin();
-  if (admin !== deployer) mpo = await ethers.getContract("MasterPriceOracle", admin);
+  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
   tx = await mpo.add(underlyings, oracles);
   await tx.wait();
 

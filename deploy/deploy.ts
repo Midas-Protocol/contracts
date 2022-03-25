@@ -33,6 +33,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
       proxyContract: "OpenZeppelinTransparentProxy",
     },
   });
+
   const ffd = await dep.deploy();
   console.log("FuseFeeDistributor: ", ffd.address);
   const fuseFeeDistributor = await ethers.getContract("FuseFeeDistributor", deployer);
@@ -233,8 +234,9 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   const masterPO = await dep.deploy();
   if (masterPO.transactionHash) await ethers.provider.waitForTransaction(masterPO.transactionHash);
   console.log("MasterPriceOracle: ", masterPO.address);
+  console.log("deployer: ", deployer);
 
-  let masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
+  const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
   const admin = await masterPriceOracle.admin();
 
   // intialize with no assets
@@ -250,7 +252,6 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     await tx.wait();
     console.log("MasterPriceOracle initialized", tx.hash);
   } else {
-    if (admin !== deployer) masterPriceOracle = await ethers.getContract("MasterPriceOracle", admin);
     tx = await masterPriceOracle.add([constants.AddressZero], [fixedNativePO.address]);
     await tx.wait();
     console.log("MasterPriceOracle already initialized");
@@ -297,5 +298,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   }
   ////
 };
+
+func.tags = ["prod"]
 
 export default func;

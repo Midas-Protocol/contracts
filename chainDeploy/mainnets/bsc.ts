@@ -321,6 +321,19 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   if (xbombLiquidator.transactionHash) await ethers.provider.waitForTransaction(xbombLiquidator.transactionHash);
   console.log("XBombLiquidator: ", xbombLiquidator.address);
 
+  dep = await deployments.deterministic("JarvisSynthereumLiquidator", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [
+      "0x0fD8170Dc284CD558325029f6AEc1538c7d99f49", // synthereum liquidity pool
+      40 * 60
+    ],
+    log: true,
+  });
+  const jarvisSynthereumLiquidator = await dep.deploy();
+  if (jarvisSynthereumLiquidator.transactionHash) await ethers.provider.waitForTransaction(jarvisSynthereumLiquidator.transactionHash);
+  console.log("JarvisSynthereumLiquidator: ", jarvisSynthereumLiquidator.address);
+
 
   ////
 };

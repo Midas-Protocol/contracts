@@ -64,9 +64,7 @@ export const deployUniswapOracle = async ({
     deployConfig.wtoken
   );
 
-  let mpo = await ethers.getContract("MasterPriceOracle", deployer);
-  const admin = await mpo.admin();
-  if (admin !== deployer) mpo = await ethers.getContract("MasterPriceOracle", admin);
+  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
   const underlyings = deployConfig.uniswap.uniswapOracleInitialDeployTokens;
   const oracles = Array(deployConfig.uniswap.uniswapOracleInitialDeployTokens.length).fill(nativeOracle);
 
