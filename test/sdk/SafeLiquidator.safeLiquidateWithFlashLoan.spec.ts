@@ -15,21 +15,6 @@ import { DeployedAsset } from "../utils/pool";
 import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
 import { ChainLiquidationConfig, liquidationConfigDefaults } from "../../dist/cjs/src";
 
-const UNISWAP_V2_PROTOCOLS = {
-  Uniswap: {
-    router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
-    factory: "0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f",
-  },
-  SushiSwap: {
-    router: "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f",
-    factory: "0xc0aee478e3658e2610c5f7a4a2e1777ce9e4f2ac",
-  },
-  PancakeSwap: {
-    router: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
-    factory: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
-  },
-};
-
 (process.env.FORK_CHAIN_ID ? describe : describe.skip)("#safeLiquidateWithFlashLoan", () => {
   let tx: providers.TransactionResponse;
 
@@ -127,8 +112,7 @@ const UNISWAP_V2_PROTOCOLS = {
       coingeckoId,
       liquidator,
       liquidationConfigOverrides,
-      erc20One.underlying,
-      erc20OneUnderlying
+      erc20OneUnderlying.balanceOf
     );
 
     // Set price of tokenOne collateral back to what it was
@@ -164,8 +148,7 @@ const UNISWAP_V2_PROTOCOLS = {
       coingeckoId,
       liquidator,
       liquidationConfigOverrides,
-      ethers.constants.AddressZero,
-      erc20OneUnderlying
+      ethers.provider.getBalance
     );
 
     // Set price of tokenOne collateral back to what it was
@@ -208,8 +191,7 @@ const UNISWAP_V2_PROTOCOLS = {
       coingeckoId,
       liquidator,
       liquidationConfigOverrides,
-      erc20Two.underlying,
-      erc20TwoUnderlying
+      erc20TwoUnderlying.balanceOf
     );
 
     tx = await simpleOracle.setDirectPrice(deployedErc20One.underlying, erc20OneOriginalUnderlyingPrice);

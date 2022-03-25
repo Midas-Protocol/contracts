@@ -29,7 +29,7 @@ const mnemonic =
 
 const config: HardhatUserConfig = {
   mocha: {
-    timeout: 120_000,
+    timeout: 200_000,
   },
   tenderly: {
     username: "carlomazzaferro",

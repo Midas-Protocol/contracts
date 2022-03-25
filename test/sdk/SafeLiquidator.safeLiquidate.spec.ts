@@ -1,6 +1,6 @@
 import { BigNumber, constants, providers, utils } from "ethers";
 import { deployments, ethers } from "hardhat";
-import { getPositionRatio, setUpLiquidation, setUpPriceOraclePrices, tradeNativeForAsset } from "../utils";
+import { setUpLiquidation, setUpPriceOraclePrices, tradeNativeForAsset } from "../utils";
 import { DeployedAsset } from "../utils/pool";
 import { addCollateral, borrowCollateral } from "../utils/collateral";
 import {
@@ -12,9 +12,8 @@ import {
   MasterPriceOracle,
   SimplePriceOracle,
 } from "../../typechain";
-import { expect } from "chai";
-import { cERC20Conf, ChainLiquidationConfig, Fuse, liquidationConfigDefaults, LiquidationStrategy } from "../../";
-import { resetPriceOracle } from "../utils/setup";
+import { cERC20Conf, ChainLiquidationConfig, liquidationConfigDefaults, LiquidationStrategy } from "../../";
+import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
 
 describe("#SafeLiquidator", () => {
   let eth: cERC20Conf;
@@ -91,7 +90,7 @@ describe("#SafeLiquidator", () => {
   });
 
   it("should retrieve & liquidate positions for a native borrow for token collateral", async function () {
-    const { alice, bob, rando } = await ethers.getNamedSigners();
+    const { alice, bob } = await ethers.getNamedSigners();
     console.log("staring with prices: ", utils.formatEther(erc20OneOriginalUnderlyingPrice));
 
     // get some liquidity via Uniswap
@@ -109,8 +108,6 @@ describe("#SafeLiquidator", () => {
     const borrowAmount = "5";
     await borrowCollateral(poolAddress, bob.address, eth.symbol, borrowAmount);
 
-    const balBefore = await erc20OneCToken.balanceOf(rando.address);
-
     // Set price of tokenOne collateral to 1/10th of what it was
     tx = await simpleOracle.setDirectPrice(
       deployedErc20One.underlying,
@@ -118,22 +115,15 @@ describe("#SafeLiquidator", () => {
     );
     await tx.wait();
 
-    const sdk = new Fuse(ethers.provider, chainId);
-    const liquidations = await sdk.getPotentialLiquidations([], utils.parseEther("1"), liquidationConfigOverrides);
-
-    expect(liquidations.length).to.gt(0);
-
-    const desiredLiquidation = liquidations.filter((l) => l.comptroller === poolAddress)[0].liquidations[0];
-
-    tx = await liquidator[desiredLiquidation.method](...desiredLiquidation.args, {
-      value: desiredLiquidation.value,
-      gasLimit: 10000000,
-      gasPrice: utils.parseUnits("10", "gwei"),
-    });
-    await tx.wait();
-
-    const balAfter = await erc20OneCToken.balanceOf(rando.address);
-    expect(balAfter).to.be.gt(balBefore);
+    await liquidateAndVerify(
+      poolName,
+      poolAddress,
+      "bob",
+      coingeckoId,
+      liquidator,
+      liquidationConfigOverrides,
+      chainId === 1337 ? erc20OneCToken.balanceOf : erc20OneUnderlying.balanceOf
+    );
 
     // return price to what it was
     tx = await simpleOracle.setDirectPrice(deployedErc20One.underlying, erc20OneOriginalUnderlyingPrice);
@@ -161,33 +151,25 @@ describe("#SafeLiquidator", () => {
     await borrowCollateral(poolAddress, bob.address, erc20One.symbol, borrowAmount);
     console.log(`Borrowed ${erc20One.symbol} collateral`);
 
-    const balBefore = await ethCToken.balanceOf(rando.address);
-
     // Set price of borrowed token to 10x of what it was
     tx = await simpleOracle.setDirectPrice(
       deployedErc20One.underlying,
       BigNumber.from(erc20OneOriginalUnderlyingPrice).mul(10).div(6)
     );
-    await tx.wait();
 
-    const sdk = new Fuse(ethers.provider, chainId);
-
-    const liquidations = await sdk.getPotentialLiquidations([], utils.parseEther("1"), liquidationConfigOverrides);
-    expect(liquidations.length).to.gt(0);
-
-    const desiredLiquidation = liquidations.filter((l) => l.comptroller === poolAddress)[0].liquidations[0];
-
-    tx = await erc20OneUnderlying.connect(alice).transfer(rando.address, desiredLiquidation.args[1]);
+    tx = await erc20OneUnderlying.connect(alice).transfer(rando.address, utils.parseEther(borrowAmount));
     tx = await erc20OneUnderlying.connect(rando).approve(liquidator.address, constants.MaxUint256);
     await tx.wait();
 
-    tx = await liquidator[desiredLiquidation.method](...desiredLiquidation.args, {
-      value: desiredLiquidation.value,
-    });
-    await tx.wait();
-
-    const balAfter = await ethCToken.balanceOf(rando.address);
-    expect(balAfter).to.be.gt(balBefore);
+    await liquidateAndVerify(
+      poolName,
+      poolAddress,
+      "bob",
+      coingeckoId,
+      liquidator,
+      liquidationConfigOverrides,
+      chainId === 1337 ? ethCToken.balanceOf : ethers.provider.getBalance
+    );
 
     // return price to what it was
     tx = await simpleOracle.setDirectPrice(deployedErc20One.underlying, erc20OneOriginalUnderlyingPrice);
@@ -210,7 +192,7 @@ describe("#SafeLiquidator", () => {
     console.log(`Added ${erc20One.symbol} collateral`);
 
     // Supply tokenTwo from other account
-    await addCollateral(poolAddress, bob, erc20Two.symbol, "4000", true, coingeckoId);
+    await addCollateral(poolAddress, bob, erc20Two.symbol, "5000", true, coingeckoId);
     console.log(`Added ${erc20Two.symbol} collateral`);
 
     // Borrow tokenTwo using tokenOne collateral
@@ -218,39 +200,25 @@ describe("#SafeLiquidator", () => {
     await borrowCollateral(poolAddress, bob.address, erc20One.symbol, borrowAmount, coingeckoId);
     console.log(`Borrowed ${erc20Two.symbol} collateral`);
 
-    const balBefore = await erc20TwoCToken.balanceOf(rando.address);
-
     // Set price of tokenOne collateral to 1/10th of what it was
     tx = await simpleOracle.setDirectPrice(
       deployedErc20One.underlying,
       BigNumber.from(erc20OneOriginalUnderlyingPrice).mul(10).div(6)
     );
 
-    const ratioBefore = await getPositionRatio({
-      name: poolName,
-      userAddress: undefined,
-      cgId: coingeckoId,
-      namedUser: "bob",
-    });
-    console.log(`Ratio Before: ${ratioBefore}`);
-
-    const sdk = new Fuse(ethers.provider, chainId);
-    const liquidations = await sdk.getPotentialLiquidations([], utils.parseEther("1"), liquidationConfigOverrides);
-    expect(liquidations.length).to.gt(0);
-
-    const desiredLiquidation = liquidations.filter((l) => l.comptroller === poolAddress)[0].liquidations[0];
-
-    tx = await erc20OneUnderlying.connect(bob).transfer(rando.address, desiredLiquidation.args[1]);
+    tx = await erc20OneUnderlying.connect(bob).transfer(rando.address, utils.parseEther(borrowAmount));
     tx = await erc20OneUnderlying.connect(rando).approve(liquidator.address, constants.MaxUint256);
     await tx.wait();
 
-    tx = await liquidator[desiredLiquidation.method](...desiredLiquidation.args, {
-      value: desiredLiquidation.value,
-    });
-    await tx.wait();
-
-    const balAfter = await erc20TwoCToken.balanceOf(rando.address);
-    expect(balAfter).to.be.gt(balBefore);
+    await liquidateAndVerify(
+      poolName,
+      poolAddress,
+      "bob",
+      coingeckoId,
+      liquidator,
+      liquidationConfigOverrides,
+      chainId === 1337 ? erc20TwoCToken.balanceOf : erc20TwoUnderlying.balanceOf
+    );
 
     // return price to what it was
     tx = await simpleOracle.setDirectPrice(deployedErc20One.underlying, erc20OneOriginalUnderlyingPrice);

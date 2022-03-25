@@ -11,7 +11,7 @@ import {
 } from "../../typechain";
 import { createPool, deployAssets, DeployedAsset, getPoolAssets } from "./pool";
 import { expect } from "chai";
-import { cERC20Conf, Fuse } from "../../src";
+import { cERC20Conf, ChainLiquidationConfig, Fuse } from "../../";
 
 export const resetPriceOracle = async (erc20One, erc20Two) => {
   const chainId = parseInt(await getChainId());
@@ -178,14 +178,13 @@ export const setUpLiquidation = async ({ poolName }) => {
 };
 
 export const liquidateAndVerify = async (
-  poolName,
-  poolAddress,
-  liquidatedUserName,
-  coingeckoId,
-  liquidator,
-  liquidationConfigOverrides,
-  underlyingCollateral,
-  erc20OneUnderlying
+  poolName: string,
+  poolAddress: string,
+  liquidatedUserName: string,
+  coingeckoId: string,
+  liquidator: FuseSafeLiquidator,
+  liquidationConfigOverrides: ChainLiquidationConfig,
+  liquidatorBalanceCalculator: (address: string) => Promise<BigNumber>
 ) => {
   let tx: providers.TransactionResponse;
 
@@ -206,15 +205,7 @@ export const liquidateAndVerify = async (
   });
   console.log(`Ratio Before: ${ratioBefore}`);
 
-  let liquidatorBalanceBeforeLiquidation: BigNumber;
-  if (
-    liquidationConfigOverrides.SUPPORTED_OUTPUT_CURRENCIES.includes(underlyingCollateral) &&
-    underlyingCollateral !== constants.AddressZero
-  ) {
-    liquidatorBalanceBeforeLiquidation = await erc20OneUnderlying.balanceOf(rando.address);
-  } else {
-    liquidatorBalanceBeforeLiquidation = await ethers.provider.getBalance(rando.address);
-  }
+  const liquidatorBalanceBeforeLiquidation = await liquidatorBalanceCalculator(rando.address);
 
   tx = await liquidator[desiredLiquidation.method](...desiredLiquidation.args, {
     value: desiredLiquidation.value,
@@ -234,16 +225,8 @@ export const liquidateAndVerify = async (
   expect(ratioBefore).to.be.gte(ratioAfter);
 
   // Assert balance after liquidation > balance before liquidation
-  let liquidatorBalanceAfterLiquidation: BigNumber;
+  const liquidatorBalanceAfterLiquidation = await liquidatorBalanceCalculator(rando.address);
 
-  if (
-    liquidationConfigOverrides.SUPPORTED_OUTPUT_CURRENCIES.includes(underlyingCollateral) &&
-    underlyingCollateral !== constants.AddressZero
-  ) {
-    liquidatorBalanceAfterLiquidation = await erc20OneUnderlying.balanceOf(rando.address);
-  } else {
-    liquidatorBalanceAfterLiquidation = await ethers.provider.getBalance(rando.address);
-  }
   console.log("Liquidator balance before liquidation: ", utils.formatEther(liquidatorBalanceBeforeLiquidation));
   console.log("Liquidator balance after liquidation: ", utils.formatEther(liquidatorBalanceAfterLiquidation));
 
