@@ -10,15 +10,15 @@ export interface ClaimableReward {
   amount: BigNumber;
 }
 
-export interface Reward {
+export interface RewardsDistributorReward {
   distributor: string;
   rewardToken: string;
-  speed: BigNumber;
+  rewardsPerBlock: BigNumber;
 }
-export interface MarketReward {
+export interface RewardsDistributorMarketReward {
   cToken: string;
-  supplyRewards: Reward[];
-  borrowRewards: Reward[];
+  supplyRewards: RewardsDistributorReward[];
+  borrowRewards: RewardsDistributorReward[];
 }
 
 export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: TBase) {
@@ -80,38 +80,45 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
     updateRewardsDistributorSupplySpeed(
       rewardsDistributorAddress: string,
       cTokenAddress: string,
-      amount: BigNumberish,
+      rewardsPerBlock: BigNumberish,
       options: { from: string }
     ) {
       const rewardsDistributorInstance = this.#getRewardsDistributorInstance(rewardsDistributorAddress, options);
 
-      return rewardsDistributorInstance._setCompSupplySpeed(cTokenAddress, amount);
+      return rewardsDistributorInstance._setCompSupplySpeed(cTokenAddress, rewardsPerBlock);
     }
 
     updateRewardsDistributorBorrowSpeed(
       rewardsDistributorAddress: string,
       cTokenAddress: string,
-      amount: BigNumberish,
+      rewardsPerBlock: BigNumberish,
       options: { from: string }
     ) {
       const rewardsDistributorInstance = this.#getRewardsDistributorInstance(rewardsDistributorAddress, options);
 
-      return rewardsDistributorInstance._setCompBorrowSpeed(cTokenAddress, amount);
+      return rewardsDistributorInstance._setCompBorrowSpeed(cTokenAddress, rewardsPerBlock);
     }
 
     updateRewardsDistributorSpeeds(
       rewardsDistributorAddress: string,
       cTokenAddress: string[],
-      amountSuppliers: BigNumberish[],
-      amountBorrowers: BigNumberish[],
+      rewardsPerBlockSuppliers: BigNumberish[],
+      rewardsPerBlockBorrowers: BigNumberish[],
       options: { from: string }
     ) {
       const rewardsDistributorInstance = this.#getRewardsDistributorInstance(rewardsDistributorAddress, options);
 
-      return rewardsDistributorInstance._setCompSpeeds(cTokenAddress, amountSuppliers, amountBorrowers);
+      return rewardsDistributorInstance._setCompSpeeds(
+        cTokenAddress,
+        rewardsPerBlockSuppliers,
+        rewardsPerBlockBorrowers
+      );
     }
 
-    async getRewardsDistributorMarketRewardsByPool(pool: string, options: { from: string }): Promise<MarketReward[]> {
+    async getRewardsDistributorMarketRewardsByPool(
+      pool: string,
+      options: { from: string }
+    ): Promise<RewardsDistributorMarketReward[]> {
       const rewardSpeedsByPoolResponse = await this.contracts.FusePoolLensSecondary.callStatic.getRewardSpeedsByPool(
         pool,
         options
@@ -125,7 +132,7 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
     ): Promise<
       {
         pool: string;
-        marketRewards: MarketReward[];
+        marketRewards: RewardsDistributorMarketReward[];
       }[]
     > {
       const [allMarkets, distributors, rewardTokens, supplySpeeds, borrowSpeeds] =
@@ -169,6 +176,10 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
       return claimableRewards;
     }
 
+    async getRewardsDistributorsBySupplier(account: string, options: { from: string }) {
+      return await this.contracts.FusePoolLensSecondary.callStatic.getRewardsDistributorsBySupplier(account, options);
+    }
+
     claimAllRewardsDistributorRewards(rewardsDistributorAddress: string, options: { from: string }) {
       const rewardsDistributorInstance = this.#getRewardsDistributorInstance(rewardsDistributorAddress, options);
       return rewardsDistributorInstance.functions["claimRewards(address)"](options.from);
@@ -188,22 +199,22 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
       rewardTokens: string[],
       supplySpeeds: BigNumber[][],
       borrowSpeeds: BigNumber[][]
-    ): MarketReward[] {
-      const marketRewards: MarketReward[] = allMarkets.map((market, marketIndex) => ({
+    ): RewardsDistributorMarketReward[] {
+      const marketRewards: RewardsDistributorMarketReward[] = allMarkets.map((market, marketIndex) => ({
         cToken: market,
         supplyRewards: supplySpeeds[marketIndex]
           .filter((speed) => speed.gt(0))
           .map((speed, speedIndex) => ({
             distributor: distributors[speedIndex],
             rewardToken: rewardTokens[speedIndex],
-            speed,
+            rewardsPerBlock: speed,
           })),
         borrowRewards: borrowSpeeds[marketIndex]
           .filter((speed) => speed.gt(0))
           .map((speed, speedIndex) => ({
             distributor: distributors[speedIndex],
             rewardToken: rewardTokens[speedIndex],
-            speed,
+            rewardsPerBlock: speed,
           })),
       }));
 
