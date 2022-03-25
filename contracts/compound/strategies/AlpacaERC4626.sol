@@ -52,6 +52,8 @@ contract AlpacaERC4626 is ERC4626 {
     IAlpacaVault _alpacaVault
   ) ERC4626(_asset, _name, _symbol) {
     alpacaVault = _alpacaVault;
+
+    asset.approve(address(alpacaVault), type(uint256).max);
   }
 
   /* ========== VIEWS ========== */
@@ -65,13 +67,12 @@ contract AlpacaERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the user holds.
   /// @return The total amount of underlying tokens the user holds.
   function balanceOfUnderlying(address account) public view returns (uint256) {
-    return this.balanceOf(account).mulDivDown(totalAssets(), totalSupply);
+    return convertToAssets(balanceOf[account]);
   }
 
   /* ========== INTERNAL FUNCTIONS ========== */
 
   function afterDeposit(uint256 amount, uint256) internal override {
-    asset.approve(address(alpacaVault), amount);
     alpacaVault.deposit(amount);
   }
 

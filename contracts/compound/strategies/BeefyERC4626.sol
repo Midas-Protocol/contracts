@@ -50,6 +50,8 @@ contract BeefyERC4626 is ERC4626 {
     IBeefyVault _beefyVault
   ) ERC4626(_asset, _name, _symbol) {
     beefyVault = _beefyVault;
+
+    asset.approve(address(beefyVault), type(uint256).max);
   }
 
   /* ========== VIEWS ========== */
@@ -63,13 +65,12 @@ contract BeefyERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the account holds.
   /// @return The total amount of underlying tokens the account holds.
   function balanceOfUnderlying(address account) public view returns (uint256) {
-    return this.balanceOf(account).mulDivDown(totalAssets(), totalSupply);
+    return convertToAssets(balanceOf[account]);
   }
 
   /* ========== INTERNAL FUNCTIONS ========== */
 
   function afterDeposit(uint256 amount, uint256) internal override {
-    asset.approve(address(beefyVault), amount);
     beefyVault.deposit(amount);
   }
 
