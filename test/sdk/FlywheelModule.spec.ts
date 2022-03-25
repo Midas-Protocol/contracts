@@ -35,7 +35,6 @@ describe("FlywheelModule", function () {
 
     const assetsA = await poolHelpers.getPoolAssets(poolAAddress, sdk.contracts.FuseFeeDistributor.address);
     const deployedAssetsA = await poolHelpers.deployAssets(assetsA.assets, deployer);
-    await poolHelpers.getPoolAssets(poolBAddress, sdk.contracts.FuseFeeDistributor.address);
 
     const erc20One = assetsA.assets.find((a) => a.underlying !== constants.AddressZero); // find first one
     const erc20Two = assetsA.assets.find(
@@ -61,37 +60,62 @@ describe("FlywheelModule", function () {
     const { deployer, alice } = await ethers.getNamedSigners();
     const rewardToken = erc20OneUnderlying;
     const market = erc20OneCToken;
+
     console.log({ rewardToken: rewardToken.address, market: market.address });
 
-    // 1. Deploy Flywheel Core
     const fwCore = await sdk.deployFlywheelCore(rewardToken.address, {
       from: deployer.address,
     });
-    console.log({ fwCore: fwCore.address });
+    console.log("FlywheelCore deployed ✅", fwCore.address);
 
-    // 1.1. Enable Market for Flywheel Core
-    await sdk.addMarketForRewardsToFlywheelCore(fwCore.address, market.address, { from: deployer.address });
-
-    // 1.2. Add Flywheel Core to Pool
-    await sdk.addFlywheelCoreToPool(fwCore.address, poolAAddress, { from: deployer.address });
-
-    // 2. Deploy Flywheel Reward: StaticReward
     const fwStaticRewards = await sdk.deployFlywheelStaticRewards(rewardToken.address, fwCore.address, {
       from: deployer.address,
     });
+    console.log("Static Rewards Deployed ✅", fwStaticRewards.address);
 
-    // 2.1 Fund Static Rewards
+    await sdk.setFlywheelRewards(fwCore.address, fwStaticRewards.address, { from: deployer.address });
+    console.log("Link Rewards to Flywheel core ✅");
+
+    await sdk.addMarketForRewardsToFlywheelCore(fwCore.address, market.address, { from: deployer.address });
+    console.log("Enable Market ✅");
+
+    await sdk.addFlywheelCoreToComptroller(fwCore.address, poolAAddress, { from: deployer.address });
+    console.log("Flywheel added to Pool ✅");
+
+    await sdk.addFlywheelCoreToComptroller(fwCore.address, poolBAddress, { from: deployer.address });
+    console.log("Flywheel added to Pool ✅");
+
     await rewardToken.transfer(fwStaticRewards.address, ethers.utils.parseUnits("100", 18), { from: deployer.address });
+    expect(await rewardToken.balanceOf(fwStaticRewards.address)).to.not.eq(0);
+    console.log("Fund Static Rewards ✅");
 
-    // 2.2 Set Reward Info on Rewards
+    // While minting interest is accrued. This breaks. But only if Reward Info is set already!
+    await collateralHelpers.addCollateral(poolAAddress, alice, await market.callStatic.symbol(), "100", true);
+    console.log("Second Collateral added ✅");
+    expect(await market.functions.totalSupply()).to.not.eq(0);
+
     await sdk.setStaticRewardInfo(
       fwStaticRewards.address,
-      rewardToken.address,
+      market.address,
       {
         rewardsEndTimestamp: 0,
-        rewardsPerSecond: ethers.utils.parseUnits("0.1", 18),
+        rewardsPerSecond: ethers.utils.parseUnits("0.000001", 18),
       },
       { from: deployer.address }
     );
+    console.log("Setup RewardInfo ✅");
+
+    await timeHelpers.advanceDays(1);
+
+    const marketRewards = await sdk.getFlywheelMarketRewardsByPools([poolAAddress, poolBAddress], {
+      from: alice.address,
+    });
+    const marketRewardsPoolA = await sdk.getFlywheelMarketRewardsByPool(poolAAddress, {
+      from: alice.address,
+    });
+    console.dir({ marketRewards, marketRewardsPoolA }, { depth: null });
+
+    // const flywheelLensRouter = sdk.contracts.FuseFlywheelLensRouter;
+    // flywheelLensRouter.functions.getUnclaimedRewardsByMarkets();
   });
 });

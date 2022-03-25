@@ -20,11 +20,14 @@ import ChainlinkPriceOracleV2Artifact from "../../artifacts/contracts/oracles/de
 import PreferredPriceOracleArtifact from "../../artifacts/contracts/oracles/default/PreferredPriceOracle.sol/PreferredPriceOracle.json";
 import MasterPriceOracleArtifact from "../../artifacts/contracts/oracles/MasterPriceOracle.sol/MasterPriceOracle.json";
 import Deployments from "../../deployments.json";
+import { Comptroller } from "../../typechain";
 import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
+import { FuseFlywheelLensRouter } from "../../typechain/FuseFlywheelLensRouter";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FusePoolLens } from "../../typechain/FusePoolLens";
 import { FusePoolLensSecondary } from "../../typechain/FusePoolLensSecondary";
 import { FuseSafeLiquidator } from "../../typechain/FuseSafeLiquidator";
+import { withComptroller } from "../modules/Comptroller";
 import { withFlywheel } from "../modules/Flywheel";
 import { withFusePoolLens } from "../modules/FusePoolLens";
 import { withRewardsDistributor } from "../modules/RewardsDistributor";
@@ -70,11 +73,13 @@ type ChainSpecificAddresses = {
 export class FuseBase {
   public provider: JsonRpcProvider | Web3Provider;
   public contracts: {
+    FuseFeeDistributor: FuseFeeDistributor;
+    FuseFlywheelLensRouter: FuseFlywheelLensRouter;
     FusePoolDirectory: FusePoolDirectory;
     FusePoolLens: FusePoolLens;
     FusePoolLensSecondary: FusePoolLensSecondary;
     FuseSafeLiquidator: FuseSafeLiquidator;
-    FuseFeeDistributor: FuseFeeDistributor;
+    [contractName: string]: Contract;
   };
   static SIMPLE_DEPLOY_ORACLES = SIMPLE_DEPLOY_ORACLES;
   static COMPTROLLER_ERROR_CODES = COMPTROLLER_ERROR_CODES;
@@ -130,6 +135,11 @@ export class FuseBase {
         this.chainDeployment.FuseFeeDistributor.abi,
         this.provider
       ) as FuseFeeDistributor,
+      FuseFlywheelLensRouter: new Contract(
+        this.chainDeployment.FuseFlywheelLensRouter.address,
+        this.chainDeployment.FuseFlywheelLensRouter.abi,
+        this.provider
+      ) as FuseFlywheelLensRouter,
     };
     this.artifacts = {
       CErc20Delegate: CErc20DelegateArtifact,
@@ -479,11 +489,7 @@ export class FuseBase {
     const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
 
     // Get Comptroller
-    const comptroller = new Contract(
-      conf.comptroller,
-      this.artifacts.Comptroller.abi,
-      this.provider.getSigner(options.from)
-    );
+    const comptroller = this.getComptrollerInstance(conf.comptroller, options);
 
     // Check for price feed assuming !bypassPriceFeedCheck
     if (!conf.bypassPriceFeedCheck) await this.checkForCErc20PriceFeed(comptroller, conf);
@@ -1078,6 +1084,14 @@ export class FuseBase {
       isAdminWhitelisted: true,
     };
   };
+
+  getComptrollerInstance(comptrollerAddress: string, options: { from: string }) {
+    return new Contract(
+      comptrollerAddress,
+      this.artifacts.Comptroller.abi,
+      this.provider.getSigner(options.from)
+    ) as Comptroller;
+  }
 }
 
 const FuseBaseWithModules = withFlywheel(withFusePoolLens(withRewardsDistributor(FuseBase)));
