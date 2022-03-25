@@ -249,7 +249,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
           if (redemptionStrategies.length > 0) {
             require(
               redemptionStrategies.length == strategyData.length,
-              "IRedemptionStrategy contract array and strategy data bytes array must the the same length."
+              "IRedemptionStrategy contract array and strategy data bytes array must be the same length."
             );
             uint256 underlyingCollateralSeized = underlyingCollateral.balanceOf(address(this));
             for (uint256 i = 0; i < redemptionStrategies.length; i++)
@@ -310,7 +310,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
         if (redemptionStrategies.length > 0) {
           require(
             redemptionStrategies.length == strategyData.length,
-            "IRedemptionStrategy contract array and strategy data bytes array must the the same length."
+            "IRedemptionStrategy contract array and strategy data bytes array must be the same length."
           );
           uint256 underlyingCollateralSeized = underlyingCollateral.balanceOf(address(this));
           for (uint256 i = 0; i < redemptionStrategies.length; i++)
@@ -704,7 +704,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     if (redemptionStrategies.length > 0) {
       require(
         redemptionStrategies.length == strategyData.length,
-        "IRedemptionStrategy contract array and strategy data bytes array must the the same length."
+        "IRedemptionStrategy contract array and strategy data bytes array must be the same length."
       );
       for (uint256 i = 0; i < redemptionStrategies.length; i++)
         (underlyingCollateral, underlyingCollateralSeized) = redeemCustomCollateral(
