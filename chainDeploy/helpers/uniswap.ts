@@ -1,5 +1,5 @@
 import { SALT } from "../../deploy/deploy";
-import { UniswapTwapPriceOracleV2Factory } from "../../typechain";
+import { UniswapTwapPriceOracleV2Factory } from "../../typechain/UniswapTwapPriceOracleV2Factory";
 import { constants } from "ethers";
 import { UniswapDeployFnParams } from "./types";
 
