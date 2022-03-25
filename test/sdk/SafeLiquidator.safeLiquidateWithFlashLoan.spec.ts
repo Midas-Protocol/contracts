@@ -84,9 +84,9 @@ import { ChainLiquidationConfig, liquidationConfigDefaults } from "../../dist/cj
   });
 
   it("FL - should liquidate a native borrow for token collateral", async function () {
-    const { alice, bob, rando } = await ethers.getNamedSigners();
+    const { alice, bob } = await ethers.getNamedSigners();
 
-    console.log("starting with prices: ", erc20OneOriginalUnderlyingPrice, erc20TwoOriginalUnderlyingPrice);
+    console.log("starting with prices: ", utils.formatEther(erc20OneOriginalUnderlyingPrice));
     // get some liquidity via Uniswap
     if (chainId !== 1337) await tradeNativeForAsset({ account: "alice", token: erc20One.underlying, amount: "300" });
 
@@ -98,7 +98,7 @@ import { ChainLiquidationConfig, liquidationConfigDefaults } from "../../dist/cj
     await addCollateral(poolAddress, bob, eth.symbol, "10", false, coingeckoId);
 
     // Borrow 5 native using token collateral
-    const borrowAmount = "5";
+    const borrowAmount = "4.5";
     await borrowCollateral(poolAddress, alice.address, eth.symbol, borrowAmount, coingeckoId);
 
     // Set price of tokenOne collateral to 6/10th of what it was
@@ -122,7 +122,7 @@ import { ChainLiquidationConfig, liquidationConfigDefaults } from "../../dist/cj
 
   // Safe liquidate token borrows
   it("FL - should liquidate a token borrow for native collateral", async function () {
-    const { alice, bob, rando } = await ethers.getNamedSigners();
+    const { alice, bob } = await ethers.getNamedSigners();
 
     console.log("staring with prices: ", utils.formatEther(erc20OneOriginalUnderlyingPrice));
     if (chainId !== 1337) await tradeNativeForAsset({ account: "alice", token: erc20One.underlying, amount: "150" });
@@ -133,7 +133,7 @@ import { ChainLiquidationConfig, liquidationConfigDefaults } from "../../dist/cj
     await addCollateral(poolAddress, alice, erc20One.symbol, "0.1", true);
 
     // Borrow tokenOne using native as collateral
-    const borrowAmount = "0.05";
+    const borrowAmount = "0.045";
     await borrowCollateral(poolAddress, bob.address, erc20One.symbol, borrowAmount);
 
     // Set price of borrowed token to 10/6th of what it was
@@ -157,8 +157,12 @@ import { ChainLiquidationConfig, liquidationConfigDefaults } from "../../dist/cj
   });
 
   it("FL - should liquidate a token borrow for token collateral", async function () {
-    const { alice, bob, rando } = await ethers.getNamedSigners();
-    console.log("staring with prices: ", utils.formatEther(erc20OneOriginalUnderlyingPrice));
+    const { alice, bob } = await ethers.getNamedSigners();
+    console.log(
+      "staring with prices: ",
+      utils.formatEther(erc20OneOriginalUnderlyingPrice),
+      utils.formatEther(erc20TwoOriginalUnderlyingPrice)
+    );
 
     if (chainId !== 1337) {
       await tradeNativeForAsset({ account: "alice", token: erc20One.underlying, amount: "50" });
@@ -174,7 +178,7 @@ import { ChainLiquidationConfig, liquidationConfigDefaults } from "../../dist/cj
     console.log(`Added ${erc20Two.symbol} collateral`);
 
     // Borrow tokenOne using tokenTwo as collateral
-    const borrowAmount = "0.05";
+    const borrowAmount = "0.045";
     await borrowCollateral(poolAddress, bob.address, erc20One.symbol, borrowAmount);
 
     // Set price of borrowed token to 10x of what it was

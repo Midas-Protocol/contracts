@@ -191,10 +191,6 @@ export const liquidateAndVerify = async (
   const { chainId } = await ethers.provider.getNetwork();
   const { rando } = await ethers.getNamedSigners();
   const sdk = new Fuse(ethers.provider, chainId);
-  const liquidations = await sdk.getPotentialLiquidations();
-  expect(liquidations.length).to.gt(0);
-
-  const desiredLiquidation = liquidations.filter((l) => l.comptroller === poolAddress)[0].liquidations[0];
 
   // Check balance before liquidation
   const ratioBefore = await getPositionRatio({
@@ -204,6 +200,11 @@ export const liquidateAndVerify = async (
     namedUser: liquidatedUserName,
   });
   console.log(`Ratio Before: ${ratioBefore}`);
+
+  const liquidations = await sdk.getPotentialLiquidations([poolAddress]);
+  expect(liquidations.length).to.eq(1);
+
+  const desiredLiquidation = liquidations.filter((l) => l.comptroller === poolAddress)[0].liquidations[0];
 
   const liquidatorBalanceBeforeLiquidation = await liquidatorBalanceCalculator(rando.address);
 
