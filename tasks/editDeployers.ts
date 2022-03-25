@@ -26,7 +26,7 @@ task("edit-deployer-whitelist-enforcement", "Edit deployer whitelist enforcement
 
     const fpd = await ethers.getContract("FusePoolDirectory", deployer);
     const current = await fpd.enforceDeployerWhitelist();
-    console.log('current: ', current);
+    console.log("current: ", current);
     if (current === enforce) {
       console.log("Already set to ", enforce);
       return;

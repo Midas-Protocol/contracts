@@ -1,5 +1,5 @@
 import { ethers, getChainId, run } from "hardhat";
-import { BigNumber, constants, providers } from "ethers";
+import { BigNumber, constants, providers, utils } from "ethers";
 import {
   CErc20,
   CEther,
@@ -11,8 +11,7 @@ import {
 } from "../../typechain";
 import { createPool, deployAssets, DeployedAsset, getPoolAssets } from "./pool";
 import { expect } from "chai";
-import { cERC20Conf } from "../../src";
-import { Fuse } from "../../src";
+import { cERC20Conf, ChainLiquidationConfig, Fuse } from "../../";
 
 export const resetPriceOracle = async (erc20One, erc20Two) => {
   const chainId = parseInt(await getChainId());
@@ -20,12 +19,12 @@ export const resetPriceOracle = async (erc20One, erc20Two) => {
   if (chainId !== 31337 && chainId !== 1337) {
     const { deployer } = await ethers.getNamedSigners();
     const sdk = new Fuse(ethers.provider, Number(chainId));
-    const spo = (await ethers.getContractAt(
+    const mpo = (await ethers.getContractAt(
       "MasterPriceOracle",
       sdk.oracles.MasterPriceOracle.address,
       deployer
     )) as MasterPriceOracle;
-    const tx = await spo.add(
+    const tx = await mpo.add(
       [erc20One.underlying, erc20Two.underlying],
       [sdk.chainDeployment.ChainlinkPriceOracleV2.address, sdk.chainDeployment.ChainlinkPriceOracleV2.address]
     );
@@ -43,8 +42,8 @@ export const setUpPriceOraclePrices = async () => {
 };
 
 const setupLocalOraclePrices = async () => {
-  await run("oracle:set-price", { token: "TRIBE", price: "103.8582" });
-  await run("oracle:set-price", { token: "TOUCH", price: "0.002653" });
+  await run("oracle:set-price", { token: "TRIBE", price: "105.1761" });
+  await run("oracle:set-price", { token: "TOUCH", price: "0.002446" });
 };
 
 const setUpBscOraclePrices = async () => {
@@ -176,4 +175,62 @@ export const setUpLiquidation = async ({ poolName }) => {
     simpleOracle,
     fuseFeeDistributor,
   };
+};
+
+export const liquidateAndVerify = async (
+  poolName: string,
+  poolAddress: string,
+  liquidatedUserName: string,
+  coingeckoId: string,
+  liquidator: FuseSafeLiquidator,
+  liquidationConfigOverrides: ChainLiquidationConfig,
+  liquidatorBalanceCalculator: (address: string) => Promise<BigNumber>
+) => {
+  let tx: providers.TransactionResponse;
+
+  const { chainId } = await ethers.provider.getNetwork();
+  const { rando } = await ethers.getNamedSigners();
+  const sdk = new Fuse(ethers.provider, chainId);
+
+  // Check balance before liquidation
+  const ratioBefore = await getPositionRatio({
+    name: poolName,
+    userAddress: undefined,
+    cgId: coingeckoId,
+    namedUser: liquidatedUserName,
+  });
+  console.log(`Ratio Before: ${ratioBefore}`);
+
+  const liquidations = await sdk.getPotentialLiquidations([poolAddress]);
+  expect(liquidations.length).to.eq(1);
+
+  const desiredLiquidation = liquidations.filter((l) => l.comptroller === poolAddress)[0].liquidations[0];
+
+  const liquidatorBalanceBeforeLiquidation = await liquidatorBalanceCalculator(rando.address);
+
+  tx = await liquidator[desiredLiquidation.method](...desiredLiquidation.args, {
+    value: desiredLiquidation.value,
+  });
+  await tx.wait();
+
+  const receipt = await tx.wait();
+  expect(receipt.status).to.eq(1);
+
+  const ratioAfter = await getPositionRatio({
+    name: poolName,
+    userAddress: undefined,
+    cgId: coingeckoId,
+    namedUser: liquidatedUserName,
+  });
+  console.log(`Ratio After: ${ratioAfter}`);
+  expect(ratioBefore).to.be.gte(ratioAfter);
+
+  // Assert balance after liquidation > balance before liquidation
+  const liquidatorBalanceAfterLiquidation = await liquidatorBalanceCalculator(rando.address);
+
+  console.log("Liquidator balance before liquidation: ", utils.formatEther(liquidatorBalanceBeforeLiquidation));
+  console.log("Liquidator balance after liquidation: ", utils.formatEther(liquidatorBalanceAfterLiquidation));
+
+  expect(liquidatorBalanceAfterLiquidation).gt(liquidatorBalanceBeforeLiquidation);
+  expect(ratioBefore).to.be.gte(ratioAfter);
 };

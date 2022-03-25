@@ -39,8 +39,8 @@ export const deployChainlinkOracle = async ({
   const underlyings = chainlinkAssets.map((c) => assets.find((a) => a.symbol === c.symbol).underlying);
   const oracles = Array(chainlinkAssets.length).fill(chainLinkv2.address);
 
-  const spo = await ethers.getContract("MasterPriceOracle", deployer);
-  tx = await spo.add(underlyings, oracles);
+  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  tx = await mpo.add(underlyings, oracles);
   await tx.wait();
 
   console.log(`Master Price Oracle updated for tokens ${underlyings.join(", ")}`);
