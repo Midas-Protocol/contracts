@@ -192,11 +192,11 @@ describe("#SafeLiquidator", () => {
     console.log(`Added ${erc20One.symbol} collateral`);
 
     // Supply tokenTwo from other account
-    await addCollateral(poolAddress, bob, erc20Two.symbol, "5000", true, coingeckoId);
+    await addCollateral(poolAddress, bob, erc20Two.symbol, "4500", true, coingeckoId);
     console.log(`Added ${erc20Two.symbol} collateral`);
 
     // Borrow tokenTwo using tokenOne collateral
-    const borrowAmount = "0.045";
+    const borrowAmount = "0.05";
     await borrowCollateral(poolAddress, bob.address, erc20One.symbol, borrowAmount, coingeckoId);
     console.log(`Borrowed ${erc20Two.symbol} collateral`);
 

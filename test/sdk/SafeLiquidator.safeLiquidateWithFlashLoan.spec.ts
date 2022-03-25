@@ -98,7 +98,7 @@ import { ChainLiquidationConfig, liquidationConfigDefaults } from "../../dist/cj
     await addCollateral(poolAddress, bob, eth.symbol, "10", false, coingeckoId);
 
     // Borrow 5 native using token collateral
-    const borrowAmount = "4.5";
+    const borrowAmount = "4.8";
     await borrowCollateral(poolAddress, alice.address, eth.symbol, borrowAmount, coingeckoId);
 
     // Set price of tokenOne collateral to 6/10th of what it was
