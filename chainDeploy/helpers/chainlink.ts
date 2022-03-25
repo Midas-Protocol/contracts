@@ -39,7 +39,9 @@ export const deployChainlinkOracle = async ({
   const underlyings = chainlinkAssets.map((c) => assets.find((a) => a.symbol === c.symbol).underlying);
   const oracles = Array(chainlinkAssets.length).fill(chainLinkv2.address);
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  let mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const admin = await mpo.admin();
+  if (admin !== deployer) mpo = await ethers.getContract("MasterPriceOracle", admin);
   tx = await mpo.add(underlyings, oracles);
   await tx.wait();
 

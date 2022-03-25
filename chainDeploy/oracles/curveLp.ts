@@ -22,7 +22,7 @@ export const deployCurveLpOracle = async ({
     log: true,
   });
   const cpo = await dep.deploy();
-  await ethers.provider.waitForTransaction(cpo.transactionHash);
+  if (cpo.transactionHash) await ethers.provider.waitForTransaction(cpo.transactionHash);
   console.log("CurveLpTokenPriceOracleNoRegistry: ", cpo.address);
 
   const curveOracle = await ethers.getContract("CurveLpTokenPriceOracleNoRegistry", deployer);
@@ -49,7 +49,9 @@ export const deployCurveLpOracle = async ({
   const underlyings = curvePools.map((c) => c.lpToken);
   const oracles = Array(curvePools.length).fill(curveOracle.address);
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  let mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const admin = await mpo.admin();
+  if (admin !== deployer) mpo = await ethers.getContract("MasterPriceOracle", admin);
   tx = await mpo.add(underlyings, oracles);
   await tx.wait();
 

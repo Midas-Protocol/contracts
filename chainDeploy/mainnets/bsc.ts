@@ -306,7 +306,21 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
     log: true,
   });
   const simplePO = await dep.deploy();
-  await ethers.provider.waitForTransaction(simplePO.transactionHash);
+  if (simplePO.transactionHash) await ethers.provider.waitForTransaction(simplePO.transactionHash);
   console.log("SimplePriceOracle: ", simplePO.address);
+  ////
+
+  //// Liquidator Redemption Strategies
+  dep = await deployments.deterministic("XBombLiquidator", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [],
+    log: true,
+  });
+  const xbombLiquidator = await dep.deploy();
+  if (xbombLiquidator.transactionHash) await ethers.provider.waitForTransaction(xbombLiquidator.transactionHash);
+  console.log("XBombLiquidator: ", xbombLiquidator.address);
+
+
   ////
 };
