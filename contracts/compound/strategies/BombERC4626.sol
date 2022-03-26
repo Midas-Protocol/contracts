@@ -6,11 +6,11 @@ import "../../external/bomb/IXBomb.sol";
 import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
 
 contract BombERC4626 is ERC4626 {
-  IXBomb xbomb = IXBomb(0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b);
+  IXBomb xbomb;
 
-  constructor(
-    ERC20 bomb
-  ) ERC4626(bomb, bomb.name(), bomb.symbol()) {}
+  constructor(IXBomb _xbomb, ERC20 asset) ERC4626(asset, asset.name(), asset.symbol()) {
+    xbomb = _xbomb;
+  }
 
   function totalAssets() public view override returns (uint256) {
     return xbomb.toREWARD(xbomb.balanceOf(address(this)));
