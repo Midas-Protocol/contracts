@@ -311,6 +311,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   ////
 
   //// Liquidator Redemption Strategies
+  /// xBOMB->BOMB
   dep = await deployments.deterministic("XBombLiquidator", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
@@ -321,12 +322,15 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   if (xbombLiquidator.transactionHash) await ethers.provider.waitForTransaction(xbombLiquidator.transactionHash);
   console.log("XBombLiquidator: ", xbombLiquidator.address);
 
+  /// jBRL->BUSD
+  let synthereumLiquidityPoolAddress = "0x0fD8170Dc284CD558325029f6AEc1538c7d99f49";
+  let expirationTime = 40 * 60; // period in which the liquidation tx is valid to be included in a block, in seconds
   dep = await deployments.deterministic("JarvisSynthereumLiquidator", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [
-      "0x0fD8170Dc284CD558325029f6AEc1538c7d99f49", // synthereum liquidity pool
-      40 * 60
+      synthereumLiquidityPoolAddress,
+      expirationTime
     ],
     log: true,
   });
@@ -334,6 +338,20 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   if (jarvisSynthereumLiquidator.transactionHash) await ethers.provider.waitForTransaction(jarvisSynthereumLiquidator.transactionHash);
   console.log("JarvisSynthereumLiquidator: ", jarvisSynthereumLiquidator.address);
 
+  /// EPS
+  const curveOracle = await ethers.getContract("CurveLpTokenPriceOracleNoRegistry", deployer);
+  dep = await deployments.deterministic("CurveLpTokenLiquidatorNoRegistry", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [
+      deployConfig.wtoken,
+      curveOracle.address
+    ],
+    log: true,
+  });
+  const curveLpTokenLiquidatorNoRegistry = await dep.deploy();
+  if (curveLpTokenLiquidatorNoRegistry.transactionHash) await ethers.provider.waitForTransaction(curveLpTokenLiquidatorNoRegistry.transactionHash);
+  console.log("CurveLpTokenLiquidatorNoRegistry: ", curveLpTokenLiquidatorNoRegistry.address);
 
   ////
 };
