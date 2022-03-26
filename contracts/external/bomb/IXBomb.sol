@@ -18,5 +18,4 @@ interface IXBomb is IERC20 {
   function name() external view returns (string memory);
 
   function symbol() external view returns (string memory);
-
 }
