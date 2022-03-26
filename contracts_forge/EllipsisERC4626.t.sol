@@ -15,7 +15,7 @@ import { FlywheelDynamicRewards } from "../contracts/flywheel/rewards/FlywheelDy
 import { IFlywheelBooster } from "../contracts/flywheel/interfaces/IFlywheelBooster.sol";
 import { IFlywheelCore } from "../contracts/flywheel/interfaces/IFlywheelCore.sol";
 import { Authority } from "@rari-capital/solmate/src/auth/Auth.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 contract EllipsisERC4626Test is DSTest {
   using stdStorage for StdStorage;
