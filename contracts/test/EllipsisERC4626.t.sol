@@ -1,21 +1,29 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.4.23;
+pragma solidity ^0.8.0;
 
 import "ds-test/test.sol";
 import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
-import { EllipsisERC4626, IEpsStaker, ILpTokenStaker } from "../contracts/compound/strategies/EllipsisERC4626.sol";
+import { EllipsisERC4626, IEpsStaker, ILpTokenStaker } from "../compound/strategies/EllipsisERC4626.sol";
 import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
 import { MockERC20 } from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
 import { MockEpsStaker } from "./mocks/ellipsis/MockEpsStaker.sol";
 import { MockLpTokenStaker } from "./mocks/ellipsis/MockLpTokenStaker.sol";
-import { FlywheelCore } from "../contracts/flywheel/FlywheelCore.sol";
-import { FlywheelDynamicRewards } from "../contracts/flywheel/rewards/FlywheelDynamicRewards.sol";
-import { IFlywheelBooster } from "../contracts/flywheel/interfaces/IFlywheelBooster.sol";
-import { IFlywheelCore } from "../contracts/flywheel/interfaces/IFlywheelCore.sol";
+import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
+import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
+import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
+import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "@rari-capital/solmate/src/auth/Auth.sol";
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+
+contract FlywheelRewards is FlywheelDynamicRewards {
+  constructor(FlywheelCore _flywheel) FlywheelDynamicRewards(_flywheel, 0) {}
+
+  function getNextCycleRewards(ERC20 strategy) internal override returns(uint192) {
+    return 1;
+  }
+}
 
 contract EllipsisERC4626Test is DSTest {
   using stdStorage for StdStorage;
@@ -42,7 +50,7 @@ contract EllipsisERC4626Test is DSTest {
   function setUp() public {
     testToken = new MockERC20("TestLpToken", "LP-TST", 18);
     epsToken = new MockERC20("epsToken", "AUTO", 18);
-    mockLpTokenStaker = new MockLpTokenStaker([uint128(0)], [uint128(5)], IERC20(address(testToken)));
+    mockLpTokenStaker = new MockLpTokenStaker([uint128(0)], [uint128(5)], IERC20Upgradeable(address(testToken)));
     minter.push(address(mockLpTokenStaker));
     mockEpsStaker = new MockEpsStaker(address(epsToken), minter);
 
@@ -58,7 +66,7 @@ contract EllipsisERC4626Test is DSTest {
       Authority(address(0))
     );
 
-    flywheelRewards = new FlywheelDynamicRewards(epsToken, address(flywheel));
+    flywheelRewards = new FlywheelRewards(flywheel);
     flywheel.setFlywheelRewards(flywheelRewards);
 
     ellipsisERC4626 = new EllipsisERC4626(
@@ -68,7 +76,7 @@ contract EllipsisERC4626Test is DSTest {
       0,
       ILpTokenStaker(address(mockLpTokenStaker)),
       IEpsStaker(address(mockEpsStaker)),
-      IFlywheelCore(address(flywheel))
+      FlywheelCore(address(flywheel))
     );
     marketKey = ERC20(address(ellipsisERC4626));
     flywheel.addStrategyForRewards(marketKey);

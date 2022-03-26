@@ -7,24 +7,25 @@ import "forge-std/Vm.sol";
 
 import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
 import { Auth, Authority } from "@rari-capital/solmate/src/auth/Auth.sol";
-import { CErc20 } from "../contracts/compound/CErc20.sol";
-import { CToken } from "../contracts/compound/CToken.sol";
 import { MockERC20 } from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
-import { WhitePaperInterestRateModel } from "../contracts/compound/WhitePaperInterestRateModel.sol";
-import { Unitroller } from "../contracts/compound/Unitroller.sol";
-import { Comptroller } from "../contracts/compound/Comptroller.sol";
-import { CErc20Delegate } from "../contracts/compound/CErc20Delegate.sol";
-import { CErc20Delegator } from "../contracts/compound/CErc20Delegator.sol";
-import { RewardsDistributorDelegate } from "../contracts/compound/RewardsDistributorDelegate.sol";
-import { RewardsDistributorDelegator } from "../contracts/compound/RewardsDistributorDelegator.sol";
-import { ComptrollerInterface } from "../contracts/compound/ComptrollerInterface.sol";
-import { InterestRateModel } from "../contracts/compound/InterestRateModel.sol";
-import { FuseFeeDistributor } from "../contracts/FuseFeeDistributor.sol";
-import { FusePoolDirectory } from "../contracts/FusePoolDirectory.sol";
-import { MockPriceOracle } from "../contracts/oracles/1337/MockPriceOracle.sol";
-import "../contracts/flywheel/fuse-compatibility/FuseFlywheelCore.sol";
-import { FuseFlywheelLensRouter, CToken as ICToken } from "../contracts/flywheel/fuse-compatibility/FuseFlywheelLensRouter.sol";
-import { FlywheelStaticRewards } from "../contracts/flywheel/rewards/FlywheelStaticRewards.sol";
+import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
+
+import { FuseFlywheelLensRouter, CToken as ICToken } from "../flywheel-v2/fuse-compatibility/FuseFlywheelLensRouter.sol";
+import { CErc20 } from "../compound/CErc20.sol";
+import { CToken } from "../compound/CToken.sol";
+import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
+import { Unitroller } from "../compound/Unitroller.sol";
+import { Comptroller } from "../compound/Comptroller.sol";
+import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
+import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
+import { RewardsDistributorDelegate } from "../compound/RewardsDistributorDelegate.sol";
+import { RewardsDistributorDelegator } from "../compound/RewardsDistributorDelegator.sol";
+import { ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
+import { InterestRateModel } from "../compound/InterestRateModel.sol";
+import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
+import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
+import "../flywheel-v2/fuse-compatibility/FuseFlywheelCore.sol";
 
 contract LiquidityMiningTest is DSTest {
   using stdStorage for StdStorage;
@@ -57,7 +58,7 @@ contract LiquidityMiningTest is DSTest {
   bool[] falseBoolArray;
   bool[] trueBoolArray;
   address[] newImplementation;
-  FlywheelCore[] flywheelsToClaim;
+  FuseFlywheelCore[] flywheelsToClaim;
 
   function setUpBaseContracts() public {
     underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
@@ -123,7 +124,7 @@ contract LiquidityMiningTest is DSTest {
       address(this),
       Authority(address(0))
     );
-    rewards = new FlywheelStaticRewards(rewardToken, address(flywheel), address(this), Authority(address(0)));
+    rewards = new FlywheelStaticRewards(flywheel, address(this), Authority(address(0)));
     flywheel.setFlywheelRewards(rewards);
 
     flywheelClaimer = new FuseFlywheelLensRouter();
@@ -143,7 +144,7 @@ contract LiquidityMiningTest is DSTest {
     );
 
     // preperation for a later call
-    flywheelsToClaim.push(FlywheelCore(flywheel));
+    flywheelsToClaim.push(flywheel);
   }
 
   function setUp() public {
@@ -180,8 +181,7 @@ contract LiquidityMiningTest is DSTest {
       user,
       ICToken(address(cErc20)),
       flywheelsToClaim,
-      trueBoolArray,
-      false
+      trueBoolArray
     );
     require(rewardToken.balanceOf(user) == userRewards);
 
@@ -199,8 +199,7 @@ contract LiquidityMiningTest is DSTest {
       user,
       ICToken(address(cErc20)),
       flywheelsToClaim,
-      trueBoolArray,
-      false
+      trueBoolArray
     );
 
     // user balance should accumulate from both rewards

@@ -3,8 +3,8 @@
 pragma solidity >=0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
 interface Minter {
   function mint(address _receiver, uint256 _amount) external;
@@ -18,8 +18,8 @@ interface Oracle {
 // LP tokens are staked within this contract to generate EPS, Ellipsis' value-capture token
 // Based on the Sushi MasterChef contract by Chef Nomi - https://github.com/sushiswap/sushiswap/
 contract MockLpTokenStaker {
-  using SafeMath for uint256;
-  using SafeERC20 for IERC20;
+  using SafeMathUpgradeable for uint256;
+  using SafeERC20Upgradeable for IERC20Upgradeable;
 
   // Info of each user.
   struct UserInfo {
@@ -28,7 +28,7 @@ contract MockLpTokenStaker {
   }
   // Info of each pool.
   struct PoolInfo {
-    IERC20 lpToken; // Address of LP token contract.
+    IERC20Upgradeable lpToken; // Address of LP token contract.
     uint256 oracleIndex; // Index value for oracles array indicating which price multiplier to use.
     uint256 allocPoint; // How many allocation points assigned to this pool.
     uint256 lastRewardTime; // Last second that reward distribution occurs.
@@ -65,7 +65,7 @@ contract MockLpTokenStaker {
   constructor(
     uint128[1] memory _startTimeOffset,
     uint128[1] memory _rewardsPerSecond,
-    IERC20 _fixedRewardToken
+    IERC20Upgradeable _fixedRewardToken
   ) public {
     emissionSchedule.push(
       EmissionPoint({ startTimeOffset: _startTimeOffset[0], rewardsPerSecond: _rewardsPerSecond[0] })
@@ -97,7 +97,7 @@ contract MockLpTokenStaker {
 
   // Add a new lp to the pool. Can only be called by the owner.
   // XXX DO NOT add the same LP token more than once. Rewards will be messed up if you do.
-  function addPool(IERC20 _lpToken, uint256 _oracleIndex) public {
+  function addPool(IERC20Upgradeable _lpToken, uint256 _oracleIndex) public {
     require(_oracleIndex < oracles.length);
     _massUpdatePools();
     poolInfo.push(

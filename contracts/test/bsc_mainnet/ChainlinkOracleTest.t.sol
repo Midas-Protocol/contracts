@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
-import "../../contracts/oracles/default/ChainlinkPriceOracleV2.sol";
+import "../../oracles/default/ChainlinkPriceOracleV2.sol";
 import "../config/BaseTest.t.sol";
 
 contract ChainlinkOraclesTest is BaseTest {

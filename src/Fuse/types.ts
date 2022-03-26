@@ -54,11 +54,17 @@ export interface InterestRateModel {
   getSupplyRate(utilizationRate: BigNumber): BigNumber;
 }
 export type Artifact = {
-  contractName: string;
-  sourceName: string;
   abi: any;
-  bytecode: string;
-  deployedBytecode: string;
+  bytecode: {
+    object: string;
+    sourceMap: string;
+    linkReferences: any
+  };
+  deployedBytecode: {
+    object: string;
+    sourceMap: string;
+    linkReferences: any
+  };
 };
 
 export type Artifacts = {

@@ -6,11 +6,12 @@ import "forge-std/Vm.sol";
 
 import { WETH } from "@rari-capital/solmate/src/tokens/WETH.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import { CurveLpTokenPriceOracleNoRegistry } from "../../contracts/oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
-import "../../contracts/oracles/default/ChainlinkPriceOracleV2.sol";
-import "../../contracts/external/jarvis/ISynthereumLiquidityPool.sol";
-import "../../contracts/oracles/MasterPriceOracle.sol";
-import "../../contracts/oracles/default/UniswapTwapPriceOracleV2Factory.sol";
+
+import { CurveLpTokenPriceOracleNoRegistry } from "../../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
+import "../../oracles/default/ChainlinkPriceOracleV2.sol";
+import "../../external/jarvis/ISynthereumLiquidityPool.sol";
+import "../../oracles/MasterPriceOracle.sol";
+import "../../oracles/default/UniswapTwapPriceOracleV2Factory.sol";
 
 abstract contract BaseTest is DSTest {
   Vm public constant vm = Vm(HEVM_ADDRESS);

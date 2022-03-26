@@ -59,14 +59,11 @@ const config: HardhatUserConfig = {
   },
   external: {
     contracts: [
-      {
-        artifacts: "./artifacts/contracts/compound",
-      },
+      { artifacts: "./out" },
     ],
   },
   paths: {
-    artifacts: "./artifacts",
-    sources: "./contracts",
+    sources: "./none",
     tests: "./test",
   },
   defaultNetwork: "hardhat",

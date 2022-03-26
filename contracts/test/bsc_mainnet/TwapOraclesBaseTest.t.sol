@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../../contracts/oracles/MasterPriceOracle.sol";
-import "../../contracts/oracles/default/UniswapTwapPriceOracleV2Factory.sol";
-import "../../contracts/external/uniswap/IUniswapV2Factory.sol";
+import "../../oracles/MasterPriceOracle.sol";
+import "../../oracles/default/UniswapTwapPriceOracleV2Factory.sol";
+import "../../external/uniswap/IUniswapV2Factory.sol";
 import "../config/BaseTest.t.sol";
 
 contract TwapOraclesBaseTest is BaseTest {

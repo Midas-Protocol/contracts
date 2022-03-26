@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.11;
+pragma solidity ^0.8.10;
 
 import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
-import { ERC4626 } from "../../utils/ERC4626.sol";
 import { SafeTransferLib } from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
+
+import { ERC4626 } from "../../utils/ERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
-import { IFlywheelCore } from "../../flywheel/interfaces/IFlywheelCore.sol";
+import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 
 interface IAutofarmV2 {
   function AUTO() external view returns (address);
@@ -33,7 +34,7 @@ contract AutofarmERC4626 is ERC4626 {
   /* ========== STATE VARIABLES ========== */
   uint256 public immutable poolId;
   IAutofarmV2 public immutable autofarm;
-  IFlywheelCore public immutable flywheel;
+  FlywheelCore public immutable flywheel;
 
   /* ========== CONSTRUCTOR ========== */
 
@@ -55,7 +56,7 @@ contract AutofarmERC4626 is ERC4626 {
     uint256 _poolId,
     ERC20 _autoToken,
     IAutofarmV2 _autofarm,
-    IFlywheelCore _flywheel
+    FlywheelCore _flywheel
   ) ERC4626(_asset, _name, _symbol) {
     poolId = _poolId;
     autofarm = _autofarm;
