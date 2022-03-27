@@ -3,18 +3,18 @@ pragma solidity ^0.8.10;
 
 import { FixedPointMathLib } from "../FixedPointMathLib.sol";
 
-import { CERC20 } from "./interfaces/CERC20.sol";
+import { FuseCERC20 } from "./interfaces/FuseCERC20.sol";
 
 /// @notice Get up to date cToken data without mutating state.
 /// @author Transmissions11 (https://github.com/transmissions11/libcompound)
 library LibFuse {
   using FixedPointMathLib for uint256;
 
-  function viewUnderlyingBalanceOf(CERC20 cToken, address user) internal view returns (uint256) {
+  function viewUnderlyingBalanceOf(FuseCERC20 cToken, address user) internal view returns (uint256) {
     return cToken.balanceOf(user).mulWadDown(viewExchangeRate(cToken));
   }
 
-  function viewExchangeRate(CERC20 cToken) internal view returns (uint256) {
+  function viewExchangeRate(FuseCERC20 cToken) internal view returns (uint256) {
     uint256 accrualBlockNumberPrior = cToken.accrualBlockNumber();
 
     if (accrualBlockNumberPrior == block.number) return cToken.exchangeRateStored();

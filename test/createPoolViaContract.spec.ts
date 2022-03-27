@@ -25,7 +25,7 @@ describe("FusePoolDirectory", function () {
   });
 
   describe("Deploy pool", async function () {
-    it("should deploy the pool via contract", async function () {
+    it.only("should deploy the pool via contract", async function () {
       this.timeout(120_000);
       const { alice } = await ethers.getNamedSigners();
       console.log("alice: ", alice.address);
@@ -62,7 +62,7 @@ describe("FusePoolDirectory", function () {
         [alice.address, POOL_NAME, depReceipt.blockNumber]
       );
       const deployCode = utils.keccak256(
-        (await deployments.getArtifact("Unitroller")).bytecode +
+        ((await deployments.getArtifact("Unitroller")).bytecode as any).object +
           abiCoder.encode(["address"], [FUSE_ADMIN_ADDRESS]).slice(2)
       );
       let poolAddress = utils.getCreate2Address(fpdWithSigner.address, saltsHash, deployCode);

@@ -5,7 +5,7 @@ import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
 
 import { InterestRateModel } from "./InterestRateModel.sol";
 
-abstract contract CERC20 is ERC20 {
+abstract contract FuseCERC20 is ERC20 {
   function mint(uint256) external virtual returns (uint256);
 
   function borrow(uint256) external virtual returns (uint256);
