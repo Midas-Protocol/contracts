@@ -3,25 +3,19 @@ pragma solidity >= 0.8.0;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
-import "../contracts/compound/strategies/BombERC4626.sol";
+import "../../contracts/compound/strategies/BombERC4626.sol";
+import "../config/BaseTest.t.sol";
 
-interface Bomb is IERC20 {
-  function operator() external view returns (address);
-  function mint(address to, uint256 amount) external returns (uint256);
-}
-
-contract BombERC4626Test is DSTest {
-  Vm public constant vm = Vm(HEVM_ADDRESS);
-
+contract BombERC4626Test is BaseTest {
   BombERC4626 vault;
-  Bomb bombToken; // 0x522348779DCb2911539e76A1042aA922F9C47Ee3 BOMB
+  IERC20 bombToken;
   IXBomb xbombToken = IXBomb(0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b);
   uint256 depositAmount = 100e18;
   uint256 depositAmountRoundedDown = depositAmount - 1;
   address whale = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
 
-  function setUp() public {
-    bombToken = Bomb(address(xbombToken.reward()));
+  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
+    bombToken = IERC20(address(xbombToken.reward()));
     vault = new BombERC4626(xbombToken, ERC20(address(bombToken)));
 
     // get some tokens from a whale
@@ -29,7 +23,7 @@ contract BombERC4626Test is DSTest {
     bombToken.transfer(address(this), depositAmount);
   }
 
-  function testInitializedValues() public {
+  function testInitializedValues() public shouldRun(forChains(BSC_MAINNET)) {
     assertEq(vault.name(), "bomb.money");
     assertEq(vault.symbol(), "BOMB");
     assertEq(address(vault.asset()), address(bombToken));
@@ -41,7 +35,7 @@ contract BombERC4626Test is DSTest {
     vault.deposit(depositAmount, address(this));
   }
 
-  function testDeposit() public {
+  function testDeposit() public shouldRun(forChains(BSC_MAINNET)) {
     deposit();
 
     //Test that the actual transfers worked
@@ -63,7 +57,7 @@ contract BombERC4626Test is DSTest {
     vault.withdraw(vaultAssets, address(this), address(this));
   }
 
-  function testWithdraw() public {
+  function testWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
     withdraw();
 
     // test that all vault assets are extracted and transferred to the depositor
@@ -79,7 +73,7 @@ contract BombERC4626Test is DSTest {
     vault.redeem(shares, address(this), address(this));
   }
 
-  function testRedeem() public {
+  function testRedeem() public shouldRun(forChains(BSC_MAINNET)) {
     redeem();
 
     assertEq(vault.balanceOfUnderlying(address(this)), 0);
