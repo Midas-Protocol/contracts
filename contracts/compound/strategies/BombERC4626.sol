@@ -21,11 +21,11 @@ contract BombERC4626 is ERC4626 {
     return convertToAssets(balanceOf[account]);
   }
 
-  function afterDeposit(uint256 bombAssets, uint256 xbombShares) internal override {
+  function afterDeposit(uint256 bombAssets, uint256) internal override {
     xbomb.enter(bombAssets);
   }
 
-  function beforeWithdraw(uint256 bombAssets, uint256 xbombShares) internal override {
+  function beforeWithdraw(uint256, uint256 xbombShares) internal override {
     xbomb.leave(xbombShares);
   }
 
