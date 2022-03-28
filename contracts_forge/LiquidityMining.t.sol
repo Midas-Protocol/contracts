@@ -128,7 +128,7 @@ contract LiquidityMiningTest is DSTest {
 
     flywheelClaimer = new FuseFlywheelLensRouter();
 
-    flywheel.addMarketForRewards(ERC20(address(cErc20)));
+    flywheel.addStrategyForRewards(ERC20(address(cErc20)));
 
     // add flywheel as rewardsDistributor to call flywheelPreBorrowAction / flywheelPreSupplyAction
     require(comptroller._addRewardsDistributor(address(flywheel)) == 0);
@@ -172,7 +172,7 @@ contract LiquidityMiningTest is DSTest {
     require(flywheel.accrue(ERC20(address(cErc20)), user) == userRewards);
 
     // check market index
-    (uint224 index, ) = flywheel.marketState(ERC20(address(cErc20)));
+    (uint224 index, ) = flywheel.strategyState(ERC20(address(cErc20)));
     require(index == flywheel.ONE() + rewardsPerToken);
 
     // claim and check user balance

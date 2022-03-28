@@ -26,7 +26,7 @@ describe("FusePoolDirectory", function () {
       const { chainId } = await ethers.provider.getNetwork();
 
       const sdk = new Fuse(ethers.provider, chainId);
-      const spo = (await ethers.getContractAt(
+      const mpo = (await ethers.getContractAt(
         "MasterPriceOracle",
         sdk.oracles.MasterPriceOracle.address,
         bob
@@ -41,7 +41,7 @@ describe("FusePoolDirectory", function () {
         false,
         bigCloseFactor,
         bigLiquidationIncentive,
-        spo.address,
+        mpo.address,
         {},
         { from: bob.address },
         []

@@ -13,7 +13,7 @@ import "./external/compound/ICToken.sol";
 import "./external/compound/ICErc20.sol";
 import "./external/compound/ICEther.sol";
 
-import "./external/aave/IW_NATIVE.sol";
+import "./utils/IW_NATIVE.sol";
 
 import "./external/uniswap/IUniswapV2Router02.sol";
 import "./external/uniswap/IUniswapV2Callee.sol";

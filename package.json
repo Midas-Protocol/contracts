@@ -1,7 +1,7 @@
 {
   "name": "@midas-capital/sdk",
   "repository": "git://github.com:midas-protocol/contracts.git",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
@@ -17,8 +17,9 @@
   "scripts": {
     "test": "hardhat test",
     "test:hardhat": "hardhat test --parallel",
-    "test:forge": "forge test --no-match-contract LiquidityMining",
-    "test:bsc": "FORK_URL=https://speedy-nodes-nyc.moralis.io/2d2926c3e761369208fba31f/bsc/mainnet/archive FORK_BLOCK_NUMBER=15990502 FORK_CHAIN_ID=56 hardhat test",
+    "test:forge": "forge test",
+    "test:forge:bsc": "forge test --fork-url ${FORK_URL_BSC} --fork-block-number 16281867 --match-path $INIT_CWD/contracts_forge/bsc_mainnet/",
+    "test:bsc": "FORK_URL=${FORK_URL_BSC} FORK_BLOCK_NUMBER=16281867 FORK_CHAIN_ID=56 hardhat test",
     "export": "hardhat export --export-all ./deployments.json",
     "build": "npm run build:hardhat && npm run build:sdk && npm run build:forge",
     "build:forge": "forge build",

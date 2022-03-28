@@ -72,6 +72,9 @@ contract EllipsisERC4626 is ERC4626 {
     lpTokenStaker = _lpTokenStaker;
     epsStaker = _epsStaker;
     flywheel = _flywheel;
+
+    asset.approve(address(lpTokenStaker), type(uint256).max);
+    ERC20(epsStaker.stakingToken()).approve(address(flywheel.flywheelRewards()), type(uint256).max);
   }
 
   /* ========== VIEWS ========== */
@@ -86,61 +89,12 @@ contract EllipsisERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the user holds.
   /// @return The total amount of underlying tokens the user holds.
   function balanceOfUnderlying(address account) public view returns (uint256) {
-    return this.balanceOf(account).mulDivDown(totalAssets(), totalSupply);
-  }
-
-  /* ========== MUTATIVE FUNCTIONS ========== */
-
-  function transfer(address to, uint256 amount) public override returns (bool) {
-    //Accrue flywheel rewards for sender and receiver
-    ERC20 EPS = ERC20(epsStaker.stakingToken());
-    EPS.approve(address(flywheel.flywheelRewards()), EPS.balanceOf(address(this)));
-    flywheel.accrue(ERC20(address(this)), msg.sender, to);
-
-    balanceOf[msg.sender] -= amount;
-
-    // Cannot overflow because the sum of all user
-    // balances can't exceed the max uint256 value.
-    unchecked {
-      balanceOf[to] += amount;
-    }
-
-    emit Transfer(msg.sender, to, amount);
-
-    return true;
-  }
-
-  function transferFrom(
-    address from,
-    address to,
-    uint256 amount
-  ) public override returns (bool) {
-    //Accrue flywheel rewards for sender and receiver
-    ERC20 EPS = ERC20(epsStaker.stakingToken());
-    EPS.approve(address(flywheel.flywheelRewards()), EPS.balanceOf(address(this)));
-    flywheel.accrue(ERC20(address(this)), from, to);
-
-    uint256 allowed = allowance[from][msg.sender]; // Saves gas for limited approvals.
-
-    if (allowed != type(uint256).max) allowance[from][msg.sender] = allowed - amount;
-
-    balanceOf[from] -= amount;
-
-    // Cannot overflow because the sum of all user
-    // balances can't exceed the max uint256 value.
-    unchecked {
-      balanceOf[to] += amount;
-    }
-
-    emit Transfer(from, to, amount);
-
-    return true;
+    return convertToAssets(balanceOf[account]);
   }
 
   /* ========== INTERNAL FUNCTIONS ========== */
 
   function afterDeposit(uint256 amount, uint256) internal override {
-    asset.approve(address(lpTokenStaker), amount);
     lpTokenStaker.deposit(poolId, amount);
 
     //Total Rewarded EPS
@@ -148,11 +102,6 @@ contract EllipsisERC4626 is ERC4626 {
     if (totalEPSReward > 0) {
       //Withdraw totalEPSReward minus 50% penalty
       epsStaker.withdraw(totalEPSReward / 2);
-
-      //Aprove EPS for flywheel and accrue rewards
-      ERC20 EPS = ERC20(epsStaker.stakingToken());
-      EPS.approve(address(flywheel.flywheelRewards()), EPS.balanceOf(address(this)));
-      flywheel.accrue(ERC20(address(this)), msg.sender);
     }
   }
 
@@ -165,11 +114,6 @@ contract EllipsisERC4626 is ERC4626 {
     if (totalEPSReward > 0) {
       //Withdraw totalEPSReward minus 50% penalty
       epsStaker.withdraw(totalEPSReward / 2);
-
-      //Aprove EPS for flywheel and accrue rewards
-      ERC20 EPS = ERC20(epsStaker.stakingToken());
-      EPS.approve(address(flywheel.flywheelRewards()), EPS.balanceOf(address(this)));
-      flywheel.accrue(ERC20(address(this)), msg.sender);
     }
   }
 }

@@ -29,6 +29,7 @@ import { FusePoolLensSecondary } from "../../typechain/FusePoolLensSecondary";
 import { FuseSafeLiquidator } from "../../typechain/FuseSafeLiquidator";
 import { withFlywheel } from "../modules/Flywheel";
 import { withFusePoolLens } from "../modules/FusePoolLens";
+import { withSafeLiquidator } from "../modules/liquidation/SafeLiquidator";
 import { withRewardsDistributor } from "../modules/RewardsDistributor";
 import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig, SupportedChains } from "../network";
 import uniswapV3PoolAbiSlim from "./abi/UniswapV3Pool.slim.json";
@@ -1093,5 +1094,5 @@ export class FuseBase {
   }
 }
 
-const FuseBaseWithModules = withFlywheel(withFusePoolLens(withRewardsDistributor(FuseBase)));
+const FuseBaseWithModules = withFlywheel(withFusePoolLens(withRewardsDistributor(withSafeLiquidator(FuseBase))));
 export default class Fuse extends FuseBaseWithModules {}

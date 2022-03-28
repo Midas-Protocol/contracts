@@ -33,8 +33,8 @@ export async function createPool({
     signer = bob;
   }
   if (!priceOracleAddress) {
-    const spo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, signer);
-    priceOracleAddress = spo.address;
+    const mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, signer);
+    priceOracleAddress = mpo.address;
   }
   if (enforceWhitelist && whitelist.length === 0) {
     throw "If enforcing whitelist, a whitelist array of addresses must be provided";
@@ -165,8 +165,7 @@ export const getPoolByName = async (
 
 export const logPoolData = async (poolAddress, sdk) => {
   const poolIndex = await getPoolIndex(poolAddress, sdk);
-  const fusePoolData = await sdk.fetchFusePoolData(poolIndex, poolAddress);
-
+  const fusePoolData = await sdk.fetchFusePoolData(poolIndex.toString());
   const poolAssets = fusePoolData.assets.map((a) => a.underlyingSymbol).join(", ");
   console.log(`Operating on pool with address ${poolAddress}, name: ${fusePoolData.name}, assets ${poolAssets}`);
 };

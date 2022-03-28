@@ -8,7 +8,7 @@ import * as poolHelpers from "../utils/pool";
 import * as timeHelpers from "../utils/time";
 import { constants } from "ethers";
 
-describe("RewardsDistributorModule", function () {
+describe.skip("RewardsDistributorModule", function () {
   let poolAAddress: string;
   let poolBAddress: string;
   let sdk: Fuse;

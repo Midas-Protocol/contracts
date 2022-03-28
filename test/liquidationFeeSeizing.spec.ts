@@ -18,7 +18,7 @@ import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { cERC20Conf } from "../src";
 import { resetPriceOracle } from "./utils/setup";
 
-describe("Protocol Liquidation Seizing", () => {
+(process.env.FORK_CHAIN_ID ? describe.skip : describe)("Protocol Liquidation Seizing", () => {
   let eth: cERC20Conf;
   let erc20One: cERC20Conf;
   let erc20Two: cERC20Conf;
