@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-import "../external/aave/IW_NATIVE.sol";
+import "../utils/IW_NATIVE.sol";
 
 import "./IRedemptionStrategy.sol";
 

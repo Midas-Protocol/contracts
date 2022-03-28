@@ -3,6 +3,10 @@ import { BigNumber, BigNumberish, providers } from "ethers";
 import JumpRateModel from "./irm/JumpRateModel";
 import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
+import { FuseBase } from ".";
+
+export type GConstructor<T = {}> = new (...args: any[]) => T;
+export type FuseBaseConstructor = GConstructor<FuseBase>;
 
 export type MinifiedContracts = {
   [key: string]: {
@@ -170,7 +174,6 @@ export interface FusePoolData {
   assets: USDPricedFuseAsset[];
   comptroller: string;
   name: string;
-  isPrivate: boolean;
   totalLiquidityUSD: number;
   totalSuppliedUSD: number;
   totalBorrowedUSD: number;

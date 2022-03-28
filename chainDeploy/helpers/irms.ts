@@ -17,6 +17,7 @@ export const deployIRMs = async ({ ethers, getNamedAccounts, deployments, deploy
   });
 
   const jrm = await dep.deploy();
+  await ethers.provider.waitForTransaction(jrm.transactionHash);
   console.log("JumpRateModel: ", jrm.address);
 
   // taken from WhitePaperInterestRateModel used for cETH
@@ -33,6 +34,7 @@ export const deployIRMs = async ({ ethers, getNamedAccounts, deployments, deploy
   });
 
   const wprm = await dep.deploy();
+  await ethers.provider.waitForTransaction(wprm.transactionHash);
   console.log("WhitePaperInterestRateModel: ", wprm.address);
   ////
 };

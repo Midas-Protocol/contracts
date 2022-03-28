@@ -1,6 +1,7 @@
 import { constants, ethers, providers } from "ethers";
 import { SALT } from "../../deploy/deploy";
 import { ChainDeployConfig } from "../helpers";
+import { CurvePoolConfig } from "../helpers/types";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xA30404AFB4c43D25542687BCF4367F59cc77b5d2",
@@ -24,7 +25,7 @@ export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Pr
   let receipt: providers.TransactionReceipt;
 
   // https://docs.kinesislabs.co/other/contract-addresses
-  const curvePools = [
+  const curvePools: CurvePoolConfig[] = [
     {
       // USD pool
       lpToken: "0x9449e017c075507d25AE2e4C67e58f390828521A",

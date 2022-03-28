@@ -16,6 +16,7 @@ import "./tasks/oracle";
 import "./tasks/getPoolData";
 import "./tasks/e2e";
 import "./tasks/swap";
+import "./tasks/liquidation";
 
 dotEnvConfig();
 
@@ -28,7 +29,7 @@ const mnemonic =
 
 const config: HardhatUserConfig = {
   mocha: {
-    timeout: 120_000,
+    timeout: 200_000,
   },
   tenderly: {
     username: "carlomazzaferro",
@@ -77,9 +78,9 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      forking: process.env.FORK_URL
+      forking: process.env.FORK_URL_BSC
         ? {
-            url: process.env.FORK_URL,
+            url: process.env.FORK_URL_BSC,
             blockNumber: Number(process.env.FORK_BLOCK_NUMBER),
           }
         : undefined,
@@ -93,7 +94,7 @@ const config: HardhatUserConfig = {
     localhost: {
       url: urlOverride || "http://localhost:8545",
       saveDeployments: true,
-      chainId: 1337,
+      chainId: process.env.FORK_CHAIN_ID ? Number(process.env.FORK_CHAIN_ID) : 1337,
       gasPrice: 20e9,
       gas: 25e6,
       allowUnlimitedContractSize: true,

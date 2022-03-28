@@ -13,8 +13,12 @@ export const deployFuseSafeLiquidator = async ({
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
   const fsl = await dep.deploy();
+  await ethers.provider.waitForTransaction(fsl.transactionHash);
   console.log("FuseSafeLiquidator: ", fsl.address);
   const fuseSafeLiquidator = await ethers.getContract("FuseSafeLiquidator", deployer);
   const uniswapRouterAddress = await fuseSafeLiquidator.UNISWAP_V2_ROUTER_02_ADDRESS();

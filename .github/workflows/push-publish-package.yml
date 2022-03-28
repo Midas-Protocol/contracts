@@ -1,0 +1,57 @@
+name: Push - publish package
+
+on:
+  push:
+    branches:
+      - main
+      - development
+
+jobs:
+  build-and-test-local:
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: "npm"
+      - run: npm install
+      - run: npm run build
+      - run: npm run test:hardhat
+      - name: Run forge tests
+        run: forge test -vvv
+
+  release:
+    needs: [build-and-test-local]
+    runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: "npm"
+      - run: npm install
+      - run: npm run build:hardhat
+      - run: npm run build:sdk
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: ${{env.GITHUB_REF_NAME == 'main' && 'latest' || 'beta'}}
+          access: "public"

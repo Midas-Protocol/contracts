@@ -1,5 +1,5 @@
 // Ethers
-import { BigNumber, BigNumberish, constants, Contract, ContractFactory, providers, utils } from "ethers";
+import { BigNumber, constants, Contract, ContractFactory, providers, utils } from "ethers";
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import axios from "axios";
@@ -57,6 +57,14 @@ import {
 } from "./config";
 import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig, SupportedChains } from "../network";
 import { filterOnlyObjectProperties, filterPoolName } from "./utils";
+import { withRewardsDistributor } from "../modules/RewardsDistributor";
+import { withFusePoolLens } from "../modules/FusePoolLens";
+import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
+import { FusePoolLens } from "../../typechain/FusePoolLens";
+import { FusePoolLensSecondary } from "../../typechain/FusePoolLensSecondary";
+import { FuseSafeLiquidator } from "../../typechain/FuseSafeLiquidator";
+import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
+import { withSafeLiquidator } from "../modules/liquidation/SafeLiquidator";
 
 type OracleConfig = {
   [contractName: string]: {
@@ -71,14 +79,14 @@ type ChainSpecificAddresses = {
   [tokenName: string]: string;
 };
 
-export default class Fuse {
+export class FuseBase {
   public provider: JsonRpcProvider | Web3Provider;
   public contracts: {
-    FusePoolDirectory: Contract;
-    FusePoolLens: Contract;
-    FusePoolLensSecondary: Contract;
-    FuseSafeLiquidator: Contract;
-    FuseFeeDistributor: Contract;
+    FusePoolDirectory: FusePoolDirectory;
+    FusePoolLens: FusePoolLens;
+    FusePoolLensSecondary: FusePoolLensSecondary;
+    FuseSafeLiquidator: FuseSafeLiquidator;
+    FuseFeeDistributor: FuseFeeDistributor;
   };
   static SIMPLE_DEPLOY_ORACLES = SIMPLE_DEPLOY_ORACLES;
   static COMPTROLLER_ERROR_CODES = COMPTROLLER_ERROR_CODES;
@@ -90,9 +98,9 @@ export default class Fuse {
   public chainId: SupportedChains;
   public chainDeployment: ChainDeployment;
   public oracles: OracleConfig;
-  private readonly irms: IrmConfig;
   public chainSpecificAddresses: ChainSpecificAddresses;
   public artifacts: Artifacts;
+  public irms: IrmConfig;
 
   constructor(web3Provider: JsonRpcProvider | Web3Provider, chainId: SupportedChains) {
     this.provider = web3Provider;
@@ -113,27 +121,27 @@ export default class Fuse {
         this.chainDeployment.FusePoolDirectory.address,
         this.chainDeployment.FusePoolDirectory.abi,
         this.provider
-      ),
+      ) as FusePoolDirectory,
       FusePoolLens: new Contract(
         this.chainDeployment.FusePoolLens.address,
         this.chainDeployment.FusePoolLens.abi,
         this.provider
-      ),
+      ) as FusePoolLens,
       FusePoolLensSecondary: new Contract(
         this.chainDeployment.FusePoolLensSecondary.address,
         this.chainDeployment.FusePoolLensSecondary.abi,
         this.provider
-      ),
+      ) as FusePoolLensSecondary,
       FuseSafeLiquidator: new Contract(
         this.chainDeployment.FuseSafeLiquidator.address,
         this.chainDeployment.FuseSafeLiquidator.abi,
         this.provider
-      ),
+      ) as FuseSafeLiquidator,
       FuseFeeDistributor: new Contract(
         this.chainDeployment.FuseFeeDistributor.address,
         this.chainDeployment.FuseFeeDistributor.abi,
         this.provider
-      ),
+      ) as FuseFeeDistributor,
     };
     this.artifacts = {
       Comptroller: ComptrollerArtifact,
@@ -199,6 +207,7 @@ export default class Fuse {
     let receipt: providers.TransactionReceipt;
     try {
       const contract = this.contracts.FusePoolDirectory.connect(this.provider.getSigner(options.from));
+      // TODO deployPool also returns the poolId which comes in handy! We should get that as well.
       const tx = await contract.deployPool(
         poolName,
         implementationAddress,
@@ -255,23 +264,6 @@ export default class Fuse {
     }
 
     return [poolAddress, implementationAddress, priceOracle];
-  }
-
-  private async getOracleContractFactory(contractName: string, signer?: string): Promise<ContractFactory> {
-    let oracleArtifact: { abi: any; bytecode: any };
-    switch (contractName) {
-      case "ChainlinkPriceOracleV2": {
-        oracleArtifact = this.oracles.ChainlinkPriceOracleV2.artifact;
-        break;
-      }
-      case "KeydonixUniswapTwapPriceOracle": {
-        oracleArtifact = this.oracles.KeydonixUniswapTwapPriceOracle.artifact;
-        break;
-      }
-      default:
-        throw Error(`Oracle contract ${contractName} not found`);
-    }
-    return new ContractFactory(oracleArtifact.abi, oracleArtifact.bytecode, this.provider.getSigner(signer));
   }
 
   async deployAsset(
@@ -387,7 +379,7 @@ export default class Fuse {
       const fuseFee = await this.contracts.FuseFeeDistributor.interestFeeRate();
       if (reserveFactorBN.add(adminFeeBN).add(BigNumber.from(fuseFee)).gt(constants.WeiPerEther))
         throw Error(
-          "Sum of reserve factor and admin fee should range from 0 to " + (1 - parseInt(fuseFee) / 1e18) + "."
+          "Sum of reserve factor and admin fee should range from 0 to " + (1 - fuseFee.div(1e18).toNumber()) + "."
         );
     }
 
@@ -457,7 +449,7 @@ export default class Fuse {
       collateralFactorBN
     );
     if (errorCode.toNumber() !== 0) {
-      throw `Failed to _deployMarket: ${Fuse.COMPTROLLER_ERROR_CODES[errorCode.toNumber()]}`;
+      throw `Failed to _deployMarket: ${FuseBase.COMPTROLLER_ERROR_CODES[errorCode.toNumber()]}`;
     }
 
     const tx = await comptrollerWithSigner._deployMarket(
@@ -548,14 +540,14 @@ export default class Fuse {
 
     const errorCode = await comptroller.callStatic._deployMarket(false, constructorData, collateralFactorBN);
     if (errorCode.toNumber() !== 0) {
-      throw `Failed to _deployMarket: ${Fuse.COMPTROLLER_ERROR_CODES[errorCode.toNumber()]}`;
+      throw `Failed to _deployMarket: ${FuseBase.COMPTROLLER_ERROR_CODES[errorCode.toNumber()]}`;
     }
 
     const tx = await comptroller._deployMarket(false, constructorData, collateralFactorBN);
     const receipt: TransactionReceipt = await tx.wait();
 
     if (receipt.status != constants.One.toNumber())
-      // throw "Failed to deploy market with error code: " + Fuse.COMPTROLLER_ERROR_CODES[errorCode];
+      // throw "Failed to deploy market with error code: " + FuseBase.COMPTROLLER_ERROR_CODES[errorCode];
       throw "Failed to deploy market ";
 
     const saltsHash = utils.solidityKeccak256(
@@ -626,13 +618,13 @@ export default class Fuse {
     options: any = {}
   ) {
     // Get price feed
-    // 1. Get priceOracle's address used by the comprtroller. PriceOracle can have multiple implementations so:
+    // 1. Get priceOracle's address used by the comptroller. PriceOracle can have multiple implementations so:
     // 1.1 We try to figure out which implementation it is, by (practically) bruteforcing it.
     //1.1.2 We first assume its a ChainlinkPriceOracleV2.
-    //1.1.3 We then try with PrefferedOracle's primary oracle i.e ChainlinkPriceOracleV2
+    //1.1.3 We then try with PreferredOracle's primary oracle i.e ChainlinkPriceOracleV2
     //1.1.4 We try with UniswapAnchoredView
     //1.1.5 We try with UniswapView
-    //1.1.6 We try with PrefferedOracle's secondary oracle i.e UniswapAnchoredView or UniswapView
+    //1.1.6 We try with PreferredOracle's secondary oracle i.e UniswapAnchoredView or UniswapView
     //1.1.6
 
     // 2. Check
@@ -985,81 +977,6 @@ export default class Fuse {
     return null;
   }
 
-  async deployRewardsDistributor(rewardToken: string, options: { from: string }) {
-    const rewardDistributorFactory = new ContractFactory(
-      this.artifacts.RewardsDistributorDelegator.abi,
-      this.artifacts.RewardsDistributorDelegator.bytecode,
-      this.provider.getSigner()
-    );
-    return await rewardDistributorFactory.deploy(
-      options.from,
-      rewardToken,
-      this.chainDeployment.RewardsDistributorDelegate.address
-    );
-  }
-
-  addRewardDistributer(comptrollerAddress: string, distributorAddress: string, options: { from: string }) {
-    const comptrollerInstance = new Contract(
-      comptrollerAddress,
-      this.artifacts.Comptroller.abi,
-      this.provider.getSigner(options.from)
-    );
-    return comptrollerInstance.functions._addRewardsDistributor(distributorAddress);
-  }
-
-  fundRewardDistributer(
-    distributorAddress: string,
-    tokenAddress: string,
-    amount: BigNumberish,
-    options: { from: any }
-  ) {
-    const tokenInstance = new Contract(tokenAddress, this.artifacts.ERC20.abi, this.provider.getSigner(options.from));
-    return tokenInstance.functions.transfer(distributorAddress, amount);
-  }
-
-  updateDistributionSpeedSuppliers(
-    distributorAddress: string,
-    cTokenAddress: string,
-    amount: BigNumberish,
-    options: { from: any }
-  ) {
-    const rewardDistributerInstance = new Contract(
-      distributorAddress,
-      this.chainDeployment.RewardsDistributorDelegate.abi,
-      this.provider.getSigner(options.from)
-    );
-    return rewardDistributerInstance._setCompSupplySpeed(cTokenAddress, amount);
-  }
-
-  updateDistributionSpeedBorrowers(
-    distributorAddress: string,
-    cTokenAddress: string,
-    amount: BigNumberish,
-    options: { from: any }
-  ) {
-    const rewardDistributerInstance = new Contract(
-      distributorAddress,
-      this.chainDeployment.RewardsDistributorDelegate.abi,
-      this.provider.getSigner(options.from)
-    );
-    return rewardDistributerInstance._setCompBorrowSpeed(cTokenAddress, amount);
-  }
-
-  updateDistributionSpeed(
-    distributorAddress: string,
-    cTokenAddress: string,
-    amountSuppliers: BigNumberish,
-    amountBorrowers: BigNumberish,
-    options: { from: any }
-  ) {
-    const rewardDistributerInstance = new Contract(
-      distributorAddress,
-      this.chainDeployment.RewardsDistributorDelegate.abi,
-      this.provider.getSigner(options.from)
-    );
-    return rewardDistributerInstance._setCompSpeeds(cTokenAddress, amountSuppliers, amountBorrowers);
-  }
-
   async checkCardinality(uniswapV3Pool: string) {
     const uniswapV3PoolContract = new Contract(uniswapV3Pool, uniswapV3PoolAbiSlim);
     return (await uniswapV3PoolContract.methods.slot0().call()).observationCardinalityNext < 64;
@@ -1088,11 +1005,7 @@ export default class Fuse {
   ): Promise<FusePoolData | undefined> => {
     if (!poolId) return undefined;
 
-    const {
-      comptroller,
-      name: _unfiliteredName,
-      isPrivate,
-    } = await this.contracts.FusePoolDirectory.pools(Number(poolId));
+    const { comptroller, name: _unfiliteredName } = await this.contracts.FusePoolDirectory.pools(Number(poolId));
 
     const name = filterPoolName(_unfiliteredName);
 
@@ -1166,7 +1079,6 @@ export default class Fuse {
       assets: assets.sort((a, b) => (b.liquidityUSD > a.liquidityUSD ? 1 : -1)),
       comptroller,
       name,
-      isPrivate,
       totalLiquidityUSD,
       totalSuppliedUSD,
       totalBorrowedUSD,
@@ -1179,3 +1091,6 @@ export default class Fuse {
     };
   };
 }
+
+const FuseBaseWithModules = withFusePoolLens(withRewardsDistributor(withSafeLiquidator(FuseBase)));
+export default class Fuse extends FuseBaseWithModules {}

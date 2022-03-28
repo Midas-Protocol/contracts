@@ -10,17 +10,14 @@ import "./external/compound/ICToken.sol";
 import "./external/compound/IRewardsDistributor.sol";
 import "./external/uniswap/IUniswapV2Pair.sol";
 
-import "./oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
-
 import "./FusePoolDirectory.sol";
-import "./utils/Multicall.sol";
 
 /**
  * @title FusePoolLensSecondary
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FusePoolLensSecondary returns data on Fuse interest rate pools in mass for viewing by dApps, bots, etc.
  */
-contract FusePoolLensSecondary is Initializable, Multicall {
+contract FusePoolLensSecondary is Initializable {
   /**
    * @notice Constructor to set the `FusePoolDirectory` contract object.
    */
@@ -400,10 +397,5 @@ contract FusePoolLensSecondary is Initializable, Multicall {
 
     // Return distributors
     return (indexes, comptrollers, distributors);
-  }
-
-  function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
-    IPriceOracle oracle = IComptroller(cToken.comptroller()).oracle();
-    return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
   }
 }

@@ -1,13 +1,14 @@
-name: Working Repo
+name: Pull Request - build and run tests
 
 on:
   push:
     branches:
       - main
       - development
-      - feat/publish-**
   pull_request:
-    branches: [main, development]
+    branches:
+      - main
+      - development
 
 jobs:
   # e2e-liquidation-tests:
@@ -24,30 +25,10 @@ jobs:
   #         docker-compose run verify-liquidations && \
   #         docker-compose down
 
-  test-and-build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-      - run: npm install
-      - run: npm run build
-      - run: npm run test
-      - run: npm run test:bsc
-
-  release:
-    needs: [test-and-build]
-    runs-on: ubuntu-latest
+  build-and-test-local:
     env:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
@@ -62,11 +43,31 @@ jobs:
           cache: "npm"
       - run: npm install
       - run: npm run build
-      - run: npm run test
+      - name: Run hardhat tests
+        run: npm run test:hardhat
       - name: Run forge tests
-        run: forge test -vvv
-      - uses: JS-DevTools/npm-publish@v1
+        run: npm run test:forge
+
+  build-and-test-bsc:
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
         with:
-          token: ${{ secrets.NPM_TOKEN }}
-          tag: ${{env.GITHUB_REF_NAME == 'main' && 'latest' || 'beta'}}
-          access: "public"
+          submodules: recursive
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: "npm"
+      - run: npm install
+      - run: npm run build
+      - name: Run hardhat tests on BSC
+        run: npm run test:bsc
+      - name: Run forge tests on BSC
+        run: npm run test:forge:bsc

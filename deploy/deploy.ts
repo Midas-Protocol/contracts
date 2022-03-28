@@ -29,6 +29,9 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
   const ffd = await dep.deploy();
   console.log("FuseFeeDistributor: ", ffd.address);
@@ -62,6 +65,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   const erc20Del = await dep.deploy();
+  await ethers.provider.waitForTransaction(erc20Del.transactionHash);
   console.log("CErc20Delegate: ", erc20Del.address);
 
   dep = await deployments.deterministic("CEtherDelegate", {
@@ -71,6 +75,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   const ethDel = await dep.deploy();
+  await ethers.provider.waitForTransaction(ethDel.transactionHash);
   console.log("CEtherDelegate: ", ethDel.address);
 
   dep = await deployments.deterministic("RewardsDistributorDelegate", {
@@ -80,6 +85,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   const rewards = await dep.deploy();
+  await ethers.provider.waitForTransaction(rewards.transactionHash);
   // const rewardsDistributorDelegate = await ethers.getContract("RewardsDistributorDelegate", deployer);
   // await rewardsDistributorDelegate.initialize(constants.AddressZero);
   console.log("RewardsDistributorDelegate: ", rewards.address);
@@ -92,13 +98,17 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
   const fpd = await dep.deploy();
+  await ethers.provider.waitForTransaction(fpd.transactionHash);
   console.log("FusePoolDirectory: ", fpd.address);
   const fusePoolDirectory = await ethers.getContract("FusePoolDirectory", deployer);
   owner = await fusePoolDirectory.owner();
   if (owner === ethers.constants.AddressZero) {
-    tx = await fusePoolDirectory.initialize(true, [deployer, alice, bob]);
+    tx = await fusePoolDirectory.initialize(false, []);
     await tx.wait();
     console.log("FusePoolDirectory initialized", tx.hash);
   } else {
@@ -119,8 +129,12 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
   const fpl = await dep.deploy();
+  await ethers.provider.waitForTransaction(fpl.transactionHash);
   console.log("FusePoolLens: ", fpl.address);
   const fusePoolLens = await ethers.getContract("FusePoolLens", deployer);
   let directory = await fusePoolLens.directory();
@@ -147,8 +161,12 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
   const fpls = await dep.deploy();
+  await ethers.provider.waitForTransaction(fpls.transactionHash);
   console.log("FusePoolLensSecondary: ", fpls.address);
 
   const fusePoolLensSecondary = await ethers.getContract("FusePoolLensSecondary", deployer);
@@ -190,19 +208,52 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   const ic = await dep.deploy();
+  await ethers.provider.waitForTransaction(ic.transactionHash);
   console.log("InitializableClones: ", ic.address);
   ////
 
   ////
   //// ORACLES
+  dep = await deployments.deterministic("FixedNativePriceOracle", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [],
+    log: true,
+  });
+  const fixedNativePO = await dep.deploy();
+  console.log("FixedNativePriceOracle: ", fixedNativePO.address);
+
   dep = await deployments.deterministic("MasterPriceOracle", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
   });
+
   const masterPO = await dep.deploy();
+  await ethers.provider.waitForTransaction(masterPO.transactionHash);
   console.log("MasterPriceOracle: ", masterPO.address);
+
+  const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
+  const admin = await masterPriceOracle.admin();
+
+  // intialize with no assets
+  if (admin === ethers.constants.AddressZero) {
+    let tx = await masterPriceOracle.initialize(
+      [constants.AddressZero],
+      [fixedNativePO.address],
+      constants.AddressZero,
+      deployer,
+      true,
+      chainDeployParams.wtoken
+    );
+    await tx.wait();
+    console.log("MasterPriceOracle initialized", tx.hash);
+  } else {
+    tx = await masterPriceOracle.add([constants.AddressZero], [fixedNativePO.address]);
+    await tx.wait();
+    console.log("MasterPriceOracle already initialized");
+  }
 
   // dep = await deployments.deterministic("KeydonixUniswapTwapPriceOracle", {
   //   from: deployer,
