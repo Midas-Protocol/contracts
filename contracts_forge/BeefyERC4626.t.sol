@@ -71,12 +71,6 @@ contract BeefyERC4626Test is DSTest {
     assertEq(testToken.balanceOf(address(mockVault)), 0);
     assertEq(testToken.balanceOf(address(mockStrategy)), 0);
 
-    //Test that the balance view calls work
-    // !!! This reverts since we divide by 0
-    // The contract works fine but the question would be if we want to return a 0 if supply is 0 or if we are fine that the view function errors
-    //assertEq(beefyERC4626.totalAssets(), 0);
-    //assertEq(beefyERC4626.balanceOfUnderlying(address(this)), 0);
-
     // //Test that we burned the correct amount of token
     assertEq(beefyERC4626.balanceOf(address(this)), 0);
   }
