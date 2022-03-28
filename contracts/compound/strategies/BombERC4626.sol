@@ -18,7 +18,7 @@ contract BombERC4626 is ERC4626 {
   }
 
   function balanceOfUnderlying(address account) public view returns (uint256) {
-    return previewRedeem(balanceOf[account]);
+    return convertToAssets(balanceOf[account]);
   }
 
   function afterDeposit(uint256 bombAssets, uint256 xbombShares) internal override {
