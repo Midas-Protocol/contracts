@@ -21,6 +21,7 @@ contract FlywheelDynamicRewards is IFlywheelRewards {
   constructor(ERC20 _rewardToken, address _flywheel) {
     rewardToken = _rewardToken;
     flywheel = _flywheel;
+    rewardToken.safeApprove(flywheel, type(uint256).max);
   }
 
   /**
@@ -30,6 +31,7 @@ contract FlywheelDynamicRewards is IFlywheelRewards {
      */
   function getAccruedRewards(ERC20 market, uint32) external override returns (uint256 amount) {
     require(msg.sender == flywheel, "!flywheel");
-    rewardToken.safeTransferFrom(address(market), flywheel, amount = rewardToken.balanceOf(address(market)));
+    amount = rewardToken.balanceOf(address(market));
+    if (amount > 0) rewardToken.safeTransferFrom(address(market), address(this), amount);
   }
 }

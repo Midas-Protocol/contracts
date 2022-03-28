@@ -1,6 +1,10 @@
 name: Pull Request - build and run tests
 
 on:
+  push:
+    branches:
+      - main
+      - development
   pull_request:
     branches:
       - main
@@ -39,13 +43,15 @@ jobs:
           cache: "npm"
       - run: npm install
       - run: npm run build
-      - run: npm run test:hardhat
+      - name: Run hardhat tests
+        run: npm run test:hardhat
       - name: Run forge tests
-        run: forge test -vvv
+        run: npm run test:forge
 
   build-and-test-bsc:
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
+      FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -61,4 +67,7 @@ jobs:
           cache: "npm"
       - run: npm install
       - run: npm run build
-      - run: npm run test:bsc
+      - name: Run hardhat tests on BSC
+        run: npm run test:bsc
+      - name: Run forge tests on BSC
+        run: npm run test:forge:bsc

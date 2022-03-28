@@ -124,6 +124,20 @@ export const assets: Asset[] = [
     name: "Ellipsis.finance UST/3EPS",
     decimals: 18,
   },
+  // Bomb
+  {
+    symbol: "xBOMB",
+    underlying: "0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b",
+    name: "xBOMB",
+    decimals: 18,
+  },
+  // Jarvis
+  {
+    symbol: "jBRL",
+    underlying: "0x316622977073BBC3dF32E7d2A9B3c77596a0a603",
+    name: "Jarvis Synthetic Brazilian Real",
+    decimals: 18,
+  },
 ];
 
 export const deployConfig: ChainDeployConfig = {
@@ -140,7 +154,9 @@ export const deployConfig: ChainDeployConfig = {
     pairInitHashCode: ethers.utils.hexlify("0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5"),
     uniswapV2RouterAddress: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
     uniswapV2FactoryAddress: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
-    uniswapOracleInitialDeployTokens: [],
+    uniswapOracleInitialDeployTokens: [
+      "0x522348779DCb2911539e76A1042aA922F9C47Ee3", // BOMB
+    ],
   },
 };
 
@@ -218,6 +234,12 @@ const chainlinkAssets: ChainlinkAsset[] = [
   {
     symbol: "UST",
     aggregator: "0xcbf8518F8727B8582B22837403cDabc53463D462",
+    feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
+  },
+  // Jarvis
+  {
+    symbol: "jBRL",
+    aggregator: "0x5cb1Cb3eA5FB46de1CE1D0F3BaDB3212e8d8eF48",
     feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
   },
 ];
