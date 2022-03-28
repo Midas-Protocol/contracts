@@ -34,7 +34,7 @@ contract BeefyERC4626Test is DSTest {
     beefyERC4626 = new BeefyERC4626(testToken, "TestVault", "TSTV", IBeefyVault(address(mockVault)));
   }
 
-  function testInitalizedValues() public {
+  function testInitializedValues() public {
     assertEq(beefyERC4626.name(), "TestVault");
     assertEq(beefyERC4626.symbol(), "TSTV");
     assertEq(address(beefyERC4626.asset()), address(testToken));

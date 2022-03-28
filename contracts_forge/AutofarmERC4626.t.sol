@@ -70,7 +70,7 @@ contract AutofarmERC4626Test is DSTest {
     mockAutofarm.add(ERC20(address(testToken)), 1, address(mockStrategy));
   }
 
-  function testInitalizedValues() public {
+  function testInitializedValues() public {
     assertEq(autofarmERC4626.name(), "TestVault");
     assertEq(autofarmERC4626.symbol(), "TSTV");
     assertEq(address(autofarmERC4626.asset()), address(testToken));
