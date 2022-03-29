@@ -298,6 +298,6 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   ////
 };
 
-func.tags = ["prod"]
+func.tags = ["prod"];
 
 export default func;

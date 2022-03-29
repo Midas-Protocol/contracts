@@ -328,14 +328,12 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   dep = await deployments.deterministic("JarvisSynthereumLiquidator", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [
-      synthereumLiquidityPoolAddress,
-      expirationTime
-    ],
+    args: [synthereumLiquidityPoolAddress, expirationTime],
     log: true,
   });
   const jarvisSynthereumLiquidator = await dep.deploy();
-  if (jarvisSynthereumLiquidator.transactionHash) await ethers.provider.waitForTransaction(jarvisSynthereumLiquidator.transactionHash);
+  if (jarvisSynthereumLiquidator.transactionHash)
+    await ethers.provider.waitForTransaction(jarvisSynthereumLiquidator.transactionHash);
   console.log("JarvisSynthereumLiquidator: ", jarvisSynthereumLiquidator.address);
 
   /// EPS
@@ -343,14 +341,12 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   dep = await deployments.deterministic("CurveLpTokenLiquidatorNoRegistry", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [
-      deployConfig.wtoken,
-      curveOracle.address
-    ],
+    args: [deployConfig.wtoken, curveOracle.address],
     log: true,
   });
   const curveLpTokenLiquidatorNoRegistry = await dep.deploy();
-  if (curveLpTokenLiquidatorNoRegistry.transactionHash) await ethers.provider.waitForTransaction(curveLpTokenLiquidatorNoRegistry.transactionHash);
+  if (curveLpTokenLiquidatorNoRegistry.transactionHash)
+    await ethers.provider.waitForTransaction(curveLpTokenLiquidatorNoRegistry.transactionHash);
   console.log("CurveLpTokenLiquidatorNoRegistry: ", curveLpTokenLiquidatorNoRegistry.address);
 
   ////
