@@ -39,7 +39,7 @@ contract GaugesController is Initializable {
   }
 
   function getTotalAssetVeSupply(CToken asset) public view returns (uint256) {
-    (bool isListed, ) = comptroller.markets(asset);
+    (bool isListed, ) = comptroller.markets(address(asset));
     require(isListed == true, "comp market is not listed");
 
     address gauge = assetToGauge[address(asset)];
