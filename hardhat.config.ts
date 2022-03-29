@@ -83,9 +83,9 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: process.env.FORK_URL_BSC
         ? {
-            url: process.env.FORK_URL_BSC,
-            blockNumber: Number(process.env.FORK_BLOCK_NUMBER),
-          }
+          url: process.env.FORK_URL_BSC,
+          blockNumber: Number(process.env.FORK_BLOCK_NUMBER),
+        }
         : undefined,
       saveDeployments: true,
       chainId: process.env.FORK_CHAIN_ID ? Number(process.env.FORK_CHAIN_ID) : 1337,

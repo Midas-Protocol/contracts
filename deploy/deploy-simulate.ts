@@ -8,6 +8,6 @@ const simulateDeploy: DeployFunction = async (hre): Promise<void> => {
   signer.sendTransaction({ to: deployer, value: hre.ethers.utils.parseEther("10") });
   await func(hre);
 }
-simulateDeploy.tags = ["simulate"]
+simulateDeploy.tags = ["simulate", "fork", "local"]
 
 export default simulateDeploy;

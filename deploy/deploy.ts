@@ -10,7 +10,7 @@ export const SALT = "ilovemidas";
 const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
   const chainId = await getChainId();
   console.log("chainId: ", chainId);
-  const { deployer, alice, bob } = await getNamedAccounts();
+  const { deployer } = await getNamedAccounts();
   console.log("deployer: ", deployer);
 
   if (!chainDeployConfig[chainId]) {
@@ -298,6 +298,6 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   ////
 };
 
-func.tags = ["prod", "local"]
+func.tags = ["prod"]
 
 export default func;

@@ -21,7 +21,8 @@ COPY src ./src
 
 RUN npm install -g npm && npm install --legacy-peer-deps
 
-RUN npm run build
+RUN npm run build:hardhat
+RUN npm run build:sdk
 
 COPY docker/*.sh ./
 RUN chmod +x *.sh

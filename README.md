@@ -41,7 +41,7 @@ Main repository for Midas Capital's contracts and SDK for interacting with those
 2. To develop against the SDK, artifacts and deployment files must be generated first, as they are used by the SDK:
 
 ```text
->>> npx hardhat node
+>>> npx hardhat node --tags local
 # in another console
 >>>> npm run export
 ```
@@ -87,7 +87,7 @@ Then, your tests should pass (assuming no other failures)
 
 ### Running BSC mainnet fork locally
 
-1. Add env vars in .env
+1. Add env vars in .env <a name="envvars"></a>
 
 `.env`
 ```
@@ -99,7 +99,7 @@ FORK_CHAIN_ID=56
 2. Run node
 
 ```shell
->>> npx hardhat node
+>>> npx hardhat node --tags fork
 ```
 
 You can then generate the deployments for bsc (chain id 56)
@@ -127,7 +127,7 @@ will act on it and liquidate it.
 In another shell:
 
 ```shell
->>> npx hardhat pools:create-unhealthy --name "test unhealthy" --network localhost
+>>> npx hardhat e2e:unhealthy-pools-exist --network localhost
 ```
 
 Check the logs from the bot and ensure it is performing the liquidations appropriately.
@@ -142,13 +142,13 @@ curl -L https://foundry.paradigm.xyz | bash
 foundryup
 ```
 
-2. Initalize forge in the repo
+2. Initialize forge in the repo
 
 ```
 forge init --force
 ```
 
-3.  Build the contracts
+3. Build the contracts
 
 ```
 forge build
@@ -158,4 +158,30 @@ forge build
 
 ```
 forge test
+```
+
+5. To run the tests on a BSC mainnet fork, run
+
+```
+npm run test:forge:bsc
+```
+
+## Simulating a prod deploy
+
+1. [Add env vars in .env][#envvars]
+
+2. Then run
+
+```shell
+>>> npx hardhat node --tags simulate
+```
+
+## Deploying to prod (BSC mainnet)
+
+1. Set the correct mnemonic in the .env file
+
+2. Run
+
+```
+hardhat --network bsc deploy --tags prod
 ```
