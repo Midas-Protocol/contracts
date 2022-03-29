@@ -3,7 +3,7 @@ import FlywheelCoreArtifact from "../../artifacts/contracts/flywheel/FlywheelCor
 import FuseFlywheelCoreArtifact from "../../artifacts/contracts/flywheel/fuse-compatibility/FuseFlywheelCore.sol/FuseFlywheelCore.json";
 import FlywheelDynamicRewardsArtifact from "../../artifacts/contracts/flywheel/rewards/FlywheelDynamicRewards.sol/FlywheelDynamicRewards.json";
 import FlywheelStaticRewardsArtifact from "../../artifacts/contracts/flywheel/rewards/FlywheelStaticRewards.sol/FlywheelStaticRewards.json";
-import { FuseFlywheelCore__factory } from "../../typechain";
+import { FuseFlywheelCore__factory } from "../../typechain/factories/FuseFlywheelCore__factory";
 import { FlywheelStaticRewards__factory } from "../../typechain/factories/FlywheelStaticRewards__factory";
 import { FlywheelCore } from "../../typechain/FlywheelCore";
 import { FlywheelStaticRewards } from "../../typechain/FlywheelStaticRewards";
@@ -105,8 +105,12 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
     }
 
     addMarketForRewardsToFlywheelCore(flywheelCoreAddress: string, marketAddress: string, options: { from: string }) {
+      return this.addStrategyForRewardsToFlywheelCore(flywheelCoreAddress, marketAddress, options);
+    }
+
+    addStrategyForRewardsToFlywheelCore(flywheelCoreAddress: string, marketAddress: string, options: { from: string }) {
       const flywheelCoreInstance = this.getFlywheelCoreInstance(flywheelCoreAddress, options);
-      return flywheelCoreInstance.functions.addMarketForRewards(marketAddress, options);
+      return flywheelCoreInstance.functions.addStrategyForRewards(marketAddress, options);
     }
 
     addFlywheelCoreToComptroller(flywheelCoreAddress: string, comptrollerAddress: string, options: { from: string }) {
