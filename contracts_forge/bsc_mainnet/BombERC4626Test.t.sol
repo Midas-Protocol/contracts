@@ -16,7 +16,7 @@ contract BombERC4626Test is BaseTest {
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     bombToken = IERC20(address(xbombToken.reward()));
-    vault = new BombERC4626(xbombToken, ERC20(address(bombToken)));
+    vault = new BombERC4626(address(xbombToken), ERC20(address(bombToken)));
 
     // get some tokens from a whale
     vm.prank(whale);
