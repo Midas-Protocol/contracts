@@ -124,6 +124,21 @@ describe("FlywheelModule", function () {
       from: alice.address,
     });
     console.dir({ claimableRewardsForPool }, { depth: null });
+    const [comptrollerIndexes, comptrollers, rewardsDistributors] =
+      await sdk.contracts.FusePoolLensSecondary.getRewardsDistributorsBySupplier(alice.address, {
+        from: alice.address,
+      });
+
+    // const uniqueRewardsDistributors = rewardsDistributors
+    //   .reduce((acc, curr) => [...acc, ...curr], []) // Flatten Array
+    //   .filter((value, index, self) => self.indexOf(value) === index); // Unique Array
+    // const sdkres = await sdk.contracts.FusePoolLensSecondary.callStatic.getUnclaimedRewardsByDistributors(
+    //   alice.address,
+    //   uniqueRewardsDistributors,
+    //   {
+    //     from: alice.address,
+    //   }
+    // );
     // const flywheelLensRouter = sdk.contracts.FuseFlywheelLensRouter;
     // flywheelLensRouter.functions.getUnclaimedRewardsByMarkets();
   });

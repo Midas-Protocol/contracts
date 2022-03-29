@@ -15,7 +15,7 @@ export interface FlywheelClaimableRewards {
   rewards: [
     {
       market: string;
-      amount: number;
+      amount: BigNumber;
     }?
   ];
 }
@@ -35,7 +35,6 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class Flywheel extends Base {
     constructor(...args) {
       super(...args);
-      this.artifacts.FlywheelCore = FlywheelCoreArtifact;
       this.artifacts.FuseFlywheelCore = FuseFlywheelCoreArtifact;
       this.artifacts.FlywheelDynamicRewardsArtifact = FlywheelDynamicRewardsArtifact;
       this.artifacts.FlywheelStaticRewards = FlywheelStaticRewardsArtifact;
@@ -141,7 +140,7 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
           if (rewardOfMarket.gt(0)) {
             rewards.push({
               market,
-              amount: rewardOfMarket.toNumber(),
+              amount: rewardOfMarket,
             });
           }
         }
@@ -199,7 +198,7 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
     getFlywheelCoreInstance(flywheelCoreAddress: string, options: { from: string }) {
       return new Contract(
         flywheelCoreAddress,
-        this.artifacts.FlywheelCore.abi,
+        this.artifacts.FuseFlywheelCore.abi,
         this.provider.getSigner(options.from)
       ) as FuseFlywheelCore;
     }
@@ -216,6 +215,7 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
         const supplyRewards: FlywheelMarketReward["supplyRewards"] = [];
         for (const flywheel of allFlywheelsOfPool) {
           // Make sure Market is added to the flywheel
+          console.dir({ flywheel });
           const marketState = await flywheel.marketState(market);
           if (marketState.lastUpdatedTimestamp > 0) {
             // Get Rewards and only add if greater than 0
