@@ -76,7 +76,9 @@ contract BombERC4626Test is BaseTest {
   function testRedeem() public shouldRun(forChains(BSC_MAINNET)) {
     redeem();
 
+    // test that all vault assets are extracted and transferred to the depositor
     assertEq(vault.balanceOfUnderlying(address(this)), 0);
+    assertEq(bombToken.balanceOf(address(vault)), 0);
     assertEq(bombToken.balanceOf(address(this)), depositAmountRoundedDown);
   }
 }
