@@ -19,7 +19,7 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     liquidator = new CurveLpTokenLiquidatorNoRegistry(chainConfig.weth, chainConfig.curveLPTokenPriceOracleNoRegistry);
   }
 
-  function testInitalizedValues() public {
+  function testInitializedValues() public {
     assertEq(address(liquidator.W_NATIVE()), address(chainConfig.weth));
     assertEq(address(liquidator.oracle()), address(chainConfig.curveLPTokenPriceOracleNoRegistry));
   }

@@ -30,7 +30,7 @@ contract AlpacaERC4626Test is DSTest {
     alpacaERC4626 = new AlpacaERC4626(testToken, "TestVault", "TSTV", IAlpacaVault(address(mockVault)));
   }
 
-  function testInitalizedValues() public {
+  function testInitializedValues() public {
     assertEq(alpacaERC4626.name(), "TestVault");
     assertEq(alpacaERC4626.symbol(), "TSTV");
     assertEq(address(alpacaERC4626.asset()), address(testToken));
