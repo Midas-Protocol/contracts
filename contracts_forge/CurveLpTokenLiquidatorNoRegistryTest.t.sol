@@ -7,10 +7,10 @@ import "forge-std/stdlib.sol";
 import { WETH } from "@rari-capital/solmate/src/tokens/WETH.sol";
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import { CurveLpTokenLiquidatorNoRegistry } from "../../contracts/liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
-import "../../contracts/utils/IW_NATIVE.sol";
-import "../../contracts/external/curve/ICurvePool.sol";
-import "../config/BaseTest.t.sol";
+import { CurveLpTokenLiquidatorNoRegistry } from "../contracts/liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
+import "../contracts/utils/IW_NATIVE.sol";
+import "../contracts/external/curve/ICurvePool.sol";
+import "./config/BaseTest.t.sol";
 
 contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
   CurveLpTokenLiquidatorNoRegistry private liquidator;
