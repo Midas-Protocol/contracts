@@ -5,19 +5,18 @@ import FlywheelDynamicRewardsArtifact from "../../artifacts/contracts/flywheel/r
 import FlywheelStaticRewardsArtifact from "../../artifacts/contracts/flywheel/rewards/FlywheelStaticRewards.sol/FlywheelStaticRewards.json";
 import { FuseFlywheelCore__factory } from "../../typechain/factories/FuseFlywheelCore__factory";
 import { FlywheelStaticRewards__factory } from "../../typechain/factories/FlywheelStaticRewards__factory";
-import { FlywheelCore } from "../../typechain/FlywheelCore";
 import { FlywheelStaticRewards } from "../../typechain/FlywheelStaticRewards";
 import { FuseFlywheelCore } from "../../typechain/FuseFlywheelCore";
 import { FuseBaseConstructor } from "../Fuse/types";
 
-export interface Test {
+export interface FlywheelClaimableRewards {
   flywheel: string;
   rewardToken: string;
   rewards: [
     {
-      ctoken: string;
+      market: string;
       amount: number;
-    }
+    }?
   ];
 }
 export interface FlywheelReward {
@@ -27,7 +26,7 @@ export interface FlywheelReward {
   rewardsEndTimestamp: number;
 }
 export interface FlywheelMarketReward {
-  cToken: string;
+  market: string;
   supplyRewards: FlywheelReward[];
   borrowRewards: FlywheelReward[];
 }
@@ -134,15 +133,15 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
 
       const rewardDistributorsOfPool = await pool.getRewardsDistributors();
       const flywheels = rewardDistributorsOfPool.map((address) => this.getFlywheelCoreInstance(address, options));
-      const flywheelWithRewards = [];
+      const flywheelWithRewards: FlywheelClaimableRewards[] = [];
       for (const flywheel of flywheels) {
-        const rewards = [];
+        const rewards: FlywheelClaimableRewards["rewards"] = [];
         for (const market of marketsOfPool) {
           const rewardOfMarket = await flywheel.callStatic["accrue(address,address)"](market, account);
           if (rewardOfMarket.gt(0)) {
             rewards.push({
-              cToken: market,
-              amount: rewardOfMarket,
+              market,
+              amount: rewardOfMarket.toNumber(),
             });
           }
         }
@@ -202,7 +201,7 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
         flywheelCoreAddress,
         this.artifacts.FlywheelCore.abi,
         this.provider.getSigner(options.from)
-      ) as FlywheelCore;
+      ) as FuseFlywheelCore;
     }
 
     async #createMarketRewards(pool: string, options: { from: string }): Promise<FlywheelMarketReward[]> {
@@ -214,7 +213,7 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
 
       const marketRewards: FlywheelMarketReward[] = [];
       for (const market of allMarketsOfPool) {
-        const supplyRewards = [];
+        const supplyRewards: FlywheelMarketReward["supplyRewards"] = [];
         for (const flywheel of allFlywheelsOfPool) {
           // Make sure Market is added to the flywheel
           const marketState = await flywheel.marketState(market);
@@ -235,7 +234,7 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
         }
         if (supplyRewards.length > 0) {
           marketRewards.push({
-            cToken: market,
+            market,
             supplyRewards,
             borrowRewards: [],
           });

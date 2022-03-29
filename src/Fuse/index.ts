@@ -20,7 +20,7 @@ import ChainlinkPriceOracleV2Artifact from "../../artifacts/contracts/oracles/de
 import PreferredPriceOracleArtifact from "../../artifacts/contracts/oracles/default/PreferredPriceOracle.sol/PreferredPriceOracle.json";
 import MasterPriceOracleArtifact from "../../artifacts/contracts/oracles/MasterPriceOracle.sol/MasterPriceOracle.json";
 import Deployments from "../../deployments.json";
-import { Comptroller } from "../../typechain";
+import { Comptroller } from "../../typechain/Comptroller";
 import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
 import { FuseFlywheelLensRouter } from "../../typechain/FuseFlywheelLensRouter";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
