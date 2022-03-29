@@ -22,7 +22,7 @@ export const deployCurveLpOracle = async ({
     log: true,
   });
   const cpo = await dep.deploy();
-  await ethers.provider.waitForTransaction(cpo.transactionHash);
+  if (cpo.transactionHash) await ethers.provider.waitForTransaction(cpo.transactionHash);
   console.log("CurveLpTokenPriceOracleNoRegistry: ", cpo.address);
 
   const curveOracle = await ethers.getContract("CurveLpTokenPriceOracleNoRegistry", deployer);

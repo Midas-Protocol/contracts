@@ -53,20 +53,19 @@ abstract contract BaseTest is DSTest {
   }
 
   modifier shouldRun(bool run) {
-    if(run) {
+    if (run) {
       _;
     }
   }
 
-  uint BSC_MAINNET = 56;
-  uint EVMOS_TESTNET = 9000;
+  uint256 BSC_MAINNET = 56;
+  uint256 EVMOS_TESTNET = 9000;
 
-  function forChains(uint id0) public view returns (bool) {
+  function forChains(uint256 id0) public view returns (bool) {
     return block.chainid == id0;
   }
 
-  function forChains(uint id0, uint id1) public view returns (bool) {
-    return block.chainid == id0
-      || block.chainid == id1;
+  function forChains(uint256 id0, uint256 id1) public view returns (bool) {
+    return block.chainid == id0 || block.chainid == id1;
   }
 }
