@@ -1,4 +1,5 @@
 import { BigNumber, BigNumberish, Contract, ContractFactory } from "ethers";
+import { FuseFlywheelCore } from "../../dist/esm/typechain";
 import { Comptroller } from "../../typechain/Comptroller";
 import { ERC20 } from "../../typechain/ERC20";
 import { RewardsDistributorDelegate } from "../../typechain/RewardsDistributorDelegate";
@@ -178,6 +179,30 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
 
     async getRewardsDistributorsBySupplier(account: string, options: { from: string }) {
       return await this.contracts.FusePoolLensSecondary.callStatic.getRewardsDistributorsBySupplier(account, options);
+    }
+
+    async getRewardsDistributorsByPool(poolAddress: string, options: { from: string }) {
+      const comptrollerInstance = this.getComptrollerInstance(poolAddress, options);
+      const allRewardDistributors = await comptrollerInstance.callStatic.getRewardsDistributors(options);
+      const instances = allRewardDistributors.map((address) => {
+        return new Contract(
+          address,
+          this.artifacts.FuseFlywheelCore.abi,
+          this.provider.getSigner(options.from)
+        ) as FuseFlywheelCore;
+      });
+
+      const filterList = await Promise.all(
+        instances.map(async (instance) => {
+          try {
+            return !(await instance.isFlywheel());
+          } catch (error) {
+            return true;
+          }
+        })
+      );
+
+      return instances.filter((_, index) => filterList[index]);
     }
 
     claimAllRewardsDistributorRewards(rewardsDistributorAddress: string, options: { from: string }) {

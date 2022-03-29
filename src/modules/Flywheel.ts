@@ -1,10 +1,6 @@
 import { BigNumber, constants, Contract, ContractFactory } from "ethers";
-import FlywheelCoreArtifact from "../../artifacts/contracts/flywheel/FlywheelCore.sol/FlywheelCore.json";
-import FuseFlywheelCoreArtifact from "../../artifacts/contracts/flywheel/fuse-compatibility/FuseFlywheelCore.sol/FuseFlywheelCore.json";
-import FlywheelDynamicRewardsArtifact from "../../artifacts/contracts/flywheel/rewards/FlywheelDynamicRewards.sol/FlywheelDynamicRewards.json";
-import FlywheelStaticRewardsArtifact from "../../artifacts/contracts/flywheel/rewards/FlywheelStaticRewards.sol/FlywheelStaticRewards.json";
-import { FuseFlywheelCore__factory } from "../../typechain/factories/FuseFlywheelCore__factory";
 import { FlywheelStaticRewards__factory } from "../../typechain/factories/FlywheelStaticRewards__factory";
+import { FuseFlywheelCore__factory } from "../../typechain/factories/FuseFlywheelCore__factory";
 import { FlywheelStaticRewards } from "../../typechain/FlywheelStaticRewards";
 import { FuseFlywheelCore } from "../../typechain/FuseFlywheelCore";
 import { FuseBaseConstructor } from "../Fuse/types";
@@ -33,13 +29,6 @@ export interface FlywheelMarketReward {
 
 export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class Flywheel extends Base {
-    constructor(...args) {
-      super(...args);
-      this.artifacts.FuseFlywheelCore = FuseFlywheelCoreArtifact;
-      this.artifacts.FlywheelDynamicRewardsArtifact = FlywheelDynamicRewardsArtifact;
-      this.artifacts.FlywheelStaticRewards = FlywheelStaticRewardsArtifact;
-    }
-
     async deployFlywheelCore(
       rewardTokenAddress: string,
       options: {
@@ -185,6 +174,30 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
           marketRewards: await this.#createMarketRewards(pool, options),
         }))
       );
+    }
+
+    async getFlywheelsByPool(poolAddress: string, options: { from: string }) {
+      const comptrollerInstance = this.getComptrollerInstance(poolAddress, options);
+      const allRewardDistributors = await comptrollerInstance.callStatic.getRewardsDistributors(options);
+      const instances = allRewardDistributors.map((address) => {
+        return new Contract(
+          address,
+          this.artifacts.FuseFlywheelCore.abi,
+          this.provider.getSigner(options.from)
+        ) as FuseFlywheelCore;
+      });
+
+      const filterList = await Promise.all(
+        instances.map(async (instance) => {
+          try {
+            return await instance.isFlywheel();
+          } catch (error) {
+            return false;
+          }
+        })
+      );
+
+      return instances.filter((_, index) => filterList[index]);
     }
 
     getStaticRewardsInstance(flywheelCoreAddress: string, options: { from: string }) {

@@ -15,6 +15,9 @@ import JumpRateModelArtifact from "../../artifacts/contracts/compound/JumpRateMo
 import RewardsDistributorDelegatorArtifact from "../../artifacts/contracts/compound/RewardsDistributorDelegator.sol/RewardsDistributorDelegator.json";
 import UnitrollerArtifact from "../../artifacts/contracts/compound/Unitroller.sol/Unitroller.json";
 import WhitePaperInterestRateModelArtifact from "../../artifacts/contracts/compound/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json";
+import FuseFlywheelCoreArtifact from "../../artifacts/contracts/flywheel/fuse-compatibility/FuseFlywheelCore.sol/FuseFlywheelCore.json";
+import FlywheelDynamicRewardsArtifact from "../../artifacts/contracts/flywheel/rewards/FlywheelDynamicRewards.sol/FlywheelDynamicRewards.json";
+import FlywheelStaticRewardsArtifact from "../../artifacts/contracts/flywheel/rewards/FlywheelStaticRewards.sol/FlywheelStaticRewards.json";
 import SimplePriceOracleArtifact from "../../artifacts/contracts/oracles/1337/SimplePriceOracle.sol/SimplePriceOracle.json";
 import ChainlinkPriceOracleV2Artifact from "../../artifacts/contracts/oracles/default/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json";
 import PreferredPriceOracleArtifact from "../../artifacts/contracts/oracles/default/PreferredPriceOracle.sol/PreferredPriceOracle.json";
@@ -74,7 +77,6 @@ export class FuseBase {
   public provider: JsonRpcProvider | Web3Provider;
   public contracts: {
     FuseFeeDistributor: FuseFeeDistributor;
-    FuseFlywheelLensRouter: FuseFlywheelLensRouter;
     FusePoolDirectory: FusePoolDirectory;
     FusePoolLens: FusePoolLens;
     FusePoolLensSecondary: FusePoolLensSecondary;
@@ -135,12 +137,16 @@ export class FuseBase {
         this.chainDeployment.FuseFeeDistributor.abi,
         this.provider
       ) as FuseFeeDistributor,
-      FuseFlywheelLensRouter: new Contract(
-        this.chainDeployment.FuseFlywheelLensRouter.address,
+    };
+    if (this.chainDeployment.FuseFlywheelLensRouter) {
+      this.contracts["FuseFlywheelLensRouter"] = new Contract(
+        this.chainDeployment.FuseFlywheelLensRouter?.address || constants.AddressZero,
         this.chainDeployment.FuseFlywheelLensRouter.abi,
         this.provider
-      ) as FuseFlywheelLensRouter,
-    };
+      ) as FuseFlywheelLensRouter;
+    } else {
+      console.warn(`FuseFlywheelLensRouter not deployed to chain ${this.chainId}`);
+    }
     this.artifacts = {
       CErc20Delegate: CErc20DelegateArtifact,
       CErc20Delegator: CErc20DelegatorArtifact,
@@ -159,7 +165,11 @@ export class FuseBase {
       SimplePriceOracle: SimplePriceOracleArtifact,
       Unitroller: UnitrollerArtifact,
       WhitePaperInterestRateModel: WhitePaperInterestRateModelArtifact,
+      FuseFlywheelCore: FuseFlywheelCoreArtifact,
+      FlywheelDynamicRewardsArtifact: FlywheelDynamicRewardsArtifact,
+      FlywheelStaticRewards: FlywheelStaticRewardsArtifact,
     };
+
     this.irms = irmConfig(this.chainDeployment, this.artifacts);
     this.oracles = oracleConfig(this.chainDeployment, this.artifacts, this.availableOracles);
   }
