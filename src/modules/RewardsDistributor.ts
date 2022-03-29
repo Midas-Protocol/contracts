@@ -1,7 +1,7 @@
 import { BigNumber, BigNumberish, Contract, ContractFactory } from "ethers";
-import { FuseFlywheelCore } from "../../dist/esm/typechain";
 import { Comptroller } from "../../typechain/Comptroller";
 import { ERC20 } from "../../typechain/ERC20";
+import { FuseFlywheelCore } from "../../typechain/FuseFlywheelCore";
 import { RewardsDistributorDelegate } from "../../typechain/RewardsDistributorDelegate";
 import { FuseBaseConstructor } from "../Fuse/types";
 
@@ -202,7 +202,18 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
         })
       );
 
-      return instances.filter((_, index) => filterList[index]);
+      const rdInstances = allRewardDistributors
+        .filter((_, index) => filterList[index])
+        .map(
+          (address) =>
+            new Contract(
+              address,
+              this.artifacts.RewardsDistributorDelegate.abi,
+              this.provider.getSigner(options.from)
+            ) as RewardsDistributorDelegate
+        );
+
+      return rdInstances;
     }
 
     claimAllRewardsDistributorRewards(rewardsDistributorAddress: string, options: { from: string }) {

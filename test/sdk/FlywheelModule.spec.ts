@@ -185,7 +185,7 @@ describe.only("FlywheelModule", function () {
       { from: deployer.address }
     );
 
-    // Enter Rewarded Market, Single User so 100% Rewards from RewardDistributor
+    // Enter Rewarded Market, Single User so 100% Rewards from RewardDistributor & Flywheel
     await collateralHelpers.addCollateral(poolAAddress, alice, await market.callStatic.symbol(), "100", true);
 
     // Advance Blocks
