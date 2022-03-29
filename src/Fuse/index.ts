@@ -64,6 +64,7 @@ import { FusePoolLens } from "../../typechain/FusePoolLens";
 import { FusePoolLensSecondary } from "../../typechain/FusePoolLensSecondary";
 import { FuseSafeLiquidator } from "../../typechain/FuseSafeLiquidator";
 import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
+import { withSafeLiquidator } from "../modules/liquidation/SafeLiquidator";
 
 type OracleConfig = {
   [contractName: string]: {
@@ -1091,5 +1092,5 @@ export class FuseBase {
   };
 }
 
-const FuseBaseWithModules = withFusePoolLens(withRewardsDistributor(FuseBase));
+const FuseBaseWithModules = withFusePoolLens(withRewardsDistributor(withSafeLiquidator(FuseBase)));
 export default class Fuse extends FuseBaseWithModules {}
