@@ -33,4 +33,25 @@ contract FuseFlywheelCore is FlywheelCore {
   function compAccrued(address user) external view returns (uint256) {
     return rewardsAccrued[user];
   }
+
+  // TODO call addStrategyForRewards instead
+  function addMarketForRewards(ERC20 strategy) external {
+    require(strategyState[strategy].index == 0, "strategy");
+    strategyState[strategy] = RewardsState({ index: ONE, lastUpdatedTimestamp: uint32(block.timestamp) });
+
+    emit AddStrategy(address(strategy));
+  }
+
+  function marketState(ERC20 strategy) external view returns (RewardsState memory) {
+    return strategyState[strategy];
+  }
+
+  // TODO implement ot make compatible with FusePoolLensSecondary.callStatic.getRewardSpeedsByPools
+  // function compSupplySpeeds(address ctoken) external view returns (uint256) {
+  //   return rewardsAccrued[user];
+  // }
+  // TODO implement ot make compatible with FusePoolLensSecondary.callStatic.getRewardSpeedsByPools
+  // function compBorrowSpeeds(address ctoken) external view returns (uint256) {
+  //   return rewardsAccrued[user];
+  // }
 }
