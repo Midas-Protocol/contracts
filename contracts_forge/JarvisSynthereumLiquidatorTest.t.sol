@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../config/BaseTest.t.sol";
-import "../../contracts/liquidators/JarvisSynthereumLiquidator.sol";
+import "./config/BaseTest.t.sol";
+import "../contracts/liquidators/JarvisSynthereumLiquidator.sol";
 
 contract JarvisSynthereumLiquidatorTest is BaseTest {
   JarvisSynthereumLiquidator private liquidator;

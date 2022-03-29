@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >= 0.8.0;
+pragma solidity >=0.8.0;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
-import "../../contracts/compound/strategies/BombERC4626.sol";
-import "../config/BaseTest.t.sol";
+import "../contracts/compound/strategies/BombERC4626.sol";
+import "./config/BaseTest.t.sol";
 
 contract BombERC4626Test is BaseTest {
   BombERC4626 vault;
