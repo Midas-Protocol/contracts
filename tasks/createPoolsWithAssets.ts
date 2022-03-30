@@ -1,6 +1,4 @@
 import { task, types } from "hardhat/config";
-import { ethers } from "hardhat";
-import { constants } from "ethers";
 import { CErc20, EIP20Interface } from "../typechain";
 
 export default task("pools", "Create Testing Pools")
@@ -37,7 +35,8 @@ task("pools:create", "Create pool if does not exist")
   .addParam("creator", "Named account from which to create the pool", "deployer", types.string)
   .addOptionalParam("priceOracle", "Which price oracle to use", undefined, types.string)
   .addOptionalParam("rewardsDistributorToken", "Token address for rewards distributor", undefined, types.string)
-  .addOptionalParam("flywheelToken", "Token address for rewards distributor", undefined, types.string)
+  .addOptionalParam("flywheelToken", "Token address for flywheel rewards", undefined, types.string)
+  .addOptionalParam("flywheelMarket", "Token SYMBOL for flywheel market", undefined, types.string)
   .setAction(async (taskArgs, hre) => {
     const { chainId } = await hre.ethers.provider.getNetwork();
     const signer = await hre.ethers.getNamedSigner(taskArgs.creator);
@@ -73,19 +72,29 @@ task("pools:create", "Create pool if does not exist")
       // Deploy Assets
       const assets = await poolModule.getPoolAssets(poolAddress, fuseFeeDistributor);
       const deployedAssets = await poolModule.deployAssets(assets.assets, signer);
-      const [erc20One, erc20Two] = assets.assets.filter((a) => a.underlying !== constants.AddressZero);
+      const [erc20One, erc20Two] = assets.assets.filter((a) => a.underlying !== hre.ethers.constants.AddressZero);
 
       const deployedErc20One = deployedAssets.find((a) => a.underlying === erc20One.underlying);
       const deployedErc20Two = deployedAssets.find((a) => a.underlying === erc20Two.underlying);
 
-      const erc20OneUnderlying = (await ethers.getContractAt("EIP20Interface", erc20One.underlying)) as EIP20Interface;
-      const erc20TwoUnderlying = (await ethers.getContractAt("EIP20Interface", erc20Two.underlying)) as EIP20Interface;
+      const erc20OneUnderlying = (await hre.ethers.getContractAt(
+        "EIP20Interface",
+        erc20One.underlying
+      )) as EIP20Interface;
+      const erc20TwoUnderlying = (await hre.ethers.getContractAt(
+        "EIP20Interface",
+        erc20Two.underlying
+      )) as EIP20Interface;
 
-      const market = (await ethers.getContractAt("CErc20", deployedErc20One.assetAddress)) as CErc20;
-      const marketTwo = (await ethers.getContractAt("CErc20", deployedErc20Two.assetAddress)) as CErc20;
+      const marketOne = (await hre.ethers.getContractAt("CErc20", deployedErc20One.assetAddress)) as CErc20;
+      const marketTwo = (await hre.ethers.getContractAt("CErc20", deployedErc20Two.assetAddress)) as CErc20;
 
       if (taskArgs.rewardsDistributorToken) {
-        const rdInstance = await sdk.deployRewardsDistributor(erc20OneUnderlying.address, {
+        const rdTokenInstance =
+          taskArgs.rewardsDistributorToken === erc20OneUnderlying.address ? erc20OneUnderlying : erc20TwoUnderlying;
+        const deployedRdTokenInstance =
+          taskArgs.rewardsDistributorToken === erc20OneUnderlying.address ? deployedErc20One : deployedErc20Two;
+        const rdInstance = await sdk.deployRewardsDistributor(rdTokenInstance.address, {
           from: signer.address,
         });
         await sdk.addRewardsDistributorToPool(rdInstance.address, poolAddress, {
@@ -95,10 +104,10 @@ task("pools:create", "Create pool if does not exist")
           from: signer.address,
         });
 
-        if (deployedErc20One) {
+        if (rdTokenInstance) {
           await sdk.updateRewardsDistributorSupplySpeed(
             rdInstance.address,
-            deployedErc20One.assetAddress,
+            deployedRdTokenInstance.assetAddress,
             hre.ethers.utils.parseUnits("2"),
             {
               from: signer.address,
@@ -106,7 +115,7 @@ task("pools:create", "Create pool if does not exist")
           );
           await sdk.updateRewardsDistributorBorrowSpeed(
             rdInstance.address,
-            deployedErc20One.assetAddress,
+            deployedRdTokenInstance.assetAddress,
             hre.ethers.utils.parseUnits("1"),
             {
               from: signer.address,
@@ -115,53 +124,49 @@ task("pools:create", "Create pool if does not exist")
         }
       }
       if (taskArgs.flywheelToken) {
-        const flywheelCoreInstance = await sdk.deployFlywheelCore(erc20TwoUnderlying.address, {
+        let flywheelMarket: CErc20;
+        const fwTokenInstance =
+          taskArgs.rewardsDistributorToken === erc20OneUnderlying.address ? erc20OneUnderlying : erc20TwoUnderlying;
+        if (taskArgs.flywheelMarket) {
+          flywheelMarket = taskArgs.flywheelMarket === (await erc20OneUnderlying.symbol()) ? marketOne : marketTwo;
+        } else {
+          flywheelMarket = marketOne;
+        }
+        const flywheelCoreInstance = await sdk.deployFlywheelCore(fwTokenInstance.address, {
           from: signer.address,
         });
         const fwStaticRewards = await sdk.deployFlywheelStaticRewards(
-          erc20TwoUnderlying.address,
+          fwTokenInstance.address,
           flywheelCoreInstance.address,
           {
             from: signer.address,
           }
         );
-
+        console.log("Deployed static rewards for: ", await fwTokenInstance.symbol());
         await sdk.setFlywheelRewards(flywheelCoreInstance.address, fwStaticRewards.address, { from: signer.address });
         await sdk.addFlywheelCoreToComptroller(flywheelCoreInstance.address, poolAddress, { from: signer.address });
 
         // Funding Static Rewards
-        await erc20TwoUnderlying.transfer(fwStaticRewards.address, ethers.utils.parseUnits("100", 18), {
+        await fwTokenInstance.transfer(fwStaticRewards.address, hre.ethers.utils.parseUnits("100", 18), {
           from: signer.address,
         });
 
         // Setup Rewards, enable and set RewardInfo
-        await sdk.addMarketForRewardsToFlywheelCore(flywheelCoreInstance.address, market.address, {
+        await sdk.addMarketForRewardsToFlywheelCore(flywheelCoreInstance.address, flywheelMarket.address, {
           from: signer.address,
         });
         await sdk.setStaticRewardInfo(
           fwStaticRewards.address,
-          market.address,
+          flywheelMarket.address,
           {
             rewardsEndTimestamp: 0,
-            rewardsPerSecond: ethers.utils.parseUnits("0.000001", 18),
+            rewardsPerSecond: hre.ethers.utils.parseUnits("0.000001", 18),
           },
           { from: signer.address }
         );
-
-        // Setup Rewards, enable and set RewardInfo
-        await sdk.addMarketForRewardsToFlywheelCore(flywheelCoreInstance.address, marketTwo.address, {
-          from: signer.address,
-        });
-        await sdk.setStaticRewardInfo(
-          fwStaticRewards.address,
-          marketTwo.address,
-          {
-            rewardsEndTimestamp: 0,
-            rewardsPerSecond: ethers.utils.parseUnits("0.000002", 18),
-          },
-          { from: signer.address }
+        console.log(
+          `Added static rewards for market ${await flywheelMarket.symbol()}, token rewards: ${await fwTokenInstance.symbol()}`
         );
-        console.log("Setup RewardInfo ✅");
       }
     }
 
