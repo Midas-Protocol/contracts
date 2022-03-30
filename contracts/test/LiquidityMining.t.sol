@@ -5,12 +5,13 @@ import "ds-test/test.sol";
 import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
-import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
-import { Auth, Authority } from "@rari-capital/solmate/src/auth/Auth.sol";
-import { MockERC20 } from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
+import { Auth, Authority } from "solmate/auth/Auth.sol";
+import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
+import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
+import "fuse-flywheel/FuseFlywheelCore.sol";
 
-import { FuseFlywheelLensRouter, CToken as ICToken } from "../flywheel-v2/fuse-compatibility/FuseFlywheelLensRouter.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 import { CToken } from "../compound/CToken.sol";
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
@@ -25,7 +26,6 @@ import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
-import "../flywheel-v2/fuse-compatibility/FuseFlywheelCore.sol";
 
 contract LiquidityMiningTest is DSTest {
   using stdStorage for StdStorage;

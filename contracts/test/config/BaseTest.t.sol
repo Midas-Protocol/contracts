@@ -4,8 +4,8 @@ pragma solidity >=0.8.0;
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 
-import { WETH } from "@rari-capital/solmate/src/tokens/WETH.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import { WETH } from "solmate/tokens/WETH.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 import { CurveLpTokenPriceOracleNoRegistry } from "../../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 import "../../oracles/default/ChainlinkPriceOracleV2.sol";

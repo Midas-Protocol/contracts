@@ -6,16 +6,16 @@ import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
 import { EllipsisERC4626, IEpsStaker, ILpTokenStaker } from "../compound/strategies/EllipsisERC4626.sol";
-import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
-import { MockERC20 } from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
+import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { MockEpsStaker } from "./mocks/ellipsis/MockEpsStaker.sol";
 import { MockLpTokenStaker } from "./mocks/ellipsis/MockLpTokenStaker.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
-import { Authority } from "@rari-capital/solmate/src/auth/Auth.sol";
-import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import { Authority } from "solmate/auth/Auth.sol";
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 contract FlywheelRewards is FlywheelDynamicRewards {
   constructor(FlywheelCore _flywheel) FlywheelDynamicRewards(_flywheel, 0) {}

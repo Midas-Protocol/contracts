@@ -5,8 +5,8 @@ import "ds-test/test.sol";
 import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
-import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
-import { MockERC20 } from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
+import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 
 import { BeefyERC4626, IBeefyVault } from "../compound/strategies/BeefyERC4626.sol";
 import { MockStrategy } from "./mocks/beefy/MockStrategy.sol";

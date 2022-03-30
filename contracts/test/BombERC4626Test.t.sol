@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 import "../compound/strategies/BombERC4626.sol";
 import "./config/BaseTest.t.sol";

@@ -1,10 +1,10 @@
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/utils/math/SafeMathUpgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol";
 
 interface IMintableToken is IERC20Upgradeable {
   function mint(address _receiver, uint256 _amount) external;
