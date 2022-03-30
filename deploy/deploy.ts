@@ -10,7 +10,7 @@ export const SALT = "ilovemidas";
 const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
   const chainId = await getChainId();
   console.log("chainId: ", chainId);
-  const { deployer, alice, bob } = await getNamedAccounts();
+  const { deployer } = await getNamedAccounts();
   console.log("deployer: ", deployer);
 
   if (!chainDeployConfig[chainId]) {
@@ -33,6 +33,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
       proxyContract: "OpenZeppelinTransparentProxy",
     },
   });
+
   const ffd = await dep.deploy();
   console.log("FuseFeeDistributor: ", ffd.address);
   const fuseFeeDistributor = await ethers.getContract("FuseFeeDistributor", deployer);
@@ -50,13 +51,14 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   console.log("FuseFeeDistributor pool limits set", tx.hash);
 
   dep = await deployments.deterministic("Comptroller", {
+    contract: "Comptroller.sol:Comptroller",
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [ffd.address],
     log: true,
   });
   const comp = await dep.deploy();
-  console.log("Comptroller: ", comp.address);
+  console.log("Comptroller.sol:Comptroller: ", comp.address);
 
   dep = await deployments.deterministic("CErc20Delegate", {
     from: deployer,
@@ -65,7 +67,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   const erc20Del = await dep.deploy();
-  await ethers.provider.waitForTransaction(erc20Del.transactionHash);
+  if (erc20Del.transactionHash) await ethers.provider.waitForTransaction(erc20Del.transactionHash);
   console.log("CErc20Delegate: ", erc20Del.address);
 
   dep = await deployments.deterministic("CEtherDelegate", {
@@ -75,7 +77,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   const ethDel = await dep.deploy();
-  await ethers.provider.waitForTransaction(ethDel.transactionHash);
+  if (ethDel.transactionHash) await ethers.provider.waitForTransaction(ethDel.transactionHash);
   console.log("CEtherDelegate: ", ethDel.address);
 
   dep = await deployments.deterministic("RewardsDistributorDelegate", {
@@ -85,7 +87,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   const rewards = await dep.deploy();
-  await ethers.provider.waitForTransaction(rewards.transactionHash);
+  if (rewards.transactionHash) await ethers.provider.waitForTransaction(rewards.transactionHash);
   // const rewardsDistributorDelegate = await ethers.getContract("RewardsDistributorDelegate", deployer);
   // await rewardsDistributorDelegate.initialize(constants.AddressZero);
   console.log("RewardsDistributorDelegate: ", rewards.address);
@@ -103,7 +105,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     },
   });
   const fpd = await dep.deploy();
-  await ethers.provider.waitForTransaction(fpd.transactionHash);
+  if (fpd.transactionHash) await ethers.provider.waitForTransaction(fpd.transactionHash);
   console.log("FusePoolDirectory: ", fpd.address);
   const fusePoolDirectory = await ethers.getContract("FusePoolDirectory", deployer);
   owner = await fusePoolDirectory.owner();
@@ -134,7 +136,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     },
   });
   const fpl = await dep.deploy();
-  await ethers.provider.waitForTransaction(fpl.transactionHash);
+  if (fpl.transactionHash) await ethers.provider.waitForTransaction(fpl.transactionHash);
   console.log("FusePoolLens: ", fpl.address);
   const fusePoolLens = await ethers.getContract("FusePoolLens", deployer);
   let directory = await fusePoolLens.directory();
@@ -166,7 +168,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     },
   });
   const fpls = await dep.deploy();
-  await ethers.provider.waitForTransaction(fpls.transactionHash);
+  if (fpls.transactionHash) await ethers.provider.waitForTransaction(fpls.transactionHash);
   console.log("FusePoolLensSecondary: ", fpls.address);
 
   const fusePoolLensSecondary = await ethers.getContract("FusePoolLensSecondary", deployer);
@@ -208,7 +210,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   const ic = await dep.deploy();
-  await ethers.provider.waitForTransaction(ic.transactionHash);
+  if (ic.transactionHash) await ethers.provider.waitForTransaction(ic.transactionHash);
   console.log("InitializableClones: ", ic.address);
   ////
 
@@ -231,7 +233,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   });
 
   const masterPO = await dep.deploy();
-  await ethers.provider.waitForTransaction(masterPO.transactionHash);
+  if (masterPO.transactionHash) await ethers.provider.waitForTransaction(masterPO.transactionHash);
   console.log("MasterPriceOracle: ", masterPO.address);
 
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
@@ -296,5 +298,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   }
   ////
 };
+
+func.tags = ["prod"];
 
 export default func;

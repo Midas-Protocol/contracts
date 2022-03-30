@@ -5,9 +5,9 @@ import "ds-test/test.sol";
 import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
-import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
-import { MockERC20 } from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
-import { Authority } from "@rari-capital/solmate/src/auth/Auth.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
+import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
+import { Authority } from "solmate/auth/Auth.sol";
 
 import { AutofarmERC4626, IAutofarmV2 } from "../compound/strategies/AutofarmERC4626.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
@@ -45,6 +45,11 @@ contract AutofarmERC4626Test is DSTest {
   uint256 depositAmount = 100e18;
   ERC20 marketKey;
   address tester = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
+  uint256 startBlockNumber = block.number;
+
+  function vmRollFwd(uint8 increment) internal {
+    vm.roll(startBlockNumber + increment);
+  }
 
   function setUp() public {
     testToken = new MockERC20("TestToken", "TST", 18);
@@ -79,7 +84,7 @@ contract AutofarmERC4626Test is DSTest {
     mockAutofarm.add(ERC20(address(testToken)), 1, address(mockStrategy));
   }
 
-  function testInitalizedValues() public {
+  function testInitializedValues() public {
     assertEq(autofarmERC4626.name(), "TestVault");
     assertEq(autofarmERC4626.symbol(), "TSTV");
     assertEq(address(autofarmERC4626.asset()), address(testToken));
@@ -124,14 +129,14 @@ contract AutofarmERC4626Test is DSTest {
   }
 
   function testAccumulatingAutoRewardsOnDeposit() public {
-    vm.roll(1);
+    vmRollFwd(1);
     deposit();
     assertEq(autoToken.balanceOf(address(mockAutofarm)), 0);
     assertEq(autoToken.balanceOf(address(autofarmERC4626)), 0);
     assertEq(autoToken.balanceOf(address(flywheel)), 0);
     assertEq(autoToken.balanceOf(address(flywheelRewards)), 0);
 
-    vm.roll(2);
+    vmRollFwd(2);
     deposit();
     flywheel.accrue(ERC20(autofarmERC4626), address(this));
     assertEq(autoToken.balanceOf(address(mockAutofarm)), 0);
@@ -141,10 +146,10 @@ contract AutofarmERC4626Test is DSTest {
   }
 
   function testAccumulatingAutoRewardsOnWithdrawal() public {
-    vm.roll(1);
+    vmRollFwd(1);
     deposit();
 
-    vm.roll(3);
+    vmRollFwd(3);
     autofarmERC4626.withdraw(1, address(this), address(this));
     flywheel.accrue(ERC20(autofarmERC4626), address(this));
     assertEq(autoToken.balanceOf(address(mockAutofarm)), 0);
@@ -154,9 +159,9 @@ contract AutofarmERC4626Test is DSTest {
   }
 
   function testClaimRewards() public {
-    vm.roll(1);
+    vmRollFwd(1);
     deposit();
-    vm.roll(3);
+    vmRollFwd(3);
     autofarmERC4626.withdraw(1, address(this), address(this));
     flywheel.accrue(ERC20(autofarmERC4626), address(this));
     flywheel.claimRewards(address(this));
@@ -164,7 +169,7 @@ contract AutofarmERC4626Test is DSTest {
   }
 
   function testClaimForMultipleUser() public {
-    vm.roll(1);
+    vmRollFwd(1);
     deposit();
     vm.startPrank(tester);
     testToken.mint(tester, depositAmount);
@@ -172,7 +177,7 @@ contract AutofarmERC4626Test is DSTest {
     autofarmERC4626.deposit(depositAmount, tester);
     vm.stopPrank();
 
-    vm.roll(3);
+    vmRollFwd(3);
     autofarmERC4626.withdraw(1, address(this), address(this));
     flywheel.accrue(ERC20(autofarmERC4626), address(this), tester);
     flywheel.claimRewards(address(this));

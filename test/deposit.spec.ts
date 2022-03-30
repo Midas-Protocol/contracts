@@ -45,7 +45,7 @@ describe("Deposit flow tests", function () {
       for (const asset of assetsInPool.assets) {
         if (asset.underlyingToken === constants.AddressZero) {
           cToken = new Contract(asset.cToken, sdk.chainDeployment.CEtherDelegate.abi, bob);
-          const pool = await ethers.getContractAt("Comptroller", poolAddress, bob);
+          const pool = await ethers.getContractAt("Comptroller.sol:Comptroller", poolAddress, bob);
           tx = await pool.enterMarkets([asset.cToken]);
           await tx.wait();
           tx = await cToken.mint({ value: utils.parseUnits("2", 18) });

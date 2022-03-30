@@ -24,7 +24,7 @@ contract ChainlinkOraclesTest is BaseTest {
     price = oracle.price(testedTokenAddress);
   }
 
-  function testJBRLPrice() shouldRun(forChains(BSC_MAINNET)) public {
+  function testJBRLPrice() public shouldRun(forChains(BSC_MAINNET)) {
     address jBRLAddress = 0x316622977073BBC3dF32E7d2A9B3c77596a0a603;
     address jBRLAggregatorAddress = 0x5cb1Cb3eA5FB46de1CE1D0F3BaDB3212e8d8eF48;
 

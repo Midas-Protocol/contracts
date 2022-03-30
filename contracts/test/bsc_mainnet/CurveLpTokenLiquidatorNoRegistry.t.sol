@@ -4,9 +4,9 @@ pragma solidity >=0.8.0;
 import "ds-test/test.sol";
 import "forge-std/stdlib.sol";
 
-import { WETH } from "@rari-capital/solmate/src/tokens/WETH.sol";
+import { WETH } from "solmate/tokens/WETH.sol";
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { CurveLpTokenLiquidatorNoRegistry } from "../../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
 import "../../utils/IW_NATIVE.sol";
 import "../../external/curve/ICurvePool.sol";
@@ -19,7 +19,7 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     liquidator = new CurveLpTokenLiquidatorNoRegistry(chainConfig.weth, chainConfig.curveLPTokenPriceOracleNoRegistry);
   }
 
-  function testInitalizedValues() public {
+  function testInitializedValues() public {
     assertEq(address(liquidator.W_NATIVE()), address(chainConfig.weth));
     assertEq(address(liquidator.oracle()), address(chainConfig.curveLPTokenPriceOracleNoRegistry));
   }

@@ -2,9 +2,9 @@
 
 pragma solidity >=0.8.0;
 
-import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { IStrategy } from "./IStrategy.sol";
-import { MockERC20 } from "@rari-capital/solmate/src/test/utils/mocks/MockERC20.sol";
+import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 
 contract MockAutofarmV2 {
   struct UserInfo {
