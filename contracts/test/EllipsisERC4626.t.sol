@@ -82,7 +82,7 @@ contract EllipsisERC4626Test is DSTest {
     flywheel.addStrategyForRewards(marketKey);
   }
 
-  function testInitalizedValues() public {
+  function testInitializedValues() public {
     assertEq(ellipsisERC4626.name(), "TestVault");
     assertEq(ellipsisERC4626.symbol(), "TSTV");
     assertEq(address(ellipsisERC4626.asset()), address(testToken));
