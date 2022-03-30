@@ -196,7 +196,7 @@ export class FuseBase {
     if (!implementationAddress) {
       const comptrollerContract = new ContractFactory(
         this.artifacts.Comptroller.abi,
-        this.artifacts.Comptroller.bytecode,
+        this.artifacts.Comptroller.bytecode.object,
         this.provider.getSigner(options.from)
       );
       const deployedComptroller = await comptrollerContract.deploy();
@@ -228,7 +228,7 @@ export class FuseBase {
       [options.from, poolName, receipt.blockNumber]
     );
     const byteCodeHash = utils.keccak256(
-      this.artifacts.Unitroller.bytecode +
+      this.artifacts.Unitroller.bytecode.object +
         new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]).slice(2)
     );
 
@@ -306,7 +306,7 @@ export class FuseBase {
 
     // Get deployArgs
     let deployArgs: any[] = [];
-    let modelArtifact: { abi: any; bytecode: any };
+    let modelArtifact: Artifact;
 
     switch (model) {
       case "JumpRateModel":
@@ -348,7 +348,7 @@ export class FuseBase {
     // Deploy InterestRateModel
     const interestRateModelContract = new ContractFactory(
       modelArtifact.abi,
-      modelArtifact.bytecode,
+      modelArtifact.bytecode.object,
       this.provider.getSigner(options.from)
     );
 
@@ -412,7 +412,7 @@ export class FuseBase {
     if (!implementationAddress) {
       const cEtherDelegateFactory = new ContractFactory(
         this.artifacts.CEtherDelegate.abi,
-        this.artifacts.CEtherDelegate.bytecode,
+        this.artifacts.CEtherDelegate.bytecode.object,
         this.provider.getSigner(options.from)
       );
 
@@ -469,7 +469,7 @@ export class FuseBase {
       [conf.comptroller, "0x0000000000000000000000000000000000000000", receipt.blockNumber]
     );
 
-    const byteCodeHash = utils.keccak256(this.artifacts.CEtherDelegator.bytecode + constructorData.substring(2));
+    const byteCodeHash = utils.keccak256(this.artifacts.CEtherDelegator.bytecode.object + constructorData.substring(2));
 
     const cEtherDelegatorAddress = utils.getCreate2Address(
       this.chainDeployment.FuseFeeDistributor.address,
@@ -503,7 +503,7 @@ export class FuseBase {
     // Deploy CErc20Delegate implementation contract if necessary
     if (!implementationAddress) {
       if (!conf.delegateContractName) conf.delegateContractName = "CErc20Delegate";
-      let delegateContractArtifact: { abi: any; bytecode: any };
+      let delegateContractArtifact: Artifact;
       if (conf.delegateContractName === "CErc20Delegate") {
         delegateContractArtifact = this.artifacts.CErc20Delegate;
       } else {
@@ -511,7 +511,7 @@ export class FuseBase {
       }
       const cErc20Delegate = new ContractFactory(
         delegateContractArtifact.abi,
-        delegateContractArtifact.bytecode,
+        delegateContractArtifact.bytecode.object,
         this.provider.getSigner(options.from)
       );
       const cErc20DelegateDeployed = await cErc20Delegate.deploy();
@@ -554,7 +554,7 @@ export class FuseBase {
       ["address", "address", "uint"],
       [conf.comptroller, conf.underlying, receipt.blockNumber]
     );
-    const byteCodeHash = utils.keccak256(this.artifacts.CErc20Delegator.bytecode + constructorData.substring(2));
+    const byteCodeHash = utils.keccak256(this.artifacts.CErc20Delegator.bytecode.object + constructorData.substring(2));
 
     const cErc20DelegatorAddress = utils.getCreate2Address(
       this.chainDeployment.FuseFeeDistributor.address,

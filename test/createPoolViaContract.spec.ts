@@ -2,7 +2,7 @@ import { deployments, ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
 import { Fuse } from "../src";
-import { constants, utils } from "ethers";
+import { BigNumber, constants, utils } from "ethers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { Comptroller, FusePoolDirectory, MasterPriceOracle, Unitroller } from "../typechain";
 import { getAssetsConf } from "./utils/assets";
@@ -25,7 +25,7 @@ describe("FusePoolDirectory", function () {
   });
 
   describe("Deploy pool", async function () {
-    it.only("should deploy the pool via contract", async function () {
+    it("should deploy the pool via contract", async function () {
       this.timeout(120_000);
       const { alice } = await ethers.getNamedSigners();
       console.log("alice: ", alice.address);
@@ -73,7 +73,7 @@ describe("FusePoolDirectory", function () {
       expect(pool.comptroller).to.eq(poolAddress);
 
       const allPools = await sdk.contracts.FusePoolDirectory.callStatic.getAllPools();
-      const { comptroller, name: _unfilteredName } = await allPools.filter((p) => p.creator === alice.address).at(-1);
+      const { comptroller, name: _unfilteredName } = allPools.filter((p) => p.creator === alice.address).at(-1);
 
       expect(comptroller).to.eq(poolAddress);
       expect(_unfilteredName).to.eq(POOL_NAME);
@@ -112,7 +112,7 @@ describe("FusePoolDirectory", function () {
         ["address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
         deployArgs
       );
-      let errorCode;
+      let errorCode: BigNumber;
       errorCode = await comptrollerContract.callStatic._deployMarket(
         constants.AddressZero,
         constructorData,

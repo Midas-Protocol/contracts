@@ -46,6 +46,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
     log: true,
   });
   const touch = await dep.deploy();
+  console.log("TOUCHToken: ", touch.address);
   const touchToken = await ethers.getContractAt("TOUCHToken", touch.address, deployer);
   tx = await touchToken.transfer(alice, ethers.utils.parseEther("100000"), { from: deployer });
   await tx.wait();
