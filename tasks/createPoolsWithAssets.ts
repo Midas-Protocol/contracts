@@ -34,6 +34,7 @@ task("pools:create", "Create pool if does not exist")
   .addParam("creator", "Named account from which to create the pool", "deployer", types.string)
   .addOptionalParam("priceOracle", "Which price oracle to use", undefined, types.string)
   .addOptionalParam("rewardsDistributorToken", "Token address for rewards distributor", undefined, types.string)
+  .addOptionalParam("flywheelToken", "Token address for rewards distributor", undefined, types.string)
   .setAction(async (taskArgs, hre) => {
     const { chainId } = await hre.ethers.provider.getNetwork();
     const signer = await hre.ethers.getNamedSigner(taskArgs.creator);
@@ -102,6 +103,9 @@ task("pools:create", "Create pool if does not exist")
             }
           );
         }
+      }
+      if (taskArgs.flywheelToken) {
+        console.log("TODO");
       }
     }
 

@@ -71,10 +71,8 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
   // get the ERC20 address of deployed cERC20
   const underlyings = [tribe.address, touch.address];
 
-  run("oracle:add-tokens", {
-    underlyings: underlyings.join(","),
-    oracles: Array(underlyings.length).fill(simplePriceOracle.address).join(","),
-  });
+  tx = await masterPriceOracle.add(underlyings, Array(underlyings.length).fill(simplePriceOracle.address));
+  await tx.wait();
   tx = await masterPriceOracle.setDefaultOracle(simplePriceOracle.address);
   await tx.wait();
   ////

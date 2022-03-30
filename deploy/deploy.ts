@@ -190,7 +190,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     },
   });
   const fflrReceipt = await dep.deploy();
-  await ethers.provider.waitForTransaction(fflrReceipt.transactionHash);
+  if (fflrReceipt.transactionHash) await ethers.provider.waitForTransaction(fflrReceipt.transactionHash);
   console.log("FuseFlywheelLensRouter: ", fflrReceipt.address);
 
   const etherDelegate = await ethers.getContract("CEtherDelegate", deployer);
