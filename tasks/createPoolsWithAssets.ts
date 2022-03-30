@@ -1,5 +1,4 @@
 import { task, types } from "hardhat/config";
-import { CErc20, EIP20Interface } from "../typechain";
 
 export default task("pools", "Create Testing Pools")
   .addParam("name", "Name of the pool to be created")
@@ -77,17 +76,11 @@ task("pools:create", "Create pool if does not exist")
       const deployedErc20One = deployedAssets.find((a) => a.underlying === erc20One.underlying);
       const deployedErc20Two = deployedAssets.find((a) => a.underlying === erc20Two.underlying);
 
-      const erc20OneUnderlying = (await hre.ethers.getContractAt(
-        "EIP20Interface",
-        erc20One.underlying
-      )) as EIP20Interface;
-      const erc20TwoUnderlying = (await hre.ethers.getContractAt(
-        "EIP20Interface",
-        erc20Two.underlying
-      )) as EIP20Interface;
+      const erc20OneUnderlying = await hre.ethers.getContractAt("EIP20Interface", erc20One.underlying);
+      const erc20TwoUnderlying = await hre.ethers.getContractAt("EIP20Interface", erc20Two.underlying);
 
-      const marketOne = (await hre.ethers.getContractAt("CErc20", deployedErc20One.assetAddress)) as CErc20;
-      const marketTwo = (await hre.ethers.getContractAt("CErc20", deployedErc20Two.assetAddress)) as CErc20;
+      const marketOne = await hre.ethers.getContractAt("CErc20", deployedErc20One.assetAddress);
+      const marketTwo = await hre.ethers.getContractAt("CErc20", deployedErc20Two.assetAddress);
 
       if (taskArgs.rewardsDistributorToken) {
         const rdTokenInstance =
@@ -124,7 +117,7 @@ task("pools:create", "Create pool if does not exist")
         }
       }
       if (taskArgs.flywheelToken) {
-        let flywheelMarket: CErc20;
+        let flywheelMarket;
         const fwTokenInstance =
           taskArgs.flywheelToken === erc20OneUnderlying.address ? erc20OneUnderlying : erc20TwoUnderlying;
         if (taskArgs.flywheelMarket) {
