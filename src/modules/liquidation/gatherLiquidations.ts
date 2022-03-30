@@ -6,7 +6,7 @@ import { FusePoolLens } from "../../../typechain/FusePoolLens";
 
 async function getLiquidatableUsers(
   fuse: FuseBase,
-  poolUsers: FusePoolLens.FusePoolUserStructOutput[],
+  poolUsers: FusePoolLens.FusePoolUserStructOutput,
   pool: PublicPoolUserWithData,
   chainLiquidationConfig: ChainLiquidationConfig
 ): Promise<Array<EncodedLiquidationTx>> {

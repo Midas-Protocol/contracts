@@ -1,4 +1,5 @@
 import { BigNumber, constants } from "ethers";
+import { FuseBase } from "../../Fuse";
 
 export enum LiquidationStrategy {
   DEFAULT = "DEFAULT",
@@ -12,51 +13,53 @@ export enum LiquidationKind {
   UNISWAP_TOKEN_BORROW = "UNISWAP_TOKEN_BORROW",
 }
 
-export const defaults = {
-  56: {
-    SUPPORTED_OUTPUT_CURRENCIES: [
-      "0x0000000000000000000000000000000000000000",
-      "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-      "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
-      "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
-      "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
-    ],
-    SUPPORTED_INPUT_CURRENCIES: [
-      "0x0000000000000000000000000000000000000000",
-      "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-    ],
-    LIQUIDATION_STRATEGY: LiquidationStrategy.UNISWAP,
-    MINIMUM_PROFIT_NATIVE: BigNumber.from(0),
-  },
-  97: {
-    SUPPORTED_OUTPUT_CURRENCIES: [
-      "0x0000000000000000000000000000000000000000",
-      "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
-      "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
-      "0x8babbb98678facc7342735486c851abd7a0d17ca",
-      "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
-    ],
-    SUPPORTED_INPUT_CURRENCIES: [
-      "0x0000000000000000000000000000000000000000",
-      "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
-    ],
-    LIQUIDATION_STRATEGY: LiquidationStrategy.UNISWAP,
-    MINIMUM_PROFIT_NATIVE: BigNumber.from(0),
-  },
-  1337: {
-    SUPPORTED_OUTPUT_CURRENCIES: [
-      "0x0000000000000000000000000000000000000000",
-      "0xB24b0E1B1a37a2F45005c52D18e3782E7e6B8797",
-      "0x42cf7A77E5b420aa44Cf3c8BDb4110220242804B",
-    ],
-    SUPPORTED_INPUT_CURRENCIES: [
-      "0x0000000000000000000000000000000000000000",
-      "0xB24b0E1B1a37a2F45005c52D18e3782E7e6B8797",
-      "0x42cf7A77E5b420aa44Cf3c8BDb4110220242804B",
-    ],
-    LIQUIDATION_STRATEGY: LiquidationStrategy.DEFAULT,
-    MINIMUM_PROFIT_NATIVE: BigNumber.from(0),
-  },
+export const defaults = (fuse: FuseBase) => {
+  return {
+    56: {
+      SUPPORTED_OUTPUT_CURRENCIES: [
+        "0x0000000000000000000000000000000000000000",
+        "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+        "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+        "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+        "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+      ],
+      SUPPORTED_INPUT_CURRENCIES: [
+        "0x0000000000000000000000000000000000000000",
+        "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      ],
+      LIQUIDATION_STRATEGY: LiquidationStrategy.UNISWAP,
+      MINIMUM_PROFIT_NATIVE: BigNumber.from(0),
+    },
+    97: {
+      SUPPORTED_OUTPUT_CURRENCIES: [
+        "0x0000000000000000000000000000000000000000",
+        "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
+        "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
+        "0x8babbb98678facc7342735486c851abd7a0d17ca",
+        "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
+      ],
+      SUPPORTED_INPUT_CURRENCIES: [
+        "0x0000000000000000000000000000000000000000",
+        "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
+      ],
+      LIQUIDATION_STRATEGY: LiquidationStrategy.UNISWAP,
+      MINIMUM_PROFIT_NATIVE: BigNumber.from(0),
+    },
+    1337: {
+      SUPPORTED_OUTPUT_CURRENCIES: [
+        "0x0000000000000000000000000000000000000000",
+        fuse.chainDeployment.TOUCHToken.address,
+        fuse.chainDeployment.TRIBEToken.address,
+      ],
+      SUPPORTED_INPUT_CURRENCIES: [
+        "0x0000000000000000000000000000000000000000",
+        fuse.chainDeployment.TOUCHToken.address,
+        fuse.chainDeployment.TRIBEToken.address,
+      ],
+      LIQUIDATION_STRATEGY: LiquidationStrategy.DEFAULT,
+      MINIMUM_PROFIT_NATIVE: BigNumber.from(0),
+    },
+  };
 };
 
 export type ChainLiquidationConfig = {
@@ -66,20 +69,20 @@ export type ChainLiquidationConfig = {
   MINIMUM_PROFIT_NATIVE: BigNumber;
 };
 
-export const getChainLiquidationConfig = (chainId: number): ChainLiquidationConfig => {
+export const getChainLiquidationConfig = (fuse: FuseBase): ChainLiquidationConfig => {
   return {
     SUPPORTED_OUTPUT_CURRENCIES: process.env.SUPPORTED_OUTPUT_CURRENCIES
       ? process.env.SUPPORTED_OUTPUT_CURRENCIES.split(",")
-      : defaults[chainId].SUPPORTED_OUTPUT_CURRENCIES,
+      : defaults(fuse)[fuse.chainId].SUPPORTED_OUTPUT_CURRENCIES,
     SUPPORTED_INPUT_CURRENCIES: process.env.SUPPORTED_INPUT_CURRENCIES
       ? process.env.SUPPORTED_INPUT_CURRENCIES.split(",")
-      : defaults[chainId].SUPPORTED_INPUT_CURRENCIES,
+      : defaults(fuse)[fuse.chainId].SUPPORTED_INPUT_CURRENCIES,
     LIQUIDATION_STRATEGY: process.env.LIQUIDATION_STRATEGY
       ? process.env.LIQUIDATION_STRATEGY
-      : defaults[chainId].LIQUIDATION_STRATEGY,
+      : defaults(fuse)[fuse.chainId].LIQUIDATION_STRATEGY,
     MINIMUM_PROFIT_NATIVE: process.env.MINIMUM_PROFIT_NATIVE
       ? BigNumber.from(process.env.MINIMUM_PROFIT_NATIVE)
-      : defaults[chainId].MINIMUM_PROFIT_NATIVE,
+      : defaults(fuse)[fuse.chainId].MINIMUM_PROFIT_NATIVE,
   };
 };
 
