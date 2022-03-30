@@ -126,7 +126,7 @@ task("pools:create", "Create pool if does not exist")
       if (taskArgs.flywheelToken) {
         let flywheelMarket: CErc20;
         const fwTokenInstance =
-          taskArgs.rewardsDistributorToken === erc20OneUnderlying.address ? erc20OneUnderlying : erc20TwoUnderlying;
+          taskArgs.flywheelToken === erc20OneUnderlying.address ? erc20OneUnderlying : erc20TwoUnderlying;
         if (taskArgs.flywheelMarket) {
           flywheelMarket = taskArgs.flywheelMarket === (await erc20OneUnderlying.symbol()) ? marketOne : marketTwo;
         } else {

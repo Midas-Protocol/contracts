@@ -204,14 +204,7 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
 
       const rdInstances = allRewardDistributors
         .filter((_, index) => filterList[index])
-        .map(
-          (address) =>
-            new Contract(
-              address,
-              this.artifacts.RewardsDistributorDelegate.abi,
-              this.provider.getSigner(options.from)
-            ) as RewardsDistributorDelegate
-        );
+        .map((address) => this.#getRewardsDistributorInstance(address, options));
 
       return rdInstances;
     }
