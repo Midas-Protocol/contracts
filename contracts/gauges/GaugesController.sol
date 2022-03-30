@@ -11,10 +11,15 @@ import "../external/compound/IComptroller.sol";
 contract GaugesController is Initializable {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
-  IERC20Upgradeable mdsToken;
-  VeMDSToken veMdsToken;
-  IComptroller comptroller;
-  mapping(address => address) assetToGauge;
+  IERC20Upgradeable public mdsToken;
+  VeMDSToken public veMdsToken;
+  IComptroller public comptroller;
+  mapping(address => address) public assetToGauge;
+  mapping(address => uint256) public stakingStartedTime;
+  mapping(address => uint256) public votingPowerSpentByAccount;
+  mapping(address => uint256) public votesAccumulatedByGauge;
+  mapping(address => mapping(address => uint256)) public votesByGaugeByAccount;
+  uint256 totalVotes;
 
   function initialize(address _mdsTokenAddress, IComptroller _comptroller) public initializer {
     comptroller = _comptroller;
@@ -23,7 +28,7 @@ contract GaugesController is Initializable {
 
   function stake(uint256 amount) public {
     mdsToken.safeTransferFrom(msg.sender, address(this), amount);
-
+    stakingStartedTime[msg.sender] = block.timestamp;
     veMdsToken.mint(msg.sender, amount);
   }
 
@@ -47,4 +52,29 @@ contract GaugesController is Initializable {
     return 0; // gauge.backingVeSupply();
   }
 
+  function voteForGauge(address gaugeAddress, uint votes) public {
+    // TODO delegation
+    uint vp = veMdsToken.votingPowerOf(msg.sender);
+
+    // TODO verify gauge is registered
+    require(votes <= vp - votingPowerSpentByAccount[msg.sender], "not enough voting power for this");
+
+    votingPowerSpentByAccount[msg.sender] += votes;
+    votesByGaugeByAccount[gaugeAddress][msg.sender] += votes;
+    votesAccumulatedByGauge[gaugeAddress] += votes;
+    totalVotes += votes;
+  }
+
+  function removeVotesForGauge(address gaugeAddress, uint votes) public {
+    // TODO delegation
+    uint vp = veMdsToken.votingPowerOf(msg.sender);
+
+    // TODO verify gauge is registered
+    require(votes <= votesByGaugeByAccount[gaugeAddress][msg.sender], "user has allocated less votes to this gauge");
+
+    votingPowerSpentByAccount[msg.sender] -= votes;
+    votesByGaugeByAccount[gaugeAddress][msg.sender] -= votes;
+    votesAccumulatedByGauge[gaugeAddress] -= votes;
+    totalVotes -= votes;
+  }
 }
