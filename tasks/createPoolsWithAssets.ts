@@ -1,4 +1,7 @@
 import { task, types } from "hardhat/config";
+import { ethers } from "hardhat";
+import { constants } from "ethers";
+import { CErc20, EIP20Interface } from "../typechain";
 
 export default task("pools", "Create Testing Pools")
   .addParam("name", "Name of the pool to be created")
@@ -70,11 +73,19 @@ task("pools:create", "Create pool if does not exist")
       // Deploy Assets
       const assets = await poolModule.getPoolAssets(poolAddress, fuseFeeDistributor);
       const deployedAssets = await poolModule.deployAssets(assets.assets, signer);
+      const [erc20One, erc20Two] = assets.assets.filter((a) => a.underlying !== constants.AddressZero);
+
+      const deployedErc20One = deployedAssets.find((a) => a.underlying === erc20One.underlying);
+      const deployedErc20Two = deployedAssets.find((a) => a.underlying === erc20Two.underlying);
+
+      const erc20OneUnderlying = (await ethers.getContractAt("EIP20Interface", erc20One.underlying)) as EIP20Interface;
+      const erc20TwoUnderlying = (await ethers.getContractAt("EIP20Interface", erc20Two.underlying)) as EIP20Interface;
+
+      const market = (await ethers.getContractAt("CErc20", deployedErc20One.assetAddress)) as CErc20;
+      const marketTwo = (await ethers.getContractAt("CErc20", deployedErc20Two.assetAddress)) as CErc20;
 
       if (taskArgs.rewardsDistributorToken) {
-        // Add Reward Distributer for TOUCH
-        const rewardTokenInstance = await hre.ethers.getContractAt("TOUCHToken", taskArgs.rewardsDistributorToken);
-        const rdInstance = await sdk.deployRewardsDistributor(rewardTokenInstance.address, {
+        const rdInstance = await sdk.deployRewardsDistributor(erc20OneUnderlying.address, {
           from: signer.address,
         });
         await sdk.addRewardsDistributorToPool(rdInstance.address, poolAddress, {
@@ -84,11 +95,10 @@ task("pools:create", "Create pool if does not exist")
           from: signer.address,
         });
 
-        const deployedCToken = deployedAssets.find((a) => a.underlying === rewardTokenInstance.address);
-        if (deployedCToken) {
+        if (deployedErc20One) {
           await sdk.updateRewardsDistributorSupplySpeed(
             rdInstance.address,
-            deployedCToken.assetAddress,
+            deployedErc20One.assetAddress,
             hre.ethers.utils.parseUnits("2"),
             {
               from: signer.address,
@@ -96,7 +106,7 @@ task("pools:create", "Create pool if does not exist")
           );
           await sdk.updateRewardsDistributorBorrowSpeed(
             rdInstance.address,
-            deployedCToken.assetAddress,
+            deployedErc20One.assetAddress,
             hre.ethers.utils.parseUnits("1"),
             {
               from: signer.address,
@@ -105,7 +115,53 @@ task("pools:create", "Create pool if does not exist")
         }
       }
       if (taskArgs.flywheelToken) {
-        console.log("TODO");
+        const flywheelCoreInstance = await sdk.deployFlywheelCore(erc20TwoUnderlying.address, {
+          from: signer.address,
+        });
+        const fwStaticRewards = await sdk.deployFlywheelStaticRewards(
+          erc20TwoUnderlying.address,
+          flywheelCoreInstance.address,
+          {
+            from: signer.address,
+          }
+        );
+
+        await sdk.setFlywheelRewards(flywheelCoreInstance.address, fwStaticRewards.address, { from: signer.address });
+        await sdk.addFlywheelCoreToComptroller(flywheelCoreInstance.address, poolAddress, { from: signer.address });
+
+        // Funding Static Rewards
+        await erc20TwoUnderlying.transfer(fwStaticRewards.address, ethers.utils.parseUnits("100", 18), {
+          from: signer.address,
+        });
+
+        // Setup Rewards, enable and set RewardInfo
+        await sdk.addMarketForRewardsToFlywheelCore(flywheelCoreInstance.address, market.address, {
+          from: signer.address,
+        });
+        await sdk.setStaticRewardInfo(
+          fwStaticRewards.address,
+          market.address,
+          {
+            rewardsEndTimestamp: 0,
+            rewardsPerSecond: ethers.utils.parseUnits("0.000001", 18),
+          },
+          { from: signer.address }
+        );
+
+        // Setup Rewards, enable and set RewardInfo
+        await sdk.addMarketForRewardsToFlywheelCore(flywheelCoreInstance.address, marketTwo.address, {
+          from: signer.address,
+        });
+        await sdk.setStaticRewardInfo(
+          fwStaticRewards.address,
+          marketTwo.address,
+          {
+            rewardsEndTimestamp: 0,
+            rewardsPerSecond: ethers.utils.parseUnits("0.000002", 18),
+          },
+          { from: signer.address }
+        );
+        console.log("Setup RewardInfo ✅");
       }
     }
 
