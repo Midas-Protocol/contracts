@@ -139,7 +139,7 @@ const config: HardhatUserConfig = {
   },
   typechain: {
     outDir: "./typechain",
-    externalArtifacts: ["./out/*.json"],
+    externalArtifacts: ["./out/*/**.json"],
   },
 };
 

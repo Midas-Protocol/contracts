@@ -21,7 +21,7 @@
     "test:forge:bsc": "forge test --fork-url ${FORK_URL_BSC} --fork-block-number 16281867",
     "test:bsc": "FORK_URL=${FORK_URL_BSC} FORK_BLOCK_NUMBER=16281867 FORK_CHAIN_ID=56 hardhat test",
     "export": "hardhat export --export-all ./deployments.json",
-    "build": "npm run build:forge && npm run typechain && npm run build:sdk ",
+    "build": "npm run build:forge && npm run build:hardhat && npm run build:sdk ",
     "build:forge": "forge build",
     "build:hardhat": "hardhat compile",
     "build:sdk": "tsc -p tsconfig-sdk.json && tsc -p tsconfig-cjs.json",
