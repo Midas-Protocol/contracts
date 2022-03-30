@@ -8,7 +8,7 @@ import * as poolHelpers from "../utils/pool";
 import * as timeHelpers from "../utils/time";
 import { constants } from "ethers";
 
-describe("FlywheelModule", function () {
+describe.only("FlywheelModule", function () {
   let poolAAddress: string;
   let poolBAddress: string;
   let sdk: Fuse;
@@ -53,7 +53,7 @@ describe("FlywheelModule", function () {
     }
   });
 
-  it.only("1 Pool, 1 Flywheel", async function () {
+  it("1 Pool, 1 Flywheel", async function () {
     const { deployer, alice } = await ethers.getNamedSigners();
     const rewardToken = erc20OneUnderlying;
     const market = erc20OneCToken;
@@ -124,5 +124,78 @@ describe("FlywheelModule", function () {
       from: alice.address,
     });
     console.dir({ claimableRewardsForPool }, { depth: null });
+    const rds = await sdk.getRewardsDistributorsByPool(poolAAddress, { from: alice.address });
+    console.log({ rds });
+  });
+
+  it("1 Pool, 1 Flywheel, 1 Reward Distributor", async function () {
+    const { deployer, alice } = await ethers.getNamedSigners();
+
+    const rewardToken = erc20OneUnderlying;
+    const market = erc20OneCToken;
+
+    // Deploy RewardsDistributor
+    const rewardDistributor = await sdk.deployRewardsDistributor(rewardToken.address, {
+      from: deployer.address,
+    });
+
+    // Deploy Flywheel with Static Rewards
+    const fwCore = await sdk.deployFlywheelCore(rewardToken.address, {
+      from: deployer.address,
+    });
+    const fwStaticRewards = await sdk.deployFlywheelStaticRewards(rewardToken.address, fwCore.address, {
+      from: deployer.address,
+    });
+
+    // Fund RewardsDistributors
+    const fundingAmount = ethers.utils.parseUnits("100", 18);
+    await sdk.fundRewardsDistributor(rewardDistributor.address, fundingAmount, {
+      from: deployer.address,
+    });
+    expect(await rewardToken.balanceOf(rewardDistributor.address)).to.not.eq(0);
+
+    // Funding Static Rewards
+    await rewardToken.transfer(fwStaticRewards.address, fundingAmount, { from: deployer.address });
+    expect(await rewardToken.balanceOf(fwStaticRewards.address)).to.not.eq(0);
+
+    // Add RewardsDistributor to Pool
+    await sdk.addRewardsDistributorToPool(rewardDistributor.address, poolAAddress, {
+      from: deployer.address,
+    });
+
+    // Add Flywheel to Pool
+    await sdk.setFlywheelRewards(fwCore.address, fwStaticRewards.address, { from: deployer.address });
+    await sdk.addFlywheelCoreToComptroller(fwCore.address, poolAAddress, { from: deployer.address });
+
+    // Setup 'TOUCH' Borrow Side Speed on Rewards Distributor
+    const rewardSpeed = ethers.utils.parseUnits("1", 0);
+    await sdk.updateRewardsDistributorBorrowSpeed(rewardDistributor.address, market.address, rewardSpeed, {
+      from: deployer.address,
+    });
+
+    // Setup Rewards, enable and set RewardInfo
+    await sdk.addMarketForRewardsToFlywheelCore(fwCore.address, market.address, { from: deployer.address });
+    await sdk.setStaticRewardInfo(
+      fwStaticRewards.address,
+      market.address,
+      {
+        rewardsEndTimestamp: 0,
+        rewardsPerSecond: rewardSpeed,
+      },
+      { from: deployer.address }
+    );
+
+    // Enter Rewarded Market, Single User so 100% Rewards from RewardDistributor & Flywheel
+    await collateralHelpers.addCollateral(poolAAddress, alice, await market.callStatic.symbol(), "100", true);
+
+    // Advance Blocks
+    await timeHelpers.advanceBlocks(250);
+    const rewardDistributors = await sdk.getRewardsDistributorsByPool(poolAAddress, { from: alice.address });
+    expect(rewardDistributors.length).to.eq(1);
+    expect(rewardDistributors[0].address).to.eq(rewardDistributor.address);
+
+    const flywheels = await sdk.getFlywheelsByPool(poolAAddress, { from: alice.address });
+    expect(flywheels.length).to.eq(1);
+    expect(flywheels[0].address).to.eq(fwCore.address);
   });
 });
