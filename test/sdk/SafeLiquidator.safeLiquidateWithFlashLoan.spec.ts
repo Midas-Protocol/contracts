@@ -13,7 +13,7 @@ import {
 import { cERC20Conf } from "../../src";
 import { DeployedAsset } from "../utils/pool";
 import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
-import { ChainLiquidationConfig, liquidationConfigDefaults } from "../../dist/cjs/src";
+import { ChainLiquidationConfig, Fuse, liquidationConfigDefaults } from "../../dist/cjs/src";
 
 (process.env.FORK_CHAIN_ID ? describe : describe.skip)("#safeLiquidateWithFlashLoan", () => {
   let tx: providers.TransactionResponse;
@@ -53,9 +53,12 @@ import { ChainLiquidationConfig, liquidationConfigDefaults } from "../../dist/cj
     if (chainId === 1337) {
       await deployments.fixture();
     }
+
+    const sdk = new Fuse(ethers.provider, Number(chainId));
+
     coingeckoId = chainId === 1337 ? "ethereum" : "binancecoin";
     liquidationConfigOverrides = {
-      ...liquidationConfigDefaults[chainId],
+      ...liquidationConfigDefaults(sdk)[chainId],
     };
     await setUpPriceOraclePrices();
     ({
