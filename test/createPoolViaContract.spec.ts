@@ -35,7 +35,7 @@ describe("FusePoolDirectory", function () {
       mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, alice);
 
       fpdWithSigner = await ethers.getContractAt("FusePoolDirectory", sdk.contracts.FusePoolDirectory.address, alice);
-      implementationComptroller = await ethers.getContractAt("Comptroller", sdk.chainDeployment.Comptroller.address);
+      implementationComptroller = await ethers.getContractAt("Comptroller.sol:Comptroller", sdk.chainDeployment.Comptroller.address);
 
       //// DEPLOY POOL
       const POOL_NAME = "TEST";
@@ -82,7 +82,7 @@ describe("FusePoolDirectory", function () {
       const adminTx = await unitroller._acceptAdmin();
       await adminTx.wait();
 
-      const comptrollerContract = await ethers.getContractAt("Comptroller", comptroller, alice);
+      const comptrollerContract = await ethers.getContractAt("Comptroller.sol:Comptroller", comptroller, alice);
       const admin = await comptrollerContract.admin();
       expect(admin).to.eq(alice.address);
 

@@ -45,7 +45,7 @@ export async function addCollateral(
   const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol, cgId);
 
   cToken = getCToken(assetToDeploy, sdk, depositor);
-  const pool = await ethers.getContractAt("Comptroller", poolAddress, depositor);
+  const pool = await ethers.getContractAt("Comptroller.sol:Comptroller", poolAddress, depositor);
   if (useAsCollateral) {
     tx = await pool.enterMarkets([assetToDeploy.cToken]);
     await tx.wait();
@@ -93,7 +93,7 @@ export async function borrowCollateral(
   const sdk = new Fuse(ethers.provider, chainId);
   const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol, cgId);
 
-  const pool = await ethers.getContractAt("Comptroller", poolAddress, signer);
+  const pool = await ethers.getContractAt("Comptroller.sol:Comptroller", poolAddress, signer);
   tx = await pool.enterMarkets([assetToDeploy.cToken]);
   await tx.wait();
 
