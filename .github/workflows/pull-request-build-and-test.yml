@@ -31,31 +31,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Build Dockerfile for tests
+        run: docker build -t contracts -f Dockerfile.test .
 
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
-
-      - name: Install Forge dependencies
-        run: forge install
-
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-
-      - name: Install NPM packages
-        run: npm install
-
-      - name: Run build
-        run: npm run build
-
-      - name: Run hardhat tests
-        run: npm run test
-
-      - name: Run forge tests
-        run: npm run test:forge
+      - name: Run tests
+        run: docker run -it --env MNEMONIC=${MNEMONIC} contracts
+#      - name: Install Foundry
+#        uses: onbjerg/foundry-toolchain@v1
+#        with:
+#          version: nightly
+#
+#      - name: Install Forge dependencies
+#        run: forge install
+#
+#      - uses: actions/setup-node@v2
+#        with:
+#          node-version: 16.x
+#          cache: "npm"
+#
+#      - name: Install NPM packages
+#        run: npm install
+#
+#      - name: Run build
+#        run: npm run build
+#
+#      - name: Run hardhat tests
+#        run: npm run test
+#
+#      - name: Run forge tests
+#        run: npm run test:forge
 
   build-and-test-bsc:
     env:
