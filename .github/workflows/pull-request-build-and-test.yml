@@ -41,7 +41,7 @@ jobs:
         run: docker build -t contracts -f Dockerfile.test .
 
       - name: Run tests
-        run: docker run -t --env MNEMONIC=${MNEMONIC} contracts
+        run: docker run -t --env MNEMONIC="${MNEMONIC}" contracts
 #      - name: Install Foundry
 #        uses: onbjerg/foundry-toolchain@v1
 #        with:
