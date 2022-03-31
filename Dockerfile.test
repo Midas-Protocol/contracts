@@ -46,7 +46,7 @@ RUN npm install -g npm && npm install --legacy-peer-deps
 RUN npm run typechain
 RUN npm run build:sdk
 
-COPY docker/*.sh .
+COPY docker/*.sh ./
 
 RUN chmod +x *.sh
 
