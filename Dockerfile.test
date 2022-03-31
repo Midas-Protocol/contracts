@@ -8,11 +8,11 @@ COPY package*.json ./
 COPY foundry.toml ./
 COPY remappings.txt ./
 COPY .gitmodules ./
-COPY .git ./
 COPY deployments.json ./
 COPY tsconfig*.json ./
 COPY lib/ ./lib
 COPY hardhat.config.ts ./
+COPY .git ./.git
 COPY chainDeploy/ ./chainDeploy
 COPY deploy/ ./deploy
 COPY tasks/ ./tasks
@@ -30,8 +30,8 @@ RUN  foundryup
 
 RUN mv /root/.foundry/bin/forge /usr/bin/
 
-RUN  forge install
-RUN  forge build
+RUN forge install
+RUN forge build
 
 
 FROM node:16.13
@@ -46,5 +46,9 @@ RUN npm install -g npm && npm install --legacy-peer-deps
 RUN npm run typechain
 RUN npm run build:sdk
 
+COPY docker/hh-test.sh .
+COPY docker/start-node.sh .
 
-ENTRYPOINT ["npx", "hardhat", "test"]
+RUN chmox +x start-node.sh hh-test.sh
+
+ENTRYPOINT ["./hh-test.sh"]
