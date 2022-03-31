@@ -12,7 +12,7 @@ import {
   MasterPriceOracle,
   SimplePriceOracle,
 } from "../../typechain";
-import { cERC20Conf, ChainLiquidationConfig, liquidationConfigDefaults, LiquidationStrategy } from "../../";
+import { cERC20Conf, ChainLiquidationConfig, Fuse, liquidationConfigDefaults, LiquidationStrategy } from "../../";
 import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
 
 describe("#SafeLiquidator", () => {
@@ -53,14 +53,16 @@ describe("#SafeLiquidator", () => {
 
     ({ chainId } = await ethers.provider.getNetwork());
 
+    const sdk = new Fuse(ethers.provider, Number(chainId));
+
     if (chainId === 1337) {
       await deployments.fixture();
     }
     coingeckoId = chainId === 1337 ? "ethereum" : "binancecoin";
     liquidationConfigOverrides = {
-      ...liquidationConfigDefaults[chainId],
+      ...liquidationConfigDefaults(sdk)[chainId],
       LIQUIDATION_STRATEGY: LiquidationStrategy.DEFAULT,
-      SUPPORTED_INPUT_CURRENCIES: liquidationConfigDefaults[chainId].SUPPORTED_OUTPUT_CURRENCIES,
+      SUPPORTED_INPUT_CURRENCIES: liquidationConfigDefaults(sdk)[chainId].SUPPORTED_OUTPUT_CURRENCIES,
     };
 
     await setUpPriceOraclePrices();

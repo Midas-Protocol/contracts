@@ -58,9 +58,7 @@ const config: HardhatUserConfig = {
     ],
   },
   external: {
-    contracts: [
-      { artifacts: "./out" },
-    ],
+    contracts: [{ artifacts: "./out" }],
   },
   paths: {
     sources: "./none",
@@ -70,7 +68,7 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: {
       default: 0,
-      "hardhat": "0x304aE8f9300e09c8B33bb1a8AE1c14A6253a5F4D"
+      hardhat: "0x304aE8f9300e09c8B33bb1a8AE1c14A6253a5F4D",
     },
     alice: { default: 1 },
     bob: { default: 2 },
@@ -80,9 +78,9 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: process.env.FORK_URL_BSC
         ? {
-          url: process.env.FORK_URL_BSC,
-          blockNumber: Number(process.env.FORK_BLOCK_NUMBER),
-        }
+            url: process.env.FORK_URL_BSC,
+            blockNumber: Number(process.env.FORK_BLOCK_NUMBER),
+          }
         : undefined,
       saveDeployments: true,
       chainId: process.env.FORK_CHAIN_ID ? Number(process.env.FORK_CHAIN_ID) : 1337,
@@ -138,9 +136,6 @@ const config: HardhatUserConfig = {
       chainId: 9000,
       url: "https://evmos-archive-testnet.api.bdnodes.net:8545",
     },
-  },
-  typechain: {
-    outDir: "./typechain",
   },
 };
 
