@@ -34,11 +34,14 @@ jobs:
         with:
           submodules: recursive
 
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+
       - name: Build Dockerfile for tests
         run: docker build -t contracts -f Dockerfile.test .
 
       - name: Run tests
-        run: docker run -it --env MNEMONIC=${MNEMONIC} contracts
+        run: docker run -t --env MNEMONIC=${MNEMONIC} contracts
 #      - name: Install Foundry
 #        uses: onbjerg/foundry-toolchain@v1
 #        with:
