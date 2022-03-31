@@ -41,31 +41,17 @@ jobs:
         run: docker build -t contracts -f Dockerfile.test .
 
       - name: Run tests
-        run: docker run -t --env MNEMONIC="${MNEMONIC}" contracts
-#      - name: Install Foundry
-#        uses: onbjerg/foundry-toolchain@v1
-#        with:
-#          version: nightly
-#
-#      - name: Install Forge dependencies
-#        run: forge install
-#
-#      - uses: actions/setup-node@v2
-#        with:
-#          node-version: 16.x
-#          cache: "npm"
-#
-#      - name: Install NPM packages
-#        run: npm install
-#
-#      - name: Run build
-#        run: npm run build
-#
-#      - name: Run hardhat tests
-#        run: npm run test
-#
-#      - name: Run forge tests
-#        run: npm run test:forge
+        run: docker run -t --env MNEMONIC="${MNEMONIC}" --entrypoint "./hh-test.sh" contracts
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - name: Run forge tests
+        run: npm run test:forge
 
   build-and-test-bsc:
     env:

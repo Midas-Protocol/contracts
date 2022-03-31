@@ -46,10 +46,8 @@ RUN npm install -g npm && npm install --legacy-peer-deps
 RUN npm run typechain
 RUN npm run build:sdk
 
-COPY docker/hh-test.sh .
-COPY docker/start-node.sh .
-COPY docker/start-bsc-node.sh .
+COPY docker/*.sh .
 
-RUN chmod +x start-node.sh hh-test.sh start-bsc-node.sh
+RUN chmod +x *.sh
 
-ENTRYPOINT ["./start-bsc-node.sh"]
+ENTRYPOINT ["./hh-test.sh"]
