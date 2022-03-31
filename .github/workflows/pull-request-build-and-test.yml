@@ -33,19 +33,29 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
+
       - name: Install Foundry
         uses: onbjerg/foundry-toolchain@v1
         with:
           version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
       - uses: actions/setup-node@v2
         with:
           node-version: 16.x
           cache: "npm"
-      - run: npm install
-      - run: forge update
-      - run: npm run build
+
+      - name: Install NPM packages
+        run: npm install
+
+      - name: Run build
+        run: npm run build
+
       - name: Run hardhat tests
-        run: npm run test:hardhat
+        run: npm run test
+
       - name: Run forge tests
         run: npm run test:forge
 
@@ -58,17 +68,28 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
+
       - name: Install Foundry
         uses: onbjerg/foundry-toolchain@v1
         with:
           version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
       - uses: actions/setup-node@v2
         with:
           node-version: 16.x
           cache: "npm"
-      - run: npm install
-      - run: npm run build
+
+      - name: Install NPM packages
+        run: npm install
+
+      - name: Run build
+        run: npm run build
+
       - name: Run hardhat tests on BSC
         run: npm run test:bsc
+
       - name: Run forge tests on BSC
         run: npm run test:forge:bsc
