@@ -48,13 +48,13 @@ export const defaults = (fuse: FuseBase) => {
     1337: {
       SUPPORTED_OUTPUT_CURRENCIES: [
         "0x0000000000000000000000000000000000000000",
-        fuse.chainDeployment.TOUCHToken.address,
-        fuse.chainDeployment.TRIBEToken.address,
+        fuse.chainDeployment.TOUCHToken ? fuse.chainDeployment.TOUCHToken.address : null,
+        fuse.chainDeployment.TRIBEToken ? fuse.chainDeployment.TRIBEToken.address : null,
       ],
       SUPPORTED_INPUT_CURRENCIES: [
         "0x0000000000000000000000000000000000000000",
-        fuse.chainDeployment.TOUCHToken.address,
-        fuse.chainDeployment.TRIBEToken.address,
+        fuse.chainDeployment.TOUCHToken ? fuse.chainDeployment.TOUCHToken.address : null,
+        fuse.chainDeployment.TRIBEToken ? fuse.chainDeployment.TRIBEToken.address : null,
       ],
       LIQUIDATION_STRATEGY: LiquidationStrategy.DEFAULT,
       MINIMUM_PROFIT_NATIVE: BigNumber.from(0),

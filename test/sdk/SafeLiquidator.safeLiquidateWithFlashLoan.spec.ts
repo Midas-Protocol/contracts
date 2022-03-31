@@ -10,10 +10,9 @@ import {
   FuseSafeLiquidator,
   SimplePriceOracle,
 } from "../../typechain";
-import { cERC20Conf } from "../../src";
+import { cERC20Conf, ChainLiquidationConfig, Fuse, liquidationConfigDefaults } from "../../src";
 import { DeployedAsset } from "../utils/pool";
 import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
-import { ChainLiquidationConfig, Fuse, liquidationConfigDefaults } from "../../dist/cjs/src";
 
 (process.env.FORK_CHAIN_ID ? describe : describe.skip)("#safeLiquidateWithFlashLoan", () => {
   let tx: providers.TransactionResponse;
@@ -53,7 +52,6 @@ import { ChainLiquidationConfig, Fuse, liquidationConfigDefaults } from "../../d
     if (chainId === 1337) {
       await deployments.fixture();
     }
-
     const sdk = new Fuse(ethers.provider, Number(chainId));
 
     coingeckoId = chainId === 1337 ? "ethereum" : "binancecoin";

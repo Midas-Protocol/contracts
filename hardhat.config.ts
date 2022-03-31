@@ -137,10 +137,6 @@ const config: HardhatUserConfig = {
       url: "https://evmos-archive-testnet.api.bdnodes.net:8545",
     },
   },
-  typechain: {
-    outDir: "./typechain",
-    externalArtifacts: ["./out/*/**.json"],
-  },
 };
 
 export default config;
