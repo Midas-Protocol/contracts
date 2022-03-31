@@ -1,0 +1,45 @@
+FROM ethereum/solc:0.8.11-alpine as build-deps
+
+FROM rust:1.59 as builder
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+COPY foundry.toml ./
+COPY remappings.txt ./
+COPY .gitmodules ./
+COPY deployments.json ./
+COPY tsconfig*.json ./
+COPY lib/ ./lib
+COPY hardhat.config.ts ./
+COPY chainDeploy/ ./chainDeploy
+COPY deploy/ ./deploy
+COPY tasks/ ./tasks
+COPY test/ ./test
+COPY contracts/ ./contracts
+COPY src ./src
+
+
+RUN curl -L https://foundry.paradigm.xyz | bash
+RUN ls $HOME/.foundry
+RUN echo $(ls $HOME/.foundry/bin)
+
+RUN  /root/.foundry/bin/foundryup
+RUN  /root/.foundry/bin/forge install
+RUN  /root/.foundry/bin/forge build
+
+
+FROM node:16.13
+
+COPY --from=build-deps /usr/local/bin/solc /usr/bin/solc
+COPY --from=builder /usr/src/app /usr/src/app
+
+WORKDIR /usr/src/app
+
+RUN npm install -g npm && npm install --legacy-peer-deps
+
+RUN npm run typechain
+RUN npm run build:sdk
+
+
+ENTRYPOINT ["npx", "hardhat", "test"]
