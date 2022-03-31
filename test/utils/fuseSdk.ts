@@ -1,15 +1,16 @@
 import { ethers } from "hardhat";
 
-import Fuse from "../Fuse";
-import { ChainDeployment } from "../Fuse/types";
+import { Fuse } from "../../src";
+import { ChainDeployment } from "../../src/Fuse/types";
 
 let fuseSdk: Fuse;
 
 export const getOrCreateFuse = async (): Promise<Fuse> => {
   if (!fuseSdk) {
     const { chainId } = await ethers.provider.getNetwork();
+    let chainDeployment: ChainDeployment;
     if (chainId === 1337) {
-      const chainDeployment: ChainDeployment = {};
+      chainDeployment = {};
       const CErc20Delegate = await ethers.getContract("CErc20Delegate");
       chainDeployment.CErc20Delegate = { abi: CErc20Delegate.abi, address: CErc20Delegate.address };
       const CEtherDelegate = await ethers.getContract("CEtherDelegate");
@@ -47,7 +48,7 @@ export const getOrCreateFuse = async (): Promise<Fuse> => {
       const WhitePaperInterestRateModel = await ethers.getContract("WhitePaperInterestRateModel");
       chainDeployment.WhitePaperInterestRateModel = { abi: WhitePaperInterestRateModel.abi, address: WhitePaperInterestRateModel.address };
     }
-    fuseSdk = new Fuse(ethers.provider, chainId);
+    fuseSdk = new Fuse(ethers.provider, chainId, chainDeployment);
   }
   return fuseSdk;
 };
