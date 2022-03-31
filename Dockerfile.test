@@ -8,6 +8,7 @@ COPY package*.json ./
 COPY foundry.toml ./
 COPY remappings.txt ./
 COPY .gitmodules ./
+COPY .git ./
 COPY deployments.json ./
 COPY tsconfig*.json ./
 COPY lib/ ./lib
@@ -24,9 +25,13 @@ RUN curl -L https://foundry.paradigm.xyz | bash
 RUN ls $HOME/.foundry
 RUN echo $(ls $HOME/.foundry/bin)
 
-RUN  /root/.foundry/bin/foundryup
-RUN  /root/.foundry/bin/forge install
-RUN  /root/.foundry/bin/forge build
+RUN mv /root/.foundry/bin/foundryup /usr/bin/
+RUN  foundryup
+
+RUN mv /root/.foundry/bin/forge /usr/bin/
+
+RUN  forge install
+RUN  forge build
 
 
 FROM node:16.13
