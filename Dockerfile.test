@@ -49,6 +49,6 @@ RUN npm run build:sdk
 COPY docker/hh-test.sh .
 COPY docker/start-node.sh .
 
-RUN chmox +x start-node.sh hh-test.sh
+RUN chmod +x start-node.sh hh-test.sh
 
 ENTRYPOINT ["./hh-test.sh"]
