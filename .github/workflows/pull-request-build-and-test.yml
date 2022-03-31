@@ -41,7 +41,8 @@ jobs:
         with:
           node-version: 16.x
           cache: "npm"
-      - run: npm install && forge install
+      - run: npm install
+      - run: forge update
       - run: npm run build
       - name: Run hardhat tests
         run: npm run test:hardhat

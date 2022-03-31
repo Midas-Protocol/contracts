@@ -33066,7 +33066,7 @@
           ]
         },
         "Comptroller": {
-          "address": "0xe18d52C19336A1827621bcF5d15FfE61992e6C83",
+          "address": "0xFb8852484698172653eeF94887fDe2868857C9F8",
           "abi": [
             {
               "inputs": [
@@ -35240,7 +35240,7 @@
           ]
         },
         "FixedNativePriceOracle": {
-          "address": "0x51fff2CB4e154738faC8a98B6f0c2C710b0E106B",
+          "address": "0xaFA6C79856f6E57D8046B061C929A2ED91f62f29",
           "abi": [
             {
               "inputs": [
@@ -35283,7 +35283,7 @@
           ]
         },
         "FuseFeeDistributor": {
-          "address": "0xBB96aedc60A74398BA12E3c6d46EDF8819bf0CDB",
+          "address": "0xEa968e0aE7b45B6bd8d739510B658545b015761b",
           "abi": [
             {
               "anonymous": false,
@@ -35394,6 +35394,19 @@
             {
               "stateMutability": "payable",
               "type": "receive"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint8",
+                  "name": "version",
+                  "type": "uint8"
+                }
+              ],
+              "name": "Initialized",
+              "type": "event"
             },
             {
               "anonymous": false,
@@ -36079,8 +36092,21 @@
           ]
         },
         "FuseFeeDistributor_Implementation": {
-          "address": "0x1178561F37C43657c58993099AD27a1F6B7AE634",
+          "address": "0xEeC6bF34452a8B02Bd8aDf2bE4C11c1D0a3E5f26",
           "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint8",
+                  "name": "version",
+                  "type": "uint8"
+                }
+              ],
+              "name": "Initialized",
+              "type": "event"
+            },
             {
               "anonymous": false,
               "inputs": [
@@ -36748,7 +36774,7 @@
           ]
         },
         "FuseFeeDistributor_Proxy": {
-          "address": "0xBB96aedc60A74398BA12E3c6d46EDF8819bf0CDB",
+          "address": "0xEa968e0aE7b45B6bd8d739510B658545b015761b",
           "abi": [
             {
               "inputs": [
@@ -36884,7 +36910,7 @@
           ]
         },
         "FusePoolDirectory": {
-          "address": "0x8c78b7232Df89E88B8b1DA765e78970743fF6985",
+          "address": "0xda1134e088c1092760f2f1411ED0EB35fd8c19dc",
           "abi": [
             {
               "anonymous": false,
@@ -37013,6 +37039,19 @@
                 }
               ],
               "name": "AdminWhitelistUpdated",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint8",
+                  "name": "version",
+                  "type": "uint8"
+                }
+              ],
+              "name": "Initialized",
               "type": "event"
             },
             {
@@ -37604,7 +37643,7 @@
           ]
         },
         "FusePoolDirectory_Implementation": {
-          "address": "0xB9143C6de61046a45678284fc07D695573Fbd57B",
+          "address": "0x88D7466D5370480532CD79dE06871eb47AE5bdc2",
           "abi": [
             {
               "anonymous": false,
@@ -37623,6 +37662,19 @@
                 }
               ],
               "name": "AdminWhitelistUpdated",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint8",
+                  "name": "version",
+                  "type": "uint8"
+                }
+              ],
+              "name": "Initialized",
               "type": "event"
             },
             {
@@ -38193,7 +38245,7 @@
           ]
         },
         "FusePoolDirectory_Proxy": {
-          "address": "0x8c78b7232Df89E88B8b1DA765e78970743fF6985",
+          "address": "0xda1134e088c1092760f2f1411ED0EB35fd8c19dc",
           "abi": [
             {
               "inputs": [
@@ -38329,7 +38381,7 @@
           ]
         },
         "FusePoolLens": {
-          "address": "0x6FbB6b20C2bf88249f54F375D764681188cBbfA1",
+          "address": "0x3bb204b32b613f9Fb62D774862e220Ecbb151A2c",
           "abi": [
             {
               "anonymous": false,
@@ -38440,6 +38492,19 @@
             {
               "stateMutability": "payable",
               "type": "receive"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint8",
+                  "name": "version",
+                  "type": "uint8"
+                }
+              ],
+              "name": "Initialized",
+              "type": "event"
             },
             {
               "inputs": [],
@@ -39628,7 +39693,7 @@
           ]
         },
         "FusePoolLensSecondary": {
-          "address": "0xE3Cc757D968025591F099118287e3ec24791b3cE",
+          "address": "0x0548502fDD31d714d5b89AEaa9Bd83E526cf6695",
           "abi": [
             {
               "anonymous": false,
@@ -39739,6 +39804,19 @@
             {
               "stateMutability": "payable",
               "type": "receive"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint8",
+                  "name": "version",
+                  "type": "uint8"
+                }
+              ],
+              "name": "Initialized",
+              "type": "event"
             },
             {
               "inputs": [],
@@ -40045,8 +40123,21 @@
           ]
         },
         "FusePoolLensSecondary_Implementation": {
-          "address": "0xB4Ec941e679f8999E81dA6981AB63644c3e121a4",
+          "address": "0x1353639BD18150Fe1922c897e6D973990aC18356",
           "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint8",
+                  "name": "version",
+                  "type": "uint8"
+                }
+              ],
+              "name": "Initialized",
+              "type": "event"
+            },
             {
               "inputs": [],
               "name": "directory",
@@ -40331,7 +40422,7 @@
           ]
         },
         "FusePoolLensSecondary_Proxy": {
-          "address": "0xE3Cc757D968025591F099118287e3ec24791b3cE",
+          "address": "0x0548502fDD31d714d5b89AEaa9Bd83E526cf6695",
           "abi": [
             {
               "inputs": [
@@ -40467,8 +40558,21 @@
           ]
         },
         "FusePoolLens_Implementation": {
-          "address": "0x304aE46f7402C3D2B0cC02777d8D23c1927e2681",
+          "address": "0x74d9cd36B9e4189bD87f9681936017FcA132DEdF",
           "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint8",
+                  "name": "version",
+                  "type": "uint8"
+                }
+              ],
+              "name": "Initialized",
+              "type": "event"
+            },
             {
               "inputs": [],
               "name": "directory",
@@ -41635,7 +41739,7 @@
           ]
         },
         "FusePoolLens_Proxy": {
-          "address": "0x6FbB6b20C2bf88249f54F375D764681188cBbfA1",
+          "address": "0x3bb204b32b613f9Fb62D774862e220Ecbb151A2c",
           "abi": [
             {
               "inputs": [
@@ -41771,7 +41875,7 @@
           ]
         },
         "FuseSafeLiquidator": {
-          "address": "0x6AB57EEE830040f4B53aCf563B1a23C79377Ae83",
+          "address": "0x4500349C24c88E5c54bA90236a90E2Ed06Cc2b8E",
           "abi": [
             {
               "anonymous": false,
@@ -41882,6 +41986,19 @@
             {
               "stateMutability": "payable",
               "type": "receive"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint8",
+                  "name": "version",
+                  "type": "uint8"
+                }
+              ],
+              "name": "Initialized",
+              "type": "event"
             },
             {
               "inputs": [],
@@ -42359,8 +42476,21 @@
           ]
         },
         "FuseSafeLiquidator_Implementation": {
-          "address": "0x015af2064245045D9afc80dCE2b2807141cD79C1",
+          "address": "0xe8e4bA3146f7b54Abb6f479C2F5eb0B4cEA06397",
           "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint8",
+                  "name": "version",
+                  "type": "uint8"
+                }
+              ],
+              "name": "Initialized",
+              "type": "event"
+            },
             {
               "inputs": [],
               "name": "BTC_TOKEN",
@@ -42820,7 +42950,7 @@
           ]
         },
         "FuseSafeLiquidator_Proxy": {
-          "address": "0x6AB57EEE830040f4B53aCf563B1a23C79377Ae83",
+          "address": "0x4500349C24c88E5c54bA90236a90E2Ed06Cc2b8E",
           "abi": [
             {
               "inputs": [
@@ -43235,8 +43365,21 @@
           ]
         },
         "MasterPriceOracle": {
-          "address": "0x1992f253447558626f4bbdc1f64Fe06e07De0c70",
+          "address": "0xD832551c5cb481c692656869F811eFA76FE81091",
           "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint8",
+                  "name": "version",
+                  "type": "uint8"
+                }
+              ],
+              "name": "Initialized",
+              "type": "event"
+            },
             {
               "anonymous": false,
               "inputs": [
