@@ -2,4 +2,4 @@
 
 set -e
 
-npx hardhat test:bsc
+npm run test:bsc

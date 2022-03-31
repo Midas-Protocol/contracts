@@ -11,20 +11,6 @@ on:
       - development
 
 jobs:
-  # e2e-liquidation-tests:
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     ETHEREUM_ADMIN_ACCOUNT: "${{ secrets.ETHEREUM_ADMIN_ACCOUNT }}"
-  #     ETHEREUM_ADMIN_PRIVATE_KEY: "${{ secrets.ETHEREUM_ADMIN_PRIVATE_KEY }}"
-  #     MNEMONIC: "${{ secrets.MNEMONIC }}"
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - run: |
-  #         docker pull ghcr.io/midas-protocol/fuse-liquidator-bot:main
-  #         docker-compose up --build -d liquidation-bot e2e && \
-  #         docker-compose run verify-liquidations && \
-  #         docker-compose down
-
   build-and-test-local:
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
@@ -42,6 +28,7 @@ jobs:
 
       - name: Run tests
         run: docker run -t --env MNEMONIC="${MNEMONIC}" --entrypoint "./hh-test.sh" contracts
+
       - name: Install Foundry
         uses: onbjerg/foundry-toolchain@v1
         with:
@@ -49,6 +36,12 @@ jobs:
 
       - name: Install Forge dependencies
         run: forge install
+
+      - name: Install NPM packages
+        run: npm install
+
+      - name: Run build
+        run: npm run build
 
       - name: Run forge tests
         run: npm run test:forge
@@ -63,10 +56,14 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+
+      - name: Build Dockerfile for tests
+        run: docker build -t contracts -f Dockerfile.test .
+
+      - name: Run tests
+        run: docker run -t --env MNEMONIC="${MNEMONIC}" --env FORK_URL_BSC="${FORK_URL_BSC}" --entrypoint "./hh-bsc-test.sh" contracts
 
       - name: Install Forge dependencies
         run: forge install
@@ -81,9 +78,6 @@ jobs:
 
       - name: Run build
         run: npm run build
-
-      - name: Run hardhat tests on BSC
-        run: npm run test:bsc
 
       - name: Run forge tests on BSC
         run: npm run test:forge:bsc
