@@ -5,8 +5,11 @@ import { createPool, setUpPriceOraclePrices } from "./utils";
 import { assetInPool, deployAssets, getPoolAssets, getPoolIndex } from "./utils/pool";
 import { Fuse, USDPricedFuseAsset } from "../src";
 import { chainDeployConfig } from "../chainDeploy";
+import { getOrCreateFuse } from "./utils/fuseSdk";
 
 describe("Deposit flow tests", function () {
+  let sdk: Fuse;
+
   this.beforeEach(async () => {
     const { chainId } = await ethers.provider.getNetwork();
     if (chainId === 1337) {
@@ -21,8 +24,7 @@ describe("Deposit flow tests", function () {
     beforeEach(async () => {
       this.timeout(120_000);
       const { bob } = await ethers.getNamedSigners();
-      const { chainId } = await ethers.provider.getNetwork();
-      const sdk = new Fuse(ethers.provider, chainId);
+      sdk = await getOrCreateFuse();
       [poolAddress] = await createPool({});
       const assets = await getPoolAssets(poolAddress, sdk.contracts.FuseFeeDistributor.address);
       await deployAssets(assets.assets, bob);
@@ -36,8 +38,6 @@ describe("Deposit flow tests", function () {
       let ethAssetAfterBorrow: USDPricedFuseAsset;
       const { bob } = await ethers.getNamedSigners();
       const { chainId } = await ethers.provider.getNetwork();
-
-      const sdk = new Fuse(ethers.provider, chainId);
 
       const poolId = (await getPoolIndex(poolAddress, sdk)).toString();
       const assetsInPool = await sdk.fetchFusePoolData(poolId);

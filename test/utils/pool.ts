@@ -5,6 +5,7 @@ import { ethers, getChainId } from "hardhat";
 
 import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../src";
 import { getAssetsConf } from "./assets";
+import { getOrCreateFuse } from "./fuseSdk";
 
 interface PoolCreationParams {
   closeFactor?: number;
@@ -25,8 +26,7 @@ export async function createPool({
   priceOracleAddress = null,
   signer = null,
 }: PoolCreationParams) {
-  const { chainId } = await ethers.provider.getNetwork();
-  const sdk = new Fuse(ethers.provider, chainId);
+  const sdk = await getOrCreateFuse();
 
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
@@ -71,7 +71,7 @@ export async function deployAssets(assets: cERC20Conf[], signer?: SignerWithAddr
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
   }
-  const sdk = new Fuse(ethers.provider, chainId);
+  const sdk = await getOrCreateFuse();
 
   const deployed: DeployedAsset[] = [];
   for (const assetConf of assets) {
@@ -103,8 +103,7 @@ export async function getPoolAssets(
   fuseFeeDistributor: string,
   interestRateModelAddress?: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> {
-  const chainId = await getChainId();
-  const sdk = new Fuse(ethers.provider, Number(chainId));
+  const sdk = await getOrCreateFuse();
 
   if (!interestRateModelAddress) {
     interestRateModelAddress = sdk.irms.JumpRateModel.address;

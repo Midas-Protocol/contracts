@@ -102,15 +102,20 @@ export class FuseBase {
   public artifacts: Artifacts;
   public irms: IrmConfig;
 
-  constructor(web3Provider: JsonRpcProvider | Web3Provider, chainId: SupportedChains) {
+  constructor(
+    web3Provider: JsonRpcProvider | Web3Provider,
+    chainId: SupportedChains,
+    chainDeployment?: ChainDeployment
+  ) {
     this.provider = web3Provider;
     this.chainId = chainId;
     this.availableOracles = chainOracles[chainId];
     this.chainDeployment =
-      Deployments[chainId.toString()] &&
-      Deployments[chainId.toString()][Object.keys(Deployments[chainId.toString()])[0]]?.contracts;
+      chainDeployment ??
+      (Deployments[chainId.toString()] &&
+        Deployments[chainId.toString()][Object.keys(Deployments[chainId.toString()])[0]]?.contracts);
     if (!this.chainDeployment) {
-      throw new Error(`Chain deployment not found for chainId ${chainId}`);
+      throw new Error(`Chain deployment not found or provided for chainId ${chainId}`);
     }
     this.WhitePaperRateModelConf = WHITE_PAPER_RATE_MODEL_CONF(chainId);
     this.JumpRateModelConf = JUMP_RATE_MODEL_CONF(chainId);

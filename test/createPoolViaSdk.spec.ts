@@ -6,14 +6,18 @@ import { DeployedAsset, poolAssets } from "./utils/pool";
 import { utils } from "ethers";
 import { MasterPriceOracle } from "../typechain/MasterPriceOracle";
 import { setUpPriceOraclePrices } from "./utils";
+import { getOrCreateFuse } from "./utils/fuseSdk";
 
 use(solidity);
 
 describe("FusePoolDirectory", function () {
+  let sdk: Fuse;
+
   this.beforeEach(async () => {
     const { chainId } = await ethers.provider.getNetwork();
     if (chainId === 1337) {
       await deployments.fixture();
+      sdk = await getOrCreateFuse();
     }
     await setUpPriceOraclePrices();
   });
@@ -25,7 +29,6 @@ describe("FusePoolDirectory", function () {
       const { bob } = await ethers.getNamedSigners();
       const { chainId } = await ethers.provider.getNetwork();
 
-      const sdk = new Fuse(ethers.provider, chainId);
       const mpo = (await ethers.getContractAt(
         "MasterPriceOracle",
         sdk.oracles.MasterPriceOracle.address,
