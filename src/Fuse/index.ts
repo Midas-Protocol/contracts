@@ -110,6 +110,7 @@ export class FuseBase {
     this.provider = web3Provider;
     this.chainId = chainId;
     this.availableOracles = chainOracles[chainId];
+    console.log('this.chainDeployment: ', this.chainDeployment);
     this.chainDeployment =
       chainDeployment ??
       (Deployments[chainId.toString()] &&
