@@ -12,8 +12,8 @@ import CTokenInterfacesArtifact from "../../artifacts/contracts/compound/CTokenI
 import DAIInterestRateModelV2Artifact from "../../artifacts/contracts/compound/DAIInterestRateModelV2.sol/DAIInterestRateModelV2.json";
 import EIP20InterfaceArtifact from "../../artifacts/contracts/compound/EIP20Interface.sol/EIP20Interface.json";
 import JumpRateModelArtifact from "../../artifacts/contracts/compound/JumpRateModel.sol/JumpRateModel.json";
-import RewardsDistributorDelegatorArtifact from "../../artifacts/contracts/compound/RewardsDistributorDelegator.sol/RewardsDistributorDelegator.json";
 import RewardsDistributorDelegateArtifact from "../../artifacts/contracts/compound/RewardsDistributorDelegate.sol/RewardsDistributorDelegate.json";
+import RewardsDistributorDelegatorArtifact from "../../artifacts/contracts/compound/RewardsDistributorDelegator.sol/RewardsDistributorDelegator.json";
 import UnitrollerArtifact from "../../artifacts/contracts/compound/Unitroller.sol/Unitroller.json";
 import WhitePaperInterestRateModelArtifact from "../../artifacts/contracts/compound/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json";
 import FuseFlywheelCoreArtifact from "../../artifacts/contracts/flywheel/fuse-compatibility/FuseFlywheelCore.sol/FuseFlywheelCore.json";
@@ -32,6 +32,7 @@ import { FusePoolLens } from "../../typechain/FusePoolLens";
 import { FusePoolLensSecondary } from "../../typechain/FusePoolLensSecondary";
 import { FuseSafeLiquidator } from "../../typechain/FuseSafeLiquidator";
 import { withFlywheel } from "../modules/Flywheel";
+import { withFundOperations } from "../modules/FundOperations";
 import { withFusePoolLens } from "../modules/FusePoolLens";
 import { withSafeLiquidator } from "../modules/liquidation/SafeLiquidator";
 import { withRewardsDistributor } from "../modules/RewardsDistributor";
@@ -1106,5 +1107,8 @@ export class FuseBase {
   }
 }
 
-const FuseBaseWithModules = withFlywheel(withFusePoolLens(withRewardsDistributor(withSafeLiquidator(FuseBase))));
+c;
+const FuseBaseWithModules = withFlywheel(
+  withFusePoolLens(withRewardsDistributor(withFundOperations(withSafeLiquidator(FuseBase))))
+);
 export default class Fuse extends FuseBaseWithModules {}
