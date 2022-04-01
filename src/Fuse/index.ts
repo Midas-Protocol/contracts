@@ -13,6 +13,7 @@ import DAIInterestRateModelV2Artifact from "../../artifacts/contracts/compound/D
 import EIP20InterfaceArtifact from "../../artifacts/contracts/compound/EIP20Interface.sol/EIP20Interface.json";
 import JumpRateModelArtifact from "../../artifacts/contracts/compound/JumpRateModel.sol/JumpRateModel.json";
 import RewardsDistributorDelegatorArtifact from "../../artifacts/contracts/compound/RewardsDistributorDelegator.sol/RewardsDistributorDelegator.json";
+import RewardsDistributorDelegateArtifact from "../../artifacts/contracts/compound/RewardsDistributorDelegate.sol/RewardsDistributorDelegate.json";
 import UnitrollerArtifact from "../../artifacts/contracts/compound/Unitroller.sol/Unitroller.json";
 import WhitePaperInterestRateModelArtifact from "../../artifacts/contracts/compound/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json";
 import FuseFlywheelCoreArtifact from "../../artifacts/contracts/flywheel/fuse-compatibility/FuseFlywheelCore.sol/FuseFlywheelCore.json";
@@ -162,6 +163,7 @@ export class FuseBase {
       MasterPriceOracle: MasterPriceOracleArtifact,
       PreferredPriceOracle: PreferredPriceOracleArtifact,
       RewardsDistributorDelegator: RewardsDistributorDelegatorArtifact,
+      RewardsDistributorDelegate: RewardsDistributorDelegateArtifact,
       SimplePriceOracle: SimplePriceOracleArtifact,
       Unitroller: UnitrollerArtifact,
       WhitePaperInterestRateModel: WhitePaperInterestRateModelArtifact,
