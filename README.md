@@ -87,7 +87,7 @@ Then, your tests should pass (assuming no other failures)
 
 ### Running BSC mainnet fork locally
 
-1. Add env vars in .env <a name="envvars"></a>
+1. Add env vars in .env
 
 `.env`
 ```
@@ -168,7 +168,7 @@ npm run test:forge:bsc
 
 ## Simulating a prod deploy
 
-1. [Add env vars in .env][#envvars]
+1. Add the chain-specific env vars in .env
 
 2. Then run
 
