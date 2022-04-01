@@ -54,7 +54,7 @@ import { getOrCreateFuse } from "./utils/fuseSdk";
     poolName = "liquidation - fee sizing" + Math.random().toString();
     ({ chainId } = await ethers.provider.getNetwork());
     if (chainId === 1337) {
-      await deployments.fixture();
+      await deployments.fixture("prod");
       sdk = await getOrCreateFuse();
     }
     await setUpPriceOraclePrices();

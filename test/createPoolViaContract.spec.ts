@@ -21,14 +21,14 @@ describe("FusePoolDirectory", function () {
   this.beforeEach(async () => {
     const { chainId } = await ethers.provider.getNetwork();
     if (chainId === 1337) {
-      await deployments.fixture();
+      await deployments.fixture("prod");
       sdk = await getOrCreateFuse();
     }
     await setUpPriceOraclePrices();
   });
 
   describe("Deploy pool", async function () {
-    it("should deploy the pool via contract", async function () {
+    it.only("should deploy the pool via contract", async function () {
       this.timeout(120_000);
       const { alice } = await ethers.getNamedSigners();
       console.log("alice: ", alice.address);

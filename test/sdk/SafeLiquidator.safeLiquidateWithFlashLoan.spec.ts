@@ -50,7 +50,7 @@ import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
     poolName = "liquidation - fl - " + Math.random().toString();
     ({ chainId } = await ethers.provider.getNetwork());
     if (chainId === 1337) {
-      await deployments.fixture();
+      await deployments.fixture("prod");
     }
     const sdk = new Fuse(ethers.provider, Number(chainId));
 

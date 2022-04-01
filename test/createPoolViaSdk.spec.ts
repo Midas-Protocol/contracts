@@ -16,7 +16,7 @@ describe("FusePoolDirectory", function () {
   this.beforeEach(async () => {
     const { chainId } = await ethers.provider.getNetwork();
     if (chainId === 1337) {
-      await deployments.fixture();
+      await deployments.fixture("prod");
       sdk = await getOrCreateFuse();
     }
     await setUpPriceOraclePrices();
@@ -27,7 +27,6 @@ describe("FusePoolDirectory", function () {
       this.timeout(120_000);
       const POOL_NAME = "TEST_BOB";
       const { bob } = await ethers.getNamedSigners();
-      const { chainId } = await ethers.provider.getNetwork();
 
       const mpo = (await ethers.getContractAt(
         "MasterPriceOracle",
