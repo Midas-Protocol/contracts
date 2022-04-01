@@ -178,7 +178,7 @@ describe("#SafeLiquidator", () => {
     await tx.wait();
   });
 
-  it.only("should retrieve & liquidate positions for a token borrow for token collateral", async function () {
+  it("should retrieve & liquidate positions for a token borrow for token collateral", async function () {
     const { alice, bob, rando } = await ethers.getNamedSigners();
     console.log("staring with prices: ", utils.formatEther(erc20OneOriginalUnderlyingPrice));
 

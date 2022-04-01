@@ -161,7 +161,7 @@ import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
     await tx.wait();
   });
 
-  it.only("FL - should liquidate a token borrow for token collateral", async function () {
+  it("FL - should liquidate a token borrow for token collateral", async function () {
     const { alice, bob } = await ethers.getNamedSigners();
     console.log(
       "staring with prices: ",
