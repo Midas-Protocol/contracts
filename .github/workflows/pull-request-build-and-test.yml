@@ -11,20 +11,6 @@ on:
       - development
 
 jobs:
-  # e2e-liquidation-tests:
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     ETHEREUM_ADMIN_ACCOUNT: "${{ secrets.ETHEREUM_ADMIN_ACCOUNT }}"
-  #     ETHEREUM_ADMIN_PRIVATE_KEY: "${{ secrets.ETHEREUM_ADMIN_PRIVATE_KEY }}"
-  #     MNEMONIC: "${{ secrets.MNEMONIC }}"
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - run: |
-  #         docker pull ghcr.io/midas-protocol/fuse-liquidator-bot:main
-  #         docker-compose up --build -d liquidation-bot e2e && \
-  #         docker-compose run verify-liquidations && \
-  #         docker-compose down
-
   build-and-test-local:
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
@@ -34,30 +20,30 @@ jobs:
         with:
           submodules: recursive
 
-     - name: Install Foundry
-       uses: onbjerg/foundry-toolchain@v1
-       with:
-         version: nightly
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
 
-     - name: Install Forge dependencies
-       run: forge install
+      - name: Install Forge dependencies
+        run: forge install
 
-     - uses: actions/setup-node@v2
-       with:
-         node-version: 16.x
-         cache: "npm"
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: "npm"
 
-     - name: Install NPM packages
-       run: npm install
+      - name: Install NPM packages
+        run: npm install
 
-     - name: Run build
-       run: npm run build
+      - name: Run build
+        run: npm run build
 
-     - name: Run hardhat tests
-       run: npm run test
+      - name: Run hardhat tests
+        run: npm run test
 
-     - name: Run forge tests
-       run: npm run test:forge
+      - name: Run forge tests
+        run: npm run test:forge
 
   build-and-test-bsc:
     env:
