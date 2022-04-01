@@ -39,9 +39,7 @@ export async function addCollateral(
   let amountBN: BigNumber;
   let cToken: Contract;
 
-  const { chainId } = await ethers.provider.getNetwork();
-
-  const sdk = new Fuse(ethers.provider, chainId);
+  const sdk = await getOrCreateFuse();
 
   const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol, cgId);
 
