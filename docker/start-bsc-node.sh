@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 set -e
 
-npm run deploy:simulate:bsc:mainnet
+FORK_URL=${FORK_URL_BSC} FORK_BLOCK_NUMBER=16281867 FORK_CHAIN_ID=56 npx hardhat node

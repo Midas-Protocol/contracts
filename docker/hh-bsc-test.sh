@@ -1,5 +1,6 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 set -e
 
-npm run test:bsc
+sleep 15
+FORK_URL=${FORK_URL_BSC} FORK_BLOCK_NUMBER=16281867 FORK_CHAIN_ID=56 npx hardhat test --network localhost
