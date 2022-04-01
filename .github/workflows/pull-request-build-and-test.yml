@@ -34,6 +34,10 @@ jobs:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
       - name: Install Foundry
         uses: onbjerg/foundry-toolchain@v1
         with:
@@ -96,15 +100,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
-
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-        continue-on-error: true
-
-      - name: Build Dockerfile for tests
-        run: docker build -t contracts -f Dockerfile.test .
-
-      - name: Run tests
-        run: docker-compose run bsc-tests
 
       - name: Install Forge dependencies
         run: forge install

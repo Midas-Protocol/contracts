@@ -7,13 +7,14 @@ services:
       - MNEMONIC=${MNEMONIC}
       - FORK_URL_BSC=${FORK_URL_BSC}
       - FORK_CHAIN_ID=56
+      - FORK_BLOCK_NUMBER=${FORK_BLOCK_NUMBER}
     build:
       dockerfile: Dockerfile.test
       context: .
-    entrypoint: ./start-node.sh
+    entrypoint: ./start-bsc-node.sh
     ports:
       - "8545:8545"
-    network_mode: host
+#    network_mode: host
   bsc-tests:
     depends_on:
       - hardhat
@@ -22,6 +23,7 @@ services:
       - ETH_PROVIDER_URL=http://0.0.0.0:8545
       - MNEMONIC=${MNEMONIC}
       - FORK_URL_BSC=${FORK_URL_BSC}
+      - FORK_BLOCK_NUMBER=${FORK_BLOCK_NUMBER}
       - FORK_CHAIN_ID=56
     build:
       dockerfile: Dockerfile.test

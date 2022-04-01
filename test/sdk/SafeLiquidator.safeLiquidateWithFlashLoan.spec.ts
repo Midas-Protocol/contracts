@@ -49,9 +49,9 @@ import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
   beforeEach(async () => {
     poolName = "liquidation - fl - " + Math.random().toString();
     ({ chainId } = await ethers.provider.getNetwork());
-    if (chainId === 1337) {
-      await deployments.fixture();
-    }
+    // if (chainId === 1337) {
+    await deployments.fixture("simulate");
+    // }
     const sdk = new Fuse(ethers.provider, Number(chainId));
 
     coingeckoId = chainId === 1337 ? "ethereum" : "binancecoin";
