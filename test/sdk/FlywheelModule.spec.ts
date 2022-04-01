@@ -8,7 +8,7 @@ import * as poolHelpers from "../utils/pool";
 import * as timeHelpers from "../utils/time";
 import { constants } from "ethers";
 
-describe("FlywheelModule", function () {
+describe.only("FlywheelModule", function () {
   let poolAAddress: string;
   let poolBAddress: string;
   let sdk: Fuse;
@@ -53,7 +53,7 @@ describe("FlywheelModule", function () {
     }
   });
 
-  it("1 Pool, 1 Flywheel", async function () {
+  it.only("1 Pool, 1 Flywheel", async function () {
     const { deployer, alice } = await ethers.getNamedSigners();
     const rewardToken = erc20OneUnderlying;
     const market = erc20OneCToken;
@@ -82,29 +82,30 @@ describe("FlywheelModule", function () {
     expect(await erc20TwoCToken.functions.totalSupply()).to.not.eq(0);
 
     // Setup Rewards, enable and set RewardInfo
+    const rewardsPerSecond = ethers.utils.parseUnits("0.000001", 18);
     await sdk.addMarketForRewardsToFlywheelCore(fwCore.address, market.address, { from: deployer.address });
     await sdk.setStaticRewardInfo(
       fwStaticRewards.address,
       market.address,
       {
         rewardsEndTimestamp: 0,
-        rewardsPerSecond: ethers.utils.parseUnits("0.000001", 18),
+        rewardsPerSecond,
       },
       { from: deployer.address }
     );
 
-    // Setup Rewards, enable and set RewardInfo
+    expect((await fwStaticRewards.rewardsInfo(market.address)).rewardsPerSecond).to.eq(rewardsPerSecond);
     await sdk.addMarketForRewardsToFlywheelCore(fwCore.address, marketTwo.address, { from: deployer.address });
     await sdk.setStaticRewardInfo(
       fwStaticRewards.address,
       marketTwo.address,
       {
         rewardsEndTimestamp: 0,
-        rewardsPerSecond: ethers.utils.parseUnits("0.000002", 18),
+        rewardsPerSecond: rewardsPerSecond,
       },
       { from: deployer.address }
     );
-    console.log("Setup RewardInfo ✅");
+    expect((await fwStaticRewards.rewardsInfo(marketTwo.address)).rewardsPerSecond).to.eq(rewardsPerSecond);
 
     await timeHelpers.advanceDays(1);
 
@@ -124,8 +125,14 @@ describe("FlywheelModule", function () {
       from: alice.address,
     });
     console.dir({ claimableRewardsForPool }, { depth: null });
-    const rds = await sdk.getRewardsDistributorsByPool(poolAAddress, { from: alice.address });
-    console.log({ rds });
+
+    const infos = await sdk.getFlywheelRewardsInfos(fwCore.address, { from: deployer.address });
+    console.dir({ infos }, { depth: null });
+
+    const singleMarketInfo = await sdk.getFlywheelRewardsInfoForMarket(fwCore.address, market.address, {
+      from: deployer.address,
+    });
+    console.log({ singleMarketInfo });
   });
 
   it("1 Pool, 1 Flywheel, 1 Reward Distributor", async function () {

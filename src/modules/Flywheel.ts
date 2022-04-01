@@ -176,6 +176,36 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
       );
     }
 
+    async getFlywheelRewardsInfos(flywheelAddress: string, options: { from: string }) {
+      const flywheelCoreInstance = this.getFlywheelCoreInstance(flywheelAddress, options);
+      const [fwStaticAddress, enabledMarkets] = await Promise.all([
+        flywheelCoreInstance.callStatic.flywheelRewards(options),
+        flywheelCoreInstance.callStatic.getAllStrategies(options),
+      ]);
+      const fwStatic = this.getStaticRewardsInstance(fwStaticAddress, options);
+      const rewardsInfos = {};
+      await Promise.all(
+        enabledMarkets.map(async (m) => {
+          rewardsInfos[m] = await fwStatic.callStatic.rewardsInfo(m);
+        })
+      );
+      return rewardsInfos;
+    }
+
+    async getFlywheelRewardsInfoForMarket(flywheelAddress: string, marketAddress: string, options: { from: string }) {
+      const fwCoreInstance = this.getFlywheelCoreInstance(flywheelAddress, options);
+      const fwRewardsAddress = await fwCoreInstance.callStatic.flywheelRewards(options);
+      const fwRewardsInstance = this.getStaticRewardsInstance(fwRewardsAddress, options);
+      const [marketState, rewardsInfo] = await Promise.all([
+        await fwCoreInstance.callStatic.marketState(marketAddress, options),
+        fwRewardsInstance.callStatic.rewardsInfo(marketAddress, options),
+      ]);
+      return {
+        enabled: marketState.lastUpdatedTimestamp > 0,
+        ...rewardsInfo,
+      };
+    }
+
     async getFlywheelsByPool(poolAddress: string, options: { from: string }) {
       const comptrollerInstance = this.getComptrollerInstance(poolAddress, options);
       const allRewardDistributors = await comptrollerInstance.callStatic.getRewardsDistributors(options);
@@ -190,7 +220,7 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
       const filterList = await Promise.all(
         instances.map(async (instance) => {
           try {
-            return await instance.isFlywheel();
+            return await instance.callStatic.isFlywheel(options);
           } catch (error) {
             return false;
           }
@@ -218,24 +248,21 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
 
     async #createMarketRewards(pool: string, options: { from: string }): Promise<FlywheelMarketReward[]> {
       const comptroller = await this.getComptrollerInstance(pool, options);
-      const allMarketsOfPool = await comptroller.getAllMarkets();
-      const allFlywheelsOfPool = (await comptroller.getRewardsDistributors()).map((fw) =>
-        this.getFlywheelCoreInstance(fw, options)
-      );
+      const allMarketsOfPool = await comptroller.callStatic.getAllMarkets(options);
+      const allFlywheelsOfPool = await this.getFlywheelsByPool(pool, options);
 
       const marketRewards: FlywheelMarketReward[] = [];
       for (const market of allMarketsOfPool) {
         const supplyRewards: FlywheelMarketReward["supplyRewards"] = [];
         for (const flywheel of allFlywheelsOfPool) {
           // Make sure Market is added to the flywheel
-          console.dir({ flywheel });
-          const marketState = await flywheel.marketState(market);
+          const marketState = await flywheel.callStatic.marketState(market, options);
           if (marketState.lastUpdatedTimestamp > 0) {
             // Get Rewards and only add if greater than 0
-            const rewards = this.getStaticRewardsInstance(await flywheel.flywheelRewards(), options);
-            const rewardsInfoForMarket = await rewards.rewardsInfo(market);
+            const rewards = this.getStaticRewardsInstance(await flywheel.callStatic.flywheelRewards(options), options);
+            const rewardsInfoForMarket = await rewards.rewardsInfo(market, options);
             if (rewardsInfoForMarket.rewardsPerSecond.gt(0)) {
-              const rewardToken = await rewards.rewardToken();
+              const rewardToken = await rewards.rewardToken(options);
               supplyRewards.push({
                 distributor: flywheel.address,
                 rewardToken,
