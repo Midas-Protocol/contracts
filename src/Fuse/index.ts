@@ -1107,7 +1107,6 @@ export class FuseBase {
   }
 }
 
-c;
 const FuseBaseWithModules = withFlywheel(
   withFusePoolLens(withRewardsDistributor(withFundOperations(withSafeLiquidator(FuseBase))))
 );
