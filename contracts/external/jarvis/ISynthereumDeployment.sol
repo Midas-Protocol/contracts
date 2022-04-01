@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20Upgradeable} from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "./ISynthereumFinder.sol";
 
 /**
@@ -24,13 +24,13 @@ interface ISynthereumDeployment {
    * @notice Get the collateral token of this pool/self-minting derivative
    * @return collateralCurrency The ERC20 collateral token
    */
-  function collateralToken() external view returns (IERC20 collateralCurrency);
+  function collateralToken() external view returns (IERC20Upgradeable collateralCurrency);
 
   /**
    * @notice Get the synthetic token associated to this pool/self-minting derivative
    * @return syntheticCurrency The ERC20 synthetic token
    */
-  function syntheticToken() external view returns (IERC20 syntheticCurrency);
+  function syntheticToken() external view returns (IERC20Upgradeable syntheticCurrency);
 
   /**
    * @notice Get the synthetic token symbol associated to this pool/self-minting derivative

@@ -11,20 +11,6 @@ on:
       - development
 
 jobs:
-  # e2e-liquidation-tests:
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     ETHEREUM_ADMIN_ACCOUNT: "${{ secrets.ETHEREUM_ADMIN_ACCOUNT }}"
-  #     ETHEREUM_ADMIN_PRIVATE_KEY: "${{ secrets.ETHEREUM_ADMIN_PRIVATE_KEY }}"
-  #     MNEMONIC: "${{ secrets.MNEMONIC }}"
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - run: |
-  #         docker pull ghcr.io/midas-protocol/fuse-liquidator-bot:main
-  #         docker-compose up --build -d liquidation-bot e2e && \
-  #         docker-compose run verify-liquidations && \
-  #         docker-compose down
-
   build-and-test-local:
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
@@ -33,18 +19,39 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
+
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+
+      - name: Build Dockerfile for tests
+        run: docker build -t contracts -f Dockerfile.test .
+
+      - name: Run tests
+        run: docker run -t --env MNEMONIC="${MNEMONIC}" --entrypoint "./hh-test.sh" contracts
+
+  build-and-test-local-forge:
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
       - name: Install Foundry
         uses: onbjerg/foundry-toolchain@v1
         with:
           version: nightly
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-      - run: npm install
-      - run: npm run build
-      - name: Run hardhat tests
-        run: npm run test:hardhat
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - name: Install NPM packages
+        run: npm install
+
+      - name: Run build
+        run: npm run build
+
       - name: Run forge tests
         run: npm run test:forge
 
@@ -57,17 +64,61 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
+
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+
+      - name: Build Dockerfile for tests
+        run: docker build -t contracts -f Dockerfile.test .
+
+      - name: Run tests
+        run: docker-compose run --rm bsc-tests
+
+      - name: Install Forge dependencies
+        run: forge install
+
       - uses: actions/setup-node@v2
         with:
           node-version: 16.x
           cache: "npm"
-      - run: npm install
-      - run: npm run build
-      - name: Run hardhat tests on BSC
-        run: npm run test:bsc
+
+      - name: Install NPM packages
+        run: npm install
+
+      - name: Run build
+        run: npm run build
+
+      - name: Run forge tests on BSC
+        run: npm run test:forge:bsc
+
+  build-and-test-bsc-forge:
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: "npm"
+
+      - name: Install NPM packages
+        run: npm install
+
+      - name: Run build
+        run: npm run build
+
       - name: Run forge tests on BSC
         run: npm run test:forge:bsc

@@ -1,9 +1,9 @@
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20Upgradeable} from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-interface IXBomb is IERC20 {
-  function reward() external view returns (IERC20);
+interface IXBomb is IERC20Upgradeable {
+  function reward() external view returns (IERC20Upgradeable);
 
   function leave(uint256 _share) external;
 

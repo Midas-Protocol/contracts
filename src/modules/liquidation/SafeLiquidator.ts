@@ -9,7 +9,7 @@ import liquidateUnhealthyBorrows from "./liquidateUnhealthyBorrows";
 
 export function withSafeLiquidator<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class SafeLiquidator extends Base {
-    public chainLiquidationConfig: ChainLiquidationConfig = getChainLiquidationConfig(this.chainId);
+    public chainLiquidationConfig: ChainLiquidationConfig = getChainLiquidationConfig(this);
 
     async getPotentialLiquidations(
       supportedComptrollers: Array<string> = [],

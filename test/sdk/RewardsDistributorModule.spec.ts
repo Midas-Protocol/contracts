@@ -22,9 +22,9 @@ describe.skip("RewardsDistributorModule", function () {
 
   this.beforeEach(async () => {
     ({ chainId } = await ethers.provider.getNetwork());
-    if (chainId === 1337) {
-      await deployments.fixture();
-    }
+    // if (chainId === 1337) {
+    await deployments.fixture();
+    // }
     await setUpPriceOraclePrices();
     const { deployer } = await ethers.getNamedSigners();
 

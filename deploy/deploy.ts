@@ -51,13 +51,14 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   console.log("FuseFeeDistributor pool limits set", tx.hash);
 
   dep = await deployments.deterministic("Comptroller", {
+    contract: "Comptroller.sol:Comptroller",
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [ffd.address],
     log: true,
   });
   const comp = await dep.deploy();
-  console.log("Comptroller: ", comp.address);
+  console.log("Comptroller.sol:Comptroller: ", comp.address);
 
   dep = await deployments.deterministic("CErc20Delegate", {
     from: deployer,
