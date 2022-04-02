@@ -19,23 +19,38 @@ describe("FusePoolDirectory", function () {
   this.beforeEach(async () => {
     const { chainId } = await ethers.provider.getNetwork();
     if (chainId === 1337) {
-      await deployments.fixture();
+      await deployments.fixture("prod");
     }
     await setUpPriceOraclePrices();
   });
 
   describe("Deploy pool", async function () {
-    it("should deploy the pool via contract", async function () {
+    it.only("should deploy the pool via contract", async function () {
       this.timeout(120_000);
       const { alice } = await ethers.getNamedSigners();
       console.log("alice: ", alice.address);
       const { chainId } = await ethers.provider.getNetwork();
 
       const sdk = new Fuse(ethers.provider, chainId);
-      mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, alice);
+      mpo = (await ethers.getContractAt(
+        "MasterPriceOracle.sol:MasterPriceOracle",
+        sdk.oracles.MasterPriceOracle.address,
+        alice
+      )) as MasterPriceOracle;
 
-      fpdWithSigner = await ethers.getContractAt("FusePoolDirectory", sdk.contracts.FusePoolDirectory.address, alice);
-      implementationComptroller = await ethers.getContractAt("Comptroller.sol:Comptroller", sdk.chainDeployment.Comptroller.address);
+      fpdWithSigner = (await ethers.getContractAt(
+        "FusePoolDirectory",
+        sdk.contracts.FusePoolDirectory.address,
+        alice
+      )) as FusePoolDirectory;
+      implementationComptroller = (await ethers.getContractAt(
+        "Comptroller.sol:Comptroller",
+        sdk.chainDeployment.Comptroller.address
+      )) as Comptroller;
+      console.log(fpdWithSigner.address, "fpdWithSigner");
+      console.log(implementationComptroller.address, "implementationComptroller");
+      console.log(mpo.address, "mpo");
+      console.log(await implementationComptroller.callStatic.admin(), "ADMin");
 
       //// DEPLOY POOL
       const POOL_NAME = "TEST";
@@ -61,15 +76,27 @@ describe("FusePoolDirectory", function () {
         ["address", "string", "uint"],
         [alice.address, POOL_NAME, depReceipt.blockNumber]
       );
+
       const deployCode = utils.keccak256(
-        ((await deployments.getArtifact("Unitroller")).bytecode as any).object +
-          abiCoder.encode(["address"], [FUSE_ADMIN_ADDRESS]).slice(2)
+        sdk.artifacts.Unitroller.bytecode.object + abiCoder.encode(["address"], [FUSE_ADMIN_ADDRESS]).slice(2)
       );
+
+      console.log(sdk.artifacts.Unitroller.bytecode.object, "CODE OBJ");
+
       let poolAddress = utils.getCreate2Address(fpdWithSigner.address, saltsHash, deployCode);
       console.log("poolAddress: ", poolAddress);
 
       const pools = await fpdWithSigner.getPoolsByAccount(alice.address);
       const pool = pools[1].at(-1);
+      console.log(pool.comptroller);
+
+      const actualUnitroller = (await ethers.getContractAt(
+        "Unitroller.sol:Unitroller",
+        pool.comptroller,
+        alice
+      )) as Unitroller;
+      console.log(await ethers.provider.getCode(actualUnitroller.address), "CODE FETCHED");
+
       expect(pool.comptroller).to.eq(poolAddress);
 
       const allPools = await sdk.contracts.FusePoolDirectory.callStatic.getAllPools();
@@ -78,7 +105,7 @@ describe("FusePoolDirectory", function () {
       expect(comptroller).to.eq(poolAddress);
       expect(_unfilteredName).to.eq(POOL_NAME);
 
-      const unitroller = (await ethers.getContractAt("Unitroller", poolAddress, alice)) as Unitroller;
+      const unitroller = (await ethers.getContractAt("Unitroller.sol:Unitroller", poolAddress, alice)) as Unitroller;
       const adminTx = await unitroller._acceptAdmin();
       await adminTx.wait();
 
@@ -87,7 +114,7 @@ describe("FusePoolDirectory", function () {
       expect(admin).to.eq(alice.address);
 
       //// DEPLOY ASSETS
-      const jrm = await ethers.getContractAt("JumpRateModel", sdk.irms.JumpRateModel.address, alice);
+      const jrm = await ethers.getContractAt("JumpRateModel.sol:JumpRateModel", sdk.irms.JumpRateModel.address, alice);
 
       const assets = await getAssetsConf(comptroller, FUSE_ADMIN_ADDRESS, jrm.address, ethers);
       const nativeAsset = assets.find((a) => a.underlying === constants.AddressZero);
