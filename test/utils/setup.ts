@@ -49,9 +49,12 @@ const setupLocalOraclePrices = async () => {
 const setUpBscOraclePrices = async () => {
   const { deployer } = await ethers.getNamedSigners();
   const sdk = new Fuse(ethers.provider, 56);
-  const oracle = await ethers.getContractAt("SimplePriceOracle", sdk.oracles.SimplePriceOracle.address, deployer);
-  await run("oracle:add-tokens", { underlyings: constants.AddressZero, oracles: oracle.address });
-  await run("oracle:set-price", { address: constants.AddressZero, price: "1" });
+  const spo = await ethers.getContractAt("SimplePriceOracle", sdk.oracles.SimplePriceOracle.address, deployer);
+  const mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, deployer);
+  let tx = await mpo.add([constants.AddressZero], [spo.address]);
+  await tx.wait();
+  tx = await spo.setDirectPrice(constants.AddressZero, ethers.utils.parseEther("1"));
+  await tx.wait();
 };
 
 export const getPositionRatio = async ({ name, namedUser, userAddress, cgId }) => {
