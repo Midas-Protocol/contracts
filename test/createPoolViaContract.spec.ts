@@ -25,7 +25,7 @@ describe("FusePoolDirectory", function () {
   });
 
   describe("Deploy pool", async function () {
-    it.only("should deploy the pool via contract", async function () {
+    it("should deploy the pool via contract", async function () {
       this.timeout(120_000);
       const { alice } = await ethers.getNamedSigners();
       console.log("alice: ", alice.address);
@@ -47,10 +47,6 @@ describe("FusePoolDirectory", function () {
         "Comptroller.sol:Comptroller",
         sdk.chainDeployment.Comptroller.address
       )) as Comptroller;
-      console.log(fpdWithSigner.address, "fpdWithSigner");
-      console.log(implementationComptroller.address, "implementationComptroller");
-      console.log(mpo.address, "mpo");
-      console.log(await implementationComptroller.callStatic.admin(), "ADMin");
 
       //// DEPLOY POOL
       const POOL_NAME = "TEST";
@@ -81,21 +77,11 @@ describe("FusePoolDirectory", function () {
         sdk.artifacts.Unitroller.bytecode.object + abiCoder.encode(["address"], [FUSE_ADMIN_ADDRESS]).slice(2)
       );
 
-      console.log(sdk.artifacts.Unitroller.bytecode.object, "CODE OBJ");
-
       let poolAddress = utils.getCreate2Address(fpdWithSigner.address, saltsHash, deployCode);
       console.log("poolAddress: ", poolAddress);
 
       const pools = await fpdWithSigner.getPoolsByAccount(alice.address);
       const pool = pools[1].at(-1);
-      console.log(pool.comptroller);
-
-      const actualUnitroller = (await ethers.getContractAt(
-        "Unitroller.sol:Unitroller",
-        pool.comptroller,
-        alice
-      )) as Unitroller;
-      console.log(await ethers.provider.getCode(actualUnitroller.address), "CODE FETCHED");
 
       expect(pool.comptroller).to.eq(poolAddress);
 
