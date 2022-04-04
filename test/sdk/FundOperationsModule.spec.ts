@@ -5,6 +5,7 @@ import { setUpPriceOraclePrices } from "../utils";
 import * as poolHelpers from "../utils/pool";
 import { constants, providers, utils } from "ethers";
 import { chainDeployConfig } from "../../chainDeploy";
+import { getOrCreateFuse } from "../utils/fuseSdk";
 
 describe("FundOperationsModule", function () {
   let poolAddress: string;
@@ -21,7 +22,7 @@ describe("FundOperationsModule", function () {
     await setUpPriceOraclePrices();
     const { deployer } = await ethers.getNamedSigners();
 
-    sdk = new Fuse(ethers.provider, chainId);
+    sdk = await getOrCreateFuse();
 
     [poolAddress] = await poolHelpers.createPool({ signer: deployer, poolName: "Pool-Fund-Operations-Test" });
 

@@ -9,12 +9,18 @@ export default task("get-pool-data", "Get pools data")
     const sdkModule = await import("../src");
     // @ts-ignore
     const poolModule = await import("../test/utils/pool");
+    // @ts-ignore
+    const fuseTestModule = await import("../test/utils/fuseSdk");
 
     const chainId = parseInt(await hre.getChainId());
     if (!(chainId in sdkModule.SupportedChains)) {
       throw "Invalid chain provided";
     }
-    const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId);
+    let chainDeployment = {};
+    if (chainId === 1337) {
+      chainDeployment = await fuseTestModule.getLocalDeployments();
+    }
+    const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId, chainDeployment);
     if (taskArgs.address) {
       const pool = await poolModule.logPoolData(taskArgs.address, sdk);
       console.log(pool);
@@ -57,12 +63,18 @@ task("get-position-ratio", "Get unhealthy po data")
     const sdkModule = await import("../src");
     // @ts-ignore
     const poolModule = await import("../test/utils/pool");
+    // @ts-ignore
+    const fuseTestModule = await import("../test/utils/fuseSdk");
 
     const chainId = parseInt(await hre.getChainId());
     if (!(chainId in sdkModule.SupportedChains)) {
       throw "Invalid chain provided";
     }
-    const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId);
+    let chainDeployment = {};
+    if (chainId === 1337) {
+      chainDeployment = await fuseTestModule.getLocalDeployments();
+    }
+    const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId, chainDeployment);
 
     if (!taskArgs.namedUser && !taskArgs.userAddress) {
       throw "Must provide either a named user or an account address";

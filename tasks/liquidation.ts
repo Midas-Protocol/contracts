@@ -10,12 +10,8 @@ export default task("get-liquidations", "Get potential liquidations")
   .addOptionalParam("maxHealth", "Filter pools by max health", "1", types.string)
   .setAction(async (taskArgs, hre) => {
     // @ts-ignore
-    const sdkModule = await import("../src");
-    const chainId = parseInt(await hre.getChainId());
-    if (!(chainId in sdkModule.SupportedChains)) {
-      throw "Invalid chain provided";
-    }
-    const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId);
+    const fuseModule = await import("../test/utils/fuseSdk");
+    const sdk = await fuseModule.getOrCreateFuse();
     const liquidations = await sdk.getPotentialLiquidations([], hre.ethers.utils.parseEther(taskArgs.maxHealth));
     liquidations.map((l) => {
       console.log(`Found ${l.liquidations.length} liquidations for pool: ${l.comptroller}}`);
