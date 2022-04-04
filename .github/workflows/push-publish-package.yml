@@ -16,24 +16,6 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-        continue-on-error: true
-
-      - name: Build Dockerfile for tests
-        run: docker build -t contracts -f Dockerfile.test .
-
-      - name: Run tests
-        run: docker run -t --env MNEMONIC="${MNEMONIC}" --entrypoint "./hh-test.sh" contracts
-
-  build-and-test-local-forge:
-    env:
-      MNEMONIC: "${{ secrets.MNEMONIC }}"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
       - name: Install Foundry
         uses: onbjerg/foundry-toolchain@v1
         with:
@@ -42,14 +24,23 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: "npm"
+
       - name: Install NPM packages
         run: npm install
 
       - name: Run build
         run: npm run build
 
+      - name: Run hardhat tests
+        run: npm run test
+
       - name: Run forge tests
-        run: npm run test:forge
+        run: echo "do it later"
+#        run: npm run test:forge
 
   release:
     needs:
