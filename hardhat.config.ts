@@ -58,15 +58,10 @@ const config: HardhatUserConfig = {
     ],
   },
   external: {
-    contracts: [
-      {
-        artifacts: "./artifacts/contracts/compound",
-      },
-    ],
+    contracts: [{ artifacts: "./out" }],
   },
   paths: {
-    artifacts: "./artifacts",
-    sources: "./contracts",
+    sources: "./none",
     tests: "./test",
   },
   defaultNetwork: "hardhat",
@@ -138,9 +133,6 @@ const config: HardhatUserConfig = {
       chainId: 9000,
       url: "https://evmos-archive-testnet.api.bdnodes.net:8545",
     },
-  },
-  typechain: {
-    outDir: "./typechain",
   },
 };
 

@@ -2,11 +2,11 @@ import { BigNumber, BigNumberish, constants, Contract, utils } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
 
 import { InterestRateModel } from "../types";
-import WhitePaperInterestRateModelArtifact from "../../../artifacts/contracts/compound/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json";
-import CTokenInterfacesArtifact from "../../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json";
+import WhitePaperInterestRateModelArtifact from "../../../out/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json";
+import CTokenInterfacesArtifact from "../../../out/CTokenInterfaces.sol/CTokenInterface.json";
 
 export default class WhitePaperInterestRateModel implements InterestRateModel {
-  static RUNTIME_BYTECODE_HASH = utils.keccak256(WhitePaperInterestRateModelArtifact.deployedBytecode);
+  static RUNTIME_BYTECODE_HASH = utils.keccak256(WhitePaperInterestRateModelArtifact.deployedBytecode.object);
 
   initialized: boolean | undefined;
   baseRatePerBlock: BigNumber | undefined;

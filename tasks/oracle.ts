@@ -36,9 +36,8 @@ task("oracle:add-tokens", "Initalize MasterPriceOracle with underlying oracle fo
   .setAction(async ({ underlyings: _underlyings, oracles: _oracles }, { ethers }) => {
     const { deployer } = await ethers.getNamedSigners();
     // @ts-ignore
-    const sdkModule = await import("../dist/esm/src");
-    const { chainId } = await ethers.provider.getNetwork();
-    const sdk = new sdkModule.Fuse(ethers.provider, chainId);
+    const fuseModule = await import("../test/utils/fuseSdk");
+    const sdk = await fuseModule.getOrCreateFuse();
 
     const mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, deployer);
     const underlyingTokens = _underlyings.split(",");
@@ -74,9 +73,8 @@ task("oracle:update-twap", "Call update on twap oracle to update the last price 
     const { deployer } = await ethers.getNamedSigners();
 
     // @ts-ignore
-    const sdkModule = await import("../dist/esm/src");
-    const { chainId } = await ethers.provider.getNetwork();
-    const sdk = new sdkModule.Fuse(ethers.provider, chainId);
+    const fuseModule = await import("../test/utils/fuseSdk");
+    const sdk = await fuseModule.getOrCreateFuse();
 
     const uniswapTwapRoot = await ethers.getContract("UniswapTwapPriceOracleV2Root", deployer);
     const uniPair = new ethers.Contract(

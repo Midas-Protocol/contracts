@@ -35,14 +35,14 @@ task("pools:create", "Create pool if does not exist")
   .addOptionalParam("priceOracle", "Which price oracle to use", undefined, types.string)
   .addOptionalParam("rewardsDistributorToken", "Token address for rewards distributor", undefined, types.string)
   .setAction(async (taskArgs, hre) => {
-    const { chainId } = await hre.ethers.provider.getNetwork();
     const signer = await hre.ethers.getNamedSigner(taskArgs.creator);
 
+    // @ts-ignore
     const poolModule = await import("../test/utils/pool");
     // @ts-ignore
-    const sdkModule = await import("../src");
+    const fuseModule = await import("../test/utils/fuseSdk");
+    const sdk = await fuseModule.getOrCreateFuse();
 
-    const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId);
     if (!taskArgs.priceOracle) {
       await hre.run("oracle:set-price", { token: "TOUCH", price: "0.1" });
       await hre.run("oracle:set-price", { token: "TRIBE", price: "0.01" });
@@ -115,6 +115,7 @@ task("pools:borrow", "Borrow collateral")
   .addParam("symbol", "Symbol of token to be borrowed", "ETH")
   .addParam("poolAddress", "Address of the poll")
   .setAction(async (taskArgs, hre) => {
+    // @ts-ignore
     const collateralModule = await import("../test/utils/collateral");
     const account = await hre.ethers.getNamedSigner(taskArgs.account);
     await collateralModule.borrowCollateral(taskArgs.poolAddress, account.address, taskArgs.symbol, taskArgs.amount);
@@ -127,6 +128,7 @@ task("pools:deposit", "Deposit collateral")
   .addParam("poolAddress", "Address of the poll")
   .addParam("enableCollateral", "Enable the asset as collateral", false, types.boolean)
   .setAction(async (taskArgs, hre) => {
+    // @ts-ignore
     const collateralModule = await import("../test/utils/collateral");
     const account = await hre.ethers.getNamedSigner(taskArgs.account);
     await collateralModule.addCollateral(
