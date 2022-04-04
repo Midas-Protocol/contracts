@@ -16,10 +16,9 @@ contract GaugesController is Initializable {
   IComptroller public comptroller;
   mapping(address => address) public assetToGauge;
   mapping(address => uint256) public stakingStartedTime;
-  mapping(address => uint256) public votingPowerSpentByAccount;
-  mapping(address => uint256) public votesAccumulatedByGauge;
+  mapping(address => uint256) public stake;
+  mapping(address => uint256) public totalVotesByGauge;
   mapping(address => mapping(address => uint256)) public votesByGaugeByAccount;
-  uint256 totalVotes;
 
   function initialize(address _mdsTokenAddress, IComptroller _comptroller) public initializer {
     comptroller = _comptroller;
@@ -29,8 +28,10 @@ contract GaugesController is Initializable {
   function stake(uint256 amount) public {
     mdsToken.safeTransferFrom(msg.sender, address(this), amount);
     stakingStartedTime[msg.sender] = block.timestamp;
-    veMdsToken.mint(msg.sender, amount);
+    stake[msg.sender] = amount;
   }
+
+  // TODO integrate with FlywheelGaugeRewards
 
   function getTotalVeSupply() public view returns (uint256) {
     // return the all-cross-chain supply
@@ -54,27 +55,45 @@ contract GaugesController is Initializable {
 
   function voteForGauge(address gaugeAddress, uint votes) public {
     // TODO delegation
-    uint vp = veMdsToken.votingPowerOf(msg.sender);
+    uint usedVP = veMdsToken.balanceOf(msg.sender);
+    uint unlockedVP = votingPowerOf(msg.sender);
+    uint usableVP = unlockedVP - usedVP;
 
-    // TODO verify gauge is registered
-    require(votes <= vp - votingPowerSpentByAccount[msg.sender], "not enough voting power for this");
+    // TODO non-transferable?
+    require(usableVP >= votes, "not enough voting power accumulated");
 
-    votingPowerSpentByAccount[msg.sender] += votes;
+    veMdsToken.mint(msg.sender, votes);
     votesByGaugeByAccount[gaugeAddress][msg.sender] += votes;
-    votesAccumulatedByGauge[gaugeAddress] += votes;
-    totalVotes += votes;
+    totalVotesByGauge[gaugeAddress] += votes;
   }
 
   function removeVotesForGauge(address gaugeAddress, uint votes) public {
     // TODO delegation
-    uint vp = veMdsToken.votingPowerOf(msg.sender);
+    uint vp = veMdsToken.balanceOf(msg.sender);
 
     // TODO verify gauge is registered
-    require(votes <= votesByGaugeByAccount[gaugeAddress][msg.sender], "user has allocated less votes to this gauge");
+    require(votes <= votesByGaugeByAccount[gaugeAddress][msg.sender], "user has not allocated  as much votes to this gauge");
 
-    votingPowerSpentByAccount[msg.sender] -= votes;
+    veMdsToken.burn(msg.sender, votes);
     votesByGaugeByAccount[gaugeAddress][msg.sender] -= votes;
-    votesAccumulatedByGauge[gaugeAddress] -= votes;
-    totalVotes -= votes;
+    totalVotesByGauge[gaugeAddress] -= votes;
+  }
+
+  function votingPowerOf(address account) public view returns (uint) {
+    uint stakingStartedTime = gaugesController.stakingStartedTime(account);
+    if (stakingStartedTime == 0) {
+      return 0;
+    } else {
+      uint _stake = stake[account];
+      uint hoursSinceStaked = (block.timestamp - stakingStartedTime) % 3600;
+      if (hoursSinceStaked < 7143) { // 7143 * 0.014 = 100.002
+        // percentage unlocked = hours since staked * 0.014
+        return (_stake * hoursSinceStaked * 14) / 100000;
+      } else {
+        // 298 * 24 = 7152
+        // during day 298 voting power becomes 100% of the staked MDS
+        return _stake;
+      }
+    }
   }
 }

@@ -6,13 +6,8 @@ import "./VeMDSToken.sol";
 import "./GaugesController.sol";
 
 contract Gauge {
-
   GaugesController public gaugesController;
   VeMDSToken private veMdsToken;
   CToken public cToken;
   IRewardsDistributor public rewardsDistributor;
-
-  function votingPower(address account) public view returns (uint) {
-    return veMdsToken.balanceOf(account);
-  }
 }
