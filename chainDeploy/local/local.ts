@@ -46,6 +46,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
     log: true,
   });
   const touch = await dep.deploy();
+  console.log("TOUCHToken: ", touch.address);
   const touchToken = await ethers.getContractAt("TOUCHToken", touch.address, deployer);
   tx = await touchToken.transfer(alice, ethers.utils.parseEther("100000"), { from: deployer });
   await tx.wait();
@@ -70,9 +71,11 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
 
   // get the ERC20 address of deployed cERC20
   const underlyings = [tribe.address, touch.address];
-
-  tx = await masterPriceOracle.add(underlyings, Array(underlyings.length).fill(simplePriceOracle.address));
+  const oracles = Array(underlyings.length).fill(simplePriceOracle.address);
+  tx = await masterPriceOracle.add(underlyings, oracles);
   await tx.wait();
+  console.log(`Master Price Oracle updated for tokens ${underlyings.join(", ")}`);
+
   tx = await masterPriceOracle.setDefaultOracle(simplePriceOracle.address);
   await tx.wait();
   ////

@@ -8,8 +8,10 @@ export default task("swap-wtoken-for-token", "Swap WNATIVE for token")
   .addOptionalParam("account", "Account with which to trade", "bob", types.string)
   .setAction(async ({ token: _token, amount: _amount, account: _account }, { ethers }) => {
     // @ts-ignore
+    const fuseModule = await import("../test/utils/fuseSdk");
+    // @ts-ignore
     const sdkModule = await import("../dist/esm/src");
-    const sdk = new sdkModule.Fuse(ethers.provider, (await ethers.provider.getNetwork()).chainId);
+    const sdk = await fuseModule.getOrCreateFuse();
     let account: SignerWithAddress;
     if (_account === "whale") {
       const signers = await ethers.getSigners();
@@ -65,8 +67,8 @@ task("swap-token-for-wtoken", "Swap token for WNATIVE")
   .addOptionalParam("account", "Account with which to trade", "bob", types.string)
   .setAction(async ({ token: _token, amount: _amount, account: _account }, { ethers }) => {
     // @ts-ignore
-    const sdkModule = await import("../dist/esm/src");
-    const sdk = new sdkModule.Fuse(ethers.provider, (await ethers.provider.getNetwork()).chainId);
+    const fuseModule = await import("../test/utils/fuseSdk");
+    const sdk = await fuseModule.getOrCreateFuse();
     const token = await ethers.getContractAt("EIP20Interface", _token);
     let account: SignerWithAddress;
     if (_account === "whale") {
@@ -116,8 +118,8 @@ task("get-token-pair", "Get token pair address")
   .addOptionalParam("account", "Account with which to trade", "deployer", types.string)
   .setAction(async ({ token0: _token0, token1: _token1, account: _account }, { ethers }) => {
     // @ts-ignore
-    const sdkModule = await import("../dist/esm/src");
-    const sdk = new sdkModule.Fuse(ethers.provider, (await ethers.provider.getNetwork()).chainId);
+    const fuseModule = await import("../test/utils/fuseSdk");
+    const sdk = await fuseModule.getOrCreateFuse();
     const account = await ethers.getNamedSigner(_account);
 
     if (!_token0) {

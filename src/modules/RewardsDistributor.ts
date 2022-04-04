@@ -27,7 +27,7 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
     async deployRewardsDistributor(rewardTokenAddress: string, options: { from: string }) {
       const rewardsDistributorFactory = new ContractFactory(
         this.artifacts.RewardsDistributorDelegator.abi,
-        this.artifacts.RewardsDistributorDelegator.bytecode,
+        this.artifacts.RewardsDistributorDelegator.bytecode.object,
         this.provider.getSigner()
       );
       return (await rewardsDistributorFactory.deploy(

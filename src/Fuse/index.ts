@@ -43,11 +43,12 @@ import {
   CTOKEN_ERROR_CODES,
   JUMP_RATE_MODEL_CONF,
   SIMPLE_DEPLOY_ORACLES,
-  WHITE_PAPER_RATE_MODEL_CONF,
+  WHITE_PAPER_RATE_MODEL_CONF
 } from "./config";
 import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
 import JumpRateModel from "./irm/JumpRateModel";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
+// Types
 import {
   Artifact,
   Artifacts,
@@ -58,9 +59,15 @@ import {
   InterestRateModelConf,
   InterestRateModelParams,
   OracleConf,
-  USDPricedFuseAsset,
+  USDPricedFuseAsset
 } from "./types";
 import { filterOnlyObjectProperties, filterPoolName } from "./utils";
+
+
+
+
+
+
 
 type OracleConfig = {
   [contractName: string]: {
@@ -99,15 +106,20 @@ export class FuseBase {
   public artifacts: Artifacts;
   public irms: IrmConfig;
 
-  constructor(web3Provider: JsonRpcProvider | Web3Provider, chainId: SupportedChains) {
+  constructor(
+    web3Provider: JsonRpcProvider | Web3Provider,
+    chainId: SupportedChains,
+    chainDeployment?: ChainDeployment
+  ) {
     this.provider = web3Provider;
     this.chainId = chainId;
     this.availableOracles = chainOracles[chainId];
     this.chainDeployment =
-      Deployments[chainId.toString()] &&
-      Deployments[chainId.toString()][Object.keys(Deployments[chainId.toString()])[0]]?.contracts;
+      chainDeployment ??
+      (Deployments[chainId.toString()] &&
+        Deployments[chainId.toString()][Object.keys(Deployments[chainId.toString()])[0]]?.contracts);
     if (!this.chainDeployment) {
-      throw new Error(`Chain deployment not found for chainId ${chainId}`);
+      throw new Error(`Chain deployment not found or provided for chainId ${chainId}`);
     }
     this.WhitePaperRateModelConf = WHITE_PAPER_RATE_MODEL_CONF(chainId);
     this.JumpRateModelConf = JUMP_RATE_MODEL_CONF(chainId);
@@ -198,7 +210,7 @@ export class FuseBase {
     liquidationIncentive: BigNumber,
     priceOracle: string, // Contract address
     priceOracleConf: OracleConf,
-    options: any, // We might need to add sender as argument. Getting address from options will colide with the override arguments in ethers contract method calls. It doesnt take address.
+    options: any, // We might need to add sender as argument. Getting address from options will collide with the override arguments in ethers contract method calls. It doesn't take address.
     whitelist: string[] // An array of whitelisted addresses
   ): Promise<[string, string, string]> {
     // 2. Deploy Comptroller implementation if necessary
@@ -207,7 +219,7 @@ export class FuseBase {
     if (!implementationAddress) {
       const comptrollerContract = new ContractFactory(
         this.artifacts.Comptroller.abi,
-        this.artifacts.Comptroller.bytecode,
+        this.artifacts.Comptroller.bytecode.object,
         this.provider.getSigner(options.from)
       );
       const deployedComptroller = await comptrollerContract.deploy();
@@ -239,7 +251,7 @@ export class FuseBase {
       [options.from, poolName, receipt.blockNumber]
     );
     const byteCodeHash = utils.keccak256(
-      this.artifacts.Unitroller.bytecode +
+      this.artifacts.Unitroller.bytecode.object +
         new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]).slice(2)
     );
 
@@ -317,7 +329,7 @@ export class FuseBase {
 
     // Get deployArgs
     let deployArgs: any[] = [];
-    let modelArtifact: { abi: any; bytecode: any };
+    let modelArtifact: Artifact;
 
     switch (model) {
       case "JumpRateModel":
@@ -359,7 +371,7 @@ export class FuseBase {
     // Deploy InterestRateModel
     const interestRateModelContract = new ContractFactory(
       modelArtifact.abi,
-      modelArtifact.bytecode,
+      modelArtifact.bytecode.object,
       this.provider.getSigner(options.from)
     );
 
@@ -423,7 +435,7 @@ export class FuseBase {
     if (!implementationAddress) {
       const cEtherDelegateFactory = new ContractFactory(
         this.artifacts.CEtherDelegate.abi,
-        this.artifacts.CEtherDelegate.bytecode,
+        this.artifacts.CEtherDelegate.bytecode.object,
         this.provider.getSigner(options.from)
       );
 
@@ -480,7 +492,7 @@ export class FuseBase {
       [conf.comptroller, "0x0000000000000000000000000000000000000000", receipt.blockNumber]
     );
 
-    const byteCodeHash = utils.keccak256(this.artifacts.CEtherDelegator.bytecode + constructorData.substring(2));
+    const byteCodeHash = utils.keccak256(this.artifacts.CEtherDelegator.bytecode.object + constructorData.substring(2));
 
     const cEtherDelegatorAddress = utils.getCreate2Address(
       this.chainDeployment.FuseFeeDistributor.address,
@@ -510,7 +522,7 @@ export class FuseBase {
     // Deploy CErc20Delegate implementation contract if necessary
     if (!implementationAddress) {
       if (!conf.delegateContractName) conf.delegateContractName = "CErc20Delegate";
-      let delegateContractArtifact: { abi: any; bytecode: any };
+      let delegateContractArtifact: Artifact;
       if (conf.delegateContractName === "CErc20Delegate") {
         delegateContractArtifact = this.artifacts.CErc20Delegate;
       } else {
@@ -518,7 +530,7 @@ export class FuseBase {
       }
       const cErc20Delegate = new ContractFactory(
         delegateContractArtifact.abi,
-        delegateContractArtifact.bytecode,
+        delegateContractArtifact.bytecode.object,
         this.provider.getSigner(options.from)
       );
       const cErc20DelegateDeployed = await cErc20Delegate.deploy();
@@ -561,7 +573,7 @@ export class FuseBase {
       ["address", "address", "uint"],
       [conf.comptroller, conf.underlying, receipt.blockNumber]
     );
-    const byteCodeHash = utils.keccak256(this.artifacts.CErc20Delegator.bytecode + constructorData.substring(2));
+    const byteCodeHash = utils.keccak256(this.artifacts.CErc20Delegator.bytecode.object + constructorData.substring(2));
 
     const cErc20DelegatorAddress = utils.getCreate2Address(
       this.chainDeployment.FuseFeeDistributor.address,
@@ -578,7 +590,7 @@ export class FuseBase {
     const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(priceOracleAddress));
 
     for (const [name, oracle] of Object.entries(this.oracles)) {
-      const value = utils.keccak256(oracle.artifact.bytecode);
+      const value = utils.keccak256(oracle.artifact.bytecode.object);
       if (runtimeBytecodeHash == value) return name;
     }
     return null;
@@ -978,7 +990,7 @@ export class FuseBase {
     // Get price oracle contract name from runtime bytecode hash
     const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(oracleAddress));
     for (const [name, oracle] of Object.entries(this.oracles)) {
-      const value = utils.keccak256(oracle.artifact.deployedBytecode);
+      const value = utils.keccak256(oracle.artifact.deployedBytecode.object);
       if (runtimeBytecodeHash === value) return name;
     }
     return null;

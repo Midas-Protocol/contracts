@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import "../../utils/ERC4626.sol";
 import "../../external/bomb/IXBomb.sol";
-import { ERC20 } from "@rari-capital/solmate/src/tokens/ERC20.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
 
 /**
  * @title Bomb ERC4626 Contract

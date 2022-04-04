@@ -40,15 +40,11 @@ task("e2e:unhealthy-pools-became-healthy", "e2e: check pools are healthy").setAc
 
 task("e2e:admin-fees-are-seized", "e2e: check fees are seized").setAction(async (taskArgs, hre) => {
   // @ts-ignore
-  const sdkModule = await import("../src");
-  // @ts-ignore
   const poolModule = await import("../test/utils/pool");
-
-  const chainId = parseInt(await hre.getChainId());
-  if (!(chainId in sdkModule.SupportedChains)) {
-    throw "Invalid chain provided";
-  }
-  const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId);
+  
+  // @ts-ignore
+  const fuseModule = await import("../test/utils/fuseSdk");
+  const sdk = await fuseModule.getOrCreateFuse();
   for (const pool of UNHEALTHY_POOLS) {
     const poolData = await poolModule.getPoolByName(pool.name, sdk);
     const poolAsset = poolData.assets.filter((a) => a.underlyingSymbol === pool.debtToken)[0];

@@ -10,10 +10,9 @@ import {
   FuseSafeLiquidator,
   SimplePriceOracle,
 } from "../../typechain";
-import { cERC20Conf } from "../../src";
+import { cERC20Conf, ChainLiquidationConfig, Fuse, liquidationConfigDefaults } from "../../src";
 import { DeployedAsset } from "../utils/pool";
 import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
-import { ChainLiquidationConfig, liquidationConfigDefaults } from "../../dist/cjs/src";
 
 (process.env.FORK_CHAIN_ID ? describe : describe.skip)("#safeLiquidateWithFlashLoan", () => {
   let tx: providers.TransactionResponse;
@@ -51,11 +50,13 @@ import { ChainLiquidationConfig, liquidationConfigDefaults } from "../../dist/cj
     poolName = "liquidation - fl - " + Math.random().toString();
     ({ chainId } = await ethers.provider.getNetwork());
     if (chainId === 1337) {
-      await deployments.fixture();
+      await deployments.fixture("prod");
     }
+    const sdk = new Fuse(ethers.provider, Number(chainId));
+
     coingeckoId = chainId === 1337 ? "ethereum" : "binancecoin";
     liquidationConfigOverrides = {
-      ...liquidationConfigDefaults[chainId],
+      ...liquidationConfigDefaults(sdk)[chainId],
     };
     await setUpPriceOraclePrices();
     ({
@@ -86,7 +87,11 @@ import { ChainLiquidationConfig, liquidationConfigDefaults } from "../../dist/cj
   it("FL - should liquidate a native borrow for token collateral", async function () {
     const { alice, bob } = await ethers.getNamedSigners();
 
-    console.log("starting with prices: ", utils.formatEther(erc20OneOriginalUnderlyingPrice));
+    console.log(
+      "starting with prices: ",
+      utils.formatEther(erc20OneOriginalUnderlyingPrice),
+      utils.formatEther(erc20TwoOriginalUnderlyingPrice)
+    );
     // get some liquidity via Uniswap
     if (chainId !== 1337) await tradeNativeForAsset({ account: "alice", token: erc20One.underlying, amount: "300" });
 
@@ -178,7 +183,7 @@ import { ChainLiquidationConfig, liquidationConfigDefaults } from "../../dist/cj
     console.log(`Added ${erc20Two.symbol} collateral`);
 
     // Borrow tokenOne using tokenTwo as collateral
-    const borrowAmount = "0.045";
+    const borrowAmount = "0.05";
     await borrowCollateral(poolAddress, bob.address, erc20One.symbol, borrowAmount);
 
     // Set price of borrowed token to 10x of what it was
