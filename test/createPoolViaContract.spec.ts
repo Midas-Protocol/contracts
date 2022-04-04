@@ -8,6 +8,7 @@ import { Comptroller, FusePoolDirectory, MasterPriceOracle, Unitroller } from ".
 import { getAssetsConf } from "./utils/assets";
 import { chainDeployConfig } from "../chainDeploy";
 import { setUpPriceOraclePrices } from "./utils";
+import { getOrCreateFuse } from "./utils/fuseSdk";
 
 use(solidity);
 
@@ -15,11 +16,13 @@ describe("FusePoolDirectory", function () {
   let mpo: MasterPriceOracle;
   let fpdWithSigner: FusePoolDirectory;
   let implementationComptroller: Comptroller;
+  let sdk: Fuse;
 
   this.beforeEach(async () => {
     const { chainId } = await ethers.provider.getNetwork();
     if (chainId === 1337) {
-      await deployments.fixture();
+      await deployments.fixture("prod");
+      sdk = await getOrCreateFuse();
     }
     await setUpPriceOraclePrices();
   });
@@ -31,7 +34,6 @@ describe("FusePoolDirectory", function () {
       console.log("alice: ", alice.address);
       const { chainId } = await ethers.provider.getNetwork();
 
-      const sdk = new Fuse(ethers.provider, chainId);
       mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, alice);
 
       fpdWithSigner = await ethers.getContractAt("FusePoolDirectory", sdk.contracts.FusePoolDirectory.address, alice);
