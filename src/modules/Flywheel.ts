@@ -1,4 +1,5 @@
 import { BigNumber, constants, Contract, ContractFactory } from "ethers";
+import { FuseFlywheelLensRouter } from "../../typechain/FuseFlywheelLensRouter";
 import { FlywheelStaticRewards__factory } from "../../typechain/factories/FlywheelStaticRewards__factory";
 import { FuseFlywheelCore__factory } from "../../typechain/factories/FuseFlywheelCore__factory";
 import { FlywheelStaticRewards } from "../../typechain/FlywheelStaticRewards";
@@ -15,18 +16,6 @@ export interface FlywheelClaimableRewards {
     }?
   ];
 }
-export interface FlywheelReward {
-  distributor: string;
-  rewardToken: string;
-  rewardsPerSecond: BigNumber;
-  rewardsEndTimestamp: number;
-}
-export interface FlywheelMarketReward {
-  market: string;
-  supplyRewards: FlywheelReward[];
-  borrowRewards: FlywheelReward[];
-}
-
 export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class Flywheel extends Base {
     async deployFlywheelCore(
@@ -155,25 +144,15 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
         .filter((value, index, self) => self.indexOf(value) === index); // Unique Array;
     }
 
-    async getFlywheelMarketRewardsByPool(pool: string, options: { from: string }): Promise<FlywheelMarketReward[]> {
-      return this.#createMarketRewards(pool, options);
+    async getFlywheelMarketRewardsByPool(pool: string, options: { from: string }) {
+      return (this.contracts.FuseFlywheelLensRouter as FuseFlywheelLensRouter).callStatic.getMarketRewardsInfo(
+        pool,
+        options
+      );
     }
 
-    async getFlywheelMarketRewardsByPools(
-      pools: string[],
-      options: { from: string }
-    ): Promise<
-      {
-        pool: string;
-        marketRewards: FlywheelMarketReward[];
-      }[]
-    > {
-      return Promise.all(
-        pools.map(async (pool) => ({
-          pool,
-          marketRewards: await this.#createMarketRewards(pool, options),
-        }))
-      );
+    async getFlywheelMarketRewardsByPools(pools: string[], options: { from: string }) {
+      return Promise.all(pools.map((pool) => this.getFlywheelMarketRewardsByPool(pool, options)));
     }
 
     async getFlywheelRewardsInfos(flywheelAddress: string, options: { from: string }) {
@@ -244,43 +223,6 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
         this.artifacts.FuseFlywheelCore.abi,
         this.provider.getSigner(options.from)
       ) as FuseFlywheelCore;
-    }
-
-    async #createMarketRewards(pool: string, options: { from: string }): Promise<FlywheelMarketReward[]> {
-      const comptroller = await this.getComptrollerInstance(pool, options);
-      const allMarketsOfPool = await comptroller.callStatic.getAllMarkets(options);
-      const allFlywheelsOfPool = await this.getFlywheelsByPool(pool, options);
-
-      const marketRewards: FlywheelMarketReward[] = [];
-      for (const market of allMarketsOfPool) {
-        const supplyRewards: FlywheelMarketReward["supplyRewards"] = [];
-        for (const flywheel of allFlywheelsOfPool) {
-          // Make sure Market is added to the flywheel
-          const marketState = await flywheel.callStatic.marketState(market, options);
-          if (marketState.lastUpdatedTimestamp > 0) {
-            // Get Rewards and only add if greater than 0
-            const rewards = this.getStaticRewardsInstance(await flywheel.callStatic.flywheelRewards(options), options);
-            const rewardsInfoForMarket = await rewards.rewardsInfo(market, options);
-            if (rewardsInfoForMarket.rewardsPerSecond.gt(0)) {
-              const rewardToken = await rewards.rewardToken(options);
-              supplyRewards.push({
-                distributor: flywheel.address,
-                rewardToken,
-                rewardsPerSecond: rewardsInfoForMarket.rewardsPerSecond,
-                rewardsEndTimestamp: rewardsInfoForMarket.rewardsEndTimestamp,
-              });
-            }
-          }
-        }
-        if (supplyRewards.length > 0) {
-          marketRewards.push({
-            market,
-            supplyRewards,
-            borrowRewards: [],
-          });
-        }
-      }
-      return marketRewards;
     }
   };
 }

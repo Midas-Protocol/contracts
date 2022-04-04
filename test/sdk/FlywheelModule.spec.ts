@@ -132,7 +132,7 @@ describe.only("FlywheelModule", function () {
     const singleMarketInfo = await sdk.getFlywheelRewardsInfoForMarket(fwCore.address, market.address, {
       from: deployer.address,
     });
-    console.log({ singleMarketInfo });
+    expect(singleMarketInfo.rewardsPerSecond).to.eq(rewardsPerSecond);
   });
 
   it("1 Pool, 1 Flywheel, 1 Reward Distributor", async function () {
