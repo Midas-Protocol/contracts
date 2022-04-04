@@ -5,8 +5,7 @@ import { ChainDeployment } from "../../src/Fuse/types";
 
 let fuseSdk: Fuse;
 
-export const getLocalDeployments = async (): Promise<ChainDeployment> => {
-  let chainDeployment: ChainDeployment = {};
+export const getCommonDeployments = async (chainDeployment: ChainDeployment) => {
   const CErc20Delegate = await ethers.getContract("CErc20Delegate");
   const CErc20DelegateArtifact = await deployments.getArtifact("CErc20Delegate");
   chainDeployment.CErc20Delegate = { abi: CErc20DelegateArtifact.abi, address: CErc20Delegate.address };
@@ -58,6 +57,12 @@ export const getLocalDeployments = async (): Promise<ChainDeployment> => {
   const SimplePriceOracle = await ethers.getContract("SimplePriceOracle");
   const SimplePriceOracleArtifact = await deployments.getArtifact("SimplePriceOracle");
   chainDeployment.SimplePriceOracle = { abi: SimplePriceOracleArtifact.abi, address: SimplePriceOracle.address };
+  return chainDeployment
+}
+
+export const getLocalDeployments = async (): Promise<ChainDeployment> => {
+  let chainDeployment: ChainDeployment = {};
+
   const TOUCHToken = await ethers.getContract("TOUCHToken");
   const TOUCHTokenArtifact = await deployments.getArtifact("TOUCHToken");
   chainDeployment.TOUCHToken = { abi: TOUCHTokenArtifact.abi, address: TOUCHToken.address };
@@ -70,8 +75,21 @@ export const getLocalDeployments = async (): Promise<ChainDeployment> => {
     abi: WhitePaperInterestRateModelArtifact.abi,
     address: WhitePaperInterestRateModel.address,
   };
-  return chainDeployment;
+  return await getCommonDeployments(chainDeployment)
 };
+
+
+export const getBscForkDeployments = async (): Promise<ChainDeployment> => {
+  let chainDeployment: ChainDeployment = {};
+  const WhitePaperInterestRateModel = await ethers.getContract("WhitePaperInterestRateModel");
+  const WhitePaperInterestRateModelArtifact = await deployments.getArtifact("WhitePaperInterestRateModel");
+  chainDeployment.WhitePaperInterestRateModel = {
+    abi: WhitePaperInterestRateModelArtifact.abi,
+    address: WhitePaperInterestRateModel.address,
+  };
+  return await getCommonDeployments(chainDeployment)
+};
+
 
 export const getOrCreateFuse = async (): Promise<Fuse> => {
   if (!fuseSdk) {
@@ -79,6 +97,8 @@ export const getOrCreateFuse = async (): Promise<Fuse> => {
     let chainDeployment: ChainDeployment;
     if (chainId === 1337) {
       chainDeployment = await getLocalDeployments();
+    } else if (process.env.FORK_CHAIN_ID!) {
+      chainDeployment = await getBscForkDeployments()
     }
     fuseSdk = new Fuse(ethers.provider, chainId, chainDeployment);
   }
