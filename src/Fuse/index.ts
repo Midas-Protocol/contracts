@@ -60,6 +60,7 @@ import { filterOnlyObjectProperties, filterPoolName } from "./utils";
 import { withRewardsDistributor } from "../modules/RewardsDistributor";
 import { withFundOperations } from "../modules/FundOperations";
 import { withFusePoolLens } from "../modules/FusePoolLens";
+import { withFusePools } from "../modules/FusePools";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FusePoolLens } from "../../typechain/FusePoolLens";
 import { FusePoolLensSecondary } from "../../typechain/FusePoolLensSecondary";
@@ -1093,5 +1094,7 @@ export class FuseBase {
   };
 }
 
-const FuseBaseWithModules = withFusePoolLens(withRewardsDistributor(withFundOperations(withSafeLiquidator(FuseBase))));
+const FuseBaseWithModules = withFusePoolLens(
+  withRewardsDistributor(withFundOperations(withSafeLiquidator(withFusePools(FuseBase))))
+);
 export default class Fuse extends FuseBaseWithModules {}
