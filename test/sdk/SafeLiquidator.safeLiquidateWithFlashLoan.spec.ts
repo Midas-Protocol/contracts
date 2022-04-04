@@ -124,7 +124,7 @@ import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
   });
 
   // Safe liquidate token borrows
-  it.only("FL - should liquidate a token borrow for native collateral", async function () {
+  it("FL - should liquidate a token borrow for native collateral", async function () {
     const { alice, bob } = await ethers.getNamedSigners();
 
     console.log("staring with prices: ", utils.formatEther(erc20OneOriginalUnderlyingPrice));
@@ -159,7 +159,7 @@ import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
     await tx.wait();
   });
 
-  it.only("FL - should liquidate a token borrow for token collateral", async function () {
+  it("FL - should liquidate a token borrow for token collateral", async function () {
     const { alice, bob } = await ethers.getNamedSigners();
     console.log(
       "staring with prices: ",

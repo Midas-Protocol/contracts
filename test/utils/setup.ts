@@ -12,6 +12,7 @@ import {
 import { createPool, deployAssets, DeployedAsset, getPoolAssets } from "./pool";
 import { expect } from "chai";
 import { cERC20Conf, ChainLiquidationConfig, Fuse } from "../../";
+import { getOrCreateFuse } from "./fuseSdk";
 
 export const resetPriceOracle = async (erc20One, erc20Two) => {
   const chainId = parseInt(await getChainId());
@@ -48,7 +49,7 @@ const setupLocalOraclePrices = async () => {
 
 const setUpBscOraclePrices = async () => {
   const { deployer } = await ethers.getNamedSigners();
-  const sdk = new Fuse(ethers.provider, 56);
+  const sdk = await getOrCreateFuse();
   const spo = await ethers.getContractAt("SimplePriceOracle", sdk.oracles.SimplePriceOracle.address, deployer);
   const mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, deployer);
   let tx = await mpo.add([constants.AddressZero], [spo.address]);
@@ -94,8 +95,7 @@ export const setUpLiquidation = async ({ poolName }) => {
 
   const { bob, deployer, rando } = await ethers.getNamedSigners();
 
-  const chainId = await getChainId();
-  const sdk = new Fuse(ethers.provider, Number(chainId));
+  const sdk = await getOrCreateFuse();
 
   simpleOracle = (await ethers.getContractAt(
     "SimplePriceOracle",
@@ -191,9 +191,8 @@ export const liquidateAndVerify = async (
 ) => {
   let tx: providers.TransactionResponse;
 
-  const { chainId } = await ethers.provider.getNetwork();
   const { rando } = await ethers.getNamedSigners();
-  const sdk = new Fuse(ethers.provider, chainId);
+  const sdk = await getOrCreateFuse();
 
   // Check balance before liquidation
   const ratioBefore = await getPositionRatio({

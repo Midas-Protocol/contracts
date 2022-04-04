@@ -30,46 +30,85 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: 16.13.0
+          node-version: 16.x
           cache: "npm"
 
-      - run: npm install
+      - name: Install NPM packages
+        run: npm install
 
-      - run: npm run build
+      - name: Run build
+        run: npm run build
 
       - name: Run hardhat tests
-        run: npm run test:hardhat
+        run: npm run test
 
       - name: Run forge tests
-        run: npm run test:forge || exit 0
-#
-#  build-and-test-bsc:
-#    env:
-#      MNEMONIC: "${{ secrets.MNEMONIC }}"
-#      FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
-#      FORK_BLOCK_NUMBER: 16621736
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#        with:
-#          submodules: recursive
-#
-#      - name: Install Forge dependencies
-#        run: forge install
-#
-#      - uses: actions/setup-node@v2
-#        with:
-#          node-version: 16.x
-#          cache: "npm"
-#
-#      - name: Install NPM packages
-#        run: npm install
-#
-#      - name: Run build
-#        run: npm run build
-#
-#      - name: Run tests on BSC fork
-#        run: npm run test:bsc
-#
-#      - name: Run forge tests on BSC
-#        run: npm run test:forge:bsc
+        run: npm run test:forge
+
+  build-and-test-bsc:
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+
+      - name: Build Dockerfile for tests
+        run: docker build -t contracts -f Dockerfile.test .
+
+      - name: Run tests
+        run: docker-compose run --rm bsc-tests
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: "npm"
+
+      - name: Install NPM packages
+        run: npm install
+
+      - name: Run build
+        run: npm run build
+
+      - name: Run forge tests on BSC
+        run: npm run test:forge:bsc
+
+  build-and-test-bsc-forge:
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: "npm"
+
+      - name: Install NPM packages
+        run: npm install
+
+      - name: Run build
+        run: npm run build
+
+      - name: Run forge tests on BSC
+        run: npm run test:forge:bsc

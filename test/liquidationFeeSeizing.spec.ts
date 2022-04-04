@@ -15,8 +15,9 @@ import {
 import { expect } from "chai";
 import { FUSE_LIQUIDATION_PROTOCOL_FEE_PER_THOUSAND, FUSE_LIQUIDATION_SEIZE_FEE_PER_THOUSAND } from "./utils/config";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { cERC20Conf } from "../src";
+import { cERC20Conf, Fuse } from "../src";
 import { resetPriceOracle } from "./utils/setup";
+import { getOrCreateFuse } from "./utils/fuseSdk";
 
 (process.env.FORK_CHAIN_ID ? describe.skip : describe)("Protocol Liquidation Seizing", () => {
   let eth: cERC20Conf;
@@ -47,12 +48,14 @@ import { resetPriceOracle } from "./utils/setup";
   let chainId: number;
 
   let poolName: string;
+  let sdk: Fuse;
 
   beforeEach(async () => {
     poolName = "liquidation - fee sizing" + Math.random().toString();
     ({ chainId } = await ethers.provider.getNetwork());
     if (chainId === 1337) {
       await deployments.fixture("prod");
+      sdk = await getOrCreateFuse();
     }
     await setUpPriceOraclePrices();
     ({

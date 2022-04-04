@@ -8,19 +8,22 @@ import { Comptroller, FusePoolDirectory, MasterPriceOracle, Unitroller } from ".
 import { getAssetsConf } from "./utils/assets";
 import { chainDeployConfig } from "../chainDeploy";
 import { setUpPriceOraclePrices } from "./utils";
+import { getOrCreateFuse } from "./utils/fuseSdk";
 
 use(solidity);
 
-describe("FusePoolDirectory", function () {
+describe.only("FusePoolDirectory", function () {
   let mpo: MasterPriceOracle;
   let fpdWithSigner: FusePoolDirectory;
   let implementationComptroller: Comptroller;
+  let sdk: Fuse;
 
   this.beforeEach(async () => {
     const { chainId } = await ethers.provider.getNetwork();
     if (chainId === 1337) {
-      await deployments.fixture("prod", );
+      await deployments.fixture("prod");
     }
+    sdk = await getOrCreateFuse();
     await setUpPriceOraclePrices();
   });
 
@@ -31,22 +34,10 @@ describe("FusePoolDirectory", function () {
       console.log("alice: ", alice.address);
       const { chainId } = await ethers.provider.getNetwork();
 
-      const sdk = new Fuse(ethers.provider, chainId);
-      mpo = (await ethers.getContractAt(
-        "MasterPriceOracle.sol:MasterPriceOracle",
-        sdk.oracles.MasterPriceOracle.address,
-        alice
-      )) as MasterPriceOracle;
+      mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, alice);
 
-      fpdWithSigner = (await ethers.getContractAt(
-        "FusePoolDirectory",
-        sdk.contracts.FusePoolDirectory.address,
-        alice
-      )) as FusePoolDirectory;
-      implementationComptroller = (await ethers.getContractAt(
-        "Comptroller.sol:Comptroller",
-        sdk.chainDeployment.Comptroller.address
-      )) as Comptroller;
+      fpdWithSigner = await ethers.getContractAt("FusePoolDirectory", sdk.contracts.FusePoolDirectory.address, alice);
+      implementationComptroller = await ethers.getContractAt("Comptroller.sol:Comptroller", sdk.chainDeployment.Comptroller.address);
 
       //// DEPLOY POOL
       const POOL_NAME = "TEST";
@@ -72,11 +63,10 @@ describe("FusePoolDirectory", function () {
         ["address", "string", "uint"],
         [alice.address, POOL_NAME, depReceipt.blockNumber]
       );
-
       const deployCode = utils.keccak256(
-        sdk.artifacts.Unitroller.bytecode.object + abiCoder.encode(["address"], [FUSE_ADMIN_ADDRESS]).slice(2)
+        ((await deployments.getArtifact("Unitroller")).bytecode as any).object +
+          abiCoder.encode(["address"], [FUSE_ADMIN_ADDRESS]).slice(2)
       );
-
       let poolAddress = utils.getCreate2Address(fpdWithSigner.address, saltsHash, deployCode);
       console.log("poolAddress: ", poolAddress);
 
@@ -91,7 +81,7 @@ describe("FusePoolDirectory", function () {
       expect(comptroller).to.eq(poolAddress);
       expect(_unfilteredName).to.eq(POOL_NAME);
 
-      const unitroller = (await ethers.getContractAt("Unitroller.sol:Unitroller", poolAddress, alice)) as Unitroller;
+      const unitroller = (await ethers.getContractAt("Unitroller", poolAddress, alice)) as Unitroller;
       const adminTx = await unitroller._acceptAdmin();
       await adminTx.wait();
 
@@ -100,7 +90,7 @@ describe("FusePoolDirectory", function () {
       expect(admin).to.eq(alice.address);
 
       //// DEPLOY ASSETS
-      const jrm = await ethers.getContractAt("JumpRateModel.sol:JumpRateModel", sdk.irms.JumpRateModel.address, alice);
+      const jrm = await ethers.getContractAt("JumpRateModel", sdk.irms.JumpRateModel.address, alice);
 
       const assets = await getAssetsConf(comptroller, FUSE_ADMIN_ADDRESS, jrm.address, ethers);
       const nativeAsset = assets.find((a) => a.underlying === constants.AddressZero);
