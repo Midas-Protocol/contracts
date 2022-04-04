@@ -12,7 +12,7 @@ import { getOrCreateFuse } from "./utils/fuseSdk";
 
 use(solidity);
 
-describe.only("FusePoolDirectory", function () {
+describe("FusePoolDirectory", function () {
   let mpo: MasterPriceOracle;
   let fpdWithSigner: FusePoolDirectory;
   let implementationComptroller: Comptroller;
