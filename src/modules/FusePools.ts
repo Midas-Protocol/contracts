@@ -29,7 +29,15 @@ export interface MergedPool {
 
 export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class FusePools extends Base {
-    async fetchPoolsManual(verification: boolean, nativeAssetPriceInUSD: number, options: { from: string }) {
+    async fetchPoolsManual({
+      verification,
+      nativeAssetPriceInUSD,
+      options,
+    }: {
+      verification: boolean;
+      nativeAssetPriceInUSD: number;
+      options: { from: string };
+    }) {
       const fusePoolsDirectoryResult = await this.contracts.FusePoolDirectory.callStatic.getPublicPoolsByVerification(
         verification,
         {
@@ -84,7 +92,15 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
       });
     }
 
-    async fetchPools(filter: string | null, nativeAssetPriceInUSD: number, options: { from: string }) {
+    async fetchPools({
+      filter,
+      nativeAssetPriceInUSD,
+      options,
+    }: {
+      filter: string | null;
+      nativeAssetPriceInUSD: number;
+      options: { from: string };
+    }) {
       const isCreatedPools = filter === "created-pools";
       const isVerifiedPools = filter === "verified-pools";
       const isUnverifiedPools = filter === "unverified-pools";
