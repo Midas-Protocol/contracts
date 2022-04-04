@@ -1,15 +1,32 @@
 FROM ethereum/solc:0.8.11-alpine as build-deps
 
-FROM rust:1.59 as builder
+FROM node:16.13-alpine as builder
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
+COPY src ./src
+COPY tsconfig*.json ./
+
+RUN npm install -g npm && npm install --legacy-peer-deps
+
+
+FROM rust:1.59 as foundy
+
+COPY --from=build-deps /usr/local/bin/solc /usr/bin/solc
+COPY --from=builder /usr/src/app /usr/src/app
+
+WORKDIR /usr/src/app
+COPY contracts/ ./contracts
+
+WORKDIR /usr/src/app
+
+COPY deployments ./deployments
 COPY foundry.toml ./
 COPY remappings.txt ./
 COPY .gitmodules ./
 COPY deployments.json ./
-COPY tsconfig*.json ./
+
 COPY lib/ ./lib
 COPY hardhat.config.ts ./
 COPY .git ./.git
@@ -18,8 +35,6 @@ COPY deploy/ ./deploy
 COPY tasks/ ./tasks
 COPY test/ ./test
 COPY contracts/ ./contracts
-COPY src ./src
-
 
 RUN curl -L https://foundry.paradigm.xyz | bash
 RUN ls $HOME/.foundry
@@ -34,22 +49,18 @@ RUN forge install
 RUN forge build
 
 
-FROM node:16.13
+FROM node:16.13-alpine
 
 COPY --from=build-deps /usr/local/bin/solc /usr/bin/solc
-COPY --from=builder /usr/src/app /usr/src/app
+COPY --from=foundy /usr/src/app /usr/src/app
 
 WORKDIR /usr/src/app
-
-RUN npm install -g npm && npm install --legacy-peer-deps
 
 RUN npm run typechain
 RUN npm run build:sdk
 
-COPY docker/hh-test.sh .
-COPY docker/start-node.sh .
-COPY docker/start-bsc-node.sh .
+COPY docker/*.sh ./
 
-RUN chmod +x start-node.sh hh-test.sh start-bsc-node.sh
+RUN chmod +x *.sh
 
-ENTRYPOINT ["./start-bsc-node.sh"]
+ENTRYPOINT ["./hh-test.sh"]

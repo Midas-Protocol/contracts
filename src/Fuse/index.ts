@@ -58,6 +58,7 @@ import {
 import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig, SupportedChains } from "../network";
 import { filterOnlyObjectProperties, filterPoolName } from "./utils";
 import { withRewardsDistributor } from "../modules/RewardsDistributor";
+import { withFundOperations } from "../modules/FundOperations";
 import { withFusePoolLens } from "../modules/FusePoolLens";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FusePoolLens } from "../../typechain/FusePoolLens";
@@ -1097,5 +1098,5 @@ export class FuseBase {
   };
 }
 
-const FuseBaseWithModules = withFusePoolLens(withRewardsDistributor(withSafeLiquidator(FuseBase)));
+const FuseBaseWithModules = withFusePoolLens(withRewardsDistributor(withFundOperations(withSafeLiquidator(FuseBase))));
 export default class Fuse extends FuseBaseWithModules {}

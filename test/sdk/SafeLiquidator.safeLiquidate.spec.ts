@@ -198,7 +198,7 @@ describe("#SafeLiquidator", () => {
     console.log(`Added ${erc20Two.symbol} collateral`);
 
     // Borrow tokenTwo using tokenOne collateral
-    const borrowAmount = "0.05";
+    const borrowAmount = "0.06";
     await borrowCollateral(poolAddress, bob.address, erc20One.symbol, borrowAmount, coingeckoId);
     console.log(`Borrowed ${erc20Two.symbol} collateral`);
 
