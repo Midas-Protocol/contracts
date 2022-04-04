@@ -1,9 +1,9 @@
 import { BigNumber, constants, Contract, ContractFactory } from "ethers";
-import { FuseFlywheelLensRouter } from "../../typechain/FuseFlywheelLensRouter";
 import { FlywheelStaticRewards__factory } from "../../typechain/factories/FlywheelStaticRewards__factory";
 import { FuseFlywheelCore__factory } from "../../typechain/factories/FuseFlywheelCore__factory";
 import { FlywheelStaticRewards } from "../../typechain/FlywheelStaticRewards";
 import { FuseFlywheelCore } from "../../typechain/FuseFlywheelCore";
+import { FuseFlywheelLensRouter } from "../../typechain/FuseFlywheelLensRouter.sol";
 import { FuseBaseConstructor } from "../Fuse/types";
 
 export interface FlywheelClaimableRewards {
@@ -58,7 +58,6 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
       ) as FlywheelStaticRewards__factory;
 
       return (await fwStaticRewardsFactory.deploy(
-        rewardTokenAddress,
         flywheelCoreAddress,
         options.ownerAddress || options.from,
         options.authorityAddress || constants.AddressZero
