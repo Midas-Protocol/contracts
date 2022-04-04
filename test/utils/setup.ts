@@ -43,8 +43,8 @@ export const setUpPriceOraclePrices = async () => {
 };
 
 const setupLocalOraclePrices = async () => {
-  await run("oracle:set-price", { token: "TRIBE", price: "104.4760429" });
-  await run("oracle:set-price", { token: "TOUCH", price: "0.002755851" });
+  await run("oracle:set-price", { token: "TRIBE", price: "94.283240360313659894" });
+  await run("oracle:set-price", { token: "TOUCH", price: "0.002673507105644885" });
 };
 
 const setUpBscOraclePrices = async () => {
