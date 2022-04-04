@@ -69,7 +69,12 @@ describe.only("FlywheelModule", function () {
     });
 
     await sdk.setFlywheelRewards(fwCore.address, fwStaticRewards.address, { from: deployer.address });
+    expect(await fwCore.flywheelRewards()).to.eq(fwStaticRewards.address);
     await sdk.addFlywheelCoreToComptroller(fwCore.address, poolAAddress, { from: deployer.address });
+    const wheels = await sdk.getFlywheelsByPool(poolAAddress, { from: alice.address });
+
+    expect((await sdk.getFlywheelsByPool(poolAAddress, { from: alice.address }))[0].address).to.eq(fwCore.address);
+    expect((await sdk.getFlywheelsByPool(poolBAddress, { from: alice.address })).length).to.eq(0);
 
     // Funding Static Rewards
     await rewardToken.transfer(fwStaticRewards.address, ethers.utils.parseUnits("100", 18), { from: deployer.address });
@@ -135,7 +140,7 @@ describe.only("FlywheelModule", function () {
     expect(singleMarketInfo.rewardsPerSecond).to.eq(rewardsPerSecond);
   });
 
-  it("1 Pool, 1 Flywheel, 1 Reward Distributor", async function () {
+  it.skip("1 Pool, 1 Flywheel, 1 Reward Distributor", async function () {
     const { deployer, alice } = await ethers.getNamedSigners();
 
     const rewardToken = erc20OneUnderlying;
