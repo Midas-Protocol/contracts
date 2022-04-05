@@ -17,7 +17,7 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-contract FlywheelRewards is FlywheelDynamicRewards, DSTest {
+contract FlywheelRewards is FlywheelDynamicRewards {
   constructor(FlywheelCore _flywheel) FlywheelDynamicRewards(_flywheel, 1) {}
 
   function getNextCycleRewards(ERC20 strategy) internal override returns(uint192) {
