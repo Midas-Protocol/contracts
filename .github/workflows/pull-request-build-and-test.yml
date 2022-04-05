@@ -75,7 +75,7 @@ jobs:
       - name: Run build
         run: npm run build
 
-      - name: Run forge tests on BSC
+      - name: Run hardhat tests on BSC
         run: npm run test:bsc
 
       - name: Run forge tests on BSC

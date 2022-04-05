@@ -13,8 +13,9 @@ import {
 import { cERC20Conf, ChainLiquidationConfig, Fuse, liquidationConfigDefaults } from "../../src";
 import { DeployedAsset } from "../utils/pool";
 import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
+import { getOrCreateFuse } from "../utils/fuseSdk";
 
-(process.env.FORK_CHAIN_ID ? describe : describe.skip)("#safeLiquidateWithFlashLoan", () => {
+(process.env.FORK_CHAIN_ID ? describe.only : describe.skip)("#safeLiquidateWithFlashLoan", () => {
   let tx: providers.TransactionResponse;
 
   let eth: cERC20Conf;
@@ -50,7 +51,7 @@ import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
     poolName = "liquidation - fl - " + Math.random().toString();
     ({ chainId } = await ethers.provider.getNetwork());
     await deployments.fixture("prod");
-    const sdk = new Fuse(ethers.provider, Number(chainId));
+    const sdk = await getOrCreateFuse();
 
     coingeckoId = chainId === 1337 ? "ethereum" : "binancecoin";
     liquidationConfigOverrides = {
