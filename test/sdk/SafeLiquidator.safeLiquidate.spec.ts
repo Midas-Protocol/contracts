@@ -54,10 +54,8 @@ describe("#SafeLiquidator", () => {
     ({ chainId } = await ethers.provider.getNetwork());
 
     const sdk = new Fuse(ethers.provider, Number(chainId));
+    await deployments.fixture("prod");
 
-    if (chainId === 1337) {
-      await deployments.fixture("prod");
-    }
     coingeckoId = chainId === 1337 ? "ethereum" : "binancecoin";
     liquidationConfigOverrides = {
       ...liquidationConfigDefaults(sdk)[chainId],

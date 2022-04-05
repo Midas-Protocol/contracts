@@ -12,17 +12,14 @@ import { getOrCreateFuse } from "./utils/fuseSdk";
 
 use(solidity);
 
-describe.only("FusePoolDirectory", function () {
+describe("FusePoolDirectory", function () {
   let mpo: MasterPriceOracle;
   let fpdWithSigner: FusePoolDirectory;
   let implementationComptroller: Comptroller;
   let sdk: Fuse;
 
   this.beforeEach(async () => {
-    const { chainId } = await ethers.provider.getNetwork();
-    // if (chainId === 1337) {
-      await deployments.fixture("prod");
-    // }
+    await deployments.fixture("prod");
     sdk = await getOrCreateFuse();
     await setUpPriceOraclePrices();
   });
