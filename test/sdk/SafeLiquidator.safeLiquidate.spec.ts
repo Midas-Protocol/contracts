@@ -16,7 +16,7 @@ import { cERC20Conf, ChainLiquidationConfig, Fuse, liquidationConfigDefaults, Li
 import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
 import { getOrCreateFuse } from "../utils/fuseSdk";
 
-describe("#SafeLiquidator", () => {
+describe.only("#SafeLiquidator", () => {
   let eth: cERC20Conf;
   let erc20One: cERC20Conf;
   let erc20Two: cERC20Conf;
