@@ -14,6 +14,7 @@ import {
 } from "../../typechain";
 import { cERC20Conf, ChainLiquidationConfig, Fuse, liquidationConfigDefaults, LiquidationStrategy } from "../../";
 import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
+import { getOrCreateFuse } from "../utils/fuseSdk";
 
 describe("#SafeLiquidator", () => {
   let eth: cERC20Conf;
@@ -53,8 +54,8 @@ describe("#SafeLiquidator", () => {
 
     ({ chainId } = await ethers.provider.getNetwork());
 
-    const sdk = new Fuse(ethers.provider, Number(chainId));
     await deployments.fixture("prod");
+    const sdk = await getOrCreateFuse();
 
     coingeckoId = chainId === 1337 ? "ethereum" : "binancecoin";
     liquidationConfigOverrides = {
