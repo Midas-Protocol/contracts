@@ -17,11 +17,18 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-contract FlywheelRewards is FlywheelDynamicRewards {
-  constructor(FlywheelCore _flywheel) FlywheelDynamicRewards(_flywheel, 0) {}
+contract FlywheelRewards is FlywheelDynamicRewards, DSTest {
+  constructor(FlywheelCore _flywheel) FlywheelDynamicRewards(_flywheel, 1) {}
 
   function getNextCycleRewards(ERC20 strategy) internal override returns(uint192) {
-    return 1;
+    uint256 rewardsStream = 0.5e18;
+    rewardToken.transferFrom(
+      address(strategy),
+      address(this),
+      rewardsStream
+    );
+
+    return uint192(rewardsStream);
   }
 }
 
@@ -42,6 +49,7 @@ contract EllipsisERC4626Test is DSTest {
   MockEpsStaker mockEpsStaker;
 
   uint256 depositAmount = 100e18;
+  uint256 rewardsStream = 0.5e18;
   ERC20 marketKey;
   address tester = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
 
@@ -78,6 +86,7 @@ contract EllipsisERC4626Test is DSTest {
       IEpsStaker(address(mockEpsStaker)),
       FlywheelCore(address(flywheel))
     );
+    epsToken.mint(address(ellipsisERC4626), rewardsStream);
     marketKey = ERC20(address(ellipsisERC4626));
     flywheel.addStrategyForRewards(marketKey);
   }
@@ -147,16 +156,19 @@ contract EllipsisERC4626Test is DSTest {
     assertEq(epsToken.balanceOf(address(mockEpsStaker)), 0);
     assertEq(epsToken.balanceOf(address(ellipsisERC4626)), 0);
     assertEq(epsToken.balanceOf(address(flywheel)), 0);
-    assertEq(epsToken.balanceOf(address(flywheelRewards)), 0);
+    // rewards are minted so the dynamic rewards account for them in the current cycle
+    assertEq(epsToken.balanceOf(address(flywheelRewards)), rewardsStream);
 
     vm.warp(3);
     deposit();
     flywheel.accrue(ERC20(ellipsisERC4626), address(this));
     assertEq(mockEpsStaker.totalBalance(address(this)), 0);
+    // half of the accrued reward is kept as penalty
     assertEq(epsToken.balanceOf(address(mockEpsStaker)), 0.5e18);
     assertEq(epsToken.balanceOf(address(ellipsisERC4626)), 0);
     assertEq(epsToken.balanceOf(address(flywheel)), 0);
-    assertEq(epsToken.balanceOf(address(flywheelRewards)), 0.5e18);
+    // rewards accrued for two cycles but not claimed
+    assertEq(epsToken.balanceOf(address(flywheelRewards)), rewardsStream * 2);
   }
 
   function testAccumulatingEPSRewardsOnWithdrawal() public {
@@ -167,10 +179,12 @@ contract EllipsisERC4626Test is DSTest {
     ellipsisERC4626.withdraw(1, address(this), address(this));
     flywheel.accrue(ERC20(ellipsisERC4626), address(this));
     assertEq(mockEpsStaker.totalBalance(address(this)), 0);
+    // half of the accrued reward is kept as penalty
     assertEq(epsToken.balanceOf(address(mockEpsStaker)), 0.5e18);
     assertEq(epsToken.balanceOf(address(ellipsisERC4626)), 0);
     assertEq(epsToken.balanceOf(address(flywheel)), 0);
-    assertEq(epsToken.balanceOf(address(flywheelRewards)), 0.5e18);
+    // rewards accrued for two cycles but not claimed
+    assertEq(epsToken.balanceOf(address(flywheelRewards)), rewardsStream * 2);
   }
 
   function testClaimRewards() public {
@@ -178,7 +192,9 @@ contract EllipsisERC4626Test is DSTest {
     deposit();
     vm.warp(3);
     ellipsisERC4626.withdraw(1, address(this), address(this));
+
     flywheel.accrue(ERC20(ellipsisERC4626), address(this));
+
     flywheel.claimRewards(address(this));
     assertEq(epsToken.balanceOf(address(this)), 499999999999999999);
   }
@@ -197,7 +213,9 @@ contract EllipsisERC4626Test is DSTest {
     flywheel.accrue(ERC20(ellipsisERC4626), address(this), tester);
     flywheel.claimRewards(address(this));
     flywheel.claimRewards(tester);
-    assertEq(epsToken.balanceOf(address(tester)), 0.5e18);
-    assertEq(epsToken.balanceOf(address(this)), 499999999999999999);
+
+    // splitting the rewards for only one cycle of accrued rewards
+    assertEq(epsToken.balanceOf(address(tester)), rewardsStream / 2);
+    assertEq(epsToken.balanceOf(address(this)), (rewardsStream / 2) - 1);
   }
 }
