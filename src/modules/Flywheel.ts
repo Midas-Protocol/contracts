@@ -1,3 +1,4 @@
+import { info } from "console";
 import { BigNumber, constants, Contract, ContractFactory } from "ethers";
 import { FlywheelStaticRewards__factory } from "../../typechain/factories/FlywheelStaticRewards__factory";
 import { FuseFlywheelCore__factory } from "../../typechain/factories/FuseFlywheelCore__factory";
@@ -144,10 +145,26 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
     }
 
     async getFlywheelMarketRewardsByPool(pool: string, options: { from: string }) {
-      return (this.contracts.FuseFlywheelLensRouter as FuseFlywheelLensRouter).callStatic.getMarketRewardsInfo(
-        pool,
-        options
-      );
+      const marketRewards = await (
+        this.contracts.FuseFlywheelLensRouter as FuseFlywheelLensRouter
+      ).callStatic.getMarketRewardsInfo(pool, options);
+      const adaptedMarketRewards = marketRewards.map((marketReward) => ({
+        underlyingPrice: marketReward.underlyingPrice,
+        market: marketReward.market,
+        rewardsInfo: marketReward.rewardsInfo
+          .filter((info) => info.rewardSpeedPerSecondPerToken.gt(0))
+          .map((info) => ({
+            rewardToken: info.rewardToken,
+            flywheel: info.flywheel,
+            rewardSpeedPerSecondPerToken: info.rewardSpeedPerSecondPerToken,
+            rewardTokenPrice: info.rewardTokenPrice,
+            formattedAPR: info.formattedAPR,
+          })),
+        rewardTokens: marketReward.rewardsInfo
+          .filter((info) => info.rewardSpeedPerSecondPerToken.gt(0))
+          .map((info) => info.rewardToken),
+      }));
+      return adaptedMarketRewards;
     }
 
     async getFlywheelMarketRewardsByPools(pools: string[], options: { from: string }) {
