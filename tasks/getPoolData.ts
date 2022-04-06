@@ -19,6 +19,8 @@ export default task("get-pool-data", "Get pools data")
     let chainDeployment = {};
     if (chainId === 1337) {
       chainDeployment = await fuseTestModule.getLocalDeployments();
+    } else if (Number(process.env.FORK_CHAIN_ID) === 56) {
+      chainDeployment = await fuseTestModule.getBscForkDeployments();
     }
     const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId, chainDeployment);
     if (taskArgs.address) {
@@ -73,6 +75,8 @@ task("get-position-ratio", "Get unhealthy po data")
     let chainDeployment = {};
     if (chainId === 1337) {
       chainDeployment = await fuseTestModule.getLocalDeployments();
+    } else if (Number(process.env.FORK_CHAIN_ID) === 56) {
+      chainDeployment = await fuseTestModule.getBscForkDeployments();
     }
     const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId, chainDeployment);
 
