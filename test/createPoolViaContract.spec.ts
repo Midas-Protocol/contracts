@@ -22,11 +22,8 @@ describe("FusePoolDirectory", function () {
   let sdk: Fuse;
 
   this.beforeEach(async () => {
-    const { chainId } = await ethers.provider.getNetwork();
-    if (chainId === 1337) {
-      await deployments.fixture("prod");
-      sdk = await getOrCreateFuse();
-    }
+    await deployments.fixture("prod");
+    sdk = await getOrCreateFuse();
     await setUpPriceOraclePrices();
   });
 
@@ -75,6 +72,7 @@ describe("FusePoolDirectory", function () {
 
       const pools = await fpdWithSigner.getPoolsByAccount(alice.address);
       const pool = pools[1].at(-1);
+
       expect(pool.comptroller).to.eq(poolAddress);
 
       const allPools = await sdk.contracts.FusePoolDirectory.callStatic.getAllPools();

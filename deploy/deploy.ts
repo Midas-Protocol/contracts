@@ -5,7 +5,7 @@ import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
 import { deployIRMs } from "../chainDeploy/helpers";
 import { deployFuseSafeLiquidator } from "../chainDeploy/helpers/liquidator";
 
-export const SALT = "ilovemidas";
+export const SALT = "midascapital.xyz";
 
 const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
   const chainId = await getChainId();

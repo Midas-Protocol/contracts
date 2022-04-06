@@ -5,8 +5,7 @@ import { ChainDeployment } from "../../src/Fuse/types";
 
 let fuseSdk: Fuse;
 
-export const getLocalDeployments = async (): Promise<ChainDeployment> => {
-  let chainDeployment: ChainDeployment = {};
+export const getCommonDeployments = async (chainDeployment: ChainDeployment) => {
   const CErc20Delegate = await ethers.getContract("CErc20Delegate");
   const CErc20DelegateArtifact = await deployments.getArtifact("CErc20Delegate");
   chainDeployment.CErc20Delegate = { abi: CErc20DelegateArtifact.abi, address: CErc20Delegate.address };
@@ -58,20 +57,85 @@ export const getLocalDeployments = async (): Promise<ChainDeployment> => {
   const SimplePriceOracle = await ethers.getContract("SimplePriceOracle");
   const SimplePriceOracleArtifact = await deployments.getArtifact("SimplePriceOracle");
   chainDeployment.SimplePriceOracle = { abi: SimplePriceOracleArtifact.abi, address: SimplePriceOracle.address };
-  const TOUCHToken = await ethers.getContract("TOUCHToken");
-  const TOUCHTokenArtifact = await deployments.getArtifact("TOUCHToken");
-  chainDeployment.TOUCHToken = { abi: TOUCHTokenArtifact.abi, address: TOUCHToken.address };
-  const TRIBEToken = await ethers.getContract("TRIBEToken");
-  const TRIBETokenArtifact = await deployments.getArtifact("TRIBEToken");
-  chainDeployment.TRIBEToken = { abi: TRIBETokenArtifact.abi, address: TRIBEToken.address };
+
   const WhitePaperInterestRateModel = await ethers.getContract("WhitePaperInterestRateModel");
   const WhitePaperInterestRateModelArtifact = await deployments.getArtifact("WhitePaperInterestRateModel");
   chainDeployment.WhitePaperInterestRateModel = {
     abi: WhitePaperInterestRateModelArtifact.abi,
     address: WhitePaperInterestRateModel.address,
   };
-  return chainDeployment;
+
+  return chainDeployment
+}
+
+export const getLocalDeployments = async (): Promise<ChainDeployment> => {
+  let chainDeployment: ChainDeployment = {};
+
+  const TOUCHToken = await ethers.getContract("TOUCHToken");
+  const TOUCHTokenArtifact = await deployments.getArtifact("TOUCHToken");
+  chainDeployment.TOUCHToken = { abi: TOUCHTokenArtifact.abi, address: TOUCHToken.address };
+  const TRIBEToken = await ethers.getContract("TRIBEToken");
+  const TRIBETokenArtifact = await deployments.getArtifact("TRIBEToken");
+  chainDeployment.TRIBEToken = { abi: TRIBETokenArtifact.abi, address: TRIBEToken.address };
+  return await getCommonDeployments(chainDeployment)
 };
+
+
+export const getBscForkDeployments = async (): Promise<ChainDeployment> => {
+  let chainDeployment: ChainDeployment = {};
+  const WhitePaperInterestRateModel = await ethers.getContract("WhitePaperInterestRateModel");
+  const WhitePaperInterestRateModelArtifact = await deployments.getArtifact("WhitePaperInterestRateModel");
+  chainDeployment.WhitePaperInterestRateModel = {
+    abi: WhitePaperInterestRateModelArtifact.abi,
+    address: WhitePaperInterestRateModel.address,
+  };
+  const ChainlinkPriceOracleV2 = await ethers.getContract("ChainlinkPriceOracleV2");
+  const ChainlinkPriceOracleV2Artifact = await deployments.getArtifact("ChainlinkPriceOracleV2");
+  chainDeployment.ChainlinkPriceOracleV2 = {
+    abi: ChainlinkPriceOracleV2Artifact.abi,
+    address: ChainlinkPriceOracleV2.address,
+  };
+
+  const UniswapTwapPriceOracleV2Root = await ethers.getContract("UniswapTwapPriceOracleV2Root");
+  const UniswapTwapPriceOracleV2RootArtifact = await deployments.getArtifact("UniswapTwapPriceOracleV2Root");
+  chainDeployment.UniswapTwapPriceOracleV2Root = {
+    abi: UniswapTwapPriceOracleV2RootArtifact.abi,
+    address: UniswapTwapPriceOracleV2Root.address,
+  };
+
+  const UniswapTwapPriceOracleV2 = await ethers.getContract("UniswapTwapPriceOracleV2");
+  const UniswapTwapPriceOracleV2Artifact = await deployments.getArtifact("UniswapTwapPriceOracleV2");
+  chainDeployment.UniswapTwapPriceOracleV2 = {
+    abi: UniswapTwapPriceOracleV2Artifact.abi,
+    address: UniswapTwapPriceOracleV2.address,
+  };
+  const CurveLpTokenPriceOracleNoRegistry = await ethers.getContract("CurveLpTokenPriceOracleNoRegistry");
+  const CurveLpTokenPriceOracleNoRegistryArtifact = await deployments.getArtifact("CurveLpTokenPriceOracleNoRegistry");
+  chainDeployment.CurveLpTokenPriceOracleNoRegistry = {
+    abi: CurveLpTokenPriceOracleNoRegistryArtifact.abi,
+    address: CurveLpTokenPriceOracleNoRegistry.address,
+  };
+  const XBombLiquidator = await ethers.getContract("XBombLiquidator");
+  const XBombLiquidatorArtifact = await deployments.getArtifact("XBombLiquidator");
+  chainDeployment.XBombLiquidator = {
+    abi: XBombLiquidatorArtifact.abi,
+    address: XBombLiquidator.address,
+  };
+  const JarvisSynthereumLiquidator = await ethers.getContract("JarvisSynthereumLiquidator");
+  const JarvisSynthereumLiquidatorArtifact = await deployments.getArtifact("JarvisSynthereumLiquidator");
+  chainDeployment.JarvisSynthereumLiquidator = {
+    abi: JarvisSynthereumLiquidatorArtifact.abi,
+    address: JarvisSynthereumLiquidator.address,
+  };
+  const CurveLpTokenLiquidatorNoRegistry = await ethers.getContract("CurveLpTokenLiquidatorNoRegistry");
+  const CurveLpTokenLiquidatorNoRegistryArtifact = await deployments.getArtifact("CurveLpTokenLiquidatorNoRegistry");
+  chainDeployment.CurveLpTokenLiquidatorNoRegistry = {
+    abi: CurveLpTokenLiquidatorNoRegistryArtifact.abi,
+    address: CurveLpTokenLiquidatorNoRegistry.address,
+  };
+  return await getCommonDeployments(chainDeployment)
+};
+
 
 export const getOrCreateFuse = async (): Promise<Fuse> => {
   if (!fuseSdk) {
@@ -79,6 +143,8 @@ export const getOrCreateFuse = async (): Promise<Fuse> => {
     let chainDeployment: ChainDeployment;
     if (chainId === 1337) {
       chainDeployment = await getLocalDeployments();
+    } else if (process.env.FORK_CHAIN_ID!) {
+      chainDeployment = await getBscForkDeployments()
     }
     fuseSdk = new Fuse(ethers.provider, chainId, chainDeployment);
   }

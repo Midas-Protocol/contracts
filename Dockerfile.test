@@ -1,8 +1,8 @@
 FROM ethereum/solc:0.8.11-alpine as build-deps
 
-FROM node:16.13-alpine as builder
+FROM node:16.13.0 as builder
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src/app/work
 
 COPY package*.json ./
 COPY src ./src
@@ -14,12 +14,12 @@ RUN npm install -g npm && npm install --legacy-peer-deps
 FROM rust:1.59 as foundy
 
 COPY --from=build-deps /usr/local/bin/solc /usr/bin/solc
-COPY --from=builder /usr/src/app /usr/src/app
+COPY --from=builder /usr/src/app/work /usr/src/app/work
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src/app/work
 COPY contracts/ ./contracts
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src/app/work
 
 COPY deployments ./deployments
 COPY foundry.toml ./
@@ -49,12 +49,12 @@ RUN forge install
 RUN forge build
 
 
-FROM node:16.13-alpine
+FROM node:16.13.0
 
 COPY --from=build-deps /usr/local/bin/solc /usr/bin/solc
-COPY --from=foundy /usr/src/app /usr/src/app
+COPY --from=foundy /usr/src/app/work /usr/src/app/work
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src/app/work
 
 RUN npm run typechain
 RUN npm run build:sdk
