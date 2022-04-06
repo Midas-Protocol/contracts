@@ -58,12 +58,12 @@ export type Artifact = {
   bytecode: {
     object: string;
     sourceMap: string;
-    linkReferences: any
+    linkReferences: any;
   };
   deployedBytecode: {
     object: string;
     sourceMap: string;
-    linkReferences: any
+    linkReferences: any;
   };
 };
 
@@ -177,7 +177,9 @@ export interface USDPricedFuseAsset extends FuseAsset {
 }
 
 export interface FusePoolData {
+  id: number;
   assets: USDPricedFuseAsset[];
+  creator: string;
   comptroller: string;
   name: string;
   totalLiquidityUSD: number;
@@ -185,11 +187,11 @@ export interface FusePoolData {
   totalBorrowedUSD: number;
   totalSupplyBalanceUSD: number;
   totalBorrowBalanceUSD: number;
-  oracle: string;
-  oracleModel: string | undefined;
-  id?: number;
-  admin: string;
-  isAdminWhitelisted: boolean;
+  blockPosted: BigNumber;
+  timestampPosted: BigNumber;
+  underlyingTokens: string[];
+  underlyingSymbols: string[];
+  whitelistedAdmin: boolean;
 }
 
 export interface FusePool {
