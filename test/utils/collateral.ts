@@ -6,6 +6,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 import { MasterPriceOracle, SimplePriceOracle } from "../../typechain";
 import { chainDeployConfig } from "../../chainDeploy";
+import { getOrCreateFuse } from "./fuseSdk";
 
 export async function getAsset(
   sdk: Fuse,
@@ -38,9 +39,7 @@ export async function addCollateral(
   let amountBN: BigNumber;
   let cToken: Contract;
 
-  const { chainId } = await ethers.provider.getNetwork();
-
-  const sdk = new Fuse(ethers.provider, chainId);
+  const sdk = await getOrCreateFuse();
 
   const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol, cgId);
 
@@ -88,9 +87,8 @@ export async function borrowCollateral(
   let tx: providers.TransactionResponse;
   let rec: providers.TransactionReceipt;
 
-  const { chainId } = await ethers.provider.getNetwork();
   const signer = await ethers.getSigner(borrowerAddress);
-  const sdk = new Fuse(ethers.provider, chainId);
+  const sdk = await getOrCreateFuse();
   const assetToDeploy = await getAsset(sdk, poolAddress, underlyingSymbol, cgId);
 
   const pool = await ethers.getContractAt("Comptroller.sol:Comptroller", poolAddress, signer);
