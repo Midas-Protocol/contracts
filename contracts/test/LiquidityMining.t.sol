@@ -124,12 +124,15 @@ contract LiquidityMiningTest is DSTest {
       address(this),
       Authority(address(0))
     );
-    rewards = new FlywheelStaticRewards(flywheel, address(this), Authority(address(0)));
+    rewards = new FlywheelStaticRewards(flywheel);
     flywheel.setFlywheelRewards(rewards);
 
     flywheelClaimer = new FuseFlywheelLensRouter();
 
-    flywheel.addStrategyForRewards(ERC20(address(cErc20)));
+    flywheel.addStrategyForRewards(
+      ERC20(address(cErc20)),
+      abi.encode(FlywheelStaticRewards.RewardsInfo({ rewardsPerSecond: 1 ether, rewardsEndTimestamp: 0 }))
+    );
 
     // add flywheel as rewardsDistributor to call flywheelPreBorrowAction / flywheelPreSupplyAction
     require(comptroller._addRewardsDistributor(address(flywheel)) == 0);
@@ -137,13 +140,7 @@ contract LiquidityMiningTest is DSTest {
     // seed rewards to flywheel
     rewardToken.mint(address(rewards), 100 ether);
 
-    // Start reward distribution at 1 token per second
-    rewards.setRewardsInfo(
-      ERC20(address(cErc20)),
-      FlywheelStaticRewards.RewardsInfo({ rewardsPerSecond: 1 ether, rewardsEndTimestamp: 0 })
-    );
-
-    // preperation for a later call
+    // preparation for a later call
     flywheelsToClaim.push(flywheel);
   }
 

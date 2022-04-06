@@ -88,7 +88,7 @@ contract EllipsisERC4626Test is DSTest {
     );
     epsToken.mint(address(ellipsisERC4626), rewardsStream);
     marketKey = ERC20(address(ellipsisERC4626));
-    flywheel.addStrategyForRewards(marketKey);
+    flywheel.addStrategyForRewards(marketKey, "");
   }
 
   function testInitializedValues() public {
