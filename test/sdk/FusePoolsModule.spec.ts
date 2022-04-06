@@ -9,7 +9,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 use(solidity);
 
-describe.only("FusePoolsModule", function () {
+describe("FusePoolsModule", function () {
   let poolAddress: string;
   let sdk: Fuse;
   let deployer: SignerWithAddress;
