@@ -44,12 +44,10 @@ import {
   Artifacts,
   cERC20Conf,
   ChainDeployment,
-  FusePoolData,
   InterestRateModel,
   InterestRateModelConf,
   InterestRateModelParams,
   OracleConf,
-  USDPricedFuseAsset,
 } from "./types";
 import {
   COMPTROLLER_ERROR_CODES,
@@ -59,11 +57,11 @@ import {
   WHITE_PAPER_RATE_MODEL_CONF,
 } from "./config";
 import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig, SupportedChains } from "../network";
-import { filterOnlyObjectProperties, filterPoolName } from "./utils";
 import { withRewardsDistributor } from "../modules/RewardsDistributor";
 import { withFundOperations } from "../modules/FundOperations";
 import { withFusePoolLens } from "../modules/FusePoolLens";
 import { withFlywheel } from "../modules/Flywheel";
+import { withFusePools } from "../modules/FusePools";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FusePoolLens } from "../../typechain/FusePoolLens";
 import { FusePoolLensSecondary } from "../../typechain/FusePoolLensSecondary";
@@ -1020,99 +1018,6 @@ export class FuseBase {
     return irmName;
   };
 
-  fetchFusePoolData = async (
-    poolId: string | undefined,
-    address?: string,
-    coingeckoId?: string
-  ): Promise<FusePoolData | undefined> => {
-    if (!poolId) return undefined;
-
-    const { comptroller, name: _unfiliteredName } = await this.contracts.FusePoolDirectory.pools(Number(poolId));
-
-    const name = filterPoolName(_unfiliteredName);
-
-    const assets: USDPricedFuseAsset[] = (
-      await this.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(comptroller, {
-        from: address,
-      })
-    ).map(filterOnlyObjectProperties);
-
-    let totalLiquidityUSD = 0;
-
-    let totalSupplyBalanceUSD = 0;
-    let totalBorrowBalanceUSD = 0;
-
-    let totalSuppliedUSD = 0;
-    let totalBorrowedUSD = 0;
-
-    const price: number = utils.formatEther(
-      // prefer rari because it has caching
-      await this.getUsdPriceBN(coingeckoId, true)
-    ) as any;
-
-    const promises: Promise<boolean>[] = [];
-
-    const comptrollerContract = new Contract(
-      comptroller,
-      this.chainDeployment.Comptroller.abi,
-      this.provider.getSigner()
-    );
-    for (let i = 0; i < assets.length; i++) {
-      const asset = assets[i];
-
-      // @todo aggregate the borrow/supply guardian paused into 1
-      promises.push(
-        comptrollerContract.callStatic
-          .borrowGuardianPaused(asset.cToken)
-          .then((isPaused: boolean) => (asset.isPaused = isPaused))
-      );
-      promises.push(
-        comptrollerContract.callStatic
-          .mintGuardianPaused(asset.cToken)
-          .then((isPaused: boolean) => (asset.isSupplyPaused = isPaused))
-      );
-
-      asset.supplyBalanceUSD =
-        Number(utils.formatUnits(asset.supplyBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
-
-      asset.borrowBalanceUSD =
-        Number(utils.formatUnits(asset.borrowBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
-
-      totalSupplyBalanceUSD += asset.supplyBalanceUSD;
-      totalBorrowBalanceUSD += asset.borrowBalanceUSD;
-
-      asset.totalSupplyUSD =
-        Number(utils.formatUnits(asset.totalSupply)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
-      asset.totalBorrowUSD =
-        Number(utils.formatUnits(asset.totalBorrow)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
-
-      totalSuppliedUSD += asset.totalSupplyUSD;
-      totalBorrowedUSD += asset.totalBorrowUSD;
-
-      asset.liquidityUSD =
-        Number(utils.formatUnits(asset.liquidity)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
-
-      totalLiquidityUSD += asset.liquidityUSD;
-    }
-
-    await Promise.all(promises);
-
-    return {
-      assets: assets.sort((a, b) => (b.liquidityUSD > a.liquidityUSD ? 1 : -1)),
-      comptroller,
-      name,
-      totalLiquidityUSD,
-      totalSuppliedUSD,
-      totalBorrowedUSD,
-      totalSupplyBalanceUSD,
-      totalBorrowBalanceUSD,
-      oracle: "",
-      oracleModel: "",
-      admin: "",
-      isAdminWhitelisted: true,
-    };
-  };
-
   getComptrollerInstance(comptrollerAddress: string, options: { from: string }) {
     return new Contract(
       comptrollerAddress,
@@ -1123,6 +1028,7 @@ export class FuseBase {
 }
 
 const FuseBaseWithModules = withFlywheel(
-  withFusePoolLens(withRewardsDistributor(withFundOperations(withSafeLiquidator(FuseBase))))
+  withFusePoolLens(withRewardsDistributor(withFundOperations(withSafeLiquidator(withFusePools(FuseBase)))))
 );
+
 export default class Fuse extends FuseBaseWithModules {}
