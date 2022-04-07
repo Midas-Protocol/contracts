@@ -9,19 +9,11 @@ import { EllipsisERC4626, ILpTokenStaker } from "../compound/strategies/Ellipsis
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { MockLpTokenStaker, IERC20Mintable } from "./mocks/ellipsis/MockLpTokenStaker.sol";
-import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
-import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
+import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
+import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
-
-contract FlywheelRewards is FlywheelDynamicRewards {
-  constructor(FlywheelCore _flywheel) FlywheelDynamicRewards(_flywheel, 0) {}
-
-  function getNextCycleRewards(ERC20 strategy) internal override returns (uint192) {
-    return 1;
-  }
-}
 
 contract EllipsisERC4626Test is DSTest {
   using stdStorage for StdStorage;
@@ -32,7 +24,7 @@ contract EllipsisERC4626Test is DSTest {
 
   EllipsisERC4626 ellipsisERC4626;
   FlywheelCore flywheel;
-  FlywheelDynamicRewards flywheelRewards;
+  FuseFlywheelDynamicRewards flywheelRewards;
 
   MockERC20 testToken;
   MockERC20 epsToken;
@@ -53,13 +45,13 @@ contract EllipsisERC4626Test is DSTest {
 
     flywheel = new FlywheelCore(
       epsToken,
-      FlywheelDynamicRewards(address(0)),
+      IFlywheelRewards(address(0)),
       IFlywheelBooster(address(0)),
       address(this),
       Authority(address(0))
     );
 
-    flywheelRewards = new FlywheelRewards(flywheel);
+    flywheelRewards = new FuseFlywheelDynamicRewards(flywheel, 1);
     flywheel.setFlywheelRewards(flywheelRewards);
 
     ellipsisERC4626 = new EllipsisERC4626(
@@ -71,6 +63,7 @@ contract EllipsisERC4626Test is DSTest {
     );
     marketKey = ERC20(address(ellipsisERC4626));
     flywheel.addStrategyForRewards(marketKey);
+    flywheel.accrue(marketKey, address(this));
   }
 
   function testInitializedValues() public {
@@ -136,6 +129,7 @@ contract EllipsisERC4626Test is DSTest {
 
     vm.warp(3);
     ellipsisERC4626.withdraw(1, address(this), address(this));
+    vm.warp(4);
     flywheel.accrue(ERC20(ellipsisERC4626), address(this));
     assertEq(epsToken.balanceOf(address(ellipsisERC4626)), 0);
     assertEq(epsToken.balanceOf(address(flywheel)), 0);
