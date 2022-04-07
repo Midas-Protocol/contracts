@@ -9,6 +9,8 @@ export enum SupportedChains {
   evmos = 9001,
   evmos_testnet = 9000,
   harmony = 1666600000,
+  moonbeam = 1284,
+  moonbase_alpha = 1287,
 }
 
 export const chainSpecificParams = {
@@ -23,6 +25,12 @@ export const chainSpecificParams = {
   },
   // TODO: not sure if this is correct
   [SupportedChains.evmos_testnet]: {
+    blocksPerYear: BigNumber.from((4 * 24 * 365 * 60).toString()),
+  },
+  [SupportedChains.moonbeam]: {
+    blocksPerYear: BigNumber.from((4 * 24 * 365 * 60).toString()),
+  },
+  [SupportedChains.moonbase_alpha]: {
     blocksPerYear: BigNumber.from((4 * 24 * 365 * 60).toString()),
   },
 };
@@ -69,6 +77,26 @@ export const chainSpecificAddresses = {
     UNISWAP_V2_FACTORY: "0xBB86C1332f54afb6509CB599BF88980f7b389403",
     PAIR_INIT_HASH: ethers.utils.hexlify("0xa192c894487128ec7b68781ed7bd7e3141d1718df9e4e051e0124b7671d9a6ef"),
   },
+  [SupportedChains.moonbeam]: {
+    DAI_POT: "",
+    DAI_JUG: "",
+    USDC: "",
+    W_TOKEN: "",
+    W_TOKEN_USD_CHAINLINK_PRICE_FEED: "",
+    UNISWAP_V2_ROUTER: "",
+    UNISWAP_V2_FACTORY: "",
+    PAIR_INIT_HASH: ethers.utils.hexlify(""),
+  },
+  [SupportedChains.moonbase_alpha]: {
+    DAI_POT: "",
+    DAI_JUG: "",
+    USDC: "",
+    W_TOKEN: "",
+    W_TOKEN_USD_CHAINLINK_PRICE_FEED: "",
+    UNISWAP_V2_ROUTER: "",
+    UNISWAP_V2_FACTORY: "",
+    PAIR_INIT_HASH: ethers.utils.hexlify(""),
+  },
 };
 
 const OracleTypes = {
@@ -93,6 +121,8 @@ export const chainOracles = {
   ],
   // TODO: not sure if this is correct
   [SupportedChains.evmos_testnet]: [OracleTypes.MasterPriceOracle],
+  [SupportedChains.moonbeam]: [OracleTypes.MasterPriceOracle],
+  [SupportedChains.moonbase_alpha]: [OracleTypes.MasterPriceOracle],
 };
 
 export const oracleConfig = (deployments: ChainDeployment, artifacts: Artifacts, availableOracles: Array<string>) => {
