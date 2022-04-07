@@ -31063,7 +31063,7 @@
       "chainId": "1337",
       "contracts": {
         "CErc20Delegate": {
-          "address": "0xE13935c5d6A578ae6132D4e5b1405b113587f6F7",
+          "address": "0x51818b900BbD21Aef63cf3c12B124850D7b48fBd",
           "abi": [
             {
               "inputs": [],
@@ -32552,7 +32552,7 @@
           ]
         },
         "CEtherDelegate": {
-          "address": "0x1986dF3cD66a6412a3d904Dec3C36760E712Ca01",
+          "address": "0x753CfA7C9710b95bd5831C3dC8D158B52a27f326",
           "abi": [
             {
               "inputs": [],
@@ -33981,7 +33981,7 @@
           ]
         },
         "Comptroller": {
-          "address": "0xeBc6C2DDBE056733370754457cf6EA87bf35596e",
+          "address": "0x0439431f9bC5D7548897ef1eeac4c1AEf3a46832",
           "abi": [
             {
               "inputs": [
@@ -36155,7 +36155,7 @@
           ]
         },
         "FixedNativePriceOracle": {
-          "address": "0x548d62eB2a09075cC119833BCd07594a4236cC40",
+          "address": "0x51B9E45b9b3B24B421422E08Ce9F9698e5EadF2A",
           "abi": [
             {
               "inputs": [
@@ -36198,7 +36198,7 @@
           ]
         },
         "FuseFeeDistributor": {
-          "address": "0xFc1f56C58286E7215701A773b61bFf2e18A177dE",
+          "address": "0xc4B53D1BD27F9e9aAc8A9d96382B56012b47CFC9",
           "abi": [
             {
               "anonymous": false,
@@ -37020,7 +37020,7 @@
           ]
         },
         "FuseFeeDistributor_Implementation": {
-          "address": "0xc72B59717E5488cb7C5b6814aDf8cE3e7aA52ce5",
+          "address": "0x82c3947f157E16d32132301527E3393bd8656C6d",
           "abi": [
             {
               "anonymous": false,
@@ -37702,7 +37702,7 @@
           ]
         },
         "FuseFeeDistributor_Proxy": {
-          "address": "0xFc1f56C58286E7215701A773b61bFf2e18A177dE",
+          "address": "0xc4B53D1BD27F9e9aAc8A9d96382B56012b47CFC9",
           "abi": [
             {
               "inputs": [
@@ -37851,7 +37851,7 @@
           ]
         },
         "FuseFlywheelLensRouter": {
-          "address": "0x8f139125382b88796D7EBd8F8A771d1b012b4de1",
+          "address": "0x30cC449C3aB0c88A99F5132C2D411d5fCc00071B",
           "abi": [
             {
               "anonymous": false,
@@ -37878,6 +37878,19 @@
                 {
                   "indexed": true,
                   "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                }
+              ],
+              "name": "BeaconUpgraded",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
                   "name": "implementation",
                   "type": "address"
                 }
@@ -37895,7 +37908,7 @@
               "outputs": [
                 {
                   "internalType": "address",
-                  "name": "",
+                  "name": "admin_",
                   "type": "address"
                 }
               ],
@@ -37921,7 +37934,7 @@
               "outputs": [
                 {
                   "internalType": "address",
-                  "name": "",
+                  "name": "implementation_",
                   "type": "address"
                 }
               ],
@@ -37966,6 +37979,69 @@
             {
               "inputs": [
                 {
+                  "internalType": "contract Comptroller",
+                  "name": "comptroller",
+                  "type": "address"
+                }
+              ],
+              "name": "getMarketRewardsInfo",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "underlyingPrice",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "contract CToken",
+                      "name": "market",
+                      "type": "address"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardSpeedPerSecondPerToken",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardTokenPrice",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "formattedAPR",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "flywheel",
+                          "type": "address"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "rewardToken",
+                          "type": "address"
+                        }
+                      ],
+                      "internalType": "struct FuseFlywheelLensRouter.RewardsInfo[]",
+                      "name": "rewardsInfo",
+                      "type": "tuple[]"
+                    }
+                  ],
+                  "internalType": "struct FuseFlywheelLensRouter.MarketRewardsInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
                   "internalType": "address",
                   "name": "user",
                   "type": "address"
@@ -37976,18 +38052,13 @@
                   "type": "address[]"
                 },
                 {
-                  "internalType": "contract FlywheelCore[]",
+                  "internalType": "contract FuseFlywheelCore[]",
                   "name": "flywheels",
                   "type": "address[]"
                 },
                 {
                   "internalType": "bool[]",
                   "name": "accrue",
-                  "type": "bool[]"
-                },
-                {
-                  "internalType": "bool[]",
-                  "name": "claimPlugins",
                   "type": "bool[]"
                 }
               ],
@@ -38015,7 +38086,7 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "contract FlywheelCore[]",
+                  "internalType": "contract FuseFlywheelCore[]",
                   "name": "flywheels",
                   "type": "address[]"
                 },
@@ -38023,11 +38094,6 @@
                   "internalType": "bool[]",
                   "name": "accrue",
                   "type": "bool[]"
-                },
-                {
-                  "internalType": "bool",
-                  "name": "claimPlugin",
-                  "type": "bool"
                 }
               ],
               "name": "getUnclaimedRewardsForMarket",
@@ -38045,12 +38111,12 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "initialLogic",
+                  "name": "_logic",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "initialAdmin",
+                  "name": "admin_",
                   "type": "address"
                 },
                 {
@@ -38065,8 +38131,71 @@
           ]
         },
         "FuseFlywheelLensRouter_Implementation": {
-          "address": "0x01B164873F366f0EF15F1AB126FAC3cD16a91f44",
+          "address": "0xd8D59864b95Fd934217996fb62BA0a62F54d5C1D",
           "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "contract Comptroller",
+                  "name": "comptroller",
+                  "type": "address"
+                }
+              ],
+              "name": "getMarketRewardsInfo",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "underlyingPrice",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "contract CToken",
+                      "name": "market",
+                      "type": "address"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardSpeedPerSecondPerToken",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardTokenPrice",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "formattedAPR",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "flywheel",
+                          "type": "address"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "rewardToken",
+                          "type": "address"
+                        }
+                      ],
+                      "internalType": "struct FuseFlywheelLensRouter.RewardsInfo[]",
+                      "name": "rewardsInfo",
+                      "type": "tuple[]"
+                    }
+                  ],
+                  "internalType": "struct FuseFlywheelLensRouter.MarketRewardsInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
             {
               "inputs": [
                 {
@@ -38080,18 +38209,13 @@
                   "type": "address[]"
                 },
                 {
-                  "internalType": "contract FlywheelCore[]",
+                  "internalType": "contract FuseFlywheelCore[]",
                   "name": "flywheels",
                   "type": "address[]"
                 },
                 {
                   "internalType": "bool[]",
                   "name": "accrue",
-                  "type": "bool[]"
-                },
-                {
-                  "internalType": "bool[]",
-                  "name": "claimPlugins",
                   "type": "bool[]"
                 }
               ],
@@ -38119,7 +38243,7 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "contract FlywheelCore[]",
+                  "internalType": "contract FuseFlywheelCore[]",
                   "name": "flywheels",
                   "type": "address[]"
                 },
@@ -38127,11 +38251,6 @@
                   "internalType": "bool[]",
                   "name": "accrue",
                   "type": "bool[]"
-                },
-                {
-                  "internalType": "bool",
-                  "name": "claimPlugin",
-                  "type": "bool"
                 }
               ],
               "name": "getUnclaimedRewardsForMarket",
@@ -38148,18 +38267,18 @@
           ]
         },
         "FuseFlywheelLensRouter_Proxy": {
-          "address": "0x8f139125382b88796D7EBd8F8A771d1b012b4de1",
+          "address": "0x30cC449C3aB0c88A99F5132C2D411d5fCc00071B",
           "abi": [
             {
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "initialLogic",
+                  "name": "_logic",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "initialAdmin",
+                  "name": "admin_",
                   "type": "address"
                 },
                 {
@@ -38196,6 +38315,19 @@
                 {
                   "indexed": true,
                   "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                }
+              ],
+              "name": "BeaconUpgraded",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
                   "name": "implementation",
                   "type": "address"
                 }
@@ -38213,7 +38345,7 @@
               "outputs": [
                 {
                   "internalType": "address",
-                  "name": "",
+                  "name": "admin_",
                   "type": "address"
                 }
               ],
@@ -38239,7 +38371,7 @@
               "outputs": [
                 {
                   "internalType": "address",
-                  "name": "",
+                  "name": "implementation_",
                   "type": "address"
                 }
               ],
@@ -38284,7 +38416,7 @@
           ]
         },
         "FusePoolDirectory": {
-          "address": "0x295d7347606F4bd810C8296bb8d75D657001fcf7",
+          "address": "0xc5004A8641DDe15De451C07191af35661334fe9D",
           "abi": [
             {
               "anonymous": false,
@@ -39030,7 +39162,7 @@
           ]
         },
         "FusePoolDirectory_Implementation": {
-          "address": "0x9974DE9F0AC2abF5f7A2E85C7039D23b9F69bd84",
+          "address": "0xbDCeC66473D04de48e7B3C4b93863884a7d40E34",
           "abi": [
             {
               "anonymous": false,
@@ -39632,7 +39764,7 @@
           ]
         },
         "FusePoolDirectory_Proxy": {
-          "address": "0x295d7347606F4bd810C8296bb8d75D657001fcf7",
+          "address": "0xc5004A8641DDe15De451C07191af35661334fe9D",
           "abi": [
             {
               "inputs": [
@@ -39781,7 +39913,7 @@
           ]
         },
         "FusePoolLens": {
-          "address": "0xFed496831E71794D746A35Ad8feef57885e6CdCB",
+          "address": "0x6129Cb0B5c954AC3ce36331960B2d3F20BB01c01",
           "abi": [
             {
               "anonymous": false,
@@ -41106,7 +41238,7 @@
           ]
         },
         "FusePoolLensSecondary": {
-          "address": "0x4B68509296e33e47d6A09D76F75500920cc1a006",
+          "address": "0x0BE6658178B48C3babD738b77e7f5cE9Bed3A4f5",
           "abi": [
             {
               "anonymous": false,
@@ -41549,7 +41681,7 @@
           ]
         },
         "FusePoolLensSecondary_Implementation": {
-          "address": "0xFd307e2DeE5F83ba90EB5B3ebBcDC08fb08087DD",
+          "address": "0xDdfeD7A3bf0a6200aF01044139644FEE1e503335",
           "abi": [
             {
               "anonymous": false,
@@ -41848,7 +41980,7 @@
           ]
         },
         "FusePoolLensSecondary_Proxy": {
-          "address": "0x4B68509296e33e47d6A09D76F75500920cc1a006",
+          "address": "0x0BE6658178B48C3babD738b77e7f5cE9Bed3A4f5",
           "abi": [
             {
               "inputs": [
@@ -41997,7 +42129,7 @@
           ]
         },
         "FusePoolLens_Implementation": {
-          "address": "0x87B30C454Cb1759adf7c1A5389D9b81f54fDd9A1",
+          "address": "0x810614AD10b4d27add2c57FD3E9ec86C2D332BF6",
           "abi": [
             {
               "anonymous": false,
@@ -43178,7 +43310,7 @@
           ]
         },
         "FusePoolLens_Proxy": {
-          "address": "0xFed496831E71794D746A35Ad8feef57885e6CdCB",
+          "address": "0x6129Cb0B5c954AC3ce36331960B2d3F20BB01c01",
           "abi": [
             {
               "inputs": [
@@ -43327,7 +43459,7 @@
           ]
         },
         "FuseSafeLiquidator": {
-          "address": "0xc9C3D317E89f4390A564D56180bBB1842CF3c99C",
+          "address": "0x23fc6bD0A728fBCaC9c945B1e8Fe554Ef81Ae724",
           "abi": [
             {
               "anonymous": false,
@@ -43941,7 +44073,7 @@
           ]
         },
         "FuseSafeLiquidator_Implementation": {
-          "address": "0x6597dDeF3c63FAc72a988b76E18e5756C5c39bCD",
+          "address": "0x1ddb16E8863C3B046a05ab4367ec28c6F0b94617",
           "abi": [
             {
               "anonymous": false,
@@ -44415,7 +44547,7 @@
           ]
         },
         "FuseSafeLiquidator_Proxy": {
-          "address": "0xc9C3D317E89f4390A564D56180bBB1842CF3c99C",
+          "address": "0x23fc6bD0A728fBCaC9c945B1e8Fe554Ef81Ae724",
           "abi": [
             {
               "inputs": [
@@ -44564,7 +44696,7 @@
           ]
         },
         "InitializableClones": {
-          "address": "0x0d60aBC417bf4190A379201FC8C3F8B0e7a9C555",
+          "address": "0x09CF34d00Bd751AB3ab5FD931889CdC8015a12E1",
           "abi": [
             {
               "anonymous": false,
@@ -44606,7 +44738,7 @@
           ]
         },
         "JumpRateModel": {
-          "address": "0x060C1e69Ee7aC35bFfa0D938FA085071F40bE45E",
+          "address": "0xE8166C656104F415914Dac317d6d99908103F14F",
           "abi": [
             {
               "inputs": [
@@ -44843,7 +44975,7 @@
           ]
         },
         "MasterPriceOracle": {
-          "address": "0xF603C1212907aeec18034451CaD28CC2347b50d4",
+          "address": "0x81d722F283a271D90A0d6fD8eBb30c7131D8ab84",
           "abi": [
             {
               "anonymous": false,
@@ -45115,7 +45247,7 @@
           ]
         },
         "RewardsDistributorDelegate": {
-          "address": "0xA567166EE1FA369e74EfB35A3dA21df764aa4Ae3",
+          "address": "0x19c5fE1357454Eda227d35Cb65898fe8F9818318",
           "abi": [
             {
               "anonymous": false,
@@ -45869,7 +46001,7 @@
           ]
         },
         "SimplePriceOracle": {
-          "address": "0x05aa5c3CdE91cA0B6264114F7B361E00A1FD924E",
+          "address": "0xC14f5de8a78715F9331459c886682565935ae116",
           "abi": [
             {
               "anonymous": false,
@@ -46011,7 +46143,7 @@
           ]
         },
         "TOUCHToken": {
-          "address": "0xa4498F7dBaBCF4248b0E9B8667aCb560252a8907",
+          "address": "0x269dfF05D9149806745b819E10EA61ab20596B3B",
           "abi": [
             {
               "inputs": [
@@ -46329,7 +46461,7 @@
           ]
         },
         "TRIBEToken": {
-          "address": "0x4557f20084DE100F2FCDC6f596e78BCAb6893562",
+          "address": "0x6b4D7aD95513CF111035a5e5e2f01c7a2A2Ffc5C",
           "abi": [
             {
               "inputs": [
@@ -46647,7 +46779,7 @@
           ]
         },
         "WhitePaperInterestRateModel": {
-          "address": "0xbb9e9203f01e2878B2418E64c79C7Ae4D39Af03b",
+          "address": "0x7fF89adcb358EAa6c1b9549ADef0A5aC22872E1f",
           "abi": [
             {
               "inputs": [
