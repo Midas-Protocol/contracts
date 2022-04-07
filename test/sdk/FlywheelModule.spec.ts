@@ -7,6 +7,7 @@ import * as collateralHelpers from "../utils/collateral";
 import * as poolHelpers from "../utils/pool";
 import * as timeHelpers from "../utils/time";
 import { constants } from "ethers";
+import { getOrCreateFuse } from "../utils/fuseSdk";
 
 describe("FlywheelModule", function () {
   let poolAAddress: string;
@@ -26,7 +27,7 @@ describe("FlywheelModule", function () {
     await setUpPriceOraclePrices();
     const { deployer } = await ethers.getNamedSigners();
 
-    sdk = new Fuse(ethers.provider, chainId);
+    sdk = await getOrCreateFuse();
 
     [poolAAddress] = await poolHelpers.createPool({ signer: deployer, poolName: "PoolA-RewardsDistributor-Test" });
     [poolBAddress] = await poolHelpers.createPool({ signer: deployer, poolName: "PoolB-RewardsDistributor-Test" });
