@@ -1,13 +1,6 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.0;
+// SPDX-License-Identifier: AGPL-3.0-only
+pragma solidity 0.8.10;
 
-import "../compound/CToken.sol";
-import "./VeMDSToken.sol";
-import "./GaugesController.sol";
 
 contract Gauge {
-  GaugesController public gaugesController;
-  VeMDSToken private veMdsToken;
-  CToken public cToken;
-  IRewardsDistributor public rewardsDistributor;
 }
