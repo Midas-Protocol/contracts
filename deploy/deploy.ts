@@ -181,6 +181,19 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     console.log("FusePoolLensSecondary already initialized");
   }
 
+  dep = await deployments.deterministic("FuseFlywheelLensRouter", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [],
+    log: true,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
+  });
+  const fflrReceipt = await dep.deploy();
+  if (fflrReceipt.transactionHash) await ethers.provider.waitForTransaction(fflrReceipt.transactionHash);
+  console.log("FuseFlywheelLensRouter: ", fflrReceipt.address);
+
   const etherDelegate = await ethers.getContract("CEtherDelegate", deployer);
   const erc20Delegate = await ethers.getContract("CErc20Delegate", deployer);
 

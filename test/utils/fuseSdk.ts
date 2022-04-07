@@ -36,6 +36,12 @@ export const getCommonDeployments = async (chainDeployment: ChainDeployment) => 
     abi: FusePoolLensSecondaryArtifact.abi,
     address: FusePoolLensSecondary.address,
   };
+  const FuseFlywheelLensRouter = await ethers.getContract("FuseFlywheelLensRouter");
+  const FuseFlywheelLensRouterArtifact = await deployments.getArtifact("FuseFlywheelLensRouter");
+  chainDeployment.FuseFlywheelLensRouter = {
+    abi: FuseFlywheelLensRouterArtifact.abi,
+    address: FuseFlywheelLensRouter.address,
+  };
   const FuseSafeLiquidator = await ethers.getContract("FuseSafeLiquidator");
   const FuseSafeLiquidatorArtifact = await deployments.getArtifact("FuseSafeLiquidator");
   chainDeployment.FuseSafeLiquidator = { abi: FuseSafeLiquidatorArtifact.abi, address: FuseSafeLiquidator.address };

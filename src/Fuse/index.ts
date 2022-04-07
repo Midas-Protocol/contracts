@@ -23,12 +23,15 @@ import CErc20DelegatorArtifact from "../../out/CErc20Delegator.sol/CErc20Delegat
 import CTokenInterfacesArtifact from "../../out/CTokenInterfaces.sol/CTokenInterface.json";
 import EIP20InterfaceArtifact from "../../out/EIP20Interface.sol/EIP20Interface.json";
 import RewardsDistributorDelegatorArtifact from "../../out/RewardsDistributorDelegator.sol/RewardsDistributorDelegator.json";
-import PreferredPriceOracleArtifact from "../../out/PreferredPriceOracle.sol/PreferredPriceOracle.json";
+import RewardsDistributorDelegateArtifact from "../../out/RewardsDistributorDelegate.sol/RewardsDistributorDelegate.json";
+import FuseFlywheelCoreArtifact from "../../out/FuseFlywheelCore.sol/FuseFlywheelCore.json";
+import FlywheelStaticRewardsArtifact from "../../out/FlywheelStaticRewards.sol/FlywheelStaticRewards.json";
 
 // Oracle Artifacts
 import MasterPriceOracleArtifact from "../../out/MasterPriceOracle.sol/MasterPriceOracle.json";
 import SimplePriceOracleArtifact from "../../out/SimplePriceOracle.sol/SimplePriceOracle.json";
 import ChainlinkPriceOracleV2Artifact from "../../out/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json";
+import PreferredPriceOracleArtifact from "../../out/PreferredPriceOracle.sol/PreferredPriceOracle.json";
 
 // IRM Artifacts
 import JumpRateModelArtifact from "../../out/JumpRateModel.sol/JumpRateModel.json";
@@ -41,12 +44,10 @@ import {
   Artifacts,
   cERC20Conf,
   ChainDeployment,
-  FusePoolData,
   InterestRateModel,
   InterestRateModelConf,
   InterestRateModelParams,
   OracleConf,
-  USDPricedFuseAsset,
 } from "./types";
 import {
   COMPTROLLER_ERROR_CODES,
@@ -56,16 +57,19 @@ import {
   WHITE_PAPER_RATE_MODEL_CONF,
 } from "./config";
 import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig, SupportedChains } from "../network";
-import { filterOnlyObjectProperties, filterPoolName } from "./utils";
 import { withRewardsDistributor } from "../modules/RewardsDistributor";
 import { withFundOperations } from "../modules/FundOperations";
 import { withFusePoolLens } from "../modules/FusePoolLens";
+import { withFlywheel } from "../modules/Flywheel";
+import { withFusePools } from "../modules/FusePools";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FusePoolLens } from "../../typechain/FusePoolLens";
 import { FusePoolLensSecondary } from "../../typechain/FusePoolLensSecondary";
 import { FuseSafeLiquidator } from "../../typechain/FuseSafeLiquidator";
 import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
 import { withSafeLiquidator } from "../modules/liquidation/SafeLiquidator";
+import { Comptroller } from "../../typechain/Comptroller";
+import { FuseFlywheelLensRouter } from "../../typechain/FuseFlywheelLensRouter.sol";
 
 type OracleConfig = {
   [contractName: string]: {
@@ -83,11 +87,12 @@ type ChainSpecificAddresses = {
 export class FuseBase {
   public provider: JsonRpcProvider | Web3Provider;
   public contracts: {
+    FuseFeeDistributor: FuseFeeDistributor;
     FusePoolDirectory: FusePoolDirectory;
     FusePoolLens: FusePoolLens;
     FusePoolLensSecondary: FusePoolLensSecondary;
     FuseSafeLiquidator: FuseSafeLiquidator;
-    FuseFeeDistributor: FuseFeeDistributor;
+    [contractName: string]: Contract;
   };
   static SIMPLE_DEPLOY_ORACLES = SIMPLE_DEPLOY_ORACLES;
   static COMPTROLLER_ERROR_CODES = COMPTROLLER_ERROR_CODES;
@@ -149,25 +154,38 @@ export class FuseBase {
         this.provider
       ) as FuseFeeDistributor,
     };
+    if (this.chainDeployment.FuseFlywheelLensRouter) {
+      this.contracts["FuseFlywheelLensRouter"] = new Contract(
+        this.chainDeployment.FuseFlywheelLensRouter?.address || constants.AddressZero,
+        this.chainDeployment.FuseFlywheelLensRouter.abi,
+        this.provider
+      ) as FuseFlywheelLensRouter;
+    } else {
+      console.warn(`FuseFlywheelLensRouter not deployed to chain ${this.chainId}`);
+    }
     this.artifacts = {
-      Comptroller: ComptrollerArtifact,
-      Unitroller: UnitrollerArtifact,
-      ERC20: ERC20Artifact,
-      CEtherDelegate: CEtherDelegateArtifact,
-      CEtherDelegator: CEtherDelegatorArtifact,
       CErc20Delegate: CErc20DelegateArtifact,
       CErc20Delegator: CErc20DelegatorArtifact,
-      CTokenInterfaces: CTokenInterfacesArtifact,
-      EIP20Interface: EIP20InterfaceArtifact,
-      RewardsDistributorDelegator: RewardsDistributorDelegatorArtifact,
-      PreferredPriceOracle: PreferredPriceOracleArtifact,
-      JumpRateModel: JumpRateModelArtifact,
-      DAIInterestRateModelV2: DAIInterestRateModelV2Artifact,
-      WhitePaperInterestRateModel: WhitePaperInterestRateModelArtifact,
+      CEtherDelegate: CEtherDelegateArtifact,
+      CEtherDelegator: CEtherDelegatorArtifact,
       ChainlinkPriceOracleV2: ChainlinkPriceOracleV2Artifact,
+      Comptroller: ComptrollerArtifact,
+      CTokenInterfaces: CTokenInterfacesArtifact,
+      DAIInterestRateModelV2: DAIInterestRateModelV2Artifact,
+      EIP20Interface: EIP20InterfaceArtifact,
+      ERC20: ERC20Artifact,
+      JumpRateModel: JumpRateModelArtifact,
       MasterPriceOracle: MasterPriceOracleArtifact,
+      PreferredPriceOracle: PreferredPriceOracleArtifact,
+      RewardsDistributorDelegator: RewardsDistributorDelegatorArtifact,
+      RewardsDistributorDelegate: RewardsDistributorDelegateArtifact,
       SimplePriceOracle: SimplePriceOracleArtifact,
+      Unitroller: UnitrollerArtifact,
+      WhitePaperInterestRateModel: WhitePaperInterestRateModelArtifact,
+      FuseFlywheelCore: FuseFlywheelCoreArtifact,
+      FlywheelStaticRewards: FlywheelStaticRewardsArtifact,
     };
+
     this.irms = irmConfig(this.chainDeployment, this.artifacts);
     this.oracles = oracleConfig(this.chainDeployment, this.artifacts, this.availableOracles);
   }
@@ -193,7 +211,7 @@ export class FuseBase {
     liquidationIncentive: BigNumber,
     priceOracle: string, // Contract address
     priceOracleConf: OracleConf,
-    options: any, // We might need to add sender as argument. Getting address from options will colide with the override arguments in ethers contract method calls. It doesnt take address.
+    options: any, // We might need to add sender as argument. Getting address from options will collide with the override arguments in ethers contract method calls. It doesn't take address.
     whitelist: string[] // An array of whitelisted addresses
   ): Promise<[string, string, string]> {
     // 2. Deploy Comptroller implementation if necessary
@@ -497,11 +515,7 @@ export class FuseBase {
     const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
 
     // Get Comptroller
-    const comptroller = new Contract(
-      conf.comptroller,
-      this.artifacts.Comptroller.abi,
-      this.provider.getSigner(options.from)
-    );
+    const comptroller = this.getComptrollerInstance(conf.comptroller, options);
 
     // Check for price feed assuming !bypassPriceFeedCheck
     if (!conf.bypassPriceFeedCheck) await this.checkForCErc20PriceFeed(comptroller, conf);
@@ -1004,99 +1018,17 @@ export class FuseBase {
     return irmName;
   };
 
-  fetchFusePoolData = async (
-    poolId: string | undefined,
-    address?: string,
-    coingeckoId?: string
-  ): Promise<FusePoolData | undefined> => {
-    if (!poolId) return undefined;
-
-    const { comptroller, name: _unfiliteredName } = await this.contracts.FusePoolDirectory.pools(Number(poolId));
-
-    const name = filterPoolName(_unfiliteredName);
-
-    const assets: USDPricedFuseAsset[] = (
-      await this.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(comptroller, {
-        from: address,
-      })
-    ).map(filterOnlyObjectProperties);
-
-    let totalLiquidityUSD = 0;
-
-    let totalSupplyBalanceUSD = 0;
-    let totalBorrowBalanceUSD = 0;
-
-    let totalSuppliedUSD = 0;
-    let totalBorrowedUSD = 0;
-
-    const price: number = utils.formatEther(
-      // prefer rari because it has caching
-      await this.getUsdPriceBN(coingeckoId, true)
-    ) as any;
-
-    const promises: Promise<boolean>[] = [];
-
-    const comptrollerContract = new Contract(
-      comptroller,
-      this.chainDeployment.Comptroller.abi,
-      this.provider.getSigner()
-    );
-    for (let i = 0; i < assets.length; i++) {
-      const asset = assets[i];
-
-      // @todo aggregate the borrow/supply guardian paused into 1
-      promises.push(
-        comptrollerContract.callStatic
-          .borrowGuardianPaused(asset.cToken)
-          .then((isPaused: boolean) => (asset.isPaused = isPaused))
-      );
-      promises.push(
-        comptrollerContract.callStatic
-          .mintGuardianPaused(asset.cToken)
-          .then((isPaused: boolean) => (asset.isSupplyPaused = isPaused))
-      );
-
-      asset.supplyBalanceUSD =
-        Number(utils.formatUnits(asset.supplyBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
-
-      asset.borrowBalanceUSD =
-        Number(utils.formatUnits(asset.borrowBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
-
-      totalSupplyBalanceUSD += asset.supplyBalanceUSD;
-      totalBorrowBalanceUSD += asset.borrowBalanceUSD;
-
-      asset.totalSupplyUSD =
-        Number(utils.formatUnits(asset.totalSupply)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
-      asset.totalBorrowUSD =
-        Number(utils.formatUnits(asset.totalBorrow)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
-
-      totalSuppliedUSD += asset.totalSupplyUSD;
-      totalBorrowedUSD += asset.totalBorrowUSD;
-
-      asset.liquidityUSD =
-        Number(utils.formatUnits(asset.liquidity)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
-
-      totalLiquidityUSD += asset.liquidityUSD;
-    }
-
-    await Promise.all(promises);
-
-    return {
-      assets: assets.sort((a, b) => (b.liquidityUSD > a.liquidityUSD ? 1 : -1)),
-      comptroller,
-      name,
-      totalLiquidityUSD,
-      totalSuppliedUSD,
-      totalBorrowedUSD,
-      totalSupplyBalanceUSD,
-      totalBorrowBalanceUSD,
-      oracle: "",
-      oracleModel: "",
-      admin: "",
-      isAdminWhitelisted: true,
-    };
-  };
+  getComptrollerInstance(comptrollerAddress: string, options: { from: string }) {
+    return new Contract(
+      comptrollerAddress,
+      this.artifacts.Comptroller.abi,
+      this.provider.getSigner(options.from)
+    ) as Comptroller;
+  }
 }
 
-const FuseBaseWithModules = withFusePoolLens(withRewardsDistributor(withFundOperations(withSafeLiquidator(FuseBase))));
+const FuseBaseWithModules = withFlywheel(
+  withFusePoolLens(withRewardsDistributor(withFundOperations(withSafeLiquidator(withFusePools(FuseBase)))))
+);
+
 export default class Fuse extends FuseBaseWithModules {}
