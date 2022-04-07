@@ -8,7 +8,7 @@ import * as poolHelpers from "../utils/pool";
 import * as timeHelpers from "../utils/time";
 import { constants } from "ethers";
 
-describe.only("FlywheelModule", function () {
+describe("FlywheelModule", function () {
   let poolAAddress: string;
   let poolBAddress: string;
   let sdk: Fuse;
@@ -53,14 +53,12 @@ describe.only("FlywheelModule", function () {
     }
   });
 
-  it.only("1 Pool, 1 Flywheel", async function () {
+  it("1 Pool, 1 Flywheel, FlywheelStaticRewards", async function () {
     const { deployer, alice } = await ethers.getNamedSigners();
     const rewardToken = erc20OneUnderlying;
     const market = erc20OneCToken;
-    const marketTwo = erc20TwoCToken;
 
-    console.log({ rewardToken: rewardToken.address, market: market.address, marketTwo: marketTwo.address });
-
+    // Setup FuseFlywheelCore with FlywheelStaticRewards
     const fwCore = await sdk.deployFlywheelCore(rewardToken.address, {
       from: deployer.address,
     });
@@ -72,11 +70,13 @@ describe.only("FlywheelModule", function () {
     expect(await fwCore.flywheelRewards()).to.eq(fwStaticRewards.address);
     await sdk.addFlywheelCoreToComptroller(fwCore.address, poolAAddress, { from: deployer.address });
     const wheels = await sdk.getFlywheelsByPool(poolAAddress, { from: alice.address });
+    expect(wheels.length).to.eq(1);
+    expect(wheels[0].address).to.eq(fwCore.address);
 
     expect((await sdk.getFlywheelsByPool(poolAAddress, { from: alice.address }))[0].address).to.eq(fwCore.address);
     expect((await sdk.getFlywheelsByPool(poolBAddress, { from: alice.address })).length).to.eq(0);
 
-    // Funding Static Rewards
+    // Funding FlywheelStaticRewards
     await rewardToken.transfer(fwStaticRewards.address, ethers.utils.parseUnits("100", 18), { from: deployer.address });
     expect(await rewardToken.balanceOf(fwStaticRewards.address)).to.not.eq(0);
 
@@ -87,8 +87,11 @@ describe.only("FlywheelModule", function () {
     expect(await erc20TwoCToken.functions.totalSupply()).to.not.eq(0);
 
     // Setup Rewards, enable and set RewardInfo
-    const rewardsPerSecond = ethers.utils.parseUnits("0.000001", 18);
+    const rewardsPerSecond = ethers.utils.parseUnits("0.0001", 18);
+    const rewardsEndTimestamp = 0;
+
     await sdk.addMarketForRewardsToFlywheelCore(fwCore.address, market.address, { from: deployer.address });
+
     await sdk.setStaticRewardInfo(
       fwStaticRewards.address,
       market.address,
@@ -99,45 +102,23 @@ describe.only("FlywheelModule", function () {
       { from: deployer.address }
     );
 
-    expect((await fwStaticRewards.rewardsInfo(market.address)).rewardsPerSecond).to.eq(rewardsPerSecond);
-    await sdk.addMarketForRewardsToFlywheelCore(fwCore.address, marketTwo.address, { from: deployer.address });
-    await sdk.setStaticRewardInfo(
-      fwStaticRewards.address,
-      marketTwo.address,
-      {
-        rewardsEndTimestamp: 0,
-        rewardsPerSecond: rewardsPerSecond,
-      },
-      { from: deployer.address }
-    );
-    expect((await fwStaticRewards.rewardsInfo(marketTwo.address)).rewardsPerSecond).to.eq(rewardsPerSecond);
-
-    await timeHelpers.advanceDays(1);
-
-    const marketRewards = await sdk.getFlywheelMarketRewardsByPools([poolAAddress, poolBAddress], {
+    // Check if Rewards are correctly set
+    const infoForMarket = await sdk.getFlywheelRewardsInfoForMarket(fwCore.address, market.address, {
       from: alice.address,
     });
+    expect(infoForMarket.rewardsPerSecond).to.eq(rewardsPerSecond);
+    expect(infoForMarket.rewardsEndTimestamp).to.eq(rewardsEndTimestamp);
+
     const marketRewardsPoolA = await sdk.getFlywheelMarketRewardsByPool(poolAAddress, {
       from: alice.address,
     });
-    console.dir({ marketRewards, marketRewardsPoolA }, { depth: null });
-    const claimableRewards = await sdk.getFlywheelClaimableRewards(alice.address, {
-      from: alice.address,
-    });
-    console.dir({ claimableRewards }, { depth: null });
+    const marketReward = marketRewardsPoolA.find((r) => r.market === market.address);
 
-    const claimableRewardsForPool = await sdk.getFlywheelClaimableRewardsForPool(poolAAddress, alice.address, {
-      from: alice.address,
-    });
-    console.dir({ claimableRewardsForPool }, { depth: null });
+    expect(marketReward.rewardsInfo.length).to.eq(1);
+    // TODO this is not the same
+    // expect(marketReward.rewardsInfo[0].rewardSpeedPerSecondPerToken).to.eq(rewardsPerSecond);
 
-    const infos = await sdk.getFlywheelRewardsInfos(fwCore.address, { from: deployer.address });
-    console.dir({ infos }, { depth: null });
-
-    const singleMarketInfo = await sdk.getFlywheelRewardsInfoForMarket(fwCore.address, market.address, {
-      from: deployer.address,
-    });
-    expect(singleMarketInfo.rewardsPerSecond).to.eq(rewardsPerSecond);
+    // TODO test claimable functions
   });
 
   it.skip("1 Pool, 1 Flywheel, 1 Reward Distributor", async function () {

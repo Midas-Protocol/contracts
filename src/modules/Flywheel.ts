@@ -148,6 +148,7 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
       const marketRewards = await (
         this.contracts.FuseFlywheelLensRouter as FuseFlywheelLensRouter
       ).callStatic.getMarketRewardsInfo(pool, options);
+
       const adaptedMarketRewards = marketRewards.map((marketReward) => ({
         underlyingPrice: marketReward.underlyingPrice,
         market: marketReward.market,
