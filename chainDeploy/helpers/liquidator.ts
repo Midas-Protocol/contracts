@@ -18,7 +18,7 @@ export const deployFuseSafeLiquidator = async ({
     },
   });
   const fsl = await dep.deploy();
-  await ethers.provider.waitForTransaction(fsl.transactionHash);
+  if (fsl.transactionHash) await ethers.provider.waitForTransaction(fsl.transactionHash);
   console.log("FuseSafeLiquidator: ", fsl.address);
   const fuseSafeLiquidator = await ethers.getContract("FuseSafeLiquidator", deployer);
   const uniswapRouterAddress = await fuseSafeLiquidator.UNISWAP_V2_ROUTER_02_ADDRESS();

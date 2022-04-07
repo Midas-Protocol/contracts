@@ -780,6 +780,10 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     // EFFECTS & INTERACTIONS
     // (No safe failures beyond this point)
 
+    /* We write previously calculated values into storage */
+    totalSupply = vars.totalSupplyNew;
+    accountTokens[redeemer] = vars.accountTokensNew;
+
     /*
      * We invoke doTransferOut for the redeemer and the redeemAmount.
      *  Note: The cToken must handle variations between ERC-20 and ETH underlying.
@@ -787,10 +791,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      *  doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
      */
     doTransferOut(redeemer, vars.redeemAmount);
-
-    /* We write previously calculated values into storage */
-    totalSupply = vars.totalSupplyNew;
-    accountTokens[redeemer] = vars.accountTokensNew;
 
     /* We emit a Transfer event, and a Redeem event */
     emit Transfer(redeemer, address(this), vars.redeemTokens);

@@ -36,23 +36,22 @@ task("oracle:add-tokens", "Initalize MasterPriceOracle with underlying oracle fo
   .setAction(async ({ underlyings: _underlyings, oracles: _oracles }, { ethers }) => {
     const { deployer } = await ethers.getNamedSigners();
     // @ts-ignore
-    const sdkModule = await import("../dist/esm/src");
-    const { chainId } = await ethers.provider.getNetwork();
-    const sdk = new sdkModule.Fuse(ethers.provider, chainId);
+    const fuseModule = await import("../test/utils/fuseSdk");
+    const sdk = await fuseModule.getOrCreateFuse();
 
-    const spo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, deployer);
+    const mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, deployer);
     const underlyingTokens = _underlyings.split(",");
 
     let underlyingOracles: Array<string>;
 
     if (!_oracles) {
       // by default, get uniswap's twap oracle address
-      const uniOralceFactory = await ethers.getContractAt(
+      const uniOracleFactory = await ethers.getContractAt(
         "UniswapTwapPriceOracleV2Factory",
-        sdk.oracles.UniswapTwapPriceOracleV2Factory.address,
+        sdk.chainDeployment.UniswapTwapPriceOracleV2Factory.address,
         deployer
       );
-      const underlyingOracle = await uniOralceFactory.callStatic.oracles(
+      const underlyingOracle = await uniOracleFactory.callStatic.oracles(
         sdk.chainSpecificAddresses.UNISWAP_V2_FACTORY,
         sdk.chainSpecificAddresses.W_TOKEN
       );
@@ -63,7 +62,7 @@ task("oracle:add-tokens", "Initalize MasterPriceOracle with underlying oracle fo
         underlyingOracles = Array(underlyingTokens.length).fill(underlyingOracles[0]);
       }
     }
-    const tx = await spo.add(underlyingTokens, underlyingOracles);
+    const tx = await mpo.add(underlyingTokens, underlyingOracles);
     await tx.wait();
     console.log(`Master Price Oracle updated for tokens ${underlyingTokens.join(", ")}`);
   });
@@ -74,9 +73,8 @@ task("oracle:update-twap", "Call update on twap oracle to update the last price 
     const { deployer } = await ethers.getNamedSigners();
 
     // @ts-ignore
-    const sdkModule = await import("../dist/esm/src");
-    const { chainId } = await ethers.provider.getNetwork();
-    const sdk = new sdkModule.Fuse(ethers.provider, chainId);
+    const fuseModule = await import("../test/utils/fuseSdk");
+    const sdk = await fuseModule.getOrCreateFuse();
 
     const uniswapTwapRoot = await ethers.getContract("UniswapTwapPriceOracleV2Root", deployer);
     const uniPair = new ethers.Contract(

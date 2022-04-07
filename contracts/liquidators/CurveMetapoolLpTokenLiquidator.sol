@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 import "../external/curve/ICurveStableSwap.sol";
 
-import "../external/aave/IW_NATIVE.sol";
+import "../utils/IW_NATIVE.sol";
 
 import "./IRedemptionStrategy.sol";
 

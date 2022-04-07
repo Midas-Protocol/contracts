@@ -16,6 +16,7 @@ import "./tasks/oracle";
 import "./tasks/getPoolData";
 import "./tasks/e2e";
 import "./tasks/swap";
+import "./tasks/liquidation";
 
 dotEnvConfig();
 
@@ -28,7 +29,7 @@ const mnemonic =
 
 const config: HardhatUserConfig = {
   mocha: {
-    timeout: 120_000,
+    timeout: 200_000,
   },
   tenderly: {
     username: "carlomazzaferro",
@@ -37,16 +38,7 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.8.11",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
-      },
-      {
-        version: "0.7.6",
+        version: "0.8.10",
         settings: {
           optimizer: {
             enabled: true,
@@ -57,15 +49,10 @@ const config: HardhatUserConfig = {
     ],
   },
   external: {
-    contracts: [
-      {
-        artifacts: "./artifacts/contracts/compound",
-      },
-    ],
+    contracts: [{ artifacts: "./out" }],
   },
   paths: {
-    artifacts: "./artifacts",
-    sources: "./contracts",
+    sources: "./none",
     tests: "./test",
   },
   defaultNetwork: "hardhat",
@@ -77,9 +64,9 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      forking: process.env.FORK_URL
+      forking: process.env.FORK_URL_BSC
         ? {
-            url: process.env.FORK_URL,
+            url: process.env.FORK_URL_BSC,
             blockNumber: Number(process.env.FORK_BLOCK_NUMBER),
           }
         : undefined,
@@ -137,9 +124,6 @@ const config: HardhatUserConfig = {
       chainId: 9000,
       url: "https://evmos-archive-testnet.api.bdnodes.net:8545",
     },
-  },
-  typechain: {
-    outDir: "./typechain",
   },
 };
 
