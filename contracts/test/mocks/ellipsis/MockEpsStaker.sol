@@ -145,16 +145,16 @@ contract MockEpsStaker is ReentrancyGuardUpgradeable {
   }
 
   // Address and claimable amount of all reward tokens for the given account
-  function claimableRewards(address account) external view returns (RewardData[] memory rewards) {
-    rewards = new RewardData[](rewardTokens.length);
-    for (uint256 i = 0; i < rewards.length; i++) {
+  function claimableRewards(address account) external view returns (RewardData[] memory result) {
+    result = new RewardData[](rewardTokens.length);
+    for (uint256 i = 0; i < result.length; i++) {
       // If i == 0 this is the stakingReward, distribution is based on locked balances
       uint256 balance = i == 0 ? balances[account].locked : balances[account].total;
       uint256 supply = i == 0 ? lockedSupply : totalSupply;
-      rewards[i].token = rewardTokens[i];
-      rewards[i].amount = _earned(account, rewards[i].token, balance, supply);
+      result[i].token = rewardTokens[i];
+      result[i].amount = _earned(account, result[i].token, balance, supply);
     }
-    return rewards;
+    return result;
   }
 
   // Total balance of an account, including unlocked, locked and earned tokens
