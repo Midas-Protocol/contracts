@@ -36,6 +36,12 @@ export const getCommonDeployments = async (chainDeployment: ChainDeployment) => 
     abi: FusePoolLensSecondaryArtifact.abi,
     address: FusePoolLensSecondary.address,
   };
+  const FuseFlywheelLensRouter = await ethers.getContract("FuseFlywheelLensRouter");
+  const FuseFlywheelLensRouterArtifact = await deployments.getArtifact("FuseFlywheelLensRouter");
+  chainDeployment.FuseFlywheelLensRouter = {
+    abi: FuseFlywheelLensRouterArtifact.abi,
+    address: FuseFlywheelLensRouter.address,
+  };
   const FuseSafeLiquidator = await ethers.getContract("FuseSafeLiquidator");
   const FuseSafeLiquidatorArtifact = await deployments.getArtifact("FuseSafeLiquidator");
   chainDeployment.FuseSafeLiquidator = { abi: FuseSafeLiquidatorArtifact.abi, address: FuseSafeLiquidator.address };
@@ -57,6 +63,14 @@ export const getCommonDeployments = async (chainDeployment: ChainDeployment) => 
   const SimplePriceOracle = await ethers.getContract("SimplePriceOracle");
   const SimplePriceOracleArtifact = await deployments.getArtifact("SimplePriceOracle");
   chainDeployment.SimplePriceOracle = { abi: SimplePriceOracleArtifact.abi, address: SimplePriceOracle.address };
+
+  const WhitePaperInterestRateModel = await ethers.getContract("WhitePaperInterestRateModel");
+  const WhitePaperInterestRateModelArtifact = await deployments.getArtifact("WhitePaperInterestRateModel");
+  chainDeployment.WhitePaperInterestRateModel = {
+    abi: WhitePaperInterestRateModelArtifact.abi,
+    address: WhitePaperInterestRateModel.address,
+  };
+
   return chainDeployment
 }
 
@@ -69,12 +83,6 @@ export const getLocalDeployments = async (): Promise<ChainDeployment> => {
   const TRIBEToken = await ethers.getContract("TRIBEToken");
   const TRIBETokenArtifact = await deployments.getArtifact("TRIBEToken");
   chainDeployment.TRIBEToken = { abi: TRIBETokenArtifact.abi, address: TRIBEToken.address };
-  const WhitePaperInterestRateModel = await ethers.getContract("WhitePaperInterestRateModel");
-  const WhitePaperInterestRateModelArtifact = await deployments.getArtifact("WhitePaperInterestRateModel");
-  chainDeployment.WhitePaperInterestRateModel = {
-    abi: WhitePaperInterestRateModelArtifact.abi,
-    address: WhitePaperInterestRateModel.address,
-  };
   return await getCommonDeployments(chainDeployment)
 };
 
@@ -86,6 +94,50 @@ export const getBscForkDeployments = async (): Promise<ChainDeployment> => {
   chainDeployment.WhitePaperInterestRateModel = {
     abi: WhitePaperInterestRateModelArtifact.abi,
     address: WhitePaperInterestRateModel.address,
+  };
+  const ChainlinkPriceOracleV2 = await ethers.getContract("ChainlinkPriceOracleV2");
+  const ChainlinkPriceOracleV2Artifact = await deployments.getArtifact("ChainlinkPriceOracleV2");
+  chainDeployment.ChainlinkPriceOracleV2 = {
+    abi: ChainlinkPriceOracleV2Artifact.abi,
+    address: ChainlinkPriceOracleV2.address,
+  };
+
+  const UniswapTwapPriceOracleV2Root = await ethers.getContract("UniswapTwapPriceOracleV2Root");
+  const UniswapTwapPriceOracleV2RootArtifact = await deployments.getArtifact("UniswapTwapPriceOracleV2Root");
+  chainDeployment.UniswapTwapPriceOracleV2Root = {
+    abi: UniswapTwapPriceOracleV2RootArtifact.abi,
+    address: UniswapTwapPriceOracleV2Root.address,
+  };
+
+  const UniswapTwapPriceOracleV2 = await ethers.getContract("UniswapTwapPriceOracleV2");
+  const UniswapTwapPriceOracleV2Artifact = await deployments.getArtifact("UniswapTwapPriceOracleV2");
+  chainDeployment.UniswapTwapPriceOracleV2 = {
+    abi: UniswapTwapPriceOracleV2Artifact.abi,
+    address: UniswapTwapPriceOracleV2.address,
+  };
+  const CurveLpTokenPriceOracleNoRegistry = await ethers.getContract("CurveLpTokenPriceOracleNoRegistry");
+  const CurveLpTokenPriceOracleNoRegistryArtifact = await deployments.getArtifact("CurveLpTokenPriceOracleNoRegistry");
+  chainDeployment.CurveLpTokenPriceOracleNoRegistry = {
+    abi: CurveLpTokenPriceOracleNoRegistryArtifact.abi,
+    address: CurveLpTokenPriceOracleNoRegistry.address,
+  };
+  const XBombLiquidator = await ethers.getContract("XBombLiquidator");
+  const XBombLiquidatorArtifact = await deployments.getArtifact("XBombLiquidator");
+  chainDeployment.XBombLiquidator = {
+    abi: XBombLiquidatorArtifact.abi,
+    address: XBombLiquidator.address,
+  };
+  const JarvisSynthereumLiquidator = await ethers.getContract("JarvisSynthereumLiquidator");
+  const JarvisSynthereumLiquidatorArtifact = await deployments.getArtifact("JarvisSynthereumLiquidator");
+  chainDeployment.JarvisSynthereumLiquidator = {
+    abi: JarvisSynthereumLiquidatorArtifact.abi,
+    address: JarvisSynthereumLiquidator.address,
+  };
+  const CurveLpTokenLiquidatorNoRegistry = await ethers.getContract("CurveLpTokenLiquidatorNoRegistry");
+  const CurveLpTokenLiquidatorNoRegistryArtifact = await deployments.getArtifact("CurveLpTokenLiquidatorNoRegistry");
+  chainDeployment.CurveLpTokenLiquidatorNoRegistry = {
+    abi: CurveLpTokenLiquidatorNoRegistryArtifact.abi,
+    address: CurveLpTokenLiquidatorNoRegistry.address,
   };
   return await getCommonDeployments(chainDeployment)
 };

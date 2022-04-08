@@ -16,7 +16,7 @@ jobs:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
@@ -75,7 +75,7 @@ jobs:
       - name: Run build
         run: npm run build
 
-      - name: Run forge tests on BSC
+      - name: Run hardhat tests on BSC
         run: npm run test:bsc
 
       - name: Run forge tests on BSC

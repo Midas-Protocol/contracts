@@ -11,10 +11,7 @@ describe("Deposit flow tests", function () {
   let sdk: Fuse;
 
   this.beforeEach(async () => {
-    const { chainId } = await ethers.provider.getNetwork();
-    if (chainId === 1337) {
-      await deployments.fixture("prod");
-    }
+    await deployments.fixture("prod");
     await setUpPriceOraclePrices();
   });
 

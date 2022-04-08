@@ -14,11 +14,8 @@ describe("FusePoolDirectory", function () {
   let sdk: Fuse;
 
   this.beforeEach(async () => {
-    const { chainId } = await ethers.provider.getNetwork();
-    if (chainId === 1337) {
-      await deployments.fixture("prod");
-      sdk = await getOrCreateFuse();
-    }
+    await deployments.fixture("prod");
+    sdk = await getOrCreateFuse();
     await setUpPriceOraclePrices();
   });
 
