@@ -122,7 +122,7 @@ const config: HardhatUserConfig = {
     evmostestnet: {
       accounts: { mnemonic },
       chainId: 9000,
-      url: "https://evmos-archive-testnet.api.bdnodes.net:8545",
+      url: "https://eth.bd.evmos.dev:8545",
     },
   },
 };
