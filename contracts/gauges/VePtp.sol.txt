@@ -301,7 +301,7 @@ IVePtp
 
   /// @notice withdraws staked ptp
   /// @param _amount the amount of ptp to unstake
-  /// Note Beware! you will loose all of your vePTP if you unstake any amount of ptp!
+  /// Note Beware! you will lose all of your vePTP if you unstake any amount of ptp!
   function withdraw(uint256 _amount) external override nonReentrant whenNotPaused {
     require(_amount > 0, 'amount to withdraw cannot be zero');
     require(users[msg.sender].amount >= _amount, 'not enough balance');
