@@ -10,13 +10,25 @@ import { FuseBaseConstructor } from "../Fuse/types";
 export interface FlywheelClaimableRewards {
   flywheel: string;
   rewardToken: string;
-  rewards: [
-    {
-      market: string;
-      amount: BigNumber;
-    }?
-  ];
+  rewards: Array<{
+    market: string;
+    amount: BigNumber;
+  }>;
 }
+
+export type FlywheelMarketRewardsInfo = {
+  underlyingPrice: BigNumber;
+  market: string;
+  rewardsInfo: {
+    rewardToken: string;
+    flywheel: string;
+    rewardSpeedPerSecondPerToken: BigNumber;
+    rewardTokenPrice: BigNumber;
+    formattedAPR: BigNumber;
+  }[];
+  rewardTokens: string[];
+};
+
 export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class Flywheel extends Base {
     async deployFlywheelCore(
@@ -144,10 +156,15 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
         .filter((value, index, self) => self.indexOf(value) === index); // Unique Array;
     }
 
-    async getFlywheelMarketRewardsByPool(pool: string, options: { from: string }) {
+    async getFlywheelMarketRewardsByPool(
+      pool: string,
+      options: { from: string }
+    ): Promise<FlywheelMarketRewardsInfo[]> {
       const marketRewards = await (
         this.contracts.FuseFlywheelLensRouter as FuseFlywheelLensRouter
       ).callStatic.getMarketRewardsInfo(pool, options);
+
+      console.log({ rawMarketRewards: marketRewards });
 
       const adaptedMarketRewards = marketRewards.map((marketReward) => ({
         underlyingPrice: marketReward.underlyingPrice,
