@@ -18,6 +18,12 @@ import { Authority } from "solmate/auth/Auth.sol";
 contract EllipsisERC4626Test is DSTest {
   using stdStorage for StdStorage;
 
+  struct RewardsCycle {
+    uint32 start;
+    uint32 end;
+    uint192 reward;
+  }
+
   Vm public constant vm = Vm(HEVM_ADDRESS);
 
   StdStorage stdstore;
@@ -31,6 +37,7 @@ contract EllipsisERC4626Test is DSTest {
   MockLpTokenStaker mockLpTokenStaker;
 
   uint256 depositAmount = 100e18;
+  uint192 rewardsStream = 0.5e18;
   ERC20 marketKey;
   address tester = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
 
@@ -63,7 +70,7 @@ contract EllipsisERC4626Test is DSTest {
     );
     marketKey = ERC20(address(ellipsisERC4626));
     flywheel.addStrategyForRewards(marketKey);
-    flywheel.accrue(marketKey, address(this));
+    vm.warp(2);
   }
 
   function testInitializedValues() public {
@@ -79,6 +86,8 @@ contract EllipsisERC4626Test is DSTest {
   function deposit() public {
     testToken.mint(address(this), depositAmount);
     testToken.approve(address(ellipsisERC4626), depositAmount);
+    // flywheelPreSupplierAction -- usually this would be done in Comptroller when supplying
+    flywheel.accrue(ERC20(ellipsisERC4626), address(this));
     ellipsisERC4626.deposit(depositAmount, address(this));
   }
 
@@ -109,45 +118,79 @@ contract EllipsisERC4626Test is DSTest {
   }
 
   function testAccumulatingEPSRewardsOnDeposit() public {
-    vm.warp(2);
     deposit();
-    assertEq(epsToken.balanceOf(address(ellipsisERC4626)), 0);
-    assertEq(epsToken.balanceOf(address(flywheel)), 0);
-    assertEq(epsToken.balanceOf(address(flywheelRewards)), 0);
-
+    assertEq(epsToken.totalSupply(), 0);
     vm.warp(3);
+
     deposit();
-    flywheel.accrue(ERC20(ellipsisERC4626), address(this));
-    assertEq(epsToken.balanceOf(address(ellipsisERC4626)), 0);
-    assertEq(epsToken.balanceOf(address(flywheel)), 0);
-    assertEq(epsToken.balanceOf(address(flywheelRewards)), 0.5e18);
+
+    assertEq(epsToken.totalSupply(), rewardsStream);
+
+    assertEq(epsToken.balanceOf(address(ellipsisERC4626)), rewardsStream);
   }
 
   function testAccumulatingEPSRewardsOnWithdrawal() public {
-    vm.warp(2);
     deposit();
-
+    assertEq(epsToken.totalSupply(), 0);
     vm.warp(3);
+
     ellipsisERC4626.withdraw(1, address(this), address(this));
-    vm.warp(4);
-    flywheel.accrue(ERC20(ellipsisERC4626), address(this));
-    assertEq(epsToken.balanceOf(address(ellipsisERC4626)), 0);
-    assertEq(epsToken.balanceOf(address(flywheel)), 0);
-    assertEq(epsToken.balanceOf(address(flywheelRewards)), 0.5e18);
+
+    assertEq(epsToken.totalSupply(), rewardsStream);
+
+    assertEq(epsToken.balanceOf(address(ellipsisERC4626)), rewardsStream);
   }
 
   function testClaimRewards() public {
-    vm.warp(2);
+    // Deposit funds, Rewards are 0
     deposit();
+
+    // No EPS-token have yet been minted as rewards
+    assertEq(epsToken.totalSupply(), 0);
+
+    (uint32 start, uint32 end, uint192 reward) = flywheelRewards.rewardsCycle(ERC20(address(ellipsisERC4626)));
+
+    // Rewards can be transfered in the next cycle at time block.timestamp == 3
+    assertEq(end, 3);
+
+    // Reward amount is still 0
+    assertEq(reward, 0);
     vm.warp(3);
+
+    // Call withdraw (could also be deposit() on the erc4626 or claim() on the epsStaker directly) to claim rewards
     ellipsisERC4626.withdraw(1, address(this), address(this));
+
+    // EPS-token have been minted
+    assertEq(epsToken.totalSupply(), rewardsStream);
+
+    // The ERC-4626 holds all rewarded eps-token now
+    assertEq(epsToken.balanceOf(address(ellipsisERC4626)), rewardsStream);
+
+    // Accrue rewards to send rewards to flywheelRewards
     flywheel.accrue(ERC20(ellipsisERC4626), address(this));
+    assertEq(epsToken.balanceOf(address(flywheelRewards)), rewardsStream);
+
+    (start, end, reward) = flywheelRewards.rewardsCycle(ERC20(address(ellipsisERC4626)));
+
+    // Rewards can be transfered in the next cycle at time block.timestamp == 4
+    assertEq(end, 4);
+
+    // Reward amount is expected value
+    assertEq(reward, rewardsStream);
+    vm.warp(4);
+
+    // Finally accrue reward from last cycle
+    flywheel.accrue(ERC20(ellipsisERC4626), address(this));
+
+    // Claim Rewards for the user
     flywheel.claimRewards(address(this));
-    assertEq(epsToken.balanceOf(address(this)), 499999999999999999);
+
+    // NOTE: Not sure why it doesnt transfer the full amount
+    assertEq(epsToken.balanceOf(address(this)), rewardsStream - 1);
+    assertEq(epsToken.balanceOf(address(flywheel)), 0);
   }
 
   function testClaimForMultipleUser() public {
-    vm.warp(2);
     deposit();
     vm.startPrank(tester);
     testToken.mint(tester, depositAmount);
@@ -155,12 +198,38 @@ contract EllipsisERC4626Test is DSTest {
     ellipsisERC4626.deposit(depositAmount, tester);
     vm.stopPrank();
 
+    assertEq(epsToken.totalSupply(), 0);
+
+    (uint32 start, uint32 end, uint192 reward) = flywheelRewards.rewardsCycle(ERC20(address(ellipsisERC4626)));
+
+    assertEq(end, 3);
+
+    assertEq(reward, 0);
     vm.warp(3);
+
     ellipsisERC4626.withdraw(1, address(this), address(this));
+
+    assertEq(epsToken.totalSupply(), rewardsStream);
+
+    assertEq(epsToken.balanceOf(address(ellipsisERC4626)), rewardsStream);
+
+    flywheel.accrue(ERC20(ellipsisERC4626), address(this));
+    assertEq(epsToken.balanceOf(address(flywheelRewards)), rewardsStream);
+
+    (start, end, reward) = flywheelRewards.rewardsCycle(ERC20(address(ellipsisERC4626)));
+
+    assertEq(end, 4);
+
+    assertEq(reward, rewardsStream);
+    vm.warp(4);
+
     flywheel.accrue(ERC20(ellipsisERC4626), address(this), tester);
+
     flywheel.claimRewards(address(this));
     flywheel.claimRewards(tester);
-    assertEq(epsToken.balanceOf(address(tester)), 0.5e18);
-    assertEq(epsToken.balanceOf(address(this)), 499999999999999999);
+
+    assertEq(epsToken.balanceOf(address(tester)), rewardsStream / 2);
+    assertEq(epsToken.balanceOf(address(this)), (rewardsStream / 2) - 1);
+    assertEq(epsToken.balanceOf(address(flywheel)), 0);
   }
 }

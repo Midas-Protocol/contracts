@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 interface IERC20Mintable {
-  function mint(address _to, uint256 _value) external returns (bool);
+  function mint(address _to, uint256 _value) external;
 
   function minter() external view returns (address);
 }
@@ -34,7 +34,7 @@ contract MockLpTokenStaker is ReentrancyGuard {
     uint256 adjustedSupply;
     uint256 rewardsPerSecond;
     uint256 lastRewardTime; // Last second that reward distribution occurs.
-    uint256 accRewardPerShare; // Accumulated rewards per share, times 1e12. See below.
+    uint256 accRewardPerShare; // Accumulated rewards per share, times 1e18. See below.
   }
 
   uint256 public immutable maxMintableTokens;
@@ -64,6 +64,8 @@ contract MockLpTokenStaker is ReentrancyGuard {
   mapping(address => uint256) public lastFeeClaim;
 
   IERC20Mintable public immutable rewardToken;
+
+  uint192 rewardsStream = 0.5e18;
 
   event Deposit(address indexed user, address indexed token, uint256 amount);
   event Withdraw(address indexed user, address indexed token, uint256 amount);
@@ -120,7 +122,7 @@ contract MockLpTokenStaker is ReentrancyGuard {
         @param _tokens Array of token addresses to query
         @return uint256[] Unclaimed rewards
      */
-  function claimableReward(address _user, address[] calldata _tokens) external view returns (uint256[] memory) {
+  function claimableReward(address _user, address[] calldata _tokens) external returns (uint256[] memory) {
     uint256[] memory claimable = new uint256[](_tokens.length);
     for (uint256 i = 0; i < _tokens.length; i++) {
       address token = _tokens[i];
@@ -128,28 +130,28 @@ contract MockLpTokenStaker is ReentrancyGuard {
       UserInfo storage user = userInfo[token][_user];
       (uint256 accRewardPerShare, ) = _getRewardData(token);
       accRewardPerShare += pool.accRewardPerShare;
-      claimable[i] = user.claimable + (user.adjustedAmount * accRewardPerShare) / 1e12 - user.rewardDebt;
+      claimable[i] = user.claimable + (user.adjustedAmount * accRewardPerShare) / 1e18 - user.rewardDebt;
     }
     return claimable;
   }
 
   // Get updated reward data for the given token
-  function _getRewardData(address _token) internal view returns (uint256 accRewardPerShare, uint256 rewardsPerSecond) {
+  function _getRewardData(address _token) internal returns (uint256 accRewardPerShare, uint256 rewardsPerSecond) {
     PoolInfo storage pool = poolInfo[_token];
     uint256 lpSupply = pool.adjustedSupply;
     uint256 start = startTime;
     uint256 currentWeek = (block.timestamp - start) / 604800;
 
     if (lpSupply == 0) {
-      return (0, 10);
+      return (0, rewardsStream);
     }
 
     uint256 lastRewardTime = pool.lastRewardTime;
-    uint256 rewardWeek = (lastRewardTime - start) / 604800;
+    // uint256 rewardWeek = (lastRewardTime - start) / 604800;
     rewardsPerSecond = pool.rewardsPerSecond;
-    uint256 reward;
+    uint256 reward = 1;
     uint256 duration;
-    if (rewardWeek < currentWeek) {
+    /*if (rewardWeek < currentWeek) {
       while (rewardWeek < currentWeek) {
         uint256 nextRewardTime = (rewardWeek + 1) * 604800 + start;
         duration = nextRewardTime - lastRewardTime;
@@ -158,18 +160,16 @@ contract MockLpTokenStaker is ReentrancyGuard {
         rewardsPerSecond = 10;
         lastRewardTime = nextRewardTime;
       }
-    }
-
+    }*/
     duration = block.timestamp - lastRewardTime;
     reward = reward + duration * rewardsPerSecond;
-    return ((reward * 1e12) / lpSupply, rewardsPerSecond);
+    return ((reward * 1e18) / lpSupply, rewardsPerSecond);
   }
 
   // Update reward variables of the given pool to be up-to-date.
   function _updatePool(address _token) internal returns (uint256 accRewardPerShare) {
     PoolInfo storage pool = poolInfo[_token];
     uint256 lastRewardTime = pool.lastRewardTime;
-    require(lastRewardTime > 0, "lastRewardTime");
     if (block.timestamp <= lastRewardTime) {
       return pool.accRewardPerShare;
     }
@@ -189,22 +189,12 @@ contract MockLpTokenStaker is ReentrancyGuard {
     uint256 _depositAmount,
     uint256 _accRewardPerShare
   ) internal {
-    uint256 userWeight = 1;
-    uint256 adjustedAmount = (_depositAmount * 40) / 100;
-    if (userWeight > 0) {
-      uint256 lpSupply = IERC20(_token).balanceOf(address(this));
-      uint256 totalWeight = 1;
-      uint256 boost = (((lpSupply * userWeight) / totalWeight) * 60) / 100;
-      adjustedAmount += boost;
-      if (adjustedAmount > _depositAmount) {
-        adjustedAmount = _depositAmount;
-      }
-    }
+    uint256 adjustedAmount = _depositAmount;
     UserInfo storage user = userInfo[_token][_user];
     uint256 newAdjustedSupply = poolInfo[_token].adjustedSupply - user.adjustedAmount;
-    user.adjustedAmount = adjustedAmount;
+    user.adjustedAmount = _depositAmount;
     poolInfo[_token].adjustedSupply = newAdjustedSupply + adjustedAmount;
-    user.rewardDebt = (adjustedAmount * _accRewardPerShare) / 1e12;
+    user.rewardDebt = (adjustedAmount * _accRewardPerShare) / 1e18;
   }
 
   /**
@@ -225,7 +215,7 @@ contract MockLpTokenStaker is ReentrancyGuard {
     UserInfo storage user = userInfo[_token][msg.sender];
     uint256 pending;
     if (user.adjustedAmount > 0) {
-      pending = (user.adjustedAmount * accRewardPerShare) / 1e12 - user.rewardDebt;
+      pending = (user.adjustedAmount * accRewardPerShare) / 1e18 - user.rewardDebt;
       if (_claimRewards) {
         pending += user.claimable;
         user.claimable = 0;
@@ -262,7 +252,7 @@ contract MockLpTokenStaker is ReentrancyGuard {
     uint256 depositAmount = user.depositAmount;
     require(depositAmount >= _amount, "withdraw: not good");
 
-    uint256 pending = (user.adjustedAmount * accRewardPerShare) / 1e12 - user.rewardDebt;
+    uint256 pending = (user.adjustedAmount * accRewardPerShare) / 1e18 - user.rewardDebt;
     if (_claimRewards) {
       pending += user.claimable;
       user.claimable = 0;
@@ -316,7 +306,7 @@ contract MockLpTokenStaker is ReentrancyGuard {
       address token = _tokens[i];
       uint256 accRewardPerShare = _updatePool(token);
       UserInfo storage user = userInfo[token][_user];
-      uint256 rewardDebt = (user.adjustedAmount * accRewardPerShare) / 1e12;
+      uint256 rewardDebt = (user.adjustedAmount * accRewardPerShare) / 1e18;
       pending += user.claimable + rewardDebt - user.rewardDebt;
       user.claimable = 0;
       _updateLiquidityLimits(_user, token, user.depositAmount, accRewardPerShare);
@@ -361,7 +351,7 @@ contract MockLpTokenStaker is ReentrancyGuard {
       uint256 accRewardPerShare = _updatePool(token);
       UserInfo storage user = userInfo[token][_user];
       if (user.adjustedAmount > 0) {
-        uint256 pending = (user.adjustedAmount * accRewardPerShare) / 1e12 - user.rewardDebt;
+        uint256 pending = (user.adjustedAmount * accRewardPerShare) / 1e18 - user.rewardDebt;
         if (pending > 0) {
           user.claimable += pending;
         }
