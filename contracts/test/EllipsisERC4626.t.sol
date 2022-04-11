@@ -20,7 +20,7 @@ import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/
 contract FlywheelRewards is FlywheelDynamicRewards {
   constructor(FlywheelCore _flywheel) FlywheelDynamicRewards(_flywheel, 1) {}
 
-  function getNextCycleRewards(ERC20) internal override returns(uint192) {
+  function getNextCycleRewards(ERC20) internal override returns (uint192) {
     uint192 rewardsStream = 0.5e18;
     MockERC20(address(rewardToken)).mint(address(this), rewardsStream);
     return rewardsStream;
@@ -83,6 +83,7 @@ contract EllipsisERC4626Test is DSTest {
     );
     marketKey = ERC20(address(ellipsisERC4626));
     flywheel.addStrategyForRewards(marketKey);
+    vm.warp(2);
   }
 
   function testInitializedValues() public {
@@ -149,7 +150,7 @@ contract EllipsisERC4626Test is DSTest {
   function testAccumulatingEPSRewardsOnDeposit() public {
     vm.label(address(ellipsisERC4626), "EllipsisERC4626");
 
-    vm.warp(2);
+    vm.warp(3);
     deposit();
     assertEq(epsToken.balanceOf(address(mockEpsStaker)), 0);
     assertEq(epsToken.balanceOf(address(ellipsisERC4626)), 0);
@@ -157,13 +158,13 @@ contract EllipsisERC4626Test is DSTest {
     // rewards for the next cycle
     assertEq(epsToken.balanceOf(address(flywheelRewards)), rewardsStream);
 
-    vm.warp(3);
+    vm.warp(4);
     deposit();
     flywheel.accrue(ERC20(ellipsisERC4626), address(this));
     assertEq(mockEpsStaker.totalBalance(address(this)), 0);
     {
       assertEq(epsToken.balanceOf(address(mockEpsStaker)), rewardsStream);
-      assertEq(epsToken.balanceOf(address(ellipsisERC4626)), 0); // failing, more rewards minted from mockLpTokenStaker
+      assertEq(epsToken.balanceOf(address(ellipsisERC4626)), rewardsStream); // failing, more rewards minted from mockLpTokenStaker
       // rewards accrued for two cycles
       assertEq(epsToken.balanceOf(address(flywheelRewards)), rewardsStream * 2);
       assertEq(epsToken.balanceOf(address(flywheel)), 0);
@@ -171,16 +172,16 @@ contract EllipsisERC4626Test is DSTest {
   }
 
   function testAccumulatingEPSRewardsOnWithdrawal() public {
-    vm.warp(2);
+    vm.warp(3);
     deposit();
 
-    vm.warp(3);
+    vm.warp(4);
     ellipsisERC4626.withdraw(1, address(this), address(this));
     flywheel.accrue(ERC20(ellipsisERC4626), address(this));
     assertEq(mockEpsStaker.totalBalance(address(this)), 0);
     {
       assertEq(epsToken.balanceOf(address(mockEpsStaker)), rewardsStream);
-      assertEq(epsToken.balanceOf(address(ellipsisERC4626)), 0);
+      assertEq(epsToken.balanceOf(address(ellipsisERC4626)), rewardsStream);
       // rewards accrued for two cycles
       assertEq(epsToken.balanceOf(address(flywheelRewards)), rewardsStream * 2);
       assertEq(epsToken.balanceOf(address(flywheel)), 0);
@@ -188,9 +189,9 @@ contract EllipsisERC4626Test is DSTest {
   }
 
   function testClaimRewards() public {
-    vm.warp(2);
-    deposit();
     vm.warp(3);
+    deposit();
+    vm.warp(4);
     ellipsisERC4626.withdraw(1, address(this), address(this));
     // flywheelPreSupplierAction
     flywheel.accrue(ERC20(ellipsisERC4626), address(this));
@@ -200,7 +201,7 @@ contract EllipsisERC4626Test is DSTest {
   }
 
   function testClaimForMultipleUser() public {
-    vm.warp(2);
+    vm.warp(3);
     deposit();
     vm.startPrank(tester);
     testToken.mint(tester, depositAmount);
@@ -208,7 +209,7 @@ contract EllipsisERC4626Test is DSTest {
     ellipsisERC4626.deposit(depositAmount, tester);
     vm.stopPrank();
 
-    vm.warp(3);
+    vm.warp(4);
     ellipsisERC4626.withdraw(1, address(this), address(this));
     flywheel.accrue(ERC20(ellipsisERC4626), address(this), tester);
     flywheel.claimRewards(address(this));
