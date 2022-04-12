@@ -211,7 +211,7 @@ export class FuseBase {
     liquidationIncentive: BigNumber,
     priceOracle: string, // Contract address
     priceOracleConf: OracleConf,
-    options: any, // We might need to add sender as argument. Getting address from options will collide with the override arguments in ethers contract method calls. It doesn't take address.
+    options: { from: string }, // We might need to add sender as argument. Getting address from options will collide with the override arguments in ethers contract method calls. It doesn't take address.
     whitelist: string[] // An array of whitelisted addresses
   ): Promise<[string, string, string]> {
     // 2. Deploy Comptroller implementation if necessary
