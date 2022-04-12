@@ -66,7 +66,7 @@ contract MockLpTokenStaker {
     uint128[1] memory _startTimeOffset,
     uint128[1] memory _rewardsPerSecond,
     IERC20Upgradeable _fixedRewardToken
-  ) public {
+  ) {
     emissionSchedule.push(
       EmissionPoint({ startTimeOffset: _startTimeOffset[0], rewardsPerSecond: _rewardsPerSecond[0] })
     );

@@ -7284,6 +7284,571 @@
             }
           ]
         },
+        "FuseFlywheelLensRouter": {
+          "address": "0x9Ae3C01b225459dBF7108b1e8386633ecc745036",
+          "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "previousAdmin",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "AdminChanged",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                }
+              ],
+              "name": "BeaconUpgraded",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                }
+              ],
+              "name": "Upgraded",
+              "type": "event"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "fallback"
+            },
+            {
+              "inputs": [],
+              "name": "admin",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "changeAdmin",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "implementation",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "implementation_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                }
+              ],
+              "name": "upgradeTo",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "upgradeToAndCall",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "receive"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract Comptroller",
+                  "name": "comptroller",
+                  "type": "address"
+                }
+              ],
+              "name": "getMarketRewardsInfo",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "underlyingPrice",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "contract CToken",
+                      "name": "market",
+                      "type": "address"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardSpeedPerSecondPerToken",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardTokenPrice",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "formattedAPR",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "flywheel",
+                          "type": "address"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "rewardToken",
+                          "type": "address"
+                        }
+                      ],
+                      "internalType": "struct FuseFlywheelLensRouter.RewardsInfo[]",
+                      "name": "rewardsInfo",
+                      "type": "tuple[]"
+                    }
+                  ],
+                  "internalType": "struct FuseFlywheelLensRouter.MarketRewardsInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract CToken[]",
+                  "name": "markets",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "contract FuseFlywheelCore[]",
+                  "name": "flywheels",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bool[]",
+                  "name": "accrue",
+                  "type": "bool[]"
+                }
+              ],
+              "name": "getUnclaimedRewardsByMarkets",
+              "outputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "rewards",
+                  "type": "uint256[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract CToken",
+                  "name": "market",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract FuseFlywheelCore[]",
+                  "name": "flywheels",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bool[]",
+                  "name": "accrue",
+                  "type": "bool[]"
+                }
+              ],
+              "name": "getUnclaimedRewardsForMarket",
+              "outputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "rewards",
+                  "type": "uint256[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_logic",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "_data",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "payable",
+              "type": "constructor"
+            }
+          ]
+        },
+        "FuseFlywheelLensRouter_Implementation": {
+          "address": "0x058895841C4CCC5105c5D76b27e5A98397a406Fe",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "contract Comptroller",
+                  "name": "comptroller",
+                  "type": "address"
+                }
+              ],
+              "name": "getMarketRewardsInfo",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "underlyingPrice",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "contract CToken",
+                      "name": "market",
+                      "type": "address"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardSpeedPerSecondPerToken",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardTokenPrice",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "formattedAPR",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "flywheel",
+                          "type": "address"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "rewardToken",
+                          "type": "address"
+                        }
+                      ],
+                      "internalType": "struct FuseFlywheelLensRouter.RewardsInfo[]",
+                      "name": "rewardsInfo",
+                      "type": "tuple[]"
+                    }
+                  ],
+                  "internalType": "struct FuseFlywheelLensRouter.MarketRewardsInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract CToken[]",
+                  "name": "markets",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "contract FuseFlywheelCore[]",
+                  "name": "flywheels",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bool[]",
+                  "name": "accrue",
+                  "type": "bool[]"
+                }
+              ],
+              "name": "getUnclaimedRewardsByMarkets",
+              "outputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "rewards",
+                  "type": "uint256[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract CToken",
+                  "name": "market",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract FuseFlywheelCore[]",
+                  "name": "flywheels",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bool[]",
+                  "name": "accrue",
+                  "type": "bool[]"
+                }
+              ],
+              "name": "getUnclaimedRewardsForMarket",
+              "outputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "rewards",
+                  "type": "uint256[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "FuseFlywheelLensRouter_Proxy": {
+          "address": "0x9Ae3C01b225459dBF7108b1e8386633ecc745036",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_logic",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "_data",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "payable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "previousAdmin",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "AdminChanged",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                }
+              ],
+              "name": "BeaconUpgraded",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                }
+              ],
+              "name": "Upgraded",
+              "type": "event"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "fallback"
+            },
+            {
+              "inputs": [],
+              "name": "admin",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "changeAdmin",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "implementation",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "implementation_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                }
+              ],
+              "name": "upgradeTo",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "upgradeToAndCall",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "receive"
+            }
+          ]
+        },
         "FusePoolDirectory": {
           "address": "0x295d7347606F4bd810C8296bb8d75D657001fcf7",
           "abi": [
@@ -15796,6 +16361,11 @@
           ]
         }
       }
+    },
+    {
+      "name": "hardhat",
+      "chainId": "56",
+      "contracts": {}
     }
   ],
   "97": [
@@ -22658,6 +23228,571 @@
         },
         "FuseFeeDistributor_Proxy": {
           "address": "0xFc1f56C58286E7215701A773b61bFf2e18A177dE",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_logic",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "_data",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "payable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "previousAdmin",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "AdminChanged",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                }
+              ],
+              "name": "BeaconUpgraded",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                }
+              ],
+              "name": "Upgraded",
+              "type": "event"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "fallback"
+            },
+            {
+              "inputs": [],
+              "name": "admin",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "changeAdmin",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "implementation",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "implementation_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                }
+              ],
+              "name": "upgradeTo",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "upgradeToAndCall",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "receive"
+            }
+          ]
+        },
+        "FuseFlywheelLensRouter": {
+          "address": "0x9Ae3C01b225459dBF7108b1e8386633ecc745036",
+          "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "previousAdmin",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "AdminChanged",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                }
+              ],
+              "name": "BeaconUpgraded",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                }
+              ],
+              "name": "Upgraded",
+              "type": "event"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "fallback"
+            },
+            {
+              "inputs": [],
+              "name": "admin",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "changeAdmin",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "implementation",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "implementation_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                }
+              ],
+              "name": "upgradeTo",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "upgradeToAndCall",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "receive"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract Comptroller",
+                  "name": "comptroller",
+                  "type": "address"
+                }
+              ],
+              "name": "getMarketRewardsInfo",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "underlyingPrice",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "contract CToken",
+                      "name": "market",
+                      "type": "address"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardSpeedPerSecondPerToken",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardTokenPrice",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "formattedAPR",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "flywheel",
+                          "type": "address"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "rewardToken",
+                          "type": "address"
+                        }
+                      ],
+                      "internalType": "struct FuseFlywheelLensRouter.RewardsInfo[]",
+                      "name": "rewardsInfo",
+                      "type": "tuple[]"
+                    }
+                  ],
+                  "internalType": "struct FuseFlywheelLensRouter.MarketRewardsInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract CToken[]",
+                  "name": "markets",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "contract FuseFlywheelCore[]",
+                  "name": "flywheels",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bool[]",
+                  "name": "accrue",
+                  "type": "bool[]"
+                }
+              ],
+              "name": "getUnclaimedRewardsByMarkets",
+              "outputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "rewards",
+                  "type": "uint256[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract CToken",
+                  "name": "market",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract FuseFlywheelCore[]",
+                  "name": "flywheels",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bool[]",
+                  "name": "accrue",
+                  "type": "bool[]"
+                }
+              ],
+              "name": "getUnclaimedRewardsForMarket",
+              "outputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "rewards",
+                  "type": "uint256[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_logic",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "_data",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "payable",
+              "type": "constructor"
+            }
+          ]
+        },
+        "FuseFlywheelLensRouter_Implementation": {
+          "address": "0x058895841C4CCC5105c5D76b27e5A98397a406Fe",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "contract Comptroller",
+                  "name": "comptroller",
+                  "type": "address"
+                }
+              ],
+              "name": "getMarketRewardsInfo",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "underlyingPrice",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "contract CToken",
+                      "name": "market",
+                      "type": "address"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardSpeedPerSecondPerToken",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardTokenPrice",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "formattedAPR",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "flywheel",
+                          "type": "address"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "rewardToken",
+                          "type": "address"
+                        }
+                      ],
+                      "internalType": "struct FuseFlywheelLensRouter.RewardsInfo[]",
+                      "name": "rewardsInfo",
+                      "type": "tuple[]"
+                    }
+                  ],
+                  "internalType": "struct FuseFlywheelLensRouter.MarketRewardsInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract CToken[]",
+                  "name": "markets",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "contract FuseFlywheelCore[]",
+                  "name": "flywheels",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bool[]",
+                  "name": "accrue",
+                  "type": "bool[]"
+                }
+              ],
+              "name": "getUnclaimedRewardsByMarkets",
+              "outputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "rewards",
+                  "type": "uint256[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract CToken",
+                  "name": "market",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract FuseFlywheelCore[]",
+                  "name": "flywheels",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bool[]",
+                  "name": "accrue",
+                  "type": "bool[]"
+                }
+              ],
+              "name": "getUnclaimedRewardsForMarket",
+              "outputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "rewards",
+                  "type": "uint256[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "FuseFlywheelLensRouter_Proxy": {
+          "address": "0x9Ae3C01b225459dBF7108b1e8386633ecc745036",
           "abi": [
             {
               "inputs": [
@@ -31057,10 +32192,10 @@
       }
     }
   ],
-  "1337": [
+  "9000": [
     {
-      "name": "localhost",
-      "chainId": "1337",
+      "name": "evmostestnet",
+      "chainId": "9000",
       "contracts": {
         "CErc20Delegate": {
           "address": "0xE13935c5d6A578ae6132D4e5b1405b113587f6F7",
@@ -35989,6 +37124,203 @@
             }
           ]
         },
+        "CurveLpTokenPriceOracleNoRegistry": {
+          "address": "0xB7a94f0483Dca6C941CBf9D9c0faA87aB7AAd1EF",
+          "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint8",
+                  "name": "version",
+                  "type": "uint8"
+                }
+              ],
+              "name": "Initialized",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "previousOwner",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnershipTransferred",
+              "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract ICToken",
+                  "name": "cToken",
+                  "type": "address"
+                }
+              ],
+              "name": "getUnderlyingPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "_lpTokens",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "_pools",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "address[][]",
+                  "name": "_poolUnderlyings",
+                  "type": "address[][]"
+                }
+              ],
+              "name": "initialize",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "poolOf",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "underlying",
+                  "type": "address"
+                }
+              ],
+              "name": "price",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_lpToken",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pool",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "_underlyings",
+                  "type": "address[]"
+                }
+              ],
+              "name": "registerPool",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "renounceOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "transferOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "underlyingTokens",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            }
+          ]
+        },
         "DefaultProxyAdmin": {
           "address": "0x0C64dEFA0125678C77dDa2287FDD6000699737Cc",
           "abi": [
@@ -37703,6 +39035,571 @@
         },
         "FuseFeeDistributor_Proxy": {
           "address": "0xFc1f56C58286E7215701A773b61bFf2e18A177dE",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_logic",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "_data",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "payable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "previousAdmin",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "AdminChanged",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                }
+              ],
+              "name": "BeaconUpgraded",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                }
+              ],
+              "name": "Upgraded",
+              "type": "event"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "fallback"
+            },
+            {
+              "inputs": [],
+              "name": "admin",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "changeAdmin",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "implementation",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "implementation_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                }
+              ],
+              "name": "upgradeTo",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "upgradeToAndCall",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "receive"
+            }
+          ]
+        },
+        "FuseFlywheelLensRouter": {
+          "address": "0x9Ae3C01b225459dBF7108b1e8386633ecc745036",
+          "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "previousAdmin",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "AdminChanged",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                }
+              ],
+              "name": "BeaconUpgraded",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                }
+              ],
+              "name": "Upgraded",
+              "type": "event"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "fallback"
+            },
+            {
+              "inputs": [],
+              "name": "admin",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "changeAdmin",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "implementation",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "implementation_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                }
+              ],
+              "name": "upgradeTo",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "upgradeToAndCall",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "receive"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract Comptroller",
+                  "name": "comptroller",
+                  "type": "address"
+                }
+              ],
+              "name": "getMarketRewardsInfo",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "underlyingPrice",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "contract CToken",
+                      "name": "market",
+                      "type": "address"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardSpeedPerSecondPerToken",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardTokenPrice",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "formattedAPR",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "flywheel",
+                          "type": "address"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "rewardToken",
+                          "type": "address"
+                        }
+                      ],
+                      "internalType": "struct FuseFlywheelLensRouter.RewardsInfo[]",
+                      "name": "rewardsInfo",
+                      "type": "tuple[]"
+                    }
+                  ],
+                  "internalType": "struct FuseFlywheelLensRouter.MarketRewardsInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract CToken[]",
+                  "name": "markets",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "contract FuseFlywheelCore[]",
+                  "name": "flywheels",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bool[]",
+                  "name": "accrue",
+                  "type": "bool[]"
+                }
+              ],
+              "name": "getUnclaimedRewardsByMarkets",
+              "outputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "rewards",
+                  "type": "uint256[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract CToken",
+                  "name": "market",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract FuseFlywheelCore[]",
+                  "name": "flywheels",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bool[]",
+                  "name": "accrue",
+                  "type": "bool[]"
+                }
+              ],
+              "name": "getUnclaimedRewardsForMarket",
+              "outputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "rewards",
+                  "type": "uint256[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_logic",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "_data",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "payable",
+              "type": "constructor"
+            }
+          ]
+        },
+        "FuseFlywheelLensRouter_Implementation": {
+          "address": "0x058895841C4CCC5105c5D76b27e5A98397a406Fe",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "contract Comptroller",
+                  "name": "comptroller",
+                  "type": "address"
+                }
+              ],
+              "name": "getMarketRewardsInfo",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "underlyingPrice",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "contract CToken",
+                      "name": "market",
+                      "type": "address"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardSpeedPerSecondPerToken",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "rewardTokenPrice",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "formattedAPR",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "flywheel",
+                          "type": "address"
+                        },
+                        {
+                          "internalType": "address",
+                          "name": "rewardToken",
+                          "type": "address"
+                        }
+                      ],
+                      "internalType": "struct FuseFlywheelLensRouter.RewardsInfo[]",
+                      "name": "rewardsInfo",
+                      "type": "tuple[]"
+                    }
+                  ],
+                  "internalType": "struct FuseFlywheelLensRouter.MarketRewardsInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract CToken[]",
+                  "name": "markets",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "contract FuseFlywheelCore[]",
+                  "name": "flywheels",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bool[]",
+                  "name": "accrue",
+                  "type": "bool[]"
+                }
+              ],
+              "name": "getUnclaimedRewardsByMarkets",
+              "outputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "rewards",
+                  "type": "uint256[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract CToken",
+                  "name": "market",
+                  "type": "address"
+                },
+                {
+                  "internalType": "contract FuseFlywheelCore[]",
+                  "name": "flywheels",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bool[]",
+                  "name": "accrue",
+                  "type": "bool[]"
+                }
+              ],
+              "name": "getUnclaimedRewardsForMarket",
+              "outputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "rewards",
+                  "type": "uint256[]"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "FuseFlywheelLensRouter_Proxy": {
+          "address": "0x9Ae3C01b225459dBF7108b1e8386633ecc745036",
           "abi": [
             {
               "inputs": [
@@ -44173,7 +46070,7 @@
           ]
         },
         "JumpRateModel": {
-          "address": "0x060C1e69Ee7aC35bFfa0D938FA085071F40bE45E",
+          "address": "0xeba429B9Be95ABc45a00f93d3e5571b7b6A9425C",
           "abi": [
             {
               "inputs": [
@@ -45435,786 +47332,8 @@
             }
           ]
         },
-        "SimplePriceOracle": {
-          "address": "0x05aa5c3CdE91cA0B6264114F7B361E00A1FD924E",
-          "abi": [
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "asset",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "previousPriceMantissa",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "requestedPriceMantissa",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "newPriceMantissa",
-                  "type": "uint256"
-                }
-              ],
-              "name": "PricePosted",
-              "type": "event"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "asset",
-                  "type": "address"
-                }
-              ],
-              "name": "assetPrices",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "contract CToken",
-                  "name": "cToken",
-                  "type": "address"
-                }
-              ],
-              "name": "getUnderlyingPrice",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "isPriceOracle",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "underlying",
-                  "type": "address"
-                }
-              ],
-              "name": "price",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "asset",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "price",
-                  "type": "uint256"
-                }
-              ],
-              "name": "setDirectPrice",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "contract CToken",
-                  "name": "cToken",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "underlyingPriceMantissa",
-                  "type": "uint256"
-                }
-              ],
-              "name": "setUnderlyingPrice",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            }
-          ]
-        },
-        "TOUCHToken": {
-          "address": "0xa4498F7dBaBCF4248b0E9B8667aCb560252a8907",
-          "abi": [
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "initialSupply",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "address",
-                  "name": "tokenOwner",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "constructor"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "owner",
-                  "type": "address"
-                },
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "spender",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "Approval",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "from",
-                  "type": "address"
-                },
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "to",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "Transfer",
-              "type": "event"
-            },
-            {
-              "inputs": [],
-              "name": "DOMAIN_SEPARATOR",
-              "outputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "",
-                  "type": "bytes32"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "name": "allowance",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "spender",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "approve",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "name": "balanceOf",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "decimals",
-              "outputs": [
-                {
-                  "internalType": "uint8",
-                  "name": "",
-                  "type": "uint8"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "name",
-              "outputs": [
-                {
-                  "internalType": "string",
-                  "name": "",
-                  "type": "string"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "name": "nonces",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "owner",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "spender",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "value",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "deadline",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint8",
-                  "name": "v",
-                  "type": "uint8"
-                },
-                {
-                  "internalType": "bytes32",
-                  "name": "r",
-                  "type": "bytes32"
-                },
-                {
-                  "internalType": "bytes32",
-                  "name": "s",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "permit",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "symbol",
-              "outputs": [
-                {
-                  "internalType": "string",
-                  "name": "",
-                  "type": "string"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "totalSupply",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "to",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "transfer",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "from",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "to",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "transferFrom",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            }
-          ]
-        },
-        "TRIBEToken": {
-          "address": "0x4557f20084DE100F2FCDC6f596e78BCAb6893562",
-          "abi": [
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "initialSupply",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "address",
-                  "name": "tokenOwner",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "constructor"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "owner",
-                  "type": "address"
-                },
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "spender",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "Approval",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "from",
-                  "type": "address"
-                },
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "to",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "Transfer",
-              "type": "event"
-            },
-            {
-              "inputs": [],
-              "name": "DOMAIN_SEPARATOR",
-              "outputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "",
-                  "type": "bytes32"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "name": "allowance",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "spender",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "approve",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "name": "balanceOf",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "decimals",
-              "outputs": [
-                {
-                  "internalType": "uint8",
-                  "name": "",
-                  "type": "uint8"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "name",
-              "outputs": [
-                {
-                  "internalType": "string",
-                  "name": "",
-                  "type": "string"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "name": "nonces",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "owner",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "spender",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "value",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "deadline",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint8",
-                  "name": "v",
-                  "type": "uint8"
-                },
-                {
-                  "internalType": "bytes32",
-                  "name": "r",
-                  "type": "bytes32"
-                },
-                {
-                  "internalType": "bytes32",
-                  "name": "s",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "permit",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "symbol",
-              "outputs": [
-                {
-                  "internalType": "string",
-                  "name": "",
-                  "type": "string"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "totalSupply",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "to",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "transfer",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "from",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "to",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "transferFrom",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            }
-          ]
-        },
         "WhitePaperInterestRateModel": {
-          "address": "0xbb9e9203f01e2878B2418E64c79C7Ae4D39Af03b",
+          "address": "0xA145b2A17Dc59224689a2eC7d7aF667e92012050",
           "abi": [
             {
               "inputs": [
@@ -46403,11 +47522,6 @@
           ]
         }
       }
-    },
-    {
-      "name": "hardhat",
-      "chainId": "1337",
-      "contracts": {}
     }
   ]
 }

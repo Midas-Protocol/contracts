@@ -22,5 +22,7 @@ We'd like to support yet another custom asset
 ### Tasks
 
 - [ ] Implement custom oracle
-- [ ] Edit deployment script to set up and deploy oracle
 - [ ] Implement custom liquidator
+- [ ] Edit deployment script to set up and deploy oracle and liquidator
+   - [ ] For ChainLink-supported oracles: add asset in the deploy script  e.g.: https://github.com/Midas-Protocol/contracts/blob/main/chainDeploy/mainnets/bsc.ts#L163
+   - [ ] For Uniswap-supported assets, redeploy the fuse-twap-bot after adding editing the `supported_pairs` variable in the [webtwo-infra](https://github.com/Midas-Protocol/webtwo-infra#adding-a-twap-bot) repository
