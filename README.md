@@ -9,171 +9,156 @@ Main repository for Midas Capital's contracts and SDK for interacting with those
  ├── .github/workflows/TestSuite.yaml <- CICD pipeline definition
  ├── .vscode                          <- IDE configs
  │
- │── artifacts                        <- (Auto-generated, git ignored)
- │       └── contracts
- │                  ├── compound      <- Compiled contracts mirroring /contracts
- │                  ├── external
- │                  └──  ...
+ ├── out                              <- (forge-generated, git ignored)
+ │    ├── *.sol/*.json                <- All the built contracts
+ │    └──  ...                        
  │
- ├── contracts                         <- All of our contracts
- │          ├── compound               <- Compound interfaces
- │          ├── external               <- External contracts we require
- │          ├── oracles                <- Oracle contracts
- │          ├── utils                  <- Utility contracts
- │          └──  ...                   <- Main Fuse contracts
+ ├── typechain                        <- (typechain-generated, git ignored)
  │
- ├── deploy                           <- hardhat deployment scripts
- ├── deployments                      <- hardhat-generated deployment files
- ├── scripts                          <- hardhat scripts
+ ├── dist                             <- (typechain-generated, git ignored)
+ │
+ ├── lib                              <- git submodules with forge-based dependencies
+ │    ├── flywheel-v2                 <- Tribe flywheel contracts
+ │    ├── fuse-flywheel               <- Fuse flywheel contracts
+ │    ├── oz-contracts-upgreadable    <- OpenZeppelin deps
+ │    └──  ...                        <- other deps
+ │
+ ├── contracts                        <- All of our contracts
+ │    ├── compound                    <- Compound interfaces
+ │    ├── external                    <- External contracts we require
+ │    ├── oracles                     <- Oracle contracts
+ │    ├── utils                       <- Utility contracts
+ │    └──  ...                        <- Main Fuse contracts
+ │
+ ├── deploy                           <- main hardhat deployment scripts
+ ├── chainDeploy                      <- hardhat chain-specific deployment scripts 
+ ├── tasks                            <- hardhat scripts
  ├── src                              <- midas-sdk main folder
+ ├── test                             <- chai-based tests (SDK integration tests)
  ├── deployments.json                 <- generated on "npx hardhat export"
  └── hardhat.config.ts                <- hardhat confing
 ```
 
 ## Dev Workflow
 
-0. Install dependencies
+0. Install dependencies: npm & [foundry](https://github.com/gakonst/foundry) (forge + cast)
+
+Forge dependencies
+
+```text
+>>> curl -L https://foundry.paradigm.xyz | bash 
+>>> foundryup
+# ensure forge and cast are available in your $PATH
+# install submodule libraries via forge 
+>>> forge install 
+```
+
+NPM dependencies
 
 ```text
 >>> npm install
 ```
 
-2. To develop against the SDK, artifacts and deployment files must be generated first, as they are used by the SDK:
+### Developing Against the SDK
 
-```text
->>> npx hardhat node --tags local
-# in another console
->>>> npm run export
-```
+To develop against the SDK, artifacts and deployment files must be generated first, as they are used by the SDK.
+This is taken care by forge
 
-3. Build the sdk
-
-```text
+```shell
 >>> npm run build
 ```
 
-4. Run tests
+Will generate all the required artifacts: `typechain` files, built contracts in `out` directory, and the newly built
+SDK in `dist`. Another file that is extremely important for the correct behavior of the SDK is the
+`deployments.json` file, which contains all the deployed contract addresses and ABIs for each of the 
+chains we deploy to
+
+Now, make the desired changes to the SDK. To test them, run the "integration" tests:
 
 ```shell
->>> npx hardhat test
-
+>>> npx hardhat test:hardhat
+# with forking, see note below on forking
+>>> npx hardhat test:bsc 
 ```
 
-### Gotchas
+### Developing Against the contracts
 
-If you're developing against the contracts, and you're getting errors such as
+Now, you make some changes to the contracts. Once statisfied:
 
 ```shell
- Error: Deployment and registration of new Fuse pool failed: Transaction reverted: function returned an unexpected amount of data
+>>> npm run build:forge
 ```
 
-It is likely because the address of the `FuseFeeDistributor` has changed. Since it is hardcoded into one of the main
-contracts that many others inherit from (all the Comptroller stuff), any calls to the old contract address will fail.
+And then test the changes with forge-based tests:
 
-Bottom line: whenever you make changes to the `FuseFeeDistributor`, make sure that this contract address is updated in the two
-main files that hardcode it:
-
-- `ComptrollerStorage.sol`
-- `CTokenInterfaces.sol`
-
-This requires a few-step approach:
-
-1. Make your desired changes to the contracts
-2. Deploy them locally and run export
-3. Get the new FFD address and replace it where needed (if it all changed -- if its source code changed, so will its bytecode, and thus its deployed contract address)
-4. Re run the node / deployment and export / build
-
-Then, your tests should pass (assuming no other failures)
-
-### Running BSC mainnet fork locally
-
-1. Add env vars in .env
-
-`.env`
+```shell
+>>> npm run test:forge
+# tests with forking, see note below on forking
+>>> npm run test:forge:bsc
 ```
-FORK_URL=https://speedy-nodes-nyc.moralis.io/2d2926c3e761369208fba31f/bsc/mainnet/archive
-FORK_BLOCK_NUMBER=15641803
+
+At this point, you also want to run integration tests that leverage the SDK. For that, you need to 
+regenerate the required artifacts:
+
+```shell
+# create freshly compiled artifacts
+>>> npm run build
+```
+
+Redeploy the contracts locally
+
+```shell
+# deploy new contracts to localhost, and export them to the deployments.json file
+>>> npx hardhat node --tags local
+# in another console
+>>> npm run export
+# rebuild the SDK with the newly created artifacts
+>>> npm run build
+```
+
+Once this is done, you can run the integration tests:
+
+
+```shell
+# Integration tests against local node
+>>> npm run test:hardhat
+```
+
+```shell
+# Integration tests against bsc fork node
+>>> npm run test:bsc
+```
+
+**NOTE**: to run tests against a BSC forked node, set the correct env variables in `.env`:
+```
+FORK_URL_BSC=https://speedy-nodes-nyc.moralis.io/2d2926c3e761369208fba31f/bsc/mainnet/archive
+# this is well before the deployment of our contracts, so you should start with a fresh set of contracts
+FORK_BLOCK_NUMBER=14621736
 FORK_CHAIN_ID=56
 ```
 
-2. Run node
+(if these env vars are set, the tests will always use them, so make sure to comment them out if you're intending
+to run tests against a non-forked node)
+
+## Running a node for FE development or integration testing
+
+With the `.env` set up as above:
 
 ```shell
 >>> npx hardhat node --tags fork
 ```
-
-You can then generate the deployments for bsc (chain id 56)
-
-```shell
->>> npm run export
-```
-
-## Running local node + liquidation bot
-
-1. Edit the `liquidation.env` file, add the account and private key from any of the
-   signer's accounts
-
-2. Edit desired parameters, if needed
+or alternatively, using the live currently deployed contracts (change the `FORK_BLOCK_NUMBER` to something recent)
 
 ```shell
->>> docker-compose up
+# no deploy is needed because contracts at those addresses already exist
+>>> npx hardhat node --tags prod --no-deploy
 ```
 
-This will spin up the bot and a local node, and create an unhealthy pool. The bot
-will act on it and liquidate it.
-
-3. Further test liquidations:
-
-In another shell:
+or alternatively, just run a local node without forking. Comment out all the `FORK_*` variables from the `.env` file
+and:
 
 ```shell
->>> npx hardhat e2e:unhealthy-pools-exist --network localhost
-```
-
-Check the logs from the bot and ensure it is performing the liquidations appropriately.
-You can also run the UI and check the "test unhealthy", as it gets liquidated.
-
-## Running Forge tests
-
-1. Install forge (mac, linux)
-
-```
-curl -L https://foundry.paradigm.xyz | bash
-foundryup
-```
-
-2. Initialize forge in the repo
-
-```
-forge init --force
-```
-
-3. Build the contracts
-
-```
-forge build
-```
-
-4. Test away
-
-```
-forge test
-```
-
-5. To run the tests on a BSC mainnet fork, run
-
-```
-npm run test:forge:bsc
-```
-
-## Simulating a prod deploy
-
-1. Add the chain-specific env vars in .env
-
-2. Then run
-
-```shell
->>> npx hardhat node --tags simulate
+>>> npx hardhat node --tags prod 
 ```
 
 ## Deploying to prod (BSC mainnet)
@@ -185,3 +170,26 @@ npm run test:forge:bsc
 ```
 hardhat --network bsc deploy --tags prod
 ```
+
+### Current & Desired Workflow
+
+Deployment flow of contracts:
+
+1. Make desired changes, and push to branch, creating a PR against `main` branch
+2. Ensure integration and forge tests pass for the local case (`npm run test:hardhat` and `npm run test:forge`)
+3. Once the local tests pass, redeploy the contracts to all target chains
+4. Export deployments files, and commit new deployment artifacts, and bump SDK version
+6. Merge to main, which triggers new SDK release
+
+This is OK, but it does not enforce the testing against the pre and post deploy BSC forked node. Our ideal scenario instead
+looks like the following:
+
+1. Make desired changes, and push to branch, creating a PR against `development` branch
+2. Ensure integration and forge tests pass for the local case & for the pre-deploy forked node case
+3. Once tests pass, redeploy the contracts to all target chains 
+4. Export deployments files, and commit new deployment artifacts, and bump SDK version
+5. Merge into `development` branch
+6. Create PR from `development` into `main` 
+7. Ensure tests against a **post-deploy** BSC fork works (both forge and hh-based tests). This will ensure that 
+the newly deployed contracts are both integration and unit tested.
+8. Update SDK, merge to `main`, which triggers new SDK release 
