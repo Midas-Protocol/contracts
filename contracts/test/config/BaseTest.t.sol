@@ -43,7 +43,7 @@ abstract contract BaseTest is DSTest {
       curveLPTokenPriceOracleNoRegistry: CurveLpTokenPriceOracleNoRegistry(0x274F5dFBDB6af889124EFcfA065A247A15243EC2),
       chainlinkOracle: ChainlinkPriceOracleV2(0xb87bC7F78F8c87d37e6FA2abcADF4C6Da0bc124A),
       synthereumLiquiditiyPool: ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49),
-      masterPriceOracle: MasterPriceOracle(0x37CF9eA8C6Bb6C020D4B5e7C3C462B02313aaFF4),
+      masterPriceOracle: MasterPriceOracle(0xF603C1212907aeec18034451CaD28CC2347b50d4),
       twapOraclesFactory: UniswapTwapPriceOracleV2Factory(0x26425D9FB9eB790CA3473223A2a98606281099bf),
       uniswapV2Factory: IUniswapV2Factory(0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73)
     });
