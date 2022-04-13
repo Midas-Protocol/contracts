@@ -94,6 +94,8 @@ contract AutofarmERC4626Test is DSTest {
     // flywheelPreSupplierAction -- usually this would be done in Comptroller when supplying
     flywheel.accrue(ERC20(autofarmERC4626), address(this));
     autofarmERC4626.deposit(depositAmount, address(this));
+    // flywheelPreSupplierAction
+    flywheel.accrue(ERC20(autofarmERC4626), address(this));
   }
 
   function testDeposit() public {
@@ -151,6 +153,7 @@ contract AutofarmERC4626Test is DSTest {
     vm.roll(3);
 
     autofarmERC4626.withdraw(1, address(this), address(this));
+    // flywheelPreSupplierAction
     flywheel.accrue(ERC20(autofarmERC4626), address(this));
     vm.warp(4);
     vm.roll(4);
