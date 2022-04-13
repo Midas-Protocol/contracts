@@ -61,7 +61,7 @@ contract TOUCHToken is ERC20 {
     // emit stakinng event
   }
 
-  // TODO possibly remove as much from the locked and unlocked stake?
+  // TODO unstake proportionally from the locked and unlocked stake?
   function unstake(uint256 amountToUnstake) public {
     require(amountToUnstake <= _unlockedStakes[msg.sender] + _lockedStakes[msg.sender], "stake not enough");
     uint256 amountToReceive = amountToUnstake;
