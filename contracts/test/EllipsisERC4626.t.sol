@@ -89,6 +89,8 @@ contract EllipsisERC4626Test is DSTest {
     // flywheelPreSupplierAction -- usually this would be done in Comptroller when supplying
     flywheel.accrue(ERC20(ellipsisERC4626), address(this));
     ellipsisERC4626.deposit(depositAmount, address(this));
+    // flywheelPreSupplierAction
+    flywheel.accrue(ERC20(ellipsisERC4626), address(this));
   }
 
   function testDeposit() public {

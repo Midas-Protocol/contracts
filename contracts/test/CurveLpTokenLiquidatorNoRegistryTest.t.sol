@@ -32,7 +32,7 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
       return;
     }
 
-    vm.prank(chainConfig.whale);
+    vm.prank(chainConfig.lpTokenWhale);
     chainConfig.lpToken.transfer(address(liquidator), 1234);
 
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
