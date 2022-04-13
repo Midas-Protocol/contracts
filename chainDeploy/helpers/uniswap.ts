@@ -25,17 +25,17 @@ export const deployUniswapOracle = async ({
   if (utpo.transactionHash) await ethers.provider.waitForTransaction(utpo.transactionHash);
   console.log("UniswapTwapPriceOracleV2: ", utpo.address);
 
-  for (let tokenPair of deployConfig.uniswap.uniswapOracleInitialDeployTokens) {
-    let dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
-      from: deployer,
-      salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-      args: [tokenPair.token],
-      log: true,
-    });
-    const utpor = await dep.deploy();
-    if (utpor.transactionHash) await ethers.provider.waitForTransaction(utpor.transactionHash);
-    console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
+  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [deployConfig.wtoken],
+    log: true,
+  });
+  const utpor = await dep.deploy();
+  if (utpor.transactionHash) await ethers.provider.waitForTransaction(utpor.transactionHash);
+  console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
 
+  for (let tokenPair of deployConfig.uniswap.uniswapOracleInitialDeployTokens) {
     dep = await deployments.deterministic("UniswapTwapPriceOracleV2Factory", {
       from: deployer,
       salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
