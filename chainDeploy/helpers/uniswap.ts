@@ -75,7 +75,6 @@ export const deployUniswapOracle = async ({
         deployConfig.uniswap.uniswapV2FactoryAddress,
         tokenPair.baseToken
       );
-      console.log(" --------------- this is deploying new oracles -------------- ", oldBaseTokenOracle);
     }
 
     const underlyingOracle = await mpo.callStatic.oracles(tokenPair.baseToken);
@@ -88,6 +87,6 @@ export const deployUniswapOracle = async ({
   if (updateOracles.length) {
     let tx = await mpo.add(updateUnderlyings, updateOracles);
     await tx.wait();
-    console.log(`Master Price Oracle updated for tokens ${updateOracles.join(", ")}`);
+    console.log(`Master Price Oracle updated for tokens ${updateUnderlyings.join(", ")}`);
   }
 };
