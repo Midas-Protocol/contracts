@@ -11,18 +11,11 @@ export const deployUniswapOracle = async ({
   deployConfig,
 }: UniswapDeployFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
+  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const updateOracles = [],
+    updateUnderlyings = [];
   //// Uniswap Oracle
-  let dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [deployConfig.wtoken],
-    log: true,
-  });
-  const utpor = await dep.deploy();
-  if (utpor.transactionHash) await ethers.provider.waitForTransaction(utpor.transactionHash);
-  console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
-
-  dep = await deployments.deterministic("UniswapTwapPriceOracleV2", {
+  let dep = await deployments.deterministic("UniswapTwapPriceOracleV2", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
@@ -32,50 +25,69 @@ export const deployUniswapOracle = async ({
   if (utpo.transactionHash) await ethers.provider.waitForTransaction(utpo.transactionHash);
   console.log("UniswapTwapPriceOracleV2: ", utpo.address);
 
-  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Factory", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [utpor.address, utpo.address, deployConfig.wtoken],
-    log: true,
-  });
-  const utpof = await dep.deploy();
-  if (utpof.transactionHash) await ethers.provider.waitForTransaction(utpof.transactionHash);
-  console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
+  for (let tokenPair of deployConfig.uniswap.uniswapOracleInitialDeployTokens) {
+    let dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
+      from: deployer,
+      salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+      args: [tokenPair.token],
+      log: true,
+    });
+    const utpor = await dep.deploy();
+    if (utpor.transactionHash) await ethers.provider.waitForTransaction(utpor.transactionHash);
+    console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
 
-  const uniTwapOracleFactory = (await ethers.getContract(
-    "UniswapTwapPriceOracleV2Factory",
-    deployer
-  )) as UniswapTwapPriceOracleV2Factory;
+    dep = await deployments.deterministic("UniswapTwapPriceOracleV2Factory", {
+      from: deployer,
+      salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+      args: [utpor.address, utpo.address, tokenPair.token],
+      log: true,
+    });
+    const utpof = await dep.deploy();
+    if (utpof.transactionHash) await ethers.provider.waitForTransaction(utpof.transactionHash);
+    console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
 
-  const existingOracle = await uniTwapOracleFactory.callStatic.oracles(
-    deployConfig.uniswap.uniswapV2FactoryAddress,
-    deployConfig.wtoken
-  );
-  if (existingOracle == constants.AddressZero) {
-    // deploy oracle with wtoken as base token
-    let tx = await uniTwapOracleFactory.deploy(deployConfig.uniswap.uniswapV2FactoryAddress, deployConfig.wtoken);
-    await tx.wait();
-  } else {
-    console.log("UniswapTwapPriceOracleV2 already deployed at: ", existingOracle);
+    const uniTwapOracleFactory = (await ethers.getContract(
+      "UniswapTwapPriceOracleV2Factory",
+      deployer
+    )) as UniswapTwapPriceOracleV2Factory;
+
+    const existingOracle = await uniTwapOracleFactory.callStatic.oracles(
+      deployConfig.uniswap.uniswapV2FactoryAddress,
+      deployConfig.wtoken
+    );
+    if (existingOracle == constants.AddressZero) {
+      // deploy oracle with wtoken as base token
+      let tx = await uniTwapOracleFactory.deploy(deployConfig.uniswap.uniswapV2FactoryAddress, deployConfig.wtoken);
+      await tx.wait();
+    } else {
+      console.log("UniswapTwapPriceOracleV2 already deployed at: ", existingOracle);
+    }
+
+    let oldBaseTokenOracle = await uniTwapOracleFactory.callStatic.oracles(
+      deployConfig.uniswap.uniswapV2FactoryAddress,
+      tokenPair.baseToken
+    );
+
+    if (oldBaseTokenOracle == constants.AddressZero) {
+      let tx = await uniTwapOracleFactory.deploy(deployConfig.uniswap.uniswapV2FactoryAddress, tokenPair.baseToken);
+      await tx.wait();
+      oldBaseTokenOracle = await uniTwapOracleFactory.callStatic.oracles(
+        deployConfig.uniswap.uniswapV2FactoryAddress,
+        tokenPair.baseToken
+      );
+      console.log(" --------------- this is deploying new oracles -------------- ", oldBaseTokenOracle);
+    }
+
+    const underlyingOracle = await mpo.callStatic.oracles(tokenPair.baseToken);
+    if (underlyingOracle == constants.AddressZero || underlyingOracle != oldBaseTokenOracle) {
+      updateOracles.push(oldBaseTokenOracle);
+      updateUnderlyings.push(tokenPair.baseToken);
+    }
   }
 
-  const nativeOracle = await uniTwapOracleFactory.callStatic.oracles(
-    deployConfig.uniswap.uniswapV2FactoryAddress,
-    deployConfig.wtoken
-  );
-
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
-  const underlyings = deployConfig.uniswap.uniswapOracleInitialDeployTokens;
-  const oracles = Array(deployConfig.uniswap.uniswapOracleInitialDeployTokens.length).fill(nativeOracle);
-
-  if (underlyings.length > 0) {
-    let anyNotAddedYet = underlyings.some(
-      async (underlying) => (await mpo.callStatic.oracles(underlying)) == constants.AddressZero
-    );
-    if (anyNotAddedYet) {
-      let tx = await mpo.add(underlyings, oracles);
-      await tx.wait();
-      console.log(`Master Price Oracle updated for tokens ${underlyings.join(", ")}`);
-    }
+  if (updateOracles.length) {
+    let tx = await mpo.add(updateUnderlyings, updateOracles);
+    await tx.wait();
+    console.log(`Master Price Oracle updated for tokens ${updateOracles.join(", ")}`);
   }
 };
