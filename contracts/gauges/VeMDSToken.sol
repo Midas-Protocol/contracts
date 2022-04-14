@@ -6,7 +6,6 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "flywheel-v2/token/ERC20Gauges.sol";
 
-import "./GaugesController.sol";
 import "../utils/TOUCHToken.sol";
 
 // TODO integrate with FlywheelGaugeRewards

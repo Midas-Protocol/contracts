@@ -3,116 +3,113 @@ pragma solidity ^0.8.0;
 // SPDX-License-Identifier: UNLICENSED
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
+import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
+
 import "../gauges/VeMDSToken.sol";
 
-contract TOUCHToken is ERC20 {
+contract TOUCHToken is ERC20, Initializable {
   mapping(address => uint256) public stakingStartedTime;
-  mapping(address => uint256) internal _lockedStakes;
-  mapping(address => uint256) internal _unlockedStakes;
-  address public totalStaked;
+  mapping(address => uint256) internal releasingStakes;
+  mapping(address => uint256) internal accumulatedStakes;
+  uint256 public totalStaked;
   VeMDSToken veToken;
 
-  constructor(uint256 _initialSupply, VeMDSToken _veToken) ERC20("Midas TOUCH Token", "TOUCH", 18) {
+  // TODO solmate ERC20 and initializable?
+  constructor() ERC20("Midas TOUCH Token", "TOUCH", 18) {}
+
+  function initialize(uint256 _initialSupply, VeMDSToken _veToken) initializer public {
     _mint(msg.sender, _initialSupply);
+//    __ERC20_init("MyToken", "MTK");
     veToken = _veToken;
   }
 
-  // needs to be called from time to time
+// needs to be called from time to time
   function claimAccumulatedVotingPower() external returns (uint256) {
     return _claimAccumulatedVotingPower();
   }
 
   // needs to be called from time to time?
   function _claimAccumulatedVotingPower() internal returns (uint256) {
-    uint256 unlockedVotingPower = votingPowerOf(msg.sender);
-
-    // update locked/unlocked state
-    _lockedStakes[msg.sender] = _unlockedStakes[msg.sender] + _lockedStakes[msg.sender] - unlockedVotingPower;
-    _unlockedStakes[msg.sender] = unlockedVotingPower;
-    // totalStaked remains the same
+    uint256 accumulatedVotingPower = accumulatedVotingPowerOf(msg.sender);
 
     // mint the accumulated veTokens
     uint256 currentBalanceOfVeTokens = veToken.balanceOf(msg.sender);
-    uint256 amountToMint = unlockedVotingPower - currentBalanceOfVeTokens;
-    veToken.mint(msg.sender, amountToMint);
+    uint256 amountToMint = accumulatedVotingPower - currentBalanceOfVeTokens;
+    if (amountToMint != 0) {
+      veToken.mint(msg.sender, amountToMint);
+    } else {
+      uint256 totalStake = accumulatedStakes[msg.sender] + releasingStakes[msg.sender];
+      if (accumulatedVotingPower == totalStake) {
+        accumulatedStakes[msg.sender] = totalStake;
+        stakingStartedTime[msg.sender] = 0;
+        releasingStakes[msg.sender] = 0;
+      }
+    }
 
     return amountToMint;
   }
 
   function stake(uint256 amountToStake) public {
+    require(amountToStake > 0, "amount to stake should be non-zero");
+    _claimAccumulatedVotingPower();
+
     // call first, then change the state
     // safe methods not needed?
-    transferFrom(msg.sender, address(this), amountToStake);
+    transfer(address(this), amountToStake);
 
-    // unlock already usable voting power, lock the rest + new
-    uint256 unlockedVotingPower = votingPowerOf(msg.sender); // =
-    // update locked/unlocked state
-    stakingStartedTime[msg.sender] = block.timestamp;
-    _unlockedStakes[msg.sender] = unlockedVotingPower;
-    // new locked + old locked - new unlocked
-    _lockedStakes[msg.sender] = amountToStake + _lockedStakes[msg.sender] - unlockedVotingPower;
+    // update releasing/accumulated state
+    uint256 accumulatedVotingPower = accumulatedVotingPowerOf(msg.sender);
+    releasingStakes[msg.sender] = accumulatedStakes[msg.sender] + releasingStakes[msg.sender] - accumulatedVotingPower;
+    accumulatedStakes[msg.sender] = accumulatedVotingPower;
+
+    releasingStakes[msg.sender] += amountToStake;
     totalStaked += amountToStake;
-
-    // mint the accumulated voting power to voting escrow
-    uint256 currentBalanceOfVeTokens = veToken.balanceOf(msg.sender);
-    uint256 amountToMint = unlockedVotingPower - currentBalanceOfVeTokens;
-    veToken.mint(msg.sender, amountToMint);
+    stakingStartedTime[msg.sender] = block.timestamp;
 
     // emit stakinng event
   }
 
-  // TODO unstake proportionally from the locked and unlocked stake?
+  // TODO unstaking period
   function unstake(uint256 amountToUnstake) public {
-    require(amountToUnstake <= _unlockedStakes[msg.sender] + _lockedStakes[msg.sender], "stake not enough");
-    uint256 amountToReceive = amountToUnstake;
-    //_claimAccumulatedVotingPower();
+    uint256 totalStakePreUnstake = accumulatedStakes[msg.sender] + releasingStakes[msg.sender];
+    require(amountToUnstake <= totalStakePreUnstake, "stake not enough");
+    _claimAccumulatedVotingPower();
 
-    // update locked/unlocked state
-    totalStaked -= amountToStake;
-    // first we unstake the unlocked part, then the locked
-    if (_unlockedStakes[msg.sender] >= amountToUnstake) {
-      _unlockedStakes[msg.sender] -= amountToUnstake;
-      amountToUnstake = 0;
-    } else {
-      amountToUnstake -= _unlockedStakes[msg.sender];
-      _unlockedStakes[msg.sender] = 0;
-    }
-    // if not enough, take from the locked part
-    if (_lockedStakes[msg.sender] >= amountToUnstake) {
-      _lockedStakes[msg.sender] -= amountToUnstake;
-      amountToUnstake = 0;
-    }
-
-    // reset if no pending to be unlocked stake is left
-    if (_lockedStakes[msg.sender] == 0) {
-      stakingStartedTime[msg.sender] = 0;
-    }
+    releasingStakes[msg.sender] = totalStakePreUnstake - amountToUnstake;
+    accumulatedStakes[msg.sender] = 0;
+    totalStaked -= amountToUnstake;
+    // reset if accumulating stake is left
+    stakingStartedTime[msg.sender] = releasingStakes[msg.sender] != 0 ? block.timestamp : 0;
 
     // remove voting power from escrow
-    veToken.burn(msg.sender, amountToReceive);
+    veToken.burn(msg.sender, veToken.balanceOf(msg.sender));
 
     // call transfer in the end, as the reentrancy protection pattern requires
-    transfer(msg.sender, amountToReceive);
+    ERC20(address(this)).transfer(msg.sender, amountToUnstake);
 
     // emit unstaking event
   }
 
-  function votingPowerOf(address account) public view returns (uint vp) {
-    uint stakingStartedTime = stakingStartedTime[account];
-    if (stakingStartedTime == 0) {
+  function stakeOf(address account) public view returns (uint256) {
+    return releasingStakes[account] + accumulatedStakes[account];
+  }
+
+  function accumulatedVotingPowerOf(address account) public view returns (uint256 vp) {
+    uint256 stakingStarted = stakingStartedTime[account];
+    if (stakingStarted == 0) {
       return 0;
     } else {
-      uint _lockedStake = _lockedStakes[account];
-      uint hoursSinceStaked = (block.timestamp - stakingStartedTime) % 3600;
+      uint256 releasingStake = releasingStakes[account];
+      uint256 hoursSinceStaked = (block.timestamp - stakingStarted) / 3600;
       if (hoursSinceStaked < 7143) { // 7142 * 0.014 = 99.988 %
-        // percentage unlocked = hours since staked * 0.014
-        vp = (_lockedStake * hoursSinceStaked * 14) / 100000;
+        // percentage released = hours since staked * 0.014
+        vp = (releasingStake * hoursSinceStaked * 14) / 100_000;
       } else {
         // hoursSinceStaked >= 7143 = 297.625 * 24
         // during day 298 voting power becomes 100% of the staked MDS
-        vp = _lockedStake;
+        vp = releasingStake;
       }
     }
-    vp += _unlockedStakes[account];
+    vp += accumulatedStakes[account];
   }
 }
