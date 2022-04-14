@@ -139,8 +139,8 @@ contract MockLpTokenStaker is ReentrancyGuard {
   function _getRewardData(address _token) internal returns (uint256 accRewardPerShare, uint256 rewardsPerSecond) {
     PoolInfo storage pool = poolInfo[_token];
     uint256 lpSupply = pool.adjustedSupply;
-    uint256 start = startTime;
-    uint256 currentWeek = (block.timestamp - start) / 604800;
+    // uint256 start = startTime;
+    // uint256 currentWeek = (block.timestamp - start) / 604800;
 
     if (lpSupply == 0) {
       return (0, rewardsStream);
@@ -211,6 +211,7 @@ contract MockLpTokenStaker is ReentrancyGuard {
     bool _claimRewards
   ) external nonReentrant returns (uint256) {
     require(_amount > 0, "Cannot deposit zero");
+
     uint256 accRewardPerShare = _updatePool(_token);
     UserInfo storage user = userInfo[_token][msg.sender];
     uint256 pending;
