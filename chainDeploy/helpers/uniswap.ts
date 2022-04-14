@@ -35,34 +35,34 @@ export const deployUniswapOracle = async ({
   if (utpor.transactionHash) await ethers.provider.waitForTransaction(utpor.transactionHash);
   console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
 
+  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Factory", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [utpor.address, utpo.address, deployConfig.wtoken],
+    log: true,
+  });
+  const utpof = await dep.deploy();
+  if (utpof.transactionHash) await ethers.provider.waitForTransaction(utpof.transactionHash);
+  console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
+
+  const uniTwapOracleFactory = (await ethers.getContract(
+    "UniswapTwapPriceOracleV2Factory",
+    deployer
+  )) as UniswapTwapPriceOracleV2Factory;
+
+  const existingOracle = await uniTwapOracleFactory.callStatic.oracles(
+    deployConfig.uniswap.uniswapV2FactoryAddress,
+    deployConfig.wtoken
+  );
+  if (existingOracle == constants.AddressZero) {
+    // deploy oracle with wtoken as base token
+    let tx = await uniTwapOracleFactory.deploy(deployConfig.uniswap.uniswapV2FactoryAddress, deployConfig.wtoken);
+    await tx.wait();
+  } else {
+    console.log("UniswapTwapPriceOracleV2 already deployed at: ", existingOracle);
+  }
+
   for (let tokenPair of deployConfig.uniswap.uniswapOracleInitialDeployTokens) {
-    dep = await deployments.deterministic("UniswapTwapPriceOracleV2Factory", {
-      from: deployer,
-      salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-      args: [utpor.address, utpo.address, tokenPair.token],
-      log: true,
-    });
-    const utpof = await dep.deploy();
-    if (utpof.transactionHash) await ethers.provider.waitForTransaction(utpof.transactionHash);
-    console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
-
-    const uniTwapOracleFactory = (await ethers.getContract(
-      "UniswapTwapPriceOracleV2Factory",
-      deployer
-    )) as UniswapTwapPriceOracleV2Factory;
-
-    const existingOracle = await uniTwapOracleFactory.callStatic.oracles(
-      deployConfig.uniswap.uniswapV2FactoryAddress,
-      deployConfig.wtoken
-    );
-    if (existingOracle == constants.AddressZero) {
-      // deploy oracle with wtoken as base token
-      let tx = await uniTwapOracleFactory.deploy(deployConfig.uniswap.uniswapV2FactoryAddress, deployConfig.wtoken);
-      await tx.wait();
-    } else {
-      console.log("UniswapTwapPriceOracleV2 already deployed at: ", existingOracle);
-    }
-
     let oldBaseTokenOracle = await uniTwapOracleFactory.callStatic.oracles(
       deployConfig.uniswap.uniswapV2FactoryAddress,
       tokenPair.baseToken
@@ -77,10 +77,10 @@ export const deployUniswapOracle = async ({
       );
     }
 
-    const underlyingOracle = await mpo.callStatic.oracles(tokenPair.baseToken);
+    const underlyingOracle = await mpo.callStatic.oracles(tokenPair.token);
     if (underlyingOracle == constants.AddressZero || underlyingOracle != oldBaseTokenOracle) {
       updateOracles.push(oldBaseTokenOracle);
-      updateUnderlyings.push(tokenPair.baseToken);
+      updateUnderlyings.push(tokenPair.token);
     }
   }
 
