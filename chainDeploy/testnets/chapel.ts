@@ -27,7 +27,7 @@ export const deployConfig: ChainDeployConfig = {
       }, // BTCB
       {
         token: "0xd66c6B4F0be8CE5b39D52E0Fd1344c389929B378",
-        baseToken: "",
+        baseToken: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
       }, // ETH
     ],
   },
