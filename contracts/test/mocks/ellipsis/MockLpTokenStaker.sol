@@ -1,279 +1,363 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.8.0;
+pragma solidity ^0.8.0;
 
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/utils/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-interface Minter {
-  function mint(address _receiver, uint256 _amount) external;
+interface IERC20Mintable {
+  function mint(address _to, uint256 _value) external;
+
+  function minter() external view returns (address);
 }
 
-interface Oracle {
-  function latestAnswer() external view returns (int256);
+interface IStableSwap {
+  function withdraw_admin_fees() external;
 }
 
-// LP token staking contract for http://ellipsis.finance/
-// LP tokens are staked within this contract to generate EPS, Ellipsis' value-capture token
-// Based on the Sushi MasterChef contract by Chef Nomi - https://github.com/sushiswap/sushiswap/
-contract MockLpTokenStaker {
-  using SafeMathUpgradeable for uint256;
-  using SafeERC20Upgradeable for IERC20Upgradeable;
+// based on the Sushi MasterChef
+// https://github.com/sushiswap/sushiswap/blob/master/contracts/MasterChef.sol
+contract MockLpTokenStaker is ReentrancyGuard {
+  using SafeERC20 for IERC20;
 
   // Info of each user.
   struct UserInfo {
-    uint256 amount;
+    uint256 depositAmount; // The amount of tokens deposited into the contract.
+    uint256 adjustedAmount; // The user's effective balance after boosting, used to calculate emission rates.
     uint256 rewardDebt;
+    uint256 claimable;
   }
   // Info of each pool.
   struct PoolInfo {
-    IERC20Upgradeable lpToken; // Address of LP token contract.
-    uint256 oracleIndex; // Index value for oracles array indicating which price multiplier to use.
-    uint256 allocPoint; // How many allocation points assigned to this pool.
+    uint256 adjustedSupply;
+    uint256 rewardsPerSecond;
     uint256 lastRewardTime; // Last second that reward distribution occurs.
-    uint256 accRewardPerShare; // Accumulated rewards per share, times 1e12. See below.
-  }
-  // Info about token emissions for a given time period.
-  struct EmissionPoint {
-    uint128 startTimeOffset;
-    uint128 rewardsPerSecond;
+    uint256 accRewardPerShare; // Accumulated rewards per share, times 1e18. See below.
   }
 
-  Minter public rewardMinter;
-  uint256 public rewardsPerSecond;
+  uint256 public immutable maxMintableTokens;
+  uint256 public mintedTokens;
+
   // Info of each pool.
-  PoolInfo[] public poolInfo;
-  // Data about the future reward rates. emissionSchedule stored in reverse chronological order,
-  // whenever the number of blocks since the start block exceeds the next block offset a new
-  // reward rate is applied.
-  EmissionPoint[] public emissionSchedule;
-  // Info of each user that stakes LP tokens.
-  mapping(uint256 => mapping(address => UserInfo)) public userInfo;
-  // Total allocation poitns. Must be the sum of all allocation points in all pools.
-  uint256 public totalAllocPoint = 0;
-  // The block number when reward mining starts.
-  uint256 public startTime;
+  address[] public registeredTokens;
+  mapping(address => PoolInfo) public poolInfo;
 
-  // List of Chainlink oracle addresses.
-  Oracle[] public oracles;
+  // token => user => Info of each user that stakes LP tokens.
+  mapping(address => mapping(address => UserInfo)) public userInfo;
+  // The timestamp when reward mining starts.
+  uint256 public immutable startTime;
 
-  event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
-  event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
-  event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
+  // account earning rewards => receiver of rewards for this account
+  // if receiver is set to address(0), rewards are paid to the earner
+  // this is used to aid 3rd party contract integrations
+  mapping(address => address) public claimReceiver;
 
-  constructor(
-    uint128[1] memory _startTimeOffset,
-    uint128[1] memory _rewardsPerSecond,
-    IERC20Upgradeable _fixedRewardToken
-  ) public {
-    emissionSchedule.push(
-      EmissionPoint({ startTimeOffset: _startTimeOffset[0], rewardsPerSecond: _rewardsPerSecond[0] })
-    );
-    // Pool values are based on USD so the first oracle is 0x00 and the price is always $1
-    oracles.push(Oracle(address(0)));
-    // The first pool receives special treatment, it always has 20% of the totalAllocPoint
-    poolInfo.push(
-      PoolInfo({
-        lpToken: _fixedRewardToken,
-        oracleIndex: 0,
-        allocPoint: 0,
-        lastRewardTime: block.timestamp,
-        accRewardPerShare: 0
-      })
-    );
-  }
+  // when set to true, other accounts cannot call
+  // `deposit` or `claim` on behalf of an account
+  mapping(address => bool) public blockThirdPartyActions;
 
-  // Start the party
-  function start() public {
-    require(startTime == 0);
+  // token => timestamp of last admin fee claim for the related pool
+  // admin fees are claimed once per day when a user claims pending
+  // rewards for the lp token
+  mapping(address => uint256) public lastFeeClaim;
+
+  IERC20Mintable public immutable rewardToken;
+
+  uint192 rewardsStream = 0.5e18;
+
+  event Deposit(address indexed user, address indexed token, uint256 amount);
+  event Withdraw(address indexed user, address indexed token, uint256 amount);
+  event EmergencyWithdraw(address indexed token, address indexed user, uint256 amount);
+  event ClaimedReward(address indexed caller, address indexed claimer, address indexed receiver, uint256 amount);
+  event FeeClaimSuccess(address pool);
+  event FeeClaimRevert(address pool);
+
+  constructor(IERC20Mintable _rewardToken, uint256 _maxMintable) {
     startTime = block.timestamp;
+    rewardToken = _rewardToken;
+    maxMintableTokens = _maxMintable;
   }
 
-  function setMinter(address _rewardMinter) public {
-    require(address(rewardMinter) == address(0));
-    rewardMinter = Minter(_rewardMinter);
-  }
-
-  // Add a new lp to the pool. Can only be called by the owner.
-  // XXX DO NOT add the same LP token more than once. Rewards will be messed up if you do.
-  function addPool(IERC20Upgradeable _lpToken, uint256 _oracleIndex) public {
-    require(_oracleIndex < oracles.length);
-    _massUpdatePools();
-    poolInfo.push(
-      PoolInfo({
-        lpToken: _lpToken,
-        oracleIndex: _oracleIndex,
-        allocPoint: 0,
-        lastRewardTime: block.timestamp,
-        accRewardPerShare: 0
-      })
-    );
-  }
-
-  // Add a new oracle address. Should only be added if required by pool.
-  function addOracle(Oracle _oracle) external {
-    _oracle.latestAnswer(); // Validates that this is actually an oracle!
-    oracles.push(_oracle);
-  }
-
-  // Calculate the final allocation points for each pool.
-  // This is the main logical deviation from the original MasterChef contract.
-  // The pool at pid 0 always recieves exactly 20% of the allocation points.
-  // All remaining pools receive an "equal" allocation, based on their rough value in USD
-  // For pools handling USD-based Ellipsis LP tokens the value per token is assumed as $1,
-  // for non-USD pools a rate is queried from a Chainlink oracle.
-  function _getAllocPoints() internal view returns (uint256[] memory allocPoints, uint256 totalAP) {
-    // Get the oracle prices. Oracle[0] is USD and fixed at $1 (100000000)
-    uint256[] memory latestPrices = new uint256[](oracles.length);
-    latestPrices[0] = 100000000;
-    for (uint256 i = 1; i < oracles.length; i++) {
-      latestPrices[i] = uint256(oracles[i].latestAnswer());
-    }
-
-    // Apply oracle prices to calculate final allocation points for each pool
-    uint256 length = poolInfo.length;
-    allocPoints = new uint256[](length);
-    for (uint256 pid = 1; pid < length; ++pid) {
-      PoolInfo storage pool = poolInfo[pid];
-      allocPoints[pid] = pool.allocPoint.mul(latestPrices[pool.oracleIndex]);
-      totalAP = totalAP.add(allocPoints[pid]);
-    }
-    // Special treatment for pool 0 to always have 20%
-    totalAP = 1;
-    allocPoints[0] = 1;
-
-    return (allocPoints, totalAP);
-  }
-
+  /**
+        @notice The current number of stakeable LP tokens
+     */
   function poolLength() external view returns (uint256) {
-    return poolInfo.length;
+    return registeredTokens.length;
   }
 
-  // View function to see pending reward tokens on frontend.
-  function claimableReward(uint256 _pid, address _user) external view returns (uint256) {
-    (uint256[] memory allocPoints, uint256 totalAP) = _getAllocPoints();
-    PoolInfo storage pool = poolInfo[_pid];
-    UserInfo storage user = userInfo[_pid][_user];
-    uint256 accRewardPerShare = pool.accRewardPerShare;
-    uint256 lpSupply = pool.lpToken.balanceOf(address(this));
-    if (block.timestamp > pool.lastRewardTime && lpSupply != 0 && totalAP != 0) {
-      uint256 duration = block.timestamp.sub(pool.lastRewardTime);
-      uint256 reward = duration.mul(rewardsPerSecond).mul(allocPoints[_pid]).div(totalAP);
-      accRewardPerShare = accRewardPerShare.add(reward.mul(1e12).div(lpSupply));
-    }
-    return user.amount.mul(accRewardPerShare).div(1e12).sub(user.rewardDebt);
+  /**
+        @notice Add a new token that may be staked within this contract
+        @dev Called by `IncentiveVoting` after a successful token approval vote
+     */
+  function addPool(address _token) external returns (bool) {
+    require(poolInfo[_token].lastRewardTime == 0);
+    registeredTokens.push(_token);
+    poolInfo[_token].lastRewardTime = block.timestamp;
+    return true;
   }
 
-  // Update reward variables for all pools
-  function _massUpdatePools() internal {
-    (uint256[] memory allocPoints, uint256 totalAP) = _getAllocPoints();
-    for (uint256 pid = 0; pid < allocPoints.length; ++pid) {
-      _updatePool(pid, allocPoints[pid], totalAP);
+  /**
+        @notice Set the claim receiver address for the caller
+        @dev When the claim receiver is not == address(0), all
+             emission claims are transferred to this address
+        @param _receiver Claim receiver address
+     */
+  function setClaimReceiver(address _receiver) external {
+    claimReceiver[msg.sender] = _receiver;
+  }
+
+  /**
+        @notice Allow or block third-party calls to deposit, withdraw
+                or claim rewards on behalf of the caller
+     */
+  function setBlockThirdPartyActions(bool _block) external {
+    blockThirdPartyActions[msg.sender] = _block;
+  }
+
+  /**
+        @notice Get the current number of unclaimed rewards for a user on one or more tokens
+        @param _user User to query pending rewards for
+        @param _tokens Array of token addresses to query
+        @return uint256[] Unclaimed rewards
+     */
+  function claimableReward(address _user, address[] calldata _tokens) external returns (uint256[] memory) {
+    uint256[] memory claimable = new uint256[](_tokens.length);
+    for (uint256 i = 0; i < _tokens.length; i++) {
+      address token = _tokens[i];
+      PoolInfo storage pool = poolInfo[token];
+      UserInfo storage user = userInfo[token][_user];
+      (uint256 accRewardPerShare, ) = _getRewardData(token);
+      accRewardPerShare += pool.accRewardPerShare;
+      claimable[i] = user.claimable + (user.adjustedAmount * accRewardPerShare) / 1e18 - user.rewardDebt;
     }
-    uint256 length = emissionSchedule.length;
-    if (startTime > 0 && length > 0) {
-      EmissionPoint memory e = emissionSchedule[length - 1];
-      if (block.timestamp.sub(startTime) > e.startTimeOffset) {
-        rewardsPerSecond = uint256(e.rewardsPerSecond);
+    return claimable;
+  }
+
+  // Get updated reward data for the given token
+  function _getRewardData(address _token) internal returns (uint256 accRewardPerShare, uint256 rewardsPerSecond) {
+    PoolInfo storage pool = poolInfo[_token];
+    uint256 lpSupply = pool.adjustedSupply;
+    // uint256 start = startTime;
+    // uint256 currentWeek = (block.timestamp - start) / 604800;
+
+    if (lpSupply == 0) {
+      return (0, rewardsStream);
+    }
+
+    uint256 lastRewardTime = pool.lastRewardTime;
+    // uint256 rewardWeek = (lastRewardTime - start) / 604800;
+    rewardsPerSecond = pool.rewardsPerSecond;
+    uint256 reward = 1;
+    uint256 duration;
+    /*if (rewardWeek < currentWeek) {
+      while (rewardWeek < currentWeek) {
+        uint256 nextRewardTime = (rewardWeek + 1) * 604800 + start;
+        duration = nextRewardTime - lastRewardTime;
+        reward = reward + duration * rewardsPerSecond;
+        rewardWeek += 1;
+        rewardsPerSecond = 10;
+        lastRewardTime = nextRewardTime;
       }
-    }
+    }*/
+    duration = block.timestamp - lastRewardTime;
+    reward = reward + duration * rewardsPerSecond;
+    return ((reward * 1e18) / lpSupply, rewardsPerSecond);
   }
 
   // Update reward variables of the given pool to be up-to-date.
-  function _updatePool(
-    uint256 _pid,
-    uint256 _allocPoint,
-    uint256 _totalAllocPoint
-  ) internal {
-    _totalAllocPoint = 1;
-    PoolInfo storage pool = poolInfo[_pid];
-    if (block.timestamp <= pool.lastRewardTime) {
-      return;
+  function _updatePool(address _token) internal returns (uint256 accRewardPerShare) {
+    PoolInfo storage pool = poolInfo[_token];
+    uint256 lastRewardTime = pool.lastRewardTime;
+    if (block.timestamp <= lastRewardTime) {
+      return pool.accRewardPerShare;
     }
-    uint256 lpSupply = pool.lpToken.balanceOf(address(this));
-    if (lpSupply == 0 || _totalAllocPoint == 0) {
-      pool.lastRewardTime = block.timestamp;
-      return;
-    }
-    uint256 duration = block.timestamp.sub(pool.lastRewardTime);
-    uint256 reward = duration.mul(rewardsPerSecond).mul(_allocPoint).div(_totalAllocPoint);
-    pool.accRewardPerShare = pool.accRewardPerShare.add(reward.mul(1e12).div(lpSupply));
+    (accRewardPerShare, pool.rewardsPerSecond) = _getRewardData(_token);
     pool.lastRewardTime = block.timestamp;
+    if (accRewardPerShare == 0) return pool.accRewardPerShare;
+    accRewardPerShare = accRewardPerShare + pool.accRewardPerShare;
+    pool.accRewardPerShare = accRewardPerShare;
+    return accRewardPerShare;
   }
 
-  // Deposit LP tokens into the contract. Also triggers a claim.
-  function deposit(uint256 _pid, uint256 _amount) public {
-    PoolInfo storage pool = poolInfo[_pid];
-    UserInfo storage user = userInfo[_pid][msg.sender];
-    _massUpdatePools();
-    pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
-    if (user.amount > 0) {
-      uint256 pending = 1e18;
-      rewardMinter.mint(msg.sender, pending);
-      user.rewardDebt = user.rewardDebt.add(pending);
-    }
-    user.amount = user.amount.add(_amount);
-    emit Deposit(msg.sender, _pid, _amount);
+  // calculate adjusted balance and total supply, used for boost
+  // boost calculations are modeled after veCRV, with a max boost of 2.5x
+  function _updateLiquidityLimits(
+    address _user,
+    address _token,
+    uint256 _depositAmount,
+    uint256 _accRewardPerShare
+  ) internal {
+    uint256 adjustedAmount = _depositAmount;
+    UserInfo storage user = userInfo[_token][_user];
+    uint256 newAdjustedSupply = poolInfo[_token].adjustedSupply - user.adjustedAmount;
+    user.adjustedAmount = _depositAmount;
+    poolInfo[_token].adjustedSupply = newAdjustedSupply + adjustedAmount;
+    user.rewardDebt = (adjustedAmount * _accRewardPerShare) / 1e18;
   }
 
-  // Withdraw LP tokens. Also triggers a claim.
-  function withdraw(uint256 _pid, uint256 _amount) public {
-    PoolInfo storage pool = poolInfo[_pid];
-    UserInfo storage user = userInfo[_pid][msg.sender];
-    require(user.amount >= _amount, "withdraw: not good");
-    _massUpdatePools();
-    uint256 pending = 1e18;
-    if (pending > 0) {
-      rewardMinter.mint(msg.sender, pending);
-    }
-    user.amount = user.amount.sub(_amount);
-    user.rewardDebt = user.rewardDebt.add(pending);
-    if (_pid > 0) {
-      pool.allocPoint = pool.allocPoint.sub(_amount);
-      totalAllocPoint = totalAllocPoint.sub(_amount);
-    }
-    pool.lpToken.safeTransfer(address(msg.sender), _amount);
-    emit Withdraw(msg.sender, _pid, _amount);
-  }
+  /**
+        @notice Deposit LP tokens into the contract
+        @dev Also updates the receiver's current boost
+        @param _token LP token address to deposit.
+        @param _amount Amount of tokens to deposit.
+        @param _claimRewards If true, also claim rewards earned on the token.
+        @return uint256 Claimed reward amount
+     */
+  function deposit(
+    address _token,
+    uint256 _amount,
+    bool _claimRewards
+  ) external nonReentrant returns (uint256) {
+    require(_amount > 0, "Cannot deposit zero");
 
-  // Withdraw without caring about rewards. EMERGENCY ONLY.
-  function emergencyWithdraw(uint256 _pid) public {
-    PoolInfo storage pool = poolInfo[_pid];
-    UserInfo storage user = userInfo[_pid][msg.sender];
-    uint256 amount = user.amount;
-    pool.lpToken.safeTransfer(address(msg.sender), amount);
-    emit EmergencyWithdraw(msg.sender, _pid, amount);
-    user.amount = 0;
-    user.rewardDebt = 0;
-
-    if (_pid > 0) {
-      if (pool.allocPoint >= amount) {
-        pool.allocPoint = pool.allocPoint.sub(amount);
-      } else {
-        pool.allocPoint = 0;
-      }
-      if (totalAllocPoint >= amount) {
-        totalAllocPoint = totalAllocPoint.sub(amount);
-      } else {
-        totalAllocPoint = 0;
-      }
-    }
-  }
-
-  // Claim pending rewards for one or more pools.
-  // Rewards are not received directly, they are minted by the rewardMinter.
-  function claim(uint256[] calldata _pids) external {
-    _massUpdatePools();
+    uint256 accRewardPerShare = _updatePool(_token);
+    UserInfo storage user = userInfo[_token][msg.sender];
     uint256 pending;
-    for (uint256 i = 0; i < _pids.length; i++) {
-      PoolInfo storage pool = poolInfo[_pids[i]];
-      UserInfo storage user = userInfo[_pids[i]][msg.sender];
-      pending = pending.add(user.amount.mul(pool.accRewardPerShare).div(1e12).sub(user.rewardDebt));
-      user.rewardDebt = user.amount.mul(pool.accRewardPerShare).div(1e12);
+    if (user.adjustedAmount > 0) {
+      pending = (user.adjustedAmount * accRewardPerShare) / 1e18 - user.rewardDebt;
+      if (_claimRewards) {
+        pending += user.claimable;
+        user.claimable = 0;
+        pending = _mintRewards(msg.sender, pending);
+      } else if (pending > 0) {
+        user.claimable += pending;
+        pending = 0;
+      }
     }
-    if (pending > 0) {
-      rewardMinter.mint(msg.sender, pending);
+    IERC20(_token).safeTransferFrom(address(msg.sender), address(this), _amount);
+    uint256 depositAmount = user.depositAmount + _amount;
+    user.depositAmount = depositAmount;
+    _updateLiquidityLimits(msg.sender, _token, depositAmount, accRewardPerShare);
+    emit Deposit(msg.sender, _token, _amount);
+    return pending;
+  }
+
+  /**
+        @notice Withdraw LP tokens from the contract
+        @dev Also updates the caller's current boost
+        @param _token LP token address to withdraw.
+        @param _amount Amount of tokens to withdraw.
+        @param _claimRewards If true, also claim rewards earned on the token.
+        @return uint256 Claimed reward amount
+     */
+  function withdraw(
+    address _token,
+    uint256 _amount,
+    bool _claimRewards
+  ) external nonReentrant returns (uint256) {
+    require(_amount > 0, "Cannot withdraw zero");
+    uint256 accRewardPerShare = _updatePool(_token);
+    UserInfo storage user = userInfo[_token][msg.sender];
+    uint256 depositAmount = user.depositAmount;
+    require(depositAmount >= _amount, "withdraw: not good");
+
+    uint256 pending = (user.adjustedAmount * accRewardPerShare) / 1e18 - user.rewardDebt;
+    if (_claimRewards) {
+      pending += user.claimable;
+      user.claimable = 0;
+      pending = _mintRewards(msg.sender, pending);
+    } else if (pending > 0) {
+      user.claimable += pending;
+      pending = 0;
+    }
+
+    depositAmount -= _amount;
+    user.depositAmount = depositAmount;
+    _updateLiquidityLimits(msg.sender, _token, depositAmount, accRewardPerShare);
+    IERC20(_token).safeTransfer(msg.sender, _amount);
+    emit Withdraw(msg.sender, _token, _amount);
+    return pending;
+  }
+
+  /**
+        @notice Withdraw a user's complete deposited balance of an LP token
+                without updating rewards calculations.
+        @dev Should be used only in an emergency when there is an error in
+             the reward math that prevents a normal withdrawal.
+        @param _token LP token address to withdraw.
+     */
+  function emergencyWithdraw(address _token) external nonReentrant {
+    UserInfo storage user = userInfo[_token][msg.sender];
+    poolInfo[_token].adjustedSupply -= user.adjustedAmount;
+
+    uint256 amount = user.depositAmount;
+    delete userInfo[_token][msg.sender];
+    IERC20(_token).safeTransfer(address(msg.sender), amount);
+    emit EmergencyWithdraw(_token, msg.sender, amount);
+  }
+
+  /**
+        @notice Claim pending rewards for one or more tokens for a user.
+        @dev Also updates the claimer's boost.
+        @param _user Address to claim rewards for. Reverts if the caller is not the
+                     claimer and the claimer has blocked third-party actions.
+        @param _tokens Array of LP token addresses to claim for.
+        @return uint256 Claimed reward amount
+     */
+  function claim(address _user, address[] calldata _tokens) external returns (uint256) {
+    if (msg.sender != _user) {
+      require(!blockThirdPartyActions[_user], "Cannot claim on behalf of this account");
+    }
+
+    // calculate claimable amount
+    uint256 pending;
+    for (uint256 i = 0; i < _tokens.length; i++) {
+      address token = _tokens[i];
+      uint256 accRewardPerShare = _updatePool(token);
+      UserInfo storage user = userInfo[token][_user];
+      uint256 rewardDebt = (user.adjustedAmount * accRewardPerShare) / 1e18;
+      pending += user.claimable + rewardDebt - user.rewardDebt;
+      user.claimable = 0;
+      _updateLiquidityLimits(_user, token, user.depositAmount, accRewardPerShare);
+
+      // claim admin fees for each pool once per day
+      if (lastFeeClaim[token] + 86400 < block.timestamp) {
+        address pool = IERC20Mintable(token).minter();
+        try IStableSwap(pool).withdraw_admin_fees() {
+          emit FeeClaimSuccess(pool);
+        } catch {
+          emit FeeClaimRevert(pool);
+        }
+        lastFeeClaim[token] = block.timestamp;
+      }
+    }
+    return _mintRewards(_user, pending);
+  }
+
+  function _mintRewards(address _user, uint256 _amount) internal returns (uint256) {
+    uint256 minted = mintedTokens;
+    if (minted + _amount > maxMintableTokens) {
+      _amount = maxMintableTokens - minted;
+    }
+    if (_amount > 0) {
+      mintedTokens = minted + _amount;
+      address receiver = claimReceiver[_user];
+      if (receiver == address(0)) receiver = _user;
+      rewardToken.mint(receiver, _amount);
+      emit ClaimedReward(msg.sender, _user, receiver, _amount);
+    }
+    return _amount;
+  }
+
+  /**
+        @notice Update a user's boost for one or more deposited tokens
+        @param _user Address of the user to update boosts for
+        @param _tokens Array of LP tokens to update boost for
+     */
+  function updateUserBoosts(address _user, address[] calldata _tokens) external {
+    for (uint256 i = 0; i < _tokens.length; i++) {
+      address token = _tokens[i];
+      uint256 accRewardPerShare = _updatePool(token);
+      UserInfo storage user = userInfo[token][_user];
+      if (user.adjustedAmount > 0) {
+        uint256 pending = (user.adjustedAmount * accRewardPerShare) / 1e18 - user.rewardDebt;
+        if (pending > 0) {
+          user.claimable += pending;
+        }
+      }
+      _updateLiquidityLimits(_user, token, user.depositAmount, accRewardPerShare);
     }
   }
 }
