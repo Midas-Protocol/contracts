@@ -19,11 +19,11 @@ export const deployConfig: ChainDeployConfig = {
     uniswapOracleInitialDeployTokens: [
       {
         token: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
-        baseToken: "",
+        baseToken: ethers.constants.AddressZero,
       }, // BUSD
       {
         token: "0x6ce8da28e2f864420840cf74474eff5fd80e65b8",
-        baseToken: "",
+        baseToken: ethers.constants.AddressZero,
       }, // BTCB
       {
         token: "0xd66c6B4F0be8CE5b39D52E0Fd1344c389929B378",
