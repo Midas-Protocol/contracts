@@ -17,14 +17,7 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { MockStrategy } from "./mocks/autofarm/MockStrategy.sol";
 import { MockAutofarmV2 } from "./mocks/autofarm/MockAutofarmV2.sol";
 import { IStrategy } from "./mocks/autofarm/IStrategy.sol";
-
-contract FlywheelRewards is FlywheelDynamicRewards {
-  constructor(FlywheelCore _flywheel) FlywheelDynamicRewards(_flywheel, 0) {}
-
-  function getNextCycleRewards(ERC20 strategy) internal override returns(uint192) {
-    return 1;
-  }
-}
+import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 
 contract AutofarmERC4626Test is DSTest {
   using stdStorage for StdStorage;
@@ -35,7 +28,7 @@ contract AutofarmERC4626Test is DSTest {
 
   AutofarmERC4626 autofarmERC4626;
   FlywheelCore flywheel;
-  FlywheelDynamicRewards flywheelRewards;
+  FuseFlywheelDynamicRewards flywheelRewards;
 
   MockERC20 testToken;
   MockERC20 autoToken;
@@ -43,19 +36,18 @@ contract AutofarmERC4626Test is DSTest {
   MockAutofarmV2 mockAutofarm;
 
   uint256 depositAmount = 100e18;
+  uint256 rewardsStream = 8e15;
   ERC20 marketKey;
   address tester = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
-  uint256 startBlockNumber = block.number;
-
-  function vmRollFwd(uint8 increment) internal {
-    vm.roll(startBlockNumber + increment);
-  }
+  uint256 startTs = block.timestamp;
 
   function setUp() public {
     testToken = new MockERC20("TestToken", "TST", 18);
     autoToken = new MockERC20("autoToken", "AUTO", 18);
     mockAutofarm = new MockAutofarmV2(address(autoToken));
     mockStrategy = new MockStrategy(address(testToken), address(mockAutofarm));
+    vm.warp(1);
+    vm.roll(1);
 
     flywheel = new FlywheelCore(
       autoToken,
@@ -65,7 +57,7 @@ contract AutofarmERC4626Test is DSTest {
       Authority(address(0))
     );
 
-    flywheelRewards = new FlywheelRewards(flywheel);
+    flywheelRewards = new FuseFlywheelDynamicRewards(flywheel, 1);
     flywheel.setFlywheelRewards(flywheelRewards);
 
     autofarmERC4626 = new AutofarmERC4626(
@@ -82,6 +74,8 @@ contract AutofarmERC4626Test is DSTest {
 
     // Add mockStrategy to Autofarm
     mockAutofarm.add(ERC20(address(testToken)), 1, address(mockStrategy));
+    vm.warp(2);
+    vm.roll(2);
   }
 
   function testInitializedValues() public {
@@ -97,7 +91,11 @@ contract AutofarmERC4626Test is DSTest {
   function deposit() public {
     testToken.mint(address(this), depositAmount);
     testToken.approve(address(autofarmERC4626), depositAmount);
+    // flywheelPreSupplierAction -- usually this would be done in Comptroller when supplying
+    flywheel.accrue(ERC20(autofarmERC4626), address(this));
     autofarmERC4626.deposit(depositAmount, address(this));
+    // flywheelPreSupplierAction
+    flywheel.accrue(ERC20(autofarmERC4626), address(this));
   }
 
   function testDeposit() public {
@@ -129,60 +127,63 @@ contract AutofarmERC4626Test is DSTest {
   }
 
   function testAccumulatingAutoRewardsOnDeposit() public {
-    vmRollFwd(1);
     deposit();
-    assertEq(autoToken.balanceOf(address(mockAutofarm)), 0);
-    assertEq(autoToken.balanceOf(address(autofarmERC4626)), 0);
-    assertEq(autoToken.balanceOf(address(flywheel)), 0);
-    assertEq(autoToken.balanceOf(address(flywheelRewards)), 0);
 
-    vmRollFwd(2);
+    vm.warp(3);
+    vm.roll(3);
+
     deposit();
-    flywheel.accrue(ERC20(autofarmERC4626), address(this));
-    assertEq(autoToken.balanceOf(address(mockAutofarm)), 0);
-    assertEq(autoToken.balanceOf(address(autofarmERC4626)), 0);
-    assertEq(autoToken.balanceOf(address(flywheel)), 0);
-    assertEq(autoToken.balanceOf(address(flywheelRewards)), 8e15);
+    assertEq(autoToken.balanceOf(address(autofarmERC4626)), rewardsStream);
   }
 
   function testAccumulatingAutoRewardsOnWithdrawal() public {
-    vmRollFwd(1);
     deposit();
+    vm.warp(3);
+    vm.roll(3);
 
-    vmRollFwd(3);
     autofarmERC4626.withdraw(1, address(this), address(this));
-    flywheel.accrue(ERC20(autofarmERC4626), address(this));
-    assertEq(autoToken.balanceOf(address(mockAutofarm)), 0);
-    assertEq(autoToken.balanceOf(address(autofarmERC4626)), 0);
-    assertEq(autoToken.balanceOf(address(flywheel)), 0);
-    assertEq(autoToken.balanceOf(address(flywheelRewards)), 16e15);
+
+    assertEq(autoToken.balanceOf(address(autofarmERC4626)), rewardsStream);
   }
 
   function testClaimRewards() public {
-    vmRollFwd(1);
+    // Deposit funds, Rewards are 0
     deposit();
-    vmRollFwd(3);
+    vm.warp(3);
+    vm.roll(3);
+
     autofarmERC4626.withdraw(1, address(this), address(this));
+    // flywheelPreSupplierAction
+    flywheel.accrue(ERC20(autofarmERC4626), address(this));
+    vm.warp(4);
+    vm.roll(4);
+
     flywheel.accrue(ERC20(autofarmERC4626), address(this));
     flywheel.claimRewards(address(this));
-    assertEq(autoToken.balanceOf(address(this)), 15999999999999999);
+    assertEq(autoToken.balanceOf(address(this)), rewardsStream - 1);
   }
 
   function testClaimForMultipleUser() public {
-    vmRollFwd(1);
     deposit();
     vm.startPrank(tester);
     testToken.mint(tester, depositAmount);
     testToken.approve(address(autofarmERC4626), depositAmount);
     autofarmERC4626.deposit(depositAmount, tester);
     vm.stopPrank();
+    vm.warp(3);
+    vm.roll(3);
 
-    vmRollFwd(3);
     autofarmERC4626.withdraw(1, address(this), address(this));
+    flywheel.accrue(ERC20(autofarmERC4626), address(this));
+    vm.warp(4);
+    vm.roll(4);
+
     flywheel.accrue(ERC20(autofarmERC4626), address(this), tester);
     flywheel.claimRewards(address(this));
     flywheel.claimRewards(tester);
-    assertEq(autoToken.balanceOf(address(this)), 7999999999999999);
-    assertEq(autoToken.balanceOf(address(this)), 7999999999999999);
+
+    assertEq(autoToken.balanceOf(address(this)), (rewardsStream / 2) - 1);
+    assertEq(autoToken.balanceOf(address(this)), (rewardsStream / 2) - 1);
+    assertEq(autoToken.balanceOf(address(flywheel)), 0);
   }
 }

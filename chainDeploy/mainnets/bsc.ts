@@ -155,7 +155,10 @@ export const deployConfig: ChainDeployConfig = {
     uniswapV2RouterAddress: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
     uniswapV2FactoryAddress: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
     uniswapOracleInitialDeployTokens: [
-      "0x522348779DCb2911539e76A1042aA922F9C47Ee3", // BOMB
+      {
+        token: "0x522348779DCb2911539e76A1042aA922F9C47Ee3", // BOMB
+        baseToken: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", // BTCB
+      },
     ],
   },
 };

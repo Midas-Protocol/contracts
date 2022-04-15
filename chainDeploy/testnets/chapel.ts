@@ -17,9 +17,18 @@ export const deployConfig: ChainDeployConfig = {
     uniswapV2RouterAddress: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
     uniswapV2FactoryAddress: "0x6725F303b657a9451d8BA641348b6761A6CC7a17",
     uniswapOracleInitialDeployTokens: [
-      "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee", // BUSD
-      "0x6ce8da28e2f864420840cf74474eff5fd80e65b8", // BTCB
-      "0xd66c6B4F0be8CE5b39D52E0Fd1344c389929B378", // ETH
+      {
+        token: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
+        baseToken: ethers.constants.AddressZero,
+      }, // BUSD
+      {
+        token: "0x6ce8da28e2f864420840cf74474eff5fd80e65b8",
+        baseToken: ethers.constants.AddressZero,
+      }, // BTCB
+      {
+        token: "0xd66c6B4F0be8CE5b39D52E0Fd1344c389929B378",
+        baseToken: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
+      }, // ETH
     ],
   },
 };
