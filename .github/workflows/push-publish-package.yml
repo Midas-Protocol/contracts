@@ -40,12 +40,12 @@ jobs:
 
       - name: Run forge tests
         run: echo "do it later"
-#        run: npm run test:forge
+        # run: npm run test:forge
 
   release:
     needs:
       - build-and-test-local
-#      - build-and-test-local-forge
+      # - build-and-test-local-forge
     runs-on: ubuntu-latest
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -64,7 +64,6 @@ jobs:
           cache: "npm"
       - run: npm install
       - run: npm run build
-      - run: npm run build:sdk
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
