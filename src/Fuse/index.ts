@@ -115,7 +115,6 @@ export class FuseBase {
   ) {
     this.provider = web3Provider;
     this.chainId = chainId;
-    this.availableOracles = chainOracles[chainId];
     this.chainDeployment =
       chainDeployment ??
       (Deployments[chainId.toString()] &&
@@ -187,6 +186,13 @@ export class FuseBase {
     };
 
     this.irms = irmConfig(this.chainDeployment, this.artifacts);
+    this.availableOracles = chainOracles[chainId].filter((o) => {
+      if (this.artifacts[o] === undefined || this.chainDeployment[o] === undefined) {
+        console.warn(`Oracle ${o} not deployed to chain ${this.chainId}`);
+        return false;
+      }
+      return true;
+    });
     this.oracles = oracleConfig(this.chainDeployment, this.artifacts, this.availableOracles);
   }
 
@@ -591,8 +597,12 @@ export class FuseBase {
     const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(priceOracleAddress));
 
     for (const [name, oracle] of Object.entries(this.oracles)) {
-      const value = utils.keccak256(oracle.artifact.bytecode.object);
-      if (runtimeBytecodeHash == value) return name;
+      if (oracle.artifact && oracle.artifact.bytecode) {
+        const value = utils.keccak256(oracle.artifact.bytecode.object);
+        if (runtimeBytecodeHash == value) return name;
+      } else {
+        console.warn(`No Artifact or Bytecode found for enabled Oracle: ${name}`);
+      }
     }
     return null;
   }
