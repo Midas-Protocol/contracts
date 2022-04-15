@@ -77,19 +77,7 @@ task("oracle:update-twap", "Call update on twap oracle to update the last price 
     const sdk = await fuseModule.getOrCreateFuse();
 
     const uniswapTwapRoot = await ethers.getContract("UniswapTwapPriceOracleV2Root", deployer);
-    const uniPair = new ethers.Contract(
-      _pair,
-      ["function token0() external view returns (address)", "function token1() external view returns (address)"],
-      deployer
-    );
-    const token0 = await uniPair.callStatic.token0();
-    const token1 = await uniPair.callStatic.token1();
-    const token = sdk.chainSpecificAddresses.W_TOKEN === token0 ? token1 : token0;
-
-    await run("oracle:get-price", { address: token });
 
     const tx = await uniswapTwapRoot["update(address)"](_pair);
     await tx.wait();
-
-    await run("oracle:get-price", { address: token });
   });
