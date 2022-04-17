@@ -41,7 +41,7 @@ abstract contract BaseTest is DSTest {
       coins: new IERC20Upgradeable[](2),
       weth: WETH(payable(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)),
       curveLPTokenPriceOracleNoRegistry: CurveLpTokenPriceOracleNoRegistry(0x44ea7bAB9121D97630b5DB0F92aAd75cA5A401a3),
-      chainlinkOracle: ChainlinkPriceOracleV2(0xdD8E0125eC6284DCAF2cE6da92735F041AEA8a98),
+      chainlinkOracle: ChainlinkPriceOracleV2(0x2B5311De4555506400273CfaAFb4393F01EC2567),
       synthereumLiquiditiyPool: ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49),
       masterPriceOracle: MasterPriceOracle(0xC3ABf2cB82C65474CeF8F90f1a4DAe79929B1940),
       twapOraclesFactory: UniswapTwapPriceOracleV2Factory(0x8853F26C198fd5693E7886C081164E0c3F0a4E51),
