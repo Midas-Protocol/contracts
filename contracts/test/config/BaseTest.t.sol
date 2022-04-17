@@ -40,17 +40,36 @@ abstract contract BaseTest is DSTest {
       lpTokenWhale: 0x8D7408C2b3154F9f97fc6dd24cd36143908d1E52,
       coins: new IERC20Upgradeable[](2),
       weth: WETH(payable(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)),
-      curveLPTokenPriceOracleNoRegistry: CurveLpTokenPriceOracleNoRegistry(0x274F5dFBDB6af889124EFcfA065A247A15243EC2),
-      chainlinkOracle: ChainlinkPriceOracleV2(0xb87bC7F78F8c87d37e6FA2abcADF4C6Da0bc124A),
+      curveLPTokenPriceOracleNoRegistry: CurveLpTokenPriceOracleNoRegistry(0x44ea7bAB9121D97630b5DB0F92aAd75cA5A401a3),
+      chainlinkOracle: ChainlinkPriceOracleV2(0xdD8E0125eC6284DCAF2cE6da92735F041AEA8a98),
       synthereumLiquiditiyPool: ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49),
-      masterPriceOracle: MasterPriceOracle(0xF603C1212907aeec18034451CaD28CC2347b50d4),
-      twapOraclesFactory: UniswapTwapPriceOracleV2Factory(0x26425D9FB9eB790CA3473223A2a98606281099bf),
+      masterPriceOracle: MasterPriceOracle(0xC3ABf2cB82C65474CeF8F90f1a4DAe79929B1940),
+      twapOraclesFactory: UniswapTwapPriceOracleV2Factory(0x8853F26C198fd5693E7886C081164E0c3F0a4E51),
       uniswapV2Factory: IUniswapV2Factory(0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73)
     });
     chainConfigs[56].coins[0] = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
     chainConfigs[56].coins[1] = IERC20Upgradeable(0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
 
     chainConfig = chainConfigs[block.chainid];
+
+    chainConfigs[97] = ChainConfig({
+      pool: IERC20Upgradeable(0x160CAed03795365F3A589f10C379FfA7d75d4E76),
+      lpToken: IERC20Upgradeable(0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452),
+      lpTokenWhale: 0x0000000000000000000000000000000000000000,
+      coins: new IERC20Upgradeable[](2),
+      weth: WETH(payable(0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd)),
+      curveLPTokenPriceOracleNoRegistry: CurveLpTokenPriceOracleNoRegistry(0x0000000000000000000000000000000000000000),
+      chainlinkOracle: ChainlinkPriceOracleV2(0x0000000000000000000000000000000000000000),
+      synthereumLiquiditiyPool: ISynthereumLiquidityPool(0x0000000000000000000000000000000000000000),
+      masterPriceOracle: MasterPriceOracle(0xC3ABf2cB82C65474CeF8F90f1a4DAe79929B1940),
+      twapOraclesFactory: UniswapTwapPriceOracleV2Factory(0x944fed08a91983d06f653E9F55Eca995316Ccd3e),
+      uniswapV2Factory: IUniswapV2Factory(0xB7926C0430Afb07AA7DEfDE6DA862aE0Bde767bc)
+    });
+    chainConfigs[97].coins[0] = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
+    chainConfigs[97].coins[1] = IERC20Upgradeable(0x8BaBbB98678facC7342735486C851ABD7A0d17Ca);
+
+    chainConfig = chainConfigs[block.chainid];
+
   }
 
   modifier shouldRun(bool run) {
@@ -61,6 +80,7 @@ abstract contract BaseTest is DSTest {
 
   uint256 BSC_MAINNET = 56;
   uint256 EVMOS_TESTNET = 9000;
+  uint256 BSC_CHAPEL = 97;
 
   function forChains(uint256 id0) public view returns (bool) {
     return block.chainid == id0;
