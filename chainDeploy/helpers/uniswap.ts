@@ -63,11 +63,12 @@ export const deployUniswapOracle = async ({
   }
 
   for (let tokenPair of deployConfig.uniswap.uniswapOracleInitialDeployTokens) {
+    console.log("operating on pair: ", tokenPair.token, tokenPair.baseToken);
     let oldBaseTokenOracle = await uniTwapOracleFactory.callStatic.oracles(
       deployConfig.uniswap.uniswapV2FactoryAddress,
       tokenPair.baseToken
     );
-
+    console.log(oldBaseTokenOracle, "oldBaseTokenOracle for base token", tokenPair.baseToken);
     if (oldBaseTokenOracle == constants.AddressZero) {
       let tx = await uniTwapOracleFactory.deploy(deployConfig.uniswap.uniswapV2FactoryAddress, tokenPair.baseToken);
       await tx.wait();
@@ -75,9 +76,11 @@ export const deployUniswapOracle = async ({
         deployConfig.uniswap.uniswapV2FactoryAddress,
         tokenPair.baseToken
       );
+      console.log(oldBaseTokenOracle, "oldBaseTokenOracle updated?");
     }
 
     const underlyingOracle = await mpo.callStatic.oracles(tokenPair.token);
+    console.log("underlying oracle: ", underlyingOracle, "for token: ", tokenPair.token);
     if (underlyingOracle == constants.AddressZero || underlyingOracle != oldBaseTokenOracle) {
       updateOracles.push(oldBaseTokenOracle);
       updateUnderlyings.push(tokenPair.token);
@@ -87,6 +90,8 @@ export const deployUniswapOracle = async ({
   if (updateOracles.length) {
     let tx = await mpo.add(updateUnderlyings, updateOracles);
     await tx.wait();
-    console.log(`Master Price Oracle updated for tokens ${updateUnderlyings.join(", ")}`);
+    console.log(
+      `Master Price Oracle updated for tokens ${updateUnderlyings.join(", ")} with oracles ${updateOracles.join(", ")}`
+    );
   }
 };
