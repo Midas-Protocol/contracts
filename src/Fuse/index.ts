@@ -29,6 +29,7 @@ import FlywheelStaticRewardsArtifact from "../../out/FlywheelStaticRewards.sol/F
 
 // Oracle Artifacts
 import MasterPriceOracleArtifact from "../../out/MasterPriceOracle.sol/MasterPriceOracle.json";
+import UniswapTwapPriceOracleV2Artifact from "../../out/UniswapTwapPriceOracleV2.sol/UniswapTwapPriceOracleV2.json";
 import SimplePriceOracleArtifact from "../../out/SimplePriceOracle.sol/SimplePriceOracle.json";
 import ChainlinkPriceOracleV2Artifact from "../../out/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json";
 import PreferredPriceOracleArtifact from "../../out/PreferredPriceOracle.sol/PreferredPriceOracle.json";
@@ -175,6 +176,7 @@ export class FuseBase {
       ERC20: ERC20Artifact,
       JumpRateModel: JumpRateModelArtifact,
       MasterPriceOracle: MasterPriceOracleArtifact,
+      UniswapTwapPriceOracleV2: UniswapTwapPriceOracleV2Artifact,
       PreferredPriceOracle: PreferredPriceOracleArtifact,
       RewardsDistributorDelegator: RewardsDistributorDelegatorArtifact,
       RewardsDistributorDelegate: RewardsDistributorDelegateArtifact,

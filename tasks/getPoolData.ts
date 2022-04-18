@@ -16,7 +16,7 @@ export default task("get-pool-data", "Get pools data")
     if (!(chainId in sdkModule.SupportedChains)) {
       throw "Invalid chain provided";
     }
-    let chainDeployment = {};
+    let chainDeployment;
     if (chainId === 1337) {
       chainDeployment = await fuseTestModule.getLocalDeployments();
     } else if (Number(process.env.FORK_CHAIN_ID) === 56) {
