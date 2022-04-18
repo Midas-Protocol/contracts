@@ -201,9 +201,14 @@ export class FuseBase {
   // TODO: probably should determine this by chain
   async getUsdPriceBN(coingeckoId: string = "ethereum", asBigNumber: boolean = false): Promise<number | BigNumber> {
     // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
-    const UsdPrice = (
-      await axios.get(`https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=${coingeckoId}`)
-    ).data[coingeckoId].usd;
+    let UsdPrice: number;
+    if(coingeckoId === 'evmos'){
+      UsdPrice = 1.00;
+    } else {
+      UsdPrice = (
+        await axios.get(`https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=${coingeckoId}`)
+      ).data[coingeckoId].usd;
+    }
 
     if (asBigNumber) {
       return utils.parseUnits(UsdPrice.toString(), 18);
