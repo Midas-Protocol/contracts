@@ -49,7 +49,7 @@ contract StakingTest is DSTest {
     }
 
     // advancing 1 day
-    vm.warp(block.timestamp + 3600 * 24);
+    vm.warp(block.timestamp + 1 days);
     govToken.claimAccumulatedVotingPower();
     assert(veToken.balanceOf(address(this)) == amountToStake * 1000 / 297625);
 
@@ -64,7 +64,7 @@ contract StakingTest is DSTest {
     }
 
     // advancing 7142 hours
-    vm.warp(block.timestamp + 3600 * 7142);
+    vm.warp(block.timestamp + 7142 hours);
     govToken.claimAccumulatedVotingPower();
     assert(veToken.balanceOf(address(this)) == amountToStake);
   }
@@ -78,7 +78,7 @@ contract StakingTest is DSTest {
     govToken.stake(amountToStake);
 
     // advancing 1 day
-    vm.warp(block.timestamp + 3600 * 24);
+    vm.warp(block.timestamp + 1 days);
     assert(veToken.balanceOf(address(this)) == 0);
 
     govToken.claimAccumulatedVotingPower();
@@ -92,7 +92,9 @@ contract StakingTest is DSTest {
     uint256 allTheVp = veToken.balanceOf(address(this));
     vm.expectEmit(true, true, true, false);
     emit Transfer(address(this), address(0), allTheVp);
-    govToken.unstake(amountToUnstake);
+    govToken.declareUnstake(amountToUnstake);
+    vm.warp(block.timestamp + 7 days);
+    govToken.unstake(address(this));
 
     uint256 stakerBalanceAfter = govToken.balanceOf(address(this));
     uint256 contractBalanceAfter = govToken.balanceOf(address(govToken));
@@ -108,4 +110,6 @@ contract StakingTest is DSTest {
 
     assert(govToken.stakeOf(address(this)) == amountToStake - amountToUnstake);
   }
+
+  // TODO test failing scenarios
 }

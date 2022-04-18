@@ -12,6 +12,8 @@ contract TOUCHToken is ERC20, Initializable {
   mapping(address => uint256) internal releasingStakes;
   mapping(address => uint256) internal accumulatedStakes;
   uint256 public totalStaked;
+  mapping(address => uint256) public unstakeDeclaredTime;
+  mapping(address => uint256) public unstakeDeclaredAmount;
   VeMDSToken veToken;
 
   // TODO solmate ERC20 and initializable?
@@ -23,26 +25,27 @@ contract TOUCHToken is ERC20, Initializable {
     veToken = _veToken;
   }
 
-// needs to be called from time to time
+  // needs to be called from time to time
   function claimAccumulatedVotingPower() external returns (uint256) {
-    return _claimAccumulatedVotingPower();
+    require(unstakeDeclaredTime[msg.sender] == 0, "unstake declared, cannot claim until executed");
+    return _claimAccumulatedVotingPower(msg.sender);
   }
 
   // needs to be called from time to time?
-  function _claimAccumulatedVotingPower() internal returns (uint256) {
-    uint256 accumulatedVotingPower = accumulatedVotingPowerOf(msg.sender);
+  function _claimAccumulatedVotingPower(address account) internal returns (uint256) {
+    uint256 accumulatedVotingPower = accumulatedVotingPowerOf(account);
 
     // mint the accumulated veTokens
-    uint256 currentBalanceOfVeTokens = veToken.balanceOf(msg.sender);
+    uint256 currentBalanceOfVeTokens = veToken.balanceOf(account);
     uint256 amountToMint = accumulatedVotingPower - currentBalanceOfVeTokens;
     if (amountToMint != 0) {
-      veToken.mint(msg.sender, amountToMint);
+      veToken.mint(account, amountToMint);
     } else {
-      uint256 totalStake = accumulatedStakes[msg.sender] + releasingStakes[msg.sender];
+      uint256 totalStake = accumulatedStakes[account] + releasingStakes[account];
       if (accumulatedVotingPower == totalStake) {
-        accumulatedStakes[msg.sender] = totalStake;
-        stakingStartedTime[msg.sender] = 0;
-        releasingStakes[msg.sender] = 0;
+        accumulatedStakes[account] = totalStake;
+        stakingStartedTime[account] = 0;
+        releasingStakes[account] = 0;
       }
     }
 
@@ -51,7 +54,8 @@ contract TOUCHToken is ERC20, Initializable {
 
   function stake(uint256 amountToStake) public {
     require(amountToStake > 0, "amount to stake should be non-zero");
-    _claimAccumulatedVotingPower();
+    require(unstakeDeclaredTime[msg.sender] == 0, "unstake declared, cannot stake until executed");
+    _claimAccumulatedVotingPower(msg.sender);
 
     // call first, then change the state
     // safe methods not needed?
@@ -69,23 +73,47 @@ contract TOUCHToken is ERC20, Initializable {
     // emit stakinng event
   }
 
-  // TODO unstaking period
-  function unstake(uint256 amountToUnstake) public {
-    uint256 totalStakePreUnstake = accumulatedStakes[msg.sender] + releasingStakes[msg.sender];
-    require(amountToUnstake <= totalStakePreUnstake, "stake not enough");
-    _claimAccumulatedVotingPower();
+  // unstake has to be declared 7 days prior to the unstaking
+  function declareUnstake(uint256 amountToUnstake) public {
+    require(unstakeDeclaredTime[msg.sender] == 0, "unstake already declared");
+    require(amountToUnstake > 0, "amount to unstake should be non-zero");
 
-    releasingStakes[msg.sender] = totalStakePreUnstake - amountToUnstake;
-    accumulatedStakes[msg.sender] = 0;
+    unstakeDeclaredTime[msg.sender] = block.timestamp;
+    unstakeDeclaredAmount[msg.sender] = amountToUnstake;
+
+    // emit unstake declared event
+  }
+
+  // unstaking can be done
+  // - by the owner 7 days after declaring it or
+  // - by anyone 10 days after declaring it
+  function unstake(address account) public {
+    require(unstakeDeclaredAmount[account] > 0, "amount to unstake should be non-zero");
+    require(unstakeDeclaredTime[account] <= block.timestamp - 7 days, "unstake needs to be declared at least a week prior");
+    require(msg.sender == account || unstakeDeclaredTime[account] <= block.timestamp - 10 days, "unstake needs to be declared at least a week prior");
+
+    uint256 amountToUnstake = unstakeDeclaredAmount[account];
+
+    uint256 totalStakePreUnstake = accumulatedStakes[account] + releasingStakes[account];
+    require(amountToUnstake <= totalStakePreUnstake, "stake not enough");
+    // not needed
+    //    _claimAccumulatedVotingPower(account);
+
+    releasingStakes[account] = totalStakePreUnstake - amountToUnstake;
+    accumulatedStakes[account] = 0;
     totalStaked -= amountToUnstake;
     // reset if accumulating stake is left
-    stakingStartedTime[msg.sender] = releasingStakes[msg.sender] != 0 ? block.timestamp : 0;
+    stakingStartedTime[account] = releasingStakes[account] != 0 ? block.timestamp : 0;
 
     // remove voting power from escrow
-    veToken.burn(msg.sender, veToken.balanceOf(msg.sender));
+    veToken.burn(account, veToken.balanceOf(account));
+
+    //
+    unstakeDeclaredTime[account] = 0;
+    unstakeDeclaredAmount[account] = 0;
 
     // call transfer in the end, as the reentrancy protection pattern requires
-    ERC20(address(this)).transfer(msg.sender, amountToUnstake);
+    ERC20(address(this)).transfer(account, amountToUnstake);
 
     // emit unstaking event
   }
