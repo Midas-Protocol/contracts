@@ -29,6 +29,8 @@ contract MockAutofarmV2 {
 
   address public AUTO;
 
+  event Test(uint256 amount);
+
   constructor(address _AUTO) {
     AUTO = _AUTO;
   }
@@ -106,6 +108,7 @@ contract MockAutofarmV2 {
 
     if (user.shares > 0) {
       uint256 pending = ((user.shares * pool.accAUTOPerShare) / 1e12) - user.rewardDebt;
+      emit Test(pending);
       if (pending > 0) {
         ERC20(AUTO).transfer(address(msg.sender), pending);
       }

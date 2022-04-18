@@ -9,24 +9,23 @@ import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 
 interface ILpTokenStaker {
-  function userInfo(uint256 _pid, address _user) external view returns (uint256, uint256);
+  function rewardToken() external view returns (address);
+
+  function userInfo(address _token, address _user) external view returns (uint256, uint256);
 
   // Deposit LP tokens into the contract. Also triggers a claim.
-  function deposit(uint256 _pid, uint256 _amount) external;
+  function deposit(
+    address _token,
+    uint256 _amount,
+    bool _claimRewards
+  ) external returns (uint256);
 
   // Withdraw LP tokens. Also triggers a claim.
-  function withdraw(uint256 _pid, uint256 _amount) external;
-}
-
-interface IEpsStaker {
-  // Withdraw staked tokens
-  // First withdraws unlocked tokens, then earned tokens. Withdrawing earned tokens
-  // incurs a 50% penalty which is distributed based on locked balances.
-  function withdraw(uint256 amount) external;
-
-  function stakingToken() external returns (address);
-
-  function totalBalance(address user) external view returns (uint256);
+  function withdraw(
+    address _token,
+    uint256 _amount,
+    bool _claimRewards
+  ) external returns (uint256);
 }
 
 /**
@@ -43,9 +42,7 @@ contract EllipsisERC4626 is ERC4626 {
   using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
-  uint256 public immutable poolId;
   ILpTokenStaker public immutable lpTokenStaker;
-  IEpsStaker public immutable epsStaker;
   FlywheelCore public immutable flywheel;
 
   /* ========== CONSTRUCTOR ========== */
@@ -55,27 +52,21 @@ contract EllipsisERC4626 is ERC4626 {
      @param _asset The ERC20 compliant token the Vault should accept.
      @param _name The name for the vault token.
      @param _symbol The symbol for the vault token.
-     @param _poolId TODO
      @param _lpTokenStaker TODO
-     @param _epsStaker TODO
      @param _flywheel TODO
     */
   constructor(
     ERC20 _asset,
     string memory _name,
     string memory _symbol,
-    uint256 _poolId,
     ILpTokenStaker _lpTokenStaker,
-    IEpsStaker _epsStaker,
     FlywheelCore _flywheel
   ) ERC4626(_asset, _name, _symbol) {
-    poolId = _poolId;
     lpTokenStaker = _lpTokenStaker;
-    epsStaker = _epsStaker;
     flywheel = _flywheel;
 
     asset.approve(address(lpTokenStaker), type(uint256).max);
-    ERC20(epsStaker.stakingToken()).approve(address(flywheel.flywheelRewards()), type(uint256).max);
+    ERC20(lpTokenStaker.rewardToken()).approve(address(flywheel.flywheelRewards()), type(uint256).max);
   }
 
   /* ========== VIEWS ========== */
@@ -83,7 +74,7 @@ contract EllipsisERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    (uint256 amount, ) = lpTokenStaker.userInfo(poolId, address(this));
+    (uint256 amount, ) = lpTokenStaker.userInfo(address(asset), address(this));
     return amount;
   }
 
@@ -96,25 +87,11 @@ contract EllipsisERC4626 is ERC4626 {
   /* ========== INTERNAL FUNCTIONS ========== */
 
   function afterDeposit(uint256 amount, uint256) internal override {
-    lpTokenStaker.deposit(poolId, amount);
-
-    //Total Rewarded EPS
-    uint256 totalEPSReward = epsStaker.totalBalance(address(this));
-    if (totalEPSReward > 0) {
-      //Withdraw totalEPSReward minus 50% penalty
-      epsStaker.withdraw(totalEPSReward / 2);
-    }
+    lpTokenStaker.deposit(address(asset), amount, true);
   }
 
   /// @notice withdraws specified amount of underlying token if possible
   function beforeWithdraw(uint256 amount, uint256) internal override {
-    lpTokenStaker.withdraw(poolId, amount);
-
-    //Total Rewarded EPS
-    uint256 totalEPSReward = epsStaker.totalBalance(address(this));
-    if (totalEPSReward > 0) {
-      //Withdraw totalEPSReward minus 50% penalty
-      epsStaker.withdraw(totalEPSReward / 2);
-    }
+    lpTokenStaker.withdraw(address(asset), amount, true);
   }
 }

@@ -122,7 +122,23 @@ const config: HardhatUserConfig = {
     evmostestnet: {
       accounts: { mnemonic },
       chainId: 9000,
-      url: "https://evmos-archive-testnet.api.bdnodes.net:8545",
+      url: "https://eth.bd.evmos.dev:8545",
+    },
+    moonbase: {
+      url: `https://rpc.api.moonbase.moonbeam.network`,
+      accounts: { mnemonic },
+      chainId: 1287,
+      saveDeployments: true,
+      gasPrice: 1000000000,
+      gas: 8000000,
+    },
+    moonbeam: {
+      url: `https://rpc.api.moonbeam.network`,
+      accounts: { mnemonic },
+      chainId: 1284,
+      saveDeployments: true,
+      gasPrice: 1000000000,
+      gas: 8000000,
     },
   },
 };

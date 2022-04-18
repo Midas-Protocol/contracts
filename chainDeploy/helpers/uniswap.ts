@@ -11,18 +11,11 @@ export const deployUniswapOracle = async ({
   deployConfig,
 }: UniswapDeployFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
+  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const updateOracles = [],
+    updateUnderlyings = [];
   //// Uniswap Oracle
-  let dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [deployConfig.wtoken],
-    log: true,
-  });
-  const utpor = await dep.deploy();
-  if (utpor.transactionHash) await ethers.provider.waitForTransaction(utpor.transactionHash);
-  console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
-
-  dep = await deployments.deterministic("UniswapTwapPriceOracleV2", {
+  let dep = await deployments.deterministic("UniswapTwapPriceOracleV2", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
@@ -31,6 +24,16 @@ export const deployUniswapOracle = async ({
   const utpo = await dep.deploy();
   if (utpo.transactionHash) await ethers.provider.waitForTransaction(utpo.transactionHash);
   console.log("UniswapTwapPriceOracleV2: ", utpo.address);
+
+  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [deployConfig.wtoken],
+    log: true,
+  });
+  const utpor = await dep.deploy();
+  if (utpor.transactionHash) await ethers.provider.waitForTransaction(utpor.transactionHash);
+  console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
 
   dep = await deployments.deterministic("UniswapTwapPriceOracleV2Factory", {
     from: deployer,
@@ -59,23 +62,36 @@ export const deployUniswapOracle = async ({
     console.log("UniswapTwapPriceOracleV2 already deployed at: ", existingOracle);
   }
 
-  const nativeOracle = await uniTwapOracleFactory.callStatic.oracles(
-    deployConfig.uniswap.uniswapV2FactoryAddress,
-    deployConfig.wtoken
-  );
-
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
-  const underlyings = deployConfig.uniswap.uniswapOracleInitialDeployTokens;
-  const oracles = Array(deployConfig.uniswap.uniswapOracleInitialDeployTokens.length).fill(nativeOracle);
-
-  if (underlyings.length > 0) {
-    let anyNotAddedYet = underlyings.some(
-      async (underlying) => (await mpo.callStatic.oracles(underlying)) == constants.AddressZero
+  for (let tokenPair of deployConfig.uniswap.uniswapOracleInitialDeployTokens) {
+    console.log("operating on pair: ", tokenPair.token, tokenPair.baseToken);
+    let oldBaseTokenOracle = await uniTwapOracleFactory.callStatic.oracles(
+      deployConfig.uniswap.uniswapV2FactoryAddress,
+      tokenPair.baseToken
     );
-    if (anyNotAddedYet) {
-      let tx = await mpo.add(underlyings, oracles);
+    console.log(oldBaseTokenOracle, "oldBaseTokenOracle for base token", tokenPair.baseToken);
+    if (oldBaseTokenOracle == constants.AddressZero) {
+      let tx = await uniTwapOracleFactory.deploy(deployConfig.uniswap.uniswapV2FactoryAddress, tokenPair.baseToken);
       await tx.wait();
-      console.log(`Master Price Oracle updated for tokens ${underlyings.join(", ")}`);
+      oldBaseTokenOracle = await uniTwapOracleFactory.callStatic.oracles(
+        deployConfig.uniswap.uniswapV2FactoryAddress,
+        tokenPair.baseToken
+      );
+      console.log(oldBaseTokenOracle, "oldBaseTokenOracle updated?");
     }
+
+    const underlyingOracle = await mpo.callStatic.oracles(tokenPair.token);
+    console.log("underlying oracle: ", underlyingOracle, "for token: ", tokenPair.token);
+    if (underlyingOracle == constants.AddressZero || underlyingOracle != oldBaseTokenOracle) {
+      updateOracles.push(oldBaseTokenOracle);
+      updateUnderlyings.push(tokenPair.token);
+    }
+  }
+
+  if (updateOracles.length) {
+    let tx = await mpo.add(updateUnderlyings, updateOracles);
+    await tx.wait();
+    console.log(
+      `Master Price Oracle updated for tokens ${updateUnderlyings.join(", ")} with oracles ${updateOracles.join(", ")}`
+    );
   }
 };
