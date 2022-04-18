@@ -50,8 +50,6 @@ abstract contract BaseTest is DSTest {
     chainConfigs[56].coins[0] = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
     chainConfigs[56].coins[1] = IERC20Upgradeable(0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
 
-    chainConfig = chainConfigs[block.chainid];
-
     chainConfigs[97] = ChainConfig({
       pool: IERC20Upgradeable(0x160CAed03795365F3A589f10C379FfA7d75d4E76),
       lpToken: IERC20Upgradeable(0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452),
@@ -69,7 +67,6 @@ abstract contract BaseTest is DSTest {
     chainConfigs[97].coins[1] = IERC20Upgradeable(0x8BaBbB98678facC7342735486C851ABD7A0d17Ca);
 
     chainConfig = chainConfigs[block.chainid];
-
   }
 
   modifier shouldRun(bool run) {

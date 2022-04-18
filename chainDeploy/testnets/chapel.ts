@@ -21,13 +21,13 @@ export const deployConfig: ChainDeployConfig = {
     uniswapV2FactoryAddress: "0xB7926C0430Afb07AA7DEfDE6DA862aE0Bde767bc",
     uniswapOracleInitialDeployTokens: [
       {
-        token: "0x8a9424745056Eb399FD19a0EC26A14316684e274",
+        token: "0x8a9424745056Eb399FD19a0EC26A14316684e274", // DAI
         baseToken: CHAPEL_WTOKEN,
-      }, // DAI
+      },
       {
-        token: "0xDAcbdeCc2992a63390d108e8507B98c7E2B5584a",
+        token: "0xDAcbdeCc2992a63390d108e8507B98c7E2B5584a", // SAFEMOON
         baseToken: CHAPEL_WTOKEN,
-      }, // SAFEMOON
+      },
       {
         token: "0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684", // USDT
         baseToken: "0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7", // BUSD
@@ -64,7 +64,7 @@ export const assets: Asset[] = [
   {
     symbol: "USDT",
     underlying: "0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684",
-    name: "Binance ETH",
+    name: "Binance Tether",
     decimals: 18,
   },
 ];
