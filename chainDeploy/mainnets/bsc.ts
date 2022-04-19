@@ -3,6 +3,7 @@ import { ChainDeployConfig, ChainlinkFeedBaseCurrency, deployChainlinkOracle, de
 import { ethers } from "ethers";
 import { Asset, ChainDeployFnParams, ChainlinkAsset, CurvePoolConfig } from "../helpers/types";
 import { deployCurveLpOracle } from "../oracles/curveLp";
+import { deployUniswapLpOracle } from "../oracles/uniswapLp";
 
 export const assets: Asset[] = [
   {
@@ -160,6 +161,13 @@ export const deployConfig: ChainDeployConfig = {
         baseToken: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", // BTCB
       },
     ],
+    uniswapOracleLpTokens: [
+      {
+        token: "0x522348779DCb2911539e76A1042aA922F9C47Ee3", // BOMB
+        baseToken: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", // BTCB
+        lpToken: "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6", // LP
+      },
+    ],
   },
 };
 
@@ -299,6 +307,8 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   //// Uniswap Oracle
   await deployUniswapOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
   ////
+
+  await deployUniswapLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
 
   await deployCurveLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig, curvePools });
 

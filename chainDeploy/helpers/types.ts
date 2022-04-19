@@ -10,6 +10,10 @@ export type TokenPair = {
   baseToken: string;
 };
 
+export type LpTokenPair = TokenPair & {
+  lpToken: string;
+};
+
 export type ChainDeployConfig = {
   uniswap: {
     uniswapV2RouterAddress: string;
@@ -18,6 +22,7 @@ export type ChainDeployConfig = {
     pairInitHashCode?: string;
     hardcoded: { name: string; symbol: string; address: string }[];
     uniswapData: { lpName: string; lpSymbol: string; lpDisplayName: string }[];
+    uniswapOracleLpTokens?: Array<LpTokenPair>;
   };
   wtoken: string;
   nativeTokenUsdChainlinkFeed?: string;
