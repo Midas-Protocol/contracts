@@ -15,7 +15,7 @@ import "../BasePriceOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author Rahul Sethuram <rahul@midascapital.xyz> (https://github.com/rhlsthrm)
  */
-contract FluxOracle is IPriceOracle, BasePriceOracle {
+contract FluxPriceOracle is IPriceOracle, BasePriceOracle {
   /**
    * @notice Maps ERC20 token addresses to ETH-based Chainlink price feed contracts.
    */
@@ -108,6 +108,7 @@ contract FluxOracle is IPriceOracle, BasePriceOracle {
 
   /**
    * @dev Internal function returning the price in ETH of `underlying`.
+   * Assumes price feeds are 8 decimals!
    */
   function _price(address underlying) internal view returns (uint256) {
     // Return 1e18 for WTOKEN
