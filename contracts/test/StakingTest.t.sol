@@ -31,7 +31,7 @@ contract StakingTest is DSTest {
   function testStaking(uint256 amountToStake) public {
     vm.assume(amountToStake > 0 && amountToStake < totalSupply);
 
-    vm.warp(1);
+    vm.warp(30 days);
 
     uint256 totalStakedBefore = govToken.totalStaked();
     uint256 stakerBalanceBefore = govToken.balanceOf(address(this));
@@ -73,7 +73,7 @@ contract StakingTest is DSTest {
     vm.assume(amountToStake > amountToUnstake && amountToStake < totalSupply);
     vm.assume(amountToUnstake > 0 && amountToUnstake < totalSupply);
 
-    vm.warp(1);
+    vm.warp(30 days);
 
     govToken.stake(amountToStake);
 
@@ -83,7 +83,6 @@ contract StakingTest is DSTest {
 
     govToken.claimAccumulatedVotingPower();
     assert(veToken.balanceOf(address(this)) == amountToStake * 1000 / 297625);
-
 
     uint256 stakerBalanceBefore = govToken.balanceOf(address(this));
     uint256 contractBalanceBefore = govToken.balanceOf(address(govToken));
@@ -112,4 +111,36 @@ contract StakingTest is DSTest {
   }
 
   // TODO test failing scenarios
+
+  function testUnstakingDeclaredFailure() public {
+    uint256 amountToStake = totalSupply;
+    uint256 amountToUnstake = totalSupply / 2;
+
+    vm.warp(30 days);
+
+    govToken.stake(amountToStake);
+
+    // advancing 1 day
+    vm.warp(block.timestamp + 1 days);
+    assertTrue(veToken.balanceOf(address(this)) == 0, "initial vp must be zero");
+
+    govToken.claimAccumulatedVotingPower();
+    assertEq(veToken.balanceOf(address(this)), amountToStake * 1000 / 297625, "incorrect accumulated vp");
+
+    uint256 stakerBalanceBefore = govToken.balanceOf(address(this));
+    uint256 contractBalanceBefore = govToken.balanceOf(address(govToken));
+    uint256 totalStakedBefore = govToken.totalStaked();
+
+    uint256 allTheVp = veToken.balanceOf(address(this));
+    vm.expectEmit(true, true, true, false);
+    emit Transfer(address(this), address(0), allTheVp);
+    govToken.declareUnstake(amountToUnstake);
+//    vm.warp(block.timestamp + 7 days);
+
+    vm.warp(block.timestamp + 3 days);
+    
+    // expect failure
+    vm.expectRevert(TOUCHToken.UnstakeTooEarly.selector);
+    govToken.unstake(address(this));
+  }
 }

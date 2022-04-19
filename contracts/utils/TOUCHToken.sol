@@ -16,6 +16,8 @@ contract TOUCHToken is ERC20, Initializable {
   mapping(address => uint256) public unstakeDeclaredAmount;
   VeMDSToken veToken;
 
+  error UnstakeTooEarly();
+
   // TODO solmate ERC20 and initializable?
   constructor() ERC20("Midas TOUCH Token", "TOUCH", 18) {}
 
@@ -89,7 +91,10 @@ contract TOUCHToken is ERC20, Initializable {
   // - by anyone 10 days after declaring it
   function unstake(address account) public {
     require(unstakeDeclaredAmount[account] > 0, "amount to unstake should be non-zero");
-    require(unstakeDeclaredTime[account] <= block.timestamp - 7 days, "unstake needs to be declared at least a week prior");
+
+    if (unstakeDeclaredTime[account] > block.timestamp - 7 days) revert UnstakeTooEarly();
+    //    require(unstakeDeclaredTime[account] <= block.timestamp - 7 days, "unstake needs to be declared at least a week prior");
+
     require(msg.sender == account || unstakeDeclaredTime[account] <= block.timestamp - 10 days, "unstake needs to be declared at least a week prior");
 
     uint256 amountToUnstake = unstakeDeclaredAmount[account];
