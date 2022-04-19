@@ -4,6 +4,7 @@ pragma solidity >=0.8.0;
 import "../oracles/MasterPriceOracle.sol";
 import "../oracles/default/UniswapLpTokenPriceOracle.sol";
 import "./config/BaseTest.t.sol";
+import "../external/uniswap/IUniswapV2Pair.sol";
 
 contract UniswapLpTokenBaseTest is BaseTest {
   UniswapLpTokenPriceOracle uniswapLpTokenPriceOracle;
@@ -13,34 +14,30 @@ contract UniswapLpTokenBaseTest is BaseTest {
     mpo = chainConfig.masterPriceOracle;
   }
 
-  function getLpTokenPrice (address tokenAddress, address baseTokenAddress) internal returns (uint256) {
-    emit log("inside getLpTokenPrice");
-    emit log_address(address(mpo.oracles(tokenAddress)));
-    // if (address(mpo.oracles(tokenAddress)) == address(0)) {
-    //   emit log("creating oracle");
-    //   uniswapLpTokenPriceOracle = UniswapLpTokenPriceOracle(baseTokenAddress);
+  function getLpTokenPrice (address lpToken, address wToken) internal returns (uint256) {
+    if (address(mpo.oracles(lpToken)) == address(0)) {
+      uniswapLpTokenPriceOracle = new UniswapLpTokenPriceOracle(wToken); // BTCB 
+      IUniswapV2Pair pair = IUniswapV2Pair(lpToken);
 
-    //   address[] memory underlyings = new address[](1);
-    //   underlyings[0] = tokenAddress;
-    //   IPriceOracle[] memory oracles = new IPriceOracle[](1);
-    //   oracles[0] = IPriceOracle(uniswapLpTokenPriceOracle);
+      address[] memory underlyings = new address[](1);
+      underlyings[0] = lpToken;
+      IPriceOracle[] memory oracles = new IPriceOracle[](1);
+      oracles[0] = IPriceOracle(uniswapLpTokenPriceOracle);
 
-    //   vm.prank(mpo.admin());
-    //   mpo.add(underlyings, oracles);
-    //   emit log("added the oracle");
-    // } else {
-    //   emit log("found the oracle");
-    // }
-    // emit log("before getting price");
-    return mpo.price(tokenAddress);
+      vm.prank(mpo.admin());
+      mpo.add(underlyings, oracles);
+      emit log("added the oracle");
+    } else {
+      emit log("found the oracle");
+    }
+    return mpo.price(lpToken);
   }
 
   function testBombBtcLpTokenOraclePrice() public shouldRun(forChains(BSC_MAINNET)) {
-    address baseToken = 0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c; // BTCB
+    address wToken = 0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c; // BTCB
     address lpToken = 0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6; // Lp BOMB-BTCB
-    emit log_address(lpToken);
-    uint256 price = getLpTokenPrice(lpToken, baseToken);
-    // emit log_uint(price);
-    // assertTrue(price > 0);
+
+    uint256 price = getLpTokenPrice(lpToken, wToken);
+    assertTrue(price > 0);
   }
 }
