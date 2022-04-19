@@ -23,6 +23,7 @@ contract FluxPriceOracleTest is BaseTest {
 
   function testFluxPriceOracle() shouldRun(forChains(EVMOS_TESTNET)) public {
     uint256 price = oracle.price(address(1));
+    assertEq(price, 611734882004000000000);
     emit log_uint(price);
   }
 }
