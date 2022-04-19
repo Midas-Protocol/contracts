@@ -90,10 +90,10 @@ contract TOUCHToken is ERC20, Initializable {
   // - by the owner 7 days after declaring it or
   // - by anyone 10 days after declaring it
   function unstake(address account) public {
-    require(unstakeDeclaredAmount[account] > 0, "amount to unstake should be non-zero");
-
     if (unstakeDeclaredTime[account] > block.timestamp - 7 days) revert UnstakeTooEarly();
-    //    require(unstakeDeclaredTime[account] <= block.timestamp - 7 days, "unstake needs to be declared at least a week prior");
+//    require(unstakeDeclaredTime[account] <= block.timestamp - 7 days, "unstake needs to be declared at least a week prior");
+
+    require(unstakeDeclaredAmount[account] > 0, "amount to unstake should be non-zero");
 
     require(msg.sender == account || unstakeDeclaredTime[account] <= block.timestamp - 10 days, "unstake needs to be declared at least a week prior");
 

@@ -112,9 +112,9 @@ contract StakingTest is DSTest {
 
   // TODO test failing scenarios
 
-  function testUnstakingDeclaredFailure() public {
-    uint256 amountToStake = totalSupply;
-    uint256 amountToUnstake = totalSupply / 2;
+  function testUnstakingDeclaredFailure(uint256 amountToStake) public {
+    vm.assume(amountToStake > 1 && amountToStake < totalSupply);
+    uint256 amountToUnstake = amountToStake / 2;
 
     vm.warp(30 days);
 
@@ -138,9 +138,12 @@ contract StakingTest is DSTest {
 //    vm.warp(block.timestamp + 7 days);
 
     vm.warp(block.timestamp + 3 days);
-    
+
+//    emit log_bytes(TOUCHToken.UnstakeTooEarly.selector);
+
+    address thisAddress = address(this);
     // expect failure
-    vm.expectRevert(TOUCHToken.UnstakeTooEarly.selector);
-    govToken.unstake(address(this));
+    vm.expectRevert(abi.encodeWithSignature("UnstakeTooEarly()"));
+    govToken.unstake(thisAddress);
   }
 }
