@@ -91,7 +91,7 @@ export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Pr
     console.log("registerPool mined: ", receipt.transactionHash);
 
     for (const underlying of pool.underlyings) {
-      tx = await spo.setDirectPrice(underlying, utils.parseEther("1"));
+      tx = await spo.setDirectPrice(underlying, utils.parseEther("1"))
       console.log("set underlying price tx sent: ", underlying, tx.hash);
       receipt = await tx.wait();
       console.log("set underlying price tx mined: ", underlying, receipt.transactionHash);
@@ -99,21 +99,11 @@ export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Pr
   }
 
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
-  const mpoUnderlyings = [];
-  const mpoOracles = [];
-  curvePools.forEach((c) => {
-    mpoUnderlyings.push(c.lpToken);
-    mpoOracles.push(curveOracle.address);
-    c.underlyings.forEach((u) => {
-      mpoUnderlyings.push(u);
-      mpoOracles.push(spo.address);
-    });
-  });
   const admin = await masterPriceOracle.admin();
   if (admin === ethers.constants.AddressZero) {
     let tx = await masterPriceOracle.initialize(
-      mpoUnderlyings,
-      mpoOracles,
+      curvePools.map((c) => c.lpToken),
+      Array(curvePools.length).fill(curveOracle.address),
       curveOracle.address,
       deployer,
       true,
