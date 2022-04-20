@@ -225,7 +225,7 @@ export class FuseBase {
     priceOracleConf: OracleConf,
     options: { from: string }, // We might need to add sender as argument. Getting address from options will collide with the override arguments in ethers contract method calls. It doesn't take address.
     whitelist: string[] // An array of whitelisted addresses
-  ): Promise<[string, number, string, string]> {
+  ): Promise<[string, string, string, number?]> {
     try {
       // Deploy Comptroller implementation if necessary
       let implementationAddress = this.chainDeployment.Comptroller.address;
@@ -252,18 +252,19 @@ export class FuseBase {
         priceOracle
       );
       const deployReceipt = await deployTx.wait();
-
-      // Latest Event is PoolRegistered which includes the poolId
-      const registerEvent = deployReceipt.events?.pop();
-      const poolId =
-        registerEvent && registerEvent.args && registerEvent.args[0]
-          ? (registerEvent.args[0] as BigNumber).toNumber()
-          : -1;
-      if (poolId === -1) {
-        console.warn("Unable to retrieve pool ID from receipt events");
-      }
-
       console.log(`Deployment of pool ${poolName} succeeded!`, deployReceipt.status);
+
+      let poolId: number | undefined;
+      try {
+        // Latest Event is PoolRegistered which includes the poolId
+        const registerEvent = deployReceipt.events?.pop();
+        poolId =
+          registerEvent && registerEvent.args && registerEvent.args[0]
+            ? (registerEvent.args[0] as BigNumber).toNumber()
+            : undefined;
+      } catch (e) {
+        console.warn("Unable to retrieve pool ID from receipt events", e);
+      }
 
       // Compute Unitroller address
       const saltsHash = utils.solidityKeccak256(
@@ -306,7 +307,7 @@ export class FuseBase {
         console.log("Whitelist updated:", whitelistReceipt.status);
       }
 
-      return [poolAddress, poolId, implementationAddress, priceOracle];
+      return [poolAddress, implementationAddress, priceOracle, poolId];
     } catch (error: any) {
       throw Error("Deployment of new Fuse pool failed: " + (error.message ? error.message : error));
     }
