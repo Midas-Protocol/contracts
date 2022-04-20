@@ -225,12 +225,7 @@ export class FuseBase {
     priceOracleConf: OracleConf,
     options: { from: string }, // We might need to add sender as argument. Getting address from options will collide with the override arguments in ethers contract method calls. It doesn't take address.
     whitelist: string[] // An array of whitelisted addresses
-  ): Promise<{
-    address: string;
-    id?: BigNumber;
-    implementation: string;
-    oracle: string;
-  }> {
+  ): Promise<[string, number, string, string]> {
     try {
       // Deploy Comptroller implementation if necessary
       let implementationAddress = this.chainDeployment.Comptroller.address;
@@ -258,10 +253,16 @@ export class FuseBase {
       );
       const deployReceipt = await deployTx.wait();
 
-      // Latest Event is PoolRegistered which emits the poolId
+      // Latest Event is PoolRegistered which includes the poolId
       const registerEvent = deployReceipt.events?.pop();
       const poolId =
-        registerEvent && registerEvent.args && registerEvent.args[0] ? (registerEvent.args[0] as BigNumber) : undefined;
+        registerEvent && registerEvent.args && registerEvent.args[0]
+          ? (registerEvent.args[0] as BigNumber).toNumber()
+          : -1;
+      if (poolId === -1) {
+        console.warn("Unable to retrieve pool ID from receipt events");
+      }
+
       console.log(`Deployment of pool ${poolName} succeeded!`, deployReceipt.status);
 
       // Compute Unitroller address
@@ -305,12 +306,7 @@ export class FuseBase {
         console.log("Whitelist updated:", whitelistReceipt.status);
       }
 
-      return {
-        address: poolAddress,
-        id: poolId,
-        implementation: implementationAddress,
-        oracle: priceOracle,
-      };
+      return [poolAddress, poolId, implementationAddress, priceOracle];
     } catch (error: any) {
       throw Error("Deployment of new Fuse pool failed: " + (error.message ? error.message : error));
     }
