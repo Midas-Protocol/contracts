@@ -20,7 +20,6 @@ abstract contract BaseTest is DSTest {
   struct ChainConfig {
     IERC20Upgradeable pool;
     address lpTokenWhale;
-    address wtoken;
     IERC20Upgradeable lpToken;
     IERC20Upgradeable[] coins;
     WETH weth;
@@ -40,7 +39,6 @@ abstract contract BaseTest is DSTest {
       lpToken: IERC20Upgradeable(0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452),
       lpTokenWhale: 0x8D7408C2b3154F9f97fc6dd24cd36143908d1E52,
       coins: new IERC20Upgradeable[](2),
-      wtoken: 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c,
       weth: WETH(payable(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)),
       curveLPTokenPriceOracleNoRegistry: CurveLpTokenPriceOracleNoRegistry(0x44ea7bAB9121D97630b5DB0F92aAd75cA5A401a3),
       chainlinkOracle: ChainlinkPriceOracleV2(0x2B5311De4555506400273CfaAFb4393F01EC2567),
@@ -56,7 +54,6 @@ abstract contract BaseTest is DSTest {
       pool: IERC20Upgradeable(0x160CAed03795365F3A589f10C379FfA7d75d4E76),
       lpToken: IERC20Upgradeable(0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452),
       lpTokenWhale: 0x0000000000000000000000000000000000000000,
-      wtoken: 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd,
       coins: new IERC20Upgradeable[](2),
       weth: WETH(payable(0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd)),
       curveLPTokenPriceOracleNoRegistry: CurveLpTokenPriceOracleNoRegistry(0x0000000000000000000000000000000000000000),
