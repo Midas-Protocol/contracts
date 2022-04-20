@@ -10,7 +10,7 @@ export type TokenPair = {
   baseToken: string;
 };
 
-export type LpTokenPair = TokenPair & {
+export type LpTokenPair = {
   lpToken: string;
 };
 

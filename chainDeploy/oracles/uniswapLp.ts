@@ -12,7 +12,7 @@ export const deployUniswapLpOracle = async ({
   let dep = await deployments.deterministic("UniswapLpTokenPriceOracle", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [deployConfig.uniswap.uniswapOracleLpTokens[0].baseToken],
+    args: [deployConfig.wtoken],
     log: true,
   });
   const lpToken = await dep.deploy();

@@ -9,14 +9,16 @@ import "../external/uniswap/IUniswapV2Pair.sol";
 contract UniswapLpTokenBaseTest is BaseTest {
   UniswapLpTokenPriceOracle uniswapLpTokenPriceOracle;
   MasterPriceOracle mpo;
+  address wtoken;
 
   function setUp() public {
     mpo = chainConfig.masterPriceOracle;
+    wtoken = chainConfig.wtoken;
   }
 
-  function getLpTokenPrice (address lpToken, address wToken) internal returns (uint256) {
+  function getLpTokenPrice (address lpToken) internal returns (uint256) {
     if (address(mpo.oracles(lpToken)) == address(0)) {
-      uniswapLpTokenPriceOracle = new UniswapLpTokenPriceOracle(wToken); // BTCB 
+      uniswapLpTokenPriceOracle = new UniswapLpTokenPriceOracle(wtoken); // BTCB 
       IUniswapV2Pair pair = IUniswapV2Pair(lpToken);
 
       address[] memory underlyings = new address[](1);
@@ -34,10 +36,9 @@ contract UniswapLpTokenBaseTest is BaseTest {
   }
 
   function testBombBtcLpTokenOraclePrice() public shouldRun(forChains(BSC_MAINNET)) {
-    address wToken = 0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c; // BTCB
     address lpToken = 0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6; // Lp BOMB-BTCB
 
-    uint256 price = getLpTokenPrice(lpToken, wToken);
+    uint256 price = getLpTokenPrice(lpToken);
     assertTrue(price > 0);
   }
 }
