@@ -257,10 +257,9 @@ export class FuseBase {
         priceOracle
       );
       const deployReceipt = await deployTx.wait();
+
       // Latest Event is PoolRegistered which emits the poolId
-      // const poolId = (deployReceipt.events.pop().args[0] as BigNumber).toNumber();
       const registerEvent = deployReceipt.events?.pop();
-      console.log({ deployReceipt, registerEvent });
       const poolId =
         registerEvent && registerEvent.args && registerEvent.args[0] ? (registerEvent.args[0] as BigNumber) : undefined;
       console.log(`Deployment of pool ${poolName} succeeded!`, deployReceipt.status);
