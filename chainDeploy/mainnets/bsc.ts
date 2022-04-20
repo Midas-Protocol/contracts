@@ -323,6 +323,17 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   console.log("SimplePriceOracle: ", simplePO.address);
   ////
 
+  dep = await deployments.deterministic("UniswapLpTokenLiquidator", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8String(SALT)),
+    args: [],
+    log: true,
+  });
+  const uniswapLpTokenLiquidator = await dep.deploy();
+  if (uniswapLpTokenLiquidator.transactionHash)
+    await ethers.provider.waitForTransaction(uniswapLpTokenLiquidator.transactionHash);
+  console.log("UniswapLpTokenLiquidator: ", uniswapLpTokenLiquidator.address);
+
   //// Liquidator Redemption Strategies
   /// xBOMB->BOMB
   dep = await deployments.deterministic("XBombLiquidator", {
