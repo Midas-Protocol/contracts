@@ -50,17 +50,6 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   await tx.wait();
   console.log("FuseFeeDistributor pool limits set", tx.hash);
 
-  console.log("deploy Test Token");
-  dep = await deployments.deterministic("ERC20", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: ["Test", "TT", 18],
-    log: true,
-  });
-
-  const fft = await dep.deploy();
-  console.log("Test Token: ", fft.address);
-
   dep = await deployments.deterministic("Comptroller", {
     contract: "Comptroller.sol:Comptroller",
     from: deployer,

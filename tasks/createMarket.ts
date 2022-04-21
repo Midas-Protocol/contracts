@@ -1,7 +1,7 @@
 import { parseEther } from "ethers/lib/utils";
 import { task, types } from "hardhat/config";
 
-// npx hardhat market:create --asset-config Test,deployer,CErc20Delegate,0x35a4861bB24291Ecaa79A69463559879bF097F0e,0x6c7De8de3d8c92246328488aC6AF8f8E46A1628f,1,0.9,1,0,true,"","","" --network localhost
+// npx hardhat market:create --asset-config Test,deployer,CErc20Delegate,0x90e68fdb102c850D852126Af8fd1419A07636cd7,0x6c7De8de3d8c92246328488aC6AF8f8E46A1628f,0.1,0.9,1,0,true,"","","" --network localhost
 
 export default task("market:create", "Create Market")
   .addParam(
@@ -59,10 +59,14 @@ export default task("market:create", "Create Market")
       rewardsDistributor: rewardsDistributor ? rewardsDistributor : null,
       rewardToken: rewardToken ? rewardToken : null,
     };
+
     console.log({ assetConf });
+
     const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
       sdk.JumpRateModelConf,
       assetConf,
       { from: signer.address }
     );
+
+    console.log("CToken: ", assetAddress);
   });
