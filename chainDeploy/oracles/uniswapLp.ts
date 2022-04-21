@@ -16,12 +16,14 @@ export const deployUniswapLpOracle = async ({
     log: true,
   });
   const lpToken = await dep.deploy();
-  if (lpToken.transactionHash) await ethers.provider.waitForTransaction(lpToken.transactionHash);
+  if (lpToken.transactionHash) {
+    await ethers.provider.waitForTransaction(lpToken.transactionHash);
+  }
   console.log("UniswapLpTokenPriceOracle: ", lpToken.address);
 
   const mpo = await ethers.getContract("MasterPriceOracle", deployer);
-  let tx = await mpo.add([deployConfig.uniswap.uniswapOracleLpTokens[0].lpToken], [lpToken.address]);
+  let tx = await mpo.add([deployConfig.uniswap.uniswapOracleLpTokens[0]], [lpToken.address]);
   await tx.wait();
 
-  console.log(`Master Price Oracle updated for token ${deployConfig.uniswap.uniswapOracleLpTokens[0].lpToken}`);
+  console.log(`Master Price Oracle updated for token ${deployConfig.uniswap.uniswapOracleLpTokens[0]}`);
 };

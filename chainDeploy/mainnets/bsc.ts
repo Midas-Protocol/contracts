@@ -162,9 +162,7 @@ export const deployConfig: ChainDeployConfig = {
       },
     ],
     uniswapOracleLpTokens: [
-      {
-        lpToken: "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6", // LP
-      },
+      "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6", // LP,
     ],
   },
 };
@@ -328,8 +326,9 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
     log: true,
   });
   const uniswapLpTokenLiquidator = await dep.deploy();
-  if (uniswapLpTokenLiquidator.transactionHash)
+  if (uniswapLpTokenLiquidator.transactionHash) {
     await ethers.provider.waitForTransaction(uniswapLpTokenLiquidator.transactionHash);
+  }
   console.log("UniswapLpTokenLiquidator: ", uniswapLpTokenLiquidator.address);
 
   //// Liquidator Redemption Strategies
