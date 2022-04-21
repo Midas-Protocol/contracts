@@ -202,12 +202,11 @@ export class FuseBase {
   async getUsdPriceBN(coingeckoId: string = "ethereum", asBigNumber: boolean = false): Promise<number | BigNumber> {
     // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
     let UsdPrice: number;
-    if(coingeckoId === 'evmos'){
-      UsdPrice = 1.00;
+    if (coingeckoId === "evmos") {
+      UsdPrice = 1.0;
     } else {
-      UsdPrice = (
-        await axios.get(`https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=${coingeckoId}`)
-      ).data[coingeckoId].usd;
+      UsdPrice = (await axios.get(`https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=${coingeckoId}`))
+        .data[coingeckoId].usd;
     }
 
     if (asBigNumber) {
@@ -226,26 +225,24 @@ export class FuseBase {
     priceOracleConf: OracleConf,
     options: { from: string }, // We might need to add sender as argument. Getting address from options will collide with the override arguments in ethers contract method calls. It doesn't take address.
     whitelist: string[] // An array of whitelisted addresses
-  ): Promise<[string, string, string]> {
-    // 2. Deploy Comptroller implementation if necessary
-    let implementationAddress = this.chainDeployment.Comptroller.address;
-
-    if (!implementationAddress) {
-      const comptrollerContract = new ContractFactory(
-        this.artifacts.Comptroller.abi,
-        this.artifacts.Comptroller.bytecode.object,
-        this.provider.getSigner(options.from)
-      );
-      const deployedComptroller = await comptrollerContract.deploy();
-      implementationAddress = deployedComptroller.address;
-    }
-
-    //3. Register new pool with FusePoolDirectory
-    let receipt: providers.TransactionReceipt;
+  ): Promise<[string, string, string, number?]> {
     try {
+      // Deploy Comptroller implementation if necessary
+      let implementationAddress = this.chainDeployment.Comptroller.address;
+
+      if (!implementationAddress) {
+        const comptrollerContract = new ContractFactory(
+          this.artifacts.Comptroller.abi,
+          this.artifacts.Comptroller.bytecode.object,
+          this.provider.getSigner(options.from)
+        );
+        const deployedComptroller = await comptrollerContract.deploy();
+        implementationAddress = deployedComptroller.address;
+      }
+
+      // Register new pool with FusePoolDirectory
       const contract = this.contracts.FusePoolDirectory.connect(this.provider.getSigner(options.from));
-      // TODO deployPool also returns the poolId which comes in handy! We should get that as well.
-      const tx = await contract.deployPool(
+      const deployTx = await contract.deployPool(
         poolName,
         implementationAddress,
         new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]),
@@ -254,53 +251,66 @@ export class FuseBase {
         liquidationIncentive,
         priceOracle
       );
-      receipt = await tx.wait();
-      console.log(`Deployment of pool ${poolName} succeeded!`);
-    } catch (error: any) {
-      throw Error("Deployment and registration of new Fuse pool failed: " + (error.message ? error.message : error));
-    }
-    //4. Compute Unitroller address
-    const saltsHash = utils.solidityKeccak256(
-      ["address", "string", "uint"],
-      [options.from, poolName, receipt.blockNumber]
-    );
-    const byteCodeHash = utils.keccak256(
-      this.artifacts.Unitroller.bytecode.object +
-        new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]).slice(2)
-    );
+      const deployReceipt = await deployTx.wait();
+      console.log(`Deployment of pool ${poolName} succeeded!`, deployReceipt.status);
 
-    const poolAddress = utils.getCreate2Address(
-      this.chainDeployment.FusePoolDirectory.address,
-      saltsHash,
-      byteCodeHash
-    );
+      let poolId: number | undefined;
+      try {
+        // Latest Event is PoolRegistered which includes the poolId
+        const registerEvent = deployReceipt.events?.pop();
+        poolId =
+          registerEvent && registerEvent.args && registerEvent.args[0]
+            ? (registerEvent.args[0] as BigNumber).toNumber()
+            : undefined;
+      } catch (e) {
+        console.warn("Unable to retrieve pool ID from receipt events", e);
+      }
 
-    const unitroller = new Contract(poolAddress, this.artifacts.Unitroller.abi, this.provider.getSigner(options.from));
-
-    // Accept admin status via Unitroller
-    try {
-      const tx = await unitroller._acceptAdmin();
-      const receipt = await tx.wait();
-      console.log(receipt.status, "Accepted admin status for admin: ");
-    } catch (error: any) {
-      throw Error("Accepting admin status failed: " + (error.message ? error.message : error));
-    }
-
-    // Whitelist
-    console.log("enforceWhitelist: ", enforceWhitelist);
-    if (enforceWhitelist) {
-      let comptroller = new Contract(
-        poolAddress,
-        this.artifacts.Comptroller.abi,
-        this.provider.getSigner(options.from)
+      // Compute Unitroller address
+      const saltsHash = utils.solidityKeccak256(
+        ["address", "string", "uint"],
+        [options.from, poolName, deployReceipt.blockNumber]
+      );
+      const byteCodeHash = utils.keccak256(
+        this.artifacts.Unitroller.bytecode.object +
+          new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]).slice(2)
       );
 
-      // Already enforced so now we just need to add the addresses
-      console.log("whitelist: ", whitelist);
-      await comptroller._setWhitelistStatuses(whitelist, Array(whitelist.length).fill(true));
-    }
+      const poolAddress = utils.getCreate2Address(
+        this.chainDeployment.FusePoolDirectory.address,
+        saltsHash,
+        byteCodeHash
+      );
 
-    return [poolAddress, implementationAddress, priceOracle];
+      // Accept admin status via Unitroller
+      const unitroller = new Contract(
+        poolAddress,
+        this.artifacts.Unitroller.abi,
+        this.provider.getSigner(options.from)
+      );
+      const acceptTx = await unitroller._acceptAdmin();
+      const acceptReceipt = await acceptTx.wait();
+      console.log("Accepted admin status for admin:", acceptReceipt.status);
+
+      // Whitelist
+      console.log("enforceWhitelist: ", enforceWhitelist);
+      if (enforceWhitelist) {
+        let comptroller = new Contract(
+          poolAddress,
+          this.artifacts.Comptroller.abi,
+          this.provider.getSigner(options.from)
+        );
+
+        // Was enforced by pool deployment, now just add addresses
+        const whitelistTx = await comptroller._setWhitelistStatuses(whitelist, Array(whitelist.length).fill(true));
+        const whitelistReceipt = await whitelistTx.wait();
+        console.log("Whitelist updated:", whitelistReceipt.status);
+      }
+
+      return [poolAddress, implementationAddress, priceOracle, poolId];
+    } catch (error: any) {
+      throw Error("Deployment of new Fuse pool failed: " + (error.message ? error.message : error));
+    }
   }
 
   async deployAsset(
