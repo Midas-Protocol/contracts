@@ -14,7 +14,7 @@ export type LensPoolsWithData = [
 
 export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class FusePools extends Base {
-    async fetchFusePoolData(poolId: string, address?: string, coingeckoId?: string): Promise<FusePoolData> {
+    async fetchFusePoolData(poolId: string, address?: string, coingeckoId?: string): Promise<FusePoolData | null> {
       try {
         const {
           comptroller,
@@ -115,23 +115,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         };
       } catch (e) {
         console.log(e);
-        return {
-          id: Number(poolId),
-          assets: [],
-          creator: "",
-          comptroller: "",
-          name: "",
-          totalLiquidityUSD: 0,
-          totalSuppliedUSD: 0,
-          totalBorrowedUSD: 0,
-          totalSupplyBalanceUSD: 0,
-          totalBorrowBalanceUSD: 0,
-          blockPosted: constants.Zero,
-          timestampPosted: constants.Zero,
-          underlyingTokens: [],
-          underlyingSymbols: [],
-          whitelistedAdmin: false,
-        };
+        return null;
       }
     }
     async fetchPoolsManual({
@@ -142,7 +126,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
       verification: boolean;
       coingeckoId: string;
       options: { from: string };
-    }): Promise<FusePoolData[] | undefined> {
+    }): Promise<(FusePoolData | null)[] | undefined> {
       try {
         const fusePoolsDirectoryResult = await this.contracts.FusePoolDirectory.callStatic.getPublicPoolsByVerification(
           verification,
@@ -177,7 +161,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
       filter: string | null;
       coingeckoId: string;
       options: { from: string };
-    }): Promise<FusePoolData[] | undefined> {
+    }): Promise<(FusePoolData | null)[] | undefined> {
       try {
         const isCreatedPools = filter === "created-pools";
         const isVerifiedPools = filter === "verified-pools";
@@ -209,8 +193,8 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
           })
         );
 
-        const whitelistedIds = whitelistedPools.map((pool) => pool.id);
-        const filteredPools = pools.filter((pool) => !whitelistedIds.includes(pool.id));
+        const whitelistedIds = whitelistedPools.map((pool) => pool?.id);
+        const filteredPools = pools.filter((pool) => !whitelistedIds.includes(pool?.id));
 
         return [...filteredPools, ...whitelistedPools];
       } catch (e) {
