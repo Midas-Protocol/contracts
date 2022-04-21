@@ -1,12 +1,14 @@
 import { parseEther } from "ethers/lib/utils";
 import { task, types } from "hardhat/config";
 
-// npx hardhat pool:create --name Test --creator deployer --price-oracle "" --close-factor 50 --liquiditation-incentive 8 --enforce-whitelist false --network localhost
+// npx hardhat strategy:create --strategy-name AlpacaERC4626 --underlying "" --name Plugin-Alpaca-USDC --symbol pAlUSDC --creator deployer --other-params "" --network localhost
 
 task("strategy:create", "Create ERC4626 Strategy")
+  .addParam("strategyName", "Name of the ERC4626 strategy", undefined, types.string)
   .addParam("underlying", "Address of the underlying token", undefined, types.string)
-  .addParam("name", "Name of the Token", "deployer", types.string)
+  .addParam("name", "Name of the Token", undefined, types.string)
   .addParam("symbol", "Symbol of the Token", undefined, types.string)
+  .addParam("creator", "Deployer Address", "deployer", types.string)
   .addOptionalParam(
     "otherParams",
     "other params that might be required to construct the strategy",
@@ -14,28 +16,19 @@ task("strategy:create", "Create ERC4626 Strategy")
     types.string
   )
   .setAction(async (taskArgs, hre) => {
-    const signer = await hre.ethers.getNamedSigner(taskArgs.creator);
+    const otherParams = taskArgs.otherParams ? taskArgs.otherParams.split(",") : null;
+    let deployArgs;
+    if (otherParams) {
+      deployArgs = [taskArgs.underlying, taskArgs.name, taskArgs.symbol, ...otherParams];
+    } else {
+      deployArgs = [taskArgs.underlying, taskArgs.name, taskArgs.symbol];
+    }
 
-    /*  new AutofarmERC4626(
-      testToken,
-      "TestVault",
-      "TSTV",
-      0,
-      autoToken,
-      IAutofarmV2(address(mockAutofarm)),
-      FlywheelCore(address(flywheel))
-    );
- */
-    /* let dep = await hre.ethers.deploy("FuseFeeDistributor", {
-      from: deployer,
-      salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-      args: [],
+    const deployment = await hre.deployments.deploy(taskArgs.strategyName, {
+      from: taskArgs.creator,
+      args: deployArgs,
       log: true,
-      proxy: {
-        proxyContract: "OpenZeppelinTransparentProxy",
-      },
     });
 
-    const ffd = await dep.deploy();
-    console.log("FuseFeeDistributor: ", ffd.address); */
+    console.log("ERC4626 Strategy: ", deployment.address);
   });
