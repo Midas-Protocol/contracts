@@ -4,28 +4,33 @@ pragma solidity >=0.4.23;
 import "ds-test/test.sol";
 import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
-import "../gauges/VeMDSToken.sol";
+import "../governance/VeMDSToken.sol";
+import "../governance/StakingController.sol";
+import "../utils/TOUCHToken.sol";
 
 contract StakingTest is DSTest {
   Vm public constant vm = Vm(HEVM_ADDRESS);
 
   VeMDSToken veToken;
   TOUCHToken govToken;
+  StakingController stakingController;
 
   event Transfer(address indexed from, address indexed to, uint256 amount);
 
   uint256 totalSupply = 100_000;
 
   function setUp() public {
-    govToken = new TOUCHToken();
+    stakingController = new StakingController();
+    govToken = new TOUCHToken(totalSupply);
     veToken = new VeMDSToken(
       2, // gaugeCycleLength
       1, // incrementFreezeWindow
       address(this),
       Authority(address(0)),
-      address(govToken)
+      address(stakingController)
     );
-    govToken.initialize(totalSupply, veToken);
+    stakingController.initialize(veToken, govToken);
+    govToken.approve(address(stakingController), type(uint256).max);
   }
 
   function testStaking(uint256 amountToStake) public {
@@ -33,15 +38,15 @@ contract StakingTest is DSTest {
 
     vm.warp(30 days);
 
-    uint256 totalStakedBefore = govToken.totalStaked();
+    uint256 totalStakedBefore = stakingController.totalStaked();
     uint256 stakerBalanceBefore = govToken.balanceOf(address(this));
-    uint256 contractBalanceBefore = govToken.balanceOf(address(govToken));
-    govToken.stake(amountToStake);
+    uint256 contractBalanceBefore = govToken.balanceOf(address(stakingController));
+    stakingController.stake(amountToStake);
 
     {
-      uint256 totalStakedAfter = govToken.totalStaked();
+      uint256 totalStakedAfter = stakingController.totalStaked();
       uint256 stakerBalanceAfter = govToken.balanceOf(address(this));
-      uint256 contractBalanceAfter = govToken.balanceOf(address(govToken));
+      uint256 contractBalanceAfter = govToken.balanceOf(address(stakingController));
 
       assert(stakerBalanceBefore - stakerBalanceAfter == amountToStake);
       assert(contractBalanceAfter - contractBalanceBefore == amountToStake);
@@ -50,13 +55,13 @@ contract StakingTest is DSTest {
 
     // advancing 1 day
     vm.warp(block.timestamp + 1 days);
-    govToken.claimAccumulatedVotingPower();
+    stakingController.claimAccumulatedVotingPower();
     assert(veToken.balanceOf(address(this)) == amountToStake * 1000 / 297625);
 
     {
-      uint256 totalStakedAfter = govToken.totalStaked();
+      uint256 totalStakedAfter = stakingController.totalStaked();
       uint256 stakerBalanceAfter = govToken.balanceOf(address(this));
-      uint256 contractBalanceAfter = govToken.balanceOf(address(govToken));
+      uint256 contractBalanceAfter = govToken.balanceOf(address(stakingController));
 
       assert(stakerBalanceBefore - stakerBalanceAfter == amountToStake);
       assert(contractBalanceAfter - contractBalanceBefore == amountToStake);
@@ -65,7 +70,7 @@ contract StakingTest is DSTest {
 
     // advancing 7142 hours
     vm.warp(block.timestamp + 7142 hours);
-    govToken.claimAccumulatedVotingPower();
+    stakingController.claimAccumulatedVotingPower();
     assert(veToken.balanceOf(address(this)) == amountToStake);
   }
 
@@ -75,29 +80,29 @@ contract StakingTest is DSTest {
 
     vm.warp(30 days);
 
-    govToken.stake(amountToStake);
+    stakingController.stake(amountToStake);
 
     // advancing 1 day
     vm.warp(block.timestamp + 1 days);
     assert(veToken.balanceOf(address(this)) == 0);
 
-    govToken.claimAccumulatedVotingPower();
+    stakingController.claimAccumulatedVotingPower();
     assert(veToken.balanceOf(address(this)) == amountToStake * 1000 / 297625);
 
     uint256 stakerBalanceBefore = govToken.balanceOf(address(this));
-    uint256 contractBalanceBefore = govToken.balanceOf(address(govToken));
-    uint256 totalStakedBefore = govToken.totalStaked();
+    uint256 contractBalanceBefore = govToken.balanceOf(address(stakingController));
+    uint256 totalStakedBefore = stakingController.totalStaked();
 
     uint256 allTheVp = veToken.balanceOf(address(this));
     vm.expectEmit(true, true, true, false);
     emit Transfer(address(this), address(0), allTheVp);
-    govToken.declareUnstake(amountToUnstake);
+    stakingController.declareUnstake(amountToUnstake);
     vm.warp(block.timestamp + 7 days);
-    govToken.unstake(address(this));
+    stakingController.unstake(address(this));
 
     uint256 stakerBalanceAfter = govToken.balanceOf(address(this));
-    uint256 contractBalanceAfter = govToken.balanceOf(address(govToken));
-    uint256 totalStakedAfter = govToken.totalStaked();
+    uint256 contractBalanceAfter = govToken.balanceOf(address(stakingController));
+    uint256 totalStakedAfter = stakingController.totalStaked();
 
     emit log_uint(contractBalanceBefore);
     emit log_uint(contractBalanceAfter);
@@ -105,9 +110,9 @@ contract StakingTest is DSTest {
     assertTrue(stakerBalanceAfter - stakerBalanceBefore == amountToUnstake, "staker balance incorrect after unstaking");
     assertTrue(totalStakedBefore - totalStakedAfter == amountToUnstake, "total staked incorrect after unstaking");
 
-    assert(govToken.accumulatedVotingPowerOf(address(this)) == 0);
+    assert(stakingController.accumulatedVotingPowerOf(address(this)) == 0);
 
-    assert(govToken.stakeOf(address(this)) == amountToStake - amountToUnstake);
+    assert(stakingController.stakeOf(address(this)) == amountToStake - amountToUnstake);
   }
 
   // TODO test failing scenarios
@@ -118,26 +123,26 @@ contract StakingTest is DSTest {
 
     vm.warp(30 days);
 
-    govToken.stake(amountToStake);
+    stakingController.stake(amountToStake);
 
     // advancing 1 day
     vm.warp(block.timestamp + 1 days);
     assertTrue(veToken.balanceOf(address(this)) == 0, "initial vp must be zero");
 
-    govToken.claimAccumulatedVotingPower();
+    stakingController.claimAccumulatedVotingPower();
 
     uint256 stakerBalanceBefore = govToken.balanceOf(address(this));
-    uint256 contractBalanceBefore = govToken.balanceOf(address(govToken));
-    uint256 totalStakedBefore = govToken.totalStaked();
+    uint256 contractBalanceBefore = govToken.balanceOf(address(stakingController));
+    uint256 totalStakedBefore = stakingController.totalStaked();
 
-    govToken.declareUnstake(amountToUnstake);
+    stakingController.declareUnstake(amountToUnstake);
 
     vm.warp(block.timestamp + 3 days);
 
     address thisAddress = address(this);
     // expect failure
     vm.expectRevert(abi.encodeWithSignature("UnstakeTooEarly()"));
-    govToken.unstake(thisAddress);
+    stakingController.unstake(thisAddress);
   }
 
   function testUnstakeNotDeclared(uint256 amountToStake) public {
@@ -146,10 +151,10 @@ contract StakingTest is DSTest {
 
     vm.warp(30 days);
 
-    govToken.stake(amountToStake);
+    stakingController.stake(amountToStake);
 
     vm.expectRevert(abi.encodeWithSignature("UnstakeNotDeclared()"));
-    govToken.unstake(address(this));
+    stakingController.unstake(address(this));
   }
 
   function testStakeNotEnough(uint256 amountToStake) public {
@@ -158,16 +163,16 @@ contract StakingTest is DSTest {
 
     vm.warp(30 days);
 
-    govToken.stake(amountToStake);
+    stakingController.stake(amountToStake);
 
     vm.warp(block.timestamp + 1 days);
 
-    govToken.declareUnstake(amountToUnstake);
+    stakingController.declareUnstake(amountToUnstake);
 
     vm.warp(block.timestamp + 8 days);
 
     vm.expectRevert(abi.encodeWithSignature("StakeNotEnough()"));
-    govToken.unstake(address(this));
+    stakingController.unstake(address(this));
   }
 
   function testUnstakeTooEarly(uint256 amountToStake) public {
@@ -176,23 +181,23 @@ contract StakingTest is DSTest {
 
     vm.warp(30 days);
 
-    govToken.stake(amountToStake);
+    stakingController.stake(amountToStake);
 
     // advancing 1 day
     vm.warp(block.timestamp + 1 days);
     assertTrue(veToken.balanceOf(address(this)) == 0, "initial vp must be zero");
 
-    govToken.claimAccumulatedVotingPower();
+    stakingController.claimAccumulatedVotingPower();
 
     uint256 stakerBalanceBefore = govToken.balanceOf(address(this));
-    uint256 contractBalanceBefore = govToken.balanceOf(address(govToken));
-    uint256 totalStakedBefore = govToken.totalStaked();
+    uint256 contractBalanceBefore = govToken.balanceOf(address(stakingController));
+    uint256 totalStakedBefore = stakingController.totalStaked();
 
-    govToken.declareUnstake(amountToUnstake);
+    stakingController.declareUnstake(amountToUnstake);
 
     vm.warp(block.timestamp + 3 days);
 
     vm.expectRevert(abi.encodeWithSignature("UnstakeTooEarly()"));
-    govToken.unstake(address(this));
+    stakingController.unstake(address(this));
   }
 }

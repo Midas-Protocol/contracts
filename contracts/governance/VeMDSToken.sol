@@ -11,35 +11,35 @@ import "../utils/TOUCHToken.sol";
 // TODO integrate with FlywheelGaugeRewards
 // TODO research ERC20VotesUpgradeable
 contract VeMDSToken is ERC20Gauges {
-  IERC20Upgradeable public mdsToken;
+  address public stakingController;
 
   constructor(
     uint32 _gaugeCycleLength,
     uint32 _incrementFreezeWindow,
     address _owner,
     Authority _authority,
-    address _mdsTokenAddress
-)
+    address _stakingController
+  )
   ERC20Gauges(_gaugeCycleLength, _incrementFreezeWindow)
   Auth(_owner, _authority)
   ERC20("voting escrow MDS", "veMDS", 18)
   {
-    mdsToken = IERC20Upgradeable(_mdsTokenAddress); // TODO typed contract param
+    stakingController = _stakingController; // TODO typed contract param
   }
 
-  modifier onlyMdsToken() {
-    require(msg.sender == address(mdsToken), "only the mdstoken can mint");
+  modifier onlyStakingController() {
+    require(msg.sender == address(stakingController), "only the staking controller can mint");
     _;
   }
 
   /// @notice thrown when incrementing over a users free weight.
   error TransferNotSupported();
 
-  function mint(address to, uint256 amount) public onlyMdsToken {
+  function mint(address to, uint256 amount) public onlyStakingController {
     _mint(to, amount);
   }
 
-  function burn(address from, uint256 amount) public onlyMdsToken {
+  function burn(address from, uint256 amount) public onlyStakingController {
     _burn(from, amount);
   }
 
