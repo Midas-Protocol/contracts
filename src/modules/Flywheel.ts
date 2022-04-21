@@ -2,6 +2,7 @@ import { info } from "console";
 import { BigNumber, constants, Contract, ContractFactory } from "ethers";
 import { FlywheelStaticRewards__factory } from "../../typechain/factories/FlywheelStaticRewards__factory";
 import { FuseFlywheelCore__factory } from "../../typechain/factories/FuseFlywheelCore__factory";
+import { FlywheelCore } from "../../typechain/FlywheelCore";
 import { FlywheelStaticRewards } from "../../typechain/FlywheelStaticRewards";
 import { FuseFlywheelCore } from "../../typechain/FuseFlywheelCore";
 import { FuseFlywheelLensRouter } from "../../typechain/FuseFlywheelLensRouter.sol";
@@ -17,16 +18,15 @@ export interface FlywheelClaimableRewards {
 }
 
 export type FlywheelMarketRewardsInfo = {
-  underlyingPrice: BigNumber;
   market: string;
+  underlyingPrice?: BigNumber;
   rewardsInfo: {
     rewardToken: string;
     flywheel: string;
-    rewardSpeedPerSecondPerToken: BigNumber;
-    rewardTokenPrice: BigNumber;
-    formattedAPR: BigNumber;
+    rewardSpeedPerSecondPerToken?: BigNumber;
+    rewardTokenPrice?: BigNumber;
+    formattedAPR?: BigNumber;
   }[];
-  rewardTokens: string[];
 };
 
 export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
@@ -160,6 +160,43 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
       pool: string,
       options: { from: string }
     ): Promise<FlywheelMarketRewardsInfo[]> {
+      const [flywheelsOfPool, marketsOfPool] = await Promise.all([
+        this.getFlywheelsByPool(pool, options),
+        this.getComptrollerInstance(pool, options).callStatic.getAllMarkets(),
+      ]);
+      const strategiesOfFlywheels = await Promise.all(flywheelsOfPool.map((fw) => fw.callStatic.getAllStrategies()));
+
+      const rewardTokens: string[] = [];
+      const marketRewardsInfo = await Promise.all(
+        marketsOfPool.map(async (market) => {
+          const rewardsInfo = await Promise.all(
+            flywheelsOfPool
+              // Make sure this market is active in this flywheel
+              .filter((_, fwIndex) => strategiesOfFlywheels[fwIndex].includes(market))
+              // TODO also check marketState?
+              .map(async (fw) => {
+                const rewardToken = await fw.callStatic.rewardToken();
+                rewardTokens.push(rewardToken);
+                return {
+                  rewardToken,
+                  flywheel: fw.address,
+                };
+              })
+          );
+          return {
+            market,
+            rewardsInfo,
+          };
+        })
+      );
+
+      return marketRewardsInfo;
+    }
+
+    async getFlywheelMarketRewardsByPoolWithAPR(
+      pool: string,
+      options: { from: string }
+    ): Promise<FlywheelMarketRewardsInfo[]> {
       const marketRewards = await (
         this.contracts.FuseFlywheelLensRouter as FuseFlywheelLensRouter
       ).callStatic.getMarketRewardsInfo(pool, options);
@@ -176,9 +213,6 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
             rewardTokenPrice: info.rewardTokenPrice,
             formattedAPR: info.formattedAPR,
           })),
-        rewardTokens: marketReward.rewardsInfo
-          .filter((info) => info.rewardSpeedPerSecondPerToken.gt(0))
-          .map((info) => info.rewardToken),
       }));
       return adaptedMarketRewards;
     }
@@ -217,7 +251,7 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
       };
     }
 
-    async getFlywheelsByPool(poolAddress: string, options: { from: string }) {
+    async getFlywheelsByPool(poolAddress: string, options: { from: string }): Promise<FlywheelCore[]> {
       const comptrollerInstance = this.getComptrollerInstance(poolAddress, options);
       const allRewardDistributors = await comptrollerInstance.callStatic.getRewardsDistributors(options);
       const instances = allRewardDistributors.map((address) => {
