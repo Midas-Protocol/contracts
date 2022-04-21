@@ -1,6 +1,8 @@
 import { parseEther } from "ethers/lib/utils";
 import { task, types } from "hardhat/config";
 
+// npx hardhat market:create --asset-config Test,deployer,CErc20Delegate,0x35a4861bB24291Ecaa79A69463559879bF097F0e,0x6c7De8de3d8c92246328488aC6AF8f8E46A1628f,1,0.9,1,0,true,"","","" --network localhost
+
 export default task("market:create", "Create Market")
   .addParam(
     "assetConfig",
@@ -9,7 +11,6 @@ export default task("market:create", "Create Market")
     types.string
   )
   .setAction(async (taskArgs, hre) => {
-    console.log(taskArgs.assetConfig.split(","));
     const [
       poolName,
       creator,
@@ -25,8 +26,6 @@ export default task("market:create", "Create Market")
       rewardsDistributor,
       rewardToken,
     ] = taskArgs.assetConfig.split(",");
-
-    // npx hardhat market:create --asset-config Test,deployer,CErc20Delegate,0x35a4861bB24291Ecaa79A69463559879bF097F0e,0x6c7De8de3d8c92246328488aC6AF8f8E46A1628f,1,0.9,1,0,true,"","","" --network localhost
 
     const signer = await hre.ethers.getNamedSigner(creator);
 

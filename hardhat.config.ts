@@ -18,6 +18,8 @@ import "./tasks/e2e";
 import "./tasks/swap";
 import "./tasks/liquidation";
 import "./tasks/createMarket";
+import "./tasks/createPool";
+import "./tasks/createStrategy";
 
 dotEnvConfig();
 
