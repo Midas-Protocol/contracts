@@ -9,11 +9,13 @@ export default task("market:create", "Create Market")
     types.string
   )
   .setAction(async (taskArgs, hre) => {
+    console.log(taskArgs.assetConfig.split(","));
     const [
       poolName,
       creator,
       delegateContractName,
       underlying,
+      interestModelAddress,
       initialExchangeRate, // Initial exchange rate scaled by 1e18
       collateralFactor,
       reserveFactor,
@@ -22,7 +24,9 @@ export default task("market:create", "Create Market")
       plugin,
       rewardsDistributor,
       rewardToken,
-    ] = taskArgs.split(",");
+    ] = taskArgs.assetConfig.split(",");
+
+    // npx hardhat market:create --asset-config Test,deployer,CErc20Delegate,0x35a4861bB24291Ecaa79A69463559879bF097F0e,0x6c7De8de3d8c92246328488aC6AF8f8E46A1628f,1,0.9,1,0,true,"","","" --network localhost
 
     const signer = await hre.ethers.getNamedSigner(creator);
 
@@ -41,8 +45,8 @@ export default task("market:create", "Create Market")
       delegateContractName: delegateContractName,
       underlying: underlying,
       comptroller: pool.comptroller,
-      fuseFeeDistributor: sdk.contracts.FuseFeeDistributor,
-      interestRateModel: sdk.JumpRateModelConf.interestRateModel,
+      fuseFeeDistributor: sdk.contracts.FuseFeeDistributor.address,
+      interestRateModel: interestModelAddress,
       initialExchangeRateMantissa: parseEther(initialExchangeRate),
       name: `${poolName} ${underlyingTokenSymol}`,
       symbol: `m${pool.id}-${underlyingTokenSymol}`,
@@ -56,6 +60,7 @@ export default task("market:create", "Create Market")
       rewardsDistributor: rewardsDistributor ? rewardsDistributor : null,
       rewardToken: rewardToken ? rewardToken : null,
     };
+    console.log({ assetConf });
     const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
       sdk.JumpRateModelConf,
       assetConf,

@@ -558,17 +558,22 @@ export class FuseBase {
     options: any,
     implementationAddress: string | null // cERC20Delegate implementation
   ): Promise<[string, string, TransactionReceipt]> {
+    console.log("deployCErc20");
+
     const abiCoder = new utils.AbiCoder();
 
     const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
     const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
     const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
+    console.log("math");
 
     // Get Comptroller
     const comptroller = this.getComptrollerInstance(conf.comptroller, options);
+    console.log("comptroller");
 
     // Check for price feed assuming !bypassPriceFeedCheck
     if (!conf.bypassPriceFeedCheck) await this.checkForCErc20PriceFeed(comptroller, conf);
+    console.log("bypassPriceFeedCheck");
 
     // Deploy CErc20Delegate implementation contract if necessary
     if (!implementationAddress) {
@@ -606,6 +611,8 @@ export class FuseBase {
       );
     }
 
+    console.log("got here");
+
     let implementationData;
     switch (conf.delegateContractName) {
       case "CErc20PluginDelegate":
@@ -628,6 +635,8 @@ export class FuseBase {
         break;
     }
 
+    console.log("got here2");
+
     // Deploy CEtherDelegator proxy contract
     let deployArgs = [
       conf.underlying,
@@ -641,6 +650,8 @@ export class FuseBase {
       reserveFactorBN,
       adminFeeBN,
     ];
+
+    console.log(deployArgs);
 
     const constructorData = abiCoder.encode(
       ["address", "address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],

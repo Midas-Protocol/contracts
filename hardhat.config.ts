@@ -17,6 +17,7 @@ import "./tasks/getPoolData";
 import "./tasks/e2e";
 import "./tasks/swap";
 import "./tasks/liquidation";
+import "./tasks/createMarket";
 
 dotEnvConfig();
 
