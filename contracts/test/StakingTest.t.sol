@@ -125,25 +125,74 @@ contract StakingTest is DSTest {
     assertTrue(veToken.balanceOf(address(this)) == 0, "initial vp must be zero");
 
     govToken.claimAccumulatedVotingPower();
-    assertEq(veToken.balanceOf(address(this)), amountToStake * 1000 / 297625, "incorrect accumulated vp");
 
     uint256 stakerBalanceBefore = govToken.balanceOf(address(this));
     uint256 contractBalanceBefore = govToken.balanceOf(address(govToken));
     uint256 totalStakedBefore = govToken.totalStaked();
 
-    uint256 allTheVp = veToken.balanceOf(address(this));
-    vm.expectEmit(true, true, true, false);
-    emit Transfer(address(this), address(0), allTheVp);
     govToken.declareUnstake(amountToUnstake);
-//    vm.warp(block.timestamp + 7 days);
 
     vm.warp(block.timestamp + 3 days);
-
-//    emit log_bytes(TOUCHToken.UnstakeTooEarly.selector);
 
     address thisAddress = address(this);
     // expect failure
     vm.expectRevert(abi.encodeWithSignature("UnstakeTooEarly()"));
     govToken.unstake(thisAddress);
+  }
+
+  function testUnstakeNotDeclared(uint256 amountToStake) public {
+    vm.assume(amountToStake > 1 && amountToStake < totalSupply);
+    uint256 amountToUnstake = amountToStake / 2;
+
+    vm.warp(30 days);
+
+    govToken.stake(amountToStake);
+
+    vm.expectRevert(abi.encodeWithSignature("UnstakeNotDeclared()"));
+    govToken.unstake(address(this));
+  }
+
+  function testStakeNotEnough(uint256 amountToStake) public {
+    vm.assume(amountToStake > 1 && amountToStake < totalSupply);
+    uint256 amountToUnstake = amountToStake * 2;
+
+    vm.warp(30 days);
+
+    govToken.stake(amountToStake);
+
+    vm.warp(block.timestamp + 1 days);
+
+    govToken.declareUnstake(amountToUnstake);
+
+    vm.warp(block.timestamp + 8 days);
+
+    vm.expectRevert(abi.encodeWithSignature("StakeNotEnough()"));
+    govToken.unstake(address(this));
+  }
+
+  function testUnstakeTooEarly(uint256 amountToStake) public {
+    vm.assume(amountToStake > 1 && amountToStake < totalSupply);
+    uint256 amountToUnstake = amountToStake / 2;
+
+    vm.warp(30 days);
+
+    govToken.stake(amountToStake);
+
+    // advancing 1 day
+    vm.warp(block.timestamp + 1 days);
+    assertTrue(veToken.balanceOf(address(this)) == 0, "initial vp must be zero");
+
+    govToken.claimAccumulatedVotingPower();
+
+    uint256 stakerBalanceBefore = govToken.balanceOf(address(this));
+    uint256 contractBalanceBefore = govToken.balanceOf(address(govToken));
+    uint256 totalStakedBefore = govToken.totalStaked();
+
+    govToken.declareUnstake(amountToUnstake);
+
+    vm.warp(block.timestamp + 3 days);
+
+    vm.expectRevert(abi.encodeWithSignature("UnstakeTooEarly()"));
+    govToken.unstake(address(this));
   }
 }

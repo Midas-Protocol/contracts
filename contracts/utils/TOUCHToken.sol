@@ -17,6 +17,8 @@ contract TOUCHToken is ERC20, Initializable {
   VeMDSToken veToken;
 
   error UnstakeTooEarly();
+  error UnstakeNotDeclared();
+  error StakeNotEnough();
 
   // TODO solmate ERC20 and initializable?
   constructor() ERC20("Midas TOUCH Token", "TOUCH", 18) {}
@@ -90,17 +92,21 @@ contract TOUCHToken is ERC20, Initializable {
   // - by the owner 7 days after declaring it or
   // - by anyone 10 days after declaring it
   function unstake(address account) public {
+    if (unstakeDeclaredTime[account] == 0) revert UnstakeNotDeclared();
     if (unstakeDeclaredTime[account] > block.timestamp - 7 days) revert UnstakeTooEarly();
 //    require(unstakeDeclaredTime[account] <= block.timestamp - 7 days, "unstake needs to be declared at least a week prior");
 
     require(unstakeDeclaredAmount[account] > 0, "amount to unstake should be non-zero");
 
-    require(msg.sender == account || unstakeDeclaredTime[account] <= block.timestamp - 10 days, "unstake needs to be declared at least a week prior");
+    if (msg.sender != account && unstakeDeclaredTime[account] > block.timestamp - 10 days) revert UnstakeTooEarly();
+//    require(msg.sender == account || unstakeDeclaredTime[account] <= block.timestamp - 10 days, "unstake needs to be declared at least a week prior");
 
     uint256 amountToUnstake = unstakeDeclaredAmount[account];
 
     uint256 totalStakePreUnstake = accumulatedStakes[account] + releasingStakes[account];
-    require(amountToUnstake <= totalStakePreUnstake, "stake not enough");
+    if (amountToUnstake > totalStakePreUnstake) revert StakeNotEnough();
+//    require(amountToUnstake <= totalStakePreUnstake, "stake not enough");
+
     // not needed
     //    _claimAccumulatedVotingPower(account);
 
