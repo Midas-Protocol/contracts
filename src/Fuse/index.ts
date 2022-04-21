@@ -430,20 +430,45 @@ export class FuseBase {
         );
     }
 
+    if (!conf.delegateContractName)
+      conf.delegateContractName =
+        conf.underlying !== undefined &&
+        conf.underlying !== null &&
+        conf.underlying.length > 0 &&
+        !BigNumber.from(conf.underlying).isZero()
+          ? "CErc20Delegate"
+          : "CEtherDelegate";
+
+    let implementationAddress;
+    switch (conf.delegateContractName) {
+      case "CErc20PluginDelegate":
+        implementationAddress = this.chainDeployment.CErc20PluginDelegate.address
+          ? this.chainDeployment.CErc20PluginDelegate.address
+          : null;
+        break;
+      case "CErc20PluginRewardsDelegate":
+        implementationAddress = this.chainDeployment.CErc20PluginRewardsDelegate.address
+          ? this.chainDeployment.CErc20PluginRewardsDelegate.address
+          : null;
+        break;
+      case "CEtherDelegate":
+        implementationAddress = this.chainDeployment.CEtherDelegate.address
+          ? this.chainDeployment.CEtherDelegate.address
+          : null;
+        break;
+      default:
+        implementationAddress = this.chainDeployment.CErc20Delegate.address
+          ? this.chainDeployment.CErc20Delegate.address
+          : null;
+        break;
+    }
+
     return conf.underlying !== undefined &&
       conf.underlying !== null &&
       conf.underlying.length > 0 &&
       !BigNumber.from(conf.underlying).isZero()
-      ? await this.deployCErc20(
-          conf,
-          options,
-          this.chainDeployment.CErc20Delegate.address ? this.chainDeployment.CErc20Delegate.address : null
-        )
-      : await this.deployCEther(
-          conf,
-          options,
-          this.chainDeployment.CEtherDelegate.address ? this.chainDeployment.CEtherDelegate.address : null
-        );
+      ? await this.deployCErc20(conf, options, implementationAddress)
+      : await this.deployCEther(conf, options, implementationAddress);
   }
 
   async deployCEther(
@@ -533,6 +558,8 @@ export class FuseBase {
     options: any,
     implementationAddress: string | null // cERC20Delegate implementation
   ): Promise<[string, string, TransactionReceipt]> {
+    const abiCoder = new utils.AbiCoder();
+
     const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
     const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
     const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
@@ -545,13 +572,19 @@ export class FuseBase {
 
     // Deploy CErc20Delegate implementation contract if necessary
     if (!implementationAddress) {
-      if (!conf.delegateContractName) conf.delegateContractName = "CErc20Delegate";
       let delegateContractArtifact: Artifact;
-      if (conf.delegateContractName === "CErc20Delegate") {
-        delegateContractArtifact = this.artifacts.CErc20Delegate;
-      } else {
-        delegateContractArtifact = this.artifacts.CEtherDelegate;
+      switch (conf.delegateContractName) {
+        case "CErc20PluginDelegate":
+          delegateContractArtifact = this.artifacts.CErc20PluginDelegate;
+          break;
+        case "CErc20PluginRewardsDelegate":
+          delegateContractArtifact = this.artifacts.CErc20PluginRewardsDelegate;
+          break;
+        default:
+          delegateContractArtifact = this.artifacts.CErc20Delegate;
+          break;
       }
+
       const cErc20Delegate = new ContractFactory(
         delegateContractArtifact.abi,
         delegateContractArtifact.bytecode.object,
@@ -559,6 +592,40 @@ export class FuseBase {
       );
       const cErc20DelegateDeployed = await cErc20Delegate.deploy();
       implementationAddress = cErc20DelegateDeployed.address;
+      const fuseFeeDistributor = new Contract(
+        this.artifacts.FuseFeeDistributor.abi,
+        this.artifacts.FuseFeeDistributor.bytecode.object,
+        this.provider.getSigner(options.from)
+      );
+
+      await fuseFeeDistributor._editCErc20DelegateWhitelist(
+        [constants.AddressZero],
+        [implementationAddress],
+        [false],
+        [true]
+      );
+    }
+
+    let implementationData;
+    switch (conf.delegateContractName) {
+      case "CErc20PluginDelegate":
+        if (!conf.plugin) {
+          throw "CErc20PluginDelegate needs plugin address";
+        }
+        implementationData = abiCoder.encode(["address"], [conf.plugin]);
+        break;
+      case "CErc20PluginRewardsDelegate":
+        if (!conf.plugin || !conf.rewardsDistributor || !conf.rewardToken) {
+          throw "CErc20PluginRewardsDelegate needs plugin, rewardsDistributor and rewardToken address";
+        }
+        implementationData = abiCoder.encode(
+          ["address", "address", "address"],
+          [conf.plugin, conf.rewardsDistributor, conf.rewardToken]
+        );
+        break;
+      default:
+        implementationData = "0x00";
+        break;
     }
 
     // Deploy CEtherDelegator proxy contract
@@ -570,12 +637,11 @@ export class FuseBase {
       conf.name,
       conf.symbol,
       implementationAddress,
-      "0x00",
+      implementationData,
       reserveFactorBN,
       adminFeeBN,
     ];
 
-    const abiCoder = new utils.AbiCoder();
     const constructorData = abiCoder.encode(
       ["address", "address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
       deployArgs

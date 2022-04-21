@@ -80,8 +80,14 @@ export type ChainDeployment = {
 
 export type InterestRateModelType = JumpRateModel | DAIInterestRateModelV2 | WhitePaperInterestRateModel;
 
+export type DelegateContractName =
+  | "CErc20Delegate"
+  | "CEtherDelegate"
+  | "CErc20PluginDelegate"
+  | "CErc20PluginRewardsDelegate";
+
 export type cERC20Conf = {
-  delegateContractName?: any;
+  delegateContractName?: DelegateContractName;
   underlying: string; // underlying ERC20
   comptroller: string; // Address of the comptroller
   fuseFeeDistributor: string;
@@ -95,6 +101,9 @@ export type cERC20Conf = {
   reserveFactor: number;
   adminFee: number;
   bypassPriceFeedCheck: boolean;
+  plugin?: string;
+  rewardsDistributor?: string;
+  rewardToken?: string;
 };
 
 export type OracleConf = {
