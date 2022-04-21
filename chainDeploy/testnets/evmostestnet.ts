@@ -1,4 +1,4 @@
-import { constants, ethers, providers } from "ethers";
+import { constants, ethers, providers, utils } from "ethers";
 import { SALT } from "../../deploy/deploy";
 import { ChainDeployConfig } from "../helpers";
 import { CurvePoolConfig } from "../helpers/types";
@@ -50,8 +50,18 @@ export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Pr
   ];
 
   //// ORACLES
+  //// Underlyings use SimplePriceOracle to hardcode the price
+  let dep = await deployments.deterministic("SimplePriceOracle", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [],
+    log: true,
+  });
+  const spo = await dep.deploy();
+  console.log("SimplePriceOracle: ", spo.address);
+
   //// CurveLpTokenPriceOracleNoRegistry
-  let dep = await deployments.deterministic("CurveLpTokenPriceOracleNoRegistry", {
+  dep = await deployments.deterministic("CurveLpTokenPriceOracleNoRegistry", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
@@ -79,14 +89,31 @@ export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Pr
     console.log("registerPool sent: ", tx.hash);
     receipt = await tx.wait();
     console.log("registerPool mined: ", receipt.transactionHash);
+
+    for (const underlying of pool.underlyings) {
+      tx = await spo.setDirectPrice(underlying, utils.parseEther("1"));
+      console.log("set underlying price tx sent: ", underlying, tx.hash);
+      receipt = await tx.wait();
+      console.log("set underlying price tx mined: ", underlying, receipt.transactionHash);
+    }
   }
 
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpoUnderlyings = [];
+  const mpoOracles = [];
+  curvePools.forEach((c) => {
+    mpoUnderlyings.push(c.lpToken);
+    mpoOracles.push(curveOracle.address);
+    c.underlyings.forEach((u) => {
+      mpoUnderlyings.push(u);
+      mpoOracles.push(spo.address);
+    });
+  });
   const admin = await masterPriceOracle.admin();
   if (admin === ethers.constants.AddressZero) {
     let tx = await masterPriceOracle.initialize(
-      curvePools.map((c) => c.lpToken),
-      Array(curvePools.length).fill(curveOracle.address),
+      mpoUnderlyings,
+      mpoOracles,
       curveOracle.address,
       deployer,
       true,
@@ -97,6 +124,4 @@ export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Pr
   } else {
     console.log("MasterPriceOracle already initialized");
   }
-
-  // TODO: add feeds for underlyings
 };
