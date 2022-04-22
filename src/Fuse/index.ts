@@ -442,24 +442,28 @@ export class FuseBase {
     let implementationAddress;
     switch (conf.delegateContractName) {
       case "CErc20PluginDelegate":
-        implementationAddress = this.chainDeployment.CErc20PluginDelegate.address
-          ? this.chainDeployment.CErc20PluginDelegate.address
-          : null;
+        implementationAddress =
+          this.chainDeployment.CErc20PluginDelegate && this.chainDeployment.CErc20PluginDelegate.address
+            ? this.chainDeployment.CErc20PluginDelegate.address
+            : null;
         break;
       case "CErc20PluginRewardsDelegate":
-        implementationAddress = this.chainDeployment.CErc20PluginRewardsDelegate.address
-          ? this.chainDeployment.CErc20PluginRewardsDelegate.address
-          : null;
+        implementationAddress =
+          this.chainDeployment.CErc20PluginRewardsDelegate && this.chainDeployment.CErc20PluginRewardsDelegate.address
+            ? this.chainDeployment.CErc20PluginRewardsDelegate.address
+            : null;
         break;
       case "CEtherDelegate":
-        implementationAddress = this.chainDeployment.CEtherDelegate.address
-          ? this.chainDeployment.CEtherDelegate.address
-          : null;
+        implementationAddress =
+          this.chainDeployment.CEtherDelegate && this.chainDeployment.CEtherDelegate.address
+            ? this.chainDeployment.CEtherDelegate.address
+            : null;
         break;
       default:
-        implementationAddress = this.chainDeployment.CErc20Delegate.address
-          ? this.chainDeployment.CErc20Delegate.address
-          : null;
+        implementationAddress =
+          this.chainDeployment.CErc20Delegate && this.chainDeployment.CErc20Delegate.address
+            ? this.chainDeployment.CErc20Delegate.address
+            : null;
         break;
     }
 
