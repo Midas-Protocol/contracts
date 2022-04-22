@@ -1,4 +1,5 @@
 import { HardhatRuntimeEnvironment, RunTaskFunction } from "hardhat/types";
+import { BigNumber } from "ethers";
 
 export enum ChainlinkFeedBaseCurrency {
   ETH,
@@ -34,6 +35,7 @@ export type Asset = {
   underlying: string;
   name: string;
   decimals: number;
+  simplePriceOracleAssetPrice?: BigNumber;
 };
 
 export type ChainlinkAsset = {
