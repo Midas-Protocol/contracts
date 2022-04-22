@@ -9,7 +9,7 @@ import {MockFluxPriceFeed} from "../../mocks/flux/MockFluxPriceFeed.sol";
 contract FluxPriceOracleTest is BaseTest {
   FluxPriceOracle private oracle;
 
-  function setUp() public {
+  function setUp() shouldRun(forChains(EVMOS_TESTNET)) public {
     CLV2V3Interface ethPool = CLV2V3Interface(0xf8af20b210bCed918f71899E9f4c26dE53e6ccE6);
     MockFluxPriceFeed mock = new MockFluxPriceFeed(5 * 10**8); // 5 USD in 8 decimals
     oracle = new FluxPriceOracle(address(this), true, address(0), address(mock));
