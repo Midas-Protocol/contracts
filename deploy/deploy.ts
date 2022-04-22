@@ -70,6 +70,27 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   if (erc20Del.transactionHash) await ethers.provider.waitForTransaction(erc20Del.transactionHash);
   console.log("CErc20Delegate: ", erc20Del.address);
 
+  dep = await deployments.deterministic("CErc20PluginDelegate", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [],
+    log: true,
+  });
+  const erc20PluginDel = await dep.deploy();
+  if (erc20PluginDel.transactionHash) await ethers.provider.waitForTransaction(erc20PluginDel.transactionHash);
+  console.log("CErc20PluginDelegate: ", erc20PluginDel.address);
+
+  dep = await deployments.deterministic("CErc20PluginRewardsDelegate", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [],
+    log: true,
+  });
+  const erc20PluginRewardsDel = await dep.deploy();
+  if (erc20PluginRewardsDel.transactionHash)
+    await ethers.provider.waitForTransaction(erc20PluginRewardsDel.transactionHash);
+  console.log("CErc20PluginRewardsDelegate: ", erc20PluginRewardsDel.address);
+
   dep = await deployments.deterministic("CEtherDelegate", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
@@ -196,6 +217,8 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
 
   const etherDelegate = await ethers.getContract("CEtherDelegate", deployer);
   const erc20Delegate = await ethers.getContract("CErc20Delegate", deployer);
+  const erc20PluginDelegate = await ethers.getContract("CErc20PluginDelegate", deployer);
+  const erc20PluginRewardsDelegate = await ethers.getContract("CErc20PluginRewardsDelegate", deployer);
 
   tx = await fuseFeeDistributor._editCEtherDelegateWhitelist(
     [constants.AddressZero],
@@ -208,10 +231,10 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   console.log("Set whitelist for Ether Delegate with status:", receipt.status, tx.hash);
 
   tx = await fuseFeeDistributor._editCErc20DelegateWhitelist(
-    [constants.AddressZero],
-    [erc20Delegate.address],
-    [false],
-    [true]
+    [constants.AddressZero, constants.AddressZero, constants.AddressZero],
+    [erc20Delegate.address, erc20PluginDelegate.address, erc20PluginRewardsDelegate.address],
+    [false, false, false],
+    [true, true, true]
   );
   receipt = await tx.wait();
   console.log("Set whitelist for ERC20 Delegate with status:", receipt.status);
