@@ -29,6 +29,7 @@ import FlywheelStaticRewardsArtifact from "../../out/FlywheelStaticRewards.sol/F
 
 // Oracle Artifacts
 import MasterPriceOracleArtifact from "../../out/MasterPriceOracle.sol/MasterPriceOracle.json";
+import UniswapTwapPriceOracleV2Artifact from "../../out/UniswapTwapPriceOracleV2.sol/UniswapTwapPriceOracleV2.json";
 import SimplePriceOracleArtifact from "../../out/SimplePriceOracle.sol/SimplePriceOracle.json";
 import ChainlinkPriceOracleV2Artifact from "../../out/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json";
 import PreferredPriceOracleArtifact from "../../out/PreferredPriceOracle.sol/PreferredPriceOracle.json";
@@ -115,7 +116,6 @@ export class FuseBase {
   ) {
     this.provider = web3Provider;
     this.chainId = chainId;
-    this.availableOracles = chainOracles[chainId];
     this.chainDeployment =
       chainDeployment ??
       (Deployments[chainId.toString()] &&
@@ -176,6 +176,7 @@ export class FuseBase {
       ERC20: ERC20Artifact,
       JumpRateModel: JumpRateModelArtifact,
       MasterPriceOracle: MasterPriceOracleArtifact,
+      UniswapTwapPriceOracleV2: UniswapTwapPriceOracleV2Artifact,
       PreferredPriceOracle: PreferredPriceOracleArtifact,
       RewardsDistributorDelegator: RewardsDistributorDelegatorArtifact,
       RewardsDistributorDelegate: RewardsDistributorDelegateArtifact,
@@ -187,15 +188,26 @@ export class FuseBase {
     };
 
     this.irms = irmConfig(this.chainDeployment, this.artifacts);
+    this.availableOracles = chainOracles[chainId].filter((o) => {
+      if (this.artifacts[o] === undefined || this.chainDeployment[o] === undefined) {
+        console.warn(`Oracle ${o} not deployed to chain ${this.chainId}`);
+        return false;
+      }
+      return true;
+    });
     this.oracles = oracleConfig(this.chainDeployment, this.artifacts, this.availableOracles);
   }
 
   // TODO: probably should determine this by chain
   async getUsdPriceBN(coingeckoId: string = "ethereum", asBigNumber: boolean = false): Promise<number | BigNumber> {
     // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
-    const UsdPrice = (
-      await axios.get(`https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=${coingeckoId}`)
-    ).data[coingeckoId].usd;
+    let UsdPrice: number;
+    if (coingeckoId === "evmos") {
+      UsdPrice = 1.0;
+    } else {
+      UsdPrice = (await axios.get(`https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=${coingeckoId}`))
+        .data[coingeckoId].usd;
+    }
 
     if (asBigNumber) {
       return utils.parseUnits(UsdPrice.toString(), 18);
@@ -213,26 +225,24 @@ export class FuseBase {
     priceOracleConf: OracleConf,
     options: { from: string }, // We might need to add sender as argument. Getting address from options will collide with the override arguments in ethers contract method calls. It doesn't take address.
     whitelist: string[] // An array of whitelisted addresses
-  ): Promise<[string, string, string]> {
-    // 2. Deploy Comptroller implementation if necessary
-    let implementationAddress = this.chainDeployment.Comptroller.address;
-
-    if (!implementationAddress) {
-      const comptrollerContract = new ContractFactory(
-        this.artifacts.Comptroller.abi,
-        this.artifacts.Comptroller.bytecode.object,
-        this.provider.getSigner(options.from)
-      );
-      const deployedComptroller = await comptrollerContract.deploy();
-      implementationAddress = deployedComptroller.address;
-    }
-
-    //3. Register new pool with FusePoolDirectory
-    let receipt: providers.TransactionReceipt;
+  ): Promise<[string, string, string, number?]> {
     try {
+      // Deploy Comptroller implementation if necessary
+      let implementationAddress = this.chainDeployment.Comptroller.address;
+
+      if (!implementationAddress) {
+        const comptrollerContract = new ContractFactory(
+          this.artifacts.Comptroller.abi,
+          this.artifacts.Comptroller.bytecode.object,
+          this.provider.getSigner(options.from)
+        );
+        const deployedComptroller = await comptrollerContract.deploy();
+        implementationAddress = deployedComptroller.address;
+      }
+
+      // Register new pool with FusePoolDirectory
       const contract = this.contracts.FusePoolDirectory.connect(this.provider.getSigner(options.from));
-      // TODO deployPool also returns the poolId which comes in handy! We should get that as well.
-      const tx = await contract.deployPool(
+      const deployTx = await contract.deployPool(
         poolName,
         implementationAddress,
         new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]),
@@ -241,53 +251,66 @@ export class FuseBase {
         liquidationIncentive,
         priceOracle
       );
-      receipt = await tx.wait();
-      console.log(`Deployment of pool ${poolName} succeeded!`);
-    } catch (error: any) {
-      throw Error("Deployment and registration of new Fuse pool failed: " + (error.message ? error.message : error));
-    }
-    //4. Compute Unitroller address
-    const saltsHash = utils.solidityKeccak256(
-      ["address", "string", "uint"],
-      [options.from, poolName, receipt.blockNumber]
-    );
-    const byteCodeHash = utils.keccak256(
-      this.artifacts.Unitroller.bytecode.object +
-        new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]).slice(2)
-    );
+      const deployReceipt = await deployTx.wait();
+      console.log(`Deployment of pool ${poolName} succeeded!`, deployReceipt.status);
 
-    const poolAddress = utils.getCreate2Address(
-      this.chainDeployment.FusePoolDirectory.address,
-      saltsHash,
-      byteCodeHash
-    );
+      let poolId: number | undefined;
+      try {
+        // Latest Event is PoolRegistered which includes the poolId
+        const registerEvent = deployReceipt.events?.pop();
+        poolId =
+          registerEvent && registerEvent.args && registerEvent.args[0]
+            ? (registerEvent.args[0] as BigNumber).toNumber()
+            : undefined;
+      } catch (e) {
+        console.warn("Unable to retrieve pool ID from receipt events", e);
+      }
 
-    const unitroller = new Contract(poolAddress, this.artifacts.Unitroller.abi, this.provider.getSigner(options.from));
-
-    // Accept admin status via Unitroller
-    try {
-      const tx = await unitroller._acceptAdmin();
-      const receipt = await tx.wait();
-      console.log(receipt.status, "Accepted admin status for admin: ");
-    } catch (error: any) {
-      throw Error("Accepting admin status failed: " + (error.message ? error.message : error));
-    }
-
-    // Whitelist
-    console.log("enforceWhitelist: ", enforceWhitelist);
-    if (enforceWhitelist) {
-      let comptroller = new Contract(
-        poolAddress,
-        this.artifacts.Comptroller.abi,
-        this.provider.getSigner(options.from)
+      // Compute Unitroller address
+      const saltsHash = utils.solidityKeccak256(
+        ["address", "string", "uint"],
+        [options.from, poolName, deployReceipt.blockNumber]
+      );
+      const byteCodeHash = utils.keccak256(
+        this.artifacts.Unitroller.bytecode.object +
+          new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]).slice(2)
       );
 
-      // Already enforced so now we just need to add the addresses
-      console.log("whitelist: ", whitelist);
-      await comptroller._setWhitelistStatuses(whitelist, Array(whitelist.length).fill(true));
-    }
+      const poolAddress = utils.getCreate2Address(
+        this.chainDeployment.FusePoolDirectory.address,
+        saltsHash,
+        byteCodeHash
+      );
 
-    return [poolAddress, implementationAddress, priceOracle];
+      // Accept admin status via Unitroller
+      const unitroller = new Contract(
+        poolAddress,
+        this.artifacts.Unitroller.abi,
+        this.provider.getSigner(options.from)
+      );
+      const acceptTx = await unitroller._acceptAdmin();
+      const acceptReceipt = await acceptTx.wait();
+      console.log("Accepted admin status for admin:", acceptReceipt.status);
+
+      // Whitelist
+      console.log("enforceWhitelist: ", enforceWhitelist);
+      if (enforceWhitelist) {
+        let comptroller = new Contract(
+          poolAddress,
+          this.artifacts.Comptroller.abi,
+          this.provider.getSigner(options.from)
+        );
+
+        // Was enforced by pool deployment, now just add addresses
+        const whitelistTx = await comptroller._setWhitelistStatuses(whitelist, Array(whitelist.length).fill(true));
+        const whitelistReceipt = await whitelistTx.wait();
+        console.log("Whitelist updated:", whitelistReceipt.status);
+      }
+
+      return [poolAddress, implementationAddress, priceOracle, poolId];
+    } catch (error: any) {
+      throw Error("Deployment of new Fuse pool failed: " + (error.message ? error.message : error));
+    }
   }
 
   async deployAsset(
@@ -591,8 +614,12 @@ export class FuseBase {
     const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(priceOracleAddress));
 
     for (const [name, oracle] of Object.entries(this.oracles)) {
-      const value = utils.keccak256(oracle.artifact.bytecode.object);
-      if (runtimeBytecodeHash == value) return name;
+      if (oracle.artifact && oracle.artifact.bytecode) {
+        const value = utils.keccak256(oracle.artifact.bytecode.object);
+        if (runtimeBytecodeHash == value) return name;
+      } else {
+        console.warn(`No Artifact or Bytecode found for enabled Oracle: ${name}`);
+      }
     }
     return null;
   }

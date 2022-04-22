@@ -55,4 +55,11 @@ contract TwapOraclesBaseTest is BaseTest {
 
     assertTrue(getTokenTwapPrice(testedAssetTokenAddress, baseToken) > 0);
   }
+
+  function testChapelEthBusdOraclePrice() public shouldRun(forChains(97)) {
+    address baseToken = 0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684; // USDT
+    address testedAssetTokenAddress = 0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7; // BUSD
+
+    assertTrue(getTokenTwapPrice(testedAssetTokenAddress, baseToken) > 0);
+  }
 }

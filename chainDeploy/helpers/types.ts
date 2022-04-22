@@ -5,14 +5,20 @@ export enum ChainlinkFeedBaseCurrency {
   USD,
 }
 
+export type TokenPair = {
+  token: string;
+  baseToken: string;
+};
+
 export type ChainDeployConfig = {
   uniswap: {
     uniswapV2RouterAddress: string;
     uniswapV2FactoryAddress: string;
-    uniswapOracleInitialDeployTokens: Array<string>;
+    uniswapOracleInitialDeployTokens: Array<TokenPair>;
     pairInitHashCode?: string;
     hardcoded: { name: string; symbol: string; address: string }[];
     uniswapData: { lpName: string; lpSymbol: string; lpDisplayName: string }[];
+    uniswapOracleLpTokens?: Array<string>;
   };
   wtoken: string;
   nativeTokenUsdChainlinkFeed?: string;
