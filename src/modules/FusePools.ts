@@ -171,8 +171,6 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
 
       const responses = await Promise.all([req, whitelistedPoolsRequest]);
 
-      if (!responses[0][0].length) return undefined;
-
       const [pools, whitelistedPools] = await Promise.all(
         responses.map(async (poolData) => {
           return await Promise.all(
