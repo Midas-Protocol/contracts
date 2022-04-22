@@ -10,7 +10,7 @@ task("pool:create", "Create pool if does not exist")
   .addParam("closeFactor", "Close factor in full percent (50% = 50)", undefined, types.string)
   .addParam("liquidationIncentive", "Liquidation incentive in full percent (8% = 8)", undefined, types.string)
   .addParam("enforceWhitelist", "Whitelist enabled?", undefined, types.string)
-  .addOptionalParam("whitelist", "whitelist as comma seperated input (address1,address2...)", undefined, types.string)
+  .addOptionalParam("whitelist", "whitelist as comma separated input (address1,address2...)", undefined, types.string)
   .setAction(async (taskArgs, hre) => {
     const signer = await hre.ethers.getNamedSigner(taskArgs.creator);
 

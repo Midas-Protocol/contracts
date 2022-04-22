@@ -19,6 +19,8 @@ import ERC20Artifact from "../../out/ERC20.sol/ERC20.json";
 import CEtherDelegateArtifact from "../../out/CEtherDelegate.sol/CEtherDelegate.json";
 import CEtherDelegatorArtifact from "../../out/CEtherDelegator.sol/CEtherDelegator.json";
 import CErc20DelegateArtifact from "../../out/CErc20Delegate.sol/CErc20Delegate.json";
+import CErc20PluginDelegateArtifact from "../../out/CErc20PluginDelegate.sol/CErc20PluginDelegate.json";
+import CErc20PluginRewardsDelegateArtifact from "../../out/CErc20PluginRewardsDelegate.sol/CErc20PluginRewardsDelegate.json";
 import CErc20DelegatorArtifact from "../../out/CErc20Delegator.sol/CErc20Delegator.json";
 import CTokenInterfacesArtifact from "../../out/CTokenInterfaces.sol/CTokenInterface.json";
 import EIP20InterfaceArtifact from "../../out/EIP20Interface.sol/EIP20Interface.json";
@@ -165,6 +167,8 @@ export class FuseBase {
     }
     this.artifacts = {
       CErc20Delegate: CErc20DelegateArtifact,
+      CErc20PluginDelegate: CErc20PluginDelegateArtifact,
+      CErc20PluginRewardsDelegate: CErc20PluginRewardsDelegateArtifact,
       CErc20Delegator: CErc20DelegatorArtifact,
       CEtherDelegate: CEtherDelegateArtifact,
       CEtherDelegator: CEtherDelegatorArtifact,
@@ -333,6 +337,7 @@ export class FuseBase {
           irmConf.interestRateModelParams
         ); // TODO: anchorMantissa
       } catch (error: any) {
+        console.error("Raw Error", error);
         throw Error("Deployment of interest rate model failed: " + (error.message ? error.message : error));
       }
     }
@@ -562,22 +567,17 @@ export class FuseBase {
     options: any,
     implementationAddress: string | null // cERC20Delegate implementation
   ): Promise<[string, string, TransactionReceipt]> {
-    console.log("deployCErc20");
-
     const abiCoder = new utils.AbiCoder();
 
     const reserveFactorBN = utils.parseUnits((conf.reserveFactor / 100).toString());
     const adminFeeBN = utils.parseUnits((conf.adminFee / 100).toString());
     const collateralFactorBN = utils.parseUnits((conf.collateralFactor / 100).toString());
-    console.log("math");
 
     // Get Comptroller
     const comptroller = this.getComptrollerInstance(conf.comptroller, options);
-    console.log("comptroller");
 
     // Check for price feed assuming !bypassPriceFeedCheck
     if (!conf.bypassPriceFeedCheck) await this.checkForCErc20PriceFeed(comptroller, conf);
-    console.log("bypassPriceFeedCheck");
 
     // Deploy CErc20Delegate implementation contract if necessary
     if (!implementationAddress) {
@@ -615,8 +615,6 @@ export class FuseBase {
       );
     }
 
-    console.log("got here");
-
     let implementationData;
     switch (conf.delegateContractName) {
       case "CErc20PluginDelegate":
@@ -639,8 +637,6 @@ export class FuseBase {
         break;
     }
 
-    console.log("got here2");
-
     // Deploy CEtherDelegator proxy contract
     let deployArgs = [
       conf.underlying,
@@ -655,14 +651,13 @@ export class FuseBase {
       adminFeeBN,
     ];
 
-    console.log(deployArgs);
-
     const constructorData = abiCoder.encode(
       ["address", "address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
       deployArgs
     );
 
     const errorCode = await comptroller.callStatic._deployMarket(false, constructorData, collateralFactorBN);
+
     if (errorCode.toNumber() !== 0) {
       throw `Failed to _deployMarket: ${FuseBase.COMPTROLLER_ERROR_CODES[errorCode.toNumber()]}`;
     }
