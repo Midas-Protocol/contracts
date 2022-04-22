@@ -41,7 +41,6 @@ export default task("market:create", "Create Market")
     let symbol = "NATIVE";
     if (!hre.ethers.constants.AddressZero === underlying) {
       const underlyingToken = await hre.ethers.getContractAt("ERC20", underlying);
-      console.log({ underlyingToken });
       symbol = await underlyingToken.callStatic.symbol();
     }
 
