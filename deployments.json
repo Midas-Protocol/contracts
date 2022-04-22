@@ -15372,7 +15372,7 @@
           ]
         },
         "SimplePriceOracle": {
-          "address": "0xB817bF0dCD69C748cFa89EFA3451c004Bc26852E",
+          "address": "0xEc97eDb4E47Bd6F548ea926a187B497EE19d6723",
           "abi": [
             {
               "anonymous": false,
@@ -15509,6 +15509,112 @@
               "name": "setUnderlyingPrice",
               "outputs": [],
               "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "UniswapLpTokenLiquidator": {
+          "address": "0x07f66bdd5d6a06Bc453B7Da528f5AcC9b204b439",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "contract IERC20Upgradeable",
+                  "name": "inputToken",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "inputAmount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "strategyData",
+                  "type": "bytes"
+                }
+              ],
+              "name": "redeem",
+              "outputs": [
+                {
+                  "internalType": "contract IERC20Upgradeable",
+                  "name": "outputToken",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "outputAmount",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "UniswapLpTokenPriceOracle": {
+          "address": "0x58f0bAF69fB069a49417239a17E639672beB12d5",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_wtoken",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract ICToken",
+                  "name": "cToken",
+                  "type": "address"
+                }
+              ],
+              "name": "getUnderlyingPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "underlying",
+                  "type": "address"
+                }
+              ],
+              "name": "price",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "wtoken",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
               "type": "function"
             }
           ]
