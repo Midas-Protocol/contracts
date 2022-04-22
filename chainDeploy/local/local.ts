@@ -42,15 +42,15 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
   dep = await deployments.deterministic("TOUCHToken", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [ethers.utils.parseEther("2250000000"), deployer],
+    args: [deployer, ethers.utils.parseEther("2250000000")],
     log: true,
   });
   const touch = await dep.deploy();
   console.log("TOUCHToken: ", touch.address);
   const touchToken = await ethers.getContractAt("TOUCHToken", touch.address, deployer);
-  tx = await touchToken['transfer(address,uint256)'](alice, ethers.utils.parseEther("100000"), { from: deployer });
+  tx = await touchToken.transferWithMemo(alice, ethers.utils.parseEther("100000"), "0xCAFE", { from: deployer });
   await tx.wait();
-  tx = await touchToken['transfer(address,uint256)'](bob, ethers.utils.parseEther("100000"), { from: deployer });
+  tx = await touchToken.transferWithMemo(bob, ethers.utils.parseEther("100000"), "0xDEAD", { from: deployer });
   await tx.wait();
   ////
 
