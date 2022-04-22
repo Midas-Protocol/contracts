@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish, Contract, utils } from "ethers";
+import { BigNumber, BigNumberish, constants, Contract, utils } from "ethers";
 import { FusePoolLens } from "../../typechain/FusePoolLens";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FuseBaseConstructor } from "../Fuse/types";
@@ -113,6 +113,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         whitelistedAdmin,
       };
     }
+
     async fetchPoolsManual({
       verification,
       coingeckoId,
@@ -121,7 +122,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
       verification: boolean;
       coingeckoId: string;
       options: { from: string };
-    }): Promise<FusePoolData[] | undefined> {
+    }): Promise<(FusePoolData | null)[] | undefined> {
       const fusePoolsDirectoryResult = await this.contracts.FusePoolDirectory.callStatic.getPublicPoolsByVerification(
         verification,
         {
@@ -151,7 +152,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
       filter: string | null;
       coingeckoId: string;
       options: { from: string };
-    }): Promise<FusePoolData[] | undefined> {
+    }): Promise<FusePoolData[]> {
       const isCreatedPools = filter === "created-pools";
       const isVerifiedPools = filter === "verified-pools";
       const isUnverifiedPools = filter === "unverified-pools";
@@ -170,8 +171,6 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
 
       const responses = await Promise.all([req, whitelistedPoolsRequest]);
 
-      if(!responses[0][0].length) return undefined;
-
       const [pools, whitelistedPools] = await Promise.all(
         responses.map(async (poolData) => {
           return await Promise.all(
@@ -182,8 +181,8 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         })
       );
 
-      const whitelistedIds = whitelistedPools.map((pool) => pool.id);
-      const filteredPools = pools.filter((pool) => !whitelistedIds.includes(pool.id));
+      const whitelistedIds = whitelistedPools.map((pool) => pool?.id);
+      const filteredPools = pools.filter((pool) => !whitelistedIds.includes(pool?.id));
 
       return [...filteredPools, ...whitelistedPools];
     }
