@@ -16,6 +16,8 @@ task("strategy:create", "Create ERC4626 Strategy")
     types.string
   )
   .setAction(async (taskArgs, hre) => {
+    const signer = await hre.ethers.getNamedSigner(taskArgs.creator);
+
     const otherParams = taskArgs.otherParams ? taskArgs.otherParams.split(",") : null;
     let deployArgs;
     if (otherParams) {
@@ -25,7 +27,7 @@ task("strategy:create", "Create ERC4626 Strategy")
     }
 
     const deployment = await hre.deployments.deploy(taskArgs.strategyName, {
-      from: taskArgs.creator,
+      from: signer.address,
       args: deployArgs,
       log: true,
     });
