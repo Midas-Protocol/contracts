@@ -13,7 +13,13 @@ export const deployConfig: ChainDeployConfig = {
   wBTCToken: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
   blocksPerYear: 20 * 24 * 365 * 60,
   uniswap: {
-    hardcoded: [],
+    hardcoded: [
+      {
+        name: "Binance Bitcoin",
+        symbol: "BTCB",
+        address: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
+      },
+    ],
     uniswapData: [],
     // see: https://bsc.kiemtienonline360.com/ for addresses
     pairInitHashCode: ethers.utils.hexlify("0xecba335299a6693cb2ebc4782e74669b84290b6378ea3a3873c7231a8d7d1074"),
