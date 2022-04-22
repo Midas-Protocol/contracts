@@ -20,7 +20,7 @@ export default task("deploy-touch-token", "Deploy the Midas TOUCH Token")
 
         const tribeDAO = "0xdEAd00000000000000000000000000000000cAFE";
         let tx: providers.TransactionResponse;
-        const initSupply = ethers.utils.parseUnits("100000000", 18);
+        const initSupply = ethers.utils.parseUnits(_chainTouchSupply, 18);
         console.log(`init supply ${initSupply}`)
         let dep = await deployments.deterministic("TOUCHToken", {
             from: deployer,

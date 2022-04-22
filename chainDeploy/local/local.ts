@@ -39,19 +39,6 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
 
   tx = await tribeToken.transfer(bob, ethers.utils.parseEther("100000"), { from: deployer });
   await tx.wait();
-  dep = await deployments.deterministic("TOUCHToken", {
-    from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [deployer, ethers.utils.parseEther("2250000000")],
-    log: true,
-  });
-  const touch = await dep.deploy();
-  console.log("TOUCHToken: ", touch.address);
-  const touchToken = await ethers.getContractAt("TOUCHToken", touch.address, deployer);
-  tx = await touchToken.transferWithMemo(alice, ethers.utils.parseEther("100000"), "0xCAFE", { from: deployer });
-  await tx.wait();
-  tx = await touchToken.transferWithMemo(bob, ethers.utils.parseEther("100000"), "0xDEAD", { from: deployer });
-  await tx.wait();
   ////
 
   ////
@@ -69,7 +56,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
   const simplePriceOracle = await ethers.getContract("SimplePriceOracle", deployer);
 
   // get the ERC20 address of deployed cERC20
-  const underlyings = [tribe.address, touch.address];
+  const underlyings = [tribe.address];
   const oracles = Array(underlyings.length).fill(simplePriceOracle.address);
   tx = await masterPriceOracle.add(underlyings, oracles);
   await tx.wait();
