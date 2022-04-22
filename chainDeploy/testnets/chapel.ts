@@ -7,7 +7,7 @@ const CHAPEL_WTOKEN = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
 export const deployConfig: ChainDeployConfig = {
   wtoken: CHAPEL_WTOKEN,
   nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
-  nativeTokenName: "Binance Network Token (Testnet)",
+  nativeTokenName: "Binance Coin Token (Testnet)",
   nativeTokenSymbol: "TBNB",
   stableToken: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
   wBTCToken: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
