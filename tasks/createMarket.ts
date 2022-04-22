@@ -1,4 +1,5 @@
 import { parseEther } from "ethers/lib/utils";
+
 import { task, types } from "hardhat/config";
 
 // npx hardhat market:create --asset-config Test,deployer,CErc20Delegate,0x90e68fdb102c850D852126Af8fd1419A07636cd7,0x6c7De8de3d8c92246328488aC6AF8f8E46A1628f,0.1,0.9,1,0,true,"","","" --network localhost
@@ -6,7 +7,7 @@ import { task, types } from "hardhat/config";
 export default task("market:create", "Create Market")
   .addParam(
     "assetConfig",
-    "Whole asset config in a comma seperated string (`param1,param2...`)",
+    "Whole asset config in a comma separated string (`param1,param2...`)",
     undefined,
     types.string
   )
@@ -37,8 +38,12 @@ export default task("market:create", "Create Market")
     const poolModule = await import("../test/utils/pool");
     const pool = await poolModule.getPoolByName(poolName, sdk);
 
-    const underlyingToken = await hre.ethers.getContractAt("ERC20", underlying);
-    const underlyingTokenSymol = await underlyingToken.callStatic.symbol();
+    let symbol = "NATIVE";
+    if (!hre.ethers.constants.AddressZero === underlying) {
+      const underlyingToken = await hre.ethers.getContractAt("ERC20", underlying);
+      console.log({ underlyingToken });
+      symbol = await underlyingToken.callStatic.symbol();
+    }
 
     const assetConf = {
       delegateContractName: delegateContractName,
@@ -47,8 +52,8 @@ export default task("market:create", "Create Market")
       fuseFeeDistributor: sdk.contracts.FuseFeeDistributor.address,
       interestRateModel: interestModelAddress,
       initialExchangeRateMantissa: parseEther(initialExchangeRate),
-      name: `${poolName} ${underlyingTokenSymol}`,
-      symbol: `m${pool.id}-${underlyingTokenSymol}`,
+      name: `${poolName} ${symbol}`,
+      symbol: `m${pool.id}-${symbol}`,
       decimals: 8, // Fuse and Compound use 8 decimals. Do we also want to do this?
       admin: creator,
       collateralFactor: Number(collateralFactor),
@@ -59,8 +64,6 @@ export default task("market:create", "Create Market")
       rewardsDistributor: rewardsDistributor ? rewardsDistributor : null,
       rewardToken: rewardToken ? rewardToken : null,
     };
-
-    console.log({ assetConf });
 
     const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
       sdk.JumpRateModelConf,
