@@ -1,7 +1,6 @@
 import { ChainDeployConfig } from "../helpers";
 import { ethers, providers } from "ethers";
-import { SALT } from "../../deploy/deploy";
-import { Asset } from "../helpers/types";
+import { Asset, ChainDeployFnParams } from "../helpers/types";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xA30404AFB4c43D25542687BCF4367F59cc77b5d2",
@@ -42,20 +41,18 @@ export const assets: Asset[] = [
   },
 ];
 
-export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Promise<void> => {
+export const deploy = async ({ run, getNamedAccounts, deployments, ethers }: ChainDeployFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   console.log("deployer: ", deployer);
   let tx: providers.TransactionResponse;
   let receipt: providers.TransactionReceipt;
   //// ORACLES
   //// Underlyings use SimplePriceOracle to hardcode the price
-  let dep = await deployments.deterministic("SimplePriceOracle", {
+  const spo = await deployments.deploy("SimplePriceOracle", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
   });
-  const spo = await dep.deploy();
   if (spo.transactionHash) await ethers.provider.waitForTransaction(spo.transactionHash);
   console.log("SimplePriceOracle: ", spo.address);
 
