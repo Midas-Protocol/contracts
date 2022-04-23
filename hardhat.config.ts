@@ -18,6 +18,7 @@ import "./tasks/e2e";
 import "./tasks/swap";
 import "./tasks/liquidation";
 import "./tasks/deployTouchToken";
+import "./tasks/fluxFeed";
 
 dotEnvConfig();
 

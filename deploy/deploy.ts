@@ -126,18 +126,13 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   await tx.wait();
   console.log("FuseFeeDistributor comptroller whitelist set", tx.hash);
 
-  dep = await deployments.deterministic("FusePoolLens", {
+  const fplDeployment = await deployments.deploy("FusePoolLens", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [],
     log: true,
-    proxy: {
-      proxyContract: "OpenZeppelinTransparentProxy",
-    },
   });
-  const fpl = await dep.deploy();
-  if (fpl.transactionHash) await ethers.provider.waitForTransaction(fpl.transactionHash);
-  console.log("FusePoolLens: ", fpl.address);
+
+  if (fplDeployment.transactionHash) await ethers.provider.waitForTransaction(fplDeployment.transactionHash);
+  console.log("FusePoolLens: ", fplDeployment.address);
   const fusePoolLens = await ethers.getContract("FusePoolLens", deployer);
   let directory = await fusePoolLens.directory();
   if (directory === constants.AddressZero) {

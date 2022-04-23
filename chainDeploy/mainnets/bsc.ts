@@ -3,6 +3,7 @@ import { ChainDeployConfig, ChainlinkFeedBaseCurrency, deployChainlinkOracle, de
 import { ethers } from "ethers";
 import { Asset, ChainDeployFnParams, ChainlinkAsset, CurvePoolConfig } from "../helpers/types";
 import { deployCurveLpOracle } from "../oracles/curveLp";
+import { deployUniswapLpOracle } from "../oracles/uniswapLp";
 
 export const assets: Asset[] = [
   {
@@ -160,6 +161,9 @@ export const deployConfig: ChainDeployConfig = {
         baseToken: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", // BTCB
       },
     ],
+    uniswapOracleLpTokens: [
+      "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6", // LP,
+    ],
   },
 };
 
@@ -300,6 +304,8 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   await deployUniswapOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
   ////
 
+  await deployUniswapLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
+
   await deployCurveLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig, curvePools });
 
   let dep = await deployments.deterministic("SimplePriceOracle", {
@@ -312,6 +318,18 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   if (simplePO.transactionHash) await ethers.provider.waitForTransaction(simplePO.transactionHash);
   console.log("SimplePriceOracle: ", simplePO.address);
   ////
+
+  dep = await deployments.deterministic("UniswapLpTokenLiquidator", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [],
+    log: true,
+  });
+  const uniswapLpTokenLiquidator = await dep.deploy();
+  if (uniswapLpTokenLiquidator.transactionHash) {
+    await ethers.provider.waitForTransaction(uniswapLpTokenLiquidator.transactionHash);
+  }
+  console.log("UniswapLpTokenLiquidator: ", uniswapLpTokenLiquidator.address);
 
   //// Liquidator Redemption Strategies
   /// xBOMB->BOMB

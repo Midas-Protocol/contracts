@@ -1,4 +1,5 @@
 import { HardhatRuntimeEnvironment, RunTaskFunction } from "hardhat/types";
+import { BigNumber } from "ethers";
 
 export enum ChainlinkFeedBaseCurrency {
   ETH,
@@ -18,6 +19,7 @@ export type ChainDeployConfig = {
     pairInitHashCode?: string;
     hardcoded: { name: string; symbol: string; address: string }[];
     uniswapData: { lpName: string; lpSymbol: string; lpDisplayName: string }[];
+    uniswapOracleLpTokens?: Array<string>;
   };
   wtoken: string;
   nativeTokenUsdChainlinkFeed?: string;
@@ -33,6 +35,7 @@ export type Asset = {
   underlying: string;
   name: string;
   decimals: number;
+  simplePriceOracleAssetPrice?: BigNumber;
 };
 
 export type ChainlinkAsset = {
