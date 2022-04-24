@@ -17,7 +17,6 @@ contract StakingController is Initializable {
   VeMDSToken veToken;
   TOUCHToken touchToken;
 
-  error UnstakeNeededFirst();
   error UnstakeTooEarly();
   error UnstakeNotDeclared();
   error UnstakeAlreadyDeclared();
@@ -36,8 +35,6 @@ contract StakingController is Initializable {
   }
 
   function _claimAccumulatedVotingPower(address account) internal returns (uint256) {
-    if (unstakeDeclaredTime[msg.sender] != 0) revert UnstakeNeededFirst();
-
     uint256 accumulatedVotingPower = accumulatedVotingPowerOf(account);
 
     // mint the accumulated veTokens
@@ -60,8 +57,6 @@ contract StakingController is Initializable {
   function stake(uint256 amountToStake) public {
     if (amountToStake == 0) revert StakeAmountZero();
 
-    // called inside claimAccumulatedVotingPower
-//    if (unstakeDeclaredTime[msg.sender] != 0) revert UnstakeNeededFirst();
     _claimAccumulatedVotingPower(msg.sender);
 
     // call first, then change the state

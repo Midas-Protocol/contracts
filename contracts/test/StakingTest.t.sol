@@ -244,33 +244,7 @@ contract StakingTest is DSTest {
     vm.expectRevert(abi.encodeWithSignature("UnstakeTooEarly()"));
     stakingController.unstake(address(this));
   }
-
-  function testUnstakeNeededFirst(uint256 amountToStake) public {
-    vm.assume(amountToStake > 1 && amountToStake < totalSupply);
-    uint256 amountToUnstake = amountToStake / 2;
-
-    vm.warp(30 days);
-
-    stakingController.stake(amountToStake);
-
-    // advancing 1 day
-    vm.warp(block.timestamp + 1 days);
-    assertTrue(veToken.balanceOf(address(this)) == 0, "initial vp must be zero");
-
-    stakingController.claimAccumulatedVotingPower();
-
-    uint256 stakerBalanceBefore = govToken.balanceOf(address(this));
-    uint256 contractBalanceBefore = govToken.balanceOf(address(stakingController));
-    uint256 totalStakedBefore = stakingController.totalStaked();
-
-    stakingController.declareUnstake(amountToUnstake);
-
-    vm.warp(block.timestamp + 3 days);
-
-    vm.expectRevert(abi.encodeWithSignature("UnstakeNeededFirst()"));
-    stakingController.stake(amountToStake);
-  }
-
+  
   function testUnstakeAlreadyDeclared(uint256 amountToStake) public {
     vm.assume(amountToStake > 1 && amountToStake < totalSupply);
     uint256 amountToUnstake = amountToStake / 2;
