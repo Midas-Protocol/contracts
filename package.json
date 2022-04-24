@@ -18,6 +18,7 @@
     "test:hardhat": "hardhat test --parallel",
     "test:forge": "forge test",
     "test:forge:bsc": "forge test --fork-url ${FORK_URL_BSC} --fork-block-number ${FORK_BLOCK_NUMBER}",
+    "test:forge:moonbeam": "forge test --fork-url https://rpc.api.moonbeam.network --fork-block-number ${FORK_BLOCK_NUMBER}",
     "test:forge:evmostestnet": "forge test --fork-url https://eth.bd.evmos.dev:8545 --fork-block-number ${FORK_BLOCK_NUMBER}",
     "test:bsc": "FORK_URL=${FORK_URL_BSC} FORK_BLOCK_NUMBER=${FORK_BLOCK_NUMBER} FORK_CHAIN_ID=56 hardhat test",
     "export": "hardhat export --export-all ./deployments.json",
