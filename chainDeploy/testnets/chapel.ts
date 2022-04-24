@@ -7,13 +7,19 @@ const CHAPEL_WTOKEN = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
 export const deployConfig: ChainDeployConfig = {
   wtoken: CHAPEL_WTOKEN,
   nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
-  nativeTokenName: "Binance Network Token (Testnet)",
+  nativeTokenName: "Binance Coin Token (Testnet)",
   nativeTokenSymbol: "TBNB",
   stableToken: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
   wBTCToken: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
   blocksPerYear: 20 * 24 * 365 * 60,
   uniswap: {
-    hardcoded: [],
+    hardcoded: [
+      {
+        name: "Binance Bitcoin",
+        symbol: "BTCB",
+        address: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
+      },
+    ],
     uniswapData: [],
     // see: https://bsc.kiemtienonline360.com/ for addresses
     pairInitHashCode: ethers.utils.hexlify("0xecba335299a6693cb2ebc4782e74669b84290b6378ea3a3873c7231a8d7d1074"),

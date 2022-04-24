@@ -36,7 +36,7 @@ jobs:
         run: npm run build
 
       - name: Run hardhat tests
-        run: npm run test
+        run: npm run test:hardhat
 
       - name: Run forge tests
         run: echo "do it later"

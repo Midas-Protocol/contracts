@@ -3,6 +3,8 @@ import { task, types } from "hardhat/config";
 export default task("get-pool-data", "Get pools data")
   .addOptionalParam("name", "Name of the pool", undefined, types.string)
   .addOptionalParam("creator", "Named account that created the pool", undefined, types.string)
+  .addOptionalParam("poolId", "Id of the pool", undefined, types.int)
+  .addOptionalParam("cgId", "Coingecko ID", undefined, types.string)
   .addOptionalParam("address", "Address of the pool", undefined, types.string)
   .setAction(async (taskArgs, hre) => {
     // @ts-ignore
@@ -38,6 +40,9 @@ export default task("get-pool-data", "Get pools data")
       const pools = await sdk.contracts.FusePoolLens.callStatic.getPoolsByAccountWithData(account.address);
       console.log(pools);
       return;
+    }
+    if (taskArgs.poolId) {
+      return await sdk.fetchFusePoolData(taskArgs.poolId.toString(), undefined, taskArgs.cgId);
     }
     if (!taskArgs.name && !taskArgs.creator) {
       const fpd = await hre.ethers.getContract("FusePoolLens", (await hre.ethers.getNamedSigner("deployer")).address);

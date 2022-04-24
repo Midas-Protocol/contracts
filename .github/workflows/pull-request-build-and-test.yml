@@ -40,7 +40,7 @@ jobs:
         run: npm run build
 
       - name: Run hardhat tests
-        run: npm run test
+        run: npm run test:hardhat
 
       - name: Run forge tests
         run: npm run test:forge
@@ -80,3 +80,35 @@ jobs:
 
       - name: Run forge tests on BSC
         run: npm run test:forge:bsc
+
+  build-and-test-evmostestnet:
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      FORK_BLOCK_NUMBER: 897089
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: "npm"
+
+      - name: Install NPM packages
+        run: npm install
+
+      - name: Run build
+        run: npm run build
+
+      - name: Run forge tests on Evmos Testnet
+        run: npm run test:forge:evmostestnet
