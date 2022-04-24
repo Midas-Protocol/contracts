@@ -6,6 +6,7 @@ import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.s
 
 import "./VeMDSToken.sol";
 
+// TODO upgradeable?
 contract StakingController is Initializable {
   mapping(address => uint256) public stakingStartedTime;
   mapping(address => uint256) internal releasingStakes;
@@ -16,8 +17,12 @@ contract StakingController is Initializable {
   VeMDSToken veToken;
   TOUCHToken touchToken;
 
+  error UnstakeNeededFirst();
   error UnstakeTooEarly();
   error UnstakeNotDeclared();
+  error UnstakeAlreadyDeclared();
+  error UnstakeAmountZero();
+  error StakeAmountZero();
   error StakeNotEnough();
 
   function initialize(VeMDSToken _veToken, TOUCHToken _touchToken) initializer public {
@@ -27,12 +32,12 @@ contract StakingController is Initializable {
 
   // needs to be called from time to time
   function claimAccumulatedVotingPower() external returns (uint256) {
-    require(unstakeDeclaredTime[msg.sender] == 0, "unstake declared, cannot claim until executed");
     return _claimAccumulatedVotingPower(msg.sender);
   }
 
-  // needs to be called from time to time?
   function _claimAccumulatedVotingPower(address account) internal returns (uint256) {
+    if (unstakeDeclaredTime[msg.sender] != 0) revert UnstakeNeededFirst();
+
     uint256 accumulatedVotingPower = accumulatedVotingPowerOf(account);
 
     // mint the accumulated veTokens
@@ -53,8 +58,10 @@ contract StakingController is Initializable {
   }
 
   function stake(uint256 amountToStake) public {
-    require(amountToStake > 0, "amount to stake should be non-zero");
-    require(unstakeDeclaredTime[msg.sender] == 0, "unstake declared, cannot stake until executed");
+    if (amountToStake == 0) revert StakeAmountZero();
+
+    // called inside claimAccumulatedVotingPower
+//    if (unstakeDeclaredTime[msg.sender] != 0) revert UnstakeNeededFirst();
     _claimAccumulatedVotingPower(msg.sender);
 
     // call first, then change the state
@@ -75,8 +82,8 @@ contract StakingController is Initializable {
 
   // unstake has to be declared 7 days prior to the unstaking
   function declareUnstake(uint256 amountToUnstake) public {
-    require(unstakeDeclaredTime[msg.sender] == 0, "unstake already declared");
-    require(amountToUnstake > 0, "amount to unstake should be non-zero");
+    if (amountToUnstake == 0) revert UnstakeAmountZero();
+    if (unstakeDeclaredTime[msg.sender] != 0) revert UnstakeAlreadyDeclared();
 
     unstakeDeclaredTime[msg.sender] = block.timestamp;
     unstakeDeclaredAmount[msg.sender] = amountToUnstake;
@@ -90,18 +97,17 @@ contract StakingController is Initializable {
   function unstake(address account) public {
     if (unstakeDeclaredTime[account] == 0) revert UnstakeNotDeclared();
     if (unstakeDeclaredTime[account] > block.timestamp - 7 days) revert UnstakeTooEarly();
-//    require(unstakeDeclaredTime[account] <= block.timestamp - 7 days, "unstake needs to be declared at least a week prior");
 
-    require(unstakeDeclaredAmount[account] > 0, "amount to unstake should be non-zero");
+    // not possible because of earlier UnstakeNotDeclared thrown
+//    if (unstakeDeclaredAmount[account] == 0) revert UnstakeAmountZero();
+
 
     if (msg.sender != account && unstakeDeclaredTime[account] > block.timestamp - 10 days) revert UnstakeTooEarly();
-//    require(msg.sender == account || unstakeDeclaredTime[account] <= block.timestamp - 10 days, "unstake needs to be declared at least a week prior");
 
     uint256 amountToUnstake = unstakeDeclaredAmount[account];
 
     uint256 totalStakePreUnstake = accumulatedStakes[account] + releasingStakes[account];
     if (amountToUnstake > totalStakePreUnstake) revert StakeNotEnough();
-//    require(amountToUnstake <= totalStakePreUnstake, "stake not enough");
 
     // not needed
     //    _claimAccumulatedVotingPower(account);
