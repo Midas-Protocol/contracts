@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-import "../BasePriceOracle.sol";
+import { IPriceOracle } from "../../external/compound/IPriceOracle.sol";
+import { ICToken } from "../../external/compound/ICToken.sol";
+import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import { MasterPriceOracle } from "../MasterPriceOracle.sol";
+import { BasePriceOracle } from "../BasePriceOracle.sol";
 
 interface DIAOracleV2 {
   function getValue(string memory key) external view returns (uint128, uint128);
@@ -51,20 +52,30 @@ contract DiaPriceOracle is IPriceOracle, BasePriceOracle {
   string public NATIVE_TOKEN_USD_KEY;
 
   /**
+   * @notice MasterPriceOracle for backup for USD price.
+   */
+  MasterPriceOracle public immutable MASTER_PRICE_ORACLE;
+  address public immutable USD_TOKEN; // token to use as USD price (i.e. USDC)
+
+  /**
    * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
    */
   constructor(
     address _admin,
     bool _canAdminOverwrite,
     address _wtoken,
-    address nativeTokenUsd,
-    string memory nativeTokenUsdKey
+    DIAOracleV2 nativeTokenUsd,
+    string memory nativeTokenUsdKey,
+    MasterPriceOracle masterPriceOracle,
+    address usdToken
   ) {
     admin = _admin;
     canAdminOverwrite = _canAdminOverwrite;
     wtoken = _wtoken;
-    NATIVE_TOKEN_USD_PRICE_FEED = DIAOracleV2(nativeTokenUsd);
+    NATIVE_TOKEN_USD_PRICE_FEED = nativeTokenUsd;
     NATIVE_TOKEN_USD_KEY = nativeTokenUsdKey;
+    MASTER_PRICE_ORACLE = masterPriceOracle;
+    USD_TOKEN = usdToken;
   }
 
   /**
@@ -134,10 +145,18 @@ contract DiaPriceOracle is IPriceOracle, BasePriceOracle {
     DiaOracle memory feed = priceFeeds[underlying];
     require(address(feed.feed) != address(0), "No oracle price feed found for this underlying ERC20 token.");
 
-    (uint128 nativeTokenUsdPrice, ) = NATIVE_TOKEN_USD_PRICE_FEED.getValue(NATIVE_TOKEN_USD_KEY);
-    if (nativeTokenUsdPrice <= 0) return 0;
-    (uint128 tokenUsdPrice, ) = feed.feed.getValue(feed.key);
-    return tokenUsdPrice >= 0 ? ((uint256(tokenUsdPrice) * 1e26) / (10**8)) / uint256(nativeTokenUsdPrice) : 0;
+    if (address(NATIVE_TOKEN_USD_PRICE_FEED) == address(0)) {
+      // Get price from MasterPriceOracle
+      uint256 usdNativeTokenPrice = MASTER_PRICE_ORACLE.price(USD_TOKEN);
+      uint256 nativeTokenUsdPrice = 1e36 / usdNativeTokenPrice; // 18 decimals
+      (uint128 tokenUsdPrice, ) = feed.feed.getValue(feed.key); // 8 decimals
+      return tokenUsdPrice >= 0 ? (uint256(tokenUsdPrice) * 1e28) / uint256(nativeTokenUsdPrice) : 0;
+    } else {
+      (uint128 nativeTokenUsdPrice, ) = NATIVE_TOKEN_USD_PRICE_FEED.getValue(NATIVE_TOKEN_USD_KEY);
+      if (nativeTokenUsdPrice <= 0) return 0;
+      (uint128 tokenUsdPrice, ) = feed.feed.getValue(feed.key); // 8 decimals
+      return tokenUsdPrice >= 0 ? (uint256(tokenUsdPrice) * 1e18) / uint256(nativeTokenUsdPrice) : 0;
+    }
   }
 
   /**
