@@ -244,7 +244,7 @@ contract StakingTest is DSTest {
     vm.expectRevert(abi.encodeWithSignature("UnstakeTooEarly()"));
     stakingController.unstake(address(this));
   }
-  
+
   function testUnstakeAlreadyDeclared(uint256 amountToStake) public {
     vm.assume(amountToStake > 1 && amountToStake < totalSupply);
     uint256 amountToUnstake = amountToStake / 2;

@@ -91,12 +91,12 @@ contract StakingController is Initializable {
   // - by anyone 10 days after declaring it
   function unstake(address account) public {
     if (unstakeDeclaredTime[account] == 0) revert UnstakeNotDeclared();
+    // not possible because UnstakeNotDeclared thrown earlier
+    // if (unstakeDeclaredAmount[account] == 0) revert UnstakeAmountZero();
     if (unstakeDeclaredTime[account] > block.timestamp - 7 days) revert UnstakeTooEarly();
 
-    // not possible because of earlier UnstakeNotDeclared thrown
-//    if (unstakeDeclaredAmount[account] == 0) revert UnstakeAmountZero();
-
-
+    // anyone can execute the unstaking in 10 days after the unstaking is declared
+    // this should discourage false-signaling a not intended unstaking
     if (msg.sender != account && unstakeDeclaredTime[account] > block.timestamp - 10 days) revert UnstakeTooEarly();
 
     uint256 amountToUnstake = unstakeDeclaredAmount[account];
@@ -114,9 +114,10 @@ contract StakingController is Initializable {
     stakingStartedTime[account] = releasingStakes[account] != 0 ? block.timestamp : 0;
 
     // remove voting power from escrow
+    // will remove all gauge votes, too
     veToken.burn(account, veToken.balanceOf(account));
 
-    //
+    // reset the declared time/amount
     unstakeDeclaredTime[account] = 0;
     unstakeDeclaredAmount[account] = 0;
 
