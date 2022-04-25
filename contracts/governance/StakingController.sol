@@ -11,9 +11,9 @@ contract StakingController is Initializable {
   mapping(address => uint256) public stakingStartedTime;
   mapping(address => uint256) internal releasingStakes;
   mapping(address => uint256) internal accumulatedStakes;
-  uint256 public totalStaked;
   mapping(address => uint256) public unstakeDeclaredTime;
   mapping(address => uint256) public unstakeDeclaredAmount;
+  uint256 public totalStaked;
   VeMDSToken veToken;
   TOUCHToken touchToken;
 

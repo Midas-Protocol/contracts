@@ -42,7 +42,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
   dep = await deployments.deterministic("TOUCHToken", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-    args: [ethers.utils.parseEther("2250000000"), deployer],
+    args: [deployer, ethers.utils.parseEther("2250000000")],
     log: true,
   });
   const touch = await dep.deploy();

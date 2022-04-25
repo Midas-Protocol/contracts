@@ -291,11 +291,5 @@ contract StakingTest is DSTest {
 
     vm.expectRevert(abi.encodeWithSignature("UnstakeAmountZero()"));
     stakingController.declareUnstake(0);
-
-    // not possible because of earlier UnstakeNotDeclared thrown
-//    vm.warp(block.timestamp + 3 days);
-//
-//    vm.expectRevert(abi.encodeWithSignature("UnstakeAmountZero()"));
-//    stakingController.unstake(address(this));
   }
 }
