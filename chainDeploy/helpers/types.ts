@@ -28,6 +28,21 @@ export type ChainDeployConfig = {
   stableToken?: string;
   wBTCToken?: string;
   blocksPerYear: number;
+  dynamicFlywheels?: DynamicFlywheelConfig[];
+  plugins?: PluginConfig[];
+};
+
+export type DynamicFlywheelConfig = {
+  rewardToken: string;
+  cycleLength: number;
+};
+
+export type PluginConfig = {
+  strategy: string;
+  underlying: string;
+  name: string;
+  symbol: string;
+  otherParams?: string[];
 };
 
 export type Asset = {
@@ -70,4 +85,8 @@ export type UniswapDeployFnParams = ChainDeployFnParams & {
 export type CurveLpFnParams = ChainDeployFnParams & {
   deployConfig: ChainDeployConfig;
   curvePools: CurvePoolConfig[];
+};
+
+export type FuseFlywheelDeployFnParams = ChainDeployFnParams & {
+  deployConfig: ChainDeployConfig;
 };
