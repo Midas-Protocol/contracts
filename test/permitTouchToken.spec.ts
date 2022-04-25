@@ -1,10 +1,14 @@
 import {deployments, ethers} from "hardhat";
-import {Fuse} from "../dist/esm/src";
 import { expect } from "chai";
+import {getOrCreateFuse} from "./utils/fuseSdk";
+import { Fuse } from "../src";
 
-describe.only("Verify the ERC20 functionality", () => {
+describe("Verify the ERC20 functionality", () => {
+  let sdk: Fuse;
+
   beforeEach(async () => {
-    await deployments.fixture(); // ensure you start from a fresh deployments
+    await deployments.fixture("prod");
+    sdk = await getOrCreateFuse();
   });
 
   it("should allow approve/transferFrom in a single tx with permit", async function () {
@@ -19,8 +23,6 @@ describe.only("Verify the ERC20 functionality", () => {
     const signingKey = new ethers.utils.SigningKey("0xCAFE");
     let signingAddress = ethers.utils.computeAddress(signingKey.publicKey);
 
-    const { chainId } = await ethers.provider.getNetwork();
-    const sdk = new Fuse(ethers.provider, chainId);
     const touchToken = await ethers.getContractAt("TOUCHToken", sdk.chainDeployment.TOUCHToken.address);
 
     // construct the permit call hash, then sign it
