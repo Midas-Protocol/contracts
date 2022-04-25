@@ -14,7 +14,7 @@ export type LensPoolsWithData = [
 
 export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class FusePools extends Base {
-    async fetchFusePoolData(poolId: string, address?: string, coingeckoId?: string): Promise<FusePoolData> {
+    async fetchFusePoolData(poolId: string, address?: string): Promise<FusePoolData> {
       const {
         comptroller,
         name: _unfiliteredName,
@@ -43,11 +43,6 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
       let totalSuppliedUSD = 0;
       let totalBorrowedUSD = 0;
 
-      const price: number = utils.formatEther(
-        // prefer rari because it has caching
-        await this.getUsdPriceBN(coingeckoId, true)
-      ) as any;
-
       const promises: Promise<boolean>[] = [];
 
       const comptrollerContract = new Contract(
@@ -71,24 +66,24 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         );
 
         asset.supplyBalanceUSD =
-          Number(utils.formatUnits(asset.supplyBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+          Number(utils.formatUnits(asset.supplyBalance)) * Number(utils.formatUnits(asset.underlyingPrice));
 
         asset.borrowBalanceUSD =
-          Number(utils.formatUnits(asset.borrowBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+          Number(utils.formatUnits(asset.borrowBalance)) * Number(utils.formatUnits(asset.underlyingPrice));
 
         totalSupplyBalanceUSD += asset.supplyBalanceUSD;
         totalBorrowBalanceUSD += asset.borrowBalanceUSD;
 
         asset.totalSupplyUSD =
-          Number(utils.formatUnits(asset.totalSupply)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+          Number(utils.formatUnits(asset.totalSupply)) * Number(utils.formatUnits(asset.underlyingPrice));
         asset.totalBorrowUSD =
-          Number(utils.formatUnits(asset.totalBorrow)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+          Number(utils.formatUnits(asset.totalBorrow)) * Number(utils.formatUnits(asset.underlyingPrice));
 
         totalSuppliedUSD += asset.totalSupplyUSD;
         totalBorrowedUSD += asset.totalBorrowUSD;
 
         asset.liquidityUSD =
-          Number(utils.formatUnits(asset.liquidity)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+          Number(utils.formatUnits(asset.liquidity)) * Number(utils.formatUnits(asset.underlyingPrice));
 
         totalLiquidityUSD += asset.liquidityUSD;
       }
