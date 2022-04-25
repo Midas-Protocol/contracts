@@ -37,12 +37,13 @@ contract StakingController is Initializable {
   function _claimAccumulatedVotingPower(address account) internal returns (uint256) {
     uint256 accumulatedVotingPower = accumulatedVotingPowerOf(account);
 
-    // mint the accumulated veTokens
     uint256 currentBalanceOfVeTokens = veToken.balanceOf(account);
     uint256 amountToMint = accumulatedVotingPower - currentBalanceOfVeTokens;
     if (amountToMint != 0) {
+      // mint the accumulated veTokens
       veToken.mint(account, amountToMint);
     } else {
+      // in case the full amount is accumulated, reset the staking
       uint256 totalStake = accumulatedStakes[account] + releasingStakes[account];
       if (accumulatedVotingPower == totalStake) {
         accumulatedStakes[account] = totalStake;
@@ -80,6 +81,9 @@ contract StakingController is Initializable {
     if (amountToUnstake == 0) revert UnstakeAmountZero();
     if (unstakeDeclaredTime[msg.sender] != 0) revert UnstakeAlreadyDeclared();
 
+    uint256 totalStakePreUnstake = accumulatedStakes[msg.sender] + releasingStakes[msg.sender];
+    if (amountToUnstake > totalStakePreUnstake) revert StakeNotEnough();
+
     unstakeDeclaredTime[msg.sender] = block.timestamp;
     unstakeDeclaredAmount[msg.sender] = amountToUnstake;
 
@@ -92,29 +96,27 @@ contract StakingController is Initializable {
   function unstake(address account) public {
     if (unstakeDeclaredTime[account] == 0) revert UnstakeNotDeclared();
     // not possible because UnstakeNotDeclared thrown earlier
-    // if (unstakeDeclaredAmount[account] == 0) revert UnstakeAmountZero();
+      // if (unstakeDeclaredAmount[account] == 0) revert UnstakeAmountZero();
     if (unstakeDeclaredTime[account] > block.timestamp - 7 days) revert UnstakeTooEarly();
 
     // anyone can execute the unstaking in 10 days after the unstaking is declared
     // this should discourage false-signaling a not intended unstaking
     if (msg.sender != account && unstakeDeclaredTime[account] > block.timestamp - 10 days) revert UnstakeTooEarly();
 
-    uint256 amountToUnstake = unstakeDeclaredAmount[account];
-
+    // all of the stake that is left is converted to a releasing stake
     uint256 totalStakePreUnstake = accumulatedStakes[account] + releasingStakes[account];
-    if (amountToUnstake > totalStakePreUnstake) revert StakeNotEnough();
-
-    // not needed
-    //    _claimAccumulatedVotingPower(account);
-
+    uint256 amountToUnstake = unstakeDeclaredAmount[account];
     releasingStakes[account] = totalStakePreUnstake - amountToUnstake;
     accumulatedStakes[account] = 0;
-    totalStaked -= amountToUnstake;
-    // reset if accumulating stake is left
+
+    // for any of the stake that is left, the countdown is reset (or zeroed if none is left)
     stakingStartedTime[account] = releasingStakes[account] != 0 ? block.timestamp : 0;
 
+    // reduce the total staked counter
+    totalStaked -= amountToUnstake;
+
     // remove voting power from escrow
-    // will remove all gauge votes, too
+    // will remove each and all gauge votes, too
     veToken.burn(account, veToken.balanceOf(account));
 
     // reset the declared time/amount
