@@ -58,6 +58,7 @@ export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Pr
     log: true,
   });
   const spo = await dep.deploy();
+  if (spo.transactionHash) await ethers.provider.waitForTransaction(spo.transactionHash);
   console.log("SimplePriceOracle: ", spo.address);
 
   //// CurveLpTokenPriceOracleNoRegistry
@@ -79,6 +80,8 @@ export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Pr
     console.log("registerPool mined: ", receipt.transactionHash);
   }
 
+  const simplePriceOracle = await ethers.getContract("SimplePriceOracle", deployer);
+
   for (const pool of curvePools) {
     const registered = await curveOracle.poolOf(pool.lpToken);
     if (registered !== constants.AddressZero) {
@@ -91,7 +94,7 @@ export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Pr
     console.log("registerPool mined: ", receipt.transactionHash);
 
     for (const underlying of pool.underlyings) {
-      tx = await spo.setDirectPrice(underlying, utils.parseEther("1"));
+      tx = await simplePriceOracle.setDirectPrice(underlying, utils.parseEther("1"));
       console.log("set underlying price tx sent: ", underlying, tx.hash);
       receipt = await tx.wait();
       console.log("set underlying price tx mined: ", underlying, receipt.transactionHash);
@@ -106,7 +109,7 @@ export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Pr
     mpoOracles.push(curveOracle.address);
     c.underlyings.forEach((u) => {
       mpoUnderlyings.push(u);
-      mpoOracles.push(spo.address);
+      mpoOracles.push(simplePriceOracle.address);
     });
   });
   const admin = await masterPriceOracle.admin();

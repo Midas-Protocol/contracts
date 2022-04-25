@@ -20,6 +20,7 @@ import "./tasks/liquidation";
 import "./tasks/createMarket";
 import "./tasks/createPool";
 import "./tasks/createStrategy";
+import "./tasks/fluxFeed";
 
 dotEnvConfig();
 
