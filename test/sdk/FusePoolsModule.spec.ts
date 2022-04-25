@@ -30,7 +30,6 @@ describe("FusePoolsModule", function () {
     it("user can fetch all pools", async function () {
       const pools = await sdk.fetchPoolsManual({
         verification: false,
-        coingeckoId: "ethereum",
         options: { from: deployer.address },
       });
       expect(pools.length).to.equal(1);
@@ -46,7 +45,6 @@ describe("FusePoolsModule", function () {
     it("user can fetch filtered pools", async function () {
       let pools = await sdk.fetchPools({
         filter: "created-pools",
-        coingeckoId: "ethereum",
         options: { from: deployer.address },
       });
       expect(pools.length).to.equal(1);
@@ -60,21 +58,18 @@ describe("FusePoolsModule", function () {
 
       pools = await sdk.fetchPools({
         filter: "verified-pools",
-        coingeckoId: "ethereum",
         options: { from: deployer.address },
       });
       expect(pools.length).to.equal(0);
 
       pools = await sdk.fetchPools({
         filter: "unverified-pools",
-        coingeckoId: "ethereum",
         options: { from: deployer.address },
       });
       expect(pools.length).to.equal(1);
 
       pools = await sdk.fetchPools({
         filter: "random-filter",
-        coingeckoId: "ethereum",
         options: { from: deployer.address },
       });
       expect(pools.length).to.equal(1);

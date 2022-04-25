@@ -111,11 +111,9 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
 
     async fetchPoolsManual({
       verification,
-      coingeckoId,
       options,
     }: {
       verification: boolean;
-      coingeckoId: string;
       options: { from: string };
     }): Promise<(FusePoolData | null)[] | undefined> {
       const fusePoolsDirectoryResult = await this.contracts.FusePoolDirectory.callStatic.getPublicPoolsByVerification(
@@ -132,7 +130,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
 
       const poolData = await Promise.all(
         poolIds.map((_id, i) => {
-          return this.fetchFusePoolData(_id, options.from, coingeckoId);
+          return this.fetchFusePoolData(_id, options.from);
         })
       );
 
@@ -141,11 +139,9 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
 
     async fetchPools({
       filter,
-      coingeckoId,
       options,
     }: {
       filter: string | null;
-      coingeckoId: string;
       options: { from: string };
     }): Promise<FusePoolData[]> {
       const isCreatedPools = filter === "created-pools";
@@ -170,7 +166,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         responses.map(async (poolData) => {
           return await Promise.all(
             poolData[0].map((_id) => {
-              return this.fetchFusePoolData(_id.toString(), options.from, coingeckoId);
+              return this.fetchFusePoolData(_id.toString(), options.from);
             })
           );
         })
