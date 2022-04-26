@@ -44,6 +44,7 @@ export default task("market:create", "Create Market")
       symbol = await underlyingToken.callStatic.symbol();
     }
 
+    console.log(`Creating market for token ${underlying}, pool ${poolName}, impl: ${delegateContractName}`);
     const assetConf = {
       delegateContractName: delegateContractName,
       underlying: underlying,

@@ -43,4 +43,4 @@ export STRATEGY=0xdC206B5684A85ddEb4e2e1Ca48A1fCb5C3d31Ef3
 export FLYWHEEL=0x681cEEE3d6781394b2ECD7a4b9d5214f537aFeEb
 export REWARD=$TOUCH
 npx hardhat oracle:set-price --address $TOUCH --price "0.01" --network localhost
-npx hardhat market:create --asset-config "\"$POOL_NAME\"",deployer,"CErc20PluginRewardsDelegate",$TOUCH,$IRM,0.01,0.9,1,0,true,$STRATEGY,$FLYWHEEL,$REWARD --network localhost
+npx hardhat market:create --asset-config "$POOL_NAME,deployer,CErc20PluginRewardsDelegate,$TOUCH,$IRM,0.01,0.9,1,0,true,$STRATEGY,$FLYWHEEL,$REWARD" --network localhost

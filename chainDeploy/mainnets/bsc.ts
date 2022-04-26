@@ -165,6 +165,65 @@ export const deployConfig: ChainDeployConfig = {
       "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6", // LP,
     ],
   },
+  plugins: [
+    {
+      // 0x
+      strategy: "BeefyERC4626",
+      name: "BOMB-BTC LP Token",
+      underlying: "", // BOMB-BTC LP
+      symbol: "BOMB-BTC LP",
+      otherParams: [],
+    },
+    {
+      // 0x
+      strategy: "BombERC4626",
+      underlying: "", // xBOMB
+      name: "Staked BOMB",
+      symbol: "xBOMB",
+      otherParams: [],
+    },
+    {
+      // 0x
+      strategy: "BombERC4626",
+      underlying: "", // xBOMB
+      name: "BOMB",
+      symbol: "BOMB",
+      otherParams: [],
+    },
+    {
+      // 0x
+      strategy: "EllipsisERC4626",
+      underlying: "", // 3EPS
+      name: "",
+      symbol: "",
+      otherParams: [],
+    },
+    {
+      // 0x
+      strategy: "EllipsisERC4626",
+      underlying: "", // dai3EPS
+      name: "",
+      symbol: "",
+      otherParams: [],
+    },
+    {
+      // 0x
+      strategy: "EllipsisERC4626",
+      underlying: "", // ust3EPS
+      name: "",
+      symbol: "",
+      otherParams: [],
+    },
+    {
+      // 0x
+      strategy: "AutofarmERC4626",
+      underlying: "", //
+      name: "",
+      symbol: "",
+      otherParams: [],
+    },
+  ],
+  dynamicFlywheels: [null, null, null, null],
 };
 
 const chainlinkAssets: ChainlinkAsset[] = [
