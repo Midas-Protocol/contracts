@@ -177,18 +177,10 @@ export const deployConfig: ChainDeployConfig = {
     {
       // 0x
       strategy: "BombERC4626",
-      underlying: "", // xBOMB
-      name: "Staked BOMB",
-      symbol: "xBOMB",
-      otherParams: [],
-    },
-    {
-      // 0x
-      strategy: "BombERC4626",
-      underlying: "", // xBOMB
+      underlying: "0x522348779DCb2911539e76A1042aA922F9C47Ee3", // BOMB
       name: "BOMB",
       symbol: "BOMB",
-      otherParams: [],
+      otherParams: ["0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b", "0x522348779DCb2911539e76A1042aA922F9C47Ee3"], // xBOMB, BOMB
     },
     {
       // 0x
