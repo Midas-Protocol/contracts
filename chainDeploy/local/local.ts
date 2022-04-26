@@ -2,6 +2,7 @@ import { SALT } from "../../deploy/deploy";
 import { ChainDeployConfig } from "../helpers";
 import { ethers } from "ethers";
 import { MasterPriceOracle } from "../../typechain";
+import { deployERC4626Plugin, deployFlywheelWithDynamicRewards } from "../helpers/erc4626Plugins";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -18,6 +19,32 @@ export const deployConfig: ChainDeployConfig = {
     uniswapData: [],
     uniswapOracleInitialDeployTokens: [],
   },
+  plugins: [
+    {
+      // 0xdC206B5684A85ddEb4e2e1Ca48A1fCb5C3d31Ef3
+      strategy: "MockERC4626",
+      underlying: "0x5d7075e5A69A4d55BfA86F8d6ae49D7893D968f9", // TRIBE
+      name: "Tribe Token",
+      symbol: "TRIBE",
+      otherParams: [],
+    },
+    {
+      // 0xf52Bd2532Cd02c4dF36107f59717B7CE424532BD
+      strategy: "MockERC4626",
+      underlying: "0x54572129Fd040C19F9ab57A1a152e95C1fEC0dF0", // TOUCH
+      name: "Touch Token",
+      symbol: "TOUCH",
+      otherParams: [],
+    },
+  ],
+  dynamicFlywheels: [
+    {
+      // 0x681cEEE3d6781394b2ECD7a4b9d5214f537aFeEb
+      rewardToken: "0x54572129Fd040C19F9ab57A1a152e95C1fEC0dF0", // TOUCH
+      cycleLength: 100000,
+    },
+    null,
+  ],
 };
 
 export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Promise<void> => {
@@ -78,5 +105,16 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
 
   tx = await masterPriceOracle.setDefaultOracle(simplePriceOracle.address);
   await tx.wait();
+
+  // Plugins & Rewards
+  await deployFlywheelWithDynamicRewards({
+    ethers,
+    getNamedAccounts,
+    deployments,
+    run,
+    deployConfig,
+  });
+  await deployERC4626Plugin({ ethers, getNamedAccounts, deployments, run, deployConfig });
+
   ////
 };
