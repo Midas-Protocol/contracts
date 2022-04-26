@@ -66,6 +66,22 @@ abstract contract BaseTest is DSTest {
     chainConfigs[97].coins[0] = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
     chainConfigs[97].coins[1] = IERC20Upgradeable(0x8BaBbB98678facC7342735486C851ABD7A0d17Ca);
 
+    chainConfigs[1284] = ChainConfig({
+      pool: IERC20Upgradeable(0x0000000000000000000000000000000000000000),
+      lpToken: IERC20Upgradeable(0x0000000000000000000000000000000000000000),
+      lpTokenWhale: 0x0000000000000000000000000000000000000000,
+      coins: new IERC20Upgradeable[](2),
+      weth: WETH(payable(0xAcc15dC74880C9944775448304B263D191c6077F)),
+      curveLPTokenPriceOracleNoRegistry: CurveLpTokenPriceOracleNoRegistry(0x0000000000000000000000000000000000000000),
+      chainlinkOracle: ChainlinkPriceOracleV2(0x0000000000000000000000000000000000000000),
+      synthereumLiquiditiyPool: ISynthereumLiquidityPool(0x0000000000000000000000000000000000000000),
+      masterPriceOracle: MasterPriceOracle(0x0000000000000000000000000000000000000000),
+      twapOraclesFactory: UniswapTwapPriceOracleV2Factory(0x0000000000000000000000000000000000000000),
+      uniswapV2Factory: IUniswapV2Factory(0x0000000000000000000000000000000000000000)
+    });
+    chainConfigs[1284].coins[0] = IERC20Upgradeable(0x0000000000000000000000000000000000000000);
+    chainConfigs[1284].coins[1] = IERC20Upgradeable(0x0000000000000000000000000000000000000000);
+
     chainConfig = chainConfigs[block.chainid];
   }
 
@@ -77,6 +93,7 @@ abstract contract BaseTest is DSTest {
 
   uint256 BSC_MAINNET = 56;
   uint256 EVMOS_TESTNET = 9000;
+  uint256 MOONBEAM_MAINNET = 1284;
   uint256 BSC_CHAPEL = 97;
 
   function forChains(uint256 id0) public view returns (bool) {

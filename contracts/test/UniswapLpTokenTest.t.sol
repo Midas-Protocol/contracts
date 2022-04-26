@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "../oracles/MasterPriceOracle.sol";
+import "../external/compound/IPriceOracle.sol";
 import "../oracles/default/UniswapLpTokenPriceOracle.sol";
 import "./config/BaseTest.t.sol";
 import "../external/uniswap/IUniswapV2Pair.sol";
@@ -12,8 +13,16 @@ contract UniswapLpTokenBaseTest is BaseTest {
   address wtoken;
 
   function setUp() public {
-    mpo = chainConfig.masterPriceOracle;
     wtoken = address(chainConfig.weth);
+    if (address(chainConfig.masterPriceOracle) == address(0)) {
+      MasterPriceOracle masterPriceOracle = new MasterPriceOracle();
+      address[] memory _underlyings;
+      IPriceOracle[] memory _oracles;
+      masterPriceOracle.initialize(_underlyings, _oracles, IPriceOracle(address(0)), address(1),true, wtoken);
+      mpo = masterPriceOracle;
+    } else {
+      mpo = chainConfig.masterPriceOracle;
+    }
   }
 
   function getLpTokenPrice (address lpToken) internal returns (uint256) {
@@ -32,6 +41,7 @@ contract UniswapLpTokenBaseTest is BaseTest {
     } else {
       emit log("found the oracle");
     }
+    emit log_address(lpToken);
     return mpo.price(lpToken);
   }
 
@@ -40,5 +50,13 @@ contract UniswapLpTokenBaseTest is BaseTest {
 
     uint256 price = getLpTokenPrice(lpToken);
     assertTrue(price > 0);
+  }
+
+  function testGlmrUsdcLpTokenOraclePrice() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+    address lpToken = 0x99588867e817023162F4d4829995299054a5fC57; // Lp GLMR-USDC
+
+    uint256 price = getLpTokenPrice(lpToken);
+    emit log_uint(price);
+    // assertTrue(price > 0);
   }
 }

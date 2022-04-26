@@ -1,6 +1,8 @@
 import { ChainDeployConfig, deployUniswapOracle } from "../helpers";
 import { ethers } from "ethers";
 import { ChainDeployFnParams, ChainlinkAsset } from "../helpers/types";
+import { deployUniswapLpOracle } from "../oracles/uniswapLp";
+import { SALT } from "../../deploy/deploy";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xAcc15dC74880C9944775448304B263D191c6077F",
@@ -14,6 +16,10 @@ export const deployConfig: ChainDeployConfig = {
     uniswapV2RouterAddress: "0xAA30eF758139ae4a7f798112902Bf6d65612045f",
     uniswapV2FactoryAddress: "0x049581aEB6Fe262727f290165C29BDAB065a1B68",
     uniswapOracleInitialDeployTokens: [],
+    uniswapOracleLpTokens: [
+      "0xb929914B89584b4081C7966AC6287636F7EfD053", // GLMR-USDC
+      "0x99588867e817023162F4d4829995299054a5fC57", // GLMR-GLINT
+    ],
   },
 };
 
@@ -21,7 +27,25 @@ const chainlinkAssets: ChainlinkAsset[] = [];
 
 export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: ChainDeployFnParams): Promise<void> => {
   console.log("no chain specific deployments to run");
+  const { deployer } = await getNamedAccounts();
   //// Uniswap Oracle
   await deployUniswapOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
   ////
+
+  //// Uniswap Lp Oracle
+  await deployUniswapLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
+
+  //// Uniswap Lp token liquidator
+
+  let dep = await deployments.deterministic("UniswapLpTokenLiquidator", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [],
+    log: true,
+  });
+  const uniswapLpTokenLiquidator = await dep.deploy();
+  if (uniswapLpTokenLiquidator.transactionHash) {
+    await ethers.provider.waitForTransaction(uniswapLpTokenLiquidator.transactionHash);
+  }
+  console.log("UniswapLpTokenLiquidator: ", uniswapLpTokenLiquidator.address);
 };
