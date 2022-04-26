@@ -23,7 +23,7 @@ export const deployConfig: ChainDeployConfig = {
     {
       // 0xdC206B5684A85ddEb4e2e1Ca48A1fCb5C3d31Ef3
       strategy: "MockERC4626",
-      underlying: "0x5d7075e5A69A4d55BfA86F8d6ae49D7893D968f9", // TRIBE
+      underlying: "", // TRIBE
       name: "Tribe Token",
       symbol: "TRIBE",
       otherParams: [],
@@ -31,7 +31,7 @@ export const deployConfig: ChainDeployConfig = {
     {
       // 0xf52Bd2532Cd02c4dF36107f59717B7CE424532BD
       strategy: "MockERC4626",
-      underlying: "0x54572129Fd040C19F9ab57A1a152e95C1fEC0dF0", // TOUCH
+      underlying: "", // TOUCH
       name: "Touch Token",
       symbol: "TOUCH",
       otherParams: [],
@@ -40,10 +40,9 @@ export const deployConfig: ChainDeployConfig = {
   dynamicFlywheels: [
     {
       // 0x681cEEE3d6781394b2ECD7a4b9d5214f537aFeEb
-      rewardToken: "0x54572129Fd040C19F9ab57A1a152e95C1fEC0dF0", // TOUCH
+      rewardToken: "", // TOUCH
       cycleLength: 100000,
     },
-    null,
   ],
 };
 
@@ -81,6 +80,11 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
   tx = await touchToken.transfer(bob, ethers.utils.parseEther("100000"), { from: deployer });
   await tx.wait();
   ////
+
+  // rewards
+  deployConfig.plugins.find((p) => p.symbol === "TRIBE").underlying = tribeToken.address;
+  deployConfig.plugins.find((p) => p.symbol === "TOUCH").underlying = touchToken.address;
+  deployConfig.dynamicFlywheels[0].rewardToken = touchToken.address;
 
   ////
   //// ORACLES
