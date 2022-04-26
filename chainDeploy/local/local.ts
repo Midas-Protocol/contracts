@@ -43,6 +43,7 @@ export const deployConfig: ChainDeployConfig = {
       rewardToken: "", // TOUCH
       cycleLength: 100000,
     },
+    null
   ],
 };
 
