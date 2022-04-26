@@ -170,9 +170,14 @@ export const deployConfig: ChainDeployConfig = {
       // 0x
       strategy: "BeefyERC4626",
       name: "BOMB-BTC LP Token",
-      underlying: "", // BOMB-BTC LP
+      underlying: "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6", // BOMB-BTC LP
       symbol: "BOMB-BTC LP",
-      otherParams: [],
+      otherParams: [
+        "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6",
+        "BOMB-BTCB LP",
+        "BOMB-BTCB",
+        "0x94e85b8e050f3f281cb9597cc0144f1f7af1fe9b",
+      ],
     },
     {
       // 0x
