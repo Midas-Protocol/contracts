@@ -38,12 +38,12 @@ contract DiaPriceOracle is IPriceOracle, BasePriceOracle {
   /**
    * @dev Controls if `admin` can overwrite existing assignments of oracles to underlying tokens.
    */
-  bool public canAdminOverwrite;
+  bool public immutable CAN_ADMIN_OVERWRITE;
 
   /**
    * @dev The Wrapped native asset address.
    */
-  address public immutable wtoken;
+  address public immutable WTOKEN;
 
   /**
    * @notice DIA NATIVE/USD price feed contracts.
@@ -62,16 +62,16 @@ contract DiaPriceOracle is IPriceOracle, BasePriceOracle {
    */
   constructor(
     address _admin,
-    bool _canAdminOverwrite,
-    address _wtoken,
+    bool canAdminOverwrite,
+    address wtoken,
     DIAOracleV2 nativeTokenUsd,
     string memory nativeTokenUsdKey,
     MasterPriceOracle masterPriceOracle,
     address usdToken
   ) {
     admin = _admin;
-    canAdminOverwrite = _canAdminOverwrite;
-    wtoken = _wtoken;
+    CAN_ADMIN_OVERWRITE = canAdminOverwrite;
+    WTOKEN = wtoken;
     NATIVE_TOKEN_USD_PRICE_FEED = nativeTokenUsd;
     NATIVE_TOKEN_USD_KEY = nativeTokenUsdKey;
     MASTER_PRICE_ORACLE = masterPriceOracle;
@@ -122,7 +122,7 @@ contract DiaPriceOracle is IPriceOracle, BasePriceOracle {
       address underlying = underlyings[i];
 
       // Check for existing oracle if !canAdminOverwrite
-      if (!canAdminOverwrite)
+      if (!CAN_ADMIN_OVERWRITE)
         require(
           address(priceFeeds[underlying].feed) == address(0),
           "Admin cannot overwrite existing assignments of price feeds to underlying tokens."
@@ -139,7 +139,7 @@ contract DiaPriceOracle is IPriceOracle, BasePriceOracle {
    */
   function _price(address underlying) internal view returns (uint256) {
     // Return 1e18 for WTOKEN
-    if (underlying == wtoken || underlying == address(0)) return 1e18;
+    if (underlying == WTOKEN || underlying == address(0)) return 1e18;
 
     // Get token/Native price from Oracle
     DiaOracle memory feed = priceFeeds[underlying];
