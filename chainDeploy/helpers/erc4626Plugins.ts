@@ -37,7 +37,7 @@ export const deployFlywheelWithDynamicRewards = async ({
       console.log("FuseFlywheelDynamicRewards: ", fdr.address);
 
       const flywheelCore = (await ethers.getContractAt("FuseFlywheelCore", fwc.address, deployer)) as FuseFlywheelCore;
-      const tx = await flywheelCore.functions.setFlywheelRewards(fdr.address, { from: deployer });
+      const tx = await flywheelCore.setFlywheelRewards(fdr.address, { from: deployer });
       await tx.wait();
     }
   }
