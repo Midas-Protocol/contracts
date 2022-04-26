@@ -42,7 +42,7 @@ export default task("get-pool-data", "Get pools data")
       return;
     }
     if (taskArgs.poolId) {
-      return await sdk.fetchFusePoolData(taskArgs.poolId.toString(), undefined, taskArgs.cgId);
+      return await sdk.fetchFusePoolData(taskArgs.poolId.toString(), undefined);
     }
     if (!taskArgs.name && !taskArgs.creator) {
       const fpd = await hre.ethers.getContract("FusePoolLens", (await hre.ethers.getNamedSigner("deployer")).address);
@@ -63,7 +63,6 @@ task("get-position-ratio", "Get unhealthy po data")
     undefined,
     types.string
   )
-  .addOptionalParam("cgId", "Coingecko id for the native asset", "ethereum", types.string)
   .addOptionalParam("logData", "Verbose logging", false, types.boolean)
   .setAction(async (taskArgs, hre) => {
     // @ts-ignore
@@ -102,8 +101,8 @@ task("get-position-ratio", "Get unhealthy po data")
     }
 
     fusePoolData = taskArgs.name
-      ? await poolModule.getPoolByName(taskArgs.name, sdk, poolUser, taskArgs.cgId)
-      : await sdk.fetchFusePoolData(taskArgs.poolId.toString(), poolUser, taskArgs.cgId);
+      ? await poolModule.getPoolByName(taskArgs.name, sdk, poolUser)
+      : await sdk.fetchFusePoolData(taskArgs.poolId.toString(), poolUser);
 
     const maxBorrowR = fusePoolData.assets.map((a) => {
       const mult = parseFloat(hre.ethers.utils.formatUnits(a.collateralFactor, a.underlyingDecimals));

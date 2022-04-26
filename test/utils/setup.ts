@@ -58,8 +58,8 @@ const setUpBscOraclePrices = async () => {
   await tx.wait();
 };
 
-export const getPositionRatio = async ({ name, namedUser, userAddress, cgId }) => {
-  return await run("get-position-ratio", { name, namedUser, userAddress, cgId });
+export const getPositionRatio = async ({ name, namedUser, userAddress }) => {
+  return await run("get-position-ratio", { name, namedUser, userAddress });
 };
 
 export const tradeNativeForAsset = async ({ token, amount, account }) => {
@@ -184,7 +184,6 @@ export const liquidateAndVerify = async (
   poolName: string,
   poolAddress: string,
   liquidatedUserName: string,
-  coingeckoId: string,
   liquidator: FuseSafeLiquidator,
   liquidationConfigOverrides: ChainLiquidationConfig,
   liquidatorBalanceCalculator: (address: string) => Promise<BigNumber>
@@ -198,7 +197,6 @@ export const liquidateAndVerify = async (
   const ratioBefore = await getPositionRatio({
     name: poolName,
     userAddress: undefined,
-    cgId: coingeckoId,
     namedUser: liquidatedUserName,
   });
   console.log(`Ratio Before: ${ratioBefore}`);
@@ -221,7 +219,6 @@ export const liquidateAndVerify = async (
   const ratioAfter = await getPositionRatio({
     name: poolName,
     userAddress: undefined,
-    cgId: coingeckoId,
     namedUser: liquidatedUserName,
   });
   console.log(`Ratio After: ${ratioAfter}`);
