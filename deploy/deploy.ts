@@ -147,6 +147,10 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   await tx.wait();
   console.log("FuseFeeDistributor comptroller whitelist set", tx.hash);
 
+  tx = await comptroller._toggleAutoImplementations(true);
+  await tx.wait();
+  console.log("Toggled comptroller AutoImplementation", tx.hash);
+
   const fplDeployment = await deployments.deploy("FusePoolLens", {
     from: deployer,
     log: true,
