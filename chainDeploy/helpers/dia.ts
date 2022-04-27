@@ -32,15 +32,15 @@ export const deployDiaOracle = async ({
   if (dia.transactionHash) await ethers.provider.waitForTransaction(dia.transactionHash);
   console.log("DiaPriceOracle: ", dia.address);
 
-  const diaOracle = (await ethers.getContract("ChainlinkPriceOracleV2", deployer)) as DiaPriceOracle;
+  const diaOracle = (await ethers.getContract("DiaPriceOracle", deployer)) as DiaPriceOracle;
   tx = await diaOracle.setPriceFeeds(
     diaAssets.map((d) => d.underlying),
     diaAssets.map((d) => d.feed),
     diaAssets.map((d) => d.key)
   );
-  console.log(`Set price feeds for ChainlinkPriceOracleV2: ${tx.hash}`);
+  console.log(`Set price feeds for DiaPriceOracle: ${tx.hash}`);
   await tx.wait();
-  console.log(`Set price feeds for ChainlinkPriceOracleV2 mined: ${tx.hash}`);
+  console.log(`Set price feeds for DiaPriceOracle mined: ${tx.hash}`);
 
   const underlyings = diaAssets.map((d) => d.underlying);
   const oracles = Array(diaAssets.length).fill(diaOracle.address);
