@@ -1,11 +1,10 @@
-import { SALT } from "../../deploy/deploy";
+import { IrmDeployFnParams } from "./types";
 
-export const deployIRMs = async ({ ethers, getNamedAccounts, deployments, deployConfig }): Promise<void> => {
+export const deployIRMs = async ({ ethers, getNamedAccounts, deployments, deployConfig }: IrmDeployFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   //// IRM MODELS|
-  let dep = await deployments.deterministic("JumpRateModel", {
+  const jrm = await deployments.deploy("JumpRateModel", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [
       deployConfig.blocksPerYear,
       "20000000000000000", // baseRatePerYear
@@ -15,16 +14,13 @@ export const deployIRMs = async ({ ethers, getNamedAccounts, deployments, deploy
     ],
     log: true,
   });
-
-  const jrm = await dep.deploy();
   if (jrm.transactionHash) await ethers.provider.waitForTransaction(jrm.transactionHash);
   console.log("JumpRateModel: ", jrm.address);
 
   // taken from WhitePaperInterestRateModel used for cETH
   // https://etherscan.io/address/0x0c3f8df27e1a00b47653fde878d68d35f00714c0#code
-  dep = await deployments.deterministic("WhitePaperInterestRateModel", {
+  const wprm = await deployments.deploy("WhitePaperInterestRateModel", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [
       deployConfig.blocksPerYear,
       "20000000000000000", // baseRatePerYear
@@ -32,8 +28,6 @@ export const deployIRMs = async ({ ethers, getNamedAccounts, deployments, deploy
     ],
     log: true,
   });
-
-  const wprm = await dep.deploy();
   if (wprm.transactionHash) await ethers.provider.waitForTransaction(wprm.transactionHash);
   console.log("WhitePaperInterestRateModel: ", wprm.address);
   ////
