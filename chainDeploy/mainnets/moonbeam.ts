@@ -1,6 +1,8 @@
 import { ChainDeployConfig, deployUniswapOracle } from "../helpers";
 import { ethers } from "ethers";
 import { ChainDeployFnParams, DiaAsset } from "../helpers/types";
+import { deployUniswapLpOracle } from "../oracles/uniswapLp";
+import { SALT } from "../../deploy/deploy";
 import { deployDiaOracle } from "../helpers/dia";
 
 export const deployConfig: ChainDeployConfig = {
@@ -14,7 +16,16 @@ export const deployConfig: ChainDeployConfig = {
     pairInitHashCode: ethers.utils.hexlify("0xe31da4209ffcce713230a74b5287fa8ec84797c9e77e1f7cfeccea015cdc97ea"),
     uniswapV2RouterAddress: "0x96b244391D98B62D19aE89b1A4dCcf0fc56970C7",
     uniswapV2FactoryAddress: "0x985BcA32293A7A496300a48081947321177a86FD",
-    uniswapOracleInitialDeployTokens: [],
+    uniswapOracleInitialDeployTokens: [
+      {
+        token: "0xcd3B51D98478D53F4515A306bE565c6EebeF1D58", // GLINT
+        baseToken: "0xAcc15dC74880C9944775448304B263D191c6077F", // GLMR
+      },
+    ],
+    uniswapOracleLpTokens: [
+      "0xb929914B89584b4081C7966AC6287636F7EfD053", // GLMR-USDC
+      "0x99588867e817023162F4d4829995299054a5fC57", // GLMR-GLINT
+    ],
   },
 };
 
@@ -41,6 +52,8 @@ const diaAssets: DiaAsset[] = [
 
 export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: ChainDeployFnParams): Promise<void> => {
   console.log("no chain specific deployments to run");
+  const { deployer } = await getNamedAccounts();
+
   //// Uniswap Oracle
   await deployUniswapOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
   ////
@@ -53,4 +66,20 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
     deployConfig,
     diaNativeFeed: { feed: "0x8ae08CB9161A38CE241BB54816b2CbA549C136Ae", key: "GLMR/USD" },
   });
+
+  //// Uniswap Lp Oracle
+  await deployUniswapLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
+
+  //// Uniswap Lp token liquidator
+  let dep = await deployments.deterministic("UniswapLpTokenLiquidator", {
+    from: deployer,
+    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
+    args: [],
+    log: true,
+  });
+  const uniswapLpTokenLiquidator = await dep.deploy();
+  if (uniswapLpTokenLiquidator.transactionHash) {
+    await ethers.provider.waitForTransaction(uniswapLpTokenLiquidator.transactionHash);
+  }
+  console.log("UniswapLpTokenLiquidator: ", uniswapLpTokenLiquidator.address);
 };
