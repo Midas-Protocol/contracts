@@ -18,7 +18,7 @@ export const deployConfig: ChainDeployConfig = {
   },
 };
 
-export const deploy = async ({ getNamedAccounts, deployments, ethers }): Promise<void> => {
+export const deploy = async ({ getNamedAccounts }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   console.log("deployer: ", deployer);
 };

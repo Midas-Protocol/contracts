@@ -1,4 +1,5 @@
-import { SALT } from "../../deploy/deploy";
+import { constants } from "ethers";
+import { MasterPriceOracle } from "../../typechain";
 import { UniswapDeployFnParams } from "../helpers/types";
 
 export const deployUniswapLpOracle = async ({
@@ -6,24 +7,29 @@ export const deployUniswapLpOracle = async ({
   getNamedAccounts,
   deployments,
   deployConfig,
-  run,
 }: UniswapDeployFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
-  let dep = await deployments.deterministic("UniswapLpTokenPriceOracle", {
+  const lpTokenPriceOralce = await deployments.deploy("UniswapLpTokenPriceOracle", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [deployConfig.wtoken],
     log: true,
+    waitConfirmations: 1,
   });
-  const lpToken = await dep.deploy();
-  if (lpToken.transactionHash) {
-    await ethers.provider.waitForTransaction(lpToken.transactionHash);
+  console.log("UniswapLpTokenPriceOracle: ", lpTokenPriceOralce.address);
+
+  const mpo = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
+  let oracles = [];
+  let underlyings = [];
+  for (let lpToken of deployConfig.uniswap.uniswapOracleLpTokens) {
+    if ((await mpo.callStatic.oracles(lpToken)) === constants.AddressZero) {
+      oracles.push(lpTokenPriceOralce.address);
+      underlyings.push(lpToken);
+    }
   }
-  console.log("UniswapLpTokenPriceOracle: ", lpToken.address);
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
-  let tx = await mpo.add([deployConfig.uniswap.uniswapOracleLpTokens[0]], [lpToken.address]);
-  await tx.wait();
-
-  console.log(`Master Price Oracle updated for token ${deployConfig.uniswap.uniswapOracleLpTokens[0]}`);
+  if (underlyings.length) {
+    let tx = await mpo.add(underlyings, oracles);
+    await tx.wait();
+    console.log(`Master Price Oracle updated for token ${underlyings.join(",")}`);
+  }
 };

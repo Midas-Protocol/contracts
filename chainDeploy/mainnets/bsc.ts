@@ -308,24 +308,20 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   await deployCurveLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig, curvePools });
 
-  let dep = await deployments.deterministic("SimplePriceOracle", {
+  const simplePO = await deployments.deploy("SimplePriceOracle", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
   });
-  const simplePO = await dep.deploy();
   if (simplePO.transactionHash) await ethers.provider.waitForTransaction(simplePO.transactionHash);
   console.log("SimplePriceOracle: ", simplePO.address);
   ////
 
-  dep = await deployments.deterministic("UniswapLpTokenLiquidator", {
+  const uniswapLpTokenLiquidator = await deployments.deploy("UniswapLpTokenLiquidator", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
   });
-  const uniswapLpTokenLiquidator = await dep.deploy();
   if (uniswapLpTokenLiquidator.transactionHash) {
     await ethers.provider.waitForTransaction(uniswapLpTokenLiquidator.transactionHash);
   }
@@ -333,39 +329,33 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   //// Liquidator Redemption Strategies
   /// xBOMB->BOMB
-  dep = await deployments.deterministic("XBombLiquidator", {
+  const xbombLiquidator = await deployments.deploy("XBombLiquidator", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
   });
-  const xbombLiquidator = await dep.deploy();
   if (xbombLiquidator.transactionHash) await ethers.provider.waitForTransaction(xbombLiquidator.transactionHash);
   console.log("XBombLiquidator: ", xbombLiquidator.address);
 
   /// jBRL->BUSD
   let synthereumLiquidityPoolAddress = "0x0fD8170Dc284CD558325029f6AEc1538c7d99f49";
   let expirationTime = 40 * 60; // period in which the liquidation tx is valid to be included in a block, in seconds
-  dep = await deployments.deterministic("JarvisSynthereumLiquidator", {
+  const jarvisSynthereumLiquidator = await deployments.deploy("JarvisSynthereumLiquidator", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [synthereumLiquidityPoolAddress, expirationTime],
     log: true,
   });
-  const jarvisSynthereumLiquidator = await dep.deploy();
   if (jarvisSynthereumLiquidator.transactionHash)
     await ethers.provider.waitForTransaction(jarvisSynthereumLiquidator.transactionHash);
   console.log("JarvisSynthereumLiquidator: ", jarvisSynthereumLiquidator.address);
 
   /// EPS
   const curveOracle = await ethers.getContract("CurveLpTokenPriceOracleNoRegistry", deployer);
-  dep = await deployments.deterministic("CurveLpTokenLiquidatorNoRegistry", {
+  const curveLpTokenLiquidatorNoRegistry = await deployments.deploy("CurveLpTokenLiquidatorNoRegistry", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [deployConfig.wtoken, curveOracle.address],
     log: true,
   });
-  const curveLpTokenLiquidatorNoRegistry = await dep.deploy();
   if (curveLpTokenLiquidatorNoRegistry.transactionHash)
     await ethers.provider.waitForTransaction(curveLpTokenLiquidatorNoRegistry.transactionHash);
   console.log("CurveLpTokenLiquidatorNoRegistry: ", curveLpTokenLiquidatorNoRegistry.address);
