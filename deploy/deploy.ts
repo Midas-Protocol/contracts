@@ -12,6 +12,10 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   console.log("chainId: ", chainId);
   const { deployer } = await getNamedAccounts();
   console.log("deployer: ", deployer);
+  const balance = await ethers.provider.getBalance(deployer);
+  console.log('balance: ', balance.toString());
+  const price = await ethers.provider.getGasPrice();
+  console.log('price: ', ethers.utils.formatUnits(price, "gwei"));
 
   if (!chainDeployConfig[chainId]) {
     throw new Error(`Config invalid for ${chainId}`);

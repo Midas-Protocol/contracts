@@ -3,7 +3,6 @@ import { ChainlinkPriceOracleV2 } from "../../typechain";
 import { Asset, ChainlinkDeployFnParams, ChainlinkFeedBaseCurrency } from "./types";
 
 export const deployChainlinkOracle = async ({
-  run,
   ethers,
   getNamedAccounts,
   deployments,
