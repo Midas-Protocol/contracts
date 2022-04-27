@@ -95,7 +95,6 @@ export type cERC20Conf = {
   initialExchangeRateMantissa?: BigNumber; // Initial exchange rate scaled by 1e18
   name: string; // ERC20 name of this token
   symbol: string; // ERC20 Symbol
-  decimals: number; // decimal precision
   admin: string; // Address of the admin
   collateralFactor: number;
   reserveFactor: number;
