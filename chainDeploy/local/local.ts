@@ -41,18 +41,17 @@ export const deployConfig: ChainDeployConfig = {
   ],
 };
 
-export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Promise<void> => {
+export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer, alice, bob } = await getNamedAccounts();
 
   ////
   //// TOKENS
-  let dep = await deployments.deterministic("TRIBEToken", {
+  const tribe = await deployments.deploy("TRIBEToken", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [ethers.utils.parseEther("1250000000"), deployer],
     log: true,
   });
-  const tribe = await dep.deploy();
   console.log("TRIBEToken: ", tribe.address);
   const tribeToken = await ethers.getContractAt("TRIBEToken", tribe.address, deployer);
   let tx = await tribeToken.transfer(alice, ethers.utils.parseEther("100000"), { from: deployer });
@@ -60,13 +59,12 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
 
   tx = await tribeToken.transfer(bob, ethers.utils.parseEther("100000"), { from: deployer });
   await tx.wait();
-  dep = await deployments.deterministic("TOUCHToken", {
+  const touch = await deployments.deploy("TOUCHToken", {
     from: deployer,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [ethers.utils.parseEther("2250000000"), deployer],
     log: true,
   });
-  const touch = await dep.deploy();
   console.log("TOUCHToken: ", touch.address);
   const touchToken = await ethers.getContractAt("TOUCHToken", touch.address, deployer);
   tx = await touchToken.transfer(alice, ethers.utils.parseEther("100000"), { from: deployer });
@@ -83,13 +81,12 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
 
   ////
   //// ORACLES
-  dep = await deployments.deterministic("SimplePriceOracle", {
+  const simplePO = await deployments.deploy("SimplePriceOracle", {
     from: bob,
     salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
   });
-  const simplePO = await dep.deploy();
   console.log("SimplePriceOracle: ", simplePO.address);
 
   const masterPriceOracle = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;

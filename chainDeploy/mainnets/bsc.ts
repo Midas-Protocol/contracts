@@ -188,31 +188,106 @@ export const deployConfig: ChainDeployConfig = {
       // 0x
       strategy: "EllipsisERC4626",
       underlying: "0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452", // 3EPS
-      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker, dynamicFlywheel
+      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker
       flywheelIndex: 0,
     },
     {
       // 0x
       strategy: "EllipsisERC4626",
       underlying: "0x0BC3a8239B0a63E945Ea1bd6722Ba747b9557e56", // dai3EPS
-      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker, dynamicFlywheel
+      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker
       flywheelIndex: 0,
     },
     {
       // 0x
       strategy: "EllipsisERC4626",
       underlying: "0x151F1611b2E304DEd36661f65506f9D7D172beba", // ust3EPS
-      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker, dynamicFlywheel
+      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker
       flywheelIndex: 0,
+    },
+    // TODO I cant tell if these vaults are depricated. Would need to speak with Autofarm to clear this up.
+    /* {
+      // 0x
+      strategy: "AutofarmERC4626",
+      underlying: "0xa184088a740c695E156F91f5cC086a06bb78b827", // AUTO
+      otherParams: ["","0xa184088a740c695E156F91f5cC086a06bb78b827", "0x0895196562C7868C5Be92459FaE7f877ED450452"], // poolId, AUTO, AutofarmV2 (Vault Handler)
+      flywheelIndex:1
     },
     {
       // 0x
       strategy: "AutofarmERC4626",
-      underlying: "", //
-      otherParams: [],
+      underlying: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", // WBNB
+      otherParams: [ "1","0xa184088a740c695E156F91f5cC086a06bb78b827", "0x0895196562C7868C5Be92459FaE7f877ED450452"], // poolId, AUTO, AutofarmV2 (Vault Handler)
+      flywheelIndex:1
+    },
+    {
+      // 0x
+      strategy: "AutofarmERC4626",
+      underlying: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56", // BUSD
+      otherParams: [ "2","0xa184088a740c695E156F91f5cC086a06bb78b827", "0x0895196562C7868C5Be92459FaE7f877ED450452"], // poolId, AUTO, AutofarmV2 (Vault Handler)
+      flywheelIndex:1
+    },
+    {
+      // 0x
+      strategy: "AutofarmERC4626",
+      underlying: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", // BTCB
+      otherParams: [ "3","0xa184088a740c695E156F91f5cC086a06bb78b827", "0x0895196562C7868C5Be92459FaE7f877ED450452"], // poolId, AUTO, AutofarmV2 (Vault Handler)
+      flywheelIndex:1
+    },
+    {
+      // 0x
+      strategy: "AutofarmERC4626",
+      underlying: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", // BETH
+      otherParams: [ "4","0xa184088a740c695E156F91f5cC086a06bb78b827", "0x0895196562C7868C5Be92459FaE7f877ED450452"], // poolId, AUTO, AutofarmV2 (Vault Handler)
+      flywheelIndex:1
+    }, */
+    {
+      // 0x
+      strategy: "AlpacaERC4626",
+      underlying: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", // WBNB
+      otherParams: ["0xd7D069493685A581d27824Fc46EdA46B7EfC0063"], // ibWBNB
+    },
+    {
+      // 0x
+      strategy: "AlpacaERC4626",
+      underlying: "0x2170ed0880ac9a755fd29b2688956bd959f933f8", // BETH
+      otherParams: ["0xbfF4a34A4644a113E8200D7F1D79b3555f723AfE"], // ibBETH
+    },
+    {
+      // 0x
+      strategy: "AlpacaERC4626",
+      underlying: "0xe9e7cea3dedca5984780bafc599bd69add087d56", // BUSD
+      otherParams: ["0x7C9e73d4C71dae564d41F78d56439bB4ba87592f"], // ibBUSD
+    },
+    {
+      // 0x
+      strategy: "AlpacaERC4626",
+      underlying: "0x55d398326f99059ff775485246999027b3197955", // USDT
+      otherParams: ["0x158Da805682BdC8ee32d52833aD41E74bb951E59"], // ibUSDT
+    },
+    {
+      // 0x
+      strategy: "AlpacaERC4626",
+      underlying: "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d", // USDC
+      otherParams: ["0x800933D685E7Dc753758cEb77C8bd34aBF1E26d7"], // ibUSDC
+    },
+    {
+      // 0x
+      strategy: "AlpacaERC4626",
+      underlying: "0x14016e85a25aeb13065688cafb43044c2ef86784", // TUSD
+      otherParams: ["0x3282d2a151ca00BfE7ed17Aa16E42880248CD3Cd"], // ibTUSD
+    },
+    {
+      // 0x
+      strategy: "AlpacaERC4626",
+      underlying: "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c", // BTCB
+      otherParams: ["0x08FC9Ba2cAc74742177e0afC3dC8Aed6961c24e7"], // ibBTCB
     },
   ],
-  dynamicFlywheels: [{ rewardToken: "0xaf41054c1487b0e5e2b9250c0332ecbce6ce9d71", cycleLength: 1 }],
+  dynamicFlywheels: [
+    { rewardToken: "0xaf41054c1487b0e5e2b9250c0332ecbce6ce9d71", cycleLength: 1 },
+    { rewardToken: "0xa184088a740c695E156F91f5cC086a06bb78b827", cycleLength: 1 },
+  ],
 };
 
 const chainlinkAssets: ChainlinkAsset[] = [
@@ -361,24 +436,20 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   await deployCurveLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig, curvePools });
 
-  let dep = await deployments.deterministic("SimplePriceOracle", {
+  const simplePO = await deployments.deploy("SimplePriceOracle", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
   });
-  const simplePO = await dep.deploy();
   if (simplePO.transactionHash) await ethers.provider.waitForTransaction(simplePO.transactionHash);
   console.log("SimplePriceOracle: ", simplePO.address);
   ////
 
-  dep = await deployments.deterministic("UniswapLpTokenLiquidator", {
+  const uniswapLpTokenLiquidator = await deployments.deploy("UniswapLpTokenLiquidator", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
   });
-  const uniswapLpTokenLiquidator = await dep.deploy();
   if (uniswapLpTokenLiquidator.transactionHash) {
     await ethers.provider.waitForTransaction(uniswapLpTokenLiquidator.transactionHash);
   }
@@ -386,39 +457,33 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   //// Liquidator Redemption Strategies
   /// xBOMB->BOMB
-  dep = await deployments.deterministic("XBombLiquidator", {
+  const xbombLiquidator = await deployments.deploy("XBombLiquidator", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
   });
-  const xbombLiquidator = await dep.deploy();
   if (xbombLiquidator.transactionHash) await ethers.provider.waitForTransaction(xbombLiquidator.transactionHash);
   console.log("XBombLiquidator: ", xbombLiquidator.address);
 
   /// jBRL->BUSD
   let synthereumLiquidityPoolAddress = "0x0fD8170Dc284CD558325029f6AEc1538c7d99f49";
   let expirationTime = 40 * 60; // period in which the liquidation tx is valid to be included in a block, in seconds
-  dep = await deployments.deterministic("JarvisSynthereumLiquidator", {
+  const jarvisSynthereumLiquidator = await deployments.deploy("JarvisSynthereumLiquidator", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [synthereumLiquidityPoolAddress, expirationTime],
     log: true,
   });
-  const jarvisSynthereumLiquidator = await dep.deploy();
   if (jarvisSynthereumLiquidator.transactionHash)
     await ethers.provider.waitForTransaction(jarvisSynthereumLiquidator.transactionHash);
   console.log("JarvisSynthereumLiquidator: ", jarvisSynthereumLiquidator.address);
 
   /// EPS
   const curveOracle = await ethers.getContract("CurveLpTokenPriceOracleNoRegistry", deployer);
-  dep = await deployments.deterministic("CurveLpTokenLiquidatorNoRegistry", {
+  const curveLpTokenLiquidatorNoRegistry = await deployments.deploy("CurveLpTokenLiquidatorNoRegistry", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [deployConfig.wtoken, curveOracle.address],
     log: true,
   });
-  const curveLpTokenLiquidatorNoRegistry = await dep.deploy();
   if (curveLpTokenLiquidatorNoRegistry.transactionHash)
     await ethers.provider.waitForTransaction(curveLpTokenLiquidatorNoRegistry.transactionHash);
   console.log("CurveLpTokenLiquidatorNoRegistry: ", curveLpTokenLiquidatorNoRegistry.address);

@@ -161,7 +161,7 @@ export const chainPlugins = {
     // TOUCH
     "0x54572129Fd040C19F9ab57A1a152e95C1fEC0dF0": [
       {
-        strategy: "Mock Touch Strategy",
+        strategyName: "Mock Touch Strategy",
         strategyAddress: "0xdC206B5684A85ddEb4e2e1Ca48A1fCb5C3d31Ef3",
         dynamicFlywheel: null,
       },

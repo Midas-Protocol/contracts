@@ -93,7 +93,7 @@ const config: HardhatUserConfig = {
     rinkeby: {
       accounts: { mnemonic },
       chainId: 4,
-      url: urlOverride || process.env.RINKEBY_ETH_PROVIDER_URL || "http://localhost:8545",
+      url: urlOverride || process.env.RINKEBY_ETH_PROVIDER_URL || "https://rpc.ankr.com/eth_rinkeby",
     },
     kovan: {
       accounts: { mnemonic },
@@ -141,8 +141,6 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
       chainId: 1284,
       saveDeployments: true,
-      gasPrice: 1000000000,
-      gas: 8000000,
     },
   },
 };
