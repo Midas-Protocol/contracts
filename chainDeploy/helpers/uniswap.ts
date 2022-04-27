@@ -1,10 +1,8 @@
-import { SALT } from "../../deploy/deploy";
 import { UniswapTwapPriceOracleV2Factory } from "../../typechain/UniswapTwapPriceOracleV2Factory";
 import { constants } from "ethers";
 import { UniswapDeployFnParams } from "./types";
 
 export const deployUniswapOracle = async ({
-  run,
   ethers,
   getNamedAccounts,
   deployments,
@@ -15,33 +13,27 @@ export const deployUniswapOracle = async ({
   const updateOracles = [],
     updateUnderlyings = [];
   //// Uniswap Oracle
-  let dep = await deployments.deterministic("UniswapTwapPriceOracleV2", {
+  const utpo = await deployments.deploy("UniswapTwapPriceOracleV2", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
   });
-  const utpo = await dep.deploy();
   if (utpo.transactionHash) await ethers.provider.waitForTransaction(utpo.transactionHash);
   console.log("UniswapTwapPriceOracleV2: ", utpo.address);
 
-  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Root", {
+  const utpor = await deployments.deploy("UniswapTwapPriceOracleV2Root", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [deployConfig.wtoken],
     log: true,
   });
-  const utpor = await dep.deploy();
   if (utpor.transactionHash) await ethers.provider.waitForTransaction(utpor.transactionHash);
   console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
 
-  dep = await deployments.deterministic("UniswapTwapPriceOracleV2Factory", {
+  const utpof = await deployments.deploy("UniswapTwapPriceOracleV2Factory", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [utpor.address, utpo.address, deployConfig.wtoken],
     log: true,
   });
-  const utpof = await dep.deploy();
   if (utpof.transactionHash) await ethers.provider.waitForTransaction(utpof.transactionHash);
   console.log("UniswapTwapPriceOracleV2Factory: ", utpof.address);
 

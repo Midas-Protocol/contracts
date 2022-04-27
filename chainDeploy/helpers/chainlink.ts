@@ -1,10 +1,8 @@
 import { providers } from "ethers";
-import { SALT } from "../../deploy/deploy";
 import { ChainlinkPriceOracleV2 } from "../../typechain";
 import { Asset, ChainlinkDeployFnParams, ChainlinkFeedBaseCurrency } from "./types";
 
 export const deployChainlinkOracle = async ({
-  run,
   ethers,
   getNamedAccounts,
   deployments,
@@ -16,13 +14,11 @@ export const deployChainlinkOracle = async ({
   let tx: providers.TransactionResponse;
 
   //// Chainlink Oracle
-  let dep = await deployments.deterministic("ChainlinkPriceOracleV2", {
+  const cpo = await deployments.deploy("ChainlinkPriceOracleV2", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [deployer, true, deployConfig.wtoken, deployConfig.nativeTokenUsdChainlinkFeed],
     log: true,
   });
-  const cpo = await dep.deploy();
   if (cpo.transactionHash) await ethers.provider.waitForTransaction(cpo.transactionHash);
   console.log("ChainlinkPriceOracleV2: ", cpo.address);
 

@@ -1,7 +1,7 @@
 import { constants, ethers, providers, utils } from "ethers";
 import { SALT } from "../../deploy/deploy";
 import { ChainDeployConfig } from "../helpers";
-import { CurvePoolConfig } from "../helpers/types";
+import { ChainDeployFnParams, CurvePoolConfig } from "../helpers/types";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xA30404AFB4c43D25542687BCF4367F59cc77b5d2",
@@ -18,7 +18,7 @@ export const deployConfig: ChainDeployConfig = {
   },
 };
 
-export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Promise<void> => {
+export const deploy = async ({ getNamedAccounts, deployments, ethers }: ChainDeployFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   console.log("deployer: ", deployer);
   let tx: providers.TransactionResponse;
@@ -51,34 +51,31 @@ export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Pr
 
   //// ORACLES
   //// Underlyings use SimplePriceOracle to hardcode the price
-  let dep = await deployments.deterministic("SimplePriceOracle", {
+  const spo = await deployments.deploy("SimplePriceOracle", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
   });
-  const spo = await dep.deploy();
   if (spo.transactionHash) await ethers.provider.waitForTransaction(spo.transactionHash);
   console.log("SimplePriceOracle: ", spo.address);
 
   //// CurveLpTokenPriceOracleNoRegistry
-  dep = await deployments.deterministic("CurveLpTokenPriceOracleNoRegistry", {
+  const cpo = await deployments.deploy("CurveLpTokenPriceOracleNoRegistry", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      execute: {
+        methodName: "initialize",
+        args: [[], [], []],
+      },
+      proxyContract: "OpenZeppelinTransparentProxy",
+      owner: deployer,
+    },
   });
-  const cpo = await dep.deploy();
   console.log("CurveLpTokenPriceOracleNoRegistry: ", cpo.address);
 
   const curveOracle = await ethers.getContract("CurveLpTokenPriceOracleNoRegistry", deployer);
-  let owner = await curveOracle.owner();
-  if (owner === constants.AddressZero) {
-    tx = await curveOracle.initialize([], [], []);
-    console.log("initialize tx sent: ", tx.hash);
-    receipt = await tx.wait();
-    console.log("registerPool mined: ", receipt.transactionHash);
-  }
 
   const simplePriceOracle = await ethers.getContract("SimplePriceOracle", deployer);
 
@@ -112,19 +109,10 @@ export const deploy = async ({ run, getNamedAccounts, deployments, ethers }): Pr
       mpoOracles.push(simplePriceOracle.address);
     });
   });
-  const admin = await masterPriceOracle.admin();
-  if (admin === ethers.constants.AddressZero) {
-    let tx = await masterPriceOracle.initialize(
-      mpoUnderlyings,
-      mpoOracles,
-      curveOracle.address,
-      deployer,
-      true,
-      deployConfig.wtoken
-    );
-    await tx.wait();
-    console.log("MasterPriceOracle initialized", tx.hash);
-  } else {
-    console.log("MasterPriceOracle already initialized");
-  }
+  tx = await masterPriceOracle.add(
+    mpoUnderlyings,
+    mpoOracles,
+  );
+  await tx.wait();
+  console.log("MasterPriceOracle oracles added", tx.hash);
 };
