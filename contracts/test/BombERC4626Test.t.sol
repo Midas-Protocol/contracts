@@ -18,7 +18,7 @@ contract BombERC4626Test is BaseTest {
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     bombToken = IERC20Upgradeable(address(xbombToken.reward()));
-    vault = new BombERC4626(address(xbombToken), ERC20(address(bombToken)));
+    vault = new BombERC4626(ERC20(address(bombToken)), address(xbombToken));
 
     // get some tokens from a whale
     vm.prank(whale);
@@ -26,8 +26,8 @@ contract BombERC4626Test is BaseTest {
   }
 
   function testInitializedValues() public shouldRun(forChains(BSC_MAINNET)) {
-    assertEq(vault.name(), "bomb.money");
-    assertEq(vault.symbol(), "BOMB");
+    assertEq(vault.name(), "Midas bomb.money Vault");
+    assertEq(vault.symbol(), "mvBOMB");
     assertEq(address(vault.asset()), address(bombToken));
     assertEq(address(vault.xbomb()), address(xbombToken));
   }

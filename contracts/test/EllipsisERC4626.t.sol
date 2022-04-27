@@ -63,10 +63,8 @@ contract EllipsisERC4626Test is DSTest {
 
     ellipsisERC4626 = new EllipsisERC4626(
       testToken,
-      "TestVault",
-      "TSTV",
-      ILpTokenStaker(address(mockLpTokenStaker)),
-      FlywheelCore(address(flywheel))
+      FlywheelCore(address(flywheel)),
+      ILpTokenStaker(address(mockLpTokenStaker))
     );
     marketKey = ERC20(address(ellipsisERC4626));
     flywheel.addStrategyForRewards(marketKey);
@@ -74,8 +72,8 @@ contract EllipsisERC4626Test is DSTest {
   }
 
   function testInitializedValues() public {
-    assertEq(ellipsisERC4626.name(), "TestVault");
-    assertEq(ellipsisERC4626.symbol(), "TSTV");
+    assertEq(ellipsisERC4626.name(), "Midas TestLpToken Vault");
+    assertEq(ellipsisERC4626.symbol(), "mvLP-TST");
     assertEq(address(ellipsisERC4626.asset()), address(testToken));
     assertEq(address(ellipsisERC4626.lpTokenStaker()), address(mockLpTokenStaker));
     assertEq(address(marketKey), address(ellipsisERC4626));

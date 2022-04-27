@@ -39,8 +39,6 @@ contract BeefyERC4626 is ERC4626 {
   /**
      @notice Creates a new Vault that accepts a specific underlying token.
      @param _asset The ERC20 compliant token the Vault should accept.
-     @param _name The name for the vault token.
-     @param _symbol The symbol for the vault token.
      @param _beefyVault The Beefy Vault contract.
     */
   constructor(ERC20 _asset, IBeefyVault _beefyVault)
