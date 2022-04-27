@@ -77,7 +77,7 @@ abstract contract BaseTest is DSTest {
       synthereumLiquiditiyPool: ISynthereumLiquidityPool(0x0000000000000000000000000000000000000000),
       masterPriceOracle: MasterPriceOracle(0x0000000000000000000000000000000000000000),
       twapOraclesFactory: UniswapTwapPriceOracleV2Factory(0x0000000000000000000000000000000000000000),
-      uniswapV2Factory: IUniswapV2Factory(0x0000000000000000000000000000000000000000)
+      uniswapV2Factory: IUniswapV2Factory(0x985BcA32293A7A496300a48081947321177a86FD)
     });
     chainConfigs[1284].coins[0] = IERC20Upgradeable(0x0000000000000000000000000000000000000000);
     chainConfigs[1284].coins[1] = IERC20Upgradeable(0x0000000000000000000000000000000000000000);

@@ -15,7 +15,16 @@ export const deployConfig: ChainDeployConfig = {
     pairInitHashCode: ethers.utils.hexlify("0xd0d4c4cd0848c93cb4fd1f498d7013ee6bfb25783ea21593d5834f5d250ece66"),
     uniswapV2RouterAddress: "0xAA30eF758139ae4a7f798112902Bf6d65612045f",
     uniswapV2FactoryAddress: "0x049581aEB6Fe262727f290165C29BDAB065a1B68",
-    uniswapOracleInitialDeployTokens: [],
+    uniswapOracleInitialDeployTokens: [
+      {
+        token: "0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b", // USDC
+        baseToken: "0xAcc15dC74880C9944775448304B263D191c6077F", // GLMR
+      },
+      {
+        token: "0xcd3B51D98478D53F4515A306bE565c6EebeF1D58", // GLINT
+        baseToken: "0xAcc15dC74880C9944775448304B263D191c6077F", // GLMR
+      },
+    ],
     uniswapOracleLpTokens: [
       "0xb929914B89584b4081C7966AC6287636F7EfD053", // GLMR-USDC
       "0x99588867e817023162F4d4829995299054a5fC57", // GLMR-GLINT
@@ -28,6 +37,10 @@ const chainlinkAssets: ChainlinkAsset[] = [];
 export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: ChainDeployFnParams): Promise<void> => {
   console.log("no chain specific deployments to run");
   const { deployer } = await getNamedAccounts();
+
+  // const masterPriceOracle = ethers.getContractFactory("MasterPriceOracle", deployer);
+  // const mpo = (await masterPriceOracle).deploy();
+
   //// Uniswap Oracle
   await deployUniswapOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
   ////
