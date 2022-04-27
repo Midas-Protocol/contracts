@@ -190,26 +190,26 @@ export const deployConfig: ChainDeployConfig = {
     {
       // 0x
       strategy: "EllipsisERC4626",
-      underlying: "", // 3EPS
-      name: "",
-      symbol: "",
-      otherParams: [],
+      underlying: "0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452", // 3EPS
+      name: "Ellipsis.finance BUSD/USDC/USDT",
+      symbol: "3EPS",
+      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b",], // lpTokenStaker, dynamicFlywheel
     },
     {
       // 0x
       strategy: "EllipsisERC4626",
-      underlying: "", // dai3EPS
-      name: "",
-      symbol: "",
-      otherParams: [],
+      underlying: "0x0BC3a8239B0a63E945Ea1bd6722Ba747b9557e56", // dai3EPS
+      name: "Ellipsis.finance DAI/3EPS",
+      symbol: "dai3EPS",
+      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b",],// lpTokenStaker, dynamicFlywheel
     },
     {
       // 0x
       strategy: "EllipsisERC4626",
-      underlying: "", // ust3EPS
-      name: "",
-      symbol: "",
-      otherParams: [],
+      underlying: "0x151F1611b2E304DEd36661f65506f9D7D172beba", // ust3EPS
+      name: "Ellipsis.finance UST/3EPS",
+      symbol: "ust3EPS",
+      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b",],// lpTokenStaker, dynamicFlywheel
     },
     {
       // 0x
