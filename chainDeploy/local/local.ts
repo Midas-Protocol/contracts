@@ -24,17 +24,12 @@ export const deployConfig: ChainDeployConfig = {
       // 0xdC206B5684A85ddEb4e2e1Ca48A1fCb5C3d31Ef3
       strategy: "MockERC4626",
       underlying: "", // TRIBE
-      name: "Tribe Token",
-      symbol: "TRIBE",
-      otherParams: [],
+      flywheelIndex: 0,
     },
     {
       // 0xf52Bd2532Cd02c4dF36107f59717B7CE424532BD
       strategy: "MockERC4626",
       underlying: "", // TOUCH
-      name: "Touch Token",
-      symbol: "TOUCH",
-      otherParams: [],
     },
   ],
   dynamicFlywheels: [
@@ -43,7 +38,6 @@ export const deployConfig: ChainDeployConfig = {
       rewardToken: "", // TOUCH
       cycleLength: 100000,
     },
-    null
   ],
 };
 
@@ -83,8 +77,8 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
   ////
 
   // rewards
-  deployConfig.plugins.find((p) => p.symbol === "TRIBE").underlying = tribeToken.address;
-  deployConfig.plugins.find((p) => p.symbol === "TOUCH").underlying = touchToken.address;
+  deployConfig.plugins[0].underlying = tribeToken.address;
+  deployConfig.plugins[1].underlying = touchToken.address;
   deployConfig.dynamicFlywheels[0].rewardToken = touchToken.address;
 
   ////
@@ -112,14 +106,14 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
   await tx.wait();
 
   // Plugins & Rewards
-  await deployFlywheelWithDynamicRewards({
+  const dynamicFlywheels = await deployFlywheelWithDynamicRewards({
     ethers,
     getNamedAccounts,
     deployments,
     run,
     deployConfig,
   });
-  await deployERC4626Plugin({ ethers, getNamedAccounts, deployments, run, deployConfig });
+  await deployERC4626Plugin({ ethers, getNamedAccounts, deployments, run, deployConfig, dynamicFlywheels });
 
   ////
 };

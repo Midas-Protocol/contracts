@@ -1,5 +1,5 @@
 import { constants } from "ethers";
-import { FuseFlywheelDeployFnParams } from "..";
+import { Erc4626PluginDeployFnParams, FuseFlywheelDeployFnParams } from "..";
 import { SALT } from "../../deploy/deploy";
 import { FuseFlywheelCore } from "../../typechain/FuseFlywheelCore";
 
@@ -8,12 +8,13 @@ export const deployFlywheelWithDynamicRewards = async ({
   getNamedAccounts,
   deployments,
   deployConfig,
-}: FuseFlywheelDeployFnParams): Promise<void> => {
+}: FuseFlywheelDeployFnParams): Promise<Array<string>> => {
   const { deployer } = await getNamedAccounts();
+
+  const dynamicFlywheels = [];
 
   for (const config of deployConfig.dynamicFlywheels) {
     if (config) {
-      console.log(config);
       console.log(`Deploying FuseFlywheelCore & FuseFlywheelDynamicRewards for ${config.rewardToken} reward token`);
       //// FuseFlyhweelCore with Dynamic Rewards
       let dep = await deployments.deterministic("FuseFlywheelCore", {
@@ -39,8 +40,12 @@ export const deployFlywheelWithDynamicRewards = async ({
       const flywheelCore = (await ethers.getContractAt("FuseFlywheelCore", fwc.address, deployer)) as FuseFlywheelCore;
       const tx = await flywheelCore.setFlywheelRewards(fdr.address, { from: deployer });
       await tx.wait();
+      dynamicFlywheels.push(fdr.address);
+    } else {
+      dynamicFlywheels.push(null);
     }
   }
+  return dynamicFlywheels;
 };
 
 export const deployERC4626Plugin = async ({
@@ -48,16 +53,26 @@ export const deployERC4626Plugin = async ({
   getNamedAccounts,
   deployments,
   deployConfig,
-}: FuseFlywheelDeployFnParams): Promise<void> => {
+  dynamicFlywheels,
+}: Erc4626PluginDeployFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
 
   for (const pluginConfig of deployConfig.plugins) {
     if (pluginConfig) {
+      const hasFlywheel = pluginConfig.flywheelIndex || pluginConfig.flywheelAddress;
+      let args = hasFlywheel
+        ? [
+            pluginConfig.underlying,
+            pluginConfig.flywheelIndex ? dynamicFlywheels[pluginConfig.flywheelIndex] : pluginConfig.flywheelAddress,
+            ...pluginConfig.otherParams,
+          ]
+        : [pluginConfig.underlying, pluginConfig.otherParams];
+
       const i = deployConfig.plugins.indexOf(pluginConfig);
       let dep = await deployments.deterministic(pluginConfig.strategy, {
         from: deployer,
         salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
-        args: [pluginConfig.underlying, pluginConfig.name, pluginConfig.symbol, ...pluginConfig.otherParams],
+        args: args,
         log: true,
       });
       const erc4626 = await dep.deploy();

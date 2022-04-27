@@ -40,9 +40,9 @@ export type DynamicFlywheelConfig = {
 export type PluginConfig = {
   strategy: string;
   underlying: string;
-  name: string;
-  symbol: string;
   otherParams?: string[];
+  flywheelAddress?: string;
+  flywheelIndex?: number;
 };
 
 export type Asset = {
@@ -89,4 +89,9 @@ export type CurveLpFnParams = ChainDeployFnParams & {
 
 export type FuseFlywheelDeployFnParams = ChainDeployFnParams & {
   deployConfig: ChainDeployConfig;
+};
+
+export type Erc4626PluginDeployFnParams = ChainDeployFnParams & {
+  deployConfig: ChainDeployConfig;
+  dynamicFlywheels: Array<string>;
 };

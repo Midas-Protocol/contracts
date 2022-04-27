@@ -87,6 +87,12 @@ export const assets: Asset[] = [
     name: "beefy.finance",
     decimals: 18,
   },
+  {
+    symbol: "ALPACA",
+    underlying: "0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F",
+    name: "AlpacaToken",
+    decimals: 18,
+  },
   // stables
   {
     symbol: "USDC",
@@ -169,58 +175,44 @@ export const deployConfig: ChainDeployConfig = {
     {
       // 0x
       strategy: "BeefyERC4626",
-      name: "BOMB-BTC LP Token",
       underlying: "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6", // BOMB-BTC LP
-      symbol: "BOMB-BTC LP",
-      otherParams: [
-        "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6",
-        "BOMB-BTCB LP",
-        "BOMB-BTCB",
-        "0x94e85b8e050f3f281cb9597cc0144f1f7af1fe9b",
-      ],
+      otherParams: ["0x94e85b8e050f3f281cb9597cc0144f1f7af1fe9b"], // Beefy Vault Address
     },
     {
       // 0x
       strategy: "BombERC4626",
       underlying: "0x522348779DCb2911539e76A1042aA922F9C47Ee3", // BOMB
-      name: "BOMB",
-      symbol: "BOMB",
-      otherParams: ["0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b", "0x522348779DCb2911539e76A1042aA922F9C47Ee3"], // xBOMB, BOMB
+      otherParams: ["0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b"], // xBOMB
     },
     {
       // 0x
       strategy: "EllipsisERC4626",
       underlying: "0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452", // 3EPS
-      name: "Ellipsis.finance BUSD/USDC/USDT",
-      symbol: "3EPS",
-      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b",], // lpTokenStaker, dynamicFlywheel
+      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker, dynamicFlywheel
+      flywheelIndex: 0,
     },
     {
       // 0x
       strategy: "EllipsisERC4626",
       underlying: "0x0BC3a8239B0a63E945Ea1bd6722Ba747b9557e56", // dai3EPS
-      name: "Ellipsis.finance DAI/3EPS",
-      symbol: "dai3EPS",
-      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b",],// lpTokenStaker, dynamicFlywheel
+      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker, dynamicFlywheel
+      flywheelIndex: 0,
     },
     {
       // 0x
       strategy: "EllipsisERC4626",
       underlying: "0x151F1611b2E304DEd36661f65506f9D7D172beba", // ust3EPS
-      name: "Ellipsis.finance UST/3EPS",
-      symbol: "ust3EPS",
-      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b",],// lpTokenStaker, dynamicFlywheel
+      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker, dynamicFlywheel
+      flywheelIndex: 0,
     },
     {
       // 0x
       strategy: "AutofarmERC4626",
       underlying: "", //
-      name: "",
-      symbol: "",
       otherParams: [],
     },
   ],
-  dynamicFlywheels: [null, null, null, null],
+  dynamicFlywheels: [{ rewardToken: "0xaf41054c1487b0e5e2b9250c0332ecbce6ce9d71", cycleLength: 1 }],
 };
 
 const chainlinkAssets: ChainlinkAsset[] = [
@@ -303,6 +295,11 @@ const chainlinkAssets: ChainlinkAsset[] = [
   {
     symbol: "jBRL",
     aggregator: "0x5cb1Cb3eA5FB46de1CE1D0F3BaDB3212e8d8eF48",
+    feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
+  },
+  {
+    symbol: "ALPACA",
+    aggregator: "0xe0073b60833249ffd1bb2af809112c2fbf221df6",
     feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
   },
 ];
