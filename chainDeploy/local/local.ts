@@ -22,14 +22,16 @@ export const deployConfig: ChainDeployConfig = {
   plugins: [
     {
       // 0xdC206B5684A85ddEb4e2e1Ca48A1fCb5C3d31Ef3
-      strategy: "MockERC4626",
+      strategy: "MockERC4626Dynamic",
       underlying: "", // TRIBE
       flywheelIndex: 0,
+      otherParams: [],
     },
     {
       // 0xf52Bd2532Cd02c4dF36107f59717B7CE424532BD
       strategy: "MockERC4626",
       underlying: "", // TOUCH
+      otherParams: [],
     },
   ],
   dynamicFlywheels: [
@@ -41,7 +43,7 @@ export const deployConfig: ChainDeployConfig = {
   ],
 };
 
-export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
+export const deploy = async ({ ethers, getNamedAccounts, deployments, run }): Promise<void> => {
   const { deployer, alice, bob } = await getNamedAccounts();
 
   ////

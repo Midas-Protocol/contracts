@@ -7,6 +7,7 @@ export const deployFlywheelWithDynamicRewards = async ({
   ethers,
   getNamedAccounts,
   deployments,
+  run,
   deployConfig,
 }: FuseFlywheelDeployFnParams): Promise<Array<string>> => {
   const { deployer } = await getNamedAccounts();
@@ -59,14 +60,17 @@ export const deployERC4626Plugin = async ({
 
   for (const pluginConfig of deployConfig.plugins) {
     if (pluginConfig) {
-      const hasFlywheel = pluginConfig.flywheelIndex || pluginConfig.flywheelAddress;
+      const hasFlywheel =
+        pluginConfig.flywheelIndex === 0 || pluginConfig.flywheelIndex || pluginConfig.flywheelAddress;
       let args = hasFlywheel
         ? [
             pluginConfig.underlying,
-            pluginConfig.flywheelIndex ? dynamicFlywheels[pluginConfig.flywheelIndex] : pluginConfig.flywheelAddress,
+            pluginConfig.flywheelIndex === 0 || pluginConfig.flywheelIndex
+              ? dynamicFlywheels[pluginConfig.flywheelIndex]
+              : pluginConfig.flywheelAddress,
             ...pluginConfig.otherParams,
           ]
-        : [pluginConfig.underlying, pluginConfig.otherParams];
+        : [pluginConfig.underlying, ...pluginConfig.otherParams];
 
       const i = deployConfig.plugins.indexOf(pluginConfig);
       let dep = await deployments.deterministic(pluginConfig.strategy, {
