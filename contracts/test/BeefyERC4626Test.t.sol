@@ -32,7 +32,7 @@ contract BeefyERC4626Test is DSTest {
     testToken = new MockERC20("TestToken", "TST", 18);
     mockStrategy = new MockStrategy(address(testToken));
     mockVault = new MockVault(address(mockStrategy), "MockVault", "MV");
-    beefyERC4626 = new BeefyERC4626(testToken, "TestVault", "TSTV", IBeefyVault(address(mockVault)));
+    beefyERC4626 = new BeefyERC4626(testToken, IBeefyVault(address(mockVault)));
   }
 
   function testInitializedValues() public {
