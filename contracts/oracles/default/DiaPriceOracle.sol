@@ -3,25 +3,32 @@ pragma solidity >=0.8.0;
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import { CLV2V3Interface } from "../../external/flux/CLV2V3Interface.sol";
 import { IPriceOracle } from "../../external/compound/IPriceOracle.sol";
 import { ICToken } from "../../external/compound/ICToken.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 import { BasePriceOracle } from "../BasePriceOracle.sol";
-import { MasterPriceOracle } from "../MasterPriceOracle.sol";
+
+interface DIAOracleV2 {
+  function getValue(string memory key) external view returns (uint128, uint128);
+}
 
 /**
- * @title FluxOracle
- * @notice Returns prices from Flux.
+ * @title DiaPriceOracle
+ * @notice Returns prices from DIA.
  * @dev Implements `PriceOracle`.
  * @author Rahul Sethuram <rahul@midascapital.xyz> (https://github.com/rhlsthrm)
  */
-contract FluxPriceOracle is IPriceOracle, BasePriceOracle {
+contract DiaPriceOracle is IPriceOracle, BasePriceOracle {
+  struct DiaOracle {
+    DIAOracleV2 feed;
+    string key;
+  }
+
   /**
    * @notice Maps ERC20 token addresses to ETH-based Chainlink price feed contracts.
    */
-  mapping(address => CLV2V3Interface) public priceFeeds;
+  mapping(address => DiaOracle) public priceFeeds;
 
   /**
    * @dev The administrator of this `MasterPriceOracle`.
@@ -39,9 +46,10 @@ contract FluxPriceOracle is IPriceOracle, BasePriceOracle {
   address public immutable WTOKEN;
 
   /**
-   * @notice Flux NATIVE/USD price feed contracts.
+   * @notice DIA NATIVE/USD price feed contracts.
    */
-  CLV2V3Interface public immutable NATIVE_TOKEN_USD_PRICE_FEED;
+  DIAOracleV2 public immutable NATIVE_TOKEN_USD_PRICE_FEED;
+  string public NATIVE_TOKEN_USD_KEY;
 
   /**
    * @notice MasterPriceOracle for backup for USD price.
@@ -56,7 +64,8 @@ contract FluxPriceOracle is IPriceOracle, BasePriceOracle {
     address _admin,
     bool canAdminOverwrite,
     address wtoken,
-    CLV2V3Interface nativeTokenUsd,
+    DIAOracleV2 nativeTokenUsd,
+    string memory nativeTokenUsdKey,
     MasterPriceOracle masterPriceOracle,
     address usdToken
   ) {
@@ -64,6 +73,7 @@ contract FluxPriceOracle is IPriceOracle, BasePriceOracle {
     CAN_ADMIN_OVERWRITE = canAdminOverwrite;
     WTOKEN = wtoken;
     NATIVE_TOKEN_USD_PRICE_FEED = nativeTokenUsd;
+    NATIVE_TOKEN_USD_KEY = nativeTokenUsdKey;
     MASTER_PRICE_ORACLE = masterPriceOracle;
     USD_TOKEN = usdToken;
   }
@@ -93,12 +103,17 @@ contract FluxPriceOracle is IPriceOracle, BasePriceOracle {
   /**
    * @dev Admin-only function to set price feeds.
    * @param underlyings Underlying token addresses for which to set price feeds.
-   * @param feeds The Oracle price feed contract addresses for each of `underlyings`.
+   * @param feeds The DIA price feed contract addresses for each of `underlyings`.
+   * @param keys The keys for each of `underlyings`, in the format "ETH/USD" for example
    */
-  function setPriceFeeds(address[] memory underlyings, CLV2V3Interface[] memory feeds) external onlyAdmin {
+  function setPriceFeeds(
+    address[] memory underlyings,
+    DIAOracleV2[] memory feeds,
+    string[] memory keys
+  ) external onlyAdmin {
     // Input validation
     require(
-      underlyings.length > 0 && underlyings.length == feeds.length,
+      underlyings.length > 0 && underlyings.length == feeds.length && underlyings.length == keys.length,
       "Lengths of both arrays must be equal and greater than 0."
     );
 
@@ -109,12 +124,12 @@ contract FluxPriceOracle is IPriceOracle, BasePriceOracle {
       // Check for existing oracle if !canAdminOverwrite
       if (!CAN_ADMIN_OVERWRITE)
         require(
-          address(priceFeeds[underlying]) == address(0),
+          address(priceFeeds[underlying].feed) == address(0),
           "Admin cannot overwrite existing assignments of price feeds to underlying tokens."
         );
 
       // Set feed and base currency
-      priceFeeds[underlying] = feeds[i];
+      priceFeeds[underlying] = DiaOracle({ feed: feeds[i], key: keys[i] });
     }
   }
 
@@ -126,20 +141,20 @@ contract FluxPriceOracle is IPriceOracle, BasePriceOracle {
     // Return 1e18 for WTOKEN
     if (underlying == WTOKEN || underlying == address(0)) return 1e18;
 
-    // Get token/ETH price from feed
-    CLV2V3Interface feed = priceFeeds[underlying];
-    require(address(feed) != address(0), "No Flux price feed found for this underlying ERC20 token.");
+    // Get token/Native price from Oracle
+    DiaOracle memory feed = priceFeeds[underlying];
+    require(address(feed.feed) != address(0), "No oracle price feed found for this underlying ERC20 token.");
 
     if (address(NATIVE_TOKEN_USD_PRICE_FEED) == address(0)) {
       // Get price from MasterPriceOracle
       uint256 usdNativeTokenPrice = MASTER_PRICE_ORACLE.price(USD_TOKEN);
       uint256 nativeTokenUsdPrice = 1e36 / usdNativeTokenPrice; // 18 decimals
-      int256 tokenUsdPrice = feed.latestAnswer();
+      (uint128 tokenUsdPrice, ) = feed.feed.getValue(feed.key); // 8 decimals
       return tokenUsdPrice >= 0 ? (uint256(tokenUsdPrice) * 1e28) / uint256(nativeTokenUsdPrice) : 0;
     } else {
-      int256 nativeTokenUsdPrice = NATIVE_TOKEN_USD_PRICE_FEED.latestAnswer();
+      (uint128 nativeTokenUsdPrice, ) = NATIVE_TOKEN_USD_PRICE_FEED.getValue(NATIVE_TOKEN_USD_KEY);
       if (nativeTokenUsdPrice <= 0) return 0;
-      int256 tokenUsdPrice = feed.latestAnswer();
+      (uint128 tokenUsdPrice, ) = feed.feed.getValue(feed.key); // 8 decimals
       return tokenUsdPrice >= 0 ? (uint256(tokenUsdPrice) * 1e18) / uint256(nativeTokenUsdPrice) : 0;
     }
   }

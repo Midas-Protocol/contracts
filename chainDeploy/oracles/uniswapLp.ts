@@ -1,4 +1,3 @@
-import { SALT } from "../../deploy/deploy";
 import { UniswapDeployFnParams } from "../helpers/types";
 
 export const deployUniswapLpOracle = async ({
@@ -6,16 +5,13 @@ export const deployUniswapLpOracle = async ({
   getNamedAccounts,
   deployments,
   deployConfig,
-  run,
 }: UniswapDeployFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
-  let dep = await deployments.deterministic("UniswapLpTokenPriceOracle", {
+  const lpToken = await deployments.deploy("UniswapLpTokenPriceOracle", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [deployConfig.wtoken],
     log: true,
   });
-  const lpToken = await dep.deploy();
   if (lpToken.transactionHash) {
     await ethers.provider.waitForTransaction(lpToken.transactionHash);
   }
