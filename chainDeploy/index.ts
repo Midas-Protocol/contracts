@@ -3,7 +3,7 @@ import { deployConfig as deployConfig1284, deploy as deploy1284 } from "./mainne
 import { deployConfig as deployConfig9000, deploy as deploy9000 } from "./testnets/evmostestnet";
 import { deployConfig as deployConfig97, deploy as deploy97 } from "./testnets/chapel";
 import { deployConfig as deployConfig42, deploy as deploy42 } from "./testnets/kovan";
-import { deployConfig as deployConfig1287, deploy as deploy1287 } from "./testnets/moonabase";
+import { deployConfig as deployConfig1287, deploy as deploy1287 } from "./testnets/moonbase";
 
 import { ChainDeployConfig } from "./helpers";
 import { deployConfig as deployConfig1337, deploy as deploy1337 } from "./local/local";
