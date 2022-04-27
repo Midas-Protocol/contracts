@@ -86,7 +86,7 @@ abstract contract BaseTest is DSTest {
     chainConfigs[BSC_CHAPEL].coins[0] = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
     chainConfigs[BSC_CHAPEL].coins[1] = IERC20Upgradeable(0x8BaBbB98678facC7342735486C851ABD7A0d17Ca);
 
-    chainConfigs[1284] = ChainConfig({
+    chainConfigs[MOONBEAM_MAINNET] = ChainConfig({
       pool: IERC20Upgradeable(0x0000000000000000000000000000000000000000),
       lpToken: IERC20Upgradeable(0x0000000000000000000000000000000000000000),
       lpTokenWhale: 0x0000000000000000000000000000000000000000,
@@ -95,12 +95,12 @@ abstract contract BaseTest is DSTest {
       curveLPTokenPriceOracleNoRegistry: CurveLpTokenPriceOracleNoRegistry(0x0000000000000000000000000000000000000000),
       chainlinkOracle: ChainlinkPriceOracleV2(0x0000000000000000000000000000000000000000),
       synthereumLiquiditiyPool: ISynthereumLiquidityPool(0x0000000000000000000000000000000000000000),
-      masterPriceOracle: MasterPriceOracle(0x0000000000000000000000000000000000000000),
+      masterPriceOracle: MasterPriceOracle(0x14C15B9ec83ED79f23BF71D51741f58b69ff1494),
       twapOraclesFactory: UniswapTwapPriceOracleV2Factory(0x0000000000000000000000000000000000000000),
       uniswapV2Factory: IUniswapV2Factory(0x985BcA32293A7A496300a48081947321177a86FD)
     });
-    chainConfigs[1284].coins[0] = IERC20Upgradeable(0x0000000000000000000000000000000000000000);
-    chainConfigs[1284].coins[1] = IERC20Upgradeable(0x0000000000000000000000000000000000000000);
+    chainConfigs[MOONBEAM_MAINNET].coins[0] = IERC20Upgradeable(0x0000000000000000000000000000000000000000);
+    chainConfigs[MOONBEAM_MAINNET].coins[1] = IERC20Upgradeable(0x0000000000000000000000000000000000000000);
 
     chainConfig = chainConfigs[block.chainid];
   }

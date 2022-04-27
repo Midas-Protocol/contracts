@@ -12,23 +12,12 @@ import "../external/uniswap/IUniswapV2Factory.sol";
 
 contract UniswapLpTokenBaseTest is BaseTest {
   UniswapLpTokenPriceOracle uniswapLpTokenPriceOracle;
-  IUniswapV2Factory uniswapV2Factory;
-  UniswapTwapPriceOracleV2Root rootOracle;
   MasterPriceOracle mpo;
   address wtoken;
 
   function setUp() public {
     wtoken = address(chainConfig.weth);
-    // uniswapV2Factory = chainConfig.uniswapV2Factory;
-    if (address(chainConfig.masterPriceOracle) == address(0)) {
-      MasterPriceOracle masterPriceOracle = new MasterPriceOracle();
-      address[] memory _underlyings;
-      IPriceOracle[] memory _oracles;
-      masterPriceOracle.initialize(_underlyings, _oracles, IPriceOracle(address(0)), address(1),true, wtoken);
-      mpo = masterPriceOracle;
-    } else {
-      mpo = chainConfig.masterPriceOracle;
-    }
+    mpo = chainConfig.masterPriceOracle;
   }
 
   function getLpTokenPrice (address lpToken) internal returns (uint256) {
@@ -36,38 +25,8 @@ contract UniswapLpTokenBaseTest is BaseTest {
       uniswapLpTokenPriceOracle = new UniswapLpTokenPriceOracle(wtoken); // BTCB 
       IUniswapV2Pair pair = IUniswapV2Pair(lpToken);
 
-      // address token0 = pair.token0();
-      // address token1 = pair.token1();
-      // address[] memory underlyings = new address[](1);
-      // IPriceOracle[] memory oracles = new IPriceOracle[](1);
-
-      // if (mpo.oracles(token0) == IPriceOracle(address(0)) || mpo.oracles(token1) == IPriceOracle(address(0))) {
-      //   rootOracle = new UniswapTwapPriceOracleV2Root(wtoken);
-      // }
-
-      // if (mpo.oracles(token0) == IPriceOracle(address(0))) {
-      //   UniswapTwapPriceOracleV2 token0Oracle = new UniswapTwapPriceOracleV2();
-      //   token0Oracle.initialize(address(rootOracle), address(uniswapV2Factory), wtoken, wtoken);
-      //   rootOracle.update(token0);
-
-      //   underlyings[0] = token0;
-      //   oracles[0] = IPriceOracle(token0Oracle);
-      //   vm.prank(mpo.admin());
-      //   mpo.add(underlyings, oracles);
-      //   emit log("token 0 oracle added");
-      // }
-
-      // if (mpo.oracles(token1) == IPriceOracle(address(0))) {
-      //   UniswapTwapPriceOracleV2 token1Oracle = new UniswapTwapPriceOracleV2();
-      //   token1Oracle.initialize(address(rootOracle), address(uniswapV2Factory), wtoken, wtoken);
-        
-      //   rootOracle.update(token1);
-      //   underlyings[0] = token1;
-      //   oracles[0] = IPriceOracle(token1Oracle);
-      //   vm.prank(mpo.admin());
-      //   mpo.add(underlyings, oracles);
-      //   emit log("token 1 oracle added");
-      // }
+      address[] memory underlyings = new address[](1);
+      IPriceOracle[] memory oracles = new IPriceOracle[](1);
 
       underlyings[0] = lpToken;
       oracles[0] = IPriceOracle(uniswapLpTokenPriceOracle);
@@ -78,7 +37,6 @@ contract UniswapLpTokenBaseTest is BaseTest {
     } else {
       emit log("found the oracle");
     }
-    emit log_address(lpToken);
     return mpo.price(lpToken);
   }
 
@@ -93,7 +51,13 @@ contract UniswapLpTokenBaseTest is BaseTest {
     address lpToken = 0xb929914B89584b4081C7966AC6287636F7EfD053; // Lp GLMR-USDC
 
     uint256 price = getLpTokenPrice(lpToken);
-    emit log_uint(price);
-    // assertTrue(price > 0);
+    assertTrue(price > 0);
+  }
+
+  function testGlmrGlintLpTokenOraclePrice() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+    address lpToken = 0x99588867e817023162F4d4829995299054a5fC57; // Lp GLMR-GLINT
+
+    uint256 price = getLpTokenPrice(lpToken);
+    assertTrue(price > 0);
   }
 }

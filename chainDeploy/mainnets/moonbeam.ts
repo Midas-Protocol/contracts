@@ -18,10 +18,6 @@ export const deployConfig: ChainDeployConfig = {
     uniswapV2FactoryAddress: "0x985BcA32293A7A496300a48081947321177a86FD",
     uniswapOracleInitialDeployTokens: [
       {
-        token: "0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b", // USDC
-        baseToken: "0xAcc15dC74880C9944775448304B263D191c6077F", // GLMR
-      },
-      {
         token: "0xcd3B51D98478D53F4515A306bE565c6EebeF1D58", // GLINT
         baseToken: "0xAcc15dC74880C9944775448304B263D191c6077F", // GLMR
       },
