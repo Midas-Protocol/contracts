@@ -6,8 +6,6 @@ import { task, types } from "hardhat/config";
 task("strategy:create", "Create ERC4626 Strategy")
   .addParam("strategyName", "Name of the ERC4626 strategy", undefined, types.string)
   .addParam("underlying", "Address of the underlying token", undefined, types.string)
-  .addParam("name", "Name of the Token", undefined, types.string)
-  .addParam("symbol", "Symbol of the Token", undefined, types.string)
   .addParam("creator", "Deployer Address", "deployer", types.string)
   .addOptionalParam(
     "otherParams",
@@ -21,9 +19,9 @@ task("strategy:create", "Create ERC4626 Strategy")
     const otherParams = taskArgs.otherParams ? taskArgs.otherParams.split(",") : null;
     let deployArgs;
     if (otherParams) {
-      deployArgs = [taskArgs.underlying, taskArgs.name, taskArgs.symbol, ...otherParams];
+      deployArgs = [taskArgs.underlying, ...otherParams];
     } else {
-      deployArgs = [taskArgs.underlying, taskArgs.name, taskArgs.symbol];
+      deployArgs = [taskArgs.underlying];
     }
 
     const deployment = await hre.deployments.deploy(taskArgs.strategyName, {

@@ -21,10 +21,16 @@ contract BombERC4626 is ERC4626 {
 
   /**
    * @notice Creates a new Vault that accepts a specific underlying token.
-   * @param _xbombAddress the xBOMB contract address
    * @param _asset The BOMB ERC20-compliant token the Vault should accept.
+   * @param _xbombAddress the xBOMB contract address
    */
-  constructor(address _xbombAddress, ERC20 _asset) ERC4626(_asset, _asset.name(), _asset.symbol()) {
+  constructor(ERC20 _asset, address _xbombAddress)
+    ERC4626(
+      _asset,
+      string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
+      string(abi.encodePacked("mv", _asset.symbol()))
+    )
+  {
     xbomb = IXBomb(_xbombAddress);
     _asset.approve(address(xbomb), type(uint256).max);
   }

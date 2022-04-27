@@ -51,13 +51,17 @@ contract AutofarmERC4626 is ERC4626 {
     */
   constructor(
     ERC20 _asset,
-    string memory _name,
-    string memory _symbol,
     uint256 _poolId,
     ERC20 _autoToken,
     IAutofarmV2 _autofarm,
     FlywheelCore _flywheel
-  ) ERC4626(_asset, _name, _symbol) {
+  )
+    ERC4626(
+      _asset,
+      string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
+      string(abi.encodePacked("mv", _asset.symbol()))
+    )
+  {
     poolId = _poolId;
     autofarm = _autofarm;
     flywheel = _flywheel;

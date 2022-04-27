@@ -54,7 +54,6 @@ export default task("market:create", "Create Market")
       initialExchangeRateMantissa: parseEther(initialExchangeRate),
       name: `${poolName} ${symbol}`,
       symbol: `m${pool.id}-${symbol}`,
-      decimals: 8, // Fuse and Compound use 8 decimals. Do we also want to do this?
       admin: creator,
       collateralFactor: Number(collateralFactor),
       reserveFactor: Number(reserveFactor),
