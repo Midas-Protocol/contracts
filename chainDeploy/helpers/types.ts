@@ -44,6 +44,13 @@ export type ChainlinkAsset = {
   feedBaseCurrency: ChainlinkFeedBaseCurrency;
 };
 
+export type DiaAsset = {
+  symbol: string;
+  underlying: string;
+  feed: string;
+  key: string;
+};
+
 export type CurvePoolConfig = {
   lpToken: string;
   pool: string;
@@ -68,6 +75,12 @@ export type IrmDeployFnParams = ChainDeployFnParams & {
 export type ChainlinkDeployFnParams = ChainDeployFnParams & {
   assets: Asset[];
   chainlinkAssets: ChainlinkAsset[];
+  deployConfig: ChainDeployConfig;
+};
+
+export type DiaDeployFnParams = ChainDeployFnParams & {
+  diaNativeFeed: Omit<DiaAsset, "symbol" | "underlying">;
+  diaAssets: DiaAsset[];
   deployConfig: ChainDeployConfig;
 };
 
