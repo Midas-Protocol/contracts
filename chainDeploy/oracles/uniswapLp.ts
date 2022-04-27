@@ -20,7 +20,7 @@ export const deployUniswapLpOracle = async ({
   let oracles = [];
   let underlyings = [];
   for (let lpToken of deployConfig.uniswap.uniswapOracleLpTokens) {
-    if (mpo.oracles(lpToken) === constants.AddressZero) {
+    if ((await mpo.oracles(lpToken)) === constants.AddressZero) {
       oracles.push(lpTokenPriceOralce.address);
       underlyings.push(lpToken);
     }
