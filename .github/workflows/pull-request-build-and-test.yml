@@ -116,7 +116,7 @@ jobs:
   build-and-test-moonbeam:
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FORK_BLOCK_NUMBER: 887460
+      FORK_BLOCK_NUMBER: 909353
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -142,5 +142,5 @@ jobs:
       - name: Run build
         run: npm run build
 
-      - name: Run forge tests on Evmos Testnet
+      - name: Run forge tests on Moonbeam
         run: npm run test:forge:moonbeam
