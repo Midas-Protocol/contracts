@@ -1,4 +1,3 @@
-import { SALT } from "../../deploy/deploy";
 import { ChainDeployConfig, ChainlinkFeedBaseCurrency, deployChainlinkOracle, deployUniswapOracle } from "../helpers";
 import { ethers } from "ethers";
 import { Asset, ChainDeployFnParams, ChainlinkAsset, CurvePoolConfig } from "../helpers/types";

@@ -1,13 +1,11 @@
 import { constants } from "ethers";
 import { Erc4626PluginDeployFnParams, FuseFlywheelDeployFnParams } from "..";
-import { SALT } from "../../deploy/deploy";
 import { FuseFlywheelCore } from "../../typechain/FuseFlywheelCore";
 
 export const deployFlywheelWithDynamicRewards = async ({
   ethers,
   getNamedAccounts,
   deployments,
-  run,
   deployConfig,
 }: FuseFlywheelDeployFnParams): Promise<Array<string>> => {
   const { deployer } = await getNamedAccounts();
@@ -18,24 +16,20 @@ export const deployFlywheelWithDynamicRewards = async ({
     if (config) {
       console.log(`Deploying FuseFlywheelCore & FuseFlywheelDynamicRewards for ${config.rewardToken} reward token`);
       //// FuseFlyhweelCore with Dynamic Rewards
-      let dep = await deployments.deterministic("FuseFlywheelCore", {
+      const fwc = await deployments.deploy("FuseFlywheelCore", {
         from: deployer,
-        salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
         args: [config.rewardToken, constants.AddressZero, constants.AddressZero, deployer, constants.AddressZero],
         log: true,
+        waitConfirmations: 1,
       });
-      const fwc = await dep.deploy();
-      if (fwc.transactionHash) await ethers.provider.waitForTransaction(fwc.transactionHash);
       console.log("FuseFlywheelCore: ", fwc.address);
 
-      dep = await deployments.deterministic("FuseFlywheelDynamicRewards", {
+      const fdr = await deployments.deterministic("FuseFlywheelDynamicRewards", {
         from: deployer,
-        salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
         args: [fwc.address, config.cycleLength],
         log: true,
+        waitConfirmations: 1
       });
-      const fdr = await dep.deploy();
-      if (fdr.transactionHash) await ethers.provider.waitForTransaction(fdr.transactionHash);
       console.log("FuseFlywheelDynamicRewards: ", fdr.address);
 
       const flywheelCore = (await ethers.getContractAt("FuseFlywheelCore", fwc.address, deployer)) as FuseFlywheelCore;
@@ -73,14 +67,12 @@ export const deployERC4626Plugin = async ({
         : [pluginConfig.underlying, ...pluginConfig.otherParams];
 
       const i = deployConfig.plugins.indexOf(pluginConfig);
-      let dep = await deployments.deterministic(pluginConfig.strategy, {
+      const erc4626 = await deployments.deploy(pluginConfig.strategy, {
         from: deployer,
-        salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
         args: args,
         log: true,
+        waitConfirmations: 1,
       });
-      const erc4626 = await dep.deploy();
-      if (erc4626.transactionHash) await ethers.provider.waitForTransaction(erc4626.transactionHash);
       console.log(`${pluginConfig.strategy}-${i}: `, erc4626.address);
     }
   }

@@ -2,7 +2,6 @@ import { ChainDeployConfig, deployUniswapOracle } from "../helpers";
 import { ethers } from "ethers";
 import { ChainDeployFnParams, DiaAsset } from "../helpers/types";
 import { deployUniswapLpOracle } from "../oracles/uniswapLp";
-import { SALT } from "../../deploy/deploy";
 import { deployDiaOracle } from "../helpers/dia";
 
 export const deployConfig: ChainDeployConfig = {
@@ -71,15 +70,11 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   await deployUniswapLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
 
   //// Uniswap Lp token liquidator
-  let dep = await deployments.deterministic("UniswapLpTokenLiquidator", {
+  const uniswapLpTokenLiquidator = await deployments.deploy("UniswapLpTokenLiquidator", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    waitConfirmations: 1
   });
-  const uniswapLpTokenLiquidator = await dep.deploy();
-  if (uniswapLpTokenLiquidator.transactionHash) {
-    await ethers.provider.waitForTransaction(uniswapLpTokenLiquidator.transactionHash);
-  }
   console.log("UniswapLpTokenLiquidator: ", uniswapLpTokenLiquidator.address);
 };
