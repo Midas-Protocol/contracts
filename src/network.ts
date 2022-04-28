@@ -144,3 +144,33 @@ export const irmConfig = (deployments: ChainDeployment, artifacts: Artifacts) =>
     },
   };
 };
+
+export const chainPlugins = {
+  [SupportedChains.ganache]: {
+    // TRIBE
+    "0x5d7075e5A69A4d55BfA86F8d6ae49D7893D968f9": [
+      {
+        strategyName: "Mock Tribe Strategy With TOUCH Rewards",
+        strategyAddress: "0xdC206B5684A85ddEb4e2e1Ca48A1fCb5C3d31Ef3",
+        dynamicFlywheel: {
+          address: "0x681cEEE3d6781394b2ECD7a4b9d5214f537aFeEb",
+          rewardToken: "0x54572129Fd040C19F9ab57A1a152e95C1fEC0dF0", // TOUCH
+        },
+      },
+    ],
+    // TOUCH
+    "0x54572129Fd040C19F9ab57A1a152e95C1fEC0dF0": [
+      {
+        strategyName: "Mock Touch Strategy",
+        strategyAddress: "0xdC206B5684A85ddEb4e2e1Ca48A1fCb5C3d31Ef3",
+        dynamicFlywheel: null,
+      },
+    ],
+  },
+  [SupportedChains.chapel]: {},
+  [SupportedChains.bsc]: {},
+  // TODO: not sure if this is correct
+  [SupportedChains.evmos_testnet]: [OracleTypes.MasterPriceOracle],
+  [SupportedChains.moonbeam]: [OracleTypes.MasterPriceOracle],
+  [SupportedChains.moonbase_alpha]: [OracleTypes.MasterPriceOracle],
+};

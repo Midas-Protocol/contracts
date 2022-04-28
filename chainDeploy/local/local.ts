@@ -1,7 +1,8 @@
-import { SALT } from "../../deploy/deploy";
 import { ChainDeployConfig } from "../helpers";
 import { ethers } from "ethers";
 import { MasterPriceOracle } from "../../typechain";
+import { deployERC4626Plugin, deployFlywheelWithDynamicRewards } from "../helpers/erc4626Plugins";
+import { ChainDeployFnParams } from "../helpers/types";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -18,20 +19,41 @@ export const deployConfig: ChainDeployConfig = {
     uniswapData: [],
     uniswapOracleInitialDeployTokens: [],
   },
+  plugins: [
+    {
+      // 0xdC206B5684A85ddEb4e2e1Ca48A1fCb5C3d31Ef3
+      strategy: "MockERC4626Dynamic",
+      underlying: "", // TRIBE
+      flywheelIndex: 0,
+      otherParams: [],
+    },
+    {
+      // 0xf52Bd2532Cd02c4dF36107f59717B7CE424532BD
+      strategy: "MockERC4626",
+      underlying: "", // TOUCH
+      otherParams: [],
+    },
+  ],
+  dynamicFlywheels: [
+    {
+      // 0x681cEEE3d6781394b2ECD7a4b9d5214f537aFeEb
+      rewardToken: "", // TOUCH
+      cycleLength: 100000,
+    },
+  ],
 };
 
-export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
+export const deploy = async ({ ethers, getNamedAccounts, deployments, run }: ChainDeployFnParams): Promise<void> => {
   const { deployer, alice, bob } = await getNamedAccounts();
 
   ////
   //// TOKENS
   const tribe = await deployments.deploy("TRIBEToken", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [ethers.utils.parseEther("1250000000"), deployer],
     log: true,
+    waitConfirmations: 1,
   });
-  console.log("TRIBEToken: ", tribe.address);
   const tribeToken = await ethers.getContractAt("TRIBEToken", tribe.address, deployer);
   let tx = await tribeToken.transfer(alice, ethers.utils.parseEther("100000"), { from: deployer });
   await tx.wait();
@@ -40,9 +62,9 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
   await tx.wait();
   const touch = await deployments.deploy("TOUCHToken", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [ethers.utils.parseEther("2250000000"), deployer],
     log: true,
+    waitConfirmations: 1,
   });
   console.log("TOUCHToken: ", touch.address);
   const touchToken = await ethers.getContractAt("TOUCHToken", touch.address, deployer);
@@ -53,13 +75,18 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
   await tx.wait();
   ////
 
+  // rewards
+  deployConfig.plugins[0].underlying = tribeToken.address;
+  deployConfig.plugins[1].underlying = touchToken.address;
+  deployConfig.dynamicFlywheels[0].rewardToken = touchToken.address;
+
   ////
   //// ORACLES
   const simplePO = await deployments.deploy("SimplePriceOracle", {
     from: bob,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    waitConfirmations: 1,
   });
   console.log("SimplePriceOracle: ", simplePO.address);
 
@@ -75,5 +102,16 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
 
   tx = await masterPriceOracle.setDefaultOracle(simplePriceOracle.address);
   await tx.wait();
+
+  // Plugins & Rewards
+  const dynamicFlywheels = await deployFlywheelWithDynamicRewards({
+    ethers,
+    getNamedAccounts,
+    deployments,
+    run,
+    deployConfig,
+  });
+  await deployERC4626Plugin({ ethers, getNamedAccounts, deployments, run, deployConfig, dynamicFlywheels });
+
   ////
 };
