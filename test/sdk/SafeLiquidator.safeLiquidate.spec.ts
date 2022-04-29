@@ -120,7 +120,6 @@ describe("#SafeLiquidator", () => {
       poolName,
       poolAddress,
       "bob",
-      coingeckoId,
       liquidator,
       liquidationConfigOverrides,
       chainId === 1337 ? erc20OneCToken.balanceOf : erc20OneUnderlying.balanceOf
@@ -166,7 +165,6 @@ describe("#SafeLiquidator", () => {
       poolName,
       poolAddress,
       "bob",
-      coingeckoId,
       liquidator,
       liquidationConfigOverrides,
       chainId === 1337 ? ethCToken.balanceOf : ethers.provider.getBalance
@@ -189,16 +187,16 @@ describe("#SafeLiquidator", () => {
     }
 
     // Supply tokenOne collateral
-    await addCollateral(poolAddress, alice, erc20One.symbol, "0.1", false, coingeckoId);
+    await addCollateral(poolAddress, alice, erc20One.symbol, "0.1", false);
     console.log(`Added ${erc20One.symbol} collateral`);
 
     // Supply tokenTwo from other account
-    await addCollateral(poolAddress, bob, erc20Two.symbol, "4500", true, coingeckoId);
+    await addCollateral(poolAddress, bob, erc20Two.symbol, "4500", true);
     console.log(`Added ${erc20Two.symbol} collateral`);
 
     // Borrow tokenTwo using tokenOne collateral
     const borrowAmount = "0.06";
-    await borrowCollateral(poolAddress, bob.address, erc20One.symbol, borrowAmount, coingeckoId);
+    await borrowCollateral(poolAddress, bob.address, erc20One.symbol, borrowAmount);
     console.log(`Borrowed ${erc20Two.symbol} collateral`);
 
     // Set price of tokenOne collateral to 1/10th of what it was
@@ -215,7 +213,6 @@ describe("#SafeLiquidator", () => {
       poolName,
       poolAddress,
       "bob",
-      coingeckoId,
       liquidator,
       liquidationConfigOverrides,
       chainId === 1337 ? erc20TwoCToken.balanceOf : erc20TwoUnderlying.balanceOf

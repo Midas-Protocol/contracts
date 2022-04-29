@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish, Contract, utils } from "ethers";
+import { BigNumber, BigNumberish, constants, Contract, utils } from "ethers";
 import { FusePoolLens } from "../../typechain/FusePoolLens";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FuseBaseConstructor } from "../Fuse/types";
@@ -14,7 +14,7 @@ export type LensPoolsWithData = [
 
 export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class FusePools extends Base {
-    async fetchFusePoolData(poolId: string, address?: string, coingeckoId?: string): Promise<FusePoolData> {
+    async fetchFusePoolData(poolId: string, address?: string): Promise<FusePoolData> {
       const {
         comptroller,
         name: _unfiliteredName,
@@ -43,11 +43,6 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
       let totalSuppliedUSD = 0;
       let totalBorrowedUSD = 0;
 
-      const price: number = utils.formatEther(
-        // prefer rari because it has caching
-        await this.getUsdPriceBN(coingeckoId, true)
-      ) as any;
-
       const promises: Promise<boolean>[] = [];
 
       const comptrollerContract = new Contract(
@@ -71,24 +66,24 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         );
 
         asset.supplyBalanceUSD =
-          Number(utils.formatUnits(asset.supplyBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+          Number(utils.formatUnits(asset.supplyBalance)) * Number(utils.formatUnits(asset.underlyingPrice));
 
         asset.borrowBalanceUSD =
-          Number(utils.formatUnits(asset.borrowBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+          Number(utils.formatUnits(asset.borrowBalance)) * Number(utils.formatUnits(asset.underlyingPrice));
 
         totalSupplyBalanceUSD += asset.supplyBalanceUSD;
         totalBorrowBalanceUSD += asset.borrowBalanceUSD;
 
         asset.totalSupplyUSD =
-          Number(utils.formatUnits(asset.totalSupply)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+          Number(utils.formatUnits(asset.totalSupply)) * Number(utils.formatUnits(asset.underlyingPrice));
         asset.totalBorrowUSD =
-          Number(utils.formatUnits(asset.totalBorrow)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+          Number(utils.formatUnits(asset.totalBorrow)) * Number(utils.formatUnits(asset.underlyingPrice));
 
         totalSuppliedUSD += asset.totalSupplyUSD;
         totalBorrowedUSD += asset.totalBorrowUSD;
 
         asset.liquidityUSD =
-          Number(utils.formatUnits(asset.liquidity)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+          Number(utils.formatUnits(asset.liquidity)) * Number(utils.formatUnits(asset.underlyingPrice));
 
         totalLiquidityUSD += asset.liquidityUSD;
       }
@@ -113,15 +108,14 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         whitelistedAdmin,
       };
     }
+
     async fetchPoolsManual({
       verification,
-      coingeckoId,
       options,
     }: {
       verification: boolean;
-      coingeckoId: string;
       options: { from: string };
-    }): Promise<FusePoolData[] | undefined> {
+    }): Promise<(FusePoolData | null)[] | undefined> {
       const fusePoolsDirectoryResult = await this.contracts.FusePoolDirectory.callStatic.getPublicPoolsByVerification(
         verification,
         {
@@ -136,7 +130,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
 
       const poolData = await Promise.all(
         poolIds.map((_id, i) => {
-          return this.fetchFusePoolData(_id, options.from, coingeckoId);
+          return this.fetchFusePoolData(_id, options.from);
         })
       );
 
@@ -145,13 +139,11 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
 
     async fetchPools({
       filter,
-      coingeckoId,
       options,
     }: {
       filter: string | null;
-      coingeckoId: string;
       options: { from: string };
-    }): Promise<FusePoolData[] | undefined> {
+    }): Promise<FusePoolData[]> {
       const isCreatedPools = filter === "created-pools";
       const isVerifiedPools = filter === "verified-pools";
       const isUnverifiedPools = filter === "unverified-pools";
@@ -170,20 +162,18 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
 
       const responses = await Promise.all([req, whitelistedPoolsRequest]);
 
-      if(!responses[0][0].length) return undefined;
-
       const [pools, whitelistedPools] = await Promise.all(
         responses.map(async (poolData) => {
           return await Promise.all(
             poolData[0].map((_id) => {
-              return this.fetchFusePoolData(_id.toString(), options.from, coingeckoId);
+              return this.fetchFusePoolData(_id.toString(), options.from);
             })
           );
         })
       );
 
-      const whitelistedIds = whitelistedPools.map((pool) => pool.id);
-      const filteredPools = pools.filter((pool) => !whitelistedIds.includes(pool.id));
+      const whitelistedIds = whitelistedPools.map((pool) => pool?.id);
+      const filteredPools = pools.filter((pool) => !whitelistedIds.includes(pool?.id));
 
       return [...filteredPools, ...whitelistedPools];
     }

@@ -43,7 +43,6 @@ import { getOrCreateFuse } from "../utils/fuseSdk";
 
   let chainId: number;
   let poolName: string;
-  let coingeckoId: string;
 
   let liquidationConfigOverrides: ChainLiquidationConfig;
 
@@ -53,7 +52,6 @@ import { getOrCreateFuse } from "../utils/fuseSdk";
     await deployments.fixture("prod");
     const sdk = await getOrCreateFuse();
 
-    coingeckoId = chainId === 1337 ? "ethereum" : "binancecoin";
     liquidationConfigOverrides = {
       ...liquidationConfigDefaults(sdk)[chainId],
     };
@@ -95,15 +93,15 @@ import { getOrCreateFuse } from "../utils/fuseSdk";
     await tradeNativeForAsset({ account: "alice", token: erc20One.underlying, amount: "300" });
 
     // Supply 1 tokenOne from other account
-    await addCollateral(poolAddress, alice, erc20One.symbol, "0.1", true, coingeckoId);
+    await addCollateral(poolAddress, alice, erc20One.symbol, "0.1", true);
     console.log(`Added ${erc20One.symbol} collateral`);
 
     // Supply 10 native from other account
-    await addCollateral(poolAddress, bob, eth.symbol, "10", false, coingeckoId);
+    await addCollateral(poolAddress, bob, eth.symbol, "10", false);
 
     // Borrow 5 native using token collateral
     const borrowAmount = "4.8";
-    await borrowCollateral(poolAddress, alice.address, eth.symbol, borrowAmount, coingeckoId);
+    await borrowCollateral(poolAddress, alice.address, eth.symbol, borrowAmount);
 
     // Set price of tokenOne collateral to 6/10th of what it was
     tx = await simpleOracle.setDirectPrice(erc20One.underlying, erc20OneOriginalUnderlyingPrice.mul(6).div(10));
@@ -113,7 +111,6 @@ import { getOrCreateFuse } from "../utils/fuseSdk";
       poolName,
       poolAddress,
       "alice",
-      coingeckoId,
       liquidator,
       liquidationConfigOverrides,
       erc20OneUnderlying.balanceOf
@@ -149,7 +146,6 @@ import { getOrCreateFuse } from "../utils/fuseSdk";
       poolName,
       poolAddress,
       "bob",
-      coingeckoId,
       liquidator,
       liquidationConfigOverrides,
       ethers.provider.getBalance
@@ -172,11 +168,11 @@ import { getOrCreateFuse } from "../utils/fuseSdk";
     await tradeNativeForAsset({ account: "bob", token: erc20Two.underlying, amount: "50" });
 
     // Supply 0.1 tokenOne from other account
-    await addCollateral(poolAddress, alice, erc20One.symbol, "0.1", true, coingeckoId);
+    await addCollateral(poolAddress, alice, erc20One.symbol, "0.1", true);
     console.log(`Added ${erc20One.symbol} collateral`);
 
     // Supply 1 tokenTwo from other account
-    await addCollateral(poolAddress, bob, erc20Two.symbol, "5000", true, coingeckoId);
+    await addCollateral(poolAddress, bob, erc20Two.symbol, "5000", true);
     console.log(`Added ${erc20Two.symbol} collateral`);
 
     // Borrow tokenOne using tokenTwo as collateral
@@ -194,7 +190,6 @@ import { getOrCreateFuse } from "../utils/fuseSdk";
       poolName,
       poolAddress,
       "bob",
-      coingeckoId,
       liquidator,
       liquidationConfigOverrides,
       erc20TwoUnderlying.balanceOf
