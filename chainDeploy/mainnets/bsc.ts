@@ -256,9 +256,9 @@ export const deployConfig: ChainDeployConfig = {
     {
       // 0x
       strategy: "AlpacaERC4626",
-      underlying: "0x2170ed0880ac9a755fd29b2688956bd959f933f8", // BETH
-      otherParams: ["0xbfF4a34A4644a113E8200D7F1D79b3555f723AfE"], // ibBETH
-      name: "BETH",
+      underlying: "0x2170ed0880ac9a755fd29b2688956bd959f933f8", // ETH
+      otherParams: ["0xbfF4a34A4644a113E8200D7F1D79b3555f723AfE"], // ibETH
+      name: "ETH",
     },
     {
       // 0x
@@ -322,22 +322,6 @@ const chainlinkAssets: ChainlinkAsset[] = [
   {
     symbol: "ETH",
     aggregator: "0x63D407F32Aa72E63C7209ce1c2F5dA40b3AaE726",
-    feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
-  },
-  // STONX
-  {
-    symbol: "TSLA",
-    aggregator: "0xEEA2ae9c074E87596A85ABE698B2Afebc9B57893",
-    feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
-  },
-  {
-    symbol: "GOOGL",
-    aggregator: "0xeDA73F8acb669274B15A977Cb0cdA57a84F18c2a",
-    feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
-  },
-  {
-    symbol: "AMZN",
-    aggregator: "0x51d08ca89d3e8c12535BA8AEd33cDf2557ab5b2a",
     feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
   },
   // CZ

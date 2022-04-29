@@ -4,6 +4,7 @@ import JumpRateModel from "./irm/JumpRateModel";
 import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
 import { FuseBase } from ".";
+import { SupportedChains } from "../network";
 
 export type GConstructor<T = {}> = new (...args: any[]) => T;
 export type FuseBaseConstructor = GConstructor<FuseBase>;
@@ -209,3 +210,20 @@ export interface FusePool {
   blockPosted: number;
   timestampPosted: number;
 }
+
+type PluginConfig = {
+  strategyName: string;
+  strategyAddress: string;
+  dynamicFlywheel: {
+    address: string;
+    rewardToken: string;
+  } | null;
+};
+
+export type AssetPluginConfig = {
+  [asset: string]: PluginConfig[];
+};
+
+export type ChainPlugins = {
+  [chain in SupportedChains]: AssetPluginConfig;
+};
