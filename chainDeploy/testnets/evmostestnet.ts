@@ -1,5 +1,4 @@
 import { constants, ethers, providers, utils } from "ethers";
-import { SALT } from "../../deploy/deploy";
 import { ChainDeployConfig } from "../helpers";
 import { ChainDeployFnParams, CurvePoolConfig } from "../helpers/types";
 
