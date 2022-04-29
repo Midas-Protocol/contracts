@@ -277,6 +277,9 @@ export const chainPluginConfig: ChainPlugins = {
   },
 
   [SupportedChains.evmos_testnet]: {},
+  [SupportedChains.evmos]: {},
   [SupportedChains.moonbeam]: {},
   [SupportedChains.moonbase_alpha]: {},
+  [SupportedChains.aurora]: {},
+  [SupportedChains.harmony]: {},
 };
