@@ -26,10 +26,12 @@ export const deployConfig: ChainDeployConfig = {
       underlying: "", // TRIBE
       flywheelIndex: 0,
       otherParams: [],
+      name: "MockERC4626Dynamic",
     },
     {
       // 0xf52Bd2532Cd02c4dF36107f59717B7CE424532BD
       strategy: "MockERC4626",
+      name: "MockERC4626",
       underlying: "", // TOUCH
       otherParams: [],
     },
@@ -39,6 +41,7 @@ export const deployConfig: ChainDeployConfig = {
       // 0x681cEEE3d6781394b2ECD7a4b9d5214f537aFeEb
       rewardToken: "", // TOUCH
       cycleLength: 100000,
+      name: "TOUCH",
     },
   ],
 };

@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import { Asset, ChainDeployFnParams, ChainlinkAsset, CurvePoolConfig } from "../helpers/types";
 import { deployCurveLpOracle } from "../oracles/curveLp";
 import { deployUniswapLpOracle } from "../oracles/uniswapLp";
+import { deployERC4626Plugin, deployFlywheelWithDynamicRewards } from "../helpers/erc4626Plugins";
 
 export const assets: Asset[] = [
   {
@@ -174,6 +175,7 @@ export const deployConfig: ChainDeployConfig = {
     {
       // 0x
       strategy: "BeefyERC4626",
+      name: "BOMBBTCLP",
       underlying: "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6", // BOMB-BTC LP
       otherParams: ["0x94e85b8e050f3f281cb9597cc0144f1f7af1fe9b"], // Beefy Vault Address
     },
@@ -182,28 +184,32 @@ export const deployConfig: ChainDeployConfig = {
       strategy: "BombERC4626",
       underlying: "0x522348779DCb2911539e76A1042aA922F9C47Ee3", // BOMB
       otherParams: ["0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b"], // xBOMB
+      name: "BOMBxBOMB",
     },
-    {
-      // 0x
-      strategy: "EllipsisERC4626",
-      underlying: "0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452", // 3EPS
-      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker
-      flywheelIndex: 0,
-    },
-    {
-      // 0x
-      strategy: "EllipsisERC4626",
-      underlying: "0x0BC3a8239B0a63E945Ea1bd6722Ba747b9557e56", // dai3EPS
-      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker
-      flywheelIndex: 0,
-    },
-    {
-      // 0x
-      strategy: "EllipsisERC4626",
-      underlying: "0x151F1611b2E304DEd36661f65506f9D7D172beba", // ust3EPS
-      otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker
-      flywheelIndex: 0,
-    },
+    // {
+    //   // 0x
+    //   strategy: "EllipsisERC4626",
+    //   underlying: "0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452", // 3EPS
+    //   otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker
+    //   flywheelIndex: 0,
+    //   name: "3EPS",
+    // },
+    // {
+    //   // 0x
+    //   strategy: "EllipsisERC4626",
+    //   underlying: "0x0BC3a8239B0a63E945Ea1bd6722Ba747b9557e56", // dai3EPS
+    //   otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker
+    //   flywheelIndex: 0,
+    //   name: "dai3EPS",
+    // },
+    // {
+    //   // 0x
+    //   strategy: "EllipsisERC4626",
+    //   underlying: "0x151F1611b2E304DEd36661f65506f9D7D172beba", // ust3EPS
+    //   otherParams: ["0xcce949De564fE60e7f96C85e55177F8B9E4CF61b"], // lpTokenStaker
+    //   flywheelIndex: 0,
+    //   name: "ust3EPS",
+    // },
     // TODO I cant tell if these vaults are depricated. Would need to speak with Autofarm to clear this up.
     /* {
       // 0x
@@ -245,47 +251,54 @@ export const deployConfig: ChainDeployConfig = {
       strategy: "AlpacaERC4626",
       underlying: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", // WBNB
       otherParams: ["0xd7D069493685A581d27824Fc46EdA46B7EfC0063"], // ibWBNB
+      name: "WBNB",
     },
     {
       // 0x
       strategy: "AlpacaERC4626",
       underlying: "0x2170ed0880ac9a755fd29b2688956bd959f933f8", // BETH
       otherParams: ["0xbfF4a34A4644a113E8200D7F1D79b3555f723AfE"], // ibBETH
+      name: "BETH",
     },
     {
       // 0x
       strategy: "AlpacaERC4626",
       underlying: "0xe9e7cea3dedca5984780bafc599bd69add087d56", // BUSD
       otherParams: ["0x7C9e73d4C71dae564d41F78d56439bB4ba87592f"], // ibBUSD
+      name: "BUSD",
     },
     {
       // 0x
       strategy: "AlpacaERC4626",
       underlying: "0x55d398326f99059ff775485246999027b3197955", // USDT
       otherParams: ["0x158Da805682BdC8ee32d52833aD41E74bb951E59"], // ibUSDT
+      name: "USDT",
     },
     {
       // 0x
       strategy: "AlpacaERC4626",
       underlying: "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d", // USDC
       otherParams: ["0x800933D685E7Dc753758cEb77C8bd34aBF1E26d7"], // ibUSDC
+      name: "USDC",
     },
     {
       // 0x
       strategy: "AlpacaERC4626",
       underlying: "0x14016e85a25aeb13065688cafb43044c2ef86784", // TUSD
       otherParams: ["0x3282d2a151ca00BfE7ed17Aa16E42880248CD3Cd"], // ibTUSD
+      name: "TUSD",
     },
     {
       // 0x
       strategy: "AlpacaERC4626",
       underlying: "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c", // BTCB
       otherParams: ["0x08FC9Ba2cAc74742177e0afC3dC8Aed6961c24e7"], // ibBTCB
+      name: "BTCB",
     },
   ],
   dynamicFlywheels: [
-    { rewardToken: "0xaf41054c1487b0e5e2b9250c0332ecbce6ce9d71", cycleLength: 1 },
-    { rewardToken: "0xa184088a740c695E156F91f5cC086a06bb78b827", cycleLength: 1 },
+    { rewardToken: "0xaf41054c1487b0e5e2b9250c0332ecbce6ce9d71", cycleLength: 1, name: "EPX" },
+    { rewardToken: "0xa184088a740c695E156F91f5cC086a06bb78b827", cycleLength: 1, name: "AUTOv2" },
   ],
 };
 
@@ -488,4 +501,15 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   console.log("CurveLpTokenLiquidatorNoRegistry: ", curveLpTokenLiquidatorNoRegistry.address);
 
   ////
+
+  // Plugins & Rewards
+  const dynamicFlywheels = await deployFlywheelWithDynamicRewards({
+    ethers,
+    getNamedAccounts,
+    deployments,
+    run,
+    deployConfig,
+  });
+  console.log("deployed dynamicFlywheels: ", dynamicFlywheels);
+  await deployERC4626Plugin({ ethers, getNamedAccounts, deployments, run, deployConfig, dynamicFlywheels });
 };

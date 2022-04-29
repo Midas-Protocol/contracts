@@ -26,6 +26,8 @@ dotEnvConfig();
 
 const urlOverride = process.env.ETH_PROVIDER_URL;
 
+console.log("FORK_URL_BSC: ", process.env.FORK_URL_BSC);
+
 const mnemonic =
   process.env.SUGAR_DADDY ||
   process.env.MNEMONIC ||
@@ -71,10 +73,10 @@ const config: HardhatUserConfig = {
       forking: process.env.FORK_URL_BSC
         ? {
             url: process.env.FORK_URL_BSC,
-            blockNumber: Number(process.env.FORK_BLOCK_NUMBER),
+            blockNumber: process.env.FORK_BLOCK_NUMBER ? Number(process.env.FORK_BLOCK_NUMBER) : undefined,
           }
         : undefined,
-      saveDeployments: true,
+      saveDeployments: false,
       chainId: process.env.FORK_CHAIN_ID ? Number(process.env.FORK_CHAIN_ID) : 1337,
       gasPrice: 20e9,
       gas: 25e6,
