@@ -32,12 +32,12 @@ contract BeefyERC4626Test is DSTest {
     testToken = new MockERC20("TestToken", "TST", 18);
     mockStrategy = new MockStrategy(address(testToken));
     mockVault = new MockVault(address(mockStrategy), "MockVault", "MV");
-    beefyERC4626 = new BeefyERC4626(testToken, "TestVault", "TSTV", IBeefyVault(address(mockVault)));
+    beefyERC4626 = new BeefyERC4626(testToken, IBeefyVault(address(mockVault)));
   }
 
   function testInitializedValues() public {
-    assertEq(beefyERC4626.name(), "TestVault");
-    assertEq(beefyERC4626.symbol(), "TSTV");
+    assertEq(beefyERC4626.name(), "Midas TestToken Vault");
+    assertEq(beefyERC4626.symbol(), "mvTST");
     assertEq(address(beefyERC4626.asset()), address(testToken));
     assertEq(address(beefyERC4626.beefyVault()), address(mockVault));
   }

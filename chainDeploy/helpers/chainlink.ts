@@ -1,5 +1,5 @@
 import { providers } from "ethers";
-import { ChainlinkPriceOracleV2 } from "../../typechain";
+import { ChainlinkPriceOracleV2 } from "../../typechain/ChainlinkPriceOracleV2";
 import { Asset, ChainlinkDeployFnParams, ChainlinkFeedBaseCurrency } from "./types";
 
 export const deployChainlinkOracle = async ({
@@ -22,7 +22,7 @@ export const deployChainlinkOracle = async ({
   if (cpo.transactionHash) await ethers.provider.waitForTransaction(cpo.transactionHash);
   console.log("ChainlinkPriceOracleV2: ", cpo.address);
 
-  const chainLinkv2 = (await ethers.getContract("ChainlinkPriceOracleV2", deployer)) as ChainlinkPriceOracleV2;
+  const chainLinkv2 = await ethers.getContract("ChainlinkPriceOracleV2", deployer);
   tx = await chainLinkv2.setPriceFeeds(
     chainlinkAssets.map((c) => assets.find((a: Asset) => a.symbol === c.symbol).underlying),
     chainlinkAssets.map((c) => c.aggregator),

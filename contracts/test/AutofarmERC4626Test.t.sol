@@ -62,12 +62,10 @@ contract AutofarmERC4626Test is DSTest {
 
     autofarmERC4626 = new AutofarmERC4626(
       testToken,
-      "TestVault",
-      "TSTV",
+      FlywheelCore(address(flywheel)),
       0,
       autoToken,
-      IAutofarmV2(address(mockAutofarm)),
-      FlywheelCore(address(flywheel))
+      IAutofarmV2(address(mockAutofarm))
     );
     marketKey = ERC20(address(autofarmERC4626));
     flywheel.addStrategyForRewards(marketKey);
@@ -79,8 +77,8 @@ contract AutofarmERC4626Test is DSTest {
   }
 
   function testInitializedValues() public {
-    assertEq(autofarmERC4626.name(), "TestVault");
-    assertEq(autofarmERC4626.symbol(), "TSTV");
+    assertEq(autofarmERC4626.name(), "Midas TestToken Vault");
+    assertEq(autofarmERC4626.symbol(), "mvTST");
     assertEq(address(autofarmERC4626.asset()), address(testToken));
     assertEq(address(autofarmERC4626.autofarm()), address(mockAutofarm));
     assertEq(address(marketKey), address(autofarmERC4626));

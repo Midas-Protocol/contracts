@@ -41,23 +41,25 @@ contract AutofarmERC4626 is ERC4626 {
   /**
      @notice Creates a new Vault that accepts a specific underlying token.
      @param _asset The ERC20 compliant token the Vault should accept.
-     @param _name The name for the vault token.
-     @param _symbol The symbol for the vault token.
+     @param _flywheel TODO
      @param _poolId TODO
      @param _autoToken The AUTO token. Used to approve flywheel
      @param _autofarm The autofarm contract.
-     @param _flywheel TODO
 
     */
   constructor(
     ERC20 _asset,
-    string memory _name,
-    string memory _symbol,
+    FlywheelCore _flywheel,
     uint256 _poolId,
     ERC20 _autoToken,
-    IAutofarmV2 _autofarm,
-    FlywheelCore _flywheel
-  ) ERC4626(_asset, _name, _symbol) {
+    IAutofarmV2 _autofarm
+  )
+    ERC4626(
+      _asset,
+      string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
+      string(abi.encodePacked("mv", _asset.symbol()))
+    )
+  {
     poolId = _poolId;
     autofarm = _autofarm;
     flywheel = _flywheel;

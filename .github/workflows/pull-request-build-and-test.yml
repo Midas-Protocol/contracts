@@ -49,7 +49,7 @@ jobs:
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
       FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
-      FORK_BLOCK_NUMBER: 17022725
+      FORK_BLOCK_NUMBER: 17366495
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

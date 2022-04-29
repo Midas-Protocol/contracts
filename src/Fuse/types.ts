@@ -4,6 +4,7 @@ import JumpRateModel from "./irm/JumpRateModel";
 import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
 import { FuseBase } from ".";
+import { SupportedChains } from "../network";
 
 export type GConstructor<T = {}> = new (...args: any[]) => T;
 export type FuseBaseConstructor = GConstructor<FuseBase>;
@@ -80,8 +81,14 @@ export type ChainDeployment = {
 
 export type InterestRateModelType = JumpRateModel | DAIInterestRateModelV2 | WhitePaperInterestRateModel;
 
+export type DelegateContractName =
+  | "CErc20Delegate"
+  | "CEtherDelegate"
+  | "CErc20PluginDelegate"
+  | "CErc20PluginRewardsDelegate";
+
 export type cERC20Conf = {
-  delegateContractName?: any;
+  delegateContractName?: DelegateContractName;
   underlying: string; // underlying ERC20
   comptroller: string; // Address of the comptroller
   fuseFeeDistributor: string;
@@ -89,12 +96,14 @@ export type cERC20Conf = {
   initialExchangeRateMantissa?: BigNumber; // Initial exchange rate scaled by 1e18
   name: string; // ERC20 name of this token
   symbol: string; // ERC20 Symbol
-  decimals: number; // decimal precision
   admin: string; // Address of the admin
   collateralFactor: number;
   reserveFactor: number;
   adminFee: number;
   bypassPriceFeedCheck: boolean;
+  plugin?: string;
+  rewardsDistributor?: string;
+  rewardToken?: string;
 };
 
 export type OracleConf = {
@@ -201,3 +210,20 @@ export interface FusePool {
   blockPosted: number;
   timestampPosted: number;
 }
+
+type PluginConfig = {
+  strategyName: string;
+  strategyAddress: string;
+  dynamicFlywheel: {
+    address: string;
+    rewardToken: string;
+  } | null;
+};
+
+export type AssetPluginConfig = {
+  [asset: string]: PluginConfig[];
+};
+
+export type ChainPlugins = {
+  [chain in SupportedChains]: AssetPluginConfig;
+};
