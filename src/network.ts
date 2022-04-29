@@ -1,4 +1,4 @@
-import { Artifacts, ChainDeployment } from "./Fuse/types";
+import { Artifacts, ChainDeployment, ChainPlugins } from "./Fuse/types";
 import { BigNumber, ethers } from "ethers";
 
 export enum SupportedChains {
@@ -145,7 +145,7 @@ export const irmConfig = (deployments: ChainDeployment, artifacts: Artifacts) =>
   };
 };
 
-export const chainPlugins = {
+export const chainPluginConfig: ChainPlugins = {
   [SupportedChains.ganache]: {
     // TRIBE
     "0x5d7075e5A69A4d55BfA86F8d6ae49D7893D968f9": [
@@ -168,9 +168,115 @@ export const chainPlugins = {
     ],
   },
   [SupportedChains.chapel]: {},
-  [SupportedChains.bsc]: {},
-  // TODO: not sure if this is correct
-  [SupportedChains.evmos_testnet]: [OracleTypes.MasterPriceOracle],
-  [SupportedChains.moonbeam]: [OracleTypes.MasterPriceOracle],
-  [SupportedChains.moonbase_alpha]: [OracleTypes.MasterPriceOracle],
+  [SupportedChains.bsc]: {
+    // BOMB-BTC LP
+    "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6": [
+      {
+        strategyName: "BOMB-BTC LP Autocompounding (beefy)",
+        strategyAddress: "",
+        dynamicFlywheel: null,
+      },
+    ],
+    // BOMB
+    "0x522348779DCb2911539e76A1042aA922F9C47Ee3": [
+      {
+        strategyName: "BOMB Autocompounding (beefy)",
+        strategyAddress: "",
+        dynamicFlywheel: null,
+      },
+    ],
+    // 3EPS
+    "0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452": [
+      {
+        strategyName: "3EPS LP Staker with EPX Rewards",
+        strategyAddress: "",
+        dynamicFlywheel: {
+          address: "",
+          rewardToken: "0xaf41054c1487b0e5e2b9250c0332ecbce6ce9d71",
+        },
+      },
+    ],
+    // dai3EPS
+    "0x0BC3a8239B0a63E945Ea1bd6722Ba747b9557e56": [
+      {
+        strategyName: "dai3EPS LP Staker with EPX Rewards",
+        strategyAddress: "",
+        dynamicFlywheel: {
+          address: "",
+          rewardToken: "0xaf41054c1487b0e5e2b9250c0332ecbce6ce9d71",
+        },
+      },
+    ],
+    // ust3EPS
+    "0x151F1611b2E304DEd36661f65506f9D7D172beba": [
+      {
+        strategyName: "ust3EPS LP Staker with EPX Rewards",
+        strategyAddress: "",
+        dynamicFlywheel: {
+          address: "",
+          rewardToken: "0xaf41054c1487b0e5e2b9250c0332ecbce6ce9d71",
+        },
+      },
+    ],
+    // WBNB
+    "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c": [
+      {
+        strategyName: "Alpaca Finance ibWBNB Vault",
+        strategyAddress: "",
+        dynamicFlywheel: null,
+      },
+    ],
+    // ETH
+    "0x2170ed0880ac9a755fd29b2688956bd959f933f8": [
+      {
+        strategyName: "Alpaca Finance ibETH Vault",
+        strategyAddress: "",
+        dynamicFlywheel: null,
+      },
+    ],
+    // BUSD
+    "0xe9e7cea3dedca5984780bafc599bd69add087d56": [
+      {
+        strategyName: "Alpaca Finance ibBUSD Vault",
+        strategyAddress: "",
+        dynamicFlywheel: null,
+      },
+    ],
+    // USDT
+    "0x55d398326f99059ff775485246999027b3197955": [
+      {
+        strategyName: "Alpaca Finance ibUSDT Vault",
+        strategyAddress: "",
+        dynamicFlywheel: null,
+      },
+    ],
+    // USDC
+    "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d": [
+      {
+        strategyName: "Alpaca Finance ibUSDC Vault",
+        strategyAddress: "",
+        dynamicFlywheel: null,
+      },
+    ],
+    // TUSD
+    "0x14016e85a25aeb13065688cafb43044c2ef86784": [
+      {
+        strategyName: "Alpaca Finance ibTUSD Vault",
+        strategyAddress: "",
+        dynamicFlywheel: null,
+      },
+    ],
+    // BTCB
+    "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c": [
+      {
+        strategyName: "Alpaca Finance ibBTCB Vault",
+        strategyAddress: "",
+        dynamicFlywheel: null,
+      },
+    ],
+  },
+
+  [SupportedChains.evmos_testnet]: {},
+  [SupportedChains.moonbeam]: {},
+  [SupportedChains.moonbase_alpha]: {},
 };
