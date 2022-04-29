@@ -225,5 +225,5 @@ export type AssetPluginConfig = {
 };
 
 export type ChainPlugins = {
-  [SupportedChains: string]: AssetPluginConfig;
+  [chain in SupportedChains]: AssetPluginConfig;
 };

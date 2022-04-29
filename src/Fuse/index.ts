@@ -2,7 +2,6 @@
 import { BigNumber, constants, Contract, ContractFactory, providers, utils } from "ethers";
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import axios from "axios";
 
 // ABIs
 import uniswapV3PoolAbiSlim from "./abi/UniswapV3Pool.slim.json";
@@ -81,7 +80,6 @@ import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
 import { withSafeLiquidator } from "../modules/liquidation/SafeLiquidator";
 import { Comptroller } from "../../typechain/Comptroller";
 import { FuseFlywheelLensRouter } from "../../typechain/FuseFlywheelLensRouter.sol";
-import { PluginConfig } from "../../chainDeploy";
 
 type OracleConfig = {
   [contractName: string]: {
