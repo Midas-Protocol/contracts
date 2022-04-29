@@ -1,6 +1,6 @@
 import { ChainDeployConfig } from "../helpers";
 import { ethers } from "ethers";
-import { MasterPriceOracle } from "../../typechain";
+import { MasterPriceOracle } from "../../typechain/MasterPriceOracle";
 import { deployERC4626Plugin, deployFlywheelWithDynamicRewards } from "../helpers/erc4626Plugins";
 import { ChainDeployFnParams } from "../helpers/types";
 
