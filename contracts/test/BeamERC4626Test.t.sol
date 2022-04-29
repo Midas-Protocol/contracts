@@ -62,7 +62,7 @@ contract BeamERC4626Test is BaseTest {
     flywheelRewards = new FuseFlywheelDynamicRewards(flywheel, 1);
     flywheel.setFlywheelRewards(flywheelRewards);
 
-    beamErc4626 = new BeamERC4626(testToken, "test", "tst", 0, glintToken, IBeamVault(address(mockBeamChef)), flywheel);
+    beamErc4626 = new BeamERC4626(testToken, "test", "tst", 0, glintToken, IVault(address(mockBeamChef)), flywheel);
     marketKey = ERC20(address(beamErc4626));
     flywheel.addStrategyForRewards(marketKey);
 
@@ -72,11 +72,11 @@ contract BeamERC4626Test is BaseTest {
     vm.roll(2);
   }
 
-  function testInitializedValues() public {
+  function testInitializedValues() public shouldRun(forChains(MOONBEAM_MAINNET)) {
     assertEq(beamErc4626.name(), "test");
     assertEq(beamErc4626.symbol(), "tst");
     assertEq(address(beamErc4626.asset()), address(testToken));
-    assertEq(address(beamErc4626.BEAM_VAULT()), address(mockBeamChef));
+    assertEq(address(beamErc4626.VAULT()), address(mockBeamChef));
     assertEq(address(marketKey), address(beamErc4626));
     assertEq(testToken.allowance(address(beamErc4626), address(mockBeamChef)), type(uint256).max);
     assertEq(glintToken.allowance(address(beamErc4626), address(flywheelRewards)), type(uint256).max);
@@ -104,7 +104,7 @@ contract BeamERC4626Test is BaseTest {
     assertEq(beamErc4626.balanceOf(address(this)), depositAmount);
   }
 
-  function testWithdraw() public {
+  function testWithdraw() public shouldRun(forChains(MOONBEAM_MAINNET)) {
     _deposit();
     beamErc4626.withdraw(depositAmount, address(this), address(this));
 

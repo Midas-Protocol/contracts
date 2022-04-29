@@ -7,7 +7,7 @@ import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 
-interface IBeamVault {
+interface IVault {
   // Info of each user.
 
   function userInfo(uint256 _pid, address _address)
@@ -31,7 +31,7 @@ contract BeamERC4626 is ERC4626 {
 
   /* ========== STATE VARIABLES ========== */
 
-  IBeamVault public immutable BEAM_VAULT;
+  IVault public immutable VAULT;
   FlywheelCore public immutable FLYWHEEL_CORE;
   uint256 public immutable POOL_ID;
 
@@ -43,8 +43,8 @@ contract BeamERC4626 is ERC4626 {
      @param _name The name for the vault token.
      @param _symbol The symbol for the vault token.
      @param _poolId pool id on beamswap.
-     @param _glintToken GLINT token. Used to getting rewards from flyWheel.
-     @param _beamChef The BeamChef contract.
+     @param _rewardToken reward token. Used to getting rewards from flyWheel.
+     @param _vault The Vault contract.
      @param _flyWheel flyWheelCore that handling rewards for pool.
     */
   constructor(
@@ -52,16 +52,16 @@ contract BeamERC4626 is ERC4626 {
     string memory _name,
     string memory _symbol,
     uint256 _poolId,
-    ERC20 _glintToken,
-    IBeamVault _beamChef,
+    ERC20 _rewardToken,
+    IVault _vault,
     FlywheelCore _flyWheel
   ) ERC4626(_asset, _name, _symbol) {
-    BEAM_VAULT = _beamChef;
+    VAULT = _vault;
     POOL_ID = _poolId;
     FLYWHEEL_CORE = _flyWheel;
 
-    asset.approve(address(BEAM_VAULT), type(uint256).max);
-    _glintToken.approve(address(_flyWheel.flywheelRewards()), type(uint256).max);
+    asset.approve(address(VAULT), type(uint256).max);
+    _rewardToken.approve(address(_flyWheel.flywheelRewards()), type(uint256).max);
   }
 
   /* ========== VIEWS ========== */
@@ -69,7 +69,7 @@ contract BeamERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    (uint256 amount, , , ) = BEAM_VAULT.userInfo(POOL_ID, address(this));
+    (uint256 amount, , , ) = VAULT.userInfo(POOL_ID, address(this));
     return amount;
   }
 
@@ -82,10 +82,10 @@ contract BeamERC4626 is ERC4626 {
   /* ========== INTERNAL FUNCTIONS ========== */
 
   function afterDeposit(uint256 amount, uint256) internal override {
-    BEAM_VAULT.deposit(POOL_ID, amount);
+    VAULT.deposit(POOL_ID, amount);
   }
 
   function beforeWithdraw(uint256, uint256 shares) internal override {
-    BEAM_VAULT.withdraw(POOL_ID, shares);
+    VAULT.withdraw(POOL_ID, shares);
   }
 }
