@@ -235,7 +235,7 @@ export const chainPluginConfig: ChainPlugins = {
       },
     ],
     // BUSD
-    "0xe9e7cea3dedca5984780bafc599bd69add087d56": [
+    "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56": [
       {
         strategyName: "Alpaca Finance ibBUSD Vault",
         strategyAddress: "0x9012ef7414D5c42873D94506b91C1677BF4DfF38",

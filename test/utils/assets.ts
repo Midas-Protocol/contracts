@@ -1,6 +1,7 @@
 import { cERC20Conf } from "../../src";
-import { bscAssets } from "../../chainDeploy";
+import { Asset, bscAssets } from "../../chainDeploy";
 import { constants } from "ethers";
+import { getOrCreateFuse } from "./fuseSdk";
 
 export const getAssetsConf = async (
   comptroller,
@@ -106,5 +107,57 @@ export const getBscAssetsConf = async (comptroller, fuseFeeDistributor, interest
     adminFee: 0,
     bypassPriceFeedCheck: true,
   };
-  return [bnbConf, btcConf, busdConf];
+  const erc4626Assets = await getBscPluginAssetsConf(
+    comptroller,
+    fuseFeeDistributor,
+    interestRateModelAddress,
+    bscAssets
+  );
+  return [bnbConf, btcConf, busdConf, ...erc4626Assets];
+};
+
+export const getBscPluginAssetsConf = async (
+  comptroller,
+  fuseFeeDistributor,
+  interestRateModelAddress,
+  bscAssets: Asset[]
+) => {
+  const busd = bscAssets.find((b) => b.symbol === "BUSD");
+  const bomb = bscAssets.find((b) => b.symbol === "BOMB");
+  const sdk = await getOrCreateFuse();
+  console.log(busd.underlying, bomb.underlying, "busd.underlying, bomb.underlying");
+  const alpacaBusdPlugin = sdk.chainPlugins[busd.underlying][0];
+  const bombPlugin = sdk.chainPlugins[bomb.underlying][0];
+
+  const busdConf: cERC20Conf = {
+    delegateContractName: "CErc20PluginDelegate",
+    underlying: busd.underlying,
+    comptroller,
+    fuseFeeDistributor,
+    interestRateModel: interestRateModelAddress,
+    name: busd.name,
+    symbol: busd.symbol,
+    admin: "true",
+    collateralFactor: 75,
+    reserveFactor: 15,
+    adminFee: 0,
+    bypassPriceFeedCheck: true,
+    plugin: alpacaBusdPlugin.strategyAddress,
+  };
+  const bombConf: cERC20Conf = {
+    delegateContractName: "CErc20PluginRewardsDelegate",
+    underlying: bomb.underlying,
+    comptroller,
+    fuseFeeDistributor,
+    interestRateModel: interestRateModelAddress,
+    name: bomb.name,
+    symbol: bomb.symbol,
+    admin: "true",
+    collateralFactor: 75,
+    reserveFactor: 15,
+    adminFee: 0,
+    bypassPriceFeedCheck: true,
+    plugin: bombPlugin.strategyAddress,
+  };
+  return [busdConf, bombConf];
 };

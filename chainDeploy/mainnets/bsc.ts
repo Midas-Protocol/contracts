@@ -133,9 +133,9 @@ export const assets: Asset[] = [
   },
   // Bomb
   {
-    symbol: "xBOMB",
-    underlying: "0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b",
-    name: "xBOMB",
+    symbol: "BOMB",
+    underlying: "0x522348779DCb2911539e76A1042aA922F9C47Ee3",
+    name: "BOMB",
     decimals: 18,
   },
   // Jarvis
@@ -263,7 +263,7 @@ export const deployConfig: ChainDeployConfig = {
     {
       // 0x
       strategy: "AlpacaERC4626",
-      underlying: "0xe9e7cea3dedca5984780bafc599bd69add087d56", // BUSD
+      underlying: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56", // BUSD
       otherParams: ["0x7C9e73d4C71dae564d41F78d56439bB4ba87592f"], // ibBUSD
       name: "BUSD",
     },
