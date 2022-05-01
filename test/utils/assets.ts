@@ -125,7 +125,7 @@ export const getBscPluginAssetsConf = async (
   const busd = bscAssets.find((b) => b.symbol === "BUSD");
   const bomb = bscAssets.find((b) => b.symbol === "BOMB");
   const sdk = await getOrCreateFuse();
-  console.log(busd.underlying, bomb.underlying, "busd.underlying, bomb.underlying");
+
   const alpacaBusdPlugin = sdk.chainPlugins[busd.underlying][0];
   const bombPlugin = sdk.chainPlugins[bomb.underlying][0];
 
@@ -135,8 +135,8 @@ export const getBscPluginAssetsConf = async (
     comptroller,
     fuseFeeDistributor,
     interestRateModel: interestRateModelAddress,
-    name: busd.name,
-    symbol: busd.symbol,
+    name: `alpaca ${busd.name}`,
+    symbol: `m${busd.symbol}`,
     admin: "true",
     collateralFactor: 75,
     reserveFactor: 15,

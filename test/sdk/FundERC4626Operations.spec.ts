@@ -21,8 +21,6 @@ import { getOrCreateFuse } from "../utils/fuseSdk";
     const { deployer } = await ethers.getNamedSigners();
 
     sdk = await getOrCreateFuse();
-    console.log(sdk.chainPlugins);
-    console.log(sdk.chainPlugins["0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"][0]);
 
     [poolAddress] = await poolHelpers.createPool({ signer: deployer, poolName: "Pool-Fund-Operations-Test" });
 
