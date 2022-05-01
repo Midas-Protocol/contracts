@@ -256,7 +256,7 @@ export const deployConfig: ChainDeployConfig = {
     {
       // 0x
       strategy: "AlpacaERC4626",
-      underlying: "0x2170ed0880ac9a755fd29b2688956bd959f933f8", // ETH
+      underlying: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", // ETH
       otherParams: ["0xbfF4a34A4644a113E8200D7F1D79b3555f723AfE"], // ibETH
       name: "ETH",
     },

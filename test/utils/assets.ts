@@ -122,21 +122,21 @@ export const getBscPluginAssetsConf = async (
   interestRateModelAddress,
   bscAssets: Asset[]
 ) => {
-  const busd = bscAssets.find((b) => b.symbol === "BUSD");
+  const beth = bscAssets.find((b) => b.symbol === "ETH");
   const bomb = bscAssets.find((b) => b.symbol === "BOMB");
   const sdk = await getOrCreateFuse();
 
-  const alpacaBusdPlugin = sdk.chainPlugins[busd.underlying][0];
+  const alpacaBusdPlugin = sdk.chainPlugins[beth.underlying][0];
   const bombPlugin = sdk.chainPlugins[bomb.underlying][0];
 
-  const busdConf: cERC20Conf = {
+  const bethConf: cERC20Conf = {
     delegateContractName: "CErc20PluginDelegate",
-    underlying: busd.underlying,
+    underlying: beth.underlying,
     comptroller,
     fuseFeeDistributor,
     interestRateModel: interestRateModelAddress,
-    name: `alpaca ${busd.name}`,
-    symbol: `m${busd.symbol}`,
+    name: `alpaca ${beth.name}`,
+    symbol: `m${beth.symbol}`,
     admin: "true",
     collateralFactor: 75,
     reserveFactor: 15,
@@ -145,7 +145,7 @@ export const getBscPluginAssetsConf = async (
     plugin: alpacaBusdPlugin.strategyAddress,
   };
   const bombConf: cERC20Conf = {
-    delegateContractName: "CErc20PluginRewardsDelegate",
+    delegateContractName: "CErc20PluginDelegate",
     underlying: bomb.underlying,
     comptroller,
     fuseFeeDistributor,
@@ -159,5 +159,5 @@ export const getBscPluginAssetsConf = async (
     bypassPriceFeedCheck: true,
     plugin: bombPlugin.strategyAddress,
   };
-  return [busdConf, bombConf];
+  return [bethConf, bombConf];
 };

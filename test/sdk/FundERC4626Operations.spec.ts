@@ -21,8 +21,12 @@ import { getOrCreateFuse } from "../utils/fuseSdk";
     const { deployer } = await ethers.getNamedSigners();
 
     sdk = await getOrCreateFuse();
+    console.log(sdk.chainPlugins);
 
-    [poolAddress] = await poolHelpers.createPool({ signer: deployer, poolName: "Pool-Fund-Operations-Test" });
+    [poolAddress] = await poolHelpers.createPool({
+      signer: deployer,
+      poolName: "Pool-Fund-Operations-Test",
+    });
 
     const assets = await poolHelpers.getPoolAssets(poolAddress, sdk.contracts.FuseFeeDistributor.address);
     await poolHelpers.deployAssets(assets.assets, deployer);

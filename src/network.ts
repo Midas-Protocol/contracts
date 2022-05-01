@@ -227,7 +227,7 @@ export const chainPluginConfig: ChainPlugins = {
       },
     ],
     // ETH
-    "0x2170ed0880ac9a755fd29b2688956bd959f933f8": [
+    "0x2170Ed0880ac9A755fd29B2688956BD959F933F8": [
       {
         strategyName: "Alpaca Finance ibETH Vault",
         strategyAddress: "0xCBE401B8874A1C30163740f5f45156088Eb21481",
