@@ -24,6 +24,14 @@ interface IBoringERC20 {
 
   function safeTransfer(address receiver, uint256 amount) external;
 
+  function transfer(address to, uint256 value) external returns (bool);
+
+  function transferFrom(
+    address from,
+    address to,
+    uint256 value
+  ) external returns (bool);
+
   event Transfer(address indexed from, address indexed to, uint256 value);
   event Approval(address indexed owner, address indexed spender, uint256 value);
 
@@ -150,7 +158,9 @@ contract MockVault {
 
     if (_amount > 0) {
       uint256 beforeDeposit = pool.lpToken.balanceOf(address(this));
-      pool.lpToken.safeTransferFrom(msg.sender, address(this), _amount);
+      uint256 beforeDeposit1 = pool.lpToken.balanceOf(msg.sender);
+      uint256 allowance = pool.lpToken.allowance(msg.sender, address(this));
+      pool.lpToken.transferFrom(msg.sender, address(this), _amount);
       uint256 afterDeposit = pool.lpToken.balanceOf(address(this));
 
       _amount = afterDeposit - beforeDeposit;
@@ -288,7 +298,7 @@ contract MockVault {
       if (address(pool.lpToken) == address(beam)) {
         totalBeamInPools -= _amount;
       }
-      pool.lpToken.safeTransfer(msg.sender, _amount);
+      pool.lpToken.transfer(msg.sender, _amount);
     }
 
     user.rewardDebt = (user.amount * pool.accBeamPerShare) / ACC_TOKEN_PRECISION;

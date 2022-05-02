@@ -4,6 +4,7 @@ pragma solidity >=0.4.23;
 import "./config/BaseTest.t.sol";
 import "../compound/strategies/BeamERC4626.sol";
 import "./mocks/beam/MockVault.sol";
+import "forge-std/Test.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
@@ -34,6 +35,7 @@ contract MockBoringERC20 is MockERC20 {
 }
 
 contract BeamERC4626Test is BaseTest {
+  using stdStorage for StdStorage;
   BeamERC4626 beamErc4626;
   MockVault mockBeamChef;
   MockBoringERC20 testToken;
@@ -42,11 +44,11 @@ contract BeamERC4626Test is BaseTest {
   FlywheelCore flywheel;
   FuseFlywheelDynamicRewards flywheelRewards;
 
-  uint256 depositAmount = 100e18;
+  uint256 depositAmount = 100;
 
   function setUp() public shouldRun(forChains(MOONBEAM_MAINNET)) {
-    testToken = new MockBoringERC20("TestToken", "TST", 18);
-    glintToken = new MockERC20("GlintToken", "GLINT", 18);
+    testToken = MockBoringERC20(0x99588867e817023162F4d4829995299054a5fC57);
+    glintToken = MockERC20(0xcd3B51D98478D53F4515A306bE565c6EebeF1D58);
     mockBeamChef = new MockVault(IBoringERC20(address(testToken)), 0, address(0), 0, address(0));
     vm.warp(1);
     vm.roll(1);
@@ -83,8 +85,16 @@ contract BeamERC4626Test is BaseTest {
   }
 
   function _deposit() internal {
-    testToken.mint(address(this), depositAmount);
+    // vm.prank(0x457C5B8A6224F524d9f15fA6B6d70fCad8EBa623);
+    // testToken.approve(address(this), depositAmount);
+    vm.prank(0x457C5B8A6224F524d9f15fA6B6d70fCad8EBa623);
+    testToken.approve(0x457C5B8A6224F524d9f15fA6B6d70fCad8EBa623, depositAmount);
+    vm.prank(0x457C5B8A6224F524d9f15fA6B6d70fCad8EBa623);
+    testToken.transferFrom(0x457C5B8A6224F524d9f15fA6B6d70fCad8EBa623, address(this), depositAmount);
+    uint256 balance = testToken.balanceOf(address(this));
     testToken.approve(address(beamErc4626), depositAmount);
+    // vm.prank(address(beamErc4626));
+    // testToken.approve(address(beamErc4626), depositAmount);
     flywheel.accrue(ERC20(beamErc4626), address(this));
     beamErc4626.deposit(depositAmount, address(this));
     flywheel.accrue(ERC20(beamErc4626), address(this));
