@@ -22,9 +22,13 @@ contract GaugesTest is DSTest {
     TOUCHToken govToken;
     StakingController stakingController;
     uint256 totalSupply = 100_000;
+    uint256 rewardsForCycle = 27000;
+    address alice = address(0x01);
+    address bob = address(0x02);
 
     Comptroller comptroller;
     MockERC20 rewardToken;
+    MockCToken gaugeStrategy;
 
     FlywheelCore flywheel;
     FlywheelGaugeRewards rewards;
@@ -36,13 +40,14 @@ contract GaugesTest is DSTest {
         stakingController = new StakingController();
         govToken = new TOUCHToken(totalSupply);
         veToken = new VeMDSToken(
-            20, // gaugeCycleLength
-            10, // incrementFreezeWindow
+            7 days, // gaugeCycleLength
+            1 days, // incrementFreezeWindow
             address(this),
             Authority(address(0)),
             address(stakingController)
         );
         veToken.setMaxGauges(1);
+        vm.label(address(veToken), "vetoken");
         stakingController.initialize(veToken, govToken);
         govToken.approve(address(stakingController), type(uint256).max);
 
@@ -58,12 +63,12 @@ contract GaugesTest is DSTest {
         flywheel = new FlywheelCore(
             rewardToken,
             IFlywheelRewards(address(0)),
-            IFlywheelBooster(address(0)), //booster,
+            booster,
             address(this),
             Authority(address(0))
         );
 
-        rewardsStream = new MockRewardsStream(rewardToken, 10 ether);
+        rewardsStream = new MockRewardsStream(rewardToken, rewardsForCycle);
 
         rewards = new FlywheelGaugeRewards(
             flywheel,
@@ -74,85 +79,101 @@ contract GaugesTest is DSTest {
         );
 
         flywheel.setFlywheelRewards(rewards);
+        // seed rewards to flywheel
+        rewardToken.mint(address(rewardsStream), rewardsForCycle * 3);
+        gaugeStrategy = new MockCToken(address(govToken), false);
+        flywheel.addStrategyForRewards(gaugeStrategy);
 
-//        flywheelClaimer = new FuseFlywheelLensRouter();
+        vm.prank(address(stakingController));
+        veToken.mint(address(this), 1000);
 
+        veToken.addGauge(address(gaugeStrategy));
     }
 
-    function testMarketGauges(/*uint256 amountToStake*/) public {
-        uint256 amountToStake = 1000;
-//        vm.assume(amountToStake < totalSupply);
-//        vm.assume(amountToStake > 100);
+    function testMarketGauges() public {
 
         setUpFlywheel();
 
-        vm.warp(30 days);
-
-        stakingController.stake(amountToStake);
-
-        // advancing 150 days
-        vm.warp(block.timestamp + 150 days);
-
-        stakingController.claimAccumulatedVotingPower();
-
-        MockCToken mockCToken = new MockCToken(address(govToken), false);
-        veToken.addGauge(address(mockCToken));
-
-        mockCToken.mint(address(this), 2000);
-
-        emit log("ctoken balances");
-        emit log_uint(mockCToken.balanceOf(address(this)));
-        emit log_uint(mockCToken.totalSupply());
-        emit log("ctoken borrow balances");
-        emit log_uint(mockCToken.borrowBalanceStored(address(this)));
-        emit log_uint(mockCToken.totalBorrows());
-
-        emit log("boosted");
-        emit log_uint(booster.boostedBalanceOf(mockCToken, address(this)));
-        emit log_uint(booster.boostedTotalSupply(mockCToken));
-
-        //        ERC20 strategy = new MockERC20("test strategy", "TKN", 18);
-        flywheel.addStrategyForRewards(mockCToken);//ERC20(address(mock)));
-
-        (uint224 indexBefore, uint32 lastUpdatedTimestampBefore) = flywheel.strategyState(mockCToken);
-        emit log_uint(indexBefore);
-        emit log_uint(lastUpdatedTimestampBefore);
-
-        //        // add flywheel as rewardsDistributor to call flywheelPreBorrowAction / flywheelPreSupplyAction
-//        require(comptroller._addRewardsDistributor(address(flywheel)) == 0, "rewards distributor non-null");
-
-        // seed rewards to flywheel
-        rewardToken.mint(address(rewardsStream), 100 ether);
-
-        // preparation for a later call
-//        flywheelsToClaim.push(flywheel);
-
-        veToken.incrementGauge(address(mockCToken), uint112(amountToStake / 2));
-
         vm.warp(block.timestamp + 1 days);
 
-        vm.label(address(veToken), "vetoken");
-        // queue rewards and the accrue them
-        rewards.queueRewardsForCycle();
+        gaugeStrategy.mint(alice, 4000);
+        gaugeStrategy.mint(bob, 6000);
 
-        emit log("balance of");
-        emit log_uint(rewardToken.balanceOf(address(this)));
+        emit log("ctoken balances");
+        emit log_uint(gaugeStrategy.balanceOf(alice));
+        emit log_uint(gaugeStrategy.balanceOf(bob));
+        emit log_uint(gaugeStrategy.totalSupply());
+        emit log("ctoken borrow balances");
+        emit log_uint(gaugeStrategy.borrowBalanceStored(alice));
+        emit log_uint(gaugeStrategy.borrowBalanceStored(bob));
+        emit log_uint(gaugeStrategy.totalBorrows());
+
+        emit log("boosted");
+        emit log_uint(booster.boostedBalanceOf(gaugeStrategy, alice));
+        emit log_uint(booster.boostedBalanceOf(gaugeStrategy, bob));
+        emit log_uint(booster.boostedTotalSupply(gaugeStrategy));
+
+        // first set up the gauge voting before the freeze window comes
+        veToken.incrementGauge(address(gaugeStrategy), 1000);
+
+        vm.warp(block.timestamp + 6 days);
+
+        printQueuedRewards();
+        emit log_uint(veToken.getGaugeCycleEnd());
+        emit log_uint(block.timestamp);
+
+        emit log("queue rewards and then accrue them");
+        // transfers the reward tokens from the stream to the rewards contract
+        rewards.queueRewardsForCycle();
+        printQueuedRewards();
+
+        printRewardBalances();
 
         vm.warp(block.timestamp + 8 days);
 
-        flywheel.accrue(mockCToken, address(this));
+//        rewards.queueRewardsForCycle();
+
+        // rewards are accrued only when the cycle is over
+        //
+        flywheel.accrue(gaugeStrategy, alice);
+        flywheel.accrue(gaugeStrategy, bob);
+
+        printQueuedRewards();
 
         emit log("boosted");
-        emit log_uint(booster.boostedBalanceOf(mockCToken, address(this)));
-        emit log_uint(booster.boostedTotalSupply(mockCToken));
+        emit log_uint(booster.boostedBalanceOf(gaugeStrategy, alice));
+        emit log_uint(booster.boostedBalanceOf(gaugeStrategy, bob));
+        emit log_uint(booster.boostedTotalSupply(gaugeStrategy));
 
-        (uint224 indexAfter, uint32 lastUpdatedTimestampAfter) = flywheel.strategyState(mockCToken);
-        emit log_uint(indexAfter);
-        emit log_uint(lastUpdatedTimestampAfter);
+        printRewardBalances();
 
-        emit log("balance of");
-        emit log_uint(rewardToken.balanceOf(address(this)));
+        vm.warp(block.timestamp + 1 days);
+
+        emit log("claiming the accrued rewards");
+        flywheel.claimRewards(alice);
+        flywheel.claimRewards(bob);
+
+        printRewardBalances();
 
         require(false, "whatever");
+    }
+
+    function printRewardBalances() internal {
+        emit log("balance of");
+        emit log_uint(rewardToken.balanceOf(alice));
+        emit log_uint(rewardToken.balanceOf(bob));
+    }
+
+    function printQueuedRewards() internal {
+        (
+            uint112 priorCycleRewards,
+            uint112 cycleRewards,
+            uint32 storedCycle
+        ) = rewards.gaugeQueuedRewards(gaugeStrategy);
+
+        emit log("queued rewards: prior cycle rew, cycle rew, stored cycle");
+        emit log_uint(priorCycleRewards);
+        emit log_uint(cycleRewards);
+        emit log_uint(storedCycle);
     }
 }
