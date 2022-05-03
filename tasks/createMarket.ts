@@ -67,11 +67,11 @@ export default task("market:create", "Create Market")
     };
 
     console.log(assetConf);
-    // const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
-    //   sdk.JumpRateModelConf,
-    //   assetConf,
-    //   { from: signer.address }
-    // );
+    const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
+      sdk.JumpRateModelConf,
+      assetConf,
+      { from: signer.address }
+    );
 
-    // console.log("CToken: ", assetAddress);
+    console.log("CToken: ", assetAddress);
   });
