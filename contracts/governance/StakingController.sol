@@ -24,6 +24,10 @@ contract StakingController is Initializable {
   error StakeAmountZero();
   error StakeNotEnough();
 
+  event Stake(address indexed account, uint256 amount);
+  event DeclareUnstake(address indexed account, uint256 amount);
+  event Unstake(address indexed account, address caller, uint256 amount);
+
   function initialize(VeMDSToken _veToken, TOUCHToken _touchToken) initializer public {
     veToken = _veToken;
     touchToken = _touchToken;
@@ -73,7 +77,7 @@ contract StakingController is Initializable {
     totalStaked += amountToStake;
     stakingStartedTime[msg.sender] = block.timestamp;
 
-    // emit stakinng event
+    emit Stake(msg.sender, amountToStake);
   }
 
   // unstake has to be declared 7 days prior to the unstaking
@@ -87,7 +91,7 @@ contract StakingController is Initializable {
     unstakeDeclaredTime[msg.sender] = block.timestamp;
     unstakeDeclaredAmount[msg.sender] = amountToUnstake;
 
-    // emit unstake declared event
+    emit DeclareUnstake(msg.sender, amountToUnstake);
   }
 
   // unstaking can be done
@@ -126,7 +130,7 @@ contract StakingController is Initializable {
     // call transfer in the end, as the reentrancy protection pattern requires
     touchToken.transfer(account, amountToUnstake);
 
-    // emit unstaking event
+    emit Unstake(account, msg.sender, amountToUnstake);
   }
 
   function stakeOf(address account) public view returns (uint256) {

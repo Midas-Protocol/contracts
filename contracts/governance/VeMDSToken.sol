@@ -7,11 +7,15 @@ import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.s
 import "flywheel-v2/token/ERC20Gauges.sol";
 
 import "../utils/TOUCHToken.sol";
+import "../external/compound/ICToken.sol";
+import "./MarketSupplyStrategy.sol";
+import "./MarketBorrowStrategy.sol";
 
 // TODO integrate with FlywheelGaugeRewards
 // TODO research ERC20VotesUpgradeable
 contract VeMDSToken is ERC20Gauges {
   address public stakingController;
+  EnumerableSet.AddressSet internal _markets;
 
   constructor(
     uint32 _gaugeCycleLength,
@@ -26,14 +30,24 @@ contract VeMDSToken is ERC20Gauges {
   {
     stakingController = _stakingController; // TODO typed contract param
   }
+  // TODO ability for the DAO address to be changed by the DAO
 
   modifier onlyStakingController() {
     require(msg.sender == address(stakingController), "only the staking controller can mint");
     _;
   }
 
-  /// @notice thrown when incrementing over a users free weight.
   error TransferNotSupported();
+
+//  function addMarketGauge(ICToken market) public requiresAuth returns (MarketSupplyStrategy, MarketBorrowStrategy) {
+//    if (_markets.add(market)) {
+//      MarketSupplyStrategy supplyStrategy = new MarketSupplyStrategy(market);
+//      _addGauge(address(supplyStrategy));
+//      MarketBorrowStrategy borrowStrategy = new MarketBorrowStrategy(market);
+//      _addGauge(address(borrowStrategy));
+//    }
+//    return strategy;
+//  }
 
   function mint(address to, uint256 amount) public onlyStakingController {
     _mint(to, amount);
@@ -44,6 +58,7 @@ contract VeMDSToken is ERC20Gauges {
   }
 
   function transfer(address, uint256) public virtual override returns (bool) {
+    // TODO TransferNotSupported
     revert("Transfer not supported");
   }
 
@@ -52,6 +67,7 @@ contract VeMDSToken is ERC20Gauges {
     address,
     uint256
   ) public virtual override returns (bool) {
+    // TODO TransferNotSupported
     revert("Transfer not supported");
   }
 }

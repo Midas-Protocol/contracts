@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "ds-test/test.sol";
-import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
 import { EllipsisERC4626, ILpTokenStaker } from "../compound/strategies/EllipsisERC4626.sol";
@@ -16,17 +15,13 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 
 contract EllipsisERC4626Test is DSTest {
-  using stdStorage for StdStorage;
+  Vm public constant vm = Vm(HEVM_ADDRESS);
 
   struct RewardsCycle {
     uint32 start;
     uint32 end;
     uint192 reward;
   }
-
-  Vm public constant vm = Vm(HEVM_ADDRESS);
-
-  StdStorage stdstore;
 
   EllipsisERC4626 ellipsisERC4626;
   FlywheelCore flywheel;
