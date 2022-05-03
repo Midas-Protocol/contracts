@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.23;
 
-import "ds-test/test.sol";
-import "forge-std/stdlib.sol";
-import "forge-std/Vm.sol";
+import "forge-std/Test.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
@@ -13,13 +11,7 @@ import { MockStrategy } from "./mocks/beefy/MockStrategy.sol";
 import { MockVault } from "./mocks/beefy/MockVault.sol";
 import { IStrategy } from "./mocks/beefy/IStrategy.sol";
 
-contract BeefyERC4626Test is DSTest {
-  using stdStorage for StdStorage;
-
-  Vm public constant vm = Vm(HEVM_ADDRESS);
-
-  StdStorage stdstore;
-
+contract BeefyERC4626Test is Test {
   BeefyERC4626 beefyERC4626;
 
   MockERC20 testToken;

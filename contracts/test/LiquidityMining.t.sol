@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.23;
 
-import "ds-test/test.sol";
-import "forge-std/stdlib.sol";
-import "forge-std/Vm.sol";
+import "forge-std/Test.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
@@ -27,13 +25,7 @@ import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 
-contract LiquidityMiningTest is DSTest {
-  using stdStorage for StdStorage;
-
-  Vm public constant vm = Vm(HEVM_ADDRESS);
-
-  StdStorage stdstore;
-
+contract LiquidityMiningTest is Test {
   MockERC20 underlyingToken;
   MockERC20 rewardToken;
 
@@ -177,12 +169,7 @@ contract LiquidityMiningTest is DSTest {
     require(index == flywheel.ONE() + rewardsPerToken);
 
     // claim and check user balance
-    flywheelClaimer.getUnclaimedRewardsForMarket(
-      user,
-      ICToken(address(cErc20)),
-      flywheelsToClaim,
-      trueBoolArray
-    );
+    flywheelClaimer.getUnclaimedRewardsForMarket(user, ICToken(address(cErc20)), flywheelsToClaim, trueBoolArray);
     require(rewardToken.balanceOf(user) == userRewards);
 
     // mint more tokens by user and rerun test
@@ -195,12 +182,7 @@ contract LiquidityMiningTest is DSTest {
     uint256 userRewards2 = (rewardsPerToken2 * cErc20.balanceOf(user)) / 1 ether;
 
     // accrue all unclaimed rewards and claim them
-    flywheelClaimer.getUnclaimedRewardsForMarket(
-      user,
-      ICToken(address(cErc20)),
-      flywheelsToClaim,
-      trueBoolArray
-    );
+    flywheelClaimer.getUnclaimedRewardsForMarket(user, ICToken(address(cErc20)), flywheelsToClaim, trueBoolArray);
 
     // user balance should accumulate from both rewards
     require(rewardToken.balanceOf(user) == userRewards + userRewards2, "balance mismatch");
