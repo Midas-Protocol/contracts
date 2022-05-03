@@ -20,12 +20,13 @@ export default task("oracle:set-price", "Set price of token")
   });
 
 task("oracle:get-price", "Get price of token")
-  .addOptionalParam("token", "Token for which to set the price", undefined, types.string)
-  .addOptionalParam("address", "Token address for which to set the price", undefined, types.string)
+  .addOptionalParam("token", "Token for which to get the price", undefined, types.string)
+  .addOptionalParam("address", "Token address for which to get the price", undefined, types.string)
   .setAction(async ({ token: _token, address: _address, price: _price }, { getNamedAccounts, ethers }) => {
     const oracleModule = await import("../test/utils/oracle");
     const [tokenAddress, oracle] = await oracleModule.setUpOracleWithToken(_token, _address, ethers, getNamedAccounts);
     const tokenPriceMPO = await oracle.price(tokenAddress);
+    console.log('tokenPriceMPO: ', tokenPriceMPO.toString());
     console.log(`Price ${_token ? _token : _address}: ${ethers.utils.formatEther(tokenPriceMPO)}`);
     return tokenPriceMPO;
   });

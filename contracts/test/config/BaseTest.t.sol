@@ -17,6 +17,12 @@ abstract contract BaseTest is DSTest {
   Vm public constant vm = Vm(HEVM_ADDRESS);
   ChainConfig internal chainConfig;
 
+  uint256 constant BSC_MAINNET = 56;
+  uint256 constant MOONBEAM_MAINNET = 1284;
+
+  uint256 constant EVMOS_TESTNET = 9000;
+  uint256 constant BSC_CHAPEL = 97;
+
   struct ChainConfig {
     IERC20Upgradeable pool;
     address lpTokenWhale;
@@ -34,7 +40,7 @@ abstract contract BaseTest is DSTest {
   mapping(uint256 => ChainConfig) private chainConfigs;
 
   constructor() {
-    chainConfigs[56] = ChainConfig({
+    chainConfigs[BSC_MAINNET] = ChainConfig({
       pool: IERC20Upgradeable(0x160CAed03795365F3A589f10C379FfA7d75d4E76),
       lpToken: IERC20Upgradeable(0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452),
       lpTokenWhale: 0x8D7408C2b3154F9f97fc6dd24cd36143908d1E52,
@@ -47,10 +53,10 @@ abstract contract BaseTest is DSTest {
       twapOraclesFactory: UniswapTwapPriceOracleV2Factory(0x8853F26C198fd5693E7886C081164E0c3F0a4E51),
       uniswapV2Factory: IUniswapV2Factory(0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73)
     });
-    chainConfigs[56].coins[0] = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
-    chainConfigs[56].coins[1] = IERC20Upgradeable(0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
+    chainConfigs[BSC_MAINNET].coins[0] = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
+    chainConfigs[BSC_MAINNET].coins[1] = IERC20Upgradeable(0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
 
-    chainConfigs[97] = ChainConfig({
+    chainConfigs[BSC_CHAPEL] = ChainConfig({
       pool: IERC20Upgradeable(0x160CAed03795365F3A589f10C379FfA7d75d4E76),
       lpToken: IERC20Upgradeable(0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452),
       lpTokenWhale: 0x0000000000000000000000000000000000000000,
@@ -63,8 +69,24 @@ abstract contract BaseTest is DSTest {
       twapOraclesFactory: UniswapTwapPriceOracleV2Factory(0x944fed08a91983d06f653E9F55Eca995316Ccd3e),
       uniswapV2Factory: IUniswapV2Factory(0xB7926C0430Afb07AA7DEfDE6DA862aE0Bde767bc)
     });
-    chainConfigs[97].coins[0] = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
-    chainConfigs[97].coins[1] = IERC20Upgradeable(0x8BaBbB98678facC7342735486C851ABD7A0d17Ca);
+    chainConfigs[BSC_CHAPEL].coins[0] = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
+    chainConfigs[BSC_CHAPEL].coins[1] = IERC20Upgradeable(0x8BaBbB98678facC7342735486C851ABD7A0d17Ca);
+
+    chainConfigs[MOONBEAM_MAINNET] = ChainConfig({
+      pool: IERC20Upgradeable(0x0000000000000000000000000000000000000000),
+      lpToken: IERC20Upgradeable(0x0000000000000000000000000000000000000000),
+      lpTokenWhale: 0x0000000000000000000000000000000000000000,
+      coins: new IERC20Upgradeable[](2),
+      weth: WETH(payable(0xAcc15dC74880C9944775448304B263D191c6077F)),
+      curveLPTokenPriceOracleNoRegistry: CurveLpTokenPriceOracleNoRegistry(0x0000000000000000000000000000000000000000),
+      chainlinkOracle: ChainlinkPriceOracleV2(0x0000000000000000000000000000000000000000),
+      synthereumLiquiditiyPool: ISynthereumLiquidityPool(0x0000000000000000000000000000000000000000),
+      masterPriceOracle: MasterPriceOracle(0x14C15B9ec83ED79f23BF71D51741f58b69ff1494),
+      twapOraclesFactory: UniswapTwapPriceOracleV2Factory(0x0000000000000000000000000000000000000000),
+      uniswapV2Factory: IUniswapV2Factory(0x985BcA32293A7A496300a48081947321177a86FD)
+    });
+    chainConfigs[MOONBEAM_MAINNET].coins[0] = IERC20Upgradeable(0x0000000000000000000000000000000000000000);
+    chainConfigs[MOONBEAM_MAINNET].coins[1] = IERC20Upgradeable(0x0000000000000000000000000000000000000000);
 
     chainConfig = chainConfigs[block.chainid];
   }
@@ -74,10 +96,6 @@ abstract contract BaseTest is DSTest {
       _;
     }
   }
-
-  uint256 BSC_MAINNET = 56;
-  uint256 EVMOS_TESTNET = 9000;
-  uint256 BSC_CHAPEL = 97;
 
   function forChains(uint256 id0) public view returns (bool) {
     return block.chainid == id0;
