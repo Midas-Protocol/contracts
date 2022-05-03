@@ -85,16 +85,12 @@ contract BeamERC4626Test is BaseTest {
   }
 
   function _deposit() internal {
-    // vm.prank(0x457C5B8A6224F524d9f15fA6B6d70fCad8EBa623);
-    // testToken.approve(address(this), depositAmount);
     vm.prank(0x457C5B8A6224F524d9f15fA6B6d70fCad8EBa623);
     testToken.approve(0x457C5B8A6224F524d9f15fA6B6d70fCad8EBa623, depositAmount);
     vm.prank(0x457C5B8A6224F524d9f15fA6B6d70fCad8EBa623);
     testToken.transferFrom(0x457C5B8A6224F524d9f15fA6B6d70fCad8EBa623, address(this), depositAmount);
     uint256 balance = testToken.balanceOf(address(this));
     testToken.approve(address(beamErc4626), depositAmount);
-    // vm.prank(address(beamErc4626));
-    // testToken.approve(address(beamErc4626), depositAmount);
     flywheel.accrue(ERC20(beamErc4626), address(this));
     beamErc4626.deposit(depositAmount, address(this));
     flywheel.accrue(ERC20(beamErc4626), address(this));
