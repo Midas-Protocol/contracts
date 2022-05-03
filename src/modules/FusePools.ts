@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish, constants, Contract, utils } from "ethers";
+import { BigNumber, BigNumberish, constants, Contract, ethers, utils } from "ethers";
 import { FusePoolLens } from "../../typechain/FusePoolLens";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FuseBaseConstructor } from "../Fuse/types";
@@ -22,9 +22,29 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         blockPosted,
         timestampPosted,
       } = await this.contracts.FusePoolDirectory.pools(Number(poolId));
-
+      //
+      const comp = new Contract(comptroller, this.chainDeployment.Comptroller.abi, this.provider.getSigner());
+      console.log(await comp.callStatic.getAllMarkets());
+      console.log(await comp.callStatic.oracle());
+      // console.log(await comp.callStatic.markets("0xd8382881cf3ca7b968df68185ffd6606fa8c9502"));
+      //
+      // const cToken = new Contract(
+      //   "0xd8382881cf3ca7b968df68185ffd6606fa8c9502",
+      //   this.chainDeployment.CErc20PluginDelegate.abi,
+      //   this.provider.getSigner()
+      // );
+      // console.log(await cToken.callStatic.implementation());
+      // console.log(await cToken.callStatic.plugin());
+      //
+      // console.log(await cToken.callStatic.totalBorrowsCurrent()); // 0
+      // console.log(await cToken.callStatic.totalReserves()); // 0
+      // console.log(await cToken.callStatic.getCash()); // <- fails
+      //
+      // await cToken.callStatic.totalReserves(),
+      //   await cToken.callStatic.totalAdminFees(),
+      //   await cToken.callStatic.totalFuseFees();
+      console.log("here");
       const rawData = await this.contracts.FusePoolLens.callStatic.getPoolSummary(comptroller);
-
       const underlyingTokens = rawData[2];
       const underlyingSymbols = rawData[3];
       const whitelistedAdmin = rawData[4];

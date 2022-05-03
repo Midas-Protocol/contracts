@@ -3,9 +3,10 @@ import { deployments, ethers } from "hardhat";
 import Fuse from "../../src/Fuse";
 import { setUpPriceOraclePrices } from "../utils";
 import * as poolHelpers from "../utils/pool";
-import { constants, providers, utils } from "ethers";
+import { BigNumber, constants, providers, utils } from "ethers";
 import { chainDeployConfig } from "../../chainDeploy";
 import { getOrCreateFuse } from "../utils/fuseSdk";
+import { SimplePriceOracle } from "../../typechain/SimplePriceOracle";
 
 (process.env.FORK_CHAIN_ID ? describe.only : describe.skip)("FundOperationsERC4626Module", function () {
   let poolAddress: string;
@@ -17,7 +18,7 @@ import { getOrCreateFuse } from "../utils/fuseSdk";
   this.beforeEach(async () => {
     ({ chainId } = await ethers.provider.getNetwork());
     await deployments.fixture("prod");
-    await setUpPriceOraclePrices();
+
     const { deployer } = await ethers.getNamedSigners();
 
     sdk = await getOrCreateFuse();
@@ -29,13 +30,24 @@ import { getOrCreateFuse } from "../utils/fuseSdk";
     });
 
     const assets = await poolHelpers.getPoolAssets(poolAddress, sdk.contracts.FuseFeeDistributor.address);
+    await setUpPriceOraclePrices(assets.assets.map((a) => a.underlying));
+    const simpleOracle = (await ethers.getContractAt(
+      "SimplePriceOracle",
+      sdk.oracles.SimplePriceOracle.address,
+      deployer
+    )) as SimplePriceOracle;
+    for (const a of assets.assets) {
+      await simpleOracle.setDirectPrice(a.underlying, BigNumber.from(1));
+    }
     await poolHelpers.deployAssets(assets.assets, deployer);
   });
 
-  it("user can supply", async function () {
+  it.only("user can supply", async function () {
     const { deployer } = await ethers.getNamedSigners();
     const poolId = (await poolHelpers.getPoolIndex(poolAddress, sdk)).toString();
+    console.log(poolId);
     const assetsInPool = await sdk.fetchFusePoolData(poolId);
+    console.log(assetsInPool);
     const asset = assetsInPool.assets.find((asset) => asset.underlyingToken === constants.AddressZero);
     const res = await sdk.supply(
       asset.cToken,

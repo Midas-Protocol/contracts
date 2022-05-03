@@ -179,7 +179,6 @@ const getPluginConfig = async (fuse: Fuse): Promise<Fuse> => {
 export const getOrCreateFuse = async (): Promise<Fuse> => {
   if (!fuseSdk) {
     const { chainId } = await ethers.provider.getNetwork();
-
     let chainDeployment: ChainDeployment;
     if (chainId === 1337) {
       chainDeployment = await getLocalDeployments();

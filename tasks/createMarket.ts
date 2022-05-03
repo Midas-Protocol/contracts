@@ -40,8 +40,10 @@ export default task("market:create", "Create Market")
 
     let symbol = "NATIVE";
     if (!hre.ethers.constants.AddressZero === underlying) {
+      console.log("Hhere???");
       const underlyingToken = await hre.ethers.getContractAt("ERC20", underlying);
       symbol = await underlyingToken.callStatic.symbol();
+      console.log(symbol);
     }
 
     console.log(`Creating market for token ${underlying}, pool ${poolName}, impl: ${delegateContractName}`);
@@ -64,11 +66,12 @@ export default task("market:create", "Create Market")
       rewardToken: rewardToken ? rewardToken : null,
     };
 
-    const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
-      sdk.JumpRateModelConf,
-      assetConf,
-      { from: signer.address }
-    );
+    console.log(assetConf);
+    // const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
+    //   sdk.JumpRateModelConf,
+    //   assetConf,
+    //   { from: signer.address }
+    // );
 
-    console.log("CToken: ", assetAddress);
+    // console.log("CToken: ", assetAddress);
   });

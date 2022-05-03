@@ -572,38 +572,17 @@ export class FuseBase {
 
     // Deploy CErc20Delegate implementation contract if necessary
     if (!implementationAddress) {
-      let delegateContractArtifact: Artifact;
       switch (conf.delegateContractName) {
         case "CErc20PluginDelegate":
-          delegateContractArtifact = this.artifacts.CErc20PluginDelegate;
+          implementationAddress = this.chainDeployment.CErc20PluginDelegate.address;
           break;
         case "CErc20PluginRewardsDelegate":
-          delegateContractArtifact = this.artifacts.CErc20PluginRewardsDelegate;
+          implementationAddress = this.chainDeployment.CErc20PluginRewardsDelegate.address;
           break;
         default:
-          delegateContractArtifact = this.artifacts.CErc20Delegate;
+          implementationAddress = this.chainDeployment.CErc20Delegate.address;
           break;
       }
-
-      const cErc20Delegate = new ContractFactory(
-        delegateContractArtifact.abi,
-        delegateContractArtifact.bytecode.object,
-        this.provider.getSigner(options.from)
-      );
-      const cErc20DelegateDeployed = await cErc20Delegate.deploy();
-      implementationAddress = cErc20DelegateDeployed.address;
-      const fuseFeeDistributor = new Contract(
-        this.artifacts.FuseFeeDistributor.abi,
-        this.artifacts.FuseFeeDistributor.bytecode.object,
-        this.provider.getSigner(options.from)
-      );
-
-      await fuseFeeDistributor._editCErc20DelegateWhitelist(
-        [constants.AddressZero],
-        [implementationAddress],
-        [false],
-        [true]
-      );
     }
 
     let implementationData;
@@ -612,6 +591,8 @@ export class FuseBase {
         if (!conf.plugin) {
           throw "CErc20PluginDelegate needs plugin address";
         }
+        console.log("HERE,  with plugin: ", conf.plugin);
+        console.log("with implementationAddress: ", implementationAddress);
         implementationData = abiCoder.encode(["address"], [conf.plugin]);
         break;
       case "CErc20PluginRewardsDelegate":

@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 import "./CErc20Delegate.sol";
 import "./EIP20Interface.sol";
 import "./IERC4626.sol";
+import "forge-std/console.sol";
 
 /**
  * @title Rari's CErc20Plugin's Contract
@@ -26,10 +27,12 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @param data The encoded arguments for becoming
    */
   function _becomeImplementation(bytes calldata data) external virtual override {
+    console.log("_becomeImplementation CErc20PluginDelegate");
     require(msg.sender == address(this) || hasAdminRights());
 
     address _plugin = abi.decode(data, (address));
-
+    console.log("HERE");
+    console.log(_plugin);
     require(_plugin != address(0), "0 addr");
 
     if (address(plugin) != address(0)) {

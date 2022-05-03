@@ -115,32 +115,28 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   const fusePoolDirectory = await ethers.getContract("FusePoolDirectory", deployer);
 
   const comptroller = await ethers.getContract("Comptroller", deployer);
-  const whitelisted = await fuseFeeDistributor.callStatic.comptrollerImplementationWhitelist(
-    constants.AddressZero,
-    comptroller.address
+  // const whitelisted = await fuseFeeDistributor.callStatic.comptrollerImplementationWhitelist(
+  //   constants.AddressZero,
+  //   comptroller.address
+  // );
+  // console.log("whitelisted: ", whitelisted);
+  tx = await fuseFeeDistributor._editComptrollerImplementationWhitelist(
+    [constants.AddressZero],
+    [comptroller.address],
+    [true]
   );
-  console.log("whitelisted: ", whitelisted);
-  if (!whitelisted) {
-    tx = await fuseFeeDistributor._editComptrollerImplementationWhitelist(
-      [constants.AddressZero],
-      [comptroller.address],
-      [true]
-    );
-    await tx.wait();
-    console.log("FuseFeeDistributor comptroller whitelist set", tx.hash);
-  } else {
-    console.log("FuseFeeDistributor comptroller whitelist already set");
-  }
+  await tx.wait();
+  console.log("FuseFeeDistributor comptroller whitelist set", tx.hash);
 
-  const autoImplementation = await comptroller.callStatic.autoImplementation();
-  console.log("autoImplementation: ", autoImplementation);
-  if (!autoImplementation) {
-    tx = await comptroller._toggleAutoImplementations(true);
-    await tx.wait();
-    console.log("Toggled comptroller AutoImplementation", tx.hash);
-  } else {
-    console.log("Comptroller AutoImplementation already set");
-  }
+  // const autoImplementation = await comptroller.callStatic.autoImplementation();
+  // console.log("autoImplementation: ", autoImplementation);
+  // if (!autoImplementation) {
+  tx = await comptroller._toggleAutoImplementations(true);
+  await tx.wait();
+  console.log("Toggled comptroller AutoImplementation", tx.hash);
+  // } else {
+  //   console.log("Comptroller AutoImplementation already set");
+  // }
 
   const fplDeployment = await deployments.deploy("FusePoolLens", {
     from: deployer,
@@ -201,62 +197,59 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   const erc20PluginRewardsDelegate = await ethers.getContract("CErc20PluginRewardsDelegate", deployer);
 
   let receipt: providers.TransactionReceipt;
-  const cetherDelegateWhitelist = await fuseFeeDistributor.callStatic.cEtherDelegateWhitelist(
-    constants.AddressZero,
-    etherDelegate.address,
-    false
-  );
-  console.log("cetherDelegateWhitelist: ", cetherDelegateWhitelist);
-  if (!cetherDelegateWhitelist) {
-    tx = await fuseFeeDistributor._editCEtherDelegateWhitelist(
-      [constants.AddressZero],
-      [etherDelegate.address],
-      [false],
-      [true]
-    );
+  // const cetherDelegateWhitelist = await fuseFeeDistributor.callStatic.cEtherDelegateWhitelist(
+  //   constants.AddressZero,
+  //   etherDelegate.address,
+  //   false
+  // );
+  // console.log("cetherDelegateWhitelist: ", cetherDelegateWhitelist);
 
-    let receipt = await tx.wait();
-    console.log("Set whitelist for Ether Delegate with status:", receipt.status, tx.hash);
-  } else {
-    console.log("Ether Delegate whitelist already set");
-  }
+  tx = await fuseFeeDistributor._editCEtherDelegateWhitelist(
+    [constants.AddressZero],
+    [etherDelegate.address],
+    [false],
+    [true]
+  );
+  receipt = await tx.wait();
+  console.log("Set whitelist for Ether Delegate with status:", receipt.status, tx.hash);
 
-  const cerc20DelegateWhitelist1 = await fuseFeeDistributor.callStatic.cEtherDelegateWhitelist(
-    constants.AddressZero,
-    erc20Delegate.address,
-    false
+  // const cerc20DelegateWhitelist1 = await fuseFeeDistributor.callStatic.cEtherDelegateWhitelist(
+  //   constants.AddressZero,
+  //   erc20Delegate.address,
+  //   false
+  // );
+  // console.log("cerc20DelegateWhitelist1: ", cerc20DelegateWhitelist1);
+  // const cerc20DelegateWhitelist2 = await fuseFeeDistributor.callStatic.cEtherDelegateWhitelist(
+  //   constants.AddressZero,
+  //   erc20PluginDelegate.address,
+  //   false
+  // );
+  // console.log("cerc20DelegateWhitelist2: ", cerc20DelegateWhitelist2);
+  // const cerc20DelegateWhitelist3 = await fuseFeeDistributor.callStatic.cEtherDelegateWhitelist(
+  //   constants.AddressZero,
+  //   erc20PluginRewardsDelegate.address,
+  //   false
+  // );
+  // console.log("cerc20DelegateWhitelist3: ", cerc20DelegateWhitelist3);
+  // if (!cerc20DelegateWhitelist1 || !cerc20DelegateWhitelist2 || cerc20DelegateWhitelist3) {
+  tx = await fuseFeeDistributor._editCErc20DelegateWhitelist(
+    [constants.AddressZero, constants.AddressZero, constants.AddressZero],
+    [erc20Delegate.address, erc20PluginDelegate.address, erc20PluginRewardsDelegate.address],
+    [false, false, false],
+    [true, true, true]
   );
-  console.log("cerc20DelegateWhitelist1: ", cerc20DelegateWhitelist1);
-  const cerc20DelegateWhitelist2 = await fuseFeeDistributor.callStatic.cEtherDelegateWhitelist(
-    constants.AddressZero,
-    erc20PluginDelegate.address,
-    false
-  );
-  console.log("cerc20DelegateWhitelist2: ", cerc20DelegateWhitelist2);
-  const cerc20DelegateWhitelist3 = await fuseFeeDistributor.callStatic.cEtherDelegateWhitelist(
-    constants.AddressZero,
-    erc20PluginRewardsDelegate.address,
-    false
-  );
-  console.log("cerc20DelegateWhitelist3: ", cerc20DelegateWhitelist3);
-  if (!cerc20DelegateWhitelist1 || !cerc20DelegateWhitelist2 || cerc20DelegateWhitelist3) {
-    tx = await fuseFeeDistributor._editCErc20DelegateWhitelist(
-      [constants.AddressZero, constants.AddressZero, constants.AddressZero],
-      [erc20Delegate.address, erc20PluginDelegate.address, erc20PluginRewardsDelegate.address],
-      [false, false, false],
-      [true, true, true]
-    );
-    receipt = await tx.wait();
-    console.log("Set whitelist for ERC20 Delegate with status:", receipt.status);
-  } else {
-    console.log("FuseFeeDistributor ERC20 Delegate whitelist already set");
-  }
+  receipt = await tx.wait();
+  console.log("Set whitelist for ERC20 Delegate with status:", receipt.status);
+  // console.log("Set whitelist for ERC20 Delegate with status:", receipt.status);
+  // } else {
+  //   console.log("FuseFeeDistributor ERC20 Delegate whitelist already set");
+  // }
 
   const ic = await deployments.deploy("InitializableClones", {
     from: deployer,
     args: [],
     log: true,
-    waitConfirmations: 1
+    waitConfirmations: 1,
   });
   ////
 
@@ -287,7 +280,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
       proxyContract: "OpenZeppelinTransparentProxy",
       owner: deployer,
     },
-    waitConfirmations: 1
+    waitConfirmations: 1,
   });
 
   ////

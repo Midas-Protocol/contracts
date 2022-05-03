@@ -3,6 +3,7 @@ pragma solidity >=0.8.0;
 
 import "./CEther.sol";
 import "./CDelegateInterface.sol";
+import "forge-std/console.sol";
 
 /**
  * @title Compound's CEtherDelegate Contract
@@ -20,6 +21,7 @@ contract CEtherDelegate is CDelegateInterface, CEther {
    * @param data The encoded bytes data for any initialization
    */
   function _becomeImplementation(bytes calldata data) external override {
+    console.log("_becomeImplementation CEtherDelegate");
     require(msg.sender == address(this) || hasAdminRights(), "!self");
 
     // Make sure admin storage is set up correctly
