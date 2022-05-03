@@ -4,7 +4,7 @@ pragma solidity >=0.4.23;
 import "forge-std/Test.sol";
 import { WithPool } from "./helpers/WithPool.sol";
 
-contract ComptrollerEnterExitMarket is Test, WithPool {
+contract Comptroller is Test, WithPool {
   address alice = address(1337);
   address bob = address(1338);
   uint256 amount = 1 ether;
@@ -22,19 +22,17 @@ contract ComptrollerEnterExitMarket is Test, WithPool {
     underlyingToken.mint(alice, amount);
     underlyingToken.mint(bob, amount);
 
-    hoax(alice);
+    vm.startPrank(alice);
     underlyingToken.approve(address(cErc20), amount);
-    hoax(alice);
     require(comptroller.enterMarkets(markets)[0] == 0, "Failed to Enter Market");
-    hoax(alice);
     cErc20.mint(amount);
+    vm.stopPrank();
 
-    hoax(bob);
+    vm.startPrank(bob);
     underlyingToken.approve(address(cErc20), amount);
-    hoax(bob);
     require(comptroller.enterMarkets(markets)[0] == 0, "Failed to Enter Market");
-    hoax(bob);
     cErc20.mint(amount);
+    vm.stopPrank();
 
     // Exit market as contract, should work as I don't have any borrow balances
     require(comptroller.exitMarket(markets[0]) == 0);
