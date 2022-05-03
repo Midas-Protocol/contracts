@@ -4,7 +4,7 @@ pragma solidity >=0.4.23;
 import "forge-std/Test.sol";
 import { WithPool } from "./helpers/WithPool.sol";
 
-contract Comptroller is Test, WithPool {
+contract ComptrollerTest is Test, WithPool {
   address alice = address(1337);
   address bob = address(1338);
   uint256 amount = 1 ether;
