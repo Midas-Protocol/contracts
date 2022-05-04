@@ -11,7 +11,6 @@ contract CErc20PluginRewardsDelegate is CErc20PluginDelegate {
   function _becomeImplementation(bytes calldata data) external override {
     require(msg.sender == address(this) || hasAdminRights());
 
-    console.log("_becomeImplementation CErc20PluginRewardsDelegate");
     (address _plugin, address _rewardsDistributor, address _rewardToken) = abi.decode(
       data,
       (address, address, address)

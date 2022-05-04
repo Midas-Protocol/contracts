@@ -3,7 +3,6 @@ pragma solidity >=0.8.0;
 
 import "./CErc20.sol";
 import "./CDelegateInterface.sol";
-import "forge-std/console.sol";
 
 /**
  * @title Compound's CErc20Delegate Contract
@@ -27,7 +26,6 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     __admin = payable(0);
     __adminHasRights = false;
     __fuseAdminHasRights = false;
-    console.log("_becomeImplementation CErc20Delegate");
   }
 
   /**
@@ -60,24 +58,18 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     // Call _resignImplementation internally (this delegate's code)
     if (allowResign) _resignImplementation();
 
-    console.log("before _becomeImplementation");
-
     // Get old implementation
     address oldImplementation = implementation;
-    console.log(oldImplementation, implementation_, "oldImplementation, mew implementation");
 
     // Store new implementation
     implementation = implementation_;
 
     // Call _becomeImplementation externally (delegating to new delegate's code)
-
     _functionCall(
       address(this),
       abi.encodeWithSignature("_becomeImplementation(bytes)", becomeImplementationData),
       "!become"
     );
-
-    console.log("_setImplementationInternal: new impl: ", implementation_, "old impl: ", oldImplementation);
 
     // Emit event
     emit NewImplementation(oldImplementation, implementation);
@@ -94,7 +86,6 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     bool allowResign,
     bytes calldata becomeImplementationData
   ) external override {
-    console.log("setting implementation");
     // Check admin rights
     require(hasAdminRights(), "!admin");
 
@@ -107,13 +98,10 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
    * @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary
    */
   function _prepare() external payable override {
-    console.log("_preparingggggg");
     if (msg.sender != address(this) && ComptrollerV3Storage(address(comptroller)).autoImplementation()) {
       (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = IFuseFeeDistributor(
         fuseAdmin
       ).latestCErc20Delegate(implementation);
-      console.log("implementation", implementation);
-      console.log("latestCErc20Delegate", latestCErc20Delegate);
       if (implementation != latestCErc20Delegate)
         _setImplementationInternal(latestCErc20Delegate, allowResign, becomeImplementationData);
     }

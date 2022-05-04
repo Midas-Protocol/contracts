@@ -8,7 +8,6 @@ import "./Exponential.sol";
 import "./EIP20Interface.sol";
 import "./EIP20NonStandardInterface.sol";
 import "./InterestRateModel.sol";
-import "forge-std/console.sol";
 
 /**
  * @title Compound's CToken Contract
@@ -1736,9 +1735,8 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     bytes memory data,
     string memory errorMessage
   ) internal returns (bytes memory) {
-    console.log(target, "target");
     (bool success, bytes memory returndata) = target.call(data);
-    console.log(success, "successsuccesssuccesssuccess");
+
     if (!success) {
       // Look for revert reason and bubble it up if present
       if (returndata.length > 0) {
