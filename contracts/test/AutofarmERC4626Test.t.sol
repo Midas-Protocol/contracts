@@ -2,7 +2,6 @@
 pragma solidity >=0.4.23;
 
 import "ds-test/test.sol";
-import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -20,11 +19,7 @@ import { IStrategy } from "./mocks/autofarm/IStrategy.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 
 contract AutofarmERC4626Test is DSTest {
-  using stdStorage for StdStorage;
-
   Vm public constant vm = Vm(HEVM_ADDRESS);
-
-  StdStorage stdstore;
 
   AutofarmERC4626 autofarmERC4626;
   FlywheelCore flywheel;
