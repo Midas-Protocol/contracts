@@ -2,7 +2,6 @@
 pragma solidity >=0.4.23;
 
 import "ds-test/test.sol";
-import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -14,11 +13,7 @@ import { MockVault } from "./mocks/beefy/MockVault.sol";
 import { IStrategy } from "./mocks/beefy/IStrategy.sol";
 
 contract BeefyERC4626Test is DSTest {
-  using stdStorage for StdStorage;
-
   Vm public constant vm = Vm(HEVM_ADDRESS);
-
-  StdStorage stdstore;
 
   BeefyERC4626 beefyERC4626;
 
