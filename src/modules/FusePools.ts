@@ -3,7 +3,7 @@ import { FusePoolLens } from "../../typechain/FusePoolLens";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FuseBaseConstructor } from "../Fuse/types";
 import { filterOnlyObjectProperties, filterPoolName } from "../Fuse/utils";
-import { FusePoolData, USDPricedFuseAsset } from "../Fuse/types";
+import { FusePoolData, NativePricedFuseAsset } from "../Fuse/types";
 
 export type LensPoolsWithData = [
   ids: BigNumberish[],
@@ -31,7 +31,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
 
       const name = filterPoolName(_unfiliteredName);
 
-      const assets: USDPricedFuseAsset[] = (
+      const assets: NativePricedFuseAsset[] = (
         await this.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(comptroller, {
           from: address,
         })
