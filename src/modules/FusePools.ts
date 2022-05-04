@@ -57,7 +57,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         promises.push(
           comptrollerContract.callStatic
             .borrowGuardianPaused(asset.cToken)
-            .then((isPaused: boolean) => (asset.isPaused = isPaused))
+            .then((isPaused: boolean) => (asset.isBorrowPaused = isPaused))
         );
         promises.push(
           comptrollerContract.callStatic

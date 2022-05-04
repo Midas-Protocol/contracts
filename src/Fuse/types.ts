@@ -171,7 +171,7 @@ export interface FuseAsset {
   totalBorrow: BigNumber;
   totalSupply: BigNumber;
 
-  isPaused: boolean;
+  isBorrowPaused: boolean;
   isSupplyPaused: boolean;
 }
 
