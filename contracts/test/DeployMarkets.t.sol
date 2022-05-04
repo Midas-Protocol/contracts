@@ -18,6 +18,7 @@ import { CToken } from "../compound/CToken.sol";
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
+import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
 import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
@@ -43,6 +44,8 @@ contract DeployMarketsTest is DSTest {
 
   WhitePaperInterestRateModel interestModel;
   Comptroller comptroller;
+
+  CErc20Delegate cErc20Delegate;
   CErc20PluginDelegate cErc20PluginDelegate;
   CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
 
@@ -117,7 +120,7 @@ contract DeployMarketsTest is DSTest {
       false,
       abi.encode(
         address(underlyingToken),
-        ComptrollerInterface(comptrollerAddress),
+        ComptrollerInterface(address(comptroller)),
         payable(address(fuseAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
@@ -131,6 +134,39 @@ contract DeployMarketsTest is DSTest {
     );
 
     CToken[] memory allMarkets = comptroller.getAllMarkets();
-    cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
+    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
+
+    assertEq(address(cToken.plugin()), address(0));
+    cToken._becomeImplementation(abi.encode(address(mockERC4626)));
+    assertEq(address(cToken.plugin()), address(mockERC4626));
+  }
+
+  function testDeployCErc20Delegate() public {
+    cErc20Delegate = new CErc20Delegate();
+    newImplementation.push(address(cErc20Delegate));
+    fuseAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);
+
+    vm.roll(1);
+    comptroller._deployMarket(
+      false,
+      abi.encode(
+        address(underlyingToken),
+        ComptrollerInterface(address(comptroller)),
+        payable(address(fuseAdmin)),
+        InterestRateModel(address(interestModel)),
+        "cUnderlyingToken",
+        "CUT",
+        address(cErc20Delegate),
+        "",
+        uint256(1),
+        uint256(0)
+      ),
+      0.9e18
+    );
+
+    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
+
+    cToken._becomeImplementation("");
   }
 }
