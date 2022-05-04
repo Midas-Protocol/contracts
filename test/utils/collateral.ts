@@ -96,8 +96,8 @@ export async function borrowCollateral(
   expect(rec.status).to.eq(1);
   const poolId = await getPoolIndex(poolAddress, sdk);
   const assetAfterBorrow = await assetInPool(poolId.toString(), sdk, assetToDeploy.underlyingSymbol, signer.address);
-  console.log(assetAfterBorrow.borrowBalanceUSD, "Borrow Balance USD: AFTER mint & borrow");
-  console.log(assetAfterBorrow.supplyBalanceUSD, "Supply Balance USD: AFTER mint & borrow");
+  console.log(assetAfterBorrow.borrowBalanceNative, "Borrow Balance USD: AFTER mint & borrow");
+  console.log(assetAfterBorrow.supplyBalanceNative, "Supply Balance USD: AFTER mint & borrow");
 }
 
 export async function setupLiquidatablePool(

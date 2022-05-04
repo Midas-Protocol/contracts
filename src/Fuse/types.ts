@@ -173,13 +173,13 @@ export interface FuseAsset {
 }
 
 export interface USDPricedFuseAsset extends FuseAsset {
-  supplyBalanceUSD: number;
-  borrowBalanceUSD: number;
+  supplyBalanceNative: number;
+  borrowBalanceNative: number;
 
-  totalSupplyUSD: number;
-  totalBorrowUSD: number;
+  totalSupplyNative: number;
+  totalBorrowNative: number;
 
-  liquidityUSD: number;
+  liquidityNative: number;
 
   isPaused: boolean;
   isSupplyPaused: boolean;
@@ -191,11 +191,11 @@ export interface FusePoolData {
   creator: string;
   comptroller: string;
   name: string;
-  totalLiquidityUSD: number;
-  totalSuppliedUSD: number;
-  totalBorrowedUSD: number;
-  totalSupplyBalanceUSD: number;
-  totalBorrowBalanceUSD: number;
+  totalLiquidityNative: number;
+  totalSuppliedNative: number;
+  totalBorrowedNative: number;
+  totalSupplyBalanceNative: number;
+  totalBorrowBalanceNative: number;
   blockPosted: BigNumber;
   timestampPosted: BigNumber;
   underlyingTokens: string[];

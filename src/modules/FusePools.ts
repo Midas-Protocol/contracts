@@ -37,11 +37,11 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         })
       ).map(filterOnlyObjectProperties);
 
-      let totalLiquidityUSD = 0;
-      let totalSupplyBalanceUSD = 0;
-      let totalBorrowBalanceUSD = 0;
-      let totalSuppliedUSD = 0;
-      let totalBorrowedUSD = 0;
+      let totalLiquidityNative = 0;
+      let totalSupplyBalanceNative = 0;
+      let totalBorrowBalanceNative = 0;
+      let totalSuppliedNative = 0;
+      let totalBorrowedNative = 0;
 
       const promises: Promise<boolean>[] = [];
 
@@ -65,42 +65,42 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
             .then((isPaused: boolean) => (asset.isSupplyPaused = isPaused))
         );
 
-        asset.supplyBalanceUSD =
+        asset.supplyBalanceNative =
           Number(utils.formatUnits(asset.supplyBalance)) * Number(utils.formatUnits(asset.underlyingPrice));
 
-        asset.borrowBalanceUSD =
+        asset.borrowBalanceNative =
           Number(utils.formatUnits(asset.borrowBalance)) * Number(utils.formatUnits(asset.underlyingPrice));
 
-        totalSupplyBalanceUSD += asset.supplyBalanceUSD;
-        totalBorrowBalanceUSD += asset.borrowBalanceUSD;
+        totalSupplyBalanceNative += asset.supplyBalanceNative;
+        totalBorrowBalanceNative += asset.borrowBalanceNative;
 
-        asset.totalSupplyUSD =
+        asset.totalSupplyNative =
           Number(utils.formatUnits(asset.totalSupply)) * Number(utils.formatUnits(asset.underlyingPrice));
-        asset.totalBorrowUSD =
+        asset.totalBorrowNative =
           Number(utils.formatUnits(asset.totalBorrow)) * Number(utils.formatUnits(asset.underlyingPrice));
 
-        totalSuppliedUSD += asset.totalSupplyUSD;
-        totalBorrowedUSD += asset.totalBorrowUSD;
+        totalSuppliedNative += asset.totalSupplyNative;
+        totalBorrowedNative += asset.totalBorrowNative;
 
-        asset.liquidityUSD =
+        asset.liquidityNative =
           Number(utils.formatUnits(asset.liquidity)) * Number(utils.formatUnits(asset.underlyingPrice));
 
-        totalLiquidityUSD += asset.liquidityUSD;
+        totalLiquidityNative += asset.liquidityNative;
       }
 
       await Promise.all(promises);
 
       return {
         id: Number(poolId),
-        assets: assets.sort((a, b) => (b.liquidityUSD > a.liquidityUSD ? 1 : -1)),
+        assets: assets.sort((a, b) => (b.liquidityNative > a.liquidityNative ? 1 : -1)),
         creator,
         comptroller,
         name,
-        totalLiquidityUSD,
-        totalSuppliedUSD,
-        totalBorrowedUSD,
-        totalSupplyBalanceUSD,
-        totalBorrowBalanceUSD,
+        totalLiquidityNative,
+        totalSuppliedNative,
+        totalBorrowedNative,
+        totalSupplyBalanceNative,
+        totalBorrowBalanceNative,
         blockPosted,
         timestampPosted,
         underlyingTokens,
