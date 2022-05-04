@@ -162,7 +162,7 @@ export const chainPluginConfig: ChainPlugins = {
     "0x54572129Fd040C19F9ab57A1a152e95C1fEC0dF0": [
       {
         strategyName: "Mock Touch Strategy",
-        strategyAddress: "0xdC206B5684A85ddEb4e2e1Ca48A1fCb5C3d31Ef3",
+        strategyAddress: "0x56385f347e18452C00801c9E5029E7658B017EB5",
         dynamicFlywheel: null,
       },
     ],

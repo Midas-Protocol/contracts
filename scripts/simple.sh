@@ -7,7 +7,7 @@ export STRATEGY=0x56385f347e18452C00801c9E5029E7658B017EB5
 export IRM=0x5B3639BaDD3A08da48cBfb8F8451ff0035d9a4c8
 
 
-TRIBE=0x522348779DCb2911539e76A1042aA922F9C47Ee3
+export TRIBE=0x6F747d2A8900A04247F491d894D7765FdEc0D97a
 #MPO=0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA
 #IRM=0x2042FE5Fa3D58af48BB310374769857871B70428
 #STRATEGY=0x22CaBeba065d1FF2FB5e53A97624121401BeaC57
@@ -19,8 +19,8 @@ npx hardhat oracle:set-price --address $TRIBE --price "0.01" --network localhost
 npx hardhat pool:create --name "$POOL_NAME" --creator deployer --price-oracle $MPO --close-factor 50 --liquidation-incentive 8 --enforce-whitelist false --network localhost
 
 
-npx hardhat market:create --asset-config "$POOL_NAME,deployer,CErc20Delegate,$TRIBE,$IRM,0.01,0.9,1,0,true,,," --network localhost
 npx hardhat market:create --asset-config "$POOL_NAME,deployer,CErc20PluginDelegate,$TOUCH,$IRM,0.01,0.9,1,0,true,$STRATEGY,," --network localhost
+npx hardhat market:create --asset-config "$POOL_NAME,deployer,CErc20Delegate,$TRIBE,$IRM,0.01,0.9,1,0,true,,," --network localhost
 
 
 #npx hardhat oracle:set-price --address $TOUCH --price "0.01" --network localhost
