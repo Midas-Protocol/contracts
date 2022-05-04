@@ -10,13 +10,22 @@ contract Flywheel3070Booster is IFlywheelBooster {
         return strategy.totalSupply();
     }
 
-    function boostedBalanceOf(ERC20 strategy, address user) external view returns (uint256) {
+    function boostedBalanceOf(ERC20 strategy, address user) external view returns (uint256 boostedBalance) {
         // TODO accrue interest first
         ICToken asCToken = ICToken(address(strategy));
-        return (
-                3 * asCToken.balanceOf(user) * asCToken.totalBorrows()
-                + 7 * asCToken.borrowBalanceStored(user) * asCToken.totalSupply()
-            ) / (10 * asCToken.totalBorrows());
+
+        boostedBalance += 3 * asCToken.balanceOf(user);
+        if (asCToken.totalBorrows() > 0) {
+            boostedBalance +=
+            (
+                7 * asCToken.borrowBalanceStored(user) * asCToken.totalSupply()
+            ) / asCToken.totalBorrows();
+        }
+        boostedBalance /= 10;
+//        return (
+//                3 * asCToken.balanceOf(user) * asCToken.totalBorrows()
+//                + 7 * asCToken.borrowBalanceStored(user) * asCToken.totalSupply()
+//            ) / (10 * asCToken.totalBorrows());
 
 //        (3 * asCToken.balanceOf(user) + (7 * asCToken.borrowBalanceCurrent(user) * asCToken.totalSupply()) / asCToken.totalBorrowsCurrent()) / 10;
 

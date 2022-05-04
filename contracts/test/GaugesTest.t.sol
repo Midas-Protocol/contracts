@@ -11,7 +11,7 @@ import { Comptroller } from "../compound/Comptroller.sol";
 import "../governance/VeMDSToken.sol";
 import "../governance/StakingController.sol";
 import "../governance/Flywheel3070Booster.sol";
-import "fuse-flywheel/test/mocks/MockCToken.sol";
+import { MockCToken } from "./mocks/MockCToken.sol";
 import "flywheel-v2/rewards/FlywheelGaugeRewards.sol";
 import "flywheel-v2/FlywheelCore.sol";
 
@@ -98,6 +98,8 @@ contract GaugesTest is DSTest {
 
         gaugeStrategy.mint(alice, 4000);
         gaugeStrategy.mint(bob, 6000);
+        gaugeStrategy.borrow(alice, 135);
+        gaugeStrategy.borrow(bob, 1215);
 
         emit log("ctoken balances");
         emit log_uint(gaugeStrategy.balanceOf(alice));
