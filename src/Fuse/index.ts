@@ -80,7 +80,7 @@ import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
 import { withSafeLiquidator } from "../modules/liquidation/SafeLiquidator";
 import { Comptroller } from "../../typechain/Comptroller";
 import { FuseFlywheelLensRouter } from "../../typechain/FuseFlywheelLensRouter.sol";
-import { CErc20Delegate } from "../../typechain";
+import { CErc20Delegate } from "../../typechain/CErc20Delegate";
 
 type OracleConfig = {
   [contractName: string]: {
