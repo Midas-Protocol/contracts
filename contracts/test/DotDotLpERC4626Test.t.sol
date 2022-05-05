@@ -72,7 +72,7 @@ contract DotDotLpERC4626Test is DSTest {
       lpToken,
       FlywheelCore(address(dddFlywheel)),
       FlywheelCore(address(epxFlywheel)),
-      mockLpDepositor
+      ILpDepositor(address(mockLpDepositor))
     );
     marketKey = ERC20(address(dotDotERC4626));
     dddFlywheel.addStrategyForRewards(marketKey);
@@ -143,7 +143,7 @@ contract DotDotLpERC4626Test is DSTest {
     assertEq(dddToken.totalSupply(), expectedReward);
     assertEq(epxToken.totalSupply(), expectedReward);
 
-    vm.warp(3);
+    vm.warp(2);
 
     dotDotERC4626.withdraw(1, address(this), address(this));
 
@@ -162,48 +162,66 @@ contract DotDotLpERC4626Test is DSTest {
     assertEq(dddToken.totalSupply(), expectedReward);
     assertEq(epxToken.totalSupply(), expectedReward);
 
-    (uint32 start, uint32 end, uint192 reward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
+    (uint32 dddStart, uint32 dddEnd, uint192 dddReward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
+    (uint32 epxStart, uint32 epxEnd, uint192 epxReward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
 
-    // Rewards can be transfered in the next cycle at time block.timestamp == 3
-    assertEq(end, 3);
+    // Rewards can be transfered in the next cycle at time block.timestamp == 2
+    assertEq(dddEnd, 2);
+    assertEq(epxEnd, 2);
 
     // Reward amount is still 0
-    assertEq(reward, 0);
-    vm.warp(3);
+    assertEq(dddReward, 0);
+    assertEq(epxReward, 0);
+
+    vm.warp(2);
 
     // Call withdraw (could also be deposit() on the erc4626 or claim() on the epsStaker directly) to claim rewards
     dotDotERC4626.withdraw(1, address(this), address(this));
 
-    // EPS-token have been minted
-    assertEq(dddToken.totalSupply(), reward);
+    // rewardsToken have been minted
+    assertEq(dddToken.totalSupply(), expectedReward * 2);
+    assertEq(epxToken.totalSupply(), expectedReward * 2);
 
-    // The ERC-4626 holds all rewarded eps-token now
-    assertEq(dddToken.balanceOf(address(dotDotERC4626)), reward);
+    // The ERC-4626 holds all rewarded token now
+    assertEq(dddToken.balanceOf(address(dotDotERC4626)), expectedReward * 2);
+    assertEq(epxToken.balanceOf(address(dotDotERC4626)), expectedReward * 2);
 
     // Accrue rewards to send rewards to flywheelRewards
     dddFlywheel.accrue(ERC20(dotDotERC4626), address(this));
-    assertEq(dddToken.balanceOf(address(dddRewards)), reward);
+    epxFlywheel.accrue(ERC20(dotDotERC4626), address(this));
+    assertEq(dddToken.balanceOf(address(dddRewards)), expectedReward * 2);
+    assertEq(epxToken.balanceOf(address(epxRewards)), expectedReward * 2);
 
-    (start, end, reward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
+    (dddStart, dddEnd, dddReward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
+    (epxStart, epxEnd, epxReward) = epxRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
 
-    // Rewards can be transfered in the next cycle at time block.timestamp == 4
-    assertEq(end, 4);
+    // Rewards can be transfered in the next cycle at time block.timestamp == 3
+    assertEq(dddEnd, 3);
+    assertEq(epxEnd, 3);
 
     // Reward amount is expected value
-    assertEq(reward, reward);
-    vm.warp(4);
+    assertEq(dddReward, expectedReward * 2);
+    assertEq(epxReward, expectedReward * 2);
+
+    vm.warp(3);
 
     // Finally accrue reward from last cycle
     dddFlywheel.accrue(ERC20(dotDotERC4626), address(this));
+    epxFlywheel.accrue(ERC20(dotDotERC4626), address(this));
 
     // Claim Rewards for the user
     dddFlywheel.claimRewards(address(this));
+    epxFlywheel.claimRewards(address(this));
 
-    assertEq(dddToken.balanceOf(address(this)), reward - 1);
+    assertEq(dddToken.balanceOf(address(this)), (expectedReward * 2) - 1);
     assertEq(dddToken.balanceOf(address(dddFlywheel)), 0);
+    assertEq(epxToken.balanceOf(address(this)), (expectedReward * 2) - 1);
+    assertEq(epxToken.balanceOf(address(epxFlywheel)), 0);
   }
 
   function testClaimForMultipleUser() public {
+    // Note: As shown in the previous test epx works in the same way as ddd so im gonna only test ddd in here
+
     deposit();
     vm.startPrank(tester);
     lpToken.mint(tester, depositAmount);
@@ -211,38 +229,38 @@ contract DotDotLpERC4626Test is DSTest {
     dotDotERC4626.deposit(depositAmount, tester);
     vm.stopPrank();
 
-    assertEq(dddToken.totalSupply(), 0);
+    assertEq(dddToken.totalSupply(), expectedReward * 2);
 
     (uint32 start, uint32 end, uint192 reward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
 
-    assertEq(end, 3);
+    assertEq(end, 2);
 
     assertEq(reward, 0);
-    vm.warp(3);
+    vm.warp(2);
 
     dotDotERC4626.withdraw(1, address(this), address(this));
 
-    assertEq(dddToken.totalSupply(), reward);
+    assertEq(dddToken.totalSupply(), expectedReward * 3);
 
-    assertEq(dddToken.balanceOf(address(dotDotERC4626)), reward);
+    assertEq(dddToken.balanceOf(address(dotDotERC4626)), expectedReward * 3);
 
     dddFlywheel.accrue(ERC20(dotDotERC4626), address(this));
-    assertEq(dddToken.balanceOf(address(dddRewards)), reward);
+    assertEq(dddToken.balanceOf(address(dddRewards)), expectedReward * 3);
 
     (start, end, reward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
 
-    assertEq(end, 4);
+    assertEq(end, 3);
 
-    assertEq(reward, reward);
-    vm.warp(4);
+    assertEq(reward, expectedReward * 3);
+    vm.warp(3);
 
     dddFlywheel.accrue(ERC20(dotDotERC4626), address(this), tester);
 
     dddFlywheel.claimRewards(address(this));
     dddFlywheel.claimRewards(tester);
 
-    assertEq(dddToken.balanceOf(address(tester)), reward / 2);
-    assertEq(dddToken.balanceOf(address(this)), (reward / 2) - 1);
+    assertEq(dddToken.balanceOf(address(tester)), (expectedReward * 3) / 2);
+    assertEq(dddToken.balanceOf(address(this)), ((expectedReward * 3) / 2) - 1);
     assertEq(dddToken.balanceOf(address(dddFlywheel)), 0);
   }
 }

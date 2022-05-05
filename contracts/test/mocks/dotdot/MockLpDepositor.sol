@@ -8,7 +8,7 @@ import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 contract MockLpDepositor is Ownable {
   using SafeERC20 for IERC20;
 
-  IERC20 public EPX;
+  MockERC20 public EPX;
   MockERC20 public DDD;
   MockERC20 public lpToken;
 
@@ -28,7 +28,7 @@ contract MockLpDepositor is Ownable {
   );
 
   constructor(
-    IERC20 _EPX,
+    MockERC20 _EPX,
     MockERC20 _DDD,
     MockERC20 _lpToken
   ) {
@@ -67,6 +67,7 @@ contract MockLpDepositor is Ownable {
     totalBalances[_token] = total - _amount;
 
     MockERC20(lpToken).burn(msg.sender, _amount);
+    IERC20(_token).safeTransfer(msg.sender, _amount);
 
     emit Withdraw(msg.sender, _receiver, _token, _amount);
   }
