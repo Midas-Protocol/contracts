@@ -3,7 +3,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { providers, utils } from "ethers";
 import { ethers, getChainId } from "hardhat";
 
-import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../src";
+import { cERC20Conf, Fuse, FusePoolData, NativePricedFuseAsset } from "../../src";
 import { getAssetsConf } from "./assets";
 import { getOrCreateFuse } from "./fuseSdk";
 
@@ -130,7 +130,7 @@ export const assetInPool = async (
   sdk: Fuse,
   underlyingSymbol: string,
   address?: string
-): Promise<USDPricedFuseAsset> => {
+): Promise<NativePricedFuseAsset> => {
   const fetchedAssetsInPool: FusePoolData = await sdk.fetchFusePoolData(poolId, address);
   return fetchedAssetsInPool.assets.filter((a) => a.underlyingSymbol === underlyingSymbol)[0];
 };

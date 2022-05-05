@@ -35,11 +35,11 @@ describe("FusePoolsModule", function () {
       expect(pools.length).to.equal(1);
       expect(pools[0].creator).to.equal(deployer.address);
       expect(pools[0].name).to.equal("Fetching-Pools-Test");
-      expect(pools[0].totalLiquidityUSD).to.equal(0);
-      expect(pools[0].totalSuppliedUSD).to.equal(0);
-      expect(pools[0].totalBorrowedUSD).to.equal(0);
-      expect(pools[0].totalSupplyBalanceUSD).to.equal(0);
-      expect(pools[0].totalBorrowBalanceUSD).to.equal(0);
+      expect(pools[0].totalLiquidityNative).to.equal(0);
+      expect(pools[0].totalSuppliedNative).to.equal(0);
+      expect(pools[0].totalBorrowedNative).to.equal(0);
+      expect(pools[0].totalSupplyBalanceNative).to.equal(0);
+      expect(pools[0].totalBorrowBalanceNative).to.equal(0);
     });
 
     it("user can fetch filtered pools", async function () {
@@ -50,11 +50,11 @@ describe("FusePoolsModule", function () {
       expect(pools.length).to.equal(1);
       expect(pools[0].creator).to.equal(deployer.address);
       expect(pools[0].name).to.equal("Fetching-Pools-Test");
-      expect(pools[0].totalLiquidityUSD).to.equal(0);
-      expect(pools[0].totalSuppliedUSD).to.equal(0);
-      expect(pools[0].totalBorrowedUSD).to.equal(0);
-      expect(pools[0].totalSupplyBalanceUSD).to.equal(0);
-      expect(pools[0].totalBorrowBalanceUSD).to.equal(0);
+      expect(pools[0].totalLiquidityNative).to.equal(0);
+      expect(pools[0].totalSuppliedNative).to.equal(0);
+      expect(pools[0].totalBorrowedNative).to.equal(0);
+      expect(pools[0].totalSupplyBalanceNative).to.equal(0);
+      expect(pools[0].totalBorrowBalanceNative).to.equal(0);
 
       pools = await sdk.fetchPools({
         filter: "verified-pools",

@@ -1,6 +1,7 @@
 import { constants } from "ethers";
 import { Erc4626PluginDeployFnParams, FuseFlywheelDeployFnParams } from "..";
 import { FuseFlywheelCore } from "../../typechain/FuseFlywheelCore";
+import ERC20 from "../../out/ERC20.sol/ERC20.json";
 
 export const deployFlywheelWithDynamicRewards = async ({
   ethers,
@@ -16,25 +17,34 @@ export const deployFlywheelWithDynamicRewards = async ({
     if (config) {
       console.log(`Deploying FuseFlywheelCore & FuseFlywheelDynamicRewards for ${config.rewardToken} reward token`);
       //// FuseFlyhweelCore with Dynamic Rewards
-      const fwc = await deployments.deploy("FuseFlywheelCore", {
+      const fwc = await deployments.deploy(`FuseFlywheelCore_${config.name}`, {
+        contract: "FuseFlywheelCore",
         from: deployer,
-        args: [config.rewardToken, constants.AddressZero, constants.AddressZero, deployer, constants.AddressZero],
+        args: [
+          config.rewardToken,
+          "0x0000000000000000000000000000000000000009", // need to initialize to address that does NOT have balance, otherwise this fails (i.e. AddressZero)
+          constants.AddressZero,
+          deployer,
+          constants.AddressZero,
+        ],
         log: true,
         waitConfirmations: 1,
       });
       console.log("FuseFlywheelCore: ", fwc.address);
 
-      const fdr = await deployments.deterministic("FuseFlywheelDynamicRewards", {
+      const fdr = await deployments.deploy(`FuseFlywheelDynamicRewards_${config.name}`, {
+        contract: "FuseFlywheelDynamicRewards",
         from: deployer,
         args: [fwc.address, config.cycleLength],
         log: true,
-        waitConfirmations: 1
+        waitConfirmations: 1,
       });
       console.log("FuseFlywheelDynamicRewards: ", fdr.address);
 
       const flywheelCore = (await ethers.getContractAt("FuseFlywheelCore", fwc.address, deployer)) as FuseFlywheelCore;
       const tx = await flywheelCore.setFlywheelRewards(fdr.address, { from: deployer });
       await tx.wait();
+      console.log("setFlywheelRewards: ", tx.hash);
       dynamicFlywheels.push(fdr.address);
     } else {
       dynamicFlywheels.push(null);
@@ -44,7 +54,6 @@ export const deployFlywheelWithDynamicRewards = async ({
 };
 
 export const deployERC4626Plugin = async ({
-  ethers,
   getNamedAccounts,
   deployments,
   deployConfig,
@@ -66,14 +75,15 @@ export const deployERC4626Plugin = async ({
           ]
         : [pluginConfig.underlying, ...pluginConfig.otherParams];
 
-      const i = deployConfig.plugins.indexOf(pluginConfig);
-      const erc4626 = await deployments.deploy(pluginConfig.strategy, {
+      console.log(`Deploying ${pluginConfig.strategy}_${pluginConfig.name}`, args);
+      const erc4626 = await deployments.deploy(`${pluginConfig.strategy}_${pluginConfig.name}`, {
+        contract: pluginConfig.strategy,
         from: deployer,
         args: args,
         log: true,
         waitConfirmations: 1,
       });
-      console.log(`${pluginConfig.strategy}-${i}: `, erc4626.address);
+      console.log(`${pluginConfig.strategy}_${pluginConfig.name}: `, erc4626.address);
     }
   }
 };

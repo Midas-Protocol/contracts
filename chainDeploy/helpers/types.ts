@@ -33,11 +33,13 @@ export type ChainDeployConfig = {
 };
 
 export type DynamicFlywheelConfig = {
+  name: string;
   rewardToken: string;
   cycleLength: number;
 };
 
 export type PluginConfig = {
+  name: string;
   strategy: string;
   underlying: string;
   otherParams?: string[];

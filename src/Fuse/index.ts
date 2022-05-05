@@ -2,7 +2,6 @@
 import { BigNumber, constants, Contract, ContractFactory, providers, utils } from "ethers";
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import axios from "axios";
 
 // ABIs
 import uniswapV3PoolAbiSlim from "./abi/UniswapV3Pool.slim.json";
@@ -51,6 +50,7 @@ import {
   InterestRateModelConf,
   InterestRateModelParams,
   OracleConf,
+  AssetPluginConfig,
 } from "./types";
 import {
   COMPTROLLER_ERROR_CODES,
@@ -59,7 +59,14 @@ import {
   SIMPLE_DEPLOY_ORACLES,
   WHITE_PAPER_RATE_MODEL_CONF,
 } from "./config";
-import { chainOracles, chainSpecificAddresses, irmConfig, oracleConfig, SupportedChains } from "../network";
+import {
+  chainOracles,
+  chainSpecificAddresses,
+  irmConfig,
+  oracleConfig,
+  chainPluginConfig,
+  SupportedChains,
+} from "../network";
 import { withRewardsDistributor } from "../modules/RewardsDistributor";
 import { withFundOperations } from "../modules/FundOperations";
 import { withFusePoolLens } from "../modules/FusePoolLens";
@@ -110,6 +117,7 @@ export class FuseBase {
   public chainSpecificAddresses: ChainSpecificAddresses;
   public artifacts: Artifacts;
   public irms: IrmConfig;
+  public chainPlugins: AssetPluginConfig;
 
   constructor(
     web3Provider: JsonRpcProvider | Web3Provider,
@@ -200,6 +208,7 @@ export class FuseBase {
       return true;
     });
     this.oracles = oracleConfig(this.chainDeployment, this.artifacts, this.availableOracles);
+    this.chainPlugins = chainPluginConfig[this.chainId];
   }
 
   async deployPool(

@@ -1,5 +1,5 @@
 import { BigNumber, constants, Contract, providers, utils } from "ethers";
-import { ERC20Abi, Fuse, USDPricedFuseAsset } from "../../src";
+import { ERC20Abi, Fuse, NativePricedFuseAsset } from "../../src";
 import { assetInPool, DeployedAsset, getPoolIndex } from "./pool";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -8,13 +8,17 @@ import { MasterPriceOracle, SimplePriceOracle } from "../../typechain";
 import { chainDeployConfig } from "../../chainDeploy";
 import { getOrCreateFuse } from "./fuseSdk";
 
-export async function getAsset(sdk: Fuse, poolAddress: string, underlyingSymbol: string): Promise<USDPricedFuseAsset> {
+export async function getAsset(
+  sdk: Fuse,
+  poolAddress: string,
+  underlyingSymbol: string
+): Promise<NativePricedFuseAsset> {
   const poolId = (await getPoolIndex(poolAddress, sdk)).toString();
   const assetsInPool = await sdk.fetchFusePoolData(poolId, undefined);
   return assetsInPool.assets.filter((a) => a.underlyingSymbol === underlyingSymbol)[0];
 }
 
-export function getCToken(asset: USDPricedFuseAsset, sdk: Fuse, signer: SignerWithAddress) {
+export function getCToken(asset: NativePricedFuseAsset, sdk: Fuse, signer: SignerWithAddress) {
   if (asset.underlyingToken === constants.AddressZero) {
     return new Contract(asset.cToken, sdk.chainDeployment.CEtherDelegate.abi, signer);
   } else {
@@ -96,8 +100,8 @@ export async function borrowCollateral(
   expect(rec.status).to.eq(1);
   const poolId = await getPoolIndex(poolAddress, sdk);
   const assetAfterBorrow = await assetInPool(poolId.toString(), sdk, assetToDeploy.underlyingSymbol, signer.address);
-  console.log(assetAfterBorrow.borrowBalanceUSD, "Borrow Balance USD: AFTER mint & borrow");
-  console.log(assetAfterBorrow.supplyBalanceUSD, "Supply Balance USD: AFTER mint & borrow");
+  console.log(assetAfterBorrow.borrowBalanceNative, "Borrow Balance USD: AFTER mint & borrow");
+  console.log(assetAfterBorrow.supplyBalanceNative, "Supply Balance USD: AFTER mint & borrow");
 }
 
 export async function setupLiquidatablePool(

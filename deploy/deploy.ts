@@ -11,9 +11,9 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   const { deployer } = await getNamedAccounts();
   console.log("deployer: ", deployer);
   const balance = await ethers.provider.getBalance(deployer);
-  console.log('balance: ', balance.toString());
+  console.log("balance: ", balance.toString());
   const price = await ethers.provider.getGasPrice();
-  console.log('price: ', ethers.utils.formatUnits(price, "gwei"));
+  console.log("price: ", ethers.utils.formatUnits(price, "gwei"));
 
   if (!chainDeployConfig[chainId]) {
     throw new Error(`Config invalid for ${chainId}`);
@@ -65,7 +65,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     from: deployer,
     args: [],
     log: true,
-    waitConfirmations: 1
+    waitConfirmations: 1,
   });
   console.log("CErc20PluginDelegate: ", erc20PluginDel.address);
 
@@ -73,7 +73,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     from: deployer,
     args: [],
     log: true,
-    waitConfirmations: 1
+    waitConfirmations: 1,
   });
   console.log("CErc20PluginRewardsDelegate: ", erc20PluginRewardsDel.address);
 
@@ -115,17 +115,32 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   const fusePoolDirectory = await ethers.getContract("FusePoolDirectory", deployer);
 
   const comptroller = await ethers.getContract("Comptroller", deployer);
-  tx = await fuseFeeDistributor._editComptrollerImplementationWhitelist(
-    [constants.AddressZero],
-    [comptroller.address],
-    [true]
+  const whitelisted = await fuseFeeDistributor.callStatic.comptrollerImplementationWhitelist(
+    constants.AddressZero,
+    comptroller.address
   );
-  await tx.wait();
-  console.log("FuseFeeDistributor comptroller whitelist set", tx.hash);
+  console.log("whitelisted: ", whitelisted);
+  if (!whitelisted) {
+    tx = await fuseFeeDistributor._editComptrollerImplementationWhitelist(
+      [constants.AddressZero],
+      [comptroller.address],
+      [true]
+    );
+    await tx.wait();
+    console.log("FuseFeeDistributor comptroller whitelist set", tx.hash);
+  } else {
+    console.log("FuseFeeDistributor comptroller whitelist already set");
+  }
 
-  tx = await comptroller._toggleAutoImplementations(true);
-  await tx.wait();
-  console.log("Toggled comptroller AutoImplementation", tx.hash);
+  const autoImplementation = await comptroller.callStatic.autoImplementation();
+  console.log("autoImplementation: ", autoImplementation);
+  if (!autoImplementation) {
+    tx = await comptroller._toggleAutoImplementations(true);
+    await tx.wait();
+    console.log("Toggled comptroller AutoImplementation", tx.hash);
+  } else {
+    console.log("Comptroller AutoImplementation already set");
+  }
 
   const fplDeployment = await deployments.deploy("FusePoolLens", {
     from: deployer,
@@ -185,32 +200,64 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   const erc20PluginDelegate = await ethers.getContract("CErc20PluginDelegate", deployer);
   const erc20PluginRewardsDelegate = await ethers.getContract("CErc20PluginRewardsDelegate", deployer);
 
-  tx = await fuseFeeDistributor._editCEtherDelegateWhitelist(
-    [constants.AddressZero],
-    [etherDelegate.address],
-    [false],
-    [true]
+  let receipt: providers.TransactionReceipt;
+  const cetherDelegateWhitelist = await fuseFeeDistributor.callStatic.cEtherDelegateWhitelist(
+    constants.AddressZero,
+    etherDelegate.address,
+    false
   );
+  console.log("cetherDelegateWhitelist: ", cetherDelegateWhitelist);
+  if (!cetherDelegateWhitelist) {
+    tx = await fuseFeeDistributor._editCEtherDelegateWhitelist(
+      [constants.AddressZero],
+      [etherDelegate.address],
+      [false],
+      [true]
+    );
 
-  let receipt = await tx.wait();
-  console.log("Set whitelist for Ether Delegate with status:", receipt.status, tx.hash);
+    let receipt = await tx.wait();
+    console.log("Set whitelist for Ether Delegate with status:", receipt.status, tx.hash);
+  } else {
+    console.log("Ether Delegate whitelist already set");
+  }
 
-  tx = await fuseFeeDistributor._editCErc20DelegateWhitelist(
-    [constants.AddressZero, constants.AddressZero, constants.AddressZero],
-    [erc20Delegate.address, erc20PluginDelegate.address, erc20PluginRewardsDelegate.address],
-    [false, false, false],
-    [true, true, true]
+  const cerc20DelegateWhitelist1 = await fuseFeeDistributor.callStatic.cEtherDelegateWhitelist(
+    constants.AddressZero,
+    erc20Delegate.address,
+    false
   );
-  receipt = await tx.wait();
-  console.log("Set whitelist for ERC20 Delegate with status:", receipt.status);
+  console.log("cerc20DelegateWhitelist1: ", cerc20DelegateWhitelist1);
+  const cerc20DelegateWhitelist2 = await fuseFeeDistributor.callStatic.cEtherDelegateWhitelist(
+    constants.AddressZero,
+    erc20PluginDelegate.address,
+    false
+  );
+  console.log("cerc20DelegateWhitelist2: ", cerc20DelegateWhitelist2);
+  const cerc20DelegateWhitelist3 = await fuseFeeDistributor.callStatic.cEtherDelegateWhitelist(
+    constants.AddressZero,
+    erc20PluginRewardsDelegate.address,
+    false
+  );
+  console.log("cerc20DelegateWhitelist3: ", cerc20DelegateWhitelist3);
+  if (!cerc20DelegateWhitelist1 || !cerc20DelegateWhitelist2 || cerc20DelegateWhitelist3) {
+    tx = await fuseFeeDistributor._editCErc20DelegateWhitelist(
+      [constants.AddressZero, constants.AddressZero, constants.AddressZero],
+      [erc20Delegate.address, erc20PluginDelegate.address, erc20PluginRewardsDelegate.address],
+      [false, false, false],
+      [true, true, true]
+    );
+    receipt = await tx.wait();
+    console.log("Set whitelist for ERC20 Delegate with status:", receipt.status);
+  } else {
+    console.log("FuseFeeDistributor ERC20 Delegate whitelist already set");
+  }
 
   const ic = await deployments.deploy("InitializableClones", {
     from: deployer,
     args: [],
     log: true,
+    waitConfirmations: 1
   });
-  if (ic.transactionHash) await ethers.provider.waitForTransaction(ic.transactionHash);
-  console.log("InitializableClones: ", ic.address);
   ////
 
   ////
@@ -240,10 +287,8 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
       proxyContract: "OpenZeppelinTransparentProxy",
       owner: deployer,
     },
+    waitConfirmations: 1
   });
-
-  if (masterPO.transactionHash) await ethers.provider.waitForTransaction(masterPO.transactionHash);
-  console.log("MasterPriceOracle: ", masterPO.address);
 
   ////
   //// IRM MODELS
