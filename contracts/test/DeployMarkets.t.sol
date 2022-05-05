@@ -61,6 +61,10 @@ contract DeployMarketsTest is Test {
   bool[] falseBoolArray;
   bool[] trueBoolArray;
   address[] newImplementation;
+  bool[] t;
+  bool[] f;
+  address[] oldCErC20Implementations;
+  address[] newCErc20Implementations;
   FuseFlywheelCore[] flywheelsToClaim;
 
   function setUpBaseContracts() public {
@@ -73,7 +77,38 @@ contract DeployMarketsTest is Test {
     fusePoolDirectory.initialize(false, emptyAddresses);
   }
 
+  function setUpWhiteList() public {
+    cErc20PluginDelegate = new CErc20PluginDelegate();
+    cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
+    cErc20Delegate = new CErc20Delegate();
+
+    for (uint256 i = 0; i < 7; i++) {
+      t.push(true);
+      f.push(false);
+    }
+
+    oldCErC20Implementations.push(address(0));
+    oldCErC20Implementations.push(address(0));
+    oldCErC20Implementations.push(address(0));
+    oldCErC20Implementations.push(address(cErc20Delegate));
+    oldCErC20Implementations.push(address(cErc20Delegate));
+    oldCErC20Implementations.push(address(cErc20PluginDelegate));
+    oldCErC20Implementations.push(address(cErc20PluginRewardsDelegate));
+
+    newCErc20Implementations.push(address(cErc20Delegate));
+    newCErc20Implementations.push(address(cErc20PluginDelegate));
+    newCErc20Implementations.push(address(cErc20PluginRewardsDelegate));
+    newCErc20Implementations.push(address(cErc20PluginDelegate));
+    newCErc20Implementations.push(address(cErc20PluginRewardsDelegate));
+    newCErc20Implementations.push(address(cErc20PluginDelegate));
+    newCErc20Implementations.push(address(cErc20PluginRewardsDelegate));
+
+    fuseAdmin._editCErc20DelegateWhitelist(oldCErC20Implementations, newCErc20Implementations, f, t);
+  }
+
   function setUpPool() public {
+    underlyingToken.mint(address(this), 100e18);
+
     MockPriceOracle priceOracle = new MockPriceOracle(10);
     emptyAddresses.push(address(0));
     Comptroller tempComptroller = new Comptroller(payable(fuseAdmin));
@@ -98,13 +133,11 @@ contract DeployMarketsTest is Test {
   function setUp() public {
     setUpBaseContracts();
     setUpPool();
+    setUpWhiteList();
+    vm.roll(1);
   }
 
   function testDeployCErc20PluginDelegate() public {
-    cErc20PluginDelegate = new CErc20PluginDelegate();
-    newImplementation.push(address(cErc20PluginDelegate));
-    fuseAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);
-
     mockERC4626 = new MockERC4626(ERC20(address(underlyingToken)));
 
     vm.roll(1);
@@ -117,7 +150,7 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginDelegate),
+        address(cErc20Delegate),
         abi.encode(address(mockERC4626)),
         uint256(1),
         uint256(0)
@@ -128,37 +161,39 @@ contract DeployMarketsTest is Test {
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
-    assertEq(address(cToken.plugin()), address(0));
-    cToken._becomeImplementation(abi.encode(address(mockERC4626)));
+    cToken._setImplementationSafe(address(cErc20PluginDelegate), false, abi.encode(address(mockERC4626)));
     assertEq(address(cToken.plugin()), address(mockERC4626));
-  }
 
-  function testDeployCErc20Delegate() public {
-    cErc20Delegate = new CErc20Delegate();
-    newImplementation.push(address(cErc20Delegate));
-    fuseAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);
-
+    underlyingToken.approve(address(cToken), 1e36);
+    address[] memory cTokens = new address[](1);
+    cTokens[0] = address(cToken);
+    comptroller.enterMarkets(cTokens);
     vm.roll(1);
-    comptroller._deployMarket(
-      false,
-      abi.encode(
-        address(underlyingToken),
-        ComptrollerInterface(address(comptroller)),
-        payable(address(fuseAdmin)),
-        InterestRateModel(address(interestModel)),
-        "cUnderlyingToken",
-        "CUT",
-        address(cErc20Delegate),
-        "",
-        uint256(1),
-        uint256(0)
-      ),
-      0.9e18
-    );
-
-    CToken[] memory allMarkets = comptroller.getAllMarkets();
-    CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
-
-    cToken._becomeImplementation("");
+    cToken.mint(10000000);
+    vm.roll(1);
   }
+  //
+  //  function testDeployCErc20Delegate() public {
+  //    vm.roll(1);
+  //    comptroller._deployMarket(
+  //      false,
+  //      abi.encode(
+  //        address(underlyingToken),
+  //        ComptrollerInterface(address(comptroller)),
+  //        payable(address(fuseAdmin)),
+  //        InterestRateModel(address(interestModel)),
+  //        "cUnderlyingToken",
+  //        "CUT",
+  //        address(cErc20Delegate),
+  //        "",
+  //        uint256(1),
+  //        uint256(0)
+  //      ),
+  //      0.9e18
+  //    );
+  //
+  //    CToken[] memory allMarkets = comptroller.getAllMarkets();
+  //    CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
+  //    assertEq(cToken.name(), "cUnderlyingToken");
+  //  }
 }
