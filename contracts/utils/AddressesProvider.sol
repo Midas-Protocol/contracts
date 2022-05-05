@@ -4,17 +4,17 @@ pragma solidity >=0.8.0;
 import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 
 contract AddressesProvider is Initializable, OwnableUpgradeable {
-    mapping(bytes32 => address) private _addresses;
+    mapping(string => address) private _addresses;
 
     function initialize(address owner) public initializer {
         __Ownable_init();
         _transferOwnership(owner);
     }
 
-    event AddressSet(bytes32 id, address indexed newAddress);
+    event AddressSet(string id, address indexed newAddress);
 
 
-    bytes32 private constant LENDING_POOL = 'LENDING_POOL';
+    string private constant LENDING_POOL = 'LENDING_POOL';
 
 
     /**
@@ -22,7 +22,7 @@ contract AddressesProvider is Initializable, OwnableUpgradeable {
      * @param id The id
      * @param newAddress The address to set
      */
-    function setAddress(bytes32 id, address newAddress) external onlyOwner {
+    function setAddress(string calldata id, address newAddress) external onlyOwner {
         _addresses[id] = newAddress;
         emit AddressSet(id, newAddress);
     }
@@ -31,7 +31,7 @@ contract AddressesProvider is Initializable, OwnableUpgradeable {
      * @dev Returns an address by id
      * @return The address
      */
-    function getAddress(bytes32 id) public view returns (address) {
+    function getAddress(string calldata id) public view returns (address) {
         return _addresses[id];
     }
 }

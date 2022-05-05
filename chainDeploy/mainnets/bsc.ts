@@ -4,6 +4,7 @@ import { Asset, ChainDeployFnParams, ChainlinkAsset, CurvePoolConfig } from "../
 import { deployCurveLpOracle } from "../oracles/curveLp";
 import { deployUniswapLpOracle } from "../oracles/uniswapLp";
 import { deployERC4626Plugin, deployFlywheelWithDynamicRewards } from "../helpers/erc4626Plugins";
+import {AddressesProvider} from "../../typechain";
 
 export const assets: Asset[] = [
   {
@@ -496,4 +497,11 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   });
   console.log("deployed dynamicFlywheels: ", dynamicFlywheels);
   await deployERC4626Plugin({ ethers, getNamedAccounts, deployments, run, deployConfig, dynamicFlywheels });
+
+
+  /// Addresses Provider
+  const addressesProvider = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
+  let tx = await addressesProvider.setAddress("bUSD", "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56");
+  await tx.wait();
+  ////
 };

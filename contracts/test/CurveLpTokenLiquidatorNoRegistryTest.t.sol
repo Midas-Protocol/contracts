@@ -15,6 +15,7 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
   CurveLpTokenLiquidatorNoRegistry private liquidator;
   address private lpTokenWhale = 0x8D7408C2b3154F9f97fc6dd24cd36143908d1E52;
   IERC20Upgradeable lpToken = IERC20Upgradeable(0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452);
+  IERC20Upgradeable bUSD = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
   // TODO in addresses provider?
   CurveLpTokenPriceOracleNoRegistry curveLPTokenPriceOracleNoRegistry = CurveLpTokenPriceOracleNoRegistry(0x44ea7bAB9121D97630b5DB0F92aAd75cA5A401a3);
 
@@ -35,9 +36,9 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       lpToken,
       1234,
-      abi.encode(uint8(0), chainConfig.coins[0])
+      abi.encode(uint8(0), bUSD)
     );
-    assertEq(address(outputToken), address(chainConfig.coins[0]));
+    assertEq(address(outputToken), address(bUSD));
     assertGt(outputAmount, 0);
     assertEq(outputToken.balanceOf(address(liquidator)), outputAmount);
   }

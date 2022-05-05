@@ -4,6 +4,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
 import { deployIRMs } from "../chainDeploy/helpers";
 import { deployFuseSafeLiquidator } from "../chainDeploy/helpers/liquidator";
+import {AddressesProvider, MasterPriceOracle, UniswapTwapPriceOracleV2Factory} from "../typechain";
 
 const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
   const chainId = await getChainId();
@@ -291,6 +292,24 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   });
 
   ////
+  //// IRM MODELS
+  await deployIRMs({ run, ethers, getNamedAccounts, deployments, deployConfig: chainDeployParams });
+  ////
+
+  //// Liquidator
+  await deployFuseSafeLiquidator({ run, ethers, getNamedAccounts, deployments, deployConfig: chainDeployParams });
+  ///
+
+  ////
+  //// CHAIN SPECIFIC DEPLOYMENT
+  console.log("Running deployment for chain: ", chainId);
+  if (deployFunc) {
+    await deployFunc({ run, ethers, getNamedAccounts, deployments });
+  }
+  ////
+
+
+  ////
   //// HELPERS - ADDRESSES PROVIDER
   const ap = await deployments.deploy("AddressesProvider", {
     from: deployer,
@@ -307,23 +326,24 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     },
     waitConfirmations: 1
   });
+  const addressesProvider = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
+  tx = await addressesProvider.setAddress("IUniswapV2Factory", chainDeployParams.uniswap.uniswapV2FactoryAddress);
+  await tx.wait();
 
-  ////
-  //// IRM MODELS
-  await deployIRMs({ run, ethers, getNamedAccounts, deployments, deployConfig: chainDeployParams });
-  ////
+  tx = await addressesProvider.setAddress("wtoken", chainDeployParams.wtoken);
+  await tx.wait();
 
-  //// Liquidator
-  await deployFuseSafeLiquidator({ run, ethers, getNamedAccounts, deployments, deployConfig: chainDeployParams });
-  ///
+  const uniTwapOracleFactory = await ethers.getContract("UniswapTwapPriceOracleV2Factory", deployer);
+  tx = await addressesProvider.setAddress("UniswapTwapPriceOracleV2Factory", uniTwapOracleFactory.address);
+  await tx.wait();
 
-  ////
-  //// CHAIN SPECIFIC DEPLOYMENT
-  console.log("Running deployment for chain: ", chainId);
-  if (deployFunc) {
-    await deployFunc({ run, ethers, getNamedAccounts, deployments });
-  }
-  ////
+  const chainlinkPriceOracleV2 = await ethers.getContract("ChainlinkPriceOracleV2", deployer);
+  tx = await addressesProvider.setAddress("ChainlinkPriceOracleV2", chainlinkPriceOracleV2.address);
+  await tx.wait();
+
+  tx = await addressesProvider.setAddress("MasterPriceOracle", masterPO.address);
+  await tx.wait();
+
 };
 
 func.tags = ["prod"];
