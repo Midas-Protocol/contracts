@@ -27,7 +27,7 @@
     "build:sdk": "tsc -p tsconfig-sdk.json && tsc -p tsconfig-cjs.json",
     "clean": "hardhat clean && rm -rf lib",
     "typechain": "typechain --target ethers-v5 --out-dir './typechain' 'out/*/**.json'",
-    "deploy:simulate:bsc:mainnet": "FORK_URL_BSC=${FORK_URL_BSC} FORK_BLOCK_NUMBER=${FORK_BLOCK_NUMBER} FORK_CHAIN_ID=56 hardhat node --tags simulate",
+    "deploy:simulate:bsc:mainnet": "FORK_URL_BSC=${FORK_URL_BSC} FORK_BLOCK_NUMBER=${FORK_BLOCK_NUMBER} FORK_CHAIN_ID=56 hardhat deploy --tags simulate",
     "deploy:bsc:mainnet": "hardhat --network bsc deploy --tags prod",
     "prettier:sol": "prettier --write 'contracts/**/*.sol' 'contracts_forge/**/*.sol'",
     "prettier:ts": "prettier --write 'chainDeploy/**/*.ts' 'src/**/*.ts' 'deploy/**/*.ts' 'tasks/**/*.ts' 'test/**/*.ts'",
