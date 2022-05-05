@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.23;
 
-import "forge-std/Test.sol";
+import "ds-test/test.sol";
+import "forge-std/Vm.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
@@ -25,7 +26,9 @@ import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 
-contract LiquidityMiningTest is Test {
+contract LiquidityMiningTest is DSTest {
+  Vm public constant vm = Vm(HEVM_ADDRESS);
+
   MockERC20 underlyingToken;
   MockERC20 rewardToken;
 

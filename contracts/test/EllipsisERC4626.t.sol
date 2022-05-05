@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "forge-std/Test.sol";
+import "ds-test/test.sol";
+import "forge-std/Vm.sol";
 
 import { EllipsisERC4626, ILpTokenStaker } from "../compound/strategies/EllipsisERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -13,12 +14,14 @@ import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 
-contract EllipsisERC4626Test is Test {
+contract EllipsisERC4626Test is DSTest {
   struct RewardsCycle {
     uint32 start;
     uint32 end;
     uint192 reward;
   }
+
+  Vm public constant vm = Vm(HEVM_ADDRESS);
 
   EllipsisERC4626 ellipsisERC4626;
   FlywheelCore flywheel;

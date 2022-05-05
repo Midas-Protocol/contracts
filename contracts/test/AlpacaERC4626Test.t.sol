@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.23;
 
-import "forge-std/Test.sol";
+import "ds-test/test.sol";
+import "forge-std/Vm.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
@@ -9,7 +10,9 @@ import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { AlpacaERC4626, IAlpacaVault } from "../compound/strategies/AlpacaERC4626.sol";
 import { MockVault } from "./mocks/alpaca/MockVault.sol";
 
-contract AlpacaERC4626Test is Test {
+contract AlpacaERC4626Test is DSTest {
+  Vm public constant vm = Vm(HEVM_ADDRESS);
+
   AlpacaERC4626 alpacaERC4626;
 
   MockERC20 testToken;

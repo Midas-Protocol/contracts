@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.23;
 
-import "forge-std/Test.sol";
+import "ds-test/test.sol";
+import "forge-std/Vm.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
@@ -17,7 +18,9 @@ import { MockAutofarmV2 } from "./mocks/autofarm/MockAutofarmV2.sol";
 import { IStrategy } from "./mocks/autofarm/IStrategy.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 
-contract AutofarmERC4626Test is Test {
+contract AutofarmERC4626Test is DSTest {
+  Vm public constant vm = Vm(HEVM_ADDRESS);
+
   AutofarmERC4626 autofarmERC4626;
   FlywheelCore flywheel;
   FuseFlywheelDynamicRewards flywheelRewards;
