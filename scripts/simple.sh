@@ -1,4 +1,6 @@
-POOL_NAME="Test Pool"
+#!/bin/bash
+set -x
+POOL_NAME="Plugin Pool"
 
 # get these from the console
 export TOUCH=0xf9a089C918ad9c484201E7d328C0d29019997117
@@ -14,6 +16,7 @@ export TRIBE=0x6F747d2A8900A04247F491d894D7765FdEc0D97a
 FLYWHEEL=""
 
 npx hardhat oracle:set-price --address $TOUCH --price "0.01" --network localhost
+
 npx hardhat oracle:set-price --address $TRIBE --price "0.01" --network localhost
 
 npx hardhat pool:create --name "$POOL_NAME" --creator deployer --price-oracle $MPO --close-factor 50 --liquidation-incentive 8 --enforce-whitelist false --network localhost
