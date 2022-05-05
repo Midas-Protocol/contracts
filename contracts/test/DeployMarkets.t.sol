@@ -172,28 +172,35 @@ contract DeployMarketsTest is Test {
     cToken.mint(10000000);
     vm.roll(1);
   }
-  //
-  //  function testDeployCErc20Delegate() public {
-  //    vm.roll(1);
-  //    comptroller._deployMarket(
-  //      false,
-  //      abi.encode(
-  //        address(underlyingToken),
-  //        ComptrollerInterface(address(comptroller)),
-  //        payable(address(fuseAdmin)),
-  //        InterestRateModel(address(interestModel)),
-  //        "cUnderlyingToken",
-  //        "CUT",
-  //        address(cErc20Delegate),
-  //        "",
-  //        uint256(1),
-  //        uint256(0)
-  //      ),
-  //      0.9e18
-  //    );
-  //
-  //    CToken[] memory allMarkets = comptroller.getAllMarkets();
-  //    CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
-  //    assertEq(cToken.name(), "cUnderlyingToken");
-  //  }
+
+    function testDeployCErc20Delegate() public {
+      vm.roll(1);
+      comptroller._deployMarket(
+        false,
+        abi.encode(
+          address(underlyingToken),
+          ComptrollerInterface(address(comptroller)),
+          payable(address(fuseAdmin)),
+          InterestRateModel(address(interestModel)),
+          "cUnderlyingToken",
+          "CUT",
+          address(cErc20Delegate),
+          "",
+          uint256(1),
+          uint256(0)
+        ),
+        0.9e18
+      );
+
+      CToken[] memory allMarkets = comptroller.getAllMarkets();
+      CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
+      assertEq(cToken.name(), "cUnderlyingToken");
+      underlyingToken.approve(address(cToken), 1e36);
+      address[] memory cTokens = new address[](1);
+      cTokens[0] = address(cToken);
+      comptroller.enterMarkets(cTokens);
+      vm.roll(1);
+      cToken.mint(10000000);
+      vm.roll(1);
+    }
 }
