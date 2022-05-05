@@ -2,7 +2,7 @@
 /* solhint-disable */
 pragma solidity >=0.4.23;
 
-import "forge-std/test.sol";
+import "forge-std/Test.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
