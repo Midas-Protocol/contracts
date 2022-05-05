@@ -8,8 +8,6 @@ import "flywheel-v2/token/ERC20Gauges.sol";
 
 import "../utils/TOUCHToken.sol";
 import "../external/compound/ICToken.sol";
-import "./MarketSupplyStrategy.sol";
-import "./MarketBorrowStrategy.sol";
 
 // TODO integrate with FlywheelGaugeRewards
 // TODO research ERC20VotesUpgradeable
@@ -38,16 +36,6 @@ contract VeMDSToken is ERC20Gauges {
   }
 
   error TransferNotSupported();
-
-//  function addMarketGauge(ICToken market) public requiresAuth returns (MarketSupplyStrategy, MarketBorrowStrategy) {
-//    if (_markets.add(market)) {
-//      MarketSupplyStrategy supplyStrategy = new MarketSupplyStrategy(market);
-//      _addGauge(address(supplyStrategy));
-//      MarketBorrowStrategy borrowStrategy = new MarketBorrowStrategy(market);
-//      _addGauge(address(borrowStrategy));
-//    }
-//    return strategy;
-//  }
 
   function mint(address to, uint256 amount) public onlyStakingController {
     _mint(to, amount);
