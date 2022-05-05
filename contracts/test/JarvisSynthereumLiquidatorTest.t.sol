@@ -7,11 +7,14 @@ import "../liquidators/JarvisSynthereumLiquidator.sol";
 contract JarvisSynthereumLiquidatorTest is BaseTest {
   JarvisSynthereumLiquidator private liquidator;
   address whale;
+  ISynthereumLiquidityPool synthereumLiquiditiyPool;
 
   function setUp() public {
     whale = 0xB57c5C22aA7b9Cd25D557f061Df61cBCe1898456;
+    // TODO in addresses provider?
+    synthereumLiquiditiyPool = ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49);
     uint64 expirationPeriod = 60 * 40; // 40 mins
-    liquidator = new JarvisSynthereumLiquidator(chainConfig.synthereumLiquiditiyPool, expirationPeriod);
+    liquidator = new JarvisSynthereumLiquidator(synthereumLiquiditiyPool, expirationPeriod);
   }
 
   function testRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
