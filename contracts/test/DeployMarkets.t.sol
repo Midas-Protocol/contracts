@@ -2,9 +2,7 @@
 /* solhint-disable */
 pragma solidity >=0.4.23;
 
-import "ds-test/test.sol";
-import "forge-std/stdlib.sol";
-import "forge-std/Vm.sol";
+import "forge-std/Test.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
@@ -32,13 +30,7 @@ import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 import { MockERC4626 } from "../compound/strategies/MockERC4626.sol";
 import { MockERC4626Dynamic } from "../compound/strategies/MockERC4626Dynamic.sol";
 
-contract DeployMarketsTest is DSTest {
-  using stdStorage for StdStorage;
-
-  Vm public constant vm = Vm(HEVM_ADDRESS);
-
-  StdStorage stdstore;
-
+contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
   MockERC20 rewardToken;
 
