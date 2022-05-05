@@ -40,22 +40,18 @@ contract BeamERC4626 is ERC4626 {
   /**
      @notice Creates a new Vault that accepts a specific underlying token.
      @param _asset The ERC20 compliant token the Vault should accept.
-     @param _name The name for the vault token.
-     @param _symbol The symbol for the vault token.
+     @param _flyWheel flyWheelCore that handling rewards for pool.
      @param _poolId pool id on beamswap.
      @param _rewardToken reward token. Used to getting rewards from flyWheel.
      @param _vault The Vault contract.
-     @param _flyWheel flyWheelCore that handling rewards for pool.
     */
   constructor(
     ERC20 _asset,
-    string memory _name,
-    string memory _symbol,
+    FlywheelCore _flyWheel,
     uint256 _poolId,
     ERC20 _rewardToken,
-    IVault _vault,
-    FlywheelCore _flyWheel
-  ) ERC4626(_asset, _name, _symbol) {
+    IVault _vault
+  ) ERC4626(_asset, _asset.name(), _asset.symbol()) {
     VAULT = _vault;
     POOL_ID = _poolId;
     FLYWHEEL_CORE = _flyWheel;
