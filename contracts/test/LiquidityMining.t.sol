@@ -172,12 +172,7 @@ contract LiquidityMiningTest is DSTest {
     require(index == flywheel.ONE() + rewardsPerToken);
 
     // claim and check user balance
-    flywheelClaimer.getUnclaimedRewardsForMarket(
-      user,
-      ICToken(address(cErc20)),
-      flywheelsToClaim,
-      trueBoolArray
-    );
+    flywheelClaimer.getUnclaimedRewardsForMarket(user, ICToken(address(cErc20)), flywheelsToClaim, trueBoolArray);
     require(rewardToken.balanceOf(user) == userRewards);
 
     // mint more tokens by user and rerun test
@@ -190,12 +185,7 @@ contract LiquidityMiningTest is DSTest {
     uint256 userRewards2 = (rewardsPerToken2 * cErc20.balanceOf(user)) / 1 ether;
 
     // accrue all unclaimed rewards and claim them
-    flywheelClaimer.getUnclaimedRewardsForMarket(
-      user,
-      ICToken(address(cErc20)),
-      flywheelsToClaim,
-      trueBoolArray
-    );
+    flywheelClaimer.getUnclaimedRewardsForMarket(user, ICToken(address(cErc20)), flywheelsToClaim, trueBoolArray);
 
     // user balance should accumulate from both rewards
     require(rewardToken.balanceOf(user) == userRewards + userRewards2, "balance mismatch");
