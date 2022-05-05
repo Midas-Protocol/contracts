@@ -130,7 +130,7 @@ contract DotDotLpERC4626Test is DSTest {
     assertEq(dotDotERC4626.balanceOf(address(this)), 0);
   }
 
-  function testAccumulatingEPSRewardsOnDeposit() public {
+  function testAccumulatingRewardsOnDeposit() public {
     deposit();
     assertEq(dddToken.totalSupply(), expectedReward);
     assertEq(epxToken.totalSupply(), expectedReward);
@@ -139,7 +139,7 @@ contract DotDotLpERC4626Test is DSTest {
     assertEq(epxToken.balanceOf(address(dotDotERC4626)), expectedReward);
   }
 
-  function testAccumulatingEPSRewardsOnWithdrawal() public {
+  function testAccumulatingRewardsOnWithdrawal() public {
     deposit();
     assertEq(dddToken.totalSupply(), expectedReward);
     assertEq(epxToken.totalSupply(), expectedReward);
