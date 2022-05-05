@@ -68,6 +68,10 @@ export const tradeNativeForAsset = async ({ token, amount, account }) => {
   await run("swap-wtoken-for-token", { token, amount, account });
 };
 
+export const tradeAssetForAsset = async ({ token1, token2, amount, account }) => {
+  await run("swap-token-for-token", { token1, token2, amount, account });
+};
+
 export const setUpLiquidation = async ({ poolName }) => {
   let eth: cERC20Conf;
   let erc20One: cERC20Conf;
