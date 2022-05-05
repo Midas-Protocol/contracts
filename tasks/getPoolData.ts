@@ -110,25 +110,25 @@ task("get-position-ratio", "Get unhealthy po data")
       if (taskArgs.logData) {
         console.log(
           a.underlyingSymbol,
-          "\n supplyBalanceUSD: ",
-          a.supplyBalanceUSD,
-          "\n borrowBalanceUSD: ",
-          a.borrowBalanceUSD,
-          "\n totalSupplyUSD: ",
-          a.totalSupplyUSD,
-          "\n totalBorrowUSD: ",
-          a.totalBorrowUSD,
+          "\n supplyBalanceNative: ",
+          a.supplyBalanceNative,
+          "\n borrowBalanceNative: ",
+          a.borrowBalanceNative,
+          "\n totalSupplyNative: ",
+          a.totalSupplyNative,
+          "\n totalBorrowNative: ",
+          a.totalBorrowNative,
           "\n Multiplier: ",
           mult,
           "\n Max Borrow Asset: ",
-          mult * a.supplyBalanceUSD
+          mult * a.supplyBalanceNative
         );
       }
 
-      return a.supplyBalanceUSD * parseFloat(hre.ethers.utils.formatUnits(a.collateralFactor, a.underlyingDecimals));
+      return a.supplyBalanceNative * parseFloat(hre.ethers.utils.formatUnits(a.collateralFactor, a.underlyingDecimals));
     });
     const maxBorrow = maxBorrowR.reduce((a, b) => a + b, 0);
-    const ratio = (fusePoolData.totalBorrowBalanceUSD / maxBorrow) * 100;
+    const ratio = (fusePoolData.totalBorrowBalanceNative / maxBorrow) * 100;
     console.log(`Ratio of total borrow / max borrow: ${ratio} %`);
     return ratio;
   });
