@@ -43,6 +43,7 @@ contract DotDotLpERC4626Test is DSTest {
   address tester = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
 
   function setUp() public {
+    vm.warp(1);
     dddToken = new MockERC20("dddToken", "DDD", 18);
     dddFlywheel = new FlywheelCore(
       dddToken,
@@ -77,7 +78,7 @@ contract DotDotLpERC4626Test is DSTest {
     marketKey = ERC20(address(dotDotERC4626));
     dddFlywheel.addStrategyForRewards(marketKey);
     epxFlywheel.addStrategyForRewards(marketKey);
-    vm.warp(1);
+    vm.warp(2);
   }
 
   function testInitializedValues() public {
@@ -143,8 +144,6 @@ contract DotDotLpERC4626Test is DSTest {
     assertEq(dddToken.totalSupply(), expectedReward);
     assertEq(epxToken.totalSupply(), expectedReward);
 
-    vm.warp(2);
-
     dotDotERC4626.withdraw(1, address(this), address(this));
 
     assertEq(dddToken.totalSupply(), expectedReward * 2);
@@ -166,14 +165,14 @@ contract DotDotLpERC4626Test is DSTest {
     (uint32 epxStart, uint32 epxEnd, uint192 epxReward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
 
     // Rewards can be transfered in the next cycle at time block.timestamp == 2
-    assertEq(dddEnd, 2);
-    assertEq(epxEnd, 2);
+    assertEq(dddEnd, 3);
+    assertEq(epxEnd, 3);
 
     // Reward amount is still 0
     assertEq(dddReward, 0);
     assertEq(epxReward, 0);
 
-    vm.warp(2);
+    vm.warp(3);
 
     // Call withdraw (could also be deposit() on the erc4626 or claim() on the epsStaker directly) to claim rewards
     dotDotERC4626.withdraw(1, address(this), address(this));
@@ -196,14 +195,14 @@ contract DotDotLpERC4626Test is DSTest {
     (epxStart, epxEnd, epxReward) = epxRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
 
     // Rewards can be transfered in the next cycle at time block.timestamp == 3
-    assertEq(dddEnd, 3);
-    assertEq(epxEnd, 3);
+    assertEq(dddEnd, 4);
+    assertEq(epxEnd, 4);
 
     // Reward amount is expected value
     assertEq(dddReward, expectedReward * 2);
     assertEq(epxReward, expectedReward * 2);
 
-    vm.warp(3);
+    vm.warp(4);
 
     // Finally accrue reward from last cycle
     dddFlywheel.accrue(ERC20(dotDotERC4626), address(this));
@@ -233,10 +232,10 @@ contract DotDotLpERC4626Test is DSTest {
 
     (uint32 start, uint32 end, uint192 reward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
 
-    assertEq(end, 2);
+    assertEq(end, 3);
 
     assertEq(reward, 0);
-    vm.warp(2);
+    vm.warp(3);
 
     dotDotERC4626.withdraw(1, address(this), address(this));
 
@@ -249,10 +248,10 @@ contract DotDotLpERC4626Test is DSTest {
 
     (start, end, reward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
 
-    assertEq(end, 3);
+    assertEq(end, 4);
 
     assertEq(reward, expectedReward * 3);
-    vm.warp(3);
+    vm.warp(4);
 
     dddFlywheel.accrue(ERC20(dotDotERC4626), address(this), tester);
 
