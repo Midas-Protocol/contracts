@@ -291,6 +291,24 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   });
 
   ////
+  //// HELPERS - ADDRESSES PROVIDER
+  const ap = await deployments.deploy("AddressesProvider", {
+    from: deployer,
+    log: true,
+    proxy: {
+      execute: {
+        methodName: "initialize",
+        args: [
+          deployer
+        ]
+      },
+      proxyContract: "OpenZeppelinTransparentProxy",
+      owner: deployer,
+    },
+    waitConfirmations: 1
+  });
+
+  ////
   //// IRM MODELS
   await deployIRMs({ run, ethers, getNamedAccounts, deployments, deployConfig: chainDeployParams });
   ////
