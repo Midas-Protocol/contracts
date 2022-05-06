@@ -73,7 +73,9 @@ contract Keep3rPriceOracle is IPriceOracle, BasePriceOracle {
     uint256 elapsedTime = block.timestamp - lastTime;
     require(elapsedTime >= MIN_TWAP_TIME && elapsedTime <= MAX_TWAP_TIME, "bad TWAP time");
     uint256 currPx0Cumu = currentPx0Cumu(pair);
-    return (currPx0Cumu - lastPx0Cumu) / (block.timestamp - lastTime); // overflow is desired
+    unchecked {
+      return (currPx0Cumu - lastPx0Cumu) / (block.timestamp - lastTime); // overflow is desired
+    }
   }
 
   /**
@@ -92,9 +94,10 @@ contract Keep3rPriceOracle is IPriceOracle, BasePriceOracle {
     uint256 elapsedTime = block.timestamp - lastTime;
     require(elapsedTime >= MIN_TWAP_TIME && elapsedTime <= MAX_TWAP_TIME, "bad TWAP time");
     uint256 currPx1Cumu = currentPx1Cumu(pair);
-    return (currPx1Cumu - lastPx1Cumu) / (block.timestamp - lastTime); // overflow is desired
+    unchecked {
+      return (currPx1Cumu - lastPx1Cumu) / (block.timestamp - lastTime); // overflow is desired
+    }
   }
-
   /**
    * @dev Return the current price0 cumulative value on Uniswap.
    * Copied from: https://github.com/AlphaFinanceLab/homora-v2/blob/master/contracts/oracle/BaseKP3ROracle.sol
@@ -105,8 +108,10 @@ contract Keep3rPriceOracle is IPriceOracle, BasePriceOracle {
     px0Cumu = IUniswapV2Pair(pair).price0CumulativeLast();
     (uint256 reserve0, uint256 reserve1, uint32 lastTime) = IUniswapV2Pair(pair).getReserves();
     if (lastTime != block.timestamp) {
-      uint32 timeElapsed = currTime - lastTime; // overflow is desired
-      px0Cumu += uint256((reserve1 << 112) / reserve0) * timeElapsed; // overflow is desired
+      unchecked {
+        uint32 timeElapsed = currTime - lastTime; // overflow is desired
+        px0Cumu += uint256((reserve1 << 112) / reserve0) * timeElapsed; // overflow is desired
+      }
     }
   }
 
@@ -120,8 +125,10 @@ contract Keep3rPriceOracle is IPriceOracle, BasePriceOracle {
     px1Cumu = IUniswapV2Pair(pair).price1CumulativeLast();
     (uint256 reserve0, uint256 reserve1, uint32 lastTime) = IUniswapV2Pair(pair).getReserves();
     if (lastTime != currTime) {
-      uint32 timeElapsed = currTime - lastTime; // overflow is desired
-      px1Cumu += uint256((reserve0 << 112) / reserve1) * timeElapsed; // overflow is desired
+      unchecked {
+        uint32 timeElapsed = currTime - lastTime; // overflow is desired
+        px1Cumu += uint256((reserve0 << 112) / reserve1) * timeElapsed; // overflow is desired
+      }
     }
   }
 

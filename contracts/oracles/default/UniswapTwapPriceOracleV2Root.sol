@@ -45,7 +45,9 @@ contract UniswapTwapPriceOracleV2Root {
     uint256 elapsedTime = block.timestamp - lastObservation.timestamp;
     require(elapsedTime >= MIN_TWAP_TIME, "Bad TWAP time.");
     uint256 currPx0Cumu = currentPx0Cumu(pair);
-    return (currPx0Cumu - lastObservation.price0Cumulative) / (block.timestamp - lastObservation.timestamp); // overflow is desired
+    unchecked {
+      return (currPx0Cumu - lastObservation.price0Cumulative) / (block.timestamp - lastObservation.timestamp); // overflow is desired
+    }
   }
 
   /**
@@ -64,7 +66,9 @@ contract UniswapTwapPriceOracleV2Root {
     uint256 elapsedTime = block.timestamp - lastObservation.timestamp;
     require(elapsedTime >= MIN_TWAP_TIME, "Bad TWAP time.");
     uint256 currPx1Cumu = currentPx1Cumu(pair);
-    return (currPx1Cumu - lastObservation.price1Cumulative) / (block.timestamp - lastObservation.timestamp); // overflow is desired
+    unchecked {
+      return (currPx1Cumu - lastObservation.price1Cumulative) / (block.timestamp - lastObservation.timestamp); // overflow is desired
+    }
   }
 
   /**
@@ -77,8 +81,10 @@ contract UniswapTwapPriceOracleV2Root {
     px0Cumu = IUniswapV2Pair(pair).price0CumulativeLast();
     (uint256 reserve0, uint256 reserve1, uint32 lastTime) = IUniswapV2Pair(pair).getReserves();
     if (lastTime != block.timestamp) {
-      uint32 timeElapsed = currTime - lastTime; // overflow is desired
-      px0Cumu += uint256((reserve1 << 112) / reserve0) * timeElapsed; // overflow is desired
+      unchecked {
+        uint32 timeElapsed = currTime - lastTime; // overflow is desired
+        px0Cumu += uint256((reserve1 << 112) / reserve0) * timeElapsed; // overflow is desired
+      }
     }
   }
 
@@ -92,8 +98,10 @@ contract UniswapTwapPriceOracleV2Root {
     px1Cumu = IUniswapV2Pair(pair).price1CumulativeLast();
     (uint256 reserve0, uint256 reserve1, uint32 lastTime) = IUniswapV2Pair(pair).getReserves();
     if (lastTime != currTime) {
-      uint32 timeElapsed = currTime - lastTime; // overflow is desired
-      px1Cumu += uint256((reserve0 << 112) / reserve1) * timeElapsed; // overflow is desired
+      unchecked {
+        uint32 timeElapsed = currTime - lastTime; // overflow is desired
+        px1Cumu += uint256((reserve0 << 112) / reserve1) * timeElapsed; // overflow is desired
+      }
     }
   }
 

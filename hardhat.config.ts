@@ -63,7 +63,10 @@ const config: HardhatUserConfig = {
   },
   defaultNetwork: "hardhat",
   namedAccounts: {
-    deployer: { default: 0 },
+    deployer: {
+      default: 0,
+      56: "0x304aE8f9300e09c8B33bb1a8AE1c14A6253a5F4D"
+    },
     alice: { default: 1 },
     bob: { default: 2 },
     rando: { default: 3 },
@@ -76,7 +79,7 @@ const config: HardhatUserConfig = {
             blockNumber: process.env.FORK_BLOCK_NUMBER ? Number(process.env.FORK_BLOCK_NUMBER) : undefined,
           }
         : undefined,
-      saveDeployments: false,
+      saveDeployments: true,
       chainId: process.env.FORK_CHAIN_ID ? Number(process.env.FORK_CHAIN_ID) : 1337,
       gasPrice: 20e9,
       gas: 25e6,

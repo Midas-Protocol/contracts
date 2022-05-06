@@ -39,7 +39,7 @@ export default task("market:create", "Create Market")
     const pool = await poolModule.getPoolByName(poolName, sdk);
 
     let symbol = "NATIVE";
-    if (!hre.ethers.constants.AddressZero === underlying) {
+    if (hre.ethers.constants.AddressZero !== underlying) {
       const underlyingToken = await hre.ethers.getContractAt("ERC20", underlying);
       symbol = await underlyingToken.callStatic.symbol();
     }
