@@ -1,7 +1,7 @@
 import func from "./deploy";
 import { DeployFunction } from "hardhat-deploy/types";
 import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
-import {ethers} from "hardhat";
+import {ethers, getNamedAccounts} from "hardhat";
 
 // use with mainnet forking to simulate the prod deployment
 const simulateDeploy: DeployFunction = async (hre): Promise<void> => {
@@ -12,12 +12,18 @@ const simulateDeploy: DeployFunction = async (hre): Promise<void> => {
   }
   const { config: chainDeployParams }: { config: ChainDeployConfig } =
       chainDeployConfig[chainId];
-  console.log("whale: ", chainDeployParams.wtoken);
+  const fundingValue = hre.ethers.utils.parseEther("10");
+  let whale = chainDeployParams.wtoken;
+  const balanceOfWToken = await ethers.provider.getBalance(whale);
+  if (balanceOfWToken < fundingValue) {
+    whale = (await hre.getNamedAccounts())["alice"];
+  }
+  console.log("whale: ", whale);
 
   const { deployer } = await hre.getNamedAccounts();
-  await ethers.provider.send("hardhat_impersonateAccount", [chainDeployParams.wtoken]);
-  const signer = hre.ethers.provider.getSigner(chainDeployParams.wtoken);
-  await signer.sendTransaction({ to: deployer, value: hre.ethers.utils.parseEther("10") });
+  await ethers.provider.send("hardhat_impersonateAccount", [whale]);
+  const signer = hre.ethers.provider.getSigner(whale);
+  await signer.sendTransaction({ to: deployer, value: fundingValue });
   await func(hre);
 };
 simulateDeploy.tags = ["simulate", "fork", "local"];
