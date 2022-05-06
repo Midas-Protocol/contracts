@@ -7,7 +7,7 @@ import "forge-std/Test.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
+import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
 import "fuse-flywheel/FuseFlywheelCore.sol";
 
@@ -49,7 +49,7 @@ contract DeployMarketsTest is Test {
   FusePoolDirectory fusePoolDirectory;
 
   FuseFlywheelCore flywheel;
-  FlywheelDynamicRewards rewards;
+  FuseFlywheelDynamicRewards rewards;
 
   ERC20 marketKey;
 
@@ -166,15 +166,14 @@ contract DeployMarketsTest is Test {
     cTokens[0] = address(cToken);
     comptroller.enterMarkets(cTokens);
     vm.roll(1);
-
-    cToken.mint(10000000);
-    assertEq(cToken.totalSupply(), 10000000);
-    assertEq(underlyingToken.balanceOf(address(cToken)), 10000000);
+    cToken.mint(10e18);
+    assertEq(cToken.totalSupply(), 10e18 * 5);
+    assertEq(underlyingToken.balanceOf(address(cToken)), 10e18);
     vm.roll(1);
 
     cToken.borrow(1000);
     assertEq(cToken.totalBorrows(), 1000);
-    assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10000000 + 1000);
+    assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10e18 + 1000);
   }
 
   function testDeployCErc20PluginDelegate() public {
@@ -210,17 +209,17 @@ contract DeployMarketsTest is Test {
     comptroller.enterMarkets(cTokens);
     vm.roll(1);
 
-    cToken.mint(10000000);
-    assertEq(cToken.totalSupply(), 10000000);
-    assertEq(mockERC4626.balanceOf(address(cToken)), 10000000);
-    assertEq(underlyingToken.balanceOf(address(mockERC4626)), 10000000);
+    cToken.mint(10e18);
+    assertEq(cToken.totalSupply(), 10e18 * 5);
+    assertEq(mockERC4626.balanceOf(address(cToken)), 10e18);
+    assertEq(underlyingToken.balanceOf(address(mockERC4626)), 10e18);
     vm.roll(1);
 
     cToken.borrow(1000);
     assertEq(cToken.totalBorrows(), 1000);
-    assertEq(underlyingToken.balanceOf(address(mockERC4626)), 10000000 - 1000);
-    assertEq(mockERC4626.balanceOf(address(cToken)), 10000000 - 1000);
-    assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10000000 + 1000);
+    assertEq(underlyingToken.balanceOf(address(mockERC4626)), 10e18 - 1000);
+    assertEq(mockERC4626.balanceOf(address(cToken)), 10e18 - 1000);
+    assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10e18 + 1000);
   }
 
   function testDeployCErc20PluginRewardsDelegate() public {
@@ -250,7 +249,7 @@ contract DeployMarketsTest is Test {
         "cUnderlyingToken",
         "CUT",
         address(cErc20Delegate),
-        abi.encode(address(mockERC4626), address(flywheel)),
+        abi.encode(address(mockERC4626Dynamic), address(flywheel), address(underlyingToken)),
         uint256(1),
         uint256(0)
       ),
@@ -263,9 +262,9 @@ contract DeployMarketsTest is Test {
     cToken._setImplementationSafe(
       address(cErc20PluginRewardsDelegate),
       false,
-      abi.encode(address(mockERC4626), address(flywheel))
+      abi.encode(address(mockERC4626Dynamic), address(flywheel), address(underlyingToken))
     );
-    assertEq(address(cToken.plugin()), address(mockERC4626));
+    assertEq(address(cToken.plugin()), address(mockERC4626Dynamic));
     assertEq(underlyingToken.allowance(address(cToken), address(flywheel)), type(uint256).max);
 
     underlyingToken.approve(address(cToken), 1e36);
@@ -275,15 +274,15 @@ contract DeployMarketsTest is Test {
     vm.roll(1);
 
     cToken.mint(10000000);
-    assertEq(cToken.totalSupply(), 10000000);
-    assertEq(mockERC4626.balanceOf(address(cToken)), 10000000);
-    assertEq(underlyingToken.balanceOf(address(cToken)), 10000000);
+    assertEq(cToken.totalSupply(), 10000000 * 5);
+    assertEq(mockERC4626Dynamic.balanceOf(address(cToken)), 10000000);
+    assertEq(underlyingToken.balanceOf(address(mockERC4626Dynamic)), 10000000);
     vm.roll(1);
 
     cToken.borrow(1000);
     assertEq(cToken.totalBorrows(), 1000);
-    assertEq(underlyingToken.balanceOf(address(mockERC4626)), 10000000 - 1000);
-    assertEq(mockERC4626.balanceOf(address(cToken)), 10000000 - 1000);
+    assertEq(underlyingToken.balanceOf(address(mockERC4626Dynamic)), 10000000 - 1000);
+    assertEq(mockERC4626Dynamic.balanceOf(address(cToken)), 10000000 - 1000);
     assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10000000 + 1000);
   }
 }
