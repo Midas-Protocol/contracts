@@ -12,9 +12,9 @@ contract TwapOraclesBaseTest is BaseTest {
   MasterPriceOracle mpo;
 
   function setUp() public {
-    uniswapV2Factory = chainConfig.uniswapV2Factory;
-    twapPriceOracleFactory = chainConfig.twapOraclesFactory;
-    mpo = chainConfig.masterPriceOracle;
+    uniswapV2Factory = IUniswapV2Factory(ap.getAddress("uniswapV2Factory"));
+    twapPriceOracleFactory = UniswapTwapPriceOracleV2Factory(ap.getAddress("twapOraclesFactory"));
+    mpo = MasterPriceOracle(ap.getAddress("masterPriceOracle"));
   }
 
   function getTokenTwapPrice(address tokenAddress, address baseTokenAddress) internal returns (uint256) {
@@ -56,7 +56,7 @@ contract TwapOraclesBaseTest is BaseTest {
     assertTrue(getTokenTwapPrice(testedAssetTokenAddress, baseToken) > 0);
   }
 
-  function testChapelEthBusdOraclePrice() public shouldRun(forChains(97)) {
+  function testChapelEthBusdOraclePrice() public shouldRun(forChains(BSC_CHAPEL)) {
     address baseToken = 0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684; // USDT
     address testedAssetTokenAddress = 0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7; // BUSD
 

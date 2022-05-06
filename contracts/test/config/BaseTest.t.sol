@@ -17,41 +17,18 @@ import "../../utils/AddressesProvider.sol";
 abstract contract BaseTest is DSTest {
   Vm public constant vm = Vm(HEVM_ADDRESS);
 
-  ChainConfig internal chainConfig;
-
   uint256 constant BSC_MAINNET = 56;
   uint256 constant MOONBEAM_MAINNET = 1284;
 
   uint256 constant EVMOS_TESTNET = 9000;
   uint256 constant BSC_CHAPEL = 97;
 
+  // TODO instantiate from the delegator/storage address
   AddressesProvider ap = new AddressesProvider();
-
-  struct ChainConfig {
-    // TODO remove from TwapOraclesBaseTest by using the deployed AddressesProvider value
-    WETH wtoken;
-    // TODO remove from TwapOraclesBaseTest by using the deployed AddressesProvider value
-    ChainlinkPriceOracleV2 chainlinkOracle;
-    // TODO remove from TwapOraclesBaseTest by using the deployed AddressesProvider value
-    MasterPriceOracle masterPriceOracle;
-    // TODO remove from TwapOraclesBaseTest by using the deployed AddressesProvider value
-    UniswapTwapPriceOracleV2Factory twapOraclesFactory;
-    // TODO remove from TwapOraclesBaseTest by using the deployed AddressesProvider value
-    IUniswapV2Factory uniswapV2Factory;
-  }
 
   constructor() {
     ap.initialize(address(this));
-
     configureAddressesProvider();
-
-    chainConfig = ChainConfig({
-      wtoken: WETH(payable(ap.getAddress("wtoken"))),
-      chainlinkOracle: ChainlinkPriceOracleV2(ap.getAddress("chainlinkOracle")),
-      masterPriceOracle: MasterPriceOracle(ap.getAddress("masterPriceOracle")),
-      twapOraclesFactory: UniswapTwapPriceOracleV2Factory(ap.getAddress("twapOraclesFactory")),
-      uniswapV2Factory: IUniswapV2Factory(ap.getAddress("uniswapV2Factory"))
-    });
   }
 
   function configureAddressesProvider() internal {

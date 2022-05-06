@@ -16,8 +16,8 @@ contract UniswapLpTokenBaseTest is BaseTest {
   address wtoken;
 
   function setUp() public {
-    wtoken = address(chainConfig.wtoken);
-    mpo = chainConfig.masterPriceOracle;
+    wtoken = ap.getAddress("wtoken");
+    mpo = MasterPriceOracle(ap.getAddress("masterPriceOracle"));
   }
 
   function getLpTokenPrice (address lpToken) internal returns (uint256) {
