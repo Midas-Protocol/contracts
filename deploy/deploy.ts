@@ -32,7 +32,11 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
     proxy: {
       proxyContract: "OpenZeppelinTransparentProxy",
-      execute: { methodName: "initialize", args: [ethers.utils.parseEther("0.1")] },
+      execute: {
+        init: {
+          methodName: "initialize", args: [ethers.utils.parseEther("0.1")]
+        }
+      },
       owner: deployer,
     },
   });
@@ -58,6 +62,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     from: deployer,
     args: [],
     log: true,
+    waitConfirmations: 1,
   });
   if (erc20Del.transactionHash) await ethers.provider.waitForTransaction(erc20Del.transactionHash);
   console.log("CErc20Delegate: ", erc20Del.address);
@@ -82,6 +87,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     from: deployer,
     args: [],
     log: true,
+    waitConfirmations: 1,
   });
   if (ethDel.transactionHash) await ethers.provider.waitForTransaction(ethDel.transactionHash);
   console.log("CEtherDelegate: ", ethDel.address);
@@ -90,6 +96,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     from: deployer,
     args: [],
     log: true,
+    waitConfirmations: 1,
   });
   if (rewards.transactionHash) await ethers.provider.waitForTransaction(rewards.transactionHash);
   // const rewardsDistributorDelegate = await ethers.getContract("RewardsDistributorDelegate", deployer);
@@ -105,11 +112,14 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     proxy: {
       proxyContract: "OpenZeppelinTransparentProxy",
       execute: {
-        methodName: "initialize",
-        args: [false, []],
+        init: {
+          methodName: "initialize",
+          args: [false, []],
+        }
       },
       owner: deployer,
     },
+    waitConfirmations: 1,
   });
   if (fpd.transactionHash) await ethers.provider.waitForTransaction(fpd.transactionHash);
   console.log("FusePoolDirectory: ", fpd.address);
@@ -275,15 +285,17 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
     proxy: {
       execute: {
-        methodName: "initialize",
-        args: [
-          [constants.AddressZero],
-          [fixedNativePO.address],
-          constants.AddressZero,
-          deployer,
-          true,
-          chainDeployParams.wtoken,
-        ],
+        init: {
+          methodName: "initialize",
+          args: [
+            [constants.AddressZero],
+            [fixedNativePO.address],
+            constants.AddressZero,
+            deployer,
+            true,
+            chainDeployParams.wtoken,
+          ],
+        }
       },
       proxyContract: "OpenZeppelinTransparentProxy",
       owner: deployer,
