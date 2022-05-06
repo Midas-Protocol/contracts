@@ -4,7 +4,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
 import { deployIRMs } from "../chainDeploy/helpers";
 import { deployFuseSafeLiquidator } from "../chainDeploy/helpers/liquidator";
-import {AddressesProvider, MasterPriceOracle, UniswapTwapPriceOracleV2Factory} from "../typechain";
+import { AddressesProvider } from "../typechain";
 
 const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
   const chainId = await getChainId();
@@ -266,7 +266,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   });
   console.log("FixedNativePriceOracle: ", fixedNativePO.address);
 
-  await deployments.deploy("MasterPriceOracle", {
+  const masterPO = await deployments.deploy("MasterPriceOracle", {
     from: deployer,
     log: true,
     proxy: {
@@ -324,6 +324,8 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     },
     waitConfirmations: 1
   });
+
+  /// EXTERNAL ADDRESSES
   const addressesProvider = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
   tx = await addressesProvider.setAddress("IUniswapV2Factory", chainDeployParams.uniswap.uniswapV2FactoryAddress);
   await tx.wait();
@@ -331,6 +333,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   tx = await addressesProvider.setAddress("wtoken", chainDeployParams.wtoken);
   await tx.wait();
 
+  /// SYSTEM ADDRESSES
   const uniTwapOracleFactory = await ethers.getContract("UniswapTwapPriceOracleV2Factory", deployer);
   tx = await addressesProvider.setAddress("UniswapTwapPriceOracleV2Factory", uniTwapOracleFactory.address);
   await tx.wait();

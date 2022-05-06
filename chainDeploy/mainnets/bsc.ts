@@ -499,8 +499,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   console.log("deployed dynamicFlywheels: ", dynamicFlywheels);
   await deployERC4626Plugin({ ethers, getNamedAccounts, deployments, run, deployConfig, dynamicFlywheels });
 
-
-  /// Addresses Provider
+  /// Addresses Provider - set bUSD
   const addressesProvider = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
   let tx = await addressesProvider.setAddress("bUSD", "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56");
   await tx.wait();

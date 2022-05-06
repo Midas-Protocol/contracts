@@ -5,6 +5,8 @@ import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.s
 
 contract AddressesProvider is Initializable, OwnableUpgradeable {
     mapping(string => address) private _addresses;
+    mapping(address => Contract) public flywheelRewards;
+    mapping(address => Contract) public plugins;
 
     function initialize(address owner) public initializer {
         __Ownable_init();
@@ -12,6 +14,19 @@ contract AddressesProvider is Initializable, OwnableUpgradeable {
     }
 
     event AddressSet(string id, address indexed newAddress);
+
+    struct Contract {
+        address addr;
+        string contractInterface;
+    }
+
+    function setFlywheelRewards(address rewardToken, address flywheel, string calldata contractInterface) public onlyOwner {
+        flywheelRewards[rewardToken] = Contract(flywheel, contractInterface);
+    }
+
+    function setPlugin(address asset, address plugin, string calldata contractInterface) public onlyOwner {
+        plugins[asset] = Contract(plugin, contractInterface);
+    }
 
     /**
      * @dev Sets an address for an id replacing the address saved in the addresses map
