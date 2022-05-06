@@ -51,6 +51,8 @@ contract DeployMarketsTest is Test {
   FuseFlywheelCore flywheel;
   FlywheelDynamicRewards rewards;
 
+  ERC20 marketKey;
+
   address user = address(this);
 
   uint256 depositAmount = 1 ether;
@@ -137,6 +139,44 @@ contract DeployMarketsTest is Test {
     vm.roll(1);
   }
 
+  function testDeployCErc20Delegate() public {
+    vm.roll(1);
+    comptroller._deployMarket(
+      false,
+      abi.encode(
+        address(underlyingToken),
+        ComptrollerInterface(address(comptroller)),
+        payable(address(fuseAdmin)),
+        InterestRateModel(address(interestModel)),
+        "cUnderlyingToken",
+        "CUT",
+        address(cErc20Delegate),
+        "",
+        uint256(1),
+        uint256(0)
+      ),
+      0.9e18
+    );
+
+    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
+    assertEq(cToken.name(), "cUnderlyingToken");
+    underlyingToken.approve(address(cToken), 1e36);
+    address[] memory cTokens = new address[](1);
+    cTokens[0] = address(cToken);
+    comptroller.enterMarkets(cTokens);
+    vm.roll(1);
+
+    cToken.mint(10000000);
+    assertEq(cToken.totalSupply(), 10000000);
+    assertEq(underlyingToken.balanceOf(address(cToken)), 10000000);
+    vm.roll(1);
+
+    cToken.borrow(1000);
+    assertEq(cToken.totalBorrows(), 1000);
+    assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10000000 + 1000);
+  }
+
   function testDeployCErc20PluginDelegate() public {
     mockERC4626 = new MockERC4626(ERC20(address(underlyingToken)));
 
@@ -169,11 +209,36 @@ contract DeployMarketsTest is Test {
     cTokens[0] = address(cToken);
     comptroller.enterMarkets(cTokens);
     vm.roll(1);
+
     cToken.mint(10000000);
+    assertEq(cToken.totalSupply(), 10000000);
+    assertEq(mockERC4626.balanceOf(address(cToken)), 10000000);
+    assertEq(underlyingToken.balanceOf(address(mockERC4626)), 10000000);
     vm.roll(1);
+
+    cToken.borrow(1000);
+    assertEq(cToken.totalBorrows(), 1000);
+    assertEq(underlyingToken.balanceOf(address(mockERC4626)), 10000000 - 1000);
+    assertEq(mockERC4626.balanceOf(address(cToken)), 10000000 - 1000);
+    assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10000000 + 1000);
   }
 
-  function testDeployCErc20Delegate() public {
+  function testDeployCErc20PluginRewardsDelegate() public {
+    flywheel = new FuseFlywheelCore(
+      underlyingToken,
+      IFlywheelRewards(address(0)),
+      IFlywheelBooster(address(0)),
+      address(this),
+      Authority(address(0))
+    );
+    rewards = new FuseFlywheelDynamicRewards(flywheel, 1);
+    flywheel.setFlywheelRewards(rewards);
+
+    mockERC4626Dynamic = new MockERC4626Dynamic(ERC20(address(underlyingToken)), FlywheelCore(address(flywheel)));
+
+    marketKey = ERC20(address(mockERC4626Dynamic));
+    flywheel.addStrategyForRewards(marketKey);
+
     vm.roll(1);
     comptroller._deployMarket(
       false,
@@ -185,7 +250,7 @@ contract DeployMarketsTest is Test {
         "cUnderlyingToken",
         "CUT",
         address(cErc20Delegate),
-        "",
+        abi.encode(address(mockERC4626), address(flywheel)),
         uint256(1),
         uint256(0)
       ),
@@ -193,14 +258,32 @@ contract DeployMarketsTest is Test {
     );
 
     CToken[] memory allMarkets = comptroller.getAllMarkets();
-    CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
-    assertEq(cToken.name(), "cUnderlyingToken");
+    CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
+
+    cToken._setImplementationSafe(
+      address(cErc20PluginRewardsDelegate),
+      false,
+      abi.encode(address(mockERC4626), address(flywheel))
+    );
+    assertEq(address(cToken.plugin()), address(mockERC4626));
+    assertEq(underlyingToken.allowance(address(cToken), address(flywheel)), type(uint256).max);
+
     underlyingToken.approve(address(cToken), 1e36);
     address[] memory cTokens = new address[](1);
     cTokens[0] = address(cToken);
     comptroller.enterMarkets(cTokens);
     vm.roll(1);
+
     cToken.mint(10000000);
+    assertEq(cToken.totalSupply(), 10000000);
+    assertEq(mockERC4626.balanceOf(address(cToken)), 10000000);
+    assertEq(underlyingToken.balanceOf(address(cToken)), 10000000);
     vm.roll(1);
+
+    cToken.borrow(1000);
+    assertEq(cToken.totalBorrows(), 1000);
+    assertEq(underlyingToken.balanceOf(address(mockERC4626)), 10000000 - 1000);
+    assertEq(mockERC4626.balanceOf(address(cToken)), 10000000 - 1000);
+    assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10000000 + 1000);
   }
 }
