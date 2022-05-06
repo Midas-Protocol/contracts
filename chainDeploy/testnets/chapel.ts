@@ -1,6 +1,7 @@
 import { ChainDeployConfig, ChainlinkFeedBaseCurrency, deployChainlinkOracle, deployUniswapOracle } from "../helpers";
 import { ethers } from "ethers";
 import { Asset, ChainlinkAsset } from "../helpers/types";
+import { deployUniswapLpOracle } from "../oracles/uniswapLp";
 
 const CHAPEL_WTOKEN = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
 
@@ -39,6 +40,7 @@ export const deployConfig: ChainDeployConfig = {
         baseToken: "0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7", // BUSD
       },
     ],
+    uniswapOracleLpTokens: ["0xAE4C99935B1AA0e76900e86cD155BFA63aB77A2a"],
   },
 };
 
@@ -76,6 +78,7 @@ export const assets: Asset[] = [
 ];
 
 export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Promise<void> => {
+  const { deployer } = await getNamedAccounts();
   ////
   //// ORACLES
   const chainlinkAssets: ChainlinkAsset[] = [
@@ -110,5 +113,15 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
 
   //// Uniswap Oracle
   await deployUniswapOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
+  await deployUniswapLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
   ////
+  const uniswapLpTokenLiquidator = await deployments.deploy("UniswapLpTokenLiquidator", {
+    from: deployer,
+    args: [],
+    log: true,
+  });
+  if (uniswapLpTokenLiquidator.transactionHash) {
+    await ethers.provider.waitForTransaction(uniswapLpTokenLiquidator.transactionHash);
+  }
+  console.log("UniswapLpTokenLiquidator: ", uniswapLpTokenLiquidator.address);
 };

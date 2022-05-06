@@ -145,7 +145,7 @@ task("swap-token-for-token", "Swap token for token")
     const uniRouter = new ethers.Contract(
       sdk.chainSpecificAddresses.UNISWAP_V2_ROUTER,
       [
-        "function getAmountsOut(uint amountIn, address[] memory path) internal view returns (uint[] memory amounts)",
+        "function getAmountsOut(uint amountIn, address[] memory path) view returns (uint[] memory amounts)",
         "function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)",
       ],
       account

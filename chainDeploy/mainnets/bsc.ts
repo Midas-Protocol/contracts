@@ -26,7 +26,7 @@ export const assets: Asset[] = [
   },
   {
     symbol: "DAI",
-    underlying: "0x132d3C0B1D2cEa0BC552588063bdBb210FDeecfA",
+    underlying: "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
     name: "Binance DAI",
     decimals: 18,
   },
@@ -168,7 +168,8 @@ export const deployConfig: ChainDeployConfig = {
       },
     ],
     uniswapOracleLpTokens: [
-      "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6", // LP,
+      "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6", // BOMB-BTC PCS LP
+      "0xc7c3cCCE4FA25700fD5574DA7E200ae28BBd36A3", // WBNB-DAI PCS LP
     ],
   },
   plugins: [
@@ -176,7 +177,7 @@ export const deployConfig: ChainDeployConfig = {
       // 0x
       strategy: "BeefyERC4626",
       name: "BOMBBTCLP",
-      underlying: "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6", // BOMB-BTC LP
+      underlying: "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6", // BOMB-BTC PCS LP
       otherParams: ["0x94e85b8e050f3f281cb9597cc0144f1f7af1fe9b"], // Beefy Vault Address
     },
     {

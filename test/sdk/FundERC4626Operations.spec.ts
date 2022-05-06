@@ -1,12 +1,12 @@
 import { expect } from "chai";
 import { deployments, ethers } from "hardhat";
 import Fuse from "../../src/Fuse";
-import { setUpPriceOraclePrices } from "../utils";
+import { setUpPriceOraclePrices, tradeNativeForAsset } from "../utils";
 import * as poolHelpers from "../utils/pool";
 import { BigNumber, constants, providers, utils } from "ethers";
-import { chainDeployConfig } from "../../chainDeploy";
 import { getOrCreateFuse } from "../utils/fuseSdk";
 import { SimplePriceOracle } from "../../typechain/SimplePriceOracle";
+import { tradeAssetForAsset } from "../utils/setup";
 
 (process.env.FORK_CHAIN_ID ? describe.only : describe.skip)("FundOperationsERC4626Module", function () {
   let poolAddress: string;
@@ -22,7 +22,6 @@ import { SimplePriceOracle } from "../../typechain/SimplePriceOracle";
     const { deployer } = await ethers.getNamedSigners();
 
     sdk = await getOrCreateFuse();
-    console.log(sdk.chainPlugins);
 
     [poolAddress] = await poolHelpers.createPool({
       signer: deployer,
@@ -40,138 +39,45 @@ import { SimplePriceOracle } from "../../typechain/SimplePriceOracle";
       await simpleOracle.setDirectPrice(a.underlying, BigNumber.from(1));
     }
     await poolHelpers.deployAssets(assets.assets, deployer);
+
+    const BTCB = assets.assets.find((a) => a.symbol === "BTCB");
+    const BOMB = assets.assets.find((a) => a.symbol === "BOMB");
+    const ETH = assets.assets.find((a) => a.symbol === "mETH");
+    // acquire some test tokens
+    await tradeNativeForAsset({ account: "bob", token: BTCB.underlying, amount: "500" });
+    await tradeNativeForAsset({ account: "bob", token: ETH.underlying, amount: "100" });
+    await tradeAssetForAsset({ account: "bob", token1: BTCB.underlying, token2: BOMB.underlying, amount: "0.2" });
   });
 
-  it.only("user can supply", async function () {
-    const { deployer } = await ethers.getNamedSigners();
+  it("user can supply any asset", async function () {
+    const { bob } = await ethers.getNamedSigners();
     const poolId = (await poolHelpers.getPoolIndex(poolAddress, sdk)).toString();
-    console.log(poolId);
+
     const assetsInPool = await sdk.fetchFusePoolData(poolId);
-    console.log(assetsInPool);
-    const asset = assetsInPool.assets.find((asset) => asset.underlyingToken === constants.AddressZero);
-    const res = await sdk.supply(
-      asset.cToken,
-      asset.underlyingToken,
-      assetsInPool.comptroller,
-      true,
-      true,
-      utils.parseUnits("3", 18),
-      { from: deployer.address }
-    );
-    tx = res.tx;
-    rec = await tx.wait();
-    expect(rec.status).to.eq(1);
-    const assetAfterSupply = await poolHelpers.assetInPool(
-      poolId,
-      sdk,
-      chainDeployConfig[chainId].config.nativeTokenSymbol,
-      deployer.address
-    );
-    expect(utils.formatUnits(assetAfterSupply.supplyBalance, 18)).to.eq("3.0");
-  });
+    const BTCB = assetsInPool.assets.find((asset) => asset.underlyingSymbol === "BTCB");
+    const BOMB = assetsInPool.assets.find((asset) => asset.underlyingSymbol === "BOMB");
+    const ETH = assetsInPool.assets.find((asset) => asset.underlyingSymbol === "ETH");
 
-  it("user can borrow", async function () {
-    const { deployer } = await ethers.getNamedSigners();
-    const poolId = (await poolHelpers.getPoolIndex(poolAddress, sdk)).toString();
-    const assetsInPool = await sdk.fetchFusePoolData(poolId);
-    const asset = assetsInPool.assets.find((asset) => asset.underlyingToken === constants.AddressZero);
-    const res = await sdk.supply(
-      asset.cToken,
-      asset.underlyingToken,
-      assetsInPool.comptroller,
-      true,
-      true,
-      utils.parseUnits("3", 18),
-      { from: deployer.address }
-    );
-    tx = res.tx;
-    rec = await tx.wait();
-    expect(rec.status).to.eq(1);
-    const resp = await sdk.borrow(asset.cToken, utils.parseUnits("2", 18), { from: deployer.address });
-    tx = resp.tx;
-    rec = await tx.wait();
-    expect(rec.status).to.eq(1);
-    const assetAfterBorrow = await poolHelpers.assetInPool(
-      poolId,
-      sdk,
-      chainDeployConfig[chainId].config.nativeTokenSymbol,
-      deployer.address
-    );
-    expect(utils.formatUnits(assetAfterBorrow.borrowBalance, 18)).to.eq("2.0");
-  });
-
-  it("user can withdraw", async function () {
-    const { deployer } = await ethers.getNamedSigners();
-    const poolId = (await poolHelpers.getPoolIndex(poolAddress, sdk)).toString();
-    const assetsInPool = await sdk.fetchFusePoolData(poolId);
-    const asset = assetsInPool.assets.find((asset) => asset.underlyingToken === constants.AddressZero);
-    const res = await sdk.supply(
-      asset.cToken,
-      asset.underlyingToken,
-      assetsInPool.comptroller,
-      true,
-      true,
-      utils.parseUnits("3", 18),
-      { from: deployer.address }
-    );
-    tx = res.tx;
-    rec = await tx.wait();
-    expect(rec.status).to.eq(1);
-    const resp = await sdk.withdraw(asset.cToken, utils.parseUnits("2", 18), { from: deployer.address });
-    tx = resp.tx;
-    rec = await tx.wait();
-    expect(rec.status).to.eq(1);
-    const assetAfterWithdraw = await poolHelpers.assetInPool(
-      poolId,
-      sdk,
-      chainDeployConfig[chainId].config.nativeTokenSymbol,
-      deployer.address
-    );
-    expect(utils.formatUnits(assetAfterWithdraw.supplyBalance, 18)).to.eq("1.0");
-  });
-
-  it("user can repay", async function () {
-    const { deployer } = await ethers.getNamedSigners();
-    const poolId = (await poolHelpers.getPoolIndex(poolAddress, sdk)).toString();
-    const assetsInPool = await sdk.fetchFusePoolData(poolId);
-    const asset = assetsInPool.assets.find((asset) => asset.underlyingToken === constants.AddressZero);
-    let res = await sdk.supply(
-      asset.cToken,
-      asset.underlyingToken,
-      assetsInPool.comptroller,
-      true,
-      true,
-      utils.parseUnits("5", 18),
-      { from: deployer.address }
-    );
-    tx = res.tx;
-    rec = await tx.wait();
-    expect(rec.status).to.eq(1);
-
-    res = await sdk.borrow(asset.cToken, utils.parseUnits("3", 18), { from: deployer.address });
-    tx = res.tx;
-    rec = await tx.wait();
-    expect(rec.status).to.eq(1);
-
-    const assetBeforeRepay = await poolHelpers.assetInPool(
-      poolId,
-      sdk,
-      chainDeployConfig[chainId].config.nativeTokenSymbol,
-      deployer.address
-    );
-
-    res = await sdk.repay(asset.cToken, asset.underlyingToken, true, false, utils.parseUnits("2", 18), {
-      from: deployer.address,
-    });
-    tx = res.tx;
-    rec = await tx.wait();
-    expect(rec.status).to.eq(1);
-    const assetAfterRepay = await poolHelpers.assetInPool(
-      poolId,
-      sdk,
-      chainDeployConfig[chainId].config.nativeTokenSymbol,
-      deployer.address
-    );
-    expect(assetBeforeRepay.borrowBalance.gt(assetAfterRepay.borrowBalance)).to.eq(true);
+    const amounts = ["0.1", "1000", "4"];
+    for (const [idx, asset] of [BTCB, BOMB, ETH].entries()) {
+      console.log(`Supplying: ${asset.underlyingSymbol}`);
+      const res = await sdk.supply(
+        asset.cToken,
+        asset.underlyingToken,
+        poolAddress,
+        asset.underlyingToken === constants.AddressZero || asset.underlyingToken === sdk.chainSpecificAddresses.W_TOKEN,
+        true,
+        utils.parseUnits(amounts[idx], 18),
+        { from: bob.address }
+      );
+      tx = res.tx;
+      rec = await tx.wait();
+      expect(rec.status).to.eq(1);
+      const assetAfterSupply = await poolHelpers.assetInPool(poolId, sdk, asset.underlyingSymbol, bob.address);
+      expect(parseFloat(utils.formatUnits(assetAfterSupply.supplyBalance, 18))).to.closeTo(
+        parseFloat(amounts[idx]),
+        0.00000001
+      );
+    }
   });
 });
