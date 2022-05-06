@@ -20,9 +20,9 @@ contract UniswapLpTokenBaseTest is BaseTest {
     mpo = chainConfig.masterPriceOracle;
   }
 
-  function getLpTokenPrice (address lpToken) internal returns (uint256) {
+  function getLpTokenPrice(address lpToken) internal returns (uint256) {
     if (address(mpo.oracles(lpToken)) == address(0)) {
-      uniswapLpTokenPriceOracle = new UniswapLpTokenPriceOracle(wtoken); // BTCB 
+      uniswapLpTokenPriceOracle = new UniswapLpTokenPriceOracle(wtoken); // BTCB
       IUniswapV2Pair pair = IUniswapV2Pair(lpToken);
 
       address[] memory underlyings = new address[](1);
