@@ -98,6 +98,7 @@ contract Keep3rPriceOracle is IPriceOracle, BasePriceOracle {
       return (currPx1Cumu - lastPx1Cumu) / (block.timestamp - lastTime); // overflow is desired
     }
   }
+
   /**
    * @dev Return the current price0 cumulative value on Uniswap.
    * Copied from: https://github.com/AlphaFinanceLab/homora-v2/blob/master/contracts/oracle/BaseKP3ROracle.sol

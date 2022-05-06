@@ -156,10 +156,29 @@ export const getBscForkDeployments = async (): Promise<ChainDeployment> => {
   return await getCommonDeployments(chainDeployment);
 };
 
+const getPluginConfig = async (fuse: Fuse): Promise<Fuse> => {
+  fuse.chainPlugins = {
+    "0x522348779DCb2911539e76A1042aA922F9C47Ee3": [
+      {
+        strategyName: "BOMB Autocompounding (beefy)",
+        strategyAddress: (await ethers.getContract("BombERC4626_BOMBxBOMB")).address,
+        dynamicFlywheel: null,
+      },
+    ],
+    "0x2170Ed0880ac9A755fd29B2688956BD959F933F8": [
+      {
+        strategyName: "Alpaca Finance ibETH Vault",
+        strategyAddress: (await ethers.getContract("AlpacaERC4626_ETH")).address,
+        dynamicFlywheel: null,
+      },
+    ],
+  };
+  return fuse;
+};
+
 export const getOrCreateFuse = async (): Promise<Fuse> => {
   if (!fuseSdk) {
     const { chainId } = await ethers.provider.getNetwork();
-
     let chainDeployment: ChainDeployment;
     if (chainId === 1337) {
       chainDeployment = await getLocalDeployments();
@@ -167,6 +186,9 @@ export const getOrCreateFuse = async (): Promise<Fuse> => {
       chainDeployment = await getBscForkDeployments();
     }
     fuseSdk = new Fuse(ethers.provider, chainId, chainDeployment);
+    if (process.env.FORK_CHAIN_ID!) {
+      fuseSdk = await getPluginConfig(fuseSdk);
+    }
   }
   return fuseSdk;
 };
