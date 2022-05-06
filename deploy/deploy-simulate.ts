@@ -1,7 +1,7 @@
 import func from "./deploy";
 import { DeployFunction } from "hardhat-deploy/types";
 import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
-import {ethers, getNamedAccounts} from "hardhat";
+import {ethers} from "hardhat";
 
 // use with mainnet forking to simulate the prod deployment
 const simulateDeploy: DeployFunction = async (hre): Promise<void> => {
