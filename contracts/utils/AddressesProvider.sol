@@ -13,10 +13,6 @@ contract AddressesProvider is Initializable, OwnableUpgradeable {
 
     event AddressSet(string id, address indexed newAddress);
 
-
-    string private constant LENDING_POOL = 'LENDING_POOL';
-
-
     /**
      * @dev Sets an address for an id replacing the address saved in the addresses map
      * @param id The id

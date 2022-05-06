@@ -12,9 +12,11 @@ import "../../oracles/default/ChainlinkPriceOracleV2.sol";
 import "../../external/jarvis/ISynthereumLiquidityPool.sol";
 import "../../oracles/MasterPriceOracle.sol";
 import "../../oracles/default/UniswapTwapPriceOracleV2Factory.sol";
+import "../../utils/AddressesProvider.sol";
 
 abstract contract BaseTest is DSTest {
   Vm public constant vm = Vm(HEVM_ADDRESS);
+
   ChainConfig internal chainConfig;
 
   uint256 constant BSC_MAINNET = 56;
@@ -23,9 +25,11 @@ abstract contract BaseTest is DSTest {
   uint256 constant EVMOS_TESTNET = 9000;
   uint256 constant BSC_CHAPEL = 97;
 
+  AddressesProvider ap = new AddressesProvider();
+
   struct ChainConfig {
     // TODO remove from TwapOraclesBaseTest by using the deployed AddressesProvider value
-    WETH weth;
+    WETH wtoken;
     // TODO remove from TwapOraclesBaseTest by using the deployed AddressesProvider value
     ChainlinkPriceOracleV2 chainlinkOracle;
     // TODO remove from TwapOraclesBaseTest by using the deployed AddressesProvider value
@@ -36,34 +40,53 @@ abstract contract BaseTest is DSTest {
     IUniswapV2Factory uniswapV2Factory;
   }
 
-  mapping(uint256 => ChainConfig) private chainConfigs;
-
   constructor() {
-    chainConfigs[BSC_MAINNET] = ChainConfig({
-      weth: WETH(payable(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)),
-      chainlinkOracle: ChainlinkPriceOracleV2(0x2B5311De4555506400273CfaAFb4393F01EC2567),
-      masterPriceOracle: MasterPriceOracle(0xC3ABf2cB82C65474CeF8F90f1a4DAe79929B1940),
-      twapOraclesFactory: UniswapTwapPriceOracleV2Factory(0x8853F26C198fd5693E7886C081164E0c3F0a4E51),
-      uniswapV2Factory: IUniswapV2Factory(0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73)
-    });
+    ap.initialize(address(this));
 
-    chainConfigs[BSC_CHAPEL] = ChainConfig({
-      weth: WETH(payable(0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd)),
-      chainlinkOracle: ChainlinkPriceOracleV2(0x0000000000000000000000000000000000000000),
-      masterPriceOracle: MasterPriceOracle(0xC3ABf2cB82C65474CeF8F90f1a4DAe79929B1940),
-      twapOraclesFactory: UniswapTwapPriceOracleV2Factory(0x944fed08a91983d06f653E9F55Eca995316Ccd3e),
-      uniswapV2Factory: IUniswapV2Factory(0xB7926C0430Afb07AA7DEfDE6DA862aE0Bde767bc)
-    });
+    configureAddressesProvider();
 
-    chainConfigs[MOONBEAM_MAINNET] = ChainConfig({
-      weth: WETH(payable(0xAcc15dC74880C9944775448304B263D191c6077F)),
-      chainlinkOracle: ChainlinkPriceOracleV2(0x0000000000000000000000000000000000000000),
-      masterPriceOracle: MasterPriceOracle(0x14C15B9ec83ED79f23BF71D51741f58b69ff1494),
-      twapOraclesFactory: UniswapTwapPriceOracleV2Factory(0x0000000000000000000000000000000000000000),
-      uniswapV2Factory: IUniswapV2Factory(0x985BcA32293A7A496300a48081947321177a86FD)
+    chainConfig = ChainConfig({
+      wtoken: WETH(payable(ap.getAddress("wtoken"))),
+      chainlinkOracle: ChainlinkPriceOracleV2(ap.getAddress("chainlinkOracle")),
+      masterPriceOracle: MasterPriceOracle(ap.getAddress("masterPriceOracle")),
+      twapOraclesFactory: UniswapTwapPriceOracleV2Factory(ap.getAddress("twapOraclesFactory")),
+      uniswapV2Factory: IUniswapV2Factory(ap.getAddress("uniswapV2Factory"))
     });
+  }
 
-    chainConfig = chainConfigs[block.chainid];
+  function configureAddressesProvider() internal {
+//    if (ap.owner() == address(0)) {
+      if(block.chainid == BSC_MAINNET) {
+        // external addresses
+        ap.setAddress("wtoken", 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
+        ap.setAddress("uniswapV2Factory", 0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73);
+        ap.setAddress("chainlinkOracle", 0x2B5311De4555506400273CfaAFb4393F01EC2567);
+
+        ap.setAddress("bUSD", 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
+
+        // system addresses
+        ap.setAddress("masterPriceOracle", 0xC3ABf2cB82C65474CeF8F90f1a4DAe79929B1940);
+        ap.setAddress("twapOraclesFactory", 0x8853F26C198fd5693E7886C081164E0c3F0a4E51);
+      } else if(block.chainid == BSC_CHAPEL) {
+        // external addresses
+        ap.setAddress("wtoken", 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd);
+        ap.setAddress("uniswapV2Factory", 0xB7926C0430Afb07AA7DEfDE6DA862aE0Bde767bc);
+        ap.setAddress("chainlinkOracle", 0x0000000000000000000000000000000000000000);
+
+        // system addresses
+        ap.setAddress("masterPriceOracle", 0xC3ABf2cB82C65474CeF8F90f1a4DAe79929B1940);
+        ap.setAddress("twapOraclesFactory", 0x944fed08a91983d06f653E9F55Eca995316Ccd3e);
+      } else if(block.chainid == MOONBEAM_MAINNET) {
+        // external addresses
+        ap.setAddress("wtoken", 0xAcc15dC74880C9944775448304B263D191c6077F);
+        ap.setAddress("uniswapV2Factory", 0x985BcA32293A7A496300a48081947321177a86FD);
+        ap.setAddress("chainlinkOracle", 0x0000000000000000000000000000000000000000);
+
+        // system addresses
+        ap.setAddress("masterPriceOracle", 0x14C15B9ec83ED79f23BF71D51741f58b69ff1494);
+        ap.setAddress("twapOraclesFactory", 0x0000000000000000000000000000000000000000);
+      }
+//    }
   }
 
   modifier shouldRun(bool run) {

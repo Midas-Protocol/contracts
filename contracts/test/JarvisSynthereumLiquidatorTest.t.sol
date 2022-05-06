@@ -6,16 +6,17 @@ import "../liquidators/JarvisSynthereumLiquidator.sol";
 
 contract JarvisSynthereumLiquidatorTest is BaseTest {
   JarvisSynthereumLiquidator private liquidator;
-  address whale;
-  ISynthereumLiquidityPool synthereumLiquiditiyPool;
+
+  // TODO in addresses provider?
+  address whale = 0xB57c5C22aA7b9Cd25D557f061Df61cBCe1898456;
+  ISynthereumLiquidityPool synthereumLiquiditiyPool = ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49);
   IERC20Upgradeable jBRLToken = IERC20Upgradeable(0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
-  IERC20Upgradeable bUSD = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
+
+  IERC20Upgradeable bUSD;
 
   function setUp() public {
-    whale = 0xB57c5C22aA7b9Cd25D557f061Df61cBCe1898456;
-    // TODO in addresses provider?
-    synthereumLiquiditiyPool = ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49);
     uint64 expirationPeriod = 60 * 40; // 40 mins
+    bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
     liquidator = new JarvisSynthereumLiquidator(synthereumLiquiditiyPool, expirationPeriod);
   }
 
