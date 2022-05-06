@@ -15,7 +15,7 @@ import { DeployedAsset } from "../utils/pool";
 import { liquidateAndVerify, resetPriceOracle } from "../utils/setup";
 import { getOrCreateFuse } from "../utils/fuseSdk";
 
-(process.env.FORK_CHAIN_ID ? describe.skip : describe.skip)("#safeLiquidateWithFlashLoan", () => {
+(process.env.FORK_CHAIN_ID ? describe.only : describe.skip)("#safeLiquidateWithFlashLoan", () => {
   let tx: providers.TransactionResponse;
 
   let eth: cERC20Conf;
