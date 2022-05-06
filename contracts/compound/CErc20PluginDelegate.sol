@@ -33,7 +33,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
     require(_plugin != address(0), "0 addr");
 
     if (address(plugin) != address(0)) {
-      plugin.redeem(address(this), address(this), plugin.balanceOf(address(this)));
+      plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
     }
 
     plugin = IERC4626(_plugin);
@@ -77,7 +77,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
   function deposit(uint256 amount) internal {
     EIP20Interface(underlying).approve(address(plugin), amount);
 
-    plugin.deposit(address(this), amount);
+    plugin.deposit(amount, address(this));
   }
 
   /**
