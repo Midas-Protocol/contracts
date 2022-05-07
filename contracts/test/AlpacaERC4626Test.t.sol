@@ -2,7 +2,6 @@
 pragma solidity >=0.4.23;
 
 import "ds-test/test.sol";
-import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -12,11 +11,7 @@ import { AlpacaERC4626, IAlpacaVault } from "../compound/strategies/AlpacaERC462
 import { MockVault } from "./mocks/alpaca/MockVault.sol";
 
 contract AlpacaERC4626Test is DSTest {
-  using stdStorage for StdStorage;
-
   Vm public constant vm = Vm(HEVM_ADDRESS);
-
-  StdStorage stdstore;
 
   AlpacaERC4626 alpacaERC4626;
 
@@ -28,12 +23,12 @@ contract AlpacaERC4626Test is DSTest {
   function setUp() public {
     testToken = new MockERC20("TestToken", "TST", 18);
     mockVault = new MockVault(address(testToken), "MockVault", "MV", 18);
-    alpacaERC4626 = new AlpacaERC4626(testToken, "TestVault", "TSTV", IAlpacaVault(address(mockVault)));
+    alpacaERC4626 = new AlpacaERC4626(testToken, IAlpacaVault(address(mockVault)));
   }
 
   function testInitializedValues() public {
-    assertEq(alpacaERC4626.name(), "TestVault");
-    assertEq(alpacaERC4626.symbol(), "TSTV");
+    assertEq(alpacaERC4626.name(), "Midas TestToken Vault");
+    assertEq(alpacaERC4626.symbol(), "mvTST");
     assertEq(address(alpacaERC4626.asset()), address(testToken));
     assertEq(address(alpacaERC4626.alpacaVault()), address(mockVault));
   }

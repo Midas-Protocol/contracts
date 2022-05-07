@@ -105,7 +105,6 @@ import { getOrCreateFuse } from "./utils/fuseSdk";
     const ratioBefore = await getPositionRatio({
       name: poolName,
       userAddress: undefined,
-      cgId: "ethereum",
       namedUser: "bob",
     });
     console.log(`Ratio Before: ${ratioBefore}`);
@@ -126,7 +125,6 @@ import { getOrCreateFuse } from "./utils/fuseSdk";
     const ratioAfter = await getPositionRatio({
       name: poolName,
       userAddress: undefined,
-      cgId: "ethereum",
       namedUser: "bob",
     });
     console.log(`Ratio After: ${ratioAfter}`);

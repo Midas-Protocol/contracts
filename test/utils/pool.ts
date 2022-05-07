@@ -3,7 +3,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { providers, utils } from "ethers";
 import { ethers, getChainId } from "hardhat";
 
-import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../src";
+import { cERC20Conf, Fuse, FusePoolData, NativePricedFuseAsset } from "../../src";
 import { getAssetsConf } from "./assets";
 import { getOrCreateFuse } from "./fuseSdk";
 
@@ -75,6 +75,7 @@ export async function deployAssets(assets: cERC20Conf[], signer?: SignerWithAddr
 
   const deployed: DeployedAsset[] = [];
   for (const assetConf of assets) {
+   
     const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
       sdk.JumpRateModelConf,
       assetConf,
@@ -129,10 +130,9 @@ export const assetInPool = async (
   poolId: string,
   sdk: Fuse,
   underlyingSymbol: string,
-  address?: string,
-  cgId?: string
-): Promise<USDPricedFuseAsset> => {
-  const fetchedAssetsInPool: FusePoolData = await sdk.fetchFusePoolData(poolId, address, cgId);
+  address?: string
+): Promise<NativePricedFuseAsset> => {
+  const fetchedAssetsInPool: FusePoolData = await sdk.fetchFusePoolData(poolId, address);
   return fetchedAssetsInPool.assets.filter((a) => a.underlyingSymbol === underlyingSymbol)[0];
 };
 
@@ -146,17 +146,12 @@ export const getPoolIndex = async (poolAddress: string, sdk: Fuse) => {
   return null;
 };
 
-export const getPoolByName = async (
-  name: string,
-  sdk: Fuse,
-  address?: string,
-  cgId?: string
-): Promise<FusePoolData> => {
+export const getPoolByName = async (name: string, sdk: Fuse, address?: string): Promise<FusePoolData> => {
   const [, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPublicPoolsWithData();
   for (let j = 0; j < publicPools.length; j++) {
     if (publicPools[j].name === name) {
       const poolIndex = await getPoolIndex(publicPools[j].comptroller, sdk);
-      return await sdk.fetchFusePoolData(poolIndex.toString(), address, cgId);
+      return await sdk.fetchFusePoolData(poolIndex.toString(), address);
     }
   }
   return null;

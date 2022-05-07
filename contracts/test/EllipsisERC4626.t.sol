@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "ds-test/test.sol";
-import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
 import { EllipsisERC4626, ILpTokenStaker } from "../compound/strategies/EllipsisERC4626.sol";
@@ -16,8 +15,6 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 
 contract EllipsisERC4626Test is DSTest {
-  using stdStorage for StdStorage;
-
   struct RewardsCycle {
     uint32 start;
     uint32 end;
@@ -25,8 +22,6 @@ contract EllipsisERC4626Test is DSTest {
   }
 
   Vm public constant vm = Vm(HEVM_ADDRESS);
-
-  StdStorage stdstore;
 
   EllipsisERC4626 ellipsisERC4626;
   FlywheelCore flywheel;
@@ -63,10 +58,8 @@ contract EllipsisERC4626Test is DSTest {
 
     ellipsisERC4626 = new EllipsisERC4626(
       testToken,
-      "TestVault",
-      "TSTV",
-      ILpTokenStaker(address(mockLpTokenStaker)),
-      FlywheelCore(address(flywheel))
+      FlywheelCore(address(flywheel)),
+      ILpTokenStaker(address(mockLpTokenStaker))
     );
     marketKey = ERC20(address(ellipsisERC4626));
     flywheel.addStrategyForRewards(marketKey);
@@ -74,8 +67,8 @@ contract EllipsisERC4626Test is DSTest {
   }
 
   function testInitializedValues() public {
-    assertEq(ellipsisERC4626.name(), "TestVault");
-    assertEq(ellipsisERC4626.symbol(), "TSTV");
+    assertEq(ellipsisERC4626.name(), "Midas TestLpToken Vault");
+    assertEq(ellipsisERC4626.symbol(), "mvLP-TST");
     assertEq(address(ellipsisERC4626.asset()), address(testToken));
     assertEq(address(ellipsisERC4626.lpTokenStaker()), address(mockLpTokenStaker));
     assertEq(address(marketKey), address(ellipsisERC4626));

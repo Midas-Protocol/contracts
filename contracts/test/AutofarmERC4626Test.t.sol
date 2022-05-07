@@ -2,7 +2,6 @@
 pragma solidity >=0.4.23;
 
 import "ds-test/test.sol";
-import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -20,11 +19,7 @@ import { IStrategy } from "./mocks/autofarm/IStrategy.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 
 contract AutofarmERC4626Test is DSTest {
-  using stdStorage for StdStorage;
-
   Vm public constant vm = Vm(HEVM_ADDRESS);
-
-  StdStorage stdstore;
 
   AutofarmERC4626 autofarmERC4626;
   FlywheelCore flywheel;
@@ -62,12 +57,10 @@ contract AutofarmERC4626Test is DSTest {
 
     autofarmERC4626 = new AutofarmERC4626(
       testToken,
-      "TestVault",
-      "TSTV",
+      FlywheelCore(address(flywheel)),
       0,
       autoToken,
-      IAutofarmV2(address(mockAutofarm)),
-      FlywheelCore(address(flywheel))
+      IAutofarmV2(address(mockAutofarm))
     );
     marketKey = ERC20(address(autofarmERC4626));
     flywheel.addStrategyForRewards(marketKey);
@@ -79,8 +72,8 @@ contract AutofarmERC4626Test is DSTest {
   }
 
   function testInitializedValues() public {
-    assertEq(autofarmERC4626.name(), "TestVault");
-    assertEq(autofarmERC4626.symbol(), "TSTV");
+    assertEq(autofarmERC4626.name(), "Midas TestToken Vault");
+    assertEq(autofarmERC4626.symbol(), "mvTST");
     assertEq(address(autofarmERC4626.asset()), address(testToken));
     assertEq(address(autofarmERC4626.autofarm()), address(mockAutofarm));
     assertEq(address(marketKey), address(autofarmERC4626));

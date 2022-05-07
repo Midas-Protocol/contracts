@@ -33,12 +33,12 @@ export const resetPriceOracle = async (erc20One, erc20Two) => {
   }
 };
 
-export const setUpPriceOraclePrices = async () => {
+export const setUpPriceOraclePrices = async (assets?: Array<string>) => {
   const chainId = parseInt(await getChainId());
   if (chainId === 31337 || chainId === 1337) {
     await setupLocalOraclePrices();
   } else if (chainId === 56) {
-    await setUpBscOraclePrices();
+    await setUpBscOraclePrices(assets);
   }
 };
 
@@ -47,23 +47,29 @@ const setupLocalOraclePrices = async () => {
   await run("oracle:set-price", { token: "TOUCH", price: "0.002673507105644885" });
 };
 
-const setUpBscOraclePrices = async () => {
+const setUpBscOraclePrices = async (assets?: Array<string>) => {
   const { deployer } = await ethers.getNamedSigners();
   const sdk = await getOrCreateFuse();
   const spo = await ethers.getContractAt("SimplePriceOracle", sdk.oracles.SimplePriceOracle.address, deployer);
   const mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, deployer);
-  let tx = await mpo.add([constants.AddressZero], [spo.address]);
+  const assetAddresses = assets ? assets : [constants.AddressZero];
+  const oracleAddresses = Array(assetAddresses.length).fill(spo.address);
+  let tx = await mpo.add(assetAddresses, oracleAddresses);
   await tx.wait();
   tx = await spo.setDirectPrice(constants.AddressZero, ethers.utils.parseEther("1"));
   await tx.wait();
 };
 
-export const getPositionRatio = async ({ name, namedUser, userAddress, cgId }) => {
-  return await run("get-position-ratio", { name, namedUser, userAddress, cgId });
+export const getPositionRatio = async ({ name, namedUser, userAddress }) => {
+  return await run("get-position-ratio", { name, namedUser, userAddress });
 };
 
 export const tradeNativeForAsset = async ({ token, amount, account }) => {
   await run("swap-wtoken-for-token", { token, amount, account });
+};
+
+export const tradeAssetForAsset = async ({ token1, token2, amount, account }) => {
+  await run("swap-token-for-token", { token1, token2, amount, account });
 };
 
 export const setUpLiquidation = async ({ poolName }) => {
@@ -184,7 +190,6 @@ export const liquidateAndVerify = async (
   poolName: string,
   poolAddress: string,
   liquidatedUserName: string,
-  coingeckoId: string,
   liquidator: FuseSafeLiquidator,
   liquidationConfigOverrides: ChainLiquidationConfig,
   liquidatorBalanceCalculator: (address: string) => Promise<BigNumber>
@@ -198,7 +203,6 @@ export const liquidateAndVerify = async (
   const ratioBefore = await getPositionRatio({
     name: poolName,
     userAddress: undefined,
-    cgId: coingeckoId,
     namedUser: liquidatedUserName,
   });
   console.log(`Ratio Before: ${ratioBefore}`);
@@ -221,7 +225,6 @@ export const liquidateAndVerify = async (
   const ratioAfter = await getPositionRatio({
     name: poolName,
     userAddress: undefined,
-    cgId: coingeckoId,
     namedUser: liquidatedUserName,
   });
   console.log(`Ratio After: ${ratioAfter}`);

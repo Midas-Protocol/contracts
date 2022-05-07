@@ -4,7 +4,6 @@ export default task("get-pool-data", "Get pools data")
   .addOptionalParam("name", "Name of the pool", undefined, types.string)
   .addOptionalParam("creator", "Named account that created the pool", undefined, types.string)
   .addOptionalParam("poolId", "Id of the pool", undefined, types.int)
-  .addOptionalParam("cgId", "Coingecko ID", undefined, types.string)
   .addOptionalParam("address", "Address of the pool", undefined, types.string)
   .setAction(async (taskArgs, hre) => {
     // @ts-ignore
@@ -41,8 +40,10 @@ export default task("get-pool-data", "Get pools data")
       console.log(pools);
       return;
     }
-    if (taskArgs.poolId) {
-      return await sdk.fetchFusePoolData(taskArgs.poolId.toString(), undefined, taskArgs.cgId);
+    if (taskArgs.poolId || taskArgs.poolId === 0) {
+      const pools = await sdk.fetchFusePoolData(taskArgs.poolId.toString(), undefined);
+      console.log(pools);
+      return;
     }
     if (!taskArgs.name && !taskArgs.creator) {
       const fpd = await hre.ethers.getContract("FusePoolLens", (await hre.ethers.getNamedSigner("deployer")).address);
@@ -63,7 +64,6 @@ task("get-position-ratio", "Get unhealthy po data")
     undefined,
     types.string
   )
-  .addOptionalParam("cgId", "Coingecko id for the native asset", "ethereum", types.string)
   .addOptionalParam("logData", "Verbose logging", false, types.boolean)
   .setAction(async (taskArgs, hre) => {
     // @ts-ignore
@@ -102,33 +102,33 @@ task("get-position-ratio", "Get unhealthy po data")
     }
 
     fusePoolData = taskArgs.name
-      ? await poolModule.getPoolByName(taskArgs.name, sdk, poolUser, taskArgs.cgId)
-      : await sdk.fetchFusePoolData(taskArgs.poolId.toString(), poolUser, taskArgs.cgId);
+      ? await poolModule.getPoolByName(taskArgs.name, sdk, poolUser)
+      : await sdk.fetchFusePoolData(taskArgs.poolId.toString(), poolUser);
 
     const maxBorrowR = fusePoolData.assets.map((a) => {
       const mult = parseFloat(hre.ethers.utils.formatUnits(a.collateralFactor, a.underlyingDecimals));
       if (taskArgs.logData) {
         console.log(
           a.underlyingSymbol,
-          "\n supplyBalanceUSD: ",
-          a.supplyBalanceUSD,
-          "\n borrowBalanceUSD: ",
-          a.borrowBalanceUSD,
-          "\n totalSupplyUSD: ",
-          a.totalSupplyUSD,
-          "\n totalBorrowUSD: ",
-          a.totalBorrowUSD,
+          "\n supplyBalanceNative: ",
+          a.supplyBalanceNative,
+          "\n borrowBalanceNative: ",
+          a.borrowBalanceNative,
+          "\n totalSupplyNative: ",
+          a.totalSupplyNative,
+          "\n totalBorrowNative: ",
+          a.totalBorrowNative,
           "\n Multiplier: ",
           mult,
           "\n Max Borrow Asset: ",
-          mult * a.supplyBalanceUSD
+          mult * a.supplyBalanceNative
         );
       }
 
-      return a.supplyBalanceUSD * parseFloat(hre.ethers.utils.formatUnits(a.collateralFactor, a.underlyingDecimals));
+      return a.supplyBalanceNative * parseFloat(hre.ethers.utils.formatUnits(a.collateralFactor, a.underlyingDecimals));
     });
     const maxBorrow = maxBorrowR.reduce((a, b) => a + b, 0);
-    const ratio = (fusePoolData.totalBorrowBalanceUSD / maxBorrow) * 100;
+    const ratio = (fusePoolData.totalBorrowBalanceNative / maxBorrow) * 100;
     console.log(`Ratio of total borrow / max borrow: ${ratio} %`);
     return ratio;
   });

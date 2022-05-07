@@ -1,6 +1,7 @@
 import { cERC20Conf } from "../../src";
-import { bscAssets } from "../../chainDeploy";
+import { Asset, bscAssets } from "../../chainDeploy";
 import { constants } from "ethers";
+import { getOrCreateFuse } from "./fuseSdk";
 
 export const getAssetsConf = async (
   comptroller,
@@ -28,7 +29,6 @@ export const getLocalAssetsConf = async (comptroller, fuseFeeDistributor, intere
     interestRateModel: interestRateModelAddress,
     name: "Ethereum",
     symbol: "ETH",
-    decimals: 18,
     admin: "true",
     collateralFactor: 75,
     reserveFactor: 20,
@@ -43,7 +43,6 @@ export const getLocalAssetsConf = async (comptroller, fuseFeeDistributor, intere
     interestRateModel: interestRateModelAddress,
     name: "TRIBE Token",
     symbol: "TRIBE",
-    decimals: 18,
     admin: "true",
     collateralFactor: 75,
     reserveFactor: 15,
@@ -57,7 +56,6 @@ export const getLocalAssetsConf = async (comptroller, fuseFeeDistributor, intere
     interestRateModel: interestRateModelAddress,
     name: "Midas TOUCH Token",
     symbol: "TOUCH",
-    decimals: 18,
     admin: "true",
     collateralFactor: 65,
     reserveFactor: 20,
@@ -77,7 +75,6 @@ export const getBscAssetsConf = async (comptroller, fuseFeeDistributor, interest
     interestRateModel: interestRateModelAddress,
     name: "Binance Coin",
     symbol: "BNB",
-    decimals: 18,
     admin: "true",
     collateralFactor: 75,
     reserveFactor: 20,
@@ -91,7 +88,6 @@ export const getBscAssetsConf = async (comptroller, fuseFeeDistributor, interest
     interestRateModel: interestRateModelAddress,
     name: btc.name,
     symbol: btc.symbol,
-    decimals: btc.decimals,
     admin: "true",
     collateralFactor: 75,
     reserveFactor: 15,
@@ -105,12 +101,63 @@ export const getBscAssetsConf = async (comptroller, fuseFeeDistributor, interest
     interestRateModel: interestRateModelAddress,
     name: busd.name,
     symbol: busd.symbol,
-    decimals: busd.decimals,
     admin: "true",
     collateralFactor: 75,
     reserveFactor: 15,
     adminFee: 0,
     bypassPriceFeedCheck: true,
   };
-  return [bnbConf, btcConf, busdConf];
+  const erc4626Assets = await getBscPluginAssetsConf(
+    comptroller,
+    fuseFeeDistributor,
+    interestRateModelAddress,
+    bscAssets
+  );
+  return [bnbConf, btcConf, busdConf, ...erc4626Assets];
+};
+
+export const getBscPluginAssetsConf = async (
+  comptroller,
+  fuseFeeDistributor,
+  interestRateModelAddress,
+  bscAssets: Asset[]
+) => {
+  const beth = bscAssets.find((b) => b.symbol === "ETH");
+  const bomb = bscAssets.find((b) => b.symbol === "BOMB");
+  const sdk = await getOrCreateFuse();
+
+  const alpacaBusdPlugin = sdk.chainPlugins[beth.underlying][0];
+  const bombPlugin = sdk.chainPlugins[bomb.underlying][0];
+
+  const bethConf: cERC20Conf = {
+    delegateContractName: "CErc20PluginDelegate",
+    underlying: beth.underlying,
+    comptroller,
+    fuseFeeDistributor,
+    interestRateModel: interestRateModelAddress,
+    name: `alpaca ${beth.name}`,
+    symbol: `m${beth.symbol}`,
+    admin: "true",
+    collateralFactor: 75,
+    reserveFactor: 15,
+    adminFee: 0,
+    bypassPriceFeedCheck: true,
+    plugin: alpacaBusdPlugin.strategyAddress,
+  };
+  const bombConf: cERC20Conf = {
+    delegateContractName: "CErc20PluginDelegate",
+    underlying: bomb.underlying,
+    comptroller,
+    fuseFeeDistributor,
+    interestRateModel: interestRateModelAddress,
+    name: bomb.name,
+    symbol: bomb.symbol,
+    admin: "true",
+    collateralFactor: 75,
+    reserveFactor: 15,
+    adminFee: 0,
+    bypassPriceFeedCheck: true,
+    plugin: bombPlugin.strategyAddress,
+  };
+  return [bethConf, bombConf];
 };

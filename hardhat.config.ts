@@ -19,11 +19,16 @@ import "./tasks/swap";
 import "./tasks/liquidation";
 import "./tasks/deployTouchToken";
 import "./tasks/deployTouchVesting";
+import "./tasks/createMarket";
+import "./tasks/createPool";
+import "./tasks/createStrategy";
 import "./tasks/fluxFeed";
 
 dotEnvConfig();
 
 const urlOverride = process.env.ETH_PROVIDER_URL;
+
+console.log("FORK_URL_BSC: ", process.env.FORK_URL_BSC);
 
 const mnemonic =
   process.env.SUGAR_DADDY ||
@@ -60,7 +65,10 @@ const config: HardhatUserConfig = {
   },
   defaultNetwork: "hardhat",
   namedAccounts: {
-    deployer: { default: 0 },
+    deployer: {
+      default: 0,
+      56: "0x304aE8f9300e09c8B33bb1a8AE1c14A6253a5F4D"
+    },
     alice: { default: 1 },
     bob: { default: 2 },
     rando: { default: 3 },
@@ -70,7 +78,7 @@ const config: HardhatUserConfig = {
       forking: process.env.FORK_URL_BSC
         ? {
             url: process.env.FORK_URL_BSC,
-            blockNumber: Number(process.env.FORK_BLOCK_NUMBER),
+            blockNumber: process.env.FORK_BLOCK_NUMBER ? Number(process.env.FORK_BLOCK_NUMBER) : undefined,
           }
         : undefined,
       saveDeployments: true,
@@ -92,7 +100,7 @@ const config: HardhatUserConfig = {
     rinkeby: {
       accounts: { mnemonic },
       chainId: 4,
-      url: urlOverride || process.env.RINKEBY_ETH_PROVIDER_URL || "http://localhost:8545",
+      url: urlOverride || process.env.RINKEBY_ETH_PROVIDER_URL || "https://rpc.ankr.com/eth_rinkeby",
     },
     kovan: {
       accounts: { mnemonic },
@@ -140,8 +148,6 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
       chainId: 1284,
       saveDeployments: true,
-      gasPrice: 1000000000,
-      gas: 8000000,
     },
   },
 };

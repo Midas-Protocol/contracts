@@ -9,6 +9,21 @@ export const getCommonDeployments = async (chainDeployment: ChainDeployment) => 
   const CErc20Delegate = await ethers.getContract("CErc20Delegate");
   const CErc20DelegateArtifact = await deployments.getArtifact("CErc20Delegate");
   chainDeployment.CErc20Delegate = { abi: CErc20DelegateArtifact.abi, address: CErc20Delegate.address };
+
+  const CErc20PluginDelegate = await ethers.getContract("CErc20PluginDelegate");
+  const CErc20PluginDelegateArtifact = await deployments.getArtifact("CErc20PluginDelegate");
+  chainDeployment.CErc20PluginDelegate = {
+    abi: CErc20PluginDelegateArtifact.abi,
+    address: CErc20PluginDelegate.address,
+  };
+
+  const CErc20PluginRewardsDelegate = await ethers.getContract("CErc20PluginRewardsDelegate");
+  const CErc20PluginRewardsArtifact = await deployments.getArtifact("CErc20PluginRewardsDelegate");
+  chainDeployment.CErc20PluginRewardsDelegate = {
+    abi: CErc20PluginRewardsArtifact.abi,
+    address: CErc20PluginRewardsDelegate.address,
+  };
+
   const CEtherDelegate = await ethers.getContract("CEtherDelegate");
   const CEtherDelegateArtifact = await deployments.getArtifact("CEtherDelegate");
   chainDeployment.CEtherDelegate = { abi: CEtherDelegateArtifact.abi, address: CEtherDelegate.address };
@@ -71,8 +86,8 @@ export const getCommonDeployments = async (chainDeployment: ChainDeployment) => 
     address: WhitePaperInterestRateModel.address,
   };
 
-  return chainDeployment
-}
+  return chainDeployment;
+};
 
 export const getLocalDeployments = async (): Promise<ChainDeployment> => {
   let chainDeployment: ChainDeployment = {};
@@ -83,9 +98,8 @@ export const getLocalDeployments = async (): Promise<ChainDeployment> => {
   const TRIBEToken = await ethers.getContract("TRIBEToken");
   const TRIBETokenArtifact = await deployments.getArtifact("TRIBEToken");
   chainDeployment.TRIBEToken = { abi: TRIBETokenArtifact.abi, address: TRIBEToken.address };
-  return await getCommonDeployments(chainDeployment)
+  return await getCommonDeployments(chainDeployment);
 };
-
 
 export const getBscForkDeployments = async (): Promise<ChainDeployment> => {
   let chainDeployment: ChainDeployment = {};
@@ -139,9 +153,28 @@ export const getBscForkDeployments = async (): Promise<ChainDeployment> => {
     abi: CurveLpTokenLiquidatorNoRegistryArtifact.abi,
     address: CurveLpTokenLiquidatorNoRegistry.address,
   };
-  return await getCommonDeployments(chainDeployment)
+  return await getCommonDeployments(chainDeployment);
 };
 
+const getPluginConfig = async (fuse: Fuse): Promise<Fuse> => {
+  fuse.chainPlugins = {
+    "0x522348779DCb2911539e76A1042aA922F9C47Ee3": [
+      {
+        strategyName: "BOMB Autocompounding (beefy)",
+        strategyAddress: (await ethers.getContract("BombERC4626_BOMBxBOMB")).address,
+        dynamicFlywheel: null,
+      },
+    ],
+    "0x2170Ed0880ac9A755fd29B2688956BD959F933F8": [
+      {
+        strategyName: "Alpaca Finance ibETH Vault",
+        strategyAddress: (await ethers.getContract("AlpacaERC4626_ETH")).address,
+        dynamicFlywheel: null,
+      },
+    ],
+  };
+  return fuse;
+};
 
 export const getOrCreateFuse = async (): Promise<Fuse> => {
   if (!fuseSdk) {
@@ -150,9 +183,12 @@ export const getOrCreateFuse = async (): Promise<Fuse> => {
     if (chainId === 1337) {
       chainDeployment = await getLocalDeployments();
     } else if (process.env.FORK_CHAIN_ID!) {
-      chainDeployment = await getBscForkDeployments()
+      chainDeployment = await getBscForkDeployments();
     }
     fuseSdk = new Fuse(ethers.provider, chainId, chainDeployment);
+    if (process.env.FORK_CHAIN_ID!) {
+      fuseSdk = await getPluginConfig(fuseSdk);
+    }
   }
   return fuseSdk;
 };

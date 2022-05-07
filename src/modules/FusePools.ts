@@ -1,9 +1,9 @@
-import { BigNumber, BigNumberish, constants, Contract, utils } from "ethers";
+import { BigNumber, BigNumberish, constants, Contract, ethers, utils } from "ethers";
 import { FusePoolLens } from "../../typechain/FusePoolLens";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FuseBaseConstructor } from "../Fuse/types";
 import { filterOnlyObjectProperties, filterPoolName } from "../Fuse/utils";
-import { FusePoolData, USDPricedFuseAsset } from "../Fuse/types";
+import { FusePoolData, NativePricedFuseAsset } from "../Fuse/types";
 
 export type LensPoolsWithData = [
   ids: BigNumberish[],
@@ -14,7 +14,7 @@ export type LensPoolsWithData = [
 
 export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class FusePools extends Base {
-    async fetchFusePoolData(poolId: string, address?: string, coingeckoId?: string): Promise<FusePoolData> {
+    async fetchFusePoolData(poolId: string, address?: string): Promise<FusePoolData> {
       const {
         comptroller,
         name: _unfiliteredName,
@@ -24,29 +24,23 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
       } = await this.contracts.FusePoolDirectory.pools(Number(poolId));
 
       const rawData = await this.contracts.FusePoolLens.callStatic.getPoolSummary(comptroller);
-
       const underlyingTokens = rawData[2];
       const underlyingSymbols = rawData[3];
       const whitelistedAdmin = rawData[4];
 
       const name = filterPoolName(_unfiliteredName);
 
-      const assets: USDPricedFuseAsset[] = (
+      const assets: NativePricedFuseAsset[] = (
         await this.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(comptroller, {
           from: address,
         })
       ).map(filterOnlyObjectProperties);
 
-      let totalLiquidityUSD = 0;
-      let totalSupplyBalanceUSD = 0;
-      let totalBorrowBalanceUSD = 0;
-      let totalSuppliedUSD = 0;
-      let totalBorrowedUSD = 0;
-
-      const price: number = utils.formatEther(
-        // prefer rari because it has caching
-        await this.getUsdPriceBN(coingeckoId, true)
-      ) as any;
+      let totalLiquidityNative = 0;
+      let totalSupplyBalanceNative = 0;
+      let totalBorrowBalanceNative = 0;
+      let totalSuppliedNative = 0;
+      let totalBorrowedNative = 0;
 
       const promises: Promise<boolean>[] = [];
 
@@ -62,7 +56,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         promises.push(
           comptrollerContract.callStatic
             .borrowGuardianPaused(asset.cToken)
-            .then((isPaused: boolean) => (asset.isPaused = isPaused))
+            .then((isPaused: boolean) => (asset.isBorrowPaused = isPaused))
         );
         promises.push(
           comptrollerContract.callStatic
@@ -70,42 +64,42 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
             .then((isPaused: boolean) => (asset.isSupplyPaused = isPaused))
         );
 
-        asset.supplyBalanceUSD =
-          Number(utils.formatUnits(asset.supplyBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+        asset.supplyBalanceNative =
+          Number(utils.formatUnits(asset.supplyBalance)) * Number(utils.formatUnits(asset.underlyingPrice));
 
-        asset.borrowBalanceUSD =
-          Number(utils.formatUnits(asset.borrowBalance)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+        asset.borrowBalanceNative =
+          Number(utils.formatUnits(asset.borrowBalance)) * Number(utils.formatUnits(asset.underlyingPrice));
 
-        totalSupplyBalanceUSD += asset.supplyBalanceUSD;
-        totalBorrowBalanceUSD += asset.borrowBalanceUSD;
+        totalSupplyBalanceNative += asset.supplyBalanceNative;
+        totalBorrowBalanceNative += asset.borrowBalanceNative;
 
-        asset.totalSupplyUSD =
-          Number(utils.formatUnits(asset.totalSupply)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
-        asset.totalBorrowUSD =
-          Number(utils.formatUnits(asset.totalBorrow)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+        asset.totalSupplyNative =
+          Number(utils.formatUnits(asset.totalSupply)) * Number(utils.formatUnits(asset.underlyingPrice));
+        asset.totalBorrowNative =
+          Number(utils.formatUnits(asset.totalBorrow)) * Number(utils.formatUnits(asset.underlyingPrice));
 
-        totalSuppliedUSD += asset.totalSupplyUSD;
-        totalBorrowedUSD += asset.totalBorrowUSD;
+        totalSuppliedNative += asset.totalSupplyNative;
+        totalBorrowedNative += asset.totalBorrowNative;
 
-        asset.liquidityUSD =
-          Number(utils.formatUnits(asset.liquidity)) * Number(utils.formatUnits(asset.underlyingPrice)) * price;
+        asset.liquidityNative =
+          Number(utils.formatUnits(asset.liquidity)) * Number(utils.formatUnits(asset.underlyingPrice));
 
-        totalLiquidityUSD += asset.liquidityUSD;
+        totalLiquidityNative += asset.liquidityNative;
       }
 
       await Promise.all(promises);
 
       return {
         id: Number(poolId),
-        assets: assets.sort((a, b) => (b.liquidityUSD > a.liquidityUSD ? 1 : -1)),
+        assets: assets.sort((a, b) => (b.liquidityNative > a.liquidityNative ? 1 : -1)),
         creator,
         comptroller,
         name,
-        totalLiquidityUSD,
-        totalSuppliedUSD,
-        totalBorrowedUSD,
-        totalSupplyBalanceUSD,
-        totalBorrowBalanceUSD,
+        totalLiquidityNative,
+        totalSuppliedNative,
+        totalBorrowedNative,
+        totalSupplyBalanceNative,
+        totalBorrowBalanceNative,
         blockPosted,
         timestampPosted,
         underlyingTokens,
@@ -116,11 +110,9 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
 
     async fetchPoolsManual({
       verification,
-      coingeckoId,
       options,
     }: {
       verification: boolean;
-      coingeckoId: string;
       options: { from: string };
     }): Promise<(FusePoolData | null)[] | undefined> {
       const fusePoolsDirectoryResult = await this.contracts.FusePoolDirectory.callStatic.getPublicPoolsByVerification(
@@ -137,7 +129,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
 
       const poolData = await Promise.all(
         poolIds.map((_id, i) => {
-          return this.fetchFusePoolData(_id, options.from, coingeckoId);
+          return this.fetchFusePoolData(_id, options.from);
         })
       );
 
@@ -146,11 +138,9 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
 
     async fetchPools({
       filter,
-      coingeckoId,
       options,
     }: {
       filter: string | null;
-      coingeckoId: string;
       options: { from: string };
     }): Promise<FusePoolData[]> {
       const isCreatedPools = filter === "created-pools";
@@ -175,7 +165,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         responses.map(async (poolData) => {
           return await Promise.all(
             poolData[0].map((_id) => {
-              return this.fetchFusePoolData(_id.toString(), options.from, coingeckoId);
+              return this.fetchFusePoolData(_id.toString(), options.from);
             })
           );
         })

@@ -1,4 +1,4 @@
-import { Artifacts, ChainDeployment } from "./Fuse/types";
+import { Artifacts, ChainDeployment, ChainPlugins } from "./Fuse/types";
 import { BigNumber, ethers } from "ethers";
 
 export enum SupportedChains {
@@ -143,4 +143,143 @@ export const irmConfig = (deployments: ChainDeployment, artifacts: Artifacts) =>
       address: deployments.WhitePaperInterestRateModel.address,
     },
   };
+};
+
+export const chainPluginConfig: ChainPlugins = {
+  [SupportedChains.ganache]: {
+    // TRIBE
+    "0x5d7075e5A69A4d55BfA86F8d6ae49D7893D968f9": [
+      {
+        strategyName: "Mock Tribe Strategy With TOUCH Rewards",
+        strategyAddress: "0xdC206B5684A85ddEb4e2e1Ca48A1fCb5C3d31Ef3",
+        dynamicFlywheel: {
+          address: "0x681cEEE3d6781394b2ECD7a4b9d5214f537aFeEb",
+          rewardToken: "0x54572129Fd040C19F9ab57A1a152e95C1fEC0dF0", // TOUCH
+        },
+      },
+    ],
+    // TOUCH
+    "0x54572129Fd040C19F9ab57A1a152e95C1fEC0dF0": [
+      {
+        strategyName: "Mock Touch Strategy",
+        strategyAddress: "0x56385f347e18452C00801c9E5029E7658B017EB5",
+        dynamicFlywheel: null,
+      },
+    ],
+  },
+  [SupportedChains.chapel]: {},
+  [SupportedChains.bsc]: {
+    // BOMB-BTC LP
+    "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6": [
+      {
+        strategyName: "BOMB-BTC LP Autocompounding (beefy)",
+        strategyAddress: "0x9015315d6757fd1c8735F7d3f0E7fE3E76934c40",
+        dynamicFlywheel: null,
+      },
+    ],
+    // BOMB
+    "0x522348779DCb2911539e76A1042aA922F9C47Ee3": [
+      {
+        strategyName: "BOMB Autocompounding (beefy)",
+        strategyAddress: "0x9baB520eBB7954D0030E9cF03A9345554994a786",
+        dynamicFlywheel: null,
+      },
+    ],
+    // 3EPS
+    "0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452": [
+      {
+        strategyName: "3EPS LP Staker with EPX Rewards",
+        strategyAddress: "",
+        dynamicFlywheel: {
+          address: "0x968086e25851D465127Bb536516c2162Cd79B360",
+          rewardToken: "0xaf41054c1487b0e5e2b9250c0332ecbce6ce9d71",
+        },
+      },
+    ],
+    // dai3EPS
+    "0x0BC3a8239B0a63E945Ea1bd6722Ba747b9557e56": [
+      {
+        strategyName: "dai3EPS LP Staker with EPX Rewards",
+        strategyAddress: "",
+        dynamicFlywheel: {
+          address: "0x968086e25851D465127Bb536516c2162Cd79B360",
+          rewardToken: "0xaf41054c1487b0e5e2b9250c0332ecbce6ce9d71",
+        },
+      },
+    ],
+    // ust3EPS
+    "0x151F1611b2E304DEd36661f65506f9D7D172beba": [
+      {
+        strategyName: "ust3EPS LP Staker with EPX Rewards",
+        strategyAddress: "",
+        dynamicFlywheel: {
+          address: "0x968086e25851D465127Bb536516c2162Cd79B360",
+          rewardToken: "0xaf41054c1487b0e5e2b9250c0332ecbce6ce9d71",
+        },
+      },
+    ],
+    // WBNB
+    "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c": [
+      {
+        strategyName: "Alpaca Finance ibWBNB Vault",
+        strategyAddress: "0x0b434c33905C2B80bA978B90bFD874dFBa5260b3",
+        dynamicFlywheel: null,
+      },
+    ],
+    // ETH
+    "0x2170Ed0880ac9A755fd29B2688956BD959F933F8": [
+      {
+        strategyName: "Alpaca Finance ibETH Vault",
+        strategyAddress: "0xCBE401B8874A1C30163740f5f45156088Eb21481",
+        dynamicFlywheel: null,
+      },
+    ],
+    // BUSD
+    "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56": [
+      {
+        strategyName: "Alpaca Finance ibBUSD Vault",
+        strategyAddress: "0x9012ef7414D5c42873D94506b91C1677BF4DfF38",
+        dynamicFlywheel: null,
+      },
+    ],
+    // USDT
+    "0x55d398326f99059ff775485246999027b3197955": [
+      {
+        strategyName: "Alpaca Finance ibUSDT Vault",
+        strategyAddress: "0xF0BbDdd4EF2Ac465f949B45f0c7a8AFFCD09C8AC",
+        dynamicFlywheel: null,
+      },
+    ],
+    // USDC
+    "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d": [
+      {
+        strategyName: "Alpaca Finance ibUSDC Vault",
+        strategyAddress: "0x40bDBA20fc031042d0b4cF804caDe6109DBEb33C",
+        dynamicFlywheel: null,
+      },
+    ],
+    // TUSD
+    "0x14016e85a25aeb13065688cafb43044c2ef86784": [
+      {
+        strategyName: "Alpaca Finance ibTUSD Vault",
+        strategyAddress: "",
+        dynamicFlywheel: null,
+      },
+    ],
+    // BTCB
+    "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c": [
+      {
+        strategyName: "Alpaca Finance ibBTCB Vault",
+        strategyAddress: "0xE2f3563b4E7d19bcC3B1F63e61D4D29f6dD7e593",
+        dynamicFlywheel: null,
+      },
+    ],
+  },
+
+  [SupportedChains.evmos_testnet]: {},
+  [SupportedChains.evmos]: {},
+  [SupportedChains.moonbeam]: {},
+  [SupportedChains.moonbase_alpha]: {},
+  [SupportedChains.aurora]: {},
+  [SupportedChains.harmony]: {},
 };
