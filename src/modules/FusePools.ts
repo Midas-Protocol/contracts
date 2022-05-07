@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish, constants, Contract, utils } from "ethers";
+import { BigNumber, BigNumberish, constants, Contract, ethers, utils } from "ethers";
 import { FusePoolLens } from "../../typechain/FusePoolLens";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FuseBaseConstructor } from "../Fuse/types";
@@ -24,7 +24,6 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
       } = await this.contracts.FusePoolDirectory.pools(Number(poolId));
 
       const rawData = await this.contracts.FusePoolLens.callStatic.getPoolSummary(comptroller);
-
       const underlyingTokens = rawData[2];
       const underlyingSymbols = rawData[3];
       const whitelistedAdmin = rawData[4];
