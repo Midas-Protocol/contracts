@@ -159,7 +159,7 @@ export const chainPluginConfig: ChainPlugins = {
       },
     ],
     // TOUCH
-    "0x54572129Fd040C19F9ab57A1a152e95C1fEC0dF0": [
+    "0xf9a089C918ad9c484201E7d328C0d29019997117": [
       {
         strategyName: "Mock Touch Strategy",
         strategyAddress: "0x56385f347e18452C00801c9E5029E7658B017EB5",
