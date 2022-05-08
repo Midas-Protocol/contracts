@@ -44,10 +44,7 @@ contract AlpacaERC4626 is ERC4626 {
      @param _asset The ERC20 compliant token the Vault should accept.
      @param _alpacaVault The Alpaca Vault contract.
     */
-  constructor(
-    ERC20 _asset,
-    IAlpacaVault _alpacaVault
-  )
+  constructor(ERC20 _asset, IAlpacaVault _alpacaVault)
     ERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
