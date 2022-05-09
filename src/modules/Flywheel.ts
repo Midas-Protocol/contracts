@@ -120,7 +120,7 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
       const pool = await this.getComptrollerInstance(poolAddress, options);
       const marketsOfPool = await pool.getAllMarkets();
 
-      const rewardDistributorsOfPool = await pool.getRewardsDistributors();
+      const rewardDistributorsOfPool = await pool.callStatic.getRewardsDistributors();
       const flywheels = rewardDistributorsOfPool.map((address) => this.getFlywheelCoreInstance(address, options));
       const flywheelWithRewards: FlywheelClaimableRewards[] = [];
       for (const flywheel of flywheels) {
