@@ -1,7 +1,6 @@
 import { providers } from "ethers";
-import { ChainlinkPriceOracleV2 } from "../../typechain/ChainlinkPriceOracleV2";
 import { Asset, ChainlinkDeployFnParams, ChainlinkFeedBaseCurrency } from "./types";
-import {AddressesProvider} from "../../typechain";
+import { AddressesProvider, ChainlinkPriceOracleV2 } from "../../typechain";
 
 export const deployChainlinkOracle = async ({
   ethers,

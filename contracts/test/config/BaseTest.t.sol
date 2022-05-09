@@ -24,11 +24,12 @@ abstract contract BaseTest is DSTest {
   uint256 constant BSC_CHAPEL = 97;
 
   // TODO instantiate from the deployed delegator/storage address
+  // when there is an on-chain AddressesProvider instance to use
   AddressesProvider ap = new AddressesProvider();
 
   constructor() {
-//    ap.initialize(address(this));
-    // TODO remove this code when there is an on-chain AddressesProvider instance to use
+    // TODO remove the config code
+    // when there is an on-chain AddressesProvider instance to use
     configureAddressesProvider();
   }
 
