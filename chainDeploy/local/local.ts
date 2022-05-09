@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import { MasterPriceOracle } from "../../typechain/MasterPriceOracle";
 import { deployERC4626Plugin, deployFlywheelWithDynamicRewards } from "../helpers/erc4626Plugins";
 import { ChainDeployFnParams } from "../helpers/types";
-import {AddressesProvider} from "../../typechain";
+import { AddressesProvider } from "../../typechain/AddressesProvider";
 
 export const deployConfig: ChainDeployConfig = {
   wtoken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",

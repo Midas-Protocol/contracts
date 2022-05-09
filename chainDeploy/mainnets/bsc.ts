@@ -4,7 +4,7 @@ import { Asset, ChainDeployFnParams, ChainlinkAsset, CurvePoolConfig } from "../
 import { deployCurveLpOracle } from "../oracles/curveLp";
 import { deployUniswapLpOracle } from "../oracles/uniswapLp";
 import { deployERC4626Plugin, deployFlywheelWithDynamicRewards } from "../helpers/erc4626Plugins";
-import { AddressesProvider } from "../../typechain";
+import { AddressesProvider } from "../../typechain/AddressesProvider";
 
 export const assets: Asset[] = [
   {
