@@ -1,4 +1,4 @@
-import { parseEther } from "ethers/lib/utils";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { task, types } from "hardhat/config";
 
 // npx hardhat pool:create --name Test --creator deployer --price-oracle 0x2D293ef3309557cD645a0D0f480ab2f3C4411846 --close-factor 50 --liquidation-incentive 8 --enforce-whitelist false --network localhost
@@ -31,7 +31,7 @@ task("pool:create", "Create pool if does not exist")
       [poolAddress, , ,] = await sdk.deployPool(
         taskArgs.name,
         taskArgs.enforceWhitelist === "true",
-        parseEther((Number(taskArgs.closeFactor) / 100).toString()),
+        parseUnits(taskArgs.closeFactor, 16),
         parseEther((Number(taskArgs.liquidationIncentive) / 100 + 1).toString()),
         taskArgs.priceOracle,
         {},
