@@ -290,24 +290,6 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   });
 
   ////
-  //// IRM MODELS
-  await deployIRMs({ run, ethers, getNamedAccounts, deployments, deployConfig: chainDeployParams });
-  ////
-
-  //// Liquidator
-  await deployFuseSafeLiquidator({ run, ethers, getNamedAccounts, deployments, deployConfig: chainDeployParams });
-  ///
-
-  ////
-  //// CHAIN SPECIFIC DEPLOYMENT
-  console.log("Running deployment for chain: ", chainId);
-  if (deployFunc) {
-    await deployFunc({ run, ethers, getNamedAccounts, deployments });
-  }
-  ////
-
-
-  ////
   //// HELPERS - ADDRESSES PROVIDER
   const ap = await deployments.deploy("AddressesProvider", {
     from: deployer,
@@ -325,6 +307,24 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     waitConfirmations: 1
   });
 
+  ////
+  //// IRM MODELS
+  await deployIRMs({ run, ethers, getNamedAccounts, deployments, deployConfig: chainDeployParams });
+  ////
+
+  //// Liquidator
+  await deployFuseSafeLiquidator({ run, ethers, getNamedAccounts, deployments, deployConfig: chainDeployParams });
+  ///
+
+  ////
+  //// CHAIN SPECIFIC DEPLOYMENT
+  console.log("Running deployment for chain: ", chainId);
+  if (deployFunc) {
+    await deployFunc({ run, ethers, getNamedAccounts, deployments });
+  }
+  ////
+
+
   /// EXTERNAL ADDRESSES
   const addressesProvider = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
   tx = await addressesProvider.setAddress("IUniswapV2Factory", chainDeployParams.uniswap.uniswapV2FactoryAddress);
@@ -334,14 +334,6 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   await tx.wait();
 
   /// SYSTEM ADDRESSES
-  const uniTwapOracleFactory = await ethers.getContract("UniswapTwapPriceOracleV2Factory", deployer);
-  tx = await addressesProvider.setAddress("UniswapTwapPriceOracleV2Factory", uniTwapOracleFactory.address);
-  await tx.wait();
-
-  const chainlinkPriceOracleV2 = await ethers.getContract("ChainlinkPriceOracleV2", deployer);
-  tx = await addressesProvider.setAddress("ChainlinkPriceOracleV2", chainlinkPriceOracleV2.address);
-  await tx.wait();
-
   tx = await addressesProvider.setAddress("MasterPriceOracle", masterPO.address);
   await tx.wait();
 
