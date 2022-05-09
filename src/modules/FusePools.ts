@@ -4,6 +4,9 @@ import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 import { FuseBaseConstructor } from "../Fuse/types";
 import { filterOnlyObjectProperties, filterPoolName } from "../Fuse/utils";
 import { FusePoolData, NativePricedFuseAsset } from "../Fuse/types";
+import { CErc20Delegate } from "../../typechain/CErc20Delegate";
+import { CErc20PluginRewardsDelegate } from "../../typechain/CErc20PluginRewardsDelegate";
+import { CErc20PluginDelegate } from "../../typechain/CErc20PluginDelegate";
 
 export type LensPoolsWithData = [
   ids: BigNumberish[],
@@ -42,7 +45,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
       let totalSuppliedNative = 0;
       let totalBorrowedNative = 0;
 
-      const promises: Promise<boolean>[] = [];
+      const promises: Promise<any>[] = [];
 
       const comptrollerContract = new Contract(
         comptroller,
@@ -62,6 +65,20 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
           comptrollerContract.callStatic
             .mintGuardianPaused(asset.cToken)
             .then((isPaused: boolean) => (asset.isSupplyPaused = isPaused))
+        );
+
+        promises.push(
+          this.getAssetInstance<CErc20PluginDelegate>(asset.cToken, "CErc20PluginDelegate")
+            .callStatic.plugin()
+            .then((plugin) => (asset.plugin = plugin))
+            .catch(() =>
+              this.getAssetInstance<CErc20PluginRewardsDelegate>(
+                asset.cToken,
+                "CErc20PluginRewardsDelegate"
+              ).callStatic.plugin()
+            )
+            .then((plugin) => (asset.plugin = plugin))
+            .catch(() => {})
         );
 
         asset.supplyBalanceNative =
@@ -176,5 +193,18 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
 
       return [...filteredPools, ...whitelistedPools];
     }
+    getAssetInstance = <T extends CErc20Delegate = CErc20Delegate>(
+      address: string,
+      implementation: "CErc20Delegate" | "CErc20PluginDelegate" | "CErc20PluginRewardsDelegate" = "CErc20Delegate"
+    ): T => {
+      switch (implementation) {
+        case "CErc20PluginDelegate":
+          return new Contract(address, this.chainDeployment[implementation].abi, this.provider) as T;
+        case "CErc20PluginRewardsDelegate":
+          return new Contract(address, this.chainDeployment[implementation].abi, this.provider) as T;
+        default:
+          return new Contract(address, this.chainDeployment[implementation].abi, this.provider) as T;
+      }
+    };
   };
 }

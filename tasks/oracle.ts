@@ -26,12 +26,12 @@ task("oracle:get-price", "Get price of token")
     const oracleModule = await import("../test/utils/oracle");
     const [tokenAddress, oracle] = await oracleModule.setUpOracleWithToken(_token, _address, ethers, getNamedAccounts);
     const tokenPriceMPO = await oracle.price(tokenAddress);
-    console.log('tokenPriceMPO: ', tokenPriceMPO.toString());
+    console.log("tokenPriceMPO: ", tokenPriceMPO.toString());
     console.log(`Price ${_token ? _token : _address}: ${ethers.utils.formatEther(tokenPriceMPO)}`);
     return tokenPriceMPO;
   });
 
-task("oracle:add-tokens", "Initalize MasterPriceOracle with underlying oracle for assets")
+task("oracle:add-tokens", "Initialize MasterPriceOracle with underlying oracle for assets")
   .addOptionalParam("underlyings", "Token for which to set the price", undefined, types.string)
   .addOptionalParam("oracles", "Token address for which to set the price", undefined, types.string)
   .setAction(async ({ underlyings: _underlyings, oracles: _oracles }, { ethers }) => {
