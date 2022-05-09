@@ -493,7 +493,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   /// Addresses Provider - set bUSD
   const addressesProvider = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
-  let tx = await addressesProvider.setAddress("bUSD", "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56");
+  let tx = await addressesProvider.setAddress("bUSD", assets.find((a) => a.symbol === "BUSD")!.underlying);
   await tx.wait();
   ////
 };
