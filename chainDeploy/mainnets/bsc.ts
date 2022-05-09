@@ -434,15 +434,6 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   await deployCurveLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig, curvePools });
 
-  const simplePO = await deployments.deploy("SimplePriceOracle", {
-    from: deployer,
-    args: [],
-    log: true,
-  });
-  if (simplePO.transactionHash) await ethers.provider.waitForTransaction(simplePO.transactionHash);
-  console.log("SimplePriceOracle: ", simplePO.address);
-  ////
-
   const uniswapLpTokenLiquidator = await deployments.deploy("UniswapLpTokenLiquidator", {
     from: deployer,
     args: [],
