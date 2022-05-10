@@ -1,4 +1,4 @@
-import { cERC20Conf } from "../../src";
+import { cERC20Conf, DelegateContractName } from "../../src";
 import { Asset, bscAssets } from "../../chainDeploy";
 import { constants } from "ethers";
 import { getOrCreateFuse } from "./fuseSdk";
@@ -130,7 +130,7 @@ export const getBscPluginAssetsConf = async (
   const bombPlugin = sdk.chainPlugins[bomb.underlying][0];
 
   const bethConf: cERC20Conf = {
-    delegateContractName: "CErc20PluginDelegate",
+    delegateContractName: DelegateContractName.CErc20PluginDelegate,
     underlying: beth.underlying,
     comptroller,
     fuseFeeDistributor,
@@ -145,7 +145,7 @@ export const getBscPluginAssetsConf = async (
     plugin: alpacaBusdPlugin.strategyAddress,
   };
   const bombConf: cERC20Conf = {
-    delegateContractName: "CErc20PluginDelegate",
+    delegateContractName: DelegateContractName.CErc20PluginDelegate,
     underlying: bomb.underlying,
     comptroller,
     fuseFeeDistributor,
