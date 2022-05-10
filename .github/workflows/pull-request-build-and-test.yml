@@ -28,11 +28,6 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-
       - name: Run forge tests
         run: npm run test:forge
 
@@ -55,11 +50,6 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-
       - name: Run forge tests on BSC
         run: npm run test:forge:bsc
 
@@ -81,11 +71,6 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-
      - name: Run forge tests on Evmos Testnet
         run: npm run test:forge:evmostestnet
 
@@ -106,11 +91,6 @@ jobs:
 
       - name: Install Forge dependencies
         run: forge install
-
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
 
       - name: Run forge tests on Moonbeam
         run: npm run test:forge:moonbeam
