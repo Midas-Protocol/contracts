@@ -9,7 +9,7 @@ import "flywheel-v2/token/ERC20Gauges.sol";
 import "../utils/TOUCHToken.sol";
 import "../external/compound/ICToken.sol";
 
-// TODO integrate with FlywheelGaugeRewards
+// TODO integrate with FlywheelGaugeRewards - deploy FlywheelGaugeRewards and provide VeMDSToken as param
 // TODO research ERC20VotesUpgradeable
 contract VeMDSToken is ERC20Gauges {
   address public stakingController;
@@ -46,8 +46,7 @@ contract VeMDSToken is ERC20Gauges {
   }
 
   function transfer(address, uint256) public virtual override returns (bool) {
-    // TODO TransferNotSupported
-    revert("Transfer not supported");
+    revert TransferNotSupported();
   }
 
   function transferFrom(
@@ -55,7 +54,6 @@ contract VeMDSToken is ERC20Gauges {
     address,
     uint256
   ) public virtual override returns (bool) {
-    // TODO TransferNotSupported
-    revert("Transfer not supported");
+    revert TransferNotSupported();
   }
 }

@@ -14,20 +14,16 @@ contract Flywheel3070Booster is IFlywheelBooster {
         // TODO accrue interest first
         ICToken asCToken = ICToken(address(strategy));
 
-        boostedBalance += 3 * asCToken.balanceOf(user);
+        // 30% of the rewards are for supplying
+        boostedBalance = 3 * asCToken.balanceOf(user);
+
+        // 70% of the rewards are for borrowing
         if (asCToken.totalBorrows() > 0) {
             boostedBalance +=
-            (
-                7 * asCToken.borrowBalanceStored(user) * asCToken.totalSupply()
-            ) / asCToken.totalBorrows();
+                (
+                    7 * asCToken.borrowBalanceStored(user) * asCToken.totalSupply()
+                ) / asCToken.totalBorrows();
         }
         boostedBalance /= 10;
-//        return (
-//                3 * asCToken.balanceOf(user) * asCToken.totalBorrows()
-//                + 7 * asCToken.borrowBalanceStored(user) * asCToken.totalSupply()
-//            ) / (10 * asCToken.totalBorrows());
-
-//        (3 * asCToken.balanceOf(user) + (7 * asCToken.borrowBalanceCurrent(user) * asCToken.totalSupply()) / asCToken.totalBorrowsCurrent()) / 10;
-
     }
 }
