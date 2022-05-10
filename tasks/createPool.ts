@@ -28,7 +28,7 @@ task("pool:create", "Create pool if does not exist")
     if (await poolModule.getPoolByName(taskArgs.name, sdk)) {
       throw "Pool already exists";
     } else {
-      [poolAddress, , ,] = await sdk.deployPool(
+      [poolAddress] = await sdk.deployPool(
         taskArgs.name,
         taskArgs.enforceWhitelist === "true",
         parseUnits(taskArgs.closeFactor, 16),
