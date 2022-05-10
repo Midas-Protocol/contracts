@@ -4,6 +4,7 @@ import { Asset, ChainDeployFnParams, ChainlinkAsset, CurvePoolConfig } from "../
 import { deployCurveLpOracle } from "../oracles/curveLp";
 import { deployUniswapLpOracle } from "../oracles/uniswapLp";
 import { deployERC4626Plugin, deployFlywheelWithDynamicRewards } from "../helpers/erc4626Plugins";
+import { AddressesProvider } from "../../typechain/AddressesProvider";
 
 export const assets: Asset[] = [
   {
@@ -464,6 +465,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   console.log("XBombLiquidator: ", xbombLiquidator.address);
 
   /// jBRL->BUSD
+  // TODO in the addresses provider?
   let synthereumLiquidityPoolAddress = "0x0fD8170Dc284CD558325029f6AEc1538c7d99f49";
   let expirationTime = 40 * 60; // period in which the liquidation tx is valid to be included in a block, in seconds
   const jarvisSynthereumLiquidator = await deployments.deploy("JarvisSynthereumLiquidator", {
@@ -498,4 +500,10 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   });
   console.log("deployed dynamicFlywheels: ", dynamicFlywheels);
   await deployERC4626Plugin({ ethers, getNamedAccounts, deployments, run, deployConfig, dynamicFlywheels });
+
+  /// Addresses Provider - set bUSD
+  const addressesProvider = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
+  let tx = await addressesProvider.setAddress("bUSD", assets.find((a) => a.symbol === "BUSD")!.underlying);
+  await tx.wait();
+  ////
 };

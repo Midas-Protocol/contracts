@@ -12,7 +12,7 @@ const simulateDeploy: DeployFunction = async (hre): Promise<void> => {
   }
   const { config: chainDeployParams }: { config: ChainDeployConfig } =
       chainDeployConfig[chainId];
-  const fundingValue = hre.ethers.utils.parseEther("10");
+  const fundingValue = hre.ethers.utils.parseEther("100");
   let whale = chainDeployParams.wtoken;
   const balanceOfWToken = await ethers.provider.getBalance(whale);
   if (balanceOfWToken < fundingValue) {
