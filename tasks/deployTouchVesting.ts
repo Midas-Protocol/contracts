@@ -1,5 +1,4 @@
-import { task, types } from "hardhat/config";
-import { providers } from "ethers";
+import { task } from "hardhat/config";
 import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
 import {deployments} from "hardhat";
 
@@ -8,7 +7,7 @@ export default task("deploy-touch-vesting", "Deploy a vesting contract for the T
     .addParam("durationSeconds", "The total duration of the vesting, the cliff included, in seconds")
     .addParam("cliffSeconds", "The total duration of the cliff, in seconds")
     .addParam("clawbackAdminAddress", "The address of the admin that is able to revoke the vesting")
-    .addOptionalParam("startTime", "The start time of the vesting, in seconds since 1970")
+    .addOptionalParam("startTime", "The start time of the vesting, in seconds since 1970", "0")
     .setAction(async ({
                           beneficiaryAddress: _beneficiaryAddress,
                           durationSeconds: _durationSeconds,
@@ -30,7 +29,7 @@ export default task("deploy-touch-vesting", "Deploy a vesting contract for the T
         const touchToken = await ethers.getContract("TOUCHToken", alice);
         console.log("TOUCHToken: ", touchToken.address);
 
-        let deployedTimelock = await deployments.deterministic("LinearTokenTimelock", {
+        let deployedTimelock = await deployments.deploy("LinearTokenTimelock", {
             from: deployer,
             args: [_beneficiaryAddress, _durationSeconds, _cliffSeconds, touchToken.address, _clawbackAdminAddress, _startTime],
             log: true,

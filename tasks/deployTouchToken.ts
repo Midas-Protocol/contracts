@@ -1,7 +1,6 @@
 import { task, types } from "hardhat/config";
 import { providers, constants } from "ethers";
 import {ChainDeployConfig, chainDeployConfig} from "../chainDeploy";
-import {SALT} from "../deploy/deploy";
 
 export default task("deploy-touch-token", "Deploy the Midas TOUCH Token")
     .addOptionalParam("chainTouchSupply", "The TOUCH tokens supply in circulation for this chain", "100000000", types.string)
@@ -20,14 +19,12 @@ export default task("deploy-touch-token", "Deploy the Midas TOUCH Token")
 
         let tx: providers.TransactionResponse;
         const initSupply = ethers.utils.parseUnits(_chainTouchSupply, 18);
-        console.log(`init supply ${initSupply}`)
-        let dep = await deployments.deterministic("TOUCHToken", {
+        console.log(`initial supply ${initSupply}`)
+        const touch = await deployments.deploy("TOUCHToken", {
             from: deployer,
-            salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
             args: [alice, initSupply],
             log: true,
         });
-        const touch = await dep.deploy();
         console.log("TOUCHToken: ", touch.address);
         const touchToken = await ethers.getContractAt("TOUCHToken", touch.address, alice);
 
