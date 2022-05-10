@@ -170,6 +170,7 @@ export const deployConfig: ChainDeployConfig = {
     uniswapOracleLpTokens: [
       "0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6", // BOMB-BTC PCS LP
       "0xc7c3cCCE4FA25700fD5574DA7E200ae28BBd36A3", // WBNB-DAI PCS LP
+      "0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16", // WBNB-BUSD PCS LP
     ],
   },
   plugins: [
@@ -433,6 +434,15 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   await deployCurveLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig, curvePools });
 
+  const simplePO = await deployments.deploy("SimplePriceOracle", {
+    from: deployer,
+    args: [],
+    log: true,
+  });
+  if (simplePO.transactionHash) await ethers.provider.waitForTransaction(simplePO.transactionHash);
+  console.log("SimplePriceOracle: ", simplePO.address);
+
+  //// Liquidator Redemption Strategies
   const uniswapLpTokenLiquidator = await deployments.deploy("UniswapLpTokenLiquidator", {
     from: deployer,
     args: [],
