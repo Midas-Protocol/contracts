@@ -108,10 +108,8 @@ export const deploy = async ({ getNamedAccounts, deployments, ethers }: ChainDep
       mpoOracles.push(simplePriceOracle.address);
     });
   });
-  tx = await masterPriceOracle.add(
-    mpoUnderlyings,
-    mpoOracles,
-  );
+  tx = await masterPriceOracle.add(mpoUnderlyings, mpoOracles);
   await tx.wait();
-  console.log("MasterPriceOracle oracles added", tx.hash);
+
+  console.log(`MasterPriceOracle updated for assets: ${mpoUnderlyings.join(",")}`);
 };

@@ -85,7 +85,9 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @param to Address to transfer funds to
    * @param amount Amount of underlying to transfer
    */
-  function doTransferOut(address payable to, uint256 amount) internal {
+  // IM WORRIED ABOUT THIS CHANGE.
+  /* Without it the function in CErc20 at L179 would be called which cant work. So i had to remove payable from to in order to overwrite the CErc20 `doTransferOut`. Did rari also make this change and we didnt pick it up or how does it work for them? o.O */
+  function doTransferOut(address to, uint256 amount) internal override {
     plugin.withdraw(amount, to, address(this));
   }
 }
