@@ -33,8 +33,9 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
       proxyContract: "OpenZeppelinTransparentProxy",
       execute: {
         init: {
-          methodName: "initialize", args: [ethers.utils.parseEther("0.1")]
-        }
+          methodName: "initialize",
+          args: [ethers.utils.parseEther("0.1")],
+        },
       },
       owner: deployer,
     },
@@ -114,7 +115,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
         init: {
           methodName: "initialize",
           args: [false, []],
-        }
+        },
       },
       owner: deployer,
     },
@@ -273,14 +274,14 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
         init: {
           methodName: "initialize",
           args: [
-            [constants.AddressZero],
-            [fixedNativePO.address],
+            [constants.AddressZero, chainDeployParams.wtoken],
+            [fixedNativePO.address, fixedNativePO.address],
             constants.AddressZero,
             deployer,
             true,
             chainDeployParams.wtoken,
           ],
-        }
+        },
       },
       proxyContract: "OpenZeppelinTransparentProxy",
       owner: deployer,
