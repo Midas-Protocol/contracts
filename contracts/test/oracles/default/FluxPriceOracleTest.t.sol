@@ -25,7 +25,14 @@ contract FluxPriceOracleTest is BaseTest {
 
   function setUpWithNativeFeed() public {
     MockFluxPriceFeed mock = new MockFluxPriceFeed(5 * 10**8); // 5 USD in 8 decimals
-    oracle = new FluxPriceOracle(address(this), true, address(0), CLV2V3Interface(address(mock)), MasterPriceOracle(address(0)), address(0));
+    oracle = new FluxPriceOracle(
+      address(this),
+      true,
+      address(0),
+      CLV2V3Interface(address(mock)),
+      MasterPriceOracle(address(0)),
+      address(0)
+    );
   }
 
   function setUpWithMasterPriceOracle() public {

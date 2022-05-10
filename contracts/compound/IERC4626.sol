@@ -18,44 +18,44 @@ interface IERC4626 is EIP20Interface {
 
   /**
       @notice Deposit a specific amount of underlying tokens.
-      @param to The address to receive shares corresponding to the deposit
       @param underlyingAmount The amount of the underlying token to deposit.
+      @param to The address to receive shares corresponding to the deposit
       @return shares The shares in the vault credited to `to`
     */
-  function deposit(address to, uint256 underlyingAmount) external returns (uint256 shares);
+  function deposit(uint256 underlyingAmount, address to) external returns (uint256 shares);
 
   /**
       @notice Mint an exact amount of shares for a variable amount of underlying tokens.
-      @param to The address to receive shares corresponding to the mint.
       @param shareAmount The amount of vault shares to mint.
+      @param to The address to receive shares corresponding to the mint.
       @return underlyingAmount The amount of the underlying tokens deposited from the mint call.
     */
-  function mint(address to, uint256 shareAmount) external returns (uint256 underlyingAmount);
+  function mint(uint256 shareAmount, address to) external returns (uint256 underlyingAmount);
 
   /**
       @notice Withdraw a specific amount of underlying tokens.
-      @param from The address to burn shares from corresponding to the withdrawal.
-      @param to The address to receive underlying corresponding to the withdrawal.
       @param underlyingAmount The amount of the underlying token to withdraw.
+      @param to The address to receive underlying corresponding to the withdrawal.
+      @param from The address to burn shares from corresponding to the withdrawal.
       @return shares The shares in the vault burned from sender
     */
   function withdraw(
-    address from,
+    uint256 underlyingAmount,
     address to,
-    uint256 underlyingAmount
+    address from
   ) external returns (uint256 shares);
 
   /**
       @notice Redeem a specific amount of shares for underlying tokens.
-      @param from The address to burn shares from corresponding to the redemption.
-      @param to The address to receive underlying corresponding to the redemption.
       @param shareAmount The amount of shares to redeem.
+      @param to The address to receive underlying corresponding to the redemption.
+      @param from The address to burn shares from corresponding to the redemption.
       @return value The underlying amount transferred to `to`.
     */
   function redeem(
-    address from,
+    uint256 shareAmount,
     address to,
-    uint256 shareAmount
+    address from
   ) external returns (uint256 value);
 
   /*///////////////////////////////////////////////////////////////
