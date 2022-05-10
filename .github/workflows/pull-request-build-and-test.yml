@@ -71,7 +71,7 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-     - name: Run forge tests on Evmos Testnet
+      - name: Run forge tests on Evmos Testnet
         run: npm run test:forge:evmostestnet
 
   build-and-test-moonbeam:
