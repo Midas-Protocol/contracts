@@ -10,7 +10,7 @@ import "../utils/TOUCHToken.sol";
 import "../external/compound/ICToken.sol";
 
 // TODO integrate with FlywheelGaugeRewards - deploy FlywheelGaugeRewards and provide VeMDSToken as param
-// TODO research ERC20VotesUpgradeable
+// TODO research ERC20VotesUpgradeable, ERC20MultiVotes
 contract VeMDSToken is ERC20Gauges {
   address public stakingController;
   EnumerableSet.AddressSet internal _markets;
