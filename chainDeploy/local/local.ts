@@ -122,7 +122,7 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments, run }: Cha
   for (const pluginConfig of deployConfig.plugins) {
     if (pluginConfig) {
       const plugin = await ethers.getContract(`${pluginConfig.strategy}_${pluginConfig.name}`, deployer);
-      tx = await addressesProvider.setPlugin(pluginConfig.underlying, plugin.address, pluginConfig.strategy);
+      tx = await addressesProvider.setPlugin(pluginConfig.underlying, plugin.address, `${pluginConfig.strategy}_${pluginConfig.name}`);
       await tx.wait();
     }
   }
@@ -131,7 +131,7 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments, run }: Cha
   for (const dynamicFlywheel of deployConfig.dynamicFlywheels) {
     if (dynamicFlywheel) {
       const flywheelRewards = await ethers.getContract(`FuseFlywheelDynamicRewards_${dynamicFlywheel.name}`, deployer);
-      tx = await addressesProvider.setFlywheelRewards(dynamicFlywheel.rewardToken, flywheelRewards.address, "FuseFlywheelDynamicRewards");
+      tx = await addressesProvider.setFlywheelRewards(dynamicFlywheel.rewardToken, flywheelRewards.address, `FuseFlywheelDynamicRewards_${dynamicFlywheel.name}`);
       await tx.wait();
     }
   }
