@@ -1,4 +1,3 @@
-import { SALT } from "../../deploy/deploy";
 import { constants, providers } from "ethers";
 import { CurveLpFnParams } from "../helpers/types";
 
@@ -6,33 +5,30 @@ export const deployCurveLpOracle = async ({
   ethers,
   getNamedAccounts,
   deployments,
-  deployConfig,
   curvePools,
-  run,
 }: CurveLpFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   let tx: providers.TransactionResponse;
   let receipt: providers.TransactionReceipt;
 
   //// CurveLpTokenPriceOracleNoRegistry
-  let dep = await deployments.deterministic("CurveLpTokenPriceOracleNoRegistry", {
+  const cpo = await deployments.deploy("CurveLpTokenPriceOracleNoRegistry", {
     from: deployer,
-    salt: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(SALT)),
     args: [],
     log: true,
+    proxy: {
+      execute: {
+        methodName: "initialize",
+        args: [[], [], []]
+      },
+      owner: deployer,
+      proxyContract: "OpenZeppelinTransparentProxy",
+    }
   });
-  const cpo = await dep.deploy();
-  await ethers.provider.waitForTransaction(cpo.transactionHash);
+  if (cpo.transactionHash) await ethers.provider.waitForTransaction(cpo.transactionHash);
   console.log("CurveLpTokenPriceOracleNoRegistry: ", cpo.address);
 
   const curveOracle = await ethers.getContract("CurveLpTokenPriceOracleNoRegistry", deployer);
-  let owner = await curveOracle.owner();
-  if (owner === constants.AddressZero) {
-    tx = await curveOracle.initialize([], [], []);
-    console.log("initialize tx sent: ", tx.hash);
-    receipt = await tx.wait();
-    console.log("registerPool mined: ", receipt.transactionHash);
-  }
 
   for (const pool of curvePools) {
     const registered = await curveOracle.poolOf(pool.lpToken);
@@ -49,8 +45,8 @@ export const deployCurveLpOracle = async ({
   const underlyings = curvePools.map((c) => c.lpToken);
   const oracles = Array(curvePools.length).fill(curveOracle.address);
 
-  const spo = await ethers.getContract("MasterPriceOracle", deployer);
-  tx = await spo.add(underlyings, oracles);
+  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  tx = await mpo.add(underlyings, oracles);
   await tx.wait();
 
   console.log(`Master Price Oracle updated for tokens ${underlyings.join(", ")}`);

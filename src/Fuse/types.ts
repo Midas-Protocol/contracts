@@ -4,6 +4,7 @@ import JumpRateModel from "./irm/JumpRateModel";
 import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
 import { FuseBase } from ".";
+import { SupportedChains } from "../network";
 
 export type GConstructor<T = {}> = new (...args: any[]) => T;
 export type FuseBaseConstructor = GConstructor<FuseBase>;
@@ -54,11 +55,17 @@ export interface InterestRateModel {
   getSupplyRate(utilizationRate: BigNumber): BigNumber;
 }
 export type Artifact = {
-  contractName: string;
-  sourceName: string;
   abi: any;
-  bytecode: string;
-  deployedBytecode: string;
+  bytecode: {
+    object: string;
+    sourceMap: string;
+    linkReferences: any;
+  };
+  deployedBytecode: {
+    object: string;
+    sourceMap: string;
+    linkReferences: any;
+  };
 };
 
 export type Artifacts = {
@@ -74,8 +81,14 @@ export type ChainDeployment = {
 
 export type InterestRateModelType = JumpRateModel | DAIInterestRateModelV2 | WhitePaperInterestRateModel;
 
+export type DelegateContractName =
+  | "CErc20Delegate"
+  | "CEtherDelegate"
+  | "CErc20PluginDelegate"
+  | "CErc20PluginRewardsDelegate";
+
 export type cERC20Conf = {
-  delegateContractName?: any;
+  delegateContractName?: DelegateContractName;
   underlying: string; // underlying ERC20
   comptroller: string; // Address of the comptroller
   fuseFeeDistributor: string;
@@ -83,12 +96,14 @@ export type cERC20Conf = {
   initialExchangeRateMantissa?: BigNumber; // Initial exchange rate scaled by 1e18
   name: string; // ERC20 name of this token
   symbol: string; // ERC20 Symbol
-  decimals: number; // decimal precision
   admin: string; // Address of the admin
   collateralFactor: number;
   reserveFactor: number;
   adminFee: number;
   bypassPriceFeedCheck: boolean;
+  plugin?: string;
+  rewardsDistributor?: string;
+  rewardToken?: string;
 };
 
 export type OracleConf = {
@@ -130,6 +145,7 @@ export type InterestRateModelConf = {
 
 export interface FuseAsset {
   cToken: string;
+  plugin?: string;
 
   borrowBalance: BigNumber;
   supplyBalance: BigNumber;
@@ -155,36 +171,37 @@ export interface FuseAsset {
 
   totalBorrow: BigNumber;
   totalSupply: BigNumber;
-}
 
-export interface USDPricedFuseAsset extends FuseAsset {
-  supplyBalanceUSD: number;
-  borrowBalanceUSD: number;
-
-  totalSupplyUSD: number;
-  totalBorrowUSD: number;
-
-  liquidityUSD: number;
-
-  isPaused: boolean;
+  isBorrowPaused: boolean;
   isSupplyPaused: boolean;
 }
 
+export interface NativePricedFuseAsset extends FuseAsset {
+  supplyBalanceNative: number;
+  borrowBalanceNative: number;
+
+  totalSupplyNative: number;
+  totalBorrowNative: number;
+
+  liquidityNative: number;
+}
+
 export interface FusePoolData {
-  assets: USDPricedFuseAsset[];
+  id: number;
+  assets: NativePricedFuseAsset[];
+  creator: string;
   comptroller: string;
   name: string;
-  isPrivate: boolean;
-  totalLiquidityUSD: number;
-  totalSuppliedUSD: number;
-  totalBorrowedUSD: number;
-  totalSupplyBalanceUSD: number;
-  totalBorrowBalanceUSD: number;
-  oracle: string;
-  oracleModel: string | undefined;
-  id?: number;
-  admin: string;
-  isAdminWhitelisted: boolean;
+  totalLiquidityNative: number;
+  totalSuppliedNative: number;
+  totalBorrowedNative: number;
+  totalSupplyBalanceNative: number;
+  totalBorrowBalanceNative: number;
+  blockPosted: BigNumber;
+  timestampPosted: BigNumber;
+  underlyingTokens: string[];
+  underlyingSymbols: string[];
+  whitelistedAdmin: boolean;
 }
 
 export interface FusePool {
@@ -194,3 +211,20 @@ export interface FusePool {
   blockPosted: number;
   timestampPosted: number;
 }
+
+type PluginConfig = {
+  strategyName: string;
+  strategyAddress: string;
+  dynamicFlywheel: {
+    address: string;
+    rewardToken: string;
+  } | null;
+};
+
+export type AssetPluginConfig = {
+  [asset: string]: PluginConfig[];
+};
+
+export type ChainPlugins = {
+  [chain in SupportedChains]: AssetPluginConfig;
+};

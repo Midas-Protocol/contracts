@@ -16,10 +16,17 @@ import "./tasks/oracle";
 import "./tasks/getPoolData";
 import "./tasks/e2e";
 import "./tasks/swap";
+import "./tasks/liquidation";
+import "./tasks/createMarket";
+import "./tasks/createPool";
+import "./tasks/createStrategy";
+import "./tasks/fluxFeed";
 
 dotEnvConfig();
 
 const urlOverride = process.env.ETH_PROVIDER_URL;
+
+console.log("FORK_URL_BSC: ", process.env.FORK_URL_BSC);
 
 const mnemonic =
   process.env.SUGAR_DADDY ||
@@ -28,7 +35,7 @@ const mnemonic =
 
 const config: HardhatUserConfig = {
   mocha: {
-    timeout: 120_000,
+    timeout: 200_000,
   },
   tenderly: {
     username: "carlomazzaferro",
@@ -37,16 +44,7 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.8.11",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
-      },
-      {
-        version: "0.7.6",
+        version: "0.8.10",
         settings: {
           optimizer: {
             enabled: true,
@@ -57,30 +55,28 @@ const config: HardhatUserConfig = {
     ],
   },
   external: {
-    contracts: [
-      {
-        artifacts: "./artifacts/contracts/compound",
-      },
-    ],
+    contracts: [{ artifacts: "./out" }],
   },
   paths: {
-    artifacts: "./artifacts",
-    sources: "./contracts",
+    sources: "./none",
     tests: "./test",
   },
   defaultNetwork: "hardhat",
   namedAccounts: {
-    deployer: { default: 0 },
+    deployer: {
+      default: 0,
+      56: "0x304aE8f9300e09c8B33bb1a8AE1c14A6253a5F4D"
+    },
     alice: { default: 1 },
     bob: { default: 2 },
     rando: { default: 3 },
   },
   networks: {
     hardhat: {
-      forking: process.env.FORK_URL
+      forking: process.env.FORK_URL_BSC
         ? {
-            url: process.env.FORK_URL,
-            blockNumber: Number(process.env.FORK_BLOCK_NUMBER),
+            url: process.env.FORK_URL_BSC,
+            blockNumber: process.env.FORK_BLOCK_NUMBER ? Number(process.env.FORK_BLOCK_NUMBER) : undefined,
           }
         : undefined,
       saveDeployments: true,
@@ -102,8 +98,7 @@ const config: HardhatUserConfig = {
     rinkeby: {
       accounts: { mnemonic },
       chainId: 4,
-      url: urlOverride || process.env.RINKEBY_ETH_PROVIDER_URL || "http://localhost:8545",
-      throwOnCallFailures: false,
+        url: urlOverride || process.env.RINKEBY_ETH_PROVIDER_URL || "https://rpc.ankr.com/eth_rinkeby",
     },
     kovan: {
       accounts: { mnemonic },
@@ -136,11 +131,22 @@ const config: HardhatUserConfig = {
     evmostestnet: {
       accounts: { mnemonic },
       chainId: 9000,
-      url: "https://evmos-archive-testnet.api.bdnodes.net:8545",
+      url: "https://eth.bd.evmos.dev:8545",
     },
-  },
-  typechain: {
-    outDir: "./typechain",
+    moonbase: {
+      url: `https://rpc.api.moonbase.moonbeam.network`,
+      accounts: { mnemonic },
+      chainId: 1287,
+      saveDeployments: true,
+      gasPrice: 1000000000,
+      gas: 8000000,
+    },
+    moonbeam: {
+      url: `https://rpc.api.moonbeam.network`,
+      accounts: { mnemonic },
+      chainId: 1284,
+      saveDeployments: true,
+    },
   },
 };
 

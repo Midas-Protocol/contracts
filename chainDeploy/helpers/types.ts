@@ -1,18 +1,25 @@
 import { HardhatRuntimeEnvironment, RunTaskFunction } from "hardhat/types";
+import { BigNumber } from "ethers";
 
 export enum ChainlinkFeedBaseCurrency {
   ETH,
   USD,
 }
 
+export type TokenPair = {
+  token: string;
+  baseToken: string;
+};
+
 export type ChainDeployConfig = {
   uniswap: {
     uniswapV2RouterAddress: string;
     uniswapV2FactoryAddress: string;
-    uniswapOracleInitialDeployTokens: Array<string>;
+    uniswapOracleInitialDeployTokens: Array<TokenPair>;
     pairInitHashCode?: string;
     hardcoded: { name: string; symbol: string; address: string }[];
     uniswapData: { lpName: string; lpSymbol: string; lpDisplayName: string }[];
+    uniswapOracleLpTokens?: Array<string>;
   };
   wtoken: string;
   nativeTokenUsdChainlinkFeed?: string;
@@ -21,6 +28,23 @@ export type ChainDeployConfig = {
   stableToken?: string;
   wBTCToken?: string;
   blocksPerYear: number;
+  dynamicFlywheels?: DynamicFlywheelConfig[];
+  plugins?: PluginConfig[];
+};
+
+export type DynamicFlywheelConfig = {
+  name: string;
+  rewardToken: string;
+  cycleLength: number;
+};
+
+export type PluginConfig = {
+  name: string;
+  strategy: string;
+  underlying: string;
+  otherParams?: string[];
+  flywheelAddress?: string;
+  flywheelIndex?: number;
 };
 
 export type Asset = {
@@ -28,12 +52,20 @@ export type Asset = {
   underlying: string;
   name: string;
   decimals: number;
+  simplePriceOracleAssetPrice?: BigNumber;
 };
 
 export type ChainlinkAsset = {
   symbol: string;
   aggregator: string;
   feedBaseCurrency: ChainlinkFeedBaseCurrency;
+};
+
+export type DiaAsset = {
+  symbol: string;
+  underlying: string;
+  feed: string;
+  key: string;
 };
 
 export type CurvePoolConfig = {
@@ -49,9 +81,23 @@ export type ChainDeployFnParams = {
   run: RunTaskFunction;
 };
 
+export type LiquidatorDeployFnParams = ChainDeployFnParams & {
+  deployConfig: ChainDeployConfig;
+};
+
+export type IrmDeployFnParams = ChainDeployFnParams & {
+  deployConfig: ChainDeployConfig;
+};
+
 export type ChainlinkDeployFnParams = ChainDeployFnParams & {
   assets: Asset[];
   chainlinkAssets: ChainlinkAsset[];
+  deployConfig: ChainDeployConfig;
+};
+
+export type DiaDeployFnParams = ChainDeployFnParams & {
+  diaNativeFeed: Omit<DiaAsset, "symbol" | "underlying">;
+  diaAssets: DiaAsset[];
   deployConfig: ChainDeployConfig;
 };
 
@@ -62,4 +108,13 @@ export type UniswapDeployFnParams = ChainDeployFnParams & {
 export type CurveLpFnParams = ChainDeployFnParams & {
   deployConfig: ChainDeployConfig;
   curvePools: CurvePoolConfig[];
+};
+
+export type FuseFlywheelDeployFnParams = ChainDeployFnParams & {
+  deployConfig: ChainDeployConfig;
+};
+
+export type Erc4626PluginDeployFnParams = ChainDeployFnParams & {
+  deployConfig: ChainDeployConfig;
+  dynamicFlywheels: Array<string>;
 };

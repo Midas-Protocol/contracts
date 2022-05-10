@@ -33,7 +33,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
     require(_plugin != address(0), "0 addr");
 
     if (address(plugin) != address(0)) {
-      plugin.redeem(address(this), address(this), plugin.balanceOf(address(this)));
+      plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
     }
 
     plugin = IERC4626(_plugin);
@@ -77,7 +77,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
   function deposit(uint256 amount) internal {
     EIP20Interface(underlying).approve(address(plugin), amount);
 
-    plugin.deposit(address(this), amount);
+    plugin.deposit(amount, address(this));
   }
 
   /**
@@ -85,7 +85,9 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @param to Address to transfer funds to
    * @param amount Amount of underlying to transfer
    */
-  function doTransferOut(address payable to, uint256 amount) internal {
-    plugin.withdraw(address(this), to, amount);
+  // IM WORRIED ABOUT THIS CHANGE.
+  /* Without it the function in CErc20 at L179 would be called which cant work. So i had to remove payable from to in order to overwrite the CErc20 `doTransferOut`. Did rari also make this change and we didnt pick it up or how does it work for them? o.O */
+  function doTransferOut(address to, uint256 amount) internal override {
+    plugin.withdraw(amount, to, address(this));
   }
 }

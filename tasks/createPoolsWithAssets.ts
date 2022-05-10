@@ -33,23 +33,30 @@ task("pools:create", "Create pool if does not exist")
   .addParam("name", "Name of the pool to be created")
   .addParam("creator", "Named account from which to create the pool", "deployer", types.string)
   .addOptionalParam("priceOracle", "Which price oracle to use", undefined, types.string)
+  .addOptionalParam("rewardsDistributorToken", "Token address for rewards distributor", undefined, types.string)
+  .addOptionalParam("flywheelToken", "Token address for flywheel rewards", undefined, types.string)
+  .addOptionalParam("flywheelMarket", "Token SYMBOL for flywheel market", undefined, types.string)
   .setAction(async (taskArgs, hre) => {
-    const { chainId } = await hre.ethers.provider.getNetwork();
     const signer = await hre.ethers.getNamedSigner(taskArgs.creator);
-    if (!taskArgs.priceOracle) {
-      await hre.run("oracle:set-price", { token: "ETH", price: "1" });
-      await hre.run("oracle:set-price", { token: "TOUCH", price: "0.1" });
-      await hre.run("oracle:set-price", { token: "TRIBE", price: "0.01" });
-      taskArgs.priceOracle = (await hre.ethers.getContract("MasterPriceOracle", signer)).address;
-    }
 
+    // @ts-ignore
     const poolModule = await import("../test/utils/pool");
     // @ts-ignore
-    const sdkModule = await import("../dist/esm/src");
+    const fuseModule = await import("../test/utils/fuseSdk");
+    const sdk = await fuseModule.getOrCreateFuse();
 
-    const sdk = new sdkModule.Fuse(hre.ethers.provider, chainId);
+    if (!taskArgs.priceOracle) {
+      await hre.run("oracle:set-price", { token: "TOUCH", price: "0.1" });
+      await hre.run("oracle:set-price", { token: "TRIBE", price: "0.01" });
+      taskArgs.priceOracle = (
+        await hre.ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, signer)
+      ).address;
+    }
+
     const existingPool = await poolModule.getPoolByName(taskArgs.name, sdk);
-    const fuseFeeDistributor = (await hre.ethers.getContract("FuseFeeDistributor")).address;
+    const fuseFeeDistributor = (
+      await hre.ethers.getContractAt("FuseFeeDistributor", sdk.contracts.FuseFeeDistributor.address)
+    ).address;
 
     let poolAddress: string;
     if (existingPool) {
@@ -64,36 +71,94 @@ task("pools:create", "Create pool if does not exist")
       // Deploy Assets
       const assets = await poolModule.getPoolAssets(poolAddress, fuseFeeDistributor);
       const deployedAssets = await poolModule.deployAssets(assets.assets, signer);
+      const [erc20One, erc20Two] = assets.assets.filter((a) => a.underlying !== hre.ethers.constants.AddressZero);
 
-      // Add Reward Distributer for TOUCH
-      const touchInstance = await hre.ethers.getContract("TOUCHToken");
-      const rdInstance = await sdk.deployRewardsDistributor(touchInstance.address, {
-        from: signer.address,
-      });
-      await sdk.addRewardDistributer(poolAddress, rdInstance.address, {
-        from: signer.address,
-      });
-      await sdk.fundRewardDistributer(rdInstance.address, touchInstance.address, hre.ethers.utils.parseUnits("10000"), {
-        from: signer.address,
-      });
+      const deployedErc20One = deployedAssets.find((a) => a.underlying === erc20One.underlying);
+      const deployedErc20Two = deployedAssets.find((a) => a.underlying === erc20Two.underlying);
 
-      const deployedCTouch = deployedAssets.find((a) => a.symbol === "TOUCH");
-      if (deployedCTouch) {
-        await sdk.updateDistributionSpeedSuppliers(
-          rdInstance.address,
-          deployedCTouch.assetAddress,
-          hre.ethers.utils.parseUnits("2"),
+      const erc20OneUnderlying = await hre.ethers.getContractAt("EIP20Interface", erc20One.underlying);
+      const erc20TwoUnderlying = await hre.ethers.getContractAt("EIP20Interface", erc20Two.underlying);
+
+      const marketOne = await hre.ethers.getContractAt("CErc20", deployedErc20One.assetAddress);
+      const marketTwo = await hre.ethers.getContractAt("CErc20", deployedErc20Two.assetAddress);
+
+      if (taskArgs.rewardsDistributorToken) {
+        const rdTokenInstance =
+          taskArgs.rewardsDistributorToken === erc20OneUnderlying.address ? erc20OneUnderlying : erc20TwoUnderlying;
+        const deployedRdTokenInstance =
+          taskArgs.rewardsDistributorToken === erc20OneUnderlying.address ? deployedErc20One : deployedErc20Two;
+        const rdInstance = await sdk.deployRewardsDistributor(rdTokenInstance.address, {
+          from: signer.address,
+        });
+        await sdk.addRewardsDistributorToPool(rdInstance.address, poolAddress, {
+          from: signer.address,
+        });
+        await sdk.fundRewardsDistributor(rdInstance.address, hre.ethers.utils.parseUnits("10000"), {
+          from: signer.address,
+        });
+
+        if (rdTokenInstance) {
+          await sdk.updateRewardsDistributorSupplySpeed(
+            rdInstance.address,
+            deployedRdTokenInstance.assetAddress,
+            hre.ethers.utils.parseUnits("2"),
+            {
+              from: signer.address,
+            }
+          );
+          await sdk.updateRewardsDistributorBorrowSpeed(
+            rdInstance.address,
+            deployedRdTokenInstance.assetAddress,
+            hre.ethers.utils.parseUnits("1"),
+            {
+              from: signer.address,
+            }
+          );
+        }
+      }
+      if (taskArgs.flywheelToken) {
+        let flywheelMarket;
+        const fwTokenInstance =
+          taskArgs.flywheelToken === erc20OneUnderlying.address ? erc20OneUnderlying : erc20TwoUnderlying;
+        if (taskArgs.flywheelMarket) {
+          flywheelMarket = taskArgs.flywheelMarket === (await erc20OneUnderlying.symbol()) ? marketOne : marketTwo;
+        } else {
+          flywheelMarket = marketOne;
+        }
+        const flywheelCoreInstance = await sdk.deployFlywheelCore(fwTokenInstance.address, {
+          from: signer.address,
+        });
+        const fwStaticRewards = await sdk.deployFlywheelStaticRewards(
+          fwTokenInstance.address,
+          flywheelCoreInstance.address,
           {
             from: signer.address,
           }
         );
-        await sdk.updateDistributionSpeedBorrowers(
-          rdInstance.address,
-          deployedCTouch.assetAddress,
-          hre.ethers.utils.parseUnits("1"),
+        console.log("Deployed static rewards for: ", await fwTokenInstance.symbol());
+        await sdk.setFlywheelRewards(flywheelCoreInstance.address, fwStaticRewards.address, { from: signer.address });
+        await sdk.addFlywheelCoreToComptroller(flywheelCoreInstance.address, poolAddress, { from: signer.address });
+
+        // Funding Static Rewards
+        await fwTokenInstance.transfer(fwStaticRewards.address, hre.ethers.utils.parseUnits("100", 18), {
+          from: signer.address,
+        });
+
+        // Setup Rewards, enable and set RewardInfo
+        await sdk.addMarketForRewardsToFlywheelCore(flywheelCoreInstance.address, flywheelMarket.address, {
+          from: signer.address,
+        });
+        await sdk.setStaticRewardInfo(
+          fwStaticRewards.address,
+          flywheelMarket.address,
           {
-            from: signer.address,
-          }
+            rewardsEndTimestamp: 0,
+            rewardsPerSecond: hre.ethers.utils.parseUnits("0.000001", 18),
+          },
+          { from: signer.address }
+        );
+        console.log(
+          `Added static rewards for market ${await flywheelMarket.symbol()}, token rewards: ${await fwTokenInstance.symbol()}`
         );
       }
     }
@@ -104,34 +169,31 @@ task("pools:create", "Create pool if does not exist")
 
 task("pools:borrow", "Borrow collateral")
   .addParam("account", "Account from which to borrow", "deployer", types.string)
-  .addParam("amount", "Amount to borrow", 0, types.int)
+  .addParam("amount", "Amount to borrow", "1", types.string)
   .addParam("symbol", "Symbol of token to be borrowed", "ETH")
   .addParam("poolAddress", "Address of the poll")
   .setAction(async (taskArgs, hre) => {
+    // @ts-ignore
     const collateralModule = await import("../test/utils/collateral");
     const account = await hre.ethers.getNamedSigner(taskArgs.account);
-    await collateralModule.borrowCollateral(
-      taskArgs.poolAddress,
-      account.address,
-      taskArgs.symbol,
-      taskArgs.amount.toString()
-    );
+    await collateralModule.borrowCollateral(taskArgs.poolAddress, account.address, taskArgs.symbol, taskArgs.amount);
   });
 
 task("pools:deposit", "Deposit collateral")
   .addParam("account", "Account from which to borrow", "deployer", types.string)
-  .addParam("amount", "Amount to deposit", 0, types.int)
+  .addParam("amount", "Amount to deposit", "0", types.string)
   .addParam("symbol", "Symbol of token to be deposited", "ETH")
   .addParam("poolAddress", "Address of the poll")
   .addParam("enableCollateral", "Enable the asset as collateral", false, types.boolean)
   .setAction(async (taskArgs, hre) => {
+    // @ts-ignore
     const collateralModule = await import("../test/utils/collateral");
     const account = await hre.ethers.getNamedSigner(taskArgs.account);
     await collateralModule.addCollateral(
       taskArgs.poolAddress,
       account,
       taskArgs.symbol,
-      taskArgs.amount.toString(),
+      taskArgs.amount,
       taskArgs.enableCollateral
     );
   });

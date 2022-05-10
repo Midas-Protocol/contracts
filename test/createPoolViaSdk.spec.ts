@@ -1,16 +1,21 @@
 import { deployments, ethers } from "hardhat";
 import { expect, use } from "chai";
 import { solidity } from "ethereum-waffle";
-import { Fuse } from "../dist/esm/src";
+import { Fuse } from "../src";
 import { DeployedAsset, poolAssets } from "./utils/pool";
 import { utils } from "ethers";
+import { MasterPriceOracle } from "../typechain/MasterPriceOracle";
 import { setUpPriceOraclePrices } from "./utils";
+import { getOrCreateFuse } from "./utils/fuseSdk";
 
 use(solidity);
 
 describe("FusePoolDirectory", function () {
+  let sdk: Fuse;
+
   this.beforeEach(async () => {
-    await deployments.fixture();
+    await deployments.fixture("prod");
+    sdk = await getOrCreateFuse();
     await setUpPriceOraclePrices();
   });
 
@@ -19,11 +24,12 @@ describe("FusePoolDirectory", function () {
       this.timeout(120_000);
       const POOL_NAME = "TEST_BOB";
       const { bob } = await ethers.getNamedSigners();
-      const { chainId } = await ethers.provider.getNetwork();
 
-      const spo = await ethers.getContract("MasterPriceOracle", bob);
-
-      const sdk = new Fuse(ethers.provider, chainId);
+      const mpo = (await ethers.getContractAt(
+        "MasterPriceOracle",
+        sdk.oracles.MasterPriceOracle.address,
+        bob
+      )) as MasterPriceOracle;
 
       // 50% -> 0.5 * 1e18
       const bigCloseFactor = utils.parseEther((50 / 100).toString());
@@ -34,7 +40,7 @@ describe("FusePoolDirectory", function () {
         false,
         bigCloseFactor,
         bigLiquidationIncentive,
-        spo.address,
+        mpo.address,
         {},
         { from: bob.address },
         []
@@ -50,8 +56,11 @@ describe("FusePoolDirectory", function () {
 
       expect(_unfiliteredName).to.be.equal(POOL_NAME);
 
-      const jrm = await ethers.getContract("JumpRateModel");
-      const assets = await poolAssets(jrm.address, comptroller, sdk.contracts.FuseFeeDistributor.address);
+      const assets = await poolAssets(
+        sdk.irms.JumpRateModel.address,
+        comptroller,
+        sdk.contracts.FuseFeeDistributor.address
+      );
       const deployedAssets: DeployedAsset[] = [];
       for (const assetConf of assets.assets) {
         const [assetAddress, cTokenImplementationAddress, irmModel, receipt] = await sdk.deployAsset(

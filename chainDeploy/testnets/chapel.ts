@@ -1,34 +1,53 @@
 import { ChainDeployConfig, ChainlinkFeedBaseCurrency, deployChainlinkOracle, deployUniswapOracle } from "../helpers";
 import { ethers } from "ethers";
 import { Asset, ChainlinkAsset } from "../helpers/types";
+import { deployUniswapLpOracle } from "../oracles/uniswapLp";
+
+const CHAPEL_WTOKEN = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
 
 export const deployConfig: ChainDeployConfig = {
-  wtoken: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
+  wtoken: CHAPEL_WTOKEN,
   nativeTokenUsdChainlinkFeed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
-  nativeTokenName: "Binance Network Token (Testnet)",
+  nativeTokenName: "Binance Coin Token (Testnet)",
   nativeTokenSymbol: "TBNB",
   stableToken: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
   wBTCToken: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
   blocksPerYear: 20 * 24 * 365 * 60,
   uniswap: {
-    hardcoded: [],
-    uniswapData: [],
-    pairInitHashCode: ethers.utils.hexlify("0xd0d4c4cd0848c93cb4fd1f498d7013ee6bfb25783ea21593d5834f5d250ece66"),
-    uniswapV2RouterAddress: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
-    uniswapV2FactoryAddress: "0x6725F303b657a9451d8BA641348b6761A6CC7a17",
-    uniswapOracleInitialDeployTokens: [
-      "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee", // BUSD
-      // "0x6ce8da28e2f864420840cf74474eff5fd80e65b8", // BTCB
-      "0x8a9424745056Eb399FD19a0EC26A14316684e274", // DAI
-      "0xd66c6B4F0be8CE5b39D52E0Fd1344c389929B378", // ETH
+    hardcoded: [
+      {
+        name: "Binance Bitcoin",
+        symbol: "BTCB",
+        address: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8",
+      },
     ],
+    uniswapData: [],
+    // see: https://bsc.kiemtienonline360.com/ for addresses
+    pairInitHashCode: ethers.utils.hexlify("0xecba335299a6693cb2ebc4782e74669b84290b6378ea3a3873c7231a8d7d1074"),
+    uniswapV2RouterAddress: "0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3",
+    uniswapV2FactoryAddress: "0xB7926C0430Afb07AA7DEfDE6DA862aE0Bde767bc",
+    uniswapOracleInitialDeployTokens: [
+      {
+        token: "0x8a9424745056Eb399FD19a0EC26A14316684e274", // DAI
+        baseToken: CHAPEL_WTOKEN,
+      },
+      {
+        token: "0xDAcbdeCc2992a63390d108e8507B98c7E2B5584a", // SAFEMOON
+        baseToken: CHAPEL_WTOKEN,
+      },
+      {
+        token: "0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684", // USDT
+        baseToken: "0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7", // BUSD
+      },
+    ],
+    uniswapOracleLpTokens: ["0xAE4C99935B1AA0e76900e86cD155BFA63aB77A2a"],
   },
 };
 
 export const assets: Asset[] = [
   {
     symbol: "BUSD",
-    underlying: "0xed24fc36d5ee211ea25a80239fb8c4cfd80f12ee",
+    underlying: "0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7",
     name: "Binance USD",
     decimals: 18,
   },
@@ -46,13 +65,20 @@ export const assets: Asset[] = [
   },
   {
     symbol: "ETH",
-    underlying: "0x76A20e5DC5721f5ddc9482af689ee12624E01313",
+    underlying: "0x8babbb98678facc7342735486c851abd7a0d17ca",
     name: "Binance ETH",
+    decimals: 18,
+  },
+  {
+    symbol: "USDT",
+    underlying: "0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684",
+    name: "Binance Tether",
     decimals: 18,
   },
 ];
 
 export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Promise<void> => {
+  const { deployer } = await getNamedAccounts();
   ////
   //// ORACLES
   const chainlinkAssets: ChainlinkAsset[] = [
@@ -64,11 +90,6 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
     {
       symbol: "BTCB",
       aggregator: "0x5741306c21795FdCBb9b265Ea0255F499DFe515C",
-      feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
-    },
-    {
-      symbol: "DAI",
-      aggregator: "0xE4eE17114774713d2De0eC0f035d4F7665fc025D",
       feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
     },
     {
@@ -86,11 +107,21 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
     deployConfig,
     assets,
     chainlinkAssets,
-    run
+    run,
   });
   ////
 
   //// Uniswap Oracle
   await deployUniswapOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
+  await deployUniswapLpOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
   ////
+  const uniswapLpTokenLiquidator = await deployments.deploy("UniswapLpTokenLiquidator", {
+    from: deployer,
+    args: [],
+    log: true,
+  });
+  if (uniswapLpTokenLiquidator.transactionHash) {
+    await ethers.provider.waitForTransaction(uniswapLpTokenLiquidator.transactionHash);
+  }
+  console.log("UniswapLpTokenLiquidator: ", uniswapLpTokenLiquidator.address);
 };

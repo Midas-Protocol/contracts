@@ -1,10 +1,11 @@
 // pool utilities used across downstream tests
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { providers, utils } from "ethers";
-import { ethers } from "hardhat";
+import { ethers, getChainId } from "hardhat";
 
-import { cERC20Conf, Fuse, FusePoolData, USDPricedFuseAsset } from "../../dist/esm/src";
+import { cERC20Conf, Fuse, FusePoolData, NativePricedFuseAsset } from "../../src";
 import { getAssetsConf } from "./assets";
+import { getOrCreateFuse } from "./fuseSdk";
 
 interface PoolCreationParams {
   closeFactor?: number;
@@ -24,21 +25,20 @@ export async function createPool({
   whitelist = [],
   priceOracleAddress = null,
   signer = null,
-}: PoolCreationParams): Promise<[string, string, string]> {
-  const { chainId } = await ethers.provider.getNetwork();
+}: PoolCreationParams) {
+  const sdk = await getOrCreateFuse();
+
   if (!signer) {
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
   }
   if (!priceOracleAddress) {
-    const spo = await ethers.getContract("MasterPriceOracle", signer);
-    priceOracleAddress = spo.address;
+    const mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, signer);
+    priceOracleAddress = mpo.address;
   }
   if (enforceWhitelist && whitelist.length === 0) {
     throw "If enforcing whitelist, a whitelist array of addresses must be provided";
   }
-  console.log("chainId: ", chainId);
-  const sdk = new Fuse(ethers.provider, chainId);
 
   // 50% -> 0.5 * 1e18
   const bigCloseFactor = utils.parseEther((closeFactor / 100).toString());
@@ -71,10 +71,11 @@ export async function deployAssets(assets: cERC20Conf[], signer?: SignerWithAddr
     const { bob } = await ethers.getNamedSigners();
     signer = bob;
   }
-  const sdk = new Fuse(ethers.provider, chainId);
+  const sdk = await getOrCreateFuse();
 
   const deployed: DeployedAsset[] = [];
   for (const assetConf of assets) {
+   
     const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
       sdk.JumpRateModelConf,
       assetConf,
@@ -103,9 +104,10 @@ export async function getPoolAssets(
   fuseFeeDistributor: string,
   interestRateModelAddress?: string
 ): Promise<{ shortName: string; longName: string; assetSymbolPrefix: string; assets: cERC20Conf[] }> {
+  const sdk = await getOrCreateFuse();
+
   if (!interestRateModelAddress) {
-    const jrm = await ethers.getContract("JumpRateModel");
-    interestRateModelAddress = jrm.address;
+    interestRateModelAddress = sdk.irms.JumpRateModel.address;
   }
   return await poolAssets(interestRateModelAddress, comptroller, fuseFeeDistributor);
 }
@@ -128,10 +130,9 @@ export const assetInPool = async (
   poolId: string,
   sdk: Fuse,
   underlyingSymbol: string,
-  address?: string,
-  cgId?: string
-): Promise<USDPricedFuseAsset> => {
-  const fetchedAssetsInPool: FusePoolData = await sdk.fetchFusePoolData(poolId, address, cgId);
+  address?: string
+): Promise<NativePricedFuseAsset> => {
+  const fetchedAssetsInPool: FusePoolData = await sdk.fetchFusePoolData(poolId, address);
   return fetchedAssetsInPool.assets.filter((a) => a.underlyingSymbol === underlyingSymbol)[0];
 };
 
@@ -145,17 +146,12 @@ export const getPoolIndex = async (poolAddress: string, sdk: Fuse) => {
   return null;
 };
 
-export const getPoolByName = async (
-  name: string,
-  sdk: Fuse,
-  address?: string,
-  cgId?: string
-): Promise<FusePoolData> => {
-  const [indexes, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPublicPoolsWithData();
+export const getPoolByName = async (name: string, sdk: Fuse, address?: string): Promise<FusePoolData> => {
+  const [, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPublicPoolsWithData();
   for (let j = 0; j < publicPools.length; j++) {
     if (publicPools[j].name === name) {
       const poolIndex = await getPoolIndex(publicPools[j].comptroller, sdk);
-      return sdk.fetchFusePoolData(poolIndex, address, cgId);
+      return await sdk.fetchFusePoolData(poolIndex.toString(), address);
     }
   }
   return null;
@@ -163,8 +159,7 @@ export const getPoolByName = async (
 
 export const logPoolData = async (poolAddress, sdk) => {
   const poolIndex = await getPoolIndex(poolAddress, sdk);
-  const fusePoolData = await sdk.fetchFusePoolData(poolIndex, poolAddress);
-
+  const fusePoolData = await sdk.fetchFusePoolData(poolIndex.toString());
   const poolAssets = fusePoolData.assets.map((a) => a.underlyingSymbol).join(", ");
   console.log(`Operating on pool with address ${poolAddress}, name: ${fusePoolData.name}, assets ${poolAssets}`);
 };

@@ -2,52 +2,31 @@ version: '3.8'
 
 services:
   hardhat:
-    image: contracts-local
+    image: contracts
     environment:
-      - MNEMONIC
+      - MNEMONIC=${MNEMONIC}
+      - FORK_URL_BSC=${FORK_URL_BSC}
+      - FORK_CHAIN_ID=56
+      - FORK_BLOCK_NUMBER=${FORK_BLOCK_NUMBER}
     build:
-      dockerfile: docker/Dockerfile.hardhat
+      dockerfile: Dockerfile.test
       context: .
-    entrypoint: ./start-node.sh
+    entrypoint: ./start-bsc-node.sh
     ports:
       - "8545:8545"
-    volumes:
-      - app-volume:/usr/src/app/deployments
-
-  liquidation-bot:
-    env_file:
-      - docker/liquidation.env
+#    network_mode: host
+  bsc-tests:
+    depends_on:
+      - hardhat
+    image: contracts
     environment:
-      - ETHEREUM_ADMIN_ACCOUNT
-      - ETHEREUM_ADMIN_PRIVATE_KEY
+      - ETH_PROVIDER_URL=http://0.0.0.0:8545
+      - MNEMONIC=${MNEMONIC}
+      - FORK_URL_BSC=${FORK_URL_BSC}
+      - FORK_BLOCK_NUMBER=${FORK_BLOCK_NUMBER}
+      - FORK_CHAIN_ID=56
     build:
-      dockerfile: docker/Dockerfile.liquidation
+      dockerfile: Dockerfile.test
       context: .
-    entrypoint: ./liquidation.sh
-
-  e2e:
-    image: contracts-local
-    environment:
-      - ETH_PROVIDER_URL=http://hardhat:8545
-      - MNEMONIC
-    entrypoint: ./setup-pools.sh
-    depends_on:
-      - hardhat
-    volumes:
-      - app-volume:/usr/src/app/deployments
-
-  verify-liquidations:
-    image: contracts-local
-    environment:
-      - ETH_PROVIDER_URL=http://hardhat:8545
-      - MNEMONIC
-    entrypoint: ./e2e.sh
-    depends_on:
-      - hardhat
-      - liquidation-bot
-    volumes:
-      - app-volume:/usr/src/app/deployments
-
-
-volumes:
-  app-volume:
+    entrypoint: ./hh-bsc-test.sh
+    network_mode: host

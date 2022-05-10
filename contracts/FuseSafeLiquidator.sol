@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 import "./liquidators/IRedemptionStrategy.sol";
 
@@ -13,7 +13,7 @@ import "./external/compound/ICToken.sol";
 import "./external/compound/ICErc20.sol";
 import "./external/compound/ICEther.sol";
 
-import "./external/aave/IW_NATIVE.sol";
+import "./utils/IW_NATIVE.sol";
 
 import "./external/uniswap/IUniswapV2Router02.sol";
 import "./external/uniswap/IUniswapV2Callee.sol";
@@ -249,7 +249,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
           if (redemptionStrategies.length > 0) {
             require(
               redemptionStrategies.length == strategyData.length,
-              "IRedemptionStrategy contract array and strategy data bytes array mnust the the same length."
+              "IRedemptionStrategy contract array and strategy data bytes array must be the same length."
             );
             uint256 underlyingCollateralSeized = underlyingCollateral.balanceOf(address(this));
             for (uint256 i = 0; i < redemptionStrategies.length; i++)
@@ -310,7 +310,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
         if (redemptionStrategies.length > 0) {
           require(
             redemptionStrategies.length == strategyData.length,
-            "IRedemptionStrategy contract array and strategy data bytes array mnust the the same length."
+            "IRedemptionStrategy contract array and strategy data bytes array must be the same length."
           );
           uint256 underlyingCollateralSeized = underlyingCollateral.balanceOf(address(this));
           for (uint256 i = 0; i < redemptionStrategies.length; i++)
@@ -407,7 +407,6 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     return distributeProfit(exchangeProfitTo, minProfitAmount, ethToCoinbase);
   }
 
-
   function safeLiquidateToEthWithFlashLoan(
     address borrower,
     uint256 repayAmount,
@@ -443,9 +442,9 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
 
     pair.swap(
       token0 == W_NATIVE_ADDRESS ? repayAmount : 0,
-        token0 != W_NATIVE_ADDRESS ? repayAmount : 0,
-        address(this),
-        msg.data
+      token0 != W_NATIVE_ADDRESS ? repayAmount : 0,
+      address(this),
+      msg.data
     );
 
     // Exchange profit, send NATIVE to coinbase if necessary, and transfer seized funds
@@ -601,7 +600,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
   }
 
   /**
- * @dev Callback function for PCS flashloans.
+   * @dev Callback function for PCS flashloans.
    */
   function pancakeCall(
     address sender,
@@ -705,7 +704,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     if (redemptionStrategies.length > 0) {
       require(
         redemptionStrategies.length == strategyData.length,
-        "IRedemptionStrategy contract array and strategy data bytes array mnust the the same length."
+        "IRedemptionStrategy contract array and strategy data bytes array must be the same length."
       );
       for (uint256 i = 0; i < redemptionStrategies.length; i++)
         (underlyingCollateral, underlyingCollateralSeized) = redeemCustomCollateral(
@@ -719,12 +718,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     // Check side of the flashloan to repay: if input token (underlying collateral) is part of flashloan, repay it (to avoid reentracy error); otherwise, convert to W_NATIVE and repay W_NATIVE
     if (
       address(uniswapV2Router) == UNISWAP_V2_ROUTER_02_ADDRESS &&
-      address(underlyingCollateral) ==
-      (
-        cErc20Collateral.underlying() == STABLE_TOKEN
-          ? BTC_TOKEN
-          : STABLE_TOKEN
-      )
+      address(underlyingCollateral) == (cErc20Collateral.underlying() == STABLE_TOKEN ? BTC_TOKEN : STABLE_TOKEN)
     ) {
       // Get tokens required to repay flashloan and repay flashloan in non-W_NATIVE tokens
       uint256 tokensRequired = getAmountsIn(
@@ -961,7 +955,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
 
   /**
    * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`], but performing a delegate call.
-   * Copied from https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/cb4774ace1cb84f2662fa47c573780aab937628b/contracts/utils/MulticallUpgradeable.sol#L37
+   * Copied from https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/contracts/blob/cb4774ace1cb84f2662fa47c573780aab937628b/contracts/utils/MulticallUpgradeable.sol#L37
    */
   function _functionDelegateCall(address target, bytes memory data) private returns (bytes memory) {
     require(AddressUpgradeable.isContract(target), "Address: delegate call to non-contract");
@@ -973,7 +967,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
 
   /**
    * @dev Used by `_functionDelegateCall` to verify the result of a delegate call.
-   * Copied from https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/cb4774ace1cb84f2662fa47c573780aab937628b/contracts/utils/MulticallUpgradeable.sol#L45
+   * Copied from https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/contracts/blob/cb4774ace1cb84f2662fa47c573780aab937628b/contracts/utils/MulticallUpgradeable.sol#L45
    */
   function _verifyCallResult(
     bool success,
