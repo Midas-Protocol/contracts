@@ -2,12 +2,12 @@ import { BigNumber, constants, Contract, ContractFactory, ethers, providers, uti
 
 import { cERC20Conf, DelegateContractName, FuseBaseConstructor, InterestRateModelConf } from "../Fuse/types";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { CErc20Delegate } from "../../typechain";
+import { CErc20Delegate } from "../../typechain/CErc20Delegate";
 import { COMPTROLLER_ERROR_CODES } from "../Fuse/config";
 
 export function withAsset<TBase extends FuseBaseConstructor>(Base: TBase) {
   return class PoolAsset extends Base {
-    private COMPTROLLER_ERROR_CODES: Array<string> = COMPTROLLER_ERROR_CODES;
+    public COMPTROLLER_ERROR_CODES: Array<string> = COMPTROLLER_ERROR_CODES;
     async deployAsset(
       irmConf: InterestRateModelConf,
       cTokenConf: cERC20Conf,
