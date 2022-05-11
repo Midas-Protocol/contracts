@@ -84,7 +84,7 @@ jobs:
   build-and-test-evmostestnet:
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FORK_BLOCK_NUMBER: 897089
+      FORK_BLOCK_NUMBER: 1217475
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
