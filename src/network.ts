@@ -148,21 +148,21 @@ export const irmConfig = (deployments: ChainDeployment, artifacts: Artifacts) =>
 export const chainPluginConfig: ChainPlugins = {
   [SupportedChains.ganache]: {
     // TRIBE
-    "0x5d7075e5A69A4d55BfA86F8d6ae49D7893D968f9": [
+    "0xeD4764ad14Bb60DC698372B92e51CEC62688DC52": [
       {
         strategyName: "Mock Tribe Strategy With TOUCH Rewards",
-        strategyAddress: "0xdC206B5684A85ddEb4e2e1Ca48A1fCb5C3d31Ef3",
+        strategyAddress: "0x0152B5D6531fb9D58274caA61C5a3070bE0DA12F",
         dynamicFlywheel: {
-          address: "0x681cEEE3d6781394b2ECD7a4b9d5214f537aFeEb",
-          rewardToken: "0x54572129Fd040C19F9ab57A1a152e95C1fEC0dF0", // TOUCH
+          address: "0xcB8A516b152a2c510d0860b551f157A9a3fc0f24",
+          rewardToken: "0xD54Ae101D6980dB5a8Aa60124b2e5D4B7f02f12C", // TOUCH
         },
       },
     ],
     // TOUCH
-    "0xf9a089C918ad9c484201E7d328C0d29019997117": [
+    "0xD54Ae101D6980dB5a8Aa60124b2e5D4B7f02f12C": [
       {
         strategyName: "Mock Touch Strategy",
-        strategyAddress: "0x56385f347e18452C00801c9E5029E7658B017EB5",
+        strategyAddress: "0x0565f350D74c532fBDb73C41D82Cd3Cbfa118422",
       },
     ],
   },
