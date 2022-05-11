@@ -35,6 +35,7 @@ abstract contract BaseTest is DSTest {
 
   function configureAddressesProvider() internal {
     if (ap.owner() == address(0)) {
+      ap.initialize(address(this));
       if(block.chainid == BSC_MAINNET) {
         // external addresses
         ap.setAddress("wtoken", 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
