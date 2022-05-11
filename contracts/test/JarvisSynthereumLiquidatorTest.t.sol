@@ -6,16 +6,22 @@ import "../liquidators/JarvisSynthereumLiquidator.sol";
 
 contract JarvisSynthereumLiquidatorTest is BaseTest {
   JarvisSynthereumLiquidator private liquidator;
-  address whale;
+
+  // TODO in the addresses provider?
+  ISynthereumLiquidityPool synthereumLiquiditiyPool = ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49);
+
+  address whale = 0xB57c5C22aA7b9Cd25D557f061Df61cBCe1898456;
+  IERC20Upgradeable jBRLToken = IERC20Upgradeable(0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
+
+  IERC20Upgradeable bUSD;
 
   function setUp() public {
-    whale = 0xB57c5C22aA7b9Cd25D557f061Df61cBCe1898456;
     uint64 expirationPeriod = 60 * 40; // 40 mins
-    liquidator = new JarvisSynthereumLiquidator(chainConfig.synthereumLiquiditiyPool, expirationPeriod);
+    bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
+    liquidator = new JarvisSynthereumLiquidator(synthereumLiquiditiyPool, expirationPeriod);
   }
 
   function testRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
-    IERC20Upgradeable jBRLToken = chainConfig.coins[1];
     uint256 whaleBalance = jBRLToken.balanceOf(whale);
     vm.prank(whale);
     jBRLToken.transfer(address(liquidator), whaleBalance);
@@ -24,7 +30,7 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(jBRLToken, whaleBalance, "");
 
     // should be BUSD
-    assertEq(address(outputToken), address(chainConfig.coins[0]));
+    assertEq(address(outputToken), address(bUSD));
     assertEq(outputAmount, redeemableAmount);
   }
 
@@ -34,7 +40,6 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
     vm.prank(manager);
     pool.emergencyShutdown();
 
-    IERC20Upgradeable jBRLToken = chainConfig.coins[1];
     uint256 whaleBalance = jBRLToken.balanceOf(whale);
     vm.prank(whale);
     jBRLToken.transfer(address(liquidator), whaleBalance);
@@ -43,7 +48,7 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(jBRLToken, whaleBalance, "");
 
     // should be BUSD
-    assertEq(address(outputToken), address(chainConfig.coins[0]));
+    assertEq(address(outputToken), address(bUSD));
     assertEq(outputAmount, redeemableAmount + fee);
   }
 }

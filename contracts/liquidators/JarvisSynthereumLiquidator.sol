@@ -10,6 +10,9 @@ contract JarvisSynthereumLiquidator is IRedemptionStrategy {
 
   constructor(ISynthereumLiquidityPool _pool, uint64 _txExpirationPeriod) {
     pool = _pool;
+
+    // check added per the audit comments
+    require(_txExpirationPeriod >= 60 * 10, "at least 10 mins expiration period required");
     // time limit to include the tx in a block as anti-slippage measure
     txExpirationPeriod = _txExpirationPeriod;
   }
