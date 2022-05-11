@@ -4,7 +4,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { ChainDeployConfig, chainDeployConfig } from "../chainDeploy";
 import { deployIRMs } from "../chainDeploy/helpers";
 import { deployFuseSafeLiquidator } from "../chainDeploy/helpers/liquidator";
-import { AddressesProvider } from "../typechain";
+import { AddressesProvider } from "../typechain/AddressesProvider";
 
 const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
   const chainId = await getChainId();
@@ -298,14 +298,12 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     proxy: {
       execute: {
         methodName: "initialize",
-        args: [
-          deployer
-        ]
+        args: [deployer],
       },
       proxyContract: "OpenZeppelinTransparentProxy",
       owner: deployer,
     },
-    waitConfirmations: 1
+    waitConfirmations: 1,
   });
 
   ////
@@ -325,7 +323,6 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   }
   ////
 
-
   /// EXTERNAL ADDRESSES
   const addressesProvider = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
   tx = await addressesProvider.setAddress("IUniswapV2Factory", chainDeployParams.uniswap.uniswapV2FactoryAddress);
@@ -337,7 +334,6 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   /// SYSTEM ADDRESSES
   tx = await addressesProvider.setAddress("MasterPriceOracle", masterPO.address);
   await tx.wait();
-
 };
 
 func.tags = ["prod"];
