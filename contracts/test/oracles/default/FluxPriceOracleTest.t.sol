@@ -60,13 +60,13 @@ contract FluxPriceOracleTest is BaseTest {
     setUpWithNativeFeed();
     setUpOracles();
     uint256 price = oracle.price(address(1));
-    assertEq(price, 611734882004000000000);
+    assertEq(price, 478313755100000000000);
   }
 
   function testFluxPriceOracleWithMasterPriceOracle() public shouldRun(forChains(EVMOS_TESTNET)) {
     setUpWithMasterPriceOracle();
     setUpOracles();
     uint256 price = oracle.price(address(1));
-    assertEq(price, 611734882004000000000);
+    assertEq(price, 478313755100000000000);
   }
 }
