@@ -41,8 +41,8 @@ contract AutofarmERC4626 is ERC4626 {
   /**
      @notice Creates a new Vault that accepts a specific underlying token.
      @param _asset The ERC20 compliant token the Vault should accept.
-     @param _flywheel TODO
-     @param _poolId TODO
+     @param _flywheel Flywheel to pull AUTO rewards
+     @param _poolId The poolId in AutofarmV2
      @param _autoToken The AUTO token. Used to approve flywheel
      @param _autofarm The autofarm contract.
 

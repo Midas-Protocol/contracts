@@ -50,8 +50,8 @@ contract EllipsisERC4626 is ERC4626 {
   /**
      @notice Creates a new Vault that accepts a specific underlying token.
      @param _asset The ERC20 compliant token the Vault should accept.
-     @param _flywheel TODO
-     @param _lpTokenStaker TODO
+     @param _flywheel Flywheel to pull EPX rewards
+     @param _lpTokenStaker LpTokenStaker contract from Ellipsis
     */
   constructor(
     ERC20 _asset,

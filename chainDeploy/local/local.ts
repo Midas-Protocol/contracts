@@ -25,7 +25,7 @@ export const deployConfig: ChainDeployConfig = {
       // 0xdC206B5684A85ddEb4e2e1Ca48A1fCb5C3d31Ef3
       strategy: "MockERC4626Dynamic",
       underlying: "", // TRIBE
-      flywheelIndex: 0,
+      flywheelIndices: [0],
       otherParams: [],
       name: "MockERC4626Dynamic",
     },
@@ -122,7 +122,11 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments, run }: Cha
   for (const pluginConfig of deployConfig.plugins) {
     if (pluginConfig) {
       const plugin = await ethers.getContract(`${pluginConfig.strategy}_${pluginConfig.name}`, deployer);
-      tx = await addressesProvider.setPlugin(pluginConfig.underlying, plugin.address, `${pluginConfig.strategy}_${pluginConfig.name}`);
+      tx = await addressesProvider.setPlugin(
+        pluginConfig.underlying,
+        plugin.address,
+        `${pluginConfig.strategy}_${pluginConfig.name}`
+      );
       await tx.wait();
     }
   }
@@ -131,7 +135,11 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments, run }: Cha
   for (const dynamicFlywheel of deployConfig.dynamicFlywheels) {
     if (dynamicFlywheel) {
       const flywheelRewards = await ethers.getContract(`FuseFlywheelDynamicRewards_${dynamicFlywheel.name}`, deployer);
-      tx = await addressesProvider.setFlywheelRewards(dynamicFlywheel.rewardToken, flywheelRewards.address, `FuseFlywheelDynamicRewards_${dynamicFlywheel.name}`);
+      tx = await addressesProvider.setFlywheelRewards(
+        dynamicFlywheel.rewardToken,
+        flywheelRewards.address,
+        `FuseFlywheelDynamicRewards_${dynamicFlywheel.name}`
+      );
       await tx.wait();
     }
   }
