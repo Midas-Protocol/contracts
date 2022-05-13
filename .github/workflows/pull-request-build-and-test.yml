@@ -33,17 +33,8 @@ jobs:
           node-version: 16.x
           cache: "npm"
 
-      - name: Install NPM packages
-        run: npm install
-
-      - name: Run build
-        run: npm run build
-
-      - name: Run hardhat tests
-        run: npm run test:hardhat
-
       - name: Run forge tests
-        run: npm run test:forge
+        run: yarn run test:forge
 
   build-and-test-bsc:
     env:
@@ -69,17 +60,8 @@ jobs:
           node-version: 16.x
           cache: "npm"
 
-      - name: Install NPM packages
-        run: npm install
-
-      - name: Run build
-        run: npm run build
-
-      - name: Run hardhat tests on BSC
-        run: npm run test:bsc
-
       - name: Run forge tests on BSC
-        run: npm run test:forge:bsc
+        run: yarn run test:forge:bsc
 
   build-and-test-evmostestnet:
     env:
@@ -104,14 +86,8 @@ jobs:
           node-version: 16.x
           cache: "npm"
 
-      - name: Install NPM packages
-        run: npm install
-
-      - name: Run build
-        run: npm run build
-
       - name: Run forge tests on Evmos Testnet
-        run: npm run test:forge:evmostestnet
+        run: yarn run test:forge:evmostestnet
 
   build-and-test-moonbeam:
     env:
@@ -136,11 +112,5 @@ jobs:
           node-version: 16.x
           cache: "npm"
 
-      - name: Install NPM packages
-        run: npm install
-
-      - name: Run build
-        run: npm run build
-
       - name: Run forge tests on Moonbeam
-        run: npm run test:forge:moonbeam
+        run: yarn run test:forge:moonbeam
