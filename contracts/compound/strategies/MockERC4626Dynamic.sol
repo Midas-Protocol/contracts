@@ -26,7 +26,7 @@ contract MockERC4626Dynamic is ERC4626 {
   /**
      @notice Creates a new Vault that accepts a specific underlying token.
      @param _asset The ERC20 compliant token the Vault should accept.
-     @param _flywheel TODO
+     @param _flywheel Flywheel to pull in rewardsToken
     */
   constructor(ERC20 _asset, FlywheelCore _flywheel)
     ERC4626(
