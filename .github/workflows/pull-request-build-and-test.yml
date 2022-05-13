@@ -28,13 +28,8 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-
       - name: Run forge tests
-        run: yarn run test:forge
+        run: forge test
 
   build-and-test-bsc:
     env:
@@ -55,13 +50,8 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-
       - name: Run forge tests on BSC
-        run: yarn run test:forge:bsc
+        run: forge test --fork-url ${FORK_URL_BSC} --fork-block-number ${FORK_BLOCK_NUMBER}
 
   build-and-test-evmostestnet:
     env:
@@ -81,13 +71,8 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-
       - name: Run forge tests on Evmos Testnet
-        run: yarn run test:forge:evmostestnet
+        run: forge test --fork-url https://eth.bd.evmos.dev:8545 --fork-block-number ${FORK_BLOCK_NUMBER}
 
   build-and-test-moonbeam:
     env:
@@ -107,10 +92,5 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-
       - name: Run forge tests on Moonbeam
-        run: yarn run test:forge:moonbeam
+        run: forge test --fork-url https://rpc.api.moonbeam.network --fork-block-number ${FORK_BLOCK_NUMBER}
