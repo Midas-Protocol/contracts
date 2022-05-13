@@ -3,6 +3,7 @@ import { Erc4626PluginDeployFnParams, FuseFlywheelDeployFnParams } from "..";
 import { FuseFlywheelCore } from "../../typechain/FuseFlywheelCore";
 import ERC20 from "../../out/ERC20.sol/ERC20.json";
 import { PluginConfig } from "./types";
+import { FlywheelCore__factory } from "../../typechain";
 
 export const deployFlywheelWithDynamicRewards = async ({
   ethers,
@@ -46,7 +47,7 @@ export const deployFlywheelWithDynamicRewards = async ({
       const tx = await flywheelCore.setFlywheelRewards(fdr.address, { from: deployer });
       await tx.wait();
       console.log("setFlywheelRewards: ", tx.hash);
-      dynamicFlywheels.push(fdr.address);
+      dynamicFlywheels.push(fwc.address);
     } else {
       dynamicFlywheels.push(null);
     }
