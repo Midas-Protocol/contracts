@@ -181,10 +181,6 @@ contract MockCToken is MockERC20, ICToken {
         return token.balanceOf(address(this));
     }
 
-    function totalBorrows() external view override returns (uint256) {
-        return _totalBorrowed;
-    }
-
     function totalReserves() external pure override returns (uint256) {
         return 0;
     }
@@ -240,6 +236,10 @@ contract MockCToken is MockERC20, ICToken {
         return 0;
     }
 
+    function totalBorrows() external view override returns (uint256) {
+        return _totalBorrowed;
+    }
+
     function borrowBalanceStored(address account) external view override returns (uint256) {
         return borrowBalances[account];
     }
@@ -251,5 +251,9 @@ contract MockCToken is MockERC20, ICToken {
 
     function accrualBlockNumber() external view returns (uint256) {
         return block.number;
+    }
+
+    function borrowIndex() external view returns (uint256) {
+        return 1e18;
     }
 }

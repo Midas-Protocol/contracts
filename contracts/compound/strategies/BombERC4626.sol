@@ -8,7 +8,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 /**
  * @title Bomb ERC4626 Contract
  * @notice ERC4626 strategy for BOMB staking
- * @author vminkov
+ * @author Veliko Minkov <veliko@midascapital.xyz>
  *
  * Stakes the deposited BOMB in the xBOMB token contract which mints xBOMB for the depositor
  * and that xBOMB can be redeemed for a better xBOMB/BOMB rate when BOMB rewards are accumulated

@@ -73,6 +73,7 @@ contract Booster3070SplitTest is DSTest {
     }
 
     function testMarketGauges(address alice, address bob, uint112 votingPower) public {
+        vm.assume(alice != 0x0000000000000000000000000000000000000000);
         vm.assume(alice != bob);
         vm.assume(votingPower > 0);
         veToken.mint(address(this), votingPower);
@@ -114,7 +115,7 @@ contract Booster3070SplitTest is DSTest {
         flywheel.claimRewards(bob);
 
         uint256 aliceRewardsAfter = rewardToken.balanceOf(alice);
-        assertEq(aliceRewardsAfter, 5130, "alice should not have any rewards in the beginning");
+        assertEq(aliceRewardsAfter, 5130, "wrong end rewards balance for alice");
 
         uint256 bobRewardsAfter = rewardToken.balanceOf(bob);
         assertEq(aliceRewardsAfter + bobRewardsAfter, rewardsForCycle, "total rewards claimed should equal the rewards for the cycle");
