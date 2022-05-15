@@ -267,9 +267,6 @@ export function withAsset<TBase extends FuseBaseConstructor>(Base: TBase) {
       // Get Comptroller
       const comptroller = this.getComptrollerInstance(conf.comptroller, options);
 
-      // Check for price feed assuming !bypassPriceFeedCheck
-      if (!conf.bypassPriceFeedCheck) await this.checkForCErc20PriceFeed(comptroller, conf);
-
       // Deploy CErc20Delegate implementation contract if necessary
       if (!implementationAddress) {
         implementationAddress = this.chainDeployment.CErc20Delegate.address;
