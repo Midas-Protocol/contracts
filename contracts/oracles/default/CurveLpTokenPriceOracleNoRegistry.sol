@@ -178,7 +178,7 @@ contract CurveLpTokenPriceOracleNoRegistry is
      */
     function _acceptAdmin() public returns (uint256) {
         // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
-        if (msg.sender != pendingAdmin || msg.sender == address(0)) {
+        if (msg.sender != pendingAdmin) {
             return
                 fail(
                     Error.UNAUTHORIZED,
