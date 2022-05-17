@@ -33,7 +33,7 @@ contract FusePoolLens is Initializable {
     string[] memory _hardcodedNames,
     string[] memory _hardcodedSymbols,
     string[] memory _uniswapLPTokenNames,
-    string[] memory _uniswapLPTokenSymbols, 
+    string[] memory _uniswapLPTokenSymbols,
     string[] memory _uniswapLPTokenDisplayNames
   ) public initializer {
     require(address(_directory) != address(0), "FusePoolDirectory instance cannot be the zero address.");
