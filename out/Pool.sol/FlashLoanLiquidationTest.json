@@ -1,0 +1,198 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "createPool",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x6080604052348015600f57600080fd5b50606580601d6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80639a06b11314602d575b600080fd5b00fea264697066735822122021d8ac512387e5b5dafa5a4c2d186f37098277a92c0a1c1207c73b5e7e77b20764736f6c634300080a0033",
+    "sourceMap": "107:71:214:-:0;;;;;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c80639a06b11314602d575b600080fd5b00fea264697066735822122021d8ac512387e5b5dafa5a4c2d186f37098277a92c0a1c1207c73b5e7e77b20764736f6c634300080a0033",
+    "sourceMap": "107:71:214:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;145:31;",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/test/helpers/Pool.sol",
+    "id": 58288,
+    "exportedSymbols": {
+      "CErc20": [
+        9319
+      ],
+      "CErc20Interface": [
+        15362
+      ],
+      "CErc20Storage": [
+        15303
+      ],
+      "CEtherInterface": [
+        15365
+      ],
+      "CToken": [
+        14883
+      ],
+      "CTokenAdminStorage": [
+        14901
+      ],
+      "CTokenInterface": [
+        15299
+      ],
+      "CTokenStorage": [
+        14990
+      ],
+      "CarefulMath": [
+        15562
+      ],
+      "CompLike": [
+        8965
+      ],
+      "Comptroller": [
+        19520
+      ],
+      "ComptrollerErrorReporter": [
+        20514
+      ],
+      "ComptrollerInterface": [
+        19756
+      ],
+      "ComptrollerV1Storage": [
+        19832
+      ],
+      "ComptrollerV2Storage": [
+        19914
+      ],
+      "ComptrollerV3Storage": [
+        19943
+      ],
+      "EIP20Interface": [
+        20316
+      ],
+      "EIP20NonStandardInterface": [
+        20388
+      ],
+      "Exponential": [
+        21308
+      ],
+      "ExponentialNoError": [
+        22062
+      ],
+      "FlashLoanLiquidationTest": [
+        58287
+      ],
+      "IFuseFeeDistributor": [
+        24631
+      ],
+      "InterestRateModel": [
+        24665
+      ],
+      "PriceOracle": [
+        26673
+      ],
+      "RewardsDistributorDelegate": [
+        28569
+      ],
+      "RewardsDistributorDelegateStorageV1": [
+        28785
+      ],
+      "RewardsDistributorDelegatorStorage": [
+        28717
+      ],
+      "TokenErrorReporter": [
+        20714
+      ],
+      "Unitroller": [
+        29964
+      ],
+      "UnitrollerAdminStorage": [
+        19810
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:140:214",
+    "nodes": [
+      {
+        "id": 58281,
+        "nodeType": "PragmaDirective",
+        "src": "39:24:214",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 58282,
+        "nodeType": "ImportDirective",
+        "src": "65:40:214",
+        "absolutePath": "/Users/peet/git/contracts/contracts/compound/Comptroller.sol",
+        "file": "../../compound/Comptroller.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 58288,
+        "sourceUnit": 19521,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 58287,
+        "nodeType": "ContractDefinition",
+        "src": "107:71:214",
+        "nodes": [
+          {
+            "id": 58286,
+            "nodeType": "FunctionDefinition",
+            "src": "145:31:214",
+            "body": {
+              "id": 58285,
+              "nodeType": "Block",
+              "src": "174:2:214",
+              "statements": []
+            },
+            "functionSelector": "9a06b113",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "createPool",
+            "nameLocation": "154:10:214",
+            "parameters": {
+              "id": 58283,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "164:2:214"
+            },
+            "returnParameters": {
+              "id": 58284,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "174:0:214"
+            },
+            "scope": 58287,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "FlashLoanLiquidationTest",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          58287
+        ],
+        "name": "FlashLoanLiquidationTest",
+        "nameLocation": "116:24:214",
+        "scope": 58288,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  }
+}

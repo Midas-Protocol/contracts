@@ -1,0 +1,157 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "collateralToken",
+      "outputs": [
+        {
+          "internalType": "contract IERC20Upgradeable",
+          "name": "collateralCurrency",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "synthereumFinder",
+      "outputs": [
+        {
+          "internalType": "contract ISynthereumFinder",
+          "name": "finder",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "syntheticToken",
+      "outputs": [
+        {
+          "internalType": "contract IERC20Upgradeable",
+          "name": "syntheticCurrency",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "syntheticTokenSymbol",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "symbol",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "version",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "poolVersion",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/jarvis/ISynthereumLiquidityPoolGeneral.sol",
+    "id": 34225,
+    "exportedSymbols": {
+      "IERC20Upgradeable": [
+        89465
+      ],
+      "ISynthereumDeployment": [
+        33965
+      ],
+      "ISynthereumFinder": [
+        33985
+      ],
+      "ISynthereumLiquidityPoolGeneral": [
+        34224
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "42:182:91",
+    "nodes": [
+      {
+        "id": 34220,
+        "nodeType": "PragmaDirective",
+        "src": "42:23:91",
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".4"
+        ]
+      },
+      {
+        "id": 34221,
+        "nodeType": "ImportDirective",
+        "src": "67:37:91",
+        "absolutePath": "/Users/peet/git/contracts/contracts/external/jarvis/ISynthereumDeployment.sol",
+        "file": "./ISynthereumDeployment.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 34225,
+        "sourceUnit": 33966,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 34224,
+        "nodeType": "ContractDefinition",
+        "src": "106:117:91",
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 34222,
+              "name": "ISynthereumDeployment",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 33965,
+              "src": "153:21:91"
+            },
+            "id": 34223,
+            "nodeType": "InheritanceSpecifier",
+            "src": "153:21:91"
+          }
+        ],
+        "canonicalName": "ISynthereumLiquidityPoolGeneral",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          34224,
+          33965
+        ],
+        "name": "ISynthereumLiquidityPoolGeneral",
+        "nameLocation": "116:31:91",
+        "scope": 34225,
+        "usedErrors": []
+      }
+    ],
+    "license": "AGPL-3.0-only"
+  }
+}

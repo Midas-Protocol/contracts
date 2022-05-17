@@ -1,0 +1,316 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "stETH",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "stEthPerToken",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_wstETHAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "unwrap",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/lido/IWstETH.sol",
+    "id": 34302,
+    "exportedSymbols": {
+      "IWstETH": [
+        34301
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:1455:95",
+    "nodes": [
+      {
+        "id": 34280,
+        "nodeType": "PragmaDirective",
+        "src": "39:24:95",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 34301,
+        "nodeType": "ContractDefinition",
+        "src": "877:616:95",
+        "nodes": [
+          {
+            "id": 34286,
+            "nodeType": "FunctionDefinition",
+            "src": "899:49:95",
+            "functionSelector": "c1fe3e48",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "stETH",
+            "nameLocation": "908:5:95",
+            "parameters": {
+              "id": 34282,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "913:2:95"
+            },
+            "returnParameters": {
+              "id": 34285,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 34284,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 34286,
+                  "src": "939:7:95",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 34283,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "939:7:95",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "938:9:95"
+            },
+            "scope": 34301,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 34292,
+            "nodeType": "FunctionDefinition",
+            "src": "1056:57:95",
+            "documentation": {
+              "id": 34287,
+              "nodeType": "StructuredDocumentation",
+              "src": "952:101:95",
+              "text": " @notice Get amount of wstETH for a one stETH\n @return Amount of stETH for 1 wstETH"
+            },
+            "functionSelector": "035faf82",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "stEthPerToken",
+            "nameLocation": "1065:13:95",
+            "parameters": {
+              "id": 34288,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1078:2:95"
+            },
+            "returnParameters": {
+              "id": 34291,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 34290,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 34292,
+                  "src": "1104:7:95",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 34289,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1104:7:95",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1103:9:95"
+            },
+            "scope": 34301,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 34300,
+            "nodeType": "FunctionDefinition",
+            "src": "1425:66:95",
+            "documentation": {
+              "id": 34293,
+              "nodeType": "StructuredDocumentation",
+              "src": "1117:305:95",
+              "text": " @notice Exchanges wstETH to stETH\n @param _wstETHAmount amount of wstETH to uwrap in exchange for stETH\n @dev Requirements:\n  - `_wstETHAmount` must be non-zero\n  - msg.sender must have at least `_wstETHAmount` wstETH.\n @return Amount of stETH user receives after unwrap"
+            },
+            "functionSelector": "de0e9a3e",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "unwrap",
+            "nameLocation": "1434:6:95",
+            "parameters": {
+              "id": 34296,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 34295,
+                  "mutability": "mutable",
+                  "name": "_wstETHAmount",
+                  "nameLocation": "1449:13:95",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 34300,
+                  "src": "1441:21:95",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 34294,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1441:7:95",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1440:23:95"
+            },
+            "returnParameters": {
+              "id": 34299,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 34298,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 34300,
+                  "src": "1482:7:95",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 34297,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1482:7:95",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1481:9:95"
+            },
+            "scope": 34301,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IWstETH",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 34281,
+          "nodeType": "StructuredDocumentation",
+          "src": "65:811:95",
+          "text": " @title StETH token wrapper with static balances.\n @dev It's an ERC20 token that represents the account's share of the total\n supply of stETH tokens. WstETH token's balance only changes on transfers,\n unlike StETH that is also changed when oracles report staking rewards and\n penalties. It's a \"power user\" token for DeFi protocols which don't\n support rebasable tokens.\n The contract is also a trustless wrapper that accepts stETH tokens and mints\n wstETH in return. Then the user unwraps, the contract burns user's wstETH\n and sends user locked stETH in return.\n The contract provides the staking shortcut: user can send ETH with regular\n transfer and get wstETH in return. The contract will send ETH to Lido submit\n method, staking it and wrapping the received stETH."
+        },
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          34301
+        ],
+        "name": "IWstETH",
+        "nameLocation": "887:7:95",
+        "scope": 34302,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  }
+}

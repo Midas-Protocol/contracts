@@ -1,0 +1,201 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "OHM",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "_trigger",
+          "type": "bool"
+        }
+      ],
+      "name": "unstake",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/olympus/OlympusStaking.sol",
+    "id": 34606,
+    "exportedSymbols": {
+      "OlympusStaking": [
+        34605
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "42:155:99",
+    "nodes": [
+      {
+        "id": 34595,
+        "nodeType": "PragmaDirective",
+        "src": "42:24:99",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 34605,
+        "nodeType": "ContractDefinition",
+        "src": "68:128:99",
+        "nodes": [
+          {
+            "id": 34597,
+            "nodeType": "VariableDeclaration",
+            "src": "105:18:99",
+            "constant": false,
+            "functionSelector": "a6c41fec",
+            "mutability": "mutable",
+            "name": "OHM",
+            "nameLocation": "120:3:99",
+            "scope": 34605,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 34596,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "105:7:99",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 34604,
+            "nodeType": "FunctionDefinition",
+            "src": "128:66:99",
+            "functionSelector": "9ebea88c",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "unstake",
+            "nameLocation": "137:7:99",
+            "parameters": {
+              "id": 34602,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 34599,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "153:7:99",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 34604,
+                  "src": "145:15:99",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 34598,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "145:7:99",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 34601,
+                  "mutability": "mutable",
+                  "name": "_trigger",
+                  "nameLocation": "167:8:99",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 34604,
+                  "src": "162:13:99",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 34600,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "162:4:99",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "144:32:99"
+            },
+            "returnParameters": {
+              "id": 34603,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "193:0:99"
+            },
+            "scope": 34605,
+            "stateMutability": "nonpayable",
+            "virtual": true,
+            "visibility": "external"
+          }
+        ],
+        "abstract": true,
+        "baseContracts": [],
+        "canonicalName": "OlympusStaking",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          34605
+        ],
+        "name": "OlympusStaking",
+        "nameLocation": "86:14:99",
+        "scope": 34606,
+        "usedErrors": []
+      }
+    ],
+    "license": "AGPL-3.0-only"
+  }
+}

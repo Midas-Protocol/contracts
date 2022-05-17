@@ -1,0 +1,421 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "factory",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "pair",
+          "type": "address"
+        }
+      ],
+      "name": "observationLength",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "observations",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "price0Cumulative",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "price1Cumulative",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/keep3r/Keep3rV1Oracle.sol",
+    "id": 34253,
+    "exportedSymbols": {
+      "Keep3rV1Oracle": [
+        34252
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:379:92",
+    "nodes": [
+      {
+        "id": 34226,
+        "nodeType": "PragmaDirective",
+        "src": "32:24:92",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 34252,
+        "nodeType": "ContractDefinition",
+        "src": "58:352:92",
+        "nodes": [
+          {
+            "id": 34233,
+            "nodeType": "StructDefinition",
+            "src": "95:107:92",
+            "canonicalName": "Keep3rV1Oracle.Observation",
+            "members": [
+              {
+                "constant": false,
+                "id": 34228,
+                "mutability": "mutable",
+                "name": "timestamp",
+                "nameLocation": "128:9:92",
+                "nodeType": "VariableDeclaration",
+                "scope": 34233,
+                "src": "120:17:92",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 34227,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "120:7:92",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 34230,
+                "mutability": "mutable",
+                "name": "price0Cumulative",
+                "nameLocation": "151:16:92",
+                "nodeType": "VariableDeclaration",
+                "scope": 34233,
+                "src": "143:24:92",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 34229,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "143:7:92",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 34232,
+                "mutability": "mutable",
+                "name": "price1Cumulative",
+                "nameLocation": "181:16:92",
+                "nodeType": "VariableDeclaration",
+                "scope": 34233,
+                "src": "173:24:92",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 34231,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "173:7:92",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "Observation",
+            "nameLocation": "102:11:92",
+            "scope": 34252,
+            "visibility": "public"
+          },
+          {
+            "id": 34238,
+            "nodeType": "FunctionDefinition",
+            "src": "206:59:92",
+            "functionSelector": "c45a0155",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "factory",
+            "nameLocation": "215:7:92",
+            "parameters": {
+              "id": 34234,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "222:2:92"
+            },
+            "returnParameters": {
+              "id": 34237,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 34236,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 34238,
+                  "src": "256:7:92",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 34235,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "256:7:92",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "255:9:92"
+            },
+            "scope": 34252,
+            "stateMutability": "pure",
+            "virtual": true,
+            "visibility": "external"
+          },
+          {
+            "id": 34244,
+            "nodeType": "VariableDeclaration",
+            "src": "269:53:92",
+            "constant": false,
+            "functionSelector": "02459966",
+            "mutability": "mutable",
+            "name": "observations",
+            "nameLocation": "310:12:92",
+            "scope": 34252,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_struct$_Observation_$34233_storage_$dyn_storage_$",
+              "typeString": "mapping(address => struct Keep3rV1Oracle.Observation[])"
+            },
+            "typeName": {
+              "id": 34243,
+              "keyType": {
+                "id": 34239,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "277:7:92",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "269:33:92",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_struct$_Observation_$34233_storage_$dyn_storage_$",
+                "typeString": "mapping(address => struct Keep3rV1Oracle.Observation[])"
+              },
+              "valueType": {
+                "baseType": {
+                  "id": 34241,
+                  "nodeType": "UserDefinedTypeName",
+                  "pathNode": {
+                    "id": 34240,
+                    "name": "Observation",
+                    "nodeType": "IdentifierPath",
+                    "referencedDeclaration": 34233,
+                    "src": "288:11:92"
+                  },
+                  "referencedDeclaration": 34233,
+                  "src": "288:11:92",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Observation_$34233_storage_ptr",
+                    "typeString": "struct Keep3rV1Oracle.Observation"
+                  }
+                },
+                "id": 34242,
+                "nodeType": "ArrayTypeName",
+                "src": "288:13:92",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_array$_t_struct$_Observation_$34233_storage_$dyn_storage_ptr",
+                  "typeString": "struct Keep3rV1Oracle.Observation[]"
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 34251,
+            "nodeType": "FunctionDefinition",
+            "src": "327:81:92",
+            "functionSelector": "81bfb885",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "observationLength",
+            "nameLocation": "336:17:92",
+            "parameters": {
+              "id": 34247,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 34246,
+                  "mutability": "mutable",
+                  "name": "pair",
+                  "nameLocation": "362:4:92",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 34251,
+                  "src": "354:12:92",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 34245,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "354:7:92",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "353:14:92"
+            },
+            "returnParameters": {
+              "id": 34250,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 34249,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 34251,
+                  "src": "399:7:92",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 34248,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "399:7:92",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "398:9:92"
+            },
+            "scope": 34252,
+            "stateMutability": "view",
+            "virtual": true,
+            "visibility": "external"
+          }
+        ],
+        "abstract": true,
+        "baseContracts": [],
+        "canonicalName": "Keep3rV1Oracle",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          34252
+        ],
+        "name": "Keep3rV1Oracle",
+        "nameLocation": "76:14:92",
+        "scope": 34253,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  }
+}

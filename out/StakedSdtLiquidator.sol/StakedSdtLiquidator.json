@@ -1,0 +1,812 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20Upgradeable",
+          "name": "inputToken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "inputAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "strategyData",
+          "type": "bytes"
+        }
+      ],
+      "name": "redeem",
+      "outputs": [
+        {
+          "internalType": "contract IERC20Upgradeable",
+          "name": "outputToken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "outputAmount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x608060405234801561001057600080fd5b5061030d806100206000396000f3fe608060405234801561001057600080fd5b506004361061002b5760003560e01c806310badf4e14610030575b600080fd5b61004361003e3660046101cd565b610066565b604080516001600160a01b03909316835260208301919091520160405180910390f35b6040516367dfd4c960e01b815260048101839052600090819085906001600160a01b038216906367dfd4c990602401600060405180830381600087803b1580156100af57600080fd5b505af11580156100c3573d6000803e3d6000fd5b50505050806001600160a01b031663a4520f5c6040518163ffffffff1660e01b8152600401602060405180830381865afa158015610105573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610129919061029a565b6040516370a0823160e01b81523060048201529093506001600160a01b038416906370a0823190602401602060405180830381865afa158015610170573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061019491906102be565b915050935093915050565b6001600160a01b03811681146101b457600080fd5b50565b634e487b7160e01b600052604160045260246000fd5b6000806000606084860312156101e257600080fd5b83356101ed8161019f565b925060208401359150604084013567ffffffffffffffff8082111561021157600080fd5b818601915086601f83011261022557600080fd5b813581811115610237576102376101b7565b604051601f8201601f19908116603f0116810190838211818310171561025f5761025f6101b7565b8160405282815289602084870101111561027857600080fd5b8260208601602083013760006020848301015280955050505050509250925092565b6000602082840312156102ac57600080fd5b81516102b78161019f565b9392505050565b6000602082840312156102d057600080fd5b505191905056fea264697066735822122033c11571bd5d4c60a378fde5e5521247d685f00156bcbcebd677f7c8cac4fda564736f6c634300080a0033",
+    "sourceMap": "446:1015:146:-:0;;;;;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x608060405234801561001057600080fd5b506004361061002b5760003560e01c806310badf4e14610030575b600080fd5b61004361003e3660046101cd565b610066565b604080516001600160a01b03909316835260208301919091520160405180910390f35b6040516367dfd4c960e01b815260048101839052600090819085906001600160a01b038216906367dfd4c990602401600060405180830381600087803b1580156100af57600080fd5b505af11580156100c3573d6000803e3d6000fd5b50505050806001600160a01b031663a4520f5c6040518163ffffffff1660e01b8152600401602060405180830381865afa158015610105573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610129919061029a565b6040516370a0823160e01b81523060048201529093506001600160a01b038416906370a0823190602401602060405180830381865afa158015610170573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061019491906102be565b915050935093915050565b6001600160a01b03811681146101b457600080fd5b50565b634e487b7160e01b600052604160045260246000fd5b6000806000606084860312156101e257600080fd5b83356101ed8161019f565b925060208401359150604084013567ffffffffffffffff8082111561021157600080fd5b818601915086601f83011261022557600080fd5b813581811115610237576102376101b7565b604051601f8201601f19908116603f0116810190838211818310171561025f5761025f6101b7565b8160405282815289602084870101111561027857600080fd5b8260208601602083013760006020848301015280955050505050509250925092565b6000602082840312156102ac57600080fd5b81516102b78161019f565b9392505050565b6000602082840312156102d057600080fd5b505191905056fea264697066735822122033c11571bd5d4c60a378fde5e5521247d685f00156bcbcebd677f7c8cac4fda564736f6c634300080a0033",
+    "sourceMap": "446:1015:146:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1000:459;;;;;;:::i;:::-;;:::i;:::-;;;;-1:-1:-1;;;;;1695:32:278;;;1677:51;;1759:2;1744:18;;1737:34;;;;1650:18;1000:459:146;;;;;;;;1315:28;;-1:-1:-1;;;1315:28:146;;;;;1928:25:278;;;1137:29:146;;;;1297:10;;-1:-1:-1;;;;;1315:15:146;;;;;1901:18:278;;1315:28:146;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1381:9;-1:-1:-1;;;;;1381:13:146;;:15;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;1418:36;;-1:-1:-1;;;1418:36:146;;1448:4;1418:36;;;2412:51:278;1349:48:146;;-1:-1:-1;;;;;;1418:21:146;;;;;2385:18:278;;1418:36:146;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;1403:51;;1190:269;1000:459;;;;;;:::o;14:150:278:-;-1:-1:-1;;;;;108:31:278;;98:42;;88:70;;154:1;151;144:12;88:70;14:150;:::o;169:127::-;230:10;225:3;221:20;218:1;211:31;261:4;258:1;251:15;285:4;282:1;275:15;301:1170;414:6;422;430;483:2;471:9;462:7;458:23;454:32;451:52;;;499:1;496;489:12;451:52;538:9;525:23;557:50;601:5;557:50;:::i;:::-;626:5;-1:-1:-1;678:2:278;663:18;;650:32;;-1:-1:-1;733:2:278;718:18;;705:32;756:18;786:14;;;783:34;;;813:1;810;803:12;783:34;851:6;840:9;836:22;826:32;;896:7;889:4;885:2;881:13;877:27;867:55;;918:1;915;908:12;867:55;954:2;941:16;976:2;972;969:10;966:36;;;982:18;;:::i;:::-;1057:2;1051:9;1025:2;1111:13;;-1:-1:-1;;1107:22:278;;;1131:2;1103:31;1099:40;1087:53;;;1155:18;;;1175:22;;;1152:46;1149:72;;;1201:18;;:::i;:::-;1241:10;1237:2;1230:22;1276:2;1268:6;1261:18;1316:7;1311:2;1306;1302;1298:11;1294:20;1291:33;1288:53;;;1337:1;1334;1327:12;1288:53;1393:2;1388;1384;1380:11;1375:2;1367:6;1363:15;1350:46;1438:1;1433:2;1428;1420:6;1416:15;1412:24;1405:35;1459:6;1449:16;;;;;;;301:1170;;;;;:::o;1964:297::-;2061:6;2114:2;2102:9;2093:7;2089:23;2085:32;2082:52;;;2130:1;2127;2120:12;2082:52;2162:9;2156:16;2181:50;2225:5;2181:50;:::i;:::-;2250:5;1964:297;-1:-1:-1;;;1964:297:278:o;2474:184::-;2544:6;2597:2;2585:9;2576:7;2572:23;2568:32;2565:52;;;2613:1;2610;2603:12;2565:52;-1:-1:-1;2636:16:278;;2474:184;-1:-1:-1;2474:184:278:o",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/liquidators/StakedSdtLiquidator.sol",
+    "id": 39691,
+    "exportedSymbols": {
+      "IERC20Upgradeable": [
+        89465
+      ],
+      "IRedemptionStrategy": [
+        39008
+      ],
+      "Sanctuary": [
+        35385
+      ],
+      "StakedSdtLiquidator": [
+        39690
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:1423:146",
+    "nodes": [
+      {
+        "id": 39631,
+        "nodeType": "PragmaDirective",
+        "src": "39:24:146",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 39632,
+        "nodeType": "ImportDirective",
+        "src": "65:88:146",
+        "absolutePath": "/Users/peet/git/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+        "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 39691,
+        "sourceUnit": 89466,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 39633,
+        "nodeType": "ImportDirective",
+        "src": "155:44:146",
+        "absolutePath": "/Users/peet/git/contracts/contracts/external/stakedao/Sanctuary.sol",
+        "file": "../external/stakedao/Sanctuary.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 39691,
+        "sourceUnit": 35386,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 39634,
+        "nodeType": "ImportDirective",
+        "src": "201:35:146",
+        "absolutePath": "/Users/peet/git/contracts/contracts/liquidators/IRedemptionStrategy.sol",
+        "file": "./IRedemptionStrategy.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 39691,
+        "sourceUnit": 39009,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 39690,
+        "nodeType": "ContractDefinition",
+        "src": "446:1015:146",
+        "nodes": [
+          {
+            "id": 39689,
+            "nodeType": "FunctionDefinition",
+            "src": "1000:459:146",
+            "baseFunctions": [
+              39007
+            ],
+            "body": {
+              "id": 39688,
+              "nodeType": "Block",
+              "src": "1190:269:146",
+              "statements": [
+                {
+                  "assignments": [
+                    39656
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 39656,
+                      "mutability": "mutable",
+                      "name": "sanctuary",
+                      "nameLocation": "1267:9:146",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 39688,
+                      "src": "1257:19:146",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_Sanctuary_$35385",
+                        "typeString": "contract Sanctuary"
+                      },
+                      "typeName": {
+                        "id": 39655,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 39654,
+                          "name": "Sanctuary",
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 35385,
+                          "src": "1257:9:146"
+                        },
+                        "referencedDeclaration": 35385,
+                        "src": "1257:9:146",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_Sanctuary_$35385",
+                          "typeString": "contract Sanctuary"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 39663,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "id": 39660,
+                            "name": "inputToken",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 39641,
+                            "src": "1297:10:146",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                              "typeString": "contract IERC20Upgradeable"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                              "typeString": "contract IERC20Upgradeable"
+                            }
+                          ],
+                          "id": 39659,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "1289:7:146",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 39658,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1289:7:146",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 39661,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1289:19:146",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 39657,
+                      "name": "Sanctuary",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 35385,
+                      "src": "1279:9:146",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_contract$_Sanctuary_$35385_$",
+                        "typeString": "type(contract Sanctuary)"
+                      }
+                    },
+                    "id": 39662,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1279:30:146",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_Sanctuary_$35385",
+                      "typeString": "contract Sanctuary"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1257:52:146"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 39667,
+                        "name": "inputAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 39643,
+                        "src": "1331:11:146",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "id": 39664,
+                        "name": "sanctuary",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 39656,
+                        "src": "1315:9:146",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_Sanctuary_$35385",
+                          "typeString": "contract Sanctuary"
+                        }
+                      },
+                      "id": 39666,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "leave",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 35384,
+                      "src": "1315:15:146",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_nonpayable$_t_uint256_$returns$__$",
+                        "typeString": "function (uint256) external"
+                      }
+                    },
+                    "id": 39668,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1315:28:146",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 39669,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1315:28:146"
+                },
+                {
+                  "expression": {
+                    "id": 39676,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 39670,
+                      "name": "outputToken",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 39650,
+                      "src": "1349:11:146",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                        "typeString": "contract IERC20Upgradeable"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "arguments": [],
+                          "expression": {
+                            "argumentTypes": [],
+                            "expression": {
+                              "id": 39672,
+                              "name": "sanctuary",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 39656,
+                              "src": "1381:9:146",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_contract$_Sanctuary_$35385",
+                                "typeString": "contract Sanctuary"
+                              }
+                            },
+                            "id": 39673,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "sdt",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 35374,
+                            "src": "1381:13:146",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_external_view$__$returns$_t_contract$_IERC20Upgradeable_$89465_$",
+                              "typeString": "function () view external returns (contract IERC20Upgradeable)"
+                            }
+                          },
+                          "id": 39674,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1381:15:146",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                            "typeString": "contract IERC20Upgradeable"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                            "typeString": "contract IERC20Upgradeable"
+                          }
+                        ],
+                        "id": 39671,
+                        "name": "IERC20Upgradeable",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 89465,
+                        "src": "1363:17:146",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_IERC20Upgradeable_$89465_$",
+                          "typeString": "type(contract IERC20Upgradeable)"
+                        }
+                      },
+                      "id": 39675,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1363:34:146",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                        "typeString": "contract IERC20Upgradeable"
+                      }
+                    },
+                    "src": "1349:48:146",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                      "typeString": "contract IERC20Upgradeable"
+                    }
+                  },
+                  "id": 39677,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1349:48:146"
+                },
+                {
+                  "expression": {
+                    "id": 39686,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 39678,
+                      "name": "outputAmount",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 39652,
+                      "src": "1403:12:146",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "arguments": [
+                            {
+                              "id": 39683,
+                              "name": "this",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": -28,
+                              "src": "1448:4:146",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_contract$_StakedSdtLiquidator_$39690",
+                                "typeString": "contract StakedSdtLiquidator"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_contract$_StakedSdtLiquidator_$39690",
+                                "typeString": "contract StakedSdtLiquidator"
+                              }
+                            ],
+                            "id": 39682,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1440:7:146",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 39681,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1440:7:146",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 39684,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1440:13:146",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "expression": {
+                          "id": 39679,
+                          "name": "outputToken",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 39650,
+                          "src": "1418:11:146",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                            "typeString": "contract IERC20Upgradeable"
+                          }
+                        },
+                        "id": 39680,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "balanceOf",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 89422,
+                        "src": "1418:21:146",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_uint256_$",
+                          "typeString": "function (address) view external returns (uint256)"
+                        }
+                      },
+                      "id": 39685,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1418:36:146",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "1403:51:146",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 39687,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1403:51:146"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 39638,
+              "nodeType": "StructuredDocumentation",
+              "src": "502:495:146",
+              "text": " @notice Redeems custom collateral `token` for an underlying token.\n @param inputToken The input wrapped token to be redeemed for an underlying token.\n @param inputAmount The amount of the input wrapped token to be redeemed for an underlying token.\n @param strategyData The ABI-encoded data to be used in the redemption strategy logic.\n @return outputToken The underlying ERC20 token outputted.\n @return outputAmount The quantity of underlying tokens outputted."
+            },
+            "functionSelector": "10badf4e",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeem",
+            "nameLocation": "1009:6:146",
+            "overrides": {
+              "id": 39647,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "1119:8:146"
+            },
+            "parameters": {
+              "id": 39646,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 39641,
+                  "mutability": "mutable",
+                  "name": "inputToken",
+                  "nameLocation": "1039:10:146",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39689,
+                  "src": "1021:28:146",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                    "typeString": "contract IERC20Upgradeable"
+                  },
+                  "typeName": {
+                    "id": 39640,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 39639,
+                      "name": "IERC20Upgradeable",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 89465,
+                      "src": "1021:17:146"
+                    },
+                    "referencedDeclaration": 89465,
+                    "src": "1021:17:146",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                      "typeString": "contract IERC20Upgradeable"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 39643,
+                  "mutability": "mutable",
+                  "name": "inputAmount",
+                  "nameLocation": "1063:11:146",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39689,
+                  "src": "1055:19:146",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 39642,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1055:7:146",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 39645,
+                  "mutability": "mutable",
+                  "name": "strategyData",
+                  "nameLocation": "1093:12:146",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39689,
+                  "src": "1080:25:146",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 39644,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1080:5:146",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1015:94:146"
+            },
+            "returnParameters": {
+              "id": 39653,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 39650,
+                  "mutability": "mutable",
+                  "name": "outputToken",
+                  "nameLocation": "1155:11:146",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39689,
+                  "src": "1137:29:146",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                    "typeString": "contract IERC20Upgradeable"
+                  },
+                  "typeName": {
+                    "id": 39649,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 39648,
+                      "name": "IERC20Upgradeable",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 89465,
+                      "src": "1137:17:146"
+                    },
+                    "referencedDeclaration": 89465,
+                    "src": "1137:17:146",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                      "typeString": "contract IERC20Upgradeable"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 39652,
+                  "mutability": "mutable",
+                  "name": "outputAmount",
+                  "nameLocation": "1176:12:146",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39689,
+                  "src": "1168:20:146",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 39651,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1168:7:146",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1136:53:146"
+            },
+            "scope": 39690,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 39636,
+              "name": "IRedemptionStrategy",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 39008,
+              "src": "478:19:146"
+            },
+            "id": 39637,
+            "nodeType": "InheritanceSpecifier",
+            "src": "478:19:146"
+          }
+        ],
+        "canonicalName": "StakedSdtLiquidator",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 39635,
+          "nodeType": "StructuredDocumentation",
+          "src": "238:207:146",
+          "text": " @title StakedSdtLiquidator\n @notice Redeems Staked SDT (xSDT) for underlying SUSHI for use as a step in a liquidation.\n @author David Lucid <david@rari.capital> (https://github.com/davidlucid)"
+        },
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          39690,
+          39008
+        ],
+        "name": "StakedSdtLiquidator",
+        "nameLocation": "455:19:146",
+        "scope": 39691,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  }
+}

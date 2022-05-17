@@ -1,0 +1,194 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "name",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "reason",
+          "type": "string"
+        }
+      ],
+      "name": "requireAndGetAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/synthetix/AddressResolver.sol",
+    "id": 35417,
+    "exportedSymbols": {
+      "AddressResolver": [
+        35416
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:159:107",
+    "nodes": [
+      {
+        "id": 35406,
+        "nodeType": "PragmaDirective",
+        "src": "32:24:107",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 35416,
+        "nodeType": "ContractDefinition",
+        "src": "58:132:107",
+        "nodes": [
+          {
+            "id": 35415,
+            "nodeType": "FunctionDefinition",
+            "src": "88:100:107",
+            "functionSelector": "dacb2d01",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "requireAndGetAddress",
+            "nameLocation": "97:20:107",
+            "parameters": {
+              "id": 35411,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35408,
+                  "mutability": "mutable",
+                  "name": "name",
+                  "nameLocation": "126:4:107",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35415,
+                  "src": "118:12:107",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 35407,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "118:7:107",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 35410,
+                  "mutability": "mutable",
+                  "name": "reason",
+                  "nameLocation": "148:6:107",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35415,
+                  "src": "132:22:107",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 35409,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "132:6:107",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "117:38:107"
+            },
+            "returnParameters": {
+              "id": 35414,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35413,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35415,
+                  "src": "179:7:107",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 35412,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "179:7:107",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "178:9:107"
+            },
+            "scope": 35416,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "AddressResolver",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          35416
+        ],
+        "name": "AddressResolver",
+        "nameLocation": "68:15:107",
+        "scope": 35417,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  }
+}
