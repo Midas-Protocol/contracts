@@ -1,0 +1,4387 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "int256",
+          "name": "_staticPrice",
+          "type": "int256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "latestAnswer",
+      "outputs": [
+        {
+          "internalType": "int256",
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "staticPrice",
+      "outputs": [
+        {
+          "internalType": "int256",
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x608060405234801561001057600080fd5b506040516100e93803806100e983398101604081905261002f91610037565b600055610050565b60006020828403121561004957600080fd5b5051919050565b608b8061005e6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c806350d25bcd146037578063ca34364814604d575b600080fd5b6000545b60405190815260200160405180910390f35b603b6000548156fea26469706673582212204a9841622d4b0b327eca0ef5161b687bb915b75700fa47b819e17ecc7570bb0364736f6c634300080a0033",
+    "sourceMap": "498:221:228:-:0;;;559:70;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;598:11;:26;498:221;;14:183:278;83:6;136:2;124:9;115:7;111:23;107:32;104:52;;;152:1;149;142:12;104:52;-1:-1:-1;175:16:278;;14:183;-1:-1:-1;14:183:278:o;:::-;498:221:228;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x6080604052348015600f57600080fd5b506004361060325760003560e01c806350d25bcd146037578063ca34364814604d575b600080fd5b6000545b60405190815260200160405180910390f35b603b6000548156fea26469706673582212204a9841622d4b0b327eca0ef5161b687bb915b75700fa47b819e17ecc7570bb0364736f6c634300080a0033",
+    "sourceMap": "498:221:228:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;633:84;680:6;701:11;633:84;;;158:25:278;;;146:2;131:18;633:84:228;;;;;;;529:25;;;;;",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/test/oracles/default/FluxPriceOracleTest.t.sol",
+    "id": 64767,
+    "exportedSymbols": {
+      "AddressUpgradeable": [
+        89957
+      ],
+      "AddressesProvider": [
+        64893
+      ],
+      "AggregatorV3Interface": [
+        32714
+      ],
+      "BasePriceOracle": [
+        40982
+      ],
+      "BaseTest": [
+        59790
+      ],
+      "CLV2V3Interface": [
+        33734
+      ],
+      "ChainlinkPriceOracleV2": [
+        42227
+      ],
+      "ClonesUpgradeable": [
+        88634
+      ],
+      "ContextUpgradeable": [
+        89999
+      ],
+      "CurveLpTokenPriceOracleNoRegistry": [
+        42511
+      ],
+      "DSTest": [
+        68041
+      ],
+      "ERC20Upgradeable": [
+        89387
+      ],
+      "FluxPriceOracle": [
+        43722
+      ],
+      "FluxPriceOracleTest": [
+        64766
+      ],
+      "ICErc20": [
+        33165
+      ],
+      "ICToken": [
+        33314
+      ],
+      "IERC20MetadataUpgradeable": [
+        89490
+      ],
+      "IERC20Upgradeable": [
+        89465
+      ],
+      "IPriceOracle": [
+        33504
+      ],
+      "ISynthereumDeployment": [
+        33965
+      ],
+      "ISynthereumFinder": [
+        33985
+      ],
+      "ISynthereumLiquidityPool": [
+        34218
+      ],
+      "ISynthereumLiquidityPoolGeneral": [
+        34224
+      ],
+      "IUniswapV2Factory": [
+        35618
+      ],
+      "IUniswapV2Pair": [
+        35860
+      ],
+      "Initializable": [
+        88776
+      ],
+      "MasterPriceOracle": [
+        41436
+      ],
+      "MockFluxPriceFeed": [
+        64473
+      ],
+      "OwnableUpgradeable": [
+        88554
+      ],
+      "SimplePriceOracle": [
+        44234
+      ],
+      "UniswapTwapPriceOracleV2": [
+        44993
+      ],
+      "UniswapTwapPriceOracleV2Factory": [
+        45144
+      ],
+      "UniswapTwapPriceOracleV2Root": [
+        46098
+      ],
+      "Vm": [
+        71569
+      ],
+      "WETH": [
+        91561
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:2583:228",
+    "nodes": [
+      {
+        "id": 64441,
+        "nodeType": "PragmaDirective",
+        "src": "39:24:228",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 64442,
+        "nodeType": "ImportDirective",
+        "src": "65:37:228",
+        "absolutePath": "/Users/peet/git/contracts/contracts/test/config/BaseTest.t.sol",
+        "file": "../../config/BaseTest.t.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 64767,
+        "sourceUnit": 59791,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 64444,
+        "nodeType": "ImportDirective",
+        "src": "103:79:228",
+        "absolutePath": "/Users/peet/git/contracts/contracts/oracles/default/FluxPriceOracle.sol",
+        "file": "../../../oracles/default/FluxPriceOracle.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 64767,
+        "sourceUnit": 43723,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 64443,
+              "name": "FluxPriceOracle",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "src": "112:15:228",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "id": 64446,
+        "nodeType": "ImportDirective",
+        "src": "183:77:228",
+        "absolutePath": "/Users/peet/git/contracts/contracts/external/flux/CLV2V3Interface.sol",
+        "file": "../../../external/flux/CLV2V3Interface.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 64767,
+        "sourceUnit": 33735,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 64445,
+              "name": "CLV2V3Interface",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "src": "192:15:228",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "id": 64448,
+        "nodeType": "ImportDirective",
+        "src": "261:83:228",
+        "absolutePath": "/Users/peet/git/contracts/contracts/oracles/default/SimplePriceOracle.sol",
+        "file": "../../../oracles/default/SimplePriceOracle.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 64767,
+        "sourceUnit": 44235,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 64447,
+              "name": "SimplePriceOracle",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "src": "270:17:228",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "id": 64450,
+        "nodeType": "ImportDirective",
+        "src": "345:75:228",
+        "absolutePath": "/Users/peet/git/contracts/contracts/oracles/MasterPriceOracle.sol",
+        "file": "../../../oracles/MasterPriceOracle.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 64767,
+        "sourceUnit": 41437,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 64449,
+              "name": "MasterPriceOracle",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "src": "354:17:228",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "id": 64452,
+        "nodeType": "ImportDirective",
+        "src": "421:75:228",
+        "absolutePath": "/Users/peet/git/contracts/contracts/external/compound/IPriceOracle.sol",
+        "file": "../../../external/compound/IPriceOracle.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 64767,
+        "sourceUnit": 33505,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 64451,
+              "name": "IPriceOracle",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "src": "430:12:228",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "id": 64473,
+        "nodeType": "ContractDefinition",
+        "src": "498:221:228",
+        "nodes": [
+          {
+            "id": 64454,
+            "nodeType": "VariableDeclaration",
+            "src": "529:25:228",
+            "constant": false,
+            "functionSelector": "ca343648",
+            "mutability": "mutable",
+            "name": "staticPrice",
+            "nameLocation": "543:11:228",
+            "scope": 64473,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_int256",
+              "typeString": "int256"
+            },
+            "typeName": {
+              "id": 64453,
+              "name": "int256",
+              "nodeType": "ElementaryTypeName",
+              "src": "529:6:228",
+              "typeDescriptions": {
+                "typeIdentifier": "t_int256",
+                "typeString": "int256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 64464,
+            "nodeType": "FunctionDefinition",
+            "src": "559:70:228",
+            "body": {
+              "id": 64463,
+              "nodeType": "Block",
+              "src": "592:37:228",
+              "statements": [
+                {
+                  "expression": {
+                    "id": 64461,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 64459,
+                      "name": "staticPrice",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 64454,
+                      "src": "598:11:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int256",
+                        "typeString": "int256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 64460,
+                      "name": "_staticPrice",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 64456,
+                      "src": "612:12:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int256",
+                        "typeString": "int256"
+                      }
+                    },
+                    "src": "598:26:228",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_int256",
+                      "typeString": "int256"
+                    }
+                  },
+                  "id": 64462,
+                  "nodeType": "ExpressionStatement",
+                  "src": "598:26:228"
+                }
+              ]
+            },
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "parameters": {
+              "id": 64457,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 64456,
+                  "mutability": "mutable",
+                  "name": "_staticPrice",
+                  "nameLocation": "578:12:228",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 64464,
+                  "src": "571:19:228",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_int256",
+                    "typeString": "int256"
+                  },
+                  "typeName": {
+                    "id": 64455,
+                    "name": "int256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "571:6:228",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_int256",
+                      "typeString": "int256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "570:21:228"
+            },
+            "returnParameters": {
+              "id": 64458,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "592:0:228"
+            },
+            "scope": 64473,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "id": 64472,
+            "nodeType": "FunctionDefinition",
+            "src": "633:84:228",
+            "body": {
+              "id": 64471,
+              "nodeType": "Block",
+              "src": "688:29:228",
+              "statements": [
+                {
+                  "expression": {
+                    "id": 64469,
+                    "name": "staticPrice",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 64454,
+                    "src": "701:11:228",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_int256",
+                      "typeString": "int256"
+                    }
+                  },
+                  "functionReturnParameters": 64468,
+                  "id": 64470,
+                  "nodeType": "Return",
+                  "src": "694:18:228"
+                }
+              ]
+            },
+            "functionSelector": "50d25bcd",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "latestAnswer",
+            "nameLocation": "642:12:228",
+            "parameters": {
+              "id": 64465,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "654:2:228"
+            },
+            "returnParameters": {
+              "id": 64468,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 64467,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 64472,
+                  "src": "680:6:228",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_int256",
+                    "typeString": "int256"
+                  },
+                  "typeName": {
+                    "id": 64466,
+                    "name": "int256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "680:6:228",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_int256",
+                      "typeString": "int256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "679:8:228"
+            },
+            "scope": 64473,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "MockFluxPriceFeed",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          64473
+        ],
+        "name": "MockFluxPriceFeed",
+        "nameLocation": "507:17:228",
+        "scope": 64767,
+        "usedErrors": []
+      },
+      {
+        "id": 64766,
+        "nodeType": "ContractDefinition",
+        "src": "721:1900:228",
+        "nodes": [
+          {
+            "id": 64478,
+            "nodeType": "VariableDeclaration",
+            "src": "766:30:228",
+            "constant": false,
+            "mutability": "mutable",
+            "name": "oracle",
+            "nameLocation": "790:6:228",
+            "scope": 64766,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_FluxPriceOracle_$43722",
+              "typeString": "contract FluxPriceOracle"
+            },
+            "typeName": {
+              "id": 64477,
+              "nodeType": "UserDefinedTypeName",
+              "pathNode": {
+                "id": 64476,
+                "name": "FluxPriceOracle",
+                "nodeType": "IdentifierPath",
+                "referencedDeclaration": 43722,
+                "src": "766:15:228"
+              },
+              "referencedDeclaration": 43722,
+              "src": "766:15:228",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_FluxPriceOracle_$43722",
+                "typeString": "contract FluxPriceOracle"
+              }
+            },
+            "visibility": "private"
+          },
+          {
+            "id": 64527,
+            "nodeType": "FunctionDefinition",
+            "src": "801:313:228",
+            "body": {
+              "id": 64526,
+              "nodeType": "Block",
+              "src": "839:275:228",
+              "statements": [
+                {
+                  "assignments": [
+                    64483
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 64483,
+                      "mutability": "mutable",
+                      "name": "mock",
+                      "nameLocation": "863:4:228",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 64526,
+                      "src": "845:22:228",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_MockFluxPriceFeed_$64473",
+                        "typeString": "contract MockFluxPriceFeed"
+                      },
+                      "typeName": {
+                        "id": 64482,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 64481,
+                          "name": "MockFluxPriceFeed",
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 64473,
+                          "src": "845:17:228"
+                        },
+                        "referencedDeclaration": 64473,
+                        "src": "845:17:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_MockFluxPriceFeed_$64473",
+                          "typeString": "contract MockFluxPriceFeed"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 64493,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_rational_500000000_by_1",
+                          "typeString": "int_const 500000000"
+                        },
+                        "id": 64491,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "hexValue": "35",
+                          "id": 64487,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "892:1:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_5_by_1",
+                            "typeString": "int_const 5"
+                          },
+                          "value": "5"
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "*",
+                        "rightExpression": {
+                          "commonType": {
+                            "typeIdentifier": "t_rational_100000000_by_1",
+                            "typeString": "int_const 100000000"
+                          },
+                          "id": 64490,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "leftExpression": {
+                            "hexValue": "3130",
+                            "id": 64488,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "number",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "896:2:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_rational_10_by_1",
+                              "typeString": "int_const 10"
+                            },
+                            "value": "10"
+                          },
+                          "nodeType": "BinaryOperation",
+                          "operator": "**",
+                          "rightExpression": {
+                            "hexValue": "38",
+                            "id": 64489,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "number",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "900:1:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_rational_8_by_1",
+                              "typeString": "int_const 8"
+                            },
+                            "value": "8"
+                          },
+                          "src": "896:5:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_100000000_by_1",
+                            "typeString": "int_const 100000000"
+                          }
+                        },
+                        "src": "892:9:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_500000000_by_1",
+                          "typeString": "int_const 500000000"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_rational_500000000_by_1",
+                          "typeString": "int_const 500000000"
+                        }
+                      ],
+                      "id": 64486,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "NewExpression",
+                      "src": "870:21:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_creation_nonpayable$_t_int256_$returns$_t_contract$_MockFluxPriceFeed_$64473_$",
+                        "typeString": "function (int256) returns (contract MockFluxPriceFeed)"
+                      },
+                      "typeName": {
+                        "id": 64485,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 64484,
+                          "name": "MockFluxPriceFeed",
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 64473,
+                          "src": "874:17:228"
+                        },
+                        "referencedDeclaration": 64473,
+                        "src": "874:17:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_MockFluxPriceFeed_$64473",
+                          "typeString": "contract MockFluxPriceFeed"
+                        }
+                      }
+                    },
+                    "id": 64492,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "870:32:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_MockFluxPriceFeed_$64473",
+                      "typeString": "contract MockFluxPriceFeed"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "845:57:228"
+                },
+                {
+                  "expression": {
+                    "id": 64524,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 64494,
+                      "name": "oracle",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 64478,
+                      "src": "931:6:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_FluxPriceOracle_$43722",
+                        "typeString": "contract FluxPriceOracle"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "arguments": [
+                            {
+                              "id": 64500,
+                              "name": "this",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": -28,
+                              "src": "975:4:228",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_contract$_FluxPriceOracleTest_$64766",
+                                "typeString": "contract FluxPriceOracleTest"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_contract$_FluxPriceOracleTest_$64766",
+                                "typeString": "contract FluxPriceOracleTest"
+                              }
+                            ],
+                            "id": 64499,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "967:7:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 64498,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "967:7:228",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 64501,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "967:13:228",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        {
+                          "hexValue": "74727565",
+                          "id": 64502,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "bool",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "988:4:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          },
+                          "value": "true"
+                        },
+                        {
+                          "arguments": [
+                            {
+                              "hexValue": "30",
+                              "id": 64505,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "1008:1:228",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              }
+                            ],
+                            "id": 64504,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1000:7:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 64503,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1000:7:228",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 64506,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1000:10:228",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        {
+                          "arguments": [
+                            {
+                              "arguments": [
+                                {
+                                  "id": 64510,
+                                  "name": "mock",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 64483,
+                                  "src": "1042:4:228",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_contract$_MockFluxPriceFeed_$64473",
+                                    "typeString": "contract MockFluxPriceFeed"
+                                  }
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": [
+                                  {
+                                    "typeIdentifier": "t_contract$_MockFluxPriceFeed_$64473",
+                                    "typeString": "contract MockFluxPriceFeed"
+                                  }
+                                ],
+                                "id": 64509,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": true,
+                                "lValueRequested": false,
+                                "nodeType": "ElementaryTypeNameExpression",
+                                "src": "1034:7:228",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_address_$",
+                                  "typeString": "type(address)"
+                                },
+                                "typeName": {
+                                  "id": 64508,
+                                  "name": "address",
+                                  "nodeType": "ElementaryTypeName",
+                                  "src": "1034:7:228",
+                                  "typeDescriptions": {}
+                                }
+                              },
+                              "id": 64511,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "kind": "typeConversion",
+                              "lValueRequested": false,
+                              "names": [],
+                              "nodeType": "FunctionCall",
+                              "src": "1034:13:228",
+                              "tryCall": false,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_address",
+                                "typeString": "address"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_address",
+                                "typeString": "address"
+                              }
+                            ],
+                            "id": 64507,
+                            "name": "CLV2V3Interface",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 33734,
+                            "src": "1018:15:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_contract$_CLV2V3Interface_$33734_$",
+                              "typeString": "type(contract CLV2V3Interface)"
+                            }
+                          },
+                          "id": 64512,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1018:30:228",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_contract$_CLV2V3Interface_$33734",
+                            "typeString": "contract CLV2V3Interface"
+                          }
+                        },
+                        {
+                          "arguments": [
+                            {
+                              "arguments": [
+                                {
+                                  "hexValue": "30",
+                                  "id": 64516,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "number",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1082:1:228",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_rational_0_by_1",
+                                    "typeString": "int_const 0"
+                                  },
+                                  "value": "0"
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": [
+                                  {
+                                    "typeIdentifier": "t_rational_0_by_1",
+                                    "typeString": "int_const 0"
+                                  }
+                                ],
+                                "id": 64515,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": true,
+                                "lValueRequested": false,
+                                "nodeType": "ElementaryTypeNameExpression",
+                                "src": "1074:7:228",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_address_$",
+                                  "typeString": "type(address)"
+                                },
+                                "typeName": {
+                                  "id": 64514,
+                                  "name": "address",
+                                  "nodeType": "ElementaryTypeName",
+                                  "src": "1074:7:228",
+                                  "typeDescriptions": {}
+                                }
+                              },
+                              "id": 64517,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "typeConversion",
+                              "lValueRequested": false,
+                              "names": [],
+                              "nodeType": "FunctionCall",
+                              "src": "1074:10:228",
+                              "tryCall": false,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_address",
+                                "typeString": "address"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_address",
+                                "typeString": "address"
+                              }
+                            ],
+                            "id": 64513,
+                            "name": "MasterPriceOracle",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 41436,
+                            "src": "1056:17:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_contract$_MasterPriceOracle_$41436_$",
+                              "typeString": "type(contract MasterPriceOracle)"
+                            }
+                          },
+                          "id": 64518,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1056:29:228",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_contract$_MasterPriceOracle_$41436",
+                            "typeString": "contract MasterPriceOracle"
+                          }
+                        },
+                        {
+                          "arguments": [
+                            {
+                              "hexValue": "30",
+                              "id": 64521,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "1101:1:228",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              }
+                            ],
+                            "id": 64520,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1093:7:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 64519,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1093:7:228",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 64522,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1093:10:228",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          },
+                          {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          },
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          },
+                          {
+                            "typeIdentifier": "t_contract$_CLV2V3Interface_$33734",
+                            "typeString": "contract CLV2V3Interface"
+                          },
+                          {
+                            "typeIdentifier": "t_contract$_MasterPriceOracle_$41436",
+                            "typeString": "contract MasterPriceOracle"
+                          },
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 64497,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "NewExpression",
+                        "src": "940:19:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_creation_nonpayable$_t_address_$_t_bool_$_t_address_$_t_contract$_CLV2V3Interface_$33734_$_t_contract$_MasterPriceOracle_$41436_$_t_address_$returns$_t_contract$_FluxPriceOracle_$43722_$",
+                          "typeString": "function (address,bool,address,contract CLV2V3Interface,contract MasterPriceOracle,address) returns (contract FluxPriceOracle)"
+                        },
+                        "typeName": {
+                          "id": 64496,
+                          "nodeType": "UserDefinedTypeName",
+                          "pathNode": {
+                            "id": 64495,
+                            "name": "FluxPriceOracle",
+                            "nodeType": "IdentifierPath",
+                            "referencedDeclaration": 43722,
+                            "src": "944:15:228"
+                          },
+                          "referencedDeclaration": 43722,
+                          "src": "944:15:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_contract$_FluxPriceOracle_$43722",
+                            "typeString": "contract FluxPriceOracle"
+                          }
+                        }
+                      },
+                      "id": 64523,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "940:169:228",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_FluxPriceOracle_$43722",
+                        "typeString": "contract FluxPriceOracle"
+                      }
+                    },
+                    "src": "931:178:228",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_FluxPriceOracle_$43722",
+                      "typeString": "contract FluxPriceOracle"
+                    }
+                  },
+                  "id": 64525,
+                  "nodeType": "ExpressionStatement",
+                  "src": "931:178:228"
+                }
+              ]
+            },
+            "functionSelector": "4b1c48d5",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setUpWithNativeFeed",
+            "nameLocation": "810:19:228",
+            "parameters": {
+              "id": 64479,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "829:2:228"
+            },
+            "returnParameters": {
+              "id": 64480,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "839:0:228"
+            },
+            "scope": 64766,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "id": 64649,
+            "nodeType": "FunctionDefinition",
+            "src": "1118:654:228",
+            "body": {
+              "id": 64648,
+              "nodeType": "Block",
+              "src": "1163:609:228",
+              "statements": [
+                {
+                  "assignments": [
+                    64532
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 64532,
+                      "mutability": "mutable",
+                      "name": "spo",
+                      "nameLocation": "1187:3:228",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 64648,
+                      "src": "1169:21:228",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_SimplePriceOracle_$44234",
+                        "typeString": "contract SimplePriceOracle"
+                      },
+                      "typeName": {
+                        "id": 64531,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 64530,
+                          "name": "SimplePriceOracle",
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 44234,
+                          "src": "1169:17:228"
+                        },
+                        "referencedDeclaration": 44234,
+                        "src": "1169:17:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_SimplePriceOracle_$44234",
+                          "typeString": "contract SimplePriceOracle"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 64537,
+                  "initialValue": {
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "id": 64535,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "NewExpression",
+                      "src": "1193:21:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_creation_nonpayable$__$returns$_t_contract$_SimplePriceOracle_$44234_$",
+                        "typeString": "function () returns (contract SimplePriceOracle)"
+                      },
+                      "typeName": {
+                        "id": 64534,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 64533,
+                          "name": "SimplePriceOracle",
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 44234,
+                          "src": "1197:17:228"
+                        },
+                        "referencedDeclaration": 44234,
+                        "src": "1197:17:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_SimplePriceOracle_$44234",
+                          "typeString": "contract SimplePriceOracle"
+                        }
+                      }
+                    },
+                    "id": 64536,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1193:23:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_SimplePriceOracle_$44234",
+                      "typeString": "contract SimplePriceOracle"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1169:47:228"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "hexValue": "32",
+                            "id": 64543,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "number",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "1249:1:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_rational_2_by_1",
+                              "typeString": "int_const 2"
+                            },
+                            "value": "2"
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_rational_2_by_1",
+                              "typeString": "int_const 2"
+                            }
+                          ],
+                          "id": 64542,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "1241:7:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 64541,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1241:7:228",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 64544,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1241:10:228",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "hexValue": "323030303030303030303030303030303030",
+                        "id": 64545,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1253:18:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_200000000000000000_by_1",
+                          "typeString": "int_const 200000000000000000"
+                        },
+                        "value": "200000000000000000"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_rational_200000000000000000_by_1",
+                          "typeString": "int_const 200000000000000000"
+                        }
+                      ],
+                      "expression": {
+                        "id": 64538,
+                        "name": "spo",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64532,
+                        "src": "1222:3:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_SimplePriceOracle_$44234",
+                          "typeString": "contract SimplePriceOracle"
+                        }
+                      },
+                      "id": 64540,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "setDirectPrice",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 44179,
+                      "src": "1222:18:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
+                        "typeString": "function (address,uint256) external"
+                      }
+                    },
+                    "id": 64546,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1222:50:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 64547,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1222:50:228"
+                },
+                {
+                  "assignments": [
+                    64550
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 64550,
+                      "mutability": "mutable",
+                      "name": "mpo",
+                      "nameLocation": "1332:3:228",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 64648,
+                      "src": "1314:21:228",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_MasterPriceOracle_$41436",
+                        "typeString": "contract MasterPriceOracle"
+                      },
+                      "typeName": {
+                        "id": 64549,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 64548,
+                          "name": "MasterPriceOracle",
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 41436,
+                          "src": "1314:17:228"
+                        },
+                        "referencedDeclaration": 41436,
+                        "src": "1314:17:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_MasterPriceOracle_$41436",
+                          "typeString": "contract MasterPriceOracle"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 64555,
+                  "initialValue": {
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "id": 64553,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "NewExpression",
+                      "src": "1338:21:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_creation_nonpayable$__$returns$_t_contract$_MasterPriceOracle_$41436_$",
+                        "typeString": "function () returns (contract MasterPriceOracle)"
+                      },
+                      "typeName": {
+                        "id": 64552,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 64551,
+                          "name": "MasterPriceOracle",
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 41436,
+                          "src": "1342:17:228"
+                        },
+                        "referencedDeclaration": 41436,
+                        "src": "1342:17:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_MasterPriceOracle_$41436",
+                          "typeString": "contract MasterPriceOracle"
+                        }
+                      }
+                    },
+                    "id": 64554,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1338:23:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_MasterPriceOracle_$41436",
+                      "typeString": "contract MasterPriceOracle"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1314:47:228"
+                },
+                {
+                  "assignments": [
+                    64560
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 64560,
+                      "mutability": "mutable",
+                      "name": "underlyings",
+                      "nameLocation": "1384:11:228",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 64648,
+                      "src": "1367:28:228",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                        "typeString": "address[]"
+                      },
+                      "typeName": {
+                        "baseType": {
+                          "id": 64558,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1367:7:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "id": 64559,
+                        "nodeType": "ArrayTypeName",
+                        "src": "1367:9:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                          "typeString": "address[]"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 64566,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "hexValue": "31",
+                        "id": 64564,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1412:1:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_1_by_1",
+                          "typeString": "int_const 1"
+                        },
+                        "value": "1"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_rational_1_by_1",
+                          "typeString": "int_const 1"
+                        }
+                      ],
+                      "id": 64563,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "NewExpression",
+                      "src": "1398:13:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_objectcreation_pure$_t_uint256_$returns$_t_array$_t_address_$dyn_memory_ptr_$",
+                        "typeString": "function (uint256) pure returns (address[] memory)"
+                      },
+                      "typeName": {
+                        "baseType": {
+                          "id": 64561,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1402:7:228",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "id": 64562,
+                        "nodeType": "ArrayTypeName",
+                        "src": "1402:9:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                          "typeString": "address[]"
+                        }
+                      }
+                    },
+                    "id": 64565,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1398:16:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                      "typeString": "address[] memory"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1367:47:228"
+                },
+                {
+                  "expression": {
+                    "id": 64574,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "baseExpression": {
+                        "id": 64567,
+                        "name": "underlyings",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64560,
+                        "src": "1420:11:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                          "typeString": "address[] memory"
+                        }
+                      },
+                      "id": 64569,
+                      "indexExpression": {
+                        "hexValue": "30",
+                        "id": 64568,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1432:1:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        },
+                        "value": "0"
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "1420:14:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "hexValue": "32",
+                          "id": 64572,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "1445:1:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_2_by_1",
+                            "typeString": "int_const 2"
+                          },
+                          "value": "2"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_rational_2_by_1",
+                            "typeString": "int_const 2"
+                          }
+                        ],
+                        "id": 64571,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "nodeType": "ElementaryTypeNameExpression",
+                        "src": "1437:7:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_address_$",
+                          "typeString": "type(address)"
+                        },
+                        "typeName": {
+                          "id": 64570,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1437:7:228",
+                          "typeDescriptions": {}
+                        }
+                      },
+                      "id": 64573,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1437:10:228",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "src": "1420:27:228",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "id": 64575,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1420:27:228"
+                },
+                {
+                  "assignments": [
+                    64580
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 64580,
+                      "mutability": "mutable",
+                      "name": "oracles",
+                      "nameLocation": "1475:7:228",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 64648,
+                      "src": "1453:29:228",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_array$_t_contract$_IPriceOracle_$33504_$dyn_memory_ptr",
+                        "typeString": "contract IPriceOracle[]"
+                      },
+                      "typeName": {
+                        "baseType": {
+                          "id": 64578,
+                          "nodeType": "UserDefinedTypeName",
+                          "pathNode": {
+                            "id": 64577,
+                            "name": "IPriceOracle",
+                            "nodeType": "IdentifierPath",
+                            "referencedDeclaration": 33504,
+                            "src": "1453:12:228"
+                          },
+                          "referencedDeclaration": 33504,
+                          "src": "1453:12:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_contract$_IPriceOracle_$33504",
+                            "typeString": "contract IPriceOracle"
+                          }
+                        },
+                        "id": 64579,
+                        "nodeType": "ArrayTypeName",
+                        "src": "1453:14:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_contract$_IPriceOracle_$33504_$dyn_storage_ptr",
+                          "typeString": "contract IPriceOracle[]"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 64587,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "hexValue": "31",
+                        "id": 64585,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1504:1:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_1_by_1",
+                          "typeString": "int_const 1"
+                        },
+                        "value": "1"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_rational_1_by_1",
+                          "typeString": "int_const 1"
+                        }
+                      ],
+                      "id": 64584,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "NewExpression",
+                      "src": "1485:18:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_objectcreation_pure$_t_uint256_$returns$_t_array$_t_contract$_IPriceOracle_$33504_$dyn_memory_ptr_$",
+                        "typeString": "function (uint256) pure returns (contract IPriceOracle[] memory)"
+                      },
+                      "typeName": {
+                        "baseType": {
+                          "id": 64582,
+                          "nodeType": "UserDefinedTypeName",
+                          "pathNode": {
+                            "id": 64581,
+                            "name": "IPriceOracle",
+                            "nodeType": "IdentifierPath",
+                            "referencedDeclaration": 33504,
+                            "src": "1489:12:228"
+                          },
+                          "referencedDeclaration": 33504,
+                          "src": "1489:12:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_contract$_IPriceOracle_$33504",
+                            "typeString": "contract IPriceOracle"
+                          }
+                        },
+                        "id": 64583,
+                        "nodeType": "ArrayTypeName",
+                        "src": "1489:14:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_contract$_IPriceOracle_$33504_$dyn_storage_ptr",
+                          "typeString": "contract IPriceOracle[]"
+                        }
+                      }
+                    },
+                    "id": 64586,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1485:21:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_contract$_IPriceOracle_$33504_$dyn_memory_ptr",
+                      "typeString": "contract IPriceOracle[] memory"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1453:53:228"
+                },
+                {
+                  "expression": {
+                    "id": 64597,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "baseExpression": {
+                        "id": 64588,
+                        "name": "oracles",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64580,
+                        "src": "1512:7:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_contract$_IPriceOracle_$33504_$dyn_memory_ptr",
+                          "typeString": "contract IPriceOracle[] memory"
+                        }
+                      },
+                      "id": 64590,
+                      "indexExpression": {
+                        "hexValue": "30",
+                        "id": 64589,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1520:1:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        },
+                        "value": "0"
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "1512:10:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IPriceOracle_$33504",
+                        "typeString": "contract IPriceOracle"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "arguments": [
+                            {
+                              "id": 64594,
+                              "name": "spo",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 64532,
+                              "src": "1546:3:228",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_contract$_SimplePriceOracle_$44234",
+                                "typeString": "contract SimplePriceOracle"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_contract$_SimplePriceOracle_$44234",
+                                "typeString": "contract SimplePriceOracle"
+                              }
+                            ],
+                            "id": 64593,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1538:7:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 64592,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1538:7:228",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 64595,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1538:12:228",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 64591,
+                        "name": "IPriceOracle",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 33504,
+                        "src": "1525:12:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_IPriceOracle_$33504_$",
+                          "typeString": "type(contract IPriceOracle)"
+                        }
+                      },
+                      "id": 64596,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1525:26:228",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IPriceOracle_$33504",
+                        "typeString": "contract IPriceOracle"
+                      }
+                    },
+                    "src": "1512:39:228",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IPriceOracle_$33504",
+                      "typeString": "contract IPriceOracle"
+                    }
+                  },
+                  "id": 64598,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1512:39:228"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 64602,
+                        "name": "underlyings",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64560,
+                        "src": "1572:11:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                          "typeString": "address[] memory"
+                        }
+                      },
+                      {
+                        "id": 64603,
+                        "name": "oracles",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64580,
+                        "src": "1585:7:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_contract$_IPriceOracle_$33504_$dyn_memory_ptr",
+                          "typeString": "contract IPriceOracle[] memory"
+                        }
+                      },
+                      {
+                        "arguments": [
+                          {
+                            "arguments": [
+                              {
+                                "id": 64607,
+                                "name": "spo",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 64532,
+                                "src": "1615:3:228",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_contract$_SimplePriceOracle_$44234",
+                                  "typeString": "contract SimplePriceOracle"
+                                }
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_contract$_SimplePriceOracle_$44234",
+                                  "typeString": "contract SimplePriceOracle"
+                                }
+                              ],
+                              "id": 64606,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "nodeType": "ElementaryTypeNameExpression",
+                              "src": "1607:7:228",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_address_$",
+                                "typeString": "type(address)"
+                              },
+                              "typeName": {
+                                "id": 64605,
+                                "name": "address",
+                                "nodeType": "ElementaryTypeName",
+                                "src": "1607:7:228",
+                                "typeDescriptions": {}
+                              }
+                            },
+                            "id": 64608,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "typeConversion",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "1607:12:228",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          ],
+                          "id": 64604,
+                          "name": "IPriceOracle",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 33504,
+                          "src": "1594:12:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_contract$_IPriceOracle_$33504_$",
+                            "typeString": "type(contract IPriceOracle)"
+                          }
+                        },
+                        "id": 64609,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1594:26:228",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_IPriceOracle_$33504",
+                          "typeString": "contract IPriceOracle"
+                        }
+                      },
+                      {
+                        "arguments": [
+                          {
+                            "id": 64612,
+                            "name": "this",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": -28,
+                            "src": "1630:4:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_FluxPriceOracleTest_$64766",
+                              "typeString": "contract FluxPriceOracleTest"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_contract$_FluxPriceOracleTest_$64766",
+                              "typeString": "contract FluxPriceOracleTest"
+                            }
+                          ],
+                          "id": 64611,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "1622:7:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 64610,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1622:7:228",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 64613,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1622:13:228",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "hexValue": "74727565",
+                        "id": 64614,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "bool",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1637:4:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        "value": "true"
+                      },
+                      {
+                        "arguments": [
+                          {
+                            "hexValue": "30",
+                            "id": 64617,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "number",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "1651:1:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_rational_0_by_1",
+                              "typeString": "int_const 0"
+                            },
+                            "value": "0"
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_rational_0_by_1",
+                              "typeString": "int_const 0"
+                            }
+                          ],
+                          "id": 64616,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "1643:7:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 64615,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1643:7:228",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 64618,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1643:10:228",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                          "typeString": "address[] memory"
+                        },
+                        {
+                          "typeIdentifier": "t_array$_t_contract$_IPriceOracle_$33504_$dyn_memory_ptr",
+                          "typeString": "contract IPriceOracle[] memory"
+                        },
+                        {
+                          "typeIdentifier": "t_contract$_IPriceOracle_$33504",
+                          "typeString": "contract IPriceOracle"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "expression": {
+                        "id": 64599,
+                        "name": "mpo",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64550,
+                        "src": "1557:3:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_MasterPriceOracle_$41436",
+                          "typeString": "contract MasterPriceOracle"
+                        }
+                      },
+                      "id": 64601,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "initialize",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 41141,
+                      "src": "1557:14:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_nonpayable$_t_array$_t_address_$dyn_memory_ptr_$_t_array$_t_contract$_IPriceOracle_$33504_$dyn_memory_ptr_$_t_contract$_IPriceOracle_$33504_$_t_address_$_t_bool_$_t_address_$returns$__$",
+                        "typeString": "function (address[] memory,contract IPriceOracle[] memory,contract IPriceOracle,address,bool,address) external"
+                      }
+                    },
+                    "id": 64619,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1557:97:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 64620,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1557:97:228"
+                },
+                {
+                  "expression": {
+                    "id": 64646,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 64621,
+                      "name": "oracle",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 64478,
+                      "src": "1660:6:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_FluxPriceOracle_$43722",
+                        "typeString": "contract FluxPriceOracle"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "arguments": [
+                            {
+                              "id": 64627,
+                              "name": "this",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": -28,
+                              "src": "1697:4:228",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_contract$_FluxPriceOracleTest_$64766",
+                                "typeString": "contract FluxPriceOracleTest"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_contract$_FluxPriceOracleTest_$64766",
+                                "typeString": "contract FluxPriceOracleTest"
+                              }
+                            ],
+                            "id": 64626,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1689:7:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 64625,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1689:7:228",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 64628,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1689:13:228",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        {
+                          "hexValue": "74727565",
+                          "id": 64629,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "bool",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "1704:4:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          },
+                          "value": "true"
+                        },
+                        {
+                          "arguments": [
+                            {
+                              "hexValue": "30",
+                              "id": 64632,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "1718:1:228",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              }
+                            ],
+                            "id": 64631,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1710:7:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 64630,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1710:7:228",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 64633,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1710:10:228",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        {
+                          "arguments": [
+                            {
+                              "arguments": [
+                                {
+                                  "hexValue": "30",
+                                  "id": 64637,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "number",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1746:1:228",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_rational_0_by_1",
+                                    "typeString": "int_const 0"
+                                  },
+                                  "value": "0"
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": [
+                                  {
+                                    "typeIdentifier": "t_rational_0_by_1",
+                                    "typeString": "int_const 0"
+                                  }
+                                ],
+                                "id": 64636,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": true,
+                                "lValueRequested": false,
+                                "nodeType": "ElementaryTypeNameExpression",
+                                "src": "1738:7:228",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_address_$",
+                                  "typeString": "type(address)"
+                                },
+                                "typeName": {
+                                  "id": 64635,
+                                  "name": "address",
+                                  "nodeType": "ElementaryTypeName",
+                                  "src": "1738:7:228",
+                                  "typeDescriptions": {}
+                                }
+                              },
+                              "id": 64638,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "typeConversion",
+                              "lValueRequested": false,
+                              "names": [],
+                              "nodeType": "FunctionCall",
+                              "src": "1738:10:228",
+                              "tryCall": false,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_address",
+                                "typeString": "address"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_address",
+                                "typeString": "address"
+                              }
+                            ],
+                            "id": 64634,
+                            "name": "CLV2V3Interface",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 33734,
+                            "src": "1722:15:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_contract$_CLV2V3Interface_$33734_$",
+                              "typeString": "type(contract CLV2V3Interface)"
+                            }
+                          },
+                          "id": 64639,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1722:27:228",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_contract$_CLV2V3Interface_$33734",
+                            "typeString": "contract CLV2V3Interface"
+                          }
+                        },
+                        {
+                          "id": 64640,
+                          "name": "mpo",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 64550,
+                          "src": "1751:3:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_contract$_MasterPriceOracle_$41436",
+                            "typeString": "contract MasterPriceOracle"
+                          }
+                        },
+                        {
+                          "arguments": [
+                            {
+                              "hexValue": "32",
+                              "id": 64643,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "1764:1:228",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_2_by_1",
+                                "typeString": "int_const 2"
+                              },
+                              "value": "2"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_rational_2_by_1",
+                                "typeString": "int_const 2"
+                              }
+                            ],
+                            "id": 64642,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1756:7:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 64641,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1756:7:228",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 64644,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1756:10:228",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          },
+                          {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          },
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          },
+                          {
+                            "typeIdentifier": "t_contract$_CLV2V3Interface_$33734",
+                            "typeString": "contract CLV2V3Interface"
+                          },
+                          {
+                            "typeIdentifier": "t_contract$_MasterPriceOracle_$41436",
+                            "typeString": "contract MasterPriceOracle"
+                          },
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 64624,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "NewExpression",
+                        "src": "1669:19:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_creation_nonpayable$_t_address_$_t_bool_$_t_address_$_t_contract$_CLV2V3Interface_$33734_$_t_contract$_MasterPriceOracle_$41436_$_t_address_$returns$_t_contract$_FluxPriceOracle_$43722_$",
+                          "typeString": "function (address,bool,address,contract CLV2V3Interface,contract MasterPriceOracle,address) returns (contract FluxPriceOracle)"
+                        },
+                        "typeName": {
+                          "id": 64623,
+                          "nodeType": "UserDefinedTypeName",
+                          "pathNode": {
+                            "id": 64622,
+                            "name": "FluxPriceOracle",
+                            "nodeType": "IdentifierPath",
+                            "referencedDeclaration": 43722,
+                            "src": "1673:15:228"
+                          },
+                          "referencedDeclaration": 43722,
+                          "src": "1673:15:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_contract$_FluxPriceOracle_$43722",
+                            "typeString": "contract FluxPriceOracle"
+                          }
+                        }
+                      },
+                      "id": 64645,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1669:98:228",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_FluxPriceOracle_$43722",
+                        "typeString": "contract FluxPriceOracle"
+                      }
+                    },
+                    "src": "1660:107:228",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_FluxPriceOracle_$43722",
+                      "typeString": "contract FluxPriceOracle"
+                    }
+                  },
+                  "id": 64647,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1660:107:228"
+                }
+              ]
+            },
+            "functionSelector": "e4f9c5bb",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setUpWithMasterPriceOracle",
+            "nameLocation": "1127:26:228",
+            "parameters": {
+              "id": 64528,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1153:2:228"
+            },
+            "returnParameters": {
+              "id": 64529,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1163:0:228"
+            },
+            "scope": 64766,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "id": 64705,
+            "nodeType": "FunctionDefinition",
+            "src": "1776:361:228",
+            "body": {
+              "id": 64704,
+              "nodeType": "Block",
+              "src": "1807:330:228",
+              "statements": [
+                {
+                  "assignments": [
+                    64654
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 64654,
+                      "mutability": "mutable",
+                      "name": "ethPool",
+                      "nameLocation": "1829:7:228",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 64704,
+                      "src": "1813:23:228",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_CLV2V3Interface_$33734",
+                        "typeString": "contract CLV2V3Interface"
+                      },
+                      "typeName": {
+                        "id": 64653,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 64652,
+                          "name": "CLV2V3Interface",
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 33734,
+                          "src": "1813:15:228"
+                        },
+                        "referencedDeclaration": 33734,
+                        "src": "1813:15:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_CLV2V3Interface_$33734",
+                          "typeString": "contract CLV2V3Interface"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 64658,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "hexValue": "307866386166323062323130624365643931386637313839394539663463323664453533653663634536",
+                        "id": 64656,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1855:42:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "value": "0xf8af20b210bCed918f71899E9f4c26dE53e6ccE6"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 64655,
+                      "name": "CLV2V3Interface",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 33734,
+                      "src": "1839:15:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_contract$_CLV2V3Interface_$33734_$",
+                        "typeString": "type(contract CLV2V3Interface)"
+                      }
+                    },
+                    "id": 64657,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1839:59:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_CLV2V3Interface_$33734",
+                      "typeString": "contract CLV2V3Interface"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1813:85:228"
+                },
+                {
+                  "assignments": [
+                    64663
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 64663,
+                      "mutability": "mutable",
+                      "name": "underlyings",
+                      "nameLocation": "1921:11:228",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 64704,
+                      "src": "1904:28:228",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                        "typeString": "address[]"
+                      },
+                      "typeName": {
+                        "baseType": {
+                          "id": 64661,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1904:7:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "id": 64662,
+                        "nodeType": "ArrayTypeName",
+                        "src": "1904:9:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                          "typeString": "address[]"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 64669,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "hexValue": "31",
+                        "id": 64667,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1949:1:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_1_by_1",
+                          "typeString": "int_const 1"
+                        },
+                        "value": "1"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_rational_1_by_1",
+                          "typeString": "int_const 1"
+                        }
+                      ],
+                      "id": 64666,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "NewExpression",
+                      "src": "1935:13:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_objectcreation_pure$_t_uint256_$returns$_t_array$_t_address_$dyn_memory_ptr_$",
+                        "typeString": "function (uint256) pure returns (address[] memory)"
+                      },
+                      "typeName": {
+                        "baseType": {
+                          "id": 64664,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1939:7:228",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "id": 64665,
+                        "nodeType": "ArrayTypeName",
+                        "src": "1939:9:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                          "typeString": "address[]"
+                        }
+                      }
+                    },
+                    "id": 64668,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1935:16:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                      "typeString": "address[] memory"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1904:47:228"
+                },
+                {
+                  "expression": {
+                    "id": 64677,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "baseExpression": {
+                        "id": 64670,
+                        "name": "underlyings",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64663,
+                        "src": "1957:11:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                          "typeString": "address[] memory"
+                        }
+                      },
+                      "id": 64672,
+                      "indexExpression": {
+                        "hexValue": "30",
+                        "id": 64671,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1969:1:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        },
+                        "value": "0"
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "1957:14:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "hexValue": "31",
+                          "id": 64675,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "1982:1:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_1_by_1",
+                            "typeString": "int_const 1"
+                          },
+                          "value": "1"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_rational_1_by_1",
+                            "typeString": "int_const 1"
+                          }
+                        ],
+                        "id": 64674,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "nodeType": "ElementaryTypeNameExpression",
+                        "src": "1974:7:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_address_$",
+                          "typeString": "type(address)"
+                        },
+                        "typeName": {
+                          "id": 64673,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1974:7:228",
+                          "typeDescriptions": {}
+                        }
+                      },
+                      "id": 64676,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1974:10:228",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "src": "1957:27:228",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "id": 64678,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1957:27:228"
+                },
+                {
+                  "assignments": [
+                    64683
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 64683,
+                      "mutability": "mutable",
+                      "name": "priceFeeds",
+                      "nameLocation": "2015:10:228",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 64704,
+                      "src": "1990:35:228",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_array$_t_contract$_CLV2V3Interface_$33734_$dyn_memory_ptr",
+                        "typeString": "contract CLV2V3Interface[]"
+                      },
+                      "typeName": {
+                        "baseType": {
+                          "id": 64681,
+                          "nodeType": "UserDefinedTypeName",
+                          "pathNode": {
+                            "id": 64680,
+                            "name": "CLV2V3Interface",
+                            "nodeType": "IdentifierPath",
+                            "referencedDeclaration": 33734,
+                            "src": "1990:15:228"
+                          },
+                          "referencedDeclaration": 33734,
+                          "src": "1990:15:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_contract$_CLV2V3Interface_$33734",
+                            "typeString": "contract CLV2V3Interface"
+                          }
+                        },
+                        "id": 64682,
+                        "nodeType": "ArrayTypeName",
+                        "src": "1990:17:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_contract$_CLV2V3Interface_$33734_$dyn_storage_ptr",
+                          "typeString": "contract CLV2V3Interface[]"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 64690,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "hexValue": "31",
+                        "id": 64688,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2050:1:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_1_by_1",
+                          "typeString": "int_const 1"
+                        },
+                        "value": "1"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_rational_1_by_1",
+                          "typeString": "int_const 1"
+                        }
+                      ],
+                      "id": 64687,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "NewExpression",
+                      "src": "2028:21:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_objectcreation_pure$_t_uint256_$returns$_t_array$_t_contract$_CLV2V3Interface_$33734_$dyn_memory_ptr_$",
+                        "typeString": "function (uint256) pure returns (contract CLV2V3Interface[] memory)"
+                      },
+                      "typeName": {
+                        "baseType": {
+                          "id": 64685,
+                          "nodeType": "UserDefinedTypeName",
+                          "pathNode": {
+                            "id": 64684,
+                            "name": "CLV2V3Interface",
+                            "nodeType": "IdentifierPath",
+                            "referencedDeclaration": 33734,
+                            "src": "2032:15:228"
+                          },
+                          "referencedDeclaration": 33734,
+                          "src": "2032:15:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_contract$_CLV2V3Interface_$33734",
+                            "typeString": "contract CLV2V3Interface"
+                          }
+                        },
+                        "id": 64686,
+                        "nodeType": "ArrayTypeName",
+                        "src": "2032:17:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_contract$_CLV2V3Interface_$33734_$dyn_storage_ptr",
+                          "typeString": "contract CLV2V3Interface[]"
+                        }
+                      }
+                    },
+                    "id": 64689,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2028:24:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_contract$_CLV2V3Interface_$33734_$dyn_memory_ptr",
+                      "typeString": "contract CLV2V3Interface[] memory"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1990:62:228"
+                },
+                {
+                  "expression": {
+                    "id": 64695,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "baseExpression": {
+                        "id": 64691,
+                        "name": "priceFeeds",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64683,
+                        "src": "2058:10:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_contract$_CLV2V3Interface_$33734_$dyn_memory_ptr",
+                          "typeString": "contract CLV2V3Interface[] memory"
+                        }
+                      },
+                      "id": 64693,
+                      "indexExpression": {
+                        "hexValue": "30",
+                        "id": 64692,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2069:1:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        },
+                        "value": "0"
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "2058:13:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_CLV2V3Interface_$33734",
+                        "typeString": "contract CLV2V3Interface"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 64694,
+                      "name": "ethPool",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 64654,
+                      "src": "2074:7:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_CLV2V3Interface_$33734",
+                        "typeString": "contract CLV2V3Interface"
+                      }
+                    },
+                    "src": "2058:23:228",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_CLV2V3Interface_$33734",
+                      "typeString": "contract CLV2V3Interface"
+                    }
+                  },
+                  "id": 64696,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2058:23:228"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 64700,
+                        "name": "underlyings",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64663,
+                        "src": "2108:11:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                          "typeString": "address[] memory"
+                        }
+                      },
+                      {
+                        "id": 64701,
+                        "name": "priceFeeds",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64683,
+                        "src": "2121:10:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_contract$_CLV2V3Interface_$33734_$dyn_memory_ptr",
+                          "typeString": "contract CLV2V3Interface[] memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                          "typeString": "address[] memory"
+                        },
+                        {
+                          "typeIdentifier": "t_array$_t_contract$_CLV2V3Interface_$33734_$dyn_memory_ptr",
+                          "typeString": "contract CLV2V3Interface[] memory"
+                        }
+                      ],
+                      "expression": {
+                        "id": 64697,
+                        "name": "oracle",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64478,
+                        "src": "2087:6:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_FluxPriceOracle_$43722",
+                          "typeString": "contract FluxPriceOracle"
+                        }
+                      },
+                      "id": 64699,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "setPriceFeeds",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 43506,
+                      "src": "2087:20:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_nonpayable$_t_array$_t_address_$dyn_memory_ptr_$_t_array$_t_contract$_CLV2V3Interface_$33734_$dyn_memory_ptr_$returns$__$",
+                        "typeString": "function (address[] memory,contract CLV2V3Interface[] memory) external"
+                      }
+                    },
+                    "id": 64702,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2087:45:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 64703,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2087:45:228"
+                }
+              ]
+            },
+            "functionSelector": "5be664b6",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setUpOracles",
+            "nameLocation": "1785:12:228",
+            "parameters": {
+              "id": 64650,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1797:2:228"
+            },
+            "returnParameters": {
+              "id": 64651,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1807:0:228"
+            },
+            "scope": 64766,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "id": 64735,
+            "nodeType": "FunctionDefinition",
+            "src": "2141:230:228",
+            "body": {
+              "id": 64734,
+              "nodeType": "Block",
+              "src": "2229:142:228",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "id": 64713,
+                      "name": "setUpWithNativeFeed",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 64527,
+                      "src": "2235:19:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
+                        "typeString": "function ()"
+                      }
+                    },
+                    "id": 64714,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2235:21:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 64715,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2235:21:228"
+                },
+                {
+                  "expression": {
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "id": 64716,
+                      "name": "setUpOracles",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 64705,
+                      "src": "2262:12:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
+                        "typeString": "function ()"
+                      }
+                    },
+                    "id": 64717,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2262:14:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 64718,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2262:14:228"
+                },
+                {
+                  "assignments": [
+                    64720
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 64720,
+                      "mutability": "mutable",
+                      "name": "price",
+                      "nameLocation": "2290:5:228",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 64734,
+                      "src": "2282:13:228",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 64719,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2282:7:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 64728,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "hexValue": "31",
+                            "id": 64725,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "number",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "2319:1:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_rational_1_by_1",
+                              "typeString": "int_const 1"
+                            },
+                            "value": "1"
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_rational_1_by_1",
+                              "typeString": "int_const 1"
+                            }
+                          ],
+                          "id": 64724,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "2311:7:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 64723,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "2311:7:228",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 64726,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "2311:10:228",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "expression": {
+                        "id": 64721,
+                        "name": "oracle",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64478,
+                        "src": "2298:6:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_FluxPriceOracle_$43722",
+                          "typeString": "contract FluxPriceOracle"
+                        }
+                      },
+                      "id": 64722,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "price",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 43647,
+                      "src": "2298:12:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_uint256_$",
+                        "typeString": "function (address) view external returns (uint256)"
+                      }
+                    },
+                    "id": 64727,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2298:24:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2282:40:228"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 64730,
+                        "name": "price",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64720,
+                        "src": "2337:5:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "hexValue": "343738333133373535313030303030303030303030",
+                        "id": 64731,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2344:21:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_478313755100000000000_by_1",
+                          "typeString": "int_const 478313755100000000000"
+                        },
+                        "value": "478313755100000000000"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_rational_478313755100000000000_by_1",
+                          "typeString": "int_const 478313755100000000000"
+                        }
+                      ],
+                      "id": 64729,
+                      "name": "assertEq",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        66575,
+                        66600,
+                        66630,
+                        66655,
+                        66714,
+                        66739,
+                        66769,
+                        66794,
+                        67894,
+                        67929
+                      ],
+                      "referencedDeclaration": 66769,
+                      "src": "2328:8:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_uint256_$_t_uint256_$returns$__$",
+                        "typeString": "function (uint256,uint256)"
+                      }
+                    },
+                    "id": 64732,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2328:38:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 64733,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2328:38:228"
+                }
+              ]
+            },
+            "functionSelector": "a90b43a8",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [
+              {
+                "arguments": [
+                  {
+                    "arguments": [
+                      {
+                        "id": 64709,
+                        "name": "EVMOS_TESTNET",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 59598,
+                        "src": "2213:13:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 64708,
+                      "name": "forChains",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        59769,
+                        59789
+                      ],
+                      "referencedDeclaration": 59769,
+                      "src": "2203:9:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_view$_t_uint256_$returns$_t_bool_$",
+                        "typeString": "function (uint256) view returns (bool)"
+                      }
+                    },
+                    "id": 64710,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2203:24:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  }
+                ],
+                "id": 64711,
+                "kind": "modifierInvocation",
+                "modifierName": {
+                  "id": 64707,
+                  "name": "shouldRun",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 59756,
+                  "src": "2193:9:228"
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "2193:35:228"
+              }
+            ],
+            "name": "testFluxPriceOracleWithNativeFeed",
+            "nameLocation": "2150:33:228",
+            "parameters": {
+              "id": 64706,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2183:2:228"
+            },
+            "returnParameters": {
+              "id": 64712,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2229:0:228"
+            },
+            "scope": 64766,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "id": 64765,
+            "nodeType": "FunctionDefinition",
+            "src": "2375:244:228",
+            "body": {
+              "id": 64764,
+              "nodeType": "Block",
+              "src": "2470:149:228",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "id": 64743,
+                      "name": "setUpWithMasterPriceOracle",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 64649,
+                      "src": "2476:26:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
+                        "typeString": "function ()"
+                      }
+                    },
+                    "id": 64744,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2476:28:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 64745,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2476:28:228"
+                },
+                {
+                  "expression": {
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "id": 64746,
+                      "name": "setUpOracles",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 64705,
+                      "src": "2510:12:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
+                        "typeString": "function ()"
+                      }
+                    },
+                    "id": 64747,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2510:14:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 64748,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2510:14:228"
+                },
+                {
+                  "assignments": [
+                    64750
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 64750,
+                      "mutability": "mutable",
+                      "name": "price",
+                      "nameLocation": "2538:5:228",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 64764,
+                      "src": "2530:13:228",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 64749,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2530:7:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 64758,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "hexValue": "31",
+                            "id": 64755,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "number",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "2567:1:228",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_rational_1_by_1",
+                              "typeString": "int_const 1"
+                            },
+                            "value": "1"
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_rational_1_by_1",
+                              "typeString": "int_const 1"
+                            }
+                          ],
+                          "id": 64754,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "2559:7:228",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 64753,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "2559:7:228",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 64756,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "2559:10:228",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "expression": {
+                        "id": 64751,
+                        "name": "oracle",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64478,
+                        "src": "2546:6:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_FluxPriceOracle_$43722",
+                          "typeString": "contract FluxPriceOracle"
+                        }
+                      },
+                      "id": 64752,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "price",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 43647,
+                      "src": "2546:12:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_uint256_$",
+                        "typeString": "function (address) view external returns (uint256)"
+                      }
+                    },
+                    "id": 64757,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2546:24:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2530:40:228"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 64760,
+                        "name": "price",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 64750,
+                        "src": "2585:5:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "hexValue": "343738333133373535313030303030303030303030",
+                        "id": 64761,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2592:21:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_478313755100000000000_by_1",
+                          "typeString": "int_const 478313755100000000000"
+                        },
+                        "value": "478313755100000000000"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_rational_478313755100000000000_by_1",
+                          "typeString": "int_const 478313755100000000000"
+                        }
+                      ],
+                      "id": 64759,
+                      "name": "assertEq",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        66575,
+                        66600,
+                        66630,
+                        66655,
+                        66714,
+                        66739,
+                        66769,
+                        66794,
+                        67894,
+                        67929
+                      ],
+                      "referencedDeclaration": 66769,
+                      "src": "2576:8:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_uint256_$_t_uint256_$returns$__$",
+                        "typeString": "function (uint256,uint256)"
+                      }
+                    },
+                    "id": 64762,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2576:38:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 64763,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2576:38:228"
+                }
+              ]
+            },
+            "functionSelector": "a4b0f7cf",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [
+              {
+                "arguments": [
+                  {
+                    "arguments": [
+                      {
+                        "id": 64739,
+                        "name": "EVMOS_TESTNET",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 59598,
+                        "src": "2454:13:228",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 64738,
+                      "name": "forChains",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        59769,
+                        59789
+                      ],
+                      "referencedDeclaration": 59769,
+                      "src": "2444:9:228",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_view$_t_uint256_$returns$_t_bool_$",
+                        "typeString": "function (uint256) view returns (bool)"
+                      }
+                    },
+                    "id": 64740,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2444:24:228",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  }
+                ],
+                "id": 64741,
+                "kind": "modifierInvocation",
+                "modifierName": {
+                  "id": 64737,
+                  "name": "shouldRun",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 59756,
+                  "src": "2434:9:228"
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "2434:35:228"
+              }
+            ],
+            "name": "testFluxPriceOracleWithMasterPriceOracle",
+            "nameLocation": "2384:40:228",
+            "parameters": {
+              "id": 64736,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2424:2:228"
+            },
+            "returnParameters": {
+              "id": 64742,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2470:0:228"
+            },
+            "scope": 64766,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 64474,
+              "name": "BaseTest",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 59790,
+              "src": "753:8:228"
+            },
+            "id": 64475,
+            "nodeType": "InheritanceSpecifier",
+            "src": "753:8:228"
+          }
+        ],
+        "canonicalName": "FluxPriceOracleTest",
+        "contractDependencies": [
+          41436,
+          43722,
+          44234,
+          64473,
+          64893
+        ],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          64766,
+          59790,
+          68041
+        ],
+        "name": "FluxPriceOracleTest",
+        "nameLocation": "730:19:228",
+        "scope": 64767,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  }
+}

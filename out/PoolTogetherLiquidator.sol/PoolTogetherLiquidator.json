@@ -1,0 +1,1051 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20Upgradeable",
+          "name": "inputToken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "inputAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "strategyData",
+          "type": "bytes"
+        }
+      ],
+      "name": "redeem",
+      "outputs": [
+        {
+          "internalType": "contract IERC20Upgradeable",
+          "name": "outputToken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "outputAmount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x608060405234801561001057600080fd5b50610333806100206000396000f3fe608060405234801561001057600080fd5b506004361061002b5760003560e01c806310badf4e14610030575b600080fd5b61004361003e3660046101f3565b610066565b604080516001600160a01b03909316835260208301919091520160405180910390f35b60008060008590506000816001600160a01b031663f77c47916040518163ffffffff1660e01b8152600401602060405180830381865afa1580156100ae573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906100d291906102c0565b60405163a016240b60e01b8152306004820152602481018890526001600160a01b03848116604483015260001960648301529192509082169063a016240b906084016020604051808303816000875af1158015610133573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061015791906102e4565b50806001600160a01b031663fc0c546a6040518163ffffffff1660e01b8152600401602060405180830381865afa158015610196573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906101ba91906102c0565b979596505050505050565b6001600160a01b03811681146101da57600080fd5b50565b634e487b7160e01b600052604160045260246000fd5b60008060006060848603121561020857600080fd5b8335610213816101c5565b925060208401359150604084013567ffffffffffffffff8082111561023757600080fd5b818601915086601f83011261024b57600080fd5b81358181111561025d5761025d6101dd565b604051601f8201601f19908116603f01168101908382118183101715610285576102856101dd565b8160405282815289602084870101111561029e57600080fd5b8260208601602083013760006020848301015280955050505050509250925092565b6000602082840312156102d257600080fd5b81516102dd816101c5565b9392505050565b6000602082840312156102f657600080fd5b505191905056fea2646970667358221220f0bd4281ca1fea59e0a0ec96db2ff2173818b3ae8445556c7f3d1930eca0a0a764736f6c634300080a0033",
+    "sourceMap": "531:1163:144:-:0;;;;;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x608060405234801561001057600080fd5b506004361061002b5760003560e01c806310badf4e14610030575b600080fd5b61004361003e3660046101f3565b610066565b604080516001600160a01b03909316835260208301919091520160405180910390f35b60008060008590506000816001600160a01b031663f77c47916040518163ffffffff1660e01b8152600401602060405180830381865afa1580156100ae573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906100d291906102c0565b60405163a016240b60e01b8152306004820152602481018890526001600160a01b03848116604483015260001960648301529192509082169063a016240b906084016020604051808303816000875af1158015610133573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061015791906102e4565b50806001600160a01b031663fc0c546a6040518163ffffffff1660e01b8152600401602060405180830381865afa158015610196573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906101ba91906102c0565b979596505050505050565b6001600160a01b03811681146101da57600080fd5b50565b634e487b7160e01b600052604160045260246000fd5b60008060006060848603121561020857600080fd5b8335610213816101c5565b925060208401359150604084013567ffffffffffffffff8082111561023757600080fd5b818601915086601f83011261024b57600080fd5b81358181111561025d5761025d6101dd565b604051601f8201601f19908116603f01168101908382118183101715610285576102856101dd565b8160405282815289602084870101111561029e57600080fd5b8260208601602083013760006020848301015280955050505050509250925092565b6000602082840312156102d257600080fd5b81516102dd816101c5565b9392505050565b6000602082840312156102f657600080fd5b505191905056fea2646970667358221220f0bd4281ca1fea59e0a0ec96db2ff2173818b3ae8445556c7f3d1930eca0a0a764736f6c634300080a0033",
+    "sourceMap": "531:1163:144:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1088:604;;;;;;:::i;:::-;;:::i;:::-;;;;-1:-1:-1;;;;;1695:32:278;;;1677:51;;1759:2;1744:18;;1737:34;;;;1650:18;1088:604:144;;;;;;;;1225:29;1256:20;1343:30;1409:10;1343:78;;1427:29;1478:5;-1:-1:-1;;;;;1478:16:144;;:18;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;1503:95;;-1:-1:-1;;;1503:95:144;;1544:4;1503:95;;;2326:34:278;2376:18;;;2369:34;;;-1:-1:-1;;;;;2439:15:278;;;2419:18;;;2412:43;-1:-1:-1;;2471:18:278;;;2464:34;1427:70:144;;-1:-1:-1;1503:32:144;;;;;;2260:19:278;;1503:95:144;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;1636:10;-1:-1:-1;;;;;1636:16:144;;:18;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;1604:51;1676:11;;-1:-1:-1;;;;;;1088:604:144:o;14:150:278:-;-1:-1:-1;;;;;108:31:278;;98:42;;88:70;;154:1;151;144:12;88:70;14:150;:::o;169:127::-;230:10;225:3;221:20;218:1;211:31;261:4;258:1;251:15;285:4;282:1;275:15;301:1170;414:6;422;430;483:2;471:9;462:7;458:23;454:32;451:52;;;499:1;496;489:12;451:52;538:9;525:23;557:50;601:5;557:50;:::i;:::-;626:5;-1:-1:-1;678:2:278;663:18;;650:32;;-1:-1:-1;733:2:278;718:18;;705:32;756:18;786:14;;;783:34;;;813:1;810;803:12;783:34;851:6;840:9;836:22;826:32;;896:7;889:4;885:2;881:13;877:27;867:55;;918:1;915;908:12;867:55;954:2;941:16;976:2;972;969:10;966:36;;;982:18;;:::i;:::-;1057:2;1051:9;1025:2;1111:13;;-1:-1:-1;;1107:22:278;;;1131:2;1103:31;1099:40;1087:53;;;1155:18;;;1175:22;;;1152:46;1149:72;;;1201:18;;:::i;:::-;1241:10;1237:2;1230:22;1276:2;1268:6;1261:18;1316:7;1311:2;1306;1302;1298:11;1294:20;1291:33;1288:53;;;1337:1;1334;1327:12;1288:53;1393:2;1388;1384;1380:11;1375:2;1367:6;1363:15;1350:46;1438:1;1433:2;1428;1420:6;1416:15;1412:24;1405:35;1459:6;1449:16;;;;;;;301:1170;;;;;:::o;1782:270::-;1852:6;1905:2;1893:9;1884:7;1880:23;1876:32;1873:52;;;1921:1;1918;1911:12;1873:52;1953:9;1947:16;1972:50;2016:5;1972:50;:::i;:::-;2041:5;1782:270;-1:-1:-1;;;1782:270:278:o;2509:184::-;2579:6;2632:2;2620:9;2611:7;2607:23;2603:32;2600:52;;;2648:1;2645;2638:12;2600:52;-1:-1:-1;2671:16:278;;2509:184;-1:-1:-1;2509:184:278:o",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/liquidators/PoolTogetherLiquidator.sol",
+    "id": 39500,
+    "exportedSymbols": {
+      "ControlledTokenInterface": [
+        35342
+      ],
+      "IERC20Upgradeable": [
+        89465
+      ],
+      "IRedemptionStrategy": [
+        39008
+      ],
+      "PoolTogetherLiquidator": [
+        39499
+      ],
+      "PrizePoolInterface": [
+        35366
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:1656:144",
+    "nodes": [
+      {
+        "id": 39423,
+        "nodeType": "PragmaDirective",
+        "src": "39:24:144",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 39424,
+        "nodeType": "ImportDirective",
+        "src": "65:88:144",
+        "absolutePath": "/Users/peet/git/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+        "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 39500,
+        "sourceUnit": 89466,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 39425,
+        "nodeType": "ImportDirective",
+        "src": "155:63:144",
+        "absolutePath": "/Users/peet/git/contracts/contracts/external/pooltogether/ControlledTokenInterface.sol",
+        "file": "../external/pooltogether/ControlledTokenInterface.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 39500,
+        "sourceUnit": 35343,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 39426,
+        "nodeType": "ImportDirective",
+        "src": "219:57:144",
+        "absolutePath": "/Users/peet/git/contracts/contracts/external/pooltogether/PrizePoolInterface.sol",
+        "file": "../external/pooltogether/PrizePoolInterface.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 39500,
+        "sourceUnit": 35367,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 39427,
+        "nodeType": "ImportDirective",
+        "src": "278:35:144",
+        "absolutePath": "/Users/peet/git/contracts/contracts/liquidators/IRedemptionStrategy.sol",
+        "file": "./IRedemptionStrategy.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 39500,
+        "sourceUnit": 39009,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 39499,
+        "nodeType": "ContractDefinition",
+        "src": "531:1163:144",
+        "nodes": [
+          {
+            "id": 39498,
+            "nodeType": "FunctionDefinition",
+            "src": "1088:604:144",
+            "baseFunctions": [
+              39007
+            ],
+            "body": {
+              "id": 39497,
+              "nodeType": "Block",
+              "src": "1278:414:144",
+              "statements": [
+                {
+                  "assignments": [
+                    39449
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 39449,
+                      "mutability": "mutable",
+                      "name": "token",
+                      "nameLocation": "1368:5:144",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 39497,
+                      "src": "1343:30:144",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_ControlledTokenInterface_$35342",
+                        "typeString": "contract ControlledTokenInterface"
+                      },
+                      "typeName": {
+                        "id": 39448,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 39447,
+                          "name": "ControlledTokenInterface",
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 35342,
+                          "src": "1343:24:144"
+                        },
+                        "referencedDeclaration": 35342,
+                        "src": "1343:24:144",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_ControlledTokenInterface_$35342",
+                          "typeString": "contract ControlledTokenInterface"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 39456,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "id": 39453,
+                            "name": "inputToken",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 39434,
+                            "src": "1409:10:144",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                              "typeString": "contract IERC20Upgradeable"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                              "typeString": "contract IERC20Upgradeable"
+                            }
+                          ],
+                          "id": 39452,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "1401:7:144",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 39451,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1401:7:144",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 39454,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1401:19:144",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 39450,
+                      "name": "ControlledTokenInterface",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 35342,
+                      "src": "1376:24:144",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_contract$_ControlledTokenInterface_$35342_$",
+                        "typeString": "type(contract ControlledTokenInterface)"
+                      }
+                    },
+                    "id": 39455,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1376:45:144",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_ControlledTokenInterface_$35342",
+                      "typeString": "contract ControlledTokenInterface"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1343:78:144"
+                },
+                {
+                  "assignments": [
+                    39459
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 39459,
+                      "mutability": "mutable",
+                      "name": "controller",
+                      "nameLocation": "1446:10:144",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 39497,
+                      "src": "1427:29:144",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_PrizePoolInterface_$35366",
+                        "typeString": "contract PrizePoolInterface"
+                      },
+                      "typeName": {
+                        "id": 39458,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 39457,
+                          "name": "PrizePoolInterface",
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 35366,
+                          "src": "1427:18:144"
+                        },
+                        "referencedDeclaration": 35366,
+                        "src": "1427:18:144",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_PrizePoolInterface_$35366",
+                          "typeString": "contract PrizePoolInterface"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 39465,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "expression": {
+                            "id": 39461,
+                            "name": "token",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 39449,
+                            "src": "1478:5:144",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_ControlledTokenInterface_$35342",
+                              "typeString": "contract ControlledTokenInterface"
+                            }
+                          },
+                          "id": 39462,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "controller",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 35341,
+                          "src": "1478:16:144",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
+                            "typeString": "function () view external returns (address)"
+                          }
+                        },
+                        "id": 39463,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1478:18:144",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 39460,
+                      "name": "PrizePoolInterface",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 35366,
+                      "src": "1459:18:144",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_contract$_PrizePoolInterface_$35366_$",
+                        "typeString": "type(contract PrizePoolInterface)"
+                      }
+                    },
+                    "id": 39464,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1459:38:144",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_PrizePoolInterface_$35366",
+                      "typeString": "contract PrizePoolInterface"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1427:70:144"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "id": 39471,
+                            "name": "this",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": -28,
+                            "src": "1544:4:144",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_PoolTogetherLiquidator_$39499",
+                              "typeString": "contract PoolTogetherLiquidator"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_contract$_PoolTogetherLiquidator_$39499",
+                              "typeString": "contract PoolTogetherLiquidator"
+                            }
+                          ],
+                          "id": 39470,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "1536:7:144",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 39469,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1536:7:144",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 39472,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1536:13:144",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 39473,
+                        "name": "inputAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 39436,
+                        "src": "1551:11:144",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "arguments": [
+                          {
+                            "id": 39476,
+                            "name": "token",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 39449,
+                            "src": "1572:5:144",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_ControlledTokenInterface_$35342",
+                              "typeString": "contract ControlledTokenInterface"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_contract$_ControlledTokenInterface_$35342",
+                              "typeString": "contract ControlledTokenInterface"
+                            }
+                          ],
+                          "id": 39475,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "1564:7:144",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 39474,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1564:7:144",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 39477,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1564:14:144",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "expression": {
+                          "arguments": [
+                            {
+                              "id": 39480,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "nodeType": "ElementaryTypeNameExpression",
+                              "src": "1585:7:144",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_uint256_$",
+                                "typeString": "type(uint256)"
+                              },
+                              "typeName": {
+                                "id": 39479,
+                                "name": "uint256",
+                                "nodeType": "ElementaryTypeName",
+                                "src": "1585:7:144",
+                                "typeDescriptions": {}
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_type$_t_uint256_$",
+                                "typeString": "type(uint256)"
+                              }
+                            ],
+                            "id": 39478,
+                            "name": "type",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": -27,
+                            "src": "1580:4:144",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_metatype_pure$__$returns$__$",
+                              "typeString": "function () pure"
+                            }
+                          },
+                          "id": 39481,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1580:13:144",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_magic_meta_type_t_uint256",
+                            "typeString": "type(uint256)"
+                          }
+                        },
+                        "id": 39482,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "memberName": "max",
+                        "nodeType": "MemberAccess",
+                        "src": "1580:17:144",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "id": 39466,
+                        "name": "controller",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 39459,
+                        "src": "1503:10:144",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_PrizePoolInterface_$35366",
+                          "typeString": "contract PrizePoolInterface"
+                        }
+                      },
+                      "id": 39468,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "withdrawInstantlyFrom",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 35359,
+                      "src": "1503:32:144",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$_t_address_$_t_uint256_$returns$_t_uint256_$",
+                        "typeString": "function (address,uint256,address,uint256) external returns (uint256)"
+                      }
+                    },
+                    "id": 39483,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1503:95:144",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 39484,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1503:95:144"
+                },
+                {
+                  "expression": {
+                    "id": 39491,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 39485,
+                      "name": "outputToken",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 39443,
+                      "src": "1604:11:144",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                        "typeString": "contract IERC20Upgradeable"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "arguments": [],
+                          "expression": {
+                            "argumentTypes": [],
+                            "expression": {
+                              "id": 39487,
+                              "name": "controller",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 39459,
+                              "src": "1636:10:144",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_contract$_PrizePoolInterface_$35366",
+                                "typeString": "contract PrizePoolInterface"
+                              }
+                            },
+                            "id": 39488,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "token",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 35365,
+                            "src": "1636:16:144",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
+                              "typeString": "function () view external returns (address)"
+                            }
+                          },
+                          "id": 39489,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1636:18:144",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 39486,
+                        "name": "IERC20Upgradeable",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 89465,
+                        "src": "1618:17:144",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_IERC20Upgradeable_$89465_$",
+                          "typeString": "type(contract IERC20Upgradeable)"
+                        }
+                      },
+                      "id": 39490,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1618:37:144",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                        "typeString": "contract IERC20Upgradeable"
+                      }
+                    },
+                    "src": "1604:51:144",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                      "typeString": "contract IERC20Upgradeable"
+                    }
+                  },
+                  "id": 39492,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1604:51:144"
+                },
+                {
+                  "expression": {
+                    "id": 39495,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 39493,
+                      "name": "outputAmount",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 39445,
+                      "src": "1661:12:144",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 39494,
+                      "name": "inputAmount",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 39436,
+                      "src": "1676:11:144",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "1661:26:144",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 39496,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1661:26:144"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 39431,
+              "nodeType": "StructuredDocumentation",
+              "src": "590:495:144",
+              "text": " @notice Redeems custom collateral `token` for an underlying token.\n @param inputToken The input wrapped token to be redeemed for an underlying token.\n @param inputAmount The amount of the input wrapped token to be redeemed for an underlying token.\n @param strategyData The ABI-encoded data to be used in the redemption strategy logic.\n @return outputToken The underlying ERC20 token outputted.\n @return outputAmount The quantity of underlying tokens outputted."
+            },
+            "functionSelector": "10badf4e",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeem",
+            "nameLocation": "1097:6:144",
+            "overrides": {
+              "id": 39440,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "1207:8:144"
+            },
+            "parameters": {
+              "id": 39439,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 39434,
+                  "mutability": "mutable",
+                  "name": "inputToken",
+                  "nameLocation": "1127:10:144",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39498,
+                  "src": "1109:28:144",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                    "typeString": "contract IERC20Upgradeable"
+                  },
+                  "typeName": {
+                    "id": 39433,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 39432,
+                      "name": "IERC20Upgradeable",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 89465,
+                      "src": "1109:17:144"
+                    },
+                    "referencedDeclaration": 89465,
+                    "src": "1109:17:144",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                      "typeString": "contract IERC20Upgradeable"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 39436,
+                  "mutability": "mutable",
+                  "name": "inputAmount",
+                  "nameLocation": "1151:11:144",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39498,
+                  "src": "1143:19:144",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 39435,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1143:7:144",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 39438,
+                  "mutability": "mutable",
+                  "name": "strategyData",
+                  "nameLocation": "1181:12:144",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39498,
+                  "src": "1168:25:144",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 39437,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1168:5:144",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1103:94:144"
+            },
+            "returnParameters": {
+              "id": 39446,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 39443,
+                  "mutability": "mutable",
+                  "name": "outputToken",
+                  "nameLocation": "1243:11:144",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39498,
+                  "src": "1225:29:144",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                    "typeString": "contract IERC20Upgradeable"
+                  },
+                  "typeName": {
+                    "id": 39442,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 39441,
+                      "name": "IERC20Upgradeable",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 89465,
+                      "src": "1225:17:144"
+                    },
+                    "referencedDeclaration": 89465,
+                    "src": "1225:17:144",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                      "typeString": "contract IERC20Upgradeable"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 39445,
+                  "mutability": "mutable",
+                  "name": "outputAmount",
+                  "nameLocation": "1264:12:144",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39498,
+                  "src": "1256:20:144",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 39444,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1256:7:144",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1224:53:144"
+            },
+            "scope": 39499,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 39429,
+              "name": "IRedemptionStrategy",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 39008,
+              "src": "566:19:144"
+            },
+            "id": 39430,
+            "nodeType": "InheritanceSpecifier",
+            "src": "566:19:144"
+          }
+        ],
+        "canonicalName": "PoolTogetherLiquidator",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 39428,
+          "nodeType": "StructuredDocumentation",
+          "src": "315:215:144",
+          "text": " @title PoolTogetherLiquidator\n @notice Redeems PoolTogether PcTokens for underlying assets for use as a step in a liquidation.\n @author David Lucid <david@rari.capital> (https://github.com/davidlucid)"
+        },
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          39499,
+          39008
+        ],
+        "name": "PoolTogetherLiquidator",
+        "nameLocation": "540:22:144",
+        "scope": 39500,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  }
+}

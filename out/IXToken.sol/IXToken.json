@@ -1,0 +1,195 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "getPricePerFullShare",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pricePerShare",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/badger/IXToken.sol",
+    "id": 31876,
+    "exportedSymbols": {
+      "IXToken": [
+        31875
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:176:60",
+    "nodes": [
+      {
+        "id": 31864,
+        "nodeType": "PragmaDirective",
+        "src": "39:24:60",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 31875,
+        "nodeType": "ContractDefinition",
+        "src": "65:149:60",
+        "nodes": [
+          {
+            "id": 31869,
+            "nodeType": "FunctionDefinition",
+            "src": "87:57:60",
+            "functionSelector": "99530b06",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "pricePerShare",
+            "nameLocation": "96:13:60",
+            "parameters": {
+              "id": 31865,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "109:2:60"
+            },
+            "returnParameters": {
+              "id": 31868,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31867,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31869,
+                  "src": "135:7:60",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31866,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "135:7:60",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "134:9:60"
+            },
+            "scope": 31875,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 31874,
+            "nodeType": "FunctionDefinition",
+            "src": "148:64:60",
+            "functionSelector": "77c7b8fc",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getPricePerFullShare",
+            "nameLocation": "157:20:60",
+            "parameters": {
+              "id": 31870,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "177:2:60"
+            },
+            "returnParameters": {
+              "id": 31873,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31872,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31874,
+                  "src": "203:7:60",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31871,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "203:7:60",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "202:9:60"
+            },
+            "scope": 31875,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IXToken",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          31875
+        ],
+        "name": "IXToken",
+        "nameLocation": "75:7:60",
+        "scope": 31876,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  }
+}

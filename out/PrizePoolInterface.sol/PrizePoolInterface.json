@@ -1,0 +1,346 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "token",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "controlledToken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maximumExitFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdrawInstantlyFrom",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/pooltogether/PrizePoolInterface.sol",
+    "id": 35367,
+    "exportedSymbols": {
+      "PrizePoolInterface": [
+        35366
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "36:1278:104",
+    "nodes": [
+      {
+        "id": 35344,
+        "nodeType": "PragmaDirective",
+        "src": "36:24:104",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 35366,
+        "nodeType": "ContractDefinition",
+        "src": "468:845:104",
+        "nodes": [
+          {
+            "id": 35359,
+            "nodeType": "FunctionDefinition",
+            "src": "1001:157:104",
+            "documentation": {
+              "id": 35346,
+              "nodeType": "StructuredDocumentation",
+              "src": "501:497:104",
+              "text": "@notice Withdraw assets from the Prize Pool instantly.  A fairness fee may be charged for an early exit.\n @param from The address to redeem tokens from.\n @param amount The amount of tokens to redeem for assets.\n @param controlledToken The address of the token to redeem (i.e. ticket or sponsorship)\n @param maximumExitFee The maximum exit fee the caller is willing to pay.  This should be pre-calculated by the calculateExitFee() fxn.\n @return The actual exit fee paid"
+            },
+            "functionSelector": "a016240b",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "withdrawInstantlyFrom",
+            "nameLocation": "1010:21:104",
+            "parameters": {
+              "id": 35355,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35348,
+                  "mutability": "mutable",
+                  "name": "from",
+                  "nameLocation": "1045:4:104",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35359,
+                  "src": "1037:12:104",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 35347,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1037:7:104",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 35350,
+                  "mutability": "mutable",
+                  "name": "amount",
+                  "nameLocation": "1063:6:104",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35359,
+                  "src": "1055:14:104",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 35349,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1055:7:104",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 35352,
+                  "mutability": "mutable",
+                  "name": "controlledToken",
+                  "nameLocation": "1083:15:104",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35359,
+                  "src": "1075:23:104",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 35351,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1075:7:104",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 35354,
+                  "mutability": "mutable",
+                  "name": "maximumExitFee",
+                  "nameLocation": "1112:14:104",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35359,
+                  "src": "1104:22:104",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 35353,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1104:7:104",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1031:99:104"
+            },
+            "returnParameters": {
+              "id": 35358,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35357,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35359,
+                  "src": "1149:7:104",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 35356,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1149:7:104",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1148:9:104"
+            },
+            "scope": 35366,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 35365,
+            "nodeType": "FunctionDefinition",
+            "src": "1262:49:104",
+            "documentation": {
+              "id": 35360,
+              "nodeType": "StructuredDocumentation",
+              "src": "1162:97:104",
+              "text": "@dev Returns the address of the underlying ERC20 asset\n @return The address of the asset"
+            },
+            "functionSelector": "fc0c546a",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "token",
+            "nameLocation": "1271:5:104",
+            "parameters": {
+              "id": 35361,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1276:2:104"
+            },
+            "returnParameters": {
+              "id": 35364,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35363,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35365,
+                  "src": "1302:7:104",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 35362,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1302:7:104",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1301:9:104"
+            },
+            "scope": 35366,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "PrizePoolInterface",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 35345,
+          "nodeType": "StructuredDocumentation",
+          "src": "62:406:104",
+          "text": "@title Escrows assets and deposits them into a yield source.  Exposes interest to Prize Strategy.  Users deposit and withdraw from this contract to participate in Prize Pool.\n @notice Accounting is managed using Controlled Tokens, whose mint and burn functions can only be called by this contract.\n @dev Must be inherited to provide specific yield-bearing asset control, such as Compound cTokens"
+        },
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          35366
+        ],
+        "name": "PrizePoolInterface",
+        "nameLocation": "478:18:104",
+        "scope": 35367,
+        "usedErrors": []
+      }
+    ],
+    "license": "GPL-3.0"
+  }
+}

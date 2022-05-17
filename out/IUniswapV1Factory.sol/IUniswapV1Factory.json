@@ -1,0 +1,163 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "getExchange",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/uniswap/IUniswapV1Factory.sol",
+    "id": 35531,
+    "exportedSymbols": {
+      "IUniswapV1Factory": [
+        35530
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "41:129:116",
+    "nodes": [
+      {
+        "id": 35522,
+        "nodeType": "PragmaDirective",
+        "src": "41:24:116",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 35530,
+        "nodeType": "ContractDefinition",
+        "src": "67:102:116",
+        "nodes": [
+          {
+            "id": 35529,
+            "nodeType": "FunctionDefinition",
+            "src": "99:68:116",
+            "functionSelector": "06f2bf62",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getExchange",
+            "nameLocation": "108:11:116",
+            "parameters": {
+              "id": 35525,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35524,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nameLocation": "128:5:116",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35529,
+                  "src": "120:13:116",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 35523,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "120:7:116",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "119:15:116"
+            },
+            "returnParameters": {
+              "id": 35528,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35527,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35529,
+                  "src": "158:7:116",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 35526,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "158:7:116",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "157:9:116"
+            },
+            "scope": 35530,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IUniswapV1Factory",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          35530
+        ],
+        "name": "IUniswapV1Factory",
+        "nameLocation": "77:17:116",
+        "scope": 35531,
+        "usedErrors": []
+      }
+    ],
+    "license": "GPL-3.0-only"
+  }
+}

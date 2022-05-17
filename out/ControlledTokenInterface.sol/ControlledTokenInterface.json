@@ -1,0 +1,140 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "controller",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/pooltogether/ControlledTokenInterface.sol",
+    "id": 35343,
+    "exportedSymbols": {
+      "ControlledTokenInterface": [
+        35342
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "36:299:103",
+    "nodes": [
+      {
+        "id": 35334,
+        "nodeType": "PragmaDirective",
+        "src": "36:24:103",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 35342,
+        "nodeType": "ContractDefinition",
+        "src": "161:173:103",
+        "nodes": [
+          {
+            "id": 35341,
+            "nodeType": "FunctionDefinition",
+            "src": "278:54:103",
+            "documentation": {
+              "id": 35336,
+              "nodeType": "StructuredDocumentation",
+              "src": "200:75:103",
+              "text": "@notice Interface to the contract responsible for controlling mint/burn"
+            },
+            "functionSelector": "f77c4791",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "controller",
+            "nameLocation": "287:10:103",
+            "parameters": {
+              "id": 35337,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "297:2:103"
+            },
+            "returnParameters": {
+              "id": 35340,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35339,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35341,
+                  "src": "323:7:103",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 35338,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "323:7:103",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "322:9:103"
+            },
+            "scope": 35342,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "ControlledTokenInterface",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 35335,
+          "nodeType": "StructuredDocumentation",
+          "src": "62:99:103",
+          "text": "@title Controlled ERC20 Token\n @notice ERC20 Tokens with a controller for minting & burning"
+        },
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          35342
+        ],
+        "name": "ControlledTokenInterface",
+        "nameLocation": "171:24:103",
+        "scope": 35343,
+        "usedErrors": []
+      }
+    ],
+    "license": "GPL-3.0"
+  }
+}

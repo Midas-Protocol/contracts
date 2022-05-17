@@ -1,0 +1,298 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20Upgradeable",
+          "name": "inputToken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "inputAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "strategyData",
+          "type": "bytes"
+        }
+      ],
+      "name": "redeem",
+      "outputs": [
+        {
+          "internalType": "contract IERC20Upgradeable",
+          "name": "outputToken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "outputAmount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/liquidators/IRedemptionStrategy.sol",
+    "id": 39009,
+    "exportedSymbols": {
+      "IERC20Upgradeable": [
+        89465
+      ],
+      "IRedemptionStrategy": [
+        39008
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:1057:141",
+    "nodes": [
+      {
+        "id": 38989,
+        "nodeType": "PragmaDirective",
+        "src": "39:24:141",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 38990,
+        "nodeType": "ImportDirective",
+        "src": "65:88:141",
+        "absolutePath": "/Users/peet/git/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+        "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 39009,
+        "sourceUnit": 89466,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 39008,
+        "nodeType": "ContractDefinition",
+        "src": "380:715:141",
+        "nodes": [
+          {
+            "id": 39007,
+            "nodeType": "FunctionDefinition",
+            "src": "912:181:141",
+            "documentation": {
+              "id": 38992,
+              "nodeType": "StructuredDocumentation",
+              "src": "414:495:141",
+              "text": " @notice Redeems custom collateral `token` for an underlying token.\n @param inputToken The input wrapped token to be redeemed for an underlying token.\n @param inputAmount The amount of the input wrapped token to be redeemed for an underlying token.\n @param strategyData The ABI-encoded data to be used in the redemption strategy logic.\n @return outputToken The underlying ERC20 token outputted.\n @return outputAmount The quantity of underlying tokens outputted."
+            },
+            "functionSelector": "10badf4e",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeem",
+            "nameLocation": "921:6:141",
+            "parameters": {
+              "id": 39000,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 38995,
+                  "mutability": "mutable",
+                  "name": "inputToken",
+                  "nameLocation": "951:10:141",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39007,
+                  "src": "933:28:141",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                    "typeString": "contract IERC20Upgradeable"
+                  },
+                  "typeName": {
+                    "id": 38994,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 38993,
+                      "name": "IERC20Upgradeable",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 89465,
+                      "src": "933:17:141"
+                    },
+                    "referencedDeclaration": 89465,
+                    "src": "933:17:141",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                      "typeString": "contract IERC20Upgradeable"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 38997,
+                  "mutability": "mutable",
+                  "name": "inputAmount",
+                  "nameLocation": "975:11:141",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39007,
+                  "src": "967:19:141",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 38996,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "967:7:141",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 38999,
+                  "mutability": "mutable",
+                  "name": "strategyData",
+                  "nameLocation": "1005:12:141",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39007,
+                  "src": "992:25:141",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 38998,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "992:5:141",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "927:94:141"
+            },
+            "returnParameters": {
+              "id": 39006,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 39003,
+                  "mutability": "mutable",
+                  "name": "outputToken",
+                  "nameLocation": "1058:11:141",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39007,
+                  "src": "1040:29:141",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                    "typeString": "contract IERC20Upgradeable"
+                  },
+                  "typeName": {
+                    "id": 39002,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 39001,
+                      "name": "IERC20Upgradeable",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 89465,
+                      "src": "1040:17:141"
+                    },
+                    "referencedDeclaration": 89465,
+                    "src": "1040:17:141",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                      "typeString": "contract IERC20Upgradeable"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 39005,
+                  "mutability": "mutable",
+                  "name": "outputAmount",
+                  "nameLocation": "1079:12:141",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 39007,
+                  "src": "1071:20:141",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 39004,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1071:7:141",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1039:53:141"
+            },
+            "scope": 39008,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IRedemptionStrategy",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 38991,
+          "nodeType": "StructuredDocumentation",
+          "src": "155:224:141",
+          "text": " @title IRedemptionStrategy\n @notice Redeems seized wrapped token collateral for an underlying token for use as a step in a liquidation.\n @author David Lucid <david@rari.capital> (https://github.com/davidlucid)"
+        },
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          39008
+        ],
+        "name": "IRedemptionStrategy",
+        "nameLocation": "390:19:141",
+        "scope": 39009,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  }
+}

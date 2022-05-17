@@ -1,0 +1,127 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "currencyKey",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/synthetix/ISynth.sol",
+    "id": 35439,
+    "exportedSymbols": {
+      "ISynth": [
+        35438
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:105:109",
+    "nodes": [
+      {
+        "id": 35432,
+        "nodeType": "PragmaDirective",
+        "src": "32:24:109",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 35438,
+        "nodeType": "ContractDefinition",
+        "src": "58:78:109",
+        "nodes": [
+          {
+            "id": 35437,
+            "nodeType": "FunctionDefinition",
+            "src": "79:55:109",
+            "functionSelector": "dbd06c85",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "currencyKey",
+            "nameLocation": "88:11:109",
+            "parameters": {
+              "id": 35433,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "99:2:109"
+            },
+            "returnParameters": {
+              "id": 35436,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35435,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35437,
+                  "src": "125:7:109",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 35434,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "125:7:109",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "124:9:109"
+            },
+            "scope": 35438,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "ISynth",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          35438
+        ],
+        "name": "ISynth",
+        "nameLocation": "68:6:109",
+        "scope": 35439,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  }
+}

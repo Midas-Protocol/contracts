@@ -1,0 +1,542 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "burnAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        }
+      ],
+      "name": "burn",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount0",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount1",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint128",
+          "name": "liquidityBurned",
+          "type": "uint128"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint160",
+          "name": "sqrtRatioX96",
+          "type": "uint160"
+        }
+      ],
+      "name": "getUnderlyingBalancesAtPrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount0Current",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount1Current",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "token0",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "token1",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/gelato/GUniPool.sol",
+    "id": 33818,
+    "exportedSymbols": {
+      "GUniPool": [
+        33817
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "36:1425:85",
+    "nodes": [
+      {
+        "id": 33782,
+        "nodeType": "PragmaDirective",
+        "src": "36:24:85",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 33817,
+        "nodeType": "ContractDefinition",
+        "src": "62:1398:85",
+        "nodes": [
+          {
+            "id": 33787,
+            "nodeType": "FunctionDefinition",
+            "src": "85:50:85",
+            "functionSelector": "0dfe1681",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "token0",
+            "nameLocation": "94:6:85",
+            "parameters": {
+              "id": 33783,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "100:2:85"
+            },
+            "returnParameters": {
+              "id": 33786,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33785,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33787,
+                  "src": "126:7:85",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 33784,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "126:7:85",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "125:9:85"
+            },
+            "scope": 33817,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 33792,
+            "nodeType": "FunctionDefinition",
+            "src": "139:50:85",
+            "functionSelector": "d21220a7",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "token1",
+            "nameLocation": "148:6:85",
+            "parameters": {
+              "id": 33788,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "154:2:85"
+            },
+            "returnParameters": {
+              "id": 33791,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33790,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33792,
+                  "src": "180:7:85",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 33789,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "180:7:85",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "179:9:85"
+            },
+            "scope": 33817,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 33802,
+            "nodeType": "FunctionDefinition",
+            "src": "582:143:85",
+            "documentation": {
+              "id": 33793,
+              "nodeType": "StructuredDocumentation",
+              "src": "193:386:85",
+              "text": "@notice compute total underlying holdings of the G-UNI token supply\n includes current liquidity invested in uniswap position, current fees earned\n and any uninvested leftover (but does not include manager or gelato fees accrued)\n @return amount0Current current total underlying balance of token0\n @return amount1Current current total underlying balance of token1"
+            },
+            "functionSelector": "b670ed7d",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getUnderlyingBalancesAtPrice",
+            "nameLocation": "591:28:85",
+            "parameters": {
+              "id": 33796,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33795,
+                  "mutability": "mutable",
+                  "name": "sqrtRatioX96",
+                  "nameLocation": "628:12:85",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33802,
+                  "src": "620:20:85",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint160",
+                    "typeString": "uint160"
+                  },
+                  "typeName": {
+                    "id": 33794,
+                    "name": "uint160",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "620:7:85",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint160",
+                      "typeString": "uint160"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "619:22:85"
+            },
+            "returnParameters": {
+              "id": 33801,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33798,
+                  "mutability": "mutable",
+                  "name": "amount0Current",
+                  "nameLocation": "685:14:85",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33802,
+                  "src": "677:22:85",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33797,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "677:7:85",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 33800,
+                  "mutability": "mutable",
+                  "name": "amount1Current",
+                  "nameLocation": "709:14:85",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33802,
+                  "src": "701:22:85",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33799,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "701:7:85",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "676:48:85"
+            },
+            "scope": 33817,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 33816,
+            "nodeType": "FunctionDefinition",
+            "src": "1297:161:85",
+            "documentation": {
+              "id": 33803,
+              "nodeType": "StructuredDocumentation",
+              "src": "729:515:85",
+              "text": "@notice burn G-UNI tokens (fractional shares of a Uniswap V3 position) and receive tokens\n @param burnAmount The number of G-UNI tokens to burn\n @param receiver The account to receive the underlying amounts of token0 and token1\n @return amount0 amount of token0 transferred to receiver for burning `burnAmount`\n @return amount1 amount of token1 transferred to receiver for burning `burnAmount`\n @return liquidityBurned amount of liquidity removed from the underlying Uniswap V3 position"
+            },
+            "functionSelector": "fcd3533c",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "burn",
+            "nameLocation": "1306:4:85",
+            "parameters": {
+              "id": 33808,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33805,
+                  "mutability": "mutable",
+                  "name": "burnAmount",
+                  "nameLocation": "1319:10:85",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33816,
+                  "src": "1311:18:85",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33804,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1311:7:85",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 33807,
+                  "mutability": "mutable",
+                  "name": "receiver",
+                  "nameLocation": "1339:8:85",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33816,
+                  "src": "1331:16:85",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 33806,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1331:7:85",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1310:38:85"
+            },
+            "returnParameters": {
+              "id": 33815,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33810,
+                  "mutability": "mutable",
+                  "name": "amount0",
+                  "nameLocation": "1390:7:85",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33816,
+                  "src": "1382:15:85",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33809,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1382:7:85",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 33812,
+                  "mutability": "mutable",
+                  "name": "amount1",
+                  "nameLocation": "1413:7:85",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33816,
+                  "src": "1405:15:85",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33811,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1405:7:85",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 33814,
+                  "mutability": "mutable",
+                  "name": "liquidityBurned",
+                  "nameLocation": "1436:15:85",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33816,
+                  "src": "1428:23:85",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint128",
+                    "typeString": "uint128"
+                  },
+                  "typeName": {
+                    "id": 33813,
+                    "name": "uint128",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1428:7:85",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint128",
+                      "typeString": "uint128"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1374:83:85"
+            },
+            "scope": 33817,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "GUniPool",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          33817
+        ],
+        "name": "GUniPool",
+        "nameLocation": "72:8:85",
+        "scope": 33818,
+        "usedErrors": []
+      }
+    ],
+    "license": "GPL-3.0"
+  }
+}

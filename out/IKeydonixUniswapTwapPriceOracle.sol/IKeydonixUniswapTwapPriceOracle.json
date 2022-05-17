@@ -1,0 +1,556 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "cToken",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "price",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "block",
+          "type": "uint256"
+        }
+      ],
+      "name": "PriceAlreadyVerified",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "cToken",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "price",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "block",
+          "type": "uint256"
+        }
+      ],
+      "name": "PriceVerified",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ICToken",
+          "name": "cToken",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bytes",
+              "name": "block",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "accountProofNodesRlp",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "reserveAndTimestampProofNodesRlp",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "priceAccumulatorProofNodesRlp",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct UniswapOracle.ProofData",
+          "name": "proofData",
+          "type": "tuple"
+        }
+      ],
+      "name": "verifyPrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/oracles/default/IKeydonixUniswapTwapPriceOracle.sol",
+    "id": 43757,
+    "exportedSymbols": {
+      "BlockVerifier": [
+        46114
+      ],
+      "ICToken": [
+        33314
+      ],
+      "IKeydonixUniswapTwapPriceOracle": [
+        43756
+      ],
+      "IUniswapV2Pair": [
+        35860
+      ],
+      "MerklePatriciaVerifier": [
+        46598
+      ],
+      "Rlp": [
+        47704
+      ],
+      "UQ112x112": [
+        47748
+      ],
+      "UniswapOracle": [
+        48232
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:441:168",
+    "nodes": [
+      {
+        "id": 43724,
+        "nodeType": "PragmaDirective",
+        "src": "39:24:168",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 43725,
+        "nodeType": "ImportDirective",
+        "src": "65:45:168",
+        "absolutePath": "/Users/peet/git/contracts/contracts/external/compound/ICToken.sol",
+        "file": "../../external/compound/ICToken.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 43757,
+        "sourceUnit": 33315,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 43726,
+        "nodeType": "ImportDirective",
+        "src": "111:39:168",
+        "absolutePath": "/Users/peet/git/contracts/contracts/oracles/keydonix/UniswapOracle.sol",
+        "file": "../keydonix/UniswapOracle.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 43757,
+        "sourceUnit": 48233,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 43756,
+        "nodeType": "ContractDefinition",
+        "src": "152:327:168",
+        "nodes": [
+          {
+            "id": 43739,
+            "nodeType": "FunctionDefinition",
+            "src": "198:117:168",
+            "functionSelector": "cd344be8",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "verifyPrice",
+            "nameLocation": "207:11:168",
+            "parameters": {
+              "id": 43733,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 43729,
+                  "mutability": "mutable",
+                  "name": "cToken",
+                  "nameLocation": "227:6:168",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43739,
+                  "src": "219:14:168",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_ICToken_$33314",
+                    "typeString": "contract ICToken"
+                  },
+                  "typeName": {
+                    "id": 43728,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 43727,
+                      "name": "ICToken",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 33314,
+                      "src": "219:7:168"
+                    },
+                    "referencedDeclaration": 33314,
+                    "src": "219:7:168",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_ICToken_$33314",
+                      "typeString": "contract ICToken"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 43732,
+                  "mutability": "mutable",
+                  "name": "proofData",
+                  "nameLocation": "268:9:168",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43739,
+                  "src": "235:42:168",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_ProofData_$47805_calldata_ptr",
+                    "typeString": "struct UniswapOracle.ProofData"
+                  },
+                  "typeName": {
+                    "id": 43731,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 43730,
+                      "name": "UniswapOracle.ProofData",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 47805,
+                      "src": "235:23:168"
+                    },
+                    "referencedDeclaration": 47805,
+                    "src": "235:23:168",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_ProofData_$47805_storage_ptr",
+                      "typeString": "struct UniswapOracle.ProofData"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "218:60:168"
+            },
+            "returnParameters": {
+              "id": 43738,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 43735,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43739,
+                  "src": "297:7:168",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 43734,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "297:7:168",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 43737,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43739,
+                  "src": "306:7:168",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 43736,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "306:7:168",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "296:18:168"
+            },
+            "scope": 43756,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 43747,
+            "nodeType": "EventDefinition",
+            "src": "319:81:168",
+            "anonymous": false,
+            "name": "PriceAlreadyVerified",
+            "nameLocation": "325:20:168",
+            "parameters": {
+              "id": 43746,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 43741,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "cToken",
+                  "nameLocation": "362:6:168",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43747,
+                  "src": "346:22:168",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 43740,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "346:7:168",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 43743,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "price",
+                  "nameLocation": "378:5:168",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43747,
+                  "src": "370:13:168",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 43742,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "370:7:168",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 43745,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "block",
+                  "nameLocation": "393:5:168",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43747,
+                  "src": "385:13:168",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 43744,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "385:7:168",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "345:54:168"
+            }
+          },
+          {
+            "id": 43755,
+            "nodeType": "EventDefinition",
+            "src": "403:74:168",
+            "anonymous": false,
+            "name": "PriceVerified",
+            "nameLocation": "409:13:168",
+            "parameters": {
+              "id": 43754,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 43749,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "cToken",
+                  "nameLocation": "439:6:168",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43755,
+                  "src": "423:22:168",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 43748,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "423:7:168",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 43751,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "price",
+                  "nameLocation": "455:5:168",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43755,
+                  "src": "447:13:168",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 43750,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "447:7:168",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 43753,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "block",
+                  "nameLocation": "470:5:168",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 43755,
+                  "src": "462:13:168",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 43752,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "462:7:168",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "422:54:168"
+            }
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IKeydonixUniswapTwapPriceOracle",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          43756
+        ],
+        "name": "IKeydonixUniswapTwapPriceOracle",
+        "nameLocation": "162:31:168",
+        "scope": 43757,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  }
+}
