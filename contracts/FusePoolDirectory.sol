@@ -15,7 +15,21 @@ import "./compound/Unitroller.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FusePoolDirectory is a directory for Fuse interest rate pools.
  */
-contract FusePoolDirectory is OwnableUpgradeable {
+contract FusePoolDirectory is
+    OwnableUpgradeable,
+    UnitrollerAdminStorage,
+    ComptrollerErrorReporter
+{
+    /**
+     * @notice Emitted when pendingAdmin is changed
+     */
+    event NewPendingAdmin(address oldPendingAdmin, address newPendingAdmin);
+
+    /**
+     * @notice Emitted when pendingAdmin is accepted, which means admin is updated
+     */
+    event NewAdmin(address oldAdmin, address newAdmin);
+
     /**
      * @dev Initializes a deployer whitelist if desired.
      * @param _enforceDeployerWhitelist Boolean indicating if the deployer whitelist is to be enforced.
@@ -399,5 +413,67 @@ contract FusePoolDirectory is OwnableUpgradeable {
         }
 
         return (indexes, publicPools);
+    }
+
+    /**
+     * @notice Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
+     * @dev Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
+     * @param newPendingAdmin New pending admin.
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function _setPendingAdmin(address newPendingAdmin)
+        public
+        returns (uint256)
+    {
+        // Check caller = admin
+        if (!hasAdminRights()) {
+            return
+                fail(
+                    Error.UNAUTHORIZED,
+                    FailureInfo.SET_PENDING_ADMIN_OWNER_CHECK
+                );
+        }
+
+        // Save current value, if any, for inclusion in log
+        address oldPendingAdmin = pendingAdmin;
+
+        // Store pendingAdmin with value newPendingAdmin
+        pendingAdmin = newPendingAdmin;
+
+        // Emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin)
+        emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin);
+
+        return uint256(Error.NO_ERROR);
+    }
+
+    /**
+     * @notice Accepts transfer of admin rights. msg.sender must be pendingAdmin
+     * @dev Admin function for pending admin to accept role and update admin
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
+    function _acceptAdmin() public returns (uint256) {
+        // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
+        if (msg.sender != pendingAdmin) {
+            return
+                fail(
+                    Error.UNAUTHORIZED,
+                    FailureInfo.ACCEPT_ADMIN_PENDING_ADMIN_CHECK
+                );
+        }
+
+        // Save current values for inclusion in log
+        address oldAdmin = admin;
+        address oldPendingAdmin = pendingAdmin;
+
+        // Store admin with value pendingAdmin
+        admin = pendingAdmin;
+
+        // Clear the pending value
+        pendingAdmin = address(0);
+
+        emit NewAdmin(oldAdmin, admin);
+        emit NewPendingAdmin(oldPendingAdmin, pendingAdmin);
+
+        return uint256(Error.NO_ERROR);
     }
 }
