@@ -1,0 +1,788 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "compAccrued",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "compBorrowSpeeds",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "compSupplySpeeds",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "cToken",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "borrower",
+          "type": "address"
+        }
+      ],
+      "name": "flywheelPreBorrowerAction",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "cToken",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "supplier",
+          "type": "address"
+        }
+      ],
+      "name": "flywheelPreSupplierAction",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getAllMarkets",
+      "outputs": [
+        {
+          "internalType": "contract ICToken[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rewardToken",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/compound/IRewardsDistributor.sol",
+    "id": 33564,
+    "exportedSymbols": {
+      "ICToken": [
+        33314
+      ],
+      "IRewardsDistributor": [
+        33563
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "41:1336:76",
+    "nodes": [
+      {
+        "id": 33506,
+        "nodeType": "PragmaDirective",
+        "src": "41:24:76",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 33507,
+        "nodeType": "ImportDirective",
+        "src": "67:23:76",
+        "absolutePath": "/Users/peet/git/contracts/contracts/external/compound/ICToken.sol",
+        "file": "./ICToken.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 33564,
+        "sourceUnit": 33315,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 33563,
+        "nodeType": "ContractDefinition",
+        "src": "149:1227:76",
+        "nodes": [
+          {
+            "id": 33514,
+            "nodeType": "FunctionDefinition",
+            "src": "227:55:76",
+            "documentation": {
+              "id": 33509,
+              "nodeType": "StructuredDocumentation",
+              "src": "183:41:76",
+              "text": "@dev The token to reward (i.e., COMP)"
+            },
+            "functionSelector": "f7c618c1",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "rewardToken",
+            "nameLocation": "236:11:76",
+            "parameters": {
+              "id": 33510,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "247:2:76"
+            },
+            "returnParameters": {
+              "id": 33513,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33512,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33514,
+                  "src": "273:7:76",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 33511,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "273:7:76",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "272:9:76"
+            },
+            "scope": 33563,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 33522,
+            "nodeType": "FunctionDefinition",
+            "src": "360:67:76",
+            "documentation": {
+              "id": 33515,
+              "nodeType": "StructuredDocumentation",
+              "src": "286:71:76",
+              "text": "@notice The portion of compRate that each market currently receives"
+            },
+            "functionSelector": "6aa875b5",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "compSupplySpeeds",
+            "nameLocation": "369:16:76",
+            "parameters": {
+              "id": 33518,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33517,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33522,
+                  "src": "386:7:76",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 33516,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "386:7:76",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "385:9:76"
+            },
+            "returnParameters": {
+              "id": 33521,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33520,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33522,
+                  "src": "418:7:76",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33519,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "418:7:76",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "417:9:76"
+            },
+            "scope": 33563,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 33530,
+            "nodeType": "FunctionDefinition",
+            "src": "505:67:76",
+            "documentation": {
+              "id": 33523,
+              "nodeType": "StructuredDocumentation",
+              "src": "431:71:76",
+              "text": "@notice The portion of compRate that each market currently receives"
+            },
+            "functionSelector": "f4a433c0",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "compBorrowSpeeds",
+            "nameLocation": "514:16:76",
+            "parameters": {
+              "id": 33526,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33525,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33530,
+                  "src": "531:7:76",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 33524,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "531:7:76",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "530:9:76"
+            },
+            "returnParameters": {
+              "id": 33529,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33528,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33530,
+                  "src": "563:7:76",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33527,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "563:7:76",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "562:9:76"
+            },
+            "scope": 33563,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 33538,
+            "nodeType": "FunctionDefinition",
+            "src": "644:62:76",
+            "documentation": {
+              "id": 33531,
+              "nodeType": "StructuredDocumentation",
+              "src": "576:65:76",
+              "text": "@notice The COMP accrued but not yet transferred to each user"
+            },
+            "functionSelector": "cc7ebdc4",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "compAccrued",
+            "nameLocation": "653:11:76",
+            "parameters": {
+              "id": 33534,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33533,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33538,
+                  "src": "665:7:76",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 33532,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "665:7:76",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "664:9:76"
+            },
+            "returnParameters": {
+              "id": 33537,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33536,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33538,
+                  "src": "697:7:76",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33535,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "697:7:76",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "696:9:76"
+            },
+            "scope": 33563,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 33546,
+            "nodeType": "FunctionDefinition",
+            "src": "901:78:76",
+            "documentation": {
+              "id": 33539,
+              "nodeType": "StructuredDocumentation",
+              "src": "710:188:76",
+              "text": " @notice Keeps the flywheel moving pre-mint and pre-redeem\n @dev Called by the Comptroller\n @param cToken The relevant market\n @param supplier The minter/redeemer"
+            },
+            "functionSelector": "1c9161e0",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "flywheelPreSupplierAction",
+            "nameLocation": "910:25:76",
+            "parameters": {
+              "id": 33544,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33541,
+                  "mutability": "mutable",
+                  "name": "cToken",
+                  "nameLocation": "944:6:76",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33546,
+                  "src": "936:14:76",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 33540,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "936:7:76",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 33543,
+                  "mutability": "mutable",
+                  "name": "supplier",
+                  "nameLocation": "960:8:76",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33546,
+                  "src": "952:16:76",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 33542,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "952:7:76",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "935:34:76"
+            },
+            "returnParameters": {
+              "id": 33545,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "978:0:76"
+            },
+            "scope": 33563,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 33554,
+            "nodeType": "FunctionDefinition",
+            "src": "1168:78:76",
+            "documentation": {
+              "id": 33547,
+              "nodeType": "StructuredDocumentation",
+              "src": "983:182:76",
+              "text": " @notice Keeps the flywheel moving pre-borrow and pre-repay\n @dev Called by the Comptroller\n @param cToken The relevant market\n @param borrower The borrower"
+            },
+            "functionSelector": "e6e162e8",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "flywheelPreBorrowerAction",
+            "nameLocation": "1177:25:76",
+            "parameters": {
+              "id": 33552,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33549,
+                  "mutability": "mutable",
+                  "name": "cToken",
+                  "nameLocation": "1211:6:76",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33554,
+                  "src": "1203:14:76",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 33548,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1203:7:76",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 33551,
+                  "mutability": "mutable",
+                  "name": "borrower",
+                  "nameLocation": "1227:8:76",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33554,
+                  "src": "1219:16:76",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 33550,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1219:7:76",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1202:34:76"
+            },
+            "returnParameters": {
+              "id": 33553,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1245:0:76"
+            },
+            "scope": 33563,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 33562,
+            "nodeType": "FunctionDefinition",
+            "src": "1308:66:76",
+            "documentation": {
+              "id": 33555,
+              "nodeType": "StructuredDocumentation",
+              "src": "1250:55:76",
+              "text": " @notice Returns an array of all markets."
+            },
+            "functionSelector": "b0772d0b",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getAllMarkets",
+            "nameLocation": "1317:13:76",
+            "parameters": {
+              "id": 33556,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1330:2:76"
+            },
+            "returnParameters": {
+              "id": 33561,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33560,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33562,
+                  "src": "1356:16:76",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_contract$_ICToken_$33314_$dyn_memory_ptr",
+                    "typeString": "contract ICToken[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 33558,
+                      "nodeType": "UserDefinedTypeName",
+                      "pathNode": {
+                        "id": 33557,
+                        "name": "ICToken",
+                        "nodeType": "IdentifierPath",
+                        "referencedDeclaration": 33314,
+                        "src": "1356:7:76"
+                      },
+                      "referencedDeclaration": 33314,
+                      "src": "1356:7:76",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_ICToken_$33314",
+                        "typeString": "contract ICToken"
+                      }
+                    },
+                    "id": 33559,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1356:9:76",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_contract$_ICToken_$33314_$dyn_storage_ptr",
+                      "typeString": "contract ICToken[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1355:18:76"
+            },
+            "scope": 33563,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IRewardsDistributor",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 33508,
+          "nodeType": "StructuredDocumentation",
+          "src": "92:56:76",
+          "text": " @title RewardsDistributor\n @author Compound"
+        },
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          33563
+        ],
+        "name": "IRewardsDistributor",
+        "nameLocation": "159:19:76",
+        "scope": 33564,
+        "usedErrors": []
+      }
+    ],
+    "license": "BSD-3-Clause"
+  }
+}

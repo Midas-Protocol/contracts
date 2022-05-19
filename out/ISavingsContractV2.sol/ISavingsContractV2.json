@@ -1,0 +1,235 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "exchangeRate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "redeemCredits",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "underlyingReturned",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/mstable/ISavingsContractV2.sol",
+    "id": 34542,
+    "exportedSymbols": {
+      "ISavingsContractV2": [
+        34541
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "46:262:97",
+    "nodes": [
+      {
+        "id": 34527,
+        "nodeType": "PragmaDirective",
+        "src": "46:24:97",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 34541,
+        "nodeType": "ContractDefinition",
+        "src": "109:198:97",
+        "nodes": [
+          {
+            "id": 34535,
+            "nodeType": "FunctionDefinition",
+            "src": "142:86:97",
+            "functionSelector": "c9f18ebd",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeemCredits",
+            "nameLocation": "151:13:97",
+            "parameters": {
+              "id": 34531,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 34530,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "173:7:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 34535,
+                  "src": "165:15:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 34529,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "165:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "164:17:97"
+            },
+            "returnParameters": {
+              "id": 34534,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 34533,
+                  "mutability": "mutable",
+                  "name": "underlyingReturned",
+                  "nameLocation": "208:18:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 34535,
+                  "src": "200:26:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 34532,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "200:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "199:28:97"
+            },
+            "scope": 34541,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 34540,
+            "nodeType": "FunctionDefinition",
+            "src": "238:56:97",
+            "functionSelector": "3ba0b9a9",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "exchangeRate",
+            "nameLocation": "247:12:97",
+            "parameters": {
+              "id": 34536,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "259:2:97"
+            },
+            "returnParameters": {
+              "id": 34539,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 34538,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 34540,
+                  "src": "285:7:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 34537,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "285:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "284:9:97"
+            },
+            "scope": 34541,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "ISavingsContractV2",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 34528,
+          "nodeType": "StructuredDocumentation",
+          "src": "72:36:97",
+          "text": " @title ISavingsContractV2"
+        },
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          34541
+        ],
+        "name": "ISavingsContractV2",
+        "nameLocation": "119:18:97",
+        "scope": 34542,
+        "usedErrors": []
+      }
+    ],
+    "license": "AGPL-3.0-or-later"
+  }
+}

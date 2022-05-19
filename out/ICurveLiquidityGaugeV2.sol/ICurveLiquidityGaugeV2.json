@@ -1,0 +1,264 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "deposit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "lp_token",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/curve/ICurveLiquidityGaugeV2.sol",
+    "id": 33600,
+    "exportedSymbols": {
+      "ICurveLiquidityGaugeV2": [
+        33599
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:211:78",
+    "nodes": [
+      {
+        "id": 33583,
+        "nodeType": "PragmaDirective",
+        "src": "39:24:78",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 33599,
+        "nodeType": "ContractDefinition",
+        "src": "65:184:78",
+        "nodes": [
+          {
+            "id": 33588,
+            "nodeType": "FunctionDefinition",
+            "src": "102:52:78",
+            "functionSelector": "82c63066",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "lp_token",
+            "nameLocation": "111:8:78",
+            "parameters": {
+              "id": 33584,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "119:2:78"
+            },
+            "returnParameters": {
+              "id": 33587,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33586,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33588,
+                  "src": "145:7:78",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 33585,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "145:7:78",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "144:9:78"
+            },
+            "scope": 33599,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 33593,
+            "nodeType": "FunctionDefinition",
+            "src": "158:42:78",
+            "functionSelector": "b6b55f25",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "deposit",
+            "nameLocation": "167:7:78",
+            "parameters": {
+              "id": 33591,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33590,
+                  "mutability": "mutable",
+                  "name": "_value",
+                  "nameLocation": "183:6:78",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33593,
+                  "src": "175:14:78",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33589,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "175:7:78",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "174:16:78"
+            },
+            "returnParameters": {
+              "id": 33592,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "199:0:78"
+            },
+            "scope": 33599,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 33598,
+            "nodeType": "FunctionDefinition",
+            "src": "204:43:78",
+            "functionSelector": "2e1a7d4d",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "withdraw",
+            "nameLocation": "213:8:78",
+            "parameters": {
+              "id": 33596,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33595,
+                  "mutability": "mutable",
+                  "name": "_value",
+                  "nameLocation": "230:6:78",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33598,
+                  "src": "222:14:78",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33594,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "222:7:78",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "221:16:78"
+            },
+            "returnParameters": {
+              "id": 33597,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "246:0:78"
+            },
+            "scope": 33599,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "ICurveLiquidityGaugeV2",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          33599
+        ],
+        "name": "ICurveLiquidityGaugeV2",
+        "nameLocation": "75:22:78",
+        "scope": 33600,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  }
+}

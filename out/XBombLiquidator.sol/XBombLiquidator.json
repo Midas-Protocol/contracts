@@ -1,0 +1,877 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20Upgradeable",
+          "name": "inputToken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "inputAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "strategyData",
+          "type": "bytes"
+        }
+      ],
+      "name": "redeem",
+      "outputs": [
+        {
+          "internalType": "contract IERC20Upgradeable",
+          "name": "outputToken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "outputAmount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x608060405234801561001057600080fd5b50610370806100206000396000f3fe608060405234801561001057600080fd5b506004361061002b5760003560e01c806310badf4e14610030575b600080fd5b61004361003e366004610230565b610066565b604080516001600160a01b03909316835260208301919091520160405180910390f35b6040516367dfd4c960e01b815260048101839052600090819085906001600160a01b038216906367dfd4c990602401600060405180830381600087803b1580156100af57600080fd5b505af11580156100c3573d6000803e3d6000fd5b50505050806001600160a01b031663228cb7336040518163ffffffff1660e01b8152600401602060405180830381865afa158015610105573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061012991906102fd565b9250806001600160a01b031663228cb7336040518163ffffffff1660e01b8152600401602060405180830381865afa158015610169573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061018d91906102fd565b6040516370a0823160e01b81523060048201526001600160a01b0391909116906370a0823190602401602060405180830381865afa1580156101d3573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906101f79190610321565b915050935093915050565b6001600160a01b038116811461021757600080fd5b50565b634e487b7160e01b600052604160045260246000fd5b60008060006060848603121561024557600080fd5b833561025081610202565b925060208401359150604084013567ffffffffffffffff8082111561027457600080fd5b818601915086601f83011261028857600080fd5b81358181111561029a5761029a61021a565b604051601f8201601f19908116603f011681019083821181831017156102c2576102c261021a565b816040528281528960208487010111156102db57600080fd5b8260208601602083013760006020848301015280955050505050509250925092565b60006020828403121561030f57600080fd5b815161031a81610202565b9392505050565b60006020828403121561033357600080fd5b505191905056fea264697066735822122078702c0d0ed94230af71ea017020a6e308e0c2192ffdd74c9b07ff4a13bfdf8864736f6c634300080a0033",
+    "sourceMap": "333:1016:154:-:0;;;;;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x608060405234801561001057600080fd5b506004361061002b5760003560e01c806310badf4e14610030575b600080fd5b61004361003e366004610230565b610066565b604080516001600160a01b03909316835260208301919091520160405180910390f35b6040516367dfd4c960e01b815260048101839052600090819085906001600160a01b038216906367dfd4c990602401600060405180830381600087803b1580156100af57600080fd5b505af11580156100c3573d6000803e3d6000fd5b50505050806001600160a01b031663228cb7336040518163ffffffff1660e01b8152600401602060405180830381865afa158015610105573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061012991906102fd565b9250806001600160a01b031663228cb7336040518163ffffffff1660e01b8152600401602060405180830381865afa158015610169573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061018d91906102fd565b6040516370a0823160e01b81523060048201526001600160a01b0391909116906370a0823190602401602060405180830381865afa1580156101d3573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906101f79190610321565b915050935093915050565b6001600160a01b038116811461021757600080fd5b50565b634e487b7160e01b600052604160045260246000fd5b60008060006060848603121561024557600080fd5b833561025081610202565b925060208401359150604084013567ffffffffffffffff8082111561027457600080fd5b818601915086601f83011261028857600080fd5b81358181111561029a5761029a61021a565b604051601f8201601f19908116603f011681019083821181831017156102c2576102c261021a565b816040528281528960208487010111156102db57600080fd5b8260208601602083013760006020848301015280955050505050509250925092565b60006020828403121561030f57600080fd5b815161031a81610202565b9392505050565b60006020828403121561033357600080fd5b505191905056fea264697066735822122078702c0d0ed94230af71ea017020a6e308e0c2192ffdd74c9b07ff4a13bfdf8864736f6c634300080a0033",
+    "sourceMap": "333:1016:154:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;877:470;;;;;;:::i;:::-;;:::i;:::-;;;;-1:-1:-1;;;;;1695:32:278;;;1677:51;;1759:2;1744:18;;1737:34;;;;1650:18;877:470:154;;;;;;;;1195:24;;-1:-1:-1;;;1195:24:154;;;;;1928:25:278;;;1014:29:154;;;;1103:10;;-1:-1:-1;;;;;1195:11:154;;;;;1901:18:278;;1195:24:154;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1266:5;-1:-1:-1;;;;;1266:12:154;;:14;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;1226:56;;1303:5;-1:-1:-1;;;;;1303:12:154;;:14;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;:39;;-1:-1:-1;;;1303:39:154;;1336:4;1303:39;;;2412:51:278;-1:-1:-1;;;;;1303:24:154;;;;;;;2385:18:278;;1303:39:154;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;1288:54;;1067:280;877:470;;;;;;:::o;14:150:278:-;-1:-1:-1;;;;;108:31:278;;98:42;;88:70;;154:1;151;144:12;88:70;14:150;:::o;169:127::-;230:10;225:3;221:20;218:1;211:31;261:4;258:1;251:15;285:4;282:1;275:15;301:1170;414:6;422;430;483:2;471:9;462:7;458:23;454:32;451:52;;;499:1;496;489:12;451:52;538:9;525:23;557:50;601:5;557:50;:::i;:::-;626:5;-1:-1:-1;678:2:278;663:18;;650:32;;-1:-1:-1;733:2:278;718:18;;705:32;756:18;786:14;;;783:34;;;813:1;810;803:12;783:34;851:6;840:9;836:22;826:32;;896:7;889:4;885:2;881:13;877:27;867:55;;918:1;915;908:12;867:55;954:2;941:16;976:2;972;969:10;966:36;;;982:18;;:::i;:::-;1057:2;1051:9;1025:2;1111:13;;-1:-1:-1;;1107:22:278;;;1131:2;1103:31;1099:40;1087:53;;;1155:18;;;1175:22;;;1152:46;1149:72;;;1201:18;;:::i;:::-;1241:10;1237:2;1230:22;1276:2;1268:6;1261:18;1316:7;1311:2;1306;1302;1298:11;1294:20;1291:33;1288:53;;;1337:1;1334;1327:12;1288:53;1393:2;1388;1384;1380:11;1375:2;1367:6;1363:15;1350:46;1438:1;1433:2;1428;1420:6;1416:15;1412:24;1405:35;1459:6;1449:16;;;;;;;301:1170;;;;;:::o;1964:297::-;2061:6;2114:2;2102:9;2093:7;2089:23;2085:32;2082:52;;;2130:1;2127;2120:12;2082:52;2162:9;2156:16;2181:50;2225:5;2181:50;:::i;:::-;2250:5;1964:297;-1:-1:-1;;;1964:297:278:o;2474:184::-;2544:6;2597:2;2585:9;2576:7;2572:23;2568:32;2565:52;;;2613:1;2610;2603:12;2565:52;-1:-1:-1;2636:16:278;;2474:184;-1:-1:-1;2474:184:278:o",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/liquidators/XBombLiquidator.sol",
+    "id": 40704,
+    "exportedSymbols": {
+      "IERC20Upgradeable": [
+        89465
+      ],
+      "IRedemptionStrategy": [
+        39008
+      ],
+      "IXBomb": [
+        32611
+      ],
+      "XBombLiquidator": [
+        40703
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:1311:154",
+    "nodes": [
+      {
+        "id": 40640,
+        "nodeType": "PragmaDirective",
+        "src": "39:24:154",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 40641,
+        "nodeType": "ImportDirective",
+        "src": "65:37:154",
+        "absolutePath": "/Users/peet/git/contracts/contracts/external/bomb/IXBomb.sol",
+        "file": "../external/bomb/IXBomb.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 40704,
+        "sourceUnit": 32612,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 40642,
+        "nodeType": "ImportDirective",
+        "src": "103:35:154",
+        "absolutePath": "/Users/peet/git/contracts/contracts/liquidators/IRedemptionStrategy.sol",
+        "file": "./IRedemptionStrategy.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 40704,
+        "sourceUnit": 39009,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 40703,
+        "nodeType": "ContractDefinition",
+        "src": "333:1016:154",
+        "nodes": [
+          {
+            "id": 40702,
+            "nodeType": "FunctionDefinition",
+            "src": "877:470:154",
+            "baseFunctions": [
+              39007
+            ],
+            "body": {
+              "id": 40701,
+              "nodeType": "Block",
+              "src": "1067:280:154",
+              "statements": [
+                {
+                  "assignments": [
+                    40664
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 40664,
+                      "mutability": "mutable",
+                      "name": "xBomb",
+                      "nameLocation": "1080:5:154",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 40701,
+                      "src": "1073:12:154",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IXBomb_$32611",
+                        "typeString": "contract IXBomb"
+                      },
+                      "typeName": {
+                        "id": 40663,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 40662,
+                          "name": "IXBomb",
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 32611,
+                          "src": "1073:6:154"
+                        },
+                        "referencedDeclaration": 32611,
+                        "src": "1073:6:154",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_IXBomb_$32611",
+                          "typeString": "contract IXBomb"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 40671,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "id": 40668,
+                            "name": "inputToken",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 40649,
+                            "src": "1103:10:154",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                              "typeString": "contract IERC20Upgradeable"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                              "typeString": "contract IERC20Upgradeable"
+                            }
+                          ],
+                          "id": 40667,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "1095:7:154",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 40666,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1095:7:154",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 40669,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1095:19:154",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 40665,
+                      "name": "IXBomb",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 32611,
+                      "src": "1088:6:154",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_contract$_IXBomb_$32611_$",
+                        "typeString": "type(contract IXBomb)"
+                      }
+                    },
+                    "id": 40670,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1088:27:154",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IXBomb_$32611",
+                      "typeString": "contract IXBomb"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1073:42:154"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 40675,
+                        "name": "inputAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 40651,
+                        "src": "1207:11:154",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "id": 40672,
+                        "name": "xBomb",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 40664,
+                        "src": "1195:5:154",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_IXBomb_$32611",
+                          "typeString": "contract IXBomb"
+                        }
+                      },
+                      "id": 40674,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "leave",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 32576,
+                      "src": "1195:11:154",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_nonpayable$_t_uint256_$returns$__$",
+                        "typeString": "function (uint256) external"
+                      }
+                    },
+                    "id": 40676,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1195:24:154",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 40677,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1195:24:154"
+                },
+                {
+                  "expression": {
+                    "id": 40687,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 40678,
+                      "name": "outputToken",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 40658,
+                      "src": "1226:11:154",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                        "typeString": "contract IERC20Upgradeable"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "arguments": [
+                            {
+                              "arguments": [],
+                              "expression": {
+                                "argumentTypes": [],
+                                "expression": {
+                                  "id": 40682,
+                                  "name": "xBomb",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 40664,
+                                  "src": "1266:5:154",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_contract$_IXBomb_$32611",
+                                    "typeString": "contract IXBomb"
+                                  }
+                                },
+                                "id": 40683,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": false,
+                                "lValueRequested": false,
+                                "memberName": "reward",
+                                "nodeType": "MemberAccess",
+                                "referencedDeclaration": 32571,
+                                "src": "1266:12:154",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_function_external_view$__$returns$_t_contract$_IERC20Upgradeable_$89465_$",
+                                  "typeString": "function () view external returns (contract IERC20Upgradeable)"
+                                }
+                              },
+                              "id": 40684,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "kind": "functionCall",
+                              "lValueRequested": false,
+                              "names": [],
+                              "nodeType": "FunctionCall",
+                              "src": "1266:14:154",
+                              "tryCall": false,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                                "typeString": "contract IERC20Upgradeable"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                                "typeString": "contract IERC20Upgradeable"
+                              }
+                            ],
+                            "id": 40681,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1258:7:154",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 40680,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1258:7:154",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 40685,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1258:23:154",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 40679,
+                        "name": "IERC20Upgradeable",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 89465,
+                        "src": "1240:17:154",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_IERC20Upgradeable_$89465_$",
+                          "typeString": "type(contract IERC20Upgradeable)"
+                        }
+                      },
+                      "id": 40686,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1240:42:154",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                        "typeString": "contract IERC20Upgradeable"
+                      }
+                    },
+                    "src": "1226:56:154",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                      "typeString": "contract IERC20Upgradeable"
+                    }
+                  },
+                  "id": 40688,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1226:56:154"
+                },
+                {
+                  "expression": {
+                    "id": 40699,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 40689,
+                      "name": "outputAmount",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 40660,
+                      "src": "1288:12:154",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "arguments": [
+                            {
+                              "id": 40696,
+                              "name": "this",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": -28,
+                              "src": "1336:4:154",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_contract$_XBombLiquidator_$40703",
+                                "typeString": "contract XBombLiquidator"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_contract$_XBombLiquidator_$40703",
+                                "typeString": "contract XBombLiquidator"
+                              }
+                            ],
+                            "id": 40695,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1328:7:154",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 40694,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1328:7:154",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 40697,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1328:13:154",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "expression": {
+                          "arguments": [],
+                          "expression": {
+                            "argumentTypes": [],
+                            "expression": {
+                              "id": 40690,
+                              "name": "xBomb",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 40664,
+                              "src": "1303:5:154",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_contract$_IXBomb_$32611",
+                                "typeString": "contract IXBomb"
+                              }
+                            },
+                            "id": 40691,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "reward",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 32571,
+                            "src": "1303:12:154",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_external_view$__$returns$_t_contract$_IERC20Upgradeable_$89465_$",
+                              "typeString": "function () view external returns (contract IERC20Upgradeable)"
+                            }
+                          },
+                          "id": 40692,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1303:14:154",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                            "typeString": "contract IERC20Upgradeable"
+                          }
+                        },
+                        "id": 40693,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "balanceOf",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 89422,
+                        "src": "1303:24:154",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_uint256_$",
+                          "typeString": "function (address) view external returns (uint256)"
+                        }
+                      },
+                      "id": 40698,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1303:39:154",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "1288:54:154",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 40700,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1288:54:154"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 40646,
+              "nodeType": "StructuredDocumentation",
+              "src": "385:489:154",
+              "text": " @notice Redeems xBOMB for the underlying BOMB reward tokens.\n @param inputToken The input wrapped token to be redeemed for an underlying token.\n @param inputAmount The amount of the input wrapped token to be redeemed for an underlying token.\n @param strategyData The ABI-encoded data to be used in the redemption strategy logic.\n @return outputToken The underlying ERC20 token outputted.\n @return outputAmount The quantity of underlying tokens outputted."
+            },
+            "functionSelector": "10badf4e",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeem",
+            "nameLocation": "886:6:154",
+            "overrides": {
+              "id": 40655,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "996:8:154"
+            },
+            "parameters": {
+              "id": 40654,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 40649,
+                  "mutability": "mutable",
+                  "name": "inputToken",
+                  "nameLocation": "916:10:154",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 40702,
+                  "src": "898:28:154",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                    "typeString": "contract IERC20Upgradeable"
+                  },
+                  "typeName": {
+                    "id": 40648,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 40647,
+                      "name": "IERC20Upgradeable",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 89465,
+                      "src": "898:17:154"
+                    },
+                    "referencedDeclaration": 89465,
+                    "src": "898:17:154",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                      "typeString": "contract IERC20Upgradeable"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 40651,
+                  "mutability": "mutable",
+                  "name": "inputAmount",
+                  "nameLocation": "940:11:154",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 40702,
+                  "src": "932:19:154",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 40650,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "932:7:154",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 40653,
+                  "mutability": "mutable",
+                  "name": "strategyData",
+                  "nameLocation": "970:12:154",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 40702,
+                  "src": "957:25:154",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 40652,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "957:5:154",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "892:94:154"
+            },
+            "returnParameters": {
+              "id": 40661,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 40658,
+                  "mutability": "mutable",
+                  "name": "outputToken",
+                  "nameLocation": "1032:11:154",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 40702,
+                  "src": "1014:29:154",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                    "typeString": "contract IERC20Upgradeable"
+                  },
+                  "typeName": {
+                    "id": 40657,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 40656,
+                      "name": "IERC20Upgradeable",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 89465,
+                      "src": "1014:17:154"
+                    },
+                    "referencedDeclaration": 89465,
+                    "src": "1014:17:154",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89465",
+                      "typeString": "contract IERC20Upgradeable"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 40660,
+                  "mutability": "mutable",
+                  "name": "outputAmount",
+                  "nameLocation": "1053:12:154",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 40702,
+                  "src": "1045:20:154",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 40659,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1045:7:154",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1013:53:154"
+            },
+            "scope": 40703,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 40644,
+              "name": "IRedemptionStrategy",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 39008,
+              "src": "361:19:154"
+            },
+            "id": 40645,
+            "nodeType": "InheritanceSpecifier",
+            "src": "361:19:154"
+          }
+        ],
+        "canonicalName": "XBombLiquidator",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 40643,
+          "nodeType": "StructuredDocumentation",
+          "src": "140:192:154",
+          "text": " @title XBombLiquidator\n @notice Exchanges seized xBOMB collateral for underlying BOMB tokens for use as a step in a liquidation.\n @author Veliko Minkov <veliko@midascapital.xyz>"
+        },
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          40703,
+          39008
+        ],
+        "name": "XBombLiquidator",
+        "nameLocation": "342:15:154",
+        "scope": 40704,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  }
+}

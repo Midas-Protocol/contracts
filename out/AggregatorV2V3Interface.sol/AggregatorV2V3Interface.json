@@ -1,0 +1,352 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "int256",
+          "name": "current",
+          "type": "int256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "updatedAt",
+          "type": "uint256"
+        }
+      ],
+      "name": "AnswerUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "startedBy",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "startedAt",
+          "type": "uint256"
+        }
+      ],
+      "name": "NewRound",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "description",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getAnswer",
+      "outputs": [
+        {
+          "internalType": "int256",
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint80",
+          "name": "_roundId",
+          "type": "uint80"
+        }
+      ],
+      "name": "getRoundData",
+      "outputs": [
+        {
+          "internalType": "uint80",
+          "name": "roundId",
+          "type": "uint80"
+        },
+        {
+          "internalType": "int256",
+          "name": "answer",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "startedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "updatedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint80",
+          "name": "answeredInRound",
+          "type": "uint80"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getTimestamp",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestAnswer",
+      "outputs": [
+        {
+          "internalType": "int256",
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestRound",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestRoundData",
+      "outputs": [
+        {
+          "internalType": "uint80",
+          "name": "roundId",
+          "type": "uint80"
+        },
+        {
+          "internalType": "int256",
+          "name": "answer",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "startedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "updatedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint80",
+          "name": "answeredInRound",
+          "type": "uint80"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestTimestamp",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "version",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/chainlink/AggregatorV2V3Interface.sol",
+    "id": 32669,
+    "exportedSymbols": {
+      "AggregatorInterface": [
+        32659
+      ],
+      "AggregatorV2V3Interface": [
+        32668
+      ],
+      "AggregatorV3Interface": [
+        32714
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:184:67",
+    "nodes": [
+      {
+        "id": 32661,
+        "nodeType": "PragmaDirective",
+        "src": "32:24:67",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 32662,
+        "nodeType": "ImportDirective",
+        "src": "58:35:67",
+        "absolutePath": "/Users/peet/git/contracts/contracts/external/chainlink/AggregatorInterface.sol",
+        "file": "./AggregatorInterface.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 32669,
+        "sourceUnit": 32660,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 32663,
+        "nodeType": "ImportDirective",
+        "src": "94:37:67",
+        "absolutePath": "/Users/peet/git/contracts/contracts/external/chainlink/AggregatorV3Interface.sol",
+        "file": "./AggregatorV3Interface.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 32669,
+        "sourceUnit": 32715,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 32668,
+        "nodeType": "ContractDefinition",
+        "src": "133:82:67",
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 32664,
+              "name": "AggregatorInterface",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 32659,
+              "src": "170:19:67"
+            },
+            "id": 32665,
+            "nodeType": "InheritanceSpecifier",
+            "src": "170:19:67"
+          },
+          {
+            "baseName": {
+              "id": 32666,
+              "name": "AggregatorV3Interface",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 32714,
+              "src": "191:21:67"
+            },
+            "id": 32667,
+            "nodeType": "InheritanceSpecifier",
+            "src": "191:21:67"
+          }
+        ],
+        "canonicalName": "AggregatorV2V3Interface",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          32668,
+          32714,
+          32659
+        ],
+        "name": "AggregatorV2V3Interface",
+        "nameLocation": "143:23:67",
+        "scope": 32669,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  }
+}

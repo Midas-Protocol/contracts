@@ -1,0 +1,352 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "int256",
+          "name": "current",
+          "type": "int256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "updatedAt",
+          "type": "uint256"
+        }
+      ],
+      "name": "AnswerUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "startedBy",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "startedAt",
+          "type": "uint256"
+        }
+      ],
+      "name": "NewRound",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "description",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getAnswer",
+      "outputs": [
+        {
+          "internalType": "int256",
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint80",
+          "name": "_roundId",
+          "type": "uint80"
+        }
+      ],
+      "name": "getRoundData",
+      "outputs": [
+        {
+          "internalType": "uint80",
+          "name": "roundId",
+          "type": "uint80"
+        },
+        {
+          "internalType": "int256",
+          "name": "answer",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "startedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "updatedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint80",
+          "name": "answeredInRound",
+          "type": "uint80"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getTimestamp",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestAnswer",
+      "outputs": [
+        {
+          "internalType": "int256",
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestRound",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestRoundData",
+      "outputs": [
+        {
+          "internalType": "uint80",
+          "name": "roundId",
+          "type": "uint80"
+        },
+        {
+          "internalType": "int256",
+          "name": "answer",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "startedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "updatedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint80",
+          "name": "answeredInRound",
+          "type": "uint80"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestTimestamp",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "version",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/flux/CLV2V3Interface.sol",
+    "id": 33735,
+    "exportedSymbols": {
+      "CLInterface": [
+        33725
+      ],
+      "CLV2V3Interface": [
+        33734
+      ],
+      "CLV3Interface": [
+        33780
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:194:83",
+    "nodes": [
+      {
+        "id": 33727,
+        "nodeType": "PragmaDirective",
+        "src": "32:24:83",
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".10"
+        ]
+      },
+      {
+        "id": 33728,
+        "nodeType": "ImportDirective",
+        "src": "58:27:83",
+        "absolutePath": "/Users/peet/git/contracts/contracts/external/flux/CLInterface.sol",
+        "file": "./CLInterface.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 33735,
+        "sourceUnit": 33726,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 33729,
+        "nodeType": "ImportDirective",
+        "src": "86:29:83",
+        "absolutePath": "/Users/peet/git/contracts/contracts/external/flux/CLV3Interface.sol",
+        "file": "./CLV3Interface.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 33735,
+        "sourceUnit": 33781,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 33734,
+        "nodeType": "ContractDefinition",
+        "src": "165:60:83",
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 33730,
+              "name": "CLInterface",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 33725,
+              "src": "194:11:83"
+            },
+            "id": 33731,
+            "nodeType": "InheritanceSpecifier",
+            "src": "194:11:83"
+          },
+          {
+            "baseName": {
+              "id": 33732,
+              "name": "CLV3Interface",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 33780,
+              "src": "207:13:83"
+            },
+            "id": 33733,
+            "nodeType": "InheritanceSpecifier",
+            "src": "207:13:83"
+          }
+        ],
+        "canonicalName": "CLV2V3Interface",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          33734,
+          33780,
+          33725
+        ],
+        "name": "CLV2V3Interface",
+        "nameLocation": "175:15:83",
+        "scope": 33735,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  }
+}

@@ -1,0 +1,271 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newPendingAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "_setPendingAdmin",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newPendingImplementation",
+          "type": "address"
+        }
+      ],
+      "name": "_setPendingImplementation",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/compound/IUnitroller.sol",
+    "id": 33582,
+    "exportedSymbols": {
+      "IUnitroller": [
+        33581
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "41:452:77",
+    "nodes": [
+      {
+        "id": 33565,
+        "nodeType": "PragmaDirective",
+        "src": "41:24:77",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 33581,
+        "nodeType": "ContractDefinition",
+        "src": "286:206:77",
+        "nodes": [
+          {
+            "id": 33573,
+            "nodeType": "FunctionDefinition",
+            "src": "312:96:77",
+            "functionSelector": "e992a041",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_setPendingImplementation",
+            "nameLocation": "321:25:77",
+            "parameters": {
+              "id": 33569,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33568,
+                  "mutability": "mutable",
+                  "name": "newPendingImplementation",
+                  "nameLocation": "355:24:77",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33573,
+                  "src": "347:32:77",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 33567,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "347:7:77",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "346:34:77"
+            },
+            "returnParameters": {
+              "id": 33572,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33571,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33573,
+                  "src": "399:7:77",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33570,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "399:7:77",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "398:9:77"
+            },
+            "scope": 33581,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 33580,
+            "nodeType": "FunctionDefinition",
+            "src": "412:78:77",
+            "functionSelector": "b71d1a0c",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_setPendingAdmin",
+            "nameLocation": "421:16:77",
+            "parameters": {
+              "id": 33576,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33575,
+                  "mutability": "mutable",
+                  "name": "newPendingAdmin",
+                  "nameLocation": "446:15:77",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33580,
+                  "src": "438:23:77",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 33574,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "438:7:77",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "437:25:77"
+            },
+            "returnParameters": {
+              "id": 33579,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 33578,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33580,
+                  "src": "481:7:77",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33577,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "481:7:77",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "480:9:77"
+            },
+            "scope": 33581,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IUnitroller",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 33566,
+          "nodeType": "StructuredDocumentation",
+          "src": "67:218:77",
+          "text": " @title ComptrollerCore\n @dev Storage for the comptroller is at this address, while execution is delegated to the `comptrollerImplementation`.\n CTokens should reference this contract as their comptroller."
+        },
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          33581
+        ],
+        "name": "IUnitroller",
+        "nameLocation": "296:11:77",
+        "scope": 33582,
+        "usedErrors": []
+      }
+    ],
+    "license": "BSD-3-Clause"
+  }
+}

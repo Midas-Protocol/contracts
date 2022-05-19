@@ -1,0 +1,225 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "sourceCurrencyKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "sourceAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "destinationCurrencyKey",
+          "type": "bytes32"
+        }
+      ],
+      "name": "effectiveValue",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/peet/git/contracts/contracts/external/synthetix/ExchangeRates.sol",
+    "id": 35431,
+    "exportedSymbols": {
+      "ExchangeRates": [
+        35430
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:216:108",
+    "nodes": [
+      {
+        "id": 35418,
+        "nodeType": "PragmaDirective",
+        "src": "32:24:108",
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 35430,
+        "nodeType": "ContractDefinition",
+        "src": "58:189:108",
+        "nodes": [
+          {
+            "id": 35429,
+            "nodeType": "FunctionDefinition",
+            "src": "86:159:108",
+            "functionSelector": "654a60ac",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "effectiveValue",
+            "nameLocation": "95:14:108",
+            "parameters": {
+              "id": 35425,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35420,
+                  "mutability": "mutable",
+                  "name": "sourceCurrencyKey",
+                  "nameLocation": "123:17:108",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35429,
+                  "src": "115:25:108",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 35419,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "115:7:108",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 35422,
+                  "mutability": "mutable",
+                  "name": "sourceAmount",
+                  "nameLocation": "154:12:108",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35429,
+                  "src": "146:20:108",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 35421,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "146:7:108",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 35424,
+                  "mutability": "mutable",
+                  "name": "destinationCurrencyKey",
+                  "nameLocation": "180:22:108",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35429,
+                  "src": "172:30:108",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 35423,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "172:7:108",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "109:97:108"
+            },
+            "returnParameters": {
+              "id": 35428,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35427,
+                  "mutability": "mutable",
+                  "name": "value",
+                  "nameLocation": "238:5:108",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 35429,
+                  "src": "230:13:108",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 35426,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "230:7:108",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "229:15:108"
+            },
+            "scope": 35430,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "ExchangeRates",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          35430
+        ],
+        "name": "ExchangeRates",
+        "nameLocation": "68:13:108",
+        "scope": 35431,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  }
+}
