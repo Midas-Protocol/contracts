@@ -24,19 +24,12 @@ jobs:
         with:
           node-version: 16
 
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
-
       - name: Install Npm dependencies
         run: npm install
 
       - name: Lint
         run: npm run lint
 
-      - name: Run forge tests
-        run: forge test
 
   build-and-test-local:
     needs: [ lint ]
