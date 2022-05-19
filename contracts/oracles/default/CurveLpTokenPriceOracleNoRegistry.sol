@@ -58,11 +58,18 @@ contract CurveLpTokenPriceOracleNoRegistry is
         address[] memory _pools,
         address[][] memory _poolUnderlyings
     ) public initializer {
-        __Ownable_init();
-        for (uint256 i = 0; i < _lpTokens.length; i++) {
-            poolOf[_lpTokens[i]] = _pools[i];
-            underlyingTokens[_lpTokens[i]] = _poolUnderlyings[i];
-        }
+      require(
+        _lpTokens.length > 0 &&
+        _lpTokens.length == _pools.length &&
+        _lpTokens.length == _poolUnderlyings.length,
+        "No LP tokens supplied or array lengths not equal."
+      );
+
+      __Ownable_init();
+      for (uint256 i = 0; i < _lpTokens.length; i++) {
+        poolOf[_lpTokens[i]] = _pools[i];
+        underlyingTokens[_lpTokens[i]] = _poolUnderlyings[i];
+      }
     }
 
     /**
