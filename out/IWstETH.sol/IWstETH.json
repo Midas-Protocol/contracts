@@ -57,20 +57,20 @@
     "linkReferences": {}
   },
   "ast": {
-    "absolutePath": "/Users/peet/git/contracts/contracts/external/lido/IWstETH.sol",
-    "id": 34302,
+    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/lido/IWstETH.sol",
+    "id": 34598,
     "exportedSymbols": {
       "IWstETH": [
-        34301
+        34597
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "39:1455:95",
+    "src": "39:1455:96",
     "nodes": [
       {
-        "id": 34280,
+        "id": 34576,
         "nodeType": "PragmaDirective",
-        "src": "39:24:95",
+        "src": "39:24:96",
         "literals": [
           "solidity",
           ">=",
@@ -79,39 +79,39 @@
         ]
       },
       {
-        "id": 34301,
+        "id": 34597,
         "nodeType": "ContractDefinition",
-        "src": "877:616:95",
+        "src": "877:616:96",
         "nodes": [
           {
-            "id": 34286,
+            "id": 34582,
             "nodeType": "FunctionDefinition",
-            "src": "899:49:95",
+            "src": "899:49:96",
             "functionSelector": "c1fe3e48",
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "stETH",
-            "nameLocation": "908:5:95",
+            "nameLocation": "908:5:96",
             "parameters": {
-              "id": 34282,
+              "id": 34578,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "913:2:95"
+              "src": "913:2:96"
             },
             "returnParameters": {
-              "id": 34285,
+              "id": 34581,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34284,
+                  "id": 34580,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34286,
-                  "src": "939:7:95",
+                  "scope": 34582,
+                  "src": "939:7:96",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -119,10 +119,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 34283,
+                    "id": 34579,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "939:7:95",
+                    "src": "939:7:96",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -132,21 +132,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "938:9:95"
+              "src": "938:9:96"
             },
-            "scope": 34301,
+            "scope": 34597,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 34292,
+            "id": 34588,
             "nodeType": "FunctionDefinition",
-            "src": "1056:57:95",
+            "src": "1056:57:96",
             "documentation": {
-              "id": 34287,
+              "id": 34583,
               "nodeType": "StructuredDocumentation",
-              "src": "952:101:95",
+              "src": "952:101:96",
               "text": " @notice Get amount of wstETH for a one stETH\n @return Amount of stETH for 1 wstETH"
             },
             "functionSelector": "035faf82",
@@ -154,26 +154,26 @@
             "kind": "function",
             "modifiers": [],
             "name": "stEthPerToken",
-            "nameLocation": "1065:13:95",
+            "nameLocation": "1065:13:96",
             "parameters": {
-              "id": 34288,
+              "id": 34584,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1078:2:95"
+              "src": "1078:2:96"
             },
             "returnParameters": {
-              "id": 34291,
+              "id": 34587,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34290,
+                  "id": 34586,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34292,
-                  "src": "1104:7:95",
+                  "scope": 34588,
+                  "src": "1104:7:96",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -181,10 +181,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 34289,
+                    "id": 34585,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1104:7:95",
+                    "src": "1104:7:96",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -193,21 +193,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1103:9:95"
+              "src": "1103:9:96"
             },
-            "scope": 34301,
+            "scope": 34597,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 34300,
+            "id": 34596,
             "nodeType": "FunctionDefinition",
-            "src": "1425:66:95",
+            "src": "1425:66:96",
             "documentation": {
-              "id": 34293,
+              "id": 34589,
               "nodeType": "StructuredDocumentation",
-              "src": "1117:305:95",
+              "src": "1117:305:96",
               "text": " @notice Exchanges wstETH to stETH\n @param _wstETHAmount amount of wstETH to uwrap in exchange for stETH\n @dev Requirements:\n  - `_wstETHAmount` must be non-zero\n  - msg.sender must have at least `_wstETHAmount` wstETH.\n @return Amount of stETH user receives after unwrap"
             },
             "functionSelector": "de0e9a3e",
@@ -215,20 +215,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "unwrap",
-            "nameLocation": "1434:6:95",
+            "nameLocation": "1434:6:96",
             "parameters": {
-              "id": 34296,
+              "id": 34592,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34295,
+                  "id": 34591,
                   "mutability": "mutable",
                   "name": "_wstETHAmount",
-                  "nameLocation": "1449:13:95",
+                  "nameLocation": "1449:13:96",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34300,
-                  "src": "1441:21:95",
+                  "scope": 34596,
+                  "src": "1441:21:96",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -236,10 +236,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 34294,
+                    "id": 34590,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1441:7:95",
+                    "src": "1441:7:96",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -248,21 +248,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1440:23:95"
+              "src": "1440:23:96"
             },
             "returnParameters": {
-              "id": 34299,
+              "id": 34595,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34298,
+                  "id": 34594,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34300,
-                  "src": "1482:7:95",
+                  "scope": 34596,
+                  "src": "1482:7:96",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -270,10 +270,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 34297,
+                    "id": 34593,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1482:7:95",
+                    "src": "1482:7:96",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -282,9 +282,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1481:9:95"
+              "src": "1481:9:96"
             },
-            "scope": 34301,
+            "scope": 34597,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -296,18 +296,18 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 34281,
+          "id": 34577,
           "nodeType": "StructuredDocumentation",
-          "src": "65:811:95",
+          "src": "65:811:96",
           "text": " @title StETH token wrapper with static balances.\n @dev It's an ERC20 token that represents the account's share of the total\n supply of stETH tokens. WstETH token's balance only changes on transfers,\n unlike StETH that is also changed when oracles report staking rewards and\n penalties. It's a \"power user\" token for DeFi protocols which don't\n support rebasable tokens.\n The contract is also a trustless wrapper that accepts stETH tokens and mints\n wstETH in return. Then the user unwraps, the contract burns user's wstETH\n and sends user locked stETH in return.\n The contract provides the staking shortcut: user can send ETH with regular\n transfer and get wstETH in return. The contract will send ETH to Lido submit\n method, staking it and wrapping the received stETH."
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          34301
+          34597
         ],
         "name": "IWstETH",
-        "nameLocation": "887:7:95",
-        "scope": 34302,
+        "nameLocation": "887:7:96",
+        "scope": 34598,
         "usedErrors": []
       }
     ],

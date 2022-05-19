@@ -8,7 +8,8 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
   JarvisSynthereumLiquidator private liquidator;
 
   // TODO in the addresses provider?
-  ISynthereumLiquidityPool synthereumLiquiditiyPool = ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49);
+  ISynthereumLiquidityPool synthereumLiquiditiyPool =
+    ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49);
 
   address whale = 0xB57c5C22aA7b9Cd25D557f061Df61cBCe1898456;
   IERC20Upgradeable jBRLToken = IERC20Upgradeable(0x316622977073BBC3dF32E7d2A9B3c77596a0a603);

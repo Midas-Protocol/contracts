@@ -31,20 +31,20 @@
     "linkReferences": {}
   },
   "ast": {
-    "absolutePath": "/Users/peet/git/contracts/contracts/external/badger/IDigg.sol",
-    "id": 31863,
+    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/badger/IDigg.sol",
+    "id": 32159,
     "exportedSymbols": {
       "IDigg": [
-        31862
+        32158
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "39:261:59",
+    "src": "39:261:60",
     "nodes": [
       {
-        "id": 31853,
+        "id": 32149,
         "nodeType": "PragmaDirective",
-        "src": "39:24:59",
+        "src": "39:24:60",
         "literals": [
           "solidity",
           ">=",
@@ -53,18 +53,18 @@
         ]
       },
       {
-        "id": 31862,
+        "id": 32158,
         "nodeType": "ContractDefinition",
-        "src": "65:234:59",
+        "src": "65:234:60",
         "nodes": [
           {
-            "id": 31861,
+            "id": 32157,
             "nodeType": "FunctionDefinition",
-            "src": "222:75:59",
+            "src": "222:75:60",
             "documentation": {
-              "id": 31854,
+              "id": 32150,
               "nodeType": "StructuredDocumentation",
-              "src": "85:134:59",
+              "src": "85:134:60",
               "text": " @param shares Share value to convert.\n @return The current fragment value of the specified underlying share amount."
             },
             "functionSelector": "5d2dde1d",
@@ -72,20 +72,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "sharesToFragments",
-            "nameLocation": "231:17:59",
+            "nameLocation": "231:17:60",
             "parameters": {
-              "id": 31857,
+              "id": 32153,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 31856,
+                  "id": 32152,
                   "mutability": "mutable",
                   "name": "shares",
-                  "nameLocation": "257:6:59",
+                  "nameLocation": "257:6:60",
                   "nodeType": "VariableDeclaration",
-                  "scope": 31861,
-                  "src": "249:14:59",
+                  "scope": 32157,
+                  "src": "249:14:60",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -93,10 +93,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 31855,
+                    "id": 32151,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "249:7:59",
+                    "src": "249:7:60",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -105,21 +105,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "248:16:59"
+              "src": "248:16:60"
             },
             "returnParameters": {
-              "id": 31860,
+              "id": 32156,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 31859,
+                  "id": 32155,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 31861,
-                  "src": "288:7:59",
+                  "scope": 32157,
+                  "src": "288:7:60",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -127,10 +127,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 31858,
+                    "id": 32154,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "288:7:59",
+                    "src": "288:7:60",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -139,9 +139,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "287:9:59"
+              "src": "287:9:60"
             },
-            "scope": 31862,
+            "scope": 32158,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -154,11 +154,11 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          31862
+          32158
         ],
         "name": "IDigg",
-        "nameLocation": "75:5:59",
-        "scope": 31863,
+        "nameLocation": "75:5:60",
+        "scope": 32159,
         "usedErrors": []
       }
     ],

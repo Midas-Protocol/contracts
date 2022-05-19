@@ -21,33 +21,33 @@
     }
   ],
   "bytecode": {
-    "object": "0x608060405234801561001057600080fd5b5060d38061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80632fba4aa914602d575b600080fd5b60536038366004606f565b6000602081905290815260409020546001600160a01b031681565b6040516001600160a01b03909116815260200160405180910390f35b600060208284031215608057600080fd5b81356001600160a01b0381168114609657600080fd5b939250505056fea2646970667358221220340d85bee487b55a13bca9f763eace6ce741eaa0ada8f4d7ac56946b98c5f50a64736f6c634300080a0033",
-    "sourceMap": "90:85:94:-:0;;;;;;;;;;;;;;;;;;;",
+    "object": "0x608060405234801561001057600080fd5b5060d38061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80632fba4aa914602d575b600080fd5b60536038366004606f565b6000602081905290815260409020546001600160a01b031681565b6040516001600160a01b03909116815260200160405180910390f35b600060208284031215608057600080fd5b81356001600160a01b0381168114609657600080fd5b939250505056fea26469706673582212204b0a73f976b9f9575809d7b440642cf2e3d1f5550716d6ed0b8358a09654fd9f64736f6c634300080a0033",
+    "sourceMap": "90:85:95:-:0;;;;;;;;;;;;;;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
-    "object": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c80632fba4aa914602d575b600080fd5b60536038366004606f565b6000602081905290815260409020546001600160a01b031681565b6040516001600160a01b03909116815260200160405180910390f35b600060208284031215608057600080fd5b81356001600160a01b0381168114609657600080fd5b939250505056fea2646970667358221220340d85bee487b55a13bca9f763eace6ce741eaa0ada8f4d7ac56946b98c5f50a64736f6c634300080a0033",
-    "sourceMap": "90:85:94:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;125:47;;;;;;:::i;:::-;;;;;;;;;;;;;-1:-1:-1;;;;;125:47:94;;;;;;-1:-1:-1;;;;;493:32:278;;;475:51;;463:2;448:18;125:47:94;;;;;;;14:286:278;73:6;126:2;114:9;105:7;101:23;97:32;94:52;;;142:1;139;132:12;94:52;168:23;;-1:-1:-1;;;;;220:31:278;;210:42;;200:70;;266:1;263;256:12;200:70;289:5;14:286;-1:-1:-1;;;14:286:278:o",
+    "object": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c80632fba4aa914602d575b600080fd5b60536038366004606f565b6000602081905290815260409020546001600160a01b031681565b6040516001600160a01b03909116815260200160405180910390f35b600060208284031215608057600080fd5b81356001600160a01b0381168114609657600080fd5b939250505056fea26469706673582212204b0a73f976b9f9575809d7b440642cf2e3d1f5550716d6ed0b8358a09654fd9f64736f6c634300080a0033",
+    "sourceMap": "90:85:95:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;125:47;;;;;;:::i;:::-;;;;;;;;;;;;;-1:-1:-1;;;;;125:47:95;;;;;;-1:-1:-1;;;;;493:32:279;;;475:51;;463:2;448:18;125:47:95;;;;;;;14:286:279;73:6;126:2;114:9;105:7;101:23;97:32;94:52;;;142:1;139;132:12;94:52;168:23;;-1:-1:-1;;;;;220:31:279;;210:42;;200:70;;266:1;263;256:12;200:70;289:5;14:286;-1:-1:-1;;;14:286:279:o",
     "linkReferences": {}
   },
   "ast": {
-    "absolutePath": "/Users/peet/git/contracts/contracts/external/keep3r/Keep3rV2OracleFactory.sol",
-    "id": 34279,
+    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/keep3r/Keep3rV2OracleFactory.sol",
+    "id": 34575,
     "exportedSymbols": {
       "Keep3rV2Oracle": [
-        34269
+        34565
       ],
       "Keep3rV2OracleFactory": [
-        34278
+        34574
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "32:144:94",
+    "src": "32:144:95",
     "nodes": [
       {
-        "id": 34271,
+        "id": 34567,
         "nodeType": "PragmaDirective",
-        "src": "32:24:94",
+        "src": "32:24:95",
         "literals": [
           "solidity",
           ">=",
@@ -56,70 +56,70 @@
         ]
       },
       {
-        "id": 34272,
+        "id": 34568,
         "nodeType": "ImportDirective",
-        "src": "58:30:94",
-        "absolutePath": "/Users/peet/git/contracts/contracts/external/keep3r/Keep3rV2Oracle.sol",
+        "src": "58:30:95",
+        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/keep3r/Keep3rV2Oracle.sol",
         "file": "./Keep3rV2Oracle.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 34279,
-        "sourceUnit": 34270,
+        "scope": 34575,
+        "sourceUnit": 34566,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 34278,
+        "id": 34574,
         "nodeType": "ContractDefinition",
-        "src": "90:85:94",
+        "src": "90:85:95",
         "nodes": [
           {
-            "id": 34277,
+            "id": 34573,
             "nodeType": "VariableDeclaration",
-            "src": "125:47:94",
+            "src": "125:47:95",
             "constant": false,
             "functionSelector": "2fba4aa9",
             "mutability": "mutable",
             "name": "feeds",
-            "nameLocation": "167:5:94",
-            "scope": 34278,
+            "nameLocation": "167:5:95",
+            "scope": 34574,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_address_$_t_contract$_Keep3rV2Oracle_$34269_$",
+              "typeIdentifier": "t_mapping$_t_address_$_t_contract$_Keep3rV2Oracle_$34565_$",
               "typeString": "mapping(address => contract Keep3rV2Oracle)"
             },
             "typeName": {
-              "id": 34276,
+              "id": 34572,
               "keyType": {
-                "id": 34273,
+                "id": 34569,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "133:7:94",
+                "src": "133:7:95",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "125:34:94",
+              "src": "125:34:95",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_address_$_t_contract$_Keep3rV2Oracle_$34269_$",
+                "typeIdentifier": "t_mapping$_t_address_$_t_contract$_Keep3rV2Oracle_$34565_$",
                 "typeString": "mapping(address => contract Keep3rV2Oracle)"
               },
               "valueType": {
-                "id": 34275,
+                "id": 34571,
                 "nodeType": "UserDefinedTypeName",
                 "pathNode": {
-                  "id": 34274,
+                  "id": 34570,
                   "name": "Keep3rV2Oracle",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 34269,
-                  "src": "144:14:94"
+                  "referencedDeclaration": 34565,
+                  "src": "144:14:95"
                 },
-                "referencedDeclaration": 34269,
-                "src": "144:14:94",
+                "referencedDeclaration": 34565,
+                "src": "144:14:95",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_contract$_Keep3rV2Oracle_$34269",
+                  "typeIdentifier": "t_contract$_Keep3rV2Oracle_$34565",
                   "typeString": "contract Keep3rV2Oracle"
                 }
               }
@@ -134,11 +134,11 @@
         "contractKind": "contract",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          34278
+          34574
         ],
         "name": "Keep3rV2OracleFactory",
-        "nameLocation": "99:21:94",
-        "scope": 34279,
+        "nameLocation": "99:21:95",
+        "scope": 34575,
         "usedErrors": []
       }
     ],

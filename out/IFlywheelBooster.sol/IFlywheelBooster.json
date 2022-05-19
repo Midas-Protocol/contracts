@@ -55,23 +55,23 @@
     "linkReferences": {}
   },
   "ast": {
-    "absolutePath": "/Users/peet/git/contracts/lib/flywheel-v2/src/interfaces/IFlywheelBooster.sol",
-    "id": 68672,
+    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/flywheel-v2/src/interfaces/IFlywheelBooster.sol",
+    "id": 69149,
     "exportedSymbols": {
       "ERC20": [
-        91482
+        92169
       ],
       "IFlywheelBooster": [
-        68671
+        69148
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "42:1612:244",
+    "src": "42:1612:245",
     "nodes": [
       {
-        "id": 68647,
+        "id": 69124,
         "nodeType": "PragmaDirective",
-        "src": "42:23:244",
+        "src": "42:23:245",
         "literals": [
           "solidity",
           "0.8",
@@ -79,22 +79,22 @@
         ]
       },
       {
-        "id": 68649,
+        "id": 69126,
         "nodeType": "ImportDirective",
-        "src": "67:47:244",
-        "absolutePath": "/Users/peet/git/contracts/lib/solmate/src/tokens/ERC20.sol",
+        "src": "67:47:245",
+        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/tokens/ERC20.sol",
         "file": "solmate/tokens/ERC20.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 68672,
-        "sourceUnit": 91483,
+        "scope": 69149,
+        "sourceUnit": 92170,
         "symbolAliases": [
           {
             "foreign": {
-              "id": 68648,
+              "id": 69125,
               "name": "ERC20",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "src": "75:5:244",
+              "src": "75:5:245",
               "typeDescriptions": {}
             },
             "nameLocation": "-1:-1:-1"
@@ -103,18 +103,18 @@
         "unitAlias": ""
       },
       {
-        "id": 68671,
+        "id": 69148,
         "nodeType": "ContractDefinition",
-        "src": "1024:629:244",
+        "src": "1024:629:245",
         "nodes": [
           {
-            "id": 68659,
+            "id": 69136,
             "nodeType": "FunctionDefinition",
-            "src": "1230:76:244",
+            "src": "1230:76:245",
             "documentation": {
-              "id": 68651,
+              "id": 69128,
               "nodeType": "StructuredDocumentation",
-              "src": "1057:168:244",
+              "src": "1057:168:245",
               "text": "@notice calculate the boosted supply of a strategy.\n@param strategy the strategy to calculate boosted supply of\n@return the boosted supply"
             },
             "functionSelector": "1e1932fb",
@@ -122,61 +122,61 @@
             "kind": "function",
             "modifiers": [],
             "name": "boostedTotalSupply",
-            "nameLocation": "1239:18:244",
+            "nameLocation": "1239:18:245",
             "parameters": {
-              "id": 68655,
+              "id": 69132,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 68654,
+                  "id": 69131,
                   "mutability": "mutable",
                   "name": "strategy",
-                  "nameLocation": "1264:8:244",
+                  "nameLocation": "1264:8:245",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68659,
-                  "src": "1258:14:244",
+                  "scope": 69136,
+                  "src": "1258:14:245",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ERC20_$91482",
+                    "typeIdentifier": "t_contract$_ERC20_$92169",
                     "typeString": "contract ERC20"
                   },
                   "typeName": {
-                    "id": 68653,
+                    "id": 69130,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 68652,
+                      "id": 69129,
                       "name": "ERC20",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 91482,
-                      "src": "1258:5:244"
+                      "referencedDeclaration": 92169,
+                      "src": "1258:5:245"
                     },
-                    "referencedDeclaration": 91482,
-                    "src": "1258:5:244",
+                    "referencedDeclaration": 92169,
+                    "src": "1258:5:245",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ERC20_$91482",
+                      "typeIdentifier": "t_contract$_ERC20_$92169",
                       "typeString": "contract ERC20"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "1257:16:244"
+              "src": "1257:16:245"
             },
             "returnParameters": {
-              "id": 68658,
+              "id": 69135,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 68657,
+                  "id": 69134,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68659,
-                  "src": "1297:7:244",
+                  "scope": 69136,
+                  "src": "1297:7:245",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -184,10 +184,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 68656,
+                    "id": 69133,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1297:7:244",
+                    "src": "1297:7:245",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -196,21 +196,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1296:9:244"
+              "src": "1296:9:245"
             },
-            "scope": 68671,
+            "scope": 69148,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 68670,
+            "id": 69147,
             "nodeType": "FunctionDefinition",
-            "src": "1563:88:244",
+            "src": "1563:88:245",
             "documentation": {
-              "id": 68660,
+              "id": 69137,
               "nodeType": "StructuredDocumentation",
-              "src": "1312:246:244",
+              "src": "1312:246:245",
               "text": "@notice calculate the boosted balance of a user in a given strategy.\n@param strategy the strategy to calculate boosted balance of\n@param user the user to calculate boosted balance of\n@return the boosted balance"
             },
             "functionSelector": "1a50ef2f",
@@ -218,40 +218,40 @@
             "kind": "function",
             "modifiers": [],
             "name": "boostedBalanceOf",
-            "nameLocation": "1572:16:244",
+            "nameLocation": "1572:16:245",
             "parameters": {
-              "id": 68666,
+              "id": 69143,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 68663,
+                  "id": 69140,
                   "mutability": "mutable",
                   "name": "strategy",
-                  "nameLocation": "1595:8:244",
+                  "nameLocation": "1595:8:245",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68670,
-                  "src": "1589:14:244",
+                  "scope": 69147,
+                  "src": "1589:14:245",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ERC20_$91482",
+                    "typeIdentifier": "t_contract$_ERC20_$92169",
                     "typeString": "contract ERC20"
                   },
                   "typeName": {
-                    "id": 68662,
+                    "id": 69139,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 68661,
+                      "id": 69138,
                       "name": "ERC20",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 91482,
-                      "src": "1589:5:244"
+                      "referencedDeclaration": 92169,
+                      "src": "1589:5:245"
                     },
-                    "referencedDeclaration": 91482,
-                    "src": "1589:5:244",
+                    "referencedDeclaration": 92169,
+                    "src": "1589:5:245",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ERC20_$91482",
+                      "typeIdentifier": "t_contract$_ERC20_$92169",
                       "typeString": "contract ERC20"
                     }
                   },
@@ -259,13 +259,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 68665,
+                  "id": 69142,
                   "mutability": "mutable",
                   "name": "user",
-                  "nameLocation": "1613:4:244",
+                  "nameLocation": "1613:4:245",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68670,
-                  "src": "1605:12:244",
+                  "scope": 69147,
+                  "src": "1605:12:245",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -273,10 +273,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 68664,
+                    "id": 69141,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1605:7:244",
+                    "src": "1605:7:245",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -286,21 +286,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1588:30:244"
+              "src": "1588:30:245"
             },
             "returnParameters": {
-              "id": 68669,
+              "id": 69146,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 68668,
+                  "id": 69145,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68670,
-                  "src": "1642:7:244",
+                  "scope": 69147,
+                  "src": "1642:7:245",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -308,10 +308,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 68667,
+                    "id": 69144,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1642:7:244",
+                    "src": "1642:7:245",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -320,9 +320,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1641:9:244"
+              "src": "1641:9:245"
             },
-            "scope": 68671,
+            "scope": 69148,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -334,18 +334,18 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 68650,
+          "id": 69127,
           "nodeType": "StructuredDocumentation",
-          "src": "116:907:244",
+          "src": "116:907:245",
           "text": "@title Balance Booster Module for Flywheel\n@notice Flywheel is a general framework for managing token incentives.\nIt takes reward streams to various *strategies* such as staking LP tokens and divides them among *users* of those strategies.\nThe Booster module is an optional module for virtually boosting or otherwise transforming user balances. \nIf a booster is not configured, the strategies ERC-20 balanceOf/totalSupply will be used instead.\nBoosting logic can be associated with referrals, vote-escrow, or other strategies.\nSECURITY NOTE: similar to how Core needs to be notified any time the strategy user composition changes, the booster would need to be notified of any conditions which change the boosted balances atomically.\nThis prevents gaming of the reward calculation function by using manipulated balances when accruing."
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          68671
+          69148
         ],
         "name": "IFlywheelBooster",
-        "nameLocation": "1034:16:244",
-        "scope": 68672,
+        "nameLocation": "1034:16:245",
+        "scope": 69149,
         "usedErrors": []
       }
     ],
