@@ -59,20 +59,20 @@
     "linkReferences": {}
   },
   "ast": {
-    "absolutePath": "/Users/peet/git/contracts/contracts/external/pooltogether/PrizePoolInterface.sol",
-    "id": 35367,
+    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/pooltogether/PrizePoolInterface.sol",
+    "id": 35663,
     "exportedSymbols": {
       "PrizePoolInterface": [
-        35366
+        35662
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "36:1278:104",
+    "src": "36:1278:105",
     "nodes": [
       {
-        "id": 35344,
+        "id": 35640,
         "nodeType": "PragmaDirective",
-        "src": "36:24:104",
+        "src": "36:24:105",
         "literals": [
           "solidity",
           ">=",
@@ -81,18 +81,18 @@
         ]
       },
       {
-        "id": 35366,
+        "id": 35662,
         "nodeType": "ContractDefinition",
-        "src": "468:845:104",
+        "src": "468:845:105",
         "nodes": [
           {
-            "id": 35359,
+            "id": 35655,
             "nodeType": "FunctionDefinition",
-            "src": "1001:157:104",
+            "src": "1001:157:105",
             "documentation": {
-              "id": 35346,
+              "id": 35642,
               "nodeType": "StructuredDocumentation",
-              "src": "501:497:104",
+              "src": "501:497:105",
               "text": "@notice Withdraw assets from the Prize Pool instantly.  A fairness fee may be charged for an early exit.\n @param from The address to redeem tokens from.\n @param amount The amount of tokens to redeem for assets.\n @param controlledToken The address of the token to redeem (i.e. ticket or sponsorship)\n @param maximumExitFee The maximum exit fee the caller is willing to pay.  This should be pre-calculated by the calculateExitFee() fxn.\n @return The actual exit fee paid"
             },
             "functionSelector": "a016240b",
@@ -100,20 +100,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "withdrawInstantlyFrom",
-            "nameLocation": "1010:21:104",
+            "nameLocation": "1010:21:105",
             "parameters": {
-              "id": 35355,
+              "id": 35651,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35348,
+                  "id": 35644,
                   "mutability": "mutable",
                   "name": "from",
-                  "nameLocation": "1045:4:104",
+                  "nameLocation": "1045:4:105",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35359,
-                  "src": "1037:12:104",
+                  "scope": 35655,
+                  "src": "1037:12:105",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -121,10 +121,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 35347,
+                    "id": 35643,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1037:7:104",
+                    "src": "1037:7:105",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -135,13 +135,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 35350,
+                  "id": 35646,
                   "mutability": "mutable",
                   "name": "amount",
-                  "nameLocation": "1063:6:104",
+                  "nameLocation": "1063:6:105",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35359,
-                  "src": "1055:14:104",
+                  "scope": 35655,
+                  "src": "1055:14:105",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -149,10 +149,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 35349,
+                    "id": 35645,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1055:7:104",
+                    "src": "1055:7:105",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -162,13 +162,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 35352,
+                  "id": 35648,
                   "mutability": "mutable",
                   "name": "controlledToken",
-                  "nameLocation": "1083:15:104",
+                  "nameLocation": "1083:15:105",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35359,
-                  "src": "1075:23:104",
+                  "scope": 35655,
+                  "src": "1075:23:105",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -176,10 +176,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 35351,
+                    "id": 35647,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1075:7:104",
+                    "src": "1075:7:105",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -190,13 +190,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 35354,
+                  "id": 35650,
                   "mutability": "mutable",
                   "name": "maximumExitFee",
-                  "nameLocation": "1112:14:104",
+                  "nameLocation": "1112:14:105",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35359,
-                  "src": "1104:22:104",
+                  "scope": 35655,
+                  "src": "1104:22:105",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -204,10 +204,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 35353,
+                    "id": 35649,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1104:7:104",
+                    "src": "1104:7:105",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -216,21 +216,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1031:99:104"
+              "src": "1031:99:105"
             },
             "returnParameters": {
-              "id": 35358,
+              "id": 35654,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35357,
+                  "id": 35653,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35359,
-                  "src": "1149:7:104",
+                  "scope": 35655,
+                  "src": "1149:7:105",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -238,10 +238,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 35356,
+                    "id": 35652,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1149:7:104",
+                    "src": "1149:7:105",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -250,21 +250,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1148:9:104"
+              "src": "1148:9:105"
             },
-            "scope": 35366,
+            "scope": 35662,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 35365,
+            "id": 35661,
             "nodeType": "FunctionDefinition",
-            "src": "1262:49:104",
+            "src": "1262:49:105",
             "documentation": {
-              "id": 35360,
+              "id": 35656,
               "nodeType": "StructuredDocumentation",
-              "src": "1162:97:104",
+              "src": "1162:97:105",
               "text": "@dev Returns the address of the underlying ERC20 asset\n @return The address of the asset"
             },
             "functionSelector": "fc0c546a",
@@ -272,26 +272,26 @@
             "kind": "function",
             "modifiers": [],
             "name": "token",
-            "nameLocation": "1271:5:104",
+            "nameLocation": "1271:5:105",
             "parameters": {
-              "id": 35361,
+              "id": 35657,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1276:2:104"
+              "src": "1276:2:105"
             },
             "returnParameters": {
-              "id": 35364,
+              "id": 35660,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35363,
+                  "id": 35659,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35365,
-                  "src": "1302:7:104",
+                  "scope": 35661,
+                  "src": "1302:7:105",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -299,10 +299,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 35362,
+                    "id": 35658,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1302:7:104",
+                    "src": "1302:7:105",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -312,9 +312,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1301:9:104"
+              "src": "1301:9:105"
             },
-            "scope": 35366,
+            "scope": 35662,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -326,18 +326,18 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 35345,
+          "id": 35641,
           "nodeType": "StructuredDocumentation",
-          "src": "62:406:104",
+          "src": "62:406:105",
           "text": "@title Escrows assets and deposits them into a yield source.  Exposes interest to Prize Strategy.  Users deposit and withdraw from this contract to participate in Prize Pool.\n @notice Accounting is managed using Controlled Tokens, whose mint and burn functions can only be called by this contract.\n @dev Must be inherited to provide specific yield-bearing asset control, such as Compound cTokens"
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          35366
+          35662
         ],
         "name": "PrizePoolInterface",
-        "nameLocation": "478:18:104",
-        "scope": 35367,
+        "nameLocation": "478:18:105",
+        "scope": 35663,
         "usedErrors": []
       }
     ],

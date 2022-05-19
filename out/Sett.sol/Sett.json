@@ -45,20 +45,20 @@
     "linkReferences": {}
   },
   "ast": {
-    "absolutePath": "/Users/peet/git/contracts/contracts/external/badger/Sett.sol",
-    "id": 31892,
+    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/badger/Sett.sol",
+    "id": 32188,
     "exportedSymbols": {
       "Sett": [
-        31891
+        32187
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "39:192:61",
+    "src": "39:192:62",
     "nodes": [
       {
-        "id": 31877,
+        "id": 32173,
         "nodeType": "PragmaDirective",
-        "src": "39:24:61",
+        "src": "39:24:62",
         "literals": [
           "solidity",
           ">=",
@@ -67,39 +67,39 @@
         ]
       },
       {
-        "id": 31891,
+        "id": 32187,
         "nodeType": "ContractDefinition",
-        "src": "65:165:61",
+        "src": "65:165:62",
         "nodes": [
           {
-            "id": 31882,
+            "id": 32178,
             "nodeType": "FunctionDefinition",
-            "src": "84:55:61",
+            "src": "84:55:62",
             "functionSelector": "18160ddd",
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "totalSupply",
-            "nameLocation": "93:11:61",
+            "nameLocation": "93:11:62",
             "parameters": {
-              "id": 31878,
+              "id": 32174,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "104:2:61"
+              "src": "104:2:62"
             },
             "returnParameters": {
-              "id": 31881,
+              "id": 32177,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 31880,
+                  "id": 32176,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 31882,
-                  "src": "130:7:61",
+                  "scope": 32178,
+                  "src": "130:7:62",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -107,10 +107,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 31879,
+                    "id": 32175,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "130:7:61",
+                    "src": "130:7:62",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -119,69 +119,69 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "129:9:61"
+              "src": "129:9:62"
             },
-            "scope": 31891,
+            "scope": 32187,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 31885,
+            "id": 32181,
             "nodeType": "FunctionDefinition",
-            "src": "143:32:61",
+            "src": "143:32:62",
             "functionSelector": "853828b6",
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "withdrawAll",
-            "nameLocation": "152:11:61",
+            "nameLocation": "152:11:62",
             "parameters": {
-              "id": 31883,
+              "id": 32179,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "163:2:61"
+              "src": "163:2:62"
             },
             "returnParameters": {
-              "id": 31884,
+              "id": 32180,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "174:0:61"
+              "src": "174:0:62"
             },
-            "scope": 31891,
+            "scope": 32187,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 31890,
+            "id": 32186,
             "nodeType": "FunctionDefinition",
-            "src": "179:49:61",
+            "src": "179:49:62",
             "functionSelector": "fc0c546a",
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "token",
-            "nameLocation": "188:5:61",
+            "nameLocation": "188:5:62",
             "parameters": {
-              "id": 31886,
+              "id": 32182,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "193:2:61"
+              "src": "193:2:62"
             },
             "returnParameters": {
-              "id": 31889,
+              "id": 32185,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 31888,
+                  "id": 32184,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 31890,
-                  "src": "219:7:61",
+                  "scope": 32186,
+                  "src": "219:7:62",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -189,10 +189,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 31887,
+                    "id": 32183,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "219:7:61",
+                    "src": "219:7:62",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -202,9 +202,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "218:9:61"
+              "src": "218:9:62"
             },
-            "scope": 31891,
+            "scope": 32187,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -217,11 +217,11 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          31891
+          32187
         ],
         "name": "Sett",
-        "nameLocation": "75:4:61",
-        "scope": 31892,
+        "nameLocation": "75:4:62",
+        "scope": 32188,
         "usedErrors": []
       }
     ],

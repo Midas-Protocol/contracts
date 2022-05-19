@@ -372,23 +372,23 @@
     "linkReferences": {}
   },
   "ast": {
-    "absolutePath": "/Users/peet/git/contracts/contracts/external/compound/ICEther.sol",
-    "id": 33181,
+    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICEther.sol",
+    "id": 33477,
     "exportedSymbols": {
       "ICEther": [
-        33180
+        33476
       ],
       "ICToken": [
-        33314
+        33610
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "41:289:72",
+    "src": "41:289:73",
     "nodes": [
       {
-        "id": 33167,
+        "id": 33463,
         "nodeType": "PragmaDirective",
-        "src": "41:24:72",
+        "src": "41:24:73",
         "literals": [
           "solidity",
           ">=",
@@ -397,45 +397,45 @@
         ]
       },
       {
-        "id": 33168,
+        "id": 33464,
         "nodeType": "ImportDirective",
-        "src": "67:23:72",
-        "absolutePath": "/Users/peet/git/contracts/contracts/external/compound/ICToken.sol",
+        "src": "67:23:73",
+        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICToken.sol",
         "file": "./ICToken.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 33181,
-        "sourceUnit": 33315,
+        "scope": 33477,
+        "sourceUnit": 33611,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 33180,
+        "id": 33476,
         "nodeType": "ContractDefinition",
-        "src": "208:121:72",
+        "src": "208:121:73",
         "nodes": [
           {
-            "id": 33179,
+            "id": 33475,
             "nodeType": "FunctionDefinition",
-            "src": "241:86:72",
+            "src": "241:86:73",
             "functionSelector": "aae40a2a",
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "liquidateBorrow",
-            "nameLocation": "250:15:72",
+            "nameLocation": "250:15:73",
             "parameters": {
-              "id": 33177,
+              "id": 33473,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33173,
+                  "id": 33469,
                   "mutability": "mutable",
                   "name": "borrower",
-                  "nameLocation": "274:8:72",
+                  "nameLocation": "274:8:73",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33179,
-                  "src": "266:16:72",
+                  "scope": 33475,
+                  "src": "266:16:73",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -443,10 +443,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33172,
+                    "id": 33468,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "266:7:72",
+                    "src": "266:7:73",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -457,48 +457,48 @@
                 },
                 {
                   "constant": false,
-                  "id": 33176,
+                  "id": 33472,
                   "mutability": "mutable",
                   "name": "cTokenCollateral",
-                  "nameLocation": "292:16:72",
+                  "nameLocation": "292:16:73",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33179,
-                  "src": "284:24:72",
+                  "scope": 33475,
+                  "src": "284:24:73",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ICToken_$33314",
+                    "typeIdentifier": "t_contract$_ICToken_$33610",
                     "typeString": "contract ICToken"
                   },
                   "typeName": {
-                    "id": 33175,
+                    "id": 33471,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 33174,
+                      "id": 33470,
                       "name": "ICToken",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 33314,
-                      "src": "284:7:72"
+                      "referencedDeclaration": 33610,
+                      "src": "284:7:73"
                     },
-                    "referencedDeclaration": 33314,
-                    "src": "284:7:72",
+                    "referencedDeclaration": 33610,
+                    "src": "284:7:73",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ICToken_$33314",
+                      "typeIdentifier": "t_contract$_ICToken_$33610",
                       "typeString": "contract ICToken"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "265:44:72"
+              "src": "265:44:73"
             },
             "returnParameters": {
-              "id": 33178,
+              "id": 33474,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "326:0:72"
+              "src": "326:0:73"
             },
-            "scope": 33180,
+            "scope": 33476,
             "stateMutability": "payable",
             "virtual": false,
             "visibility": "external"
@@ -508,34 +508,34 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 33170,
+              "id": 33466,
               "name": "ICToken",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 33314,
-              "src": "229:7:72"
+              "referencedDeclaration": 33610,
+              "src": "229:7:73"
             },
-            "id": 33171,
+            "id": 33467,
             "nodeType": "InheritanceSpecifier",
-            "src": "229:7:72"
+            "src": "229:7:73"
           }
         ],
         "canonicalName": "ICEther",
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 33169,
+          "id": 33465,
           "nodeType": "StructuredDocumentation",
-          "src": "92:115:72",
+          "src": "92:115:73",
           "text": " @title Compound's CEther Contract\n @notice CTokens which wrap an EIP-20 underlying\n @author Compound"
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          33180,
-          33314
+          33476,
+          33610
         ],
         "name": "ICEther",
-        "nameLocation": "218:7:72",
-        "scope": 33181,
+        "nameLocation": "218:7:73",
+        "scope": 33477,
         "usedErrors": []
       }
     ],

@@ -11,7 +11,35 @@ on:
       - development
 
 jobs:
+  lint:
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Npm dependencies
+        run: npm install
+
+      - name: Lint
+        run: npm run list
+
+      - name: Run forge tests
+        run: forge test
+
   build-and-test-local:
+    needs: [ lint ]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
     runs-on: ubuntu-latest
@@ -32,6 +60,7 @@ jobs:
         run: forge test
 
   build-and-test-bsc:
+    needs: [ lint ]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
       FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
@@ -54,6 +83,7 @@ jobs:
         run: forge test --fork-url ${FORK_URL_BSC} --fork-block-number ${FORK_BLOCK_NUMBER}
 
   build-and-test-evmostestnet:
+    needs: [ lint ]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
       FORK_BLOCK_NUMBER: 1217475
@@ -75,6 +105,7 @@ jobs:
         run: forge test --fork-url https://eth.bd.evmos.dev:8545 --fork-block-number ${FORK_BLOCK_NUMBER}
 
   build-and-test-moonbeam:
+    needs: [ lint ]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
       FORK_BLOCK_NUMBER: 1058520

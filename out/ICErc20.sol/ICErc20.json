@@ -396,23 +396,23 @@
     "linkReferences": {}
   },
   "ast": {
-    "absolutePath": "/Users/peet/git/contracts/contracts/external/compound/ICErc20.sol",
-    "id": 33166,
+    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICErc20.sol",
+    "id": 33462,
     "exportedSymbols": {
       "ICErc20": [
-        33165
+        33461
       ],
       "ICToken": [
-        33314
+        33610
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "41:394:71",
+    "src": "41:394:72",
     "nodes": [
       {
-        "id": 33143,
+        "id": 33439,
         "nodeType": "PragmaDirective",
-        "src": "41:24:71",
+        "src": "41:24:72",
         "literals": [
           "solidity",
           ">=",
@@ -421,51 +421,51 @@
         ]
       },
       {
-        "id": 33144,
+        "id": 33440,
         "nodeType": "ImportDirective",
-        "src": "67:23:71",
-        "absolutePath": "/Users/peet/git/contracts/contracts/external/compound/ICToken.sol",
+        "src": "67:23:72",
+        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICToken.sol",
         "file": "./ICToken.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 33166,
-        "sourceUnit": 33315,
+        "scope": 33462,
+        "sourceUnit": 33611,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 33165,
+        "id": 33461,
         "nodeType": "ContractDefinition",
-        "src": "208:226:71",
+        "src": "208:226:72",
         "nodes": [
           {
-            "id": 33152,
+            "id": 33448,
             "nodeType": "FunctionDefinition",
-            "src": "241:54:71",
+            "src": "241:54:72",
             "functionSelector": "6f307dc3",
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "underlying",
-            "nameLocation": "250:10:71",
+            "nameLocation": "250:10:72",
             "parameters": {
-              "id": 33148,
+              "id": 33444,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "260:2:71"
+              "src": "260:2:72"
             },
             "returnParameters": {
-              "id": 33151,
+              "id": 33447,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33150,
+                  "id": 33446,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33152,
-                  "src": "286:7:71",
+                  "scope": 33448,
+                  "src": "286:7:72",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -473,10 +473,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33149,
+                    "id": 33445,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "286:7:71",
+                    "src": "286:7:72",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -486,36 +486,36 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "285:9:71"
+              "src": "285:9:72"
             },
-            "scope": 33165,
+            "scope": 33461,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 33164,
+            "id": 33460,
             "nodeType": "FunctionDefinition",
-            "src": "299:133:71",
+            "src": "299:133:72",
             "functionSelector": "f5e3c462",
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "liquidateBorrow",
-            "nameLocation": "308:15:71",
+            "nameLocation": "308:15:72",
             "parameters": {
-              "id": 33160,
+              "id": 33456,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33154,
+                  "id": 33450,
                   "mutability": "mutable",
                   "name": "borrower",
-                  "nameLocation": "337:8:71",
+                  "nameLocation": "337:8:72",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33164,
-                  "src": "329:16:71",
+                  "scope": 33460,
+                  "src": "329:16:72",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -523,10 +523,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33153,
+                    "id": 33449,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "329:7:71",
+                    "src": "329:7:72",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -537,13 +537,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 33156,
+                  "id": 33452,
                   "mutability": "mutable",
                   "name": "repayAmount",
-                  "nameLocation": "359:11:71",
+                  "nameLocation": "359:11:72",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33164,
-                  "src": "351:19:71",
+                  "scope": 33460,
+                  "src": "351:19:72",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -551,10 +551,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 33155,
+                    "id": 33451,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "351:7:71",
+                    "src": "351:7:72",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -564,54 +564,54 @@
                 },
                 {
                   "constant": false,
-                  "id": 33159,
+                  "id": 33455,
                   "mutability": "mutable",
                   "name": "cTokenCollateral",
-                  "nameLocation": "384:16:71",
+                  "nameLocation": "384:16:72",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33164,
-                  "src": "376:24:71",
+                  "scope": 33460,
+                  "src": "376:24:72",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ICToken_$33314",
+                    "typeIdentifier": "t_contract$_ICToken_$33610",
                     "typeString": "contract ICToken"
                   },
                   "typeName": {
-                    "id": 33158,
+                    "id": 33454,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 33157,
+                      "id": 33453,
                       "name": "ICToken",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 33314,
-                      "src": "376:7:71"
+                      "referencedDeclaration": 33610,
+                      "src": "376:7:72"
                     },
-                    "referencedDeclaration": 33314,
-                    "src": "376:7:71",
+                    "referencedDeclaration": 33610,
+                    "src": "376:7:72",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ICToken_$33314",
+                      "typeIdentifier": "t_contract$_ICToken_$33610",
                       "typeString": "contract ICToken"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "323:81:71"
+              "src": "323:81:72"
             },
             "returnParameters": {
-              "id": 33163,
+              "id": 33459,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33162,
+                  "id": 33458,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33164,
-                  "src": "423:7:71",
+                  "scope": 33460,
+                  "src": "423:7:72",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -619,10 +619,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 33161,
+                    "id": 33457,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "423:7:71",
+                    "src": "423:7:72",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -631,9 +631,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "422:9:71"
+              "src": "422:9:72"
             },
-            "scope": 33165,
+            "scope": 33461,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -643,34 +643,34 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 33146,
+              "id": 33442,
               "name": "ICToken",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 33314,
-              "src": "229:7:71"
+              "referencedDeclaration": 33610,
+              "src": "229:7:72"
             },
-            "id": 33147,
+            "id": 33443,
             "nodeType": "InheritanceSpecifier",
-            "src": "229:7:71"
+            "src": "229:7:72"
           }
         ],
         "canonicalName": "ICErc20",
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 33145,
+          "id": 33441,
           "nodeType": "StructuredDocumentation",
-          "src": "92:115:71",
+          "src": "92:115:72",
           "text": " @title Compound's CErc20 Contract\n @notice CTokens which wrap an EIP-20 underlying\n @author Compound"
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          33165,
-          33314
+          33461,
+          33610
         ],
         "name": "ICErc20",
-        "nameLocation": "218:7:71",
-        "scope": 33166,
+        "nameLocation": "218:7:72",
+        "scope": 33462,
         "usedErrors": []
       }
     ],

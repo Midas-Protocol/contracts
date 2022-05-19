@@ -25,20 +25,20 @@
     "linkReferences": {}
   },
   "ast": {
-    "absolutePath": "/Users/peet/git/contracts/contracts/external/pooltogether/ControlledTokenInterface.sol",
-    "id": 35343,
+    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/pooltogether/ControlledTokenInterface.sol",
+    "id": 35639,
     "exportedSymbols": {
       "ControlledTokenInterface": [
-        35342
+        35638
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "36:299:103",
+    "src": "36:299:104",
     "nodes": [
       {
-        "id": 35334,
+        "id": 35630,
         "nodeType": "PragmaDirective",
-        "src": "36:24:103",
+        "src": "36:24:104",
         "literals": [
           "solidity",
           ">=",
@@ -47,18 +47,18 @@
         ]
       },
       {
-        "id": 35342,
+        "id": 35638,
         "nodeType": "ContractDefinition",
-        "src": "161:173:103",
+        "src": "161:173:104",
         "nodes": [
           {
-            "id": 35341,
+            "id": 35637,
             "nodeType": "FunctionDefinition",
-            "src": "278:54:103",
+            "src": "278:54:104",
             "documentation": {
-              "id": 35336,
+              "id": 35632,
               "nodeType": "StructuredDocumentation",
-              "src": "200:75:103",
+              "src": "200:75:104",
               "text": "@notice Interface to the contract responsible for controlling mint/burn"
             },
             "functionSelector": "f77c4791",
@@ -66,26 +66,26 @@
             "kind": "function",
             "modifiers": [],
             "name": "controller",
-            "nameLocation": "287:10:103",
+            "nameLocation": "287:10:104",
             "parameters": {
-              "id": 35337,
+              "id": 35633,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "297:2:103"
+              "src": "297:2:104"
             },
             "returnParameters": {
-              "id": 35340,
+              "id": 35636,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35339,
+                  "id": 35635,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35341,
-                  "src": "323:7:103",
+                  "scope": 35637,
+                  "src": "323:7:104",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -93,10 +93,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 35338,
+                    "id": 35634,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "323:7:103",
+                    "src": "323:7:104",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -106,9 +106,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "322:9:103"
+              "src": "322:9:104"
             },
-            "scope": 35342,
+            "scope": 35638,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -120,18 +120,18 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 35335,
+          "id": 35631,
           "nodeType": "StructuredDocumentation",
-          "src": "62:99:103",
+          "src": "62:99:104",
           "text": "@title Controlled ERC20 Token\n @notice ERC20 Tokens with a controller for minting & burning"
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          35342
+          35638
         ],
         "name": "ControlledTokenInterface",
-        "nameLocation": "171:24:103",
-        "scope": 35343,
+        "nameLocation": "171:24:104",
+        "scope": 35639,
         "usedErrors": []
       }
     ],

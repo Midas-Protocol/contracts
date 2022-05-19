@@ -134,38 +134,38 @@
     "linkReferences": {}
   },
   "ast": {
-    "absolutePath": "/Users/peet/git/contracts/lib/flywheel-v2/src/rewards/FlywheelDynamicRewards.sol",
-    "id": 68972,
+    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/flywheel-v2/src/rewards/FlywheelDynamicRewards.sol",
+    "id": 69449,
     "exportedSymbols": {
       "BaseFlywheelRewards": [
-        68785
+        69262
       ],
       "ERC20": [
-        91482
+        92169
       ],
       "FlywheelCore": [
-        68645
+        69122
       ],
       "FlywheelDynamicRewards": [
-        68971
+        69448
       ],
       "IFlywheelRewards": [
-        68704
+        69181
       ],
       "SafeCastLib": [
-        91772
+        92459
       ],
       "SafeTransferLib": [
-        91865
+        92552
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "42:2715:247",
+    "src": "42:2715:248",
     "nodes": [
       {
-        "id": 68787,
+        "id": 69264,
         "nodeType": "PragmaDirective",
-        "src": "42:23:247",
+        "src": "42:23:248",
         "literals": [
           "solidity",
           "0.8",
@@ -173,34 +173,34 @@
         ]
       },
       {
-        "id": 68788,
+        "id": 69265,
         "nodeType": "ImportDirective",
-        "src": "67:35:247",
-        "absolutePath": "/Users/peet/git/contracts/lib/flywheel-v2/src/rewards/BaseFlywheelRewards.sol",
+        "src": "67:35:248",
+        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/flywheel-v2/src/rewards/BaseFlywheelRewards.sol",
         "file": "./BaseFlywheelRewards.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 68972,
-        "sourceUnit": 68786,
+        "scope": 69449,
+        "sourceUnit": 69263,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 68790,
+        "id": 69267,
         "nodeType": "ImportDirective",
-        "src": "103:58:247",
-        "absolutePath": "/Users/peet/git/contracts/lib/solmate/src/utils/SafeCastLib.sol",
+        "src": "103:58:248",
+        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/utils/SafeCastLib.sol",
         "file": "solmate/utils/SafeCastLib.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 68972,
-        "sourceUnit": 91773,
+        "scope": 69449,
+        "sourceUnit": 92460,
         "symbolAliases": [
           {
             "foreign": {
-              "id": 68789,
+              "id": 69266,
               "name": "SafeCastLib",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "src": "111:11:247",
+              "src": "111:11:248",
               "typeDescriptions": {}
             },
             "nameLocation": "-1:-1:-1"
@@ -209,55 +209,55 @@
         "unitAlias": ""
       },
       {
-        "id": 68971,
+        "id": 69448,
         "nodeType": "ContractDefinition",
-        "src": "633:2123:247",
+        "src": "633:2123:248",
         "nodes": [
           {
-            "id": 68797,
+            "id": 69274,
             "nodeType": "UsingForDirective",
-            "src": "703:32:247",
+            "src": "703:32:248",
             "libraryName": {
-              "id": 68794,
+              "id": 69271,
               "name": "SafeTransferLib",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 91865,
-              "src": "709:15:247"
+              "referencedDeclaration": 92552,
+              "src": "709:15:248"
             },
             "typeName": {
-              "id": 68796,
+              "id": 69273,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 68795,
+                "id": 69272,
                 "name": "ERC20",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 91482,
-                "src": "729:5:247"
+                "referencedDeclaration": 92169,
+                "src": "729:5:248"
               },
-              "referencedDeclaration": 91482,
-              "src": "729:5:247",
+              "referencedDeclaration": 92169,
+              "src": "729:5:248",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20_$91482",
+                "typeIdentifier": "t_contract$_ERC20_$92169",
                 "typeString": "contract ERC20"
               }
             }
           },
           {
-            "id": 68800,
+            "id": 69277,
             "nodeType": "UsingForDirective",
-            "src": "740:30:247",
+            "src": "740:30:248",
             "libraryName": {
-              "id": 68798,
+              "id": 69275,
               "name": "SafeCastLib",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 91772,
-              "src": "746:11:247"
+              "referencedDeclaration": 92459,
+              "src": "746:11:248"
             },
             "typeName": {
-              "id": 68799,
+              "id": 69276,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "762:7:247",
+              "src": "762:7:248",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -265,26 +265,26 @@
             }
           },
           {
-            "id": 68808,
+            "id": 69285,
             "nodeType": "EventDefinition",
-            "src": "776:80:247",
+            "src": "776:80:248",
             "anonymous": false,
             "name": "NewRewardsCycle",
-            "nameLocation": "782:15:247",
+            "nameLocation": "782:15:248",
             "parameters": {
-              "id": 68807,
+              "id": 69284,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 68802,
+                  "id": 69279,
                   "indexed": true,
                   "mutability": "mutable",
                   "name": "start",
-                  "nameLocation": "813:5:247",
+                  "nameLocation": "813:5:248",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68808,
-                  "src": "798:20:247",
+                  "scope": 69285,
+                  "src": "798:20:248",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -292,10 +292,10 @@
                     "typeString": "uint32"
                   },
                   "typeName": {
-                    "id": 68801,
+                    "id": 69278,
                     "name": "uint32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "798:6:247",
+                    "src": "798:6:248",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint32",
                       "typeString": "uint32"
@@ -305,14 +305,14 @@
                 },
                 {
                   "constant": false,
-                  "id": 68804,
+                  "id": 69281,
                   "indexed": true,
                   "mutability": "mutable",
                   "name": "end",
-                  "nameLocation": "835:3:247",
+                  "nameLocation": "835:3:248",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68808,
-                  "src": "820:18:247",
+                  "scope": 69285,
+                  "src": "820:18:248",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -320,10 +320,10 @@
                     "typeString": "uint32"
                   },
                   "typeName": {
-                    "id": 68803,
+                    "id": 69280,
                     "name": "uint32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "820:6:247",
+                    "src": "820:6:248",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint32",
                       "typeString": "uint32"
@@ -333,14 +333,14 @@
                 },
                 {
                   "constant": false,
-                  "id": 68806,
+                  "id": 69283,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "reward",
-                  "nameLocation": "848:6:247",
+                  "nameLocation": "848:6:248",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68808,
-                  "src": "840:14:247",
+                  "scope": 69285,
+                  "src": "840:14:248",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -348,10 +348,10 @@
                     "typeString": "uint192"
                   },
                   "typeName": {
-                    "id": 68805,
+                    "id": 69282,
                     "name": "uint192",
                     "nodeType": "ElementaryTypeName",
-                    "src": "840:7:247",
+                    "src": "840:7:248",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint192",
                       "typeString": "uint192"
@@ -360,25 +360,25 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "797:58:247"
+              "src": "797:58:248"
             }
           },
           {
-            "id": 68811,
+            "id": 69288,
             "nodeType": "VariableDeclaration",
-            "src": "908:42:247",
+            "src": "908:42:248",
             "constant": false,
             "documentation": {
-              "id": 68809,
+              "id": 69286,
               "nodeType": "StructuredDocumentation",
-              "src": "862:41:247",
+              "src": "862:41:248",
               "text": "@notice the length of a rewards cycle"
             },
             "functionSelector": "6fcf5e5f",
             "mutability": "immutable",
             "name": "rewardsCycleLength",
-            "nameLocation": "932:18:247",
-            "scope": 68971,
+            "nameLocation": "932:18:248",
+            "scope": 69448,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -386,10 +386,10 @@
               "typeString": "uint32"
             },
             "typeName": {
-              "id": 68810,
+              "id": 69287,
               "name": "uint32",
               "nodeType": "ElementaryTypeName",
-              "src": "908:6:247",
+              "src": "908:6:248",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint32",
                 "typeString": "uint32"
@@ -398,20 +398,20 @@
             "visibility": "public"
           },
           {
-            "id": 68818,
+            "id": 69295,
             "nodeType": "StructDefinition",
-            "src": "957:93:247",
+            "src": "957:93:248",
             "canonicalName": "FlywheelDynamicRewards.RewardsCycle",
             "members": [
               {
                 "constant": false,
-                "id": 68813,
+                "id": 69290,
                 "mutability": "mutable",
                 "name": "start",
-                "nameLocation": "994:5:247",
+                "nameLocation": "994:5:248",
                 "nodeType": "VariableDeclaration",
-                "scope": 68818,
-                "src": "987:12:247",
+                "scope": 69295,
+                "src": "987:12:248",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -419,10 +419,10 @@
                   "typeString": "uint32"
                 },
                 "typeName": {
-                  "id": 68812,
+                  "id": 69289,
                   "name": "uint32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "987:6:247",
+                  "src": "987:6:248",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint32",
                     "typeString": "uint32"
@@ -432,13 +432,13 @@
               },
               {
                 "constant": false,
-                "id": 68815,
+                "id": 69292,
                 "mutability": "mutable",
                 "name": "end",
-                "nameLocation": "1016:3:247",
+                "nameLocation": "1016:3:248",
                 "nodeType": "VariableDeclaration",
-                "scope": 68818,
-                "src": "1009:10:247",
+                "scope": 69295,
+                "src": "1009:10:248",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -446,10 +446,10 @@
                   "typeString": "uint32"
                 },
                 "typeName": {
-                  "id": 68814,
+                  "id": 69291,
                   "name": "uint32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1009:6:247",
+                  "src": "1009:6:248",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint32",
                     "typeString": "uint32"
@@ -459,13 +459,13 @@
               },
               {
                 "constant": false,
-                "id": 68817,
+                "id": 69294,
                 "mutability": "mutable",
                 "name": "reward",
-                "nameLocation": "1037:6:247",
+                "nameLocation": "1037:6:248",
                 "nodeType": "VariableDeclaration",
-                "scope": 68818,
-                "src": "1029:14:247",
+                "scope": 69295,
+                "src": "1029:14:248",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -473,10 +473,10 @@
                   "typeString": "uint192"
                 },
                 "typeName": {
-                  "id": 68816,
+                  "id": 69293,
                   "name": "uint192",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1029:7:247",
+                  "src": "1029:7:248",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint192",
                     "typeString": "uint192"
@@ -486,65 +486,65 @@
               }
             ],
             "name": "RewardsCycle",
-            "nameLocation": "964:12:247",
-            "scope": 68971,
+            "nameLocation": "964:12:248",
+            "scope": 69448,
             "visibility": "public"
           },
           {
-            "id": 68824,
+            "id": 69301,
             "nodeType": "VariableDeclaration",
-            "src": "1056:50:247",
+            "src": "1056:50:248",
             "constant": false,
             "functionSelector": "faa6c3c8",
             "mutability": "mutable",
             "name": "rewardsCycle",
-            "nameLocation": "1094:12:247",
-            "scope": 68971,
+            "nameLocation": "1094:12:248",
+            "scope": 69448,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_contract$_ERC20_$91482_$_t_struct$_RewardsCycle_$68818_storage_$",
+              "typeIdentifier": "t_mapping$_t_contract$_ERC20_$92169_$_t_struct$_RewardsCycle_$69295_storage_$",
               "typeString": "mapping(contract ERC20 => struct FlywheelDynamicRewards.RewardsCycle)"
             },
             "typeName": {
-              "id": 68823,
+              "id": 69300,
               "keyType": {
-                "id": 68820,
+                "id": 69297,
                 "nodeType": "UserDefinedTypeName",
                 "pathNode": {
-                  "id": 68819,
+                  "id": 69296,
                   "name": "ERC20",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 91482,
-                  "src": "1064:5:247"
+                  "referencedDeclaration": 92169,
+                  "src": "1064:5:248"
                 },
-                "referencedDeclaration": 91482,
-                "src": "1064:5:247",
+                "referencedDeclaration": 92169,
+                "src": "1064:5:248",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_contract$_ERC20_$91482",
+                  "typeIdentifier": "t_contract$_ERC20_$92169",
                   "typeString": "contract ERC20"
                 }
               },
               "nodeType": "Mapping",
-              "src": "1056:30:247",
+              "src": "1056:30:248",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_contract$_ERC20_$91482_$_t_struct$_RewardsCycle_$68818_storage_$",
+                "typeIdentifier": "t_mapping$_t_contract$_ERC20_$92169_$_t_struct$_RewardsCycle_$69295_storage_$",
                 "typeString": "mapping(contract ERC20 => struct FlywheelDynamicRewards.RewardsCycle)"
               },
               "valueType": {
-                "id": 68822,
+                "id": 69299,
                 "nodeType": "UserDefinedTypeName",
                 "pathNode": {
-                  "id": 68821,
+                  "id": 69298,
                   "name": "RewardsCycle",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 68818,
-                  "src": "1073:12:247"
+                  "referencedDeclaration": 69295,
+                  "src": "1073:12:248"
                 },
-                "referencedDeclaration": 68818,
-                "src": "1073:12:247",
+                "referencedDeclaration": 69295,
+                "src": "1073:12:248",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_RewardsCycle_$68818_storage_ptr",
+                  "typeIdentifier": "t_struct$_RewardsCycle_$69295_storage_ptr",
                   "typeString": "struct FlywheelDynamicRewards.RewardsCycle"
                 }
               }
@@ -552,28 +552,28 @@
             "visibility": "public"
           },
           {
-            "id": 68840,
+            "id": 69317,
             "nodeType": "FunctionDefinition",
-            "src": "1113:152:247",
+            "src": "1113:152:248",
             "body": {
-              "id": 68839,
+              "id": 69316,
               "nodeType": "Block",
-              "src": "1208:57:247",
+              "src": "1208:57:248",
               "statements": [
                 {
                   "expression": {
-                    "id": 68837,
+                    "id": 69314,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
-                      "id": 68835,
+                      "id": 69312,
                       "name": "rewardsCycleLength",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 68811,
-                      "src": "1218:18:247",
+                      "referencedDeclaration": 69288,
+                      "src": "1218:18:248",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
                         "typeString": "uint32"
@@ -582,26 +582,26 @@
                     "nodeType": "Assignment",
                     "operator": "=",
                     "rightHandSide": {
-                      "id": 68836,
+                      "id": 69313,
                       "name": "_rewardsCycleLength",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 68829,
-                      "src": "1239:19:247",
+                      "referencedDeclaration": 69306,
+                      "src": "1239:19:248",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
                         "typeString": "uint32"
                       }
                     },
-                    "src": "1218:40:247",
+                    "src": "1218:40:248",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint32",
                       "typeString": "uint32"
                     }
                   },
-                  "id": 68838,
+                  "id": 69315,
                   "nodeType": "ExpressionStatement",
-                  "src": "1218:40:247"
+                  "src": "1218:40:248"
                 }
               ]
             },
@@ -611,66 +611,66 @@
               {
                 "arguments": [
                   {
-                    "id": 68832,
+                    "id": 69309,
                     "name": "_flywheel",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 68827,
-                    "src": "1197:9:247",
+                    "referencedDeclaration": 69304,
+                    "src": "1197:9:248",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_FlywheelCore_$68645",
+                      "typeIdentifier": "t_contract$_FlywheelCore_$69122",
                       "typeString": "contract FlywheelCore"
                     }
                   }
                 ],
-                "id": 68833,
+                "id": 69310,
                 "kind": "baseConstructorSpecifier",
                 "modifierName": {
-                  "id": 68831,
+                  "id": 69308,
                   "name": "BaseFlywheelRewards",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 68785,
-                  "src": "1177:19:247"
+                  "referencedDeclaration": 69262,
+                  "src": "1177:19:248"
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "1177:30:247"
+                "src": "1177:30:248"
               }
             ],
             "name": "",
             "nameLocation": "-1:-1:-1",
             "parameters": {
-              "id": 68830,
+              "id": 69307,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 68827,
+                  "id": 69304,
                   "mutability": "mutable",
                   "name": "_flywheel",
-                  "nameLocation": "1138:9:247",
+                  "nameLocation": "1138:9:248",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68840,
-                  "src": "1125:22:247",
+                  "scope": 69317,
+                  "src": "1125:22:248",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_FlywheelCore_$68645",
+                    "typeIdentifier": "t_contract$_FlywheelCore_$69122",
                     "typeString": "contract FlywheelCore"
                   },
                   "typeName": {
-                    "id": 68826,
+                    "id": 69303,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 68825,
+                      "id": 69302,
                       "name": "FlywheelCore",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 68645,
-                      "src": "1125:12:247"
+                      "referencedDeclaration": 69122,
+                      "src": "1125:12:248"
                     },
-                    "referencedDeclaration": 68645,
-                    "src": "1125:12:247",
+                    "referencedDeclaration": 69122,
+                    "src": "1125:12:248",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_FlywheelCore_$68645",
+                      "typeIdentifier": "t_contract$_FlywheelCore_$69122",
                       "typeString": "contract FlywheelCore"
                     }
                   },
@@ -678,13 +678,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 68829,
+                  "id": 69306,
                   "mutability": "mutable",
                   "name": "_rewardsCycleLength",
-                  "nameLocation": "1156:19:247",
+                  "nameLocation": "1156:19:248",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68840,
-                  "src": "1149:26:247",
+                  "scope": 69317,
+                  "src": "1149:26:248",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -692,10 +692,10 @@
                     "typeString": "uint32"
                   },
                   "typeName": {
-                    "id": 68828,
+                    "id": 69305,
                     "name": "uint32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1149:6:247",
+                    "src": "1149:6:248",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint32",
                       "typeString": "uint32"
@@ -704,95 +704,95 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1124:52:247"
+              "src": "1124:52:248"
             },
             "returnParameters": {
-              "id": 68834,
+              "id": 69311,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1208:0:247"
+              "src": "1208:0:248"
             },
-            "scope": 68971,
+            "scope": 69448,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "internal"
           },
           {
-            "id": 68962,
+            "id": 69439,
             "nodeType": "FunctionDefinition",
-            "src": "1477:1191:247",
+            "src": "1477:1191:248",
             "baseFunctions": [
-              68689
+              69166
             ],
             "body": {
-              "id": 68961,
+              "id": 69438,
               "nodeType": "Block",
-              "src": "1641:1027:247",
+              "src": "1641:1027:248",
               "statements": [
                 {
                   "assignments": [
-                    68856
+                    69333
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 68856,
+                      "id": 69333,
                       "mutability": "mutable",
                       "name": "cycle",
-                      "nameLocation": "1671:5:247",
+                      "nameLocation": "1671:5:248",
                       "nodeType": "VariableDeclaration",
-                      "scope": 68961,
-                      "src": "1651:25:247",
+                      "scope": 69438,
+                      "src": "1651:25:248",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_RewardsCycle_$68818_memory_ptr",
+                        "typeIdentifier": "t_struct$_RewardsCycle_$69295_memory_ptr",
                         "typeString": "struct FlywheelDynamicRewards.RewardsCycle"
                       },
                       "typeName": {
-                        "id": 68855,
+                        "id": 69332,
                         "nodeType": "UserDefinedTypeName",
                         "pathNode": {
-                          "id": 68854,
+                          "id": 69331,
                           "name": "RewardsCycle",
                           "nodeType": "IdentifierPath",
-                          "referencedDeclaration": 68818,
-                          "src": "1651:12:247"
+                          "referencedDeclaration": 69295,
+                          "src": "1651:12:248"
                         },
-                        "referencedDeclaration": 68818,
-                        "src": "1651:12:247",
+                        "referencedDeclaration": 69295,
+                        "src": "1651:12:248",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_RewardsCycle_$68818_storage_ptr",
+                          "typeIdentifier": "t_struct$_RewardsCycle_$69295_storage_ptr",
                           "typeString": "struct FlywheelDynamicRewards.RewardsCycle"
                         }
                       },
                       "visibility": "internal"
                     }
                   ],
-                  "id": 68860,
+                  "id": 69337,
                   "initialValue": {
                     "baseExpression": {
-                      "id": 68857,
+                      "id": 69334,
                       "name": "rewardsCycle",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 68824,
-                      "src": "1679:12:247",
+                      "referencedDeclaration": 69301,
+                      "src": "1679:12:248",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_mapping$_t_contract$_ERC20_$91482_$_t_struct$_RewardsCycle_$68818_storage_$",
+                        "typeIdentifier": "t_mapping$_t_contract$_ERC20_$92169_$_t_struct$_RewardsCycle_$69295_storage_$",
                         "typeString": "mapping(contract ERC20 => struct FlywheelDynamicRewards.RewardsCycle storage ref)"
                       }
                     },
-                    "id": 68859,
+                    "id": 69336,
                     "indexExpression": {
-                      "id": 68858,
+                      "id": 69335,
                       "name": "strategy",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 68844,
-                      "src": "1692:8:247",
+                      "referencedDeclaration": 69321,
+                      "src": "1692:8:248",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_ERC20_$91482",
+                        "typeIdentifier": "t_contract$_ERC20_$92169",
                         "typeString": "contract ERC20"
                       }
                     },
@@ -801,29 +801,29 @@
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "IndexAccess",
-                    "src": "1679:22:247",
+                    "src": "1679:22:248",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_RewardsCycle_$68818_storage",
+                      "typeIdentifier": "t_struct$_RewardsCycle_$69295_storage",
                       "typeString": "struct FlywheelDynamicRewards.RewardsCycle storage ref"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "1651:50:247"
+                  "src": "1651:50:248"
                 },
                 {
                   "assignments": [
-                    68862
+                    69339
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 68862,
+                      "id": 69339,
                       "mutability": "mutable",
                       "name": "timestamp",
-                      "nameLocation": "1719:9:247",
+                      "nameLocation": "1719:9:248",
                       "nodeType": "VariableDeclaration",
-                      "scope": 68961,
-                      "src": "1712:16:247",
+                      "scope": 69438,
+                      "src": "1712:16:248",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -831,10 +831,10 @@
                         "typeString": "uint32"
                       },
                       "typeName": {
-                        "id": 68861,
+                        "id": 69338,
                         "name": "uint32",
                         "nodeType": "ElementaryTypeName",
-                        "src": "1712:6:247",
+                        "src": "1712:6:248",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint32",
                           "typeString": "uint32"
@@ -843,52 +843,52 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 68867,
+                  "id": 69344,
                   "initialValue": {
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
                       "expression": {
                         "expression": {
-                          "id": 68863,
+                          "id": 69340,
                           "name": "block",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": -4,
-                          "src": "1731:5:247",
+                          "src": "1731:5:248",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_block",
                             "typeString": "block"
                           }
                         },
-                        "id": 68864,
+                        "id": 69341,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "timestamp",
                         "nodeType": "MemberAccess",
-                        "src": "1731:15:247",
+                        "src": "1731:15:248",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "id": 68865,
+                      "id": 69342,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "safeCastTo32",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 91748,
-                      "src": "1731:28:247",
+                      "referencedDeclaration": 92435,
+                      "src": "1731:28:248",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$returns$_t_uint32_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256) pure returns (uint32)"
                       }
                     },
-                    "id": 68866,
+                    "id": 69343,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -896,7 +896,7 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1731:30:247",
+                    "src": "1731:30:248",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint32",
@@ -904,22 +904,22 @@
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "1712:49:247"
+                  "src": "1712:49:248"
                 },
                 {
                   "assignments": [
-                    68869
+                    69346
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 68869,
+                      "id": 69346,
                       "mutability": "mutable",
                       "name": "latest",
-                      "nameLocation": "1779:6:247",
+                      "nameLocation": "1779:6:248",
                       "nodeType": "VariableDeclaration",
-                      "scope": 68961,
-                      "src": "1772:13:247",
+                      "scope": 69438,
+                      "src": "1772:13:248",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -927,10 +927,10 @@
                         "typeString": "uint32"
                       },
                       "typeName": {
-                        "id": 68868,
+                        "id": 69345,
                         "name": "uint32",
                         "nodeType": "ElementaryTypeName",
-                        "src": "1772:6:247",
+                        "src": "1772:6:248",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint32",
                           "typeString": "uint32"
@@ -939,25 +939,25 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 68878,
+                  "id": 69355,
                   "initialValue": {
                     "condition": {
                       "commonType": {
                         "typeIdentifier": "t_uint32",
                         "typeString": "uint32"
                       },
-                      "id": 68873,
+                      "id": 69350,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
-                        "id": 68870,
+                        "id": 69347,
                         "name": "timestamp",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 68862,
-                        "src": "1788:9:247",
+                        "referencedDeclaration": 69339,
+                        "src": "1788:9:248",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint32",
                           "typeString": "uint32"
@@ -967,78 +967,78 @@
                       "operator": ">=",
                       "rightExpression": {
                         "expression": {
-                          "id": 68871,
+                          "id": 69348,
                           "name": "cycle",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 68856,
-                          "src": "1801:5:247",
+                          "referencedDeclaration": 69333,
+                          "src": "1801:5:248",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_RewardsCycle_$68818_memory_ptr",
+                            "typeIdentifier": "t_struct$_RewardsCycle_$69295_memory_ptr",
                             "typeString": "struct FlywheelDynamicRewards.RewardsCycle memory"
                           }
                         },
-                        "id": 68872,
+                        "id": 69349,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "end",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 68815,
-                        "src": "1801:9:247",
+                        "referencedDeclaration": 69292,
+                        "src": "1801:9:248",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint32",
                           "typeString": "uint32"
                         }
                       },
-                      "src": "1788:22:247",
+                      "src": "1788:22:248",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
                       }
                     },
                     "falseExpression": {
-                      "id": 68876,
+                      "id": 69353,
                       "name": "timestamp",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 68862,
-                      "src": "1825:9:247",
+                      "referencedDeclaration": 69339,
+                      "src": "1825:9:248",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
                         "typeString": "uint32"
                       }
                     },
-                    "id": 68877,
+                    "id": 69354,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "Conditional",
-                    "src": "1788:46:247",
+                    "src": "1788:46:248",
                     "trueExpression": {
                       "expression": {
-                        "id": 68874,
+                        "id": 69351,
                         "name": "cycle",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 68856,
-                        "src": "1813:5:247",
+                        "referencedDeclaration": 69333,
+                        "src": "1813:5:248",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_RewardsCycle_$68818_memory_ptr",
+                          "typeIdentifier": "t_struct$_RewardsCycle_$69295_memory_ptr",
                           "typeString": "struct FlywheelDynamicRewards.RewardsCycle memory"
                         }
                       },
-                      "id": 68875,
+                      "id": 69352,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "end",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 68815,
-                      "src": "1813:9:247",
+                      "referencedDeclaration": 69292,
+                      "src": "1813:9:248",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
                         "typeString": "uint32"
@@ -1050,22 +1050,22 @@
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "1772:62:247"
+                  "src": "1772:62:248"
                 },
                 {
                   "assignments": [
-                    68880
+                    69357
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 68880,
+                      "id": 69357,
                       "mutability": "mutable",
                       "name": "earliest",
-                      "nameLocation": "1851:8:247",
+                      "nameLocation": "1851:8:248",
                       "nodeType": "VariableDeclaration",
-                      "scope": 68961,
-                      "src": "1844:15:247",
+                      "scope": 69438,
+                      "src": "1844:15:248",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1073,10 +1073,10 @@
                         "typeString": "uint32"
                       },
                       "typeName": {
-                        "id": 68879,
+                        "id": 69356,
                         "name": "uint32",
                         "nodeType": "ElementaryTypeName",
-                        "src": "1844:6:247",
+                        "src": "1844:6:248",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint32",
                           "typeString": "uint32"
@@ -1085,25 +1085,25 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 68889,
+                  "id": 69366,
                   "initialValue": {
                     "condition": {
                       "commonType": {
                         "typeIdentifier": "t_uint32",
                         "typeString": "uint32"
                       },
-                      "id": 68884,
+                      "id": 69361,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
-                        "id": 68881,
+                        "id": 69358,
                         "name": "lastUpdatedTimestamp",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 68846,
-                        "src": "1862:20:247",
+                        "referencedDeclaration": 69323,
+                        "src": "1862:20:248",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint32",
                           "typeString": "uint32"
@@ -1113,78 +1113,78 @@
                       "operator": "<=",
                       "rightExpression": {
                         "expression": {
-                          "id": 68882,
+                          "id": 69359,
                           "name": "cycle",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 68856,
-                          "src": "1886:5:247",
+                          "referencedDeclaration": 69333,
+                          "src": "1886:5:248",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_RewardsCycle_$68818_memory_ptr",
+                            "typeIdentifier": "t_struct$_RewardsCycle_$69295_memory_ptr",
                             "typeString": "struct FlywheelDynamicRewards.RewardsCycle memory"
                           }
                         },
-                        "id": 68883,
+                        "id": 69360,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "start",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 68813,
-                        "src": "1886:11:247",
+                        "referencedDeclaration": 69290,
+                        "src": "1886:11:248",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint32",
                           "typeString": "uint32"
                         }
                       },
-                      "src": "1862:35:247",
+                      "src": "1862:35:248",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
                       }
                     },
                     "falseExpression": {
-                      "id": 68887,
+                      "id": 69364,
                       "name": "lastUpdatedTimestamp",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 68846,
-                      "src": "1914:20:247",
+                      "referencedDeclaration": 69323,
+                      "src": "1914:20:248",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
                         "typeString": "uint32"
                       }
                     },
-                    "id": 68888,
+                    "id": 69365,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "Conditional",
-                    "src": "1862:72:247",
+                    "src": "1862:72:248",
                     "trueExpression": {
                       "expression": {
-                        "id": 68885,
+                        "id": 69362,
                         "name": "cycle",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 68856,
-                        "src": "1900:5:247",
+                        "referencedDeclaration": 69333,
+                        "src": "1900:5:248",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_RewardsCycle_$68818_memory_ptr",
+                          "typeIdentifier": "t_struct$_RewardsCycle_$69295_memory_ptr",
                           "typeString": "struct FlywheelDynamicRewards.RewardsCycle memory"
                         }
                       },
-                      "id": 68886,
+                      "id": 69363,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "start",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 68813,
-                      "src": "1900:11:247",
+                      "referencedDeclaration": 69290,
+                      "src": "1900:11:248",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
                         "typeString": "uint32"
@@ -1196,7 +1196,7 @@
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "1844:90:247"
+                  "src": "1844:90:248"
                 },
                 {
                   "condition": {
@@ -1204,33 +1204,33 @@
                       "typeIdentifier": "t_uint32",
                       "typeString": "uint32"
                     },
-                    "id": 68893,
+                    "id": 69370,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "expression": {
-                        "id": 68890,
+                        "id": 69367,
                         "name": "cycle",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 68856,
-                        "src": "1948:5:247",
+                        "referencedDeclaration": 69333,
+                        "src": "1948:5:248",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_RewardsCycle_$68818_memory_ptr",
+                          "typeIdentifier": "t_struct$_RewardsCycle_$69295_memory_ptr",
                           "typeString": "struct FlywheelDynamicRewards.RewardsCycle memory"
                         }
                       },
-                      "id": 68891,
+                      "id": 69368,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "end",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 68815,
-                      "src": "1948:9:247",
+                      "referencedDeclaration": 69292,
+                      "src": "1948:9:248",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
                         "typeString": "uint32"
@@ -1240,48 +1240,48 @@
                     "operator": "!=",
                     "rightExpression": {
                       "hexValue": "30",
-                      "id": 68892,
+                      "id": 69369,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "1961:1:247",
+                      "src": "1961:1:248",
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
                         "typeString": "int_const 0"
                       },
                       "value": "0"
                     },
-                    "src": "1948:14:247",
+                    "src": "1948:14:248",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "id": 68920,
+                  "id": 69397,
                   "nodeType": "IfStatement",
-                  "src": "1944:241:247",
+                  "src": "1944:241:248",
                   "trueBody": {
-                    "id": 68919,
+                    "id": 69396,
                     "nodeType": "Block",
-                    "src": "1964:221:247",
+                    "src": "1964:221:248",
                     "statements": [
                       {
                         "expression": {
-                          "id": 68910,
+                          "id": 69387,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftHandSide": {
-                            "id": 68894,
+                            "id": 69371,
                             "name": "amount",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 68852,
-                            "src": "1978:6:247",
+                            "referencedDeclaration": 69329,
+                            "src": "1978:6:248",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -1294,7 +1294,7 @@
                               "typeIdentifier": "t_uint192",
                               "typeString": "uint192"
                             },
-                            "id": 68909,
+                            "id": 69386,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -1306,33 +1306,33 @@
                                     "typeIdentifier": "t_uint192",
                                     "typeString": "uint192"
                                   },
-                                  "id": 68901,
+                                  "id": 69378,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": false,
                                   "lValueRequested": false,
                                   "leftExpression": {
                                     "expression": {
-                                      "id": 68895,
+                                      "id": 69372,
                                       "name": "cycle",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 68856,
-                                      "src": "1988:5:247",
+                                      "referencedDeclaration": 69333,
+                                      "src": "1988:5:248",
                                       "typeDescriptions": {
-                                        "typeIdentifier": "t_struct$_RewardsCycle_$68818_memory_ptr",
+                                        "typeIdentifier": "t_struct$_RewardsCycle_$69295_memory_ptr",
                                         "typeString": "struct FlywheelDynamicRewards.RewardsCycle memory"
                                       }
                                     },
-                                    "id": 68896,
+                                    "id": 69373,
                                     "isConstant": false,
                                     "isLValue": true,
                                     "isPure": false,
                                     "lValueRequested": false,
                                     "memberName": "reward",
                                     "nodeType": "MemberAccess",
-                                    "referencedDeclaration": 68817,
-                                    "src": "1988:12:247",
+                                    "referencedDeclaration": 69294,
+                                    "src": "1988:12:248",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_uint192",
                                       "typeString": "uint192"
@@ -1347,18 +1347,18 @@
                                           "typeIdentifier": "t_uint32",
                                           "typeString": "uint32"
                                         },
-                                        "id": 68899,
+                                        "id": 69376,
                                         "isConstant": false,
                                         "isLValue": false,
                                         "isPure": false,
                                         "lValueRequested": false,
                                         "leftExpression": {
-                                          "id": 68897,
+                                          "id": 69374,
                                           "name": "latest",
                                           "nodeType": "Identifier",
                                           "overloadedDeclarations": [],
-                                          "referencedDeclaration": 68869,
-                                          "src": "2004:6:247",
+                                          "referencedDeclaration": 69346,
+                                          "src": "2004:6:248",
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_uint32",
                                             "typeString": "uint32"
@@ -1367,52 +1367,52 @@
                                         "nodeType": "BinaryOperation",
                                         "operator": "-",
                                         "rightExpression": {
-                                          "id": 68898,
+                                          "id": 69375,
                                           "name": "earliest",
                                           "nodeType": "Identifier",
                                           "overloadedDeclarations": [],
-                                          "referencedDeclaration": 68880,
-                                          "src": "2013:8:247",
+                                          "referencedDeclaration": 69357,
+                                          "src": "2013:8:248",
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_uint32",
                                             "typeString": "uint32"
                                           }
                                         },
-                                        "src": "2004:17:247",
+                                        "src": "2004:17:248",
                                         "typeDescriptions": {
                                           "typeIdentifier": "t_uint32",
                                           "typeString": "uint32"
                                         }
                                       }
                                     ],
-                                    "id": 68900,
+                                    "id": 69377,
                                     "isConstant": false,
                                     "isInlineArray": false,
                                     "isLValue": false,
                                     "isPure": false,
                                     "lValueRequested": false,
                                     "nodeType": "TupleExpression",
-                                    "src": "2003:19:247",
+                                    "src": "2003:19:248",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_uint32",
                                       "typeString": "uint32"
                                     }
                                   },
-                                  "src": "1988:34:247",
+                                  "src": "1988:34:248",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint192",
                                     "typeString": "uint192"
                                   }
                                 }
                               ],
-                              "id": 68902,
+                              "id": 69379,
                               "isConstant": false,
                               "isInlineArray": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "nodeType": "TupleExpression",
-                              "src": "1987:36:247",
+                              "src": "1987:36:248",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint192",
                                 "typeString": "uint192"
@@ -1427,33 +1427,33 @@
                                     "typeIdentifier": "t_uint32",
                                     "typeString": "uint32"
                                   },
-                                  "id": 68907,
+                                  "id": 69384,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": false,
                                   "lValueRequested": false,
                                   "leftExpression": {
                                     "expression": {
-                                      "id": 68903,
+                                      "id": 69380,
                                       "name": "cycle",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 68856,
-                                      "src": "2027:5:247",
+                                      "referencedDeclaration": 69333,
+                                      "src": "2027:5:248",
                                       "typeDescriptions": {
-                                        "typeIdentifier": "t_struct$_RewardsCycle_$68818_memory_ptr",
+                                        "typeIdentifier": "t_struct$_RewardsCycle_$69295_memory_ptr",
                                         "typeString": "struct FlywheelDynamicRewards.RewardsCycle memory"
                                       }
                                     },
-                                    "id": 68904,
+                                    "id": 69381,
                                     "isConstant": false,
                                     "isLValue": true,
                                     "isPure": false,
                                     "lValueRequested": false,
                                     "memberName": "end",
                                     "nodeType": "MemberAccess",
-                                    "referencedDeclaration": 68815,
-                                    "src": "2027:9:247",
+                                    "referencedDeclaration": 69292,
+                                    "src": "2027:9:248",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_uint32",
                                       "typeString": "uint32"
@@ -1463,66 +1463,66 @@
                                   "operator": "-",
                                   "rightExpression": {
                                     "expression": {
-                                      "id": 68905,
+                                      "id": 69382,
                                       "name": "cycle",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 68856,
-                                      "src": "2039:5:247",
+                                      "referencedDeclaration": 69333,
+                                      "src": "2039:5:248",
                                       "typeDescriptions": {
-                                        "typeIdentifier": "t_struct$_RewardsCycle_$68818_memory_ptr",
+                                        "typeIdentifier": "t_struct$_RewardsCycle_$69295_memory_ptr",
                                         "typeString": "struct FlywheelDynamicRewards.RewardsCycle memory"
                                       }
                                     },
-                                    "id": 68906,
+                                    "id": 69383,
                                     "isConstant": false,
                                     "isLValue": true,
                                     "isPure": false,
                                     "lValueRequested": false,
                                     "memberName": "start",
                                     "nodeType": "MemberAccess",
-                                    "referencedDeclaration": 68813,
-                                    "src": "2039:11:247",
+                                    "referencedDeclaration": 69290,
+                                    "src": "2039:11:248",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_uint32",
                                       "typeString": "uint32"
                                     }
                                   },
-                                  "src": "2027:23:247",
+                                  "src": "2027:23:248",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint32",
                                     "typeString": "uint32"
                                   }
                                 }
                               ],
-                              "id": 68908,
+                              "id": 69385,
                               "isConstant": false,
                               "isInlineArray": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "nodeType": "TupleExpression",
-                              "src": "2026:25:247",
+                              "src": "2026:25:248",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint32",
                                 "typeString": "uint32"
                               }
                             },
-                            "src": "1987:64:247",
+                            "src": "1987:64:248",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint192",
                               "typeString": "uint192"
                             }
                           },
-                          "src": "1978:73:247",
+                          "src": "1978:73:248",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 68911,
+                        "id": 69388,
                         "nodeType": "ExpressionStatement",
-                        "src": "1978:73:247"
+                        "src": "1978:73:248"
                       },
                       {
                         "expression": {
@@ -1532,18 +1532,18 @@
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               },
-                              "id": 68916,
+                              "id": 69393,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "leftExpression": {
-                                "id": 68913,
+                                "id": 69390,
                                 "name": "amount",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 68852,
-                                "src": "2072:6:247",
+                                "referencedDeclaration": 69329,
+                                "src": "2072:6:248",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
@@ -1553,32 +1553,32 @@
                               "operator": "<=",
                               "rightExpression": {
                                 "expression": {
-                                  "id": 68914,
+                                  "id": 69391,
                                   "name": "cycle",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 68856,
-                                  "src": "2082:5:247",
+                                  "referencedDeclaration": 69333,
+                                  "src": "2082:5:248",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_struct$_RewardsCycle_$68818_memory_ptr",
+                                    "typeIdentifier": "t_struct$_RewardsCycle_$69295_memory_ptr",
                                     "typeString": "struct FlywheelDynamicRewards.RewardsCycle memory"
                                   }
                                 },
-                                "id": 68915,
+                                "id": 69392,
                                 "isConstant": false,
                                 "isLValue": true,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "reward",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 68817,
-                                "src": "2082:12:247",
+                                "referencedDeclaration": 69294,
+                                "src": "2082:12:248",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint192",
                                   "typeString": "uint192"
                                 }
                               },
-                              "src": "2072:22:247",
+                              "src": "2072:22:248",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bool",
                                 "typeString": "bool"
@@ -1592,18 +1592,18 @@
                                 "typeString": "bool"
                               }
                             ],
-                            "id": 68912,
+                            "id": 69389,
                             "name": "assert",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": -3,
-                            "src": "2065:6:247",
+                            "src": "2065:6:248",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                               "typeString": "function (bool) pure"
                             }
                           },
-                          "id": 68917,
+                          "id": 69394,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -1611,16 +1611,16 @@
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "2065:30:247",
+                          "src": "2065:30:248",
                           "tryCall": false,
                           "typeDescriptions": {
                             "typeIdentifier": "t_tuple$__$",
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 68918,
+                        "id": 69395,
                         "nodeType": "ExpressionStatement",
-                        "src": "2065:30:247"
+                        "src": "2065:30:248"
                       }
                     ]
                   }
@@ -1631,18 +1631,18 @@
                       "typeIdentifier": "t_uint32",
                       "typeString": "uint32"
                     },
-                    "id": 68924,
+                    "id": 69401,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
-                      "id": 68921,
+                      "id": 69398,
                       "name": "timestamp",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 68862,
-                      "src": "2268:9:247",
+                      "referencedDeclaration": 69339,
+                      "src": "2268:9:248",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
                         "typeString": "uint32"
@@ -1652,59 +1652,59 @@
                     "operator": ">=",
                     "rightExpression": {
                       "expression": {
-                        "id": 68922,
+                        "id": 69399,
                         "name": "cycle",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 68856,
-                        "src": "2281:5:247",
+                        "referencedDeclaration": 69333,
+                        "src": "2281:5:248",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_RewardsCycle_$68818_memory_ptr",
+                          "typeIdentifier": "t_struct$_RewardsCycle_$69295_memory_ptr",
                           "typeString": "struct FlywheelDynamicRewards.RewardsCycle memory"
                         }
                       },
-                      "id": 68923,
+                      "id": 69400,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "end",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 68815,
-                      "src": "2281:9:247",
+                      "referencedDeclaration": 69292,
+                      "src": "2281:9:248",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
                         "typeString": "uint32"
                       }
                     },
-                    "src": "2268:22:247",
+                    "src": "2268:22:248",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "id": 68960,
+                  "id": 69437,
                   "nodeType": "IfStatement",
-                  "src": "2264:398:247",
+                  "src": "2264:398:248",
                   "trueBody": {
-                    "id": 68959,
+                    "id": 69436,
                     "nodeType": "Block",
-                    "src": "2292:370:247",
+                    "src": "2292:370:248",
                     "statements": [
                       {
                         "assignments": [
-                          68926
+                          69403
                         ],
                         "declarations": [
                           {
                             "constant": false,
-                            "id": 68926,
+                            "id": 69403,
                             "mutability": "mutable",
                             "name": "end",
-                            "nameLocation": "2313:3:247",
+                            "nameLocation": "2313:3:248",
                             "nodeType": "VariableDeclaration",
-                            "scope": 68959,
-                            "src": "2306:10:247",
+                            "scope": 69436,
+                            "src": "2306:10:248",
                             "stateVariable": false,
                             "storageLocation": "default",
                             "typeDescriptions": {
@@ -1712,10 +1712,10 @@
                               "typeString": "uint32"
                             },
                             "typeName": {
-                              "id": 68925,
+                              "id": 69402,
                               "name": "uint32",
                               "nodeType": "ElementaryTypeName",
-                              "src": "2306:6:247",
+                              "src": "2306:6:248",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint32",
                                 "typeString": "uint32"
@@ -1724,13 +1724,13 @@
                             "visibility": "internal"
                           }
                         ],
-                        "id": 68936,
+                        "id": 69413,
                         "initialValue": {
                           "commonType": {
                             "typeIdentifier": "t_uint32",
                             "typeString": "uint32"
                           },
-                          "id": 68935,
+                          "id": 69412,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -1742,7 +1742,7 @@
                                   "typeIdentifier": "t_uint32",
                                   "typeString": "uint32"
                                 },
-                                "id": 68932,
+                                "id": 69409,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
@@ -1754,18 +1754,18 @@
                                         "typeIdentifier": "t_uint32",
                                         "typeString": "uint32"
                                       },
-                                      "id": 68929,
+                                      "id": 69406,
                                       "isConstant": false,
                                       "isLValue": false,
                                       "isPure": false,
                                       "lValueRequested": false,
                                       "leftExpression": {
-                                        "id": 68927,
+                                        "id": 69404,
                                         "name": "timestamp",
                                         "nodeType": "Identifier",
                                         "overloadedDeclarations": [],
-                                        "referencedDeclaration": 68862,
-                                        "src": "2321:9:247",
+                                        "referencedDeclaration": 69339,
+                                        "src": "2321:9:248",
                                         "typeDescriptions": {
                                           "typeIdentifier": "t_uint32",
                                           "typeString": "uint32"
@@ -1774,32 +1774,32 @@
                                       "nodeType": "BinaryOperation",
                                       "operator": "+",
                                       "rightExpression": {
-                                        "id": 68928,
+                                        "id": 69405,
                                         "name": "rewardsCycleLength",
                                         "nodeType": "Identifier",
                                         "overloadedDeclarations": [],
-                                        "referencedDeclaration": 68811,
-                                        "src": "2333:18:247",
+                                        "referencedDeclaration": 69288,
+                                        "src": "2333:18:248",
                                         "typeDescriptions": {
                                           "typeIdentifier": "t_uint32",
                                           "typeString": "uint32"
                                         }
                                       },
-                                      "src": "2321:30:247",
+                                      "src": "2321:30:248",
                                       "typeDescriptions": {
                                         "typeIdentifier": "t_uint32",
                                         "typeString": "uint32"
                                       }
                                     }
                                   ],
-                                  "id": 68930,
+                                  "id": 69407,
                                   "isConstant": false,
                                   "isInlineArray": false,
                                   "isLValue": false,
                                   "isPure": false,
                                   "lValueRequested": false,
                                   "nodeType": "TupleExpression",
-                                  "src": "2320:32:247",
+                                  "src": "2320:32:248",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint32",
                                     "typeString": "uint32"
@@ -1808,32 +1808,32 @@
                                 "nodeType": "BinaryOperation",
                                 "operator": "/",
                                 "rightExpression": {
-                                  "id": 68931,
+                                  "id": 69408,
                                   "name": "rewardsCycleLength",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 68811,
-                                  "src": "2355:18:247",
+                                  "referencedDeclaration": 69288,
+                                  "src": "2355:18:248",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint32",
                                     "typeString": "uint32"
                                   }
                                 },
-                                "src": "2320:53:247",
+                                "src": "2320:53:248",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint32",
                                   "typeString": "uint32"
                                 }
                               }
                             ],
-                            "id": 68933,
+                            "id": 69410,
                             "isConstant": false,
                             "isInlineArray": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "TupleExpression",
-                            "src": "2319:55:247",
+                            "src": "2319:55:248",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint32",
                               "typeString": "uint32"
@@ -1842,40 +1842,40 @@
                           "nodeType": "BinaryOperation",
                           "operator": "*",
                           "rightExpression": {
-                            "id": 68934,
+                            "id": 69411,
                             "name": "rewardsCycleLength",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 68811,
-                            "src": "2377:18:247",
+                            "referencedDeclaration": 69288,
+                            "src": "2377:18:248",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint32",
                               "typeString": "uint32"
                             }
                           },
-                          "src": "2319:76:247",
+                          "src": "2319:76:248",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint32",
                             "typeString": "uint32"
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "2306:89:247"
+                        "src": "2306:89:248"
                       },
                       {
                         "assignments": [
-                          68938
+                          69415
                         ],
                         "declarations": [
                           {
                             "constant": false,
-                            "id": 68938,
+                            "id": 69415,
                             "mutability": "mutable",
                             "name": "rewards",
-                            "nameLocation": "2417:7:247",
+                            "nameLocation": "2417:7:248",
                             "nodeType": "VariableDeclaration",
-                            "scope": 68959,
-                            "src": "2409:15:247",
+                            "scope": 69436,
+                            "src": "2409:15:248",
                             "stateVariable": false,
                             "storageLocation": "default",
                             "typeDescriptions": {
@@ -1883,10 +1883,10 @@
                               "typeString": "uint192"
                             },
                             "typeName": {
-                              "id": 68937,
+                              "id": 69414,
                               "name": "uint192",
                               "nodeType": "ElementaryTypeName",
-                              "src": "2409:7:247",
+                              "src": "2409:7:248",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint192",
                                 "typeString": "uint192"
@@ -1895,18 +1895,18 @@
                             "visibility": "internal"
                           }
                         ],
-                        "id": 68942,
+                        "id": 69419,
                         "initialValue": {
                           "arguments": [
                             {
-                              "id": 68940,
+                              "id": 69417,
                               "name": "strategy",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 68844,
-                              "src": "2447:8:247",
+                              "referencedDeclaration": 69321,
+                              "src": "2447:8:248",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_ERC20_$91482",
+                                "typeIdentifier": "t_contract$_ERC20_$92169",
                                 "typeString": "contract ERC20"
                               }
                             }
@@ -1914,22 +1914,22 @@
                           "expression": {
                             "argumentTypes": [
                               {
-                                "typeIdentifier": "t_contract$_ERC20_$91482",
+                                "typeIdentifier": "t_contract$_ERC20_$92169",
                                 "typeString": "contract ERC20"
                               }
                             ],
-                            "id": 68939,
+                            "id": 69416,
                             "name": "getNextCycleRewards",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 68970,
-                            "src": "2427:19:247",
+                            "referencedDeclaration": 69447,
+                            "src": "2427:19:248",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_function_internal_nonpayable$_t_contract$_ERC20_$91482_$returns$_t_uint192_$",
+                              "typeIdentifier": "t_function_internal_nonpayable$_t_contract$_ERC20_$92169_$returns$_t_uint192_$",
                               "typeString": "function (contract ERC20) returns (uint192)"
                             }
                           },
-                          "id": 68941,
+                          "id": 69418,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -1937,7 +1937,7 @@
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "2427:29:247",
+                          "src": "2427:29:248",
                           "tryCall": false,
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint192",
@@ -1945,38 +1945,38 @@
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "2409:47:247"
+                        "src": "2409:47:248"
                       },
                       {
                         "expression": {
-                          "id": 68951,
+                          "id": 69428,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftHandSide": {
                             "baseExpression": {
-                              "id": 68943,
+                              "id": 69420,
                               "name": "rewardsCycle",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 68824,
-                              "src": "2507:12:247",
+                              "referencedDeclaration": 69301,
+                              "src": "2507:12:248",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_mapping$_t_contract$_ERC20_$91482_$_t_struct$_RewardsCycle_$68818_storage_$",
+                                "typeIdentifier": "t_mapping$_t_contract$_ERC20_$92169_$_t_struct$_RewardsCycle_$69295_storage_$",
                                 "typeString": "mapping(contract ERC20 => struct FlywheelDynamicRewards.RewardsCycle storage ref)"
                               }
                             },
-                            "id": 68945,
+                            "id": 69422,
                             "indexExpression": {
-                              "id": 68944,
+                              "id": 69421,
                               "name": "strategy",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 68844,
-                              "src": "2520:8:247",
+                              "referencedDeclaration": 69321,
+                              "src": "2520:8:248",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_ERC20_$91482",
+                                "typeIdentifier": "t_contract$_ERC20_$92169",
                                 "typeString": "contract ERC20"
                               }
                             },
@@ -1985,9 +1985,9 @@
                             "isPure": false,
                             "lValueRequested": true,
                             "nodeType": "IndexAccess",
-                            "src": "2507:22:247",
+                            "src": "2507:22:248",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_RewardsCycle_$68818_storage",
+                              "typeIdentifier": "t_struct$_RewardsCycle_$69295_storage",
                               "typeString": "struct FlywheelDynamicRewards.RewardsCycle storage ref"
                             }
                           },
@@ -1996,36 +1996,36 @@
                           "rightHandSide": {
                             "arguments": [
                               {
-                                "id": 68947,
+                                "id": 69424,
                                 "name": "timestamp",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 68862,
-                                "src": "2553:9:247",
+                                "referencedDeclaration": 69339,
+                                "src": "2553:9:248",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint32",
                                   "typeString": "uint32"
                                 }
                               },
                               {
-                                "id": 68948,
+                                "id": 69425,
                                 "name": "end",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 68926,
-                                "src": "2569:3:247",
+                                "referencedDeclaration": 69403,
+                                "src": "2569:3:248",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint32",
                                   "typeString": "uint32"
                                 }
                               },
                               {
-                                "id": 68949,
+                                "id": 69426,
                                 "name": "rewards",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 68938,
-                                "src": "2582:7:247",
+                                "referencedDeclaration": 69415,
+                                "src": "2582:7:248",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint192",
                                   "typeString": "uint192"
@@ -2047,18 +2047,18 @@
                                   "typeString": "uint192"
                                 }
                               ],
-                              "id": 68946,
+                              "id": 69423,
                               "name": "RewardsCycle",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 68818,
-                              "src": "2532:12:247",
+                              "referencedDeclaration": 69295,
+                              "src": "2532:12:248",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_type$_t_struct$_RewardsCycle_$68818_storage_ptr_$",
+                                "typeIdentifier": "t_type$_t_struct$_RewardsCycle_$69295_storage_ptr_$",
                                 "typeString": "type(struct FlywheelDynamicRewards.RewardsCycle storage pointer)"
                               }
                             },
-                            "id": 68950,
+                            "id": 69427,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -2070,57 +2070,57 @@
                               "reward"
                             ],
                             "nodeType": "FunctionCall",
-                            "src": "2532:59:247",
+                            "src": "2532:59:248",
                             "tryCall": false,
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_RewardsCycle_$68818_memory_ptr",
+                              "typeIdentifier": "t_struct$_RewardsCycle_$69295_memory_ptr",
                               "typeString": "struct FlywheelDynamicRewards.RewardsCycle memory"
                             }
                           },
-                          "src": "2507:84:247",
+                          "src": "2507:84:248",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_RewardsCycle_$68818_storage",
+                            "typeIdentifier": "t_struct$_RewardsCycle_$69295_storage",
                             "typeString": "struct FlywheelDynamicRewards.RewardsCycle storage ref"
                           }
                         },
-                        "id": 68952,
+                        "id": 69429,
                         "nodeType": "ExpressionStatement",
-                        "src": "2507:84:247"
+                        "src": "2507:84:248"
                       },
                       {
                         "eventCall": {
                           "arguments": [
                             {
-                              "id": 68954,
+                              "id": 69431,
                               "name": "timestamp",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 68862,
-                              "src": "2627:9:247",
+                              "referencedDeclaration": 69339,
+                              "src": "2627:9:248",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint32",
                                 "typeString": "uint32"
                               }
                             },
                             {
-                              "id": 68955,
+                              "id": 69432,
                               "name": "end",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 68926,
-                              "src": "2638:3:247",
+                              "referencedDeclaration": 69403,
+                              "src": "2638:3:248",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint32",
                                 "typeString": "uint32"
                               }
                             },
                             {
-                              "id": 68956,
+                              "id": 69433,
                               "name": "rewards",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 68938,
-                              "src": "2643:7:247",
+                              "referencedDeclaration": 69415,
+                              "src": "2643:7:248",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint192",
                                 "typeString": "uint192"
@@ -2142,18 +2142,18 @@
                                 "typeString": "uint192"
                               }
                             ],
-                            "id": 68953,
+                            "id": 69430,
                             "name": "NewRewardsCycle",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 68808,
-                            "src": "2611:15:247",
+                            "referencedDeclaration": 69285,
+                            "src": "2611:15:248",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_event_nonpayable$_t_uint32_$_t_uint32_$_t_uint192_$returns$__$",
                               "typeString": "function (uint32,uint32,uint192)"
                             }
                           },
-                          "id": 68957,
+                          "id": 69434,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -2161,16 +2161,16 @@
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "2611:40:247",
+                          "src": "2611:40:248",
                           "tryCall": false,
                           "typeDescriptions": {
                             "typeIdentifier": "t_tuple$__$",
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 68958,
+                        "id": 69435,
                         "nodeType": "EmitStatement",
-                        "src": "2606:45:247"
+                        "src": "2606:45:248"
                       }
                     ]
                   }
@@ -2178,9 +2178,9 @@
               ]
             },
             "documentation": {
-              "id": 68841,
+              "id": 69318,
               "nodeType": "StructuredDocumentation",
-              "src": "1271:201:247",
+              "src": "1271:201:248",
               "text": "@notice calculate and transfer accrued rewards to flywheel core\n@param strategy the strategy to accrue rewards for\n@return amount the amount of tokens accrued and transferred"
             },
             "functionSelector": "b334db7b",
@@ -2188,60 +2188,60 @@
             "kind": "function",
             "modifiers": [
               {
-                "id": 68850,
+                "id": 69327,
                 "kind": "modifierInvocation",
                 "modifierName": {
-                  "id": 68849,
+                  "id": 69326,
                   "name": "onlyFlywheel",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 68784,
-                  "src": "1591:12:247"
+                  "referencedDeclaration": 69261,
+                  "src": "1591:12:248"
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "1591:12:247"
+                "src": "1591:12:248"
               }
             ],
             "name": "getAccruedRewards",
-            "nameLocation": "1486:17:247",
+            "nameLocation": "1486:17:248",
             "overrides": {
-              "id": 68848,
+              "id": 69325,
               "nodeType": "OverrideSpecifier",
               "overrides": [],
-              "src": "1574:8:247"
+              "src": "1574:8:248"
             },
             "parameters": {
-              "id": 68847,
+              "id": 69324,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 68844,
+                  "id": 69321,
                   "mutability": "mutable",
                   "name": "strategy",
-                  "nameLocation": "1510:8:247",
+                  "nameLocation": "1510:8:248",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68962,
-                  "src": "1504:14:247",
+                  "scope": 69439,
+                  "src": "1504:14:248",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ERC20_$91482",
+                    "typeIdentifier": "t_contract$_ERC20_$92169",
                     "typeString": "contract ERC20"
                   },
                   "typeName": {
-                    "id": 68843,
+                    "id": 69320,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 68842,
+                      "id": 69319,
                       "name": "ERC20",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 91482,
-                      "src": "1504:5:247"
+                      "referencedDeclaration": 92169,
+                      "src": "1504:5:248"
                     },
-                    "referencedDeclaration": 91482,
-                    "src": "1504:5:247",
+                    "referencedDeclaration": 92169,
+                    "src": "1504:5:248",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ERC20_$91482",
+                      "typeIdentifier": "t_contract$_ERC20_$92169",
                       "typeString": "contract ERC20"
                     }
                   },
@@ -2249,13 +2249,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 68846,
+                  "id": 69323,
                   "mutability": "mutable",
                   "name": "lastUpdatedTimestamp",
-                  "nameLocation": "1527:20:247",
+                  "nameLocation": "1527:20:248",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68962,
-                  "src": "1520:27:247",
+                  "scope": 69439,
+                  "src": "1520:27:248",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2263,10 +2263,10 @@
                     "typeString": "uint32"
                   },
                   "typeName": {
-                    "id": 68845,
+                    "id": 69322,
                     "name": "uint32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1520:6:247",
+                    "src": "1520:6:248",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint32",
                       "typeString": "uint32"
@@ -2275,21 +2275,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1503:45:247"
+              "src": "1503:45:248"
             },
             "returnParameters": {
-              "id": 68853,
+              "id": 69330,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 68852,
+                  "id": 69329,
                   "mutability": "mutable",
                   "name": "amount",
-                  "nameLocation": "1629:6:247",
+                  "nameLocation": "1629:6:248",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68962,
-                  "src": "1621:14:247",
+                  "scope": 69439,
+                  "src": "1621:14:248",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2297,10 +2297,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 68851,
+                    "id": 69328,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1621:7:247",
+                    "src": "1621:7:248",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2309,76 +2309,76 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1620:16:247"
+              "src": "1620:16:248"
             },
-            "scope": 68971,
+            "scope": 69448,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 68970,
+            "id": 69447,
             "nodeType": "FunctionDefinition",
-            "src": "2674:80:247",
+            "src": "2674:80:248",
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getNextCycleRewards",
-            "nameLocation": "2683:19:247",
+            "nameLocation": "2683:19:248",
             "parameters": {
-              "id": 68966,
+              "id": 69443,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 68965,
+                  "id": 69442,
                   "mutability": "mutable",
                   "name": "strategy",
-                  "nameLocation": "2709:8:247",
+                  "nameLocation": "2709:8:248",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68970,
-                  "src": "2703:14:247",
+                  "scope": 69447,
+                  "src": "2703:14:248",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ERC20_$91482",
+                    "typeIdentifier": "t_contract$_ERC20_$92169",
                     "typeString": "contract ERC20"
                   },
                   "typeName": {
-                    "id": 68964,
+                    "id": 69441,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 68963,
+                      "id": 69440,
                       "name": "ERC20",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 91482,
-                      "src": "2703:5:247"
+                      "referencedDeclaration": 92169,
+                      "src": "2703:5:248"
                     },
-                    "referencedDeclaration": 91482,
-                    "src": "2703:5:247",
+                    "referencedDeclaration": 92169,
+                    "src": "2703:5:248",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ERC20_$91482",
+                      "typeIdentifier": "t_contract$_ERC20_$92169",
                       "typeString": "contract ERC20"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "2702:16:247"
+              "src": "2702:16:248"
             },
             "returnParameters": {
-              "id": 68969,
+              "id": 69446,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 68968,
+                  "id": 69445,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 68970,
-                  "src": "2745:7:247",
+                  "scope": 69447,
+                  "src": "2745:7:248",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2386,10 +2386,10 @@
                     "typeString": "uint192"
                   },
                   "typeName": {
-                    "id": 68967,
+                    "id": 69444,
                     "name": "uint192",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2745:7:247",
+                    "src": "2745:7:248",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint192",
                       "typeString": "uint192"
@@ -2398,9 +2398,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2744:9:247"
+              "src": "2744:9:248"
             },
-            "scope": 68971,
+            "scope": 69448,
             "stateMutability": "nonpayable",
             "virtual": true,
             "visibility": "internal"
@@ -2410,37 +2410,37 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 68792,
+              "id": 69269,
               "name": "BaseFlywheelRewards",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 68785,
-              "src": "677:19:247"
+              "referencedDeclaration": 69262,
+              "src": "677:19:248"
             },
-            "id": 68793,
+            "id": 69270,
             "nodeType": "InheritanceSpecifier",
-            "src": "677:19:247"
+            "src": "677:19:248"
           }
         ],
         "canonicalName": "FlywheelDynamicRewards",
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 68791,
+          "id": 69268,
           "nodeType": "StructuredDocumentation",
-          "src": "163:469:247",
+          "src": "163:469:248",
           "text": "@title Flywheel Dynamic Reward Stream\n@notice Determines rewards based on a dynamic reward stream.\nRewards are transferred linearly over a \"rewards cycle\" to prevent gaming the reward distribution. \nThe reward source can be arbitrary logic, but most common is to \"pass through\" rewards from some other source.\nThe getNextCycleRewards() hook should also transfer the next cycle's rewards to this contract to ensure proper accounting."
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          68971,
-          68785,
-          68704
+          69448,
+          69262,
+          69181
         ],
         "name": "FlywheelDynamicRewards",
-        "nameLocation": "651:22:247",
-        "scope": 68972,
+        "nameLocation": "651:22:248",
+        "scope": 69449,
         "usedErrors": [
-          68723
+          69200
         ]
       }
     ],
