@@ -18,11 +18,7 @@ assignees: ''
     - [ ]  Wrapped Native
     - [ ]  Other?
 - [ ]  Faucet (Acquire some native tokens for deployments)
-    - [ ]  URL for Mainnet Faucet
+    - [ ]  URL for Mainnet Faucet: 
+
+    - [ ]  URL for Testnet: 
     
-    | URL |
-    | --- |
-    - [ ]  URL for Testnet
-    
-    | URL |
-    | --- |
