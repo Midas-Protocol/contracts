@@ -3,6 +3,7 @@ pragma solidity >=0.8.0;
 
 import "./helpers/WithPool.sol";
 import "./config/BaseTest.t.sol";
+import "forge-std/Test.sol";
 
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {FuseFlywheelDynamicRewards} from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
@@ -15,6 +16,8 @@ interface MockXBomb {
 }
 
 contract BombE2eTest is WithPool, BaseTest {
+    using stdStorage for StdStorage;
+
     constructor()
         WithPool(
             MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
@@ -77,8 +80,30 @@ contract BombE2eTest is WithPool, BaseTest {
             0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c
         );
         emit log_address(address(oracle));
-        uint256 price = oracle.getUnderlyingPrice(ICToken(address(cToken)));
+        uint256 price = priceOracle.price(address(underlyingToken));
         emit log_uint(price);
+        UniswapTwapPriceOracleV2Root twapOracleRoot = UniswapTwapPriceOracleV2Root(
+                0x315b23e85E1ad004A466f3C89544794Ef3392179
+            );
+
+        twapOracleRoot.update(0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6);
+        uint256 updatedPrice = priceOracle.price(address(underlyingToken));
+        uint256 price0 = IUniswapV2Pair(
+            0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6
+        ).price0CumulativeLast();
+        uint256 price1 = IUniswapV2Pair(
+            0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6
+        ).price1CumulativeLast();
+        // uint256 slot = stdstore
+        //     .target(0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6)
+        //     .sig("price0CumulativeLast()")
+        //     .find();
+        // emit log_uint(slot);
+        // emit log_uint(price0);
+        // emit log_uint(price1);
+
+        // uint256 price = oracle.getUnderlyingPrice(ICToken(address(cToken)));
+        // emit log_uint(updatedPrice);
     }
 
     function testDeployCErc20PluginDelegate()
@@ -137,6 +162,7 @@ contract BombE2eTest is WithPool, BaseTest {
         public
         shouldRun(forChains(BSC_MAINNET))
     {
+        MockERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
         FuseFlywheelDynamicRewards rewards;
         FuseFlywheelCore flywheel = new FuseFlywheelCore(
             underlyingToken,
@@ -175,7 +201,20 @@ contract BombE2eTest is WithPool, BaseTest {
         );
         assertEq(address(cToken.plugin()), address(mockERC4626Dynamic));
         assertEq(
+            underlyingToken.allowance(
+                address(cToken),
+                address(mockERC4626Dynamic)
+            ),
+            type(uint256).max
+        );
+        assertEq(
             underlyingToken.allowance(address(cToken), address(flywheel)),
+            0
+        );
+
+        cToken.approve(address(rewardToken), address(flywheel));
+        assertEq(
+            rewardToken.allowance(address(cToken), address(flywheel)),
             type(uint256).max
         );
 
