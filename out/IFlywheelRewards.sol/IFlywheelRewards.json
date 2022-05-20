@@ -63,23 +63,23 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/flywheel-v2/src/interfaces/IFlywheelRewards.sol",
-    "id": 69182,
+    "id": 69167,
     "exportedSymbols": {
       "ERC20": [
-        92169
+        91926
       ],
       "FlywheelCore": [
-        69122
+        69107
       ],
       "IFlywheelRewards": [
-        69181
+        69166
       ]
     },
     "nodeType": "SourceUnit",
     "src": "42:1824:246",
     "nodes": [
       {
-        "id": 69150,
+        "id": 69135,
         "nodeType": "PragmaDirective",
         "src": "42:23:246",
         "literals": [
@@ -89,18 +89,18 @@
         ]
       },
       {
-        "id": 69152,
+        "id": 69137,
         "nodeType": "ImportDirective",
         "src": "67:47:246",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/tokens/ERC20.sol",
         "file": "solmate/tokens/ERC20.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 69182,
-        "sourceUnit": 92170,
+        "scope": 69167,
+        "sourceUnit": 91927,
         "symbolAliases": [
           {
             "foreign": {
-              "id": 69151,
+              "id": 69136,
               "name": "ERC20",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
@@ -113,18 +113,18 @@
         "unitAlias": ""
       },
       {
-        "id": 69154,
+        "id": 69139,
         "nodeType": "ImportDirective",
         "src": "115:49:246",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/flywheel-v2/src/FlywheelCore.sol",
         "file": "../FlywheelCore.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 69182,
-        "sourceUnit": 69123,
+        "scope": 69167,
+        "sourceUnit": 69108,
         "symbolAliases": [
           {
             "foreign": {
-              "id": 69153,
+              "id": 69138,
               "name": "FlywheelCore",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
@@ -137,16 +137,16 @@
         "unitAlias": ""
       },
       {
-        "id": 69181,
+        "id": 69166,
         "nodeType": "ContractDefinition",
         "src": "1171:694:246",
         "nodes": [
           {
-            "id": 69166,
+            "id": 69151,
             "nodeType": "FunctionDefinition",
             "src": "1514:107:246",
             "documentation": {
-              "id": 69156,
+              "id": 69141,
               "nodeType": "StructuredDocumentation",
               "src": "1204:305:246",
               "text": "@notice calculate the rewards amount accrued to a strategy since the last update.\n@param strategy the strategy to accrue rewards for.\n@param lastUpdatedTimestamp the last time rewards were accrued for the strategy.\n@return rewards the amount of rewards accrued to the market"
@@ -158,38 +158,38 @@
             "name": "getAccruedRewards",
             "nameLocation": "1523:17:246",
             "parameters": {
-              "id": 69162,
+              "id": 69147,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 69159,
+                  "id": 69144,
                   "mutability": "mutable",
                   "name": "strategy",
                   "nameLocation": "1547:8:246",
                   "nodeType": "VariableDeclaration",
-                  "scope": 69166,
+                  "scope": 69151,
                   "src": "1541:14:246",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ERC20_$92169",
+                    "typeIdentifier": "t_contract$_ERC20_$91926",
                     "typeString": "contract ERC20"
                   },
                   "typeName": {
-                    "id": 69158,
+                    "id": 69143,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 69157,
+                      "id": 69142,
                       "name": "ERC20",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 92169,
+                      "referencedDeclaration": 91926,
                       "src": "1541:5:246"
                     },
-                    "referencedDeclaration": 92169,
+                    "referencedDeclaration": 91926,
                     "src": "1541:5:246",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ERC20_$92169",
+                      "typeIdentifier": "t_contract$_ERC20_$91926",
                       "typeString": "contract ERC20"
                     }
                   },
@@ -197,12 +197,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 69161,
+                  "id": 69146,
                   "mutability": "mutable",
                   "name": "lastUpdatedTimestamp",
                   "nameLocation": "1564:20:246",
                   "nodeType": "VariableDeclaration",
-                  "scope": 69166,
+                  "scope": 69151,
                   "src": "1557:27:246",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -211,7 +211,7 @@
                     "typeString": "uint32"
                   },
                   "typeName": {
-                    "id": 69160,
+                    "id": 69145,
                     "name": "uint32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1557:6:246",
@@ -226,17 +226,17 @@
               "src": "1540:45:246"
             },
             "returnParameters": {
-              "id": 69165,
+              "id": 69150,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 69164,
+                  "id": 69149,
                   "mutability": "mutable",
                   "name": "rewards",
                   "nameLocation": "1612:7:246",
                   "nodeType": "VariableDeclaration",
-                  "scope": 69166,
+                  "scope": 69151,
                   "src": "1604:15:246",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -245,7 +245,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 69163,
+                    "id": 69148,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1604:7:246",
@@ -259,17 +259,17 @@
               ],
               "src": "1603:17:246"
             },
-            "scope": 69181,
+            "scope": 69166,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 69173,
+            "id": 69158,
             "nodeType": "FunctionDefinition",
             "src": "1676:57:246",
             "documentation": {
-              "id": 69167,
+              "id": 69152,
               "nodeType": "StructuredDocumentation",
               "src": "1627:44:246",
               "text": "@notice return the flywheel core address"
@@ -281,44 +281,44 @@
             "name": "flywheel",
             "nameLocation": "1685:8:246",
             "parameters": {
-              "id": 69168,
+              "id": 69153,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1693:2:246"
             },
             "returnParameters": {
-              "id": 69172,
+              "id": 69157,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 69171,
+                  "id": 69156,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 69173,
+                  "scope": 69158,
                   "src": "1719:12:246",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_FlywheelCore_$69122",
+                    "typeIdentifier": "t_contract$_FlywheelCore_$69107",
                     "typeString": "contract FlywheelCore"
                   },
                   "typeName": {
-                    "id": 69170,
+                    "id": 69155,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 69169,
+                      "id": 69154,
                       "name": "FlywheelCore",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 69122,
+                      "referencedDeclaration": 69107,
                       "src": "1719:12:246"
                     },
-                    "referencedDeclaration": 69122,
+                    "referencedDeclaration": 69107,
                     "src": "1719:12:246",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_FlywheelCore_$69122",
+                      "typeIdentifier": "t_contract$_FlywheelCore_$69107",
                       "typeString": "contract FlywheelCore"
                     }
                   },
@@ -327,17 +327,17 @@
               ],
               "src": "1718:14:246"
             },
-            "scope": 69181,
+            "scope": 69166,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 69180,
+            "id": 69165,
             "nodeType": "FunctionDefinition",
             "src": "1810:53:246",
             "documentation": {
-              "id": 69174,
+              "id": 69159,
               "nodeType": "StructuredDocumentation",
               "src": "1739:66:246",
               "text": "@notice return the reward token associated with flywheel core."
@@ -349,44 +349,44 @@
             "name": "rewardToken",
             "nameLocation": "1819:11:246",
             "parameters": {
-              "id": 69175,
+              "id": 69160,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1830:2:246"
             },
             "returnParameters": {
-              "id": 69179,
+              "id": 69164,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 69178,
+                  "id": 69163,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 69180,
+                  "scope": 69165,
                   "src": "1856:5:246",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ERC20_$92169",
+                    "typeIdentifier": "t_contract$_ERC20_$91926",
                     "typeString": "contract ERC20"
                   },
                   "typeName": {
-                    "id": 69177,
+                    "id": 69162,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 69176,
+                      "id": 69161,
                       "name": "ERC20",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 92169,
+                      "referencedDeclaration": 91926,
                       "src": "1856:5:246"
                     },
-                    "referencedDeclaration": 92169,
+                    "referencedDeclaration": 91926,
                     "src": "1856:5:246",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ERC20_$92169",
+                      "typeIdentifier": "t_contract$_ERC20_$91926",
                       "typeString": "contract ERC20"
                     }
                   },
@@ -395,7 +395,7 @@
               ],
               "src": "1855:7:246"
             },
-            "scope": 69181,
+            "scope": 69166,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -407,18 +407,18 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 69155,
+          "id": 69140,
           "nodeType": "StructuredDocumentation",
           "src": "166:1004:246",
           "text": "@title Rewards Module for Flywheel\n@notice Flywheel is a general framework for managing token incentives.\nIt takes reward streams to various *strategies* such as staking LP tokens and divides them among *users* of those strategies.\nThe Rewards module is responsible for:\n determining the ongoing reward amounts to entire strategies (core handles the logic for dividing among users)\n actually holding rewards that are yet to be claimed\nThe reward stream can follow arbitrary logic as long as the amount of rewards passed to flywheel core has been sent to this contract.\nDifferent module strategies include:\n a static reward rate per second\n a decaying reward rate\n a dynamic just-in-time reward stream\n liquid governance reward delegation (Curve Gauge style)\nSECURITY NOTE: The rewards strategy should be smooth and continuous, to prevent gaming the reward distribution by frontrunning."
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          69181
+          69166
         ],
         "name": "IFlywheelRewards",
         "nameLocation": "1181:16:246",
-        "scope": 69182,
+        "scope": 69167,
         "usedErrors": []
       }
     ],

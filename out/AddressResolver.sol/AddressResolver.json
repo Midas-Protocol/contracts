@@ -37,17 +37,17 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/synthetix/AddressResolver.sol",
-    "id": 35713,
+    "id": 35703,
     "exportedSymbols": {
       "AddressResolver": [
-        35712
+        35702
       ]
     },
     "nodeType": "SourceUnit",
     "src": "32:159:108",
     "nodes": [
       {
-        "id": 35702,
+        "id": 35692,
         "nodeType": "PragmaDirective",
         "src": "32:24:108",
         "literals": [
@@ -58,12 +58,12 @@
         ]
       },
       {
-        "id": 35712,
+        "id": 35702,
         "nodeType": "ContractDefinition",
         "src": "58:132:108",
         "nodes": [
           {
-            "id": 35711,
+            "id": 35701,
             "nodeType": "FunctionDefinition",
             "src": "88:100:108",
             "functionSelector": "dacb2d01",
@@ -73,17 +73,17 @@
             "name": "requireAndGetAddress",
             "nameLocation": "97:20:108",
             "parameters": {
-              "id": 35707,
+              "id": 35697,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35704,
+                  "id": 35694,
                   "mutability": "mutable",
                   "name": "name",
                   "nameLocation": "126:4:108",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35711,
+                  "scope": 35701,
                   "src": "118:12:108",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -92,7 +92,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 35703,
+                    "id": 35693,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "118:7:108",
@@ -105,12 +105,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 35706,
+                  "id": 35696,
                   "mutability": "mutable",
                   "name": "reason",
                   "nameLocation": "148:6:108",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35711,
+                  "scope": 35701,
                   "src": "132:22:108",
                   "stateVariable": false,
                   "storageLocation": "calldata",
@@ -119,7 +119,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 35705,
+                    "id": 35695,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "132:6:108",
@@ -134,17 +134,17 @@
               "src": "117:38:108"
             },
             "returnParameters": {
-              "id": 35710,
+              "id": 35700,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35709,
+                  "id": 35699,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35711,
+                  "scope": 35701,
                   "src": "179:7:108",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -153,7 +153,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 35708,
+                    "id": 35698,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "179:7:108",
@@ -168,7 +168,7 @@
               ],
               "src": "178:9:108"
             },
-            "scope": 35712,
+            "scope": 35702,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -181,11 +181,11 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          35712
+          35702
         ],
         "name": "AddressResolver",
         "nameLocation": "68:15:108",
-        "scope": 35713,
+        "scope": 35703,
         "usedErrors": []
       }
     ],

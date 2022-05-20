@@ -68,29 +68,29 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/flywheel-v2/src/rewards/BaseFlywheelRewards.sol",
-    "id": 69263,
+    "id": 69248,
     "exportedSymbols": {
       "BaseFlywheelRewards": [
-        69262
+        69247
       ],
       "ERC20": [
-        92169
+        91926
       ],
       "FlywheelCore": [
-        69122
+        69107
       ],
       "IFlywheelRewards": [
-        69181
+        69166
       ],
       "SafeTransferLib": [
-        92552
+        92309
       ]
     },
     "nodeType": "SourceUnit",
     "src": "42:1204:247",
     "nodes": [
       {
-        "id": 69183,
+        "id": 69168,
         "nodeType": "PragmaDirective",
         "src": "42:23:247",
         "literals": [
@@ -100,18 +100,18 @@
         ]
       },
       {
-        "id": 69186,
+        "id": 69171,
         "nodeType": "ImportDirective",
         "src": "67:73:247",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/utils/SafeTransferLib.sol",
         "file": "solmate/utils/SafeTransferLib.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 69263,
-        "sourceUnit": 92553,
+        "scope": 69248,
+        "sourceUnit": 92310,
         "symbolAliases": [
           {
             "foreign": {
-              "id": 69184,
+              "id": 69169,
               "name": "SafeTransferLib",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
@@ -122,7 +122,7 @@
           },
           {
             "foreign": {
-              "id": 69185,
+              "id": 69170,
               "name": "ERC20",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
@@ -135,18 +135,18 @@
         "unitAlias": ""
       },
       {
-        "id": 69188,
+        "id": 69173,
         "nodeType": "ImportDirective",
         "src": "141:68:247",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/flywheel-v2/src/interfaces/IFlywheelRewards.sol",
         "file": "../interfaces/IFlywheelRewards.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 69263,
-        "sourceUnit": 69182,
+        "scope": 69248,
+        "sourceUnit": 69167,
         "symbolAliases": [
           {
             "foreign": {
-              "id": 69187,
+              "id": 69172,
               "name": "IFlywheelRewards",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
@@ -159,18 +159,18 @@
         "unitAlias": ""
       },
       {
-        "id": 69190,
+        "id": 69175,
         "nodeType": "ImportDirective",
         "src": "210:49:247",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/flywheel-v2/src/FlywheelCore.sol",
         "file": "../FlywheelCore.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 69263,
-        "sourceUnit": 69123,
+        "scope": 69248,
+        "sourceUnit": 69108,
         "symbolAliases": [
           {
             "foreign": {
-              "id": 69189,
+              "id": 69174,
               "name": "FlywheelCore",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
@@ -183,45 +183,45 @@
         "unitAlias": ""
       },
       {
-        "id": 69262,
+        "id": 69247,
         "nodeType": "ContractDefinition",
         "src": "519:726:247",
         "nodes": [
           {
-            "id": 69197,
+            "id": 69182,
             "nodeType": "UsingForDirective",
             "src": "583:32:247",
             "libraryName": {
-              "id": 69194,
+              "id": 69179,
               "name": "SafeTransferLib",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 92552,
+              "referencedDeclaration": 92309,
               "src": "589:15:247"
             },
             "typeName": {
-              "id": 69196,
+              "id": 69181,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 69195,
+                "id": 69180,
                 "name": "ERC20",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 92169,
+                "referencedDeclaration": 91926,
                 "src": "609:5:247"
               },
-              "referencedDeclaration": 92169,
+              "referencedDeclaration": 91926,
               "src": "609:5:247",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20_$92169",
+                "typeIdentifier": "t_contract$_ERC20_$91926",
                 "typeString": "contract ERC20"
               }
             }
           },
           {
-            "id": 69200,
+            "id": 69185,
             "nodeType": "ErrorDefinition",
             "src": "676:22:247",
             "documentation": {
-              "id": 69198,
+              "id": 69183,
               "nodeType": "StructuredDocumentation",
               "src": "621:50:247",
               "text": "@notice thrown when caller is not the flywheel"
@@ -229,22 +229,22 @@
             "name": "FlywheelError",
             "nameLocation": "682:13:247",
             "parameters": {
-              "id": 69199,
+              "id": 69184,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "695:2:247"
             }
           },
           {
-            "id": 69205,
+            "id": 69190,
             "nodeType": "VariableDeclaration",
             "src": "742:43:247",
             "baseFunctions": [
-              69180
+              69165
             ],
             "constant": false,
             "documentation": {
-              "id": 69201,
+              "id": 69186,
               "nodeType": "StructuredDocumentation",
               "src": "704:33:247",
               "text": "@notice the reward token paid"
@@ -254,47 +254,47 @@
             "name": "rewardToken",
             "nameLocation": "774:11:247",
             "overrides": {
-              "id": 69204,
+              "id": 69189,
               "nodeType": "OverrideSpecifier",
               "overrides": [],
               "src": "765:8:247"
             },
-            "scope": 69262,
+            "scope": 69247,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_ERC20_$92169",
+              "typeIdentifier": "t_contract$_ERC20_$91926",
               "typeString": "contract ERC20"
             },
             "typeName": {
-              "id": 69203,
+              "id": 69188,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 69202,
+                "id": 69187,
                 "name": "ERC20",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 92169,
+                "referencedDeclaration": 91926,
                 "src": "742:5:247"
               },
-              "referencedDeclaration": 92169,
+              "referencedDeclaration": 91926,
               "src": "742:5:247",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20_$92169",
+                "typeIdentifier": "t_contract$_ERC20_$91926",
                 "typeString": "contract ERC20"
               }
             },
             "visibility": "public"
           },
           {
-            "id": 69210,
+            "id": 69195,
             "nodeType": "VariableDeclaration",
             "src": "835:47:247",
             "baseFunctions": [
-              69173
+              69158
             ],
             "constant": false,
             "documentation": {
-              "id": 69206,
+              "id": 69191,
               "nodeType": "StructuredDocumentation",
               "src": "792:38:247",
               "text": "@notice the flywheel core contract"
@@ -304,161 +304,161 @@
             "name": "flywheel",
             "nameLocation": "874:8:247",
             "overrides": {
-              "id": 69209,
+              "id": 69194,
               "nodeType": "OverrideSpecifier",
               "overrides": [],
               "src": "865:8:247"
             },
-            "scope": 69262,
+            "scope": 69247,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_FlywheelCore_$69122",
+              "typeIdentifier": "t_contract$_FlywheelCore_$69107",
               "typeString": "contract FlywheelCore"
             },
             "typeName": {
-              "id": 69208,
+              "id": 69193,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 69207,
+                "id": 69192,
                 "name": "FlywheelCore",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 69122,
+                "referencedDeclaration": 69107,
                 "src": "835:12:247"
               },
-              "referencedDeclaration": 69122,
+              "referencedDeclaration": 69107,
               "src": "835:12:247",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_FlywheelCore_$69122",
+                "typeIdentifier": "t_contract$_FlywheelCore_$69107",
                 "typeString": "contract FlywheelCore"
               }
             },
             "visibility": "public"
           },
           {
-            "id": 69246,
+            "id": 69231,
             "nodeType": "FunctionDefinition",
             "src": "889:237:247",
             "body": {
-              "id": 69245,
+              "id": 69230,
               "nodeType": "Block",
               "src": "925:201:247",
               "statements": [
                 {
                   "expression": {
-                    "id": 69218,
+                    "id": 69203,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
-                      "id": 69216,
+                      "id": 69201,
                       "name": "flywheel",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 69210,
+                      "referencedDeclaration": 69195,
                       "src": "935:8:247",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_FlywheelCore_$69122",
+                        "typeIdentifier": "t_contract$_FlywheelCore_$69107",
                         "typeString": "contract FlywheelCore"
                       }
                     },
                     "nodeType": "Assignment",
                     "operator": "=",
                     "rightHandSide": {
-                      "id": 69217,
+                      "id": 69202,
                       "name": "_flywheel",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 69213,
+                      "referencedDeclaration": 69198,
                       "src": "946:9:247",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_FlywheelCore_$69122",
+                        "typeIdentifier": "t_contract$_FlywheelCore_$69107",
                         "typeString": "contract FlywheelCore"
                       }
                     },
                     "src": "935:20:247",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_FlywheelCore_$69122",
+                      "typeIdentifier": "t_contract$_FlywheelCore_$69107",
                       "typeString": "contract FlywheelCore"
                     }
                   },
-                  "id": 69219,
+                  "id": 69204,
                   "nodeType": "ExpressionStatement",
                   "src": "935:20:247"
                 },
                 {
                   "assignments": [
-                    69222
+                    69207
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 69222,
+                      "id": 69207,
                       "mutability": "mutable",
                       "name": "_rewardToken",
                       "nameLocation": "971:12:247",
                       "nodeType": "VariableDeclaration",
-                      "scope": 69245,
+                      "scope": 69230,
                       "src": "965:18:247",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_ERC20_$92169",
+                        "typeIdentifier": "t_contract$_ERC20_$91926",
                         "typeString": "contract ERC20"
                       },
                       "typeName": {
-                        "id": 69221,
+                        "id": 69206,
                         "nodeType": "UserDefinedTypeName",
                         "pathNode": {
-                          "id": 69220,
+                          "id": 69205,
                           "name": "ERC20",
                           "nodeType": "IdentifierPath",
-                          "referencedDeclaration": 92169,
+                          "referencedDeclaration": 91926,
                           "src": "965:5:247"
                         },
-                        "referencedDeclaration": 92169,
+                        "referencedDeclaration": 91926,
                         "src": "965:5:247",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_ERC20_$92169",
+                          "typeIdentifier": "t_contract$_ERC20_$91926",
                           "typeString": "contract ERC20"
                         }
                       },
                       "visibility": "internal"
                     }
                   ],
-                  "id": 69226,
+                  "id": 69211,
                   "initialValue": {
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
                       "expression": {
-                        "id": 69223,
+                        "id": 69208,
                         "name": "_flywheel",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 69213,
+                        "referencedDeclaration": 69198,
                         "src": "986:9:247",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_FlywheelCore_$69122",
+                          "typeIdentifier": "t_contract$_FlywheelCore_$69107",
                           "typeString": "contract FlywheelCore"
                         }
                       },
-                      "id": 69224,
+                      "id": 69209,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "rewardToken",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 68547,
+                      "referencedDeclaration": 68532,
                       "src": "986:21:247",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_external_view$__$returns$_t_contract$_ERC20_$92169_$",
+                        "typeIdentifier": "t_function_external_view$__$returns$_t_contract$_ERC20_$91926_$",
                         "typeString": "function () view external returns (contract ERC20)"
                       }
                     },
-                    "id": 69225,
+                    "id": 69210,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -469,7 +469,7 @@
                     "src": "986:23:247",
                     "tryCall": false,
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ERC20_$92169",
+                      "typeIdentifier": "t_contract$_ERC20_$91926",
                       "typeString": "contract ERC20"
                     }
                   },
@@ -478,44 +478,44 @@
                 },
                 {
                   "expression": {
-                    "id": 69229,
+                    "id": 69214,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
-                      "id": 69227,
+                      "id": 69212,
                       "name": "rewardToken",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 69205,
+                      "referencedDeclaration": 69190,
                       "src": "1019:11:247",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_ERC20_$92169",
+                        "typeIdentifier": "t_contract$_ERC20_$91926",
                         "typeString": "contract ERC20"
                       }
                     },
                     "nodeType": "Assignment",
                     "operator": "=",
                     "rightHandSide": {
-                      "id": 69228,
+                      "id": 69213,
                       "name": "_rewardToken",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 69222,
+                      "referencedDeclaration": 69207,
                       "src": "1033:12:247",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_ERC20_$92169",
+                        "typeIdentifier": "t_contract$_ERC20_$91926",
                         "typeString": "contract ERC20"
                       }
                     },
                     "src": "1019:26:247",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ERC20_$92169",
+                      "typeIdentifier": "t_contract$_ERC20_$91926",
                       "typeString": "contract ERC20"
                     }
                   },
-                  "id": 69230,
+                  "id": 69215,
                   "nodeType": "ExpressionStatement",
                   "src": "1019:26:247"
                 },
@@ -525,14 +525,14 @@
                       {
                         "arguments": [
                           {
-                            "id": 69236,
+                            "id": 69221,
                             "name": "_flywheel",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 69213,
+                            "referencedDeclaration": 69198,
                             "src": "1089:9:247",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_FlywheelCore_$69122",
+                              "typeIdentifier": "t_contract$_FlywheelCore_$69107",
                               "typeString": "contract FlywheelCore"
                             }
                           }
@@ -540,11 +540,11 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_contract$_FlywheelCore_$69122",
+                              "typeIdentifier": "t_contract$_FlywheelCore_$69107",
                               "typeString": "contract FlywheelCore"
                             }
                           ],
-                          "id": 69235,
+                          "id": 69220,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -556,14 +556,14 @@
                             "typeString": "type(address)"
                           },
                           "typeName": {
-                            "id": 69234,
+                            "id": 69219,
                             "name": "address",
                             "nodeType": "ElementaryTypeName",
                             "src": "1081:7:247",
                             "typeDescriptions": {}
                           }
                         },
-                        "id": 69237,
+                        "id": 69222,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -582,7 +582,7 @@
                         "expression": {
                           "arguments": [
                             {
-                              "id": 69240,
+                              "id": 69225,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -594,7 +594,7 @@
                                 "typeString": "type(uint256)"
                               },
                               "typeName": {
-                                "id": 69239,
+                                "id": 69224,
                                 "name": "uint256",
                                 "nodeType": "ElementaryTypeName",
                                 "src": "1106:7:247",
@@ -609,7 +609,7 @@
                                 "typeString": "type(uint256)"
                               }
                             ],
-                            "id": 69238,
+                            "id": 69223,
                             "name": "type",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
@@ -620,7 +620,7 @@
                               "typeString": "function () pure"
                             }
                           },
-                          "id": 69241,
+                          "id": 69226,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -635,7 +635,7 @@
                             "typeString": "type(uint256)"
                           }
                         },
-                        "id": 69242,
+                        "id": 69227,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -661,32 +661,32 @@
                         }
                       ],
                       "expression": {
-                        "id": 69231,
+                        "id": 69216,
                         "name": "_rewardToken",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 69222,
+                        "referencedDeclaration": 69207,
                         "src": "1056:12:247",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_ERC20_$92169",
+                          "typeIdentifier": "t_contract$_ERC20_$91926",
                           "typeString": "contract ERC20"
                         }
                       },
-                      "id": 69233,
+                      "id": 69218,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "safeApprove",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 92551,
+                      "referencedDeclaration": 92308,
                       "src": "1056:24:247",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_nonpayable$_t_contract$_ERC20_$92169_$_t_address_$_t_uint256_$returns$__$bound_to$_t_contract$_ERC20_$92169_$",
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_contract$_ERC20_$91926_$_t_address_$_t_uint256_$returns$__$bound_to$_t_contract$_ERC20_$91926_$",
                         "typeString": "function (contract ERC20,address,uint256)"
                       }
                     },
-                    "id": 69243,
+                    "id": 69228,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -701,7 +701,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 69244,
+                  "id": 69229,
                   "nodeType": "ExpressionStatement",
                   "src": "1056:63:247"
                 }
@@ -713,38 +713,38 @@
             "name": "",
             "nameLocation": "-1:-1:-1",
             "parameters": {
-              "id": 69214,
+              "id": 69199,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 69213,
+                  "id": 69198,
                   "mutability": "mutable",
                   "name": "_flywheel",
                   "nameLocation": "914:9:247",
                   "nodeType": "VariableDeclaration",
-                  "scope": 69246,
+                  "scope": 69231,
                   "src": "901:22:247",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_FlywheelCore_$69122",
+                    "typeIdentifier": "t_contract$_FlywheelCore_$69107",
                     "typeString": "contract FlywheelCore"
                   },
                   "typeName": {
-                    "id": 69212,
+                    "id": 69197,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 69211,
+                      "id": 69196,
                       "name": "FlywheelCore",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 69122,
+                      "referencedDeclaration": 69107,
                       "src": "901:12:247"
                     },
-                    "referencedDeclaration": 69122,
+                    "referencedDeclaration": 69107,
                     "src": "901:12:247",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_FlywheelCore_$69122",
+                      "typeIdentifier": "t_contract$_FlywheelCore_$69107",
                       "typeString": "contract FlywheelCore"
                     }
                   },
@@ -754,22 +754,22 @@
               "src": "900:24:247"
             },
             "returnParameters": {
-              "id": 69215,
+              "id": 69200,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "925:0:247"
             },
-            "scope": 69262,
+            "scope": 69247,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "internal"
           },
           {
-            "id": 69261,
+            "id": 69246,
             "nodeType": "ModifierDefinition",
             "src": "1132:111:247",
             "body": {
-              "id": 69260,
+              "id": 69245,
               "nodeType": "Block",
               "src": "1156:87:247",
               "statements": [
@@ -779,14 +779,14 @@
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     },
-                    "id": 69254,
+                    "id": 69239,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "expression": {
-                        "id": 69248,
+                        "id": 69233,
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
@@ -797,7 +797,7 @@
                           "typeString": "msg"
                         }
                       },
-                      "id": 69249,
+                      "id": 69234,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -815,14 +815,14 @@
                     "rightExpression": {
                       "arguments": [
                         {
-                          "id": 69252,
+                          "id": 69237,
                           "name": "flywheel",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 69210,
+                          "referencedDeclaration": 69195,
                           "src": "1192:8:247",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_contract$_FlywheelCore_$69122",
+                            "typeIdentifier": "t_contract$_FlywheelCore_$69107",
                             "typeString": "contract FlywheelCore"
                           }
                         }
@@ -830,11 +830,11 @@
                       "expression": {
                         "argumentTypes": [
                           {
-                            "typeIdentifier": "t_contract$_FlywheelCore_$69122",
+                            "typeIdentifier": "t_contract$_FlywheelCore_$69107",
                             "typeString": "contract FlywheelCore"
                           }
                         ],
-                        "id": 69251,
+                        "id": 69236,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -846,14 +846,14 @@
                           "typeString": "type(address)"
                         },
                         "typeName": {
-                          "id": 69250,
+                          "id": 69235,
                           "name": "address",
                           "nodeType": "ElementaryTypeName",
                           "src": "1184:7:247",
                           "typeDescriptions": {}
                         }
                       },
-                      "id": 69253,
+                      "id": 69238,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -874,7 +874,7 @@
                       "typeString": "bool"
                     }
                   },
-                  "id": 69258,
+                  "id": 69243,
                   "nodeType": "IfStatement",
                   "src": "1166:59:247",
                   "trueBody": {
@@ -882,18 +882,18 @@
                       "arguments": [],
                       "expression": {
                         "argumentTypes": [],
-                        "id": 69255,
+                        "id": 69240,
                         "name": "FlywheelError",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 69200,
+                        "referencedDeclaration": 69185,
                         "src": "1210:13:247",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_error_pure$__$returns$__$",
                           "typeString": "function () pure"
                         }
                       },
-                      "id": 69256,
+                      "id": 69241,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -908,13 +908,13 @@
                         "typeString": "tuple()"
                       }
                     },
-                    "id": 69257,
+                    "id": 69242,
                     "nodeType": "RevertStatement",
                     "src": "1203:22:247"
                   }
                 },
                 {
-                  "id": 69259,
+                  "id": 69244,
                   "nodeType": "PlaceholderStatement",
                   "src": "1235:1:247"
                 }
@@ -923,7 +923,7 @@
             "name": "onlyFlywheel",
             "nameLocation": "1141:12:247",
             "parameters": {
-              "id": 69247,
+              "id": 69232,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1153:2:247"
@@ -936,13 +936,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 69192,
+              "id": 69177,
               "name": "IFlywheelRewards",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 69181,
+              "referencedDeclaration": 69166,
               "src": "560:16:247"
             },
-            "id": 69193,
+            "id": 69178,
             "nodeType": "InheritanceSpecifier",
             "src": "560:16:247"
           }
@@ -951,21 +951,21 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 69191,
+          "id": 69176,
           "nodeType": "StructuredDocumentation",
           "src": "261:257:247",
           "text": "@title Flywheel Reward Module\n@notice Determines how many rewards accrue to each strategy globally over a given time period.\n@dev approves the flywheel core for the reward token to allow balances to be managed by the module but claimed from core."
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          69262,
-          69181
+          69247,
+          69166
         ],
         "name": "BaseFlywheelRewards",
         "nameLocation": "537:19:247",
-        "scope": 69263,
+        "scope": 69248,
         "usedErrors": [
-          69200
+          69185
         ]
       }
     ],

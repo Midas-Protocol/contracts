@@ -32,35 +32,35 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/default/RecursivePriceOracle.sol",
-    "id": 44494,
+    "id": 44479,
     "exportedSymbols": {
       "ICErc20": [
-        33461
+        33451
       ],
       "ICToken": [
-        33610
+        33600
       ],
       "IComptroller": [
-        33787
+        33777
       ],
       "IPriceOracle": [
-        33800
+        33790
       ],
       "IRewardsDistributor": [
-        33859
+        33849
       ],
       "IUnitroller": [
-        33877
+        33867
       ],
       "RecursivePriceOracle": [
-        44493
+        44478
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:1366:171",
     "nodes": [
       {
-        "id": 44428,
+        "id": 44413,
         "nodeType": "PragmaDirective",
         "src": "39:24:171",
         "literals": [
@@ -71,111 +71,111 @@
         ]
       },
       {
-        "id": 44429,
+        "id": 44414,
         "nodeType": "ImportDirective",
         "src": "65:50:171",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/IPriceOracle.sol",
         "file": "../../external/compound/IPriceOracle.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 44494,
-        "sourceUnit": 33801,
+        "scope": 44479,
+        "sourceUnit": 33791,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 44430,
+        "id": 44415,
         "nodeType": "ImportDirective",
         "src": "116:45:171",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICToken.sol",
         "file": "../../external/compound/ICToken.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 44494,
-        "sourceUnit": 33611,
+        "scope": 44479,
+        "sourceUnit": 33601,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 44431,
+        "id": 44416,
         "nodeType": "ImportDirective",
         "src": "162:45:171",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICErc20.sol",
         "file": "../../external/compound/ICErc20.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 44494,
-        "sourceUnit": 33462,
+        "scope": 44479,
+        "sourceUnit": 33452,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 44432,
+        "id": 44417,
         "nodeType": "ImportDirective",
         "src": "208:50:171",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/IComptroller.sol",
         "file": "../../external/compound/IComptroller.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 44494,
-        "sourceUnit": 33788,
+        "scope": 44479,
+        "sourceUnit": 33778,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 44493,
+        "id": 44478,
         "nodeType": "ContractDefinition",
         "src": "467:937:171",
         "nodes": [
           {
-            "id": 44492,
+            "id": 44477,
             "nodeType": "FunctionDefinition",
             "src": "789:613:171",
             "baseFunctions": [
-              33799
+              33789
             ],
             "body": {
-              "id": 44491,
+              "id": 44476,
               "nodeType": "Block",
               "src": "874:528:171",
               "statements": [
                 {
                   "assignments": [
-                    44447
+                    44432
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 44447,
+                      "id": 44432,
                       "mutability": "mutable",
                       "name": "underlying",
                       "nameLocation": "926:10:171",
                       "nodeType": "VariableDeclaration",
-                      "scope": 44491,
+                      "scope": 44476,
                       "src": "918:18:171",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_ICToken_$33610",
+                        "typeIdentifier": "t_contract$_ICToken_$33600",
                         "typeString": "contract ICToken"
                       },
                       "typeName": {
-                        "id": 44446,
+                        "id": 44431,
                         "nodeType": "UserDefinedTypeName",
                         "pathNode": {
-                          "id": 44445,
+                          "id": 44430,
                           "name": "ICToken",
                           "nodeType": "IdentifierPath",
-                          "referencedDeclaration": 33610,
+                          "referencedDeclaration": 33600,
                           "src": "918:7:171"
                         },
-                        "referencedDeclaration": 33610,
+                        "referencedDeclaration": 33600,
                         "src": "918:7:171",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_ICToken_$33610",
+                          "typeIdentifier": "t_contract$_ICToken_$33600",
                           "typeString": "contract ICToken"
                         }
                       },
                       "visibility": "internal"
                     }
                   ],
-                  "id": 44458,
+                  "id": 44443,
                   "initialValue": {
                     "arguments": [
                       {
@@ -187,14 +187,14 @@
                               {
                                 "arguments": [
                                   {
-                                    "id": 44452,
+                                    "id": 44437,
                                     "name": "cToken",
                                     "nodeType": "Identifier",
                                     "overloadedDeclarations": [],
-                                    "referencedDeclaration": 44439,
+                                    "referencedDeclaration": 44424,
                                     "src": "963:6:171",
                                     "typeDescriptions": {
-                                      "typeIdentifier": "t_contract$_ICToken_$33610",
+                                      "typeIdentifier": "t_contract$_ICToken_$33600",
                                       "typeString": "contract ICToken"
                                     }
                                   }
@@ -202,11 +202,11 @@
                                 "expression": {
                                   "argumentTypes": [
                                     {
-                                      "typeIdentifier": "t_contract$_ICToken_$33610",
+                                      "typeIdentifier": "t_contract$_ICToken_$33600",
                                       "typeString": "contract ICToken"
                                     }
                                   ],
-                                  "id": 44451,
+                                  "id": 44436,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": true,
@@ -218,14 +218,14 @@
                                     "typeString": "type(address)"
                                   },
                                   "typeName": {
-                                    "id": 44450,
+                                    "id": 44435,
                                     "name": "address",
                                     "nodeType": "ElementaryTypeName",
                                     "src": "955:7:171",
                                     "typeDescriptions": {}
                                   }
                                 },
-                                "id": 44453,
+                                "id": 44438,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
@@ -248,18 +248,18 @@
                                   "typeString": "address"
                                 }
                               ],
-                              "id": 44449,
+                              "id": 44434,
                               "name": "ICErc20",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 33461,
+                              "referencedDeclaration": 33451,
                               "src": "947:7:171",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_type$_t_contract$_ICErc20_$33461_$",
+                                "typeIdentifier": "t_type$_t_contract$_ICErc20_$33451_$",
                                 "typeString": "type(contract ICErc20)"
                               }
                             },
-                            "id": 44454,
+                            "id": 44439,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -270,25 +270,25 @@
                             "src": "947:24:171",
                             "tryCall": false,
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_ICErc20_$33461",
+                              "typeIdentifier": "t_contract$_ICErc20_$33451",
                               "typeString": "contract ICErc20"
                             }
                           },
-                          "id": 44455,
+                          "id": 44440,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "underlying",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 33448,
+                          "referencedDeclaration": 33438,
                           "src": "947:35:171",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
                             "typeString": "function () view external returns (address)"
                           }
                         },
-                        "id": 44456,
+                        "id": 44441,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -311,18 +311,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 44448,
+                      "id": 44433,
                       "name": "ICToken",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 33610,
+                      "referencedDeclaration": 33600,
                       "src": "939:7:171",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_contract$_ICToken_$33610_$",
+                        "typeIdentifier": "t_type$_t_contract$_ICToken_$33600_$",
                         "typeString": "type(contract ICToken)"
                       }
                     },
-                    "id": 44457,
+                    "id": 44442,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -333,7 +333,7 @@
                     "src": "939:46:171",
                     "tryCall": false,
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ICToken_$33610",
+                      "typeIdentifier": "t_contract$_ICToken_$33600",
                       "typeString": "contract ICToken"
                     }
                   },
@@ -342,45 +342,45 @@
                 },
                 {
                   "assignments": [
-                    44461
+                    44446
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 44461,
+                      "id": 44446,
                       "mutability": "mutable",
                       "name": "comptroller",
                       "nameLocation": "1028:11:171",
                       "nodeType": "VariableDeclaration",
-                      "scope": 44491,
+                      "scope": 44476,
                       "src": "1015:24:171",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_IComptroller_$33787",
+                        "typeIdentifier": "t_contract$_IComptroller_$33777",
                         "typeString": "contract IComptroller"
                       },
                       "typeName": {
-                        "id": 44460,
+                        "id": 44445,
                         "nodeType": "UserDefinedTypeName",
                         "pathNode": {
-                          "id": 44459,
+                          "id": 44444,
                           "name": "IComptroller",
                           "nodeType": "IdentifierPath",
-                          "referencedDeclaration": 33787,
+                          "referencedDeclaration": 33777,
                           "src": "1015:12:171"
                         },
-                        "referencedDeclaration": 33787,
+                        "referencedDeclaration": 33777,
                         "src": "1015:12:171",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IComptroller_$33787",
+                          "typeIdentifier": "t_contract$_IComptroller_$33777",
                           "typeString": "contract IComptroller"
                         }
                       },
                       "visibility": "internal"
                     }
                   ],
-                  "id": 44467,
+                  "id": 44452,
                   "initialValue": {
                     "arguments": [
                       {
@@ -388,32 +388,32 @@
                         "expression": {
                           "argumentTypes": [],
                           "expression": {
-                            "id": 44463,
+                            "id": 44448,
                             "name": "underlying",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 44447,
+                            "referencedDeclaration": 44432,
                             "src": "1055:10:171",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_ICToken_$33610",
+                              "typeIdentifier": "t_contract$_ICToken_$33600",
                               "typeString": "contract ICToken"
                             }
                           },
-                          "id": 44464,
+                          "id": 44449,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "comptroller",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 33504,
+                          "referencedDeclaration": 33494,
                           "src": "1055:22:171",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
                             "typeString": "function () view external returns (address)"
                           }
                         },
-                        "id": 44465,
+                        "id": 44450,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -436,18 +436,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 44462,
+                      "id": 44447,
                       "name": "IComptroller",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 33787,
+                      "referencedDeclaration": 33777,
                       "src": "1042:12:171",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_contract$_IComptroller_$33787_$",
+                        "typeIdentifier": "t_type$_t_contract$_IComptroller_$33777_$",
                         "typeString": "type(contract IComptroller)"
                       }
                     },
-                    "id": 44466,
+                    "id": 44451,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -458,7 +458,7 @@
                     "src": "1042:38:171",
                     "tryCall": false,
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_IComptroller_$33787",
+                      "typeIdentifier": "t_contract$_IComptroller_$33777",
                       "typeString": "contract IComptroller"
                     }
                   },
@@ -471,32 +471,32 @@
                     "expression": {
                       "argumentTypes": [],
                       "expression": {
-                        "id": 44468,
+                        "id": 44453,
                         "name": "underlying",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 44447,
+                        "referencedDeclaration": 44432,
                         "src": "1137:10:171",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_ICToken_$33610",
+                          "typeIdentifier": "t_contract$_ICToken_$33600",
                           "typeString": "contract ICToken"
                         }
                       },
-                      "id": 44469,
+                      "id": 44454,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "isCEther",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 33544,
+                      "referencedDeclaration": 33534,
                       "src": "1137:19:171",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$__$returns$_t_bool_$",
                         "typeString": "function () view external returns (bool)"
                       }
                     },
-                    "id": 44470,
+                    "id": 44455,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -511,11 +511,11 @@
                       "typeString": "bool"
                     }
                   },
-                  "id": 44476,
+                  "id": 44461,
                   "nodeType": "IfStatement",
                   "src": "1133:80:171",
                   "trueBody": {
-                    "id": 44475,
+                    "id": 44460,
                     "nodeType": "Block",
                     "src": "1160:53:171",
                     "statements": [
@@ -525,32 +525,32 @@
                           "expression": {
                             "argumentTypes": [],
                             "expression": {
-                              "id": 44471,
+                              "id": 44456,
                               "name": "underlying",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 44447,
+                              "referencedDeclaration": 44432,
                               "src": "1175:10:171",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_ICToken_$33610",
+                                "typeIdentifier": "t_contract$_ICToken_$33600",
                                 "typeString": "contract ICToken"
                               }
                             },
-                            "id": 44472,
+                            "id": 44457,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "exchangeRateStored",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 33590,
+                            "referencedDeclaration": 33580,
                             "src": "1175:29:171",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_external_view$__$returns$_t_uint256_$",
                               "typeString": "function () view external returns (uint256)"
                             }
                           },
-                          "id": 44473,
+                          "id": 44458,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -565,8 +565,8 @@
                             "typeString": "uint256"
                           }
                         },
-                        "functionReturnParameters": 44444,
-                        "id": 44474,
+                        "functionReturnParameters": 44429,
+                        "id": 44459,
                         "nodeType": "Return",
                         "src": "1168:38:171"
                       }
@@ -579,7 +579,7 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 44489,
+                    "id": 44474,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -591,7 +591,7 @@
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-                          "id": 44486,
+                          "id": 44471,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -601,32 +601,32 @@
                             "expression": {
                               "argumentTypes": [],
                               "expression": {
-                                "id": 44477,
+                                "id": 44462,
                                 "name": "underlying",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 44447,
+                                "referencedDeclaration": 44432,
                                 "src": "1304:10:171",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_contract$_ICToken_$33610",
+                                  "typeIdentifier": "t_contract$_ICToken_$33600",
                                   "typeString": "contract ICToken"
                                 }
                               },
-                              "id": 44478,
+                              "id": 44463,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "memberName": "exchangeRateStored",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 33590,
+                              "referencedDeclaration": 33580,
                               "src": "1304:29:171",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_external_view$__$returns$_t_uint256_$",
                                 "typeString": "function () view external returns (uint256)"
                               }
                             },
-                            "id": 44479,
+                            "id": 44464,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -646,14 +646,14 @@
                           "rightExpression": {
                             "arguments": [
                               {
-                                "id": 44484,
+                                "id": 44469,
                                 "name": "underlying",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 44447,
+                                "referencedDeclaration": 44432,
                                 "src": "1378:10:171",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_contract$_ICToken_$33610",
+                                  "typeIdentifier": "t_contract$_ICToken_$33600",
                                   "typeString": "contract ICToken"
                                 }
                               }
@@ -661,7 +661,7 @@
                             "expression": {
                               "argumentTypes": [
                                 {
-                                  "typeIdentifier": "t_contract$_ICToken_$33610",
+                                  "typeIdentifier": "t_contract$_ICToken_$33600",
                                   "typeString": "contract ICToken"
                                 }
                               ],
@@ -670,32 +670,32 @@
                                 "expression": {
                                   "argumentTypes": [],
                                   "expression": {
-                                    "id": 44480,
+                                    "id": 44465,
                                     "name": "comptroller",
                                     "nodeType": "Identifier",
                                     "overloadedDeclarations": [],
-                                    "referencedDeclaration": 44461,
+                                    "referencedDeclaration": 44446,
                                     "src": "1338:11:171",
                                     "typeDescriptions": {
-                                      "typeIdentifier": "t_contract$_IComptroller_$33787",
+                                      "typeIdentifier": "t_contract$_IComptroller_$33777",
                                       "typeString": "contract IComptroller"
                                     }
                                   },
-                                  "id": 44481,
+                                  "id": 44466,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": false,
                                   "lValueRequested": false,
                                   "memberName": "oracle",
                                   "nodeType": "MemberAccess",
-                                  "referencedDeclaration": 33638,
+                                  "referencedDeclaration": 33628,
                                   "src": "1338:18:171",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_function_external_view$__$returns$_t_contract$_IPriceOracle_$33800_$",
+                                    "typeIdentifier": "t_function_external_view$__$returns$_t_contract$_IPriceOracle_$33790_$",
                                     "typeString": "function () view external returns (contract IPriceOracle)"
                                   }
                                 },
-                                "id": 44482,
+                                "id": 44467,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
@@ -706,25 +706,25 @@
                                 "src": "1338:20:171",
                                 "tryCall": false,
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_contract$_IPriceOracle_$33800",
+                                  "typeIdentifier": "t_contract$_IPriceOracle_$33790",
                                   "typeString": "contract IPriceOracle"
                                 }
                               },
-                              "id": 44483,
+                              "id": 44468,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "memberName": "getUnderlyingPrice",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 33799,
+                              "referencedDeclaration": 33789,
                               "src": "1338:39:171",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_function_external_view$_t_contract$_ICToken_$33610_$returns$_t_uint256_$",
+                                "typeIdentifier": "t_function_external_view$_t_contract$_ICToken_$33600_$returns$_t_uint256_$",
                                 "typeString": "function (contract ICToken) view external returns (uint256)"
                               }
                             },
-                            "id": 44485,
+                            "id": 44470,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -746,7 +746,7 @@
                           }
                         }
                       ],
-                      "id": 44487,
+                      "id": 44472,
                       "isConstant": false,
                       "isInlineArray": false,
                       "isLValue": false,
@@ -763,7 +763,7 @@
                     "operator": "/",
                     "rightExpression": {
                       "hexValue": "31653138",
-                      "id": 44488,
+                      "id": 44473,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -783,15 +783,15 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 44444,
-                  "id": 44490,
+                  "functionReturnParameters": 44429,
+                  "id": 44475,
                   "nodeType": "Return",
                   "src": "1296:101:171"
                 }
               ]
             },
             "documentation": {
-              "id": 44436,
+              "id": 44421,
               "nodeType": "StructuredDocumentation",
               "src": "517:269:171",
               "text": " @notice Returns the price in ETH of the token underlying `cToken`.\n @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).\n @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`."
@@ -803,44 +803,44 @@
             "name": "getUnderlyingPrice",
             "nameLocation": "798:18:171",
             "overrides": {
-              "id": 44441,
+              "id": 44426,
               "nodeType": "OverrideSpecifier",
               "overrides": [],
               "src": "847:8:171"
             },
             "parameters": {
-              "id": 44440,
+              "id": 44425,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 44439,
+                  "id": 44424,
                   "mutability": "mutable",
                   "name": "cToken",
                   "nameLocation": "825:6:171",
                   "nodeType": "VariableDeclaration",
-                  "scope": 44492,
+                  "scope": 44477,
                   "src": "817:14:171",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ICToken_$33610",
+                    "typeIdentifier": "t_contract$_ICToken_$33600",
                     "typeString": "contract ICToken"
                   },
                   "typeName": {
-                    "id": 44438,
+                    "id": 44423,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 44437,
+                      "id": 44422,
                       "name": "ICToken",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 33610,
+                      "referencedDeclaration": 33600,
                       "src": "817:7:171"
                     },
-                    "referencedDeclaration": 33610,
+                    "referencedDeclaration": 33600,
                     "src": "817:7:171",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ICToken_$33610",
+                      "typeIdentifier": "t_contract$_ICToken_$33600",
                       "typeString": "contract ICToken"
                     }
                   },
@@ -850,17 +850,17 @@
               "src": "816:16:171"
             },
             "returnParameters": {
-              "id": 44444,
+              "id": 44429,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 44443,
+                  "id": 44428,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 44492,
+                  "scope": 44477,
                   "src": "865:7:171",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -869,7 +869,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 44442,
+                    "id": 44427,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "865:7:171",
@@ -883,7 +883,7 @@
               ],
               "src": "864:9:171"
             },
-            "scope": 44493,
+            "scope": 44478,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -893,13 +893,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 44434,
+              "id": 44419,
               "name": "IPriceOracle",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 33800,
+              "referencedDeclaration": 33790,
               "src": "500:12:171"
             },
-            "id": 44435,
+            "id": 44420,
             "nodeType": "InheritanceSpecifier",
             "src": "500:12:171"
           }
@@ -908,19 +908,19 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 44433,
+          "id": 44418,
           "nodeType": "StructuredDocumentation",
           "src": "260:206:171",
           "text": " @title RecursivePriceOracle\n @notice Returns prices from other cTokens (from Fuse).\n @dev Implements `PriceOracle`.\n @author David Lucid <david@rari.capital> (https://github.com/davidlucid)"
         },
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          44493,
-          33800
+          44478,
+          33790
         ],
         "name": "RecursivePriceOracle",
         "nameLocation": "476:20:171",
-        "scope": 44494,
+        "scope": 44479,
         "usedErrors": []
       }
     ],

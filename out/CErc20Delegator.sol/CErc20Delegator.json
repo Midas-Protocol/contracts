@@ -90,29 +90,29 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/CErc20Delegator.sol",
-    "id": 9903,
+    "id": 9893,
     "exportedSymbols": {
       "CDelegateInterface": [
-        9227
+        9217
       ],
       "CDelegationStorage": [
-        9197
+        9187
       ],
       "CErc20Delegator": [
-        9902
+        9892
       ],
       "ComptrollerInterface": [
-        20056
+        20046
       ],
       "InterestRateModel": [
-        24965
+        24955
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:3449:10",
     "nodes": [
       {
-        "id": 9784,
+        "id": 9774,
         "nodeType": "PragmaDirective",
         "src": "39:24:10",
         "literals": [
@@ -123,52 +123,52 @@
         ]
       },
       {
-        "id": 9785,
+        "id": 9775,
         "nodeType": "ImportDirective",
         "src": "65:36:10",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/ComptrollerInterface.sol",
         "file": "./ComptrollerInterface.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 9903,
-        "sourceUnit": 20057,
+        "scope": 9893,
+        "sourceUnit": 20047,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 9786,
+        "id": 9776,
         "nodeType": "ImportDirective",
         "src": "102:33:10",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/InterestRateModel.sol",
         "file": "./InterestRateModel.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 9903,
-        "sourceUnit": 24966,
+        "scope": 9893,
+        "sourceUnit": 24956,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 9787,
+        "id": 9777,
         "nodeType": "ImportDirective",
         "src": "136:34:10",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/CDelegateInterface.sol",
         "file": "./CDelegateInterface.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 9903,
-        "sourceUnit": 9228,
+        "scope": 9893,
+        "sourceUnit": 9218,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 9902,
+        "id": 9892,
         "nodeType": "ContractDefinition",
         "src": "331:3156:10",
         "nodes": [
           {
-            "id": 9844,
+            "id": 9834,
             "nodeType": "FunctionDefinition",
             "src": "881:1075:10",
             "body": {
-              "id": 9843,
+              "id": 9833,
               "nodeType": "Block",
               "src": "1233:723:10",
               "statements": [
@@ -176,11 +176,11 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 9817,
+                        "id": 9807,
                         "name": "implementation_",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9807,
+                        "referencedDeclaration": 9797,
                         "src": "1336:15:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -191,7 +191,7 @@
                         "arguments": [
                           {
                             "hexValue": "696e697469616c697a6528616464726573732c616464726573732c616464726573732c616464726573732c737472696e672c737472696e672c75696e743235362c75696e7432353629",
-                            "id": 9820,
+                            "id": 9810,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -206,11 +206,11 @@
                             "value": "initialize(address,address,address,address,string,string,uint256,uint256)"
                           },
                           {
-                            "id": 9821,
+                            "id": 9811,
                             "name": "underlying_",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 9793,
+                            "referencedDeclaration": 9783,
                             "src": "1477:11:10",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -218,23 +218,23 @@
                             }
                           },
                           {
-                            "id": 9822,
+                            "id": 9812,
                             "name": "comptroller_",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 9796,
+                            "referencedDeclaration": 9786,
                             "src": "1498:12:10",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_ComptrollerInterface_$20056",
+                              "typeIdentifier": "t_contract$_ComptrollerInterface_$20046",
                               "typeString": "contract ComptrollerInterface"
                             }
                           },
                           {
-                            "id": 9823,
+                            "id": 9813,
                             "name": "fuseAdmin_",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 9798,
+                            "referencedDeclaration": 9788,
                             "src": "1520:10:10",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address_payable",
@@ -242,23 +242,23 @@
                             }
                           },
                           {
-                            "id": 9824,
+                            "id": 9814,
                             "name": "interestRateModel_",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 9801,
+                            "referencedDeclaration": 9791,
                             "src": "1540:18:10",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_InterestRateModel_$24965",
+                              "typeIdentifier": "t_contract$_InterestRateModel_$24955",
                               "typeString": "contract InterestRateModel"
                             }
                           },
                           {
-                            "id": 9825,
+                            "id": 9815,
                             "name": "name_",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 9803,
+                            "referencedDeclaration": 9793,
                             "src": "1568:5:10",
                             "typeDescriptions": {
                               "typeIdentifier": "t_string_memory_ptr",
@@ -266,11 +266,11 @@
                             }
                           },
                           {
-                            "id": 9826,
+                            "id": 9816,
                             "name": "symbol_",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 9805,
+                            "referencedDeclaration": 9795,
                             "src": "1583:7:10",
                             "typeDescriptions": {
                               "typeIdentifier": "t_string_memory_ptr",
@@ -278,11 +278,11 @@
                             }
                           },
                           {
-                            "id": 9827,
+                            "id": 9817,
                             "name": "reserveFactorMantissa_",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 9811,
+                            "referencedDeclaration": 9801,
                             "src": "1600:22:10",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
@@ -290,11 +290,11 @@
                             }
                           },
                           {
-                            "id": 9828,
+                            "id": 9818,
                             "name": "adminFeeMantissa_",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 9813,
+                            "referencedDeclaration": 9803,
                             "src": "1632:17:10",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
@@ -313,7 +313,7 @@
                               "typeString": "address"
                             },
                             {
-                              "typeIdentifier": "t_contract$_ComptrollerInterface_$20056",
+                              "typeIdentifier": "t_contract$_ComptrollerInterface_$20046",
                               "typeString": "contract ComptrollerInterface"
                             },
                             {
@@ -321,7 +321,7 @@
                               "typeString": "address payable"
                             },
                             {
-                              "typeIdentifier": "t_contract$_InterestRateModel_$24965",
+                              "typeIdentifier": "t_contract$_InterestRateModel_$24955",
                               "typeString": "contract InterestRateModel"
                             },
                             {
@@ -342,7 +342,7 @@
                             }
                           ],
                           "expression": {
-                            "id": 9818,
+                            "id": 9808,
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
@@ -353,7 +353,7 @@
                               "typeString": "abi"
                             }
                           },
-                          "id": 9819,
+                          "id": 9809,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -366,7 +366,7 @@
                             "typeString": "function (string memory) pure returns (bytes memory)"
                           }
                         },
-                        "id": 9829,
+                        "id": 9819,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -393,18 +393,18 @@
                           "typeString": "bytes memory"
                         }
                       ],
-                      "id": 9816,
+                      "id": 9806,
                       "name": "delegateTo",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9867,
+                      "referencedDeclaration": 9857,
                       "src": "1318:10:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_bytes_memory_ptr_$returns$_t_bytes_memory_ptr_$",
                         "typeString": "function (address,bytes memory) returns (bytes memory)"
                       }
                     },
-                    "id": 9830,
+                    "id": 9820,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -419,7 +419,7 @@
                       "typeString": "bytes memory"
                     }
                   },
-                  "id": 9831,
+                  "id": 9821,
                   "nodeType": "ExpressionStatement",
                   "src": "1318:345:10"
                 },
@@ -427,11 +427,11 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 9833,
+                        "id": 9823,
                         "name": "implementation_",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9807,
+                        "referencedDeclaration": 9797,
                         "src": "1763:15:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -442,7 +442,7 @@
                         "arguments": [
                           {
                             "hexValue": "5f736574496d706c656d656e746174696f6e5361666528616464726573732c626f6f6c2c627974657329",
-                            "id": 9836,
+                            "id": 9826,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -457,11 +457,11 @@
                             "value": "_setImplementationSafe(address,bool,bytes)"
                           },
                           {
-                            "id": 9837,
+                            "id": 9827,
                             "name": "implementation_",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 9807,
+                            "referencedDeclaration": 9797,
                             "src": "1873:15:10",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -470,7 +470,7 @@
                           },
                           {
                             "hexValue": "66616c7365",
-                            "id": 9838,
+                            "id": 9828,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -485,11 +485,11 @@
                             "value": "false"
                           },
                           {
-                            "id": 9839,
+                            "id": 9829,
                             "name": "becomeImplementationData",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 9809,
+                            "referencedDeclaration": 9799,
                             "src": "1913:24:10",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes_memory_ptr",
@@ -517,7 +517,7 @@
                             }
                           ],
                           "expression": {
-                            "id": 9834,
+                            "id": 9824,
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
@@ -528,7 +528,7 @@
                               "typeString": "abi"
                             }
                           },
-                          "id": 9835,
+                          "id": 9825,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -541,7 +541,7 @@
                             "typeString": "function (string memory) pure returns (bytes memory)"
                           }
                         },
-                        "id": 9840,
+                        "id": 9830,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -568,18 +568,18 @@
                           "typeString": "bytes memory"
                         }
                       ],
-                      "id": 9832,
+                      "id": 9822,
                       "name": "delegateTo",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9867,
+                      "referencedDeclaration": 9857,
                       "src": "1745:10:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_bytes_memory_ptr_$returns$_t_bytes_memory_ptr_$",
                         "typeString": "function (address,bytes memory) returns (bytes memory)"
                       }
                     },
-                    "id": 9841,
+                    "id": 9831,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -594,14 +594,14 @@
                       "typeString": "bytes memory"
                     }
                   },
-                  "id": 9842,
+                  "id": 9832,
                   "nodeType": "ExpressionStatement",
                   "src": "1745:206:10"
                 }
               ]
             },
             "documentation": {
-              "id": 9791,
+              "id": 9781,
               "nodeType": "StructuredDocumentation",
               "src": "382:496:10",
               "text": " @notice Construct a new money market\n @param underlying_ The address of the underlying asset\n @param comptroller_ The address of the Comptroller\n @param interestRateModel_ The address of the interest rate model\n @param name_ ERC-20 name of this token\n @param symbol_ ERC-20 symbol of this token\n @param implementation_ The address of the implementation the contract delegates to\n @param becomeImplementationData The encoded args for becomeImplementation"
@@ -612,17 +612,17 @@
             "name": "",
             "nameLocation": "-1:-1:-1",
             "parameters": {
-              "id": 9814,
+              "id": 9804,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9793,
+                  "id": 9783,
                   "mutability": "mutable",
                   "name": "underlying_",
                   "nameLocation": "906:11:10",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9844,
+                  "scope": 9834,
                   "src": "898:19:10",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -631,7 +631,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9792,
+                    "id": 9782,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "898:7:10",
@@ -645,33 +645,33 @@
                 },
                 {
                   "constant": false,
-                  "id": 9796,
+                  "id": 9786,
                   "mutability": "mutable",
                   "name": "comptroller_",
                   "nameLocation": "944:12:10",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9844,
+                  "scope": 9834,
                   "src": "923:33:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ComptrollerInterface_$20056",
+                    "typeIdentifier": "t_contract$_ComptrollerInterface_$20046",
                     "typeString": "contract ComptrollerInterface"
                   },
                   "typeName": {
-                    "id": 9795,
+                    "id": 9785,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 9794,
+                      "id": 9784,
                       "name": "ComptrollerInterface",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 20056,
+                      "referencedDeclaration": 20046,
                       "src": "923:20:10"
                     },
-                    "referencedDeclaration": 20056,
+                    "referencedDeclaration": 20046,
                     "src": "923:20:10",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ComptrollerInterface_$20056",
+                      "typeIdentifier": "t_contract$_ComptrollerInterface_$20046",
                       "typeString": "contract ComptrollerInterface"
                     }
                   },
@@ -679,12 +679,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 9798,
+                  "id": 9788,
                   "mutability": "mutable",
                   "name": "fuseAdmin_",
                   "nameLocation": "978:10:10",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9844,
+                  "scope": 9834,
                   "src": "962:26:10",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -693,7 +693,7 @@
                     "typeString": "address payable"
                   },
                   "typeName": {
-                    "id": 9797,
+                    "id": 9787,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "962:15:10",
@@ -707,33 +707,33 @@
                 },
                 {
                   "constant": false,
-                  "id": 9801,
+                  "id": 9791,
                   "mutability": "mutable",
                   "name": "interestRateModel_",
                   "nameLocation": "1012:18:10",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9844,
+                  "scope": 9834,
                   "src": "994:36:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_InterestRateModel_$24965",
+                    "typeIdentifier": "t_contract$_InterestRateModel_$24955",
                     "typeString": "contract InterestRateModel"
                   },
                   "typeName": {
-                    "id": 9800,
+                    "id": 9790,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 9799,
+                      "id": 9789,
                       "name": "InterestRateModel",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 24965,
+                      "referencedDeclaration": 24955,
                       "src": "994:17:10"
                     },
-                    "referencedDeclaration": 24965,
+                    "referencedDeclaration": 24955,
                     "src": "994:17:10",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_InterestRateModel_$24965",
+                      "typeIdentifier": "t_contract$_InterestRateModel_$24955",
                       "typeString": "contract InterestRateModel"
                     }
                   },
@@ -741,12 +741,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 9803,
+                  "id": 9793,
                   "mutability": "mutable",
                   "name": "name_",
                   "nameLocation": "1050:5:10",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9844,
+                  "scope": 9834,
                   "src": "1036:19:10",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -755,7 +755,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 9802,
+                    "id": 9792,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "1036:6:10",
@@ -768,12 +768,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 9805,
+                  "id": 9795,
                   "mutability": "mutable",
                   "name": "symbol_",
                   "nameLocation": "1075:7:10",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9844,
+                  "scope": 9834,
                   "src": "1061:21:10",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -782,7 +782,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 9804,
+                    "id": 9794,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "1061:6:10",
@@ -795,12 +795,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 9807,
+                  "id": 9797,
                   "mutability": "mutable",
                   "name": "implementation_",
                   "nameLocation": "1096:15:10",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9844,
+                  "scope": 9834,
                   "src": "1088:23:10",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -809,7 +809,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9806,
+                    "id": 9796,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1088:7:10",
@@ -823,12 +823,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 9809,
+                  "id": 9799,
                   "mutability": "mutable",
                   "name": "becomeImplementationData",
                   "nameLocation": "1130:24:10",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9844,
+                  "scope": 9834,
                   "src": "1117:37:10",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -837,7 +837,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 9808,
+                    "id": 9798,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1117:5:10",
@@ -850,12 +850,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 9811,
+                  "id": 9801,
                   "mutability": "mutable",
                   "name": "reserveFactorMantissa_",
                   "nameLocation": "1168:22:10",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9844,
+                  "scope": 9834,
                   "src": "1160:30:10",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -864,7 +864,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9810,
+                    "id": 9800,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1160:7:10",
@@ -877,12 +877,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 9813,
+                  "id": 9803,
                   "mutability": "mutable",
                   "name": "adminFeeMantissa_",
                   "nameLocation": "1204:17:10",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9844,
+                  "scope": 9834,
                   "src": "1196:25:10",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -891,7 +891,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9812,
+                    "id": 9802,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1196:7:10",
@@ -906,39 +906,39 @@
               "src": "892:333:10"
             },
             "returnParameters": {
-              "id": 9815,
+              "id": 9805,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1233:0:10"
             },
-            "scope": 9902,
+            "scope": 9892,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "public"
           },
           {
-            "id": 9867,
+            "id": 9857,
             "nodeType": "FunctionDefinition",
             "src": "2291:299:10",
             "body": {
-              "id": 9866,
+              "id": 9856,
               "nodeType": "Block",
               "src": "2378:212:10",
               "statements": [
                 {
                   "assignments": [
-                    9855,
-                    9857
+                    9845,
+                    9847
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 9855,
+                      "id": 9845,
                       "mutability": "mutable",
                       "name": "success",
                       "nameLocation": "2390:7:10",
                       "nodeType": "VariableDeclaration",
-                      "scope": 9866,
+                      "scope": 9856,
                       "src": "2385:12:10",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -947,7 +947,7 @@
                         "typeString": "bool"
                       },
                       "typeName": {
-                        "id": 9854,
+                        "id": 9844,
                         "name": "bool",
                         "nodeType": "ElementaryTypeName",
                         "src": "2385:4:10",
@@ -960,12 +960,12 @@
                     },
                     {
                       "constant": false,
-                      "id": 9857,
+                      "id": 9847,
                       "mutability": "mutable",
                       "name": "returnData",
                       "nameLocation": "2412:10:10",
                       "nodeType": "VariableDeclaration",
-                      "scope": 9866,
+                      "scope": 9856,
                       "src": "2399:23:10",
                       "stateVariable": false,
                       "storageLocation": "memory",
@@ -974,7 +974,7 @@
                         "typeString": "bytes"
                       },
                       "typeName": {
-                        "id": 9856,
+                        "id": 9846,
                         "name": "bytes",
                         "nodeType": "ElementaryTypeName",
                         "src": "2399:5:10",
@@ -986,15 +986,15 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 9862,
+                  "id": 9852,
                   "initialValue": {
                     "arguments": [
                       {
-                        "id": 9860,
+                        "id": 9850,
                         "name": "data",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9849,
+                        "referencedDeclaration": 9839,
                         "src": "2446:4:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
@@ -1010,18 +1010,18 @@
                         }
                       ],
                       "expression": {
-                        "id": 9858,
+                        "id": 9848,
                         "name": "callee",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9847,
+                        "referencedDeclaration": 9837,
                         "src": "2426:6:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         }
                       },
-                      "id": 9859,
+                      "id": 9849,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1034,7 +1034,7 @@
                         "typeString": "function (bytes memory) returns (bool,bytes memory)"
                       }
                     },
-                    "id": 9861,
+                    "id": 9851,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1143,46 +1143,46 @@
                   "evmVersion": "london",
                   "externalReferences": [
                     {
-                      "declaration": 9857,
+                      "declaration": 9847,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "2513:10:10",
                       "valueSize": 1
                     },
                     {
-                      "declaration": 9855,
+                      "declaration": 9845,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "2480:7:10",
                       "valueSize": 1
                     }
                   ],
-                  "id": 9863,
+                  "id": 9853,
                   "nodeType": "InlineAssembly",
                   "src": "2457:106:10"
                 },
                 {
                   "expression": {
-                    "id": 9864,
+                    "id": 9854,
                     "name": "returnData",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 9857,
+                    "referencedDeclaration": 9847,
                     "src": "2575:10:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory_ptr",
                       "typeString": "bytes memory"
                     }
                   },
-                  "functionReturnParameters": 9853,
-                  "id": 9865,
+                  "functionReturnParameters": 9843,
+                  "id": 9855,
                   "nodeType": "Return",
                   "src": "2568:17:10"
                 }
               ]
             },
             "documentation": {
-              "id": 9845,
+              "id": 9835,
               "nodeType": "StructuredDocumentation",
               "src": "1960:328:10",
               "text": " @notice Internal method to delegate execution to another contract\n @dev It returns to the external caller whatever the implementation returns or forwards reverts\n @param callee The contract to delegatecall\n @param data The raw data to delegatecall\n @return The returned bytes from the delegatecall"
@@ -1193,17 +1193,17 @@
             "name": "delegateTo",
             "nameLocation": "2300:10:10",
             "parameters": {
-              "id": 9850,
+              "id": 9840,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9847,
+                  "id": 9837,
                   "mutability": "mutable",
                   "name": "callee",
                   "nameLocation": "2319:6:10",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9867,
+                  "scope": 9857,
                   "src": "2311:14:10",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1212,7 +1212,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9846,
+                    "id": 9836,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2311:7:10",
@@ -1226,12 +1226,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 9849,
+                  "id": 9839,
                   "mutability": "mutable",
                   "name": "data",
                   "nameLocation": "2340:4:10",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9867,
+                  "scope": 9857,
                   "src": "2327:17:10",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1240,7 +1240,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 9848,
+                    "id": 9838,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "2327:5:10",
@@ -1255,17 +1255,17 @@
               "src": "2310:35:10"
             },
             "returnParameters": {
-              "id": 9853,
+              "id": 9843,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9852,
+                  "id": 9842,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9867,
+                  "scope": 9857,
                   "src": "2364:12:10",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1274,7 +1274,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 9851,
+                    "id": 9841,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "2364:5:10",
@@ -1288,23 +1288,23 @@
               ],
               "src": "2363:14:10"
             },
-            "scope": 9902,
+            "scope": 9892,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "internal"
           },
           {
-            "id": 9872,
+            "id": 9862,
             "nodeType": "FunctionDefinition",
             "src": "2769:29:10",
             "body": {
-              "id": 9871,
+              "id": 9861,
               "nodeType": "Block",
               "src": "2796:2:10",
               "statements": []
             },
             "documentation": {
-              "id": 9868,
+              "id": 9858,
               "nodeType": "StructuredDocumentation",
               "src": "2594:172:10",
               "text": " @notice Delegates execution to an implementation contract\n @dev It returns to the external caller whatever the implementation returns or forwards reverts"
@@ -1315,28 +1315,28 @@
             "name": "",
             "nameLocation": "-1:-1:-1",
             "parameters": {
-              "id": 9869,
+              "id": 9859,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2776:2:10"
             },
             "returnParameters": {
-              "id": 9870,
+              "id": 9860,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2796:0:10"
             },
-            "scope": 9902,
+            "scope": 9892,
             "stateMutability": "payable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 9901,
+            "id": 9891,
             "nodeType": "FunctionDefinition",
             "src": "2802:683:10",
             "body": {
-              "id": 9900,
+              "id": 9890,
               "nodeType": "Block",
               "src": "2830:655:10",
               "statements": [
@@ -1348,14 +1348,14 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 9879,
+                        "id": 9869,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "expression": {
-                            "id": 9876,
+                            "id": 9866,
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
@@ -1366,7 +1366,7 @@
                               "typeString": "msg"
                             }
                           },
-                          "id": 9877,
+                          "id": 9867,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -1383,7 +1383,7 @@
                         "operator": "==",
                         "rightExpression": {
                           "hexValue": "30",
-                          "id": 9878,
+                          "id": 9868,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -1405,7 +1405,7 @@
                       },
                       {
                         "hexValue": "43457263323044656c656761746f723a66616c6c6261636b3a2063616e6e6f742073656e642076616c756520746f2066616c6c6261636b",
-                        "id": 9880,
+                        "id": 9870,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -1431,7 +1431,7 @@
                           "typeString": "literal_string \"CErc20Delegator:fallback: cannot send value to fallback\""
                         }
                       ],
-                      "id": 9875,
+                      "id": 9865,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
@@ -1445,7 +1445,7 @@
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 9881,
+                    "id": 9871,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1460,7 +1460,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 9882,
+                  "id": 9872,
                   "nodeType": "ExpressionStatement",
                   "src": "2880:82:10"
                 },
@@ -1468,11 +1468,11 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 9884,
+                        "id": 9874,
                         "name": "implementation",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9196,
+                        "referencedDeclaration": 9186,
                         "src": "3022:14:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1483,7 +1483,7 @@
                         "arguments": [
                           {
                             "hexValue": "5f707265706172652829",
-                            "id": 9887,
+                            "id": 9877,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -1506,7 +1506,7 @@
                             }
                           ],
                           "expression": {
-                            "id": 9885,
+                            "id": 9875,
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
@@ -1517,7 +1517,7 @@
                               "typeString": "abi"
                             }
                           },
-                          "id": 9886,
+                          "id": 9876,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -1530,7 +1530,7 @@
                             "typeString": "function (string memory) pure returns (bytes memory)"
                           }
                         },
-                        "id": 9888,
+                        "id": 9878,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -1557,18 +1557,18 @@
                           "typeString": "bytes memory"
                         }
                       ],
-                      "id": 9883,
+                      "id": 9873,
                       "name": "delegateTo",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 9867,
+                      "referencedDeclaration": 9857,
                       "src": "3011:10:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_bytes_memory_ptr_$returns$_t_bytes_memory_ptr_$",
                         "typeString": "function (address,bytes memory) returns (bytes memory)"
                       }
                     },
-                    "id": 9889,
+                    "id": 9879,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1583,24 +1583,24 @@
                       "typeString": "bytes memory"
                     }
                   },
-                  "id": 9890,
+                  "id": 9880,
                   "nodeType": "ExpressionStatement",
                   "src": "3011:65:10"
                 },
                 {
                   "assignments": [
-                    9892,
+                    9882,
                     null
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 9892,
+                      "id": 9882,
                       "mutability": "mutable",
                       "name": "success",
                       "nameLocation": "3151:7:10",
                       "nodeType": "VariableDeclaration",
-                      "scope": 9900,
+                      "scope": 9890,
                       "src": "3146:12:10",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -1609,7 +1609,7 @@
                         "typeString": "bool"
                       },
                       "typeName": {
-                        "id": 9891,
+                        "id": 9881,
                         "name": "bool",
                         "nodeType": "ElementaryTypeName",
                         "src": "3146:4:10",
@@ -1622,12 +1622,12 @@
                     },
                     null
                   ],
-                  "id": 9898,
+                  "id": 9888,
                   "initialValue": {
                     "arguments": [
                       {
                         "expression": {
-                          "id": 9895,
+                          "id": 9885,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
@@ -1638,7 +1638,7 @@
                             "typeString": "msg"
                           }
                         },
-                        "id": 9896,
+                        "id": 9886,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1660,18 +1660,18 @@
                         }
                       ],
                       "expression": {
-                        "id": 9893,
+                        "id": 9883,
                         "name": "implementation",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9196,
+                        "referencedDeclaration": 9186,
                         "src": "3164:14:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         }
                       },
-                      "id": 9894,
+                      "id": 9884,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1684,7 +1684,7 @@
                         "typeString": "function (bytes memory) returns (bool,bytes memory)"
                       }
                     },
-                    "id": 9897,
+                    "id": 9887,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1878,14 +1878,14 @@
                   "evmVersion": "london",
                   "externalReferences": [
                     {
-                      "declaration": 9892,
+                      "declaration": 9882,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "3327:7:10",
                       "valueSize": 1
                     }
                   ],
-                  "id": 9899,
+                  "id": 9889,
                   "nodeType": "InlineAssembly",
                   "src": "3208:273:10"
                 }
@@ -1897,18 +1897,18 @@
             "name": "",
             "nameLocation": "-1:-1:-1",
             "parameters": {
-              "id": 9873,
+              "id": 9863,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2810:2:10"
             },
             "returnParameters": {
-              "id": 9874,
+              "id": 9864,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2830:0:10"
             },
-            "scope": 9902,
+            "scope": 9892,
             "stateMutability": "payable",
             "virtual": false,
             "visibility": "external"
@@ -1918,13 +1918,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 9789,
+              "id": 9779,
               "name": "CDelegationStorage",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 9197,
+              "referencedDeclaration": 9187,
               "src": "359:18:10"
             },
-            "id": 9790,
+            "id": 9780,
             "nodeType": "InheritanceSpecifier",
             "src": "359:18:10"
           }
@@ -1933,19 +1933,19 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 9788,
+          "id": 9778,
           "nodeType": "StructuredDocumentation",
           "src": "172:158:10",
           "text": " @title Compound's CErc20Delegator Contract\n @notice CTokens which wrap an EIP-20 underlying and delegate to an implementation\n @author Compound"
         },
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          9902,
-          9197
+          9892,
+          9187
         ],
         "name": "CErc20Delegator",
         "nameLocation": "340:15:10",
-        "scope": 9903,
+        "scope": 9893,
         "usedErrors": []
       }
     ],

@@ -47,16 +47,13 @@ contract FusePoolLens is Initializable {
   ) public initializer {
     require(address(_directory) != address(0), "FusePoolDirectory instance cannot be the zero address.");
     require(
-      _hardcodedAddresses.length > 0 &&
-        _hardcodedAddresses.length == _hardcodedNames.length &&
-        _hardcodedAddresses.length == _hardcodedSymbols.length,
-      "No hardcoded addresses supplied or array lengths not equal."
+      _hardcodedAddresses.length == _hardcodedNames.length && _hardcodedAddresses.length == _hardcodedSymbols.length,
+      "Hardcoded addresses lengths not equal."
     );
     require(
-      _uniswapLPTokenNames.length > 0 &&
-        _uniswapLPTokenNames.length == _uniswapLPTokenSymbols.length &&
+      _uniswapLPTokenNames.length == _uniswapLPTokenSymbols.length &&
         _uniswapLPTokenNames.length == _uniswapLPTokenDisplayNames.length,
-      "No uniswap LP token names supplied or array lengths not equal."
+      "Uniswap LP token names lengths not equal."
     );
 
     directory = _directory;

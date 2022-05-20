@@ -251,23 +251,23 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/flux/CLV2V3Interface.sol",
-    "id": 34031,
+    "id": 34021,
     "exportedSymbols": {
       "CLInterface": [
-        34021
+        34011
       ],
       "CLV2V3Interface": [
-        34030
+        34020
       ],
       "CLV3Interface": [
-        34076
+        34066
       ]
     },
     "nodeType": "SourceUnit",
     "src": "32:194:84",
     "nodes": [
       {
-        "id": 34023,
+        "id": 34013,
         "nodeType": "PragmaDirective",
         "src": "32:24:84",
         "literals": [
@@ -278,56 +278,56 @@
         ]
       },
       {
-        "id": 34024,
+        "id": 34014,
         "nodeType": "ImportDirective",
         "src": "58:27:84",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/flux/CLInterface.sol",
         "file": "./CLInterface.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 34031,
-        "sourceUnit": 34022,
+        "scope": 34021,
+        "sourceUnit": 34012,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 34025,
+        "id": 34015,
         "nodeType": "ImportDirective",
         "src": "86:29:84",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/flux/CLV3Interface.sol",
         "file": "./CLV3Interface.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 34031,
-        "sourceUnit": 34077,
+        "scope": 34021,
+        "sourceUnit": 34067,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 34030,
+        "id": 34020,
         "nodeType": "ContractDefinition",
         "src": "165:60:84",
         "abstract": false,
         "baseContracts": [
           {
             "baseName": {
-              "id": 34026,
+              "id": 34016,
               "name": "CLInterface",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 34021,
+              "referencedDeclaration": 34011,
               "src": "194:11:84"
             },
-            "id": 34027,
+            "id": 34017,
             "nodeType": "InheritanceSpecifier",
             "src": "194:11:84"
           },
           {
             "baseName": {
-              "id": 34028,
+              "id": 34018,
               "name": "CLV3Interface",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 34076,
+              "referencedDeclaration": 34066,
               "src": "207:13:84"
             },
-            "id": 34029,
+            "id": 34019,
             "nodeType": "InheritanceSpecifier",
             "src": "207:13:84"
           }
@@ -337,13 +337,13 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          34030,
-          34076,
-          34021
+          34020,
+          34066,
+          34011
         ],
         "name": "CLV2V3Interface",
         "nameLocation": "175:15:84",
-        "scope": 34031,
+        "scope": 34021,
         "usedErrors": []
       }
     ],

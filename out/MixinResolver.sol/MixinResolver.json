@@ -26,20 +26,20 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/synthetix/MixinResolver.sol",
-    "id": 35756,
+    "id": 35746,
     "exportedSymbols": {
       "AddressResolver": [
-        35712
+        35702
       ],
       "MixinResolver": [
-        35755
+        35745
       ]
     },
     "nodeType": "SourceUnit",
     "src": "32:121:112",
     "nodes": [
       {
-        "id": 35750,
+        "id": 35740,
         "nodeType": "PragmaDirective",
         "src": "32:24:112",
         "literals": [
@@ -50,24 +50,24 @@
         ]
       },
       {
-        "id": 35751,
+        "id": 35741,
         "nodeType": "ImportDirective",
         "src": "58:31:112",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/synthetix/AddressResolver.sol",
         "file": "./AddressResolver.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 35756,
-        "sourceUnit": 35713,
+        "scope": 35746,
+        "sourceUnit": 35703,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 35755,
+        "id": 35745,
         "nodeType": "ContractDefinition",
         "src": "91:61:112",
         "nodes": [
           {
-            "id": 35754,
+            "id": 35744,
             "nodeType": "VariableDeclaration",
             "src": "118:31:112",
             "constant": false,
@@ -75,27 +75,27 @@
             "mutability": "mutable",
             "name": "resolver",
             "nameLocation": "141:8:112",
-            "scope": 35755,
+            "scope": 35745,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_AddressResolver_$35712",
+              "typeIdentifier": "t_contract$_AddressResolver_$35702",
               "typeString": "contract AddressResolver"
             },
             "typeName": {
-              "id": 35753,
+              "id": 35743,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 35752,
+                "id": 35742,
                 "name": "AddressResolver",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 35712,
+                "referencedDeclaration": 35702,
                 "src": "118:15:112"
               },
-              "referencedDeclaration": 35712,
+              "referencedDeclaration": 35702,
               "src": "118:15:112",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_AddressResolver_$35712",
+                "typeIdentifier": "t_contract$_AddressResolver_$35702",
                 "typeString": "contract AddressResolver"
               }
             },
@@ -109,11 +109,11 @@
         "contractKind": "contract",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          35755
+          35745
         ],
         "name": "MixinResolver",
         "nameLocation": "100:13:112",
-        "scope": 35756,
+        "scope": 35746,
         "usedErrors": []
       }
     ],

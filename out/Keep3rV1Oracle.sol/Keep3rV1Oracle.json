@@ -79,17 +79,17 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/keep3r/Keep3rV1Oracle.sol",
-    "id": 34549,
+    "id": 34539,
     "exportedSymbols": {
       "Keep3rV1Oracle": [
-        34548
+        34538
       ]
     },
     "nodeType": "SourceUnit",
     "src": "32:379:93",
     "nodes": [
       {
-        "id": 34522,
+        "id": 34512,
         "nodeType": "PragmaDirective",
         "src": "32:24:93",
         "literals": [
@@ -100,24 +100,24 @@
         ]
       },
       {
-        "id": 34548,
+        "id": 34538,
         "nodeType": "ContractDefinition",
         "src": "58:352:93",
         "nodes": [
           {
-            "id": 34529,
+            "id": 34519,
             "nodeType": "StructDefinition",
             "src": "95:107:93",
             "canonicalName": "Keep3rV1Oracle.Observation",
             "members": [
               {
                 "constant": false,
-                "id": 34524,
+                "id": 34514,
                 "mutability": "mutable",
                 "name": "timestamp",
                 "nameLocation": "128:9:93",
                 "nodeType": "VariableDeclaration",
-                "scope": 34529,
+                "scope": 34519,
                 "src": "120:17:93",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -126,7 +126,7 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 34523,
+                  "id": 34513,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "120:7:93",
@@ -139,12 +139,12 @@
               },
               {
                 "constant": false,
-                "id": 34526,
+                "id": 34516,
                 "mutability": "mutable",
                 "name": "price0Cumulative",
                 "nameLocation": "151:16:93",
                 "nodeType": "VariableDeclaration",
-                "scope": 34529,
+                "scope": 34519,
                 "src": "143:24:93",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -153,7 +153,7 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 34525,
+                  "id": 34515,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "143:7:93",
@@ -166,12 +166,12 @@
               },
               {
                 "constant": false,
-                "id": 34528,
+                "id": 34518,
                 "mutability": "mutable",
                 "name": "price1Cumulative",
                 "nameLocation": "181:16:93",
                 "nodeType": "VariableDeclaration",
-                "scope": 34529,
+                "scope": 34519,
                 "src": "173:24:93",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -180,7 +180,7 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 34527,
+                  "id": 34517,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "173:7:93",
@@ -194,11 +194,11 @@
             ],
             "name": "Observation",
             "nameLocation": "102:11:93",
-            "scope": 34548,
+            "scope": 34538,
             "visibility": "public"
           },
           {
-            "id": 34534,
+            "id": 34524,
             "nodeType": "FunctionDefinition",
             "src": "206:59:93",
             "functionSelector": "c45a0155",
@@ -208,23 +208,23 @@
             "name": "factory",
             "nameLocation": "215:7:93",
             "parameters": {
-              "id": 34530,
+              "id": 34520,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "222:2:93"
             },
             "returnParameters": {
-              "id": 34533,
+              "id": 34523,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34532,
+                  "id": 34522,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34534,
+                  "scope": 34524,
                   "src": "256:7:93",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -233,7 +233,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 34531,
+                    "id": 34521,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "256:7:93",
@@ -248,13 +248,13 @@
               ],
               "src": "255:9:93"
             },
-            "scope": 34548,
+            "scope": 34538,
             "stateMutability": "pure",
             "virtual": true,
             "visibility": "external"
           },
           {
-            "id": 34540,
+            "id": 34530,
             "nodeType": "VariableDeclaration",
             "src": "269:53:93",
             "constant": false,
@@ -262,17 +262,17 @@
             "mutability": "mutable",
             "name": "observations",
             "nameLocation": "310:12:93",
-            "scope": 34548,
+            "scope": 34538,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_struct$_Observation_$34529_storage_$dyn_storage_$",
+              "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_struct$_Observation_$34519_storage_$dyn_storage_$",
               "typeString": "mapping(address => struct Keep3rV1Oracle.Observation[])"
             },
             "typeName": {
-              "id": 34539,
+              "id": 34529,
               "keyType": {
-                "id": 34535,
+                "id": 34525,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "277:7:93",
@@ -284,32 +284,32 @@
               "nodeType": "Mapping",
               "src": "269:33:93",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_struct$_Observation_$34529_storage_$dyn_storage_$",
+                "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_struct$_Observation_$34519_storage_$dyn_storage_$",
                 "typeString": "mapping(address => struct Keep3rV1Oracle.Observation[])"
               },
               "valueType": {
                 "baseType": {
-                  "id": 34537,
+                  "id": 34527,
                   "nodeType": "UserDefinedTypeName",
                   "pathNode": {
-                    "id": 34536,
+                    "id": 34526,
                     "name": "Observation",
                     "nodeType": "IdentifierPath",
-                    "referencedDeclaration": 34529,
+                    "referencedDeclaration": 34519,
                     "src": "288:11:93"
                   },
-                  "referencedDeclaration": 34529,
+                  "referencedDeclaration": 34519,
                   "src": "288:11:93",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Observation_$34529_storage_ptr",
+                    "typeIdentifier": "t_struct$_Observation_$34519_storage_ptr",
                     "typeString": "struct Keep3rV1Oracle.Observation"
                   }
                 },
-                "id": 34538,
+                "id": 34528,
                 "nodeType": "ArrayTypeName",
                 "src": "288:13:93",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_array$_t_struct$_Observation_$34529_storage_$dyn_storage_ptr",
+                  "typeIdentifier": "t_array$_t_struct$_Observation_$34519_storage_$dyn_storage_ptr",
                   "typeString": "struct Keep3rV1Oracle.Observation[]"
                 }
               }
@@ -317,7 +317,7 @@
             "visibility": "public"
           },
           {
-            "id": 34547,
+            "id": 34537,
             "nodeType": "FunctionDefinition",
             "src": "327:81:93",
             "functionSelector": "81bfb885",
@@ -327,17 +327,17 @@
             "name": "observationLength",
             "nameLocation": "336:17:93",
             "parameters": {
-              "id": 34543,
+              "id": 34533,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34542,
+                  "id": 34532,
                   "mutability": "mutable",
                   "name": "pair",
                   "nameLocation": "362:4:93",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34547,
+                  "scope": 34537,
                   "src": "354:12:93",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -346,7 +346,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 34541,
+                    "id": 34531,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "354:7:93",
@@ -362,17 +362,17 @@
               "src": "353:14:93"
             },
             "returnParameters": {
-              "id": 34546,
+              "id": 34536,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34545,
+                  "id": 34535,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34547,
+                  "scope": 34537,
                   "src": "399:7:93",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -381,7 +381,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 34544,
+                    "id": 34534,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "399:7:93",
@@ -395,7 +395,7 @@
               ],
               "src": "398:9:93"
             },
-            "scope": 34548,
+            "scope": 34538,
             "stateMutability": "view",
             "virtual": true,
             "visibility": "external"
@@ -408,11 +408,11 @@
         "contractKind": "contract",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          34548
+          34538
         ],
         "name": "Keep3rV1Oracle",
         "nameLocation": "76:14:93",
-        "scope": 34549,
+        "scope": 34539,
         "usedErrors": []
       }
     ],

@@ -232,20 +232,20 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/curve/ICurveStableSwap.sol",
-    "id": 33974,
+    "id": 33964,
     "exportedSymbols": {
       "ICurveStableSwap": [
-        33973
+        33963
       ],
       "IERC20Upgradeable": [
-        90152
+        89909
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:354:82",
     "nodes": [
       {
-        "id": 33953,
+        "id": 33943,
         "nodeType": "PragmaDirective",
         "src": "39:24:82",
         "literals": [
@@ -256,24 +256,24 @@
         ]
       },
       {
-        "id": 33954,
+        "id": 33944,
         "nodeType": "ImportDirective",
         "src": "65:88:82",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 33974,
-        "sourceUnit": 90153,
+        "scope": 33964,
+        "sourceUnit": 89910,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 33973,
+        "id": 33963,
         "nodeType": "ContractDefinition",
         "src": "155:237:82",
         "nodes": [
           {
-            "id": 33963,
+            "id": 33953,
             "nodeType": "FunctionDefinition",
             "src": "207:66:82",
             "functionSelector": "14f05979",
@@ -283,23 +283,23 @@
             "name": "get_balances",
             "nameLocation": "216:12:82",
             "parameters": {
-              "id": 33957,
+              "id": 33947,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "228:2:82"
             },
             "returnParameters": {
-              "id": 33962,
+              "id": 33952,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33961,
+                  "id": 33951,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33963,
+                  "scope": 33953,
                   "src": "254:17:82",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -309,7 +309,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 33958,
+                      "id": 33948,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "254:7:82",
@@ -318,10 +318,10 @@
                         "typeString": "uint256"
                       }
                     },
-                    "id": 33960,
+                    "id": 33950,
                     "length": {
                       "hexValue": "32",
-                      "id": 33959,
+                      "id": 33949,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -347,13 +347,13 @@
               ],
               "src": "253:19:82"
             },
-            "scope": 33973,
+            "scope": 33963,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 33972,
+            "id": 33962,
             "nodeType": "FunctionDefinition",
             "src": "277:113:82",
             "functionSelector": "1a4d01d2",
@@ -363,17 +363,17 @@
             "name": "remove_liquidity_one_coin",
             "nameLocation": "286:25:82",
             "parameters": {
-              "id": 33970,
+              "id": 33960,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33965,
+                  "id": 33955,
                   "mutability": "mutable",
                   "name": "_token_amount",
                   "nameLocation": "325:13:82",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33972,
+                  "scope": 33962,
                   "src": "317:21:82",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -382,7 +382,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 33964,
+                    "id": 33954,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "317:7:82",
@@ -395,12 +395,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 33967,
+                  "id": 33957,
                   "mutability": "mutable",
                   "name": "i",
                   "nameLocation": "351:1:82",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33972,
+                  "scope": 33962,
                   "src": "344:8:82",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -409,7 +409,7 @@
                     "typeString": "int128"
                   },
                   "typeName": {
-                    "id": 33966,
+                    "id": 33956,
                     "name": "int128",
                     "nodeType": "ElementaryTypeName",
                     "src": "344:6:82",
@@ -422,12 +422,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 33969,
+                  "id": 33959,
                   "mutability": "mutable",
                   "name": "min_amount",
                   "nameLocation": "366:10:82",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33972,
+                  "scope": 33962,
                   "src": "358:18:82",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -436,7 +436,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 33968,
+                    "id": 33958,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "358:7:82",
@@ -451,12 +451,12 @@
               "src": "311:69:82"
             },
             "returnParameters": {
-              "id": 33971,
+              "id": 33961,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "389:0:82"
             },
-            "scope": 33973,
+            "scope": 33963,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -466,13 +466,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 33955,
+              "id": 33945,
               "name": "IERC20Upgradeable",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 90152,
+              "referencedDeclaration": 89909,
               "src": "185:17:82"
             },
-            "id": 33956,
+            "id": 33946,
             "nodeType": "InheritanceSpecifier",
             "src": "185:17:82"
           }
@@ -482,12 +482,12 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          33973,
-          90152
+          33963,
+          89909
         ],
         "name": "ICurveStableSwap",
         "nameLocation": "165:16:82",
-        "scope": 33974,
+        "scope": 33964,
         "usedErrors": []
       }
     ],

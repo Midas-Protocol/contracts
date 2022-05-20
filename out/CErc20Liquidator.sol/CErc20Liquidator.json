@@ -47,29 +47,29 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/liquidators/CErc20Liquidator.sol",
-    "id": 37753,
+    "id": 37743,
     "exportedSymbols": {
       "CErc20Liquidator": [
-        37752
+        37742
       ],
       "ICErc20": [
-        33461
+        33451
       ],
       "ICToken": [
-        33610
+        33600
       ],
       "IERC20Upgradeable": [
-        90152
+        89909
       ],
       "IRedemptionStrategy": [
-        39304
+        39294
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:1582:131",
     "nodes": [
       {
-        "id": 37685,
+        "id": 37675,
         "nodeType": "PragmaDirective",
         "src": "39:24:131",
         "literals": [
@@ -80,112 +80,112 @@
         ]
       },
       {
-        "id": 37686,
+        "id": 37676,
         "nodeType": "ImportDirective",
         "src": "65:88:131",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 37753,
-        "sourceUnit": 90153,
+        "scope": 37743,
+        "sourceUnit": 89910,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 37687,
+        "id": 37677,
         "nodeType": "ImportDirective",
         "src": "155:42:131",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICErc20.sol",
         "file": "../external/compound/ICErc20.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 37753,
-        "sourceUnit": 33462,
+        "scope": 37743,
+        "sourceUnit": 33452,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 37688,
+        "id": 37678,
         "nodeType": "ImportDirective",
         "src": "199:35:131",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/liquidators/IRedemptionStrategy.sol",
         "file": "./IRedemptionStrategy.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 37753,
-        "sourceUnit": 39305,
+        "scope": 37743,
+        "sourceUnit": 39295,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 37752,
+        "id": 37742,
         "nodeType": "ContractDefinition",
         "src": "466:1154:131",
         "nodes": [
           {
-            "id": 37751,
+            "id": 37741,
             "nodeType": "FunctionDefinition",
             "src": "1017:601:131",
             "baseFunctions": [
-              39303
+              39293
             ],
             "body": {
-              "id": 37750,
+              "id": 37740,
               "nodeType": "Block",
               "src": "1207:411:131",
               "statements": [
                 {
                   "assignments": [
-                    37710
+                    37700
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 37710,
+                      "id": 37700,
                       "mutability": "mutable",
                       "name": "cErc20",
                       "nameLocation": "1306:6:131",
                       "nodeType": "VariableDeclaration",
-                      "scope": 37750,
+                      "scope": 37740,
                       "src": "1298:14:131",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_ICErc20_$33461",
+                        "typeIdentifier": "t_contract$_ICErc20_$33451",
                         "typeString": "contract ICErc20"
                       },
                       "typeName": {
-                        "id": 37709,
+                        "id": 37699,
                         "nodeType": "UserDefinedTypeName",
                         "pathNode": {
-                          "id": 37708,
+                          "id": 37698,
                           "name": "ICErc20",
                           "nodeType": "IdentifierPath",
-                          "referencedDeclaration": 33461,
+                          "referencedDeclaration": 33451,
                           "src": "1298:7:131"
                         },
-                        "referencedDeclaration": 33461,
+                        "referencedDeclaration": 33451,
                         "src": "1298:7:131",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_ICErc20_$33461",
+                          "typeIdentifier": "t_contract$_ICErc20_$33451",
                           "typeString": "contract ICErc20"
                         }
                       },
                       "visibility": "internal"
                     }
                   ],
-                  "id": 37717,
+                  "id": 37707,
                   "initialValue": {
                     "arguments": [
                       {
                         "arguments": [
                           {
-                            "id": 37714,
+                            "id": 37704,
                             "name": "inputToken",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 37695,
+                            "referencedDeclaration": 37685,
                             "src": "1331:10:131",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                              "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                               "typeString": "contract IERC20Upgradeable"
                             }
                           }
@@ -193,11 +193,11 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                              "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                               "typeString": "contract IERC20Upgradeable"
                             }
                           ],
-                          "id": 37713,
+                          "id": 37703,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -209,14 +209,14 @@
                             "typeString": "type(address)"
                           },
                           "typeName": {
-                            "id": 37712,
+                            "id": 37702,
                             "name": "address",
                             "nodeType": "ElementaryTypeName",
                             "src": "1323:7:131",
                             "typeDescriptions": {}
                           }
                         },
-                        "id": 37715,
+                        "id": 37705,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -239,18 +239,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 37711,
+                      "id": 37701,
                       "name": "ICErc20",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 33461,
+                      "referencedDeclaration": 33451,
                       "src": "1315:7:131",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_contract$_ICErc20_$33461_$",
+                        "typeIdentifier": "t_type$_t_contract$_ICErc20_$33451_$",
                         "typeString": "type(contract ICErc20)"
                       }
                     },
-                    "id": 37716,
+                    "id": 37706,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -261,7 +261,7 @@
                     "src": "1315:28:131",
                     "tryCall": false,
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ICErc20_$33461",
+                      "typeIdentifier": "t_contract$_ICErc20_$33451",
                       "typeString": "contract ICErc20"
                     }
                   },
@@ -270,17 +270,17 @@
                 },
                 {
                   "assignments": [
-                    37719
+                    37709
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 37719,
+                      "id": 37709,
                       "mutability": "mutable",
                       "name": "redeemResult",
                       "nameLocation": "1357:12:131",
                       "nodeType": "VariableDeclaration",
-                      "scope": 37750,
+                      "scope": 37740,
                       "src": "1349:20:131",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -289,7 +289,7 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 37718,
+                        "id": 37708,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "1349:7:131",
@@ -301,15 +301,15 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 37724,
+                  "id": 37714,
                   "initialValue": {
                     "arguments": [
                       {
-                        "id": 37722,
+                        "id": 37712,
                         "name": "inputAmount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 37697,
+                        "referencedDeclaration": 37687,
                         "src": "1386:11:131",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -325,32 +325,32 @@
                         }
                       ],
                       "expression": {
-                        "id": 37720,
+                        "id": 37710,
                         "name": "cErc20",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 37710,
+                        "referencedDeclaration": 37700,
                         "src": "1372:6:131",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_ICErc20_$33461",
+                          "typeIdentifier": "t_contract$_ICErc20_$33451",
                           "typeString": "contract ICErc20"
                         }
                       },
-                      "id": 37721,
+                      "id": 37711,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "redeem",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 33602,
+                      "referencedDeclaration": 33592,
                       "src": "1372:13:131",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_uint256_$returns$_t_uint256_$",
                         "typeString": "function (uint256) external returns (uint256)"
                       }
                     },
-                    "id": 37723,
+                    "id": 37713,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -376,17 +376,17 @@
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 37728,
+                        "id": 37718,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
-                          "id": 37726,
+                          "id": 37716,
                           "name": "redeemResult",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 37719,
+                          "referencedDeclaration": 37709,
                           "src": "1412:12:131",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -397,7 +397,7 @@
                         "operator": "==",
                         "rightExpression": {
                           "hexValue": "30",
-                          "id": 37727,
+                          "id": 37717,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -419,7 +419,7 @@
                       },
                       {
                         "hexValue": "4572726f722063616c6c696e672072656465656d696e67207365697a6564206345726332303a206572726f7220636f6465206e6f7420657175616c20746f2030",
-                        "id": 37729,
+                        "id": 37719,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -445,7 +445,7 @@
                           "typeString": "literal_string \"Error calling redeeming seized cErc20: error code not equal to 0\""
                         }
                       ],
-                      "id": 37725,
+                      "id": 37715,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
@@ -459,7 +459,7 @@
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 37730,
+                    "id": 37720,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -474,26 +474,26 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 37731,
+                  "id": 37721,
                   "nodeType": "ExpressionStatement",
                   "src": "1404:94:131"
                 },
                 {
                   "expression": {
-                    "id": 37738,
+                    "id": 37728,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
-                      "id": 37732,
+                      "id": 37722,
                       "name": "outputToken",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 37704,
+                      "referencedDeclaration": 37694,
                       "src": "1504:11:131",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                        "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                         "typeString": "contract IERC20Upgradeable"
                       }
                     },
@@ -506,32 +506,32 @@
                           "expression": {
                             "argumentTypes": [],
                             "expression": {
-                              "id": 37734,
+                              "id": 37724,
                               "name": "cErc20",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 37710,
+                              "referencedDeclaration": 37700,
                               "src": "1536:6:131",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_ICErc20_$33461",
+                                "typeIdentifier": "t_contract$_ICErc20_$33451",
                                 "typeString": "contract ICErc20"
                               }
                             },
-                            "id": 37735,
+                            "id": 37725,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "underlying",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 33448,
+                            "referencedDeclaration": 33438,
                             "src": "1536:17:131",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
                               "typeString": "function () view external returns (address)"
                             }
                           },
-                          "id": 37736,
+                          "id": 37726,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -554,18 +554,18 @@
                             "typeString": "address"
                           }
                         ],
-                        "id": 37733,
+                        "id": 37723,
                         "name": "IERC20Upgradeable",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 90152,
+                        "referencedDeclaration": 89909,
                         "src": "1518:17:131",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_IERC20Upgradeable_$90152_$",
+                          "typeIdentifier": "t_type$_t_contract$_IERC20Upgradeable_$89909_$",
                           "typeString": "type(contract IERC20Upgradeable)"
                         }
                       },
-                      "id": 37737,
+                      "id": 37727,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -576,33 +576,33 @@
                       "src": "1518:38:131",
                       "tryCall": false,
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                        "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                         "typeString": "contract IERC20Upgradeable"
                       }
                     },
                     "src": "1504:52:131",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                       "typeString": "contract IERC20Upgradeable"
                     }
                   },
-                  "id": 37739,
+                  "id": 37729,
                   "nodeType": "ExpressionStatement",
                   "src": "1504:52:131"
                 },
                 {
                   "expression": {
-                    "id": 37748,
+                    "id": 37738,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
-                      "id": 37740,
+                      "id": 37730,
                       "name": "outputAmount",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 37706,
+                      "referencedDeclaration": 37696,
                       "src": "1562:12:131",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -616,14 +616,14 @@
                         {
                           "arguments": [
                             {
-                              "id": 37745,
+                              "id": 37735,
                               "name": "this",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
                               "referencedDeclaration": -28,
                               "src": "1607:4:131",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_CErc20Liquidator_$37752",
+                                "typeIdentifier": "t_contract$_CErc20Liquidator_$37742",
                                 "typeString": "contract CErc20Liquidator"
                               }
                             }
@@ -631,11 +631,11 @@
                           "expression": {
                             "argumentTypes": [
                               {
-                                "typeIdentifier": "t_contract$_CErc20Liquidator_$37752",
+                                "typeIdentifier": "t_contract$_CErc20Liquidator_$37742",
                                 "typeString": "contract CErc20Liquidator"
                               }
                             ],
-                            "id": 37744,
+                            "id": 37734,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -647,14 +647,14 @@
                               "typeString": "type(address)"
                             },
                             "typeName": {
-                              "id": 37743,
+                              "id": 37733,
                               "name": "address",
                               "nodeType": "ElementaryTypeName",
                               "src": "1599:7:131",
                               "typeDescriptions": {}
                             }
                           },
-                          "id": 37746,
+                          "id": 37736,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -678,32 +678,32 @@
                           }
                         ],
                         "expression": {
-                          "id": 37741,
+                          "id": 37731,
                           "name": "outputToken",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 37704,
+                          "referencedDeclaration": 37694,
                           "src": "1577:11:131",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                            "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                             "typeString": "contract IERC20Upgradeable"
                           }
                         },
-                        "id": 37742,
+                        "id": 37732,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "balanceOf",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 90109,
+                        "referencedDeclaration": 89866,
                         "src": "1577:21:131",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_uint256_$",
                           "typeString": "function (address) view external returns (uint256)"
                         }
                       },
-                      "id": 37747,
+                      "id": 37737,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -724,14 +724,14 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 37749,
+                  "id": 37739,
                   "nodeType": "ExpressionStatement",
                   "src": "1562:51:131"
                 }
               ]
             },
             "documentation": {
-              "id": 37692,
+              "id": 37682,
               "nodeType": "StructuredDocumentation",
               "src": "519:495:131",
               "text": " @notice Redeems custom collateral `token` for an underlying token.\n @param inputToken The input wrapped token to be redeemed for an underlying token.\n @param inputAmount The amount of the input wrapped token to be redeemed for an underlying token.\n @param strategyData The ABI-encoded data to be used in the redemption strategy logic.\n @return outputToken The underlying ERC20 token outputted.\n @return outputAmount The quantity of underlying tokens outputted."
@@ -743,44 +743,44 @@
             "name": "redeem",
             "nameLocation": "1026:6:131",
             "overrides": {
-              "id": 37701,
+              "id": 37691,
               "nodeType": "OverrideSpecifier",
               "overrides": [],
               "src": "1136:8:131"
             },
             "parameters": {
-              "id": 37700,
+              "id": 37690,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 37695,
+                  "id": 37685,
                   "mutability": "mutable",
                   "name": "inputToken",
                   "nameLocation": "1056:10:131",
                   "nodeType": "VariableDeclaration",
-                  "scope": 37751,
+                  "scope": 37741,
                   "src": "1038:28:131",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                     "typeString": "contract IERC20Upgradeable"
                   },
                   "typeName": {
-                    "id": 37694,
+                    "id": 37684,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 37693,
+                      "id": 37683,
                       "name": "IERC20Upgradeable",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 90152,
+                      "referencedDeclaration": 89909,
                       "src": "1038:17:131"
                     },
-                    "referencedDeclaration": 90152,
+                    "referencedDeclaration": 89909,
                     "src": "1038:17:131",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                       "typeString": "contract IERC20Upgradeable"
                     }
                   },
@@ -788,12 +788,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 37697,
+                  "id": 37687,
                   "mutability": "mutable",
                   "name": "inputAmount",
                   "nameLocation": "1080:11:131",
                   "nodeType": "VariableDeclaration",
-                  "scope": 37751,
+                  "scope": 37741,
                   "src": "1072:19:131",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -802,7 +802,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 37696,
+                    "id": 37686,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1072:7:131",
@@ -815,12 +815,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 37699,
+                  "id": 37689,
                   "mutability": "mutable",
                   "name": "strategyData",
                   "nameLocation": "1110:12:131",
                   "nodeType": "VariableDeclaration",
-                  "scope": 37751,
+                  "scope": 37741,
                   "src": "1097:25:131",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -829,7 +829,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 37698,
+                    "id": 37688,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1097:5:131",
@@ -844,38 +844,38 @@
               "src": "1032:94:131"
             },
             "returnParameters": {
-              "id": 37707,
+              "id": 37697,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 37704,
+                  "id": 37694,
                   "mutability": "mutable",
                   "name": "outputToken",
                   "nameLocation": "1172:11:131",
                   "nodeType": "VariableDeclaration",
-                  "scope": 37751,
+                  "scope": 37741,
                   "src": "1154:29:131",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                     "typeString": "contract IERC20Upgradeable"
                   },
                   "typeName": {
-                    "id": 37703,
+                    "id": 37693,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 37702,
+                      "id": 37692,
                       "name": "IERC20Upgradeable",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 90152,
+                      "referencedDeclaration": 89909,
                       "src": "1154:17:131"
                     },
-                    "referencedDeclaration": 90152,
+                    "referencedDeclaration": 89909,
                     "src": "1154:17:131",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                       "typeString": "contract IERC20Upgradeable"
                     }
                   },
@@ -883,12 +883,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 37706,
+                  "id": 37696,
                   "mutability": "mutable",
                   "name": "outputAmount",
                   "nameLocation": "1193:12:131",
                   "nodeType": "VariableDeclaration",
-                  "scope": 37751,
+                  "scope": 37741,
                   "src": "1185:20:131",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -897,7 +897,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 37705,
+                    "id": 37695,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1185:7:131",
@@ -911,7 +911,7 @@
               ],
               "src": "1153:53:131"
             },
-            "scope": 37752,
+            "scope": 37742,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -921,13 +921,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 37690,
+              "id": 37680,
               "name": "IRedemptionStrategy",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 39304,
+              "referencedDeclaration": 39294,
               "src": "495:19:131"
             },
-            "id": 37691,
+            "id": 37681,
             "nodeType": "InheritanceSpecifier",
             "src": "495:19:131"
           }
@@ -936,19 +936,19 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 37689,
+          "id": 37679,
           "nodeType": "StructuredDocumentation",
           "src": "236:229:131",
           "text": " @title CErc20Liquidator\n @notice Redeems seized Compound/Cream/Fuse CErc20 cTokens for underlying tokens for use as a step in a liquidation.\n @author David Lucid <david@rari.capital> (https://github.com/davidlucid)"
         },
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          37752,
-          39304
+          37742,
+          39294
         ],
         "name": "CErc20Liquidator",
         "nameLocation": "475:16:131",
-        "scope": 37753,
+        "scope": 37743,
         "usedErrors": []
       }
     ],

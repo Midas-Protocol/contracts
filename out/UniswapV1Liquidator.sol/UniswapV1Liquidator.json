@@ -47,38 +47,38 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/liquidators/UniswapV1Liquidator.sol",
-    "id": 40582,
+    "id": 40572,
     "exportedSymbols": {
       "AddressUpgradeable": [
-        90644
-      ],
-      "IERC20Upgradeable": [
-        90152
-      ],
-      "IRedemptionStrategy": [
-        39304
-      ],
-      "IUniswapV1Exchange": [
-        35816
-      ],
-      "IUniswapV1Factory": [
-        35826
-      ],
-      "IW_NATIVE": [
-        66064
-      ],
-      "SafeERC20Upgradeable": [
         90401
       ],
+      "IERC20Upgradeable": [
+        89909
+      ],
+      "IRedemptionStrategy": [
+        39294
+      ],
+      "IUniswapV1Exchange": [
+        35806
+      ],
+      "IUniswapV1Factory": [
+        35816
+      ],
+      "IW_NATIVE": [
+        66049
+      ],
+      "SafeERC20Upgradeable": [
+        90158
+      ],
       "UniswapV1Liquidator": [
-        40581
+        40571
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:2663:151",
     "nodes": [
       {
-        "id": 40430,
+        "id": 40420,
         "nodeType": "PragmaDirective",
         "src": "39:24:151",
         "literals": [
@@ -89,118 +89,118 @@
         ]
       },
       {
-        "id": 40431,
+        "id": 40421,
         "nodeType": "ImportDirective",
         "src": "65:88:151",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 40582,
-        "sourceUnit": 90153,
+        "scope": 40572,
+        "sourceUnit": 89910,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 40432,
+        "id": 40422,
         "nodeType": "ImportDirective",
         "src": "154:97:151",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 40582,
-        "sourceUnit": 90402,
+        "scope": 40572,
+        "sourceUnit": 90159,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 40433,
+        "id": 40423,
         "nodeType": "ImportDirective",
         "src": "253:52:151",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/uniswap/IUniswapV1Exchange.sol",
         "file": "../external/uniswap/IUniswapV1Exchange.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 40582,
-        "sourceUnit": 35817,
+        "scope": 40572,
+        "sourceUnit": 35807,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 40434,
+        "id": 40424,
         "nodeType": "ImportDirective",
         "src": "306:51:151",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/uniswap/IUniswapV1Factory.sol",
         "file": "../external/uniswap/IUniswapV1Factory.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 40582,
-        "sourceUnit": 35827,
+        "scope": 40572,
+        "sourceUnit": 35817,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 40435,
+        "id": 40425,
         "nodeType": "ImportDirective",
         "src": "359:32:151",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/IW_NATIVE.sol",
         "file": "../utils/IW_NATIVE.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 40582,
-        "sourceUnit": 66065,
+        "scope": 40572,
+        "sourceUnit": 66050,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 40436,
+        "id": 40426,
         "nodeType": "ImportDirective",
         "src": "393:35:151",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/liquidators/IRedemptionStrategy.sol",
         "file": "./IRedemptionStrategy.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 40582,
-        "sourceUnit": 39305,
+        "scope": 40572,
+        "sourceUnit": 39295,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 40581,
+        "id": 40571,
         "nodeType": "ContractDefinition",
         "src": "669:2032:151",
         "nodes": [
           {
-            "id": 40443,
+            "id": 40433,
             "nodeType": "UsingForDirective",
             "src": "725:49:151",
             "libraryName": {
-              "id": 40440,
+              "id": 40430,
               "name": "SafeERC20Upgradeable",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 90401,
+              "referencedDeclaration": 90158,
               "src": "731:20:151"
             },
             "typeName": {
-              "id": 40442,
+              "id": 40432,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 40441,
+                "id": 40431,
                 "name": "IERC20Upgradeable",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 90152,
+                "referencedDeclaration": 89909,
                 "src": "756:17:151"
               },
-              "referencedDeclaration": 90152,
+              "referencedDeclaration": 89909,
               "src": "756:17:151",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                 "typeString": "contract IERC20Upgradeable"
               }
             }
           },
           {
-            "id": 40450,
+            "id": 40440,
             "nodeType": "VariableDeclaration",
             "src": "833:117:151",
             "constant": true,
             "documentation": {
-              "id": 40444,
+              "id": 40434,
               "nodeType": "StructuredDocumentation",
               "src": "778:52:151",
               "text": " @dev The V1 Uniswap factory contract."
@@ -208,27 +208,27 @@
             "mutability": "constant",
             "name": "UNISWAP_V1_FACTORY",
             "nameLocation": "868:18:151",
-            "scope": 40581,
+            "scope": 40571,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_IUniswapV1Factory_$35826",
+              "typeIdentifier": "t_contract$_IUniswapV1Factory_$35816",
               "typeString": "contract IUniswapV1Factory"
             },
             "typeName": {
-              "id": 40446,
+              "id": 40436,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 40445,
+                "id": 40435,
                 "name": "IUniswapV1Factory",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 35826,
+                "referencedDeclaration": 35816,
                 "src": "833:17:151"
               },
-              "referencedDeclaration": 35826,
+              "referencedDeclaration": 35816,
               "src": "833:17:151",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IUniswapV1Factory_$35826",
+                "typeIdentifier": "t_contract$_IUniswapV1Factory_$35816",
                 "typeString": "contract IUniswapV1Factory"
               }
             },
@@ -236,7 +236,7 @@
               "arguments": [
                 {
                   "hexValue": "307863306134376446653033344234303042343762446144354665634461323632316465366334643935",
-                  "id": 40448,
+                  "id": 40438,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -258,18 +258,18 @@
                     "typeString": "address"
                   }
                 ],
-                "id": 40447,
+                "id": 40437,
                 "name": "IUniswapV1Factory",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
-                "referencedDeclaration": 35826,
+                "referencedDeclaration": 35816,
                 "src": "889:17:151",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_type$_t_contract$_IUniswapV1Factory_$35826_$",
+                  "typeIdentifier": "t_type$_t_contract$_IUniswapV1Factory_$35816_$",
                   "typeString": "type(contract IUniswapV1Factory)"
                 }
               },
-              "id": 40449,
+              "id": 40439,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -280,19 +280,19 @@
               "src": "889:61:151",
               "tryCall": false,
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IUniswapV1Factory_$35826",
+                "typeIdentifier": "t_contract$_IUniswapV1Factory_$35816",
                 "typeString": "contract IUniswapV1Factory"
               }
             },
             "visibility": "private"
           },
           {
-            "id": 40457,
+            "id": 40447,
             "nodeType": "VariableDeclaration",
             "src": "1003:91:151",
             "constant": true,
             "documentation": {
-              "id": 40451,
+              "id": 40441,
               "nodeType": "StructuredDocumentation",
               "src": "955:45:151",
               "text": " @dev W_NATIVE contract object."
@@ -300,27 +300,27 @@
             "mutability": "constant",
             "name": "W_NATIVE",
             "nameLocation": "1030:8:151",
-            "scope": 40581,
+            "scope": 40571,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_IW_NATIVE_$66064",
+              "typeIdentifier": "t_contract$_IW_NATIVE_$66049",
               "typeString": "contract IW_NATIVE"
             },
             "typeName": {
-              "id": 40453,
+              "id": 40443,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 40452,
+                "id": 40442,
                 "name": "IW_NATIVE",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 66064,
+                "referencedDeclaration": 66049,
                 "src": "1003:9:151"
               },
-              "referencedDeclaration": 66064,
+              "referencedDeclaration": 66049,
               "src": "1003:9:151",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IW_NATIVE_$66064",
+                "typeIdentifier": "t_contract$_IW_NATIVE_$66049",
                 "typeString": "contract IW_NATIVE"
               }
             },
@@ -328,7 +328,7 @@
               "arguments": [
                 {
                   "hexValue": "307843303261614133396232323346453844304130653543344632376541443930383343373536436332",
-                  "id": 40455,
+                  "id": 40445,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -350,18 +350,18 @@
                     "typeString": "address"
                   }
                 ],
-                "id": 40454,
+                "id": 40444,
                 "name": "IW_NATIVE",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
-                "referencedDeclaration": 66064,
+                "referencedDeclaration": 66049,
                 "src": "1041:9:151",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_type$_t_contract$_IW_NATIVE_$66064_$",
+                  "typeIdentifier": "t_type$_t_contract$_IW_NATIVE_$66049_$",
                   "typeString": "type(contract IW_NATIVE)"
                 }
               },
-              "id": 40456,
+              "id": 40446,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -372,34 +372,34 @@
               "src": "1041:53:151",
               "tryCall": false,
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IW_NATIVE_$66064",
+                "typeIdentifier": "t_contract$_IW_NATIVE_$66049",
                 "typeString": "contract IW_NATIVE"
               }
             },
             "visibility": "private"
           },
           {
-            "id": 40507,
+            "id": 40497,
             "nodeType": "FunctionDefinition",
             "src": "1195:305:151",
             "body": {
-              "id": 40506,
+              "id": 40496,
               "nodeType": "Block",
               "src": "1296:204:151",
               "statements": [
                 {
                   "assignments": [
-                    40469
+                    40459
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 40469,
+                      "id": 40459,
                       "mutability": "mutable",
                       "name": "allowance",
                       "nameLocation": "1310:9:151",
                       "nodeType": "VariableDeclaration",
-                      "scope": 40506,
+                      "scope": 40496,
                       "src": "1302:17:151",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -408,7 +408,7 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 40468,
+                        "id": 40458,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "1302:7:151",
@@ -420,20 +420,20 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 40478,
+                  "id": 40468,
                   "initialValue": {
                     "arguments": [
                       {
                         "arguments": [
                           {
-                            "id": 40474,
+                            "id": 40464,
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": -28,
                             "src": "1346:4:151",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_UniswapV1Liquidator_$40581",
+                              "typeIdentifier": "t_contract$_UniswapV1Liquidator_$40571",
                               "typeString": "contract UniswapV1Liquidator"
                             }
                           }
@@ -441,11 +441,11 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_contract$_UniswapV1Liquidator_$40581",
+                              "typeIdentifier": "t_contract$_UniswapV1Liquidator_$40571",
                               "typeString": "contract UniswapV1Liquidator"
                             }
                           ],
-                          "id": 40473,
+                          "id": 40463,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -457,14 +457,14 @@
                             "typeString": "type(address)"
                           },
                           "typeName": {
-                            "id": 40472,
+                            "id": 40462,
                             "name": "address",
                             "nodeType": "ElementaryTypeName",
                             "src": "1338:7:151",
                             "typeDescriptions": {}
                           }
                         },
-                        "id": 40475,
+                        "id": 40465,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -480,11 +480,11 @@
                         }
                       },
                       {
-                        "id": 40476,
+                        "id": 40466,
                         "name": "to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 40463,
+                        "referencedDeclaration": 40453,
                         "src": "1353:2:151",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -504,32 +504,32 @@
                         }
                       ],
                       "expression": {
-                        "id": 40470,
+                        "id": 40460,
                         "name": "token",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 40461,
+                        "referencedDeclaration": 40451,
                         "src": "1322:5:151",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                          "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                           "typeString": "contract IERC20Upgradeable"
                         }
                       },
-                      "id": 40471,
+                      "id": 40461,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "allowance",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 90129,
+                      "referencedDeclaration": 89886,
                       "src": "1322:15:151",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$_t_address_$returns$_t_uint256_$",
                         "typeString": "function (address,address) view external returns (uint256)"
                       }
                     },
-                    "id": 40477,
+                    "id": 40467,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -553,17 +553,17 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 40481,
+                    "id": 40471,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
-                      "id": 40479,
+                      "id": 40469,
                       "name": "allowance",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 40469,
+                      "referencedDeclaration": 40459,
                       "src": "1367:9:151",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -573,11 +573,11 @@
                     "nodeType": "BinaryOperation",
                     "operator": "<",
                     "rightExpression": {
-                      "id": 40480,
+                      "id": 40470,
                       "name": "minAmount",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 40465,
+                      "referencedDeclaration": 40455,
                       "src": "1379:9:151",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -590,11 +590,11 @@
                       "typeString": "bool"
                     }
                   },
-                  "id": 40505,
+                  "id": 40495,
                   "nodeType": "IfStatement",
                   "src": "1363:133:151",
                   "trueBody": {
-                    "id": 40504,
+                    "id": 40494,
                     "nodeType": "Block",
                     "src": "1390:106:151",
                     "statements": [
@@ -604,17 +604,17 @@
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-                          "id": 40484,
+                          "id": 40474,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftExpression": {
-                            "id": 40482,
+                            "id": 40472,
                             "name": "allowance",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 40469,
+                            "referencedDeclaration": 40459,
                             "src": "1402:9:151",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
@@ -625,7 +625,7 @@
                           "operator": ">",
                           "rightExpression": {
                             "hexValue": "30",
-                            "id": 40483,
+                            "id": 40473,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -645,18 +645,18 @@
                             "typeString": "bool"
                           }
                         },
-                        "id": 40492,
+                        "id": 40482,
                         "nodeType": "IfStatement",
                         "src": "1398:43:151",
                         "trueBody": {
                           "expression": {
                             "arguments": [
                               {
-                                "id": 40488,
+                                "id": 40478,
                                 "name": "to",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 40463,
+                                "referencedDeclaration": 40453,
                                 "src": "1435:2:151",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_address",
@@ -665,7 +665,7 @@
                               },
                               {
                                 "hexValue": "30",
-                                "id": 40489,
+                                "id": 40479,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": true,
@@ -692,32 +692,32 @@
                                 }
                               ],
                               "expression": {
-                                "id": 40485,
+                                "id": 40475,
                                 "name": "token",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 40461,
+                                "referencedDeclaration": 40451,
                                 "src": "1417:5:151",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                                  "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                                   "typeString": "contract IERC20Upgradeable"
                                 }
                               },
-                              "id": 40487,
+                              "id": 40477,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "memberName": "safeApprove",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 90278,
+                              "referencedDeclaration": 90035,
                               "src": "1417:17:151",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_function_internal_nonpayable$_t_contract$_IERC20Upgradeable_$90152_$_t_address_$_t_uint256_$returns$__$bound_to$_t_contract$_IERC20Upgradeable_$90152_$",
+                                "typeIdentifier": "t_function_internal_nonpayable$_t_contract$_IERC20Upgradeable_$89909_$_t_address_$_t_uint256_$returns$__$bound_to$_t_contract$_IERC20Upgradeable_$89909_$",
                                 "typeString": "function (contract IERC20Upgradeable,address,uint256)"
                               }
                             },
-                            "id": 40490,
+                            "id": 40480,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -732,7 +732,7 @@
                               "typeString": "tuple()"
                             }
                           },
-                          "id": 40491,
+                          "id": 40481,
                           "nodeType": "ExpressionStatement",
                           "src": "1417:24:151"
                         }
@@ -741,11 +741,11 @@
                         "expression": {
                           "arguments": [
                             {
-                              "id": 40496,
+                              "id": 40486,
                               "name": "to",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 40463,
+                              "referencedDeclaration": 40453,
                               "src": "1467:2:151",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
@@ -756,7 +756,7 @@
                               "expression": {
                                 "arguments": [
                                   {
-                                    "id": 40499,
+                                    "id": 40489,
                                     "isConstant": false,
                                     "isLValue": false,
                                     "isPure": true,
@@ -768,7 +768,7 @@
                                       "typeString": "type(uint256)"
                                     },
                                     "typeName": {
-                                      "id": 40498,
+                                      "id": 40488,
                                       "name": "uint256",
                                       "nodeType": "ElementaryTypeName",
                                       "src": "1476:7:151",
@@ -783,7 +783,7 @@
                                       "typeString": "type(uint256)"
                                     }
                                   ],
-                                  "id": 40497,
+                                  "id": 40487,
                                   "name": "type",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
@@ -794,7 +794,7 @@
                                     "typeString": "function () pure"
                                   }
                                 },
-                                "id": 40500,
+                                "id": 40490,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": true,
@@ -809,7 +809,7 @@
                                   "typeString": "type(uint256)"
                                 }
                               },
-                              "id": 40501,
+                              "id": 40491,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -835,32 +835,32 @@
                               }
                             ],
                             "expression": {
-                              "id": 40493,
+                              "id": 40483,
                               "name": "token",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 40461,
+                              "referencedDeclaration": 40451,
                               "src": "1449:5:151",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                                "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                                 "typeString": "contract IERC20Upgradeable"
                               }
                             },
-                            "id": 40495,
+                            "id": 40485,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "safeApprove",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 90278,
+                            "referencedDeclaration": 90035,
                             "src": "1449:17:151",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_function_internal_nonpayable$_t_contract$_IERC20Upgradeable_$90152_$_t_address_$_t_uint256_$returns$__$bound_to$_t_contract$_IERC20Upgradeable_$90152_$",
+                              "typeIdentifier": "t_function_internal_nonpayable$_t_contract$_IERC20Upgradeable_$89909_$_t_address_$_t_uint256_$returns$__$bound_to$_t_contract$_IERC20Upgradeable_$89909_$",
                               "typeString": "function (contract IERC20Upgradeable,address,uint256)"
                             }
                           },
-                          "id": 40502,
+                          "id": 40492,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -875,7 +875,7 @@
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 40503,
+                        "id": 40493,
                         "nodeType": "ExpressionStatement",
                         "src": "1449:40:151"
                       }
@@ -885,7 +885,7 @@
               ]
             },
             "documentation": {
-              "id": 40458,
+              "id": 40448,
               "nodeType": "StructuredDocumentation",
               "src": "1099:93:151",
               "text": " @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`."
@@ -896,38 +896,38 @@
             "name": "safeApprove",
             "nameLocation": "1204:11:151",
             "parameters": {
-              "id": 40466,
+              "id": 40456,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 40461,
+                  "id": 40451,
                   "mutability": "mutable",
                   "name": "token",
                   "nameLocation": "1239:5:151",
                   "nodeType": "VariableDeclaration",
-                  "scope": 40507,
+                  "scope": 40497,
                   "src": "1221:23:151",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                     "typeString": "contract IERC20Upgradeable"
                   },
                   "typeName": {
-                    "id": 40460,
+                    "id": 40450,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 40459,
+                      "id": 40449,
                       "name": "IERC20Upgradeable",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 90152,
+                      "referencedDeclaration": 89909,
                       "src": "1221:17:151"
                     },
-                    "referencedDeclaration": 90152,
+                    "referencedDeclaration": 89909,
                     "src": "1221:17:151",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                       "typeString": "contract IERC20Upgradeable"
                     }
                   },
@@ -935,12 +935,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 40463,
+                  "id": 40453,
                   "mutability": "mutable",
                   "name": "to",
                   "nameLocation": "1258:2:151",
                   "nodeType": "VariableDeclaration",
-                  "scope": 40507,
+                  "scope": 40497,
                   "src": "1250:10:151",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -949,7 +949,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 40462,
+                    "id": 40452,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1250:7:151",
@@ -963,12 +963,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 40465,
+                  "id": 40455,
                   "mutability": "mutable",
                   "name": "minAmount",
                   "nameLocation": "1274:9:151",
                   "nodeType": "VariableDeclaration",
-                  "scope": 40507,
+                  "scope": 40497,
                   "src": "1266:17:151",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -977,7 +977,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 40464,
+                    "id": 40454,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1266:7:151",
@@ -992,69 +992,69 @@
               "src": "1215:72:151"
             },
             "returnParameters": {
-              "id": 40467,
+              "id": 40457,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1296:0:151"
             },
-            "scope": 40581,
+            "scope": 40571,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "private"
           },
           {
-            "id": 40580,
+            "id": 40570,
             "nodeType": "FunctionDefinition",
             "src": "2002:697:151",
             "baseFunctions": [
-              39303
+              39293
             ],
             "body": {
-              "id": 40579,
+              "id": 40569,
               "nodeType": "Block",
               "src": "2192:507:151",
               "statements": [
                 {
                   "assignments": [
-                    40526
+                    40516
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 40526,
+                      "id": 40516,
                       "mutability": "mutable",
                       "name": "uniswapV1Exchange",
                       "nameLocation": "2245:17:151",
                       "nodeType": "VariableDeclaration",
-                      "scope": 40579,
+                      "scope": 40569,
                       "src": "2226:36:151",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_IUniswapV1Exchange_$35816",
+                        "typeIdentifier": "t_contract$_IUniswapV1Exchange_$35806",
                         "typeString": "contract IUniswapV1Exchange"
                       },
                       "typeName": {
-                        "id": 40525,
+                        "id": 40515,
                         "nodeType": "UserDefinedTypeName",
                         "pathNode": {
-                          "id": 40524,
+                          "id": 40514,
                           "name": "IUniswapV1Exchange",
                           "nodeType": "IdentifierPath",
-                          "referencedDeclaration": 35816,
+                          "referencedDeclaration": 35806,
                           "src": "2226:18:151"
                         },
-                        "referencedDeclaration": 35816,
+                        "referencedDeclaration": 35806,
                         "src": "2226:18:151",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IUniswapV1Exchange_$35816",
+                          "typeIdentifier": "t_contract$_IUniswapV1Exchange_$35806",
                           "typeString": "contract IUniswapV1Exchange"
                         }
                       },
                       "visibility": "internal"
                     }
                   ],
-                  "id": 40536,
+                  "id": 40526,
                   "initialValue": {
                     "arguments": [
                       {
@@ -1062,14 +1062,14 @@
                           {
                             "arguments": [
                               {
-                                "id": 40532,
+                                "id": 40522,
                                 "name": "inputToken",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 40511,
+                                "referencedDeclaration": 40501,
                                 "src": "2323:10:151",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                                  "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                                   "typeString": "contract IERC20Upgradeable"
                                 }
                               }
@@ -1077,11 +1077,11 @@
                             "expression": {
                               "argumentTypes": [
                                 {
-                                  "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                                  "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                                   "typeString": "contract IERC20Upgradeable"
                                 }
                               ],
-                              "id": 40531,
+                              "id": 40521,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -1093,14 +1093,14 @@
                                 "typeString": "type(address)"
                               },
                               "typeName": {
-                                "id": 40530,
+                                "id": 40520,
                                 "name": "address",
                                 "nodeType": "ElementaryTypeName",
                                 "src": "2315:7:151",
                                 "typeDescriptions": {}
                               }
                             },
-                            "id": 40533,
+                            "id": 40523,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -1124,32 +1124,32 @@
                             }
                           ],
                           "expression": {
-                            "id": 40528,
+                            "id": 40518,
                             "name": "UNISWAP_V1_FACTORY",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 40450,
+                            "referencedDeclaration": 40440,
                             "src": "2284:18:151",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_IUniswapV1Factory_$35826",
+                              "typeIdentifier": "t_contract$_IUniswapV1Factory_$35816",
                               "typeString": "contract IUniswapV1Factory"
                             }
                           },
-                          "id": 40529,
+                          "id": 40519,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "getExchange",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 35825,
+                          "referencedDeclaration": 35815,
                           "src": "2284:30:151",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_address_$",
                             "typeString": "function (address) view external returns (address)"
                           }
                         },
-                        "id": 40534,
+                        "id": 40524,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1172,18 +1172,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 40527,
+                      "id": 40517,
                       "name": "IUniswapV1Exchange",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 35816,
+                      "referencedDeclaration": 35806,
                       "src": "2265:18:151",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_contract$_IUniswapV1Exchange_$35816_$",
+                        "typeIdentifier": "t_type$_t_contract$_IUniswapV1Exchange_$35806_$",
                         "typeString": "type(contract IUniswapV1Exchange)"
                       }
                     },
-                    "id": 40535,
+                    "id": 40525,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1194,7 +1194,7 @@
                     "src": "2265:71:151",
                     "tryCall": false,
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_IUniswapV1Exchange_$35816",
+                      "typeIdentifier": "t_contract$_IUniswapV1Exchange_$35806",
                       "typeString": "contract IUniswapV1Exchange"
                     }
                   },
@@ -1205,28 +1205,28 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 40538,
+                        "id": 40528,
                         "name": "inputToken",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 40511,
+                        "referencedDeclaration": 40501,
                         "src": "2385:10:151",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                          "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                           "typeString": "contract IERC20Upgradeable"
                         }
                       },
                       {
                         "arguments": [
                           {
-                            "id": 40541,
+                            "id": 40531,
                             "name": "uniswapV1Exchange",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 40526,
+                            "referencedDeclaration": 40516,
                             "src": "2405:17:151",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_IUniswapV1Exchange_$35816",
+                              "typeIdentifier": "t_contract$_IUniswapV1Exchange_$35806",
                               "typeString": "contract IUniswapV1Exchange"
                             }
                           }
@@ -1234,11 +1234,11 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_contract$_IUniswapV1Exchange_$35816",
+                              "typeIdentifier": "t_contract$_IUniswapV1Exchange_$35806",
                               "typeString": "contract IUniswapV1Exchange"
                             }
                           ],
-                          "id": 40540,
+                          "id": 40530,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -1250,14 +1250,14 @@
                             "typeString": "type(address)"
                           },
                           "typeName": {
-                            "id": 40539,
+                            "id": 40529,
                             "name": "address",
                             "nodeType": "ElementaryTypeName",
                             "src": "2397:7:151",
                             "typeDescriptions": {}
                           }
                         },
-                        "id": 40542,
+                        "id": 40532,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1273,11 +1273,11 @@
                         }
                       },
                       {
-                        "id": 40543,
+                        "id": 40533,
                         "name": "inputAmount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 40513,
+                        "referencedDeclaration": 40503,
                         "src": "2425:11:151",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1288,7 +1288,7 @@
                     "expression": {
                       "argumentTypes": [
                         {
-                          "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                          "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                           "typeString": "contract IERC20Upgradeable"
                         },
                         {
@@ -1300,18 +1300,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 40537,
+                      "id": 40527,
                       "name": "safeApprove",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 40507,
+                      "referencedDeclaration": 40497,
                       "src": "2373:11:151",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_nonpayable$_t_contract$_IERC20Upgradeable_$90152_$_t_address_$_t_uint256_$returns$__$",
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_contract$_IERC20Upgradeable_$89909_$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (contract IERC20Upgradeable,address,uint256)"
                       }
                     },
-                    "id": 40544,
+                    "id": 40534,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1326,7 +1326,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 40545,
+                  "id": 40535,
                   "nodeType": "ExpressionStatement",
                   "src": "2373:64:151"
                 },
@@ -1334,11 +1334,11 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 40549,
+                        "id": 40539,
                         "name": "inputAmount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 40513,
+                        "referencedDeclaration": 40503,
                         "src": "2481:11:151",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1347,7 +1347,7 @@
                       },
                       {
                         "hexValue": "31",
-                        "id": 40550,
+                        "id": 40540,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -1363,7 +1363,7 @@
                       },
                       {
                         "expression": {
-                          "id": 40551,
+                          "id": 40541,
                           "name": "block",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
@@ -1374,7 +1374,7 @@
                             "typeString": "block"
                           }
                         },
-                        "id": 40552,
+                        "id": 40542,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1404,32 +1404,32 @@
                         }
                       ],
                       "expression": {
-                        "id": 40546,
+                        "id": 40536,
                         "name": "uniswapV1Exchange",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 40526,
+                        "referencedDeclaration": 40516,
                         "src": "2443:17:151",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IUniswapV1Exchange_$35816",
+                          "typeIdentifier": "t_contract$_IUniswapV1Exchange_$35806",
                           "typeString": "contract IUniswapV1Exchange"
                         }
                       },
-                      "id": 40548,
+                      "id": 40538,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "tokenToEthSwapInput",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 35815,
+                      "referencedDeclaration": 35805,
                       "src": "2443:37:151",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_uint256_$_t_uint256_$_t_uint256_$returns$_t_uint256_$",
                         "typeString": "function (uint256,uint256,uint256) external returns (uint256)"
                       }
                     },
-                    "id": 40553,
+                    "id": 40543,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1444,23 +1444,23 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 40554,
+                  "id": 40544,
                   "nodeType": "ExpressionStatement",
                   "src": "2443:70:151"
                 },
                 {
                   "expression": {
-                    "id": 40561,
+                    "id": 40551,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
-                      "id": 40555,
+                      "id": 40545,
                       "name": "outputAmount",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 40522,
+                      "referencedDeclaration": 40512,
                       "src": "2546:12:151",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -1473,14 +1473,14 @@
                       "expression": {
                         "arguments": [
                           {
-                            "id": 40558,
+                            "id": 40548,
                             "name": "this",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": -28,
                             "src": "2569:4:151",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_UniswapV1Liquidator_$40581",
+                              "typeIdentifier": "t_contract$_UniswapV1Liquidator_$40571",
                               "typeString": "contract UniswapV1Liquidator"
                             }
                           }
@@ -1488,11 +1488,11 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_contract$_UniswapV1Liquidator_$40581",
+                              "typeIdentifier": "t_contract$_UniswapV1Liquidator_$40571",
                               "typeString": "contract UniswapV1Liquidator"
                             }
                           ],
-                          "id": 40557,
+                          "id": 40547,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -1504,14 +1504,14 @@
                             "typeString": "type(address)"
                           },
                           "typeName": {
-                            "id": 40556,
+                            "id": 40546,
                             "name": "address",
                             "nodeType": "ElementaryTypeName",
                             "src": "2561:7:151",
                             "typeDescriptions": {}
                           }
                         },
-                        "id": 40559,
+                        "id": 40549,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1526,7 +1526,7 @@
                           "typeString": "address"
                         }
                       },
-                      "id": 40560,
+                      "id": 40550,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1545,7 +1545,7 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 40562,
+                  "id": 40552,
                   "nodeType": "ExpressionStatement",
                   "src": "2546:36:151"
                 },
@@ -1557,32 +1557,32 @@
                       "expression": {
                         "argumentTypes": [],
                         "expression": {
-                          "id": 40563,
+                          "id": 40553,
                           "name": "W_NATIVE",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 40457,
+                          "referencedDeclaration": 40447,
                           "src": "2588:8:151",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_contract$_IW_NATIVE_$66064",
+                            "typeIdentifier": "t_contract$_IW_NATIVE_$66049",
                             "typeString": "contract IW_NATIVE"
                           }
                         },
-                        "id": 40565,
+                        "id": 40555,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "deposit",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 66029,
+                        "referencedDeclaration": 66014,
                         "src": "2588:16:151",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_external_payable$__$returns$__$",
                           "typeString": "function () payable external"
                         }
                       },
-                      "id": 40567,
+                      "id": 40557,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1593,11 +1593,11 @@
                       "nodeType": "FunctionCallOptions",
                       "options": [
                         {
-                          "id": 40566,
+                          "id": 40556,
                           "name": "outputAmount",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 40522,
+                          "referencedDeclaration": 40512,
                           "src": "2613:12:151",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
@@ -1611,7 +1611,7 @@
                         "typeString": "function () payable external"
                       }
                     },
-                    "id": 40568,
+                    "id": 40558,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1626,7 +1626,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 40569,
+                  "id": 40559,
                   "nodeType": "ExpressionStatement",
                   "src": "2588:41:151"
                 },
@@ -1638,14 +1638,14 @@
                           {
                             "arguments": [
                               {
-                                "id": 40573,
+                                "id": 40563,
                                 "name": "W_NATIVE",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 40457,
+                                "referencedDeclaration": 40447,
                                 "src": "2669:8:151",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_contract$_IW_NATIVE_$66064",
+                                  "typeIdentifier": "t_contract$_IW_NATIVE_$66049",
                                   "typeString": "contract IW_NATIVE"
                                 }
                               }
@@ -1653,11 +1653,11 @@
                             "expression": {
                               "argumentTypes": [
                                 {
-                                  "typeIdentifier": "t_contract$_IW_NATIVE_$66064",
+                                  "typeIdentifier": "t_contract$_IW_NATIVE_$66049",
                                   "typeString": "contract IW_NATIVE"
                                 }
                               ],
-                              "id": 40572,
+                              "id": 40562,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -1669,14 +1669,14 @@
                                 "typeString": "type(address)"
                               },
                               "typeName": {
-                                "id": 40571,
+                                "id": 40561,
                                 "name": "address",
                                 "nodeType": "ElementaryTypeName",
                                 "src": "2661:7:151",
                                 "typeDescriptions": {}
                               }
                             },
-                            "id": 40574,
+                            "id": 40564,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -1699,18 +1699,18 @@
                               "typeString": "address"
                             }
                           ],
-                          "id": 40570,
+                          "id": 40560,
                           "name": "IERC20Upgradeable",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 90152,
+                          "referencedDeclaration": 89909,
                           "src": "2643:17:151",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IERC20Upgradeable_$90152_$",
+                            "typeIdentifier": "t_type$_t_contract$_IERC20Upgradeable_$89909_$",
                             "typeString": "type(contract IERC20Upgradeable)"
                           }
                         },
-                        "id": 40575,
+                        "id": 40565,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -1721,16 +1721,16 @@
                         "src": "2643:36:151",
                         "tryCall": false,
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                          "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                           "typeString": "contract IERC20Upgradeable"
                         }
                       },
                       {
-                        "id": 40576,
+                        "id": 40566,
                         "name": "outputAmount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 40522,
+                        "referencedDeclaration": 40512,
                         "src": "2681:12:151",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1738,7 +1738,7 @@
                         }
                       }
                     ],
-                    "id": 40577,
+                    "id": 40567,
                     "isConstant": false,
                     "isInlineArray": false,
                     "isLValue": false,
@@ -1747,19 +1747,19 @@
                     "nodeType": "TupleExpression",
                     "src": "2642:52:151",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_tuple$_t_contract$_IERC20Upgradeable_$90152_$_t_uint256_$",
+                      "typeIdentifier": "t_tuple$_t_contract$_IERC20Upgradeable_$89909_$_t_uint256_$",
                       "typeString": "tuple(contract IERC20Upgradeable,uint256)"
                     }
                   },
-                  "functionReturnParameters": 40523,
-                  "id": 40578,
+                  "functionReturnParameters": 40513,
+                  "id": 40568,
                   "nodeType": "Return",
                   "src": "2635:59:151"
                 }
               ]
             },
             "documentation": {
-              "id": 40508,
+              "id": 40498,
               "nodeType": "StructuredDocumentation",
               "src": "1504:495:151",
               "text": " @notice Redeems custom collateral `token` for an underlying token.\n @param inputToken The input wrapped token to be redeemed for an underlying token.\n @param inputAmount The amount of the input wrapped token to be redeemed for an underlying token.\n @param strategyData The ABI-encoded data to be used in the redemption strategy logic.\n @return outputToken The underlying ERC20 token outputted.\n @return outputAmount The quantity of underlying tokens outputted."
@@ -1771,44 +1771,44 @@
             "name": "redeem",
             "nameLocation": "2011:6:151",
             "overrides": {
-              "id": 40517,
+              "id": 40507,
               "nodeType": "OverrideSpecifier",
               "overrides": [],
               "src": "2121:8:151"
             },
             "parameters": {
-              "id": 40516,
+              "id": 40506,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 40511,
+                  "id": 40501,
                   "mutability": "mutable",
                   "name": "inputToken",
                   "nameLocation": "2041:10:151",
                   "nodeType": "VariableDeclaration",
-                  "scope": 40580,
+                  "scope": 40570,
                   "src": "2023:28:151",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                     "typeString": "contract IERC20Upgradeable"
                   },
                   "typeName": {
-                    "id": 40510,
+                    "id": 40500,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 40509,
+                      "id": 40499,
                       "name": "IERC20Upgradeable",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 90152,
+                      "referencedDeclaration": 89909,
                       "src": "2023:17:151"
                     },
-                    "referencedDeclaration": 90152,
+                    "referencedDeclaration": 89909,
                     "src": "2023:17:151",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                       "typeString": "contract IERC20Upgradeable"
                     }
                   },
@@ -1816,12 +1816,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 40513,
+                  "id": 40503,
                   "mutability": "mutable",
                   "name": "inputAmount",
                   "nameLocation": "2065:11:151",
                   "nodeType": "VariableDeclaration",
-                  "scope": 40580,
+                  "scope": 40570,
                   "src": "2057:19:151",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1830,7 +1830,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 40512,
+                    "id": 40502,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2057:7:151",
@@ -1843,12 +1843,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 40515,
+                  "id": 40505,
                   "mutability": "mutable",
                   "name": "strategyData",
                   "nameLocation": "2095:12:151",
                   "nodeType": "VariableDeclaration",
-                  "scope": 40580,
+                  "scope": 40570,
                   "src": "2082:25:151",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1857,7 +1857,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 40514,
+                    "id": 40504,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "2082:5:151",
@@ -1872,38 +1872,38 @@
               "src": "2017:94:151"
             },
             "returnParameters": {
-              "id": 40523,
+              "id": 40513,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 40520,
+                  "id": 40510,
                   "mutability": "mutable",
                   "name": "outputToken",
                   "nameLocation": "2157:11:151",
                   "nodeType": "VariableDeclaration",
-                  "scope": 40580,
+                  "scope": 40570,
                   "src": "2139:29:151",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                     "typeString": "contract IERC20Upgradeable"
                   },
                   "typeName": {
-                    "id": 40519,
+                    "id": 40509,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 40518,
+                      "id": 40508,
                       "name": "IERC20Upgradeable",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 90152,
+                      "referencedDeclaration": 89909,
                       "src": "2139:17:151"
                     },
-                    "referencedDeclaration": 90152,
+                    "referencedDeclaration": 89909,
                     "src": "2139:17:151",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$90152",
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
                       "typeString": "contract IERC20Upgradeable"
                     }
                   },
@@ -1911,12 +1911,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 40522,
+                  "id": 40512,
                   "mutability": "mutable",
                   "name": "outputAmount",
                   "nameLocation": "2178:12:151",
                   "nodeType": "VariableDeclaration",
-                  "scope": 40580,
+                  "scope": 40570,
                   "src": "2170:20:151",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1925,7 +1925,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 40521,
+                    "id": 40511,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2170:7:151",
@@ -1939,7 +1939,7 @@
               ],
               "src": "2138:53:151"
             },
-            "scope": 40581,
+            "scope": 40571,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -1949,13 +1949,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 40438,
+              "id": 40428,
               "name": "IRedemptionStrategy",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 39304,
+              "referencedDeclaration": 39294,
               "src": "701:19:151"
             },
-            "id": 40439,
+            "id": 40429,
             "nodeType": "InheritanceSpecifier",
             "src": "701:19:151"
           }
@@ -1964,19 +1964,19 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 40437,
+          "id": 40427,
           "nodeType": "StructuredDocumentation",
           "src": "430:238:151",
           "text": " @title UniswapV1Liquidator\n @notice Exchanges seized token collateral for underlying tokens via a Uniswap V1 pool for use as a step in a liquidation.\n @author David Lucid <david@rari.capital> (https://github.com/davidlucid)"
         },
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          40581,
-          39304
+          40571,
+          39294
         ],
         "name": "UniswapV1Liquidator",
         "nameLocation": "678:19:151",
-        "scope": 40582,
+        "scope": 40572,
         "usedErrors": []
       }
     ],

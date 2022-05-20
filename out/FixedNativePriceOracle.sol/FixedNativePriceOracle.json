@@ -51,47 +51,47 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/default/FixedNativePriceOracle.sol",
-    "id": 43633,
+    "id": 43618,
     "exportedSymbols": {
       "AddressUpgradeable": [
-        90644
+        90401
       ],
       "BasePriceOracle": [
-        41278
+        41268
       ],
       "ContextUpgradeable": [
-        90686
+        90443
       ],
       "ERC20Upgradeable": [
-        90074
+        89831
       ],
       "FixedNativePriceOracle": [
-        43632
+        43617
       ],
       "ICErc20": [
-        33461
+        33451
       ],
       "ICToken": [
-        33610
+        33600
       ],
       "IERC20MetadataUpgradeable": [
-        90177
+        89934
       ],
       "IERC20Upgradeable": [
-        90152
+        89909
       ],
       "IPriceOracle": [
-        33800
+        33790
       ],
       "Initializable": [
-        89463
+        89220
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:1281:166",
     "nodes": [
       {
-        "id": 43596,
+        "id": 43581,
         "nodeType": "PragmaDirective",
         "src": "39:24:166",
         "literals": [
@@ -102,86 +102,86 @@
         ]
       },
       {
-        "id": 43597,
+        "id": 43582,
         "nodeType": "ImportDirective",
         "src": "65:87:166",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 43633,
-        "sourceUnit": 90075,
+        "scope": 43618,
+        "sourceUnit": 89832,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 43598,
+        "id": 43583,
         "nodeType": "ImportDirective",
         "src": "154:50:166",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/IPriceOracle.sol",
         "file": "../../external/compound/IPriceOracle.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 43633,
-        "sourceUnit": 33801,
+        "scope": 43618,
+        "sourceUnit": 33791,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 43599,
+        "id": 43584,
         "nodeType": "ImportDirective",
         "src": "205:45:166",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICToken.sol",
         "file": "../../external/compound/ICToken.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 43633,
-        "sourceUnit": 33611,
+        "scope": 43618,
+        "sourceUnit": 33601,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 43600,
+        "id": 43585,
         "nodeType": "ImportDirective",
         "src": "251:45:166",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICErc20.sol",
         "file": "../../external/compound/ICErc20.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 43633,
-        "sourceUnit": 33462,
+        "scope": 43618,
+        "sourceUnit": 33452,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 43601,
+        "id": 43586,
         "nodeType": "ImportDirective",
         "src": "298:32:166",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/BasePriceOracle.sol",
         "file": "../BasePriceOracle.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 43633,
-        "sourceUnit": 41279,
+        "scope": 43618,
+        "sourceUnit": 41269,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 43632,
+        "id": 43617,
         "nodeType": "ContractDefinition",
         "src": "645:674:166",
         "nodes": [
           {
-            "id": 43618,
+            "id": 43603,
             "nodeType": "FunctionDefinition",
             "src": "818:98:166",
             "baseFunctions": [
-              41277
+              41267
             ],
             "body": {
-              "id": 43617,
+              "id": 43602,
               "nodeType": "Block",
               "src": "894:22:166",
               "statements": [
                 {
                   "expression": {
                     "hexValue": "31653138",
-                    "id": 43615,
+                    "id": 43600,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
@@ -195,15 +195,15 @@
                     },
                     "value": "1e18"
                   },
-                  "functionReturnParameters": 43614,
-                  "id": 43616,
+                  "functionReturnParameters": 43599,
+                  "id": 43601,
                   "nodeType": "Return",
                   "src": "900:11:166"
                 }
               ]
             },
             "documentation": {
-              "id": 43607,
+              "id": 43592,
               "nodeType": "StructuredDocumentation",
               "src": "714:101:166",
               "text": " @dev Returns the price in native token of `underlying` (implements `BasePriceOracle`)."
@@ -215,23 +215,23 @@
             "name": "price",
             "nameLocation": "827:5:166",
             "overrides": {
-              "id": 43611,
+              "id": 43596,
               "nodeType": "OverrideSpecifier",
               "overrides": [],
               "src": "867:8:166"
             },
             "parameters": {
-              "id": 43610,
+              "id": 43595,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 43609,
+                  "id": 43594,
                   "mutability": "mutable",
                   "name": "underlying",
                   "nameLocation": "841:10:166",
                   "nodeType": "VariableDeclaration",
-                  "scope": 43618,
+                  "scope": 43603,
                   "src": "833:18:166",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -240,7 +240,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 43608,
+                    "id": 43593,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "833:7:166",
@@ -256,17 +256,17 @@
               "src": "832:20:166"
             },
             "returnParameters": {
-              "id": 43614,
+              "id": 43599,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 43613,
+                  "id": 43598,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 43618,
+                  "scope": 43603,
                   "src": "885:7:166",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -275,7 +275,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 43612,
+                    "id": 43597,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "885:7:166",
@@ -289,27 +289,27 @@
               ],
               "src": "884:9:166"
             },
-            "scope": 43632,
+            "scope": 43617,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 43631,
+            "id": 43616,
             "nodeType": "FunctionDefinition",
             "src": "1210:107:166",
             "baseFunctions": [
-              33799
+              33789
             ],
             "body": {
-              "id": 43630,
+              "id": 43615,
               "nodeType": "Block",
               "src": "1295:22:166",
               "statements": [
                 {
                   "expression": {
                     "hexValue": "31653138",
-                    "id": 43628,
+                    "id": 43613,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
@@ -323,15 +323,15 @@
                     },
                     "value": "1e18"
                   },
-                  "functionReturnParameters": 43627,
-                  "id": 43629,
+                  "functionReturnParameters": 43612,
+                  "id": 43614,
                   "nodeType": "Return",
                   "src": "1301:11:166"
                 }
               ]
             },
             "documentation": {
-              "id": 43619,
+              "id": 43604,
               "nodeType": "StructuredDocumentation",
               "src": "920:287:166",
               "text": " @notice Returns the price in native token of the token underlying `cToken`.\n @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).\n @return Price in native token of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`."
@@ -343,44 +343,44 @@
             "name": "getUnderlyingPrice",
             "nameLocation": "1219:18:166",
             "overrides": {
-              "id": 43624,
+              "id": 43609,
               "nodeType": "OverrideSpecifier",
               "overrides": [],
               "src": "1268:8:166"
             },
             "parameters": {
-              "id": 43623,
+              "id": 43608,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 43622,
+                  "id": 43607,
                   "mutability": "mutable",
                   "name": "cToken",
                   "nameLocation": "1246:6:166",
                   "nodeType": "VariableDeclaration",
-                  "scope": 43631,
+                  "scope": 43616,
                   "src": "1238:14:166",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ICToken_$33610",
+                    "typeIdentifier": "t_contract$_ICToken_$33600",
                     "typeString": "contract ICToken"
                   },
                   "typeName": {
-                    "id": 43621,
+                    "id": 43606,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 43620,
+                      "id": 43605,
                       "name": "ICToken",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 33610,
+                      "referencedDeclaration": 33600,
                       "src": "1238:7:166"
                     },
-                    "referencedDeclaration": 33610,
+                    "referencedDeclaration": 33600,
                     "src": "1238:7:166",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ICToken_$33610",
+                      "typeIdentifier": "t_contract$_ICToken_$33600",
                       "typeString": "contract ICToken"
                     }
                   },
@@ -390,17 +390,17 @@
               "src": "1237:16:166"
             },
             "returnParameters": {
-              "id": 43627,
+              "id": 43612,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 43626,
+                  "id": 43611,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 43631,
+                  "scope": 43616,
                   "src": "1286:7:166",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -409,7 +409,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 43625,
+                    "id": 43610,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1286:7:166",
@@ -423,7 +423,7 @@
               ],
               "src": "1285:9:166"
             },
-            "scope": 43632,
+            "scope": 43617,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -433,25 +433,25 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 43603,
+              "id": 43588,
               "name": "IPriceOracle",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 33800,
+              "referencedDeclaration": 33790,
               "src": "680:12:166"
             },
-            "id": 43604,
+            "id": 43589,
             "nodeType": "InheritanceSpecifier",
             "src": "680:12:166"
           },
           {
             "baseName": {
-              "id": 43605,
+              "id": 43590,
               "name": "BasePriceOracle",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 41278,
+              "referencedDeclaration": 41268,
               "src": "694:15:166"
             },
-            "id": 43606,
+            "id": 43591,
             "nodeType": "InheritanceSpecifier",
             "src": "694:15:166"
           }
@@ -460,20 +460,20 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 43602,
+          "id": 43587,
           "nodeType": "StructuredDocumentation",
           "src": "332:312:166",
           "text": " @title FixedEthPriceOracle\n @notice Returns fixed prices of 1 denominated in the chain's native token for all tokens (expected to be used under a `MasterPriceOracle`).\n @dev Implements `PriceOracle` and `BasePriceOracle`.\n @author David Lucid <david@rari.capital> (https://github.com/davidlucid)"
         },
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          43632,
-          41278,
-          33800
+          43617,
+          41268,
+          33790
         ],
         "name": "FixedNativePriceOracle",
         "nameLocation": "654:22:166",
-        "scope": 43633,
+        "scope": 43618,
         "usedErrors": []
       }
     ],

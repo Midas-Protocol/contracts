@@ -97,17 +97,17 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/gelato/GUniPool.sol",
-    "id": 34114,
+    "id": 34104,
     "exportedSymbols": {
       "GUniPool": [
-        34113
+        34103
       ]
     },
     "nodeType": "SourceUnit",
     "src": "36:1425:86",
     "nodes": [
       {
-        "id": 34078,
+        "id": 34068,
         "nodeType": "PragmaDirective",
         "src": "36:24:86",
         "literals": [
@@ -118,12 +118,12 @@
         ]
       },
       {
-        "id": 34113,
+        "id": 34103,
         "nodeType": "ContractDefinition",
         "src": "62:1398:86",
         "nodes": [
           {
-            "id": 34083,
+            "id": 34073,
             "nodeType": "FunctionDefinition",
             "src": "85:50:86",
             "functionSelector": "0dfe1681",
@@ -133,23 +133,23 @@
             "name": "token0",
             "nameLocation": "94:6:86",
             "parameters": {
-              "id": 34079,
+              "id": 34069,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "100:2:86"
             },
             "returnParameters": {
-              "id": 34082,
+              "id": 34072,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34081,
+                  "id": 34071,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34083,
+                  "scope": 34073,
                   "src": "126:7:86",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -158,7 +158,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 34080,
+                    "id": 34070,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "126:7:86",
@@ -173,13 +173,13 @@
               ],
               "src": "125:9:86"
             },
-            "scope": 34113,
+            "scope": 34103,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 34088,
+            "id": 34078,
             "nodeType": "FunctionDefinition",
             "src": "139:50:86",
             "functionSelector": "d21220a7",
@@ -189,23 +189,23 @@
             "name": "token1",
             "nameLocation": "148:6:86",
             "parameters": {
-              "id": 34084,
+              "id": 34074,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "154:2:86"
             },
             "returnParameters": {
-              "id": 34087,
+              "id": 34077,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34086,
+                  "id": 34076,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34088,
+                  "scope": 34078,
                   "src": "180:7:86",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -214,7 +214,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 34085,
+                    "id": 34075,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "180:7:86",
@@ -229,17 +229,17 @@
               ],
               "src": "179:9:86"
             },
-            "scope": 34113,
+            "scope": 34103,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 34098,
+            "id": 34088,
             "nodeType": "FunctionDefinition",
             "src": "582:143:86",
             "documentation": {
-              "id": 34089,
+              "id": 34079,
               "nodeType": "StructuredDocumentation",
               "src": "193:386:86",
               "text": "@notice compute total underlying holdings of the G-UNI token supply\n includes current liquidity invested in uniswap position, current fees earned\n and any uninvested leftover (but does not include manager or gelato fees accrued)\n @return amount0Current current total underlying balance of token0\n @return amount1Current current total underlying balance of token1"
@@ -251,17 +251,17 @@
             "name": "getUnderlyingBalancesAtPrice",
             "nameLocation": "591:28:86",
             "parameters": {
-              "id": 34092,
+              "id": 34082,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34091,
+                  "id": 34081,
                   "mutability": "mutable",
                   "name": "sqrtRatioX96",
                   "nameLocation": "628:12:86",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34098,
+                  "scope": 34088,
                   "src": "620:20:86",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -270,7 +270,7 @@
                     "typeString": "uint160"
                   },
                   "typeName": {
-                    "id": 34090,
+                    "id": 34080,
                     "name": "uint160",
                     "nodeType": "ElementaryTypeName",
                     "src": "620:7:86",
@@ -285,17 +285,17 @@
               "src": "619:22:86"
             },
             "returnParameters": {
-              "id": 34097,
+              "id": 34087,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34094,
+                  "id": 34084,
                   "mutability": "mutable",
                   "name": "amount0Current",
                   "nameLocation": "685:14:86",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34098,
+                  "scope": 34088,
                   "src": "677:22:86",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -304,7 +304,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 34093,
+                    "id": 34083,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "677:7:86",
@@ -317,12 +317,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 34096,
+                  "id": 34086,
                   "mutability": "mutable",
                   "name": "amount1Current",
                   "nameLocation": "709:14:86",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34098,
+                  "scope": 34088,
                   "src": "701:22:86",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -331,7 +331,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 34095,
+                    "id": 34085,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "701:7:86",
@@ -345,17 +345,17 @@
               ],
               "src": "676:48:86"
             },
-            "scope": 34113,
+            "scope": 34103,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 34112,
+            "id": 34102,
             "nodeType": "FunctionDefinition",
             "src": "1297:161:86",
             "documentation": {
-              "id": 34099,
+              "id": 34089,
               "nodeType": "StructuredDocumentation",
               "src": "729:515:86",
               "text": "@notice burn G-UNI tokens (fractional shares of a Uniswap V3 position) and receive tokens\n @param burnAmount The number of G-UNI tokens to burn\n @param receiver The account to receive the underlying amounts of token0 and token1\n @return amount0 amount of token0 transferred to receiver for burning `burnAmount`\n @return amount1 amount of token1 transferred to receiver for burning `burnAmount`\n @return liquidityBurned amount of liquidity removed from the underlying Uniswap V3 position"
@@ -367,17 +367,17 @@
             "name": "burn",
             "nameLocation": "1306:4:86",
             "parameters": {
-              "id": 34104,
+              "id": 34094,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34101,
+                  "id": 34091,
                   "mutability": "mutable",
                   "name": "burnAmount",
                   "nameLocation": "1319:10:86",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34112,
+                  "scope": 34102,
                   "src": "1311:18:86",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -386,7 +386,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 34100,
+                    "id": 34090,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1311:7:86",
@@ -399,12 +399,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 34103,
+                  "id": 34093,
                   "mutability": "mutable",
                   "name": "receiver",
                   "nameLocation": "1339:8:86",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34112,
+                  "scope": 34102,
                   "src": "1331:16:86",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -413,7 +413,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 34102,
+                    "id": 34092,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1331:7:86",
@@ -429,17 +429,17 @@
               "src": "1310:38:86"
             },
             "returnParameters": {
-              "id": 34111,
+              "id": 34101,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34106,
+                  "id": 34096,
                   "mutability": "mutable",
                   "name": "amount0",
                   "nameLocation": "1390:7:86",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34112,
+                  "scope": 34102,
                   "src": "1382:15:86",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -448,7 +448,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 34105,
+                    "id": 34095,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1382:7:86",
@@ -461,12 +461,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 34108,
+                  "id": 34098,
                   "mutability": "mutable",
                   "name": "amount1",
                   "nameLocation": "1413:7:86",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34112,
+                  "scope": 34102,
                   "src": "1405:15:86",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -475,7 +475,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 34107,
+                    "id": 34097,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1405:7:86",
@@ -488,12 +488,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 34110,
+                  "id": 34100,
                   "mutability": "mutable",
                   "name": "liquidityBurned",
                   "nameLocation": "1436:15:86",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34112,
+                  "scope": 34102,
                   "src": "1428:23:86",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -502,7 +502,7 @@
                     "typeString": "uint128"
                   },
                   "typeName": {
-                    "id": 34109,
+                    "id": 34099,
                     "name": "uint128",
                     "nodeType": "ElementaryTypeName",
                     "src": "1428:7:86",
@@ -516,7 +516,7 @@
               ],
               "src": "1374:83:86"
             },
-            "scope": 34113,
+            "scope": 34103,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -529,11 +529,11 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          34113
+          34103
         ],
         "name": "GUniPool",
         "nameLocation": "72:8:86",
-        "scope": 34114,
+        "scope": 34104,
         "usedErrors": []
       }
     ],

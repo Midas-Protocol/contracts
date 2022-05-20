@@ -50,23 +50,23 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/InitializableClones.sol",
-    "id": 66108,
+    "id": 66093,
     "exportedSymbols": {
       "AddressUpgradeable": [
-        90644
+        90401
       ],
       "ClonesUpgradeable": [
-        89321
+        89078
       ],
       "InitializableClones": [
-        66107
+        66092
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:933:235",
     "nodes": [
       {
-        "id": 66066,
+        "id": 66051,
         "nodeType": "PragmaDirective",
         "src": "39:24:235",
         "literals": [
@@ -77,47 +77,47 @@
         ]
       },
       {
-        "id": 66067,
+        "id": 66052,
         "nodeType": "ImportDirective",
         "src": "65:82:235",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 66108,
-        "sourceUnit": 89322,
+        "scope": 66093,
+        "sourceUnit": 89079,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 66068,
+        "id": 66053,
         "nodeType": "ImportDirective",
         "src": "148:83:235",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 66108,
-        "sourceUnit": 90645,
+        "scope": 66093,
+        "sourceUnit": 90402,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 66107,
+        "id": 66092,
         "nodeType": "ContractDefinition",
         "src": "432:539:235",
         "nodes": [
           {
-            "id": 66072,
+            "id": 66057,
             "nodeType": "UsingForDirective",
             "src": "465:37:235",
             "libraryName": {
-              "id": 66070,
+              "id": 66055,
               "name": "AddressUpgradeable",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 90644,
+              "referencedDeclaration": 90401,
               "src": "471:18:235"
             },
             "typeName": {
-              "id": 66071,
+              "id": 66056,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "494:7:235",
@@ -129,12 +129,12 @@
             }
           },
           {
-            "id": 66077,
+            "id": 66062,
             "nodeType": "EventDefinition",
             "src": "568:33:235",
             "anonymous": false,
             "documentation": {
-              "id": 66073,
+              "id": 66058,
               "nodeType": "StructuredDocumentation",
               "src": "506:59:235",
               "text": " @dev Event emitted when a clone is deployed."
@@ -142,18 +142,18 @@
             "name": "Deployed",
             "nameLocation": "574:8:235",
             "parameters": {
-              "id": 66076,
+              "id": 66061,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 66075,
+                  "id": 66060,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "instance",
                   "nameLocation": "591:8:235",
                   "nodeType": "VariableDeclaration",
-                  "scope": 66077,
+                  "scope": 66062,
                   "src": "583:16:235",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -162,7 +162,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 66074,
+                    "id": 66059,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "583:7:235",
@@ -179,27 +179,27 @@
             }
           },
           {
-            "id": 66106,
+            "id": 66091,
             "nodeType": "FunctionDefinition",
             "src": "723:246:235",
             "body": {
-              "id": 66105,
+              "id": 66090,
               "nodeType": "Block",
               "src": "816:153:235",
               "statements": [
                 {
                   "expression": {
-                    "id": 66092,
+                    "id": 66077,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
-                      "id": 66087,
+                      "id": 66072,
                       "name": "instance",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 66085,
+                      "referencedDeclaration": 66070,
                       "src": "822:8:235",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -211,11 +211,11 @@
                     "rightHandSide": {
                       "arguments": [
                         {
-                          "id": 66090,
+                          "id": 66075,
                           "name": "master",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 66080,
+                          "referencedDeclaration": 66065,
                           "src": "857:6:235",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -231,32 +231,32 @@
                           }
                         ],
                         "expression": {
-                          "id": 66088,
+                          "id": 66073,
                           "name": "ClonesUpgradeable",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 89321,
+                          "referencedDeclaration": 89078,
                           "src": "833:17:235",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_ClonesUpgradeable_$89321_$",
+                            "typeIdentifier": "t_type$_t_contract$_ClonesUpgradeable_$89078_$",
                             "typeString": "type(library ClonesUpgradeable)"
                           }
                         },
-                        "id": 66089,
+                        "id": 66074,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "clone",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 89264,
+                        "referencedDeclaration": 89021,
                         "src": "833:23:235",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_address_$",
                           "typeString": "function (address) returns (address)"
                         }
                       },
-                      "id": 66091,
+                      "id": 66076,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -277,7 +277,7 @@
                       "typeString": "address"
                     }
                   },
-                  "id": 66093,
+                  "id": 66078,
                   "nodeType": "ExpressionStatement",
                   "src": "822:42:235"
                 },
@@ -285,11 +285,11 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 66097,
+                        "id": 66082,
                         "name": "initializer",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 66082,
+                        "referencedDeclaration": 66067,
                         "src": "892:11:235",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
@@ -298,7 +298,7 @@
                       },
                       {
                         "hexValue": "4661696c656420746f20696e697469616c697a6520636c6f6e652e",
-                        "id": 66098,
+                        "id": 66083,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -325,32 +325,32 @@
                         }
                       ],
                       "expression": {
-                        "id": 66094,
+                        "id": 66079,
                         "name": "instance",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 66085,
+                        "referencedDeclaration": 66070,
                         "src": "870:8:235",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         }
                       },
-                      "id": 66096,
+                      "id": 66081,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "functionCall",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 90490,
+                      "referencedDeclaration": 90247,
                       "src": "870:21:235",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_bytes_memory_ptr_$_t_string_memory_ptr_$returns$_t_bytes_memory_ptr_$bound_to$_t_address_$",
                         "typeString": "function (address,bytes memory,string memory) returns (bytes memory)"
                       }
                     },
-                    "id": 66099,
+                    "id": 66084,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -365,7 +365,7 @@
                       "typeString": "bytes memory"
                     }
                   },
-                  "id": 66100,
+                  "id": 66085,
                   "nodeType": "ExpressionStatement",
                   "src": "870:65:235"
                 },
@@ -373,11 +373,11 @@
                   "eventCall": {
                     "arguments": [
                       {
-                        "id": 66102,
+                        "id": 66087,
                         "name": "instance",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 66085,
+                        "referencedDeclaration": 66070,
                         "src": "955:8:235",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -392,18 +392,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 66101,
+                      "id": 66086,
                       "name": "Deployed",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 66077,
+                      "referencedDeclaration": 66062,
                       "src": "946:8:235",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 66103,
+                    "id": 66088,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -418,14 +418,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 66104,
+                  "id": 66089,
                   "nodeType": "EmitStatement",
                   "src": "941:23:235"
                 }
               ]
             },
             "documentation": {
-              "id": 66078,
+              "id": 66063,
               "nodeType": "StructuredDocumentation",
               "src": "605:115:235",
               "text": " @dev Deploys, initializes, and returns the address of a clone that mimics the behaviour of `master`."
@@ -437,17 +437,17 @@
             "name": "clone",
             "nameLocation": "732:5:235",
             "parameters": {
-              "id": 66083,
+              "id": 66068,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 66080,
+                  "id": 66065,
                   "mutability": "mutable",
                   "name": "master",
                   "nameLocation": "746:6:235",
                   "nodeType": "VariableDeclaration",
-                  "scope": 66106,
+                  "scope": 66091,
                   "src": "738:14:235",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -456,7 +456,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 66079,
+                    "id": 66064,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "738:7:235",
@@ -470,12 +470,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 66082,
+                  "id": 66067,
                   "mutability": "mutable",
                   "name": "initializer",
                   "nameLocation": "767:11:235",
                   "nodeType": "VariableDeclaration",
-                  "scope": 66106,
+                  "scope": 66091,
                   "src": "754:24:235",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -484,7 +484,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 66081,
+                    "id": 66066,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "754:5:235",
@@ -499,17 +499,17 @@
               "src": "737:42:235"
             },
             "returnParameters": {
-              "id": 66086,
+              "id": 66071,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 66085,
+                  "id": 66070,
                   "mutability": "mutable",
                   "name": "instance",
                   "nameLocation": "806:8:235",
                   "nodeType": "VariableDeclaration",
-                  "scope": 66106,
+                  "scope": 66091,
                   "src": "798:16:235",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -518,7 +518,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 66084,
+                    "id": 66069,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "798:7:235",
@@ -533,7 +533,7 @@
               ],
               "src": "797:18:235"
             },
-            "scope": 66107,
+            "scope": 66092,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -545,18 +545,18 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 66069,
+          "id": 66054,
           "nodeType": "StructuredDocumentation",
           "src": "233:198:235",
           "text": " @title InitializableClones\n @author David Lucid <david@rari.capital> (https://github.com/davidlucid)\n @notice Deploys minimal proxy contracts (known as \"clones\") and initializes them."
         },
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          66107
+          66092
         ],
         "name": "InitializableClones",
         "nameLocation": "441:19:235",
-        "scope": 66108,
+        "scope": 66093,
         "usedErrors": []
       }
     ],

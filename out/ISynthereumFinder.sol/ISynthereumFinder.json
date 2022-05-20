@@ -50,17 +50,17 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/jarvis/ISynthereumFinder.sol",
-    "id": 34282,
+    "id": 34272,
     "exportedSymbols": {
       "ISynthereumFinder": [
-        34281
+        34271
       ]
     },
     "nodeType": "SourceUnit",
     "src": "42:880:90",
     "nodes": [
       {
-        "id": 34263,
+        "id": 34253,
         "nodeType": "PragmaDirective",
         "src": "42:23:90",
         "literals": [
@@ -71,16 +71,16 @@
         ]
       },
       {
-        "id": 34281,
+        "id": 34271,
         "nodeType": "ContractDefinition",
         "src": "154:767:90",
         "nodes": [
           {
-            "id": 34272,
+            "id": 34262,
             "nodeType": "FunctionDefinition",
             "src": "481:100:90",
             "documentation": {
-              "id": 34265,
+              "id": 34255,
               "nodeType": "StructuredDocumentation",
               "src": "186:292:90",
               "text": " @notice Updates the address of the contract that implements `interfaceName`.\n @param interfaceName bytes32 encoding of the interface name that is either changed or registered.\n @param implementationAddress address of the deployed contract that implements the interface."
@@ -92,17 +92,17 @@
             "name": "changeImplementationAddress",
             "nameLocation": "490:27:90",
             "parameters": {
-              "id": 34270,
+              "id": 34260,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34267,
+                  "id": 34257,
                   "mutability": "mutable",
                   "name": "interfaceName",
                   "nameLocation": "526:13:90",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34272,
+                  "scope": 34262,
                   "src": "518:21:90",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -111,7 +111,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 34266,
+                    "id": 34256,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "518:7:90",
@@ -124,12 +124,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 34269,
+                  "id": 34259,
                   "mutability": "mutable",
                   "name": "implementationAddress",
                   "nameLocation": "549:21:90",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34272,
+                  "scope": 34262,
                   "src": "541:29:90",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -138,7 +138,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 34268,
+                    "id": 34258,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "541:7:90",
@@ -154,22 +154,22 @@
               "src": "517:54:90"
             },
             "returnParameters": {
-              "id": 34271,
+              "id": 34261,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "580:0:90"
             },
-            "scope": 34281,
+            "scope": 34271,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 34280,
+            "id": 34270,
             "nodeType": "FunctionDefinition",
             "src": "830:89:90",
             "documentation": {
-              "id": 34273,
+              "id": 34263,
               "nodeType": "StructuredDocumentation",
               "src": "585:242:90",
               "text": " @notice Gets the address of the contract that implements the given `interfaceName`.\n @param interfaceName queried interface.\n @return implementationAddress Address of the deployed contract that implements the interface."
@@ -181,17 +181,17 @@
             "name": "getImplementationAddress",
             "nameLocation": "839:24:90",
             "parameters": {
-              "id": 34276,
+              "id": 34266,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34275,
+                  "id": 34265,
                   "mutability": "mutable",
                   "name": "interfaceName",
                   "nameLocation": "872:13:90",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34280,
+                  "scope": 34270,
                   "src": "864:21:90",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -200,7 +200,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 34274,
+                    "id": 34264,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "864:7:90",
@@ -215,17 +215,17 @@
               "src": "863:23:90"
             },
             "returnParameters": {
-              "id": 34279,
+              "id": 34269,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34278,
+                  "id": 34268,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34280,
+                  "scope": 34270,
                   "src": "910:7:90",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -234,7 +234,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 34277,
+                    "id": 34267,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "910:7:90",
@@ -249,7 +249,7 @@
               ],
               "src": "909:9:90"
             },
-            "scope": 34281,
+            "scope": 34271,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -261,18 +261,18 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 34264,
+          "id": 34254,
           "nodeType": "StructuredDocumentation",
           "src": "67:86:90",
           "text": " @title Provides addresses of the contracts implementing certain interfaces."
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          34281
+          34271
         ],
         "name": "ISynthereumFinder",
         "nameLocation": "164:17:90",
-        "scope": 34282,
+        "scope": 34272,
         "usedErrors": []
       }
     ],

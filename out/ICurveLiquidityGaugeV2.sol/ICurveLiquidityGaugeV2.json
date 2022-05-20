@@ -52,17 +52,17 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/curve/ICurveLiquidityGaugeV2.sol",
-    "id": 33896,
+    "id": 33886,
     "exportedSymbols": {
       "ICurveLiquidityGaugeV2": [
-        33895
+        33885
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:211:79",
     "nodes": [
       {
-        "id": 33879,
+        "id": 33869,
         "nodeType": "PragmaDirective",
         "src": "39:24:79",
         "literals": [
@@ -73,12 +73,12 @@
         ]
       },
       {
-        "id": 33895,
+        "id": 33885,
         "nodeType": "ContractDefinition",
         "src": "65:184:79",
         "nodes": [
           {
-            "id": 33884,
+            "id": 33874,
             "nodeType": "FunctionDefinition",
             "src": "102:52:79",
             "functionSelector": "82c63066",
@@ -88,23 +88,23 @@
             "name": "lp_token",
             "nameLocation": "111:8:79",
             "parameters": {
-              "id": 33880,
+              "id": 33870,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "119:2:79"
             },
             "returnParameters": {
-              "id": 33883,
+              "id": 33873,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33882,
+                  "id": 33872,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33884,
+                  "scope": 33874,
                   "src": "145:7:79",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -113,7 +113,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33881,
+                    "id": 33871,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "145:7:79",
@@ -128,13 +128,13 @@
               ],
               "src": "144:9:79"
             },
-            "scope": 33895,
+            "scope": 33885,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 33889,
+            "id": 33879,
             "nodeType": "FunctionDefinition",
             "src": "158:42:79",
             "functionSelector": "b6b55f25",
@@ -144,17 +144,17 @@
             "name": "deposit",
             "nameLocation": "167:7:79",
             "parameters": {
-              "id": 33887,
+              "id": 33877,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33886,
+                  "id": 33876,
                   "mutability": "mutable",
                   "name": "_value",
                   "nameLocation": "183:6:79",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33889,
+                  "scope": 33879,
                   "src": "175:14:79",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -163,7 +163,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 33885,
+                    "id": 33875,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "175:7:79",
@@ -178,18 +178,18 @@
               "src": "174:16:79"
             },
             "returnParameters": {
-              "id": 33888,
+              "id": 33878,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "199:0:79"
             },
-            "scope": 33895,
+            "scope": 33885,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 33894,
+            "id": 33884,
             "nodeType": "FunctionDefinition",
             "src": "204:43:79",
             "functionSelector": "2e1a7d4d",
@@ -199,17 +199,17 @@
             "name": "withdraw",
             "nameLocation": "213:8:79",
             "parameters": {
-              "id": 33892,
+              "id": 33882,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33891,
+                  "id": 33881,
                   "mutability": "mutable",
                   "name": "_value",
                   "nameLocation": "230:6:79",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33894,
+                  "scope": 33884,
                   "src": "222:14:79",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -218,7 +218,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 33890,
+                    "id": 33880,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "222:7:79",
@@ -233,12 +233,12 @@
               "src": "221:16:79"
             },
             "returnParameters": {
-              "id": 33893,
+              "id": 33883,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "246:0:79"
             },
-            "scope": 33895,
+            "scope": 33885,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -251,11 +251,11 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          33895
+          33885
         ],
         "name": "ICurveLiquidityGaugeV2",
         "nameLocation": "75:22:79",
-        "scope": 33896,
+        "scope": 33886,
         "usedErrors": []
       }
     ],

@@ -59,7 +59,7 @@ contract CurveLpTokenPriceOracleNoRegistry is
     address[][] memory _poolUnderlyings
   ) public initializer {
     require(
-      _lpTokens.length > 0 && _lpTokens.length == _pools.length && _lpTokens.length == _poolUnderlyings.length,
+      _lpTokens.length == _pools.length && _lpTokens.length == _poolUnderlyings.length,
       "No LP tokens supplied or array lengths not equal."
     );
 
