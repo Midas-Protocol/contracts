@@ -32,20 +32,20 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/keep3r/Keep3rV2OracleFactory.sol",
-    "id": 34575,
+    "id": 34565,
     "exportedSymbols": {
       "Keep3rV2Oracle": [
-        34565
+        34555
       ],
       "Keep3rV2OracleFactory": [
-        34574
+        34564
       ]
     },
     "nodeType": "SourceUnit",
     "src": "32:144:95",
     "nodes": [
       {
-        "id": 34567,
+        "id": 34557,
         "nodeType": "PragmaDirective",
         "src": "32:24:95",
         "literals": [
@@ -56,24 +56,24 @@
         ]
       },
       {
-        "id": 34568,
+        "id": 34558,
         "nodeType": "ImportDirective",
         "src": "58:30:95",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/keep3r/Keep3rV2Oracle.sol",
         "file": "./Keep3rV2Oracle.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 34575,
-        "sourceUnit": 34566,
+        "scope": 34565,
+        "sourceUnit": 34556,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 34574,
+        "id": 34564,
         "nodeType": "ContractDefinition",
         "src": "90:85:95",
         "nodes": [
           {
-            "id": 34573,
+            "id": 34563,
             "nodeType": "VariableDeclaration",
             "src": "125:47:95",
             "constant": false,
@@ -81,17 +81,17 @@
             "mutability": "mutable",
             "name": "feeds",
             "nameLocation": "167:5:95",
-            "scope": 34574,
+            "scope": 34564,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_address_$_t_contract$_Keep3rV2Oracle_$34565_$",
+              "typeIdentifier": "t_mapping$_t_address_$_t_contract$_Keep3rV2Oracle_$34555_$",
               "typeString": "mapping(address => contract Keep3rV2Oracle)"
             },
             "typeName": {
-              "id": 34572,
+              "id": 34562,
               "keyType": {
-                "id": 34569,
+                "id": 34559,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "133:7:95",
@@ -103,23 +103,23 @@
               "nodeType": "Mapping",
               "src": "125:34:95",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_address_$_t_contract$_Keep3rV2Oracle_$34565_$",
+                "typeIdentifier": "t_mapping$_t_address_$_t_contract$_Keep3rV2Oracle_$34555_$",
                 "typeString": "mapping(address => contract Keep3rV2Oracle)"
               },
               "valueType": {
-                "id": 34571,
+                "id": 34561,
                 "nodeType": "UserDefinedTypeName",
                 "pathNode": {
-                  "id": 34570,
+                  "id": 34560,
                   "name": "Keep3rV2Oracle",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 34565,
+                  "referencedDeclaration": 34555,
                   "src": "144:14:95"
                 },
-                "referencedDeclaration": 34565,
+                "referencedDeclaration": 34555,
                 "src": "144:14:95",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_contract$_Keep3rV2Oracle_$34565",
+                  "typeIdentifier": "t_contract$_Keep3rV2Oracle_$34555",
                   "typeString": "contract Keep3rV2Oracle"
                 }
               }
@@ -134,11 +134,11 @@
         "contractKind": "contract",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          34574
+          34564
         ],
         "name": "Keep3rV2OracleFactory",
         "nameLocation": "99:21:95",
-        "scope": 34575,
+        "scope": 34565,
         "usedErrors": []
       }
     ],

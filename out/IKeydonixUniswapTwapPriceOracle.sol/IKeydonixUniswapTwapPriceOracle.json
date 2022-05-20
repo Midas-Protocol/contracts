@@ -114,38 +114,38 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/default/IKeydonixUniswapTwapPriceOracle.sol",
-    "id": 44187,
+    "id": 44172,
     "exportedSymbols": {
       "BlockVerifier": [
-        46544
+        46529
       ],
       "ICToken": [
-        33610
+        33600
       ],
       "IKeydonixUniswapTwapPriceOracle": [
-        44186
+        44171
       ],
       "IUniswapV2Pair": [
-        36156
+        36146
       ],
       "MerklePatriciaVerifier": [
-        47028
+        47013
       ],
       "Rlp": [
-        48134
+        48119
       ],
       "UQ112x112": [
-        48178
+        48163
       ],
       "UniswapOracle": [
-        48662
+        48647
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:441:169",
     "nodes": [
       {
-        "id": 44154,
+        "id": 44139,
         "nodeType": "PragmaDirective",
         "src": "39:24:169",
         "literals": [
@@ -156,36 +156,36 @@
         ]
       },
       {
-        "id": 44155,
+        "id": 44140,
         "nodeType": "ImportDirective",
         "src": "65:45:169",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICToken.sol",
         "file": "../../external/compound/ICToken.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 44187,
-        "sourceUnit": 33611,
+        "scope": 44172,
+        "sourceUnit": 33601,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 44156,
+        "id": 44141,
         "nodeType": "ImportDirective",
         "src": "111:39:169",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/keydonix/UniswapOracle.sol",
         "file": "../keydonix/UniswapOracle.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 44187,
-        "sourceUnit": 48663,
+        "scope": 44172,
+        "sourceUnit": 48648,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 44186,
+        "id": 44171,
         "nodeType": "ContractDefinition",
         "src": "152:327:169",
         "nodes": [
           {
-            "id": 44169,
+            "id": 44154,
             "nodeType": "FunctionDefinition",
             "src": "198:117:169",
             "functionSelector": "cd344be8",
@@ -195,38 +195,38 @@
             "name": "verifyPrice",
             "nameLocation": "207:11:169",
             "parameters": {
-              "id": 44163,
+              "id": 44148,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 44159,
+                  "id": 44144,
                   "mutability": "mutable",
                   "name": "cToken",
                   "nameLocation": "227:6:169",
                   "nodeType": "VariableDeclaration",
-                  "scope": 44169,
+                  "scope": 44154,
                   "src": "219:14:169",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ICToken_$33610",
+                    "typeIdentifier": "t_contract$_ICToken_$33600",
                     "typeString": "contract ICToken"
                   },
                   "typeName": {
-                    "id": 44158,
+                    "id": 44143,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 44157,
+                      "id": 44142,
                       "name": "ICToken",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 33610,
+                      "referencedDeclaration": 33600,
                       "src": "219:7:169"
                     },
-                    "referencedDeclaration": 33610,
+                    "referencedDeclaration": 33600,
                     "src": "219:7:169",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ICToken_$33610",
+                      "typeIdentifier": "t_contract$_ICToken_$33600",
                       "typeString": "contract ICToken"
                     }
                   },
@@ -234,33 +234,33 @@
                 },
                 {
                   "constant": false,
-                  "id": 44162,
+                  "id": 44147,
                   "mutability": "mutable",
                   "name": "proofData",
                   "nameLocation": "268:9:169",
                   "nodeType": "VariableDeclaration",
-                  "scope": 44169,
+                  "scope": 44154,
                   "src": "235:42:169",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_ProofData_$48235_calldata_ptr",
+                    "typeIdentifier": "t_struct$_ProofData_$48220_calldata_ptr",
                     "typeString": "struct UniswapOracle.ProofData"
                   },
                   "typeName": {
-                    "id": 44161,
+                    "id": 44146,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 44160,
+                      "id": 44145,
                       "name": "UniswapOracle.ProofData",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 48235,
+                      "referencedDeclaration": 48220,
                       "src": "235:23:169"
                     },
-                    "referencedDeclaration": 48235,
+                    "referencedDeclaration": 48220,
                     "src": "235:23:169",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ProofData_$48235_storage_ptr",
+                      "typeIdentifier": "t_struct$_ProofData_$48220_storage_ptr",
                       "typeString": "struct UniswapOracle.ProofData"
                     }
                   },
@@ -270,17 +270,17 @@
               "src": "218:60:169"
             },
             "returnParameters": {
-              "id": 44168,
+              "id": 44153,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 44165,
+                  "id": 44150,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 44169,
+                  "scope": 44154,
                   "src": "297:7:169",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -289,7 +289,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 44164,
+                    "id": 44149,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "297:7:169",
@@ -302,12 +302,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 44167,
+                  "id": 44152,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 44169,
+                  "scope": 44154,
                   "src": "306:7:169",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -316,7 +316,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 44166,
+                    "id": 44151,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "306:7:169",
@@ -330,31 +330,31 @@
               ],
               "src": "296:18:169"
             },
-            "scope": 44186,
+            "scope": 44171,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 44177,
+            "id": 44162,
             "nodeType": "EventDefinition",
             "src": "319:81:169",
             "anonymous": false,
             "name": "PriceAlreadyVerified",
             "nameLocation": "325:20:169",
             "parameters": {
-              "id": 44176,
+              "id": 44161,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 44171,
+                  "id": 44156,
                   "indexed": true,
                   "mutability": "mutable",
                   "name": "cToken",
                   "nameLocation": "362:6:169",
                   "nodeType": "VariableDeclaration",
-                  "scope": 44177,
+                  "scope": 44162,
                   "src": "346:22:169",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -363,7 +363,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 44170,
+                    "id": 44155,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "346:7:169",
@@ -377,13 +377,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 44173,
+                  "id": 44158,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "price",
                   "nameLocation": "378:5:169",
                   "nodeType": "VariableDeclaration",
-                  "scope": 44177,
+                  "scope": 44162,
                   "src": "370:13:169",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -392,7 +392,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 44172,
+                    "id": 44157,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "370:7:169",
@@ -405,13 +405,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 44175,
+                  "id": 44160,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "block",
                   "nameLocation": "393:5:169",
                   "nodeType": "VariableDeclaration",
-                  "scope": 44177,
+                  "scope": 44162,
                   "src": "385:13:169",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -420,7 +420,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 44174,
+                    "id": 44159,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "385:7:169",
@@ -436,25 +436,25 @@
             }
           },
           {
-            "id": 44185,
+            "id": 44170,
             "nodeType": "EventDefinition",
             "src": "403:74:169",
             "anonymous": false,
             "name": "PriceVerified",
             "nameLocation": "409:13:169",
             "parameters": {
-              "id": 44184,
+              "id": 44169,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 44179,
+                  "id": 44164,
                   "indexed": true,
                   "mutability": "mutable",
                   "name": "cToken",
                   "nameLocation": "439:6:169",
                   "nodeType": "VariableDeclaration",
-                  "scope": 44185,
+                  "scope": 44170,
                   "src": "423:22:169",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -463,7 +463,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 44178,
+                    "id": 44163,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "423:7:169",
@@ -477,13 +477,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 44181,
+                  "id": 44166,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "price",
                   "nameLocation": "455:5:169",
                   "nodeType": "VariableDeclaration",
-                  "scope": 44185,
+                  "scope": 44170,
                   "src": "447:13:169",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -492,7 +492,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 44180,
+                    "id": 44165,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "447:7:169",
@@ -505,13 +505,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 44183,
+                  "id": 44168,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "block",
                   "nameLocation": "470:5:169",
                   "nodeType": "VariableDeclaration",
-                  "scope": 44185,
+                  "scope": 44170,
                   "src": "462:13:169",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -520,7 +520,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 44182,
+                    "id": 44167,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "462:7:169",
@@ -543,11 +543,11 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          44186
+          44171
         ],
         "name": "IKeydonixUniswapTwapPriceOracle",
         "nameLocation": "162:31:169",
-        "scope": 44187,
+        "scope": 44172,
         "usedErrors": []
       }
     ],

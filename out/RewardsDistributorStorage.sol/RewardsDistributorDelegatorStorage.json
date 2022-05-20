@@ -52,83 +52,83 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/RewardsDistributorStorage.sol",
-    "id": 29086,
+    "id": 29076,
     "exportedSymbols": {
       "CErc20Interface": [
-        15662
+        15652
       ],
       "CErc20Storage": [
-        15603
+        15593
       ],
       "CEtherInterface": [
-        15665
+        15655
       ],
       "CToken": [
-        15183
+        15173
       ],
       "CTokenAdminStorage": [
-        15201
+        15191
       ],
       "CTokenInterface": [
-        15599
+        15589
       ],
       "CTokenStorage": [
-        15290
+        15280
       ],
       "CarefulMath": [
-        15862
+        15852
       ],
       "ComptrollerErrorReporter": [
-        20814
+        20804
       ],
       "ComptrollerInterface": [
-        20056
+        20046
       ],
       "ComptrollerV1Storage": [
-        20132
+        20122
       ],
       "ComptrollerV2Storage": [
-        20214
+        20204
       ],
       "ComptrollerV3Storage": [
-        20243
+        20233
       ],
       "EIP20Interface": [
-        20616
+        20606
       ],
       "EIP20NonStandardInterface": [
-        20688
+        20678
       ],
       "Exponential": [
-        21608
+        21598
       ],
       "ExponentialNoError": [
-        22362
+        22352
       ],
       "IFuseFeeDistributor": [
-        24931
+        24921
       ],
       "InterestRateModel": [
-        24965
+        24955
       ],
       "RewardsDistributorDelegateStorageV1": [
-        29085
+        29075
       ],
       "RewardsDistributorDelegatorStorage": [
-        29017
+        29007
       ],
       "TokenErrorReporter": [
-        21014
+        21004
       ],
       "UnitrollerAdminStorage": [
-        20110
+        20100
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:2324:42",
     "nodes": [
       {
-        "id": 29006,
+        "id": 28996,
         "nodeType": "PragmaDirective",
         "src": "39:24:42",
         "literals": [
@@ -139,29 +139,29 @@
         ]
       },
       {
-        "id": 29007,
+        "id": 28997,
         "nodeType": "ImportDirective",
         "src": "65:22:42",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/CToken.sol",
         "file": "./CToken.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 29086,
-        "sourceUnit": 15184,
+        "scope": 29076,
+        "sourceUnit": 15174,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 29017,
+        "id": 29007,
         "nodeType": "ContractDefinition",
         "src": "89:287:42",
         "nodes": [
           {
-            "id": 29010,
+            "id": 29000,
             "nodeType": "VariableDeclaration",
             "src": "183:20:42",
             "constant": false,
             "documentation": {
-              "id": 29008,
+              "id": 28998,
               "nodeType": "StructuredDocumentation",
               "src": "137:43:42",
               "text": "@notice Administrator for this contract"
@@ -170,7 +170,7 @@
             "mutability": "mutable",
             "name": "admin",
             "nameLocation": "198:5:42",
-            "scope": 29017,
+            "scope": 29007,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -178,7 +178,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 29009,
+              "id": 28999,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "183:7:42",
@@ -191,12 +191,12 @@
             "visibility": "public"
           },
           {
-            "id": 29013,
+            "id": 29003,
             "nodeType": "VariableDeclaration",
             "src": "262:27:42",
             "constant": false,
             "documentation": {
-              "id": 29011,
+              "id": 29001,
               "nodeType": "StructuredDocumentation",
               "src": "208:51:42",
               "text": "@notice Pending administrator for this contract"
@@ -205,7 +205,7 @@
             "mutability": "mutable",
             "name": "pendingAdmin",
             "nameLocation": "277:12:42",
-            "scope": 29017,
+            "scope": 29007,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -213,7 +213,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 29012,
+              "id": 29002,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "262:7:42",
@@ -226,12 +226,12 @@
             "visibility": "public"
           },
           {
-            "id": 29016,
+            "id": 29006,
             "nodeType": "VariableDeclaration",
             "src": "344:29:42",
             "constant": false,
             "documentation": {
-              "id": 29014,
+              "id": 29004,
               "nodeType": "StructuredDocumentation",
               "src": "294:47:42",
               "text": "@notice Active brains of RewardsDistributor"
@@ -240,7 +240,7 @@
             "mutability": "mutable",
             "name": "implementation",
             "nameLocation": "359:14:42",
-            "scope": 29017,
+            "scope": 29007,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -248,7 +248,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 29015,
+              "id": 29005,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "344:7:42",
@@ -268,25 +268,25 @@
         "contractKind": "contract",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          29017
+          29007
         ],
         "name": "RewardsDistributorDelegatorStorage",
         "nameLocation": "98:34:42",
-        "scope": 29086,
+        "scope": 29076,
         "usedErrors": []
       },
       {
-        "id": 29085,
+        "id": 29075,
         "nodeType": "ContractDefinition",
         "src": "672:1690:42",
         "nodes": [
           {
-            "id": 29023,
+            "id": 29013,
             "nodeType": "VariableDeclaration",
             "src": "803:26:42",
             "constant": false,
             "documentation": {
-              "id": 29021,
+              "id": 29011,
               "nodeType": "StructuredDocumentation",
               "src": "759:41:42",
               "text": "@dev The token to reward (i.e., COMP)"
@@ -295,7 +295,7 @@
             "mutability": "mutable",
             "name": "rewardToken",
             "nameLocation": "818:11:42",
-            "scope": 29085,
+            "scope": 29075,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -303,7 +303,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 29022,
+              "id": 29012,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "803:7:42",
@@ -316,19 +316,19 @@
             "visibility": "public"
           },
           {
-            "id": 29028,
+            "id": 29018,
             "nodeType": "StructDefinition",
             "src": "834:187:42",
             "canonicalName": "RewardsDistributorDelegateStorageV1.CompMarketState",
             "members": [
               {
                 "constant": false,
-                "id": 29025,
+                "id": 29015,
                 "mutability": "mutable",
                 "name": "index",
                 "nameLocation": "939:5:42",
                 "nodeType": "VariableDeclaration",
-                "scope": 29028,
+                "scope": 29018,
                 "src": "931:13:42",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -337,7 +337,7 @@
                   "typeString": "uint224"
                 },
                 "typeName": {
-                  "id": 29024,
+                  "id": 29014,
                   "name": "uint224",
                   "nodeType": "ElementaryTypeName",
                   "src": "931:7:42",
@@ -350,12 +350,12 @@
               },
               {
                 "constant": false,
-                "id": 29027,
+                "id": 29017,
                 "mutability": "mutable",
                 "name": "block",
                 "nameLocation": "1011:5:42",
                 "nodeType": "VariableDeclaration",
-                "scope": 29028,
+                "scope": 29018,
                 "src": "1004:12:42",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -364,7 +364,7 @@
                   "typeString": "uint32"
                 },
                 "typeName": {
-                  "id": 29026,
+                  "id": 29016,
                   "name": "uint32",
                   "nodeType": "ElementaryTypeName",
                   "src": "1004:6:42",
@@ -378,16 +378,16 @@
             ],
             "name": "CompMarketState",
             "nameLocation": "841:15:42",
-            "scope": 29085,
+            "scope": 29075,
             "visibility": "public"
           },
           {
-            "id": 29033,
+            "id": 29023,
             "nodeType": "VariableDeclaration",
             "src": "1061:26:42",
             "constant": false,
             "documentation": {
-              "id": 29029,
+              "id": 29019,
               "nodeType": "StructuredDocumentation",
               "src": "1025:33:42",
               "text": "@notice A list of all markets"
@@ -396,48 +396,48 @@
             "mutability": "mutable",
             "name": "allMarkets",
             "nameLocation": "1077:10:42",
-            "scope": 29085,
+            "scope": 29075,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_array$_t_contract$_CToken_$15183_$dyn_storage",
+              "typeIdentifier": "t_array$_t_contract$_CToken_$15173_$dyn_storage",
               "typeString": "contract CToken[]"
             },
             "typeName": {
               "baseType": {
-                "id": 29031,
+                "id": 29021,
                 "nodeType": "UserDefinedTypeName",
                 "pathNode": {
-                  "id": 29030,
+                  "id": 29020,
                   "name": "CToken",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 15183,
+                  "referencedDeclaration": 15173,
                   "src": "1061:6:42"
                 },
-                "referencedDeclaration": 15183,
+                "referencedDeclaration": 15173,
                 "src": "1061:6:42",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_contract$_CToken_$15183",
+                  "typeIdentifier": "t_contract$_CToken_$15173",
                   "typeString": "contract CToken"
                 }
               },
-              "id": 29032,
+              "id": 29022,
               "nodeType": "ArrayTypeName",
               "src": "1061:8:42",
               "typeDescriptions": {
-                "typeIdentifier": "t_array$_t_contract$_CToken_$15183_$dyn_storage_ptr",
+                "typeIdentifier": "t_array$_t_contract$_CToken_$15173_$dyn_storage_ptr",
                 "typeString": "contract CToken[]"
               }
             },
             "visibility": "public"
           },
           {
-            "id": 29038,
+            "id": 29028,
             "nodeType": "VariableDeclaration",
             "src": "1166:51:42",
             "constant": false,
             "documentation": {
-              "id": 29034,
+              "id": 29024,
               "nodeType": "StructuredDocumentation",
               "src": "1092:71:42",
               "text": "@notice The portion of compRate that each market currently receives"
@@ -446,7 +446,7 @@
             "mutability": "mutable",
             "name": "compSupplySpeeds",
             "nameLocation": "1201:16:42",
-            "scope": 29085,
+            "scope": 29075,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -454,9 +454,9 @@
               "typeString": "mapping(address => uint256)"
             },
             "typeName": {
-              "id": 29037,
+              "id": 29027,
               "keyType": {
-                "id": 29035,
+                "id": 29025,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "1174:7:42",
@@ -472,7 +472,7 @@
                 "typeString": "mapping(address => uint256)"
               },
               "valueType": {
-                "id": 29036,
+                "id": 29026,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
                 "src": "1185:7:42",
@@ -485,12 +485,12 @@
             "visibility": "public"
           },
           {
-            "id": 29043,
+            "id": 29033,
             "nodeType": "VariableDeclaration",
             "src": "1296:51:42",
             "constant": false,
             "documentation": {
-              "id": 29039,
+              "id": 29029,
               "nodeType": "StructuredDocumentation",
               "src": "1222:71:42",
               "text": "@notice The portion of compRate that each market currently receives"
@@ -499,7 +499,7 @@
             "mutability": "mutable",
             "name": "compBorrowSpeeds",
             "nameLocation": "1331:16:42",
-            "scope": 29085,
+            "scope": 29075,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -507,9 +507,9 @@
               "typeString": "mapping(address => uint256)"
             },
             "typeName": {
-              "id": 29042,
+              "id": 29032,
               "keyType": {
-                "id": 29040,
+                "id": 29030,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "1304:7:42",
@@ -525,7 +525,7 @@
                 "typeString": "mapping(address => uint256)"
               },
               "valueType": {
-                "id": 29041,
+                "id": 29031,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
                 "src": "1315:7:42",
@@ -538,12 +538,12 @@
             "visibility": "public"
           },
           {
-            "id": 29049,
+            "id": 29039,
             "nodeType": "VariableDeclaration",
             "src": "1411:58:42",
             "constant": false,
             "documentation": {
-              "id": 29044,
+              "id": 29034,
               "nodeType": "StructuredDocumentation",
               "src": "1352:56:42",
               "text": "@notice The COMP market supply state for each market"
@@ -552,17 +552,17 @@
             "mutability": "mutable",
             "name": "compSupplyState",
             "nameLocation": "1454:15:42",
-            "scope": 29085,
+            "scope": 29075,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$29028_storage_$",
+              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$29018_storage_$",
               "typeString": "mapping(address => struct RewardsDistributorDelegateStorageV1.CompMarketState)"
             },
             "typeName": {
-              "id": 29048,
+              "id": 29038,
               "keyType": {
-                "id": 29045,
+                "id": 29035,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "1419:7:42",
@@ -574,23 +574,23 @@
               "nodeType": "Mapping",
               "src": "1411:35:42",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$29028_storage_$",
+                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$29018_storage_$",
                 "typeString": "mapping(address => struct RewardsDistributorDelegateStorageV1.CompMarketState)"
               },
               "valueType": {
-                "id": 29047,
+                "id": 29037,
                 "nodeType": "UserDefinedTypeName",
                 "pathNode": {
-                  "id": 29046,
+                  "id": 29036,
                   "name": "CompMarketState",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 29028,
+                  "referencedDeclaration": 29018,
                   "src": "1430:15:42"
                 },
-                "referencedDeclaration": 29028,
+                "referencedDeclaration": 29018,
                 "src": "1430:15:42",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_CompMarketState_$29028_storage_ptr",
+                  "typeIdentifier": "t_struct$_CompMarketState_$29018_storage_ptr",
                   "typeString": "struct RewardsDistributorDelegateStorageV1.CompMarketState"
                 }
               }
@@ -598,12 +598,12 @@
             "visibility": "public"
           },
           {
-            "id": 29055,
+            "id": 29045,
             "nodeType": "VariableDeclaration",
             "src": "1533:58:42",
             "constant": false,
             "documentation": {
-              "id": 29050,
+              "id": 29040,
               "nodeType": "StructuredDocumentation",
               "src": "1474:56:42",
               "text": "@notice The COMP market borrow state for each market"
@@ -612,17 +612,17 @@
             "mutability": "mutable",
             "name": "compBorrowState",
             "nameLocation": "1576:15:42",
-            "scope": 29085,
+            "scope": 29075,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$29028_storage_$",
+              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$29018_storage_$",
               "typeString": "mapping(address => struct RewardsDistributorDelegateStorageV1.CompMarketState)"
             },
             "typeName": {
-              "id": 29054,
+              "id": 29044,
               "keyType": {
-                "id": 29051,
+                "id": 29041,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "1541:7:42",
@@ -634,23 +634,23 @@
               "nodeType": "Mapping",
               "src": "1533:35:42",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$29028_storage_$",
+                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$29018_storage_$",
                 "typeString": "mapping(address => struct RewardsDistributorDelegateStorageV1.CompMarketState)"
               },
               "valueType": {
-                "id": 29053,
+                "id": 29043,
                 "nodeType": "UserDefinedTypeName",
                 "pathNode": {
-                  "id": 29052,
+                  "id": 29042,
                   "name": "CompMarketState",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 29028,
+                  "referencedDeclaration": 29018,
                   "src": "1552:15:42"
                 },
-                "referencedDeclaration": 29028,
+                "referencedDeclaration": 29018,
                 "src": "1552:15:42",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_CompMarketState_$29028_storage_ptr",
+                  "typeIdentifier": "t_struct$_CompMarketState_$29018_storage_ptr",
                   "typeString": "struct RewardsDistributorDelegateStorageV1.CompMarketState"
                 }
               }
@@ -658,12 +658,12 @@
             "visibility": "public"
           },
           {
-            "id": 29062,
+            "id": 29052,
             "nodeType": "VariableDeclaration",
             "src": "1704:72:42",
             "constant": false,
             "documentation": {
-              "id": 29056,
+              "id": 29046,
               "nodeType": "StructuredDocumentation",
               "src": "1596:105:42",
               "text": "@notice The COMP borrow index for each market for each supplier as of the last time they accrued COMP"
@@ -672,7 +672,7 @@
             "mutability": "mutable",
             "name": "compSupplierIndex",
             "nameLocation": "1759:17:42",
-            "scope": 29085,
+            "scope": 29075,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -680,9 +680,9 @@
               "typeString": "mapping(address => mapping(address => uint256))"
             },
             "typeName": {
-              "id": 29061,
+              "id": 29051,
               "keyType": {
-                "id": 29057,
+                "id": 29047,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "1712:7:42",
@@ -698,9 +698,9 @@
                 "typeString": "mapping(address => mapping(address => uint256))"
               },
               "valueType": {
-                "id": 29060,
+                "id": 29050,
                 "keyType": {
-                  "id": 29058,
+                  "id": 29048,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1731:7:42",
@@ -716,7 +716,7 @@
                   "typeString": "mapping(address => uint256)"
                 },
                 "valueType": {
-                  "id": 29059,
+                  "id": 29049,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "1742:7:42",
@@ -730,12 +730,12 @@
             "visibility": "public"
           },
           {
-            "id": 29069,
+            "id": 29059,
             "nodeType": "VariableDeclaration",
             "src": "1889:72:42",
             "constant": false,
             "documentation": {
-              "id": 29063,
+              "id": 29053,
               "nodeType": "StructuredDocumentation",
               "src": "1781:105:42",
               "text": "@notice The COMP borrow index for each market for each borrower as of the last time they accrued COMP"
@@ -744,7 +744,7 @@
             "mutability": "mutable",
             "name": "compBorrowerIndex",
             "nameLocation": "1944:17:42",
-            "scope": 29085,
+            "scope": 29075,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -752,9 +752,9 @@
               "typeString": "mapping(address => mapping(address => uint256))"
             },
             "typeName": {
-              "id": 29068,
+              "id": 29058,
               "keyType": {
-                "id": 29064,
+                "id": 29054,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "1897:7:42",
@@ -770,9 +770,9 @@
                 "typeString": "mapping(address => mapping(address => uint256))"
               },
               "valueType": {
-                "id": 29067,
+                "id": 29057,
                 "keyType": {
-                  "id": 29065,
+                  "id": 29055,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1916:7:42",
@@ -788,7 +788,7 @@
                   "typeString": "mapping(address => uint256)"
                 },
                 "valueType": {
-                  "id": 29066,
+                  "id": 29056,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "1927:7:42",
@@ -802,12 +802,12 @@
             "visibility": "public"
           },
           {
-            "id": 29074,
+            "id": 29064,
             "nodeType": "VariableDeclaration",
             "src": "2034:46:42",
             "constant": false,
             "documentation": {
-              "id": 29070,
+              "id": 29060,
               "nodeType": "StructuredDocumentation",
               "src": "1966:65:42",
               "text": "@notice The COMP accrued but not yet transferred to each user"
@@ -816,7 +816,7 @@
             "mutability": "mutable",
             "name": "compAccrued",
             "nameLocation": "2069:11:42",
-            "scope": 29085,
+            "scope": 29075,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -824,9 +824,9 @@
               "typeString": "mapping(address => uint256)"
             },
             "typeName": {
-              "id": 29073,
+              "id": 29063,
               "keyType": {
-                "id": 29071,
+                "id": 29061,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "2042:7:42",
@@ -842,7 +842,7 @@
                 "typeString": "mapping(address => uint256)"
               },
               "valueType": {
-                "id": 29072,
+                "id": 29062,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
                 "src": "2053:7:42",
@@ -855,12 +855,12 @@
             "visibility": "public"
           },
           {
-            "id": 29079,
+            "id": 29069,
             "nodeType": "VariableDeclaration",
             "src": "2160:56:42",
             "constant": false,
             "documentation": {
-              "id": 29075,
+              "id": 29065,
               "nodeType": "StructuredDocumentation",
               "src": "2085:72:42",
               "text": "@notice The portion of COMP that each contributor receives per block"
@@ -869,7 +869,7 @@
             "mutability": "mutable",
             "name": "compContributorSpeeds",
             "nameLocation": "2195:21:42",
-            "scope": 29085,
+            "scope": 29075,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -877,9 +877,9 @@
               "typeString": "mapping(address => uint256)"
             },
             "typeName": {
-              "id": 29078,
+              "id": 29068,
               "keyType": {
-                "id": 29076,
+                "id": 29066,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "2168:7:42",
@@ -895,7 +895,7 @@
                 "typeString": "mapping(address => uint256)"
               },
               "valueType": {
-                "id": 29077,
+                "id": 29067,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
                 "src": "2179:7:42",
@@ -908,12 +908,12 @@
             "visibility": "public"
           },
           {
-            "id": 29084,
+            "id": 29074,
             "nodeType": "VariableDeclaration",
             "src": "2304:55:42",
             "constant": false,
             "documentation": {
-              "id": 29080,
+              "id": 29070,
               "nodeType": "StructuredDocumentation",
               "src": "2221:80:42",
               "text": "@notice Last block at which a contributor's COMP rewards have been allocated"
@@ -922,7 +922,7 @@
             "mutability": "mutable",
             "name": "lastContributorBlock",
             "nameLocation": "2339:20:42",
-            "scope": 29085,
+            "scope": 29075,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -930,9 +930,9 @@
               "typeString": "mapping(address => uint256)"
             },
             "typeName": {
-              "id": 29083,
+              "id": 29073,
               "keyType": {
-                "id": 29081,
+                "id": 29071,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "2312:7:42",
@@ -948,7 +948,7 @@
                 "typeString": "mapping(address => uint256)"
               },
               "valueType": {
-                "id": 29082,
+                "id": 29072,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
                 "src": "2323:7:42",
@@ -965,13 +965,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 29019,
+              "id": 29009,
               "name": "RewardsDistributorDelegatorStorage",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 29017,
+              "referencedDeclaration": 29007,
               "src": "720:34:42"
             },
-            "id": 29020,
+            "id": 29010,
             "nodeType": "InheritanceSpecifier",
             "src": "720:34:42"
           }
@@ -980,19 +980,19 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 29018,
+          "id": 29008,
           "nodeType": "StructuredDocumentation",
           "src": "378:293:42",
           "text": " @title Storage for RewardsDistributorDelegate\n @notice For future upgrades, do not change RewardsDistributorDelegateStorageV1. Create a new\n contract which implements RewardsDistributorDelegateStorageV1 and following the naming convention\n RewardsDistributorDelegateStorageVX."
         },
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          29085,
-          29017
+          29075,
+          29007
         ],
         "name": "RewardsDistributorDelegateStorageV1",
         "nameLocation": "681:35:42",
-        "scope": 29086,
+        "scope": 29076,
         "usedErrors": []
       }
     ],

@@ -44,17 +44,17 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/olympus/OlympusStaking.sol",
-    "id": 34902,
+    "id": 34892,
     "exportedSymbols": {
       "OlympusStaking": [
-        34901
+        34891
       ]
     },
     "nodeType": "SourceUnit",
     "src": "42:155:100",
     "nodes": [
       {
-        "id": 34891,
+        "id": 34881,
         "nodeType": "PragmaDirective",
         "src": "42:24:100",
         "literals": [
@@ -65,12 +65,12 @@
         ]
       },
       {
-        "id": 34901,
+        "id": 34891,
         "nodeType": "ContractDefinition",
         "src": "68:128:100",
         "nodes": [
           {
-            "id": 34893,
+            "id": 34883,
             "nodeType": "VariableDeclaration",
             "src": "105:18:100",
             "constant": false,
@@ -78,7 +78,7 @@
             "mutability": "mutable",
             "name": "OHM",
             "nameLocation": "120:3:100",
-            "scope": 34901,
+            "scope": 34891,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -86,7 +86,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 34892,
+              "id": 34882,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "105:7:100",
@@ -99,7 +99,7 @@
             "visibility": "public"
           },
           {
-            "id": 34900,
+            "id": 34890,
             "nodeType": "FunctionDefinition",
             "src": "128:66:100",
             "functionSelector": "9ebea88c",
@@ -109,17 +109,17 @@
             "name": "unstake",
             "nameLocation": "137:7:100",
             "parameters": {
-              "id": 34898,
+              "id": 34888,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34895,
+                  "id": 34885,
                   "mutability": "mutable",
                   "name": "_amount",
                   "nameLocation": "153:7:100",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34900,
+                  "scope": 34890,
                   "src": "145:15:100",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -128,7 +128,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 34894,
+                    "id": 34884,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "145:7:100",
@@ -141,12 +141,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 34897,
+                  "id": 34887,
                   "mutability": "mutable",
                   "name": "_trigger",
                   "nameLocation": "167:8:100",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34900,
+                  "scope": 34890,
                   "src": "162:13:100",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -155,7 +155,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 34896,
+                    "id": 34886,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "162:4:100",
@@ -170,12 +170,12 @@
               "src": "144:32:100"
             },
             "returnParameters": {
-              "id": 34899,
+              "id": 34889,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "193:0:100"
             },
-            "scope": 34901,
+            "scope": 34891,
             "stateMutability": "nonpayable",
             "virtual": true,
             "visibility": "external"
@@ -188,11 +188,11 @@
         "contractKind": "contract",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          34901
+          34891
         ],
         "name": "OlympusStaking",
         "nameLocation": "86:14:100",
-        "scope": 34902,
+        "scope": 34892,
         "usedErrors": []
       }
     ],

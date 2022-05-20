@@ -60,17 +60,17 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/pooltogether/PrizePoolInterface.sol",
-    "id": 35663,
+    "id": 35653,
     "exportedSymbols": {
       "PrizePoolInterface": [
-        35662
+        35652
       ]
     },
     "nodeType": "SourceUnit",
     "src": "36:1278:105",
     "nodes": [
       {
-        "id": 35640,
+        "id": 35630,
         "nodeType": "PragmaDirective",
         "src": "36:24:105",
         "literals": [
@@ -81,16 +81,16 @@
         ]
       },
       {
-        "id": 35662,
+        "id": 35652,
         "nodeType": "ContractDefinition",
         "src": "468:845:105",
         "nodes": [
           {
-            "id": 35655,
+            "id": 35645,
             "nodeType": "FunctionDefinition",
             "src": "1001:157:105",
             "documentation": {
-              "id": 35642,
+              "id": 35632,
               "nodeType": "StructuredDocumentation",
               "src": "501:497:105",
               "text": "@notice Withdraw assets from the Prize Pool instantly.  A fairness fee may be charged for an early exit.\n @param from The address to redeem tokens from.\n @param amount The amount of tokens to redeem for assets.\n @param controlledToken The address of the token to redeem (i.e. ticket or sponsorship)\n @param maximumExitFee The maximum exit fee the caller is willing to pay.  This should be pre-calculated by the calculateExitFee() fxn.\n @return The actual exit fee paid"
@@ -102,17 +102,17 @@
             "name": "withdrawInstantlyFrom",
             "nameLocation": "1010:21:105",
             "parameters": {
-              "id": 35651,
+              "id": 35641,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35644,
+                  "id": 35634,
                   "mutability": "mutable",
                   "name": "from",
                   "nameLocation": "1045:4:105",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35655,
+                  "scope": 35645,
                   "src": "1037:12:105",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -121,7 +121,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 35643,
+                    "id": 35633,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1037:7:105",
@@ -135,12 +135,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 35646,
+                  "id": 35636,
                   "mutability": "mutable",
                   "name": "amount",
                   "nameLocation": "1063:6:105",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35655,
+                  "scope": 35645,
                   "src": "1055:14:105",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -149,7 +149,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 35645,
+                    "id": 35635,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1055:7:105",
@@ -162,12 +162,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 35648,
+                  "id": 35638,
                   "mutability": "mutable",
                   "name": "controlledToken",
                   "nameLocation": "1083:15:105",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35655,
+                  "scope": 35645,
                   "src": "1075:23:105",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -176,7 +176,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 35647,
+                    "id": 35637,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1075:7:105",
@@ -190,12 +190,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 35650,
+                  "id": 35640,
                   "mutability": "mutable",
                   "name": "maximumExitFee",
                   "nameLocation": "1112:14:105",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35655,
+                  "scope": 35645,
                   "src": "1104:22:105",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -204,7 +204,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 35649,
+                    "id": 35639,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1104:7:105",
@@ -219,17 +219,17 @@
               "src": "1031:99:105"
             },
             "returnParameters": {
-              "id": 35654,
+              "id": 35644,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35653,
+                  "id": 35643,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35655,
+                  "scope": 35645,
                   "src": "1149:7:105",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -238,7 +238,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 35652,
+                    "id": 35642,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1149:7:105",
@@ -252,17 +252,17 @@
               ],
               "src": "1148:9:105"
             },
-            "scope": 35662,
+            "scope": 35652,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 35661,
+            "id": 35651,
             "nodeType": "FunctionDefinition",
             "src": "1262:49:105",
             "documentation": {
-              "id": 35656,
+              "id": 35646,
               "nodeType": "StructuredDocumentation",
               "src": "1162:97:105",
               "text": "@dev Returns the address of the underlying ERC20 asset\n @return The address of the asset"
@@ -274,23 +274,23 @@
             "name": "token",
             "nameLocation": "1271:5:105",
             "parameters": {
-              "id": 35657,
+              "id": 35647,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1276:2:105"
             },
             "returnParameters": {
-              "id": 35660,
+              "id": 35650,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35659,
+                  "id": 35649,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35661,
+                  "scope": 35651,
                   "src": "1302:7:105",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -299,7 +299,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 35658,
+                    "id": 35648,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1302:7:105",
@@ -314,7 +314,7 @@
               ],
               "src": "1301:9:105"
             },
-            "scope": 35662,
+            "scope": 35652,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -326,18 +326,18 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 35641,
+          "id": 35631,
           "nodeType": "StructuredDocumentation",
           "src": "62:406:105",
           "text": "@title Escrows assets and deposits them into a yield source.  Exposes interest to Prize Strategy.  Users deposit and withdraw from this contract to participate in Prize Pool.\n @notice Accounting is managed using Controlled Tokens, whose mint and burn functions can only be called by this contract.\n @dev Must be inherited to provide specific yield-bearing asset control, such as Compound cTokens"
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          35662
+          35652
         ],
         "name": "PrizePoolInterface",
         "nameLocation": "478:18:105",
-        "scope": 35663,
+        "scope": 35653,
         "usedErrors": []
       }
     ],

@@ -241,29 +241,29 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/AddressesProvider.sol",
-    "id": 65371,
+    "id": 65356,
     "exportedSymbols": {
       "AddressUpgradeable": [
-        90644
+        90401
       ],
       "AddressesProvider": [
-        65370
+        65355
       ],
       "ContextUpgradeable": [
-        90686
+        90443
       ],
       "Initializable": [
-        89463
+        89220
       ],
       "OwnableUpgradeable": [
-        89241
+        88998
       ]
     },
     "nodeType": "SourceUnit",
     "src": "42:2466:230",
     "nodes": [
       {
-        "id": 65245,
+        "id": 65230,
         "nodeType": "PragmaDirective",
         "src": "42:24:230",
         "literals": [
@@ -274,31 +274,31 @@
         ]
       },
       {
-        "id": 65246,
+        "id": 65231,
         "nodeType": "ImportDirective",
         "src": "68:84:230",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 65371,
-        "sourceUnit": 89242,
+        "scope": 65356,
+        "sourceUnit": 88999,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 65370,
+        "id": 65355,
         "nodeType": "ContractDefinition",
         "src": "411:2096:230",
         "nodes": [
           {
-            "id": 65253,
+            "id": 65238,
             "nodeType": "VariableDeclaration",
             "src": "464:45:230",
             "constant": false,
             "mutability": "mutable",
             "name": "_addresses",
             "nameLocation": "499:10:230",
-            "scope": 65370,
+            "scope": 65355,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -306,9 +306,9 @@
               "typeString": "mapping(string => address)"
             },
             "typeName": {
-              "id": 65252,
+              "id": 65237,
               "keyType": {
-                "id": 65250,
+                "id": 65235,
                 "name": "string",
                 "nodeType": "ElementaryTypeName",
                 "src": "472:6:230",
@@ -324,7 +324,7 @@
                 "typeString": "mapping(string => address)"
               },
               "valueType": {
-                "id": 65251,
+                "id": 65236,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "482:7:230",
@@ -338,7 +338,7 @@
             "visibility": "private"
           },
           {
-            "id": 65258,
+            "id": 65243,
             "nodeType": "VariableDeclaration",
             "src": "513:51:230",
             "constant": false,
@@ -346,17 +346,17 @@
             "mutability": "mutable",
             "name": "flywheelRewards",
             "nameLocation": "549:15:230",
-            "scope": 65370,
+            "scope": 65355,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Contract_$65290_storage_$",
+              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Contract_$65275_storage_$",
               "typeString": "mapping(address => struct AddressesProvider.Contract)"
             },
             "typeName": {
-              "id": 65257,
+              "id": 65242,
               "keyType": {
-                "id": 65254,
+                "id": 65239,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "521:7:230",
@@ -368,23 +368,23 @@
               "nodeType": "Mapping",
               "src": "513:28:230",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Contract_$65290_storage_$",
+                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Contract_$65275_storage_$",
                 "typeString": "mapping(address => struct AddressesProvider.Contract)"
               },
               "valueType": {
-                "id": 65256,
+                "id": 65241,
                 "nodeType": "UserDefinedTypeName",
                 "pathNode": {
-                  "id": 65255,
+                  "id": 65240,
                   "name": "Contract",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 65290,
+                  "referencedDeclaration": 65275,
                   "src": "532:8:230"
                 },
-                "referencedDeclaration": 65290,
+                "referencedDeclaration": 65275,
                 "src": "532:8:230",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_Contract_$65290_storage_ptr",
+                  "typeIdentifier": "t_struct$_Contract_$65275_storage_ptr",
                   "typeString": "struct AddressesProvider.Contract"
                 }
               }
@@ -392,7 +392,7 @@
             "visibility": "public"
           },
           {
-            "id": 65263,
+            "id": 65248,
             "nodeType": "VariableDeclaration",
             "src": "568:43:230",
             "constant": false,
@@ -400,17 +400,17 @@
             "mutability": "mutable",
             "name": "plugins",
             "nameLocation": "604:7:230",
-            "scope": 65370,
+            "scope": 65355,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Contract_$65290_storage_$",
+              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Contract_$65275_storage_$",
               "typeString": "mapping(address => struct AddressesProvider.Contract)"
             },
             "typeName": {
-              "id": 65262,
+              "id": 65247,
               "keyType": {
-                "id": 65259,
+                "id": 65244,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "576:7:230",
@@ -422,23 +422,23 @@
               "nodeType": "Mapping",
               "src": "568:28:230",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Contract_$65290_storage_$",
+                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Contract_$65275_storage_$",
                 "typeString": "mapping(address => struct AddressesProvider.Contract)"
               },
               "valueType": {
-                "id": 65261,
+                "id": 65246,
                 "nodeType": "UserDefinedTypeName",
                 "pathNode": {
-                  "id": 65260,
+                  "id": 65245,
                   "name": "Contract",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 65290,
+                  "referencedDeclaration": 65275,
                   "src": "587:8:230"
                 },
-                "referencedDeclaration": 65290,
+                "referencedDeclaration": 65275,
                 "src": "587:8:230",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_Contract_$65290_storage_ptr",
+                  "typeIdentifier": "t_struct$_Contract_$65275_storage_ptr",
                   "typeString": "struct AddressesProvider.Contract"
                 }
               }
@@ -446,11 +446,11 @@
             "visibility": "public"
           },
           {
-            "id": 65279,
+            "id": 65264,
             "nodeType": "FunctionDefinition",
             "src": "700:112:230",
             "body": {
-              "id": 65278,
+              "id": 65263,
               "nodeType": "Block",
               "src": "754:58:230",
               "statements": [
@@ -459,18 +459,18 @@
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
-                      "id": 65271,
+                      "id": 65256,
                       "name": "__Ownable_init",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 89144,
+                      "referencedDeclaration": 88901,
                       "src": "760:14:230",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
                         "typeString": "function ()"
                       }
                     },
-                    "id": 65272,
+                    "id": 65257,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -485,7 +485,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 65273,
+                  "id": 65258,
                   "nodeType": "ExpressionStatement",
                   "src": "760:16:230"
                 },
@@ -493,11 +493,11 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 65275,
+                        "id": 65260,
                         "name": "owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 65266,
+                        "referencedDeclaration": 65251,
                         "src": "801:5:230",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -512,18 +512,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 65274,
+                      "id": 65259,
                       "name": "_transferOwnership",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 89235,
+                      "referencedDeclaration": 88992,
                       "src": "782:18:230",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 65276,
+                    "id": 65261,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -538,14 +538,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 65277,
+                  "id": 65262,
                   "nodeType": "ExpressionStatement",
                   "src": "782:25:230"
                 }
               ]
             },
             "documentation": {
-              "id": 65264,
+              "id": 65249,
               "nodeType": "StructuredDocumentation",
               "src": "616:81:230",
               "text": "@dev Initializer to set the admin that can set and change contracts addresses"
@@ -555,13 +555,13 @@
             "kind": "function",
             "modifiers": [
               {
-                "id": 65269,
+                "id": 65254,
                 "kind": "modifierInvocation",
                 "modifierName": {
-                  "id": 65268,
+                  "id": 65253,
                   "name": "initializer",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 89365,
+                  "referencedDeclaration": 89122,
                   "src": "742:11:230"
                 },
                 "nodeType": "ModifierInvocation",
@@ -571,17 +571,17 @@
             "name": "initialize",
             "nameLocation": "709:10:230",
             "parameters": {
-              "id": 65267,
+              "id": 65252,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 65266,
+                  "id": 65251,
                   "mutability": "mutable",
                   "name": "owner",
                   "nameLocation": "728:5:230",
                   "nodeType": "VariableDeclaration",
-                  "scope": 65279,
+                  "scope": 65264,
                   "src": "720:13:230",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -590,7 +590,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 65265,
+                    "id": 65250,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "720:7:230",
@@ -606,36 +606,36 @@
               "src": "719:15:230"
             },
             "returnParameters": {
-              "id": 65270,
+              "id": 65255,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "754:0:230"
             },
-            "scope": 65370,
+            "scope": 65355,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "public"
           },
           {
-            "id": 65285,
+            "id": 65270,
             "nodeType": "EventDefinition",
             "src": "816:56:230",
             "anonymous": false,
             "name": "AddressSet",
             "nameLocation": "822:10:230",
             "parameters": {
-              "id": 65284,
+              "id": 65269,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 65281,
+                  "id": 65266,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "id",
                   "nameLocation": "840:2:230",
                   "nodeType": "VariableDeclaration",
-                  "scope": 65285,
+                  "scope": 65270,
                   "src": "833:9:230",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -644,7 +644,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 65280,
+                    "id": 65265,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "833:6:230",
@@ -657,13 +657,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 65283,
+                  "id": 65268,
                   "indexed": true,
                   "mutability": "mutable",
                   "name": "newAddress",
                   "nameLocation": "860:10:230",
                   "nodeType": "VariableDeclaration",
-                  "scope": 65285,
+                  "scope": 65270,
                   "src": "844:26:230",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -672,7 +672,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 65282,
+                    "id": 65267,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "844:7:230",
@@ -689,19 +689,19 @@
             }
           },
           {
-            "id": 65290,
+            "id": 65275,
             "nodeType": "StructDefinition",
             "src": "982:69:230",
             "canonicalName": "AddressesProvider.Contract",
             "members": [
               {
                 "constant": false,
-                "id": 65287,
+                "id": 65272,
                 "mutability": "mutable",
                 "name": "addr",
                 "nameLocation": "1012:4:230",
                 "nodeType": "VariableDeclaration",
-                "scope": 65290,
+                "scope": 65275,
                 "src": "1004:12:230",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -710,7 +710,7 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 65286,
+                  "id": 65271,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1004:7:230",
@@ -724,12 +724,12 @@
               },
               {
                 "constant": false,
-                "id": 65289,
+                "id": 65274,
                 "mutability": "mutable",
                 "name": "contractInterface",
                 "nameLocation": "1029:17:230",
                 "nodeType": "VariableDeclaration",
-                "scope": 65290,
+                "scope": 65275,
                 "src": "1022:24:230",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -738,7 +738,7 @@
                   "typeString": "string"
                 },
                 "typeName": {
-                  "id": 65288,
+                  "id": 65273,
                   "name": "string",
                   "nodeType": "ElementaryTypeName",
                   "src": "1022:6:230",
@@ -752,45 +752,45 @@
             ],
             "name": "Contract",
             "nameLocation": "989:8:230",
-            "scope": 65370,
+            "scope": 65355,
             "visibility": "public"
           },
           {
-            "id": 65312,
+            "id": 65297,
             "nodeType": "FunctionDefinition",
             "src": "1337:214:230",
             "body": {
-              "id": 65311,
+              "id": 65296,
               "nodeType": "Block",
               "src": "1472:79:230",
               "statements": [
                 {
                   "expression": {
-                    "id": 65309,
+                    "id": 65294,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "baseExpression": {
-                        "id": 65302,
+                        "id": 65287,
                         "name": "flywheelRewards",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 65258,
+                        "referencedDeclaration": 65243,
                         "src": "1478:15:230",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Contract_$65290_storage_$",
+                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Contract_$65275_storage_$",
                           "typeString": "mapping(address => struct AddressesProvider.Contract storage ref)"
                         }
                       },
-                      "id": 65304,
+                      "id": 65289,
                       "indexExpression": {
-                        "id": 65303,
+                        "id": 65288,
                         "name": "rewardToken",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 65293,
+                        "referencedDeclaration": 65278,
                         "src": "1494:11:230",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -804,7 +804,7 @@
                       "nodeType": "IndexAccess",
                       "src": "1478:28:230",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Contract_$65290_storage",
+                        "typeIdentifier": "t_struct$_Contract_$65275_storage",
                         "typeString": "struct AddressesProvider.Contract storage ref"
                       }
                     },
@@ -813,11 +813,11 @@
                     "rightHandSide": {
                       "arguments": [
                         {
-                          "id": 65306,
+                          "id": 65291,
                           "name": "flywheel",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 65295,
+                          "referencedDeclaration": 65280,
                           "src": "1518:8:230",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -825,11 +825,11 @@
                           }
                         },
                         {
-                          "id": 65307,
+                          "id": 65292,
                           "name": "contractInterface",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 65297,
+                          "referencedDeclaration": 65282,
                           "src": "1528:17:230",
                           "typeDescriptions": {
                             "typeIdentifier": "t_string_calldata_ptr",
@@ -848,18 +848,18 @@
                             "typeString": "string calldata"
                           }
                         ],
-                        "id": 65305,
+                        "id": 65290,
                         "name": "Contract",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 65290,
+                        "referencedDeclaration": 65275,
                         "src": "1509:8:230",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_struct$_Contract_$65290_storage_ptr_$",
+                          "typeIdentifier": "t_type$_t_struct$_Contract_$65275_storage_ptr_$",
                           "typeString": "type(struct AddressesProvider.Contract storage pointer)"
                         }
                       },
-                      "id": 65308,
+                      "id": 65293,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -870,24 +870,24 @@
                       "src": "1509:37:230",
                       "tryCall": false,
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Contract_$65290_memory_ptr",
+                        "typeIdentifier": "t_struct$_Contract_$65275_memory_ptr",
                         "typeString": "struct AddressesProvider.Contract memory"
                       }
                     },
                     "src": "1478:68:230",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Contract_$65290_storage",
+                      "typeIdentifier": "t_struct$_Contract_$65275_storage",
                       "typeString": "struct AddressesProvider.Contract storage ref"
                     }
                   },
-                  "id": 65310,
+                  "id": 65295,
                   "nodeType": "ExpressionStatement",
                   "src": "1478:68:230"
                 }
               ]
             },
             "documentation": {
-              "id": 65291,
+              "id": 65276,
               "nodeType": "StructuredDocumentation",
               "src": "1055:279:230",
               "text": " @dev sets the address and contract interface ID of the flywheel for the reward token\n @param rewardToken the reward token address\n @param flywheel the flywheel address\n @param contractInterface a string that uniquely identifies the contract's interface"
@@ -897,13 +897,13 @@
             "kind": "function",
             "modifiers": [
               {
-                "id": 65300,
+                "id": 65285,
                 "kind": "modifierInvocation",
                 "modifierName": {
-                  "id": 65299,
+                  "id": 65284,
                   "name": "onlyOwner",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 89178,
+                  "referencedDeclaration": 88935,
                   "src": "1462:9:230"
                 },
                 "nodeType": "ModifierInvocation",
@@ -913,17 +913,17 @@
             "name": "setFlywheelRewards",
             "nameLocation": "1346:18:230",
             "parameters": {
-              "id": 65298,
+              "id": 65283,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 65293,
+                  "id": 65278,
                   "mutability": "mutable",
                   "name": "rewardToken",
                   "nameLocation": "1378:11:230",
                   "nodeType": "VariableDeclaration",
-                  "scope": 65312,
+                  "scope": 65297,
                   "src": "1370:19:230",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -932,7 +932,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 65292,
+                    "id": 65277,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1370:7:230",
@@ -946,12 +946,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 65295,
+                  "id": 65280,
                   "mutability": "mutable",
                   "name": "flywheel",
                   "nameLocation": "1403:8:230",
                   "nodeType": "VariableDeclaration",
-                  "scope": 65312,
+                  "scope": 65297,
                   "src": "1395:16:230",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -960,7 +960,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 65294,
+                    "id": 65279,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1395:7:230",
@@ -974,12 +974,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 65297,
+                  "id": 65282,
                   "mutability": "mutable",
                   "name": "contractInterface",
                   "nameLocation": "1433:17:230",
                   "nodeType": "VariableDeclaration",
-                  "scope": 65312,
+                  "scope": 65297,
                   "src": "1417:33:230",
                   "stateVariable": false,
                   "storageLocation": "calldata",
@@ -988,7 +988,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 65296,
+                    "id": 65281,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "1417:6:230",
@@ -1003,52 +1003,52 @@
               "src": "1364:90:230"
             },
             "returnParameters": {
-              "id": 65301,
+              "id": 65286,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1472:0:230"
             },
-            "scope": 65370,
+            "scope": 65355,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "public"
           },
           {
-            "id": 65334,
+            "id": 65319,
             "nodeType": "FunctionDefinition",
             "src": "1827:181:230",
             "body": {
-              "id": 65333,
+              "id": 65318,
               "nodeType": "Block",
               "src": "1945:63:230",
               "statements": [
                 {
                   "expression": {
-                    "id": 65331,
+                    "id": 65316,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "baseExpression": {
-                        "id": 65324,
+                        "id": 65309,
                         "name": "plugins",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 65263,
+                        "referencedDeclaration": 65248,
                         "src": "1951:7:230",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Contract_$65290_storage_$",
+                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Contract_$65275_storage_$",
                           "typeString": "mapping(address => struct AddressesProvider.Contract storage ref)"
                         }
                       },
-                      "id": 65326,
+                      "id": 65311,
                       "indexExpression": {
-                        "id": 65325,
+                        "id": 65310,
                         "name": "asset",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 65315,
+                        "referencedDeclaration": 65300,
                         "src": "1959:5:230",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1062,7 +1062,7 @@
                       "nodeType": "IndexAccess",
                       "src": "1951:14:230",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Contract_$65290_storage",
+                        "typeIdentifier": "t_struct$_Contract_$65275_storage",
                         "typeString": "struct AddressesProvider.Contract storage ref"
                       }
                     },
@@ -1071,11 +1071,11 @@
                     "rightHandSide": {
                       "arguments": [
                         {
-                          "id": 65328,
+                          "id": 65313,
                           "name": "plugin",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 65317,
+                          "referencedDeclaration": 65302,
                           "src": "1977:6:230",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -1083,11 +1083,11 @@
                           }
                         },
                         {
-                          "id": 65329,
+                          "id": 65314,
                           "name": "contractInterface",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 65319,
+                          "referencedDeclaration": 65304,
                           "src": "1985:17:230",
                           "typeDescriptions": {
                             "typeIdentifier": "t_string_calldata_ptr",
@@ -1106,18 +1106,18 @@
                             "typeString": "string calldata"
                           }
                         ],
-                        "id": 65327,
+                        "id": 65312,
                         "name": "Contract",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 65290,
+                        "referencedDeclaration": 65275,
                         "src": "1968:8:230",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_struct$_Contract_$65290_storage_ptr_$",
+                          "typeIdentifier": "t_type$_t_struct$_Contract_$65275_storage_ptr_$",
                           "typeString": "type(struct AddressesProvider.Contract storage pointer)"
                         }
                       },
-                      "id": 65330,
+                      "id": 65315,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1128,24 +1128,24 @@
                       "src": "1968:35:230",
                       "tryCall": false,
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Contract_$65290_memory_ptr",
+                        "typeIdentifier": "t_struct$_Contract_$65275_memory_ptr",
                         "typeString": "struct AddressesProvider.Contract memory"
                       }
                     },
                     "src": "1951:52:230",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Contract_$65290_storage",
+                      "typeIdentifier": "t_struct$_Contract_$65275_storage",
                       "typeString": "struct AddressesProvider.Contract storage ref"
                     }
                   },
-                  "id": 65332,
+                  "id": 65317,
                   "nodeType": "ExpressionStatement",
                   "src": "1951:52:230"
                 }
               ]
             },
             "documentation": {
-              "id": 65313,
+              "id": 65298,
               "nodeType": "StructuredDocumentation",
               "src": "1555:269:230",
               "text": " @dev sets the address and contract interface ID of the ERC4626 plugin for the asset\n @param asset the asset address\n @param plugin the ERC4626 plugin address\n @param contractInterface a string that uniquely identifies the contract's interface"
@@ -1155,13 +1155,13 @@
             "kind": "function",
             "modifiers": [
               {
-                "id": 65322,
+                "id": 65307,
                 "kind": "modifierInvocation",
                 "modifierName": {
-                  "id": 65321,
+                  "id": 65306,
                   "name": "onlyOwner",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 89178,
+                  "referencedDeclaration": 88935,
                   "src": "1935:9:230"
                 },
                 "nodeType": "ModifierInvocation",
@@ -1171,17 +1171,17 @@
             "name": "setPlugin",
             "nameLocation": "1836:9:230",
             "parameters": {
-              "id": 65320,
+              "id": 65305,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 65315,
+                  "id": 65300,
                   "mutability": "mutable",
                   "name": "asset",
                   "nameLocation": "1859:5:230",
                   "nodeType": "VariableDeclaration",
-                  "scope": 65334,
+                  "scope": 65319,
                   "src": "1851:13:230",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1190,7 +1190,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 65314,
+                    "id": 65299,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1851:7:230",
@@ -1204,12 +1204,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 65317,
+                  "id": 65302,
                   "mutability": "mutable",
                   "name": "plugin",
                   "nameLocation": "1878:6:230",
                   "nodeType": "VariableDeclaration",
-                  "scope": 65334,
+                  "scope": 65319,
                   "src": "1870:14:230",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1218,7 +1218,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 65316,
+                    "id": 65301,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1870:7:230",
@@ -1232,12 +1232,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 65319,
+                  "id": 65304,
                   "mutability": "mutable",
                   "name": "contractInterface",
                   "nameLocation": "1906:17:230",
                   "nodeType": "VariableDeclaration",
-                  "scope": 65334,
+                  "scope": 65319,
                   "src": "1890:33:230",
                   "stateVariable": false,
                   "storageLocation": "calldata",
@@ -1246,7 +1246,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 65318,
+                    "id": 65303,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "1890:6:230",
@@ -1261,52 +1261,52 @@
               "src": "1845:82:230"
             },
             "returnParameters": {
-              "id": 65323,
+              "id": 65308,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1945:0:230"
             },
-            "scope": 65370,
+            "scope": 65355,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "public"
           },
           {
-            "id": 65356,
+            "id": 65341,
             "nodeType": "FunctionDefinition",
             "src": "2173:154:230",
             "body": {
-              "id": 65355,
+              "id": 65340,
               "nodeType": "Block",
               "src": "2252:75:230",
               "statements": [
                 {
                   "expression": {
-                    "id": 65348,
+                    "id": 65333,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "baseExpression": {
-                        "id": 65344,
+                        "id": 65329,
                         "name": "_addresses",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 65253,
+                        "referencedDeclaration": 65238,
                         "src": "2258:10:230",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_string_memory_ptr_$_t_address_$",
                           "typeString": "mapping(string memory => address)"
                         }
                       },
-                      "id": 65346,
+                      "id": 65331,
                       "indexExpression": {
-                        "id": 65345,
+                        "id": 65330,
                         "name": "id",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 65337,
+                        "referencedDeclaration": 65322,
                         "src": "2269:2:230",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_calldata_ptr",
@@ -1327,11 +1327,11 @@
                     "nodeType": "Assignment",
                     "operator": "=",
                     "rightHandSide": {
-                      "id": 65347,
+                      "id": 65332,
                       "name": "newAddress",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 65339,
+                      "referencedDeclaration": 65324,
                       "src": "2275:10:230",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -1344,7 +1344,7 @@
                       "typeString": "address"
                     }
                   },
-                  "id": 65349,
+                  "id": 65334,
                   "nodeType": "ExpressionStatement",
                   "src": "2258:27:230"
                 },
@@ -1352,11 +1352,11 @@
                   "eventCall": {
                     "arguments": [
                       {
-                        "id": 65351,
+                        "id": 65336,
                         "name": "id",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 65337,
+                        "referencedDeclaration": 65322,
                         "src": "2307:2:230",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_calldata_ptr",
@@ -1364,11 +1364,11 @@
                         }
                       },
                       {
-                        "id": 65352,
+                        "id": 65337,
                         "name": "newAddress",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 65339,
+                        "referencedDeclaration": 65324,
                         "src": "2311:10:230",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1387,18 +1387,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 65350,
+                      "id": 65335,
                       "name": "AddressSet",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 65285,
+                      "referencedDeclaration": 65270,
                       "src": "2296:10:230",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_string_memory_ptr_$_t_address_$returns$__$",
                         "typeString": "function (string memory,address)"
                       }
                     },
-                    "id": 65353,
+                    "id": 65338,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1413,14 +1413,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 65354,
+                  "id": 65339,
                   "nodeType": "EmitStatement",
                   "src": "2291:31:230"
                 }
               ]
             },
             "documentation": {
-              "id": 65335,
+              "id": 65320,
               "nodeType": "StructuredDocumentation",
               "src": "2012:158:230",
               "text": " @dev Sets an address for an id replacing the address saved in the addresses map\n @param id The id\n @param newAddress The address to set"
@@ -1430,13 +1430,13 @@
             "kind": "function",
             "modifiers": [
               {
-                "id": 65342,
+                "id": 65327,
                 "kind": "modifierInvocation",
                 "modifierName": {
-                  "id": 65341,
+                  "id": 65326,
                   "name": "onlyOwner",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 89178,
+                  "referencedDeclaration": 88935,
                   "src": "2242:9:230"
                 },
                 "nodeType": "ModifierInvocation",
@@ -1446,17 +1446,17 @@
             "name": "setAddress",
             "nameLocation": "2182:10:230",
             "parameters": {
-              "id": 65340,
+              "id": 65325,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 65337,
+                  "id": 65322,
                   "mutability": "mutable",
                   "name": "id",
                   "nameLocation": "2209:2:230",
                   "nodeType": "VariableDeclaration",
-                  "scope": 65356,
+                  "scope": 65341,
                   "src": "2193:18:230",
                   "stateVariable": false,
                   "storageLocation": "calldata",
@@ -1465,7 +1465,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 65336,
+                    "id": 65321,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "2193:6:230",
@@ -1478,12 +1478,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 65339,
+                  "id": 65324,
                   "mutability": "mutable",
                   "name": "newAddress",
                   "nameLocation": "2221:10:230",
                   "nodeType": "VariableDeclaration",
-                  "scope": 65356,
+                  "scope": 65341,
                   "src": "2213:18:230",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1492,7 +1492,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 65338,
+                    "id": 65323,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2213:7:230",
@@ -1508,46 +1508,46 @@
               "src": "2192:40:230"
             },
             "returnParameters": {
-              "id": 65343,
+              "id": 65328,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2252:0:230"
             },
-            "scope": 65370,
+            "scope": 65355,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 65369,
+            "id": 65354,
             "nodeType": "FunctionDefinition",
             "src": "2403:102:230",
             "body": {
-              "id": 65368,
+              "id": 65353,
               "nodeType": "Block",
               "src": "2473:32:230",
               "statements": [
                 {
                   "expression": {
                     "baseExpression": {
-                      "id": 65364,
+                      "id": 65349,
                       "name": "_addresses",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 65253,
+                      "referencedDeclaration": 65238,
                       "src": "2486:10:230",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_string_memory_ptr_$_t_address_$",
                         "typeString": "mapping(string memory => address)"
                       }
                     },
-                    "id": 65366,
+                    "id": 65351,
                     "indexExpression": {
-                      "id": 65365,
+                      "id": 65350,
                       "name": "id",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 65359,
+                      "referencedDeclaration": 65344,
                       "src": "2497:2:230",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_calldata_ptr",
@@ -1565,15 +1565,15 @@
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 65363,
-                  "id": 65367,
+                  "functionReturnParameters": 65348,
+                  "id": 65352,
                   "nodeType": "Return",
                   "src": "2479:21:230"
                 }
               ]
             },
             "documentation": {
-              "id": 65357,
+              "id": 65342,
               "nodeType": "StructuredDocumentation",
               "src": "2331:69:230",
               "text": " @dev Returns an address by id\n @return The address"
@@ -1585,17 +1585,17 @@
             "name": "getAddress",
             "nameLocation": "2412:10:230",
             "parameters": {
-              "id": 65360,
+              "id": 65345,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 65359,
+                  "id": 65344,
                   "mutability": "mutable",
                   "name": "id",
                   "nameLocation": "2439:2:230",
                   "nodeType": "VariableDeclaration",
-                  "scope": 65369,
+                  "scope": 65354,
                   "src": "2423:18:230",
                   "stateVariable": false,
                   "storageLocation": "calldata",
@@ -1604,7 +1604,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 65358,
+                    "id": 65343,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "2423:6:230",
@@ -1619,17 +1619,17 @@
               "src": "2422:20:230"
             },
             "returnParameters": {
-              "id": 65363,
+              "id": 65348,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 65362,
+                  "id": 65347,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 65369,
+                  "scope": 65354,
                   "src": "2464:7:230",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1638,7 +1638,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 65361,
+                    "id": 65346,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2464:7:230",
@@ -1653,7 +1653,7 @@
               ],
               "src": "2463:9:230"
             },
-            "scope": 65370,
+            "scope": 65355,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "public"
@@ -1663,13 +1663,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 65248,
+              "id": 65233,
               "name": "OwnableUpgradeable",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 89241,
+              "referencedDeclaration": 88998,
               "src": "441:18:230"
             },
-            "id": 65249,
+            "id": 65234,
             "nodeType": "InheritanceSpecifier",
             "src": "441:18:230"
           }
@@ -1678,21 +1678,21 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 65247,
+          "id": 65232,
           "nodeType": "StructuredDocumentation",
           "src": "154:256:230",
           "text": " @title AddressesProvider\n @notice The Addresses Provider serves as a central storage of system internal and external\n         contract addresses that change between deploys and across chains\n @author Veliko Minkov <veliko@midascapital.xyz>"
         },
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          65370,
-          89241,
-          90686,
-          89463
+          65355,
+          88998,
+          90443,
+          89220
         ],
         "name": "AddressesProvider",
         "nameLocation": "420:17:230",
-        "scope": 65371,
+        "scope": 65356,
         "usedErrors": []
       }
     ],

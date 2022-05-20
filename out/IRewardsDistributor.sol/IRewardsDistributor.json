@@ -132,20 +132,20 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/IRewardsDistributor.sol",
-    "id": 33860,
+    "id": 33850,
     "exportedSymbols": {
       "ICToken": [
-        33610
+        33600
       ],
       "IRewardsDistributor": [
-        33859
+        33849
       ]
     },
     "nodeType": "SourceUnit",
     "src": "41:1336:77",
     "nodes": [
       {
-        "id": 33802,
+        "id": 33792,
         "nodeType": "PragmaDirective",
         "src": "41:24:77",
         "literals": [
@@ -156,28 +156,28 @@
         ]
       },
       {
-        "id": 33803,
+        "id": 33793,
         "nodeType": "ImportDirective",
         "src": "67:23:77",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICToken.sol",
         "file": "./ICToken.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 33860,
-        "sourceUnit": 33611,
+        "scope": 33850,
+        "sourceUnit": 33601,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 33859,
+        "id": 33849,
         "nodeType": "ContractDefinition",
         "src": "149:1227:77",
         "nodes": [
           {
-            "id": 33810,
+            "id": 33800,
             "nodeType": "FunctionDefinition",
             "src": "227:55:77",
             "documentation": {
-              "id": 33805,
+              "id": 33795,
               "nodeType": "StructuredDocumentation",
               "src": "183:41:77",
               "text": "@dev The token to reward (i.e., COMP)"
@@ -189,23 +189,23 @@
             "name": "rewardToken",
             "nameLocation": "236:11:77",
             "parameters": {
-              "id": 33806,
+              "id": 33796,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "247:2:77"
             },
             "returnParameters": {
-              "id": 33809,
+              "id": 33799,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33808,
+                  "id": 33798,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33810,
+                  "scope": 33800,
                   "src": "273:7:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -214,7 +214,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33807,
+                    "id": 33797,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "273:7:77",
@@ -229,17 +229,17 @@
               ],
               "src": "272:9:77"
             },
-            "scope": 33859,
+            "scope": 33849,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 33818,
+            "id": 33808,
             "nodeType": "FunctionDefinition",
             "src": "360:67:77",
             "documentation": {
-              "id": 33811,
+              "id": 33801,
               "nodeType": "StructuredDocumentation",
               "src": "286:71:77",
               "text": "@notice The portion of compRate that each market currently receives"
@@ -251,17 +251,17 @@
             "name": "compSupplySpeeds",
             "nameLocation": "369:16:77",
             "parameters": {
-              "id": 33814,
+              "id": 33804,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33813,
+                  "id": 33803,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33818,
+                  "scope": 33808,
                   "src": "386:7:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -270,7 +270,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33812,
+                    "id": 33802,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "386:7:77",
@@ -286,17 +286,17 @@
               "src": "385:9:77"
             },
             "returnParameters": {
-              "id": 33817,
+              "id": 33807,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33816,
+                  "id": 33806,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33818,
+                  "scope": 33808,
                   "src": "418:7:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -305,7 +305,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 33815,
+                    "id": 33805,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "418:7:77",
@@ -319,17 +319,17 @@
               ],
               "src": "417:9:77"
             },
-            "scope": 33859,
+            "scope": 33849,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 33826,
+            "id": 33816,
             "nodeType": "FunctionDefinition",
             "src": "505:67:77",
             "documentation": {
-              "id": 33819,
+              "id": 33809,
               "nodeType": "StructuredDocumentation",
               "src": "431:71:77",
               "text": "@notice The portion of compRate that each market currently receives"
@@ -341,17 +341,17 @@
             "name": "compBorrowSpeeds",
             "nameLocation": "514:16:77",
             "parameters": {
-              "id": 33822,
+              "id": 33812,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33821,
+                  "id": 33811,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33826,
+                  "scope": 33816,
                   "src": "531:7:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -360,7 +360,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33820,
+                    "id": 33810,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "531:7:77",
@@ -376,17 +376,17 @@
               "src": "530:9:77"
             },
             "returnParameters": {
-              "id": 33825,
+              "id": 33815,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33824,
+                  "id": 33814,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33826,
+                  "scope": 33816,
                   "src": "563:7:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -395,7 +395,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 33823,
+                    "id": 33813,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "563:7:77",
@@ -409,17 +409,17 @@
               ],
               "src": "562:9:77"
             },
-            "scope": 33859,
+            "scope": 33849,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 33834,
+            "id": 33824,
             "nodeType": "FunctionDefinition",
             "src": "644:62:77",
             "documentation": {
-              "id": 33827,
+              "id": 33817,
               "nodeType": "StructuredDocumentation",
               "src": "576:65:77",
               "text": "@notice The COMP accrued but not yet transferred to each user"
@@ -431,17 +431,17 @@
             "name": "compAccrued",
             "nameLocation": "653:11:77",
             "parameters": {
-              "id": 33830,
+              "id": 33820,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33829,
+                  "id": 33819,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33834,
+                  "scope": 33824,
                   "src": "665:7:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -450,7 +450,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33828,
+                    "id": 33818,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "665:7:77",
@@ -466,17 +466,17 @@
               "src": "664:9:77"
             },
             "returnParameters": {
-              "id": 33833,
+              "id": 33823,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33832,
+                  "id": 33822,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33834,
+                  "scope": 33824,
                   "src": "697:7:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -485,7 +485,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 33831,
+                    "id": 33821,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "697:7:77",
@@ -499,17 +499,17 @@
               ],
               "src": "696:9:77"
             },
-            "scope": 33859,
+            "scope": 33849,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 33842,
+            "id": 33832,
             "nodeType": "FunctionDefinition",
             "src": "901:78:77",
             "documentation": {
-              "id": 33835,
+              "id": 33825,
               "nodeType": "StructuredDocumentation",
               "src": "710:188:77",
               "text": " @notice Keeps the flywheel moving pre-mint and pre-redeem\n @dev Called by the Comptroller\n @param cToken The relevant market\n @param supplier The minter/redeemer"
@@ -521,17 +521,17 @@
             "name": "flywheelPreSupplierAction",
             "nameLocation": "910:25:77",
             "parameters": {
-              "id": 33840,
+              "id": 33830,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33837,
+                  "id": 33827,
                   "mutability": "mutable",
                   "name": "cToken",
                   "nameLocation": "944:6:77",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33842,
+                  "scope": 33832,
                   "src": "936:14:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -540,7 +540,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33836,
+                    "id": 33826,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "936:7:77",
@@ -554,12 +554,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 33839,
+                  "id": 33829,
                   "mutability": "mutable",
                   "name": "supplier",
                   "nameLocation": "960:8:77",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33842,
+                  "scope": 33832,
                   "src": "952:16:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -568,7 +568,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33838,
+                    "id": 33828,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "952:7:77",
@@ -584,22 +584,22 @@
               "src": "935:34:77"
             },
             "returnParameters": {
-              "id": 33841,
+              "id": 33831,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "978:0:77"
             },
-            "scope": 33859,
+            "scope": 33849,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 33850,
+            "id": 33840,
             "nodeType": "FunctionDefinition",
             "src": "1168:78:77",
             "documentation": {
-              "id": 33843,
+              "id": 33833,
               "nodeType": "StructuredDocumentation",
               "src": "983:182:77",
               "text": " @notice Keeps the flywheel moving pre-borrow and pre-repay\n @dev Called by the Comptroller\n @param cToken The relevant market\n @param borrower The borrower"
@@ -611,17 +611,17 @@
             "name": "flywheelPreBorrowerAction",
             "nameLocation": "1177:25:77",
             "parameters": {
-              "id": 33848,
+              "id": 33838,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33845,
+                  "id": 33835,
                   "mutability": "mutable",
                   "name": "cToken",
                   "nameLocation": "1211:6:77",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33850,
+                  "scope": 33840,
                   "src": "1203:14:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -630,7 +630,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33844,
+                    "id": 33834,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1203:7:77",
@@ -644,12 +644,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 33847,
+                  "id": 33837,
                   "mutability": "mutable",
                   "name": "borrower",
                   "nameLocation": "1227:8:77",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33850,
+                  "scope": 33840,
                   "src": "1219:16:77",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -658,7 +658,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33846,
+                    "id": 33836,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1219:7:77",
@@ -674,22 +674,22 @@
               "src": "1202:34:77"
             },
             "returnParameters": {
-              "id": 33849,
+              "id": 33839,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1245:0:77"
             },
-            "scope": 33859,
+            "scope": 33849,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 33858,
+            "id": 33848,
             "nodeType": "FunctionDefinition",
             "src": "1308:66:77",
             "documentation": {
-              "id": 33851,
+              "id": 33841,
               "nodeType": "StructuredDocumentation",
               "src": "1250:55:77",
               "text": " @notice Returns an array of all markets."
@@ -701,53 +701,53 @@
             "name": "getAllMarkets",
             "nameLocation": "1317:13:77",
             "parameters": {
-              "id": 33852,
+              "id": 33842,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1330:2:77"
             },
             "returnParameters": {
-              "id": 33857,
+              "id": 33847,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33856,
+                  "id": 33846,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33858,
+                  "scope": 33848,
                   "src": "1356:16:77",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_contract$_ICToken_$33610_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_contract$_ICToken_$33600_$dyn_memory_ptr",
                     "typeString": "contract ICToken[]"
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 33854,
+                      "id": 33844,
                       "nodeType": "UserDefinedTypeName",
                       "pathNode": {
-                        "id": 33853,
+                        "id": 33843,
                         "name": "ICToken",
                         "nodeType": "IdentifierPath",
-                        "referencedDeclaration": 33610,
+                        "referencedDeclaration": 33600,
                         "src": "1356:7:77"
                       },
-                      "referencedDeclaration": 33610,
+                      "referencedDeclaration": 33600,
                       "src": "1356:7:77",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_ICToken_$33610",
+                        "typeIdentifier": "t_contract$_ICToken_$33600",
                         "typeString": "contract ICToken"
                       }
                     },
-                    "id": 33855,
+                    "id": 33845,
                     "nodeType": "ArrayTypeName",
                     "src": "1356:9:77",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_contract$_ICToken_$33610_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_contract$_ICToken_$33600_$dyn_storage_ptr",
                       "typeString": "contract ICToken[]"
                     }
                   },
@@ -756,7 +756,7 @@
               ],
               "src": "1355:18:77"
             },
-            "scope": 33859,
+            "scope": 33849,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -768,18 +768,18 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 33804,
+          "id": 33794,
           "nodeType": "StructuredDocumentation",
           "src": "92:56:77",
           "text": " @title RewardsDistributor\n @author Compound"
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          33859
+          33849
         ],
         "name": "IRewardsDistributor",
         "nameLocation": "159:19:77",
-        "scope": 33860,
+        "scope": 33850,
         "usedErrors": []
       }
     ],

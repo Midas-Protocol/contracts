@@ -26,20 +26,20 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/CDelegateInterface.sol",
-    "id": 9228,
+    "id": 9218,
     "exportedSymbols": {
       "CDelegateInterface": [
-        9227
+        9217
       ],
       "CDelegationStorage": [
-        9197
+        9187
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:1412:7",
     "nodes": [
       {
-        "id": 9193,
+        "id": 9183,
         "nodeType": "PragmaDirective",
         "src": "39:24:7",
         "literals": [
@@ -50,17 +50,17 @@
         ]
       },
       {
-        "id": 9197,
+        "id": 9187,
         "nodeType": "ContractDefinition",
         "src": "65:130:7",
         "nodes": [
           {
-            "id": 9196,
+            "id": 9186,
             "nodeType": "VariableDeclaration",
             "src": "163:29:7",
             "constant": false,
             "documentation": {
-              "id": 9194,
+              "id": 9184,
               "nodeType": "StructuredDocumentation",
               "src": "97:63:7",
               "text": " @notice Implementation address for this contract"
@@ -69,7 +69,7 @@
             "mutability": "mutable",
             "name": "implementation",
             "nameLocation": "178:14:7",
-            "scope": 9197,
+            "scope": 9187,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -77,7 +77,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 9195,
+              "id": 9185,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "163:7:7",
@@ -97,25 +97,25 @@
         "contractKind": "contract",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          9197
+          9187
         ],
         "name": "CDelegationStorage",
         "nameLocation": "74:18:7",
-        "scope": 9228,
+        "scope": 9218,
         "usedErrors": []
       },
       {
-        "id": 9227,
+        "id": 9217,
         "nodeType": "ContractDefinition",
         "src": "197:1253:7",
         "nodes": [
           {
-            "id": 9206,
+            "id": 9196,
             "nodeType": "EventDefinition",
             "src": "324:78:7",
             "anonymous": false,
             "documentation": {
-              "id": 9200,
+              "id": 9190,
               "nodeType": "StructuredDocumentation",
               "src": "260:61:7",
               "text": " @notice Emitted when implementation is changed"
@@ -123,18 +123,18 @@
             "name": "NewImplementation",
             "nameLocation": "330:17:7",
             "parameters": {
-              "id": 9205,
+              "id": 9195,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9202,
+                  "id": 9192,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "oldImplementation",
                   "nameLocation": "356:17:7",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9206,
+                  "scope": 9196,
                   "src": "348:25:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -143,7 +143,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9201,
+                    "id": 9191,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "348:7:7",
@@ -157,13 +157,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 9204,
+                  "id": 9194,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "newImplementation",
                   "nameLocation": "383:17:7",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9206,
+                  "scope": 9196,
                   "src": "375:25:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -172,7 +172,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9203,
+                    "id": 9193,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "375:7:7",
@@ -189,11 +189,11 @@
             }
           },
           {
-            "id": 9216,
+            "id": 9206,
             "nodeType": "FunctionDefinition",
             "src": "781:149:7",
             "documentation": {
-              "id": 9207,
+              "id": 9197,
               "nodeType": "StructuredDocumentation",
               "src": "406:372:7",
               "text": " @notice Called by the admin to update the implementation of the delegator\n @param implementation_ The address of the new implementation for delegation\n @param allowResign Flag to indicate whether to call _resignImplementation on the old implementation\n @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation"
@@ -205,17 +205,17 @@
             "name": "_setImplementationSafe",
             "nameLocation": "790:22:7",
             "parameters": {
-              "id": 9214,
+              "id": 9204,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9209,
+                  "id": 9199,
                   "mutability": "mutable",
                   "name": "implementation_",
                   "nameLocation": "826:15:7",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9216,
+                  "scope": 9206,
                   "src": "818:23:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -224,7 +224,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9208,
+                    "id": 9198,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "818:7:7",
@@ -238,12 +238,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 9211,
+                  "id": 9201,
                   "mutability": "mutable",
                   "name": "allowResign",
                   "nameLocation": "852:11:7",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9216,
+                  "scope": 9206,
                   "src": "847:16:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -252,7 +252,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 9210,
+                    "id": 9200,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "847:4:7",
@@ -265,12 +265,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 9213,
+                  "id": 9203,
                   "mutability": "mutable",
                   "name": "becomeImplementationData",
                   "nameLocation": "884:24:7",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9216,
+                  "scope": 9206,
                   "src": "869:39:7",
                   "stateVariable": false,
                   "storageLocation": "calldata",
@@ -279,7 +279,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 9212,
+                    "id": 9202,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "869:5:7",
@@ -294,22 +294,22 @@
               "src": "812:100:7"
             },
             "returnParameters": {
-              "id": 9215,
+              "id": 9205,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "929:0:7"
             },
-            "scope": 9227,
+            "scope": 9217,
             "stateMutability": "nonpayable",
             "virtual": true,
             "visibility": "external"
           },
           {
-            "id": 9222,
+            "id": 9212,
             "nodeType": "FunctionDefinition",
             "src": "1165:69:7",
             "documentation": {
-              "id": 9217,
+              "id": 9207,
               "nodeType": "StructuredDocumentation",
               "src": "934:228:7",
               "text": " @notice Called by the delegator on a delegate to initialize it for duty\n @dev Should revert if any issues arise which make it unfit for delegation\n @param data The encoded bytes data for any initialization"
@@ -321,17 +321,17 @@
             "name": "_becomeImplementation",
             "nameLocation": "1174:21:7",
             "parameters": {
-              "id": 9220,
+              "id": 9210,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9219,
+                  "id": 9209,
                   "mutability": "mutable",
                   "name": "data",
                   "nameLocation": "1211:4:7",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9222,
+                  "scope": 9212,
                   "src": "1196:19:7",
                   "stateVariable": false,
                   "storageLocation": "calldata",
@@ -340,7 +340,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 9218,
+                    "id": 9208,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1196:5:7",
@@ -355,22 +355,22 @@
               "src": "1195:21:7"
             },
             "returnParameters": {
-              "id": 9221,
+              "id": 9211,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1233:0:7"
             },
-            "scope": 9227,
+            "scope": 9217,
             "stateMutability": "nonpayable",
             "virtual": true,
             "visibility": "external"
           },
           {
-            "id": 9226,
+            "id": 9216,
             "nodeType": "FunctionDefinition",
             "src": "1403:45:7",
             "documentation": {
-              "id": 9223,
+              "id": 9213,
               "nodeType": "StructuredDocumentation",
               "src": "1238:162:7",
               "text": " @notice Function called before all delegator functions\n @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary"
@@ -382,18 +382,18 @@
             "name": "_prepare",
             "nameLocation": "1412:8:7",
             "parameters": {
-              "id": 9224,
+              "id": 9214,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1420:2:7"
             },
             "returnParameters": {
-              "id": 9225,
+              "id": 9215,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1447:0:7"
             },
-            "scope": 9227,
+            "scope": 9217,
             "stateMutability": "payable",
             "virtual": true,
             "visibility": "external"
@@ -403,13 +403,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 9198,
+              "id": 9188,
               "name": "CDelegationStorage",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 9197,
+              "referencedDeclaration": 9187,
               "src": "237:18:7"
             },
-            "id": 9199,
+            "id": 9189,
             "nodeType": "InheritanceSpecifier",
             "src": "237:18:7"
           }
@@ -419,12 +419,12 @@
         "contractKind": "contract",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          9227,
-          9197
+          9217,
+          9187
         ],
         "name": "CDelegateInterface",
         "nameLocation": "215:18:7",
-        "scope": 9228,
+        "scope": 9218,
         "usedErrors": []
       }
     ],

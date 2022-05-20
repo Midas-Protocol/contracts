@@ -32,17 +32,17 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/badger/IDigg.sol",
-    "id": 32159,
+    "id": 32149,
     "exportedSymbols": {
       "IDigg": [
-        32158
+        32148
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:261:60",
     "nodes": [
       {
-        "id": 32149,
+        "id": 32139,
         "nodeType": "PragmaDirective",
         "src": "39:24:60",
         "literals": [
@@ -53,16 +53,16 @@
         ]
       },
       {
-        "id": 32158,
+        "id": 32148,
         "nodeType": "ContractDefinition",
         "src": "65:234:60",
         "nodes": [
           {
-            "id": 32157,
+            "id": 32147,
             "nodeType": "FunctionDefinition",
             "src": "222:75:60",
             "documentation": {
-              "id": 32150,
+              "id": 32140,
               "nodeType": "StructuredDocumentation",
               "src": "85:134:60",
               "text": " @param shares Share value to convert.\n @return The current fragment value of the specified underlying share amount."
@@ -74,17 +74,17 @@
             "name": "sharesToFragments",
             "nameLocation": "231:17:60",
             "parameters": {
-              "id": 32153,
+              "id": 32143,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 32152,
+                  "id": 32142,
                   "mutability": "mutable",
                   "name": "shares",
                   "nameLocation": "257:6:60",
                   "nodeType": "VariableDeclaration",
-                  "scope": 32157,
+                  "scope": 32147,
                   "src": "249:14:60",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -93,7 +93,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 32151,
+                    "id": 32141,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "249:7:60",
@@ -108,17 +108,17 @@
               "src": "248:16:60"
             },
             "returnParameters": {
-              "id": 32156,
+              "id": 32146,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 32155,
+                  "id": 32145,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 32157,
+                  "scope": 32147,
                   "src": "288:7:60",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -127,7 +127,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 32154,
+                    "id": 32144,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "288:7:60",
@@ -141,7 +141,7 @@
               ],
               "src": "287:9:60"
             },
-            "scope": 32158,
+            "scope": 32148,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -154,11 +154,11 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          32158
+          32148
         ],
         "name": "IDigg",
         "nameLocation": "75:5:60",
-        "scope": 32159,
+        "scope": 32149,
         "usedErrors": []
       }
     ],

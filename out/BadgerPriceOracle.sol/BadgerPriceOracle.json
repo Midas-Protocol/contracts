@@ -129,62 +129,62 @@
   },
   "ast": {
     "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/mainnet/BadgerPriceOracle.sol",
-    "id": 49138,
+    "id": 49123,
     "exportedSymbols": {
       "AddressUpgradeable": [
-        90644
+        90401
       ],
       "AggregatorV3Interface": [
-        33010
+        33000
       ],
       "BadgerPriceOracle": [
-        49137
+        49122
       ],
       "BasePriceOracle": [
-        41278
+        41268
       ],
       "ContextUpgradeable": [
-        90686
+        90443
       ],
       "DiggSett": [
-        32147
+        32137
       ],
       "ERC20Upgradeable": [
-        90074
+        89831
       ],
       "ICErc20": [
-        33461
+        33451
       ],
       "ICToken": [
-        33610
+        33600
       ],
       "IDigg": [
-        32158
+        32148
       ],
       "IERC20MetadataUpgradeable": [
-        90177
+        89934
       ],
       "IERC20Upgradeable": [
-        90152
+        89909
       ],
       "IPriceOracle": [
-        33800
+        33790
       ],
       "IXToken": [
-        32171
+        32161
       ],
       "Initializable": [
-        89463
+        89220
       ],
       "Sett": [
-        32187
+        32177
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:4598:185",
     "nodes": [
       {
-        "id": 48829,
+        "id": 48814,
         "nodeType": "PragmaDirective",
         "src": "39:24:185",
         "literals": [
@@ -195,113 +195,113 @@
         ]
       },
       {
-        "id": 48830,
+        "id": 48815,
         "nodeType": "ImportDirective",
         "src": "65:87:185",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 49138,
-        "sourceUnit": 90075,
+        "scope": 49123,
+        "sourceUnit": 89832,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 48831,
+        "id": 48816,
         "nodeType": "ImportDirective",
         "src": "154:50:185",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/IPriceOracle.sol",
         "file": "../../external/compound/IPriceOracle.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 49138,
-        "sourceUnit": 33801,
+        "scope": 49123,
+        "sourceUnit": 33791,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 48832,
+        "id": 48817,
         "nodeType": "ImportDirective",
         "src": "205:45:185",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICErc20.sol",
         "file": "../../external/compound/ICErc20.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 49138,
-        "sourceUnit": 33462,
+        "scope": 49123,
+        "sourceUnit": 33452,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 48833,
+        "id": 48818,
         "nodeType": "ImportDirective",
         "src": "252:60:185",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/chainlink/AggregatorV3Interface.sol",
         "file": "../../external/chainlink/AggregatorV3Interface.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 49138,
-        "sourceUnit": 33011,
+        "scope": 49123,
+        "sourceUnit": 33001,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 48834,
+        "id": 48819,
         "nodeType": "ImportDirective",
         "src": "314:43:185",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/badger/IXToken.sol",
         "file": "../../external/badger/IXToken.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 49138,
-        "sourceUnit": 32172,
+        "scope": 49123,
+        "sourceUnit": 32162,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 48835,
+        "id": 48820,
         "nodeType": "ImportDirective",
         "src": "358:41:185",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/badger/IDigg.sol",
         "file": "../../external/badger/IDigg.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 49138,
-        "sourceUnit": 32159,
+        "scope": 49123,
+        "sourceUnit": 32149,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 48836,
+        "id": 48821,
         "nodeType": "ImportDirective",
         "src": "400:44:185",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/badger/DiggSett.sol",
         "file": "../../external/badger/DiggSett.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 49138,
-        "sourceUnit": 32148,
+        "scope": 49123,
+        "sourceUnit": 32138,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 48837,
+        "id": 48822,
         "nodeType": "ImportDirective",
         "src": "446:32:185",
         "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/BasePriceOracle.sol",
         "file": "../BasePriceOracle.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 49138,
-        "sourceUnit": 41279,
+        "scope": 49123,
+        "sourceUnit": 41269,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 49137,
+        "id": 49122,
         "nodeType": "ContractDefinition",
         "src": "705:3931:185",
         "nodes": [
           {
-            "id": 48849,
+            "id": 48834,
             "nodeType": "VariableDeclaration",
             "src": "824:125:185",
             "constant": true,
             "documentation": {
-              "id": 48843,
+              "id": 48828,
               "nodeType": "StructuredDocumentation",
               "src": "769:52:185",
               "text": " @dev BADGER/ETH Chainlink price feed."
@@ -310,27 +310,27 @@
             "mutability": "constant",
             "name": "BADGER_ETH_FEED",
             "nameLocation": "862:15:185",
-            "scope": 49137,
+            "scope": 49122,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_AggregatorV3Interface_$33010",
+              "typeIdentifier": "t_contract$_AggregatorV3Interface_$33000",
               "typeString": "contract AggregatorV3Interface"
             },
             "typeName": {
-              "id": 48845,
+              "id": 48830,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 48844,
+                "id": 48829,
                 "name": "AggregatorV3Interface",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 33010,
+                "referencedDeclaration": 33000,
                 "src": "824:21:185"
               },
-              "referencedDeclaration": 33010,
+              "referencedDeclaration": 33000,
               "src": "824:21:185",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_AggregatorV3Interface_$33010",
+                "typeIdentifier": "t_contract$_AggregatorV3Interface_$33000",
                 "typeString": "contract AggregatorV3Interface"
               }
             },
@@ -338,7 +338,7 @@
               "arguments": [
                 {
                   "hexValue": "307835383932314163313430353232383637626635306239453030393539394461304341344132333739",
-                  "id": 48847,
+                  "id": 48832,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -360,18 +360,18 @@
                     "typeString": "address"
                   }
                 ],
-                "id": 48846,
+                "id": 48831,
                 "name": "AggregatorV3Interface",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
-                "referencedDeclaration": 33010,
+                "referencedDeclaration": 33000,
                 "src": "884:21:185",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_type$_t_contract$_AggregatorV3Interface_$33010_$",
+                  "typeIdentifier": "t_type$_t_contract$_AggregatorV3Interface_$33000_$",
                   "typeString": "type(contract AggregatorV3Interface)"
                 }
               },
-              "id": 48848,
+              "id": 48833,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -382,19 +382,19 @@
               "src": "884:65:185",
               "tryCall": false,
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_AggregatorV3Interface_$33010",
+                "typeIdentifier": "t_contract$_AggregatorV3Interface_$33000",
                 "typeString": "contract AggregatorV3Interface"
               }
             },
             "visibility": "public"
           },
           {
-            "id": 48856,
+            "id": 48841,
             "nodeType": "VariableDeclaration",
             "src": "1006:85:185",
             "constant": true,
             "documentation": {
-              "id": 48850,
+              "id": 48835,
               "nodeType": "StructuredDocumentation",
               "src": "954:49:185",
               "text": " @dev bBADGER ERC20 token contract."
@@ -403,27 +403,27 @@
             "mutability": "constant",
             "name": "BBADGER",
             "nameLocation": "1030:7:185",
-            "scope": 49137,
+            "scope": 49122,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_IXToken_$32171",
+              "typeIdentifier": "t_contract$_IXToken_$32161",
               "typeString": "contract IXToken"
             },
             "typeName": {
-              "id": 48852,
+              "id": 48837,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 48851,
+                "id": 48836,
                 "name": "IXToken",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 32171,
+                "referencedDeclaration": 32161,
                 "src": "1006:7:185"
               },
-              "referencedDeclaration": 32171,
+              "referencedDeclaration": 32161,
               "src": "1006:7:185",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IXToken_$32171",
+                "typeIdentifier": "t_contract$_IXToken_$32161",
                 "typeString": "contract IXToken"
               }
             },
@@ -431,7 +431,7 @@
               "arguments": [
                 {
                   "hexValue": "307831394439374438664138313345453266353161443442346530344541303862416634444666433238",
-                  "id": 48854,
+                  "id": 48839,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -453,18 +453,18 @@
                     "typeString": "address"
                   }
                 ],
-                "id": 48853,
+                "id": 48838,
                 "name": "IXToken",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
-                "referencedDeclaration": 32171,
+                "referencedDeclaration": 32161,
                 "src": "1040:7:185",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_type$_t_contract$_IXToken_$32171_$",
+                  "typeIdentifier": "t_type$_t_contract$_IXToken_$32161_$",
                   "typeString": "type(contract IXToken)"
                 }
               },
-              "id": 48855,
+              "id": 48840,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -475,19 +475,19 @@
               "src": "1040:51:185",
               "tryCall": false,
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IXToken_$32171",
+                "typeIdentifier": "t_contract$_IXToken_$32161",
                 "typeString": "contract IXToken"
               }
             },
             "visibility": "public"
           },
           {
-            "id": 48863,
+            "id": 48848,
             "nodeType": "VariableDeclaration",
             "src": "1149:123:185",
             "constant": true,
             "documentation": {
-              "id": 48857,
+              "id": 48842,
               "nodeType": "StructuredDocumentation",
               "src": "1096:50:185",
               "text": " @dev DIGG/BTC Chainlink price feed."
@@ -496,27 +496,27 @@
             "mutability": "constant",
             "name": "DIGG_BTC_FEED",
             "nameLocation": "1187:13:185",
-            "scope": 49137,
+            "scope": 49122,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_AggregatorV3Interface_$33010",
+              "typeIdentifier": "t_contract$_AggregatorV3Interface_$33000",
               "typeString": "contract AggregatorV3Interface"
             },
             "typeName": {
-              "id": 48859,
+              "id": 48844,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 48858,
+                "id": 48843,
                 "name": "AggregatorV3Interface",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 33010,
+                "referencedDeclaration": 33000,
                 "src": "1149:21:185"
               },
-              "referencedDeclaration": 33010,
+              "referencedDeclaration": 33000,
               "src": "1149:21:185",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_AggregatorV3Interface_$33010",
+                "typeIdentifier": "t_contract$_AggregatorV3Interface_$33000",
                 "typeString": "contract AggregatorV3Interface"
               }
             },
@@ -524,7 +524,7 @@
               "arguments": [
                 {
                   "hexValue": "307834313861364339384344354238323735393535663038463062384331633638333863386231363835",
-                  "id": 48861,
+                  "id": 48846,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -546,18 +546,18 @@
                     "typeString": "address"
                   }
                 ],
-                "id": 48860,
+                "id": 48845,
                 "name": "AggregatorV3Interface",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
-                "referencedDeclaration": 33010,
+                "referencedDeclaration": 33000,
                 "src": "1207:21:185",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_type$_t_contract$_AggregatorV3Interface_$33010_$",
+                  "typeIdentifier": "t_type$_t_contract$_AggregatorV3Interface_$33000_$",
                   "typeString": "type(contract AggregatorV3Interface)"
                 }
               },
-              "id": 48862,
+              "id": 48847,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -568,19 +568,19 @@
               "src": "1207:65:185",
               "tryCall": false,
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_AggregatorV3Interface_$33010",
+                "typeIdentifier": "t_contract$_AggregatorV3Interface_$33000",
                 "typeString": "contract AggregatorV3Interface"
               }
             },
             "visibility": "public"
           },
           {
-            "id": 48870,
+            "id": 48855,
             "nodeType": "VariableDeclaration",
             "src": "1327:85:185",
             "constant": true,
             "documentation": {
-              "id": 48864,
+              "id": 48849,
               "nodeType": "StructuredDocumentation",
               "src": "1277:47:185",
               "text": " @dev bDIGG ERC20 token contract."
@@ -589,27 +589,27 @@
             "mutability": "constant",
             "name": "BDIGG",
             "nameLocation": "1352:5:185",
-            "scope": 49137,
+            "scope": 49122,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_DiggSett_$32147",
+              "typeIdentifier": "t_contract$_DiggSett_$32137",
               "typeString": "contract DiggSett"
             },
             "typeName": {
-              "id": 48866,
+              "id": 48851,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 48865,
+                "id": 48850,
                 "name": "DiggSett",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 32147,
+                "referencedDeclaration": 32137,
                 "src": "1327:8:185"
               },
-              "referencedDeclaration": 32147,
+              "referencedDeclaration": 32137,
               "src": "1327:8:185",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_DiggSett_$32147",
+                "typeIdentifier": "t_contract$_DiggSett_$32137",
                 "typeString": "contract DiggSett"
               }
             },
@@ -617,7 +617,7 @@
               "arguments": [
                 {
                   "hexValue": "307837653745313132413638643844324532323145313130343761373266464331303635633338653161",
-                  "id": 48868,
+                  "id": 48853,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -639,18 +639,18 @@
                     "typeString": "address"
                   }
                 ],
-                "id": 48867,
+                "id": 48852,
                 "name": "DiggSett",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
-                "referencedDeclaration": 32147,
+                "referencedDeclaration": 32137,
                 "src": "1360:8:185",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_type$_t_contract$_DiggSett_$32147_$",
+                  "typeIdentifier": "t_type$_t_contract$_DiggSett_$32137_$",
                   "typeString": "type(contract DiggSett)"
                 }
               },
-              "id": 48869,
+              "id": 48854,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -661,19 +661,19 @@
               "src": "1360:52:185",
               "tryCall": false,
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_DiggSett_$32147",
+                "typeIdentifier": "t_contract$_DiggSett_$32137",
                 "typeString": "contract DiggSett"
               }
             },
             "visibility": "public"
           },
           {
-            "id": 48877,
+            "id": 48862,
             "nodeType": "VariableDeclaration",
             "src": "1469:122:185",
             "constant": true,
             "documentation": {
-              "id": 48871,
+              "id": 48856,
               "nodeType": "StructuredDocumentation",
               "src": "1417:49:185",
               "text": " @dev BTC/ETH Chainlink price feed."
@@ -682,27 +682,27 @@
             "mutability": "constant",
             "name": "BTC_ETH_FEED",
             "nameLocation": "1507:12:185",
-            "scope": 49137,
+            "scope": 49122,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_AggregatorV3Interface_$33010",
+              "typeIdentifier": "t_contract$_AggregatorV3Interface_$33000",
               "typeString": "contract AggregatorV3Interface"
             },
             "typeName": {
-              "id": 48873,
+              "id": 48858,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 48872,
+                "id": 48857,
                 "name": "AggregatorV3Interface",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 33010,
+                "referencedDeclaration": 33000,
                 "src": "1469:21:185"
               },
-              "referencedDeclaration": 33010,
+              "referencedDeclaration": 33000,
               "src": "1469:21:185",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_AggregatorV3Interface_$33010",
+                "typeIdentifier": "t_contract$_AggregatorV3Interface_$33000",
                 "typeString": "contract AggregatorV3Interface"
               }
             },
@@ -710,7 +710,7 @@
               "arguments": [
                 {
                   "hexValue": "307864656232383846373337303636353839353938653932313445373832666135413865443638396538",
-                  "id": 48875,
+                  "id": 48860,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -732,18 +732,18 @@
                     "typeString": "address"
                   }
                 ],
-                "id": 48874,
+                "id": 48859,
                 "name": "AggregatorV3Interface",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
-                "referencedDeclaration": 33010,
+                "referencedDeclaration": 33000,
                 "src": "1526:21:185",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_type$_t_contract$_AggregatorV3Interface_$33010_$",
+                  "typeIdentifier": "t_type$_t_contract$_AggregatorV3Interface_$33000_$",
                   "typeString": "type(contract AggregatorV3Interface)"
                 }
               },
-              "id": 48876,
+              "id": 48861,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -754,19 +754,19 @@
               "src": "1526:65:185",
               "tryCall": false,
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_AggregatorV3Interface_$33010",
+                "typeIdentifier": "t_contract$_AggregatorV3Interface_$33000",
                 "typeString": "contract AggregatorV3Interface"
               }
             },
             "visibility": "public"
           },
           {
-            "id": 48884,
+            "id": 48869,
             "nodeType": "VariableDeclaration",
             "src": "1646:83:185",
             "constant": true,
             "documentation": {
-              "id": 48878,
+              "id": 48863,
               "nodeType": "StructuredDocumentation",
               "src": "1596:47:185",
               "text": " @dev ibBTC ERC20 token contract."
@@ -775,27 +775,27 @@
             "mutability": "constant",
             "name": "IBBTC",
             "nameLocation": "1670:5:185",
-            "scope": 49137,
+            "scope": 49122,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_IXToken_$32171",
+              "typeIdentifier": "t_contract$_IXToken_$32161",
               "typeString": "contract IXToken"
             },
             "typeName": {
-              "id": 48880,
+              "id": 48865,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 48879,
+                "id": 48864,
                 "name": "IXToken",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 32171,
+                "referencedDeclaration": 32161,
                 "src": "1646:7:185"
               },
-              "referencedDeclaration": 32171,
+              "referencedDeclaration": 32161,
               "src": "1646:7:185",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IXToken_$32171",
+                "typeIdentifier": "t_contract$_IXToken_$32161",
                 "typeString": "contract IXToken"
               }
             },
@@ -803,7 +803,7 @@
               "arguments": [
                 {
                   "hexValue": "307863344531353937334536664632413335634338303463324346394432613162383137613862343046",
-                  "id": 48882,
+                  "id": 48867,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -825,18 +825,18 @@
                     "typeString": "address"
                   }
                 ],
-                "id": 48881,
+                "id": 48866,
                 "name": "IXToken",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
-                "referencedDeclaration": 32171,
+                "referencedDeclaration": 32161,
                 "src": "1678:7:185",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_type$_t_contract$_IXToken_$32171_$",
+                  "typeIdentifier": "t_type$_t_contract$_IXToken_$32161_$",
                   "typeString": "type(contract IXToken)"
                 }
               },
-              "id": 48883,
+              "id": 48868,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -847,21 +847,21 @@
               "src": "1678:51:185",
               "tryCall": false,
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IXToken_$32171",
+                "typeIdentifier": "t_contract$_IXToken_$32161",
                 "typeString": "contract IXToken"
               }
             },
             "visibility": "public"
           },
           {
-            "id": 48898,
+            "id": 48883,
             "nodeType": "FunctionDefinition",
             "src": "1954:112:185",
             "baseFunctions": [
-              41277
+              41267
             ],
             "body": {
-              "id": 48897,
+              "id": 48882,
               "nodeType": "Block",
               "src": "2030:36:185",
               "statements": [
@@ -869,11 +869,11 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 48894,
+                        "id": 48879,
                         "name": "underlying",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 48887,
+                        "referencedDeclaration": 48872,
                         "src": "2050:10:185",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -888,18 +888,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 48893,
+                      "id": 48878,
                       "name": "_price",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 49136,
+                      "referencedDeclaration": 49121,
                       "src": "2043:6:185",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_uint256_$",
                         "typeString": "function (address) view returns (uint256)"
                       }
                     },
-                    "id": 48895,
+                    "id": 48880,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -914,15 +914,15 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 48892,
-                  "id": 48896,
+                  "functionReturnParameters": 48877,
+                  "id": 48881,
                   "nodeType": "Return",
                   "src": "2036:25:185"
                 }
               ]
             },
             "documentation": {
-              "id": 48885,
+              "id": 48870,
               "nodeType": "StructuredDocumentation",
               "src": "1734:217:185",
               "text": " @notice Fetches the token/ETH price, with 18 decimals of precision.\n @param underlying The underlying token address for which to get the price.\n @return Price denominated in ETH (scaled by 1e18)"
@@ -934,23 +934,23 @@
             "name": "price",
             "nameLocation": "1963:5:185",
             "overrides": {
-              "id": 48889,
+              "id": 48874,
               "nodeType": "OverrideSpecifier",
               "overrides": [],
               "src": "2003:8:185"
             },
             "parameters": {
-              "id": 48888,
+              "id": 48873,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 48887,
+                  "id": 48872,
                   "mutability": "mutable",
                   "name": "underlying",
                   "nameLocation": "1977:10:185",
                   "nodeType": "VariableDeclaration",
-                  "scope": 48898,
+                  "scope": 48883,
                   "src": "1969:18:185",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -959,7 +959,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 48886,
+                    "id": 48871,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1969:7:185",
@@ -975,17 +975,17 @@
               "src": "1968:20:185"
             },
             "returnParameters": {
-              "id": 48892,
+              "id": 48877,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 48891,
+                  "id": 48876,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 48898,
+                  "scope": 48883,
                   "src": "2021:7:185",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -994,7 +994,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 48890,
+                    "id": 48875,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2021:7:185",
@@ -1008,36 +1008,36 @@
               ],
               "src": "2020:9:185"
             },
-            "scope": 49137,
+            "scope": 49122,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 48939,
+            "id": 48924,
             "nodeType": "FunctionDefinition",
             "src": "2342:422:185",
             "baseFunctions": [
-              33799
+              33789
             ],
             "body": {
-              "id": 48938,
+              "id": 48923,
               "nodeType": "Block",
               "src": "2427:337:185",
               "statements": [
                 {
                   "assignments": [
-                    48909
+                    48894
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 48909,
+                      "id": 48894,
                       "mutability": "mutable",
                       "name": "underlying",
                       "nameLocation": "2441:10:185",
                       "nodeType": "VariableDeclaration",
-                      "scope": 48938,
+                      "scope": 48923,
                       "src": "2433:18:185",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -1046,7 +1046,7 @@
                         "typeString": "address"
                       },
                       "typeName": {
-                        "id": 48908,
+                        "id": 48893,
                         "name": "address",
                         "nodeType": "ElementaryTypeName",
                         "src": "2433:7:185",
@@ -1059,7 +1059,7 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 48918,
+                  "id": 48903,
                   "initialValue": {
                     "arguments": [],
                     "expression": {
@@ -1069,14 +1069,14 @@
                           {
                             "arguments": [
                               {
-                                "id": 48913,
+                                "id": 48898,
                                 "name": "cToken",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 48902,
+                                "referencedDeclaration": 48887,
                                 "src": "2470:6:185",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_contract$_ICToken_$33610",
+                                  "typeIdentifier": "t_contract$_ICToken_$33600",
                                   "typeString": "contract ICToken"
                                 }
                               }
@@ -1084,11 +1084,11 @@
                             "expression": {
                               "argumentTypes": [
                                 {
-                                  "typeIdentifier": "t_contract$_ICToken_$33610",
+                                  "typeIdentifier": "t_contract$_ICToken_$33600",
                                   "typeString": "contract ICToken"
                                 }
                               ],
-                              "id": 48912,
+                              "id": 48897,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -1100,14 +1100,14 @@
                                 "typeString": "type(address)"
                               },
                               "typeName": {
-                                "id": 48911,
+                                "id": 48896,
                                 "name": "address",
                                 "nodeType": "ElementaryTypeName",
                                 "src": "2462:7:185",
                                 "typeDescriptions": {}
                               }
                             },
-                            "id": 48914,
+                            "id": 48899,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -1130,18 +1130,18 @@
                               "typeString": "address"
                             }
                           ],
-                          "id": 48910,
+                          "id": 48895,
                           "name": "ICErc20",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 33461,
+                          "referencedDeclaration": 33451,
                           "src": "2454:7:185",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_ICErc20_$33461_$",
+                            "typeIdentifier": "t_type$_t_contract$_ICErc20_$33451_$",
                             "typeString": "type(contract ICErc20)"
                           }
                         },
-                        "id": 48915,
+                        "id": 48900,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1152,25 +1152,25 @@
                         "src": "2454:24:185",
                         "tryCall": false,
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_ICErc20_$33461",
+                          "typeIdentifier": "t_contract$_ICErc20_$33451",
                           "typeString": "contract ICErc20"
                         }
                       },
-                      "id": 48916,
+                      "id": 48901,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "underlying",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 33448,
+                      "referencedDeclaration": 33438,
                       "src": "2454:35:185",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
                         "typeString": "function () view external returns (address)"
                       }
                     },
-                    "id": 48917,
+                    "id": 48902,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1194,7 +1194,7 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 48936,
+                    "id": 48921,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1206,7 +1206,7 @@
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-                          "id": 48923,
+                          "id": 48908,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -1214,11 +1214,11 @@
                           "leftExpression": {
                             "arguments": [
                               {
-                                "id": 48920,
+                                "id": 48905,
                                 "name": "underlying",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 48909,
+                                "referencedDeclaration": 48894,
                                 "src": "2683:10:185",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_address",
@@ -1233,18 +1233,18 @@
                                   "typeString": "address"
                                 }
                               ],
-                              "id": 48919,
+                              "id": 48904,
                               "name": "_price",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 49136,
+                              "referencedDeclaration": 49121,
                               "src": "2676:6:185",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_uint256_$",
                                 "typeString": "function (address) view returns (uint256)"
                               }
                             },
-                            "id": 48921,
+                            "id": 48906,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -1263,7 +1263,7 @@
                           "operator": "*",
                           "rightExpression": {
                             "hexValue": "31653138",
-                            "id": 48922,
+                            "id": 48907,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -1284,7 +1284,7 @@
                           }
                         }
                       ],
-                      "id": 48924,
+                      "id": 48909,
                       "isConstant": false,
                       "isInlineArray": false,
                       "isLValue": false,
@@ -1306,14 +1306,14 @@
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-                          "id": 48934,
+                          "id": 48919,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftExpression": {
                             "hexValue": "3130",
-                            "id": 48925,
+                            "id": 48910,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -1338,11 +1338,11 @@
                                   "expression": {
                                     "arguments": [
                                       {
-                                        "id": 48929,
+                                        "id": 48914,
                                         "name": "underlying",
                                         "nodeType": "Identifier",
                                         "overloadedDeclarations": [],
-                                        "referencedDeclaration": 48909,
+                                        "referencedDeclaration": 48894,
                                         "src": "2735:10:185",
                                         "typeDescriptions": {
                                           "typeIdentifier": "t_address",
@@ -1357,18 +1357,18 @@
                                           "typeString": "address"
                                         }
                                       ],
-                                      "id": 48928,
+                                      "id": 48913,
                                       "name": "ERC20Upgradeable",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 90074,
+                                      "referencedDeclaration": 89831,
                                       "src": "2718:16:185",
                                       "typeDescriptions": {
-                                        "typeIdentifier": "t_type$_t_contract$_ERC20Upgradeable_$90074_$",
+                                        "typeIdentifier": "t_type$_t_contract$_ERC20Upgradeable_$89831_$",
                                         "typeString": "type(contract ERC20Upgradeable)"
                                       }
                                     },
-                                    "id": 48930,
+                                    "id": 48915,
                                     "isConstant": false,
                                     "isLValue": false,
                                     "isPure": false,
@@ -1379,25 +1379,25 @@
                                     "src": "2718:28:185",
                                     "tryCall": false,
                                     "typeDescriptions": {
-                                      "typeIdentifier": "t_contract$_ERC20Upgradeable_$90074",
+                                      "typeIdentifier": "t_contract$_ERC20Upgradeable_$89831",
                                       "typeString": "contract ERC20Upgradeable"
                                     }
                                   },
-                                  "id": 48931,
+                                  "id": 48916,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": false,
                                   "lValueRequested": false,
                                   "memberName": "decimals",
                                   "nodeType": "MemberAccess",
-                                  "referencedDeclaration": 89558,
+                                  "referencedDeclaration": 89315,
                                   "src": "2718:37:185",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_function_external_view$__$returns$_t_uint8_$",
                                     "typeString": "function () view external returns (uint8)"
                                   }
                                 },
-                                "id": 48932,
+                                "id": 48917,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
@@ -1420,7 +1420,7 @@
                                   "typeString": "uint8"
                                 }
                               ],
-                              "id": 48927,
+                              "id": 48912,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -1432,14 +1432,14 @@
                                 "typeString": "type(uint256)"
                               },
                               "typeName": {
-                                "id": 48926,
+                                "id": 48911,
                                 "name": "uint256",
                                 "nodeType": "ElementaryTypeName",
                                 "src": "2710:7:185",
                                 "typeDescriptions": {}
                               }
                             },
-                            "id": 48933,
+                            "id": 48918,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -1461,7 +1461,7 @@
                           }
                         }
                       ],
-                      "id": 48935,
+                      "id": 48920,
                       "isConstant": false,
                       "isInlineArray": false,
                       "isLValue": false,
@@ -1480,15 +1480,15 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 48907,
-                  "id": 48937,
+                  "functionReturnParameters": 48892,
+                  "id": 48922,
                   "nodeType": "Return",
                   "src": "2668:91:185"
                 }
               ]
             },
             "documentation": {
-              "id": 48899,
+              "id": 48884,
               "nodeType": "StructuredDocumentation",
               "src": "2070:269:185",
               "text": " @notice Returns the price in ETH of the token underlying `cToken`.\n @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).\n @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`."
@@ -1500,44 +1500,44 @@
             "name": "getUnderlyingPrice",
             "nameLocation": "2351:18:185",
             "overrides": {
-              "id": 48904,
+              "id": 48889,
               "nodeType": "OverrideSpecifier",
               "overrides": [],
               "src": "2400:8:185"
             },
             "parameters": {
-              "id": 48903,
+              "id": 48888,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 48902,
+                  "id": 48887,
                   "mutability": "mutable",
                   "name": "cToken",
                   "nameLocation": "2378:6:185",
                   "nodeType": "VariableDeclaration",
-                  "scope": 48939,
+                  "scope": 48924,
                   "src": "2370:14:185",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ICToken_$33610",
+                    "typeIdentifier": "t_contract$_ICToken_$33600",
                     "typeString": "contract ICToken"
                   },
                   "typeName": {
-                    "id": 48901,
+                    "id": 48886,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 48900,
+                      "id": 48885,
                       "name": "ICToken",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 33610,
+                      "referencedDeclaration": 33600,
                       "src": "2370:7:185"
                     },
-                    "referencedDeclaration": 33610,
+                    "referencedDeclaration": 33600,
                     "src": "2370:7:185",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ICToken_$33610",
+                      "typeIdentifier": "t_contract$_ICToken_$33600",
                       "typeString": "contract ICToken"
                     }
                   },
@@ -1547,17 +1547,17 @@
               "src": "2369:16:185"
             },
             "returnParameters": {
-              "id": 48907,
+              "id": 48892,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 48906,
+                  "id": 48891,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 48939,
+                  "scope": 48924,
                   "src": "2418:7:185",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1566,7 +1566,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 48905,
+                    "id": 48890,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2418:7:185",
@@ -1580,17 +1580,17 @@
               ],
               "src": "2417:9:185"
             },
-            "scope": 49137,
+            "scope": 49122,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 49136,
+            "id": 49121,
             "nodeType": "FunctionDefinition",
             "src": "2853:1781:185",
             "body": {
-              "id": 49135,
+              "id": 49120,
               "nodeType": "Block",
               "src": "2916:1718:185",
               "statements": [
@@ -1600,17 +1600,17 @@
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     },
-                    "id": 48952,
+                    "id": 48937,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
-                      "id": 48947,
+                      "id": 48932,
                       "name": "token",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 48942,
+                      "referencedDeclaration": 48927,
                       "src": "2926:5:185",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -1622,14 +1622,14 @@
                     "rightExpression": {
                       "arguments": [
                         {
-                          "id": 48950,
+                          "id": 48935,
                           "name": "BBADGER",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 48856,
+                          "referencedDeclaration": 48841,
                           "src": "2943:7:185",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_contract$_IXToken_$32171",
+                            "typeIdentifier": "t_contract$_IXToken_$32161",
                             "typeString": "contract IXToken"
                           }
                         }
@@ -1637,11 +1637,11 @@
                       "expression": {
                         "argumentTypes": [
                           {
-                            "typeIdentifier": "t_contract$_IXToken_$32171",
+                            "typeIdentifier": "t_contract$_IXToken_$32161",
                             "typeString": "contract IXToken"
                           }
                         ],
-                        "id": 48949,
+                        "id": 48934,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -1653,14 +1653,14 @@
                           "typeString": "type(address)"
                         },
                         "typeName": {
-                          "id": 48948,
+                          "id": 48933,
                           "name": "address",
                           "nodeType": "ElementaryTypeName",
                           "src": "2935:7:185",
                           "typeDescriptions": {}
                         }
                       },
-                      "id": 48951,
+                      "id": 48936,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1687,17 +1687,17 @@
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       },
-                      "id": 48993,
+                      "id": 48978,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
-                        "id": 48988,
+                        "id": 48973,
                         "name": "token",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 48942,
+                        "referencedDeclaration": 48927,
                         "src": "3259:5:185",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1709,14 +1709,14 @@
                       "rightExpression": {
                         "arguments": [
                           {
-                            "id": 48991,
+                            "id": 48976,
                             "name": "BDIGG",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 48870,
+                            "referencedDeclaration": 48855,
                             "src": "3276:5:185",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_DiggSett_$32147",
+                              "typeIdentifier": "t_contract$_DiggSett_$32137",
                               "typeString": "contract DiggSett"
                             }
                           }
@@ -1724,11 +1724,11 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_contract$_DiggSett_$32147",
+                              "typeIdentifier": "t_contract$_DiggSett_$32137",
                               "typeString": "contract DiggSett"
                             }
                           ],
-                          "id": 48990,
+                          "id": 48975,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -1740,14 +1740,14 @@
                             "typeString": "type(address)"
                           },
                           "typeName": {
-                            "id": 48989,
+                            "id": 48974,
                             "name": "address",
                             "nodeType": "ElementaryTypeName",
                             "src": "3268:7:185",
                             "typeDescriptions": {}
                           }
                         },
-                        "id": 48992,
+                        "id": 48977,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -1774,17 +1774,17 @@
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 49092,
+                        "id": 49077,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
-                          "id": 49087,
+                          "id": 49072,
                           "name": "token",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 48942,
+                          "referencedDeclaration": 48927,
                           "src": "4263:5:185",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -1796,14 +1796,14 @@
                         "rightExpression": {
                           "arguments": [
                             {
-                              "id": 49090,
+                              "id": 49075,
                               "name": "IBBTC",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 48884,
+                              "referencedDeclaration": 48869,
                               "src": "4280:5:185",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_IXToken_$32171",
+                                "typeIdentifier": "t_contract$_IXToken_$32161",
                                 "typeString": "contract IXToken"
                               }
                             }
@@ -1811,11 +1811,11 @@
                           "expression": {
                             "argumentTypes": [
                               {
-                                "typeIdentifier": "t_contract$_IXToken_$32171",
+                                "typeIdentifier": "t_contract$_IXToken_$32161",
                                 "typeString": "contract IXToken"
                               }
                             ],
-                            "id": 49089,
+                            "id": 49074,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -1827,14 +1827,14 @@
                               "typeString": "type(address)"
                             },
                             "typeName": {
-                              "id": 49088,
+                              "id": 49073,
                               "name": "address",
                               "nodeType": "ElementaryTypeName",
                               "src": "4272:7:185",
                               "typeDescriptions": {}
                             }
                           },
-                          "id": 49091,
+                          "id": 49076,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -1860,7 +1860,7 @@
                           "arguments": [
                             {
                               "hexValue": "496e76616c696420746f6b656e20616464726573732070617373656420746f2042616467657250726963654f7261636c652e",
-                              "id": 49129,
+                              "id": 49114,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -1882,7 +1882,7 @@
                                 "typeString": "literal_string \"Invalid token address passed to BadgerPriceOracle.\""
                               }
                             ],
-                            "id": 49128,
+                            "id": 49113,
                             "name": "revert",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [
@@ -1896,7 +1896,7 @@
                               "typeString": "function (string memory) pure"
                             }
                           },
-                          "id": 49130,
+                          "id": 49115,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -1911,35 +1911,35 @@
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 49131,
+                        "id": 49116,
                         "nodeType": "ExpressionStatement",
                         "src": "4569:60:185"
                       },
-                      "id": 49132,
+                      "id": 49117,
                       "nodeType": "IfStatement",
                       "src": "4259:370:185",
                       "trueBody": {
-                        "id": 49127,
+                        "id": 49112,
                         "nodeType": "Block",
                         "src": "4288:275:185",
                         "statements": [
                           {
                             "assignments": [
-                              49094,
-                              49096,
+                              49079,
+                              49081,
                               null,
                               null,
-                              49098
+                              49083
                             ],
                             "declarations": [
                               {
                                 "constant": false,
-                                "id": 49094,
+                                "id": 49079,
                                 "mutability": "mutable",
                                 "name": "roundId",
                                 "nameLocation": "4304:7:185",
                                 "nodeType": "VariableDeclaration",
-                                "scope": 49127,
+                                "scope": 49112,
                                 "src": "4297:14:185",
                                 "stateVariable": false,
                                 "storageLocation": "default",
@@ -1948,7 +1948,7 @@
                                   "typeString": "uint80"
                                 },
                                 "typeName": {
-                                  "id": 49093,
+                                  "id": 49078,
                                   "name": "uint80",
                                   "nodeType": "ElementaryTypeName",
                                   "src": "4297:6:185",
@@ -1961,12 +1961,12 @@
                               },
                               {
                                 "constant": false,
-                                "id": 49096,
+                                "id": 49081,
                                 "mutability": "mutable",
                                 "name": "btcEthPrice",
                                 "nameLocation": "4320:11:185",
                                 "nodeType": "VariableDeclaration",
-                                "scope": 49127,
+                                "scope": 49112,
                                 "src": "4313:18:185",
                                 "stateVariable": false,
                                 "storageLocation": "default",
@@ -1975,7 +1975,7 @@
                                   "typeString": "int256"
                                 },
                                 "typeName": {
-                                  "id": 49095,
+                                  "id": 49080,
                                   "name": "int256",
                                   "nodeType": "ElementaryTypeName",
                                   "src": "4313:6:185",
@@ -1990,12 +1990,12 @@
                               null,
                               {
                                 "constant": false,
-                                "id": 49098,
+                                "id": 49083,
                                 "mutability": "mutable",
                                 "name": "answeredInRound",
                                 "nameLocation": "4344:15:185",
                                 "nodeType": "VariableDeclaration",
-                                "scope": 49127,
+                                "scope": 49112,
                                 "src": "4337:22:185",
                                 "stateVariable": false,
                                 "storageLocation": "default",
@@ -2004,7 +2004,7 @@
                                   "typeString": "uint80"
                                 },
                                 "typeName": {
-                                  "id": 49097,
+                                  "id": 49082,
                                   "name": "uint80",
                                   "nodeType": "ElementaryTypeName",
                                   "src": "4337:6:185",
@@ -2016,38 +2016,38 @@
                                 "visibility": "internal"
                               }
                             ],
-                            "id": 49102,
+                            "id": 49087,
                             "initialValue": {
                               "arguments": [],
                               "expression": {
                                 "argumentTypes": [],
                                 "expression": {
-                                  "id": 49099,
+                                  "id": 49084,
                                   "name": "BTC_ETH_FEED",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 48877,
+                                  "referencedDeclaration": 48862,
                                   "src": "4363:12:185",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_contract$_AggregatorV3Interface_$33010",
+                                    "typeIdentifier": "t_contract$_AggregatorV3Interface_$33000",
                                     "typeString": "contract AggregatorV3Interface"
                                   }
                                 },
-                                "id": 49100,
+                                "id": 49085,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "latestRoundData",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 33009,
+                                "referencedDeclaration": 32999,
                                 "src": "4363:28:185",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_external_view$__$returns$_t_uint80_$_t_int256_$_t_uint256_$_t_uint256_$_t_uint80_$",
                                   "typeString": "function () view external returns (uint80,int256,uint256,uint256,uint80)"
                                 }
                               },
-                              "id": 49101,
+                              "id": 49086,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -2073,17 +2073,17 @@
                                     "typeIdentifier": "t_uint80",
                                     "typeString": "uint80"
                                   },
-                                  "id": 49106,
+                                  "id": 49091,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": false,
                                   "lValueRequested": false,
                                   "leftExpression": {
-                                    "id": 49104,
+                                    "id": 49089,
                                     "name": "answeredInRound",
                                     "nodeType": "Identifier",
                                     "overloadedDeclarations": [],
-                                    "referencedDeclaration": 49098,
+                                    "referencedDeclaration": 49083,
                                     "src": "4409:15:185",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_uint80",
@@ -2093,11 +2093,11 @@
                                   "nodeType": "BinaryOperation",
                                   "operator": "==",
                                   "rightExpression": {
-                                    "id": 49105,
+                                    "id": 49090,
                                     "name": "roundId",
                                     "nodeType": "Identifier",
                                     "overloadedDeclarations": [],
-                                    "referencedDeclaration": 49094,
+                                    "referencedDeclaration": 49079,
                                     "src": "4428:7:185",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_uint80",
@@ -2112,7 +2112,7 @@
                                 },
                                 {
                                   "hexValue": "436861696e6c696e6b20726f756e642074696d6564206f75742e",
-                                  "id": 49107,
+                                  "id": 49092,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": true,
@@ -2138,7 +2138,7 @@
                                     "typeString": "literal_string \"Chainlink round timed out.\""
                                   }
                                 ],
-                                "id": 49103,
+                                "id": 49088,
                                 "name": "require",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [
@@ -2152,7 +2152,7 @@
                                   "typeString": "function (bool,string memory) pure"
                                 }
                               },
-                              "id": 49108,
+                              "id": 49093,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -2167,7 +2167,7 @@
                                 "typeString": "tuple()"
                               }
                             },
-                            "id": 49109,
+                            "id": 49094,
                             "nodeType": "ExpressionStatement",
                             "src": "4401:65:185"
                           },
@@ -2178,17 +2178,17 @@
                                   "typeIdentifier": "t_int256",
                                   "typeString": "int256"
                                 },
-                                "id": 49112,
+                                "id": 49097,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "leftExpression": {
-                                  "id": 49110,
+                                  "id": 49095,
                                   "name": "btcEthPrice",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 49096,
+                                  "referencedDeclaration": 49081,
                                   "src": "4481:11:185",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_int256",
@@ -2199,7 +2199,7 @@
                                 "operator": ">",
                                 "rightExpression": {
                                   "hexValue": "30",
-                                  "id": 49111,
+                                  "id": 49096,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": true,
@@ -2221,7 +2221,7 @@
                               },
                               "falseExpression": {
                                 "hexValue": "30",
-                                "id": 49124,
+                                "id": 49109,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": true,
@@ -2235,7 +2235,7 @@
                                 },
                                 "value": "0"
                               },
-                              "id": 49125,
+                              "id": 49110,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -2247,7 +2247,7 @@
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
                                 },
-                                "id": 49123,
+                                "id": 49108,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
@@ -2259,7 +2259,7 @@
                                         "typeIdentifier": "t_uint256",
                                         "typeString": "uint256"
                                       },
-                                      "id": 49120,
+                                      "id": 49105,
                                       "isConstant": false,
                                       "isLValue": false,
                                       "isPure": false,
@@ -2267,11 +2267,11 @@
                                       "leftExpression": {
                                         "arguments": [
                                           {
-                                            "id": 49115,
+                                            "id": 49100,
                                             "name": "btcEthPrice",
                                             "nodeType": "Identifier",
                                             "overloadedDeclarations": [],
-                                            "referencedDeclaration": 49096,
+                                            "referencedDeclaration": 49081,
                                             "src": "4508:11:185",
                                             "typeDescriptions": {
                                               "typeIdentifier": "t_int256",
@@ -2286,7 +2286,7 @@
                                               "typeString": "int256"
                                             }
                                           ],
-                                          "id": 49114,
+                                          "id": 49099,
                                           "isConstant": false,
                                           "isLValue": false,
                                           "isPure": true,
@@ -2298,14 +2298,14 @@
                                             "typeString": "type(uint256)"
                                           },
                                           "typeName": {
-                                            "id": 49113,
+                                            "id": 49098,
                                             "name": "uint256",
                                             "nodeType": "ElementaryTypeName",
                                             "src": "4500:7:185",
                                             "typeDescriptions": {}
                                           }
                                         },
-                                        "id": 49116,
+                                        "id": 49101,
                                         "isConstant": false,
                                         "isLValue": false,
                                         "isPure": false,
@@ -2327,32 +2327,32 @@
                                         "expression": {
                                           "argumentTypes": [],
                                           "expression": {
-                                            "id": 49117,
+                                            "id": 49102,
                                             "name": "IBBTC",
                                             "nodeType": "Identifier",
                                             "overloadedDeclarations": [],
-                                            "referencedDeclaration": 48884,
+                                            "referencedDeclaration": 48869,
                                             "src": "4523:5:185",
                                             "typeDescriptions": {
-                                              "typeIdentifier": "t_contract$_IXToken_$32171",
+                                              "typeIdentifier": "t_contract$_IXToken_$32161",
                                               "typeString": "contract IXToken"
                                             }
                                           },
-                                          "id": 49118,
+                                          "id": 49103,
                                           "isConstant": false,
                                           "isLValue": false,
                                           "isPure": false,
                                           "lValueRequested": false,
                                           "memberName": "pricePerShare",
                                           "nodeType": "MemberAccess",
-                                          "referencedDeclaration": 32165,
+                                          "referencedDeclaration": 32155,
                                           "src": "4523:19:185",
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_function_external_view$__$returns$_t_uint256_$",
                                             "typeString": "function () view external returns (uint256)"
                                           }
                                         },
-                                        "id": 49119,
+                                        "id": 49104,
                                         "isConstant": false,
                                         "isLValue": false,
                                         "isPure": false,
@@ -2374,7 +2374,7 @@
                                       }
                                     }
                                   ],
-                                  "id": 49121,
+                                  "id": 49106,
                                   "isConstant": false,
                                   "isInlineArray": false,
                                   "isLValue": false,
@@ -2391,7 +2391,7 @@
                                 "operator": "/",
                                 "rightExpression": {
                                   "hexValue": "31653138",
-                                  "id": 49122,
+                                  "id": 49107,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": true,
@@ -2416,39 +2416,39 @@
                                 "typeString": "uint256"
                               }
                             },
-                            "functionReturnParameters": 48946,
-                            "id": 49126,
+                            "functionReturnParameters": 48931,
+                            "id": 49111,
                             "nodeType": "Return",
                             "src": "4474:82:185"
                           }
                         ]
                       }
                     },
-                    "id": 49133,
+                    "id": 49118,
                     "nodeType": "IfStatement",
                     "src": "3255:1374:185",
                     "trueBody": {
-                      "id": 49086,
+                      "id": 49071,
                       "nodeType": "Block",
                       "src": "3284:969:185",
                       "statements": [
                         {
                           "assignments": [
-                            48995,
-                            48997,
+                            48980,
+                            48982,
                             null,
                             null,
-                            48999
+                            48984
                           ],
                           "declarations": [
                             {
                               "constant": false,
-                              "id": 48995,
+                              "id": 48980,
                               "mutability": "mutable",
                               "name": "roundId",
                               "nameLocation": "3300:7:185",
                               "nodeType": "VariableDeclaration",
-                              "scope": 49086,
+                              "scope": 49071,
                               "src": "3293:14:185",
                               "stateVariable": false,
                               "storageLocation": "default",
@@ -2457,7 +2457,7 @@
                                 "typeString": "uint80"
                               },
                               "typeName": {
-                                "id": 48994,
+                                "id": 48979,
                                 "name": "uint80",
                                 "nodeType": "ElementaryTypeName",
                                 "src": "3293:6:185",
@@ -2470,12 +2470,12 @@
                             },
                             {
                               "constant": false,
-                              "id": 48997,
+                              "id": 48982,
                               "mutability": "mutable",
                               "name": "diggBtcPrice",
                               "nameLocation": "3316:12:185",
                               "nodeType": "VariableDeclaration",
-                              "scope": 49086,
+                              "scope": 49071,
                               "src": "3309:19:185",
                               "stateVariable": false,
                               "storageLocation": "default",
@@ -2484,7 +2484,7 @@
                                 "typeString": "int256"
                               },
                               "typeName": {
-                                "id": 48996,
+                                "id": 48981,
                                 "name": "int256",
                                 "nodeType": "ElementaryTypeName",
                                 "src": "3309:6:185",
@@ -2499,12 +2499,12 @@
                             null,
                             {
                               "constant": false,
-                              "id": 48999,
+                              "id": 48984,
                               "mutability": "mutable",
                               "name": "answeredInRound",
                               "nameLocation": "3341:15:185",
                               "nodeType": "VariableDeclaration",
-                              "scope": 49086,
+                              "scope": 49071,
                               "src": "3334:22:185",
                               "stateVariable": false,
                               "storageLocation": "default",
@@ -2513,7 +2513,7 @@
                                 "typeString": "uint80"
                               },
                               "typeName": {
-                                "id": 48998,
+                                "id": 48983,
                                 "name": "uint80",
                                 "nodeType": "ElementaryTypeName",
                                 "src": "3334:6:185",
@@ -2525,38 +2525,38 @@
                               "visibility": "internal"
                             }
                           ],
-                          "id": 49003,
+                          "id": 48988,
                           "initialValue": {
                             "arguments": [],
                             "expression": {
                               "argumentTypes": [],
                               "expression": {
-                                "id": 49000,
+                                "id": 48985,
                                 "name": "DIGG_BTC_FEED",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 48863,
+                                "referencedDeclaration": 48848,
                                 "src": "3360:13:185",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_contract$_AggregatorV3Interface_$33010",
+                                  "typeIdentifier": "t_contract$_AggregatorV3Interface_$33000",
                                   "typeString": "contract AggregatorV3Interface"
                                 }
                               },
-                              "id": 49001,
+                              "id": 48986,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "memberName": "latestRoundData",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 33009,
+                              "referencedDeclaration": 32999,
                               "src": "3360:29:185",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_external_view$__$returns$_t_uint80_$_t_int256_$_t_uint256_$_t_uint256_$_t_uint80_$",
                                 "typeString": "function () view external returns (uint80,int256,uint256,uint256,uint80)"
                               }
                             },
-                            "id": 49002,
+                            "id": 48987,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -2582,17 +2582,17 @@
                                   "typeIdentifier": "t_uint80",
                                   "typeString": "uint80"
                                 },
-                                "id": 49007,
+                                "id": 48992,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "leftExpression": {
-                                  "id": 49005,
+                                  "id": 48990,
                                   "name": "answeredInRound",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 48999,
+                                  "referencedDeclaration": 48984,
                                   "src": "3407:15:185",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint80",
@@ -2602,11 +2602,11 @@
                                 "nodeType": "BinaryOperation",
                                 "operator": "==",
                                 "rightExpression": {
-                                  "id": 49006,
+                                  "id": 48991,
                                   "name": "roundId",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 48995,
+                                  "referencedDeclaration": 48980,
                                   "src": "3426:7:185",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint80",
@@ -2621,7 +2621,7 @@
                               },
                               {
                                 "hexValue": "436861696e6c696e6b20726f756e642074696d6564206f75742e",
-                                "id": 49008,
+                                "id": 48993,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": true,
@@ -2647,7 +2647,7 @@
                                   "typeString": "literal_string \"Chainlink round timed out.\""
                                 }
                               ],
-                              "id": 49004,
+                              "id": 48989,
                               "name": "require",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [
@@ -2661,7 +2661,7 @@
                                 "typeString": "function (bool,string memory) pure"
                               }
                             },
-                            "id": 49009,
+                            "id": 48994,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -2676,7 +2676,7 @@
                               "typeString": "tuple()"
                             }
                           },
-                          "id": 49010,
+                          "id": 48995,
                           "nodeType": "ExpressionStatement",
                           "src": "3399:65:185"
                         },
@@ -2686,17 +2686,17 @@
                               "typeIdentifier": "t_int256",
                               "typeString": "int256"
                             },
-                            "id": 49013,
+                            "id": 48998,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "leftExpression": {
-                              "id": 49011,
+                              "id": 48996,
                               "name": "diggBtcPrice",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 48997,
+                              "referencedDeclaration": 48982,
                               "src": "3476:12:185",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_int256",
@@ -2707,7 +2707,7 @@
                             "operator": "<",
                             "rightExpression": {
                               "hexValue": "30",
-                              "id": 49012,
+                              "id": 48997,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -2727,13 +2727,13 @@
                               "typeString": "bool"
                             }
                           },
-                          "id": 49016,
+                          "id": 49001,
                           "nodeType": "IfStatement",
                           "src": "3472:30:185",
                           "trueBody": {
                             "expression": {
                               "hexValue": "30",
-                              "id": 49014,
+                              "id": 48999,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -2747,25 +2747,25 @@
                               },
                               "value": "0"
                             },
-                            "functionReturnParameters": 48946,
-                            "id": 49015,
+                            "functionReturnParameters": 48931,
+                            "id": 49000,
                             "nodeType": "Return",
                             "src": "3494:8:185"
                           }
                         },
                         {
                           "assignments": [
-                            49018
+                            49003
                           ],
                           "declarations": [
                             {
                               "constant": false,
-                              "id": 49018,
+                              "id": 49003,
                               "mutability": "mutable",
                               "name": "btcEthPrice",
                               "nameLocation": "3517:11:185",
                               "nodeType": "VariableDeclaration",
-                              "scope": 49086,
+                              "scope": 49071,
                               "src": "3510:18:185",
                               "stateVariable": false,
                               "storageLocation": "default",
@@ -2774,7 +2774,7 @@
                                 "typeString": "int256"
                               },
                               "typeName": {
-                                "id": 49017,
+                                "id": 49002,
                                 "name": "int256",
                                 "nodeType": "ElementaryTypeName",
                                 "src": "3510:6:185",
@@ -2786,13 +2786,13 @@
                               "visibility": "internal"
                             }
                           ],
-                          "id": 49019,
+                          "id": 49004,
                           "nodeType": "VariableDeclarationStatement",
                           "src": "3510:18:185"
                         },
                         {
                           "expression": {
-                            "id": 49027,
+                            "id": 49012,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -2800,11 +2800,11 @@
                             "leftHandSide": {
                               "components": [
                                 {
-                                  "id": 49020,
+                                  "id": 49005,
                                   "name": "roundId",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 48995,
+                                  "referencedDeclaration": 48980,
                                   "src": "3537:7:185",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint80",
@@ -2812,11 +2812,11 @@
                                   }
                                 },
                                 {
-                                  "id": 49021,
+                                  "id": 49006,
                                   "name": "btcEthPrice",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 49018,
+                                  "referencedDeclaration": 49003,
                                   "src": "3546:11:185",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_int256",
@@ -2826,11 +2826,11 @@
                                 null,
                                 null,
                                 {
-                                  "id": 49022,
+                                  "id": 49007,
                                   "name": "answeredInRound",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 48999,
+                                  "referencedDeclaration": 48984,
                                   "src": "3563:15:185",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint80",
@@ -2838,7 +2838,7 @@
                                   }
                                 }
                               ],
-                              "id": 49023,
+                              "id": 49008,
                               "isConstant": false,
                               "isInlineArray": false,
                               "isLValue": true,
@@ -2858,32 +2858,32 @@
                               "expression": {
                                 "argumentTypes": [],
                                 "expression": {
-                                  "id": 49024,
+                                  "id": 49009,
                                   "name": "BTC_ETH_FEED",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 48877,
+                                  "referencedDeclaration": 48862,
                                   "src": "3582:12:185",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_contract$_AggregatorV3Interface_$33010",
+                                    "typeIdentifier": "t_contract$_AggregatorV3Interface_$33000",
                                     "typeString": "contract AggregatorV3Interface"
                                   }
                                 },
-                                "id": 49025,
+                                "id": 49010,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "latestRoundData",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 33009,
+                                "referencedDeclaration": 32999,
                                 "src": "3582:28:185",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_external_view$__$returns$_t_uint80_$_t_int256_$_t_uint256_$_t_uint256_$_t_uint80_$",
                                   "typeString": "function () view external returns (uint80,int256,uint256,uint256,uint80)"
                                 }
                               },
-                              "id": 49026,
+                              "id": 49011,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -2904,7 +2904,7 @@
                               "typeString": "tuple()"
                             }
                           },
-                          "id": 49028,
+                          "id": 49013,
                           "nodeType": "ExpressionStatement",
                           "src": "3536:76:185"
                         },
@@ -2916,17 +2916,17 @@
                                   "typeIdentifier": "t_uint80",
                                   "typeString": "uint80"
                                 },
-                                "id": 49032,
+                                "id": 49017,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "leftExpression": {
-                                  "id": 49030,
+                                  "id": 49015,
                                   "name": "answeredInRound",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 48999,
+                                  "referencedDeclaration": 48984,
                                   "src": "3628:15:185",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint80",
@@ -2936,11 +2936,11 @@
                                 "nodeType": "BinaryOperation",
                                 "operator": "==",
                                 "rightExpression": {
-                                  "id": 49031,
+                                  "id": 49016,
                                   "name": "roundId",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 48995,
+                                  "referencedDeclaration": 48980,
                                   "src": "3647:7:185",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint80",
@@ -2955,7 +2955,7 @@
                               },
                               {
                                 "hexValue": "436861696e6c696e6b20726f756e642074696d6564206f75742e",
-                                "id": 49033,
+                                "id": 49018,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": true,
@@ -2981,7 +2981,7 @@
                                   "typeString": "literal_string \"Chainlink round timed out.\""
                                 }
                               ],
-                              "id": 49029,
+                              "id": 49014,
                               "name": "require",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [
@@ -2995,7 +2995,7 @@
                                 "typeString": "function (bool,string memory) pure"
                               }
                             },
-                            "id": 49034,
+                            "id": 49019,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -3010,7 +3010,7 @@
                               "typeString": "tuple()"
                             }
                           },
-                          "id": 49035,
+                          "id": 49020,
                           "nodeType": "ExpressionStatement",
                           "src": "3620:65:185"
                         },
@@ -3020,17 +3020,17 @@
                               "typeIdentifier": "t_int256",
                               "typeString": "int256"
                             },
-                            "id": 49038,
+                            "id": 49023,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "leftExpression": {
-                              "id": 49036,
+                              "id": 49021,
                               "name": "btcEthPrice",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 49018,
+                              "referencedDeclaration": 49003,
                               "src": "3697:11:185",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_int256",
@@ -3041,7 +3041,7 @@
                             "operator": "<",
                             "rightExpression": {
                               "hexValue": "30",
-                              "id": 49037,
+                              "id": 49022,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -3061,13 +3061,13 @@
                               "typeString": "bool"
                             }
                           },
-                          "id": 49041,
+                          "id": 49026,
                           "nodeType": "IfStatement",
                           "src": "3693:29:185",
                           "trueBody": {
                             "expression": {
                               "hexValue": "30",
-                              "id": 49039,
+                              "id": 49024,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -3081,25 +3081,25 @@
                               },
                               "value": "0"
                             },
-                            "functionReturnParameters": 48946,
-                            "id": 49040,
+                            "functionReturnParameters": 48931,
+                            "id": 49025,
                             "nodeType": "Return",
                             "src": "3714:8:185"
                           }
                         },
                         {
                           "assignments": [
-                            49043
+                            49028
                           ],
                           "declarations": [
                             {
                               "constant": false,
-                              "id": 49043,
+                              "id": 49028,
                               "mutability": "mutable",
                               "name": "bDiggDiggPrice",
                               "nameLocation": "3829:14:185",
                               "nodeType": "VariableDeclaration",
-                              "scope": 49086,
+                              "scope": 49071,
                               "src": "3821:22:185",
                               "stateVariable": false,
                               "storageLocation": "default",
@@ -3108,7 +3108,7 @@
                                 "typeString": "uint256"
                               },
                               "typeName": {
-                                "id": 49042,
+                                "id": 49027,
                                 "name": "uint256",
                                 "nodeType": "ElementaryTypeName",
                                 "src": "3821:7:185",
@@ -3120,7 +3120,7 @@
                               "visibility": "internal"
                             }
                           ],
-                          "id": 49061,
+                          "id": 49046,
                           "initialValue": {
                             "arguments": [
                               {
@@ -3128,7 +3128,7 @@
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
                                 },
-                                "id": 49059,
+                                "id": 49044,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
@@ -3140,7 +3140,7 @@
                                         "typeIdentifier": "t_uint256",
                                         "typeString": "uint256"
                                       },
-                                      "id": 49054,
+                                      "id": 49039,
                                       "isConstant": false,
                                       "isLValue": false,
                                       "isPure": false,
@@ -3150,32 +3150,32 @@
                                         "expression": {
                                           "argumentTypes": [],
                                           "expression": {
-                                            "id": 49050,
+                                            "id": 49035,
                                             "name": "BDIGG",
                                             "nodeType": "Identifier",
                                             "overloadedDeclarations": [],
-                                            "referencedDeclaration": 48870,
+                                            "referencedDeclaration": 48855,
                                             "src": "3886:5:185",
                                             "typeDescriptions": {
-                                              "typeIdentifier": "t_contract$_DiggSett_$32147",
+                                              "typeIdentifier": "t_contract$_DiggSett_$32137",
                                               "typeString": "contract DiggSett"
                                             }
                                           },
-                                          "id": 49051,
+                                          "id": 49036,
                                           "isConstant": false,
                                           "isLValue": false,
                                           "isPure": false,
                                           "lValueRequested": false,
                                           "memberName": "shares",
                                           "nodeType": "MemberAccess",
-                                          "referencedDeclaration": 32146,
+                                          "referencedDeclaration": 32136,
                                           "src": "3886:12:185",
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_function_external_view$__$returns$_t_uint256_$",
                                             "typeString": "function () view external returns (uint256)"
                                           }
                                         },
-                                        "id": 49052,
+                                        "id": 49037,
                                         "isConstant": false,
                                         "isLValue": false,
                                         "isPure": false,
@@ -3194,7 +3194,7 @@
                                       "operator": "*",
                                       "rightExpression": {
                                         "hexValue": "31653138",
-                                        "id": 49053,
+                                        "id": 49038,
                                         "isConstant": false,
                                         "isLValue": false,
                                         "isPure": true,
@@ -3215,7 +3215,7 @@
                                       }
                                     }
                                   ],
-                                  "id": 49055,
+                                  "id": 49040,
                                   "isConstant": false,
                                   "isInlineArray": false,
                                   "isLValue": false,
@@ -3235,32 +3235,32 @@
                                   "expression": {
                                     "argumentTypes": [],
                                     "expression": {
-                                      "id": 49056,
+                                      "id": 49041,
                                       "name": "BDIGG",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 48870,
+                                      "referencedDeclaration": 48855,
                                       "src": "3911:5:185",
                                       "typeDescriptions": {
-                                        "typeIdentifier": "t_contract$_DiggSett_$32147",
+                                        "typeIdentifier": "t_contract$_DiggSett_$32137",
                                         "typeString": "contract DiggSett"
                                       }
                                     },
-                                    "id": 49057,
+                                    "id": 49042,
                                     "isConstant": false,
                                     "isLValue": false,
                                     "isPure": false,
                                     "lValueRequested": false,
                                     "memberName": "totalSupply",
                                     "nodeType": "MemberAccess",
-                                    "referencedDeclaration": 32178,
+                                    "referencedDeclaration": 32168,
                                     "src": "3911:17:185",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_function_external_view$__$returns$_t_uint256_$",
                                       "typeString": "function () view external returns (uint256)"
                                     }
                                   },
-                                  "id": 49058,
+                                  "id": 49043,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": false,
@@ -3296,32 +3296,32 @@
                                     "expression": {
                                       "argumentTypes": [],
                                       "expression": {
-                                        "id": 49045,
+                                        "id": 49030,
                                         "name": "BDIGG",
                                         "nodeType": "Identifier",
                                         "overloadedDeclarations": [],
-                                        "referencedDeclaration": 48870,
+                                        "referencedDeclaration": 48855,
                                         "src": "3852:5:185",
                                         "typeDescriptions": {
-                                          "typeIdentifier": "t_contract$_DiggSett_$32147",
+                                          "typeIdentifier": "t_contract$_DiggSett_$32137",
                                           "typeString": "contract DiggSett"
                                         }
                                       },
-                                      "id": 49046,
+                                      "id": 49031,
                                       "isConstant": false,
                                       "isLValue": false,
                                       "isPure": false,
                                       "lValueRequested": false,
                                       "memberName": "token",
                                       "nodeType": "MemberAccess",
-                                      "referencedDeclaration": 32186,
+                                      "referencedDeclaration": 32176,
                                       "src": "3852:11:185",
                                       "typeDescriptions": {
                                         "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
                                         "typeString": "function () view external returns (address)"
                                       }
                                     },
-                                    "id": 49047,
+                                    "id": 49032,
                                     "isConstant": false,
                                     "isLValue": false,
                                     "isPure": false,
@@ -3344,18 +3344,18 @@
                                       "typeString": "address"
                                     }
                                   ],
-                                  "id": 49044,
+                                  "id": 49029,
                                   "name": "IDigg",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 32158,
+                                  "referencedDeclaration": 32148,
                                   "src": "3846:5:185",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_type$_t_contract$_IDigg_$32158_$",
+                                    "typeIdentifier": "t_type$_t_contract$_IDigg_$32148_$",
                                     "typeString": "type(contract IDigg)"
                                   }
                                 },
-                                "id": 49048,
+                                "id": 49033,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
@@ -3366,25 +3366,25 @@
                                 "src": "3846:20:185",
                                 "tryCall": false,
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_contract$_IDigg_$32158",
+                                  "typeIdentifier": "t_contract$_IDigg_$32148",
                                   "typeString": "contract IDigg"
                                 }
                               },
-                              "id": 49049,
+                              "id": 49034,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "memberName": "sharesToFragments",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 32157,
+                              "referencedDeclaration": 32147,
                               "src": "3846:38:185",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_external_view$_t_uint256_$returns$_t_uint256_$",
                                 "typeString": "function (uint256) view external returns (uint256)"
                               }
                             },
-                            "id": 49060,
+                            "id": 49045,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -3409,17 +3409,17 @@
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               },
-                              "id": 49064,
+                              "id": 49049,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "leftExpression": {
-                                "id": 49062,
+                                "id": 49047,
                                 "name": "bDiggDiggPrice",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 49043,
+                                "referencedDeclaration": 49028,
                                 "src": "4142:14:185",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
@@ -3430,7 +3430,7 @@
                               "operator": ">",
                               "rightExpression": {
                                 "hexValue": "30",
-                                "id": 49063,
+                                "id": 49048,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": true,
@@ -3452,7 +3452,7 @@
                             },
                             "falseExpression": {
                               "hexValue": "30",
-                              "id": 49083,
+                              "id": 49068,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -3466,7 +3466,7 @@
                               },
                               "value": "0"
                             },
-                            "id": 49084,
+                            "id": 49069,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -3478,7 +3478,7 @@
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               },
-                              "id": 49082,
+                              "id": 49067,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -3490,7 +3490,7 @@
                                       "typeIdentifier": "t_uint256",
                                       "typeString": "uint256"
                                     },
-                                    "id": 49079,
+                                    "id": 49064,
                                     "isConstant": false,
                                     "isLValue": false,
                                     "isPure": false,
@@ -3502,7 +3502,7 @@
                                             "typeIdentifier": "t_uint256",
                                             "typeString": "uint256"
                                           },
-                                          "id": 49076,
+                                          "id": 49061,
                                           "isConstant": false,
                                           "isLValue": false,
                                           "isPure": false,
@@ -3514,7 +3514,7 @@
                                                   "typeIdentifier": "t_uint256",
                                                   "typeString": "uint256"
                                                 },
-                                                "id": 49073,
+                                                "id": 49058,
                                                 "isConstant": false,
                                                 "isLValue": false,
                                                 "isPure": false,
@@ -3522,11 +3522,11 @@
                                                 "leftExpression": {
                                                   "arguments": [
                                                     {
-                                                      "id": 49067,
+                                                      "id": 49052,
                                                       "name": "diggBtcPrice",
                                                       "nodeType": "Identifier",
                                                       "overloadedDeclarations": [],
-                                                      "referencedDeclaration": 48997,
+                                                      "referencedDeclaration": 48982,
                                                       "src": "4174:12:185",
                                                       "typeDescriptions": {
                                                         "typeIdentifier": "t_int256",
@@ -3541,7 +3541,7 @@
                                                         "typeString": "int256"
                                                       }
                                                     ],
-                                                    "id": 49066,
+                                                    "id": 49051,
                                                     "isConstant": false,
                                                     "isLValue": false,
                                                     "isPure": true,
@@ -3553,14 +3553,14 @@
                                                       "typeString": "type(uint256)"
                                                     },
                                                     "typeName": {
-                                                      "id": 49065,
+                                                      "id": 49050,
                                                       "name": "uint256",
                                                       "nodeType": "ElementaryTypeName",
                                                       "src": "4166:7:185",
                                                       "typeDescriptions": {}
                                                     }
                                                   },
-                                                  "id": 49068,
+                                                  "id": 49053,
                                                   "isConstant": false,
                                                   "isLValue": false,
                                                   "isPure": false,
@@ -3580,11 +3580,11 @@
                                                 "rightExpression": {
                                                   "arguments": [
                                                     {
-                                                      "id": 49071,
+                                                      "id": 49056,
                                                       "name": "btcEthPrice",
                                                       "nodeType": "Identifier",
                                                       "overloadedDeclarations": [],
-                                                      "referencedDeclaration": 49018,
+                                                      "referencedDeclaration": 49003,
                                                       "src": "4198:11:185",
                                                       "typeDescriptions": {
                                                         "typeIdentifier": "t_int256",
@@ -3599,7 +3599,7 @@
                                                         "typeString": "int256"
                                                       }
                                                     ],
-                                                    "id": 49070,
+                                                    "id": 49055,
                                                     "isConstant": false,
                                                     "isLValue": false,
                                                     "isPure": true,
@@ -3611,14 +3611,14 @@
                                                       "typeString": "type(uint256)"
                                                     },
                                                     "typeName": {
-                                                      "id": 49069,
+                                                      "id": 49054,
                                                       "name": "uint256",
                                                       "nodeType": "ElementaryTypeName",
                                                       "src": "4190:7:185",
                                                       "typeDescriptions": {}
                                                     }
                                                   },
-                                                  "id": 49072,
+                                                  "id": 49057,
                                                   "isConstant": false,
                                                   "isLValue": false,
                                                   "isPure": false,
@@ -3640,7 +3640,7 @@
                                                 }
                                               }
                                             ],
-                                            "id": 49074,
+                                            "id": 49059,
                                             "isConstant": false,
                                             "isInlineArray": false,
                                             "isLValue": false,
@@ -3657,7 +3657,7 @@
                                           "operator": "/",
                                           "rightExpression": {
                                             "hexValue": "316538",
-                                            "id": 49075,
+                                            "id": 49060,
                                             "isConstant": false,
                                             "isLValue": false,
                                             "isPure": true,
@@ -3678,7 +3678,7 @@
                                           }
                                         }
                                       ],
-                                      "id": 49077,
+                                      "id": 49062,
                                       "isConstant": false,
                                       "isInlineArray": false,
                                       "isLValue": false,
@@ -3694,11 +3694,11 @@
                                     "nodeType": "BinaryOperation",
                                     "operator": "*",
                                     "rightExpression": {
-                                      "id": 49078,
+                                      "id": 49063,
                                       "name": "bDiggDiggPrice",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 49043,
+                                      "referencedDeclaration": 49028,
                                       "src": "4221:14:185",
                                       "typeDescriptions": {
                                         "typeIdentifier": "t_uint256",
@@ -3712,7 +3712,7 @@
                                     }
                                   }
                                 ],
-                                "id": 49080,
+                                "id": 49065,
                                 "isConstant": false,
                                 "isInlineArray": false,
                                 "isLValue": false,
@@ -3729,7 +3729,7 @@
                               "operator": "/",
                               "rightExpression": {
                                 "hexValue": "316539",
-                                "id": 49081,
+                                "id": 49066,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": true,
@@ -3754,39 +3754,39 @@
                               "typeString": "uint256"
                             }
                           },
-                          "functionReturnParameters": 48946,
-                          "id": 49085,
+                          "functionReturnParameters": 48931,
+                          "id": 49070,
                           "nodeType": "Return",
                           "src": "4135:111:185"
                         }
                       ]
                     }
                   },
-                  "id": 49134,
+                  "id": 49119,
                   "nodeType": "IfStatement",
                   "src": "2922:1707:185",
                   "trueBody": {
-                    "id": 48987,
+                    "id": 48972,
                     "nodeType": "Block",
                     "src": "2953:296:185",
                     "statements": [
                       {
                         "assignments": [
-                          48954,
-                          48956,
+                          48939,
+                          48941,
                           null,
                           null,
-                          48958
+                          48943
                         ],
                         "declarations": [
                           {
                             "constant": false,
-                            "id": 48954,
+                            "id": 48939,
                             "mutability": "mutable",
                             "name": "roundId",
                             "nameLocation": "2969:7:185",
                             "nodeType": "VariableDeclaration",
-                            "scope": 48987,
+                            "scope": 48972,
                             "src": "2962:14:185",
                             "stateVariable": false,
                             "storageLocation": "default",
@@ -3795,7 +3795,7 @@
                               "typeString": "uint80"
                             },
                             "typeName": {
-                              "id": 48953,
+                              "id": 48938,
                               "name": "uint80",
                               "nodeType": "ElementaryTypeName",
                               "src": "2962:6:185",
@@ -3808,12 +3808,12 @@
                           },
                           {
                             "constant": false,
-                            "id": 48956,
+                            "id": 48941,
                             "mutability": "mutable",
                             "name": "badgerEthPrice",
                             "nameLocation": "2985:14:185",
                             "nodeType": "VariableDeclaration",
-                            "scope": 48987,
+                            "scope": 48972,
                             "src": "2978:21:185",
                             "stateVariable": false,
                             "storageLocation": "default",
@@ -3822,7 +3822,7 @@
                               "typeString": "int256"
                             },
                             "typeName": {
-                              "id": 48955,
+                              "id": 48940,
                               "name": "int256",
                               "nodeType": "ElementaryTypeName",
                               "src": "2978:6:185",
@@ -3837,12 +3837,12 @@
                           null,
                           {
                             "constant": false,
-                            "id": 48958,
+                            "id": 48943,
                             "mutability": "mutable",
                             "name": "answeredInRound",
                             "nameLocation": "3012:15:185",
                             "nodeType": "VariableDeclaration",
-                            "scope": 48987,
+                            "scope": 48972,
                             "src": "3005:22:185",
                             "stateVariable": false,
                             "storageLocation": "default",
@@ -3851,7 +3851,7 @@
                               "typeString": "uint80"
                             },
                             "typeName": {
-                              "id": 48957,
+                              "id": 48942,
                               "name": "uint80",
                               "nodeType": "ElementaryTypeName",
                               "src": "3005:6:185",
@@ -3863,38 +3863,38 @@
                             "visibility": "internal"
                           }
                         ],
-                        "id": 48962,
+                        "id": 48947,
                         "initialValue": {
                           "arguments": [],
                           "expression": {
                             "argumentTypes": [],
                             "expression": {
-                              "id": 48959,
+                              "id": 48944,
                               "name": "BADGER_ETH_FEED",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 48849,
+                              "referencedDeclaration": 48834,
                               "src": "3031:15:185",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_AggregatorV3Interface_$33010",
+                                "typeIdentifier": "t_contract$_AggregatorV3Interface_$33000",
                                 "typeString": "contract AggregatorV3Interface"
                               }
                             },
-                            "id": 48960,
+                            "id": 48945,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "latestRoundData",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 33009,
+                            "referencedDeclaration": 32999,
                             "src": "3031:31:185",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_external_view$__$returns$_t_uint80_$_t_int256_$_t_uint256_$_t_uint256_$_t_uint80_$",
                               "typeString": "function () view external returns (uint80,int256,uint256,uint256,uint80)"
                             }
                           },
-                          "id": 48961,
+                          "id": 48946,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -3920,17 +3920,17 @@
                                 "typeIdentifier": "t_uint80",
                                 "typeString": "uint80"
                               },
-                              "id": 48966,
+                              "id": 48951,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "leftExpression": {
-                                "id": 48964,
+                                "id": 48949,
                                 "name": "answeredInRound",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 48958,
+                                "referencedDeclaration": 48943,
                                 "src": "3080:15:185",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint80",
@@ -3940,11 +3940,11 @@
                               "nodeType": "BinaryOperation",
                               "operator": "==",
                               "rightExpression": {
-                                "id": 48965,
+                                "id": 48950,
                                 "name": "roundId",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 48954,
+                                "referencedDeclaration": 48939,
                                 "src": "3099:7:185",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint80",
@@ -3959,7 +3959,7 @@
                             },
                             {
                               "hexValue": "436861696e6c696e6b20726f756e642074696d6564206f75742e",
-                              "id": 48967,
+                              "id": 48952,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -3985,7 +3985,7 @@
                                 "typeString": "literal_string \"Chainlink round timed out.\""
                               }
                             ],
-                            "id": 48963,
+                            "id": 48948,
                             "name": "require",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [
@@ -3999,7 +3999,7 @@
                               "typeString": "function (bool,string memory) pure"
                             }
                           },
-                          "id": 48968,
+                          "id": 48953,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -4014,7 +4014,7 @@
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 48969,
+                        "id": 48954,
                         "nodeType": "ExpressionStatement",
                         "src": "3072:65:185"
                       },
@@ -4025,17 +4025,17 @@
                               "typeIdentifier": "t_int256",
                               "typeString": "int256"
                             },
-                            "id": 48972,
+                            "id": 48957,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "leftExpression": {
-                              "id": 48970,
+                              "id": 48955,
                               "name": "badgerEthPrice",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 48956,
+                              "referencedDeclaration": 48941,
                               "src": "3152:14:185",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_int256",
@@ -4046,7 +4046,7 @@
                             "operator": ">",
                             "rightExpression": {
                               "hexValue": "30",
-                              "id": 48971,
+                              "id": 48956,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -4068,7 +4068,7 @@
                           },
                           "falseExpression": {
                             "hexValue": "30",
-                            "id": 48984,
+                            "id": 48969,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
@@ -4082,7 +4082,7 @@
                             },
                             "value": "0"
                           },
-                          "id": 48985,
+                          "id": 48970,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -4094,7 +4094,7 @@
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             },
-                            "id": 48983,
+                            "id": 48968,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -4106,7 +4106,7 @@
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
                                   },
-                                  "id": 48980,
+                                  "id": 48965,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": false,
@@ -4114,11 +4114,11 @@
                                   "leftExpression": {
                                     "arguments": [
                                       {
-                                        "id": 48975,
+                                        "id": 48960,
                                         "name": "badgerEthPrice",
                                         "nodeType": "Identifier",
                                         "overloadedDeclarations": [],
-                                        "referencedDeclaration": 48956,
+                                        "referencedDeclaration": 48941,
                                         "src": "3182:14:185",
                                         "typeDescriptions": {
                                           "typeIdentifier": "t_int256",
@@ -4133,7 +4133,7 @@
                                           "typeString": "int256"
                                         }
                                       ],
-                                      "id": 48974,
+                                      "id": 48959,
                                       "isConstant": false,
                                       "isLValue": false,
                                       "isPure": true,
@@ -4145,14 +4145,14 @@
                                         "typeString": "type(uint256)"
                                       },
                                       "typeName": {
-                                        "id": 48973,
+                                        "id": 48958,
                                         "name": "uint256",
                                         "nodeType": "ElementaryTypeName",
                                         "src": "3174:7:185",
                                         "typeDescriptions": {}
                                       }
                                     },
-                                    "id": 48976,
+                                    "id": 48961,
                                     "isConstant": false,
                                     "isLValue": false,
                                     "isPure": false,
@@ -4174,32 +4174,32 @@
                                     "expression": {
                                       "argumentTypes": [],
                                       "expression": {
-                                        "id": 48977,
+                                        "id": 48962,
                                         "name": "BBADGER",
                                         "nodeType": "Identifier",
                                         "overloadedDeclarations": [],
-                                        "referencedDeclaration": 48856,
+                                        "referencedDeclaration": 48841,
                                         "src": "3200:7:185",
                                         "typeDescriptions": {
-                                          "typeIdentifier": "t_contract$_IXToken_$32171",
+                                          "typeIdentifier": "t_contract$_IXToken_$32161",
                                           "typeString": "contract IXToken"
                                         }
                                       },
-                                      "id": 48978,
+                                      "id": 48963,
                                       "isConstant": false,
                                       "isLValue": false,
                                       "isPure": false,
                                       "lValueRequested": false,
                                       "memberName": "getPricePerFullShare",
                                       "nodeType": "MemberAccess",
-                                      "referencedDeclaration": 32170,
+                                      "referencedDeclaration": 32160,
                                       "src": "3200:28:185",
                                       "typeDescriptions": {
                                         "typeIdentifier": "t_function_external_view$__$returns$_t_uint256_$",
                                         "typeString": "function () view external returns (uint256)"
                                       }
                                     },
-                                    "id": 48979,
+                                    "id": 48964,
                                     "isConstant": false,
                                     "isLValue": false,
                                     "isPure": false,
@@ -4221,7 +4221,7 @@
                                   }
                                 }
                               ],
-                              "id": 48981,
+                              "id": 48966,
                               "isConstant": false,
                               "isInlineArray": false,
                               "isLValue": false,
@@ -4238,7 +4238,7 @@
                             "operator": "/",
                             "rightExpression": {
                               "hexValue": "31653138",
-                              "id": 48982,
+                              "id": 48967,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -4263,8 +4263,8 @@
                             "typeString": "uint256"
                           }
                         },
-                        "functionReturnParameters": 48946,
-                        "id": 48986,
+                        "functionReturnParameters": 48931,
+                        "id": 48971,
                         "nodeType": "Return",
                         "src": "3145:97:185"
                       }
@@ -4274,7 +4274,7 @@
               ]
             },
             "documentation": {
-              "id": 48940,
+              "id": 48925,
               "nodeType": "StructuredDocumentation",
               "src": "2768:82:185",
               "text": " @notice Fetches the token/ETH price, with 18 decimals of precision."
@@ -4285,17 +4285,17 @@
             "name": "_price",
             "nameLocation": "2862:6:185",
             "parameters": {
-              "id": 48943,
+              "id": 48928,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 48942,
+                  "id": 48927,
                   "mutability": "mutable",
                   "name": "token",
                   "nameLocation": "2877:5:185",
                   "nodeType": "VariableDeclaration",
-                  "scope": 49136,
+                  "scope": 49121,
                   "src": "2869:13:185",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -4304,7 +4304,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 48941,
+                    "id": 48926,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2869:7:185",
@@ -4320,17 +4320,17 @@
               "src": "2868:15:185"
             },
             "returnParameters": {
-              "id": 48946,
+              "id": 48931,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 48945,
+                  "id": 48930,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 49136,
+                  "scope": 49121,
                   "src": "2907:7:185",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -4339,7 +4339,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 48944,
+                    "id": 48929,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2907:7:185",
@@ -4353,7 +4353,7 @@
               ],
               "src": "2906:9:185"
             },
-            "scope": 49137,
+            "scope": 49122,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "internal"
@@ -4363,25 +4363,25 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 48839,
+              "id": 48824,
               "name": "IPriceOracle",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 33800,
+              "referencedDeclaration": 33790,
               "src": "735:12:185"
             },
-            "id": 48840,
+            "id": 48825,
             "nodeType": "InheritanceSpecifier",
             "src": "735:12:185"
           },
           {
             "baseName": {
-              "id": 48841,
+              "id": 48826,
               "name": "BasePriceOracle",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 41278,
+              "referencedDeclaration": 41268,
               "src": "749:15:185"
             },
-            "id": 48842,
+            "id": 48827,
             "nodeType": "InheritanceSpecifier",
             "src": "749:15:185"
           }
@@ -4390,20 +4390,20 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 48838,
+          "id": 48823,
           "nodeType": "StructuredDocumentation",
           "src": "480:224:185",
           "text": " @title BadgerPriceOracle\n @notice Returns prices for bDIGG, bBADGER, and ibBTC.\n @dev Implements `PriceOracle` and `BasePriceOracle`.\n @author David Lucid <david@rari.capital> (https://github.com/davidlucid)"
         },
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          49137,
-          41278,
-          33800
+          49122,
+          41268,
+          33790
         ],
         "name": "BadgerPriceOracle",
         "nameLocation": "714:17:185",
-        "scope": 49138,
+        "scope": 49123,
         "usedErrors": []
       }
     ],
