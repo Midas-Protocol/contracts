@@ -603,8 +603,32 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "bAssetIndexes(address)": "2f91a724",
+    "collectInterest()": "2a2fab22",
+    "collectPlatformInterest()": "7e8901ea",
+    "getBasket()": "cd6ef2b0",
+    "getBasset(address)": "3e37bcbc",
+    "getBassets()": "1d3ce398",
+    "getMintMultiOutput(address[],uint256[])": "e5555b8f",
+    "getMintOutput(address,uint256)": "119849cf",
+    "getRedeemExactBassetsOutput(address[],uint256[])": "04de5a73",
+    "getRedeemOutput(address,uint256)": "78aa987e",
+    "getSwapOutput(address,address,uint256)": "72ea9076",
+    "migrateBassets(address[],address)": "6fb3e89c",
+    "mint(address,uint256,uint256,address)": "f74bfe8e",
+    "mintMulti(address[],uint256[],uint256,address)": "af290bd4",
+    "redeem(address,uint256,uint256,address)": "43bcfab6",
+    "redeemExactBassets(address[],uint256[],uint256,address)": "aa5d27e9",
+    "redeemMasset(uint256,uint256[],address)": "ab06346c",
+    "setCacheSize(uint256)": "1820783d",
+    "setFees(uint256,uint256)": "0b78f9c0",
+    "setTransferFeesFlag(address,bool)": "bdfbe29c",
+    "swap(address,address,uint256,uint256,address)": "d5bcb9b5",
+    "upgradeForgeValidator(address)": "26bbe60a"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/mstable/IMasset.sol",
+    "absolutePath": "/Users/veliko/git/midas/contracts/contracts/external/mstable/IMasset.sol",
     "id": 34812,
     "exportedSymbols": {
       "IMasset": [
@@ -632,7 +656,7 @@
         "id": 34590,
         "nodeType": "ImportDirective",
         "src": "72:29:97",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/mstable/MassetStructs.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/external/mstable/MassetStructs.sol",
         "file": "./MassetStructs.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 34812,
@@ -3289,5 +3313,6 @@
       }
     ],
     "license": "AGPL-3.0-or-later"
-  }
+  },
+  "id": 97
 }

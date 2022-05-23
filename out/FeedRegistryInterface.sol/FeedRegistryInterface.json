@@ -812,8 +812,34 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "confirmFeed(address,address,address)": "045abf4b",
+    "decimals(address,address)": "58e2d3a8",
+    "description(address,address)": "fa820de9",
+    "getAnswer(address,address,uint256)": "15cd4ad2",
+    "getCurrentPhaseId(address,address)": "30322818",
+    "getFeed(address,address)": "d2edb6dd",
+    "getNextRoundId(address,address,uint80)": "a051538e",
+    "getPhase(address,address,uint16)": "ff0601c0",
+    "getPhaseFeed(address,address,uint16)": "52dbeb8b",
+    "getPhaseRange(address,address,uint16)": "c1ce86fc",
+    "getPreviousRoundId(address,address,uint80)": "9e3ff6fd",
+    "getProposedFeed(address,address)": "5ad9d9df",
+    "getRoundData(address,address,uint80)": "fc58749e",
+    "getRoundFeed(address,address,uint80)": "c639cd91",
+    "getTimestamp(address,address,uint256)": "91624c95",
+    "isFeedEnabled(address)": "b099d43b",
+    "latestAnswer(address,address)": "d4c282a3",
+    "latestRound(address,address)": "ec62f44b",
+    "latestRoundData(address,address)": "bcfd032d",
+    "latestTimestamp(address,address)": "672ff44f",
+    "proposeFeed(address,address,address)": "9eed82b0",
+    "proposedGetRoundData(address,address,uint80)": "8916524a",
+    "proposedLatestRoundData(address,address)": "d0188fc6",
+    "version(address,address)": "af34b03a"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/chainlink/FeedRegistryInterface.sol",
+    "absolutePath": "/Users/veliko/git/midas/contracts/contracts/external/chainlink/FeedRegistryInterface.sol",
     "id": 33428,
     "exportedSymbols": {
       "AggregatorInterface": [
@@ -847,7 +873,7 @@
         "id": 33120,
         "nodeType": "ImportDirective",
         "src": "58:39:71",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/chainlink/AggregatorV2V3Interface.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/external/chainlink/AggregatorV2V3Interface.sol",
         "file": "./AggregatorV2V3Interface.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 33428,
@@ -4742,5 +4768,6 @@
       }
     ],
     "license": "MIT"
-  }
+  },
+  "id": 71
 }

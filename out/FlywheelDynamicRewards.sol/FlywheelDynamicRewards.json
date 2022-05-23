@@ -133,8 +133,15 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "flywheel()": "7acf5b92",
+    "getAccruedRewards(address,uint32)": "b334db7b",
+    "rewardToken()": "f7c618c1",
+    "rewardsCycle(address)": "faa6c3c8",
+    "rewardsCycleLength()": "6fcf5e5f"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/flywheel-v2/src/rewards/FlywheelDynamicRewards.sol",
+    "absolutePath": "/Users/veliko/git/midas/contracts/lib/flywheel-v2/src/rewards/FlywheelDynamicRewards.sol",
     "id": 69434,
     "exportedSymbols": {
       "BaseFlywheelRewards": [
@@ -176,7 +183,7 @@
         "id": 69250,
         "nodeType": "ImportDirective",
         "src": "67:35:248",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/flywheel-v2/src/rewards/BaseFlywheelRewards.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/flywheel-v2/src/rewards/BaseFlywheelRewards.sol",
         "file": "./BaseFlywheelRewards.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 69434,
@@ -188,7 +195,7 @@
         "id": 69252,
         "nodeType": "ImportDirective",
         "src": "103:58:248",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/utils/SafeCastLib.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/solmate/src/utils/SafeCastLib.sol",
         "file": "solmate/utils/SafeCastLib.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 69434,
@@ -721,9 +728,6 @@
             "id": 69424,
             "nodeType": "FunctionDefinition",
             "src": "1477:1191:248",
-            "baseFunctions": [
-              69151
-            ],
             "body": {
               "id": 69423,
               "nodeType": "Block",
@@ -2177,6 +2181,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              69151
+            ],
             "documentation": {
               "id": 69303,
               "nodeType": "StructuredDocumentation",
@@ -2445,5 +2452,6 @@
       }
     ],
     "license": "AGPL-3.0-only"
-  }
+  },
+  "id": 248
 }

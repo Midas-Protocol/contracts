@@ -84,8 +84,14 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "AUTO()": "69f94adf",
+    "deposit(uint256,uint256)": "e2bbb158",
+    "stakedWantTokens(uint256,address)": "7b84daec",
+    "withdraw(uint256,uint256)": "441a3e70"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/strategies/AutofarmERC4626.sol",
+    "absolutePath": "/Users/veliko/git/midas/contracts/contracts/compound/strategies/AutofarmERC4626.sol",
     "id": 30806,
     "exportedSymbols": {
       "AutofarmERC4626": [
@@ -128,7 +134,7 @@
         "id": 30599,
         "nodeType": "ImportDirective",
         "src": "68:49:48",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/tokens/ERC20.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/solmate/src/tokens/ERC20.sol",
         "file": "solmate/tokens/ERC20.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 30806,
@@ -152,7 +158,7 @@
         "id": 30601,
         "nodeType": "ImportDirective",
         "src": "118:68:48",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/utils/SafeTransferLib.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/solmate/src/utils/SafeTransferLib.sol",
         "file": "solmate/utils/SafeTransferLib.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 30806,
@@ -176,7 +182,7 @@
         "id": 30603,
         "nodeType": "ImportDirective",
         "src": "188:50:48",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/ERC4626.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/utils/ERC4626.sol",
         "file": "../../utils/ERC4626.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 30806,
@@ -200,7 +206,7 @@
         "id": 30605,
         "nodeType": "ImportDirective",
         "src": "239:70:48",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/FixedPointMathLib.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/utils/FixedPointMathLib.sol",
         "file": "../../utils/FixedPointMathLib.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 30806,
@@ -224,7 +230,7 @@
         "id": 30607,
         "nodeType": "ImportDirective",
         "src": "310:60:48",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/flywheel-v2/src/FlywheelCore.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/flywheel-v2/src/FlywheelCore.sol",
         "file": "flywheel-v2/FlywheelCore.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 30806,
@@ -1856,9 +1862,6 @@
             "id": 30756,
             "nodeType": "FunctionDefinition",
             "src": "2298:128:48",
-            "baseFunctions": [
-              65685
-            ],
             "body": {
               "id": 30755,
               "nodeType": "Block",
@@ -1995,6 +1998,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              65685
+            ],
             "documentation": {
               "id": 30740,
               "nodeType": "StructuredDocumentation",
@@ -2238,9 +2244,6 @@
             "id": 30787,
             "nodeType": "FunctionDefinition",
             "src": "2760:108:48",
-            "baseFunctions": [
-              65875
-            ],
             "body": {
               "id": 30786,
               "nodeType": "Block",
@@ -2332,6 +2335,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              65875
+            ],
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -2419,9 +2425,6 @@
             "id": 30804,
             "nodeType": "FunctionDefinition",
             "src": "2945:111:48",
-            "baseFunctions": [
-              65867
-            ],
             "body": {
               "id": 30803,
               "nodeType": "Block",
@@ -2513,6 +2516,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              65867
+            ],
             "documentation": {
               "id": 30788,
               "nodeType": "StructuredDocumentation",
@@ -2640,5 +2646,6 @@
       }
     ],
     "license": "AGPL-3.0-only"
-  }
+  },
+  "id": 48
 }

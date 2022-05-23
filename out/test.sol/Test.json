@@ -665,8 +665,30 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "IS_TEST()": "fa7626d4",
+    "bound(uint256,uint256,uint256)": "5a6c1eed",
+    "deal(address,address,uint256)": "6bce989b",
+    "deal(address,address,uint256,bool)": "97754ae9",
+    "deal(address,uint256)": "c88a5e6d",
+    "deployCode(string)": "9a8325a0",
+    "deployCode(string,bytes)": "29ce9dde",
+    "failed()": "ba414fa6",
+    "hoax(address)": "233240ee",
+    "hoax(address,address)": "29a9e300",
+    "hoax(address,address,uint256)": "af9bbe5f",
+    "hoax(address,uint256)": "e9a79a7b",
+    "rewind(uint256)": "2d6c17a3",
+    "skip(uint256)": "b9c071b4",
+    "startHoax(address)": "6f597075",
+    "startHoax(address,address)": "d06d8229",
+    "startHoax(address,address,uint256)": "3bf82db1",
+    "startHoax(address,uint256)": "108554f2",
+    "tip(address,address,uint256)": "d82555f1",
+    "vm()": "3a768463"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/forge-std/src/Test.sol",
+    "absolutePath": "/Users/veliko/git/midas/contracts/lib/forge-std/src/Test.sol",
     "id": 71813,
     "exportedSymbols": {
       "DSTest": [
@@ -718,7 +740,7 @@
         "id": 69581,
         "nodeType": "ImportDirective",
         "src": "71:18:250",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/forge-std/src/Vm.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/forge-std/src/Vm.sol",
         "file": "./Vm.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 71813,
@@ -730,7 +752,7 @@
         "id": 69582,
         "nodeType": "ImportDirective",
         "src": "90:26:250",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/ds-test/src/test.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/ds-test/src/test.sol",
         "file": "ds-test/test.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 71813,
@@ -742,7 +764,7 @@
         "id": 69583,
         "nodeType": "ImportDirective",
         "src": "117:23:250",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/forge-std/src/console.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/forge-std/src/console.sol",
         "file": "./console.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 71813,
@@ -754,7 +776,7 @@
         "id": 69584,
         "nodeType": "ImportDirective",
         "src": "141:24:250",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/forge-std/src/console2.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/forge-std/src/console2.sol",
         "file": "./console2.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 71813,
@@ -30037,5 +30059,6 @@
       }
     ],
     "license": "Unlicense"
-  }
+  },
+  "id": 250
 }

@@ -172,8 +172,18 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "borrow(uint256)": "c5ebeaec",
+    "liquidateBorrow(address,uint256,address)": "f5e3c462",
+    "mint(uint256)": "a0712d68",
+    "redeem(uint256)": "db006a75",
+    "redeemUnderlying(uint256)": "852a12e3",
+    "repayBorrow(uint256)": "0e752702",
+    "repayBorrowBehalf(address,uint256)": "2608f818",
+    "underlying()": "6f307dc3"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/CTokenInterfaces.sol",
+    "absolutePath": "/Users/veliko/git/midas/contracts/contracts/compound/CTokenInterfaces.sol",
     "id": 15656,
     "exportedSymbols": {
       "CErc20Interface": [
@@ -234,7 +244,7 @@
         "id": 15176,
         "nodeType": "ImportDirective",
         "src": "65:35:18",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/IFuseFeeDistributor.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/compound/IFuseFeeDistributor.sol",
         "file": "./IFuseFeeDistributor.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 15656,
@@ -246,7 +256,7 @@
         "id": 15177,
         "nodeType": "ImportDirective",
         "src": "101:34:18",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/ComptrollerStorage.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/compound/ComptrollerStorage.sol",
         "file": "./ComptrollerStorage.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 15656,
@@ -258,7 +268,7 @@
         "id": 15178,
         "nodeType": "ImportDirective",
         "src": "136:36:18",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/ComptrollerInterface.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/compound/ComptrollerInterface.sol",
         "file": "./ComptrollerInterface.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 15656,
@@ -270,7 +280,7 @@
         "id": 15179,
         "nodeType": "ImportDirective",
         "src": "173:33:18",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/InterestRateModel.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/compound/InterestRateModel.sol",
         "file": "./InterestRateModel.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 15656,
@@ -5885,5 +5895,6 @@
       }
     ],
     "license": "UNLICENSED"
-  }
+  },
+  "id": 18
 }

@@ -130,8 +130,17 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "compAccrued(address)": "cc7ebdc4",
+    "compBorrowSpeeds(address)": "f4a433c0",
+    "compSupplySpeeds(address)": "6aa875b5",
+    "flywheelPreBorrowerAction(address,address)": "e6e162e8",
+    "flywheelPreSupplierAction(address,address)": "1c9161e0",
+    "getAllMarkets()": "b0772d0b",
+    "rewardToken()": "f7c618c1"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/IRewardsDistributor.sol",
+    "absolutePath": "/Users/veliko/git/midas/contracts/contracts/external/compound/IRewardsDistributor.sol",
     "id": 33850,
     "exportedSymbols": {
       "ICToken": [
@@ -159,7 +168,7 @@
         "id": 33793,
         "nodeType": "ImportDirective",
         "src": "67:23:77",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICToken.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/external/compound/ICToken.sol",
         "file": "./ICToken.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 33850,
@@ -784,5 +793,6 @@
       }
     ],
     "license": "BSD-3-Clause"
-  }
+  },
+  "id": 77
 }

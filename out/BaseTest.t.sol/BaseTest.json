@@ -361,8 +361,15 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "IS_TEST()": "fa7626d4",
+    "failed()": "ba414fa6",
+    "forChains(uint256)": "25bf0d18",
+    "forChains(uint256,uint256)": "15a9c83d",
+    "vm()": "3a768463"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/test/config/BaseTest.t.sol",
+    "absolutePath": "/Users/veliko/git/midas/contracts/contracts/test/config/BaseTest.t.sol",
     "id": 60253,
     "exportedSymbols": {
       "AddressUpgradeable": [
@@ -474,7 +481,7 @@
         "id": 60032,
         "nodeType": "ImportDirective",
         "src": "65:26:216",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/ds-test/src/test.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/ds-test/src/test.sol",
         "file": "ds-test/test.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 60253,
@@ -486,7 +493,7 @@
         "id": 60033,
         "nodeType": "ImportDirective",
         "src": "92:26:216",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/forge-std/src/Vm.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/forge-std/src/Vm.sol",
         "file": "forge-std/Vm.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 60253,
@@ -498,7 +505,7 @@
         "id": 60035,
         "nodeType": "ImportDirective",
         "src": "120:47:216",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/tokens/WETH.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/solmate/src/tokens/WETH.sol",
         "file": "solmate/tokens/WETH.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 60253,
@@ -522,7 +529,7 @@
         "id": 60036,
         "nodeType": "ImportDirective",
         "src": "168:88:216",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 60253,
@@ -534,7 +541,7 @@
         "id": 60038,
         "nodeType": "ImportDirective",
         "src": "258:112:216",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/default/CurveLpTokenPriceOracleNoRegistry.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/oracles/default/CurveLpTokenPriceOracleNoRegistry.sol",
         "file": "../../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 60253,
@@ -558,7 +565,7 @@
         "id": 60039,
         "nodeType": "ImportDirective",
         "src": "371:58:216",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/default/ChainlinkPriceOracleV2.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/oracles/default/ChainlinkPriceOracleV2.sol",
         "file": "../../oracles/default/ChainlinkPriceOracleV2.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 60253,
@@ -570,7 +577,7 @@
         "id": 60040,
         "nodeType": "ImportDirective",
         "src": "430:60:216",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/jarvis/ISynthereumLiquidityPool.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/external/jarvis/ISynthereumLiquidityPool.sol",
         "file": "../../external/jarvis/ISynthereumLiquidityPool.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 60253,
@@ -582,7 +589,7 @@
         "id": 60041,
         "nodeType": "ImportDirective",
         "src": "491:45:216",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/MasterPriceOracle.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/oracles/MasterPriceOracle.sol",
         "file": "../../oracles/MasterPriceOracle.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 60253,
@@ -594,7 +601,7 @@
         "id": 60042,
         "nodeType": "ImportDirective",
         "src": "537:67:216",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/default/UniswapTwapPriceOracleV2Factory.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/oracles/default/UniswapTwapPriceOracleV2Factory.sol",
         "file": "../../oracles/default/UniswapTwapPriceOracleV2Factory.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 60253,
@@ -606,7 +613,7 @@
         "id": 60043,
         "nodeType": "ImportDirective",
         "src": "605:43:216",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/AddressesProvider.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/utils/AddressesProvider.sol",
         "file": "../../utils/AddressesProvider.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 60253,
@@ -3221,5 +3228,6 @@
       }
     ],
     "license": "UNLICENSED"
-  }
+  },
+  "id": 216
 }

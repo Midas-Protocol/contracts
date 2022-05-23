@@ -40,17 +40,21 @@
     }
   ],
   "bytecode": {
-    "object": "0x608060405234801561001057600080fd5b5060cf8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c8063aea91078146037578063fc57d4df146037575b600080fd5b604f60423660046078565b50670de0b6b3a764000090565b60405190815260200160405180910390f35b6001600160a01b0381168114607557600080fd5b50565b600060208284031215608957600080fd5b81356092816061565b939250505056fea264697066735822122013ffde587ee6ab16b97760affec32ca155630ba345384eca68ba021acedcd06164736f6c634300080a0033",
+    "object": "0x608060405234801561001057600080fd5b5060cf8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c8063aea91078146037578063fc57d4df146037575b600080fd5b604f60423660046078565b50670de0b6b3a764000090565b60405190815260200160405180910390f35b6001600160a01b0381168114607557600080fd5b50565b600060208284031215608957600080fd5b81356092816061565b939250505056fea26469706673582212205ff070ea94a7a8a8ec39369629e1c73fd861aab47e9b37482f6bfdd97dc5237464736f6c634300080a0033",
     "sourceMap": "645:674:166:-:0;;;;;;;;;;;;;;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
-    "object": "0x6080604052348015600f57600080fd5b506004361060325760003560e01c8063aea91078146037578063fc57d4df146037575b600080fd5b604f60423660046078565b50670de0b6b3a764000090565b60405190815260200160405180910390f35b6001600160a01b0381168114607557600080fd5b50565b600060208284031215608957600080fd5b81356092816061565b939250505056fea264697066735822122013ffde587ee6ab16b97760affec32ca155630ba345384eca68ba021acedcd06164736f6c634300080a0033",
+    "object": "0x6080604052348015600f57600080fd5b506004361060325760003560e01c8063aea91078146037578063fc57d4df146037575b600080fd5b604f60423660046078565b50670de0b6b3a764000090565b60405190815260200160405180910390f35b6001600160a01b0381168114607557600080fd5b50565b600060208284031215608957600080fd5b81356092816061565b939250505056fea26469706673582212205ff070ea94a7a8a8ec39369629e1c73fd861aab47e9b37482f6bfdd97dc5237464736f6c634300080a0033",
     "sourceMap": "645:674:166:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;818:98;;;;;;:::i;:::-;-1:-1:-1;907:4:166;;818:98;;;;548:25:279;;;536:2;521:18;818:98:166;;;;;;;14:131:279;-1:-1:-1;;;;;89:31:279;;79:42;;69:70;;135:1;132;125:12;69:70;14:131;:::o;150:247::-;209:6;262:2;250:9;241:7;237:23;233:32;230:52;;;278:1;275;268:12;230:52;317:9;304:23;336:31;361:5;336:31;:::i;:::-;386:5;150:247;-1:-1:-1;;;150:247:279:o",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "getUnderlyingPrice(address)": "fc57d4df",
+    "price(address)": "aea91078"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/default/FixedNativePriceOracle.sol",
+    "absolutePath": "/Users/veliko/git/midas/contracts/contracts/oracles/default/FixedNativePriceOracle.sol",
     "id": 43618,
     "exportedSymbols": {
       "AddressUpgradeable": [
@@ -105,7 +109,7 @@
         "id": 43582,
         "nodeType": "ImportDirective",
         "src": "65:87:166",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 43618,
@@ -117,7 +121,7 @@
         "id": 43583,
         "nodeType": "ImportDirective",
         "src": "154:50:166",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/IPriceOracle.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/external/compound/IPriceOracle.sol",
         "file": "../../external/compound/IPriceOracle.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 43618,
@@ -129,7 +133,7 @@
         "id": 43584,
         "nodeType": "ImportDirective",
         "src": "205:45:166",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICToken.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/external/compound/ICToken.sol",
         "file": "../../external/compound/ICToken.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 43618,
@@ -141,7 +145,7 @@
         "id": 43585,
         "nodeType": "ImportDirective",
         "src": "251:45:166",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICErc20.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/external/compound/ICErc20.sol",
         "file": "../../external/compound/ICErc20.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 43618,
@@ -153,7 +157,7 @@
         "id": 43586,
         "nodeType": "ImportDirective",
         "src": "298:32:166",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/BasePriceOracle.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/oracles/BasePriceOracle.sol",
         "file": "../BasePriceOracle.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 43618,
@@ -170,9 +174,6 @@
             "id": 43603,
             "nodeType": "FunctionDefinition",
             "src": "818:98:166",
-            "baseFunctions": [
-              41267
-            ],
             "body": {
               "id": 43602,
               "nodeType": "Block",
@@ -202,6 +203,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              41267
+            ],
             "documentation": {
               "id": 43592,
               "nodeType": "StructuredDocumentation",
@@ -298,9 +302,6 @@
             "id": 43616,
             "nodeType": "FunctionDefinition",
             "src": "1210:107:166",
-            "baseFunctions": [
-              33789
-            ],
             "body": {
               "id": 43615,
               "nodeType": "Block",
@@ -330,6 +331,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              33789
+            ],
             "documentation": {
               "id": 43604,
               "nodeType": "StructuredDocumentation",
@@ -478,5 +482,6 @@
       }
     ],
     "license": "UNLICENSED"
-  }
+  },
+  "id": 166
 }

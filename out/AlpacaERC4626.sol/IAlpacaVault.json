@@ -82,8 +82,15 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "balanceOf(address)": "70a08231",
+    "deposit(uint256)": "b6b55f25",
+    "totalSupply()": "18160ddd",
+    "totalToken()": "626be567",
+    "withdraw(uint256)": "2e1a7d4d"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/strategies/AlpacaERC4626.sol",
+    "absolutePath": "/Users/veliko/git/midas/contracts/contracts/compound/strategies/AlpacaERC4626.sol",
     "id": 30596,
     "exportedSymbols": {
       "AlpacaERC4626": [
@@ -123,7 +130,7 @@
         "id": 30422,
         "nodeType": "ImportDirective",
         "src": "68:49:47",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/tokens/ERC20.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/solmate/src/tokens/ERC20.sol",
         "file": "solmate/tokens/ERC20.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 30596,
@@ -147,7 +154,7 @@
         "id": 30424,
         "nodeType": "ImportDirective",
         "src": "118:68:47",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/utils/SafeTransferLib.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/solmate/src/utils/SafeTransferLib.sol",
         "file": "solmate/utils/SafeTransferLib.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 30596,
@@ -171,7 +178,7 @@
         "id": 30426,
         "nodeType": "ImportDirective",
         "src": "188:50:47",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/ERC4626.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/utils/ERC4626.sol",
         "file": "../../utils/ERC4626.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 30596,
@@ -195,7 +202,7 @@
         "id": 30428,
         "nodeType": "ImportDirective",
         "src": "239:70:47",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/FixedPointMathLib.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/utils/FixedPointMathLib.sol",
         "file": "../../utils/FixedPointMathLib.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 30596,
@@ -1355,9 +1362,6 @@
             "id": 30549,
             "nodeType": "FunctionDefinition",
             "src": "2065:180:47",
-            "baseFunctions": [
-              65685
-            ],
             "body": {
               "id": 30548,
               "nodeType": "Block",
@@ -1611,6 +1615,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              65685
+            ],
             "documentation": {
               "id": 30526,
               "nodeType": "StructuredDocumentation",
@@ -1854,9 +1861,6 @@
             "id": 30579,
             "nodeType": "FunctionDefinition",
             "src": "2579:103:47",
-            "baseFunctions": [
-              65875
-            ],
             "body": {
               "id": 30578,
               "nodeType": "Block",
@@ -1932,6 +1936,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              65875
+            ],
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -2019,9 +2026,6 @@
             "id": 30594,
             "nodeType": "FunctionDefinition",
             "src": "2686:106:47",
-            "baseFunctions": [
-              65867
-            ],
             "body": {
               "id": 30593,
               "nodeType": "Block",
@@ -2097,6 +2101,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              65867
+            ],
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -2218,5 +2225,6 @@
       }
     ],
     "license": "AGPL-3.0-only"
-  }
+  },
+  "id": 47
 }

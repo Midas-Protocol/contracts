@@ -230,8 +230,18 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "allowance(address,address)": "dd62ed3e",
+    "approve(address,uint256)": "095ea7b3",
+    "balanceOf(address)": "70a08231",
+    "get_balances()": "14f05979",
+    "remove_liquidity_one_coin(uint256,int128,uint256)": "1a4d01d2",
+    "totalSupply()": "18160ddd",
+    "transfer(address,uint256)": "a9059cbb",
+    "transferFrom(address,address,uint256)": "23b872dd"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/curve/ICurveStableSwap.sol",
+    "absolutePath": "/Users/veliko/git/midas/contracts/contracts/external/curve/ICurveStableSwap.sol",
     "id": 33964,
     "exportedSymbols": {
       "ICurveStableSwap": [
@@ -259,7 +269,7 @@
         "id": 33944,
         "nodeType": "ImportDirective",
         "src": "65:88:82",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 33964,
@@ -492,5 +502,6 @@
       }
     ],
     "license": "UNLICENSED"
-  }
+  },
+  "id": 82
 }

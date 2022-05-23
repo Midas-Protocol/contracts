@@ -39,17 +39,21 @@
     }
   ],
   "bytecode": {
-    "object": "0x608060405234801561001057600080fd5b5060d88061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c80635001f3b5146037578063d9638d36146052575b600080fd5b603f60015481565b6040519081526020015b60405180910390f35b6076605d366004608a565b6000602081905290815260409020805460019091015482565b604080519283526020830191909152016049565b600060208284031215609b57600080fd5b503591905056fea2646970667358221220e5e4682221f629aeca0185212b7d5c927a124fb747cea7becac3d0a2b919591364736f6c634300080a0033",
+    "object": "0x608060405234801561001057600080fd5b5060d88061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c80635001f3b5146037578063d9638d36146052575b600080fd5b603f60015481565b6040519081526020015b60405180910390f35b6076605d366004608a565b6000602081905290815260409020805460019091015482565b604080519283526020830191909152016049565b600060208284031215609b57600080fd5b503591905056fea2646970667358221220441b62ee366b74795c83fc23c48ae76e92839db8cc2393a89c69d0151b02822664736f6c634300080a0033",
     "sourceMap": "4564:155:23:-:0;;;;;;;;;;;;;;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
-    "object": "0x6080604052348015600f57600080fd5b506004361060325760003560e01c80635001f3b5146037578063d9638d36146052575b600080fd5b603f60015481565b6040519081526020015b60405180910390f35b6076605d366004608a565b6000602081905290815260409020805460019091015482565b604080519283526020830191909152016049565b600060208284031215609b57600080fd5b503591905056fea2646970667358221220e5e4682221f629aeca0185212b7d5c927a124fb747cea7becac3d0a2b919591364736f6c634300080a0033",
+    "object": "0x6080604052348015600f57600080fd5b506004361060325760003560e01c80635001f3b5146037578063d9638d36146052575b600080fd5b603f60015481565b6040519081526020015b60405180910390f35b6076605d366004608a565b6000602081905290815260409020805460019091015482565b604080519283526020830191909152016049565b600060208284031215609b57600080fd5b503591905056fea2646970667358221220441b62ee366b74795c83fc23c48ae76e92839db8cc2393a89c69d0151b02822664736f6c634300080a0033",
     "sourceMap": "4564:155:23:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;4697:19;;;;;;;;;160:25:279;;;148:2;133:18;4697:19:23;;;;;;;;4658:35;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;555:25:279;;;611:2;596:18;;589:34;;;;528:18;4658:35:23;381:248:279;196:180;255:6;308:2;296:9;287:7;283:23;279:32;276:52;;;324:1;321;314:12;276:52;-1:-1:-1;347:23:279;;196:180;-1:-1:-1;196:180:279:o",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "base()": "5001f3b5",
+    "ilks(bytes32)": "d9638d36"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/DAIInterestRateModelV2.sol",
+    "absolutePath": "/Users/veliko/git/midas/contracts/contracts/compound/DAIInterestRateModelV2.sol",
     "id": 20516,
     "exportedSymbols": {
       "DAIInterestRateModelV2": [
@@ -89,7 +93,7 @@
         "id": 20236,
         "nodeType": "ImportDirective",
         "src": "65:29:23",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/JumpRateModel.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/compound/JumpRateModel.sol",
         "file": "./JumpRateModel.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 20516,
@@ -101,7 +105,7 @@
         "id": 20237,
         "nodeType": "ImportDirective",
         "src": "95:24:23",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/SafeMath.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/compound/SafeMath.sol",
         "file": "./SafeMath.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 20516,
@@ -835,9 +839,6 @@
             "id": 20360,
             "nodeType": "FunctionDefinition",
             "src": "2357:502:23",
-            "baseFunctions": [
-              25201
-            ],
             "body": {
               "id": 20359,
               "nodeType": "Block",
@@ -1465,6 +1466,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              25201
+            ],
             "documentation": {
               "id": 20301,
               "nodeType": "StructuredDocumentation",
@@ -3789,5 +3793,6 @@
       }
     ],
     "license": "UNLICENSED"
-  }
+  },
+  "id": 23
 }

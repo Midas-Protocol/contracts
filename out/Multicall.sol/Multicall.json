@@ -30,8 +30,11 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "multicall(bytes[])": "ac9650d8"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/Multicall.sol",
+    "absolutePath": "/Users/veliko/git/midas/contracts/contracts/utils/Multicall.sol",
     "id": 66177,
     "exportedSymbols": {
       "IMulticall": [
@@ -59,7 +62,7 @@
         "id": 66095,
         "nodeType": "ImportDirective",
         "src": "71:26:236",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/IMulticall.sol",
+        "absolutePath": "/Users/veliko/git/midas/contracts/contracts/utils/IMulticall.sol",
         "file": "./IMulticall.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 66177,
@@ -76,9 +79,6 @@
             "id": 66175,
             "nodeType": "FunctionDefinition",
             "src": "273:565:236",
-            "baseFunctions": [
-              66008
-            ],
             "body": {
               "id": 66174,
               "nodeType": "Block",
@@ -966,6 +966,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              66008
+            ],
             "documentation": {
               "id": 66099,
               "nodeType": "StructuredDocumentation",
@@ -1112,5 +1115,6 @@
       }
     ],
     "license": "GPL-2.0-or-later"
-  }
+  },
+  "id": 236
 }
