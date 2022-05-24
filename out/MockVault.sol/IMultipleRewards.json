@@ -90,8 +90,14 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "onBeamReward(uint256,address,uint256)": "75bbb7f0",
+    "pendingTokens(uint256,address)": "ffcd4263",
+    "poolRewardsPerSec(uint256)": "465e81ec",
+    "rewardToken()": "f7c618c1"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/test/mocks/beam/MockVault.sol",
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/test/mocks/beam/MockVault.sol",
     "id": 62790,
     "exportedSymbols": {
       "Address": [
@@ -128,7 +134,7 @@
         "id": 61716,
         "nodeType": "ImportDirective",
         "src": "59:56:222",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol",
         "file": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 62790,
@@ -140,7 +146,7 @@
         "id": 61717,
         "nodeType": "ImportDirective",
         "src": "116:51:222",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts/contracts/utils/Address.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/openzeppelin-contracts/contracts/utils/Address.sol",
         "file": "@openzeppelin/contracts/utils/Address.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 62790,
@@ -13620,5 +13626,6 @@
       }
     ],
     "license": "MIT"
-  }
+  },
+  "id": 222
 }

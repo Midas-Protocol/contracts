@@ -612,8 +612,32 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "_afterNonReentrant()": "632e5142",
+    "_beforeNonReentrant()": "c90c20b1",
+    "borrowAllowed(address,address,uint256)": "da3d454c",
+    "borrowVerify(address,address,uint256)": "5c778605",
+    "borrowWithinLimits(address,uint256)": "779b2294",
+    "enterMarkets(address[])": "c2998238",
+    "exitMarket(address)": "ede4edd0",
+    "isComptroller()": "007e3dd2",
+    "liquidateBorrowAllowed(address,address,address,address,uint256)": "5fc7e71e",
+    "liquidateBorrowVerify(address,address,address,address,uint256,uint256)": "47ef3b3b",
+    "liquidateCalculateSeizeTokens(address,address,uint256)": "c488847b",
+    "mintAllowed(address,address,uint256)": "4ef4c3e1",
+    "mintVerify(address,address,uint256,uint256)": "41c728b9",
+    "mintWithinLimits(address,uint256,uint256,uint256)": "2259192a",
+    "redeemAllowed(address,address,uint256)": "eabe7d91",
+    "redeemVerify(address,address,uint256,uint256)": "51dff989",
+    "repayBorrowAllowed(address,address,address,uint256)": "24008a62",
+    "repayBorrowVerify(address,address,address,uint256,uint256)": "1ededc91",
+    "seizeAllowed(address,address,address,address,uint256)": "d02f7351",
+    "seizeVerify(address,address,address,address,uint256)": "6d35bf91",
+    "transferAllowed(address,address,address,uint256)": "bdcdc258",
+    "transferVerify(address,address,address,uint256)": "6a56947e"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/ComptrollerInterface.sol",
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/compound/ComptrollerInterface.sol",
     "id": 20047,
     "exportedSymbols": {
       "ComptrollerInterface": [
@@ -3582,5 +3606,6 @@
       }
     ],
     "license": "UNLICENSED"
-  }
+  },
+  "id": 21
 }

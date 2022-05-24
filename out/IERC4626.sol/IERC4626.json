@@ -523,8 +523,31 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "allowance(address,address)": "dd62ed3e",
+    "approve(address,uint256)": "095ea7b3",
+    "balanceOf(address)": "70a08231",
+    "balanceOfUnderlying(address)": "3af9e669",
+    "decimals()": "313ce567",
+    "deposit(uint256,address)": "6e553f65",
+    "exchangeRate()": "3ba0b9a9",
+    "mint(uint256,address)": "94bf804d",
+    "name()": "06fdde03",
+    "previewDeposit(uint256)": "ef8b30f7",
+    "previewMint(uint256)": "b3d7f6b9",
+    "previewRedeem(uint256)": "4cdad506",
+    "previewWithdraw(uint256)": "0a28a477",
+    "redeem(uint256,address,address)": "ba087652",
+    "symbol()": "95d89b41",
+    "totalSupply()": "18160ddd",
+    "totalUnderlying()": "c70920bc",
+    "transfer(address,uint256)": "a9059cbb",
+    "transferFrom(address,address,uint256)": "23b872dd",
+    "underlying()": "6f307dc3",
+    "withdraw(uint256,address,address)": "b460af94"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/IERC4626.sol",
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/compound/IERC4626.sol",
     "id": 24819,
     "exportedSymbols": {
       "EIP20Interface": [
@@ -561,7 +584,7 @@
         "id": 24696,
         "nodeType": "ImportDirective",
         "src": "60:54:31",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/EIP20Interface.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/compound/EIP20Interface.sol",
         "file": "./EIP20Interface.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 24819,
@@ -1978,5 +2001,6 @@
         "usedErrors": []
       }
     ]
-  }
+  },
+  "id": 31
 }

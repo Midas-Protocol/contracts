@@ -82,8 +82,15 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "balance()": "b69ef8a8",
+    "balanceOf(address)": "70a08231",
+    "deposit(uint256)": "b6b55f25",
+    "totalSupply()": "18160ddd",
+    "withdraw(uint256)": "2e1a7d4d"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/strategies/BeefyERC4626.sol",
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/compound/strategies/BeefyERC4626.sol",
     "id": 31178,
     "exportedSymbols": {
       "BeefyERC4626": [
@@ -123,7 +130,7 @@
         "id": 31007,
         "nodeType": "ImportDirective",
         "src": "68:49:50",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/tokens/ERC20.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/solmate/src/tokens/ERC20.sol",
         "file": "solmate/tokens/ERC20.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 31178,
@@ -147,7 +154,7 @@
         "id": 31009,
         "nodeType": "ImportDirective",
         "src": "118:50:50",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/ERC4626.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/utils/ERC4626.sol",
         "file": "../../utils/ERC4626.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 31178,
@@ -171,7 +178,7 @@
         "id": 31011,
         "nodeType": "ImportDirective",
         "src": "169:68:50",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/utils/SafeTransferLib.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/solmate/src/utils/SafeTransferLib.sol",
         "file": "solmate/utils/SafeTransferLib.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 31178,
@@ -195,7 +202,7 @@
         "id": 31013,
         "nodeType": "ImportDirective",
         "src": "238:70:50",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/FixedPointMathLib.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/utils/FixedPointMathLib.sol",
         "file": "../../utils/FixedPointMathLib.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 31178,
@@ -1337,9 +1344,6 @@
             "id": 31131,
             "nodeType": "FunctionDefinition",
             "src": "1857:174:50",
-            "baseFunctions": [
-              65685
-            ],
             "body": {
               "id": 31130,
               "nodeType": "Block",
@@ -1593,6 +1597,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              65685
+            ],
             "documentation": {
               "id": 31108,
               "nodeType": "StructuredDocumentation",
@@ -1836,9 +1843,6 @@
             "id": 31161,
             "nodeType": "FunctionDefinition",
             "src": "2371:102:50",
-            "baseFunctions": [
-              65875
-            ],
             "body": {
               "id": 31160,
               "nodeType": "Block",
@@ -1914,6 +1918,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              65875
+            ],
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -2001,9 +2008,6 @@
             "id": 31176,
             "nodeType": "FunctionDefinition",
             "src": "2477:105:50",
-            "baseFunctions": [
-              65867
-            ],
             "body": {
               "id": 31175,
               "nodeType": "Block",
@@ -2079,6 +2083,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              65867
+            ],
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -2200,5 +2207,6 @@
       }
     ],
     "license": "AGPL-3.0-only"
-  }
+  },
+  "id": 50
 }

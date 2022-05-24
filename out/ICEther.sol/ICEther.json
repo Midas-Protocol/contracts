@@ -371,8 +371,35 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "admin()": "f851a440",
+    "adminFeeMantissa()": "8d02d9a1",
+    "adminHasRights()": "0a755ec2",
+    "balanceOf(address)": "70a08231",
+    "balanceOfUnderlying(address)": "3af9e669",
+    "borrowBalanceStored(address)": "95dd9193",
+    "borrowRatePerBlock()": "f8f9da28",
+    "comptroller()": "5fe3b567",
+    "exchangeRateCurrent()": "bd6d894d",
+    "exchangeRateStored()": "182df0f5",
+    "fuseAdminHasRights()": "2f1069ba",
+    "fuseFeeMantissa()": "dbfe7c19",
+    "getCash()": "3b1d21a2",
+    "isCEther()": "ac784ddc",
+    "isCToken()": "fe9c44ae",
+    "liquidateBorrow(address,address)": "aae40a2a",
+    "redeem(uint256)": "db006a75",
+    "redeemUnderlying(uint256)": "852a12e3",
+    "reserveFactorMantissa()": "173b9904",
+    "supplyRatePerBlock()": "ae9d70b0",
+    "symbol()": "95d89b41",
+    "totalAdminFees()": "61feacff",
+    "totalBorrowsCurrent()": "73acee98",
+    "totalFuseFees()": "dc028ab1",
+    "totalReserves()": "8f840ddd"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICEther.sol",
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/ICEther.sol",
     "id": 33467,
     "exportedSymbols": {
       "ICEther": [
@@ -400,7 +427,7 @@
         "id": 33454,
         "nodeType": "ImportDirective",
         "src": "67:23:73",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICToken.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/ICToken.sol",
         "file": "./ICToken.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 33467,
@@ -540,5 +567,6 @@
       }
     ],
     "license": "BSD-3-Clause"
-  }
+  },
+  "id": 73
 }
