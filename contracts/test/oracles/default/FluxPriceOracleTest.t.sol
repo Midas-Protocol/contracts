@@ -23,7 +23,7 @@ contract MockFluxPriceFeed {
 contract FluxPriceOracleTest is BaseTest {
   FluxPriceOracle private oracle;
 
-  function setUpWithNativeFeed() public {
+  function setUpWithNativeFeed() public shouldRun(forChains(EVMOS_TESTNET)) {
     MockFluxPriceFeed mock = new MockFluxPriceFeed(5 * 10**8); // 5 USD in 8 decimals
     oracle = new FluxPriceOracle(
       address(this),
@@ -35,7 +35,7 @@ contract FluxPriceOracleTest is BaseTest {
     );
   }
 
-  function setUpWithMasterPriceOracle() public {
+  function setUpWithMasterPriceOracle() public shouldRun(forChains(EVMOS_TESTNET)) {
     SimplePriceOracle spo = new SimplePriceOracle();
     spo.setDirectPrice(address(2), 200000000000000000); // 1e36 / 200000000000000000 = 5e18
     MasterPriceOracle mpo = new MasterPriceOracle();
@@ -47,7 +47,7 @@ contract FluxPriceOracleTest is BaseTest {
     oracle = new FluxPriceOracle(address(this), true, address(0), CLV2V3Interface(address(0)), mpo, address(2));
   }
 
-  function setUpOracles() public {
+  function setUpOracles() public shouldRun(forChains(EVMOS_TESTNET)) {
     CLV2V3Interface ethPool = CLV2V3Interface(0xf8af20b210bCed918f71899E9f4c26dE53e6ccE6);
     address[] memory underlyings = new address[](1);
     underlyings[0] = address(1);
