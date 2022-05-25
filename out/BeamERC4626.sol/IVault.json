@@ -86,8 +86,13 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "deposit(uint256,uint256)": "e2bbb158",
+    "userInfo(uint256,address)": "93f1a40b",
+    "withdraw(uint256,uint256)": "441a3e70"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/strategies/BeamERC4626.sol",
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/compound/strategies/BeamERC4626.sol",
     "id": 31004,
     "exportedSymbols": {
       "BeamERC4626": [
@@ -130,7 +135,7 @@
         "id": 30809,
         "nodeType": "ImportDirective",
         "src": "68:50:49",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/ERC4626.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/utils/ERC4626.sol",
         "file": "../../utils/ERC4626.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 31004,
@@ -154,7 +159,7 @@
         "id": 30811,
         "nodeType": "ImportDirective",
         "src": "119:49:49",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/tokens/ERC20.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/solmate/src/tokens/ERC20.sol",
         "file": "solmate/tokens/ERC20.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 31004,
@@ -178,7 +183,7 @@
         "id": 30813,
         "nodeType": "ImportDirective",
         "src": "169:68:49",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/utils/SafeTransferLib.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/solmate/src/utils/SafeTransferLib.sol",
         "file": "solmate/utils/SafeTransferLib.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 31004,
@@ -202,7 +207,7 @@
         "id": 30815,
         "nodeType": "ImportDirective",
         "src": "238:70:49",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/FixedPointMathLib.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/utils/FixedPointMathLib.sol",
         "file": "../../utils/FixedPointMathLib.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 31004,
@@ -226,7 +231,7 @@
         "id": 30817,
         "nodeType": "ImportDirective",
         "src": "309:60:49",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/flywheel-v2/src/FlywheelCore.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/flywheel-v2/src/FlywheelCore.sol",
         "file": "flywheel-v2/FlywheelCore.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 31004,
@@ -1635,9 +1640,6 @@
             "id": 30955,
             "nodeType": "FunctionDefinition",
             "src": "1977:155:49",
-            "baseFunctions": [
-              65685
-            ],
             "body": {
               "id": 30954,
               "nodeType": "Block",
@@ -1829,6 +1831,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              65685
+            ],
             "documentation": {
               "id": 30935,
               "nodeType": "StructuredDocumentation",
@@ -2072,9 +2077,6 @@
             "id": 30986,
             "nodeType": "FunctionDefinition",
             "src": "2472:106:49",
-            "baseFunctions": [
-              65875
-            ],
             "body": {
               "id": 30985,
               "nodeType": "Block",
@@ -2166,6 +2168,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              65875
+            ],
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -2253,9 +2258,6 @@
             "id": 31002,
             "nodeType": "FunctionDefinition",
             "src": "2582:109:49",
-            "baseFunctions": [
-              65867
-            ],
             "body": {
               "id": 31001,
               "nodeType": "Block",
@@ -2347,6 +2349,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              65867
+            ],
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -2462,5 +2467,6 @@
       }
     ],
     "license": "AGPL-3.0-only"
-  }
+  },
+  "id": 49
 }

@@ -582,8 +582,41 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "claimFee()": "99d32fc4",
+    "collateralCoverage()": "36d24bb7",
+    "collateralRequirement()": "48e30c3f",
+    "collateralToken()": "b2016bd4",
+    "decreaseCollateral(uint256,uint256)": "52363587",
+    "emergencyShutdown()": "3403c2fc",
+    "emergencyShutdownPrice()": "7b34ee7f",
+    "emergencyShutdownTimestamp()": "6cf1be29",
+    "feePercentage()": "a001ecdd",
+    "feeRecipientsInfo()": "b3a84820",
+    "getMintTradeInfo(uint256)": "d668909f",
+    "getRedeemTradeInfo(uint256)": "980f23c5",
+    "increaseCollateral(uint256,uint256)": "54f0cb0d",
+    "liquidate(uint256)": "415f1240",
+    "liquidationReward()": "b339b368",
+    "mint((uint256,uint256,uint256,address))": "9a3e4eb8",
+    "redeem((uint256,uint256,uint256,address))": "525e6b11",
+    "setFeePercentage(uint256)": "ae06c1b7",
+    "setFeeRecipients(address[],uint32[])": "b5e40390",
+    "setLiquidationReward(uint256)": "4845a820",
+    "setOverCollateralization(uint256)": "31e78ca7",
+    "settleEmergencyShutdown()": "00b9add7",
+    "synthereumFinder()": "f6bf3ef6",
+    "syntheticToken()": "8230ecd6",
+    "syntheticTokenSymbol()": "36815bb7",
+    "totalCollateralAmount()": "63f31d2c",
+    "totalFeeAmount()": "96521716",
+    "totalSyntheticTokens()": "67f7d029",
+    "userFee(address)": "56c5f349",
+    "version()": "54fd4d50",
+    "withdrawLiquidity(uint256)": "0a861f2a"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/jarvis/ISynthereumLiquidityPool.sol",
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/jarvis/ISynthereumLiquidityPool.sol",
     "id": 34505,
     "exportedSymbols": {
       "IERC20Upgradeable": [
@@ -620,7 +653,7 @@
         "id": 34274,
         "nodeType": "ImportDirective",
         "src": "67:47:91",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/jarvis/ISynthereumLiquidityPoolGeneral.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/jarvis/ISynthereumLiquidityPoolGeneral.sol",
         "file": "./ISynthereumLiquidityPoolGeneral.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 34505,
@@ -3182,5 +3215,6 @@
       }
     ],
     "license": "AGPL-3.0-only"
-  }
+  },
+  "id": 91
 }

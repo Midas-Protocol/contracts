@@ -615,8 +615,42 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "DOMAIN_SEPARATOR()": "3644e515",
+    "accrualBlockNumber()": "6c540baf",
+    "adminFeeMantissa()": "8d02d9a1",
+    "allowance(address,address)": "dd62ed3e",
+    "approve(address,uint256)": "095ea7b3",
+    "balanceOf(address)": "70a08231",
+    "balanceOfUnderlying(address)": "3af9e669",
+    "borrow(uint256)": "c5ebeaec",
+    "borrowBalanceCurrent(address)": "17bfdfbc",
+    "decimals()": "313ce567",
+    "exchangeRateCurrent()": "bd6d894d",
+    "exchangeRateStored()": "182df0f5",
+    "fuseFeeMantissa()": "dbfe7c19",
+    "initialExchangeRateMantissa()": "675d972c",
+    "interestRateModel()": "f3fdb15a",
+    "mint(uint256)": "a0712d68",
+    "name()": "06fdde03",
+    "nonces(address)": "7ecebe00",
+    "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)": "d505accf",
+    "redeemUnderlying(uint256)": "852a12e3",
+    "repayBorrow(uint256)": "0e752702",
+    "repayBorrowBehalf(address,uint256)": "2608f818",
+    "reserveFactorMantissa()": "173b9904",
+    "symbol()": "95d89b41",
+    "totalAdminFees()": "61feacff",
+    "totalBorrows()": "47bd3718",
+    "totalFuseFees()": "dc028ab1",
+    "totalReserves()": "8f840ddd",
+    "totalSupply()": "18160ddd",
+    "transfer(address,uint256)": "a9059cbb",
+    "transferFrom(address,address,uint256)": "23b872dd",
+    "underlying()": "6f307dc3"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/libcompound/interfaces/FuseCERC20.sol",
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/utils/libcompound/interfaces/FuseCERC20.sol",
     "id": 66690,
     "exportedSymbols": {
       "ERC20": [
@@ -647,7 +681,7 @@
         "id": 66566,
         "nodeType": "ImportDirective",
         "src": "68:49:241",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/tokens/ERC20.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/solmate/src/tokens/ERC20.sol",
         "file": "solmate/tokens/ERC20.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 66690,
@@ -671,7 +705,7 @@
         "id": 66568,
         "nodeType": "ImportDirective",
         "src": "119:60:241",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/utils/libcompound/interfaces/InterestRateModel.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/utils/libcompound/interfaces/InterestRateModel.sol",
         "file": "./InterestRateModel.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 66690,
@@ -2067,5 +2101,6 @@
       }
     ],
     "license": "AGPL-3.0-only"
-  }
+  },
+  "id": 241
 }

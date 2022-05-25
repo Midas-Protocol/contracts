@@ -39,17 +39,21 @@
     }
   ],
   "bytecode": {
-    "object": "0x608060405234801561001057600080fd5b506040516100e93803806100e983398101604081905261002f91610037565b600055610050565b60006020828403121561004957600080fd5b5051919050565b608b8061005e6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c806350d25bcd146037578063ca34364814604d575b600080fd5b6000545b60405190815260200160405180910390f35b603b6000548156fea26469706673582212208669e83d995dd08452547fa8ee97130519168dfd2e1387bc41e205b4e63ee3db64736f6c634300080a0033",
+    "object": "0x608060405234801561001057600080fd5b506040516100c03803806100c083398101604081905261002f91610037565b600055610050565b60006020828403121561004957600080fd5b5051919050565b60628061005e6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c806350d25bcd146037578063ca34364814604d575b600080fd5b6000545b60405190815260200160405180910390f35b603b6000548156fea164736f6c634300080a000a",
     "sourceMap": "498:221:229:-:0;;;559:70;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;598:11;:26;498:221;;14:183:279;83:6;136:2;124:9;115:7;111:23;107:32;104:52;;;152:1;149;142:12;104:52;-1:-1:-1;175:16:279;;14:183;-1:-1:-1;14:183:279:o;:::-;498:221:229;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
-    "object": "0x6080604052348015600f57600080fd5b506004361060325760003560e01c806350d25bcd146037578063ca34364814604d575b600080fd5b6000545b60405190815260200160405180910390f35b603b6000548156fea26469706673582212208669e83d995dd08452547fa8ee97130519168dfd2e1387bc41e205b4e63ee3db64736f6c634300080a0033",
+    "object": "0x6080604052348015600f57600080fd5b506004361060325760003560e01c806350d25bcd146037578063ca34364814604d575b600080fd5b6000545b60405190815260200160405180910390f35b603b6000548156fea164736f6c634300080a000a",
     "sourceMap": "498:221:229:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;633:84;680:6;701:11;633:84;;;158:25:279;;;146:2;131:18;633:84:229;;;;;;;529:25;;;;;",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "latestAnswer()": "50d25bcd",
+    "staticPrice()": "ca343648"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/test/oracles/default/FluxPriceOracleTest.t.sol",
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/test/oracles/default/FluxPriceOracleTest.t.sol",
     "id": 65229,
     "exportedSymbols": {
       "AddressUpgradeable": [
@@ -176,7 +180,7 @@
         "id": 64904,
         "nodeType": "ImportDirective",
         "src": "65:37:229",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/test/config/BaseTest.t.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/test/config/BaseTest.t.sol",
         "file": "../../config/BaseTest.t.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 65229,
@@ -188,7 +192,7 @@
         "id": 64906,
         "nodeType": "ImportDirective",
         "src": "103:79:229",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/default/FluxPriceOracle.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/oracles/default/FluxPriceOracle.sol",
         "file": "../../../oracles/default/FluxPriceOracle.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 65229,
@@ -212,7 +216,7 @@
         "id": 64908,
         "nodeType": "ImportDirective",
         "src": "183:77:229",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/flux/CLV2V3Interface.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/flux/CLV2V3Interface.sol",
         "file": "../../../external/flux/CLV2V3Interface.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 65229,
@@ -236,7 +240,7 @@
         "id": 64910,
         "nodeType": "ImportDirective",
         "src": "261:83:229",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/default/SimplePriceOracle.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/oracles/default/SimplePriceOracle.sol",
         "file": "../../../oracles/default/SimplePriceOracle.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 65229,
@@ -260,7 +264,7 @@
         "id": 64912,
         "nodeType": "ImportDirective",
         "src": "345:75:229",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/MasterPriceOracle.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/oracles/MasterPriceOracle.sol",
         "file": "../../../oracles/MasterPriceOracle.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 65229,
@@ -284,7 +288,7 @@
         "id": 64914,
         "nodeType": "ImportDirective",
         "src": "421:75:229",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/IPriceOracle.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/IPriceOracle.sol",
         "file": "../../../external/compound/IPriceOracle.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 65229,
@@ -4383,5 +4387,6 @@
       }
     ],
     "license": "UNLICENSED"
-  }
+  },
+  "id": 229
 }

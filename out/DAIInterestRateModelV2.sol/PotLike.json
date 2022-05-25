@@ -108,8 +108,17 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "chi()": "c92aecc4",
+    "drip()": "9f678cca",
+    "dsr()": "487bf082",
+    "exit(uint256)": "7f8661a1",
+    "join(uint256)": "049878f3",
+    "pie(address)": "0bebac86",
+    "rho()": "20aba08b"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/DAIInterestRateModelV2.sol",
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/compound/DAIInterestRateModelV2.sol",
     "id": 20516,
     "exportedSymbols": {
       "DAIInterestRateModelV2": [
@@ -149,7 +158,7 @@
         "id": 20236,
         "nodeType": "ImportDirective",
         "src": "65:29:23",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/JumpRateModel.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/compound/JumpRateModel.sol",
         "file": "./JumpRateModel.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 20516,
@@ -161,7 +170,7 @@
         "id": 20237,
         "nodeType": "ImportDirective",
         "src": "95:24:23",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/SafeMath.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/compound/SafeMath.sol",
         "file": "./SafeMath.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 20516,
@@ -895,9 +904,6 @@
             "id": 20360,
             "nodeType": "FunctionDefinition",
             "src": "2357:502:23",
-            "baseFunctions": [
-              25201
-            ],
             "body": {
               "id": 20359,
               "nodeType": "Block",
@@ -1525,6 +1531,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              25201
+            ],
             "documentation": {
               "id": 20301,
               "nodeType": "StructuredDocumentation",
@@ -3849,5 +3858,6 @@
       }
     ],
     "license": "UNLICENSED"
-  }
+  },
+  "id": 23
 }

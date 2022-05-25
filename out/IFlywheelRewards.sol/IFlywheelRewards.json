@@ -61,8 +61,13 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "flywheel()": "7acf5b92",
+    "getAccruedRewards(address,uint32)": "b334db7b",
+    "rewardToken()": "f7c618c1"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/flywheel-v2/src/interfaces/IFlywheelRewards.sol",
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/flywheel-v2/src/interfaces/IFlywheelRewards.sol",
     "id": 69167,
     "exportedSymbols": {
       "ERC20": [
@@ -92,7 +97,7 @@
         "id": 69137,
         "nodeType": "ImportDirective",
         "src": "67:47:246",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/solmate/src/tokens/ERC20.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/solmate/src/tokens/ERC20.sol",
         "file": "solmate/tokens/ERC20.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 69167,
@@ -116,7 +121,7 @@
         "id": 69139,
         "nodeType": "ImportDirective",
         "src": "115:49:246",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/flywheel-v2/src/FlywheelCore.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/flywheel-v2/src/FlywheelCore.sol",
         "file": "../FlywheelCore.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 69167,
@@ -423,5 +428,6 @@
       }
     ],
     "license": "AGPL-3.0-only"
-  }
+  },
+  "id": 246
 }
