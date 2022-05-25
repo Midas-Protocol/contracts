@@ -27,6 +27,7 @@ import {FusePoolDirectory} from "../../FusePoolDirectory.sol";
 import {MockPriceOracle} from "../../oracles/1337/MockPriceOracle.sol";
 import {MasterPriceOracle} from "../../oracles/MasterPriceOracle.sol";
 import {MockERC4626} from "../../compound/strategies/MockERC4626.sol";
+import {FuseSafeLiquidator} from "../../FuseSafeLiquidator.sol";
 import {MockERC4626Dynamic} from "../../compound/strategies/MockERC4626Dynamic.sol";
 
 contract WithPool {
@@ -39,10 +40,12 @@ contract WithPool {
     CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
 
     Comptroller comptroller;
+    Comptroller comptroller1;
     WhitePaperInterestRateModel interestModel;
 
     FuseFeeDistributor fuseAdmin;
     FusePoolDirectory fusePoolDirectory;
+    FuseSafeLiquidator liquidator;
     MasterPriceOracle priceOracle;
 
     address[] markets;
@@ -111,62 +114,6 @@ contract WithPool {
         // priceOracle = new MockPriceOracle(10);
     }
 
-    // function setUpPoolAndMarket() public {
-    //     emptyAddresses.push(address(0));
-    //     Comptroller tempComptroller = new Comptroller(payable(fuseAdmin));
-    //     newUnitroller.push(address(tempComptroller));
-    //     trueBoolArray.push(true);
-    //     falseBoolArray.push(false);
-    //     fuseAdmin._editComptrollerImplementationWhitelist(
-    //         emptyAddresses,
-    //         newUnitroller,
-    //         trueBoolArray
-    //     );
-    //     (uint256 index, address comptrollerAddress) = fusePoolDirectory
-    //         .deployPool(
-    //             "TestPool",
-    //             address(tempComptroller),
-    //             abi.encode(payable(address(fuseAdmin))),
-    //             false,
-    //             0.1e18,
-    //             1.1e18,
-    //             address(priceOracle)
-    //         );
-
-    //     Unitroller(payable(comptrollerAddress))._acceptAdmin();
-    //     comptroller = Comptroller(comptrollerAddress);
-
-    //     newImplementation.push(address(cErc20Delegate));
-    //     fuseAdmin._editCErc20DelegateWhitelist(
-    //         emptyAddresses,
-    //         newImplementation,
-    //         falseBoolArray,
-    //         trueBoolArray
-    //     );
-    //     vm.roll(1);
-    //     comptroller._deployMarket(
-    //         false,
-    //         abi.encode(
-    //             address(underlyingToken),
-    //             ComptrollerInterface(comptrollerAddress),
-    //             payable(address(fuseAdmin)),
-    //             InterestRateModel(address(interestModel)),
-    //             "CUnderlyingToken",
-    //             "CUT",
-    //             address(cErc20Delegate),
-    //             "",
-    //             uint256(1),
-    //             uint256(0)
-    //         ),
-    //         0.9e18
-    //     );
-
-    //     CToken[] memory allMarkets = comptroller.getAllMarkets();
-    //     cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
-    //     cToken = CToken(address(cErc20));
-    //     markets = [address(cErc20)];
-    // }
-
     function setUpPool(
         string memory name,
         bool enforceWhitelist,
@@ -199,6 +146,7 @@ contract WithPool {
     }
 
     function deployCErc20Delegate(
+        address _underlyingToken,
         bytes memory name,
         bytes memory symbol,
         uint256 _collateralFactorMantissa
@@ -206,7 +154,7 @@ contract WithPool {
         comptroller._deployMarket(
             false,
             abi.encode(
-                address(underlyingToken),
+                _underlyingToken,
                 ComptrollerInterface(address(comptroller)),
                 payable(address(fuseAdmin)),
                 InterestRateModel(address(interestModel)),
