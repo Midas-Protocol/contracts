@@ -1,5 +1,5 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
-pragma experimental ABIEncoderV2;
 
 import "./CErc20Delegate.sol";
 import "./EIP20Interface.sol";
@@ -30,13 +30,15 @@ contract CErc20PluginDelegate is CErc20Delegate {
 
     address _plugin = abi.decode(data, (address));
 
-    require(_plugin != address(0), "0 addr");
+    require(_plugin != address(0), "0");
 
-    if (address(plugin) != address(0)) {
+    if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
       plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
     }
 
     plugin = IERC4626(_plugin);
+
+    EIP20Interface(underlying).approve(_plugin, type(uint256).max);
 
     uint256 amount = EIP20Interface(underlying).balanceOf(address(this));
     if (amount != 0) {
@@ -53,7 +55,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @return The quantity of underlying tokens owned by this contract
    */
   function getCashPrior() internal view override returns (uint256) {
-    return plugin.balanceOfUnderlying(address(this));
+    return plugin.previewRedeem(plugin.balanceOf(address(this)));
   }
 
   /**
@@ -64,19 +66,13 @@ contract CErc20PluginDelegate is CErc20Delegate {
    */
   function doTransferIn(address from, uint256 amount) internal override returns (uint256) {
     // Perform the EIP-20 transfer in
-    require(EIP20Interface(underlying).transferFrom(from, address(this), amount), "send fail");
+    require(EIP20Interface(underlying).transferFrom(from, address(this), amount), "send");
 
     deposit(amount);
     return amount;
   }
 
-  /**
-   * @notice Deposit the underlying in the plugin
-   * @param amount Amount of underlying to deposit
-   */
   function deposit(uint256 amount) internal {
-    EIP20Interface(underlying).approve(address(plugin), amount);
-
     plugin.deposit(amount, address(this));
   }
 
@@ -85,8 +81,6 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @param to Address to transfer funds to
    * @param amount Amount of underlying to transfer
    */
-  // IM WORRIED ABOUT THIS CHANGE.
-  /* Without it the function in CErc20 at L179 would be called which cant work. So i had to remove payable from to in order to overwrite the CErc20 `doTransferOut`. Did rari also make this change and we didnt pick it up or how does it work for them? o.O */
   function doTransferOut(address to, uint256 amount) internal override {
     plugin.withdraw(amount, to, address(this));
   }

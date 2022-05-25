@@ -249,27 +249,39 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "decimals()": "313ce567",
+    "description()": "7284e416",
+    "getAnswer(uint256)": "b5ab58dc",
+    "getRoundData(uint80)": "9a6fc8f5",
+    "getTimestamp(uint256)": "b633620c",
+    "latestAnswer()": "50d25bcd",
+    "latestRound()": "668a0f02",
+    "latestRoundData()": "feaf968c",
+    "latestTimestamp()": "8205bf6a",
+    "version()": "54fd4d50"
+  },
   "ast": {
-    "absolutePath": "/Users/peet/git/contracts/contracts/external/chainlink/AggregatorV2V3Interface.sol",
-    "id": 32669,
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/chainlink/AggregatorV2V3Interface.sol",
+    "id": 32955,
     "exportedSymbols": {
       "AggregatorInterface": [
-        32659
+        32945
       ],
       "AggregatorV2V3Interface": [
-        32668
+        32954
       ],
       "AggregatorV3Interface": [
-        32714
+        33000
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "32:184:67",
+    "src": "32:184:68",
     "nodes": [
       {
-        "id": 32661,
+        "id": 32947,
         "nodeType": "PragmaDirective",
-        "src": "32:24:67",
+        "src": "32:24:68",
         "literals": [
           "solidity",
           ">=",
@@ -278,58 +290,58 @@
         ]
       },
       {
-        "id": 32662,
+        "id": 32948,
         "nodeType": "ImportDirective",
-        "src": "58:35:67",
-        "absolutePath": "/Users/peet/git/contracts/contracts/external/chainlink/AggregatorInterface.sol",
+        "src": "58:35:68",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/chainlink/AggregatorInterface.sol",
         "file": "./AggregatorInterface.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 32669,
-        "sourceUnit": 32660,
+        "scope": 32955,
+        "sourceUnit": 32946,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 32663,
+        "id": 32949,
         "nodeType": "ImportDirective",
-        "src": "94:37:67",
-        "absolutePath": "/Users/peet/git/contracts/contracts/external/chainlink/AggregatorV3Interface.sol",
+        "src": "94:37:68",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/chainlink/AggregatorV3Interface.sol",
         "file": "./AggregatorV3Interface.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 32669,
-        "sourceUnit": 32715,
+        "scope": 32955,
+        "sourceUnit": 33001,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 32668,
+        "id": 32954,
         "nodeType": "ContractDefinition",
-        "src": "133:82:67",
+        "src": "133:82:68",
         "abstract": false,
         "baseContracts": [
           {
             "baseName": {
-              "id": 32664,
+              "id": 32950,
               "name": "AggregatorInterface",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 32659,
-              "src": "170:19:67"
+              "referencedDeclaration": 32945,
+              "src": "170:19:68"
             },
-            "id": 32665,
+            "id": 32951,
             "nodeType": "InheritanceSpecifier",
-            "src": "170:19:67"
+            "src": "170:19:68"
           },
           {
             "baseName": {
-              "id": 32666,
+              "id": 32952,
               "name": "AggregatorV3Interface",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 32714,
-              "src": "191:21:67"
+              "referencedDeclaration": 33000,
+              "src": "191:21:68"
             },
-            "id": 32667,
+            "id": 32953,
             "nodeType": "InheritanceSpecifier",
-            "src": "191:21:67"
+            "src": "191:21:68"
           }
         ],
         "canonicalName": "AggregatorV2V3Interface",
@@ -337,16 +349,17 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          32668,
-          32714,
-          32659
+          32954,
+          33000,
+          32945
         ],
         "name": "AggregatorV2V3Interface",
-        "nameLocation": "143:23:67",
-        "scope": 32669,
+        "nameLocation": "143:23:68",
+        "scope": 32955,
         "usedErrors": []
       }
     ],
     "license": "MIT"
-  }
+  },
+  "id": 68
 }

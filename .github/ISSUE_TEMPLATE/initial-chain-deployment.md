@@ -2,7 +2,7 @@
 name: Initial Chain Deployment
 about: Task for having a full SC deployment to a new chain
 title: 'Initial Chain Deployment: <Chain Name>'
-labels: contracts
+labels: ''
 assignees: ''
 
 ---

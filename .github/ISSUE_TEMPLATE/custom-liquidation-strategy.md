@@ -11,7 +11,7 @@ Implement Custom Liquidation Strategy for the desired asset
 
 ### Liquidation Strategy Description
 
-Brief description of what kind of assets this oracle would support 
+Brief description of the liquidation strategy for the custom asset
 
 ### Links and Documentation
 

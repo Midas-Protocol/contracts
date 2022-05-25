@@ -76,30 +76,37 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "collateralToken()": "b2016bd4",
+    "synthereumFinder()": "f6bf3ef6",
+    "syntheticToken()": "8230ecd6",
+    "syntheticTokenSymbol()": "36815bb7",
+    "version()": "54fd4d50"
+  },
   "ast": {
-    "absolutePath": "/Users/peet/git/contracts/contracts/external/jarvis/ISynthereumLiquidityPoolGeneral.sol",
-    "id": 34225,
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/jarvis/ISynthereumLiquidityPoolGeneral.sol",
+    "id": 34511,
     "exportedSymbols": {
       "IERC20Upgradeable": [
-        89465
+        89909
       ],
       "ISynthereumDeployment": [
-        33965
+        34251
       ],
       "ISynthereumFinder": [
-        33985
+        34271
       ],
       "ISynthereumLiquidityPoolGeneral": [
-        34224
+        34510
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "42:182:91",
+    "src": "42:182:92",
     "nodes": [
       {
-        "id": 34220,
+        "id": 34506,
         "nodeType": "PragmaDirective",
-        "src": "42:23:91",
+        "src": "42:23:92",
         "literals": [
           "solidity",
           "^",
@@ -108,34 +115,34 @@
         ]
       },
       {
-        "id": 34221,
+        "id": 34507,
         "nodeType": "ImportDirective",
-        "src": "67:37:91",
-        "absolutePath": "/Users/peet/git/contracts/contracts/external/jarvis/ISynthereumDeployment.sol",
+        "src": "67:37:92",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/jarvis/ISynthereumDeployment.sol",
         "file": "./ISynthereumDeployment.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 34225,
-        "sourceUnit": 33966,
+        "scope": 34511,
+        "sourceUnit": 34252,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 34224,
+        "id": 34510,
         "nodeType": "ContractDefinition",
-        "src": "106:117:91",
+        "src": "106:117:92",
         "abstract": false,
         "baseContracts": [
           {
             "baseName": {
-              "id": 34222,
+              "id": 34508,
               "name": "ISynthereumDeployment",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 33965,
-              "src": "153:21:91"
+              "referencedDeclaration": 34251,
+              "src": "153:21:92"
             },
-            "id": 34223,
+            "id": 34509,
             "nodeType": "InheritanceSpecifier",
-            "src": "153:21:91"
+            "src": "153:21:92"
           }
         ],
         "canonicalName": "ISynthereumLiquidityPoolGeneral",
@@ -143,15 +150,16 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          34224,
-          33965
+          34510,
+          34251
         ],
         "name": "ISynthereumLiquidityPoolGeneral",
-        "nameLocation": "116:31:91",
-        "scope": 34225,
+        "nameLocation": "116:31:92",
+        "scope": 34511,
         "usedErrors": []
       }
     ],
     "license": "AGPL-3.0-only"
-  }
+  },
+  "id": 92
 }
