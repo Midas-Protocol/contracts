@@ -11,7 +11,28 @@ on:
       - development
 
 jobs:
+  lint:
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install Npm dependencies
+        run: npm install
+
+      - name: Lint
+        run: npm run lint
+
+
   build-and-test-local:
+    needs: [ lint ]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
     runs-on: ubuntu-latest
@@ -28,24 +49,11 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-
-      - name: Install NPM packages
-        run: npm install
-
-      - name: Run build
-        run: npm run build
-
-      - name: Run hardhat tests
-        run: npm run test:hardhat
-
       - name: Run forge tests
-        run: npm run test:forge
+        run: forge test
 
   build-and-test-bsc:
+    needs: [ lint ]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
       FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
@@ -64,27 +72,14 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-
-      - name: Install NPM packages
-        run: npm install
-
-      - name: Run build
-        run: npm run build
-
-      - name: Run hardhat tests on BSC
-        run: npm run test:bsc
-
       - name: Run forge tests on BSC
-        run: npm run test:forge:bsc
+        run: forge test --fork-url ${FORK_URL_BSC} --fork-block-number ${FORK_BLOCK_NUMBER}
 
   build-and-test-evmostestnet:
+    needs: [ lint ]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FORK_BLOCK_NUMBER: 897089
+      FORK_BLOCK_NUMBER: 1217475
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -98,25 +93,15 @@ jobs:
 
       - name: Install Forge dependencies
         run: forge install
-
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-
-      - name: Install NPM packages
-        run: npm install
-
-      - name: Run build
-        run: npm run build
 
       - name: Run forge tests on Evmos Testnet
-        run: npm run test:forge:evmostestnet
+        run: forge test --fork-url https://eth.bd.evmos.dev:8545 --fork-block-number ${FORK_BLOCK_NUMBER}
 
   build-and-test-moonbeam:
+    needs: [ lint ]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FORK_BLOCK_NUMBER: 909353
+      FORK_BLOCK_NUMBER: 1058520
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -131,16 +116,5 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: "npm"
-
-      - name: Install NPM packages
-        run: npm install
-
-      - name: Run build
-        run: npm run build
-
       - name: Run forge tests on Moonbeam
-        run: npm run test:forge:moonbeam
+        run: forge test --fork-url https://rpc.api.moonbeam.network --fork-block-number ${FORK_BLOCK_NUMBER}

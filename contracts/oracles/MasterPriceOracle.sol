@@ -64,12 +64,13 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
   event NewOracle(address underlying, address oldOracle, address newOracle);
 
   /**
-   * @dev Constructor to initialize state variables.
+   * @dev  Initialize state variables.
    * @param underlyings The underlying ERC20 token addresses to link to `_oracles`.
    * @param _oracles The `PriceOracle` contracts to be assigned to `underlyings`.
    * @param _defaultOracle The default `PriceOracle` contract to use.
    * @param _admin The admin who can assign oracles to underlying tokens.
    * @param _canAdminOverwrite Controls if `admin` can overwrite existing assignments of oracles to underlying tokens.
+   * @param _wtoken The Wrapped native asset address
    */
   function initialize(
     address[] memory underlyings,
@@ -122,7 +123,7 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
   }
 
   /**
-   * @dev Changes the admin and emits an event.
+   * @dev Changes the default price oracle
    */
   function setDefaultOracle(IPriceOracle newOracle) external onlyAdmin {
     IPriceOracle oldOracle = defaultOracle;

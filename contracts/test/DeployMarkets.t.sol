@@ -265,7 +265,11 @@ contract DeployMarketsTest is Test {
       abi.encode(address(mockERC4626Dynamic), address(flywheel), address(underlyingToken))
     );
     assertEq(address(cToken.plugin()), address(mockERC4626Dynamic));
-    assertEq(underlyingToken.allowance(address(cToken), address(flywheel)), type(uint256).max);
+    assertEq(underlyingToken.allowance(address(cToken), address(mockERC4626Dynamic)), type(uint256).max);
+    assertEq(underlyingToken.allowance(address(cToken), address(flywheel)), 0);
+
+    cToken.approve(address(rewardToken), address(flywheel));
+    assertEq(rewardToken.allowance(address(cToken), address(flywheel)), type(uint256).max);
 
     underlyingToken.approve(address(cToken), 1e36);
     address[] memory cTokens = new address[](1);

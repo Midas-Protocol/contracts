@@ -5,8 +5,8 @@ import "./IRedemptionStrategy.sol";
 import "../external/jarvis/ISynthereumLiquidityPool.sol";
 
 contract JarvisSynthereumLiquidator is IRedemptionStrategy {
-  ISynthereumLiquidityPool public pool;
-  uint64 public txExpirationPeriod;
+  ISynthereumLiquidityPool public immutable pool;
+  uint64 public immutable txExpirationPeriod;
 
   constructor(ISynthereumLiquidityPool _pool, uint64 _txExpirationPeriod) {
     pool = _pool;
@@ -17,6 +17,12 @@ contract JarvisSynthereumLiquidator is IRedemptionStrategy {
     txExpirationPeriod = _txExpirationPeriod;
   }
 
+  /**
+   * @dev Redeems `inputToken` for `outputToken` where `inputAmount` < `outputAmount`
+   * @param inputToken Address of the token
+   * @param inputAmount Sets `UniswapV2Factory`
+   * @param strategyData unused in this contract
+   */
   function redeem(
     IERC20Upgradeable inputToken,
     uint256 inputAmount,

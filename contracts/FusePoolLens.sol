@@ -23,7 +23,16 @@ import "./oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
  */
 contract FusePoolLens is Initializable {
   /**
-   * @notice Constructor to set the `FusePoolDirectory` contract object.
+   * @notice Initialize the `FusePoolDirectory` contract object.
+   * @param _directory The FusePoolDirectory
+   * @param _name Name for the nativeToken
+   * @param _symbol Symbol for the nativeToken
+   * @param _hardcodedAddresses Underlying token addresses for a token like maker which are DSToken and/or use bytes32 for `symbol`
+   * @param _hardcodedNames Harcoded name for these tokens
+   * @param _hardcodedSymbols Harcoded symbol for these tokens
+   * @param _uniswapLPTokenNames Harcoded names for underlying uniswap LpToken
+   * @param _uniswapLPTokenSymbols Harcoded symbols for underlying uniswap LpToken
+   * @param _uniswapLPTokenDisplayNames Harcoded display names for underlying uniswap LpToken
    */
   function initialize(
     FusePoolDirectory _directory,
@@ -37,6 +46,15 @@ contract FusePoolLens is Initializable {
     string[] memory _uniswapLPTokenDisplayNames
   ) public initializer {
     require(address(_directory) != address(0), "FusePoolDirectory instance cannot be the zero address.");
+    require(
+      _hardcodedAddresses.length == _hardcodedNames.length && _hardcodedAddresses.length == _hardcodedSymbols.length,
+      "Hardcoded addresses lengths not equal."
+    );
+    require(
+      _uniswapLPTokenNames.length == _uniswapLPTokenSymbols.length &&
+        _uniswapLPTokenNames.length == _uniswapLPTokenDisplayNames.length,
+      "Uniswap LP token names lengths not equal."
+    );
 
     directory = _directory;
     name = _name;
@@ -672,6 +690,11 @@ contract FusePoolLens is Initializable {
     return (indexes, accountPools, data, errored);
   }
 
+  /**
+   * @notice Verify that the price of `underlying` of the given cToken matches KeydonixUniswapTwapPriceOracle
+   * @param cToken The cToken which price we want to verify
+   * @param proofData UniswapOracle.ProofData
+   */
   function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
     IPriceOracle oracle = IComptroller(cToken.comptroller()).oracle();
     return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);

@@ -3,7 +3,6 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-import "../external/curve/ICurveRegistry.sol";
 import "../external/curve/ICurvePool.sol";
 import "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 
