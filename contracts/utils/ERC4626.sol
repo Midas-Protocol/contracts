@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity >=0.8.0;
+//
+//import "ds-test/test.sol";
+//import "forge-std/Vm.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
@@ -76,6 +79,7 @@ abstract contract ERC4626 is ERC20 {
     address receiver,
     address owner
   ) public virtual returns (uint256 shares) {
+
     shares = previewWithdraw(assets); // No need to check for rounding error, previewWithdraw rounds up.
 
     if (msg.sender != owner) {
@@ -89,7 +93,9 @@ abstract contract ERC4626 is ERC20 {
     _burn(owner, shares);
 
     emit Withdraw(msg.sender, receiver, owner, assets, shares);
-
+//    emit log_uint(assets);
+//    emit log("HERE");
+//    emit log_address(address(receiver));
     asset.safeTransfer(receiver, assets);
   }
 

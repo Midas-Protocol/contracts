@@ -9,6 +9,9 @@ import {FuseFlywheelDynamicRewards} from "fuse-flywheel/rewards/FuseFlywheelDyna
 import {MockERC20} from "solmate/test/utils/mocks/MockERC20.sol";
 import {ICToken} from "../external/compound/ICToken.sol";
 import {MasterPriceOracle} from "../oracles/MasterPriceOracle.sol";
+import {AlpacaERC4626, IAlpacaVault} from "../compound/strategies/AlpacaERC4626.sol";
+import { IW_NATIVE } from "../utils/IW_NATIVE.sol";
+
 
 contract BNBE2eTest is WithPool, BaseTest {
     constructor()
@@ -63,8 +66,10 @@ contract BNBE2eTest is WithPool, BaseTest {
         public
         shouldRun(forChains(BSC_MAINNET))
     {
-        MockERC4626 erc4626 = MockERC4626(
-            0xe7DdE367531E40ec302fEd6B581E19534442A7ed
+        AlpacaERC4626 erc4626 = new AlpacaERC4626(
+            underlyingToken,
+            IAlpacaVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063),
+            IW_NATIVE(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
         );
 
         vm.roll(1);
@@ -91,6 +96,8 @@ contract BNBE2eTest is WithPool, BaseTest {
         cToken.mint(1e18);
         assertEq(cToken.totalSupply(), 1e18 * 5);
         uint256 balance = erc4626.balanceOf(address(cToken));
+        uint256 maxWithdraw = erc4626.previewWithdraw(1000);
+        emit log_uint(maxWithdraw);
         uint256 blaance1 = underlyingToken.balanceOf(address(erc4626));
         emit log_uint(blaance1);
         assertEq(balance, 1e18);
@@ -101,7 +108,7 @@ contract BNBE2eTest is WithPool, BaseTest {
         // );
         // emit log_uint(0xd7D069493685A581d27824Fc46EdA46B7EfC0063.balance);
         // emit log_uint(balance2);
-        cToken.borrow(10);
+        cToken.borrow(0.5e18);
         // assertEq(cToken.totalBorrows(), 100);
         // // assertEq(underlyingToken.balanceOf(address(erc4626)), 10e18 - 1000);
         // balance = erc4626.balanceOf(address(cToken));

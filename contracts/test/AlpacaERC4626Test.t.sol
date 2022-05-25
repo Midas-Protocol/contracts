@@ -9,6 +9,7 @@ import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 
 import { AlpacaERC4626, IAlpacaVault } from "../compound/strategies/AlpacaERC4626.sol";
 import { MockVault } from "./mocks/alpaca/MockVault.sol";
+import { IW_NATIVE } from "../utils/IW_NATIVE.sol";
 
 contract AlpacaERC4626Test is DSTest {
   Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -23,7 +24,7 @@ contract AlpacaERC4626Test is DSTest {
   function setUp() public {
     testToken = new MockERC20("TestToken", "TST", 18);
     mockVault = new MockVault(address(testToken), "MockVault", "MV", 18);
-    alpacaERC4626 = new AlpacaERC4626(testToken, IAlpacaVault(address(mockVault)));
+    alpacaERC4626 = new AlpacaERC4626(testToken, IAlpacaVault(address(mockVault)), IW_NATIVE(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c));
   }
 
   function testInitializedValues() public {
