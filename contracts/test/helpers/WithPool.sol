@@ -29,8 +29,7 @@ import {MasterPriceOracle} from "../../oracles/MasterPriceOracle.sol";
 import {MockERC4626} from "../../compound/strategies/MockERC4626.sol";
 import {FuseSafeLiquidator} from "../../FuseSafeLiquidator.sol";
 import {MockERC4626Dynamic} from "../../compound/strategies/MockERC4626Dynamic.sol";
-import { ERC4626 } from "../../utils/ERC4626.sol";
-
+import {ERC4626} from "../../utils/ERC4626.sol";
 
 contract WithPool {
     MockERC20 underlyingToken;
@@ -194,7 +193,7 @@ contract WithPool {
     }
 
     function deployCErc20PluginRewardsDelegate(
-        MockERC4626Dynamic _mockERC4626Dynamic,
+        ERC4626 _mockERC4626Dynamic,
         FuseFlywheelCore _flywheel,
         uint256 _collateralFactorMantissa
     ) public {
