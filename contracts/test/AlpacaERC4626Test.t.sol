@@ -24,7 +24,11 @@ contract AlpacaERC4626Test is DSTest {
   function setUp() public {
     testToken = new MockERC20("TestToken", "TST", 18);
     mockVault = new MockVault(address(testToken), "MockVault", "MV", 18);
-    alpacaERC4626 = new AlpacaERC4626(testToken, IAlpacaVault(address(mockVault)), IW_NATIVE(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c));
+    alpacaERC4626 = new AlpacaERC4626(
+      testToken,
+      IAlpacaVault(address(mockVault)),
+      IW_NATIVE(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
+    );
   }
 
   function testInitializedValues() public {
