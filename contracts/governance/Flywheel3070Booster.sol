@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 import "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import "../external/compound/ICToken.sol";
 import "../external/balancer/BNum.sol";
+import "../../lib/fuse-flywheel/src/FuseFlywheelCore.sol";
 
 /**
  * @title Flywheel3070Booster
@@ -19,8 +20,8 @@ import "../external/balancer/BNum.sol";
  *
  * @author Veliko Minkov <veliko@midascapital.xyz>
  */
-contract Flywheel3070Booster is IFlywheelBooster {
-    uint256 public constant ONE = 1e18;
+contract Flywheel3070Booster is IFlywheelBooster, BNum {
+//    uint256 public constant ONE = 1e18;
 
     function boostedTotalSupply(ERC20 strategy) external view returns (uint256) {
         // the 70% of the borrow should be incentivizing only the borrowed principal
@@ -28,27 +29,28 @@ contract Flywheel3070Booster is IFlywheelBooster {
         ICToken asCToken = ICToken(address(strategy));
         uint256 index = asCToken.borrowIndex();
 
-        uint256 totalBorrowedPrincipal = asCToken.totalBorrows() * ONE / index;
+        uint256 totalBorrowedPrincipal = bdiv(asCToken.totalBorrows(), index); //asCToken.totalBorrows() * ONE / index;
         uint256 totalSupply = asCToken.totalSupply();
 
-        // TODO use BNum multiplication
-        return totalBorrowedPrincipal * totalSupply;
+        return bmul(totalBorrowedPrincipal, totalSupply); // (totalBorrowedPrincipal * totalSupply) / ONE;
     }
 
     function boostedBalanceOf(ERC20 strategy, address user) external view returns (uint256 boostedBalance) {
-        // TODO accrue interest first - use flywheelpresupplieraction
+        // TODO accrue interest first - use flywheelpresupplieraction - done in FuseFlywheelCore?
         ICToken asCToken = ICToken(address(strategy));
         uint256 index = asCToken.borrowIndex();
         uint256 balance = asCToken.balanceOf(user);
         uint256 totalSupply = asCToken.totalSupply();
-        uint256 borrowPrincipal = asCToken.borrowBalanceStored(user) * ONE / index;
-        uint256 totalBorrowedPrincipal = asCToken.totalBorrows() * ONE / index;
+        uint256 borrowPrincipal = bdiv(asCToken.borrowBalanceStored(user), index); // asCToken.borrowBalanceStored(user) * ONE / index;
+        uint256 totalBorrowedPrincipal = bdiv(asCToken.totalBorrows(), index); // asCToken.totalBorrows() * ONE / index;
 
         // 30% of the rewards are for supplying
         // 70% of the rewards are for borrowing
-        return (
-                (7 * totalSupply * borrowPrincipal)
-                + (3 * totalBorrowedPrincipal * balance)
-            ) / 10;
+        return
+                    (
+                        7 * bmul(totalSupply, borrowPrincipal)
+                        +
+                        3 * bmul(totalBorrowedPrincipal, balance)
+                    ) / 10;
     }
 }

@@ -13,7 +13,6 @@ import "../governance/StakingController.sol";
 import "../governance/Flywheel3070Booster.sol";
 import { MockCToken } from "./mocks/MockCToken.sol";
 import "flywheel-v2/rewards/FlywheelGaugeRewards.sol";
-import "flywheel-v2/FlywheelCore.sol";
 
 // no mock imports
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
@@ -27,6 +26,7 @@ import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { CToken } from "../compound/CToken.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
+import "fuse-flywheel/FuseFlywheelCore.sol";
 
 
 contract Booster3070SplitTest is DSTest {
@@ -41,10 +41,10 @@ contract Booster3070SplitTest is DSTest {
     MockERC20 rewardToken;
     MockCToken gaugeStrategy;
 
-    FlywheelCore flywheel;
+    FuseFlywheelCore flywheel;
     FlywheelGaugeRewards rewards;
     MockRewardsStream rewardsStream;
-
+    FlywheelStaticRewards staticRewards;
     Flywheel3070Booster booster;
 
     // no mock testing
@@ -117,26 +117,35 @@ contract Booster3070SplitTest is DSTest {
 
         CToken[] memory allMarkets = comptroller.getAllMarkets();
         cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
+    }
 
+    function setUpStaticRewards(CErc20 _cErc20) internal {
         rewardToken = new MockERC20("test token", "TKN", 18);
         booster = new Flywheel3070Booster();
-        flywheel = new FlywheelCore(
+        flywheel = new FuseFlywheelCore(
             rewardToken,
-            IFlywheelRewards(address(0)),
+            IFlywheelRewards(address(0)), // it's ok, set later
             booster,
             address(this),
             Authority(address(0))
         );
 
-        FlywheelStaticRewards staticRewards = new FlywheelStaticRewards(flywheel, address(this), Authority(address(0)));
+        staticRewards = new FlywheelStaticRewards(flywheel, address(this), Authority(address(0)));
+
+        // seed rewards to flywheel
+        rewardToken.mint(address(staticRewards), 100 ether);
+
         flywheel.setFlywheelRewards(staticRewards);
-        flywheel.addStrategyForRewards(ERC20(address(cErc20)));
+        flywheel.addStrategyForRewards(ERC20(address(_cErc20)));
 
         // add flywheel as rewardsDistributor to call flywheelPreBorrowAction / flywheelPreSupplyAction
         require(comptroller._addRewardsDistributor(address(flywheel)) == 0);
 
-        // seed rewards to flywheel
-        rewardToken.mint(address(staticRewards), 100 ether);
+        // Start reward distribution at 1 token per second
+        staticRewards.setRewardsInfo(
+            ERC20(address(_cErc20)),
+            FlywheelStaticRewards.RewardsInfo({ rewardsPerSecond: 1000, rewardsEndTimestamp: 0 })
+        );
     }
 
     function setUp() public {
@@ -153,7 +162,7 @@ contract Booster3070SplitTest is DSTest {
         rewardToken = new MockERC20("test token", "TKN", 18);
         booster = new Flywheel3070Booster();
 
-        flywheel = new FlywheelCore(
+        flywheel = new FuseFlywheelCore(
             rewardToken,
             IFlywheelRewards(address(0)),
             booster,
@@ -191,7 +200,7 @@ contract Booster3070SplitTest is DSTest {
         // the rest is supplied by Bob
         gaugeStrategy.mint(bob, 6000);
 
-        // Alice contributes 10% of the borrowed
+        // Alice contributes to 10% of the borrowed
         gaugeStrategy.borrow(alice, 135);
         // the rest is borrowed by Bob
         gaugeStrategy.borrow(bob, 1215);
@@ -230,19 +239,40 @@ contract Booster3070SplitTest is DSTest {
     }
 
     /*
+    for borrowing:
     alice accruing all the rewards for the first half of the year = x rewards
     then splitting them 10/90 for the second half of the year = 0.1x rewards
+    (1.1x alice + 0.9x bob) = 0.3 total rewards
+
+    for supplying:
+    alice accrues all the rewards for the first half the year = y rewards
+    then splitting the other rewards 50/50 for the second half of the year = 0.5 rewards
+    (1.5y alice + 0.5y bob) = 0.7 total rewards
+
+
+    alice gets: 1.1/2 of 30% of the rewards + 1.5/2 of 70% of the rewards = 0.69 rew
+    bob gets: 0.45 * 0.3 * rew + 0.25 * 0.7 * rew = 0.31 rew
     */
     function testInterestAccrual() public {
         setUpNoMock();
         setUpPoolAndMarket();
+        setUpStaticRewards(cErc20);
 
         uint256 accrualBlockNumberBefore = cErc20.accrualBlockNumber();
-        vm.warp(block.timestamp + 1 days);
         vm.roll(block.number + 1);
+        vm.warp(block.timestamp + 1 days);
+
+        {
+            (uint224 index, uint32 lastUpdatedTimestamp) = flywheel.strategyState(ERC20(address(cErc20)));
+            emit log("strategy state index");
+            emit log_uint(index);
+            emit log("strategy state lastUpdatedTimestamp");
+            emit log_uint(lastUpdatedTimestamp);
+            vm.prank(address(flywheel));
+            emit log_uint(staticRewards.getAccruedRewards(ERC20(address(cErc20)), lastUpdatedTimestamp));
+        }
 
         uint256 _amount = 1 ether;
-//        comptroller.enterMarkets(markets);
 
         // deposit 10% of the total as alice
         {
@@ -250,41 +280,73 @@ contract Booster3070SplitTest is DSTest {
             vm.startPrank(alice);
             underlyingToken.approve(address(cErc20), _amount);
             cErc20.mint(_amount);
-            cErc20.borrow(10);
+            cErc20.borrow(1000);
             vm.stopPrank();
         }
 
         uint256 totalBorrowsBefore = cErc20.totalBorrows();
         // advance the time with 1/2 year
-        vm.roll(block.number + interestModel.blocksPerYear() / 2 + 1);
+//        vm.roll(block.number + interestModel.blocksPerYear() / 2 + 1);
+        vm.warp(block.timestamp + 178 days);
         cErc20.accrueInterest();
 
-        // deposit the other 90% as bob
+        // deposit the other 50% as bob and contribute as 90% of the borrowed
         {
             underlyingToken.mint(bob, _amount);
             vm.startPrank(bob);
             underlyingToken.approve(address(cErc20), _amount);
             cErc20.mint(_amount);
-            cErc20.borrow(90);
+            cErc20.borrow(9000);
             vm.stopPrank();
         }
 
+        {
+            (uint224 index, uint32 lastUpdatedTimestamp) = flywheel.strategyState(ERC20(address(cErc20)));
+            emit log("strategy state index");
+            emit log_uint(index);
+            emit log("strategy state lastUpdatedTimestamp");
+            emit log_uint(lastUpdatedTimestamp);
+        }
+
         // advance the time with 1/2 year
-        vm.roll(block.number + interestModel.blocksPerYear() / 2 + 1);
+//        vm.roll(block.number + interestModel.blocksPerYear() / 2 + 1);
+        vm.warp(block.timestamp + 178 days);
         cErc20.accrueInterest();
 
-        flywheel.accrue(ERC20(address(cErc20)), alice);
-        flywheel.accrue(ERC20(address(cErc20)), bob);
+        {
+            (uint224 index, uint32 lastUpdatedTimestamp) = flywheel.strategyState(ERC20(address(cErc20)));
+            emit log("strategy state index");
+            emit log_uint(index);
+            emit log("strategy state lastUpdatedTimestamp");
+            emit log_uint(lastUpdatedTimestamp);
+        }
+
+        emit log("current timestamp");
+        emit log_uint(block.timestamp);
+
+        flywheel.accrue(ERC20(address(cErc20)), alice, bob);
+
+        {
+            emit log("comp accrued");
+            uint256 aliceCompAfter = flywheel.compAccrued(alice);
+            uint256 bobCompAfter = flywheel.compAccrued(bob);
+
+            emit log_uint(aliceCompAfter);
+            emit log_uint(bobCompAfter);
+        }
 
         // claiming the accrued rewards
         flywheel.claimRewards(alice);
         flywheel.claimRewards(bob);
 
-        uint256 aliceRewardsAfter = rewardToken.balanceOf(alice);
-        uint256 bobRewardsAfter = rewardToken.balanceOf(bob);
+        {
+            emit log("rewards balance after");
+            uint256 aliceRewardsAfter = rewardToken.balanceOf(alice);
+            uint256 bobRewardsAfter = rewardToken.balanceOf(bob);
 
-        emit log_uint(aliceRewardsAfter);
-        emit log_uint(bobRewardsAfter);
+            emit log_uint(aliceRewardsAfter);
+            emit log_uint(bobRewardsAfter);
+        } // this prints 13/90 of the rewards for alice
 
         assertTrue(false, "whatever");
     }
