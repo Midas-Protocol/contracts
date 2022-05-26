@@ -229,6 +229,10 @@ contract Booster3070SplitTest is DSTest {
         assertEq(aliceRewardsAfter + bobRewardsAfter, rewardsForCycle, "total rewards claimed should equal the rewards for the cycle");
     }
 
+    /*
+    alice accruing all the rewards for the first half of the year = x rewards
+    then splitting them 10/90 for the second half of the year = 0.1x rewards
+    */
     function testInterestAccrual() public {
         setUpNoMock();
         setUpPoolAndMarket();
@@ -250,8 +254,8 @@ contract Booster3070SplitTest is DSTest {
             vm.stopPrank();
         }
 
-
         uint256 totalBorrowsBefore = cErc20.totalBorrows();
+        // advance the time with 1/2 year
         vm.roll(block.number + interestModel.blocksPerYear() / 2 + 1);
         cErc20.accrueInterest();
 
@@ -265,6 +269,7 @@ contract Booster3070SplitTest is DSTest {
             vm.stopPrank();
         }
 
+        // advance the time with 1/2 year
         vm.roll(block.number + interestModel.blocksPerYear() / 2 + 1);
         cErc20.accrueInterest();
 
