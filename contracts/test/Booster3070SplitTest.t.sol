@@ -29,7 +29,7 @@ import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards
 import "fuse-flywheel/FuseFlywheelCore.sol";
 
 
-contract Booster3070SplitTest is DSTest {
+contract Booster3070SplitTest is DSTest, BNum {
     Vm public constant vm = Vm(HEVM_ADDRESS);
 
     VeMDSToken veToken;
@@ -239,21 +239,25 @@ contract Booster3070SplitTest is DSTest {
     }
 
     /*
-    for borrowing:
-    alice accruing all the rewards for the first half of the year = x rewards
-    then splitting them 10/90 for the second half of the year = 0.1x rewards
-    (1.1x alice + 0.9x bob) = 0.3 total rewards
-
     for supplying:
-    alice accrues all the rewards for the first half the year = y rewards
-    then splitting the other rewards 50/50 for the second half of the year = 0.5 rewards
-    (1.5y alice + 0.5y bob) = 0.7 total rewards
+    alice accrues all the rewards for the first half the period = y rewards
+    then splitting the other rewards 50/50 for the second half of the period
+    (1.5y alice + 0.5y bob) = 30% total rewards
+
+    for borrowing:
+    alice accruing all the rewards for the first half of the period = x rewards
+    then splitting them 10/90 for the second half of the period
+    (1.1x alice + 0.9x bob) = 70% total rewards
 
 
-    alice gets: 1.1/2 of 30% of the rewards + 1.5/2 of 70% of the rewards = 0.69 rew
-    bob gets: 0.45 * 0.3 * rew + 0.25 * 0.7 * rew = 0.31 rew
+    alice gets: 1.1/2 of 30% of the rewards + 1.5/2 of 70% of the rewards = 61% of the rewards
+    bob gets: 0.45 * 0.7 * rew + 0.25 * 0.3 * rew = 39% of the rewards
     */
-    function testInterestAccrual() public {
+    function testInterestAccrual(uint256 borrowAmount) public {
+//        vm.assume(supplyAmount > 100000000 && supplyAmount < 1000000000);
+        uint256 supplyAmount = 1 ether;
+        vm.assume(borrowAmount > supplyAmount / 20 && borrowAmount <= supplyAmount / 10);
+
         setUpNoMock();
         setUpPoolAndMarket();
         setUpStaticRewards(cErc20);
@@ -262,92 +266,75 @@ contract Booster3070SplitTest is DSTest {
         vm.roll(block.number + 1);
         vm.warp(block.timestamp + 1 days);
 
+        // deposit 1 ether as alice and borrow 1000 units
         {
-            (uint224 index, uint32 lastUpdatedTimestamp) = flywheel.strategyState(ERC20(address(cErc20)));
-            emit log("strategy state index");
-            emit log_uint(index);
-            emit log("strategy state lastUpdatedTimestamp");
-            emit log_uint(lastUpdatedTimestamp);
-            vm.prank(address(flywheel));
-            emit log_uint(staticRewards.getAccruedRewards(ERC20(address(cErc20)), lastUpdatedTimestamp));
-        }
-
-        uint256 _amount = 1 ether;
-
-        // deposit 10% of the total as alice
-        {
-            underlyingToken.mint(alice, _amount);
+            underlyingToken.mint(alice, supplyAmount);
             vm.startPrank(alice);
-            underlyingToken.approve(address(cErc20), _amount);
-            cErc20.mint(_amount);
-            cErc20.borrow(1000);
+            underlyingToken.approve(address(cErc20), supplyAmount);
+            cErc20.mint(supplyAmount);
+            cErc20.borrow(borrowAmount);
             vm.stopPrank();
         }
 
-        uint256 totalBorrowsBefore = cErc20.totalBorrows();
-        // advance the time with 1/2 year
-//        vm.roll(block.number + interestModel.blocksPerYear() / 2 + 1);
-        vm.warp(block.timestamp + 178 days);
-        cErc20.accrueInterest();
-
-        // deposit the other 50% as bob and contribute as 90% of the borrowed
+        uint256 aliceSupplyBefore = cErc20.balanceOfUnderlying(alice);
+        // advance the time with 1/2 period
         {
-            underlyingToken.mint(bob, _amount);
-            vm.startPrank(bob);
-            underlyingToken.approve(address(cErc20), _amount);
-            cErc20.mint(_amount);
-            cErc20.borrow(9000);
-            vm.stopPrank();
+            vm.roll(block.number + interestModel.blocksPerYear());
+            vm.warp(block.timestamp + 365.25 days);
+            // accrue the interest to show the booster does not take it into account
+            cErc20.accrueInterest();
         }
+        uint256 aliceSupplyAfter = cErc20.balanceOfUnderlying(alice);
+        emit log_uint(aliceSupplyBefore);
+        emit log_uint(aliceSupplyAfter);
+        assertLt(aliceSupplyBefore, aliceSupplyAfter, "alice should accrue interest on her deposit");
 
-        {
-            (uint224 index, uint32 lastUpdatedTimestamp) = flywheel.strategyState(ERC20(address(cErc20)));
-            emit log("strategy state index");
-            emit log_uint(index);
-            emit log("strategy state lastUpdatedTimestamp");
-            emit log_uint(lastUpdatedTimestamp);
-        }
-
-        // advance the time with 1/2 year
-//        vm.roll(block.number + interestModel.blocksPerYear() / 2 + 1);
-        vm.warp(block.timestamp + 178 days);
-        cErc20.accrueInterest();
-
-        {
-            (uint224 index, uint32 lastUpdatedTimestamp) = flywheel.strategyState(ERC20(address(cErc20)));
-            emit log("strategy state index");
-            emit log_uint(index);
-            emit log("strategy state lastUpdatedTimestamp");
-            emit log_uint(lastUpdatedTimestamp);
-        }
-
-        emit log("current timestamp");
-        emit log_uint(block.timestamp);
-
+        // accrue the rewards before bob takes part in the supplying/borrowing
         flywheel.accrue(ERC20(address(cErc20)), alice, bob);
 
-        {
-            emit log("comp accrued");
-            uint256 aliceCompAfter = flywheel.compAccrued(alice);
-            uint256 bobCompAfter = flywheel.compAccrued(bob);
+//        uint256 aliceAccruedBefore = flywheel.compAccrued(alice);
+//        uint256 bobAccruedBefore = flywheel.compAccrued(bob);
+//        emit log_uint(aliceAccruedBefore);
+//        emit log_uint(bobAccruedBefore);
+//        uint256 calculatedRewards = aliceSupplyAfter * 3 / 10 * (1000 * 365.25 days);
+//        emit log_uint(calculatedRewards);
+//
+//        assertTrue(aliceAccruedBefore == calculatedRewards);
 
-            emit log_uint(aliceCompAfter);
-            emit log_uint(bobCompAfter);
+        // deposit the other 50% as bob and contribute to 90% of the borrowed
+        {
+            underlyingToken.mint(bob, supplyAmount);
+            vm.startPrank(bob);
+            underlyingToken.approve(address(cErc20), supplyAmount);
+            cErc20.mint(supplyAmount);
+            cErc20.borrow(9 * borrowAmount);
+            vm.stopPrank();
         }
+
+        // advance the time with 1/2 period
+        {
+            vm.roll(block.number + interestModel.blocksPerYear());
+            vm.warp(block.timestamp + 365.25 days);
+            // accrue the interest to show the booster does not take it into account
+            cErc20.accrueInterest();
+        }
+
+        flywheel.accrue(ERC20(address(cErc20)), alice, bob);
 
         // claiming the accrued rewards
         flywheel.claimRewards(alice);
         flywheel.claimRewards(bob);
 
-        {
-            emit log("rewards balance after");
-            uint256 aliceRewardsAfter = rewardToken.balanceOf(alice);
-            uint256 bobRewardsAfter = rewardToken.balanceOf(bob);
+        uint256 aliceRewardsAfter = rewardToken.balanceOf(alice);
+        uint256 bobRewardsAfter = rewardToken.balanceOf(bob);
 
-            emit log_uint(aliceRewardsAfter);
-            emit log_uint(bobRewardsAfter);
-        } // this prints 13/90 of the rewards for alice
+        emit log_uint((aliceRewardsAfter * 100) / (aliceRewardsAfter + bobRewardsAfter));
 
-        assertTrue(false, "whatever");
+        emit log("current exch rate");
+        emit log_uint(cErc20.exchangeRateCurrent());
+
+        assertTrue(
+            100 * aliceRewardsAfter / (aliceRewardsAfter + bobRewardsAfter) == 64
+            , "alice should get approx 64% of the total rewards");
     }
 }
