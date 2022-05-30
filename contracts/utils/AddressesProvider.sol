@@ -33,15 +33,15 @@ contract AddressesProvider is OwnableUpgradeable {
   /**
    * @dev sets the address and contract interface ID of the flywheel for the reward token
    * @param rewardToken the reward token address
-   * @param flywheel the flywheel address
+   * @param flywheelRewardsModule the flywheel rewards module address
    * @param contractInterface a string that uniquely identifies the contract's interface
    */
   function setFlywheelRewards(
     address rewardToken,
-    address flywheel,
+    address flywheelRewardsModule,
     string calldata contractInterface
   ) public onlyOwner {
-    flywheelRewards[rewardToken] = Contract(flywheel, contractInterface);
+    flywheelRewards[rewardToken] = Contract(flywheelRewardsModule, contractInterface);
   }
 
   /**

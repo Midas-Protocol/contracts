@@ -426,8 +426,34 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "_become(address)": "1d504dc6",
+    "_setCloseFactor(uint256)": "317b0b77",
+    "_setLiquidationIncentive(uint256)": "4fd42e17",
+    "_setPriceOracle(address)": "55ee1fe1",
+    "_setWhitelistEnforcement(bool)": "952adf5a",
+    "_setWhitelistStatuses(address[],bool[])": "c8c9c975",
+    "_toggleAutoImplementations(bool)": "d5333166",
+    "admin()": "f851a440",
+    "adminHasRights()": "0a755ec2",
+    "borrowGuardianPaused(address)": "6d154ea5",
+    "checkMembership(address,address)": "929fe9a1",
+    "closeFactorMantissa()": "e8755446",
+    "enforceWhitelist()": "b0957210",
+    "fuseAdminHasRights()": "2f1069ba",
+    "getAccountLiquidity(address)": "5ec88c79",
+    "getAllBorrowers()": "32abcdbe",
+    "getAllMarkets()": "b0772d0b",
+    "getAssetsIn(address)": "abfceffc",
+    "getRewardsDistributors()": "3605b51b",
+    "liquidationIncentiveMantissa()": "4ada90af",
+    "markets(address)": "8e8f294b",
+    "oracle()": "7dc0d1d0",
+    "suppliers(address)": "16dc15fe",
+    "whitelist(address)": "9b19251a"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/IComptroller.sol",
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/IComptroller.sol",
     "id": 33778,
     "exportedSymbols": {
       "ICToken": [
@@ -464,7 +490,7 @@
         "id": 33603,
         "nodeType": "ImportDirective",
         "src": "67:28:75",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/IPriceOracle.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/IPriceOracle.sol",
         "file": "./IPriceOracle.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 33778,
@@ -476,7 +502,7 @@
         "id": 33604,
         "nodeType": "ImportDirective",
         "src": "96:23:75",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICToken.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/ICToken.sol",
         "file": "./ICToken.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 33778,
@@ -488,7 +514,7 @@
         "id": 33605,
         "nodeType": "ImportDirective",
         "src": "120:27:75",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/IUnitroller.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/IUnitroller.sol",
         "file": "./IUnitroller.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 33778,
@@ -500,7 +526,7 @@
         "id": 33606,
         "nodeType": "ImportDirective",
         "src": "148:35:75",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/IRewardsDistributor.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/IRewardsDistributor.sol",
         "file": "./IRewardsDistributor.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 33778,
@@ -2468,5 +2494,6 @@
       }
     ],
     "license": "BSD-3-Clause"
-  }
+  },
+  "id": 75
 }

@@ -35,8 +35,11 @@
     "sourceMap": "",
     "linkReferences": {}
   },
+  "methodIdentifiers": {
+    "getValue(string)": "960384a0"
+  },
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/default/DiaPriceOracle.sol",
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/oracles/default/DiaPriceOracle.sol",
     "id": 43392,
     "exportedSymbols": {
       "BasePriceOracle": [
@@ -82,7 +85,7 @@
         "id": 42930,
         "nodeType": "ImportDirective",
         "src": "65:113:164",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 43392,
@@ -106,7 +109,7 @@
         "id": 42932,
         "nodeType": "ImportDirective",
         "src": "180:72:164",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/IPriceOracle.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/IPriceOracle.sol",
         "file": "../../external/compound/IPriceOracle.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 43392,
@@ -130,7 +133,7 @@
         "id": 42934,
         "nodeType": "ImportDirective",
         "src": "253:62:164",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICToken.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/ICToken.sol",
         "file": "../../external/compound/ICToken.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 43392,
@@ -154,7 +157,7 @@
         "id": 42936,
         "nodeType": "ImportDirective",
         "src": "316:62:164",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/external/compound/ICErc20.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/ICErc20.sol",
         "file": "../../external/compound/ICErc20.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 43392,
@@ -178,7 +181,7 @@
         "id": 42938,
         "nodeType": "ImportDirective",
         "src": "379:61:164",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/MasterPriceOracle.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/oracles/MasterPriceOracle.sol",
         "file": "../MasterPriceOracle.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 43392,
@@ -202,7 +205,7 @@
         "id": 42940,
         "nodeType": "ImportDirective",
         "src": "441:57:164",
-        "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/oracles/BasePriceOracle.sol",
+        "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/oracles/BasePriceOracle.sol",
         "file": "../BasePriceOracle.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 43392,
@@ -4767,9 +4770,6 @@
             "id": 43316,
             "nodeType": "FunctionDefinition",
             "src": "5461:112:164",
-            "baseFunctions": [
-              41267
-            ],
             "body": {
               "id": 43315,
               "nodeType": "Block",
@@ -4831,6 +4831,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              41267
+            ],
             "documentation": {
               "id": 43303,
               "nodeType": "StructuredDocumentation",
@@ -4927,9 +4930,6 @@
             "id": 43390,
             "nodeType": "FunctionDefinition",
             "src": "5849:610:164",
-            "baseFunctions": [
-              33789
-            ],
             "body": {
               "id": 43389,
               "nodeType": "Block",
@@ -5856,6 +5856,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              33789
+            ],
             "documentation": {
               "id": 43317,
               "nodeType": "StructuredDocumentation",
@@ -6004,5 +6007,6 @@
       }
     ],
     "license": "UNLICENSED"
-  }
+  },
+  "id": 164
 }

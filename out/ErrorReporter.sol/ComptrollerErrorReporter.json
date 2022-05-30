@@ -27,33 +27,34 @@
     }
   ],
   "bytecode": {
-    "object": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea264697066735822122039bb613f625f8536c2789ddcfe7ceb7840eab097f7b29271035650b3c4ce301164736f6c634300080a0033",
-    "sourceMap": "65:2543:26:-:0;;;;;;;;;;;;;;;;;;;",
+    "object": "0x6080604052348015600f57600080fd5b50601680601d6000396000f3fe6080604052600080fdfea164736f6c634300080a000a",
+    "sourceMap": "65:2543:12:-:0;;;;;;;;;;;;;;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
-    "object": "0x6080604052600080fdfea264697066735822122039bb613f625f8536c2789ddcfe7ceb7840eab097f7b29271035650b3c4ce301164736f6c634300080a0033",
-    "sourceMap": "65:2543:26:-:0;;;;;",
+    "object": "0x6080604052600080fdfea164736f6c634300080a000a",
+    "sourceMap": "65:2543:12:-:0;;;;;",
     "linkReferences": {}
   },
+  "methodIdentifiers": {},
   "ast": {
-    "absolutePath": "/Users/carlomazzaferro/projects/eth/contracts/contracts/compound/ErrorReporter.sol",
-    "id": 21005,
+    "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/compound/ErrorReporter.sol",
+    "id": 6642,
     "exportedSymbols": {
       "ComptrollerErrorReporter": [
-        20804
+        6441
       ],
       "TokenErrorReporter": [
-        21004
+        6641
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "39:8378:26",
+    "src": "39:8378:12",
     "nodes": [
       {
-        "id": 20680,
+        "id": 6317,
         "nodeType": "PragmaDirective",
-        "src": "39:24:26",
+        "src": "39:24:12",
         "literals": [
           "solidity",
           ">=",
@@ -62,407 +63,407 @@
         ]
       },
       {
-        "id": 20804,
+        "id": 6441,
         "nodeType": "ContractDefinition",
-        "src": "65:2543:26",
+        "src": "65:2543:12",
         "nodes": [
           {
-            "id": 20703,
+            "id": 6340,
             "nodeType": "EnumDefinition",
-            "src": "103:554:26",
+            "src": "103:554:12",
             "canonicalName": "ComptrollerErrorReporter.Error",
             "members": [
               {
-                "id": 20681,
+                "id": 6318,
                 "name": "NO_ERROR",
-                "nameLocation": "120:8:26",
+                "nameLocation": "120:8:12",
                 "nodeType": "EnumValue",
-                "src": "120:8:26"
+                "src": "120:8:12"
               },
               {
-                "id": 20682,
+                "id": 6319,
                 "name": "UNAUTHORIZED",
-                "nameLocation": "134:12:26",
+                "nameLocation": "134:12:12",
                 "nodeType": "EnumValue",
-                "src": "134:12:26"
+                "src": "134:12:12"
               },
               {
-                "id": 20683,
+                "id": 6320,
                 "name": "COMPTROLLER_MISMATCH",
-                "nameLocation": "152:20:26",
+                "nameLocation": "152:20:12",
                 "nodeType": "EnumValue",
-                "src": "152:20:26"
+                "src": "152:20:12"
               },
               {
-                "id": 20684,
+                "id": 6321,
                 "name": "INSUFFICIENT_SHORTFALL",
-                "nameLocation": "178:22:26",
+                "nameLocation": "178:22:12",
                 "nodeType": "EnumValue",
-                "src": "178:22:26"
+                "src": "178:22:12"
               },
               {
-                "id": 20685,
+                "id": 6322,
                 "name": "INSUFFICIENT_LIQUIDITY",
-                "nameLocation": "206:22:26",
+                "nameLocation": "206:22:12",
                 "nodeType": "EnumValue",
-                "src": "206:22:26"
+                "src": "206:22:12"
               },
               {
-                "id": 20686,
+                "id": 6323,
                 "name": "INVALID_CLOSE_FACTOR",
-                "nameLocation": "234:20:26",
+                "nameLocation": "234:20:12",
                 "nodeType": "EnumValue",
-                "src": "234:20:26"
+                "src": "234:20:12"
               },
               {
-                "id": 20687,
+                "id": 6324,
                 "name": "INVALID_COLLATERAL_FACTOR",
-                "nameLocation": "260:25:26",
+                "nameLocation": "260:25:12",
                 "nodeType": "EnumValue",
-                "src": "260:25:26"
+                "src": "260:25:12"
               },
               {
-                "id": 20688,
+                "id": 6325,
                 "name": "INVALID_LIQUIDATION_INCENTIVE",
-                "nameLocation": "291:29:26",
+                "nameLocation": "291:29:12",
                 "nodeType": "EnumValue",
-                "src": "291:29:26"
+                "src": "291:29:12"
               },
               {
-                "id": 20689,
+                "id": 6326,
                 "name": "MARKET_NOT_ENTERED",
-                "nameLocation": "326:18:26",
+                "nameLocation": "326:18:12",
                 "nodeType": "EnumValue",
-                "src": "326:18:26"
+                "src": "326:18:12"
               },
               {
-                "id": 20690,
+                "id": 6327,
                 "name": "MARKET_NOT_LISTED",
-                "nameLocation": "372:17:26",
+                "nameLocation": "372:17:12",
                 "nodeType": "EnumValue",
-                "src": "372:17:26"
+                "src": "372:17:12"
               },
               {
-                "id": 20691,
+                "id": 6328,
                 "name": "MARKET_ALREADY_LISTED",
-                "nameLocation": "395:21:26",
+                "nameLocation": "395:21:12",
                 "nodeType": "EnumValue",
-                "src": "395:21:26"
+                "src": "395:21:12"
               },
               {
-                "id": 20692,
+                "id": 6329,
                 "name": "MATH_ERROR",
-                "nameLocation": "422:10:26",
+                "nameLocation": "422:10:12",
                 "nodeType": "EnumValue",
-                "src": "422:10:26"
+                "src": "422:10:12"
               },
               {
-                "id": 20693,
+                "id": 6330,
                 "name": "NONZERO_BORROW_BALANCE",
-                "nameLocation": "438:22:26",
+                "nameLocation": "438:22:12",
                 "nodeType": "EnumValue",
-                "src": "438:22:26"
+                "src": "438:22:12"
               },
               {
-                "id": 20694,
+                "id": 6331,
                 "name": "PRICE_ERROR",
-                "nameLocation": "466:11:26",
+                "nameLocation": "466:11:12",
                 "nodeType": "EnumValue",
-                "src": "466:11:26"
+                "src": "466:11:12"
               },
               {
-                "id": 20695,
+                "id": 6332,
                 "name": "REJECTION",
-                "nameLocation": "483:9:26",
+                "nameLocation": "483:9:12",
                 "nodeType": "EnumValue",
-                "src": "483:9:26"
+                "src": "483:9:12"
               },
               {
-                "id": 20696,
+                "id": 6333,
                 "name": "SNAPSHOT_ERROR",
-                "nameLocation": "498:14:26",
+                "nameLocation": "498:14:12",
                 "nodeType": "EnumValue",
-                "src": "498:14:26"
+                "src": "498:14:12"
               },
               {
-                "id": 20697,
+                "id": 6334,
                 "name": "TOO_MANY_ASSETS",
-                "nameLocation": "518:15:26",
+                "nameLocation": "518:15:12",
                 "nodeType": "EnumValue",
-                "src": "518:15:26"
+                "src": "518:15:12"
               },
               {
-                "id": 20698,
+                "id": 6335,
                 "name": "TOO_MUCH_REPAY",
-                "nameLocation": "539:14:26",
+                "nameLocation": "539:14:12",
                 "nodeType": "EnumValue",
-                "src": "539:14:26"
+                "src": "539:14:12"
               },
               {
-                "id": 20699,
+                "id": 6336,
                 "name": "SUPPLIER_NOT_WHITELISTED",
-                "nameLocation": "559:24:26",
+                "nameLocation": "559:24:12",
                 "nodeType": "EnumValue",
-                "src": "559:24:26"
+                "src": "559:24:12"
               },
               {
-                "id": 20700,
+                "id": 6337,
                 "name": "BORROW_BELOW_MIN",
-                "nameLocation": "589:16:26",
+                "nameLocation": "589:16:12",
                 "nodeType": "EnumValue",
-                "src": "589:16:26"
+                "src": "589:16:12"
               },
               {
-                "id": 20701,
+                "id": 6338,
                 "name": "SUPPLY_ABOVE_MAX",
-                "nameLocation": "611:16:26",
+                "nameLocation": "611:16:12",
                 "nodeType": "EnumValue",
-                "src": "611:16:26"
+                "src": "611:16:12"
               },
               {
-                "id": 20702,
+                "id": 6339,
                 "name": "NONZERO_TOTAL_SUPPLY",
-                "nameLocation": "633:20:26",
+                "nameLocation": "633:20:12",
                 "nodeType": "EnumValue",
-                "src": "633:20:26"
+                "src": "633:20:12"
               }
             ],
             "name": "Error",
-            "nameLocation": "108:5:26"
+            "nameLocation": "108:5:12"
           },
           {
-            "id": 20732,
+            "id": 6369,
             "nodeType": "EnumDefinition",
-            "src": "661:1071:26",
+            "src": "661:1071:12",
             "canonicalName": "ComptrollerErrorReporter.FailureInfo",
             "members": [
               {
-                "id": 20704,
+                "id": 6341,
                 "name": "ACCEPT_ADMIN_PENDING_ADMIN_CHECK",
-                "nameLocation": "684:32:26",
+                "nameLocation": "684:32:12",
                 "nodeType": "EnumValue",
-                "src": "684:32:26"
+                "src": "684:32:12"
               },
               {
-                "id": 20705,
+                "id": 6342,
                 "name": "ACCEPT_PENDING_IMPLEMENTATION_ADDRESS_CHECK",
-                "nameLocation": "722:43:26",
+                "nameLocation": "722:43:12",
                 "nodeType": "EnumValue",
-                "src": "722:43:26"
+                "src": "722:43:12"
               },
               {
-                "id": 20706,
+                "id": 6343,
                 "name": "ADD_REWARDS_DISTRIBUTOR_OWNER_CHECK",
-                "nameLocation": "771:35:26",
+                "nameLocation": "771:35:12",
                 "nodeType": "EnumValue",
-                "src": "771:35:26"
+                "src": "771:35:12"
               },
               {
-                "id": 20707,
+                "id": 6344,
                 "name": "EXIT_MARKET_BALANCE_OWED",
-                "nameLocation": "812:24:26",
+                "nameLocation": "812:24:12",
                 "nodeType": "EnumValue",
-                "src": "812:24:26"
+                "src": "812:24:12"
               },
               {
-                "id": 20708,
+                "id": 6345,
                 "name": "EXIT_MARKET_REJECTION",
-                "nameLocation": "842:21:26",
+                "nameLocation": "842:21:12",
                 "nodeType": "EnumValue",
-                "src": "842:21:26"
+                "src": "842:21:12"
               },
               {
-                "id": 20709,
+                "id": 6346,
                 "name": "TOGGLE_ADMIN_RIGHTS_OWNER_CHECK",
-                "nameLocation": "869:31:26",
+                "nameLocation": "869:31:12",
                 "nodeType": "EnumValue",
-                "src": "869:31:26"
+                "src": "869:31:12"
               },
               {
-                "id": 20710,
+                "id": 6347,
                 "name": "TOGGLE_AUTO_IMPLEMENTATIONS_ENABLED_OWNER_CHECK",
-                "nameLocation": "906:47:26",
+                "nameLocation": "906:47:12",
                 "nodeType": "EnumValue",
-                "src": "906:47:26"
+                "src": "906:47:12"
               },
               {
-                "id": 20711,
+                "id": 6348,
                 "name": "SET_CLOSE_FACTOR_OWNER_CHECK",
-                "nameLocation": "959:28:26",
+                "nameLocation": "959:28:12",
                 "nodeType": "EnumValue",
-                "src": "959:28:26"
+                "src": "959:28:12"
               },
               {
-                "id": 20712,
+                "id": 6349,
                 "name": "SET_CLOSE_FACTOR_VALIDATION",
-                "nameLocation": "993:27:26",
+                "nameLocation": "993:27:12",
                 "nodeType": "EnumValue",
-                "src": "993:27:26"
+                "src": "993:27:12"
               },
               {
-                "id": 20713,
+                "id": 6350,
                 "name": "SET_COLLATERAL_FACTOR_OWNER_CHECK",
-                "nameLocation": "1026:33:26",
+                "nameLocation": "1026:33:12",
                 "nodeType": "EnumValue",
-                "src": "1026:33:26"
+                "src": "1026:33:12"
               },
               {
-                "id": 20714,
+                "id": 6351,
                 "name": "SET_COLLATERAL_FACTOR_NO_EXISTS",
-                "nameLocation": "1065:31:26",
+                "nameLocation": "1065:31:12",
                 "nodeType": "EnumValue",
-                "src": "1065:31:26"
+                "src": "1065:31:12"
               },
               {
-                "id": 20715,
+                "id": 6352,
                 "name": "SET_COLLATERAL_FACTOR_VALIDATION",
-                "nameLocation": "1102:32:26",
+                "nameLocation": "1102:32:12",
                 "nodeType": "EnumValue",
-                "src": "1102:32:26"
+                "src": "1102:32:12"
               },
               {
-                "id": 20716,
+                "id": 6353,
                 "name": "SET_COLLATERAL_FACTOR_WITHOUT_PRICE",
-                "nameLocation": "1140:35:26",
+                "nameLocation": "1140:35:12",
                 "nodeType": "EnumValue",
-                "src": "1140:35:26"
+                "src": "1140:35:12"
               },
               {
-                "id": 20717,
+                "id": 6354,
                 "name": "SET_LIQUIDATION_INCENTIVE_OWNER_CHECK",
-                "nameLocation": "1181:37:26",
+                "nameLocation": "1181:37:12",
                 "nodeType": "EnumValue",
-                "src": "1181:37:26"
+                "src": "1181:37:12"
               },
               {
-                "id": 20718,
+                "id": 6355,
                 "name": "SET_LIQUIDATION_INCENTIVE_VALIDATION",
-                "nameLocation": "1224:36:26",
+                "nameLocation": "1224:36:12",
                 "nodeType": "EnumValue",
-                "src": "1224:36:26"
+                "src": "1224:36:12"
               },
               {
-                "id": 20719,
+                "id": 6356,
                 "name": "SET_MAX_ASSETS_OWNER_CHECK",
-                "nameLocation": "1266:26:26",
+                "nameLocation": "1266:26:12",
                 "nodeType": "EnumValue",
-                "src": "1266:26:26"
+                "src": "1266:26:12"
               },
               {
-                "id": 20720,
+                "id": 6357,
                 "name": "SET_PENDING_ADMIN_OWNER_CHECK",
-                "nameLocation": "1298:29:26",
+                "nameLocation": "1298:29:12",
                 "nodeType": "EnumValue",
-                "src": "1298:29:26"
+                "src": "1298:29:12"
               },
               {
-                "id": 20721,
+                "id": 6358,
                 "name": "SET_PENDING_IMPLEMENTATION_CONTRACT_CHECK",
-                "nameLocation": "1333:41:26",
+                "nameLocation": "1333:41:12",
                 "nodeType": "EnumValue",
-                "src": "1333:41:26"
+                "src": "1333:41:12"
               },
               {
-                "id": 20722,
+                "id": 6359,
                 "name": "SET_PENDING_IMPLEMENTATION_OWNER_CHECK",
-                "nameLocation": "1380:38:26",
+                "nameLocation": "1380:38:12",
                 "nodeType": "EnumValue",
-                "src": "1380:38:26"
+                "src": "1380:38:12"
               },
               {
-                "id": 20723,
+                "id": 6360,
                 "name": "SET_PRICE_ORACLE_OWNER_CHECK",
-                "nameLocation": "1424:28:26",
+                "nameLocation": "1424:28:12",
                 "nodeType": "EnumValue",
-                "src": "1424:28:26"
+                "src": "1424:28:12"
               },
               {
-                "id": 20724,
+                "id": 6361,
                 "name": "SET_WHITELIST_ENFORCEMENT_OWNER_CHECK",
-                "nameLocation": "1458:37:26",
+                "nameLocation": "1458:37:12",
                 "nodeType": "EnumValue",
-                "src": "1458:37:26"
+                "src": "1458:37:12"
               },
               {
-                "id": 20725,
+                "id": 6362,
                 "name": "SET_WHITELIST_STATUS_OWNER_CHECK",
-                "nameLocation": "1501:32:26",
+                "nameLocation": "1501:32:12",
                 "nodeType": "EnumValue",
-                "src": "1501:32:26"
+                "src": "1501:32:12"
               },
               {
-                "id": 20726,
+                "id": 6363,
                 "name": "SUPPORT_MARKET_EXISTS",
-                "nameLocation": "1539:21:26",
+                "nameLocation": "1539:21:12",
                 "nodeType": "EnumValue",
-                "src": "1539:21:26"
+                "src": "1539:21:12"
               },
               {
-                "id": 20727,
+                "id": 6364,
                 "name": "SUPPORT_MARKET_OWNER_CHECK",
-                "nameLocation": "1566:26:26",
+                "nameLocation": "1566:26:12",
                 "nodeType": "EnumValue",
-                "src": "1566:26:26"
+                "src": "1566:26:12"
               },
               {
-                "id": 20728,
+                "id": 6365,
                 "name": "SET_PAUSE_GUARDIAN_OWNER_CHECK",
-                "nameLocation": "1598:30:26",
+                "nameLocation": "1598:30:12",
                 "nodeType": "EnumValue",
-                "src": "1598:30:26"
+                "src": "1598:30:12"
               },
               {
-                "id": 20729,
+                "id": 6366,
                 "name": "UNSUPPORT_MARKET_OWNER_CHECK",
-                "nameLocation": "1634:28:26",
+                "nameLocation": "1634:28:12",
                 "nodeType": "EnumValue",
-                "src": "1634:28:26"
+                "src": "1634:28:12"
               },
               {
-                "id": 20730,
+                "id": 6367,
                 "name": "UNSUPPORT_MARKET_DOES_NOT_EXIST",
-                "nameLocation": "1668:31:26",
+                "nameLocation": "1668:31:12",
                 "nodeType": "EnumValue",
-                "src": "1668:31:26"
+                "src": "1668:31:12"
               },
               {
-                "id": 20731,
+                "id": 6368,
                 "name": "UNSUPPORT_MARKET_IN_USE",
-                "nameLocation": "1705:23:26",
+                "nameLocation": "1705:23:12",
                 "nodeType": "EnumValue",
-                "src": "1705:23:26"
+                "src": "1705:23:12"
               }
             ],
             "name": "FailureInfo",
-            "nameLocation": "666:11:26"
+            "nameLocation": "666:11:12"
           },
           {
-            "id": 20741,
+            "id": 6378,
             "nodeType": "EventDefinition",
-            "src": "1964:59:26",
+            "src": "1964:59:12",
             "anonymous": false,
             "documentation": {
-              "id": 20733,
+              "id": 6370,
               "nodeType": "StructuredDocumentation",
-              "src": "1736:225:26",
+              "src": "1736:225:12",
               "text": " @dev `error` corresponds to enum Error; `info` corresponds to enum FailureInfo, and `detail` is an arbitrary\n contract-specific code that enables us to report opaque error codes from upgradeable contracts.*"
             },
             "name": "Failure",
-            "nameLocation": "1970:7:26",
+            "nameLocation": "1970:7:12",
             "parameters": {
-              "id": 20740,
+              "id": 6377,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 20735,
+                  "id": 6372,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "error",
-                  "nameLocation": "1986:5:26",
+                  "nameLocation": "1986:5:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20741,
-                  "src": "1978:13:26",
+                  "scope": 6378,
+                  "src": "1978:13:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -470,10 +471,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 20734,
+                    "id": 6371,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1978:7:26",
+                    "src": "1978:7:12",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -483,14 +484,14 @@
                 },
                 {
                   "constant": false,
-                  "id": 20737,
+                  "id": 6374,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "info",
-                  "nameLocation": "2001:4:26",
+                  "nameLocation": "2001:4:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20741,
-                  "src": "1993:12:26",
+                  "scope": 6378,
+                  "src": "1993:12:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -498,10 +499,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 20736,
+                    "id": 6373,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1993:7:26",
+                    "src": "1993:7:12",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -511,14 +512,14 @@
                 },
                 {
                   "constant": false,
-                  "id": 20739,
+                  "id": 6376,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "detail",
-                  "nameLocation": "2015:6:26",
+                  "nameLocation": "2015:6:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20741,
-                  "src": "2007:14:26",
+                  "scope": 6378,
+                  "src": "2007:14:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -526,10 +527,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 20738,
+                    "id": 6375,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2007:7:26",
+                    "src": "2007:7:12",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -538,17 +539,17 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1977:45:26"
+              "src": "1977:45:12"
             }
           },
           {
-            "id": 20771,
+            "id": 6408,
             "nodeType": "FunctionDefinition",
-            "src": "2143:151:26",
+            "src": "2143:151:12",
             "body": {
-              "id": 20770,
+              "id": 6407,
               "nodeType": "Block",
-              "src": "2213:81:26",
+              "src": "2213:81:12",
               "statements": [
                 {
                   "eventCall": {
@@ -556,14 +557,14 @@
                       {
                         "arguments": [
                           {
-                            "id": 20756,
+                            "id": 6393,
                             "name": "err",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 20745,
-                            "src": "2240:3:26",
+                            "referencedDeclaration": 6382,
+                            "src": "2240:3:12",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_enum$_Error_$20703",
+                              "typeIdentifier": "t_enum$_Error_$6340",
                               "typeString": "enum ComptrollerErrorReporter.Error"
                             }
                           }
@@ -571,30 +572,30 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_enum$_Error_$20703",
+                              "typeIdentifier": "t_enum$_Error_$6340",
                               "typeString": "enum ComptrollerErrorReporter.Error"
                             }
                           ],
-                          "id": 20755,
+                          "id": 6392,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "2232:7:26",
+                          "src": "2232:7:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_uint256_$",
                             "typeString": "type(uint256)"
                           },
                           "typeName": {
-                            "id": 20754,
+                            "id": 6391,
                             "name": "uint256",
                             "nodeType": "ElementaryTypeName",
-                            "src": "2232:7:26",
+                            "src": "2232:7:12",
                             "typeDescriptions": {}
                           }
                         },
-                        "id": 20757,
+                        "id": 6394,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -602,7 +603,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "2232:12:26",
+                        "src": "2232:12:12",
                         "tryCall": false,
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -612,14 +613,14 @@
                       {
                         "arguments": [
                           {
-                            "id": 20760,
+                            "id": 6397,
                             "name": "info",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 20748,
-                            "src": "2254:4:26",
+                            "referencedDeclaration": 6385,
+                            "src": "2254:4:12",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_enum$_FailureInfo_$20732",
+                              "typeIdentifier": "t_enum$_FailureInfo_$6369",
                               "typeString": "enum ComptrollerErrorReporter.FailureInfo"
                             }
                           }
@@ -627,30 +628,30 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_enum$_FailureInfo_$20732",
+                              "typeIdentifier": "t_enum$_FailureInfo_$6369",
                               "typeString": "enum ComptrollerErrorReporter.FailureInfo"
                             }
                           ],
-                          "id": 20759,
+                          "id": 6396,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "2246:7:26",
+                          "src": "2246:7:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_uint256_$",
                             "typeString": "type(uint256)"
                           },
                           "typeName": {
-                            "id": 20758,
+                            "id": 6395,
                             "name": "uint256",
                             "nodeType": "ElementaryTypeName",
-                            "src": "2246:7:26",
+                            "src": "2246:7:12",
                             "typeDescriptions": {}
                           }
                         },
-                        "id": 20761,
+                        "id": 6398,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -658,7 +659,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "2246:13:26",
+                        "src": "2246:13:12",
                         "tryCall": false,
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -667,14 +668,14 @@
                       },
                       {
                         "hexValue": "30",
-                        "id": 20762,
+                        "id": 6399,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "2261:1:26",
+                        "src": "2261:1:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_0_by_1",
                           "typeString": "int_const 0"
@@ -697,18 +698,18 @@
                           "typeString": "int_const 0"
                         }
                       ],
-                      "id": 20753,
+                      "id": 6390,
                       "name": "Failure",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 20741,
-                      "src": "2224:7:26",
+                      "referencedDeclaration": 6378,
+                      "src": "2224:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_uint256_$_t_uint256_$_t_uint256_$returns$__$",
                         "typeString": "function (uint256,uint256,uint256)"
                       }
                     },
-                    "id": 20763,
+                    "id": 6400,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -716,29 +717,29 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "2224:39:26",
+                    "src": "2224:39:12",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 20764,
+                  "id": 6401,
                   "nodeType": "EmitStatement",
-                  "src": "2219:44:26"
+                  "src": "2219:44:12"
                 },
                 {
                   "expression": {
                     "arguments": [
                       {
-                        "id": 20767,
+                        "id": 6404,
                         "name": "err",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 20745,
-                        "src": "2285:3:26",
+                        "referencedDeclaration": 6382,
+                        "src": "2285:3:12",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_Error_$20703",
+                          "typeIdentifier": "t_enum$_Error_$6340",
                           "typeString": "enum ComptrollerErrorReporter.Error"
                         }
                       }
@@ -746,30 +747,30 @@
                     "expression": {
                       "argumentTypes": [
                         {
-                          "typeIdentifier": "t_enum$_Error_$20703",
+                          "typeIdentifier": "t_enum$_Error_$6340",
                           "typeString": "enum ComptrollerErrorReporter.Error"
                         }
                       ],
-                      "id": 20766,
+                      "id": 6403,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "lValueRequested": false,
                       "nodeType": "ElementaryTypeNameExpression",
-                      "src": "2277:7:26",
+                      "src": "2277:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_uint256_$",
                         "typeString": "type(uint256)"
                       },
                       "typeName": {
-                        "id": 20765,
+                        "id": 6402,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "2277:7:26",
+                        "src": "2277:7:12",
                         "typeDescriptions": {}
                       }
                     },
-                    "id": 20768,
+                    "id": 6405,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -777,64 +778,64 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "2277:12:26",
+                    "src": "2277:12:12",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 20752,
-                  "id": 20769,
+                  "functionReturnParameters": 6389,
+                  "id": 6406,
                   "nodeType": "Return",
-                  "src": "2270:19:26"
+                  "src": "2270:19:12"
                 }
               ]
             },
             "documentation": {
-              "id": 20742,
+              "id": 6379,
               "nodeType": "StructuredDocumentation",
-              "src": "2027:113:26",
+              "src": "2027:113:12",
               "text": " @dev use this when reporting a known error from the money market or a non-upgradeable collaborator"
             },
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "fail",
-            "nameLocation": "2152:4:26",
+            "nameLocation": "2152:4:12",
             "parameters": {
-              "id": 20749,
+              "id": 6386,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 20745,
+                  "id": 6382,
                   "mutability": "mutable",
                   "name": "err",
-                  "nameLocation": "2163:3:26",
+                  "nameLocation": "2163:3:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20771,
-                  "src": "2157:9:26",
+                  "scope": 6408,
+                  "src": "2157:9:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_Error_$20703",
+                    "typeIdentifier": "t_enum$_Error_$6340",
                     "typeString": "enum ComptrollerErrorReporter.Error"
                   },
                   "typeName": {
-                    "id": 20744,
+                    "id": 6381,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 20743,
+                      "id": 6380,
                       "name": "Error",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 20703,
-                      "src": "2157:5:26"
+                      "referencedDeclaration": 6340,
+                      "src": "2157:5:12"
                     },
-                    "referencedDeclaration": 20703,
-                    "src": "2157:5:26",
+                    "referencedDeclaration": 6340,
+                    "src": "2157:5:12",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_Error_$20703",
+                      "typeIdentifier": "t_enum$_Error_$6340",
                       "typeString": "enum ComptrollerErrorReporter.Error"
                     }
                   },
@@ -842,54 +843,54 @@
                 },
                 {
                   "constant": false,
-                  "id": 20748,
+                  "id": 6385,
                   "mutability": "mutable",
                   "name": "info",
-                  "nameLocation": "2180:4:26",
+                  "nameLocation": "2180:4:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20771,
-                  "src": "2168:16:26",
+                  "scope": 6408,
+                  "src": "2168:16:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_FailureInfo_$20732",
+                    "typeIdentifier": "t_enum$_FailureInfo_$6369",
                     "typeString": "enum ComptrollerErrorReporter.FailureInfo"
                   },
                   "typeName": {
-                    "id": 20747,
+                    "id": 6384,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 20746,
+                      "id": 6383,
                       "name": "FailureInfo",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 20732,
-                      "src": "2168:11:26"
+                      "referencedDeclaration": 6369,
+                      "src": "2168:11:12"
                     },
-                    "referencedDeclaration": 20732,
-                    "src": "2168:11:26",
+                    "referencedDeclaration": 6369,
+                    "src": "2168:11:12",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_FailureInfo_$20732",
+                      "typeIdentifier": "t_enum$_FailureInfo_$6369",
                       "typeString": "enum ComptrollerErrorReporter.FailureInfo"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "2156:29:26"
+              "src": "2156:29:12"
             },
             "returnParameters": {
-              "id": 20752,
+              "id": 6389,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 20751,
+                  "id": 6388,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20771,
-                  "src": "2204:7:26",
+                  "scope": 6408,
+                  "src": "2204:7:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -897,10 +898,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 20750,
+                    "id": 6387,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2204:7:26",
+                    "src": "2204:7:12",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -909,21 +910,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2203:9:26"
+              "src": "2203:9:12"
             },
-            "scope": 20804,
+            "scope": 6441,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "internal"
           },
           {
-            "id": 20803,
+            "id": 6440,
             "nodeType": "FunctionDefinition",
-            "src": "2402:204:26",
+            "src": "2402:204:12",
             "body": {
-              "id": 20802,
+              "id": 6439,
               "nodeType": "Block",
-              "src": "2515:91:26",
+              "src": "2515:91:12",
               "statements": [
                 {
                   "eventCall": {
@@ -931,14 +932,14 @@
                       {
                         "arguments": [
                           {
-                            "id": 20788,
+                            "id": 6425,
                             "name": "err",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 20775,
-                            "src": "2542:3:26",
+                            "referencedDeclaration": 6412,
+                            "src": "2542:3:12",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_enum$_Error_$20703",
+                              "typeIdentifier": "t_enum$_Error_$6340",
                               "typeString": "enum ComptrollerErrorReporter.Error"
                             }
                           }
@@ -946,30 +947,30 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_enum$_Error_$20703",
+                              "typeIdentifier": "t_enum$_Error_$6340",
                               "typeString": "enum ComptrollerErrorReporter.Error"
                             }
                           ],
-                          "id": 20787,
+                          "id": 6424,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "2534:7:26",
+                          "src": "2534:7:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_uint256_$",
                             "typeString": "type(uint256)"
                           },
                           "typeName": {
-                            "id": 20786,
+                            "id": 6423,
                             "name": "uint256",
                             "nodeType": "ElementaryTypeName",
-                            "src": "2534:7:26",
+                            "src": "2534:7:12",
                             "typeDescriptions": {}
                           }
                         },
-                        "id": 20789,
+                        "id": 6426,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -977,7 +978,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "2534:12:26",
+                        "src": "2534:12:12",
                         "tryCall": false,
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -987,14 +988,14 @@
                       {
                         "arguments": [
                           {
-                            "id": 20792,
+                            "id": 6429,
                             "name": "info",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 20778,
-                            "src": "2556:4:26",
+                            "referencedDeclaration": 6415,
+                            "src": "2556:4:12",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_enum$_FailureInfo_$20732",
+                              "typeIdentifier": "t_enum$_FailureInfo_$6369",
                               "typeString": "enum ComptrollerErrorReporter.FailureInfo"
                             }
                           }
@@ -1002,30 +1003,30 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_enum$_FailureInfo_$20732",
+                              "typeIdentifier": "t_enum$_FailureInfo_$6369",
                               "typeString": "enum ComptrollerErrorReporter.FailureInfo"
                             }
                           ],
-                          "id": 20791,
+                          "id": 6428,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "2548:7:26",
+                          "src": "2548:7:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_uint256_$",
                             "typeString": "type(uint256)"
                           },
                           "typeName": {
-                            "id": 20790,
+                            "id": 6427,
                             "name": "uint256",
                             "nodeType": "ElementaryTypeName",
-                            "src": "2548:7:26",
+                            "src": "2548:7:12",
                             "typeDescriptions": {}
                           }
                         },
-                        "id": 20793,
+                        "id": 6430,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1033,7 +1034,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "2548:13:26",
+                        "src": "2548:13:12",
                         "tryCall": false,
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1041,12 +1042,12 @@
                         }
                       },
                       {
-                        "id": 20794,
+                        "id": 6431,
                         "name": "opaqueError",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 20780,
-                        "src": "2563:11:26",
+                        "referencedDeclaration": 6417,
+                        "src": "2563:11:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1068,18 +1069,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 20785,
+                      "id": 6422,
                       "name": "Failure",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 20741,
-                      "src": "2526:7:26",
+                      "referencedDeclaration": 6378,
+                      "src": "2526:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_uint256_$_t_uint256_$_t_uint256_$returns$__$",
                         "typeString": "function (uint256,uint256,uint256)"
                       }
                     },
-                    "id": 20795,
+                    "id": 6432,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1087,29 +1088,29 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "2526:49:26",
+                    "src": "2526:49:12",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 20796,
+                  "id": 6433,
                   "nodeType": "EmitStatement",
-                  "src": "2521:54:26"
+                  "src": "2521:54:12"
                 },
                 {
                   "expression": {
                     "arguments": [
                       {
-                        "id": 20799,
+                        "id": 6436,
                         "name": "err",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 20775,
-                        "src": "2597:3:26",
+                        "referencedDeclaration": 6412,
+                        "src": "2597:3:12",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_Error_$20703",
+                          "typeIdentifier": "t_enum$_Error_$6340",
                           "typeString": "enum ComptrollerErrorReporter.Error"
                         }
                       }
@@ -1117,30 +1118,30 @@
                     "expression": {
                       "argumentTypes": [
                         {
-                          "typeIdentifier": "t_enum$_Error_$20703",
+                          "typeIdentifier": "t_enum$_Error_$6340",
                           "typeString": "enum ComptrollerErrorReporter.Error"
                         }
                       ],
-                      "id": 20798,
+                      "id": 6435,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "lValueRequested": false,
                       "nodeType": "ElementaryTypeNameExpression",
-                      "src": "2589:7:26",
+                      "src": "2589:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_uint256_$",
                         "typeString": "type(uint256)"
                       },
                       "typeName": {
-                        "id": 20797,
+                        "id": 6434,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "2589:7:26",
+                        "src": "2589:7:12",
                         "typeDescriptions": {}
                       }
                     },
-                    "id": 20800,
+                    "id": 6437,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1148,64 +1149,64 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "2589:12:26",
+                    "src": "2589:12:12",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 20784,
-                  "id": 20801,
+                  "functionReturnParameters": 6421,
+                  "id": 6438,
                   "nodeType": "Return",
-                  "src": "2582:19:26"
+                  "src": "2582:19:12"
                 }
               ]
             },
             "documentation": {
-              "id": 20772,
+              "id": 6409,
               "nodeType": "StructuredDocumentation",
-              "src": "2298:101:26",
+              "src": "2298:101:12",
               "text": " @dev use this when reporting an opaque error from an upgradeable collaborator contract"
             },
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "failOpaque",
-            "nameLocation": "2411:10:26",
+            "nameLocation": "2411:10:12",
             "parameters": {
-              "id": 20781,
+              "id": 6418,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 20775,
+                  "id": 6412,
                   "mutability": "mutable",
                   "name": "err",
-                  "nameLocation": "2433:3:26",
+                  "nameLocation": "2433:3:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20803,
-                  "src": "2427:9:26",
+                  "scope": 6440,
+                  "src": "2427:9:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_Error_$20703",
+                    "typeIdentifier": "t_enum$_Error_$6340",
                     "typeString": "enum ComptrollerErrorReporter.Error"
                   },
                   "typeName": {
-                    "id": 20774,
+                    "id": 6411,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 20773,
+                      "id": 6410,
                       "name": "Error",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 20703,
-                      "src": "2427:5:26"
+                      "referencedDeclaration": 6340,
+                      "src": "2427:5:12"
                     },
-                    "referencedDeclaration": 20703,
-                    "src": "2427:5:26",
+                    "referencedDeclaration": 6340,
+                    "src": "2427:5:12",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_Error_$20703",
+                      "typeIdentifier": "t_enum$_Error_$6340",
                       "typeString": "enum ComptrollerErrorReporter.Error"
                     }
                   },
@@ -1213,33 +1214,33 @@
                 },
                 {
                   "constant": false,
-                  "id": 20778,
+                  "id": 6415,
                   "mutability": "mutable",
                   "name": "info",
-                  "nameLocation": "2454:4:26",
+                  "nameLocation": "2454:4:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20803,
-                  "src": "2442:16:26",
+                  "scope": 6440,
+                  "src": "2442:16:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_FailureInfo_$20732",
+                    "typeIdentifier": "t_enum$_FailureInfo_$6369",
                     "typeString": "enum ComptrollerErrorReporter.FailureInfo"
                   },
                   "typeName": {
-                    "id": 20777,
+                    "id": 6414,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 20776,
+                      "id": 6413,
                       "name": "FailureInfo",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 20732,
-                      "src": "2442:11:26"
+                      "referencedDeclaration": 6369,
+                      "src": "2442:11:12"
                     },
-                    "referencedDeclaration": 20732,
-                    "src": "2442:11:26",
+                    "referencedDeclaration": 6369,
+                    "src": "2442:11:12",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_FailureInfo_$20732",
+                      "typeIdentifier": "t_enum$_FailureInfo_$6369",
                       "typeString": "enum ComptrollerErrorReporter.FailureInfo"
                     }
                   },
@@ -1247,13 +1248,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 20780,
+                  "id": 6417,
                   "mutability": "mutable",
                   "name": "opaqueError",
-                  "nameLocation": "2472:11:26",
+                  "nameLocation": "2472:11:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20803,
-                  "src": "2464:19:26",
+                  "scope": 6440,
+                  "src": "2464:19:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1261,10 +1262,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 20779,
+                    "id": 6416,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2464:7:26",
+                    "src": "2464:7:12",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1273,21 +1274,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2421:66:26"
+              "src": "2421:66:12"
             },
             "returnParameters": {
-              "id": 20784,
+              "id": 6421,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 20783,
+                  "id": 6420,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20803,
-                  "src": "2506:7:26",
+                  "scope": 6440,
+                  "src": "2506:7:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1295,10 +1296,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 20782,
+                    "id": 6419,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2506:7:26",
+                    "src": "2506:7:12",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1307,9 +1308,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2505:9:26"
+              "src": "2505:9:12"
             },
-            "scope": 20804,
+            "scope": 6441,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "internal"
@@ -1322,891 +1323,891 @@
         "contractKind": "contract",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          20804
+          6441
         ],
         "name": "ComptrollerErrorReporter",
-        "nameLocation": "74:24:26",
-        "scope": 21005,
+        "nameLocation": "74:24:12",
+        "scope": 6642,
         "usedErrors": []
       },
       {
-        "id": 21004,
+        "id": 6641,
         "nodeType": "ContractDefinition",
-        "src": "2610:5806:26",
+        "src": "2610:5806:12",
         "nodes": [
           {
-            "id": 20823,
+            "id": 6460,
             "nodeType": "EnumDefinition",
-            "src": "2642:492:26",
+            "src": "2642:492:12",
             "canonicalName": "TokenErrorReporter.Error",
             "members": [
               {
-                "id": 20805,
+                "id": 6442,
                 "name": "NO_ERROR",
-                "nameLocation": "2659:8:26",
+                "nameLocation": "2659:8:12",
                 "nodeType": "EnumValue",
-                "src": "2659:8:26"
+                "src": "2659:8:12"
               },
               {
-                "id": 20806,
+                "id": 6443,
                 "name": "UNAUTHORIZED",
-                "nameLocation": "2673:12:26",
+                "nameLocation": "2673:12:12",
                 "nodeType": "EnumValue",
-                "src": "2673:12:26"
+                "src": "2673:12:12"
               },
               {
-                "id": 20807,
+                "id": 6444,
                 "name": "BAD_INPUT",
-                "nameLocation": "2691:9:26",
+                "nameLocation": "2691:9:12",
                 "nodeType": "EnumValue",
-                "src": "2691:9:26"
+                "src": "2691:9:12"
               },
               {
-                "id": 20808,
+                "id": 6445,
                 "name": "COMPTROLLER_REJECTION",
-                "nameLocation": "2706:21:26",
+                "nameLocation": "2706:21:12",
                 "nodeType": "EnumValue",
-                "src": "2706:21:26"
+                "src": "2706:21:12"
               },
               {
-                "id": 20809,
+                "id": 6446,
                 "name": "COMPTROLLER_CALCULATION_ERROR",
-                "nameLocation": "2733:29:26",
+                "nameLocation": "2733:29:12",
                 "nodeType": "EnumValue",
-                "src": "2733:29:26"
+                "src": "2733:29:12"
               },
               {
-                "id": 20810,
+                "id": 6447,
                 "name": "INTEREST_RATE_MODEL_ERROR",
-                "nameLocation": "2768:25:26",
+                "nameLocation": "2768:25:12",
                 "nodeType": "EnumValue",
-                "src": "2768:25:26"
+                "src": "2768:25:12"
               },
               {
-                "id": 20811,
+                "id": 6448,
                 "name": "INVALID_ACCOUNT_PAIR",
-                "nameLocation": "2799:20:26",
+                "nameLocation": "2799:20:12",
                 "nodeType": "EnumValue",
-                "src": "2799:20:26"
+                "src": "2799:20:12"
               },
               {
-                "id": 20812,
+                "id": 6449,
                 "name": "INVALID_CLOSE_AMOUNT_REQUESTED",
-                "nameLocation": "2825:30:26",
+                "nameLocation": "2825:30:12",
                 "nodeType": "EnumValue",
-                "src": "2825:30:26"
+                "src": "2825:30:12"
               },
               {
-                "id": 20813,
+                "id": 6450,
                 "name": "INVALID_COLLATERAL_FACTOR",
-                "nameLocation": "2861:25:26",
+                "nameLocation": "2861:25:12",
                 "nodeType": "EnumValue",
-                "src": "2861:25:26"
+                "src": "2861:25:12"
               },
               {
-                "id": 20814,
+                "id": 6451,
                 "name": "MATH_ERROR",
-                "nameLocation": "2892:10:26",
+                "nameLocation": "2892:10:12",
                 "nodeType": "EnumValue",
-                "src": "2892:10:26"
+                "src": "2892:10:12"
               },
               {
-                "id": 20815,
+                "id": 6452,
                 "name": "MARKET_NOT_FRESH",
-                "nameLocation": "2908:16:26",
+                "nameLocation": "2908:16:12",
                 "nodeType": "EnumValue",
-                "src": "2908:16:26"
+                "src": "2908:16:12"
               },
               {
-                "id": 20816,
+                "id": 6453,
                 "name": "MARKET_NOT_LISTED",
-                "nameLocation": "2930:17:26",
+                "nameLocation": "2930:17:12",
                 "nodeType": "EnumValue",
-                "src": "2930:17:26"
+                "src": "2930:17:12"
               },
               {
-                "id": 20817,
+                "id": 6454,
                 "name": "TOKEN_INSUFFICIENT_ALLOWANCE",
-                "nameLocation": "2953:28:26",
+                "nameLocation": "2953:28:12",
                 "nodeType": "EnumValue",
-                "src": "2953:28:26"
+                "src": "2953:28:12"
               },
               {
-                "id": 20818,
+                "id": 6455,
                 "name": "TOKEN_INSUFFICIENT_BALANCE",
-                "nameLocation": "2987:26:26",
+                "nameLocation": "2987:26:12",
                 "nodeType": "EnumValue",
-                "src": "2987:26:26"
+                "src": "2987:26:12"
               },
               {
-                "id": 20819,
+                "id": 6456,
                 "name": "TOKEN_INSUFFICIENT_CASH",
-                "nameLocation": "3019:23:26",
+                "nameLocation": "3019:23:12",
                 "nodeType": "EnumValue",
-                "src": "3019:23:26"
+                "src": "3019:23:12"
               },
               {
-                "id": 20820,
+                "id": 6457,
                 "name": "TOKEN_TRANSFER_IN_FAILED",
-                "nameLocation": "3048:24:26",
+                "nameLocation": "3048:24:12",
                 "nodeType": "EnumValue",
-                "src": "3048:24:26"
+                "src": "3048:24:12"
               },
               {
-                "id": 20821,
+                "id": 6458,
                 "name": "TOKEN_TRANSFER_OUT_FAILED",
-                "nameLocation": "3078:25:26",
+                "nameLocation": "3078:25:12",
                 "nodeType": "EnumValue",
-                "src": "3078:25:26"
+                "src": "3078:25:12"
               },
               {
-                "id": 20822,
+                "id": 6459,
                 "name": "UTILIZATION_ABOVE_MAX",
-                "nameLocation": "3109:21:26",
+                "nameLocation": "3109:21:12",
                 "nodeType": "EnumValue",
-                "src": "3109:21:26"
+                "src": "3109:21:12"
               }
             ],
             "name": "Error",
-            "nameLocation": "2647:5:26"
+            "nameLocation": "2647:5:12"
           },
           {
-            "id": 20924,
+            "id": 6561,
             "nodeType": "EnumDefinition",
-            "src": "3402:4080:26",
+            "src": "3402:4080:12",
             "canonicalName": "TokenErrorReporter.FailureInfo",
             "members": [
               {
-                "id": 20824,
+                "id": 6461,
                 "name": "ACCEPT_ADMIN_PENDING_ADMIN_CHECK",
-                "nameLocation": "3425:32:26",
+                "nameLocation": "3425:32:12",
                 "nodeType": "EnumValue",
-                "src": "3425:32:26"
+                "src": "3425:32:12"
               },
               {
-                "id": 20825,
+                "id": 6462,
                 "name": "ACCRUE_INTEREST_ACCUMULATED_INTEREST_CALCULATION_FAILED",
-                "nameLocation": "3463:55:26",
+                "nameLocation": "3463:55:12",
                 "nodeType": "EnumValue",
-                "src": "3463:55:26"
+                "src": "3463:55:12"
               },
               {
-                "id": 20826,
+                "id": 6463,
                 "name": "ACCRUE_INTEREST_BORROW_RATE_CALCULATION_FAILED",
-                "nameLocation": "3524:46:26",
+                "nameLocation": "3524:46:12",
                 "nodeType": "EnumValue",
-                "src": "3524:46:26"
+                "src": "3524:46:12"
               },
               {
-                "id": 20827,
+                "id": 6464,
                 "name": "ACCRUE_INTEREST_NEW_BORROW_INDEX_CALCULATION_FAILED",
-                "nameLocation": "3576:51:26",
+                "nameLocation": "3576:51:12",
                 "nodeType": "EnumValue",
-                "src": "3576:51:26"
+                "src": "3576:51:12"
               },
               {
-                "id": 20828,
+                "id": 6465,
                 "name": "ACCRUE_INTEREST_NEW_TOTAL_BORROWS_CALCULATION_FAILED",
-                "nameLocation": "3633:52:26",
+                "nameLocation": "3633:52:12",
                 "nodeType": "EnumValue",
-                "src": "3633:52:26"
+                "src": "3633:52:12"
               },
               {
-                "id": 20829,
+                "id": 6466,
                 "name": "ACCRUE_INTEREST_NEW_TOTAL_RESERVES_CALCULATION_FAILED",
-                "nameLocation": "3691:53:26",
+                "nameLocation": "3691:53:12",
                 "nodeType": "EnumValue",
-                "src": "3691:53:26"
+                "src": "3691:53:12"
               },
               {
-                "id": 20830,
+                "id": 6467,
                 "name": "ACCRUE_INTEREST_NEW_TOTAL_FUSE_FEES_CALCULATION_FAILED",
-                "nameLocation": "3750:54:26",
+                "nameLocation": "3750:54:12",
                 "nodeType": "EnumValue",
-                "src": "3750:54:26"
+                "src": "3750:54:12"
               },
               {
-                "id": 20831,
+                "id": 6468,
                 "name": "ACCRUE_INTEREST_NEW_TOTAL_ADMIN_FEES_CALCULATION_FAILED",
-                "nameLocation": "3810:55:26",
+                "nameLocation": "3810:55:12",
                 "nodeType": "EnumValue",
-                "src": "3810:55:26"
+                "src": "3810:55:12"
               },
               {
-                "id": 20832,
+                "id": 6469,
                 "name": "ACCRUE_INTEREST_SIMPLE_INTEREST_FACTOR_CALCULATION_FAILED",
-                "nameLocation": "3871:57:26",
+                "nameLocation": "3871:57:12",
                 "nodeType": "EnumValue",
-                "src": "3871:57:26"
+                "src": "3871:57:12"
               },
               {
-                "id": 20833,
+                "id": 6470,
                 "name": "BORROW_ACCUMULATED_BALANCE_CALCULATION_FAILED",
-                "nameLocation": "3934:45:26",
+                "nameLocation": "3934:45:12",
                 "nodeType": "EnumValue",
-                "src": "3934:45:26"
+                "src": "3934:45:12"
               },
               {
-                "id": 20834,
+                "id": 6471,
                 "name": "BORROW_ACCRUE_INTEREST_FAILED",
-                "nameLocation": "3985:29:26",
+                "nameLocation": "3985:29:12",
                 "nodeType": "EnumValue",
-                "src": "3985:29:26"
+                "src": "3985:29:12"
               },
               {
-                "id": 20835,
+                "id": 6472,
                 "name": "BORROW_CASH_NOT_AVAILABLE",
-                "nameLocation": "4020:25:26",
+                "nameLocation": "4020:25:12",
                 "nodeType": "EnumValue",
-                "src": "4020:25:26"
+                "src": "4020:25:12"
               },
               {
-                "id": 20836,
+                "id": 6473,
                 "name": "BORROW_FRESHNESS_CHECK",
-                "nameLocation": "4051:22:26",
+                "nameLocation": "4051:22:12",
                 "nodeType": "EnumValue",
-                "src": "4051:22:26"
+                "src": "4051:22:12"
               },
               {
-                "id": 20837,
+                "id": 6474,
                 "name": "BORROW_NEW_TOTAL_BALANCE_CALCULATION_FAILED",
-                "nameLocation": "4079:43:26",
+                "nameLocation": "4079:43:12",
                 "nodeType": "EnumValue",
-                "src": "4079:43:26"
+                "src": "4079:43:12"
               },
               {
-                "id": 20838,
+                "id": 6475,
                 "name": "BORROW_NEW_ACCOUNT_BORROW_BALANCE_CALCULATION_FAILED",
-                "nameLocation": "4128:52:26",
+                "nameLocation": "4128:52:12",
                 "nodeType": "EnumValue",
-                "src": "4128:52:26"
+                "src": "4128:52:12"
               },
               {
-                "id": 20839,
+                "id": 6476,
                 "name": "BORROW_MARKET_NOT_LISTED",
-                "nameLocation": "4186:24:26",
+                "nameLocation": "4186:24:12",
                 "nodeType": "EnumValue",
-                "src": "4186:24:26"
+                "src": "4186:24:12"
               },
               {
-                "id": 20840,
+                "id": 6477,
                 "name": "BORROW_COMPTROLLER_REJECTION",
-                "nameLocation": "4216:28:26",
+                "nameLocation": "4216:28:12",
                 "nodeType": "EnumValue",
-                "src": "4216:28:26"
+                "src": "4216:28:12"
               },
               {
-                "id": 20841,
+                "id": 6478,
                 "name": "LIQUIDATE_ACCRUE_BORROW_INTEREST_FAILED",
-                "nameLocation": "4250:39:26",
+                "nameLocation": "4250:39:12",
                 "nodeType": "EnumValue",
-                "src": "4250:39:26"
+                "src": "4250:39:12"
               },
               {
-                "id": 20842,
+                "id": 6479,
                 "name": "LIQUIDATE_ACCRUE_COLLATERAL_INTEREST_FAILED",
-                "nameLocation": "4295:43:26",
+                "nameLocation": "4295:43:12",
                 "nodeType": "EnumValue",
-                "src": "4295:43:26"
+                "src": "4295:43:12"
               },
               {
-                "id": 20843,
+                "id": 6480,
                 "name": "LIQUIDATE_COLLATERAL_FRESHNESS_CHECK",
-                "nameLocation": "4344:36:26",
+                "nameLocation": "4344:36:12",
                 "nodeType": "EnumValue",
-                "src": "4344:36:26"
+                "src": "4344:36:12"
               },
               {
-                "id": 20844,
+                "id": 6481,
                 "name": "LIQUIDATE_COMPTROLLER_REJECTION",
-                "nameLocation": "4386:31:26",
+                "nameLocation": "4386:31:12",
                 "nodeType": "EnumValue",
-                "src": "4386:31:26"
+                "src": "4386:31:12"
               },
               {
-                "id": 20845,
+                "id": 6482,
                 "name": "LIQUIDATE_COMPTROLLER_CALCULATE_AMOUNT_SEIZE_FAILED",
-                "nameLocation": "4423:51:26",
+                "nameLocation": "4423:51:12",
                 "nodeType": "EnumValue",
-                "src": "4423:51:26"
+                "src": "4423:51:12"
               },
               {
-                "id": 20846,
+                "id": 6483,
                 "name": "LIQUIDATE_CLOSE_AMOUNT_IS_UINT_MAX",
-                "nameLocation": "4480:34:26",
+                "nameLocation": "4480:34:12",
                 "nodeType": "EnumValue",
-                "src": "4480:34:26"
+                "src": "4480:34:12"
               },
               {
-                "id": 20847,
+                "id": 6484,
                 "name": "LIQUIDATE_CLOSE_AMOUNT_IS_ZERO",
-                "nameLocation": "4520:30:26",
+                "nameLocation": "4520:30:12",
                 "nodeType": "EnumValue",
-                "src": "4520:30:26"
+                "src": "4520:30:12"
               },
               {
-                "id": 20848,
+                "id": 6485,
                 "name": "LIQUIDATE_FRESHNESS_CHECK",
-                "nameLocation": "4556:25:26",
+                "nameLocation": "4556:25:12",
                 "nodeType": "EnumValue",
-                "src": "4556:25:26"
+                "src": "4556:25:12"
               },
               {
-                "id": 20849,
+                "id": 6486,
                 "name": "LIQUIDATE_LIQUIDATOR_IS_BORROWER",
-                "nameLocation": "4587:32:26",
+                "nameLocation": "4587:32:12",
                 "nodeType": "EnumValue",
-                "src": "4587:32:26"
+                "src": "4587:32:12"
               },
               {
-                "id": 20850,
+                "id": 6487,
                 "name": "LIQUIDATE_REPAY_BORROW_FRESH_FAILED",
-                "nameLocation": "4625:35:26",
+                "nameLocation": "4625:35:12",
                 "nodeType": "EnumValue",
-                "src": "4625:35:26"
+                "src": "4625:35:12"
               },
               {
-                "id": 20851,
+                "id": 6488,
                 "name": "LIQUIDATE_SEIZE_BALANCE_INCREMENT_FAILED",
-                "nameLocation": "4666:40:26",
+                "nameLocation": "4666:40:12",
                 "nodeType": "EnumValue",
-                "src": "4666:40:26"
+                "src": "4666:40:12"
               },
               {
-                "id": 20852,
+                "id": 6489,
                 "name": "LIQUIDATE_SEIZE_BALANCE_DECREMENT_FAILED",
-                "nameLocation": "4712:40:26",
+                "nameLocation": "4712:40:12",
                 "nodeType": "EnumValue",
-                "src": "4712:40:26"
+                "src": "4712:40:12"
               },
               {
-                "id": 20853,
+                "id": 6490,
                 "name": "LIQUIDATE_SEIZE_COMPTROLLER_REJECTION",
-                "nameLocation": "4758:37:26",
+                "nameLocation": "4758:37:12",
                 "nodeType": "EnumValue",
-                "src": "4758:37:26"
+                "src": "4758:37:12"
               },
               {
-                "id": 20854,
+                "id": 6491,
                 "name": "LIQUIDATE_SEIZE_LIQUIDATOR_IS_BORROWER",
-                "nameLocation": "4801:38:26",
+                "nameLocation": "4801:38:12",
                 "nodeType": "EnumValue",
-                "src": "4801:38:26"
+                "src": "4801:38:12"
               },
               {
-                "id": 20855,
+                "id": 6492,
                 "name": "LIQUIDATE_SEIZE_TOO_MUCH",
-                "nameLocation": "4845:24:26",
+                "nameLocation": "4845:24:12",
                 "nodeType": "EnumValue",
-                "src": "4845:24:26"
+                "src": "4845:24:12"
               },
               {
-                "id": 20856,
+                "id": 6493,
                 "name": "MINT_ACCRUE_INTEREST_FAILED",
-                "nameLocation": "4875:27:26",
+                "nameLocation": "4875:27:12",
                 "nodeType": "EnumValue",
-                "src": "4875:27:26"
+                "src": "4875:27:12"
               },
               {
-                "id": 20857,
+                "id": 6494,
                 "name": "MINT_COMPTROLLER_REJECTION",
-                "nameLocation": "4908:26:26",
+                "nameLocation": "4908:26:12",
                 "nodeType": "EnumValue",
-                "src": "4908:26:26"
+                "src": "4908:26:12"
               },
               {
-                "id": 20858,
+                "id": 6495,
                 "name": "MINT_EXCHANGE_CALCULATION_FAILED",
-                "nameLocation": "4940:32:26",
+                "nameLocation": "4940:32:12",
                 "nodeType": "EnumValue",
-                "src": "4940:32:26"
+                "src": "4940:32:12"
               },
               {
-                "id": 20859,
+                "id": 6496,
                 "name": "MINT_EXCHANGE_RATE_READ_FAILED",
-                "nameLocation": "4978:30:26",
+                "nameLocation": "4978:30:12",
                 "nodeType": "EnumValue",
-                "src": "4978:30:26"
+                "src": "4978:30:12"
               },
               {
-                "id": 20860,
+                "id": 6497,
                 "name": "MINT_FRESHNESS_CHECK",
-                "nameLocation": "5014:20:26",
+                "nameLocation": "5014:20:12",
                 "nodeType": "EnumValue",
-                "src": "5014:20:26"
+                "src": "5014:20:12"
               },
               {
-                "id": 20861,
+                "id": 6498,
                 "name": "MINT_NEW_ACCOUNT_BALANCE_CALCULATION_FAILED",
-                "nameLocation": "5040:43:26",
+                "nameLocation": "5040:43:12",
                 "nodeType": "EnumValue",
-                "src": "5040:43:26"
+                "src": "5040:43:12"
               },
               {
-                "id": 20862,
+                "id": 6499,
                 "name": "MINT_NEW_TOTAL_SUPPLY_CALCULATION_FAILED",
-                "nameLocation": "5089:40:26",
+                "nameLocation": "5089:40:12",
                 "nodeType": "EnumValue",
-                "src": "5089:40:26"
+                "src": "5089:40:12"
               },
               {
-                "id": 20863,
+                "id": 6500,
                 "name": "MINT_TRANSFER_IN_FAILED",
-                "nameLocation": "5135:23:26",
+                "nameLocation": "5135:23:12",
                 "nodeType": "EnumValue",
-                "src": "5135:23:26"
+                "src": "5135:23:12"
               },
               {
-                "id": 20864,
+                "id": 6501,
                 "name": "MINT_TRANSFER_IN_NOT_POSSIBLE",
-                "nameLocation": "5164:29:26",
+                "nameLocation": "5164:29:12",
                 "nodeType": "EnumValue",
-                "src": "5164:29:26"
+                "src": "5164:29:12"
               },
               {
-                "id": 20865,
+                "id": 6502,
                 "name": "NEW_UTILIZATION_RATE_ABOVE_MAX",
-                "nameLocation": "5199:30:26",
+                "nameLocation": "5199:30:12",
                 "nodeType": "EnumValue",
-                "src": "5199:30:26"
+                "src": "5199:30:12"
               },
               {
-                "id": 20866,
+                "id": 6503,
                 "name": "REDEEM_ACCRUE_INTEREST_FAILED",
-                "nameLocation": "5235:29:26",
+                "nameLocation": "5235:29:12",
                 "nodeType": "EnumValue",
-                "src": "5235:29:26"
+                "src": "5235:29:12"
               },
               {
-                "id": 20867,
+                "id": 6504,
                 "name": "REDEEM_COMPTROLLER_REJECTION",
-                "nameLocation": "5270:28:26",
+                "nameLocation": "5270:28:12",
                 "nodeType": "EnumValue",
-                "src": "5270:28:26"
+                "src": "5270:28:12"
               },
               {
-                "id": 20868,
+                "id": 6505,
                 "name": "REDEEM_EXCHANGE_TOKENS_CALCULATION_FAILED",
-                "nameLocation": "5304:41:26",
+                "nameLocation": "5304:41:12",
                 "nodeType": "EnumValue",
-                "src": "5304:41:26"
+                "src": "5304:41:12"
               },
               {
-                "id": 20869,
+                "id": 6506,
                 "name": "REDEEM_EXCHANGE_AMOUNT_CALCULATION_FAILED",
-                "nameLocation": "5351:41:26",
+                "nameLocation": "5351:41:12",
                 "nodeType": "EnumValue",
-                "src": "5351:41:26"
+                "src": "5351:41:12"
               },
               {
-                "id": 20870,
+                "id": 6507,
                 "name": "REDEEM_EXCHANGE_RATE_READ_FAILED",
-                "nameLocation": "5398:32:26",
+                "nameLocation": "5398:32:12",
                 "nodeType": "EnumValue",
-                "src": "5398:32:26"
+                "src": "5398:32:12"
               },
               {
-                "id": 20871,
+                "id": 6508,
                 "name": "REDEEM_FRESHNESS_CHECK",
-                "nameLocation": "5436:22:26",
+                "nameLocation": "5436:22:12",
                 "nodeType": "EnumValue",
-                "src": "5436:22:26"
+                "src": "5436:22:12"
               },
               {
-                "id": 20872,
+                "id": 6509,
                 "name": "REDEEM_NEW_ACCOUNT_BALANCE_CALCULATION_FAILED",
-                "nameLocation": "5464:45:26",
+                "nameLocation": "5464:45:12",
                 "nodeType": "EnumValue",
-                "src": "5464:45:26"
+                "src": "5464:45:12"
               },
               {
-                "id": 20873,
+                "id": 6510,
                 "name": "REDEEM_NEW_TOTAL_SUPPLY_CALCULATION_FAILED",
-                "nameLocation": "5515:42:26",
+                "nameLocation": "5515:42:12",
                 "nodeType": "EnumValue",
-                "src": "5515:42:26"
+                "src": "5515:42:12"
               },
               {
-                "id": 20874,
+                "id": 6511,
                 "name": "REDEEM_TRANSFER_OUT_NOT_POSSIBLE",
-                "nameLocation": "5563:32:26",
+                "nameLocation": "5563:32:12",
                 "nodeType": "EnumValue",
-                "src": "5563:32:26"
+                "src": "5563:32:12"
               },
               {
-                "id": 20875,
+                "id": 6512,
                 "name": "WITHDRAW_FUSE_FEES_ACCRUE_INTEREST_FAILED",
-                "nameLocation": "5601:41:26",
+                "nameLocation": "5601:41:12",
                 "nodeType": "EnumValue",
-                "src": "5601:41:26"
+                "src": "5601:41:12"
               },
               {
-                "id": 20876,
+                "id": 6513,
                 "name": "WITHDRAW_FUSE_FEES_CASH_NOT_AVAILABLE",
-                "nameLocation": "5648:37:26",
+                "nameLocation": "5648:37:12",
                 "nodeType": "EnumValue",
-                "src": "5648:37:26"
+                "src": "5648:37:12"
               },
               {
-                "id": 20877,
+                "id": 6514,
                 "name": "WITHDRAW_FUSE_FEES_FRESH_CHECK",
-                "nameLocation": "5691:30:26",
+                "nameLocation": "5691:30:12",
                 "nodeType": "EnumValue",
-                "src": "5691:30:26"
+                "src": "5691:30:12"
               },
               {
-                "id": 20878,
+                "id": 6515,
                 "name": "WITHDRAW_FUSE_FEES_VALIDATION",
-                "nameLocation": "5727:29:26",
+                "nameLocation": "5727:29:12",
                 "nodeType": "EnumValue",
-                "src": "5727:29:26"
+                "src": "5727:29:12"
               },
               {
-                "id": 20879,
+                "id": 6516,
                 "name": "WITHDRAW_ADMIN_FEES_ACCRUE_INTEREST_FAILED",
-                "nameLocation": "5762:42:26",
+                "nameLocation": "5762:42:12",
                 "nodeType": "EnumValue",
-                "src": "5762:42:26"
+                "src": "5762:42:12"
               },
               {
-                "id": 20880,
+                "id": 6517,
                 "name": "WITHDRAW_ADMIN_FEES_CASH_NOT_AVAILABLE",
-                "nameLocation": "5810:38:26",
+                "nameLocation": "5810:38:12",
                 "nodeType": "EnumValue",
-                "src": "5810:38:26"
+                "src": "5810:38:12"
               },
               {
-                "id": 20881,
+                "id": 6518,
                 "name": "WITHDRAW_ADMIN_FEES_FRESH_CHECK",
-                "nameLocation": "5854:31:26",
+                "nameLocation": "5854:31:12",
                 "nodeType": "EnumValue",
-                "src": "5854:31:26"
+                "src": "5854:31:12"
               },
               {
-                "id": 20882,
+                "id": 6519,
                 "name": "WITHDRAW_ADMIN_FEES_VALIDATION",
-                "nameLocation": "5891:30:26",
+                "nameLocation": "5891:30:12",
                 "nodeType": "EnumValue",
-                "src": "5891:30:26"
+                "src": "5891:30:12"
               },
               {
-                "id": 20883,
+                "id": 6520,
                 "name": "REDUCE_RESERVES_ACCRUE_INTEREST_FAILED",
-                "nameLocation": "5927:38:26",
+                "nameLocation": "5927:38:12",
                 "nodeType": "EnumValue",
-                "src": "5927:38:26"
+                "src": "5927:38:12"
               },
               {
-                "id": 20884,
+                "id": 6521,
                 "name": "REDUCE_RESERVES_ADMIN_CHECK",
-                "nameLocation": "5971:27:26",
+                "nameLocation": "5971:27:12",
                 "nodeType": "EnumValue",
-                "src": "5971:27:26"
+                "src": "5971:27:12"
               },
               {
-                "id": 20885,
+                "id": 6522,
                 "name": "REDUCE_RESERVES_CASH_NOT_AVAILABLE",
-                "nameLocation": "6004:34:26",
+                "nameLocation": "6004:34:12",
                 "nodeType": "EnumValue",
-                "src": "6004:34:26"
+                "src": "6004:34:12"
               },
               {
-                "id": 20886,
+                "id": 6523,
                 "name": "REDUCE_RESERVES_FRESH_CHECK",
-                "nameLocation": "6044:27:26",
+                "nameLocation": "6044:27:12",
                 "nodeType": "EnumValue",
-                "src": "6044:27:26"
+                "src": "6044:27:12"
               },
               {
-                "id": 20887,
+                "id": 6524,
                 "name": "REDUCE_RESERVES_VALIDATION",
-                "nameLocation": "6077:26:26",
+                "nameLocation": "6077:26:12",
                 "nodeType": "EnumValue",
-                "src": "6077:26:26"
+                "src": "6077:26:12"
               },
               {
-                "id": 20888,
+                "id": 6525,
                 "name": "REPAY_BEHALF_ACCRUE_INTEREST_FAILED",
-                "nameLocation": "6109:35:26",
+                "nameLocation": "6109:35:12",
                 "nodeType": "EnumValue",
-                "src": "6109:35:26"
+                "src": "6109:35:12"
               },
               {
-                "id": 20889,
+                "id": 6526,
                 "name": "REPAY_BORROW_ACCRUE_INTEREST_FAILED",
-                "nameLocation": "6150:35:26",
+                "nameLocation": "6150:35:12",
                 "nodeType": "EnumValue",
-                "src": "6150:35:26"
+                "src": "6150:35:12"
               },
               {
-                "id": 20890,
+                "id": 6527,
                 "name": "REPAY_BORROW_ACCUMULATED_BALANCE_CALCULATION_FAILED",
-                "nameLocation": "6191:51:26",
+                "nameLocation": "6191:51:12",
                 "nodeType": "EnumValue",
-                "src": "6191:51:26"
+                "src": "6191:51:12"
               },
               {
-                "id": 20891,
+                "id": 6528,
                 "name": "REPAY_BORROW_COMPTROLLER_REJECTION",
-                "nameLocation": "6248:34:26",
+                "nameLocation": "6248:34:12",
                 "nodeType": "EnumValue",
-                "src": "6248:34:26"
+                "src": "6248:34:12"
               },
               {
-                "id": 20892,
+                "id": 6529,
                 "name": "REPAY_BORROW_FRESHNESS_CHECK",
-                "nameLocation": "6288:28:26",
+                "nameLocation": "6288:28:12",
                 "nodeType": "EnumValue",
-                "src": "6288:28:26"
+                "src": "6288:28:12"
               },
               {
-                "id": 20893,
+                "id": 6530,
                 "name": "REPAY_BORROW_NEW_ACCOUNT_BORROW_BALANCE_CALCULATION_FAILED",
-                "nameLocation": "6322:58:26",
+                "nameLocation": "6322:58:12",
                 "nodeType": "EnumValue",
-                "src": "6322:58:26"
+                "src": "6322:58:12"
               },
               {
-                "id": 20894,
+                "id": 6531,
                 "name": "REPAY_BORROW_NEW_TOTAL_BALANCE_CALCULATION_FAILED",
-                "nameLocation": "6386:49:26",
+                "nameLocation": "6386:49:12",
                 "nodeType": "EnumValue",
-                "src": "6386:49:26"
+                "src": "6386:49:12"
               },
               {
-                "id": 20895,
+                "id": 6532,
                 "name": "REPAY_BORROW_TRANSFER_IN_NOT_POSSIBLE",
-                "nameLocation": "6441:37:26",
+                "nameLocation": "6441:37:12",
                 "nodeType": "EnumValue",
-                "src": "6441:37:26"
+                "src": "6441:37:12"
               },
               {
-                "id": 20896,
+                "id": 6533,
                 "name": "SET_COLLATERAL_FACTOR_OWNER_CHECK",
-                "nameLocation": "6484:33:26",
+                "nameLocation": "6484:33:12",
                 "nodeType": "EnumValue",
-                "src": "6484:33:26"
+                "src": "6484:33:12"
               },
               {
-                "id": 20897,
+                "id": 6534,
                 "name": "SET_COLLATERAL_FACTOR_VALIDATION",
-                "nameLocation": "6523:32:26",
+                "nameLocation": "6523:32:12",
                 "nodeType": "EnumValue",
-                "src": "6523:32:26"
+                "src": "6523:32:12"
               },
               {
-                "id": 20898,
+                "id": 6535,
                 "name": "SET_COMPTROLLER_OWNER_CHECK",
-                "nameLocation": "6561:27:26",
+                "nameLocation": "6561:27:12",
                 "nodeType": "EnumValue",
-                "src": "6561:27:26"
+                "src": "6561:27:12"
               },
               {
-                "id": 20899,
+                "id": 6536,
                 "name": "SET_INTEREST_RATE_MODEL_ACCRUE_INTEREST_FAILED",
-                "nameLocation": "6594:46:26",
+                "nameLocation": "6594:46:12",
                 "nodeType": "EnumValue",
-                "src": "6594:46:26"
+                "src": "6594:46:12"
               },
               {
-                "id": 20900,
+                "id": 6537,
                 "name": "SET_INTEREST_RATE_MODEL_FRESH_CHECK",
-                "nameLocation": "6646:35:26",
+                "nameLocation": "6646:35:12",
                 "nodeType": "EnumValue",
-                "src": "6646:35:26"
+                "src": "6646:35:12"
               },
               {
-                "id": 20901,
+                "id": 6538,
                 "name": "SET_INTEREST_RATE_MODEL_OWNER_CHECK",
-                "nameLocation": "6687:35:26",
+                "nameLocation": "6687:35:12",
                 "nodeType": "EnumValue",
-                "src": "6687:35:26"
+                "src": "6687:35:12"
               },
               {
-                "id": 20902,
+                "id": 6539,
                 "name": "SET_MAX_ASSETS_OWNER_CHECK",
-                "nameLocation": "6728:26:26",
+                "nameLocation": "6728:26:12",
                 "nodeType": "EnumValue",
-                "src": "6728:26:26"
+                "src": "6728:26:12"
               },
               {
-                "id": 20903,
+                "id": 6540,
                 "name": "SET_ORACLE_MARKET_NOT_LISTED",
-                "nameLocation": "6760:28:26",
+                "nameLocation": "6760:28:12",
                 "nodeType": "EnumValue",
-                "src": "6760:28:26"
+                "src": "6760:28:12"
               },
               {
-                "id": 20904,
+                "id": 6541,
                 "name": "TOGGLE_ADMIN_RIGHTS_OWNER_CHECK",
-                "nameLocation": "6794:31:26",
+                "nameLocation": "6794:31:12",
                 "nodeType": "EnumValue",
-                "src": "6794:31:26"
+                "src": "6794:31:12"
               },
               {
-                "id": 20905,
+                "id": 6542,
                 "name": "SET_PENDING_ADMIN_OWNER_CHECK",
-                "nameLocation": "6831:29:26",
+                "nameLocation": "6831:29:12",
                 "nodeType": "EnumValue",
-                "src": "6831:29:26"
+                "src": "6831:29:12"
               },
               {
-                "id": 20906,
+                "id": 6543,
                 "name": "SET_ADMIN_FEE_ACCRUE_INTEREST_FAILED",
-                "nameLocation": "6866:36:26",
+                "nameLocation": "6866:36:12",
                 "nodeType": "EnumValue",
-                "src": "6866:36:26"
+                "src": "6866:36:12"
               },
               {
-                "id": 20907,
+                "id": 6544,
                 "name": "SET_ADMIN_FEE_ADMIN_CHECK",
-                "nameLocation": "6908:25:26",
+                "nameLocation": "6908:25:12",
                 "nodeType": "EnumValue",
-                "src": "6908:25:26"
+                "src": "6908:25:12"
               },
               {
-                "id": 20908,
+                "id": 6545,
                 "name": "SET_ADMIN_FEE_FRESH_CHECK",
-                "nameLocation": "6939:25:26",
+                "nameLocation": "6939:25:12",
                 "nodeType": "EnumValue",
-                "src": "6939:25:26"
+                "src": "6939:25:12"
               },
               {
-                "id": 20909,
+                "id": 6546,
                 "name": "SET_ADMIN_FEE_BOUNDS_CHECK",
-                "nameLocation": "6970:26:26",
+                "nameLocation": "6970:26:12",
                 "nodeType": "EnumValue",
-                "src": "6970:26:26"
+                "src": "6970:26:12"
               },
               {
-                "id": 20910,
+                "id": 6547,
                 "name": "SET_FUSE_FEE_ACCRUE_INTEREST_FAILED",
-                "nameLocation": "7002:35:26",
+                "nameLocation": "7002:35:12",
                 "nodeType": "EnumValue",
-                "src": "7002:35:26"
+                "src": "7002:35:12"
               },
               {
-                "id": 20911,
+                "id": 6548,
                 "name": "SET_FUSE_FEE_FRESH_CHECK",
-                "nameLocation": "7043:24:26",
+                "nameLocation": "7043:24:12",
                 "nodeType": "EnumValue",
-                "src": "7043:24:26"
+                "src": "7043:24:12"
               },
               {
-                "id": 20912,
+                "id": 6549,
                 "name": "SET_FUSE_FEE_BOUNDS_CHECK",
-                "nameLocation": "7073:25:26",
+                "nameLocation": "7073:25:12",
                 "nodeType": "EnumValue",
-                "src": "7073:25:26"
+                "src": "7073:25:12"
               },
               {
-                "id": 20913,
+                "id": 6550,
                 "name": "SET_RESERVE_FACTOR_ACCRUE_INTEREST_FAILED",
-                "nameLocation": "7104:41:26",
+                "nameLocation": "7104:41:12",
                 "nodeType": "EnumValue",
-                "src": "7104:41:26"
+                "src": "7104:41:12"
               },
               {
-                "id": 20914,
+                "id": 6551,
                 "name": "SET_RESERVE_FACTOR_ADMIN_CHECK",
-                "nameLocation": "7151:30:26",
+                "nameLocation": "7151:30:12",
                 "nodeType": "EnumValue",
-                "src": "7151:30:26"
+                "src": "7151:30:12"
               },
               {
-                "id": 20915,
+                "id": 6552,
                 "name": "SET_RESERVE_FACTOR_FRESH_CHECK",
-                "nameLocation": "7187:30:26",
+                "nameLocation": "7187:30:12",
                 "nodeType": "EnumValue",
-                "src": "7187:30:26"
+                "src": "7187:30:12"
               },
               {
-                "id": 20916,
+                "id": 6553,
                 "name": "SET_RESERVE_FACTOR_BOUNDS_CHECK",
-                "nameLocation": "7223:31:26",
+                "nameLocation": "7223:31:12",
                 "nodeType": "EnumValue",
-                "src": "7223:31:26"
+                "src": "7223:31:12"
               },
               {
-                "id": 20917,
+                "id": 6554,
                 "name": "TRANSFER_COMPTROLLER_REJECTION",
-                "nameLocation": "7260:30:26",
+                "nameLocation": "7260:30:12",
                 "nodeType": "EnumValue",
-                "src": "7260:30:26"
+                "src": "7260:30:12"
               },
               {
-                "id": 20918,
+                "id": 6555,
                 "name": "TRANSFER_NOT_ALLOWED",
-                "nameLocation": "7296:20:26",
+                "nameLocation": "7296:20:12",
                 "nodeType": "EnumValue",
-                "src": "7296:20:26"
+                "src": "7296:20:12"
               },
               {
-                "id": 20919,
+                "id": 6556,
                 "name": "TRANSFER_NOT_ENOUGH",
-                "nameLocation": "7322:19:26",
+                "nameLocation": "7322:19:12",
                 "nodeType": "EnumValue",
-                "src": "7322:19:26"
+                "src": "7322:19:12"
               },
               {
-                "id": 20920,
+                "id": 6557,
                 "name": "TRANSFER_TOO_MUCH",
-                "nameLocation": "7347:17:26",
+                "nameLocation": "7347:17:12",
                 "nodeType": "EnumValue",
-                "src": "7347:17:26"
+                "src": "7347:17:12"
               },
               {
-                "id": 20921,
+                "id": 6558,
                 "name": "ADD_RESERVES_ACCRUE_INTEREST_FAILED",
-                "nameLocation": "7370:35:26",
+                "nameLocation": "7370:35:12",
                 "nodeType": "EnumValue",
-                "src": "7370:35:26"
+                "src": "7370:35:12"
               },
               {
-                "id": 20922,
+                "id": 6559,
                 "name": "ADD_RESERVES_FRESH_CHECK",
-                "nameLocation": "7411:24:26",
+                "nameLocation": "7411:24:12",
                 "nodeType": "EnumValue",
-                "src": "7411:24:26"
+                "src": "7411:24:12"
               },
               {
-                "id": 20923,
+                "id": 6560,
                 "name": "ADD_RESERVES_TRANSFER_IN_NOT_POSSIBLE",
-                "nameLocation": "7441:37:26",
+                "nameLocation": "7441:37:12",
                 "nodeType": "EnumValue",
-                "src": "7441:37:26"
+                "src": "7441:37:12"
               }
             ],
             "name": "FailureInfo",
-            "nameLocation": "3407:11:26"
+            "nameLocation": "3407:11:12"
           },
           {
-            "id": 20933,
+            "id": 6570,
             "nodeType": "EventDefinition",
-            "src": "7714:59:26",
+            "src": "7714:59:12",
             "anonymous": false,
             "documentation": {
-              "id": 20925,
+              "id": 6562,
               "nodeType": "StructuredDocumentation",
-              "src": "7486:225:26",
+              "src": "7486:225:12",
               "text": " @dev `error` corresponds to enum Error; `info` corresponds to enum FailureInfo, and `detail` is an arbitrary\n contract-specific code that enables us to report opaque error codes from upgradeable contracts.*"
             },
             "name": "Failure",
-            "nameLocation": "7720:7:26",
+            "nameLocation": "7720:7:12",
             "parameters": {
-              "id": 20932,
+              "id": 6569,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 20927,
+                  "id": 6564,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "error",
-                  "nameLocation": "7736:5:26",
+                  "nameLocation": "7736:5:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20933,
-                  "src": "7728:13:26",
+                  "scope": 6570,
+                  "src": "7728:13:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2214,10 +2215,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 20926,
+                    "id": 6563,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "7728:7:26",
+                    "src": "7728:7:12",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2227,14 +2228,14 @@
                 },
                 {
                   "constant": false,
-                  "id": 20929,
+                  "id": 6566,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "info",
-                  "nameLocation": "7751:4:26",
+                  "nameLocation": "7751:4:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20933,
-                  "src": "7743:12:26",
+                  "scope": 6570,
+                  "src": "7743:12:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2242,10 +2243,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 20928,
+                    "id": 6565,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "7743:7:26",
+                    "src": "7743:7:12",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2255,14 +2256,14 @@
                 },
                 {
                   "constant": false,
-                  "id": 20931,
+                  "id": 6568,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "detail",
-                  "nameLocation": "7765:6:26",
+                  "nameLocation": "7765:6:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20933,
-                  "src": "7757:14:26",
+                  "scope": 6570,
+                  "src": "7757:14:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2270,10 +2271,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 20930,
+                    "id": 6567,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "7757:7:26",
+                    "src": "7757:7:12",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2282,17 +2283,17 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "7727:45:26"
+              "src": "7727:45:12"
             }
           },
           {
-            "id": 20963,
+            "id": 6600,
             "nodeType": "FunctionDefinition",
-            "src": "7893:151:26",
+            "src": "7893:151:12",
             "body": {
-              "id": 20962,
+              "id": 6599,
               "nodeType": "Block",
-              "src": "7963:81:26",
+              "src": "7963:81:12",
               "statements": [
                 {
                   "eventCall": {
@@ -2300,14 +2301,14 @@
                       {
                         "arguments": [
                           {
-                            "id": 20948,
+                            "id": 6585,
                             "name": "err",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 20937,
-                            "src": "7990:3:26",
+                            "referencedDeclaration": 6574,
+                            "src": "7990:3:12",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_enum$_Error_$20823",
+                              "typeIdentifier": "t_enum$_Error_$6460",
                               "typeString": "enum TokenErrorReporter.Error"
                             }
                           }
@@ -2315,30 +2316,30 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_enum$_Error_$20823",
+                              "typeIdentifier": "t_enum$_Error_$6460",
                               "typeString": "enum TokenErrorReporter.Error"
                             }
                           ],
-                          "id": 20947,
+                          "id": 6584,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "7982:7:26",
+                          "src": "7982:7:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_uint256_$",
                             "typeString": "type(uint256)"
                           },
                           "typeName": {
-                            "id": 20946,
+                            "id": 6583,
                             "name": "uint256",
                             "nodeType": "ElementaryTypeName",
-                            "src": "7982:7:26",
+                            "src": "7982:7:12",
                             "typeDescriptions": {}
                           }
                         },
-                        "id": 20949,
+                        "id": 6586,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2346,7 +2347,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "7982:12:26",
+                        "src": "7982:12:12",
                         "tryCall": false,
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -2356,14 +2357,14 @@
                       {
                         "arguments": [
                           {
-                            "id": 20952,
+                            "id": 6589,
                             "name": "info",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 20940,
-                            "src": "8004:4:26",
+                            "referencedDeclaration": 6577,
+                            "src": "8004:4:12",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_enum$_FailureInfo_$20924",
+                              "typeIdentifier": "t_enum$_FailureInfo_$6561",
                               "typeString": "enum TokenErrorReporter.FailureInfo"
                             }
                           }
@@ -2371,30 +2372,30 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_enum$_FailureInfo_$20924",
+                              "typeIdentifier": "t_enum$_FailureInfo_$6561",
                               "typeString": "enum TokenErrorReporter.FailureInfo"
                             }
                           ],
-                          "id": 20951,
+                          "id": 6588,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "7996:7:26",
+                          "src": "7996:7:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_uint256_$",
                             "typeString": "type(uint256)"
                           },
                           "typeName": {
-                            "id": 20950,
+                            "id": 6587,
                             "name": "uint256",
                             "nodeType": "ElementaryTypeName",
-                            "src": "7996:7:26",
+                            "src": "7996:7:12",
                             "typeDescriptions": {}
                           }
                         },
-                        "id": 20953,
+                        "id": 6590,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2402,7 +2403,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "7996:13:26",
+                        "src": "7996:13:12",
                         "tryCall": false,
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -2411,14 +2412,14 @@
                       },
                       {
                         "hexValue": "30",
-                        "id": 20954,
+                        "id": 6591,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "8011:1:26",
+                        "src": "8011:1:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_0_by_1",
                           "typeString": "int_const 0"
@@ -2441,18 +2442,18 @@
                           "typeString": "int_const 0"
                         }
                       ],
-                      "id": 20945,
+                      "id": 6582,
                       "name": "Failure",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 20933,
-                      "src": "7974:7:26",
+                      "referencedDeclaration": 6570,
+                      "src": "7974:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_uint256_$_t_uint256_$_t_uint256_$returns$__$",
                         "typeString": "function (uint256,uint256,uint256)"
                       }
                     },
-                    "id": 20955,
+                    "id": 6592,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2460,29 +2461,29 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "7974:39:26",
+                    "src": "7974:39:12",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 20956,
+                  "id": 6593,
                   "nodeType": "EmitStatement",
-                  "src": "7969:44:26"
+                  "src": "7969:44:12"
                 },
                 {
                   "expression": {
                     "arguments": [
                       {
-                        "id": 20959,
+                        "id": 6596,
                         "name": "err",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 20937,
-                        "src": "8035:3:26",
+                        "referencedDeclaration": 6574,
+                        "src": "8035:3:12",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_Error_$20823",
+                          "typeIdentifier": "t_enum$_Error_$6460",
                           "typeString": "enum TokenErrorReporter.Error"
                         }
                       }
@@ -2490,30 +2491,30 @@
                     "expression": {
                       "argumentTypes": [
                         {
-                          "typeIdentifier": "t_enum$_Error_$20823",
+                          "typeIdentifier": "t_enum$_Error_$6460",
                           "typeString": "enum TokenErrorReporter.Error"
                         }
                       ],
-                      "id": 20958,
+                      "id": 6595,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "lValueRequested": false,
                       "nodeType": "ElementaryTypeNameExpression",
-                      "src": "8027:7:26",
+                      "src": "8027:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_uint256_$",
                         "typeString": "type(uint256)"
                       },
                       "typeName": {
-                        "id": 20957,
+                        "id": 6594,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "8027:7:26",
+                        "src": "8027:7:12",
                         "typeDescriptions": {}
                       }
                     },
-                    "id": 20960,
+                    "id": 6597,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2521,64 +2522,64 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "8027:12:26",
+                    "src": "8027:12:12",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 20944,
-                  "id": 20961,
+                  "functionReturnParameters": 6581,
+                  "id": 6598,
                   "nodeType": "Return",
-                  "src": "8020:19:26"
+                  "src": "8020:19:12"
                 }
               ]
             },
             "documentation": {
-              "id": 20934,
+              "id": 6571,
               "nodeType": "StructuredDocumentation",
-              "src": "7777:113:26",
+              "src": "7777:113:12",
               "text": " @dev use this when reporting a known error from the money market or a non-upgradeable collaborator"
             },
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "fail",
-            "nameLocation": "7902:4:26",
+            "nameLocation": "7902:4:12",
             "parameters": {
-              "id": 20941,
+              "id": 6578,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 20937,
+                  "id": 6574,
                   "mutability": "mutable",
                   "name": "err",
-                  "nameLocation": "7913:3:26",
+                  "nameLocation": "7913:3:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20963,
-                  "src": "7907:9:26",
+                  "scope": 6600,
+                  "src": "7907:9:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_Error_$20823",
+                    "typeIdentifier": "t_enum$_Error_$6460",
                     "typeString": "enum TokenErrorReporter.Error"
                   },
                   "typeName": {
-                    "id": 20936,
+                    "id": 6573,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 20935,
+                      "id": 6572,
                       "name": "Error",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 20823,
-                      "src": "7907:5:26"
+                      "referencedDeclaration": 6460,
+                      "src": "7907:5:12"
                     },
-                    "referencedDeclaration": 20823,
-                    "src": "7907:5:26",
+                    "referencedDeclaration": 6460,
+                    "src": "7907:5:12",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_Error_$20823",
+                      "typeIdentifier": "t_enum$_Error_$6460",
                       "typeString": "enum TokenErrorReporter.Error"
                     }
                   },
@@ -2586,54 +2587,54 @@
                 },
                 {
                   "constant": false,
-                  "id": 20940,
+                  "id": 6577,
                   "mutability": "mutable",
                   "name": "info",
-                  "nameLocation": "7930:4:26",
+                  "nameLocation": "7930:4:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20963,
-                  "src": "7918:16:26",
+                  "scope": 6600,
+                  "src": "7918:16:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_FailureInfo_$20924",
+                    "typeIdentifier": "t_enum$_FailureInfo_$6561",
                     "typeString": "enum TokenErrorReporter.FailureInfo"
                   },
                   "typeName": {
-                    "id": 20939,
+                    "id": 6576,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 20938,
+                      "id": 6575,
                       "name": "FailureInfo",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 20924,
-                      "src": "7918:11:26"
+                      "referencedDeclaration": 6561,
+                      "src": "7918:11:12"
                     },
-                    "referencedDeclaration": 20924,
-                    "src": "7918:11:26",
+                    "referencedDeclaration": 6561,
+                    "src": "7918:11:12",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_FailureInfo_$20924",
+                      "typeIdentifier": "t_enum$_FailureInfo_$6561",
                       "typeString": "enum TokenErrorReporter.FailureInfo"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "7906:29:26"
+              "src": "7906:29:12"
             },
             "returnParameters": {
-              "id": 20944,
+              "id": 6581,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 20943,
+                  "id": 6580,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 20963,
-                  "src": "7954:7:26",
+                  "scope": 6600,
+                  "src": "7954:7:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2641,10 +2642,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 20942,
+                    "id": 6579,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "7954:7:26",
+                    "src": "7954:7:12",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2653,21 +2654,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "7953:9:26"
+              "src": "7953:9:12"
             },
-            "scope": 21004,
+            "scope": 6641,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "internal"
           },
           {
-            "id": 21003,
+            "id": 6640,
             "nodeType": "FunctionDefinition",
-            "src": "8152:262:26",
+            "src": "8152:262:12",
             "body": {
-              "id": 21002,
+              "id": 6639,
               "nodeType": "Block",
-              "src": "8265:149:26",
+              "src": "8265:149:12",
               "statements": [
                 {
                   "eventCall": {
@@ -2675,14 +2676,14 @@
                       {
                         "arguments": [
                           {
-                            "id": 20980,
+                            "id": 6617,
                             "name": "err",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 20967,
-                            "src": "8292:3:26",
+                            "referencedDeclaration": 6604,
+                            "src": "8292:3:12",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_enum$_Error_$20823",
+                              "typeIdentifier": "t_enum$_Error_$6460",
                               "typeString": "enum TokenErrorReporter.Error"
                             }
                           }
@@ -2690,30 +2691,30 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_enum$_Error_$20823",
+                              "typeIdentifier": "t_enum$_Error_$6460",
                               "typeString": "enum TokenErrorReporter.Error"
                             }
                           ],
-                          "id": 20979,
+                          "id": 6616,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "8284:7:26",
+                          "src": "8284:7:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_uint256_$",
                             "typeString": "type(uint256)"
                           },
                           "typeName": {
-                            "id": 20978,
+                            "id": 6615,
                             "name": "uint256",
                             "nodeType": "ElementaryTypeName",
-                            "src": "8284:7:26",
+                            "src": "8284:7:12",
                             "typeDescriptions": {}
                           }
                         },
-                        "id": 20981,
+                        "id": 6618,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2721,7 +2722,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "8284:12:26",
+                        "src": "8284:12:12",
                         "tryCall": false,
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -2731,14 +2732,14 @@
                       {
                         "arguments": [
                           {
-                            "id": 20984,
+                            "id": 6621,
                             "name": "info",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 20970,
-                            "src": "8306:4:26",
+                            "referencedDeclaration": 6607,
+                            "src": "8306:4:12",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_enum$_FailureInfo_$20924",
+                              "typeIdentifier": "t_enum$_FailureInfo_$6561",
                               "typeString": "enum TokenErrorReporter.FailureInfo"
                             }
                           }
@@ -2746,30 +2747,30 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_enum$_FailureInfo_$20924",
+                              "typeIdentifier": "t_enum$_FailureInfo_$6561",
                               "typeString": "enum TokenErrorReporter.FailureInfo"
                             }
                           ],
-                          "id": 20983,
+                          "id": 6620,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "8298:7:26",
+                          "src": "8298:7:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_uint256_$",
                             "typeString": "type(uint256)"
                           },
                           "typeName": {
-                            "id": 20982,
+                            "id": 6619,
                             "name": "uint256",
                             "nodeType": "ElementaryTypeName",
-                            "src": "8298:7:26",
+                            "src": "8298:7:12",
                             "typeDescriptions": {}
                           }
                         },
-                        "id": 20985,
+                        "id": 6622,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2777,7 +2778,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "8298:13:26",
+                        "src": "8298:13:12",
                         "tryCall": false,
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -2785,12 +2786,12 @@
                         }
                       },
                       {
-                        "id": 20986,
+                        "id": 6623,
                         "name": "opaqueError",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 20972,
-                        "src": "8313:11:26",
+                        "referencedDeclaration": 6609,
+                        "src": "8313:11:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2812,18 +2813,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 20977,
+                      "id": 6614,
                       "name": "Failure",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 20933,
-                      "src": "8276:7:26",
+                      "referencedDeclaration": 6570,
+                      "src": "8276:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_uint256_$_t_uint256_$_t_uint256_$returns$__$",
                         "typeString": "function (uint256,uint256,uint256)"
                       }
                     },
-                    "id": 20987,
+                    "id": 6624,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2831,38 +2832,38 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "8276:49:26",
+                    "src": "8276:49:12",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 20988,
+                  "id": 6625,
                   "nodeType": "EmitStatement",
-                  "src": "8271:54:26"
+                  "src": "8271:54:12"
                 },
                 {
                   "expression": {
                     "condition": {
                       "commonType": {
-                        "typeIdentifier": "t_enum$_Error_$20823",
+                        "typeIdentifier": "t_enum$_Error_$6460",
                         "typeString": "enum TokenErrorReporter.Error"
                       },
-                      "id": 20992,
+                      "id": 6629,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
-                        "id": 20989,
+                        "id": 6626,
                         "name": "err",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 20967,
-                        "src": "8339:3:26",
+                        "referencedDeclaration": 6604,
+                        "src": "8339:3:12",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_Error_$20823",
+                          "typeIdentifier": "t_enum$_Error_$6460",
                           "typeString": "enum TokenErrorReporter.Error"
                         }
                       },
@@ -2870,32 +2871,32 @@
                       "operator": "==",
                       "rightExpression": {
                         "expression": {
-                          "id": 20990,
+                          "id": 6627,
                           "name": "Error",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 20823,
-                          "src": "8346:5:26",
+                          "referencedDeclaration": 6460,
+                          "src": "8346:5:12",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_Error_$20823_$",
+                            "typeIdentifier": "t_type$_t_enum$_Error_$6460_$",
                             "typeString": "type(enum TokenErrorReporter.Error)"
                           }
                         },
-                        "id": 20991,
+                        "id": 6628,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "lValueRequested": false,
                         "memberName": "COMPTROLLER_REJECTION",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 20808,
-                        "src": "8346:27:26",
+                        "referencedDeclaration": 6445,
+                        "src": "8346:27:12",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_Error_$20823",
+                          "typeIdentifier": "t_enum$_Error_$6460",
                           "typeString": "enum TokenErrorReporter.Error"
                         }
                       },
-                      "src": "8339:34:26",
+                      "src": "8339:34:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -2904,14 +2905,14 @@
                     "falseExpression": {
                       "arguments": [
                         {
-                          "id": 20998,
+                          "id": 6635,
                           "name": "err",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 20967,
-                          "src": "8405:3:26",
+                          "referencedDeclaration": 6604,
+                          "src": "8405:3:12",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Error_$20823",
+                            "typeIdentifier": "t_enum$_Error_$6460",
                             "typeString": "enum TokenErrorReporter.Error"
                           }
                         }
@@ -2919,30 +2920,30 @@
                       "expression": {
                         "argumentTypes": [
                           {
-                            "typeIdentifier": "t_enum$_Error_$20823",
+                            "typeIdentifier": "t_enum$_Error_$6460",
                             "typeString": "enum TokenErrorReporter.Error"
                           }
                         ],
-                        "id": 20997,
+                        "id": 6634,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "lValueRequested": false,
                         "nodeType": "ElementaryTypeNameExpression",
-                        "src": "8397:7:26",
+                        "src": "8397:7:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_type$_t_uint256_$",
                           "typeString": "type(uint256)"
                         },
                         "typeName": {
-                          "id": 20996,
+                          "id": 6633,
                           "name": "uint256",
                           "nodeType": "ElementaryTypeName",
-                          "src": "8397:7:26",
+                          "src": "8397:7:12",
                           "typeDescriptions": {}
                         }
                       },
-                      "id": 20999,
+                      "id": 6636,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2950,40 +2951,40 @@
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "8397:12:26",
+                      "src": "8397:12:12",
                       "tryCall": false,
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 21000,
+                    "id": 6637,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "Conditional",
-                    "src": "8339:70:26",
+                    "src": "8339:70:12",
                     "trueExpression": {
                       "commonType": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       },
-                      "id": 20995,
+                      "id": 6632,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
                         "hexValue": "31303030",
-                        "id": 20993,
+                        "id": 6630,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "8376:4:26",
+                        "src": "8376:4:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_1000_by_1",
                           "typeString": "int_const 1000"
@@ -2993,18 +2994,18 @@
                       "nodeType": "BinaryOperation",
                       "operator": "+",
                       "rightExpression": {
-                        "id": 20994,
+                        "id": 6631,
                         "name": "opaqueError",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 20972,
-                        "src": "8383:11:26",
+                        "referencedDeclaration": 6609,
+                        "src": "8383:11:12",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "src": "8376:18:26",
+                      "src": "8376:18:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -3015,57 +3016,57 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 20976,
-                  "id": 21001,
+                  "functionReturnParameters": 6613,
+                  "id": 6638,
                   "nodeType": "Return",
-                  "src": "8332:77:26"
+                  "src": "8332:77:12"
                 }
               ]
             },
             "documentation": {
-              "id": 20964,
+              "id": 6601,
               "nodeType": "StructuredDocumentation",
-              "src": "8048:101:26",
+              "src": "8048:101:12",
               "text": " @dev use this when reporting an opaque error from an upgradeable collaborator contract"
             },
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "failOpaque",
-            "nameLocation": "8161:10:26",
+            "nameLocation": "8161:10:12",
             "parameters": {
-              "id": 20973,
+              "id": 6610,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 20967,
+                  "id": 6604,
                   "mutability": "mutable",
                   "name": "err",
-                  "nameLocation": "8183:3:26",
+                  "nameLocation": "8183:3:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 21003,
-                  "src": "8177:9:26",
+                  "scope": 6640,
+                  "src": "8177:9:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_Error_$20823",
+                    "typeIdentifier": "t_enum$_Error_$6460",
                     "typeString": "enum TokenErrorReporter.Error"
                   },
                   "typeName": {
-                    "id": 20966,
+                    "id": 6603,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 20965,
+                      "id": 6602,
                       "name": "Error",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 20823,
-                      "src": "8177:5:26"
+                      "referencedDeclaration": 6460,
+                      "src": "8177:5:12"
                     },
-                    "referencedDeclaration": 20823,
-                    "src": "8177:5:26",
+                    "referencedDeclaration": 6460,
+                    "src": "8177:5:12",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_Error_$20823",
+                      "typeIdentifier": "t_enum$_Error_$6460",
                       "typeString": "enum TokenErrorReporter.Error"
                     }
                   },
@@ -3073,33 +3074,33 @@
                 },
                 {
                   "constant": false,
-                  "id": 20970,
+                  "id": 6607,
                   "mutability": "mutable",
                   "name": "info",
-                  "nameLocation": "8204:4:26",
+                  "nameLocation": "8204:4:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 21003,
-                  "src": "8192:16:26",
+                  "scope": 6640,
+                  "src": "8192:16:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_FailureInfo_$20924",
+                    "typeIdentifier": "t_enum$_FailureInfo_$6561",
                     "typeString": "enum TokenErrorReporter.FailureInfo"
                   },
                   "typeName": {
-                    "id": 20969,
+                    "id": 6606,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 20968,
+                      "id": 6605,
                       "name": "FailureInfo",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 20924,
-                      "src": "8192:11:26"
+                      "referencedDeclaration": 6561,
+                      "src": "8192:11:12"
                     },
-                    "referencedDeclaration": 20924,
-                    "src": "8192:11:26",
+                    "referencedDeclaration": 6561,
+                    "src": "8192:11:12",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_FailureInfo_$20924",
+                      "typeIdentifier": "t_enum$_FailureInfo_$6561",
                       "typeString": "enum TokenErrorReporter.FailureInfo"
                     }
                   },
@@ -3107,13 +3108,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 20972,
+                  "id": 6609,
                   "mutability": "mutable",
                   "name": "opaqueError",
-                  "nameLocation": "8222:11:26",
+                  "nameLocation": "8222:11:12",
                   "nodeType": "VariableDeclaration",
-                  "scope": 21003,
-                  "src": "8214:19:26",
+                  "scope": 6640,
+                  "src": "8214:19:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3121,10 +3122,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 20971,
+                    "id": 6608,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "8214:7:26",
+                    "src": "8214:7:12",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3133,21 +3134,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "8171:66:26"
+              "src": "8171:66:12"
             },
             "returnParameters": {
-              "id": 20976,
+              "id": 6613,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 20975,
+                  "id": 6612,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 21003,
-                  "src": "8256:7:26",
+                  "scope": 6640,
+                  "src": "8256:7:12",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3155,10 +3156,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 20974,
+                    "id": 6611,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "8256:7:26",
+                    "src": "8256:7:12",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3167,9 +3168,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "8255:9:26"
+              "src": "8255:9:12"
             },
-            "scope": 21004,
+            "scope": 6641,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "internal"
@@ -3182,14 +3183,15 @@
         "contractKind": "contract",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          21004
+          6641
         ],
         "name": "TokenErrorReporter",
-        "nameLocation": "2619:18:26",
-        "scope": 21005,
+        "nameLocation": "2619:18:12",
+        "scope": 6642,
         "usedErrors": []
       }
     ],
     "license": "UNLICENSED"
-  }
+  },
+  "id": 12
 }
