@@ -9,7 +9,7 @@ assignees: ''
 
 ## Chain Information
 
-Link to Chain Developer docs: XXX
+Link to Chain Developer docs: *XXX*
 
 **Mainnet**
 Chain Name:  *XXX* <br>
