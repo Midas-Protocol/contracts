@@ -12,25 +12,26 @@ assignees: ''
 Developer docs: XXX
 
 **Mainnet**
-Chain Name:  XXX
-Chain ID:  XXX
-RPC URL:  XXX
-Native Token: <explorer url/XXX>
-Wrapped Native Token: <explorer url/XXX>
+Chain Name:  *XXX* <br>
+Chain ID:  *XXX* <br>
+RPC URL:  *XXX* <br>
+Native Token: *explorer url/XXX *<br>
+Wrapped Native Token: *explorer url/XXX* <br>
 
 **Testnet**
-Chain Name:  XXX
-Chain ID:  XXX
-RPC URL:  XXX
-Native Token: <explorer url/XXX>
-Wrapped Native Token: <explorer url/XXX>
+Chain Name: *XXX* <br>
+Chain ID:  *XXX* <br>
+RPC URL:  *XXX* <br>
+Native Token: *explorer url/XXX* <br>
+Wrapped Native Token: *explorer url/XXX* <br>
 
 **Ecosystem**
-Uniswap-clone project name: XXX
-Uniswap-clone docs: XXX
+Uniswap-clone project name: XXX <br>
+Uniswap-clone docs: XXX <br>
 
 ## Tasks
 
+- [ ] [Link to Custom Asset Template](https://github.com/Midas-Protocol/monorepo/issues/new?assignees=&labels=Custom+Asset+Support&template=custom-asset-support.md&title=Support+Asset+%24XXX)
 - [ ] Create chain-specific deploy script inside `chainDeploy`
 - [ ] Add the supported chain and its parameters to the [network configs](https://github.com/Midas-Protocol/contracts/blob/main/src/network.ts) of the SDK 
    - [ ] Blocks per year
