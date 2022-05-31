@@ -40,11 +40,11 @@ Uniswap-clone docs: XXX <br>
    - [ ] Chain-specific addresses
    - [ ] Supported oracles
 - [ ] Add network to hardhat config
-- [ ] Run deploy script, export deployments and commit both `deployments.json` and deployments artifacts <br>
+- [ ] Run deploy script, export deployments and commit both `deployments.json` and deployments artifacts <br> <br>
 **SDK**
 - [ ] Add supported assets to chainConfig/supportedAssets
 - [ ] Add chain ids to SupportedChains enum
-- [ ] Redeploy SDK <br>
+- [ ] Redeploy SDK <br> <br>
 **UI**
 - [ ] Add Chain Mainnet and Testnet to `SwitchNetworkModal`
  - [ ] Add ChainMetadata for Main & Testnet
