@@ -28,146 +28,146 @@ contract BNBE2eTest is WithPool, BaseTest {
     setUpPool("bsc-test", false, 0.1e18, 1.1e18);
   }
 
-  // function testDeployCErc20Delegate() public shouldRun(forChains(BSC_MAINNET)) {
-  //   vm.roll(1);
-  //   deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
+  function testDeployCErc20Delegate() public shouldRun(forChains(BSC_MAINNET)) {
+    vm.roll(1);
+    deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
-  //   CToken[] memory allMarkets = comptroller.getAllMarkets();
-  //   CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
-  //   assertEq(cToken.name(), "cUnderlyingToken");
-  //   underlyingToken.approve(address(cToken), 1e36);
-  //   address[] memory cTokens = new address[](1);
-  //   cTokens[0] = address(cToken);
-  //   comptroller.enterMarkets(cTokens);
+    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
+    assertEq(cToken.name(), "cUnderlyingToken");
+    underlyingToken.approve(address(cToken), 1e36);
+    address[] memory cTokens = new address[](1);
+    cTokens[0] = address(cToken);
+    comptroller.enterMarkets(cTokens);
 
-  //   vm.roll(1);
+    vm.roll(1);
 
-  //   cToken.mint(10e18);
-  //   assertEq(cToken.totalSupply(), 10e18 * 5);
-  //   assertEq(underlyingToken.balanceOf(address(cToken)), 10e18);
+    cToken.mint(10e18);
+    assertEq(cToken.totalSupply(), 10e18 * 5);
+    assertEq(underlyingToken.balanceOf(address(cToken)), 10e18);
 
-  //   cToken.borrow(1000);
-  //   assertEq(cToken.totalBorrows(), 1000);
-  //   assertEq(underlyingToken.balanceOf(address(this)), 1000);
-  // }
-
-  function testGetPoolAssetsData() public shouldRun(forChains(BSC_MAINNET)) {
-      // vm.roll(1);
-      // deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
-
-      // CToken[] memory allMarkets = comptroller.getAllMarkets();
-      // CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
-      // assertEq(cToken.name(), "cUnderlyingToken");
-      // underlyingToken.approve(address(cToken), 1e36);
-      // address[] memory cTokens = new address[](1);
-      // cTokens[0] = address(cToken);
-      // comptroller.enterMarkets(cTokens);
-
-      // cToken.mint(10e18);
-
-      address comptroller1 = 0x31d76A64Bc8BbEffb601fac5884372DEF910F044;
-      address comptroller2 = 0x11355CF65a9B76e5Ac4C289362fD7c22eE93E762;
-
-      FusePoolLens.FusePoolAsset[] memory assets = poolLens
-          .getPoolAssetsWithData(IComptroller(comptroller2));
-      
-      FusePoolLens.FusePoolAsset[] memory assets1 = poolLens
-          .getPoolAssetsWithData(IComptroller(comptroller1));
-
-      // assertEq(assets[0].supplyBalance, 10e18);
+    cToken.borrow(1000);
+    assertEq(cToken.totalBorrows(), 1000);
+    assertEq(underlyingToken.balanceOf(address(this)), 1000);
   }
 
-  // function testDeployCErc20PluginDelegate() public shouldRun(forChains(BSC_MAINNET)) {
-  //   AlpacaERC4626 erc4626 = new AlpacaERC4626(
-  //     underlyingToken,
-  //     IAlpacaVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063),
-  //     IW_NATIVE(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
-  //   );
+  function testGetPoolAssetsData() public shouldRun(forChains(BSC_MAINNET)) {
+      vm.roll(1);
+      deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
-  //   vm.roll(1);
-  //   deployCErc20PluginDelegate(erc4626, 0.9e18);
+      CToken[] memory allMarkets = comptroller.getAllMarkets();
+      CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
+      assertEq(cToken.name(), "cUnderlyingToken");
+      underlyingToken.approve(address(cToken), 1e36);
+      address[] memory cTokens = new address[](1);
+      cTokens[0] = address(cToken);
+      comptroller.enterMarkets(cTokens);
 
-  //   CToken[] memory allMarkets = comptroller.getAllMarkets();
-  //   CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
+      cToken.mint(10e18);
 
-  //   cToken._setImplementationSafe(address(cErc20PluginDelegate), false, abi.encode(address(erc4626)));
-  //   assertEq(address(cToken.plugin()), address(erc4626));
+      // address comptroller1 = 0x31d76A64Bc8BbEffb601fac5884372DEF910F044;
+      // address comptroller2 = 0x11355CF65a9B76e5Ac4C289362fD7c22eE93E762;
 
-  //   underlyingToken.approve(address(cToken), 1e36);
-  //   address[] memory cTokens = new address[](1);
-  //   cTokens[0] = address(cToken);
-  //   comptroller.enterMarkets(cTokens);
-  //   vm.roll(1);
+      FusePoolLens.FusePoolAsset[] memory assets = poolLens
+          .getPoolAssetsWithData(IComptroller(address(comptroller)));
+      
+      // FusePoolLens.FusePoolAsset[] memory assets1 = poolLens
+      //     .getPoolAssetsWithData(IComptroller(comptroller1));
 
-  //   cToken.mint(1e18);
-  //   assertEq(cToken.totalSupply(), 1e18 * 5);
-  //   uint256 balance = erc4626.balanceOf(address(cToken));
-  //   assertEq(balance, 1e18);
-  //   vm.roll(1);
+      assertEq(assets[0].supplyBalance, 10e18);
+  }
 
-  //   cToken.borrow(1000);
-  //   assertEq(cToken.totalBorrows(), 1000);
-  //   balance = erc4626.balanceOf(address(cToken));
-  //   uint256 maxWithdraw = erc4626.previewWithdraw(1000);
-  //   assertEq(balance, 1e18 - maxWithdraw);
-  //   assertEq(underlyingToken.balanceOf(address(this)), 10e18 - 1e18 + 1000);
-  // }
+  function testDeployCErc20PluginDelegate() public shouldRun(forChains(BSC_MAINNET)) {
+    AlpacaERC4626 erc4626 = new AlpacaERC4626(
+      underlyingToken,
+      IAlpacaVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063),
+      IW_NATIVE(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
+    );
 
-  // function testDeployCErc20PluginRewardsDelegate() public shouldRun(forChains(BSC_MAINNET)) {
-  //   MockERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
-  //   FuseFlywheelDynamicRewards rewards;
-  //   FuseFlywheelCore flywheel = new FuseFlywheelCore(
-  //     underlyingToken,
-  //     IFlywheelRewards(address(2)),
-  //     IFlywheelBooster(address(0)),
-  //     address(this),
-  //     Authority(address(0))
-  //   );
-  //   rewards = new FuseFlywheelDynamicRewards(flywheel, 1);
-  //   flywheel.setFlywheelRewards(rewards);
+    vm.roll(1);
+    deployCErc20PluginDelegate(erc4626, 0.9e18);
 
-  //   AlpacaERC4626 erc4626 = new AlpacaERC4626(
-  //     underlyingToken,
-  //     IAlpacaVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063),
-  //     IW_NATIVE(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
-  //   );
+    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
-  //   ERC20 marketKey = ERC20(address(erc4626));
-  //   flywheel.addStrategyForRewards(marketKey);
+    cToken._setImplementationSafe(address(cErc20PluginDelegate), false, abi.encode(address(erc4626)));
+    assertEq(address(cToken.plugin()), address(erc4626));
 
-  //   vm.roll(1);
-  //   deployCErc20PluginRewardsDelegate(erc4626, flywheel, 0.9e18);
+    underlyingToken.approve(address(cToken), 1e36);
+    address[] memory cTokens = new address[](1);
+    cTokens[0] = address(cToken);
+    comptroller.enterMarkets(cTokens);
+    vm.roll(1);
 
-  //   CToken[] memory allMarkets = comptroller.getAllMarkets();
-  //   CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
+    cToken.mint(1e18);
+    assertEq(cToken.totalSupply(), 1e18 * 5);
+    uint256 balance = erc4626.balanceOf(address(cToken));
+    assertEq(balance, 1e18);
+    vm.roll(1);
 
-  //   cToken._setImplementationSafe(
-  //     address(cErc20PluginRewardsDelegate),
-  //     false,
-  //     abi.encode(address(erc4626), address(flywheel), address(underlyingToken))
-  //   );
-  //   assertEq(address(cToken.plugin()), address(erc4626));
-  //   assertEq(underlyingToken.allowance(address(cToken), address(erc4626)), type(uint256).max);
-  //   assertEq(underlyingToken.allowance(address(cToken), address(flywheel)), 0);
+    cToken.borrow(1000);
+    assertEq(cToken.totalBorrows(), 1000);
+    balance = erc4626.balanceOf(address(cToken));
+    uint256 maxWithdraw = erc4626.previewWithdraw(1000);
+    assertEq(balance, 1e18 - maxWithdraw);
+    assertEq(underlyingToken.balanceOf(address(this)), 10e18 - 1e18 + 1000);
+  }
 
-  //   cToken.approve(address(rewardToken), address(flywheel));
-  //   assertEq(rewardToken.allowance(address(cToken), address(flywheel)), type(uint256).max);
+  function testDeployCErc20PluginRewardsDelegate() public shouldRun(forChains(BSC_MAINNET)) {
+    MockERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
+    FuseFlywheelDynamicRewards rewards;
+    FuseFlywheelCore flywheel = new FuseFlywheelCore(
+      underlyingToken,
+      IFlywheelRewards(address(2)),
+      IFlywheelBooster(address(0)),
+      address(this),
+      Authority(address(0))
+    );
+    rewards = new FuseFlywheelDynamicRewards(flywheel, 1);
+    flywheel.setFlywheelRewards(rewards);
 
-  //   underlyingToken.approve(address(cToken), 1e36);
-  //   address[] memory cTokens = new address[](1);
-  //   cTokens[0] = address(cToken);
-  //   comptroller.enterMarkets(cTokens);
-  //   vm.roll(1);
+    AlpacaERC4626 erc4626 = new AlpacaERC4626(
+      underlyingToken,
+      IAlpacaVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063),
+      IW_NATIVE(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
+    );
 
-  //   cToken.mint(10000000);
-  //   assertEq(cToken.totalSupply(), 10000000 * 5);
-  //   assertEq(erc4626.balanceOf(address(cToken)), 10000000);
-  //   vm.roll(1);
+    ERC20 marketKey = ERC20(address(erc4626));
+    flywheel.addStrategyForRewards(marketKey);
 
-  //   cToken.borrow(1000);
-  //   uint256 maxWithdraw = erc4626.previewWithdraw(1000);
-  //   assertEq(cToken.totalBorrows(), 1000);
-  //   assertEq(erc4626.balanceOf(address(cToken)), 10000000 - maxWithdraw);
-  //   assertEq(underlyingToken.balanceOf(address(this)), 10e18 - 10000000 + 1000);
-  // }
+    vm.roll(1);
+    deployCErc20PluginRewardsDelegate(erc4626, flywheel, 0.9e18);
+
+    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
+
+    cToken._setImplementationSafe(
+      address(cErc20PluginRewardsDelegate),
+      false,
+      abi.encode(address(erc4626), address(flywheel), address(underlyingToken))
+    );
+    assertEq(address(cToken.plugin()), address(erc4626));
+    assertEq(underlyingToken.allowance(address(cToken), address(erc4626)), type(uint256).max);
+    assertEq(underlyingToken.allowance(address(cToken), address(flywheel)), 0);
+
+    cToken.approve(address(rewardToken), address(flywheel));
+    assertEq(rewardToken.allowance(address(cToken), address(flywheel)), type(uint256).max);
+
+    underlyingToken.approve(address(cToken), 1e36);
+    address[] memory cTokens = new address[](1);
+    cTokens[0] = address(cToken);
+    comptroller.enterMarkets(cTokens);
+    vm.roll(1);
+
+    cToken.mint(10000000);
+    assertEq(cToken.totalSupply(), 10000000 * 5);
+    assertEq(erc4626.balanceOf(address(cToken)), 10000000);
+    vm.roll(1);
+
+    cToken.borrow(1000);
+    uint256 maxWithdraw = erc4626.previewWithdraw(1000);
+    assertEq(cToken.totalBorrows(), 1000);
+    assertEq(erc4626.balanceOf(address(cToken)), 10000000 - maxWithdraw);
+    assertEq(underlyingToken.balanceOf(address(this)), 10e18 - 10000000 + 1000);
+  }
 }
