@@ -42,3 +42,11 @@ Uniswap-clone docs: XXX <br>
 - [ ] Add network to hardhat config
 - [ ] Run deploy script, export deployments and commit both `deployments.json` and deployments artifacts
 - [ ] Redeploy SDK
+ SDK
+- [ ] Add supported assets to chainConfig/supportedAssets
+- [ ] Add chain ids to SupportedChains enum <br>
+ UI
+- [ ] Add Chain Mainnet and Testnet to <SwitchNetworkModal/>
+ - [ ] Add ChainMetadata for Main & Testnet
+ - [ ] Make sure Main & Testnet are Listed in SupportedChains
+ - [ ] Deactivate Mainnet via netlify.toml until specific release
