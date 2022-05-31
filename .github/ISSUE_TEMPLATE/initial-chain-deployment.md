@@ -31,7 +31,8 @@ Uniswap-clone docs: XXX <br>
 
 ## Tasks
 
-- [ ] [Link to Custom Asset Template](https://github.com/Midas-Protocol/monorepo/issues/new?assignees=&labels=Custom+Asset+Support&template=custom-asset-support.md&title=Support+Asset+%24XXX)
+- [ ] Please use the link below to add initial set of assets <br>
+   - [Link to Custom Asset Template](https://github.com/Midas-Protocol/monorepo/issues/new?assignees=&labels=Custom+Asset+Support&template=custom-asset-support.md&title=Support+Asset+%24XXX)
 - [ ] Create chain-specific deploy script inside `chainDeploy`
 - [ ] Add the supported chain and its parameters to the [network configs](https://github.com/Midas-Protocol/contracts/blob/main/src/network.ts) of the SDK 
    - [ ] Blocks per year
