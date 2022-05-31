@@ -30,6 +30,7 @@ Uniswap-clone project name: XXX <br>
 Uniswap-clone docs: XXX <br>
 
 ## Tasks
+*Please mark the tasks below, as appropriate.  Then link supporting Github items together using:* ![Screenshot of Github Link Button](https://user-images.githubusercontent.com/103433798/169572470-b7e31053-afab-4225-9816-6403193b86b3.png)
 
 - [ ] Please use the link below to add initial set of assets <br>
    - [Link to Custom Asset Template](https://github.com/Midas-Protocol/monorepo/issues/new?assignees=&labels=Custom+Asset+Support&template=custom-asset-support.md&title=Support+Asset+%24XXX)
