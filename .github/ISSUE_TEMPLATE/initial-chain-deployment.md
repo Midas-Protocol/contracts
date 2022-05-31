@@ -9,13 +9,13 @@ assignees: ''
 
 ## Chain Information
 
-Developer docs: XXX
+Link to Chain Developer docs: XXX
 
 **Mainnet**
 Chain Name:  *XXX* <br>
 Chain ID:  *XXX* <br>
 RPC URL:  *XXX* <br>
-Native Token: *explorer url/XXX *<br>
+Native Token: *explorer url/XXX* <br>
 Wrapped Native Token: *explorer url/XXX* <br>
 
 **Testnet**
