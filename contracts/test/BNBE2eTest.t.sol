@@ -11,6 +11,7 @@ import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { AlpacaERC4626, IAlpacaVault } from "../compound/strategies/AlpacaERC4626.sol";
 import { IW_NATIVE } from "../utils/IW_NATIVE.sol";
+import { IComptroller } from "../external/compound/IComptroller.sol";
 
 contract BNBE2eTest is WithPool, BaseTest {
   constructor()
@@ -48,6 +49,26 @@ contract BNBE2eTest is WithPool, BaseTest {
     cToken.borrow(1000);
     assertEq(cToken.totalBorrows(), 1000);
     assertEq(underlyingToken.balanceOf(address(this)), 1000);
+  }
+
+  function testGetPoolAssetsData() public shouldRun(forChains(BSC_MAINNET)) {
+      vm.roll(1);
+      deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
+
+      CToken[] memory allMarkets = comptroller.getAllMarkets();
+      CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
+      assertEq(cToken.name(), "cUnderlyingToken");
+      underlyingToken.approve(address(cToken), 1e36);
+      address[] memory cTokens = new address[](1);
+      cTokens[0] = address(cToken);
+      comptroller.enterMarkets(cTokens);
+
+      cToken.mint(10e18);
+
+      FusePoolLens.FusePoolAsset[] memory assets = poolLens
+          .getPoolAssetsWithData(IComptroller(address(comptroller)));
+
+      assertEq(assets[0].supplyBalance, 10e18);
   }
 
   function testDeployCErc20PluginDelegate() public shouldRun(forChains(BSC_MAINNET)) {

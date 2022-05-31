@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.23;
 
-import "forge-std/Test.sol";
-
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
@@ -30,6 +28,7 @@ import { MockERC4626 } from "../../compound/strategies/MockERC4626.sol";
 import { FuseSafeLiquidator } from "../../FuseSafeLiquidator.sol";
 import { MockERC4626Dynamic } from "../../compound/strategies/MockERC4626Dynamic.sol";
 import { ERC4626 } from "../../utils/ERC4626.sol";
+import { FusePoolLens } from "../../FusePoolLens.sol";
 
 contract WithPool {
   MockERC20 underlyingToken;
@@ -48,6 +47,7 @@ contract WithPool {
   FusePoolDirectory fusePoolDirectory;
   FuseSafeLiquidator liquidator;
   MasterPriceOracle priceOracle;
+  FusePoolLens poolLens;
 
   address[] markets;
   address[] emptyAddresses;
@@ -59,6 +59,10 @@ contract WithPool {
   address[] newImplementation;
   address[] oldCErC20Implementations;
   address[] newCErc20Implementations;
+  address[] hardcodedAddresses;
+  string[] hardcodedNames;
+
+  event log_address1(address add);
 
   constructor(MasterPriceOracle _masterPriceOracle, MockERC20 _underlyingToken) {
     priceOracle = _masterPriceOracle;
@@ -98,13 +102,25 @@ contract WithPool {
   }
 
   function setUpBaseContracts() public {
-    // underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
     interestModel = new WhitePaperInterestRateModel(2343665, 1e18, 1e18);
     fuseAdmin = new FuseFeeDistributor();
     fuseAdmin.initialize(1e16);
     fusePoolDirectory = new FusePoolDirectory();
     fusePoolDirectory.initialize(false, emptyAddresses);
-    // priceOracle = new MockPriceOracle(10);
+    
+    poolLens = new FusePoolLens();
+    emit log_address1(address(poolLens));
+    poolLens.initialize(
+        fusePoolDirectory,
+        "Pool",
+        "lens",
+        hardcodedAddresses,
+        hardcodedNames,
+        hardcodedNames,
+        hardcodedNames,
+        hardcodedNames,
+        hardcodedNames
+    );
   }
 
   function setUpPool(
