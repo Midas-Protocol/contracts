@@ -246,20 +246,20 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/sushi/SushiBar.sol",
-    "id": 35691,
+    "id": 35589,
     "exportedSymbols": {
       "IERC20Upgradeable": [
-        89909
+        92413
       ],
       "SushiBar": [
-        35690
+        35588
       ]
     },
     "nodeType": "SourceUnit",
     "src": "32:402:107",
     "nodes": [
       {
-        "id": 35673,
+        "id": 35571,
         "nodeType": "PragmaDirective",
         "src": "32:24:107",
         "literals": [
@@ -270,24 +270,24 @@
         ]
       },
       {
-        "id": 35674,
+        "id": 35572,
         "nodeType": "ImportDirective",
         "src": "58:88:107",
         "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 35691,
-        "sourceUnit": 89910,
+        "scope": 35589,
+        "sourceUnit": 92414,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 35690,
+        "id": 35588,
         "nodeType": "ContractDefinition",
         "src": "148:285:107",
         "nodes": [
           {
-            "id": 35679,
+            "id": 35577,
             "nodeType": "VariableDeclaration",
             "src": "200:30:107",
             "constant": false,
@@ -295,34 +295,34 @@
             "mutability": "mutable",
             "name": "sushi",
             "nameLocation": "225:5:107",
-            "scope": 35690,
+            "scope": 35588,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
+              "typeIdentifier": "t_contract$_IERC20Upgradeable_$92413",
               "typeString": "contract IERC20Upgradeable"
             },
             "typeName": {
-              "id": 35678,
+              "id": 35576,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 35677,
+                "id": 35575,
                 "name": "IERC20Upgradeable",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 89909,
+                "referencedDeclaration": 92413,
                 "src": "200:17:107"
               },
-              "referencedDeclaration": 89909,
+              "referencedDeclaration": 92413,
               "src": "200:17:107",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
+                "typeIdentifier": "t_contract$_IERC20Upgradeable_$92413",
                 "typeString": "contract IERC20Upgradeable"
               }
             },
             "visibility": "public"
           },
           {
-            "id": 35684,
+            "id": 35582,
             "nodeType": "FunctionDefinition",
             "src": "290:47:107",
             "functionSelector": "a59f3e0c",
@@ -332,17 +332,17 @@
             "name": "enter",
             "nameLocation": "299:5:107",
             "parameters": {
-              "id": 35682,
+              "id": 35580,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35681,
+                  "id": 35579,
                   "mutability": "mutable",
                   "name": "_amount",
                   "nameLocation": "313:7:107",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35684,
+                  "scope": 35582,
                   "src": "305:15:107",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -351,7 +351,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 35680,
+                    "id": 35578,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "305:7:107",
@@ -366,18 +366,18 @@
               "src": "304:17:107"
             },
             "returnParameters": {
-              "id": 35683,
+              "id": 35581,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "336:0:107"
             },
-            "scope": 35690,
+            "scope": 35588,
             "stateMutability": "nonpayable",
             "virtual": true,
             "visibility": "public"
           },
           {
-            "id": 35689,
+            "id": 35587,
             "nodeType": "FunctionDefinition",
             "src": "385:46:107",
             "functionSelector": "67dfd4c9",
@@ -387,17 +387,17 @@
             "name": "leave",
             "nameLocation": "394:5:107",
             "parameters": {
-              "id": 35687,
+              "id": 35585,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35686,
+                  "id": 35584,
                   "mutability": "mutable",
                   "name": "_share",
                   "nameLocation": "408:6:107",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35689,
+                  "scope": 35587,
                   "src": "400:14:107",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -406,7 +406,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 35685,
+                    "id": 35583,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "400:7:107",
@@ -421,12 +421,12 @@
               "src": "399:16:107"
             },
             "returnParameters": {
-              "id": 35688,
+              "id": 35586,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "430:0:107"
             },
-            "scope": 35690,
+            "scope": 35588,
             "stateMutability": "nonpayable",
             "virtual": true,
             "visibility": "public"
@@ -436,13 +436,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 35675,
+              "id": 35573,
               "name": "IERC20Upgradeable",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 89909,
+              "referencedDeclaration": 92413,
               "src": "178:17:107"
             },
-            "id": 35676,
+            "id": 35574,
             "nodeType": "InheritanceSpecifier",
             "src": "178:17:107"
           }
@@ -452,12 +452,12 @@
         "contractKind": "contract",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          35690,
-          89909
+          35588,
+          92413
         ],
         "name": "SushiBar",
         "nameLocation": "166:8:107",
-        "scope": 35691,
+        "scope": 35589,
         "usedErrors": []
       }
     ],

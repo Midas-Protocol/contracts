@@ -13,17 +13,17 @@
   "methodIdentifiers": {},
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/mstable/MassetStructs.sol",
-    "id": 34880,
+    "id": 34778,
     "exportedSymbols": {
       "MassetStructs": [
-        34879
+        34777
       ]
     },
     "nodeType": "SourceUnit",
     "src": "46:1227:99",
     "nodes": [
       {
-        "id": 34829,
+        "id": 34727,
         "nodeType": "PragmaDirective",
         "src": "46:24:99",
         "literals": [
@@ -34,24 +34,24 @@
         ]
       },
       {
-        "id": 34879,
+        "id": 34777,
         "nodeType": "ContractDefinition",
         "src": "72:1200:99",
         "nodes": [
           {
-            "id": 34839,
+            "id": 34737,
             "nodeType": "StructDefinition",
             "src": "100:297:99",
             "canonicalName": "MassetStructs.BassetPersonal",
             "members": [
               {
                 "constant": false,
-                "id": 34831,
+                "id": 34729,
                 "mutability": "mutable",
                 "name": "addr",
                 "nameLocation": "165:4:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34839,
+                "scope": 34737,
                 "src": "157:12:99",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -60,7 +60,7 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 34830,
+                  "id": 34728,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "157:7:99",
@@ -74,12 +74,12 @@
               },
               {
                 "constant": false,
-                "id": 34833,
+                "id": 34731,
                 "mutability": "mutable",
                 "name": "integrator",
                 "nameLocation": "212:10:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34839,
+                "scope": 34737,
                 "src": "204:18:99",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -88,7 +88,7 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 34832,
+                  "id": 34730,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "204:7:99",
@@ -102,12 +102,12 @@
               },
               {
                 "constant": false,
-                "id": 34835,
+                "id": 34733,
                 "mutability": "mutable",
                 "name": "hasTxFee",
                 "nameLocation": "304:8:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34839,
+                "scope": 34737,
                 "src": "299:13:99",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -116,7 +116,7 @@
                   "typeString": "bool"
                 },
                 "typeName": {
-                  "id": 34834,
+                  "id": 34732,
                   "name": "bool",
                   "nodeType": "ElementaryTypeName",
                   "src": "299:4:99",
@@ -129,33 +129,33 @@
               },
               {
                 "constant": false,
-                "id": 34838,
+                "id": 34736,
                 "mutability": "mutable",
                 "name": "status",
                 "nameLocation": "386:6:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34839,
+                "scope": 34737,
                 "src": "373:19:99",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_enum$_BassetStatus_$34853",
+                  "typeIdentifier": "t_enum$_BassetStatus_$34751",
                   "typeString": "enum MassetStructs.BassetStatus"
                 },
                 "typeName": {
-                  "id": 34837,
+                  "id": 34735,
                   "nodeType": "UserDefinedTypeName",
                   "pathNode": {
-                    "id": 34836,
+                    "id": 34734,
                     "name": "BassetStatus",
                     "nodeType": "IdentifierPath",
-                    "referencedDeclaration": 34853,
+                    "referencedDeclaration": 34751,
                     "src": "373:12:99"
                   },
-                  "referencedDeclaration": 34853,
+                  "referencedDeclaration": 34751,
                   "src": "373:12:99",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_BassetStatus_$34853",
+                    "typeIdentifier": "t_enum$_BassetStatus_$34751",
                     "typeString": "enum MassetStructs.BassetStatus"
                   }
                 },
@@ -164,23 +164,23 @@
             ],
             "name": "BassetPersonal",
             "nameLocation": "107:14:99",
-            "scope": 34879,
+            "scope": 34777,
             "visibility": "public"
           },
           {
-            "id": 34844,
+            "id": 34742,
             "nodeType": "StructDefinition",
             "src": "401:344:99",
             "canonicalName": "MassetStructs.BassetData",
             "members": [
               {
                 "constant": false,
-                "id": 34841,
+                "id": 34739,
                 "mutability": "mutable",
                 "name": "ratio",
                 "nameLocation": "654:5:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34844,
+                "scope": 34742,
                 "src": "646:13:99",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -189,7 +189,7 @@
                   "typeString": "uint128"
                 },
                 "typeName": {
-                  "id": 34840,
+                  "id": 34738,
                   "name": "uint128",
                   "nodeType": "ElementaryTypeName",
                   "src": "646:7:99",
@@ -202,12 +202,12 @@
               },
               {
                 "constant": false,
-                "id": 34843,
+                "id": 34741,
                 "mutability": "mutable",
                 "name": "vaultBalance",
                 "nameLocation": "728:12:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34844,
+                "scope": 34742,
                 "src": "720:20:99",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -216,7 +216,7 @@
                   "typeString": "uint128"
                 },
                 "typeName": {
-                  "id": 34842,
+                  "id": 34740,
                   "name": "uint128",
                   "nodeType": "ElementaryTypeName",
                   "src": "720:7:99",
@@ -230,66 +230,66 @@
             ],
             "name": "BassetData",
             "nameLocation": "408:10:99",
-            "scope": 34879,
+            "scope": 34777,
             "visibility": "public"
           },
           {
-            "id": 34853,
+            "id": 34751,
             "nodeType": "EnumDefinition",
             "src": "800:149:99",
             "canonicalName": "MassetStructs.BassetStatus",
             "members": [
               {
-                "id": 34845,
+                "id": 34743,
                 "name": "Default",
                 "nameLocation": "824:7:99",
                 "nodeType": "EnumValue",
                 "src": "824:7:99"
               },
               {
-                "id": 34846,
+                "id": 34744,
                 "name": "Normal",
                 "nameLocation": "837:6:99",
                 "nodeType": "EnumValue",
                 "src": "837:6:99"
               },
               {
-                "id": 34847,
+                "id": 34745,
                 "name": "BrokenBelowPeg",
                 "nameLocation": "849:14:99",
                 "nodeType": "EnumValue",
                 "src": "849:14:99"
               },
               {
-                "id": 34848,
+                "id": 34746,
                 "name": "BrokenAbovePeg",
                 "nameLocation": "869:14:99",
                 "nodeType": "EnumValue",
                 "src": "869:14:99"
               },
               {
-                "id": 34849,
+                "id": 34747,
                 "name": "Blacklisted",
                 "nameLocation": "889:11:99",
                 "nodeType": "EnumValue",
                 "src": "889:11:99"
               },
               {
-                "id": 34850,
+                "id": 34748,
                 "name": "Liquidating",
                 "nameLocation": "906:11:99",
                 "nodeType": "EnumValue",
                 "src": "906:11:99"
               },
               {
-                "id": 34851,
+                "id": 34749,
                 "name": "Liquidated",
                 "nameLocation": "923:10:99",
                 "nodeType": "EnumValue",
                 "src": "923:10:99"
               },
               {
-                "id": 34852,
+                "id": 34750,
                 "name": "Failed",
                 "nameLocation": "939:6:99",
                 "nodeType": "EnumValue",
@@ -300,19 +300,19 @@
             "nameLocation": "805:12:99"
           },
           {
-            "id": 34858,
+            "id": 34756,
             "nodeType": "StructDefinition",
             "src": "953:67:99",
             "canonicalName": "MassetStructs.BasketState",
             "members": [
               {
                 "constant": false,
-                "id": 34855,
+                "id": 34753,
                 "mutability": "mutable",
                 "name": "undergoingRecol",
                 "nameLocation": "983:15:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34858,
+                "scope": 34756,
                 "src": "978:20:99",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -321,7 +321,7 @@
                   "typeString": "bool"
                 },
                 "typeName": {
-                  "id": 34854,
+                  "id": 34752,
                   "name": "bool",
                   "nodeType": "ElementaryTypeName",
                   "src": "978:4:99",
@@ -334,12 +334,12 @@
               },
               {
                 "constant": false,
-                "id": 34857,
+                "id": 34755,
                 "mutability": "mutable",
                 "name": "failed",
                 "nameLocation": "1009:6:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34858,
+                "scope": 34756,
                 "src": "1004:11:99",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -348,7 +348,7 @@
                   "typeString": "bool"
                 },
                 "typeName": {
-                  "id": 34856,
+                  "id": 34754,
                   "name": "bool",
                   "nodeType": "ElementaryTypeName",
                   "src": "1004:4:99",
@@ -362,23 +362,23 @@
             ],
             "name": "BasketState",
             "nameLocation": "960:11:99",
-            "scope": 34879,
+            "scope": 34777,
             "visibility": "public"
           },
           {
-            "id": 34864,
+            "id": 34762,
             "nodeType": "StructDefinition",
             "src": "1024:68:99",
             "canonicalName": "MassetStructs.InvariantConfig",
             "members": [
               {
                 "constant": false,
-                "id": 34860,
+                "id": 34758,
                 "mutability": "mutable",
                 "name": "a",
                 "nameLocation": "1061:1:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34864,
+                "scope": 34762,
                 "src": "1053:9:99",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -387,7 +387,7 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 34859,
+                  "id": 34757,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "1053:7:99",
@@ -400,33 +400,33 @@
               },
               {
                 "constant": false,
-                "id": 34863,
+                "id": 34761,
                 "mutability": "mutable",
                 "name": "limits",
                 "nameLocation": "1081:6:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34864,
+                "scope": 34762,
                 "src": "1068:19:99",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_WeightLimits_$34869_storage_ptr",
+                  "typeIdentifier": "t_struct$_WeightLimits_$34767_storage_ptr",
                   "typeString": "struct MassetStructs.WeightLimits"
                 },
                 "typeName": {
-                  "id": 34862,
+                  "id": 34760,
                   "nodeType": "UserDefinedTypeName",
                   "pathNode": {
-                    "id": 34861,
+                    "id": 34759,
                     "name": "WeightLimits",
                     "nodeType": "IdentifierPath",
-                    "referencedDeclaration": 34869,
+                    "referencedDeclaration": 34767,
                     "src": "1068:12:99"
                   },
-                  "referencedDeclaration": 34869,
+                  "referencedDeclaration": 34767,
                   "src": "1068:12:99",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_WeightLimits_$34869_storage_ptr",
+                    "typeIdentifier": "t_struct$_WeightLimits_$34767_storage_ptr",
                     "typeString": "struct MassetStructs.WeightLimits"
                   }
                 },
@@ -435,23 +435,23 @@
             ],
             "name": "InvariantConfig",
             "nameLocation": "1031:15:99",
-            "scope": 34879,
+            "scope": 34777,
             "visibility": "public"
           },
           {
-            "id": 34869,
+            "id": 34767,
             "nodeType": "StructDefinition",
             "src": "1096:59:99",
             "canonicalName": "MassetStructs.WeightLimits",
             "members": [
               {
                 "constant": false,
-                "id": 34866,
+                "id": 34764,
                 "mutability": "mutable",
                 "name": "min",
                 "nameLocation": "1130:3:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34869,
+                "scope": 34767,
                 "src": "1122:11:99",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -460,7 +460,7 @@
                   "typeString": "uint128"
                 },
                 "typeName": {
-                  "id": 34865,
+                  "id": 34763,
                   "name": "uint128",
                   "nodeType": "ElementaryTypeName",
                   "src": "1122:7:99",
@@ -473,12 +473,12 @@
               },
               {
                 "constant": false,
-                "id": 34868,
+                "id": 34766,
                 "mutability": "mutable",
                 "name": "max",
                 "nameLocation": "1147:3:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34869,
+                "scope": 34767,
                 "src": "1139:11:99",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -487,7 +487,7 @@
                   "typeString": "uint128"
                 },
                 "typeName": {
-                  "id": 34867,
+                  "id": 34765,
                   "name": "uint128",
                   "nodeType": "ElementaryTypeName",
                   "src": "1139:7:99",
@@ -501,23 +501,23 @@
             ],
             "name": "WeightLimits",
             "nameLocation": "1103:12:99",
-            "scope": 34879,
+            "scope": 34777,
             "visibility": "public"
           },
           {
-            "id": 34878,
+            "id": 34776,
             "nodeType": "StructDefinition",
             "src": "1159:111:99",
             "canonicalName": "MassetStructs.AmpData",
             "members": [
               {
                 "constant": false,
-                "id": 34871,
+                "id": 34769,
                 "mutability": "mutable",
                 "name": "initialA",
                 "nameLocation": "1187:8:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34878,
+                "scope": 34776,
                 "src": "1180:15:99",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -526,7 +526,7 @@
                   "typeString": "uint64"
                 },
                 "typeName": {
-                  "id": 34870,
+                  "id": 34768,
                   "name": "uint64",
                   "nodeType": "ElementaryTypeName",
                   "src": "1180:6:99",
@@ -539,12 +539,12 @@
               },
               {
                 "constant": false,
-                "id": 34873,
+                "id": 34771,
                 "mutability": "mutable",
                 "name": "targetA",
                 "nameLocation": "1208:7:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34878,
+                "scope": 34776,
                 "src": "1201:14:99",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -553,7 +553,7 @@
                   "typeString": "uint64"
                 },
                 "typeName": {
-                  "id": 34872,
+                  "id": 34770,
                   "name": "uint64",
                   "nodeType": "ElementaryTypeName",
                   "src": "1201:6:99",
@@ -566,12 +566,12 @@
               },
               {
                 "constant": false,
-                "id": 34875,
+                "id": 34773,
                 "mutability": "mutable",
                 "name": "rampStartTime",
                 "nameLocation": "1228:13:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34878,
+                "scope": 34776,
                 "src": "1221:20:99",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -580,7 +580,7 @@
                   "typeString": "uint64"
                 },
                 "typeName": {
-                  "id": 34874,
+                  "id": 34772,
                   "name": "uint64",
                   "nodeType": "ElementaryTypeName",
                   "src": "1221:6:99",
@@ -593,12 +593,12 @@
               },
               {
                 "constant": false,
-                "id": 34877,
+                "id": 34775,
                 "mutability": "mutable",
                 "name": "rampEndTime",
                 "nameLocation": "1254:11:99",
                 "nodeType": "VariableDeclaration",
-                "scope": 34878,
+                "scope": 34776,
                 "src": "1247:18:99",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -607,7 +607,7 @@
                   "typeString": "uint64"
                 },
                 "typeName": {
-                  "id": 34876,
+                  "id": 34774,
                   "name": "uint64",
                   "nodeType": "ElementaryTypeName",
                   "src": "1247:6:99",
@@ -621,7 +621,7 @@
             ],
             "name": "AmpData",
             "nameLocation": "1166:7:99",
-            "scope": 34879,
+            "scope": 34777,
             "visibility": "public"
           }
         ],
@@ -632,11 +632,11 @@
         "contractKind": "interface",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          34879
+          34777
         ],
         "name": "MassetStructs",
         "nameLocation": "82:13:99",
-        "scope": 34880,
+        "scope": 34778,
         "usedErrors": []
       }
     ],

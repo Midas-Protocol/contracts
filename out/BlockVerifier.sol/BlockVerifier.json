@@ -13,17 +13,17 @@
   "methodIdentifiers": {},
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/oracles/keydonix/BlockVerifier.sol",
-    "id": 46530,
+    "id": 46431,
     "exportedSymbols": {
       "BlockVerifier": [
-        46529
+        46430
       ]
     },
     "nodeType": "SourceUnit",
     "src": "0:3376:178",
     "nodes": [
       {
-        "id": 46515,
+        "id": 46416,
         "nodeType": "PragmaDirective",
         "src": "0:24:178",
         "literals": [
@@ -34,16 +34,16 @@
         ]
       },
       {
-        "id": 46529,
+        "id": 46430,
         "nodeType": "ContractDefinition",
         "src": "26:3349:178",
         "nodes": [
           {
-            "id": 46528,
+            "id": 46429,
             "nodeType": "FunctionDefinition",
             "src": "51:3322:178",
             "body": {
-              "id": 46527,
+              "id": 46428,
               "nodeType": "Block",
               "src": "199:3174:178",
               "statements": [
@@ -1763,70 +1763,70 @@
                   "evmVersion": "london",
                   "externalReferences": [
                     {
-                      "declaration": 46524,
+                      "declaration": 46425,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "2980:11:178",
                       "valueSize": 1
                     },
                     {
-                      "declaration": 46524,
+                      "declaration": 46425,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "3093:11:178",
                       "valueSize": 1
                     },
                     {
-                      "declaration": 46522,
+                      "declaration": 46423,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "3285:14:178",
                       "valueSize": 1
                     },
                     {
-                      "declaration": 46517,
+                      "declaration": 46418,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "1267:8:178",
                       "valueSize": 1
                     },
                     {
-                      "declaration": 46517,
+                      "declaration": 46418,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "3134:8:178",
                       "valueSize": 1
                     },
                     {
-                      "declaration": 46517,
+                      "declaration": 46418,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "831:8:178",
                       "valueSize": 1
                     },
                     {
-                      "declaration": 46517,
+                      "declaration": 46418,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "887:8:178",
                       "valueSize": 1
                     },
                     {
-                      "declaration": 46517,
+                      "declaration": 46418,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "903:8:178",
                       "valueSize": 1
                     },
                     {
-                      "declaration": 46520,
+                      "declaration": 46421,
                       "isOffset": false,
                       "isSlot": false,
                       "src": "3245:9:178",
                       "valueSize": 1
                     }
                   ],
-                  "id": 46526,
+                  "id": 46427,
                   "nodeType": "InlineAssembly",
                   "src": "203:3167:178"
                 }
@@ -1838,17 +1838,17 @@
             "name": "extractStateRootAndTimestamp",
             "nameLocation": "60:28:178",
             "parameters": {
-              "id": 46518,
+              "id": 46419,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 46517,
+                  "id": 46418,
                   "mutability": "mutable",
                   "name": "rlpBytes",
                   "nameLocation": "102:8:178",
                   "nodeType": "VariableDeclaration",
-                  "scope": 46528,
+                  "scope": 46429,
                   "src": "89:21:178",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1857,7 +1857,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 46516,
+                    "id": 46417,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "89:5:178",
@@ -1872,17 +1872,17 @@
               "src": "88:23:178"
             },
             "returnParameters": {
-              "id": 46525,
+              "id": 46426,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 46520,
+                  "id": 46421,
                   "mutability": "mutable",
                   "name": "stateRoot",
                   "nameLocation": "143:9:178",
                   "nodeType": "VariableDeclaration",
-                  "scope": 46528,
+                  "scope": 46429,
                   "src": "135:17:178",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1891,7 +1891,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 46519,
+                    "id": 46420,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "135:7:178",
@@ -1904,12 +1904,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 46522,
+                  "id": 46423,
                   "mutability": "mutable",
                   "name": "blockTimestamp",
                   "nameLocation": "162:14:178",
                   "nodeType": "VariableDeclaration",
-                  "scope": 46528,
+                  "scope": 46429,
                   "src": "154:22:178",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1918,7 +1918,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 46521,
+                    "id": 46422,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "154:7:178",
@@ -1931,12 +1931,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 46524,
+                  "id": 46425,
                   "mutability": "mutable",
                   "name": "blockNumber",
                   "nameLocation": "186:11:178",
                   "nodeType": "VariableDeclaration",
-                  "scope": 46528,
+                  "scope": 46429,
                   "src": "178:19:178",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1945,7 +1945,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 46523,
+                    "id": 46424,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "178:7:178",
@@ -1959,7 +1959,7 @@
               ],
               "src": "134:64:178"
             },
-            "scope": 46529,
+            "scope": 46430,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "internal"
@@ -1972,11 +1972,11 @@
         "contractKind": "library",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          46529
+          46430
         ],
         "name": "BlockVerifier",
         "nameLocation": "34:13:178",
-        "scope": 46530,
+        "scope": 46431,
         "usedErrors": []
       }
     ]

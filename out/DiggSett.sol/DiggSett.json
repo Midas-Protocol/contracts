@@ -65,20 +65,20 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/badger/DiggSett.sol",
-    "id": 32138,
+    "id": 32036,
     "exportedSymbols": {
       "DiggSett": [
-        32137
+        32035
       ],
       "Sett": [
-        32177
+        32075
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:132:59",
     "nodes": [
       {
-        "id": 32128,
+        "id": 32026,
         "nodeType": "PragmaDirective",
         "src": "39:24:59",
         "literals": [
@@ -89,24 +89,24 @@
         ]
       },
       {
-        "id": 32129,
+        "id": 32027,
         "nodeType": "ImportDirective",
         "src": "65:20:59",
         "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/badger/Sett.sol",
         "file": "./Sett.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 32138,
-        "sourceUnit": 32178,
+        "scope": 32036,
+        "sourceUnit": 32076,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 32137,
+        "id": 32035,
         "nodeType": "ContractDefinition",
         "src": "87:83:59",
         "nodes": [
           {
-            "id": 32136,
+            "id": 32034,
             "nodeType": "FunctionDefinition",
             "src": "118:50:59",
             "functionSelector": "03314efa",
@@ -116,23 +116,23 @@
             "name": "shares",
             "nameLocation": "127:6:59",
             "parameters": {
-              "id": 32132,
+              "id": 32030,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "133:2:59"
             },
             "returnParameters": {
-              "id": 32135,
+              "id": 32033,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 32134,
+                  "id": 32032,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 32136,
+                  "scope": 32034,
                   "src": "159:7:59",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -141,7 +141,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 32133,
+                    "id": 32031,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "159:7:59",
@@ -155,7 +155,7 @@
               ],
               "src": "158:9:59"
             },
-            "scope": 32137,
+            "scope": 32035,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -165,13 +165,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 32130,
+              "id": 32028,
               "name": "Sett",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 32177,
+              "referencedDeclaration": 32075,
               "src": "109:4:59"
             },
-            "id": 32131,
+            "id": 32029,
             "nodeType": "InheritanceSpecifier",
             "src": "109:4:59"
           }
@@ -181,12 +181,12 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          32137,
-          32177
+          32035,
+          32075
         ],
         "name": "DiggSett",
         "nameLocation": "97:8:59",
-        "scope": 32138,
+        "scope": 32036,
         "usedErrors": []
       }
     ],

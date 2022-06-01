@@ -27,7 +27,7 @@
   },
   "deployedBytecode": {
     "object": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c80632fba4aa914602d575b600080fd5b60536038366004606f565b6000602081905290815260409020546001600160a01b031681565b6040516001600160a01b03909116815260200160405180910390f35b600060208284031215608057600080fd5b81356001600160a01b0381168114609657600080fd5b939250505056fea164736f6c634300080a000a",
-    "sourceMap": "90:85:95:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;125:47;;;;;;:::i;:::-;;;;;;;;;;;;;-1:-1:-1;;;;;125:47:95;;;;;;-1:-1:-1;;;;;493:32:279;;;475:51;;463:2;448:18;125:47:95;;;;;;;14:286:279;73:6;126:2;114:9;105:7;101:23;97:32;94:52;;;142:1;139;132:12;94:52;168:23;;-1:-1:-1;;;;;220:31:279;;210:42;;200:70;;266:1;263;256:12;200:70;289:5;14:286;-1:-1:-1;;;14:286:279:o",
+    "sourceMap": "90:85:95:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;125:47;;;;;;:::i;:::-;;;;;;;;;;;;;-1:-1:-1;;;;;125:47:95;;;;;;-1:-1:-1;;;;;493:32:280;;;475:51;;463:2;448:18;125:47:95;;;;;;;14:286:280;73:6;126:2;114:9;105:7;101:23;97:32;94:52;;;142:1;139;132:12;94:52;168:23;;-1:-1:-1;;;;;220:31:280;;210:42;;200:70;;266:1;263;256:12;200:70;289:5;14:286;-1:-1:-1;;;14:286:280:o",
     "linkReferences": {}
   },
   "methodIdentifiers": {
@@ -35,20 +35,20 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/keep3r/Keep3rV2OracleFactory.sol",
-    "id": 34565,
+    "id": 34463,
     "exportedSymbols": {
       "Keep3rV2Oracle": [
-        34555
+        34453
       ],
       "Keep3rV2OracleFactory": [
-        34564
+        34462
       ]
     },
     "nodeType": "SourceUnit",
     "src": "32:144:95",
     "nodes": [
       {
-        "id": 34557,
+        "id": 34455,
         "nodeType": "PragmaDirective",
         "src": "32:24:95",
         "literals": [
@@ -59,24 +59,24 @@
         ]
       },
       {
-        "id": 34558,
+        "id": 34456,
         "nodeType": "ImportDirective",
         "src": "58:30:95",
         "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/keep3r/Keep3rV2Oracle.sol",
         "file": "./Keep3rV2Oracle.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 34565,
-        "sourceUnit": 34556,
+        "scope": 34463,
+        "sourceUnit": 34454,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 34564,
+        "id": 34462,
         "nodeType": "ContractDefinition",
         "src": "90:85:95",
         "nodes": [
           {
-            "id": 34563,
+            "id": 34461,
             "nodeType": "VariableDeclaration",
             "src": "125:47:95",
             "constant": false,
@@ -84,17 +84,17 @@
             "mutability": "mutable",
             "name": "feeds",
             "nameLocation": "167:5:95",
-            "scope": 34564,
+            "scope": 34462,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_address_$_t_contract$_Keep3rV2Oracle_$34555_$",
+              "typeIdentifier": "t_mapping$_t_address_$_t_contract$_Keep3rV2Oracle_$34453_$",
               "typeString": "mapping(address => contract Keep3rV2Oracle)"
             },
             "typeName": {
-              "id": 34562,
+              "id": 34460,
               "keyType": {
-                "id": 34559,
+                "id": 34457,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
                 "src": "133:7:95",
@@ -106,23 +106,23 @@
               "nodeType": "Mapping",
               "src": "125:34:95",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_address_$_t_contract$_Keep3rV2Oracle_$34555_$",
+                "typeIdentifier": "t_mapping$_t_address_$_t_contract$_Keep3rV2Oracle_$34453_$",
                 "typeString": "mapping(address => contract Keep3rV2Oracle)"
               },
               "valueType": {
-                "id": 34561,
+                "id": 34459,
                 "nodeType": "UserDefinedTypeName",
                 "pathNode": {
-                  "id": 34560,
+                  "id": 34458,
                   "name": "Keep3rV2Oracle",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 34555,
+                  "referencedDeclaration": 34453,
                   "src": "144:14:95"
                 },
-                "referencedDeclaration": 34555,
+                "referencedDeclaration": 34453,
                 "src": "144:14:95",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_contract$_Keep3rV2Oracle_$34555",
+                  "typeIdentifier": "t_contract$_Keep3rV2Oracle_$34453",
                   "typeString": "contract Keep3rV2Oracle"
                 }
               }
@@ -137,11 +137,11 @@
         "contractKind": "contract",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          34564
+          34462
         ],
         "name": "Keep3rV2OracleFactory",
         "nameLocation": "99:21:95",
-        "scope": 34565,
+        "scope": 34463,
         "usedErrors": []
       }
     ],

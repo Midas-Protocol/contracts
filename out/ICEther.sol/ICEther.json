@@ -400,20 +400,20 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/ICEther.sol",
-    "id": 33467,
+    "id": 33365,
     "exportedSymbols": {
       "ICEther": [
-        33466
+        33364
       ],
       "ICToken": [
-        33600
+        33498
       ]
     },
     "nodeType": "SourceUnit",
     "src": "41:289:73",
     "nodes": [
       {
-        "id": 33453,
+        "id": 33351,
         "nodeType": "PragmaDirective",
         "src": "41:24:73",
         "literals": [
@@ -424,24 +424,24 @@
         ]
       },
       {
-        "id": 33454,
+        "id": 33352,
         "nodeType": "ImportDirective",
         "src": "67:23:73",
         "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/ICToken.sol",
         "file": "./ICToken.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 33467,
-        "sourceUnit": 33601,
+        "scope": 33365,
+        "sourceUnit": 33499,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 33466,
+        "id": 33364,
         "nodeType": "ContractDefinition",
         "src": "208:121:73",
         "nodes": [
           {
-            "id": 33465,
+            "id": 33363,
             "nodeType": "FunctionDefinition",
             "src": "241:86:73",
             "functionSelector": "aae40a2a",
@@ -451,17 +451,17 @@
             "name": "liquidateBorrow",
             "nameLocation": "250:15:73",
             "parameters": {
-              "id": 33463,
+              "id": 33361,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33459,
+                  "id": 33357,
                   "mutability": "mutable",
                   "name": "borrower",
                   "nameLocation": "274:8:73",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33465,
+                  "scope": 33363,
                   "src": "266:16:73",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -470,7 +470,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33458,
+                    "id": 33356,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "266:7:73",
@@ -484,33 +484,33 @@
                 },
                 {
                   "constant": false,
-                  "id": 33462,
+                  "id": 33360,
                   "mutability": "mutable",
                   "name": "cTokenCollateral",
                   "nameLocation": "292:16:73",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33465,
+                  "scope": 33363,
                   "src": "284:24:73",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ICToken_$33600",
+                    "typeIdentifier": "t_contract$_ICToken_$33498",
                     "typeString": "contract ICToken"
                   },
                   "typeName": {
-                    "id": 33461,
+                    "id": 33359,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 33460,
+                      "id": 33358,
                       "name": "ICToken",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 33600,
+                      "referencedDeclaration": 33498,
                       "src": "284:7:73"
                     },
-                    "referencedDeclaration": 33600,
+                    "referencedDeclaration": 33498,
                     "src": "284:7:73",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ICToken_$33600",
+                      "typeIdentifier": "t_contract$_ICToken_$33498",
                       "typeString": "contract ICToken"
                     }
                   },
@@ -520,12 +520,12 @@
               "src": "265:44:73"
             },
             "returnParameters": {
-              "id": 33464,
+              "id": 33362,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "326:0:73"
             },
-            "scope": 33466,
+            "scope": 33364,
             "stateMutability": "payable",
             "virtual": false,
             "visibility": "external"
@@ -535,13 +535,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 33456,
+              "id": 33354,
               "name": "ICToken",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 33600,
+              "referencedDeclaration": 33498,
               "src": "229:7:73"
             },
-            "id": 33457,
+            "id": 33355,
             "nodeType": "InheritanceSpecifier",
             "src": "229:7:73"
           }
@@ -550,19 +550,19 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 33455,
+          "id": 33353,
           "nodeType": "StructuredDocumentation",
           "src": "92:115:73",
           "text": " @title Compound's CEther Contract\n @notice CTokens which wrap an EIP-20 underlying\n @author Compound"
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          33466,
-          33600
+          33364,
+          33498
         ],
         "name": "ICEther",
         "nameLocation": "218:7:73",
-        "scope": 33467,
+        "scope": 33365,
         "usedErrors": []
       }
     ],

@@ -35,17 +35,17 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/badger/IDigg.sol",
-    "id": 32149,
+    "id": 32047,
     "exportedSymbols": {
       "IDigg": [
-        32148
+        32046
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:261:60",
     "nodes": [
       {
-        "id": 32139,
+        "id": 32037,
         "nodeType": "PragmaDirective",
         "src": "39:24:60",
         "literals": [
@@ -56,16 +56,16 @@
         ]
       },
       {
-        "id": 32148,
+        "id": 32046,
         "nodeType": "ContractDefinition",
         "src": "65:234:60",
         "nodes": [
           {
-            "id": 32147,
+            "id": 32045,
             "nodeType": "FunctionDefinition",
             "src": "222:75:60",
             "documentation": {
-              "id": 32140,
+              "id": 32038,
               "nodeType": "StructuredDocumentation",
               "src": "85:134:60",
               "text": " @param shares Share value to convert.\n @return The current fragment value of the specified underlying share amount."
@@ -77,17 +77,17 @@
             "name": "sharesToFragments",
             "nameLocation": "231:17:60",
             "parameters": {
-              "id": 32143,
+              "id": 32041,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 32142,
+                  "id": 32040,
                   "mutability": "mutable",
                   "name": "shares",
                   "nameLocation": "257:6:60",
                   "nodeType": "VariableDeclaration",
-                  "scope": 32147,
+                  "scope": 32045,
                   "src": "249:14:60",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -96,7 +96,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 32141,
+                    "id": 32039,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "249:7:60",
@@ -111,17 +111,17 @@
               "src": "248:16:60"
             },
             "returnParameters": {
-              "id": 32146,
+              "id": 32044,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 32145,
+                  "id": 32043,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 32147,
+                  "scope": 32045,
                   "src": "288:7:60",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -130,7 +130,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 32144,
+                    "id": 32042,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "288:7:60",
@@ -144,7 +144,7 @@
               ],
               "src": "287:9:60"
             },
-            "scope": 32148,
+            "scope": 32046,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -157,11 +157,11 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          32148
+          32046
         ],
         "name": "IDigg",
         "nameLocation": "75:5:60",
-        "scope": 32149,
+        "scope": 32047,
         "usedErrors": []
       }
     ],
