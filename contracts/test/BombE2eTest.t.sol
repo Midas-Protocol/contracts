@@ -22,9 +22,7 @@ interface MockXBomb {
 contract MockBnb is MockERC20 {
   constructor() MockERC20("test", "test", 8) {}
 
-  function deposit() external payable {
-
-  }
+  function deposit() external payable {}
 }
 
 contract BombE2eTest is WithPool, BaseTest {
@@ -67,137 +65,125 @@ contract BombE2eTest is WithPool, BaseTest {
   }
 
   function testGetPoolAssetsData() public shouldRun(forChains(BSC_MAINNET)) {
-      vm.roll(1);
-      deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
+    vm.roll(1);
+    deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
-      CToken[] memory allMarkets = comptroller.getAllMarkets();
-      CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
-      assertEq(cToken.name(), "cUnderlyingToken");
-      underlyingToken.approve(address(cToken), 1e36);
-      address[] memory cTokens = new address[](1);
-      cTokens[0] = address(cToken);
-      comptroller.enterMarkets(cTokens);
+    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
+    assertEq(cToken.name(), "cUnderlyingToken");
+    underlyingToken.approve(address(cToken), 1e36);
+    address[] memory cTokens = new address[](1);
+    cTokens[0] = address(cToken);
+    comptroller.enterMarkets(cTokens);
 
-      cToken.mint(10e18);
+    cToken.mint(10e18);
 
-      FusePoolLens.FusePoolAsset[] memory assets = poolLens
-          .getPoolAssetsWithData(IComptroller(address(comptroller)));
+    FusePoolLens.FusePoolAsset[] memory assets = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
 
-      assertEq(assets[0].supplyBalance, 10e18);
+    assertEq(assets[0].supplyBalance, 10e18);
   }
 
   function testCErc20Liquidation() public shouldRun(forChains(BSC_MAINNET)) {
-      vm.roll(1);
-      MockERC4626 erc4626 = MockERC4626(
-          0x92C6C8278509A69f5d601Eea1E6273F304311bFe
-      );
-      MockBnb bnb = MockBnb(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
+    vm.roll(1);
+    MockERC4626 erc4626 = MockERC4626(0x92C6C8278509A69f5d601Eea1E6273F304311bFe);
+    MockBnb bnb = MockBnb(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
 
-      deployCErc20PluginDelegate(erc4626, 0.9e18);
-      deployCErc20Delegate(address(bnb), "BNB", "bnb", 0.9e18);
+    deployCErc20PluginDelegate(erc4626, 0.9e18);
+    deployCErc20Delegate(address(bnb), "BNB", "bnb", 0.9e18);
 
-      CToken[] memory allMarkets = comptroller.getAllMarkets();
-      CErc20PluginDelegate cToken = CErc20PluginDelegate(
-          address(allMarkets[0])
-      );
+    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[0]));
 
-      cToken._setImplementationSafe(
-          address(cErc20PluginDelegate),
-          false,
-          abi.encode(address(erc4626))
-      );
+    cToken._setImplementationSafe(address(cErc20PluginDelegate), false, abi.encode(address(erc4626)));
 
-      CErc20Delegate cBnbToken = CErc20Delegate(address(allMarkets[1]));
+    CErc20Delegate cBnbToken = CErc20Delegate(address(allMarkets[1]));
 
-      address[] memory cTokens = new address[](2);
-      cTokens[0] = address(cToken);
-      cTokens[1] = address(cBnbToken);
-      comptroller.enterMarkets(cTokens);
+    address[] memory cTokens = new address[](2);
+    cTokens[0] = address(cToken);
+    cTokens[1] = address(cBnbToken);
+    comptroller.enterMarkets(cTokens);
 
-      // setting up liquidator
-      liquidator = new FuseSafeLiquidator();
-      liquidator.initialize(
-          0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c,
-          0x10ED43C718714eb63d5aA57B78B54704E256024E,
-          0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56,
-          0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c,
-          "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5"
-      );
-      address accountOne = address(1);
-      address accountTwo = address(2);
+    // setting up liquidator
+    liquidator = new FuseSafeLiquidator();
+    liquidator.initialize(
+      0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c,
+      0x10ED43C718714eb63d5aA57B78B54704E256024E,
+      0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56,
+      0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c,
+      "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5"
+    );
+    address accountOne = address(1);
+    address accountTwo = address(2);
 
-      FusePoolLensSecondary secondary = new FusePoolLensSecondary();
-      secondary.initialize(fusePoolDirectory);
+    FusePoolLensSecondary secondary = new FusePoolLensSecondary();
+    secondary.initialize(fusePoolDirectory);
 
-      vm.prank(0xcd6cD62F11F9417FBD44dc0a44F891fd3E869234);
-      underlyingToken.mint(accountTwo, 1000000000000e18);
-      // Account One Supply
-      vm.deal(accountOne, 1000000000000e18);
-      vm.startPrank(accountOne);
-      bnb.deposit{value: 1000000000000e18}();
-      vm.stopPrank();
+    vm.prank(0xcd6cD62F11F9417FBD44dc0a44F891fd3E869234);
+    underlyingToken.mint(accountTwo, 1000000000000e18);
+    // Account One Supply
+    vm.deal(accountOne, 1000000000000e18);
+    vm.startPrank(accountOne);
+    bnb.deposit{ value: 1000000000000e18 }();
+    vm.stopPrank();
 
-      // Account One Supply
-      vm.startPrank(accountOne);
-      bnb.approve(address(cBnbToken), 1e36);
-      cBnbToken.mint(1e17);
-      vm.stopPrank();
+    // Account One Supply
+    vm.startPrank(accountOne);
+    bnb.approve(address(cBnbToken), 1e36);
+    cBnbToken.mint(1e17);
+    vm.stopPrank();
 
-      // Account Two Supply
-      vm.startPrank(accountTwo);
-      underlyingToken.approve(address(cToken), 1e36);
-      cToken.mint(10e18);
-      vm.stopPrank();
-      assertEq(cToken.totalSupply(), 10e18 * 5);
-      assertEq(cBnbToken.totalSupply(), 1e17 * 5);
-      
-      // Account One Borrow
-      vm.startPrank(accountOne);
-      underlyingToken.approve(address(cToken), 1e36);
-      cToken.borrow(100);
-      vm.stopPrank();
-      assertEq(cToken.totalBorrows(), 100);
-      uint256 price1 = priceOracle.getUnderlyingPrice(ICToken(address(cToken)));
-      vm.mockCall(
-          0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA,
-          abi.encodeWithSelector(
-              priceOracle.getUnderlyingPrice.selector,
-              ICToken(address(cToken))
-          ),
-          abi.encode(price1 * 1000)
-      );
+    // Account Two Supply
+    vm.startPrank(accountTwo);
+    underlyingToken.approve(address(cToken), 1e36);
+    cToken.mint(10e18);
+    vm.stopPrank();
+    assertEq(cToken.totalSupply(), 10e18 * 5);
+    assertEq(cBnbToken.totalSupply(), 1e17 * 5);
 
-      IRedemptionStrategy[] memory strategies = new IRedemptionStrategy[](0);
-      bytes[] memory abis = new bytes[](0);
- 
-      vm.startPrank(accountOne);
-      FusePoolLens.FusePoolAsset[] memory assetsData = poolLens
-          .getPoolAssetsWithData(IComptroller(address(comptroller)));
-      uint256 bnbBalance = cBnbToken.balanceOf(accountOne);
+    // Account One Borrow
+    vm.startPrank(accountOne);
+    underlyingToken.approve(address(cToken), 1e36);
+    cToken.borrow(100);
+    vm.stopPrank();
+    assertEq(cToken.totalBorrows(), 100);
+    uint256 price1 = priceOracle.getUnderlyingPrice(ICToken(address(cToken)));
+    vm.mockCall(
+      0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA,
+      abi.encodeWithSelector(priceOracle.getUnderlyingPrice.selector, ICToken(address(cToken))),
+      abi.encode(price1 * 1000)
+    );
 
-      liquidator.safeLiquidateToTokensWithFlashLoan(
-          accountOne,
-          9,
-          ICErc20(address(cToken)),
-          ICErc20(address(cBnbToken)),
-          0,
-          address(0),
-          IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E),
-          IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E),
-          strategies,
-          abis,
-          0
-      );
+    IRedemptionStrategy[] memory strategies = new IRedemptionStrategy[](0);
+    bytes[] memory abis = new bytes[](0);
 
-      FusePoolLens.FusePoolAsset[] memory assetsDataAfter = poolLens
-          .getPoolAssetsWithData(IComptroller(address(comptroller)));
+    vm.startPrank(accountOne);
+    FusePoolLens.FusePoolAsset[] memory assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
+    uint256 bnbBalance = cBnbToken.balanceOf(accountOne);
 
-      uint256 bnbBalanceAfter = cBnbToken.balanceOf(accountOne);
-      
-      assertGt(bnbBalance, bnbBalanceAfter);
-      assertGt(assetsData[1].supplyBalance, assetsDataAfter[1].supplyBalance);
-      
-      vm.stopPrank();
+    liquidator.safeLiquidateToTokensWithFlashLoan(
+      accountOne,
+      9,
+      ICErc20(address(cToken)),
+      ICErc20(address(cBnbToken)),
+      0,
+      address(0),
+      IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E),
+      IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E),
+      strategies,
+      abis,
+      0
+    );
+
+    FusePoolLens.FusePoolAsset[] memory assetsDataAfter = poolLens.getPoolAssetsWithData(
+      IComptroller(address(comptroller))
+    );
+
+    uint256 bnbBalanceAfter = cBnbToken.balanceOf(accountOne);
+
+    assertGt(bnbBalance, bnbBalanceAfter);
+    assertGt(assetsData[1].supplyBalance, assetsDataAfter[1].supplyBalance);
+
+    vm.stopPrank();
   }
 
   function testDeployCErc20PluginDelegate() public shouldRun(forChains(BSC_MAINNET)) {

@@ -107,19 +107,19 @@ contract WithPool {
     fuseAdmin.initialize(1e16);
     fusePoolDirectory = new FusePoolDirectory();
     fusePoolDirectory.initialize(false, emptyAddresses);
-    
+
     poolLens = new FusePoolLens();
     emit log_address1(address(poolLens));
     poolLens.initialize(
-        fusePoolDirectory,
-        "Pool",
-        "lens",
-        hardcodedAddresses,
-        hardcodedNames,
-        hardcodedNames,
-        hardcodedNames,
-        hardcodedNames,
-        hardcodedNames
+      fusePoolDirectory,
+      "Pool",
+      "lens",
+      hardcodedAddresses,
+      hardcodedNames,
+      hardcodedNames,
+      hardcodedNames,
+      hardcodedNames,
+      hardcodedNames
     );
   }
 

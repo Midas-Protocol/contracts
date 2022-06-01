@@ -52,29 +52,28 @@ contract BNBE2eTest is WithPool, BaseTest {
   }
 
   function testGetPoolAssetsData() public shouldRun(forChains(BSC_MAINNET)) {
-      vm.roll(1);
-      deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
+    vm.roll(1);
+    deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
-      CToken[] memory allMarkets = comptroller.getAllMarkets();
-      CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
-      assertEq(cToken.name(), "cUnderlyingToken");
-      underlyingToken.approve(address(cToken), 1e36);
-      address[] memory cTokens = new address[](1);
-      cTokens[0] = address(cToken);
-      comptroller.enterMarkets(cTokens);
+    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
+    assertEq(cToken.name(), "cUnderlyingToken");
+    underlyingToken.approve(address(cToken), 1e36);
+    address[] memory cTokens = new address[](1);
+    cTokens[0] = address(cToken);
+    comptroller.enterMarkets(cTokens);
 
-      cToken.mint(10e18);
+    cToken.mint(10e18);
 
-      // address comptroller1 = 0x31d76A64Bc8BbEffb601fac5884372DEF910F044;
-      // address comptroller2 = 0x11355CF65a9B76e5Ac4C289362fD7c22eE93E762;
+    // address comptroller1 = 0x31d76A64Bc8BbEffb601fac5884372DEF910F044;
+    // address comptroller2 = 0x11355CF65a9B76e5Ac4C289362fD7c22eE93E762;
 
-      FusePoolLens.FusePoolAsset[] memory assets = poolLens
-          .getPoolAssetsWithData(IComptroller(address(comptroller)));
-      
-      // FusePoolLens.FusePoolAsset[] memory assets1 = poolLens
-      //     .getPoolAssetsWithData(IComptroller(comptroller1));
+    FusePoolLens.FusePoolAsset[] memory assets = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
 
-      assertEq(assets[0].supplyBalance, 10e18);
+    // FusePoolLens.FusePoolAsset[] memory assets1 = poolLens
+    //     .getPoolAssetsWithData(IComptroller(comptroller1));
+
+    assertEq(assets[0].supplyBalance, 10e18);
   }
 
   function testDeployCErc20PluginDelegate() public shouldRun(forChains(BSC_MAINNET)) {
