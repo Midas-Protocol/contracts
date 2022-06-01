@@ -6,6 +6,7 @@ import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 
 import { ERC4626 } from "../../utils/ERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { IW_NATIVE } from "../../utils/IW_NATIVE.sol";
 
 interface IAlpacaVault {
   /// @notice Return the total ERC20 entitled to the token holders. Be careful of unaccrued interests.
@@ -36,6 +37,7 @@ contract AlpacaERC4626 is ERC4626 {
   /* ========== STATE VARIABLES ========== */
 
   IAlpacaVault public immutable alpacaVault;
+  IW_NATIVE wtoken;
 
   /* ========== CONSTRUCTOR ========== */
 
@@ -44,7 +46,11 @@ contract AlpacaERC4626 is ERC4626 {
      @param _asset The ERC20 compliant token the Vault should accept.
      @param _alpacaVault The Alpaca Vault contract.
     */
-  constructor(ERC20 _asset, IAlpacaVault _alpacaVault)
+  constructor(
+    ERC20 _asset,
+    IAlpacaVault _alpacaVault,
+    IW_NATIVE _wtoken
+  )
     ERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
@@ -52,7 +58,7 @@ contract AlpacaERC4626 is ERC4626 {
     )
   {
     alpacaVault = _alpacaVault;
-
+    wtoken = _wtoken;
     asset.approve(address(alpacaVault), type(uint256).max);
   }
 
@@ -74,6 +80,10 @@ contract AlpacaERC4626 is ERC4626 {
 
   function afterDeposit(uint256 amount, uint256) internal override {
     alpacaVault.deposit(amount);
+  }
+
+  receive() external payable {
+    wtoken.deposit{ value: msg.value }();
   }
 
   function beforeWithdraw(uint256, uint256 shares) internal override {

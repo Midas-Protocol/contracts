@@ -13,7 +13,7 @@ contract BombERC4626Test is BaseTest {
   IERC20Upgradeable bombToken;
   IXBomb xbombToken = IXBomb(0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b);
   uint256 depositAmount = 100e18;
-  uint256 depositAmountRoundedDown = depositAmount - 1;
+  uint256 depositAmountRoundedDown = depositAmount - 2;
   address whale = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
