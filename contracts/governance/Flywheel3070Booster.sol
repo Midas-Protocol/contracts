@@ -10,9 +10,9 @@ import "../../lib/fuse-flywheel/src/FuseFlywheelCore.sol";
  * @title Flywheel3070Booster
  * @notice A booster that splits the rewards in a 30/70 ratio between supply and borrow
  *
- *                                      user.supplied                     user.borrowed_principal
- *  user_rewards =  rewards * (0.3 * ---------------------- + 0.7 * --------------------------------------)
- *                                 strategy.total_supplied            strategy.total_borrowed_principal
+ *                                    strategy.balance_of(user)            strategy.borrowed_principal_of(user)
+ *  user_rewards = rewards * (0.3 * ----------------------------- + 0.7 * --------------------------------------)
+ *                                    strategy.total_supplied()             strategy.total_borrowed_principal()
  *
  *                                   booster.boosted_balance_of()
  *  also, user_rewards = rewards * --------------------------------
@@ -37,7 +37,6 @@ contract Flywheel3070Booster is IFlywheelBooster, BNum {
     }
 
     function boostedBalanceOf(ERC20 strategy, address user) external view returns (uint256 boostedBalance) {
-        // TODO accrue interest first - use flywheelpresupplieraction - done in FuseFlywheelCore?
         ICToken asCToken = ICToken(address(strategy));
         uint256 index = asCToken.borrowIndex();
         // total borrows is denominated in underlying

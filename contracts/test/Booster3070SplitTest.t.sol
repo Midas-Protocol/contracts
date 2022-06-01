@@ -15,7 +15,6 @@ import { MockCToken } from "./mocks/MockCToken.sol";
 import "flywheel-v2/rewards/FlywheelGaugeRewards.sol";
 
 // no mock imports
-import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
@@ -28,13 +27,33 @@ import { Unitroller } from "../compound/Unitroller.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
 import "fuse-flywheel/FuseFlywheelCore.sol";
 
+contract MockInterestRateModel is InterestRateModel {
+    uint256 public blocksPerYear = 1e6;
+
+    function getBorrowRate(
+        uint256,
+        uint256,
+        uint256
+    ) public view override returns (uint256) {
+        return 2e12;
+    }
+
+    function getSupplyRate(
+        uint256,
+        uint256,
+        uint256,
+        uint256
+    ) public view override returns (uint256) {
+        return 2e12;
+    }
+}
 
 contract Booster3070SplitTest is DSTest, BNum {
     Vm public constant vm = Vm(HEVM_ADDRESS);
 
     VeMDSToken veToken;
-    uint256 totalSupply = 100_000;
-    uint256 rewardsForCycle = 27000;
+    uint256 totalSupply = 1e5;
+    uint256 rewardsForCycle = 1e5;
     address alice = address(0x10);
     address bob = address(0x20);
 
@@ -48,7 +67,7 @@ contract Booster3070SplitTest is DSTest, BNum {
     Flywheel3070Booster booster;
 
     // no mock testing
-    WhitePaperInterestRateModel interestModel;
+    MockInterestRateModel interestModel;
     Comptroller comptroller;
     CErc20 cErc20;
     FuseFeeDistributor fuseAdmin;
@@ -61,92 +80,6 @@ contract Booster3070SplitTest is DSTest, BNum {
     bool[] falseBoolArray;
     bool[] trueBoolArray;
     address[] newImplementation;
-
-    // first set up these
-    function setUpNoMock() internal {
-        interestModel = new WhitePaperInterestRateModel(2343665, 1e18, 1e18);
-        fuseAdmin = new FuseFeeDistributor();
-        fuseAdmin.initialize(1e16);
-        fusePoolDirectory = new FusePoolDirectory();
-        fusePoolDirectory.initialize(false, emptyAddresses);
-        cErc20Delegate = new CErc20Delegate();
-        underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
-    }
-
-    // then these second
-    function setUpPoolAndMarket() internal {
-        MockPriceOracle priceOracle = new MockPriceOracle(10);
-        emptyAddresses.push(address(0));
-        Comptroller tempComptroller = new Comptroller(payable(fuseAdmin));
-        newUnitroller.push(address(tempComptroller));
-        trueBoolArray.push(true);
-        falseBoolArray.push(false);
-        fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
-        (uint256 index, address comptrollerAddress) = fusePoolDirectory.deployPool(
-            "TestPool",
-            address(tempComptroller),
-            abi.encode(payable(address(fuseAdmin))),
-            false,
-            0.1e18,
-            1.1e18,
-            address(priceOracle)
-        );
-
-        Unitroller(payable(comptrollerAddress))._acceptAdmin();
-        comptroller = Comptroller(comptrollerAddress);
-
-        newImplementation.push(address(cErc20Delegate));
-        fuseAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);
-        vm.roll(1);
-        comptroller._deployMarket(
-            false,
-            abi.encode(
-                address(underlyingToken),
-                ComptrollerInterface(comptrollerAddress),
-                payable(address(fuseAdmin)),
-                InterestRateModel(address(interestModel)),
-                "CUnderlyingToken",
-                "CUT",
-                address(cErc20Delegate),
-                "",
-                uint256(1),
-                uint256(0)
-            ),
-            0.9e18
-        );
-
-        CToken[] memory allMarkets = comptroller.getAllMarkets();
-        cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
-    }
-
-    function setUpStaticRewards(CErc20 _cErc20) internal {
-        rewardToken = new MockERC20("test token", "TKN", 18);
-        booster = new Flywheel3070Booster();
-        flywheel = new FuseFlywheelCore(
-            rewardToken,
-            IFlywheelRewards(address(0)), // it's ok, set later
-            booster,
-            address(this),
-            Authority(address(0))
-        );
-
-        staticRewards = new FlywheelStaticRewards(flywheel, address(this), Authority(address(0)));
-
-        // seed rewards to flywheel
-        rewardToken.mint(address(staticRewards), 100 ether);
-
-        flywheel.setFlywheelRewards(staticRewards);
-        flywheel.addStrategyForRewards(ERC20(address(_cErc20)));
-
-        // add flywheel as rewardsDistributor to call flywheelPreBorrowAction / flywheelPreSupplyAction
-        require(comptroller._addRewardsDistributor(address(flywheel)) == 0);
-
-        // Start reward distribution at 1 token per second
-        staticRewards.setRewardsInfo(
-            ERC20(address(_cErc20)),
-            FlywheelStaticRewards.RewardsInfo({ rewardsPerSecond: 1000, rewardsEndTimestamp: 0 })
-        );
-    }
 
     function setUp() public {
         veToken = new VeMDSToken(
@@ -238,6 +171,92 @@ contract Booster3070SplitTest is DSTest, BNum {
         assertEq(aliceRewardsAfter + bobRewardsAfter, rewardsForCycle, "total rewards claimed should equal the rewards for the cycle");
     }
 
+    // first set up these
+    function setUpNoMock() internal {
+        underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
+    }
+
+    // then these second
+    function setUpPoolAndMarket() internal {
+        cErc20Delegate = new CErc20Delegate();
+        interestModel = new MockInterestRateModel();
+        fusePoolDirectory = new FusePoolDirectory();
+        fusePoolDirectory.initialize(false, emptyAddresses);
+        fuseAdmin = new FuseFeeDistributor();
+        fuseAdmin.initialize(1e16);
+        MockPriceOracle priceOracle = new MockPriceOracle(10);
+        emptyAddresses.push(address(0));
+        Comptroller tempComptroller = new Comptroller(payable(fuseAdmin));
+        newUnitroller.push(address(tempComptroller));
+        trueBoolArray.push(true);
+        falseBoolArray.push(false);
+        fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
+        (uint256 index, address comptrollerAddress) = fusePoolDirectory.deployPool(
+            "TestPool",
+            address(tempComptroller),
+            abi.encode(payable(address(fuseAdmin))),
+            false,
+            0.1e18,
+            1.1e18,
+            address(priceOracle)
+        );
+
+        Unitroller(payable(comptrollerAddress))._acceptAdmin();
+        comptroller = Comptroller(comptrollerAddress);
+
+        newImplementation.push(address(cErc20Delegate));
+        fuseAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);
+        vm.roll(1);
+        comptroller._deployMarket(
+            false,
+            abi.encode(
+                address(underlyingToken),
+                ComptrollerInterface(comptrollerAddress),
+                payable(address(fuseAdmin)),
+                interestModel,
+                "CUnderlyingToken",
+                "CUT",
+                address(cErc20Delegate),
+                "",
+                uint256(1),
+                uint256(0)
+            ),
+            0.9e18
+        );
+
+        CToken[] memory allMarkets = comptroller.getAllMarkets();
+        cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
+    }
+
+    function setUpStaticRewards(CErc20 _cErc20) internal {
+        rewardToken = new MockERC20("test token", "TKN", 18);
+        booster = new Flywheel3070Booster();
+        flywheel = new FuseFlywheelCore(
+            rewardToken,
+            IFlywheelRewards(address(0)), // it's ok, set later
+            booster,
+            address(this),
+            Authority(address(0))
+        );
+
+        staticRewards = new FlywheelStaticRewards(flywheel, address(this), Authority(address(0)));
+
+        // seed rewards to flywheel
+        rewardToken.mint(address(staticRewards), 100 ether);
+
+        flywheel.setFlywheelRewards(staticRewards);
+        flywheel.addStrategyForRewards(ERC20(address(_cErc20)));
+
+        // add flywheel as rewardsDistributor to call flywheelPreBorrowAction / flywheelPreSupplyAction
+        require(comptroller._addRewardsDistributor(address(flywheel)) == 0);
+
+        // Start reward distribution at 1 token per second
+        staticRewards.setRewardsInfo(
+            ERC20(address(_cErc20)),
+            FlywheelStaticRewards.RewardsInfo({ rewardsPerSecond: 1000, rewardsEndTimestamp: 0 })
+        );
+    }
+
     /*
     for supplying:
     alice accrues all the rewards for the first half the period = y rewards
@@ -253,16 +272,16 @@ contract Booster3070SplitTest is DSTest, BNum {
     alice gets: 1.1/2 of 30% of the rewards + 1.5/2 of 70% of the rewards = 61% of the rewards
     bob gets: 0.45 * 0.7 * rew + 0.25 * 0.3 * rew = 39% of the rewards
     */
-    function testInterestAccrual(uint256 borrowAmount) public {
+    function testInterestAccrual(/*uint256 borrowAmount*/) public {
 //        vm.assume(supplyAmount > 100000000 && supplyAmount < 1000000000);
         uint256 supplyAmount = 1 ether;
-        vm.assume(borrowAmount > supplyAmount / 20 && borrowAmount <= supplyAmount / 10);
+        uint256 borrowAmount = supplyAmount / 20;
+//        vm.assume(borrowAmount > supplyAmount / 20 && borrowAmount <= supplyAmount / 10);
 
         setUpNoMock();
         setUpPoolAndMarket();
         setUpStaticRewards(cErc20);
 
-        uint256 accrualBlockNumberBefore = cErc20.accrualBlockNumber();
         vm.roll(block.number + 1);
         vm.warp(block.timestamp + 1 days);
 
@@ -271,6 +290,10 @@ contract Booster3070SplitTest is DSTest, BNum {
             underlyingToken.mint(alice, supplyAmount);
             vm.startPrank(alice);
             underlyingToken.approve(address(cErc20), supplyAmount);
+
+            bytes4 selector = bytes4(keccak256(bytes("flywheelPreSupplierAction(address,address)")));
+            vm.expectCall(address(flywheel), abi.encodeWithSelector(selector, address(cErc20), alice));
+
             cErc20.mint(supplyAmount);
             cErc20.borrow(borrowAmount);
             vm.stopPrank();
@@ -279,11 +302,11 @@ contract Booster3070SplitTest is DSTest, BNum {
         uint256 aliceSupplyBefore = cErc20.balanceOfUnderlying(alice);
         // advance the time with 1/2 period
         {
-            vm.roll(block.number + interestModel.blocksPerYear());
-            vm.warp(block.timestamp + 365.25 days);
-            // accrue the interest to show the booster does not take it into account
-            cErc20.accrueInterest();
+            vm.roll(block.number + interestModel.blocksPerYear() / 2);
+            vm.warp(block.timestamp + 365.25 days / 2);
         }
+
+        // balanceOfUnderlying accrues the interest
         uint256 aliceSupplyAfter = cErc20.balanceOfUnderlying(alice);
         emit log_uint(aliceSupplyBefore);
         emit log_uint(aliceSupplyAfter);
@@ -292,31 +315,19 @@ contract Booster3070SplitTest is DSTest, BNum {
         // accrue the rewards before bob takes part in the supplying/borrowing
         flywheel.accrue(ERC20(address(cErc20)), alice, bob);
 
-//        uint256 aliceAccruedBefore = flywheel.compAccrued(alice);
-//        uint256 bobAccruedBefore = flywheel.compAccrued(bob);
-//        emit log_uint(aliceAccruedBefore);
-//        emit log_uint(bobAccruedBefore);
-//        uint256 calculatedRewards = aliceSupplyAfter * 3 / 10 * (1000 * 365.25 days);
-//        emit log_uint(calculatedRewards);
-//
-//        assertTrue(aliceAccruedBefore == calculatedRewards);
-
-        // deposit the other 50% as bob and contribute to 90% of the borrowed
+        // deposit the other 50 % as bob and contribute to 90 % of the borrowed
         {
             underlyingToken.mint(bob, supplyAmount);
             vm.startPrank(bob);
             underlyingToken.approve(address(cErc20), supplyAmount);
             cErc20.mint(supplyAmount);
-            cErc20.borrow(9 * borrowAmount);
             vm.stopPrank();
         }
 
         // advance the time with 1/2 period
         {
-            vm.roll(block.number + interestModel.blocksPerYear());
-            vm.warp(block.timestamp + 365.25 days);
-            // accrue the interest to show the booster does not take it into account
-            cErc20.accrueInterest();
+            vm.roll(block.number + interestModel.blocksPerYear() / 2);
+            vm.warp(block.timestamp + 365.25 days / 2);
         }
 
         flywheel.accrue(ERC20(address(cErc20)), alice, bob);
@@ -328,10 +339,7 @@ contract Booster3070SplitTest is DSTest, BNum {
         uint256 aliceRewardsAfter = rewardToken.balanceOf(alice);
         uint256 bobRewardsAfter = rewardToken.balanceOf(bob);
 
-        emit log_uint((aliceRewardsAfter * 100) / (aliceRewardsAfter + bobRewardsAfter));
-
-        emit log("current exch rate");
-        emit log_uint(cErc20.exchangeRateCurrent());
+//        emit log_uint((aliceRewardsAfter * 100) / (aliceRewardsAfter + bobRewardsAfter));
 
         assertTrue(
             100 * aliceRewardsAfter / (aliceRewardsAfter + bobRewardsAfter) == 64
