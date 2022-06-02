@@ -44,7 +44,7 @@ contract FuseSafeLiquidatorTest is DSTest {
         IRedemptionStrategy strategy = new MockRedemptionStrategy();
         bytes memory strategyData = "";
 
-        fsl._whitelistRedemtionStrategy(strategy, true);
+        fsl._whitelistRedemptionStrategy(strategy, true);
         fsl.redeemCustomCollateral(underlyingCollateral, underlyingCollateralSeized, strategy, strategyData);
     }
 }
