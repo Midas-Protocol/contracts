@@ -49,82 +49,22 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/compound/PriceOracle.sol",
-    "id": 26838,
+    "id": 8271,
     "exportedSymbols": {
-      "CErc20Interface": [
-        15526
-      ],
-      "CErc20Storage": [
-        15467
-      ],
-      "CEtherInterface": [
-        15529
-      ],
       "CToken": [
-        15047
-      ],
-      "CTokenAdminStorage": [
-        15065
-      ],
-      "CTokenInterface": [
-        15463
-      ],
-      "CTokenStorage": [
-        15154
-      ],
-      "CarefulMath": [
-        15726
-      ],
-      "ComptrollerErrorReporter": [
-        20678
-      ],
-      "ComptrollerInterface": [
-        19920
-      ],
-      "ComptrollerV1Storage": [
-        19996
-      ],
-      "ComptrollerV2Storage": [
-        20078
-      ],
-      "ComptrollerV3Storage": [
-        20107
-      ],
-      "EIP20Interface": [
-        20480
-      ],
-      "EIP20NonStandardInterface": [
-        20552
-      ],
-      "Exponential": [
-        21472
-      ],
-      "ExponentialNoError": [
-        22226
-      ],
-      "IFuseFeeDistributor": [
-        24795
-      ],
-      "InterestRateModel": [
-        24829
+        5050
       ],
       "PriceOracle": [
-        26837
-      ],
-      "TokenErrorReporter": [
-        20878
-      ],
-      "UnitrollerAdminStorage": [
-        19974
+        8270
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "39:532:38",
+    "src": "39:532:18",
     "nodes": [
       {
-        "id": 26822,
+        "id": 8255,
         "nodeType": "PragmaDirective",
-        "src": "39:24:38",
+        "src": "39:24:18",
         "literals": [
           "solidity",
           ">=",
@@ -133,38 +73,38 @@
         ]
       },
       {
-        "id": 26823,
+        "id": 8256,
         "nodeType": "ImportDirective",
-        "src": "65:22:38",
+        "src": "65:22:18",
         "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/compound/CToken.sol",
         "file": "./CToken.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 26838,
-        "sourceUnit": 15048,
+        "scope": 8271,
+        "sourceUnit": 5051,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 26837,
+        "id": 8270,
         "nodeType": "ContractDefinition",
-        "src": "89:481:38",
+        "src": "89:481:18",
         "nodes": [
           {
-            "id": 26827,
+            "id": 8260,
             "nodeType": "VariableDeclaration",
-            "src": "200:41:38",
+            "src": "200:41:18",
             "constant": true,
             "documentation": {
-              "id": 26824,
+              "id": 8257,
               "nodeType": "StructuredDocumentation",
-              "src": "123:74:38",
+              "src": "123:74:18",
               "text": "@notice Indicator that this is a PriceOracle contract (for inspection)"
             },
             "functionSelector": "66331bba",
             "mutability": "constant",
             "name": "isPriceOracle",
-            "nameLocation": "221:13:38",
-            "scope": 26837,
+            "nameLocation": "221:13:18",
+            "scope": 8270,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -172,10 +112,10 @@
               "typeString": "bool"
             },
             "typeName": {
-              "id": 26825,
+              "id": 8258,
               "name": "bool",
               "nodeType": "ElementaryTypeName",
-              "src": "200:4:38",
+              "src": "200:4:18",
               "typeDescriptions": {
                 "typeIdentifier": "t_bool",
                 "typeString": "bool"
@@ -183,14 +123,14 @@
             },
             "value": {
               "hexValue": "74727565",
-              "id": 26826,
+              "id": 8259,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "bool",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "237:4:38",
+              "src": "237:4:18",
               "typeDescriptions": {
                 "typeIdentifier": "t_bool",
                 "typeString": "bool"
@@ -200,13 +140,13 @@
             "visibility": "public"
           },
           {
-            "id": 26836,
+            "id": 8269,
             "nodeType": "FunctionDefinition",
-            "src": "485:83:38",
+            "src": "485:83:18",
             "documentation": {
-              "id": 26828,
+              "id": 8261,
               "nodeType": "StructuredDocumentation",
-              "src": "246:236:38",
+              "src": "246:236:18",
               "text": " @notice Get the underlying price of a cToken asset\n @param cToken The cToken to get the underlying price of\n @return The underlying asset price mantissa (scaled by 1e18).\n  Zero means the price is unavailable."
             },
             "functionSelector": "fc57d4df",
@@ -214,61 +154,61 @@
             "kind": "function",
             "modifiers": [],
             "name": "getUnderlyingPrice",
-            "nameLocation": "494:18:38",
+            "nameLocation": "494:18:18",
             "parameters": {
-              "id": 26832,
+              "id": 8265,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 26831,
+                  "id": 8264,
                   "mutability": "mutable",
                   "name": "cToken",
-                  "nameLocation": "520:6:38",
+                  "nameLocation": "520:6:18",
                   "nodeType": "VariableDeclaration",
-                  "scope": 26836,
-                  "src": "513:13:38",
+                  "scope": 8269,
+                  "src": "513:13:18",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_CToken_$15047",
+                    "typeIdentifier": "t_contract$_CToken_$5050",
                     "typeString": "contract CToken"
                   },
                   "typeName": {
-                    "id": 26830,
+                    "id": 8263,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 26829,
+                      "id": 8262,
                       "name": "CToken",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 15047,
-                      "src": "513:6:38"
+                      "referencedDeclaration": 5050,
+                      "src": "513:6:18"
                     },
-                    "referencedDeclaration": 15047,
-                    "src": "513:6:38",
+                    "referencedDeclaration": 5050,
+                    "src": "513:6:18",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_CToken_$15047",
+                      "typeIdentifier": "t_contract$_CToken_$5050",
                       "typeString": "contract CToken"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "512:15:38"
+              "src": "512:15:18"
             },
             "returnParameters": {
-              "id": 26835,
+              "id": 8268,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 26834,
+                  "id": 8267,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 26836,
-                  "src": "559:7:38",
+                  "scope": 8269,
+                  "src": "559:7:18",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -276,10 +216,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 26833,
+                    "id": 8266,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "559:7:38",
+                    "src": "559:7:18",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -288,9 +228,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "558:9:38"
+              "src": "558:9:18"
             },
-            "scope": 26837,
+            "scope": 8270,
             "stateMutability": "view",
             "virtual": true,
             "visibility": "external"
@@ -303,15 +243,15 @@
         "contractKind": "contract",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          26837
+          8270
         ],
         "name": "PriceOracle",
-        "nameLocation": "107:11:38",
-        "scope": 26838,
+        "nameLocation": "107:11:18",
+        "scope": 8271,
         "usedErrors": []
       }
     ],
     "license": "UNLICENSED"
   },
-  "id": 38
+  "id": 18
 }
