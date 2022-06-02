@@ -45,17 +45,17 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/synthetix/ISynthetix.sol",
-    "id": 35739,
+    "id": 35637,
     "exportedSymbols": {
       "ISynthetix": [
-        35738
+        35636
       ]
     },
     "nodeType": "SourceUnit",
     "src": "32:211:111",
     "nodes": [
       {
-        "id": 35726,
+        "id": 35624,
         "nodeType": "PragmaDirective",
         "src": "32:24:111",
         "literals": [
@@ -66,12 +66,12 @@
         ]
       },
       {
-        "id": 35738,
+        "id": 35636,
         "nodeType": "ContractDefinition",
         "src": "58:184:111",
         "nodes": [
           {
-            "id": 35737,
+            "id": 35635,
             "nodeType": "FunctionDefinition",
             "src": "83:157:111",
             "functionSelector": "ee52a2f3",
@@ -81,17 +81,17 @@
             "name": "exchange",
             "nameLocation": "92:8:111",
             "parameters": {
-              "id": 35733,
+              "id": 35631,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35728,
+                  "id": 35626,
                   "mutability": "mutable",
                   "name": "sourceCurrencyKey",
                   "nameLocation": "114:17:111",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35737,
+                  "scope": 35635,
                   "src": "106:25:111",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -100,7 +100,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 35727,
+                    "id": 35625,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "106:7:111",
@@ -113,12 +113,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 35730,
+                  "id": 35628,
                   "mutability": "mutable",
                   "name": "sourceAmount",
                   "nameLocation": "145:12:111",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35737,
+                  "scope": 35635,
                   "src": "137:20:111",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -127,7 +127,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 35729,
+                    "id": 35627,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "137:7:111",
@@ -140,12 +140,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 35732,
+                  "id": 35630,
                   "mutability": "mutable",
                   "name": "destinationCurrencyKey",
                   "nameLocation": "171:22:111",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35737,
+                  "scope": 35635,
                   "src": "163:30:111",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -154,7 +154,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 35731,
+                    "id": 35629,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "163:7:111",
@@ -169,17 +169,17 @@
               "src": "100:97:111"
             },
             "returnParameters": {
-              "id": 35736,
+              "id": 35634,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35735,
+                  "id": 35633,
                   "mutability": "mutable",
                   "name": "amountReceived",
                   "nameLocation": "224:14:111",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35737,
+                  "scope": 35635,
                   "src": "216:22:111",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -188,7 +188,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 35734,
+                    "id": 35632,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "216:7:111",
@@ -202,7 +202,7 @@
               ],
               "src": "215:24:111"
             },
-            "scope": 35738,
+            "scope": 35636,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -215,11 +215,11 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          35738
+          35636
         ],
         "name": "ISynthetix",
         "nameLocation": "68:10:111",
-        "scope": 35739,
+        "scope": 35637,
         "usedErrors": []
       }
     ],

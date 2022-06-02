@@ -57,17 +57,17 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/curve/ICurveLiquidityGaugeV2.sol",
-    "id": 33886,
+    "id": 33784,
     "exportedSymbols": {
       "ICurveLiquidityGaugeV2": [
-        33885
+        33783
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:211:79",
     "nodes": [
       {
-        "id": 33869,
+        "id": 33767,
         "nodeType": "PragmaDirective",
         "src": "39:24:79",
         "literals": [
@@ -78,12 +78,12 @@
         ]
       },
       {
-        "id": 33885,
+        "id": 33783,
         "nodeType": "ContractDefinition",
         "src": "65:184:79",
         "nodes": [
           {
-            "id": 33874,
+            "id": 33772,
             "nodeType": "FunctionDefinition",
             "src": "102:52:79",
             "functionSelector": "82c63066",
@@ -93,23 +93,23 @@
             "name": "lp_token",
             "nameLocation": "111:8:79",
             "parameters": {
-              "id": 33870,
+              "id": 33768,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "119:2:79"
             },
             "returnParameters": {
-              "id": 33873,
+              "id": 33771,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33872,
+                  "id": 33770,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33874,
+                  "scope": 33772,
                   "src": "145:7:79",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -118,7 +118,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33871,
+                    "id": 33769,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "145:7:79",
@@ -133,13 +133,13 @@
               ],
               "src": "144:9:79"
             },
-            "scope": 33885,
+            "scope": 33783,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 33879,
+            "id": 33777,
             "nodeType": "FunctionDefinition",
             "src": "158:42:79",
             "functionSelector": "b6b55f25",
@@ -149,17 +149,17 @@
             "name": "deposit",
             "nameLocation": "167:7:79",
             "parameters": {
-              "id": 33877,
+              "id": 33775,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33876,
+                  "id": 33774,
                   "mutability": "mutable",
                   "name": "_value",
                   "nameLocation": "183:6:79",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33879,
+                  "scope": 33777,
                   "src": "175:14:79",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -168,7 +168,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 33875,
+                    "id": 33773,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "175:7:79",
@@ -183,18 +183,18 @@
               "src": "174:16:79"
             },
             "returnParameters": {
-              "id": 33878,
+              "id": 33776,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "199:0:79"
             },
-            "scope": 33885,
+            "scope": 33783,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 33884,
+            "id": 33782,
             "nodeType": "FunctionDefinition",
             "src": "204:43:79",
             "functionSelector": "2e1a7d4d",
@@ -204,17 +204,17 @@
             "name": "withdraw",
             "nameLocation": "213:8:79",
             "parameters": {
-              "id": 33882,
+              "id": 33780,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33881,
+                  "id": 33779,
                   "mutability": "mutable",
                   "name": "_value",
                   "nameLocation": "230:6:79",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33884,
+                  "scope": 33782,
                   "src": "222:14:79",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -223,7 +223,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 33880,
+                    "id": 33778,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "222:7:79",
@@ -238,12 +238,12 @@
               "src": "221:16:79"
             },
             "returnParameters": {
-              "id": 33883,
+              "id": 33781,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "246:0:79"
             },
-            "scope": 33885,
+            "scope": 33783,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -256,11 +256,11 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          33885
+          33783
         ],
         "name": "ICurveLiquidityGaugeV2",
         "nameLocation": "75:22:79",
-        "scope": 33886,
+        "scope": 33784,
         "usedErrors": []
       }
     ],

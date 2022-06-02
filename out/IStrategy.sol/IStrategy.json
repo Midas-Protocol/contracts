@@ -57,22 +57,22 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/test/mocks/beefy/IStrategy.sol",
-    "id": 62811,
+    "id": 65285,
     "exportedSymbols": {
       "ERC20": [
-        91926
+        94430
       ],
       "IStrategy": [
-        62810
+        65284
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "33:254:223",
+    "src": "33:254:224",
     "nodes": [
       {
-        "id": 62791,
+        "id": 65265,
         "nodeType": "PragmaDirective",
-        "src": "33:24:223",
+        "src": "33:24:224",
         "literals": [
           "solidity",
           ">=",
@@ -81,22 +81,22 @@
         ]
       },
       {
-        "id": 62793,
+        "id": 65267,
         "nodeType": "ImportDirective",
-        "src": "58:49:223",
+        "src": "58:49:224",
         "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/solmate/src/tokens/ERC20.sol",
         "file": "solmate/tokens/ERC20.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 62811,
-        "sourceUnit": 91927,
+        "scope": 65285,
+        "sourceUnit": 94431,
         "symbolAliases": [
           {
             "foreign": {
-              "id": 62792,
+              "id": 65266,
               "name": "ERC20",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "src": "67:5:223",
+              "src": "67:5:224",
               "typeDescriptions": {}
             },
             "nameLocation": "-1:-1:-1"
@@ -105,101 +105,101 @@
         "unitAlias": ""
       },
       {
-        "id": 62810,
+        "id": 65284,
         "nodeType": "ContractDefinition",
-        "src": "109:177:223",
+        "src": "109:177:224",
         "nodes": [
           {
-            "id": 62799,
+            "id": 65273,
             "nodeType": "FunctionDefinition",
-            "src": "133:46:223",
+            "src": "133:46:224",
             "functionSelector": "1f1fcd51",
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "want",
-            "nameLocation": "142:4:223",
+            "nameLocation": "142:4:224",
             "parameters": {
-              "id": 62794,
+              "id": 65268,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "146:2:223"
+              "src": "146:2:224"
             },
             "returnParameters": {
-              "id": 62798,
+              "id": 65272,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 62797,
+                  "id": 65271,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 62799,
-                  "src": "172:5:223",
+                  "scope": 65273,
+                  "src": "172:5:224",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ERC20_$91926",
+                    "typeIdentifier": "t_contract$_ERC20_$94430",
                     "typeString": "contract ERC20"
                   },
                   "typeName": {
-                    "id": 62796,
+                    "id": 65270,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 62795,
+                      "id": 65269,
                       "name": "ERC20",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 91926,
-                      "src": "172:5:223"
+                      "referencedDeclaration": 94430,
+                      "src": "172:5:224"
                     },
-                    "referencedDeclaration": 91926,
-                    "src": "172:5:223",
+                    "referencedDeclaration": 94430,
+                    "src": "172:5:224",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ERC20_$91926",
+                      "typeIdentifier": "t_contract$_ERC20_$94430",
                       "typeString": "contract ERC20"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "171:7:223"
+              "src": "171:7:224"
             },
-            "scope": 62810,
+            "scope": 65284,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 62804,
+            "id": 65278,
             "nodeType": "FunctionDefinition",
-            "src": "183:53:223",
+            "src": "183:53:224",
             "functionSelector": "722713f7",
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "balanceOf",
-            "nameLocation": "192:9:223",
+            "nameLocation": "192:9:224",
             "parameters": {
-              "id": 62800,
+              "id": 65274,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "201:2:223"
+              "src": "201:2:224"
             },
             "returnParameters": {
-              "id": 62803,
+              "id": 65277,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 62802,
+                  "id": 65276,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 62804,
-                  "src": "227:7:223",
+                  "scope": 65278,
+                  "src": "227:7:224",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -207,10 +207,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 62801,
+                    "id": 65275,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "227:7:223",
+                    "src": "227:7:224",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -219,36 +219,36 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "226:9:223"
+              "src": "226:9:224"
             },
-            "scope": 62810,
+            "scope": 65284,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 62809,
+            "id": 65283,
             "nodeType": "FunctionDefinition",
-            "src": "240:44:223",
+            "src": "240:44:224",
             "functionSelector": "2e1a7d4d",
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "withdraw",
-            "nameLocation": "249:8:223",
+            "nameLocation": "249:8:224",
             "parameters": {
-              "id": 62807,
+              "id": 65281,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 62806,
+                  "id": 65280,
                   "mutability": "mutable",
                   "name": "_amount",
-                  "nameLocation": "266:7:223",
+                  "nameLocation": "266:7:224",
                   "nodeType": "VariableDeclaration",
-                  "scope": 62809,
-                  "src": "258:15:223",
+                  "scope": 65283,
+                  "src": "258:15:224",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -256,10 +256,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 62805,
+                    "id": 65279,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "258:7:223",
+                    "src": "258:7:224",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -268,15 +268,15 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "257:17:223"
+              "src": "257:17:224"
             },
             "returnParameters": {
-              "id": 62808,
+              "id": 65282,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "283:0:223"
+              "src": "283:0:224"
             },
-            "scope": 62810,
+            "scope": 65284,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -289,15 +289,15 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          62810
+          65284
         ],
         "name": "IStrategy",
-        "nameLocation": "119:9:223",
-        "scope": 62811,
+        "nameLocation": "119:9:224",
+        "scope": 65285,
         "usedErrors": []
       }
     ],
     "license": "MIT"
   },
-  "id": 223
+  "id": 224
 }

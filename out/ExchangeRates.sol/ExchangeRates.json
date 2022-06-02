@@ -45,17 +45,17 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/synthetix/ExchangeRates.sol",
-    "id": 35717,
+    "id": 35615,
     "exportedSymbols": {
       "ExchangeRates": [
-        35716
+        35614
       ]
     },
     "nodeType": "SourceUnit",
     "src": "32:216:109",
     "nodes": [
       {
-        "id": 35704,
+        "id": 35602,
         "nodeType": "PragmaDirective",
         "src": "32:24:109",
         "literals": [
@@ -66,12 +66,12 @@
         ]
       },
       {
-        "id": 35716,
+        "id": 35614,
         "nodeType": "ContractDefinition",
         "src": "58:189:109",
         "nodes": [
           {
-            "id": 35715,
+            "id": 35613,
             "nodeType": "FunctionDefinition",
             "src": "86:159:109",
             "functionSelector": "654a60ac",
@@ -81,17 +81,17 @@
             "name": "effectiveValue",
             "nameLocation": "95:14:109",
             "parameters": {
-              "id": 35711,
+              "id": 35609,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35706,
+                  "id": 35604,
                   "mutability": "mutable",
                   "name": "sourceCurrencyKey",
                   "nameLocation": "123:17:109",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35715,
+                  "scope": 35613,
                   "src": "115:25:109",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -100,7 +100,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 35705,
+                    "id": 35603,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "115:7:109",
@@ -113,12 +113,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 35708,
+                  "id": 35606,
                   "mutability": "mutable",
                   "name": "sourceAmount",
                   "nameLocation": "154:12:109",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35715,
+                  "scope": 35613,
                   "src": "146:20:109",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -127,7 +127,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 35707,
+                    "id": 35605,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "146:7:109",
@@ -140,12 +140,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 35710,
+                  "id": 35608,
                   "mutability": "mutable",
                   "name": "destinationCurrencyKey",
                   "nameLocation": "180:22:109",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35715,
+                  "scope": 35613,
                   "src": "172:30:109",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -154,7 +154,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 35709,
+                    "id": 35607,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "172:7:109",
@@ -169,17 +169,17 @@
               "src": "109:97:109"
             },
             "returnParameters": {
-              "id": 35714,
+              "id": 35612,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35713,
+                  "id": 35611,
                   "mutability": "mutable",
                   "name": "value",
                   "nameLocation": "238:5:109",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35715,
+                  "scope": 35613,
                   "src": "230:13:109",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -188,7 +188,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 35712,
+                    "id": 35610,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "230:7:109",
@@ -202,7 +202,7 @@
               ],
               "src": "229:15:109"
             },
-            "scope": 35716,
+            "scope": 35614,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -215,11 +215,11 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          35716
+          35614
         ],
         "name": "ExchangeRates",
         "nameLocation": "68:13:109",
-        "scope": 35717,
+        "scope": 35615,
         "usedErrors": []
       }
     ],
