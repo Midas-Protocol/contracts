@@ -950,6 +950,25 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   }
 
   /**
+   * @dev for security reasons only whitelisted redemption strategies may be used.
+   * Each whitelisted redemption strategy has to be checked to not be able to
+   * call `selfdestruct` with the `delegatecall` call in `redeemCustomCollateral`
+   */
+  function _whitelistRedemptionStrategies(
+    IRedemptionStrategy[] calldata strategies,
+    bool[] calldata whitelisted
+  ) external onlyOwner {
+    require(
+      strategies.length > 0 && strategies.length == whitelisted.length,
+      "list of strategies empty or whitelist does not match its length"
+    );
+
+    for (uint256 i = 0; i < strategies.length; i++) {
+      redemptionStrategiesWhitelist[address(strategies[i])] = whitelisted[i];
+    }
+  }
+
+  /**
    * @dev Redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
    * Public visibility because we have to call this function externally if called from a payable FuseSafeLiquidator function (for some reason delegatecall fails when called with msg.value > 0).
    */
