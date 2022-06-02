@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -29,7 +29,7 @@ import "./external/compound/IComptroller.sol";
  * @notice FuseSafeLiquidator safely liquidates unhealthy borrowers (with flashloan support).
  * @dev Do not transfer NATIVE or tokens directly to this address. Only send NATIVE here when using a method, and only approve tokens for transfer to here when using a method. Direct NATIVE transfers will be rejected and direct token transfers will be lost.
  */
-contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
+contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   using AddressUpgradeable for address payable;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -75,6 +75,8 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
    */
   address private _liquidatorProfitExchangeSource;
 
+  mapping(address => bool) public redemptionStrategiesWhitelist;
+
   function initialize(
     address _wtoken,
     address _uniswapV2router,
@@ -82,6 +84,8 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     address _btcToken,
     bytes memory _uniswapPairInitHashCode
   ) external initializer {
+    __Ownable_init();
+
     require(_uniswapV2router != address(0), "UniswapV2Factory not defined.");
     W_NATIVE_ADDRESS = _wtoken;
     UNISWAP_V2_ROUTER_02_ADDRESS = _uniswapV2router;
@@ -937,6 +941,15 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
   }
 
   /**
+   * @dev for security reasons only whitelisted redemption strategies may be used.
+   * Each whitelisted redemption strategy has to be checked to not be able to
+   * call `selfdestruct` with the `delegatecall` call in `redeemCustomCollateral`
+   */
+  function _whitelistRedemtionStrategy(IRedemptionStrategy strategy, bool whitelisted) external onlyOwner {
+    redemptionStrategiesWhitelist[address(strategy)] = whitelisted;
+  }
+
+  /**
    * @dev Redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
    * Public visibility because we have to call this function externally if called from a payable FuseSafeLiquidator function (for some reason delegatecall fails when called with msg.value > 0).
    */
@@ -946,6 +959,8 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     IRedemptionStrategy strategy,
     bytes memory strategyData
   ) public returns (IERC20Upgradeable, uint256) {
+    require(redemptionStrategiesWhitelist[address(strategy)], "only whitelisted redemption strategies can be used");
+
     bytes memory returndata = _functionDelegateCall(
       address(strategy),
       abi.encodeWithSelector(strategy.redeem.selector, underlyingCollateral, underlyingCollateralSeized, strategyData)
