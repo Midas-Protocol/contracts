@@ -954,10 +954,10 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    * Each whitelisted redemption strategy has to be checked to not be able to
    * call `selfdestruct` with the `delegatecall` call in `redeemCustomCollateral`
    */
-  function _whitelistRedemptionStrategies(
-    IRedemptionStrategy[] calldata strategies,
-    bool[] calldata whitelisted
-  ) external onlyOwner {
+  function _whitelistRedemptionStrategies(IRedemptionStrategy[] calldata strategies, bool[] calldata whitelisted)
+    external
+    onlyOwner
+  {
     require(
       strategies.length > 0 && strategies.length == whitelisted.length,
       "list of strategies empty or whitelist does not match its length"
