@@ -4,6 +4,10 @@ pragma solidity >=0.8.0;
 import "./config/BaseTest.t.sol";
 import "../liquidators/JarvisSynthereumLiquidator.sol";
 
+interface IMockERC20 is IERC20Upgradeable {
+  function mint(address _address, uint256 amount) external;
+}
+
 contract JarvisSynthereumLiquidatorTest is BaseTest {
   JarvisSynthereumLiquidator private liquidator;
 
@@ -11,8 +15,8 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
   ISynthereumLiquidityPool synthereumLiquiditiyPool =
     ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49);
 
-  address whale = 0xB57c5C22aA7b9Cd25D557f061Df61cBCe1898456;
-  IERC20Upgradeable jBRLToken = IERC20Upgradeable(0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
+  address minter = 0x0fD8170Dc284CD558325029f6AEc1538c7d99f49;
+  IMockERC20 jBRLToken = IMockERC20(0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
 
   IERC20Upgradeable bUSD;
 
@@ -23,12 +27,11 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
   }
 
   function testRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
-    uint256 whaleBalance = jBRLToken.balanceOf(whale);
-    vm.prank(whale);
-    jBRLToken.transfer(address(liquidator), whaleBalance);
+    vm.prank(minter);
+    jBRLToken.mint(address(liquidator), 10e18);
 
-    (uint256 redeemableAmount, ) = liquidator.pool().getRedeemTradeInfo(whaleBalance);
-    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(jBRLToken, whaleBalance, "");
+    (uint256 redeemableAmount, ) = liquidator.pool().getRedeemTradeInfo(10e18);
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(jBRLToken, 10e18, "");
 
     // should be BUSD
     assertEq(address(outputToken), address(bUSD));
@@ -41,12 +44,11 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
     vm.prank(manager);
     pool.emergencyShutdown();
 
-    uint256 whaleBalance = jBRLToken.balanceOf(whale);
-    vm.prank(whale);
-    jBRLToken.transfer(address(liquidator), whaleBalance);
+    vm.prank(minter);
+    jBRLToken.mint(address(liquidator), 10e18);
 
-    (uint256 redeemableAmount, uint256 fee) = liquidator.pool().getRedeemTradeInfo(whaleBalance);
-    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(jBRLToken, whaleBalance, "");
+    (uint256 redeemableAmount, uint256 fee) = liquidator.pool().getRedeemTradeInfo(10e18);
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(jBRLToken, 10e18, "");
 
     // should be BUSD
     assertEq(address(outputToken), address(bUSD));

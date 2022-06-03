@@ -30,9 +30,8 @@ jobs:
       - name: Lint
         run: npm run lint
 
-
   build-and-test-local:
-    needs: [ lint ]
+    needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
     runs-on: ubuntu-latest
@@ -53,11 +52,11 @@ jobs:
         run: forge test
 
   build-and-test-bsc:
-    needs: [ lint ]
+    needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
       FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
-      FORK_BLOCK_NUMBER: 17366495
+      FORK_BLOCK_NUMBER: 18299335
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -76,7 +75,7 @@ jobs:
         run: forge test --fork-url ${FORK_URL_BSC} --fork-block-number ${FORK_BLOCK_NUMBER}
 
   build-and-test-evmostestnet:
-    needs: [ lint ]
+    needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
       FORK_BLOCK_NUMBER: 1217475
@@ -98,10 +97,10 @@ jobs:
         run: forge test --fork-url https://eth.bd.evmos.dev:8545 --fork-block-number ${FORK_BLOCK_NUMBER}
 
   build-and-test-moonbeam:
-    needs: [ lint ]
+    needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FORK_BLOCK_NUMBER: 1058520
+      FORK_BLOCK_NUMBER: 1058521
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
