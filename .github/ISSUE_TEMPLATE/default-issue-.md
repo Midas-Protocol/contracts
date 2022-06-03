@@ -19,6 +19,10 @@ Any information that gives more context as to why this task exists, and why it m
 
 Describes in 1-2 sentences what the output of the Task is, so that it can be verified by another team member easily. “Feature X is implemented as described and can be verified by using it”
 
+## Acceptance Criteria
+
+Describe criteria required for proper testing after
+
 ## Tasks
 
 - [ ] Task 1

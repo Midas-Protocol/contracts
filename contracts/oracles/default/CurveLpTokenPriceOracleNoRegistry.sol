@@ -8,6 +8,7 @@ import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.s
 import "../../external/compound/IPriceOracle.sol";
 import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
+import "../../compound/ErrorReporter.sol";
 import "../../compound/ComptrollerStorage.sol";
 import { ComptrollerErrorReporter } from "../../compound/ErrorReporter.sol";
 import "../../external/curve/ICurvePool.sol";

@@ -370,21 +370,21 @@ contract FusePoolLens is Initializable {
     string memory _symbol = tokenContract.symbol();
 
     // Check for Uniswap V2/SushiSwap pair
-    for (uint256 i = 0; i < uniswapData.length; i++) {
-      try IUniswapV2Pair(token).token0() returns (address _token0) {
-        UniswapData memory ud = uniswapData[i];
-        bool isUniswapToken = keccak256(abi.encodePacked(_name)) == keccak256(abi.encodePacked(ud.name)) &&
-          keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked(ud.symbol));
+    // for (uint256 i = 0; i < uniswapData.length; i++) {
+    //   try IUniswapV2Pair(token).token0() returns (address _token0) {
+    //     UniswapData memory ud = uniswapData[i];
+    //     bool isUniswapToken = keccak256(abi.encodePacked(_name)) == keccak256(abi.encodePacked(ud.name)) &&
+    //       keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked(ud.symbol));
 
-        if (isUniswapToken) {
-          ERC20Upgradeable token0 = ERC20Upgradeable(_token0);
-          ERC20Upgradeable token1 = ERC20Upgradeable(IUniswapV2Pair(token).token1());
-          _name = string(abi.encodePacked(ud.displayName, " ", token0.symbol(), "/", token1.symbol(), " LP")); // add space
-          _symbol = string(abi.encodePacked(token0.symbol(), "-", token1.symbol()));
-          return (_name, _symbol);
-        }
-      } catch {}
-    }
+    //     if (isUniswapToken) {
+    //       ERC20Upgradeable token0 = ERC20Upgradeable(_token0);
+    //       ERC20Upgradeable token1 = ERC20Upgradeable(IUniswapV2Pair(token).token1());
+    //       _name = string(abi.encodePacked(ud.displayName, " ", token0.symbol(), "/", token1.symbol(), " LP")); // add space
+    //       _symbol = string(abi.encodePacked(token0.symbol(), "-", token1.symbol()));
+    //       return (_name, _symbol);
+    //     }
+    //   } catch {}
+    // }
 
     return (_name, _symbol);
   }
