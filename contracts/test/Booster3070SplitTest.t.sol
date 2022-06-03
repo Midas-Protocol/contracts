@@ -122,9 +122,9 @@ contract Booster3070SplitTest is DSTest, BNum {
         veToken.addGauge(address(gaugeStrategy));
     }
 
-    function testMarketGauges(address alice, address bob, uint112 votingPower) public {
-        vm.assume(alice != address(0));
-        vm.assume(alice != bob);
+    function testMarketGauges(uint112 votingPower) public {
+//        vm.assume(alice != address(0));
+//        vm.assume(alice != bob);
         vm.assume(votingPower > 0);
         veToken.mint(address(this), votingPower);
 
@@ -171,13 +171,13 @@ contract Booster3070SplitTest is DSTest, BNum {
         assertEq(aliceRewardsAfter + bobRewardsAfter, rewardsForCycle, "total rewards claimed should equal the rewards for the cycle");
     }
 
-    // first set up these
-    function setUpNoMock() internal {
-        underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
-    }
-
-    // then these second
+    // first set up the token holdings
     function setUpPoolAndMarket() internal {
+        uint256 mintAmount = 1 ether;
+        underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
+        underlyingToken.mint(alice, mintAmount);
+        underlyingToken.mint(bob, mintAmount);
+
         cErc20Delegate = new CErc20Delegate();
         interestModel = new MockInterestRateModel();
         fusePoolDirectory = new FusePoolDirectory();
@@ -226,6 +226,11 @@ contract Booster3070SplitTest is DSTest, BNum {
 
         CToken[] memory allMarkets = comptroller.getAllMarkets();
         cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
+
+        vm.prank(alice);
+        underlyingToken.approve(address(cErc20), mintAmount);
+        vm.prank(bob);
+        underlyingToken.approve(address(cErc20), mintAmount);
     }
 
     function setUpStaticRewards(CErc20 _cErc20) internal {
@@ -278,7 +283,6 @@ contract Booster3070SplitTest is DSTest, BNum {
         uint256 borrowAmount = supplyAmount / 20;
 //        vm.assume(borrowAmount > supplyAmount / 20 && borrowAmount <= supplyAmount / 10);
 
-        setUpNoMock();
         setUpPoolAndMarket();
         setUpStaticRewards(cErc20);
 
@@ -287,13 +291,11 @@ contract Booster3070SplitTest is DSTest, BNum {
 
         // deposit 1 ether as alice and borrow 1000 units
         {
-            underlyingToken.mint(alice, supplyAmount);
             vm.startPrank(alice);
-            underlyingToken.approve(address(cErc20), supplyAmount);
 
             bytes4 selector = bytes4(keccak256(bytes("flywheelPreSupplierAction(address,address)")));
             vm.expectCall(address(flywheel), abi.encodeWithSelector(selector, address(cErc20), alice));
-
+            
             cErc20.mint(supplyAmount);
             cErc20.borrow(borrowAmount);
             vm.stopPrank();
@@ -312,15 +314,20 @@ contract Booster3070SplitTest is DSTest, BNum {
         emit log_uint(aliceSupplyAfter);
         assertLt(aliceSupplyBefore, aliceSupplyAfter, "alice should accrue interest on her deposit");
 
+        // TODO figure out if it is actually desired to require alice to accrue from time to time
         // accrue the rewards before bob takes part in the supplying/borrowing
         flywheel.accrue(ERC20(address(cErc20)), alice, bob);
 
         // deposit the other 50 % as bob and contribute to 90 % of the borrowed
         {
-            underlyingToken.mint(bob, supplyAmount);
             vm.startPrank(bob);
-            underlyingToken.approve(address(cErc20), supplyAmount);
+
+            bytes4 selector = bytes4(keccak256(bytes("flywheelPreSupplierAction(address,address)")));
+            // should fail at alice being not bob
+            vm.expectCall(address(flywheel), abi.encodeWithSelector(selector, address(cErc20), bob));
+
             cErc20.mint(supplyAmount);
+            cErc20.borrow(9 * borrowAmount);
             vm.stopPrank();
         }
 
@@ -339,7 +346,7 @@ contract Booster3070SplitTest is DSTest, BNum {
         uint256 aliceRewardsAfter = rewardToken.balanceOf(alice);
         uint256 bobRewardsAfter = rewardToken.balanceOf(bob);
 
-//        emit log_uint((aliceRewardsAfter * 100) / (aliceRewardsAfter + bobRewardsAfter));
+        emit log_uint((aliceRewardsAfter * 100) / (aliceRewardsAfter + bobRewardsAfter));
 
         assertTrue(
             100 * aliceRewardsAfter / (aliceRewardsAfter + bobRewardsAfter) == 64
