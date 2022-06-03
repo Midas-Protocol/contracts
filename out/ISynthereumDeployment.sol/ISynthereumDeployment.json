@@ -85,23 +85,23 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/jarvis/ISynthereumDeployment.sol",
-    "id": 34252,
+    "id": 34150,
     "exportedSymbols": {
       "IERC20Upgradeable": [
-        89909
+        92413
       ],
       "ISynthereumDeployment": [
-        34251
+        34149
       ],
       "ISynthereumFinder": [
-        34271
+        34169
       ]
     },
     "nodeType": "SourceUnit",
     "src": "42:1424:89",
     "nodes": [
       {
-        "id": 34213,
+        "id": 34111,
         "nodeType": "PragmaDirective",
         "src": "42:23:89",
         "literals": [
@@ -112,18 +112,18 @@
         ]
       },
       {
-        "id": 34215,
+        "id": 34113,
         "nodeType": "ImportDirective",
         "src": "67:115:89",
         "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 34252,
-        "sourceUnit": 89910,
+        "scope": 34150,
+        "sourceUnit": 92414,
         "symbolAliases": [
           {
             "foreign": {
-              "id": 34214,
+              "id": 34112,
               "name": "IERC20Upgradeable",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
@@ -136,28 +136,28 @@
         "unitAlias": ""
       },
       {
-        "id": 34216,
+        "id": 34114,
         "nodeType": "ImportDirective",
         "src": "183:33:89",
         "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/jarvis/ISynthereumFinder.sol",
         "file": "./ISynthereumFinder.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 34252,
-        "sourceUnit": 34272,
+        "scope": 34150,
+        "sourceUnit": 34170,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 34251,
+        "id": 34149,
         "nodeType": "ContractDefinition",
         "src": "308:1157:89",
         "nodes": [
           {
-            "id": 34224,
+            "id": 34122,
             "nodeType": "FunctionDefinition",
             "src": "471:77:89",
             "documentation": {
-              "id": 34218,
+              "id": 34116,
               "nodeType": "StructuredDocumentation",
               "src": "344:124:89",
               "text": " @notice Get Synthereum finder of the pool/self-minting derivative\n @return finder Returns finder contract"
@@ -169,44 +169,44 @@
             "name": "synthereumFinder",
             "nameLocation": "480:16:89",
             "parameters": {
-              "id": 34219,
+              "id": 34117,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "496:2:89"
             },
             "returnParameters": {
-              "id": 34223,
+              "id": 34121,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34222,
+                  "id": 34120,
                   "mutability": "mutable",
                   "name": "finder",
                   "nameLocation": "540:6:89",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34224,
+                  "scope": 34122,
                   "src": "522:24:89",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ISynthereumFinder_$34271",
+                    "typeIdentifier": "t_contract$_ISynthereumFinder_$34169",
                     "typeString": "contract ISynthereumFinder"
                   },
                   "typeName": {
-                    "id": 34221,
+                    "id": 34119,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 34220,
+                      "id": 34118,
                       "name": "ISynthereumFinder",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 34271,
+                      "referencedDeclaration": 34169,
                       "src": "522:17:89"
                     },
-                    "referencedDeclaration": 34271,
+                    "referencedDeclaration": 34169,
                     "src": "522:17:89",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ISynthereumFinder_$34271",
+                      "typeIdentifier": "t_contract$_ISynthereumFinder_$34169",
                       "typeString": "contract ISynthereumFinder"
                     }
                   },
@@ -215,17 +215,17 @@
               ],
               "src": "521:26:89"
             },
-            "scope": 34251,
+            "scope": 34149,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 34230,
+            "id": 34128,
             "nodeType": "FunctionDefinition",
             "src": "682:61:89",
             "documentation": {
-              "id": 34225,
+              "id": 34123,
               "nodeType": "StructuredDocumentation",
               "src": "552:127:89",
               "text": " @notice Get Synthereum version\n @return poolVersion Returns the version of this pool/self-minting derivative"
@@ -237,23 +237,23 @@
             "name": "version",
             "nameLocation": "691:7:89",
             "parameters": {
-              "id": 34226,
+              "id": 34124,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "698:2:89"
             },
             "returnParameters": {
-              "id": 34229,
+              "id": 34127,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34228,
+                  "id": 34126,
                   "mutability": "mutable",
                   "name": "poolVersion",
                   "nameLocation": "730:11:89",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34230,
+                  "scope": 34128,
                   "src": "724:17:89",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -262,7 +262,7 @@
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 34227,
+                    "id": 34125,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "724:5:89",
@@ -276,17 +276,17 @@
               ],
               "src": "723:19:89"
             },
-            "scope": 34251,
+            "scope": 34149,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 34237,
+            "id": 34135,
             "nodeType": "FunctionDefinition",
             "src": "893:88:89",
             "documentation": {
-              "id": 34231,
+              "id": 34129,
               "nodeType": "StructuredDocumentation",
               "src": "747:143:89",
               "text": " @notice Get the collateral token of this pool/self-minting derivative\n @return collateralCurrency The ERC20 collateral token"
@@ -298,44 +298,44 @@
             "name": "collateralToken",
             "nameLocation": "902:15:89",
             "parameters": {
-              "id": 34232,
+              "id": 34130,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "917:2:89"
             },
             "returnParameters": {
-              "id": 34236,
+              "id": 34134,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34235,
+                  "id": 34133,
                   "mutability": "mutable",
                   "name": "collateralCurrency",
                   "nameLocation": "961:18:89",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34237,
+                  "scope": 34135,
                   "src": "943:36:89",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$92413",
                     "typeString": "contract IERC20Upgradeable"
                   },
                   "typeName": {
-                    "id": 34234,
+                    "id": 34132,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 34233,
+                      "id": 34131,
                       "name": "IERC20Upgradeable",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 89909,
+                      "referencedDeclaration": 92413,
                       "src": "943:17:89"
                     },
-                    "referencedDeclaration": 89909,
+                    "referencedDeclaration": 92413,
                     "src": "943:17:89",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$92413",
                       "typeString": "contract IERC20Upgradeable"
                     }
                   },
@@ -344,17 +344,17 @@
               ],
               "src": "942:38:89"
             },
-            "scope": 34251,
+            "scope": 34149,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 34244,
+            "id": 34142,
             "nodeType": "FunctionDefinition",
             "src": "1139:86:89",
             "documentation": {
-              "id": 34238,
+              "id": 34136,
               "nodeType": "StructuredDocumentation",
               "src": "985:151:89",
               "text": " @notice Get the synthetic token associated to this pool/self-minting derivative\n @return syntheticCurrency The ERC20 synthetic token"
@@ -366,44 +366,44 @@
             "name": "syntheticToken",
             "nameLocation": "1148:14:89",
             "parameters": {
-              "id": 34239,
+              "id": 34137,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1162:2:89"
             },
             "returnParameters": {
-              "id": 34243,
+              "id": 34141,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34242,
+                  "id": 34140,
                   "mutability": "mutable",
                   "name": "syntheticCurrency",
                   "nameLocation": "1206:17:89",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34244,
+                  "scope": 34142,
                   "src": "1188:35:89",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
+                    "typeIdentifier": "t_contract$_IERC20Upgradeable_$92413",
                     "typeString": "contract IERC20Upgradeable"
                   },
                   "typeName": {
-                    "id": 34241,
+                    "id": 34139,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 34240,
+                      "id": 34138,
                       "name": "IERC20Upgradeable",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 89909,
+                      "referencedDeclaration": 92413,
                       "src": "1188:17:89"
                     },
-                    "referencedDeclaration": 89909,
+                    "referencedDeclaration": 92413,
                     "src": "1188:17:89",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$89909",
+                      "typeIdentifier": "t_contract$_IERC20Upgradeable_$92413",
                       "typeString": "contract IERC20Upgradeable"
                     }
                   },
@@ -412,17 +412,17 @@
               ],
               "src": "1187:37:89"
             },
-            "scope": 34251,
+            "scope": 34149,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 34250,
+            "id": 34148,
             "nodeType": "FunctionDefinition",
             "src": "1386:77:89",
             "documentation": {
-              "id": 34245,
+              "id": 34143,
               "nodeType": "StructuredDocumentation",
               "src": "1229:154:89",
               "text": " @notice Get the synthetic token symbol associated to this pool/self-minting derivative\n @return symbol The ERC20 synthetic token symbol"
@@ -434,23 +434,23 @@
             "name": "syntheticTokenSymbol",
             "nameLocation": "1395:20:89",
             "parameters": {
-              "id": 34246,
+              "id": 34144,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1415:2:89"
             },
             "returnParameters": {
-              "id": 34249,
+              "id": 34147,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34248,
+                  "id": 34146,
                   "mutability": "mutable",
                   "name": "symbol",
                   "nameLocation": "1455:6:89",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34250,
+                  "scope": 34148,
                   "src": "1441:20:89",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -459,7 +459,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 34247,
+                    "id": 34145,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "1441:6:89",
@@ -473,7 +473,7 @@
               ],
               "src": "1440:22:89"
             },
-            "scope": 34251,
+            "scope": 34149,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -485,18 +485,18 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 34217,
+          "id": 34115,
           "nodeType": "StructuredDocumentation",
           "src": "218:89:89",
           "text": " @title Interface that a pool MUST have in order to be included in the deployer"
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          34251
+          34149
         ],
         "name": "ISynthereumDeployment",
         "nameLocation": "318:21:89",
-        "scope": 34252,
+        "scope": 34150,
         "usedErrors": []
       }
     ],

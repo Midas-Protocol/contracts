@@ -55,23 +55,23 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/oracles/BasePriceOracle.sol",
-    "id": 41269,
+    "id": 41167,
     "exportedSymbols": {
       "BasePriceOracle": [
-        41268
+        41166
       ],
       "ICToken": [
-        33600
+        33498
       ],
       "IPriceOracle": [
-        33790
+        33688
       ]
     },
     "nodeType": "SourceUnit",
     "src": "39:709:159",
     "nodes": [
       {
-        "id": 41255,
+        "id": 41153,
         "nodeType": "PragmaDirective",
         "src": "39:24:159",
         "literals": [
@@ -82,28 +82,28 @@
         ]
       },
       {
-        "id": 41256,
+        "id": 41154,
         "nodeType": "ImportDirective",
         "src": "65:47:159",
         "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/IPriceOracle.sol",
         "file": "../external/compound/IPriceOracle.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 41269,
-        "sourceUnit": 33791,
+        "scope": 41167,
+        "sourceUnit": 33689,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 41268,
+        "id": 41166,
         "nodeType": "ContractDefinition",
         "src": "383:364:159",
         "nodes": [
           {
-            "id": 41267,
+            "id": 41165,
             "nodeType": "FunctionDefinition",
             "src": "678:67:159",
             "documentation": {
-              "id": 41260,
+              "id": 41158,
               "nodeType": "StructuredDocumentation",
               "src": "429:246:159",
               "text": " @notice Get the price of an underlying asset.\n @param underlying The underlying asset to get the price of.\n @return The underlying asset price in ETH as a mantissa (scaled by 1e18).\n Zero means the price is unavailable."
@@ -115,17 +115,17 @@
             "name": "price",
             "nameLocation": "687:5:159",
             "parameters": {
-              "id": 41263,
+              "id": 41161,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 41262,
+                  "id": 41160,
                   "mutability": "mutable",
                   "name": "underlying",
                   "nameLocation": "701:10:159",
                   "nodeType": "VariableDeclaration",
-                  "scope": 41267,
+                  "scope": 41165,
                   "src": "693:18:159",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -134,7 +134,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 41261,
+                    "id": 41159,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "693:7:159",
@@ -150,17 +150,17 @@
               "src": "692:20:159"
             },
             "returnParameters": {
-              "id": 41266,
+              "id": 41164,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 41265,
+                  "id": 41163,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 41267,
+                  "scope": 41165,
                   "src": "736:7:159",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -169,7 +169,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 41264,
+                    "id": 41162,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "736:7:159",
@@ -183,7 +183,7 @@
               ],
               "src": "735:9:159"
             },
-            "scope": 41268,
+            "scope": 41166,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -193,13 +193,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 41258,
+              "id": 41156,
               "name": "IPriceOracle",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 33790,
+              "referencedDeclaration": 33688,
               "src": "412:12:159"
             },
-            "id": 41259,
+            "id": 41157,
             "nodeType": "InheritanceSpecifier",
             "src": "412:12:159"
           }
@@ -208,19 +208,19 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 41257,
+          "id": 41155,
           "nodeType": "StructuredDocumentation",
           "src": "114:268:159",
           "text": " @title BasePriceOracle\n @notice Returns prices of underlying tokens directly without the caller having to specify a cToken address.\n @dev Implements the `PriceOracle` interface.\n @author David Lucid <david@rari.capital> (https://github.com/davidlucid)"
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          41268,
-          33790
+          41166,
+          33688
         ],
         "name": "BasePriceOracle",
         "nameLocation": "393:15:159",
-        "scope": 41269,
+        "scope": 41167,
         "usedErrors": []
       }
     ],

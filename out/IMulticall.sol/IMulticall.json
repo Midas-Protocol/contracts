@@ -35,19 +35,19 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/utils/IMulticall.sol",
-    "id": 66010,
+    "id": 68514,
     "exportedSymbols": {
       "IMulticall": [
-        66009
+        68513
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "45:630:233",
+    "src": "45:630:234",
     "nodes": [
       {
-        "id": 65997,
+        "id": 68501,
         "nodeType": "PragmaDirective",
-        "src": "45:24:233",
+        "src": "45:24:234",
         "literals": [
           "solidity",
           ">=",
@@ -56,18 +56,18 @@
         ]
       },
       {
-        "id": 66009,
+        "id": 68513,
         "nodeType": "ContractDefinition",
-        "src": "180:494:233",
+        "src": "180:494:234",
         "nodes": [
           {
-            "id": 66008,
+            "id": 68512,
             "nodeType": "FunctionDefinition",
-            "src": "580:92:233",
+            "src": "580:92:234",
             "documentation": {
-              "id": 65999,
+              "id": 68503,
               "nodeType": "StructuredDocumentation",
-              "src": "205:372:233",
+              "src": "205:372:234",
               "text": "@notice Call multiple functions in the current contract and return the data from all of them if they all succeed\n @dev The `msg.value` should not be trusted for any method callable from multicall.\n @param data The encoded function data for each of the calls to make to this contract\n @return results The results from each of the calls passed in via data"
             },
             "functionSelector": "ac9650d8",
@@ -75,20 +75,20 @@
             "kind": "function",
             "modifiers": [],
             "name": "multicall",
-            "nameLocation": "589:9:233",
+            "nameLocation": "589:9:234",
             "parameters": {
-              "id": 66003,
+              "id": 68507,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 66002,
+                  "id": 68506,
                   "mutability": "mutable",
                   "name": "data",
-                  "nameLocation": "616:4:233",
+                  "nameLocation": "616:4:234",
                   "nodeType": "VariableDeclaration",
-                  "scope": 66008,
-                  "src": "599:21:233",
+                  "scope": 68512,
+                  "src": "599:21:234",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
@@ -97,18 +97,18 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 66000,
+                      "id": 68504,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "599:5:233",
+                      "src": "599:5:234",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 66001,
+                    "id": 68505,
                     "nodeType": "ArrayTypeName",
-                    "src": "599:7:233",
+                    "src": "599:7:234",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -117,21 +117,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "598:23:233"
+              "src": "598:23:234"
             },
             "returnParameters": {
-              "id": 66007,
+              "id": 68511,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 66006,
+                  "id": 68510,
                   "mutability": "mutable",
                   "name": "results",
-                  "nameLocation": "663:7:233",
+                  "nameLocation": "663:7:234",
                   "nodeType": "VariableDeclaration",
-                  "scope": 66008,
-                  "src": "648:22:233",
+                  "scope": 68512,
+                  "src": "648:22:234",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -140,18 +140,18 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 66004,
+                      "id": 68508,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "648:5:233",
+                      "src": "648:5:234",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 66005,
+                    "id": 68509,
                     "nodeType": "ArrayTypeName",
-                    "src": "648:7:233",
+                    "src": "648:7:234",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -160,9 +160,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "647:24:233"
+              "src": "647:24:234"
             },
-            "scope": 66009,
+            "scope": 68513,
             "stateMutability": "payable",
             "virtual": false,
             "visibility": "external"
@@ -174,22 +174,22 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 65998,
+          "id": 68502,
           "nodeType": "StructuredDocumentation",
-          "src": "71:109:233",
+          "src": "71:109:234",
           "text": "@title Multicall interface\n @notice Enables calling multiple methods in a single call to the contract"
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          66009
+          68513
         ],
         "name": "IMulticall",
-        "nameLocation": "190:10:233",
-        "scope": 66010,
+        "nameLocation": "190:10:234",
+        "scope": 68514,
         "usedErrors": []
       }
     ],
     "license": "GPL-2.0-or-later"
   },
-  "id": 233
+  "id": 234
 }

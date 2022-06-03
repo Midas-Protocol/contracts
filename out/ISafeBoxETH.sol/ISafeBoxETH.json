@@ -240,20 +240,20 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/alpha/ISafeBoxETH.sol",
-    "id": 32127,
+    "id": 32025,
     "exportedSymbols": {
       "IERC20Upgradeable": [
-        89909
+        92413
       ],
       "ISafeBoxETH": [
-        32126
+        32024
       ]
     },
     "nodeType": "SourceUnit",
     "src": "32:303:58",
     "nodes": [
       {
-        "id": 32109,
+        "id": 32007,
         "nodeType": "PragmaDirective",
         "src": "32:24:58",
         "literals": [
@@ -264,24 +264,24 @@
         ]
       },
       {
-        "id": 32110,
+        "id": 32008,
         "nodeType": "ImportDirective",
         "src": "58:88:58",
         "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 32127,
-        "sourceUnit": 89910,
+        "scope": 32025,
+        "sourceUnit": 92414,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 32126,
+        "id": 32024,
         "nodeType": "ContractDefinition",
         "src": "148:186:58",
         "nodes": [
           {
-            "id": 32117,
+            "id": 32015,
             "nodeType": "FunctionDefinition",
             "src": "195:50:58",
             "functionSelector": "69e527da",
@@ -291,23 +291,23 @@
             "name": "cToken",
             "nameLocation": "204:6:58",
             "parameters": {
-              "id": 32113,
+              "id": 32011,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "210:2:58"
             },
             "returnParameters": {
-              "id": 32116,
+              "id": 32014,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 32115,
+                  "id": 32013,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 32117,
+                  "scope": 32015,
                   "src": "236:7:58",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -316,7 +316,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 32114,
+                    "id": 32012,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "236:7:58",
@@ -331,13 +331,13 @@
               ],
               "src": "235:9:58"
             },
-            "scope": 32126,
+            "scope": 32024,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 32120,
+            "id": 32018,
             "nodeType": "FunctionDefinition",
             "src": "249:36:58",
             "functionSelector": "d0e30db0",
@@ -347,24 +347,24 @@
             "name": "deposit",
             "nameLocation": "258:7:58",
             "parameters": {
-              "id": 32118,
+              "id": 32016,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "265:2:58"
             },
             "returnParameters": {
-              "id": 32119,
+              "id": 32017,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "284:0:58"
             },
-            "scope": 32126,
+            "scope": 32024,
             "stateMutability": "payable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 32125,
+            "id": 32023,
             "nodeType": "FunctionDefinition",
             "src": "289:43:58",
             "functionSelector": "2e1a7d4d",
@@ -374,17 +374,17 @@
             "name": "withdraw",
             "nameLocation": "298:8:58",
             "parameters": {
-              "id": 32123,
+              "id": 32021,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 32122,
+                  "id": 32020,
                   "mutability": "mutable",
                   "name": "amount",
                   "nameLocation": "315:6:58",
                   "nodeType": "VariableDeclaration",
-                  "scope": 32125,
+                  "scope": 32023,
                   "src": "307:14:58",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -393,7 +393,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 32121,
+                    "id": 32019,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "307:7:58",
@@ -408,12 +408,12 @@
               "src": "306:16:58"
             },
             "returnParameters": {
-              "id": 32124,
+              "id": 32022,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "331:0:58"
             },
-            "scope": 32126,
+            "scope": 32024,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -423,13 +423,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 32111,
+              "id": 32009,
               "name": "IERC20Upgradeable",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 89909,
+              "referencedDeclaration": 92413,
               "src": "173:17:58"
             },
-            "id": 32112,
+            "id": 32010,
             "nodeType": "InheritanceSpecifier",
             "src": "173:17:58"
           }
@@ -439,12 +439,12 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          32126,
-          89909
+          32024,
+          92413
         ],
         "name": "ISafeBoxETH",
         "nameLocation": "158:11:58",
-        "scope": 32127,
+        "scope": 32025,
         "usedErrors": []
       }
     ],

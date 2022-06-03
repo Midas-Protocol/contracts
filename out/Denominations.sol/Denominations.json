@@ -268,7 +268,7 @@
   },
   "deployedBytecode": {
     "object": "0x73000000000000000000000000000000000000000030146080604052600436106101365760003560e01c806356ef4514116100b7578063a4a235951161007b578063a4a2359514610200578063ca9d1a7214610208578063e774928e14610211578063f37fcc421461021a578063fd760c491461022357600080fd5b806356ef4514146101c15780636b09583c146101ca5780638322fff2146101d3578063976d5e77146101ee5780639db2a472146101f757600080fd5b80632792949d116100fe5780632792949d14610182578063294a2bf21461019d5780632e79477f146101a6578063465bd0a3146101af57806353f7c367146101b857600080fd5b806301b8b3391461013b57806303d698f2146101605780630c0128341461016957806319342a64146101715780631bf6c21b14610179575b600080fd5b61014461033a81565b6040516001600160a01b03909116815260200160405180910390f35b61014461023681565b610144602081565b610144607c81565b61014461034881565b61014473bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb81565b6101446103d281565b6101446102be81565b61014461018881565b61014461026081565b61014461019a81565b6101446103da81565b61014473eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee81565b61014461028381565b6101446102c681565b610144609c81565b61014461022a81565b61014461016481565b6101446102f481565b61014460248156fea164736f6c634300080a000a",
-    "sourceMap": "58:1071:70:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;350:42;;388:3;350:42;;;;;-1:-1:-1;;;;;186:32:279;;;168:51;;156:2;141:18;350:42:70;;;;;;;900;;938:3;900:42;;717:41;;755:2;717:41;;625:42;;663:3;625:42;;304;;342:3;304:42;;160:72;;190:42;160:72;;396:42;;434:3;396:42;;854;;892:3;854:42;;442;;480:3;442:42;;762;;800:3;762:42;;488;;526:3;488:42;;1084;;1122:3;1084:42;;84:72;;114:42;84:72;;992:42;;1030:3;992:42;;946;;984:3;946:42;;534;;572:3;534:42;;808;;846:3;808:42;;1038;;1076:3;1038:42;;671;;709:3;671:42;;580:41;;618:2;580:41;",
+    "sourceMap": "58:1071:70:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;350:42;;388:3;350:42;;;;;-1:-1:-1;;;;;186:32:280;;;168:51;;156:2;141:18;350:42:70;;;;;;;900;;938:3;900:42;;717:41;;755:2;717:41;;625:42;;663:3;625:42;;304;;342:3;304:42;;160:72;;190:42;160:72;;396:42;;434:3;396:42;;854;;892:3;854:42;;442;;480:3;442:42;;762;;800:3;762:42;;488;;526:3;488:42;;1084;;1122:3;1084:42;;84:72;;114:42;84:72;;992:42;;1030:3;992:42;;946;;984:3;946:42;;534;;572:3;534:42;;808;;846:3;808:42;;1038;;1076:3;1038:42;;671;;709:3;671:42;;580:41;;618:2;580:41;",
     "linkReferences": {}
   },
   "methodIdentifiers": {
@@ -295,17 +295,17 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/chainlink/Denominations.sol",
-    "id": 33118,
+    "id": 33016,
     "exportedSymbols": {
       "Denominations": [
-        33117
+        33015
       ]
     },
     "nodeType": "SourceUnit",
     "src": "32:1098:70",
     "nodes": [
       {
-        "id": 33002,
+        "id": 32900,
         "nodeType": "PragmaDirective",
         "src": "32:24:70",
         "literals": [
@@ -316,12 +316,12 @@
         ]
       },
       {
-        "id": 33117,
+        "id": 33015,
         "nodeType": "ContractDefinition",
         "src": "58:1071:70",
         "nodes": [
           {
-            "id": 33005,
+            "id": 32903,
             "nodeType": "VariableDeclaration",
             "src": "84:72:70",
             "constant": true,
@@ -329,7 +329,7 @@
             "mutability": "constant",
             "name": "ETH",
             "nameLocation": "108:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -337,7 +337,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33003,
+              "id": 32901,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "84:7:70",
@@ -349,7 +349,7 @@
             },
             "value": {
               "hexValue": "307845656565654565656545654565654565456545656545454565656565456565656565656545456545",
-              "id": 33004,
+              "id": 32902,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -366,7 +366,7 @@
             "visibility": "public"
           },
           {
-            "id": 33008,
+            "id": 32906,
             "nodeType": "VariableDeclaration",
             "src": "160:72:70",
             "constant": true,
@@ -374,7 +374,7 @@
             "mutability": "constant",
             "name": "BTC",
             "nameLocation": "184:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -382,7 +382,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33006,
+              "id": 32904,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "160:7:70",
@@ -394,7 +394,7 @@
             },
             "value": {
               "hexValue": "307862426242424242626242424262626242626242626262624242624262626262426242626242426242",
-              "id": 33007,
+              "id": 32905,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -411,7 +411,7 @@
             "visibility": "public"
           },
           {
-            "id": 33014,
+            "id": 32912,
             "nodeType": "VariableDeclaration",
             "src": "304:42:70",
             "constant": true,
@@ -419,7 +419,7 @@
             "mutability": "constant",
             "name": "USD",
             "nameLocation": "328:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -427,7 +427,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33009,
+              "id": 32907,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "304:7:70",
@@ -441,7 +441,7 @@
               "arguments": [
                 {
                   "hexValue": "383430",
-                  "id": 33012,
+                  "id": 32910,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -463,7 +463,7 @@
                     "typeString": "int_const 840"
                   }
                 ],
-                "id": 33011,
+                "id": 32909,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -475,14 +475,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33010,
+                  "id": 32908,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "334:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33013,
+              "id": 32911,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -500,7 +500,7 @@
             "visibility": "public"
           },
           {
-            "id": 33020,
+            "id": 32918,
             "nodeType": "VariableDeclaration",
             "src": "350:42:70",
             "constant": true,
@@ -508,7 +508,7 @@
             "mutability": "constant",
             "name": "GBP",
             "nameLocation": "374:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -516,7 +516,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33015,
+              "id": 32913,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "350:7:70",
@@ -530,7 +530,7 @@
               "arguments": [
                 {
                   "hexValue": "383236",
-                  "id": 33018,
+                  "id": 32916,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -552,7 +552,7 @@
                     "typeString": "int_const 826"
                   }
                 ],
-                "id": 33017,
+                "id": 32915,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -564,14 +564,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33016,
+                  "id": 32914,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "380:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33019,
+              "id": 32917,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -589,7 +589,7 @@
             "visibility": "public"
           },
           {
-            "id": 33026,
+            "id": 32924,
             "nodeType": "VariableDeclaration",
             "src": "396:42:70",
             "constant": true,
@@ -597,7 +597,7 @@
             "mutability": "constant",
             "name": "EUR",
             "nameLocation": "420:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -605,7 +605,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33021,
+              "id": 32919,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "396:7:70",
@@ -619,7 +619,7 @@
               "arguments": [
                 {
                   "hexValue": "393738",
-                  "id": 33024,
+                  "id": 32922,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -641,7 +641,7 @@
                     "typeString": "int_const 978"
                   }
                 ],
-                "id": 33023,
+                "id": 32921,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -653,14 +653,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33022,
+                  "id": 32920,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "426:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33025,
+              "id": 32923,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -678,7 +678,7 @@
             "visibility": "public"
           },
           {
-            "id": 33032,
+            "id": 32930,
             "nodeType": "VariableDeclaration",
             "src": "442:42:70",
             "constant": true,
@@ -686,7 +686,7 @@
             "mutability": "constant",
             "name": "JPY",
             "nameLocation": "466:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -694,7 +694,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33027,
+              "id": 32925,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "442:7:70",
@@ -708,7 +708,7 @@
               "arguments": [
                 {
                   "hexValue": "333932",
-                  "id": 33030,
+                  "id": 32928,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -730,7 +730,7 @@
                     "typeString": "int_const 392"
                   }
                 ],
-                "id": 33029,
+                "id": 32927,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -742,14 +742,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33028,
+                  "id": 32926,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "472:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33031,
+              "id": 32929,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -767,7 +767,7 @@
             "visibility": "public"
           },
           {
-            "id": 33038,
+            "id": 32936,
             "nodeType": "VariableDeclaration",
             "src": "488:42:70",
             "constant": true,
@@ -775,7 +775,7 @@
             "mutability": "constant",
             "name": "KRW",
             "nameLocation": "512:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -783,7 +783,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33033,
+              "id": 32931,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "488:7:70",
@@ -797,7 +797,7 @@
               "arguments": [
                 {
                   "hexValue": "343130",
-                  "id": 33036,
+                  "id": 32934,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -819,7 +819,7 @@
                     "typeString": "int_const 410"
                   }
                 ],
-                "id": 33035,
+                "id": 32933,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -831,14 +831,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33034,
+                  "id": 32932,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "518:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33037,
+              "id": 32935,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -856,7 +856,7 @@
             "visibility": "public"
           },
           {
-            "id": 33044,
+            "id": 32942,
             "nodeType": "VariableDeclaration",
             "src": "534:42:70",
             "constant": true,
@@ -864,7 +864,7 @@
             "mutability": "constant",
             "name": "CNY",
             "nameLocation": "558:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -872,7 +872,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33039,
+              "id": 32937,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "534:7:70",
@@ -886,7 +886,7 @@
               "arguments": [
                 {
                   "hexValue": "313536",
-                  "id": 33042,
+                  "id": 32940,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -908,7 +908,7 @@
                     "typeString": "int_const 156"
                   }
                 ],
-                "id": 33041,
+                "id": 32939,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -920,14 +920,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33040,
+                  "id": 32938,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "564:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33043,
+              "id": 32941,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -945,7 +945,7 @@
             "visibility": "public"
           },
           {
-            "id": 33050,
+            "id": 32948,
             "nodeType": "VariableDeclaration",
             "src": "580:41:70",
             "constant": true,
@@ -953,7 +953,7 @@
             "mutability": "constant",
             "name": "AUD",
             "nameLocation": "604:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -961,7 +961,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33045,
+              "id": 32943,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "580:7:70",
@@ -975,7 +975,7 @@
               "arguments": [
                 {
                   "hexValue": "3336",
-                  "id": 33048,
+                  "id": 32946,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -997,7 +997,7 @@
                     "typeString": "int_const 36"
                   }
                 ],
-                "id": 33047,
+                "id": 32945,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -1009,14 +1009,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33046,
+                  "id": 32944,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "610:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33049,
+              "id": 32947,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1034,7 +1034,7 @@
             "visibility": "public"
           },
           {
-            "id": 33056,
+            "id": 32954,
             "nodeType": "VariableDeclaration",
             "src": "625:42:70",
             "constant": true,
@@ -1042,7 +1042,7 @@
             "mutability": "constant",
             "name": "CAD",
             "nameLocation": "649:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1050,7 +1050,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33051,
+              "id": 32949,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "625:7:70",
@@ -1064,7 +1064,7 @@
               "arguments": [
                 {
                   "hexValue": "313234",
-                  "id": 33054,
+                  "id": 32952,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -1086,7 +1086,7 @@
                     "typeString": "int_const 124"
                   }
                 ],
-                "id": 33053,
+                "id": 32951,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -1098,14 +1098,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33052,
+                  "id": 32950,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "655:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33055,
+              "id": 32953,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1123,7 +1123,7 @@
             "visibility": "public"
           },
           {
-            "id": 33062,
+            "id": 32960,
             "nodeType": "VariableDeclaration",
             "src": "671:42:70",
             "constant": true,
@@ -1131,7 +1131,7 @@
             "mutability": "constant",
             "name": "CHF",
             "nameLocation": "695:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1139,7 +1139,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33057,
+              "id": 32955,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "671:7:70",
@@ -1153,7 +1153,7 @@
               "arguments": [
                 {
                   "hexValue": "373536",
-                  "id": 33060,
+                  "id": 32958,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -1175,7 +1175,7 @@
                     "typeString": "int_const 756"
                   }
                 ],
-                "id": 33059,
+                "id": 32957,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -1187,14 +1187,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33058,
+                  "id": 32956,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "701:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33061,
+              "id": 32959,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1212,7 +1212,7 @@
             "visibility": "public"
           },
           {
-            "id": 33068,
+            "id": 32966,
             "nodeType": "VariableDeclaration",
             "src": "717:41:70",
             "constant": true,
@@ -1220,7 +1220,7 @@
             "mutability": "constant",
             "name": "ARS",
             "nameLocation": "741:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1228,7 +1228,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33063,
+              "id": 32961,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "717:7:70",
@@ -1242,7 +1242,7 @@
               "arguments": [
                 {
                   "hexValue": "3332",
-                  "id": 33066,
+                  "id": 32964,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -1264,7 +1264,7 @@
                     "typeString": "int_const 32"
                   }
                 ],
-                "id": 33065,
+                "id": 32963,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -1276,14 +1276,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33064,
+                  "id": 32962,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "747:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33067,
+              "id": 32965,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1301,7 +1301,7 @@
             "visibility": "public"
           },
           {
-            "id": 33074,
+            "id": 32972,
             "nodeType": "VariableDeclaration",
             "src": "762:42:70",
             "constant": true,
@@ -1309,7 +1309,7 @@
             "mutability": "constant",
             "name": "PHP",
             "nameLocation": "786:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1317,7 +1317,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33069,
+              "id": 32967,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "762:7:70",
@@ -1331,7 +1331,7 @@
               "arguments": [
                 {
                   "hexValue": "363038",
-                  "id": 33072,
+                  "id": 32970,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -1353,7 +1353,7 @@
                     "typeString": "int_const 608"
                   }
                 ],
-                "id": 33071,
+                "id": 32969,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -1365,14 +1365,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33070,
+                  "id": 32968,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "792:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33073,
+              "id": 32971,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1390,7 +1390,7 @@
             "visibility": "public"
           },
           {
-            "id": 33080,
+            "id": 32978,
             "nodeType": "VariableDeclaration",
             "src": "808:42:70",
             "constant": true,
@@ -1398,7 +1398,7 @@
             "mutability": "constant",
             "name": "NZD",
             "nameLocation": "832:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1406,7 +1406,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33075,
+              "id": 32973,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "808:7:70",
@@ -1420,7 +1420,7 @@
               "arguments": [
                 {
                   "hexValue": "353534",
-                  "id": 33078,
+                  "id": 32976,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -1442,7 +1442,7 @@
                     "typeString": "int_const 554"
                   }
                 ],
-                "id": 33077,
+                "id": 32975,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -1454,14 +1454,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33076,
+                  "id": 32974,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "838:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33079,
+              "id": 32977,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1479,7 +1479,7 @@
             "visibility": "public"
           },
           {
-            "id": 33086,
+            "id": 32984,
             "nodeType": "VariableDeclaration",
             "src": "854:42:70",
             "constant": true,
@@ -1487,7 +1487,7 @@
             "mutability": "constant",
             "name": "SGD",
             "nameLocation": "878:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1495,7 +1495,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33081,
+              "id": 32979,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "854:7:70",
@@ -1509,7 +1509,7 @@
               "arguments": [
                 {
                   "hexValue": "373032",
-                  "id": 33084,
+                  "id": 32982,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -1531,7 +1531,7 @@
                     "typeString": "int_const 702"
                   }
                 ],
-                "id": 33083,
+                "id": 32981,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -1543,14 +1543,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33082,
+                  "id": 32980,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "884:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33085,
+              "id": 32983,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1568,7 +1568,7 @@
             "visibility": "public"
           },
           {
-            "id": 33092,
+            "id": 32990,
             "nodeType": "VariableDeclaration",
             "src": "900:42:70",
             "constant": true,
@@ -1576,7 +1576,7 @@
             "mutability": "constant",
             "name": "NGN",
             "nameLocation": "924:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1584,7 +1584,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33087,
+              "id": 32985,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "900:7:70",
@@ -1598,7 +1598,7 @@
               "arguments": [
                 {
                   "hexValue": "353636",
-                  "id": 33090,
+                  "id": 32988,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -1620,7 +1620,7 @@
                     "typeString": "int_const 566"
                   }
                 ],
-                "id": 33089,
+                "id": 32987,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -1632,14 +1632,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33088,
+                  "id": 32986,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "930:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33091,
+              "id": 32989,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1657,7 +1657,7 @@
             "visibility": "public"
           },
           {
-            "id": 33098,
+            "id": 32996,
             "nodeType": "VariableDeclaration",
             "src": "946:42:70",
             "constant": true,
@@ -1665,7 +1665,7 @@
             "mutability": "constant",
             "name": "ZAR",
             "nameLocation": "970:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1673,7 +1673,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33093,
+              "id": 32991,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "946:7:70",
@@ -1687,7 +1687,7 @@
               "arguments": [
                 {
                   "hexValue": "373130",
-                  "id": 33096,
+                  "id": 32994,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -1709,7 +1709,7 @@
                     "typeString": "int_const 710"
                   }
                 ],
-                "id": 33095,
+                "id": 32993,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -1721,14 +1721,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33094,
+                  "id": 32992,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "976:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33097,
+              "id": 32995,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1746,7 +1746,7 @@
             "visibility": "public"
           },
           {
-            "id": 33104,
+            "id": 33002,
             "nodeType": "VariableDeclaration",
             "src": "992:42:70",
             "constant": true,
@@ -1754,7 +1754,7 @@
             "mutability": "constant",
             "name": "RUB",
             "nameLocation": "1016:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1762,7 +1762,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33099,
+              "id": 32997,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "992:7:70",
@@ -1776,7 +1776,7 @@
               "arguments": [
                 {
                   "hexValue": "363433",
-                  "id": 33102,
+                  "id": 33000,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -1798,7 +1798,7 @@
                     "typeString": "int_const 643"
                   }
                 ],
-                "id": 33101,
+                "id": 32999,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -1810,14 +1810,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33100,
+                  "id": 32998,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1022:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33103,
+              "id": 33001,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1835,7 +1835,7 @@
             "visibility": "public"
           },
           {
-            "id": 33110,
+            "id": 33008,
             "nodeType": "VariableDeclaration",
             "src": "1038:42:70",
             "constant": true,
@@ -1843,7 +1843,7 @@
             "mutability": "constant",
             "name": "INR",
             "nameLocation": "1062:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1851,7 +1851,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33105,
+              "id": 33003,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "1038:7:70",
@@ -1865,7 +1865,7 @@
               "arguments": [
                 {
                   "hexValue": "333536",
-                  "id": 33108,
+                  "id": 33006,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -1887,7 +1887,7 @@
                     "typeString": "int_const 356"
                   }
                 ],
-                "id": 33107,
+                "id": 33005,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -1899,14 +1899,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33106,
+                  "id": 33004,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1068:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33109,
+              "id": 33007,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1924,7 +1924,7 @@
             "visibility": "public"
           },
           {
-            "id": 33116,
+            "id": 33014,
             "nodeType": "VariableDeclaration",
             "src": "1084:42:70",
             "constant": true,
@@ -1932,7 +1932,7 @@
             "mutability": "constant",
             "name": "BRL",
             "nameLocation": "1108:3:70",
-            "scope": 33117,
+            "scope": 33015,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1940,7 +1940,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 33111,
+              "id": 33009,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "1084:7:70",
@@ -1954,7 +1954,7 @@
               "arguments": [
                 {
                   "hexValue": "393836",
-                  "id": 33114,
+                  "id": 33012,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -1976,7 +1976,7 @@
                     "typeString": "int_const 986"
                   }
                 ],
-                "id": 33113,
+                "id": 33011,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -1988,14 +1988,14 @@
                   "typeString": "type(address)"
                 },
                 "typeName": {
-                  "id": 33112,
+                  "id": 33010,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1114:7:70",
                   "typeDescriptions": {}
                 }
               },
-              "id": 33115,
+              "id": 33013,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -2020,11 +2020,11 @@
         "contractKind": "library",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          33117
+          33015
         ],
         "name": "Denominations",
         "nameLocation": "66:13:70",
-        "scope": 33118,
+        "scope": 33016,
         "usedErrors": []
       }
     ],

@@ -35,20 +35,20 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/IPriceOracle.sol",
-    "id": 33791,
+    "id": 33689,
     "exportedSymbols": {
       "ICToken": [
-        33600
+        33498
       ],
       "IPriceOracle": [
-        33790
+        33688
       ]
     },
     "nodeType": "SourceUnit",
     "src": "41:396:76",
     "nodes": [
       {
-        "id": 33779,
+        "id": 33677,
         "nodeType": "PragmaDirective",
         "src": "41:24:76",
         "literals": [
@@ -59,28 +59,28 @@
         ]
       },
       {
-        "id": 33780,
+        "id": 33678,
         "nodeType": "ImportDirective",
         "src": "67:23:76",
         "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/ICToken.sol",
         "file": "./ICToken.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 33791,
-        "sourceUnit": 33601,
+        "scope": 33689,
+        "sourceUnit": 33499,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 33790,
+        "id": 33688,
         "nodeType": "ContractDefinition",
         "src": "92:344:76",
         "nodes": [
           {
-            "id": 33789,
+            "id": 33687,
             "nodeType": "FunctionDefinition",
             "src": "358:76:76",
             "documentation": {
-              "id": 33781,
+              "id": 33679,
               "nodeType": "StructuredDocumentation",
               "src": "119:236:76",
               "text": " @notice Get the underlying price of a cToken asset\n @param cToken The cToken to get the underlying price of\n @return The underlying asset price mantissa (scaled by 1e18).\n  Zero means the price is unavailable."
@@ -92,38 +92,38 @@
             "name": "getUnderlyingPrice",
             "nameLocation": "367:18:76",
             "parameters": {
-              "id": 33785,
+              "id": 33683,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33784,
+                  "id": 33682,
                   "mutability": "mutable",
                   "name": "cToken",
                   "nameLocation": "394:6:76",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33789,
+                  "scope": 33687,
                   "src": "386:14:76",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_ICToken_$33600",
+                    "typeIdentifier": "t_contract$_ICToken_$33498",
                     "typeString": "contract ICToken"
                   },
                   "typeName": {
-                    "id": 33783,
+                    "id": 33681,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 33782,
+                      "id": 33680,
                       "name": "ICToken",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 33600,
+                      "referencedDeclaration": 33498,
                       "src": "386:7:76"
                     },
-                    "referencedDeclaration": 33600,
+                    "referencedDeclaration": 33498,
                     "src": "386:7:76",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_ICToken_$33600",
+                      "typeIdentifier": "t_contract$_ICToken_$33498",
                       "typeString": "contract ICToken"
                     }
                   },
@@ -133,17 +133,17 @@
               "src": "385:16:76"
             },
             "returnParameters": {
-              "id": 33788,
+              "id": 33686,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33787,
+                  "id": 33685,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33789,
+                  "scope": 33687,
                   "src": "425:7:76",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -152,7 +152,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 33786,
+                    "id": 33684,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "425:7:76",
@@ -166,7 +166,7 @@
               ],
               "src": "424:9:76"
             },
-            "scope": 33790,
+            "scope": 33688,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -179,11 +179,11 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          33790
+          33688
         ],
         "name": "IPriceOracle",
         "nameLocation": "102:12:76",
-        "scope": 33791,
+        "scope": 33689,
         "usedErrors": []
       }
     ],

@@ -48,17 +48,17 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/olympus/OlympusStaking.sol",
-    "id": 34892,
+    "id": 34790,
     "exportedSymbols": {
       "OlympusStaking": [
-        34891
+        34789
       ]
     },
     "nodeType": "SourceUnit",
     "src": "42:155:100",
     "nodes": [
       {
-        "id": 34881,
+        "id": 34779,
         "nodeType": "PragmaDirective",
         "src": "42:24:100",
         "literals": [
@@ -69,12 +69,12 @@
         ]
       },
       {
-        "id": 34891,
+        "id": 34789,
         "nodeType": "ContractDefinition",
         "src": "68:128:100",
         "nodes": [
           {
-            "id": 34883,
+            "id": 34781,
             "nodeType": "VariableDeclaration",
             "src": "105:18:100",
             "constant": false,
@@ -82,7 +82,7 @@
             "mutability": "mutable",
             "name": "OHM",
             "nameLocation": "120:3:100",
-            "scope": 34891,
+            "scope": 34789,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -90,7 +90,7 @@
               "typeString": "address"
             },
             "typeName": {
-              "id": 34882,
+              "id": 34780,
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "105:7:100",
@@ -103,7 +103,7 @@
             "visibility": "public"
           },
           {
-            "id": 34890,
+            "id": 34788,
             "nodeType": "FunctionDefinition",
             "src": "128:66:100",
             "functionSelector": "9ebea88c",
@@ -113,17 +113,17 @@
             "name": "unstake",
             "nameLocation": "137:7:100",
             "parameters": {
-              "id": 34888,
+              "id": 34786,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 34885,
+                  "id": 34783,
                   "mutability": "mutable",
                   "name": "_amount",
                   "nameLocation": "153:7:100",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34890,
+                  "scope": 34788,
                   "src": "145:15:100",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -132,7 +132,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 34884,
+                    "id": 34782,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "145:7:100",
@@ -145,12 +145,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 34887,
+                  "id": 34785,
                   "mutability": "mutable",
                   "name": "_trigger",
                   "nameLocation": "167:8:100",
                   "nodeType": "VariableDeclaration",
-                  "scope": 34890,
+                  "scope": 34788,
                   "src": "162:13:100",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -159,7 +159,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 34886,
+                    "id": 34784,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "162:4:100",
@@ -174,12 +174,12 @@
               "src": "144:32:100"
             },
             "returnParameters": {
-              "id": 34889,
+              "id": 34787,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "193:0:100"
             },
-            "scope": 34891,
+            "scope": 34789,
             "stateMutability": "nonpayable",
             "virtual": true,
             "visibility": "external"
@@ -192,11 +192,11 @@
         "contractKind": "contract",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          34891
+          34789
         ],
         "name": "OlympusStaking",
         "nameLocation": "86:14:100",
-        "scope": 34892,
+        "scope": 34790,
         "usedErrors": []
       }
     ],

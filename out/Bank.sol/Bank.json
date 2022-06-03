@@ -240,20 +240,20 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/alpha/Bank.sol",
-    "id": 32082,
+    "id": 31980,
     "exportedSymbols": {
       "Bank": [
-        32081
+        31979
       ],
       "IERC20Upgradeable": [
-        89909
+        92413
       ]
     },
     "nodeType": "SourceUnit",
     "src": "32:530:56",
     "nodes": [
       {
-        "id": 32061,
+        "id": 31959,
         "nodeType": "PragmaDirective",
         "src": "32:24:56",
         "literals": [
@@ -264,28 +264,28 @@
         ]
       },
       {
-        "id": 32062,
+        "id": 31960,
         "nodeType": "ImportDirective",
         "src": "58:88:56",
         "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "file": "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 32082,
-        "sourceUnit": 89910,
+        "scope": 31980,
+        "sourceUnit": 92414,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 32081,
+        "id": 31979,
         "nodeType": "ContractDefinition",
         "src": "148:413:56",
         "nodes": [
           {
-            "id": 32070,
+            "id": 31968,
             "nodeType": "FunctionDefinition",
             "src": "286:52:56",
             "documentation": {
-              "id": 32065,
+              "id": 31963,
               "nodeType": "StructuredDocumentation",
               "src": "188:95:56",
               "text": "@dev Return the total ETH entitled to the token holders. Be careful of unaccrued interests."
@@ -297,23 +297,23 @@
             "name": "totalETH",
             "nameLocation": "295:8:56",
             "parameters": {
-              "id": 32066,
+              "id": 31964,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "303:2:56"
             },
             "returnParameters": {
-              "id": 32069,
+              "id": 31967,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 32068,
+                  "id": 31966,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 32070,
+                  "scope": 31968,
                   "src": "329:7:56",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -322,7 +322,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 32067,
+                    "id": 31965,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "329:7:56",
@@ -336,17 +336,17 @@
               ],
               "src": "328:9:56"
             },
-            "scope": 32081,
+            "scope": 31979,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 32074,
+            "id": 31972,
             "nodeType": "FunctionDefinition",
             "src": "410:36:56",
             "documentation": {
-              "id": 32071,
+              "id": 31969,
               "nodeType": "StructuredDocumentation",
               "src": "342:65:56",
               "text": "@dev Add more ETH to the bank. Hope to get some good returns."
@@ -358,28 +358,28 @@
             "name": "deposit",
             "nameLocation": "419:7:56",
             "parameters": {
-              "id": 32072,
+              "id": 31970,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "426:2:56"
             },
             "returnParameters": {
-              "id": 32073,
+              "id": 31971,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "445:0:56"
             },
-            "scope": 32081,
+            "scope": 31979,
             "stateMutability": "payable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 32080,
+            "id": 31978,
             "nodeType": "FunctionDefinition",
             "src": "517:42:56",
             "documentation": {
-              "id": 32075,
+              "id": 31973,
               "nodeType": "StructuredDocumentation",
               "src": "450:64:56",
               "text": "@dev Withdraw ETH from the bank by burning the share tokens."
@@ -391,17 +391,17 @@
             "name": "withdraw",
             "nameLocation": "526:8:56",
             "parameters": {
-              "id": 32078,
+              "id": 31976,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 32077,
+                  "id": 31975,
                   "mutability": "mutable",
                   "name": "share",
                   "nameLocation": "543:5:56",
                   "nodeType": "VariableDeclaration",
-                  "scope": 32080,
+                  "scope": 31978,
                   "src": "535:13:56",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -410,7 +410,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 32076,
+                    "id": 31974,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "535:7:56",
@@ -425,12 +425,12 @@
               "src": "534:15:56"
             },
             "returnParameters": {
-              "id": 32079,
+              "id": 31977,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "558:0:56"
             },
-            "scope": 32081,
+            "scope": 31979,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -440,13 +440,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 32063,
+              "id": 31961,
               "name": "IERC20Upgradeable",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 89909,
+              "referencedDeclaration": 92413,
               "src": "166:17:56"
             },
-            "id": 32064,
+            "id": 31962,
             "nodeType": "InheritanceSpecifier",
             "src": "166:17:56"
           }
@@ -456,12 +456,12 @@
         "contractKind": "interface",
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          32081,
-          89909
+          31979,
+          92413
         ],
         "name": "Bank",
         "nameLocation": "158:4:56",
-        "scope": 32082,
+        "scope": 31980,
         "usedErrors": []
       }
     ],

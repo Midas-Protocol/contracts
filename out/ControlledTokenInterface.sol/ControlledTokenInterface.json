@@ -29,17 +29,17 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/pooltogether/ControlledTokenInterface.sol",
-    "id": 35629,
+    "id": 35527,
     "exportedSymbols": {
       "ControlledTokenInterface": [
-        35628
+        35526
       ]
     },
     "nodeType": "SourceUnit",
     "src": "36:299:104",
     "nodes": [
       {
-        "id": 35620,
+        "id": 35518,
         "nodeType": "PragmaDirective",
         "src": "36:24:104",
         "literals": [
@@ -50,16 +50,16 @@
         ]
       },
       {
-        "id": 35628,
+        "id": 35526,
         "nodeType": "ContractDefinition",
         "src": "161:173:104",
         "nodes": [
           {
-            "id": 35627,
+            "id": 35525,
             "nodeType": "FunctionDefinition",
             "src": "278:54:104",
             "documentation": {
-              "id": 35622,
+              "id": 35520,
               "nodeType": "StructuredDocumentation",
               "src": "200:75:104",
               "text": "@notice Interface to the contract responsible for controlling mint/burn"
@@ -71,23 +71,23 @@
             "name": "controller",
             "nameLocation": "287:10:104",
             "parameters": {
-              "id": 35623,
+              "id": 35521,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "297:2:104"
             },
             "returnParameters": {
-              "id": 35626,
+              "id": 35524,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35625,
+                  "id": 35523,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35627,
+                  "scope": 35525,
                   "src": "323:7:104",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -96,7 +96,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 35624,
+                    "id": 35522,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "323:7:104",
@@ -111,7 +111,7 @@
               ],
               "src": "322:9:104"
             },
-            "scope": 35628,
+            "scope": 35526,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
@@ -123,18 +123,18 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 35621,
+          "id": 35519,
           "nodeType": "StructuredDocumentation",
           "src": "62:99:104",
           "text": "@title Controlled ERC20 Token\n @notice ERC20 Tokens with a controller for minting & burning"
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          35628
+          35526
         ],
         "name": "ControlledTokenInterface",
         "nameLocation": "171:24:104",
-        "scope": 35629,
+        "scope": 35527,
         "usedErrors": []
       }
     ],

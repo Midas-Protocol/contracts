@@ -55,17 +55,17 @@
   },
   "ast": {
     "absolutePath": "/Users/veliko/git/midas/monorepo/packages/sdk/lib/contracts/contracts/external/compound/IUnitroller.sol",
-    "id": 33868,
+    "id": 33766,
     "exportedSymbols": {
       "IUnitroller": [
-        33867
+        33765
       ]
     },
     "nodeType": "SourceUnit",
     "src": "41:452:78",
     "nodes": [
       {
-        "id": 33851,
+        "id": 33749,
         "nodeType": "PragmaDirective",
         "src": "41:24:78",
         "literals": [
@@ -76,12 +76,12 @@
         ]
       },
       {
-        "id": 33867,
+        "id": 33765,
         "nodeType": "ContractDefinition",
         "src": "286:206:78",
         "nodes": [
           {
-            "id": 33859,
+            "id": 33757,
             "nodeType": "FunctionDefinition",
             "src": "312:96:78",
             "functionSelector": "e992a041",
@@ -91,17 +91,17 @@
             "name": "_setPendingImplementation",
             "nameLocation": "321:25:78",
             "parameters": {
-              "id": 33855,
+              "id": 33753,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33854,
+                  "id": 33752,
                   "mutability": "mutable",
                   "name": "newPendingImplementation",
                   "nameLocation": "355:24:78",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33859,
+                  "scope": 33757,
                   "src": "347:32:78",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -110,7 +110,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33853,
+                    "id": 33751,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "347:7:78",
@@ -126,17 +126,17 @@
               "src": "346:34:78"
             },
             "returnParameters": {
-              "id": 33858,
+              "id": 33756,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33857,
+                  "id": 33755,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33859,
+                  "scope": 33757,
                   "src": "399:7:78",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -145,7 +145,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 33856,
+                    "id": 33754,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "399:7:78",
@@ -159,13 +159,13 @@
               ],
               "src": "398:9:78"
             },
-            "scope": 33867,
+            "scope": 33765,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
-            "id": 33866,
+            "id": 33764,
             "nodeType": "FunctionDefinition",
             "src": "412:78:78",
             "functionSelector": "b71d1a0c",
@@ -175,17 +175,17 @@
             "name": "_setPendingAdmin",
             "nameLocation": "421:16:78",
             "parameters": {
-              "id": 33862,
+              "id": 33760,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33861,
+                  "id": 33759,
                   "mutability": "mutable",
                   "name": "newPendingAdmin",
                   "nameLocation": "446:15:78",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33866,
+                  "scope": 33764,
                   "src": "438:23:78",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -194,7 +194,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 33860,
+                    "id": 33758,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "438:7:78",
@@ -210,17 +210,17 @@
               "src": "437:25:78"
             },
             "returnParameters": {
-              "id": 33865,
+              "id": 33763,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 33864,
+                  "id": 33762,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 33866,
+                  "scope": 33764,
                   "src": "481:7:78",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -229,7 +229,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 33863,
+                    "id": 33761,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "481:7:78",
@@ -243,7 +243,7 @@
               ],
               "src": "480:9:78"
             },
-            "scope": 33867,
+            "scope": 33765,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -255,18 +255,18 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 33852,
+          "id": 33750,
           "nodeType": "StructuredDocumentation",
           "src": "67:218:78",
           "text": " @title ComptrollerCore\n @dev Storage for the comptroller is at this address, while execution is delegated to the `comptrollerImplementation`.\n CTokens should reference this contract as their comptroller."
         },
         "fullyImplemented": false,
         "linearizedBaseContracts": [
-          33867
+          33765
         ],
         "name": "IUnitroller",
         "nameLocation": "296:11:78",
-        "scope": 33868,
+        "scope": 33766,
         "usedErrors": []
       }
     ],
