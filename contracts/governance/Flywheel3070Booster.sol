@@ -4,7 +4,8 @@ pragma solidity 0.8.10;
 import "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import "../external/compound/ICToken.sol";
 import "../external/balancer/BNum.sol";
-import "../../lib/fuse-flywheel/src/FuseFlywheelCore.sol";
+import "fuse-flywheel/FuseFlywheelCore.sol";
+import "solmate/utils/SafeCastLib.sol";
 
 /**
  * @title Flywheel3070Booster
@@ -21,42 +22,44 @@ import "../../lib/fuse-flywheel/src/FuseFlywheelCore.sol";
  * @author Veliko Minkov <veliko@midascapital.xyz>
  */
 contract Flywheel3070Booster is IFlywheelBooster, BNum {
+    using SafeCastLib for uint256;
+
     /* Calculate new borrow balance using the interest index:
      *  recentBorrowBalance = borrower.borrowBalance * market.borrowIndex / borrower.borrowIndex
      */
     function boostedTotalSupply(ERC20 strategy) external view returns (uint256) {
         ICToken asCToken = ICToken(address(strategy));
-        uint256 index = asCToken.borrowIndex();
+        uint224 index = asCToken.borrowIndex().safeCastTo224();
         // total borrows is denominated in underlying
-        uint256 totalBorrows = asCToken.totalBorrows();
+        uint224 totalBorrows = asCToken.totalBorrows().safeCastTo224();
         uint256 totalBorrowedPrincipal = bdiv(totalBorrows, index);
         // total supply is denominated in cTokens
-        uint256 totalSupply = asCToken.totalSupply();
+        uint224 totalSupply = asCToken.totalSupply().safeCastTo224();
 
-        return bmul(totalBorrowedPrincipal, totalSupply);
+        return bmul(/*BONE * */totalBorrowedPrincipal, totalSupply);
     }
 
     function boostedBalanceOf(ERC20 strategy, address user) external view returns (uint256 boostedBalance) {
         ICToken asCToken = ICToken(address(strategy));
-        uint256 index = asCToken.borrowIndex();
+        uint224 index = asCToken.borrowIndex().safeCastTo224();
         // total borrows is denominated in underlying
-        uint256 totalBorrows = asCToken.totalBorrows();
+        uint224 totalBorrows = asCToken.totalBorrows().safeCastTo224();
 
         uint256 userBorrowedPrincipal = bdiv(asCToken.borrowBalanceStored(user), index);
         uint256 totalBorrowedPrincipal = bdiv(totalBorrows, index);
 
         // total supply is denominated in cTokens
-        uint256 totalSupply = asCToken.totalSupply();
+        uint224 totalSupply = asCToken.totalSupply().safeCastTo224();
         // balance is denominated in cTokens
-        uint256 balance = asCToken.balanceOf(user);
+        uint224 balance = asCToken.balanceOf(user).safeCastTo224();
 
         // 30% of the rewards are for supplying
         // 70% of the rewards are for borrowing
         return
                     (
-                        7 * bmul(totalSupply, userBorrowedPrincipal)
+                        7 * bmul(/*BONE * */totalSupply, userBorrowedPrincipal)
                         +
-                        3 * bmul(totalBorrowedPrincipal, balance)
+                        3 * bmul(/*BONE * */totalBorrowedPrincipal, balance)
                     ) / 10;
     }
 }

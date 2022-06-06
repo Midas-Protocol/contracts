@@ -173,10 +173,7 @@ contract Booster3070SplitTest is DSTest, BNum {
 
     // first set up the token holdings
     function setUpPoolAndMarket() internal {
-        uint256 mintAmount = 1 ether;
         underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
-        underlyingToken.mint(alice, mintAmount);
-        underlyingToken.mint(bob, mintAmount);
 
         cErc20Delegate = new CErc20Delegate();
         interestModel = new MockInterestRateModel();
@@ -226,11 +223,6 @@ contract Booster3070SplitTest is DSTest, BNum {
 
         CToken[] memory allMarkets = comptroller.getAllMarkets();
         cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
-
-        vm.prank(alice);
-        underlyingToken.approve(address(cErc20), mintAmount);
-        vm.prank(bob);
-        underlyingToken.approve(address(cErc20), mintAmount);
     }
 
     function setUpStaticRewards(CErc20 _cErc20) internal {
@@ -277,14 +269,26 @@ contract Booster3070SplitTest is DSTest, BNum {
     alice gets: 1.1/2 of 30% of the rewards + 1.5/2 of 70% of the rewards = 61% of the rewards
     bob gets: 0.45 * 0.7 * rew + 0.25 * 0.3 * rew = 39% of the rewards
     */
-    function testInterestAccrual(/*uint256 borrowAmount*/) public {
-//        vm.assume(supplyAmount > 100000000 && supplyAmount < 1000000000);
-        uint256 supplyAmount = 1 ether;
-        uint256 borrowAmount = supplyAmount / 20;
-//        vm.assume(borrowAmount > supplyAmount / 20 && borrowAmount <= supplyAmount / 10);
+    function testInterestAccrual(uint256 supplyAmount, uint256 borrowAmount) public {
+        vm.assume(supplyAmount < type(uint112).max);
+        vm.assume(borrowAmount < type(uint112).max);
+        vm.assume(supplyAmount > 1000);
+        vm.assume(borrowAmount > 10);
+        vm.assume(10 * borrowAmount < supplyAmount);
+        vm.assume(borrowAmount * 1000 > supplyAmount);
+
+        emit log_uint(supplyAmount);
+        emit log_uint(borrowAmount);
 
         setUpPoolAndMarket();
         setUpStaticRewards(cErc20);
+
+        underlyingToken.mint(alice, supplyAmount);
+        underlyingToken.mint(bob, supplyAmount);
+        vm.prank(alice);
+        underlyingToken.approve(address(cErc20), supplyAmount);
+        vm.prank(bob);
+        underlyingToken.approve(address(cErc20), supplyAmount);
 
         vm.roll(block.number + 1);
         vm.warp(block.timestamp + 1 days);
@@ -295,7 +299,7 @@ contract Booster3070SplitTest is DSTest, BNum {
 
             bytes4 selector = bytes4(keccak256(bytes("flywheelPreSupplierAction(address,address)")));
             vm.expectCall(address(flywheel), abi.encodeWithSelector(selector, address(cErc20), alice));
-            
+
             cErc20.mint(supplyAmount);
             cErc20.borrow(borrowAmount);
             vm.stopPrank();
@@ -314,9 +318,13 @@ contract Booster3070SplitTest is DSTest, BNum {
         emit log_uint(aliceSupplyAfter);
         assertLt(aliceSupplyBefore, aliceSupplyAfter, "alice should accrue interest on her deposit");
 
+        printBoostedStats();
+
         // TODO figure out if it is actually desired to require alice to accrue from time to time
         // accrue the rewards before bob takes part in the supplying/borrowing
         flywheel.accrue(ERC20(address(cErc20)), alice, bob);
+
+        printBoostedStats();
 
         // deposit the other 50 % as bob and contribute to 90 % of the borrowed
         {
@@ -346,10 +354,45 @@ contract Booster3070SplitTest is DSTest, BNum {
         uint256 aliceRewardsAfter = rewardToken.balanceOf(alice);
         uint256 bobRewardsAfter = rewardToken.balanceOf(bob);
 
-        emit log_uint((aliceRewardsAfter * 100) / (aliceRewardsAfter + bobRewardsAfter));
+        emit log_uint(aliceRewardsAfter);
+        emit log_uint(bobRewardsAfter);
 
-        assertTrue(
-            100 * aliceRewardsAfter / (aliceRewardsAfter + bobRewardsAfter) == 64
-            , "alice should get approx 64% of the total rewards");
+        emit log_uint(100 * aliceRewardsAfter / (aliceRewardsAfter + bobRewardsAfter));
+        emit log_uint(bdiv(100 * aliceRewardsAfter, (aliceRewardsAfter + bobRewardsAfter)));
+
+        uint256 alicesShareOfRewards = btoi(bdiv(100 * aliceRewardsAfter, (aliceRewardsAfter + bobRewardsAfter)));
+        assertTrue(alicesShareOfRewards >= 63 && alicesShareOfRewards <= 65
+            , "alice should get approx 63-65% of the total rewards (depending on the interest accrued)");
+    }
+
+    function printBoostedStats() internal {
+        ICToken asCToken = ICToken(address(cErc20));
+        uint256 index = asCToken.borrowIndex();
+        // total borrows is denominated in underlying
+        uint256 totalBorrows = asCToken.totalBorrows();
+
+        uint256 userBorrowedPrincipal = bdiv(asCToken.borrowBalanceStored(alice), index);
+        uint256 totalBorrowedPrincipal = bdiv(totalBorrows, index);
+
+        // total supply is denominated in cTokens
+        uint256 totalSupply = asCToken.totalSupply();
+        // balance is denominated in cTokens
+        uint256 balance = asCToken.balanceOf(alice);
+
+        emit log("boosted stats");
+        //            emit log_uint(totalSupply);
+        //            emit log_uint(totalBorrowedPrincipal);
+        //            emit log_uint(balance);
+        //            emit log_uint(userBorrowedPrincipal);
+        uint256 bmulMultiplied = bmul(totalSupply, userBorrowedPrincipal);
+        emit log_uint(bmulMultiplied);
+        uint256 multiplied = (totalSupply * userBorrowedPrincipal);
+        emit log_uint(multiplied);
+
+
+        uint256 boostedAlice = booster.boostedBalanceOf(ERC20(address(cErc20)), alice);
+        uint256 boostedBob = booster.boostedBalanceOf(ERC20(address(cErc20)), bob);
+        emit log_uint(boostedAlice);
+        emit log_uint(boostedBob);
     }
 }
