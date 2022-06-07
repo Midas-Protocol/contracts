@@ -35,7 +35,7 @@ contract MockInterestRateModel is InterestRateModel {
         uint256,
         uint256
     ) public view override returns (uint256) {
-        return 2e12;
+        return 3238064100000;
     }
 
     function getSupplyRate(
@@ -44,16 +44,20 @@ contract MockInterestRateModel is InterestRateModel {
         uint256,
         uint256
     ) public view override returns (uint256) {
-        return 2e12;
+        return 0;
     }
 }
 
-contract Booster3070SplitTest is DSTest, BNum {
+contract BoosterGaugesTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
 
     VeMDSToken veToken;
     uint256 totalSupply = 1e5;
-    uint256 rewardsForCycle = 1e5;
+    uint256 rewardsForCycle = 27000;
+
+    // min 1% of the total supply must be borrowed for rewards to be given for the borrow side
+    uint16 minBorrowsAsBps = 100;
+
     address alice = address(0x10);
     address bob = address(0x20);
 
@@ -63,23 +67,7 @@ contract Booster3070SplitTest is DSTest, BNum {
     FuseFlywheelCore flywheel;
     FlywheelGaugeRewards rewards;
     MockRewardsStream rewardsStream;
-    FlywheelStaticRewards staticRewards;
     Flywheel3070Booster booster;
-
-    // no mock testing
-    MockInterestRateModel interestModel;
-    Comptroller comptroller;
-    CErc20 cErc20;
-    FuseFeeDistributor fuseAdmin;
-    FusePoolDirectory fusePoolDirectory;
-    CErc20Delegate cErc20Delegate;
-    MockERC20 underlyingToken;
-
-    address[] emptyAddresses;
-    address[] newUnitroller;
-    bool[] falseBoolArray;
-    bool[] trueBoolArray;
-    address[] newImplementation;
 
     function setUp() public {
         veToken = new VeMDSToken(
@@ -93,7 +81,7 @@ contract Booster3070SplitTest is DSTest, BNum {
         vm.label(address(veToken), "vetoken");
 
         rewardToken = new MockERC20("test token", "TKN", 18);
-        booster = new Flywheel3070Booster();
+        booster = new Flywheel3070Booster(minBorrowsAsBps);
 
         flywheel = new FuseFlywheelCore(
             rewardToken,
@@ -123,8 +111,6 @@ contract Booster3070SplitTest is DSTest, BNum {
     }
 
     function testMarketGauges(uint112 votingPower) public {
-//        vm.assume(alice != address(0));
-//        vm.assume(alice != bob);
         vm.assume(votingPower > 0);
         veToken.mint(address(this), votingPower);
 
@@ -170,6 +156,42 @@ contract Booster3070SplitTest is DSTest, BNum {
         uint256 bobRewardsAfter = rewardToken.balanceOf(bob);
         assertEq(aliceRewardsAfter + bobRewardsAfter, rewardsForCycle, "total rewards claimed should equal the rewards for the cycle");
     }
+}
+
+contract Booster3070SplitTest is DSTest {
+    Vm public constant vm = Vm(HEVM_ADDRESS);
+
+    VeMDSToken veToken;
+    uint256 totalSupply = 1e5;
+    uint256 rewardsForCycle = 1e5;
+    address alice = address(0x10);
+    address bob = address(0x20);
+    uint256 rewardsTotalPeriod = 1e8;
+
+    // min 1% of the total supply must be borrowed for rewards to be given for the borrow side
+    uint16 minBorrowsAsBps = 100;
+
+    MockERC20 rewardToken;
+
+    FuseFlywheelCore flywheel;
+    FlywheelGaugeRewards rewards;
+    MockRewardsStream rewardsStream;
+    FlywheelStaticRewards staticRewards;
+    Flywheel3070Booster booster;
+
+    MockInterestRateModel interestModel;
+    Comptroller comptroller;
+    CErc20 cErc20;
+    FuseFeeDistributor fuseAdmin;
+    FusePoolDirectory fusePoolDirectory;
+    CErc20Delegate cErc20Delegate;
+    MockERC20 underlyingToken;
+
+    address[] emptyAddresses;
+    address[] newUnitroller;
+    bool[] falseBoolArray;
+    bool[] trueBoolArray;
+    address[] newImplementation;
 
     // first set up the token holdings
     function setUpPoolAndMarket() internal {
@@ -225,9 +247,9 @@ contract Booster3070SplitTest is DSTest, BNum {
         cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
     }
 
-    function setUpStaticRewards(CErc20 _cErc20) internal {
+    function setUpStaticRewards(CErc20 _cErc20, uint32 rewardsPerSec) internal {
         rewardToken = new MockERC20("test token", "TKN", 18);
-        booster = new Flywheel3070Booster();
+        booster = new Flywheel3070Booster(minBorrowsAsBps);
         flywheel = new FuseFlywheelCore(
             rewardToken,
             IFlywheelRewards(address(0)), // it's ok, set later
@@ -250,7 +272,7 @@ contract Booster3070SplitTest is DSTest, BNum {
         // Start reward distribution at 1 token per second
         staticRewards.setRewardsInfo(
             ERC20(address(_cErc20)),
-            FlywheelStaticRewards.RewardsInfo({ rewardsPerSecond: 1000, rewardsEndTimestamp: 0 })
+            FlywheelStaticRewards.RewardsInfo({ rewardsPerSecond: rewardsPerSec, rewardsEndTimestamp: 0 })
         );
     }
 
@@ -269,19 +291,47 @@ contract Booster3070SplitTest is DSTest, BNum {
     alice gets: 1.1/2 of 30% of the rewards + 1.5/2 of 70% of the rewards = 61% of the rewards
     bob gets: 0.45 * 0.7 * rew + 0.25 * 0.3 * rew = 39% of the rewards
     */
-    function testInterestAccrual(uint256 supplyAmount, uint256 borrowAmount) public {
-        vm.assume(supplyAmount < type(uint112).max);
-        vm.assume(borrowAmount < type(uint112).max);
-        vm.assume(supplyAmount > 1000);
-        vm.assume(borrowAmount > 10);
-        vm.assume(10 * borrowAmount < supplyAmount);
-        vm.assume(borrowAmount * 1000 > supplyAmount);
+    function testInterestAccrualFixedParams() public {
+        uint128 supplyAmount = 1e9;
+        uint8 borrowMultiplier = 9;
+        uint32 rewardsPerSec = 1000;
 
+        accrueInterestAndRewards(supplyAmount, borrowMultiplier, rewardsPerSec);
+
+        uint256 aliceRewardsAfter = rewardToken.balanceOf(alice);
+        uint256 bobRewardsAfter = rewardToken.balanceOf(bob);
+
+        emit log("rewards claimed");
+        emit log_uint(aliceRewardsAfter);
+        emit log_uint(bobRewardsAfter);
+
+        uint256 alicesShareOfRewards = 1e18 * aliceRewardsAfter / (aliceRewardsAfter + bobRewardsAfter);
+        emit log("alice's share of the rewards");
+        emit log_uint(alicesShareOfRewards);
+
+        assertTrue(alicesShareOfRewards == 620000002262400000,
+            "alice should get approx 62% of the total rewards (rounding error from the interest accrued)");
+    }
+
+    function testFuzzInterestAccrual(uint128 supplyAmount, uint8 borrowMultiplier, uint32 rewardsPerSec) public {
+        accrueInterestAndRewards(supplyAmount, borrowMultiplier, rewardsPerSec);
+    }
+
+    function accrueInterestAndRewards(uint128 supplyAmount, uint8 borrowMultiplier, uint32 rewardsPerSec) internal {
+        vm.assume(rewardsPerSec > 0 && supplyAmount > 1000 && borrowMultiplier > 5 && borrowMultiplier < 95);
+        vm.assume(supplyAmount < uint256(rewardsPerSec) * rewardsTotalPeriod / 2);
+        uint128 baseBorrowAmount = supplyAmount / 100;
+//        vm.assume(1000 * borrowAmount < type(uint128).max);
+        vm.assume(10 * baseBorrowAmount < supplyAmount && 1000 * baseBorrowAmount > supplyAmount);
+//        vm.assume(1000 * borrowAmount > supplyAmount);
+
+        emit log("supply");
         emit log_uint(supplyAmount);
-        emit log_uint(borrowAmount);
+        emit log("borrow");
+        emit log_uint(baseBorrowAmount);
 
         setUpPoolAndMarket();
-        setUpStaticRewards(cErc20);
+        setUpStaticRewards(cErc20, rewardsPerSec);
 
         underlyingToken.mint(alice, supplyAmount);
         underlyingToken.mint(bob, supplyAmount);
@@ -290,10 +340,9 @@ contract Booster3070SplitTest is DSTest, BNum {
         vm.prank(bob);
         underlyingToken.approve(address(cErc20), supplyAmount);
 
-        vm.roll(block.number + 1);
-        vm.warp(block.timestamp + 1 days);
+        vm.roll(1);
+        vm.warp(1 days);
 
-        // deposit 1 ether as alice and borrow 1000 units
         {
             vm.startPrank(alice);
 
@@ -301,30 +350,24 @@ contract Booster3070SplitTest is DSTest, BNum {
             vm.expectCall(address(flywheel), abi.encodeWithSelector(selector, address(cErc20), alice));
 
             cErc20.mint(supplyAmount);
-            cErc20.borrow(borrowAmount);
+            cErc20.borrow(baseBorrowAmount);
             vm.stopPrank();
         }
 
         uint256 aliceSupplyBefore = cErc20.balanceOfUnderlying(alice);
         // advance the time with 1/2 period
         {
-            vm.roll(block.number + interestModel.blocksPerYear() / 2);
-            vm.warp(block.timestamp + 365.25 days / 2);
+            vm.roll(block.number + rewardsTotalPeriod / 1000);
+            vm.warp(block.timestamp + rewardsTotalPeriod / 2);
         }
 
         // balanceOfUnderlying accrues the interest
         uint256 aliceSupplyAfter = cErc20.balanceOfUnderlying(alice);
-        emit log_uint(aliceSupplyBefore);
-        emit log_uint(aliceSupplyAfter);
         assertLt(aliceSupplyBefore, aliceSupplyAfter, "alice should accrue interest on her deposit");
 
-        printBoostedStats();
-
         // TODO figure out if it is actually desired to require alice to accrue from time to time
-        // accrue the rewards before bob takes part in the supplying/borrowing
+        // the rewards, before bob takes part in the supplying/borrowing
         flywheel.accrue(ERC20(address(cErc20)), alice, bob);
-
-        printBoostedStats();
 
         // deposit the other 50 % as bob and contribute to 90 % of the borrowed
         {
@@ -335,14 +378,14 @@ contract Booster3070SplitTest is DSTest, BNum {
             vm.expectCall(address(flywheel), abi.encodeWithSelector(selector, address(cErc20), bob));
 
             cErc20.mint(supplyAmount);
-            cErc20.borrow(9 * borrowAmount);
+            cErc20.borrow(borrowMultiplier * baseBorrowAmount);
             vm.stopPrank();
         }
 
         // advance the time with 1/2 period
         {
-            vm.roll(block.number + interestModel.blocksPerYear() / 2);
-            vm.warp(block.timestamp + 365.25 days / 2);
+            vm.roll(block.number + rewardsTotalPeriod / 1000);
+            vm.warp(block.timestamp + rewardsTotalPeriod / 2);
         }
 
         flywheel.accrue(ERC20(address(cErc20)), alice, bob);
@@ -354,45 +397,10 @@ contract Booster3070SplitTest is DSTest, BNum {
         uint256 aliceRewardsAfter = rewardToken.balanceOf(alice);
         uint256 bobRewardsAfter = rewardToken.balanceOf(bob);
 
-        emit log_uint(aliceRewardsAfter);
-        emit log_uint(bobRewardsAfter);
+        uint8 roundingError = 2;
+        uint256 truncatedCombinedRewards = (aliceRewardsAfter + bobRewardsAfter + roundingError) / 1000;
+        uint256 truncatedRewardsForPeriod = (rewardsPerSec * rewardsTotalPeriod) / 1000;
 
-        emit log_uint(100 * aliceRewardsAfter / (aliceRewardsAfter + bobRewardsAfter));
-        emit log_uint(bdiv(100 * aliceRewardsAfter, (aliceRewardsAfter + bobRewardsAfter)));
-
-        uint256 alicesShareOfRewards = btoi(bdiv(100 * aliceRewardsAfter, (aliceRewardsAfter + bobRewardsAfter)));
-        assertTrue(alicesShareOfRewards >= 63 && alicesShareOfRewards <= 65
-            , "alice should get approx 63-65% of the total rewards (depending on the interest accrued)");
-    }
-
-    function printBoostedStats() internal {
-        ICToken asCToken = ICToken(address(cErc20));
-        uint256 index = asCToken.borrowIndex();
-        // total borrows is denominated in underlying
-        uint256 totalBorrows = asCToken.totalBorrows();
-
-        uint256 userBorrowedPrincipal = bdiv(asCToken.borrowBalanceStored(alice), index);
-        uint256 totalBorrowedPrincipal = bdiv(totalBorrows, index);
-
-        // total supply is denominated in cTokens
-        uint256 totalSupply = asCToken.totalSupply();
-        // balance is denominated in cTokens
-        uint256 balance = asCToken.balanceOf(alice);
-
-        emit log("boosted stats");
-        //            emit log_uint(totalSupply);
-        //            emit log_uint(totalBorrowedPrincipal);
-        //            emit log_uint(balance);
-        //            emit log_uint(userBorrowedPrincipal);
-        uint256 bmulMultiplied = bmul(totalSupply, userBorrowedPrincipal);
-        emit log_uint(bmulMultiplied);
-        uint256 multiplied = (totalSupply * userBorrowedPrincipal);
-        emit log_uint(multiplied);
-
-
-        uint256 boostedAlice = booster.boostedBalanceOf(ERC20(address(cErc20)), alice);
-        uint256 boostedBob = booster.boostedBalanceOf(ERC20(address(cErc20)), bob);
-        emit log_uint(boostedAlice);
-        emit log_uint(boostedBob);
+        assertEq(truncatedCombinedRewards, truncatedRewardsForPeriod, "total rewards claimed should equal the rewards for the two cycles");
     }
 }
