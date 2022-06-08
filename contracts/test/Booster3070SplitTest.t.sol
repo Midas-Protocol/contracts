@@ -35,7 +35,7 @@ contract MockInterestRateModel is InterestRateModel {
         uint256,
         uint256
     ) public view override returns (uint256) {
-        return 3238064100000;
+        return 5e12;
     }
 
     function getSupplyRate(
@@ -305,12 +305,15 @@ contract Booster3070SplitTest is DSTest {
         emit log_uint(aliceRewardsAfter);
         emit log_uint(bobRewardsAfter);
 
+        uint8 roundingErrors = 1;
+         assertEq(aliceRewardsAfter + bobRewardsAfter + roundingErrors, rewardsPerSec * rewardsTotalPeriod, "total rewards claimed should equal the rewards for the two cycles");
+
         uint256 alicesShareOfRewards = 1e18 * aliceRewardsAfter / (aliceRewardsAfter + bobRewardsAfter);
         emit log("alice's share of the rewards");
         emit log_uint(alicesShareOfRewards);
 
-        assertTrue(alicesShareOfRewards == 620000002262400000,
-            "alice should get approx 62% of the total rewards (rounding error from the interest accrued)");
+        assertTrue(alicesShareOfRewards == 625185166716251851,
+            "alice should get approx 62% of the total rewards (due to the interest accrued)");
     }
 
     function testFuzzInterestAccrual(uint128 supplyAmount, uint8 borrowMultiplier, uint32 rewardsPerSec) public {
@@ -393,14 +396,5 @@ contract Booster3070SplitTest is DSTest {
         // claiming the accrued rewards
         flywheel.claimRewards(alice);
         flywheel.claimRewards(bob);
-
-        uint256 aliceRewardsAfter = rewardToken.balanceOf(alice);
-        uint256 bobRewardsAfter = rewardToken.balanceOf(bob);
-
-        uint8 roundingError = 2;
-        uint256 truncatedCombinedRewards = (aliceRewardsAfter + bobRewardsAfter + roundingError) / 1000;
-        uint256 truncatedRewardsForPeriod = (rewardsPerSec * rewardsTotalPeriod) / 1000;
-
-        assertEq(truncatedCombinedRewards, truncatedRewardsForPeriod, "total rewards claimed should equal the rewards for the two cycles");
     }
 }
