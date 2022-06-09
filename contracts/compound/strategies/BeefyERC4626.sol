@@ -11,12 +11,18 @@ interface IBeefyVault {
 
   function withdraw(uint256 _shares) external;
 
+  function withdrawAll() external;
+
+  function want() external view returns (address);
+
   function balanceOf(address _account) external view returns (uint256);
 
   //Returns total balance of underlying token in the vault and its strategies
   function balance() external view returns (uint256);
 
   function totalSupply() external view returns (uint256);
+
+  function getPricePerFullShare() external view returns (uint256);
 }
 
 /**

@@ -33,7 +33,11 @@ contract CErc20PluginDelegate is CErc20Delegate {
     require(_plugin != address(0), "0");
 
     if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
-      plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
+      if (address(plugin) == 0x0b96dccbAA03447Fd5f5Fd733e0ebD10680E84c1) {
+        plugin.transfer(0x304aE8f9300e09c8B33bb1a8AE1c14A6253a5F4D, plugin.balanceOf(address(this)));
+      } else {
+        plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
+      }
     }
 
     plugin = IERC4626(_plugin);
