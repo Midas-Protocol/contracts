@@ -116,4 +116,4 @@ jobs:
         run: forge install
 
       - name: Run forge tests on Moonbeam
-        run: forge test --fork-url https://rpc.api.moonbeam.network --fork-block-number ${FORK_BLOCK_NUMBER}
+        run: forge test --fork-url https://moonbeam.api.onfinality.io/public --fork-block-number ${FORK_BLOCK_NUMBER}
