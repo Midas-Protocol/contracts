@@ -76,4 +76,29 @@ contract BeefyERC4626 is ERC4626 {
   function beforeWithdraw(uint256, uint256 shares) internal override {
     beefyVault.withdraw(shares);
   }
+
+  function previewWithdraw(uint256 assets) public view override returns (uint256) {
+    uint256 supply = totalSupply;
+
+    // shares in the vault ? sharesInThis4626
+    //             shares = (_amount.mul(totalSupply())).div(balance());
+    // sharesInTheVaultToRedeem = assets * beefyVaultTotalShares / beefyVaultTotalAssets
+    // TODO muldivdown
+    //    return supply == 0 ? assets : assets.mulDivDown(beefyVault.totalSupply(), beefyVault.balance());
+
+    // underlyingToWithdraw * this4626TotalSupply / ourAssetsInTheBeefyVault
+    //    return supply == 0 ? assets : assets.mulDivUp(supply, totalAssets());
+
+
+    return supply == 0 ? assets : assets * beefyVault.totalSupply() / beefyVault.balance();
+  }
+
+  function previewRedeem(uint256 shares) public view override returns (uint256) {
+    uint256 supply = totalSupply;
+
+    // ourShares * ourAssetsInTheBeefyVault / ourTotalSupply
+
+    return supply == 0 ? shares : shares * beefyVault.balance() / beefyVault.totalSupply();
+    // return supply;
+  }
 }
