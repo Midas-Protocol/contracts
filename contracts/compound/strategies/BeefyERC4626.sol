@@ -2,11 +2,13 @@
 pragma solidity ^0.8.10;
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { ERC4626 } from "../../utils/ERC4626.sol";
+import { MidasERC4626 } from "./MidasERC4626.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 
 interface IBeefyVault {
+  function want() external view returns (ERC20);
+
   function deposit(uint256 _amount) external;
 
   function withdraw(uint256 _shares) external;
@@ -26,7 +28,7 @@ interface IBeefyVault {
  *
  * Wraps https://github.com/beefyfinance/beefy-contracts/blob/master/contracts/BIFI/vaults/BeefyVaultV6.sol
  */
-contract BeefyERC4626 is ERC4626 {
+contract BeefyERC4626 is MidasERC4626 {
   using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
@@ -42,7 +44,7 @@ contract BeefyERC4626 is ERC4626 {
      @param _beefyVault The Beefy Vault contract.
     */
   constructor(ERC20 _asset, IBeefyVault _beefyVault)
-    ERC4626(
+    MidasERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
       string(abi.encodePacked("mv", _asset.symbol()))
@@ -58,7 +60,7 @@ contract BeefyERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    return beefyVault.balanceOf(address(this)).mulDivDown(beefyVault.balance(), beefyVault.totalSupply());
+    return beefyVault.balanceOf(address(this)).mulDivUp(beefyVault.balance(), beefyVault.totalSupply());
   }
 
   /// @notice Calculates the total amount of underlying tokens the account holds.
@@ -89,8 +91,7 @@ contract BeefyERC4626 is ERC4626 {
     // underlyingToWithdraw * this4626TotalSupply / ourAssetsInTheBeefyVault
     //    return supply == 0 ? assets : assets.mulDivUp(supply, totalAssets());
 
-
-    return supply == 0 ? assets : assets * beefyVault.totalSupply() / beefyVault.balance();
+    return supply == 0 ? assets : (assets * beefyVault.totalSupply()) / beefyVault.balance();
   }
 
   function previewRedeem(uint256 shares) public view override returns (uint256) {
@@ -98,7 +99,35 @@ contract BeefyERC4626 is ERC4626 {
 
     // ourShares * ourAssetsInTheBeefyVault / ourTotalSupply
 
-    return supply == 0 ? shares : shares * beefyVault.balance() / beefyVault.totalSupply();
-    // return supply;
+    return supply == 0 ? shares : (shares * beefyVault.balance()) / beefyVault.totalSupply();
+  }
+
+  event previewVaultWith(uint256 value);
+
+  function withdraw(
+    uint256 assets,
+    address receiver,
+    address owner
+  ) public virtual override returns (uint256 shares) {
+    shares = previewWithdraw(assets); // No need to check for rounding error, previewWithdraw rounds up.
+
+    if (msg.sender != owner) {
+      uint256 allowed = allowance[owner][msg.sender]; // Saves gas for limited approvals.
+
+      if (allowed != type(uint256).max) allowance[owner][msg.sender] = allowed - shares;
+    }
+    uint256 _shares = convertToShares(assets);
+    beforeWithdraw(assets, shares);
+
+    _burn(owner, _shares);
+
+    emit Withdraw(msg.sender, receiver, owner, assets, shares);
+
+    uint256 b = beefyVault.want().balanceOf(address(beefyVault));
+    if (b < assets) {
+      asset.safeTransfer(receiver, (assets * 999) / 1000);
+    } else {
+      asset.safeTransfer(receiver, assets);
+    }
   }
 }

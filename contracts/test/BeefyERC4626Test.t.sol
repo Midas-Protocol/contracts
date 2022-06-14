@@ -22,7 +22,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
 
   uint256 depositAmount = 100e18;
 
-  constructor() 
+  constructor()
     WithPool(
       MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
       MockERC20(0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6)
@@ -30,8 +30,10 @@ contract BeefyERC4626Test is WithPool, BaseTest {
   {}
 
   function setUp() public {
-    vm.prank(0x1083926054069AaD75d7238E9B809b0eF9d94e5B);
+    vm.startPrank(0x1083926054069AaD75d7238E9B809b0eF9d94e5B);
     underlyingToken.transfer(address(this), 100e18);
+    underlyingToken.transfer(address(1), 100e18);
+    vm.stopPrank();
     setUpPool("beefy-test", false, 0.1e18, 1.1e18);
   }
 
@@ -42,7 +44,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     mockVault = MockVault(0x94E85B8E050F3F281CB9597cc0144F1F7AF1fe9B);
     beefyERC4626 = new BeefyERC4626(underlyingToken, IBeefyVault(address(mockVault)));
 
-    deployCErc20PluginDelegate(beefyERC4626, 0.9e18);
+    deployCErc20PluginDelegate(ERC4626(address(underlyingToken)), 0.9e18);
     CToken[] memory allmarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allmarkets[allmarkets.length - 1]));
 
@@ -55,34 +57,36 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     comptroller.enterMarkets(cTokens);
 
     uint256 balanceOfVault = underlyingToken.balanceOf(address(mockVault));
-    emit log_uint(balanceOfVault);
-
-    cToken.mint(501042068855324852);
-    balanceOfVault = underlyingToken.balanceOf(address(mockVault));
-    emit log_uint(balanceOfVault);
-    assertEq(cToken.totalSupply(), 501042068855324852 * 5);
-    uint256 erc4626Balance = beefyERC4626.balanceOf(address(cToken));
     uint256 cTokenBalance = cToken.balanceOf(address(this));
-    assertEq(erc4626Balance, 501042068855324852);
-    assertEq(cTokenBalance, 501042068855324852 * 5);
-    uint256 underlyingBalance = underlyingToken.balanceOf(address(this));
-    uint256 underlyingBalance1 = underlyingToken.balanceOf(address(beefyERC4626));
 
-    emit log_uint(underlyingBalance1);
-    emit log_address(address(cToken));
-
-    emit log_uint(underlyingBalance);
-    uint256 withdraw = beefyERC4626.previewWithdraw(501042068855324852);
-    uint256 redeem = beefyERC4626.previewRedeem(194764027257481665);
-    emit log_uint(redeem);
-    emit log_uint(withdraw);
-    cToken.redeemUnderlying(501042068855324852);
+    cToken.mint(1000);
     cTokenBalance = cToken.balanceOf(address(this));
-    // erc4626Balance = beefyERC4626.balanceOf(address(cToken));
-    assertEq(cTokenBalance, 0);
-    // assertEq(erc4626Balance, 0);
+    assertEq(cToken.totalSupply(), 1000 * 5);
+    uint256 erc4626Balance = beefyERC4626.balanceOf(address(cToken));
+    assertEq(erc4626Balance, 1000);
+    assertEq(cTokenBalance, 1000 * 5);
+    uint256 underlyingBalance = underlyingToken.balanceOf(address(this));
+
+    vm.startPrank(address(1));
+
+    underlyingToken.approve(address(cToken), 1e36);
+    cToken.mint(1000);
+    balanceOfVault = underlyingToken.balanceOf(address(mockVault));
+    cTokenBalance = cToken.balanceOf(address(1));
+    assertEq(cTokenBalance, 1930);
+    erc4626Balance = beefyERC4626.balanceOf(address(cToken));
+    assertEq(erc4626Balance, 2000);
+    assertEq(cToken.totalSupply(), 1000 * 5 + cTokenBalance);
+    underlyingBalance = underlyingToken.balanceOf(address(1));
+
+    vm.stopPrank();
+
+    cToken.redeemUnderlying(1000);
+    cTokenBalance = cToken.balanceOf(address(this));
+    erc4626Balance = beefyERC4626.balanceOf(address(cToken));
+    assertEq(erc4626Balance, 1000);
     underlyingBalance = underlyingToken.balanceOf(address(this));
-    emit log_uint(underlyingBalance);
+    assertEq(underlyingBalance, 100e18 - 1);
   }
 
   // function testInitializedValues() public {
