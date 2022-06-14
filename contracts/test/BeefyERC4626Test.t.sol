@@ -29,7 +29,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     )
   {}
 
-  function setUp() public {
+  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     vm.startPrank(0x1083926054069AaD75d7238E9B809b0eF9d94e5B);
     underlyingToken.transfer(address(this), 100e18);
     underlyingToken.transfer(address(1), 100e18);
@@ -39,9 +39,9 @@ contract BeefyERC4626Test is WithPool, BaseTest {
 
   function testDeployCErc20PluginDelegate() public shouldRun(forChains(BSC_MAINNET)) {
     emit log_uint(underlyingToken.balanceOf(address(this)));
-    // mockStrategy = new MockStrategy(address(underlyingToken));
-    // mockVault = new MockVault(address(mockStrategy), "MockVault", "MV");
-    mockVault = MockVault(0x94E85B8E050F3F281CB9597cc0144F1F7AF1fe9B);
+    mockStrategy = new MockStrategy(address(underlyingToken));
+    mockVault = new MockVault(address(mockStrategy), "MockVault", "MV");
+    // mockVault = MockVault(0x94E85B8E050F3F281CB9597cc0144F1F7AF1fe9B);
     beefyERC4626 = new BeefyERC4626(underlyingToken, IBeefyVault(address(mockVault)));
 
     deployCErc20PluginDelegate(ERC4626(address(underlyingToken)), 0.9e18);
@@ -73,7 +73,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     cToken.mint(1000);
     balanceOfVault = underlyingToken.balanceOf(address(mockVault));
     cTokenBalance = cToken.balanceOf(address(1));
-    assertEq(cTokenBalance, 1930);
+    assertEq(cTokenBalance, 1000 * 5);
     erc4626Balance = beefyERC4626.balanceOf(address(cToken));
     assertEq(erc4626Balance, 2000);
     assertEq(cToken.totalSupply(), 1000 * 5 + cTokenBalance);
