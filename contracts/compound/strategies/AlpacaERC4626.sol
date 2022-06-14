@@ -45,6 +45,7 @@ contract AlpacaERC4626 is ERC4626 {
      @notice Creates a new Vault that accepts a specific underlying token.
      @param _asset The ERC20 compliant token the Vault should accept.
      @param _alpacaVault The Alpaca Vault contract.
+     @param _wtoken the wrapped native asset token contract address.
     */
   constructor(
     ERC20 _asset,
