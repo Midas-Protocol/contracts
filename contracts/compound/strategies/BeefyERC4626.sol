@@ -75,57 +75,10 @@ contract BeefyERC4626 is MidasERC4626 {
     beefyVault.deposit(amount);
   }
 
-  function beforeWithdraw(uint256, uint256 shares) internal override {
-    beefyVault.withdraw(shares);
-  }
-
-  function previewWithdraw(uint256 assets) public view override returns (uint256) {
+  function beforeWithdraw(uint256 assets, uint256 shares) internal override {
     uint256 supply = totalSupply;
 
-    // assets * beefyTotalSupply / beefyVaultUnderlyingBalance
-    return supply == 0 ? assets : assets.mulDivUp(beefyVault.totalSupply(), beefyVault.balance());
-  }
-
-  function previewRedeem(uint256 shares) public view override returns (uint256) {
-    uint256 supply = totalSupply;
-
-    // ourShares * beefyVaultUnderlyingBalance / beefyTotalSupply
-    return supply == 0 ? shares : shares.mulDivDown(beefyVault.balance(), beefyVault.totalSupply());
-  }
-
-  function previewMint(uint256 shares) public view override returns (uint256) {
-    uint256 supply = totalSupply;
-
-    // ourShares * beefyVaultUnderlyingBalance / beefyTotalSupply
-    return supply == 0 ? shares : shares.mulDivUp(beefyVault.balance(), beefyVault.totalSupply());
-  }
-
-  function previewDeposit(uint256 assets) public view override returns (uint256) {
-    uint256 supply = totalSupply; // Saves an extra SLOAD if totalSupply is non-zero.
-
-    // assets * beefyTotalSupply / beefyVaultUnderlyingBalance
-    return supply == 0 ? assets : assets.mulDivDown(beefyVault.totalSupply(), beefyVault.balance());
-  }
-
-  function withdraw(
-    uint256 assets,
-    address receiver,
-    address owner
-  ) public override returns (uint256 shares) {
-    shares = previewWithdraw(assets); // No need to check for rounding error, previewWithdraw rounds up.
-
-    if (msg.sender != owner) {
-      uint256 allowed = allowance[owner][msg.sender]; // Saves gas for limited approvals.
-
-      if (allowed != type(uint256).max) allowance[owner][msg.sender] = allowed - shares;
-    }
-    uint256 _shares = convertToShares(assets);
-    beforeWithdraw(assets, shares);
-
-    _burn(owner, _shares);
-
-    emit Withdraw(msg.sender, receiver, owner, assets, shares);
-
-    asset.safeTransfer(receiver, asset.balanceOf(address(this)));
+    // convert to beefyVault share
+    beefyVault.withdraw(supply == 0 ? assets : assets.mulDivUp(beefyVault.totalSupply(), beefyVault.balance()));
   }
 }
