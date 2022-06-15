@@ -91,7 +91,7 @@ contract BeefyERC4626 is MidasERC4626 {
     // underlyingToWithdraw * this4626TotalSupply / ourAssetsInTheBeefyVault
     //    return supply == 0 ? assets : assets.mulDivUp(supply, totalAssets());
 
-    return supply == 0 ? assets : (assets * beefyVault.totalSupply()) / beefyVault.balance();
+    return supply == 0 ? assets : assets.mulDivUp(beefyVault.totalSupply(), beefyVault.balance());
   }
 
   function previewRedeem(uint256 shares) public view override returns (uint256) {
@@ -99,7 +99,7 @@ contract BeefyERC4626 is MidasERC4626 {
 
     // ourShares * ourAssetsInTheBeefyVault / ourTotalSupply
 
-    return supply == 0 ? shares : (shares * beefyVault.balance()) / beefyVault.totalSupply();
+    return supply == 0 ? shares : shares.mulDivUp(beefyVault.balance(), beefyVault.totalSupply());
   }
 
   event previewVaultWith(uint256 value);
