@@ -82,33 +82,36 @@ contract BeefyERC4626 is MidasERC4626 {
   function previewWithdraw(uint256 assets) public view override returns (uint256) {
     uint256 supply = totalSupply;
 
-    // shares in the vault ? sharesInThis4626
-    //             shares = (_amount.mul(totalSupply())).div(balance());
-    // sharesInTheVaultToRedeem = assets * beefyVaultTotalShares / beefyVaultTotalAssets
-    // TODO muldivdown
-    //    return supply == 0 ? assets : assets.mulDivDown(beefyVault.totalSupply(), beefyVault.balance());
-
-    // underlyingToWithdraw * this4626TotalSupply / ourAssetsInTheBeefyVault
-    //    return supply == 0 ? assets : assets.mulDivUp(supply, totalAssets());
-
-    return supply == 0 ? assets : assets.mulDivDown(beefyVault.totalSupply(), beefyVault.balance());
+    // assets * beefyTotalSupply / beefyVaultUnderlyingBalance
+    return supply == 0 ? assets : assets.mulDivUp(beefyVault.totalSupply(), beefyVault.balance());
   }
 
   function previewRedeem(uint256 shares) public view override returns (uint256) {
     uint256 supply = totalSupply;
 
-    // ourShares * ourAssetsInTheBeefyVault / ourTotalSupply
-
+    // ourShares * beefyVaultUnderlyingBalance / beefyTotalSupply
     return supply == 0 ? shares : shares.mulDivDown(beefyVault.balance(), beefyVault.totalSupply());
   }
 
-  event previewVaultWith(uint256 value);
+  function previewMint(uint256 shares) public view override returns (uint256) {
+    uint256 supply = totalSupply;
+
+    // ourShares * beefyVaultUnderlyingBalance / beefyTotalSupply
+    return supply == 0 ? shares : shares.mulDivUp(beefyVault.balance(), beefyVault.totalSupply());
+  }
+
+  function previewDeposit(uint256 assets) public view override returns (uint256) {
+    uint256 supply = totalSupply; // Saves an extra SLOAD if totalSupply is non-zero.
+
+    // assets * beefyTotalSupply / beefyVaultUnderlyingBalance
+    return supply == 0 ? assets : assets.mulDivDown(beefyVault.totalSupply(), beefyVault.balance());
+  }
 
   function withdraw(
     uint256 assets,
     address receiver,
     address owner
-  ) public virtual override returns (uint256 shares) {
+  ) public override returns (uint256 shares) {
     shares = previewWithdraw(assets); // No need to check for rounding error, previewWithdraw rounds up.
 
     if (msg.sender != owner) {
