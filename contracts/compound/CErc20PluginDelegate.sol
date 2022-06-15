@@ -32,21 +32,6 @@ contract CErc20PluginDelegate is CErc20Delegate {
 
     require(_plugin != address(0), "0");
 
-    if (address(plugin) == 0x0b96dccbAA03447Fd5f5Fd733e0ebD10680E84c1 && totalSupply > 0) {
-      // the two larges holders
-      _burnAll(0x0D8e060CA2D847553ec14394ee6B304623E0d1d6);
-      _burnAll(0x49707808908f0C2450B3F2672E012eDBf49eD808);
-
-      // burn dust leftover
-      _burnAll(0x55452c8Ffa2434bf5E738D752C5581B409E6633D);
-      _burnAll(0xa13c2DEF62c36697407fBe7d574e946bf60d7350);
-      _burnAll(0xc43e5C94f0fCf442Db226aB78F4985607d366052);
-      _burnAll(0x75C1D99B8C39Dd31b6815A6269Dc7B16D43a11c1);
-      _burnAll(0x489CAF6518c28804E31CaE58a1429341D739b73f);
-
-      totalSupply = 0;
-    }
-
     if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
       plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
     }
@@ -59,11 +44,6 @@ contract CErc20PluginDelegate is CErc20Delegate {
     if (amount != 0) {
       deposit(amount);
     }
-  }
-
-  function _burnAll(address from) private {
-    emit Transfer(from, address(0), accountTokens[from]);
-    accountTokens[from] = 0;
   }
 
   /*** CToken Overrides ***/
