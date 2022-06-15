@@ -66,5 +66,9 @@ interface IComptroller {
 
   function _toggleAutoImplementations(bool enabled) external returns (uint256);
 
-  function _deployMarket ( bool isCEther, bytes memory constructorData, uint256 collateralFactorMantissa ) external returns ( uint256 );
+  function _deployMarket(
+    bool isCEther,
+    bytes memory constructorData,
+    uint256 collateralFactorMantissa
+  ) external returns (uint256);
 }
