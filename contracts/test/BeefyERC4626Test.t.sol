@@ -86,7 +86,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     erc4626Balance = beefyERC4626.balanceOf(address(cToken));
     assertEq(erc4626Balance, 1000);
     underlyingBalance = underlyingToken.balanceOf(address(this));
-    assertEq(underlyingBalance, 100e18 - 1);
+    assertEq(underlyingBalance, 100e18);
   }
 
   // function testInitializedValues() public {
