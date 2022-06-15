@@ -26,7 +26,10 @@ contract CarefulMath {
       return (MathError.NO_ERROR, 0);
     }
 
-    uint256 c = a * b;
+    uint256 c;
+    unchecked {
+      c = a * b;
+    }
 
     if (c / a != b) {
       return (MathError.INTEGER_OVERFLOW, 0);
@@ -61,7 +64,10 @@ contract CarefulMath {
    * @dev Adds two numbers, returns an error on overflow.
    */
   function addUInt(uint256 a, uint256 b) internal pure returns (MathError, uint256) {
-    uint256 c = a + b;
+    uint256 c;
+    unchecked {
+      c = a + b;
+    }
 
     if (c >= a) {
       return (MathError.NO_ERROR, c);
