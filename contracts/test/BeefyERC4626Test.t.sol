@@ -49,12 +49,12 @@ contract BeefyERC4626Test is WithPool, BaseTest {
   //   assertEq(address(beefyERC4626.beefyVault()), address(beefyVault));
   // }
 
-  function deposit() public {
+  function deposit() public shouldRun(forChains(BSC_MAINNET)) {
     underlyingToken.approve(address(beefyERC4626), depositAmount);
     beefyERC4626.deposit(depositAmount, address(this));
   }
 
-  function testDeposit() public {
+  function testDeposit() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 expectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
     uint256 expectedErc4626Shares = beefyERC4626.previewDeposit(depositAmount);
 
@@ -75,7 +75,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares);
   }
 
-  function testWithdraw() public {
+  function testWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 beefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
 
     deposit();
