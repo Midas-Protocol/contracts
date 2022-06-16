@@ -101,11 +101,17 @@ contract BeefyERC4626 is MidasERC4626 {
     return supply == 0 ? assets : assets.mulDivUp(supply, totalAssets());
   }
 
-  // TODO
   function previewRedeem(uint256 shares) public view override returns (uint256) {
     uint256 supply = totalSupply;
 
-    // ourShares * beefyVaultUnderlyingBalance / beefyTotalSupply
-    return supply == 0 ? shares : shares.mulDivDown(beefyVault.balance(), beefyVault.totalSupply());
+    uint256 assets = convertToAssets(shares);
+
+    uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
+    if (assetsInBeefyVault < assets) {
+      uint256 _withdraw = assets - assetsInBeefyVault;
+      assets -= (_withdraw * withdrawalFee) / BPS_DENOMINATOR;
+    }
+
+    return assets;
   }
 }
