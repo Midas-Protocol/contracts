@@ -116,7 +116,7 @@ contract BeefyERC4626UnitTest is BaseTest {
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     beefyVault = IBeefyVault(beefyVaultAddress);
-    beefyERC4626 = new BeefyERC4626(ERC20(cakeLPAddress), beefyVault);
+    beefyERC4626 = new BeefyERC4626(ERC20(cakeLPAddress), beefyVault, 100);
     cakeLpToken = ERC20(cakeLPAddress);
   }
 
@@ -150,13 +150,7 @@ contract BeefyERC4626UnitTest is BaseTest {
     }
 
     uint256 assetsToWithdraw = amount / 2;
-    uint256 beefyVaultSharesToWithdraw = beefyERC4626.previewWithdraw(assetsToWithdraw);
-    assertEq(beefyVaultSharesToWithdraw, beefyVaultSharesMintedToPlugin / 2, "previewWithdraw must return the shares of the beefy vault to redeem");
-
-    uint256 sharesToRedeem = beefyERC4626SharesMintedToBob / 2;
-    uint256 assetsToWithdrawFromBeefyVault = beefyERC4626.previewRedeem(sharesToRedeem);
-    assertEq(assetsToWithdrawFromBeefyVault, assetsToWithdraw, "expected assets to withdraw should equal half of the assets owned in the beefy vault");
-
+    
     beefyERC4626.withdraw(assetsToWithdraw, bob, bob);
     uint256 assetsWithdrawn = cakeLpToken.balanceOf(bob);
 
