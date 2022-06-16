@@ -84,11 +84,19 @@ contract BeefyERC4626 is MidasERC4626 {
     beefyVault.deposit(amount);
   }
 
-  function beforeWithdraw(uint256, uint256 shares) internal override {
+  // takes as argument the internal ERC4626 shares to redeem
+  // returns the external BeefyVault shares to withdraw
+  function convertToBeefyVaultShares(uint256 shares) public returns(uint256) {
     uint256 supply = totalSupply;
-    beefyVault.withdraw(supply == 0 ? shares : shares.mulDivUp(beefyVault.balanceOf(address(this)), supply));
+    return supply == 0 ? shares : shares.mulDivUp(beefyVault.balanceOf(address(this)), supply);
   }
 
+  // takes as argument the internal ERC4626 shares to redeem
+  function beforeWithdraw(uint256, uint256 shares) internal override {
+    beefyVault.withdraw(convertToBeefyVaultShares(shares));
+  }
+
+  // returns the internal ERC4626 shares to withdraw
   function previewWithdraw(uint256 assets) public view override returns (uint256) {
     uint256 supply = totalSupply;
 
@@ -101,6 +109,7 @@ contract BeefyERC4626 is MidasERC4626 {
     return supply == 0 ? assets : assets.mulDivUp(supply, totalAssets());
   }
 
+  // takes as argument the internal ERC4626 shares to redeem
   function previewRedeem(uint256 shares) public view override returns (uint256) {
     uint256 supply = totalSupply;
 
