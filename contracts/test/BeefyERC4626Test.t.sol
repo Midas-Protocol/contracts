@@ -139,7 +139,11 @@ contract BeefyERC4626UnitTest is BaseTest {
 
     // test if the shares of the BeefyERC4626 equal to the assets deposited
     uint256 beefyERC4626SharesMintedToBob = beefyERC4626.balanceOf(bob);
-    assertEq(beefyERC4626SharesMintedToBob, amount, "the first minted shares in beefyERC4626 are expected to equal the assets deposited");
+    assertEq(
+      beefyERC4626SharesMintedToBob,
+      amount,
+      "the first minted shares in beefyERC4626 are expected to equal the assets deposited"
+    );
 
     uint256 beefyVaultSharesMintedToPlugin = beefyVault.balanceOf(address(beefyERC4626));
 
@@ -150,7 +154,7 @@ contract BeefyERC4626UnitTest is BaseTest {
     }
 
     uint256 assetsToWithdraw = amount / 2;
-    
+
     beefyERC4626.withdraw(assetsToWithdraw, bob, bob);
     uint256 assetsWithdrawn = cakeLpToken.balanceOf(bob);
 

@@ -11,5 +11,4 @@ abstract contract MidasERC4626 is ERC4626, Ownable {
     string memory _name,
     string memory _symbol
   ) ERC4626(_asset, _name, _symbol) {}
-
 }
