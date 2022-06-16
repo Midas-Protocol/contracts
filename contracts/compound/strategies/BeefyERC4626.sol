@@ -103,7 +103,7 @@ contract BeefyERC4626 is MidasERC4626 {
     uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
     if (assetsInBeefyVault < assets) {
       uint256 _withdraw = assets - assetsInBeefyVault;
-      assets += (_withdraw * withdrawalFee) / (BPS_DENOMINATOR - withdrawalFee);
+      assets = assetsInBeefyVault + _withdraw * BPS_DENOMINATOR / (BPS_DENOMINATOR - withdrawalFee);
     }
 
     return supply == 0 ? assets : assets.mulDivUp(supply, totalAssets());
