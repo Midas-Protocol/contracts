@@ -80,7 +80,7 @@ contract BeefyERC4626 is MidasERC4626 {
 
   /* ========== INTERNAL FUNCTIONS ========== */
 
-  function afterDeposit(uint256 amount, uint256) internal override {
+  function afterDeposit(uint256 amount, uint256) internal override whenNotPaused {
     beefyVault.deposit(amount);
   }
 
@@ -92,7 +92,7 @@ contract BeefyERC4626 is MidasERC4626 {
   }
 
   // takes as argument the internal ERC4626 shares to redeem
-  function beforeWithdraw(uint256 assets, uint256 shares) internal override {
+  function beforeWithdraw(uint256 assets, uint256 shares) internal override whenNotPaused {
     beefyVault.withdraw(convertToBeefyVaultShares(shares));
   }
 
@@ -122,5 +122,12 @@ contract BeefyERC4626 is MidasERC4626 {
     }
 
     return assets;
+  }
+
+  /* ========== EMERGENCY FUNCTIONS ========== */
+
+  function emergencyWithdrawFromStrategy() external override onlyOwner {
+    beefyVault.withdraw(beefyVault.balanceOf(address(this)));
+    _pause();
   }
 }
