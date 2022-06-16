@@ -228,6 +228,7 @@ contract BeefyERC4626UnitTest is BaseTest {
     cakeLpToken.transfer(alice, 100e18);
 
     deposit(bob, amount);
+    vm.startPrank(bob);
 
     // test if the shares of the BeefyERC4626 equal to the assets deposited
     uint256 beefyERC4626SharesMintedToBob = beefyERC4626.balanceOf(bob);
@@ -260,6 +261,7 @@ contract BeefyERC4626UnitTest is BaseTest {
     cakeLpToken.transfer(alice, 100e18);
 
     deposit(charlie, amount);
+    vm.startPrank(charlie);
 
     // test if the shares of the BeefyERC4626 equal to the assets deposited
     uint256 beefyERC4626SharesMintedToCharlie = beefyERC4626.balanceOf(charlie);
