@@ -35,6 +35,9 @@ contract BeefyERC4626 is MidasERC4626 {
   /* ========== STATE VARIABLES ========== */
 
   IBeefyVault public immutable beefyVault;
+  uint256 public immutable withdrawalFee;
+
+  uint256 BPS_DENOMINATOR = 10_000;
 
   /* ========== CONSTRUCTOR ========== */
 
@@ -42,8 +45,13 @@ contract BeefyERC4626 is MidasERC4626 {
      @notice Creates a new Vault that accepts a specific underlying token.
      @param _asset The ERC20 compliant token the Vault should accept.
      @param _beefyVault The Beefy Vault contract.
+     @param _withdrawalFee of the beefyVault in BPS
     */
-  constructor(ERC20 _asset, IBeefyVault _beefyVault)
+  constructor(
+    ERC20 _asset,
+    IBeefyVault _beefyVault,
+    uint256 _withdrawalFee
+  )
     MidasERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
@@ -51,6 +59,7 @@ contract BeefyERC4626 is MidasERC4626 {
     )
   {
     beefyVault = _beefyVault;
+    withdrawalFee = _withdrawalFee;
 
     asset.approve(address(beefyVault), type(uint256).max);
   }
@@ -75,10 +84,28 @@ contract BeefyERC4626 is MidasERC4626 {
     beefyVault.deposit(amount);
   }
 
-  function beforeWithdraw(uint256 assets, uint256) internal override {
+  function beforeWithdraw(uint256, uint256 shares) internal override {
+    uint256 supply = totalSupply;
+    beefyVault.withdraw(supply == 0 ? shares : shares.mulDivUp(beefyVault.balanceOf(address(this)), supply));
+  }
+
+  function previewWithdraw(uint256 assets) public view override returns (uint256) {
     uint256 supply = totalSupply;
 
-    // convert to beefyVault share
-    beefyVault.withdraw(supply == 0 ? assets : assets.mulDivUp(beefyVault.totalSupply(), beefyVault.balance()));
+    uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
+    if (assetsInBeefyVault < assets) {
+      uint256 _withdraw = assets - assetsInBeefyVault;
+      assets += (_withdraw * withdrawalFee) / (BPS_DENOMINATOR - withdrawalFee);
+    }
+
+    return supply == 0 ? assets : assets.mulDivUp(supply, totalAssets());
+  }
+
+  // TODO
+  function previewRedeem(uint256 shares) public view override returns (uint256) {
+    uint256 supply = totalSupply;
+
+    // ourShares * beefyVaultUnderlyingBalance / beefyTotalSupply
+    return supply == 0 ? shares : shares.mulDivDown(beefyVault.balance(), beefyVault.totalSupply());
   }
 }
