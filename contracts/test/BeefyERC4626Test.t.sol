@@ -2,6 +2,7 @@
 pragma solidity >=0.4.23;
 
 import "ds-test/test.sol";
+import "forge-std/Vm.sol";
 import "./helpers/WithPool.sol";
 import "./config/BaseTest.t.sol";
 
@@ -15,12 +16,13 @@ import { IStrategy } from "./mocks/beefy/IStrategy.sol";
 
 contract BeefyERC4626Test is WithPool, BaseTest {
   BeefyERC4626 beefyERC4626;
-
-  MockERC20 testToken;
-  MockStrategy mockStrategy;
-  MockVault mockVault;
+  IBeefyVault beefyVault;
+  address beefyStrategy = 0xEeBcd7E1f008C52fe5804B306832B7DD317e163D;
 
   uint256 depositAmount = 100e18;
+
+  uint256 initalBeefyBalance;
+  uint256 initalBeefySupply;
 
   constructor()
     WithPool(
@@ -34,57 +36,70 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     underlyingToken.transfer(address(this), 100e18);
     underlyingToken.transfer(address(1), 100e18);
     vm.stopPrank();
-    setUpPool("beefy-test", false, 0.1e18, 1.1e18);
+    beefyVault = IBeefyVault(0xD2FeCe7Ff1B791F8fE7f35424165abB8BD1671f2);
+    beefyERC4626 = new BeefyERC4626(underlyingToken, beefyVault);
+    initalBeefyBalance = beefyVault.balance();
+    initalBeefySupply = beefyVault.totalSupply();
   }
 
-  function testDeployCErc20PluginDelegate() public shouldRun(forChains(BSC_MAINNET)) {
-    emit log_uint(underlyingToken.balanceOf(address(this)));
-    mockStrategy = new MockStrategy(address(underlyingToken));
-    mockVault = new MockVault(address(mockStrategy), "MockVault", "MV");
-    beefyERC4626 = new BeefyERC4626(underlyingToken, IBeefyVault(address(mockVault)));
+  // function testInitializedValues() public {
+  //   assertEq(beefyERC4626.name(), "Midas Pancake LPs Vault");
+  //   assertEq(beefyERC4626.symbol(), "mvCake-LP");
+  //   assertEq(address(beefyERC4626.asset()), address(underlyingToken));
+  //   assertEq(address(beefyERC4626.beefyVault()), address(beefyVault));
+  // }
 
-    deployCErc20PluginDelegate(ERC4626(address(underlyingToken)), 0.9e18);
-    CToken[] memory allmarkets = comptroller.getAllMarkets();
-    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allmarkets[allmarkets.length - 1]));
+  function deposit() public {
+    underlyingToken.approve(address(beefyERC4626), depositAmount);
+    beefyERC4626.deposit(depositAmount, address(this));
+  }
 
-    cToken._setImplementationSafe(address(cErc20PluginDelegate), false, abi.encode(address(beefyERC4626)));
-    assertEq(address(cToken.plugin()), address(beefyERC4626));
+  function testDeposit() public {
+    uint256 expectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
+    uint256 expectedErc4626Shares = beefyERC4626.previewDeposit(depositAmount);
 
-    underlyingToken.approve(address(cToken), 1e36);
-    address[] memory cTokens = new address[](1);
-    cTokens[0] = address(cToken);
-    comptroller.enterMarkets(cTokens);
+    deposit();
 
-    uint256 balanceOfVault = underlyingToken.balanceOf(address(mockVault));
-    uint256 cTokenBalance = cToken.balanceOf(address(this));
+    // Test that the actual transfers worked
+    assertEq(beefyVault.balance(), initalBeefyBalance + depositAmount);
 
-    cToken.mint(1000);
-    cTokenBalance = cToken.balanceOf(address(this));
-    assertEq(cToken.totalSupply(), 1000 * 5);
-    uint256 erc4626Balance = beefyERC4626.balanceOf(address(cToken));
-    assertEq(erc4626Balance, 1000);
-    assertEq(cTokenBalance, 1000 * 5);
-    uint256 underlyingBalance = underlyingToken.balanceOf(address(this));
+    // Test that the balance view calls work
+    assertEq(beefyERC4626.totalAssets(), depositAmount);
+    assertEq(beefyERC4626.balanceOfUnderlying(address(this)), depositAmount);
 
-    vm.startPrank(address(1));
+    // Test that we minted the correct amount of token
+    assertEq(beefyERC4626.balanceOf(address(this)), expectedErc4626Shares);
+    assertEq(beefyERC4626.totalSupply(), expectedErc4626Shares);
 
-    underlyingToken.approve(address(cToken), 1e36);
-    cToken.mint(1000);
-    balanceOfVault = underlyingToken.balanceOf(address(mockVault));
-    cTokenBalance = cToken.balanceOf(address(1));
-    assertEq(cTokenBalance, 1000 * 5);
-    erc4626Balance = beefyERC4626.balanceOf(address(cToken));
-    assertEq(erc4626Balance, 2000);
-    assertEq(cToken.totalSupply(), 1000 * 5 + cTokenBalance);
-    underlyingBalance = underlyingToken.balanceOf(address(1));
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares);
+  }
 
-    vm.stopPrank();
+  function testWithdraw() public {
+    uint256 beefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
 
-    cToken.redeemUnderlying(1000);
-    cTokenBalance = cToken.balanceOf(address(this));
-    erc4626Balance = beefyERC4626.balanceOf(address(cToken));
-    assertEq(erc4626Balance, 1000);
-    underlyingBalance = underlyingToken.balanceOf(address(this));
-    assertEq(underlyingBalance, 100e18);
+    deposit();
+
+    uint256 assetBalBefore = underlyingToken.balanceOf(address(this));
+    uint256 erc4626BalBefore = beefyERC4626.balanceOf(address(this));
+    uint256 expectedErc4626SharesNeeded = beefyERC4626.previewWithdraw(10e18);
+    uint256 expectedBeefySharesNeeded = (expectedErc4626SharesNeeded * beefyVault.balanceOf(address(this))) /
+      beefyERC4626.totalSupply();
+
+    beefyERC4626.withdraw(10e18, address(this), address(this));
+
+    // Test that the actual transfers worked
+    assertEq(underlyingToken.balanceOf(address(this)), assetBalBefore + 10e18);
+
+    // Test that the balance view calls work
+    // assertEq(beefyERC4626.totalAssets(), depositAmount - ((expectedErc4626SharesNeeded * 101) / 100));
+    // assertEq(beefyERC4626.balanceOfUnderlying(address(this)), depositAmount - expectedErc4626SharesNeeded);
+    // assertEq(beefyERC4626.totalSupply(), depositAmount - expectedErc4626SharesNeeded);
+
+    // Test that we burned the right amount of shares
+    assertEq(beefyERC4626.balanceOf(address(this)), erc4626BalBefore - expectedErc4626SharesNeeded);
+
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    // assertEq(beefyVault.balanceOf(address(beefyERC4626)), beefyShares - expectedBeefySharesNeeded);
   }
 }
