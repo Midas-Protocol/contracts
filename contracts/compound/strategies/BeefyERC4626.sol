@@ -94,10 +94,6 @@ contract BeefyERC4626 is MidasERC4626 {
   // takes as argument the internal ERC4626 shares to redeem
   function beforeWithdraw(uint256 assets, uint256 shares) internal override {
     beefyVault.withdraw(convertToBeefyVaultShares(shares));
-    //    uint256 amountWithdrawn = asset.balanceOf(address(this));
-    //    if (amountWithdrawn > assets) {
-    //      beefyVault.deposit(amountWithdrawn - assets);
-    //    }
   }
 
   // returns the internal ERC4626 shares to withdraw
@@ -107,7 +103,7 @@ contract BeefyERC4626 is MidasERC4626 {
     uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
     if (assetsInBeefyVault < assets) {
       uint256 _withdraw = assets - assetsInBeefyVault;
-      assets += (_withdraw * withdrawalFee) / (BPS_DENOMINATOR - withdrawalFee);
+      assets = assetsInBeefyVault + (_withdraw * BPS_DENOMINATOR) / (BPS_DENOMINATOR - withdrawalFee);
     }
 
     return supply == 0 ? assets : assets.mulDivUp(supply, totalAssets());

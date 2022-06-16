@@ -23,7 +23,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
   address beefyStrategy = 0xEeBcd7E1f008C52fe5804B306832B7DD317e163D;
 
   uint256 depositAmount = 100e18;
-  uint256 withdrawalFee = 100;
+  uint256 withdrawalFee = 10;
   uint256 BPS_DENOMINATOR = 10_000;
 
   uint256 initalBeefyBalance;
@@ -202,7 +202,7 @@ contract BeefyERC4626UnitTest is BaseTest {
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     beefyVault = IBeefyVault(beefyVaultAddress);
-    beefyERC4626 = new BeefyERC4626(ERC20(cakeLPAddress), beefyVault, 100);
+    beefyERC4626 = new BeefyERC4626(ERC20(cakeLPAddress), beefyVault, 10);
     cakeLpToken = ERC20(cakeLPAddress);
   }
 
@@ -228,6 +228,7 @@ contract BeefyERC4626UnitTest is BaseTest {
     cakeLpToken.transfer(alice, 100e18);
 
     deposit(bob, amount);
+    vm.startPrank(bob);
 
     vm.startPrank(bob);
 
@@ -262,6 +263,7 @@ contract BeefyERC4626UnitTest is BaseTest {
     cakeLpToken.transfer(alice, 100e18);
 
     deposit(charlie, amount);
+    vm.startPrank(charlie);
 
     vm.startPrank(charlie);
 
