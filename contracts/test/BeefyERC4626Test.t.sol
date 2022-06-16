@@ -149,6 +149,7 @@ contract BeefyERC4626UnitTest is BaseTest {
       emit log_uint(assetsToWithdraw);
       emit log_uint(assetsWithdrawn);
     }
+    assertEq(assetsWithdrawn, assetsToWithdraw, "the assets withdrawn must equal the requested assets to withdraw");
 
     vm.stopPrank();
   }
