@@ -75,7 +75,7 @@ contract BeefyERC4626 is MidasERC4626 {
     beefyVault.deposit(amount);
   }
 
-  function beforeWithdraw(uint256 assets, uint256 shares) internal override {
+  function beforeWithdraw(uint256 assets, uint256) internal override {
     uint256 supply = totalSupply;
 
     // convert to beefyVault share

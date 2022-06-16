@@ -11,4 +11,20 @@ abstract contract MidasERC4626 is ERC4626, Ownable {
     string memory _name,
     string memory _symbol
   ) ERC4626(_asset, _name, _symbol) {}
+
+  function previewWithdraw(uint256 assets) public view virtual returns (uint256) {
+    revert("previewWithdraw must be overridden");
+  }
+
+  function previewRedeem(uint256 shares) public view virtual returns (uint256) {
+    revert("previewRedeem must be overridden");
+  }
+
+  function previewMint(uint256 shares) public view virtual returns (uint256) {
+    revert("previewMint must be overridden");
+  }
+
+  function previewDeposit(uint256 assets) public view virtual returns (uint256) {
+    revert("previewDeposit must be overridden");
+  }
 }
