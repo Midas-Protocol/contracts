@@ -196,6 +196,7 @@ contract BeefyERC4626UnitTest is BaseTest {
   address beefyVaultAddress = 0x94E85B8E050F3F281CB9597cc0144F1F7AF1fe9B;
   address alice = address(10);
   address bob = address(20);
+  address charlie = address(30);
   IBeefyVault beefyVault;
   ERC20 cakeLpToken;
 
@@ -205,23 +206,28 @@ contract BeefyERC4626UnitTest is BaseTest {
     cakeLpToken = ERC20(cakeLPAddress);
   }
 
-  function testTheBug() public shouldRun(forChains(BSC_MAINNET)) {
+  function deposit(address user, uint256 amount) internal {
+    // transfer to user exactly amount
+    vm.prank(alice);
+    cakeLpToken.transfer(user, amount);
+    assertEq(cakeLpToken.balanceOf(user), amount, "the full balance of cakeLP of user should equal amount");
+
+    // deposit the full amount to the plugin as user, check the result
+    vm.startPrank(user);
+    cakeLpToken.approve(address(beefyERC4626), amount);
+    beefyERC4626.deposit(amount, user);
+    // make sure the full amount is deposited and none is left
+    assertEq(cakeLpToken.balanceOf(user), 0, "should deposit the full balance of cakeLP of user");
+    assertEq(cakeLpToken.balanceOf(address(beefyERC4626)), 0, "should deposit the full balance of cakeLP of user");
+    vm.stopPrank();
+  }
+
+  function testTheBugWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 amount = 1e18;
     vm.prank(beefyStrategyAddress);
     cakeLpToken.transfer(alice, 100e18);
 
-    // transfer to bob exactly amount
-    vm.prank(alice);
-    cakeLpToken.transfer(bob, amount);
-    assertEq(cakeLpToken.balanceOf(bob), amount, "the full balance of cakeLP of bob should equal amount");
-
-    // deposit the full amount to the plugin as bob, check the result
-    vm.startPrank(bob);
-    cakeLpToken.approve(address(beefyERC4626), amount);
-    beefyERC4626.deposit(amount, bob);
-    // make sure the full amount is deposited and none is left
-    assertEq(cakeLpToken.balanceOf(bob), 0, "should deposit the full balance of cakeLP of bob");
-    assertEq(cakeLpToken.balanceOf(address(beefyERC4626)), 0, "should deposit the full balance of cakeLP of bob");
+    deposit(bob, amount);
 
     // test if the shares of the BeefyERC4626 equal to the assets deposited
     uint256 beefyERC4626SharesMintedToBob = beefyERC4626.balanceOf(bob);
@@ -231,28 +237,45 @@ contract BeefyERC4626UnitTest is BaseTest {
       "the first minted shares in beefyERC4626 are expected to equal the assets deposited"
     );
 
-    uint256 beefyVaultSharesMintedToPlugin = beefyVault.balanceOf(address(beefyERC4626));
+    {
+      uint256 assetsToWithdraw = amount / 2;
+      beefyERC4626.withdraw(assetsToWithdraw, bob, bob);
+      uint256 assetsWithdrawn = cakeLpToken.balanceOf(bob);
+      assertEq(assetsWithdrawn, assetsToWithdraw, "the assets withdrawn must equal the requested assets to withdraw");
+    }
 
-    uint256 assetsToWithdraw = amount / 2;
+    uint256 lockedFunds = cakeLpToken.balanceOf(address(beefyERC4626));
+    {
+      emit log_uint(lockedFunds);
+    }
+    // check if any funds remained locked in the BeefyERC4626
+    assertEq(lockedFunds, 0, "should transfer the full balance of the withdrawn cakeLP");
 
-    uint256 beefyVaultSharesToWithdraw = beefyERC4626.previewWithdraw(assetsToWithdraw);
+    vm.stopPrank();
+  }
+
+  function testTheBugRedeem() public shouldRun(forChains(BSC_MAINNET)) {
+    uint256 amount = 1e18;
+    vm.prank(beefyStrategyAddress);
+    cakeLpToken.transfer(alice, 100e18);
+
+    deposit(charlie, amount);
+
+    // test if the shares of the BeefyERC4626 equal to the assets deposited
+    uint256 beefyERC4626SharesMintedToCharlie = beefyERC4626.balanceOf(charlie);
     assertEq(
-      beefyVaultSharesToWithdraw,
-      beefyVaultSharesMintedToPlugin / 2,
-      "previewWithdraw must return the shares of the beefy vault to redeem"
+      beefyERC4626SharesMintedToCharlie,
+      amount,
+      "the first minted shares in beefyERC4626 are expected to equal the assets deposited"
     );
 
-    uint256 sharesToRedeem = beefyERC4626SharesMintedToBob / 2;
-    uint256 assetsToWithdrawFromBeefyVault = beefyERC4626.previewRedeem(sharesToRedeem);
-    assertEq(
-      assetsToWithdrawFromBeefyVault,
-      assetsToWithdraw,
-      "expected assets to withdraw should equal half of the assets owned in the beefy vault"
-    );
-
-    beefyERC4626.withdraw(assetsToWithdraw, bob, bob);
-    uint256 assetsWithdrawn = cakeLpToken.balanceOf(bob);
-    assertEq(assetsWithdrawn, assetsToWithdraw, "the assets withdrawn must equal the requested assets to withdraw");
+    {
+      uint256 beefyERC4626SharesToRedeem = beefyERC4626.balanceOf(charlie);
+      beefyERC4626.redeem(beefyERC4626SharesToRedeem, charlie, charlie);
+      uint256 assetsWithdrawn = cakeLpToken.balanceOf(charlie);
+      uint256 assetsToWithdraw = beefyERC4626.previewRedeem(beefyERC4626SharesToRedeem);
+      assertEq(assetsWithdrawn, assetsToWithdraw, "the assets withdrawn must equal the requested assets to withdraw");
+    }
 
     uint256 lockedFunds = cakeLpToken.balanceOf(address(beefyERC4626));
     {
