@@ -35,6 +35,9 @@ contract BeefyERC4626 is MidasERC4626 {
   /* ========== STATE VARIABLES ========== */
 
   IBeefyVault public immutable beefyVault;
+  uint256 public immutable withdrawalFee;
+
+  uint256 BPS_DENOMINATOR = 10_000;
 
   /* ========== CONSTRUCTOR ========== */
 
@@ -42,8 +45,13 @@ contract BeefyERC4626 is MidasERC4626 {
      @notice Creates a new Vault that accepts a specific underlying token.
      @param _asset The ERC20 compliant token the Vault should accept.
      @param _beefyVault The Beefy Vault contract.
+     @param _withdrawalFee of the beefyVault in BPS
     */
-  constructor(ERC20 _asset, IBeefyVault _beefyVault)
+  constructor(
+    ERC20 _asset,
+    IBeefyVault _beefyVault,
+    uint256 _withdrawalFee
+  )
     MidasERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
@@ -51,6 +59,7 @@ contract BeefyERC4626 is MidasERC4626 {
     )
   {
     beefyVault = _beefyVault;
+    withdrawalFee = _withdrawalFee;
 
     asset.approve(address(beefyVault), type(uint256).max);
   }
@@ -83,14 +92,10 @@ contract BeefyERC4626 is MidasERC4626 {
   function previewWithdraw(uint256 assets) public view override returns (uint256) {
     uint256 supply = totalSupply;
 
-    // Placeholder amount
-    // TODO find a way to fetch or set this amount
-    uint256 withdrawalFee = 100;
-
     uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
     if (assetsInBeefyVault < assets) {
       uint256 _withdraw = assets - assetsInBeefyVault;
-      assets += (_withdraw * withdrawalFee) / (10_000 - withdrawalFee);
+      assets += (_withdraw * withdrawalFee) / (BPS_DENOMINATOR - withdrawalFee);
     }
 
     return supply == 0 ? assets : assets.mulDivUp(supply, totalAssets());

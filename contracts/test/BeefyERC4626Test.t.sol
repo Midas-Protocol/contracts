@@ -37,7 +37,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     underlyingToken.transfer(address(1), 100e18);
     vm.stopPrank();
     beefyVault = IBeefyVault(0xD2FeCe7Ff1B791F8fE7f35424165abB8BD1671f2);
-    beefyERC4626 = new BeefyERC4626(underlyingToken, beefyVault);
+    beefyERC4626 = new BeefyERC4626(underlyingToken, beefyVault, 100);
     initalBeefyBalance = beefyVault.balance();
     initalBeefySupply = beefyVault.totalSupply();
   }
@@ -89,15 +89,15 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyERC4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertEq(underlyingToken.balanceOf(address(this)), assetBalBefore + 10e18);
+    assertEq(underlyingToken.balanceOf(address(this)), assetBalBefore + 10e18, "!user asset bal");
 
     // Test that the balance view calls work
-    // assertEq(beefyERC4626.totalAssets(), depositAmount - ((expectedErc4626SharesNeeded * 101) / 100));
+    // assertEq(beefyERC4626.totalAssets(), depositAmount - expectedErc4626SharesNeeded, "!erc4626 asset bal");
     // assertEq(beefyERC4626.balanceOfUnderlying(address(this)), depositAmount - expectedErc4626SharesNeeded);
     // assertEq(beefyERC4626.totalSupply(), depositAmount - expectedErc4626SharesNeeded);
 
     // Test that we burned the right amount of shares
-    assertEq(beefyERC4626.balanceOf(address(this)), erc4626BalBefore - expectedErc4626SharesNeeded);
+    assertEq(beefyERC4626.balanceOf(address(this)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     // assertEq(beefyVault.balanceOf(address(beefyERC4626)), beefyShares - expectedBeefySharesNeeded);
