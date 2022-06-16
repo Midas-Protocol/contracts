@@ -222,14 +222,12 @@ contract BeefyERC4626UnitTest is BaseTest {
     vm.stopPrank();
   }
 
-  function testTheBugWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
-    uint256 amount = 1e18;
+  function testTheBugWithdraw(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
+    vm.assume(amount > 100 && amount < 1e19);
     vm.prank(beefyStrategyAddress);
     cakeLpToken.transfer(alice, 100e18);
 
     deposit(bob, amount);
-    vm.startPrank(bob);
-
     vm.startPrank(bob);
 
     // test if the shares of the BeefyERC4626 equal to the assets deposited
@@ -244,7 +242,7 @@ contract BeefyERC4626UnitTest is BaseTest {
       uint256 assetsToWithdraw = amount / 2;
       beefyERC4626.withdraw(assetsToWithdraw, bob, bob);
       uint256 assetsWithdrawn = cakeLpToken.balanceOf(bob);
-      assertEq(assetsWithdrawn, assetsToWithdraw, "the assets withdrawn must equal the requested assets to withdraw");
+      assertTrue(assetsToWithdraw - assetsWithdrawn < 10, "the assets withdrawn must be almost equal to the requested assets to withdraw");
     }
 
     uint256 lockedFunds = cakeLpToken.balanceOf(address(beefyERC4626));
@@ -252,19 +250,17 @@ contract BeefyERC4626UnitTest is BaseTest {
       emit log_uint(lockedFunds);
     }
     // check if any funds remained locked in the BeefyERC4626
-    assertEq(lockedFunds, 0, "should transfer the full balance of the withdrawn cakeLP");
+    assertTrue(lockedFunds < 10, "should transfer the full balance of the withdrawn cakeLP, some dust is acceptable");
 
     vm.stopPrank();
   }
 
-  function testTheBugRedeem() public shouldRun(forChains(BSC_MAINNET)) {
-    uint256 amount = 1e18;
+  function testTheBugRedeem(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
+    vm.assume(amount > 100 && amount < 1e19);
     vm.prank(beefyStrategyAddress);
     cakeLpToken.transfer(alice, 100e18);
 
     deposit(charlie, amount);
-    vm.startPrank(charlie);
-
     vm.startPrank(charlie);
 
     // test if the shares of the BeefyERC4626 equal to the assets deposited
@@ -278,9 +274,9 @@ contract BeefyERC4626UnitTest is BaseTest {
     {
       uint256 beefyERC4626SharesToRedeem = beefyERC4626.balanceOf(charlie);
       beefyERC4626.redeem(beefyERC4626SharesToRedeem, charlie, charlie);
-      uint256 assetsWithdrawn = cakeLpToken.balanceOf(charlie);
-      uint256 assetsToWithdraw = beefyERC4626.previewRedeem(beefyERC4626SharesToRedeem);
-      assertEq(assetsWithdrawn, assetsToWithdraw, "the assets withdrawn must equal the requested assets to withdraw");
+      uint256 assetsRedeemed = cakeLpToken.balanceOf(charlie);
+      uint256 assetsToRedeem = beefyERC4626.previewRedeem(beefyERC4626SharesToRedeem);
+      assertTrue(assetsToRedeem - assetsRedeemed < 10, "the assets redeemed must be almost equal to the requested assets to redeem");
     }
 
     uint256 lockedFunds = cakeLpToken.balanceOf(address(beefyERC4626));
@@ -288,7 +284,7 @@ contract BeefyERC4626UnitTest is BaseTest {
       emit log_uint(lockedFunds);
     }
     // check if any funds remained locked in the BeefyERC4626
-    assertEq(lockedFunds, 0, "should transfer the full balance of the withdrawn cakeLP");
+    assertTrue(lockedFunds < 10, "should transfer the full balance of the redeemed cakeLP, some dust is acceptable");
 
     vm.stopPrank();
   }
