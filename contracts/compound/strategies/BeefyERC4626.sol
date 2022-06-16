@@ -86,7 +86,7 @@ contract BeefyERC4626 is MidasERC4626 {
 
   // takes as argument the internal ERC4626 shares to redeem
   // returns the external BeefyVault shares to withdraw
-  function convertToBeefyVaultShares(uint256 shares) public returns(uint256) {
+  function convertToBeefyVaultShares(uint256 shares) public returns (uint256) {
     uint256 supply = totalSupply;
     return supply == 0 ? shares : shares.mulDivUp(beefyVault.balanceOf(address(this)), supply);
   }
