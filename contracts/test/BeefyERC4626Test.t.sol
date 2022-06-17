@@ -269,7 +269,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testPauseContract() public {
+  function testPauseContract() public shouldRun(forChains(BSC_MAINNET)) {
     sendUnderlyingToken(depositAmount, address(this));
 
     deposit();
@@ -290,7 +290,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyERC4626.redeem(1e18, address(this), address(this));
   }
 
-  function testEmergencyWithdrawFromStrategyAndPauseContract() public {
+  function testEmergencyWithdrawFromStrategyAndPauseContract() public shouldRun(forChains(BSC_MAINNET)) {
     deposit();
     uint256 expectedBal = beefyERC4626.previewRedeem(depositAmount);
 
@@ -300,7 +300,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertEq(beefyERC4626.totalAssets(), 0, "!totalAssets == 0");
   }
 
-  function testEmergencyWithdraw() public {
+  function testEmergencyWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
     deposit();
     uint256 expectedBal = beefyERC4626.previewRedeem(depositAmount);
 
