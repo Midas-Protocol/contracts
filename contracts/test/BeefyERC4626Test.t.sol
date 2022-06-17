@@ -272,7 +272,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testMultipleDeposit() public {
+  function testMultipleDeposit() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 expectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
     uint256 expectedErc4626Shares = beefyERC4626.previewDeposit(depositAmount);
 
@@ -308,7 +308,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 1, "Beefy erc4626 locked amount checking");
   }
 
-  function testMultipleWithdraw() public {
+  function testMultipleWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 beefyShares = ((depositAmount * initalBeefySupply) / initalBeefyBalance) * 2;
 
     uint256 withdrawalAmount = 10e18;
@@ -382,7 +382,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 2, "Beefy erc4626 locked amount checking");
   }
 
-  function testMultipleRedeem() public {
+  function testMultipleRedeem() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 beefyShares = ((depositAmount * initalBeefySupply) / initalBeefyBalance) * 2;
 
     uint256 withdrawalAmount = 10e18;
@@ -453,7 +453,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 2, "Beefy erc4626 locked amount checking");
   }
 
-  function testMultipleMint() public {
+  function testMultipleMint() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 expectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
     uint256 mintAmount = beefyERC4626.previewDeposit(depositAmount);
 
