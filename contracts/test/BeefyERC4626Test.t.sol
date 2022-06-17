@@ -269,21 +269,49 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testEmergencyWithdrawFromStrategy() public {
+  function testPauseContract() public {
     sendUnderlyingToken(depositAmount, address(this));
 
     deposit();
 
-    beefyERC4626.emergencyWithdrawFromStrategy();
-
-    assertEq(beefyERC4626.paused(), true, "!paused");
+    beefyERC4626.emergencyWithdrawFromStrategyAndPauseContract();
 
     underlyingToken.approve(address(beefyERC4626), depositAmount);
     vm.expectRevert("Pausable: paused");
     beefyERC4626.deposit(depositAmount, address(this));
 
     vm.expectRevert("Pausable: paused");
+    beefyERC4626.mint(depositAmount, address(this));
+
+    vm.expectRevert("Pausable: paused");
     beefyERC4626.withdraw(1e18, address(this), address(this));
+
+    vm.expectRevert("Pausable: paused");
+    beefyERC4626.redeem(1e18, address(this), address(this));
+  }
+
+  function testEmergencyWithdrawFromStrategyAndPauseContract() public {
+    deposit();
+    uint256 expectedBal = beefyERC4626.previewRedeem(depositAmount);
+
+    beefyERC4626.emergencyWithdrawFromStrategyAndPauseContract();
+
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), expectedBal, "!withdraws underlying");
+    assertEq(beefyERC4626.totalAssets(), 0, "!totalAssets == 0");
+  }
+
+  function testEmergencyWithdraw() public {
+    deposit();
+    uint256 expectedBal = beefyERC4626.previewRedeem(depositAmount);
+
+    beefyERC4626.emergencyWithdrawFromStrategyAndPauseContract();
+
+    beefyERC4626.emergencyWithdraw(depositAmount);
+
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "!no leftover");
+    assertEq(beefyERC4626.totalAssets(), 0, "!totalAssets == 0");
+    assertEq(beefyERC4626.totalSupply(), 0, "!totalSupply == 0");
+    assertEq(underlyingToken.balanceOf(address(this)), expectedBal, "!userBal");
   }
 }
 
