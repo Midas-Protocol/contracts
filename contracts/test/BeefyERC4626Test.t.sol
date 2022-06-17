@@ -37,19 +37,27 @@ contract BeefyERC4626Test is WithPool, BaseTest {
   {}
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
-    vm.startPrank(0x1083926054069AaD75d7238E9B809b0eF9d94e5B);
-    underlyingToken.transfer(address(this), 100e18);
-    underlyingToken.transfer(address(1), 100e18);
-    vm.stopPrank();
     beefyVault = IBeefyVault(0xD2FeCe7Ff1B791F8fE7f35424165abB8BD1671f2);
     beefyERC4626 = new BeefyERC4626(underlyingToken, beefyVault, withdrawalFee);
     initalBeefyBalance = beefyVault.balance();
     initalBeefySupply = beefyVault.totalSupply();
+    sendUnderlyingToken(100e18, address(this));
   }
 
   function deposit() public {
     underlyingToken.approve(address(beefyERC4626), depositAmount);
     beefyERC4626.deposit(depositAmount, address(this));
+  }
+
+  function sendUnderlyingToken(uint256 amount, address recipient) public {
+    vm.startPrank(0x1083926054069AaD75d7238E9B809b0eF9d94e5B);
+    underlyingToken.transfer(recipient, amount);
+    vm.stopPrank();
+  }
+
+  function increaseAssetsInVault() public {
+    sendUnderlyingToken(1000e18, address(beefyVault));
+    beefyVault.earn();
   }
 
   function testInitializedValues() public {
@@ -92,6 +100,34 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares);
   }
 
+  function testDepositWithIncreasedVaultValue() public {
+    sendUnderlyingToken(depositAmount, address(this));
+
+    uint256 oldExpectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
+    uint256 oldExpected4626Shares = beefyERC4626.previewDeposit(depositAmount);
+
+    deposit();
+
+    // Increase the share price
+    increaseAssetsInVault();
+
+    uint256 expectedBeefyShares = (depositAmount * beefyVault.totalSupply()) / beefyVault.balance();
+    uint256 previewErc4626Shares = beefyERC4626.previewDeposit(depositAmount);
+    uint256 expected4626Shares = depositAmount.mulDivDown(beefyERC4626.totalSupply(), beefyERC4626.totalAssets());
+
+    deposit();
+
+    // Test that we minted the correct amount of token
+    assertEq(beefyERC4626.balanceOf(address(this)), oldExpected4626Shares + previewErc4626Shares);
+
+    // Test that we got less shares on the second mint after assets in the vault increased
+    assertLe(previewErc4626Shares, oldExpected4626Shares, "!new shares < old Shares");
+    assertEq(previewErc4626Shares, expected4626Shares, "!previewShares == expectedShares");
+
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(beefyVault.balanceOf(address(beefyERC4626)), oldExpectedBeefyShares + expectedBeefyShares);
+  }
+
   function testMint() public {
     uint256 expectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
     uint256 mintAmount = beefyERC4626.previewDeposit(depositAmount);
@@ -129,7 +165,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
       beefyERC4626.totalSupply()
     );
 
-    beefyERC4626.withdraw(10e18, address(this), address(this));
+    beefyERC4626.withdraw(withdrawalAmount, address(this), address(this));
 
     // Test that the actual transfers worked
     assertEq(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount, "!user asset bal");
@@ -142,12 +178,57 @@ contract BeefyERC4626Test is WithPool, BaseTest {
 
     // Test that we burned the right amount of shares
     assertEq(beefyERC4626.balanceOf(address(this)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "!0");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     assertEq(
       beefyVault.balanceOf(address(beefyERC4626)),
       beefyShares - expectedBeefySharesNeeded,
       "!beefy share balance"
+    );
+  }
+
+  function testWithdrawWithIncreasedVaultValue() public {
+    sendUnderlyingToken(depositAmount, address(this));
+
+    uint256 beefyShareBal = (depositAmount * initalBeefySupply) / initalBeefyBalance;
+
+    deposit();
+
+    uint256 withdrawalAmount = 10e18;
+
+    uint256 oldExpectedErc4626SharesNeeded = beefyERC4626.previewWithdraw(withdrawalAmount);
+    uint256 oldExpectedBeefySharesNeeded = oldExpectedErc4626SharesNeeded.mulDivUp(
+      beefyVault.balanceOf(address(beefyERC4626)),
+      beefyERC4626.totalSupply()
+    );
+
+    beefyERC4626.withdraw(withdrawalAmount, address(this), address(this));
+
+    // Increase the share price
+    increaseAssetsInVault();
+
+    uint256 expectedErc4626SharesNeeded = beefyERC4626.previewWithdraw(withdrawalAmount);
+    uint256 expectedBeefySharesNeeded = expectedErc4626SharesNeeded.mulDivUp(
+      beefyVault.balanceOf(address(beefyERC4626)),
+      beefyERC4626.totalSupply()
+    );
+
+    beefyERC4626.withdraw(withdrawalAmount, address(this), address(this));
+
+    // Test that we minted the correct amount of token
+    assertEq(
+      beefyERC4626.balanceOf(address(this)),
+      depositAmount - (oldExpectedErc4626SharesNeeded + expectedErc4626SharesNeeded)
+    );
+
+    // Test that we got less shares on the second mint after assets in the vault increased
+    assertLe(expectedErc4626SharesNeeded, oldExpectedErc4626SharesNeeded, "!new shares < old Shares");
+
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(
+      beefyVault.balanceOf(address(beefyERC4626)),
+      beefyShareBal - (oldExpectedBeefySharesNeeded + expectedBeefySharesNeeded)
     );
   }
 
