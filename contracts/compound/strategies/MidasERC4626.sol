@@ -17,52 +17,52 @@ abstract contract MidasERC4626 is ERC4626, Ownable {
   event log_event(uint256 amount);
 
   function withdraw(
-        uint256 assets,
-        address receiver,
-        address owner
-    ) public override returns (uint256 shares) {
-        shares = previewWithdraw(assets); // No need to check for rounding error, previewWithdraw rounds up.
+    uint256 assets,
+    address receiver,
+    address owner
+  ) public override returns (uint256 shares) {
+    shares = previewWithdraw(assets); // No need to check for rounding error, previewWithdraw rounds up.
 
-        if (msg.sender != owner) {
-            uint256 allowed = allowance[owner][msg.sender]; // Saves gas for limited approvals.
+    if (msg.sender != owner) {
+      uint256 allowed = allowance[owner][msg.sender]; // Saves gas for limited approvals.
 
-            if (allowed != type(uint256).max) allowance[owner][msg.sender] = allowed - shares;
-        }
-
-        uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
-        emit log_event(balanceBeforeWithdraw);
-        beforeWithdraw(assets, shares);
-
-        _burn(owner, shares);
-
-        emit Withdraw(msg.sender, receiver, owner, assets, shares);
-        emit log_event(asset.balanceOf(address(this)) - balanceBeforeWithdraw);
-
-        asset.safeTransfer(receiver, asset.balanceOf(address(this)) - balanceBeforeWithdraw);
+      if (allowed != type(uint256).max) allowance[owner][msg.sender] = allowed - shares;
     }
 
-    function redeem(
-        uint256 shares,
-        address receiver,
-        address owner
-    ) public override returns (uint256 assets) {
-        if (msg.sender != owner) {
-            uint256 allowed = allowance[owner][msg.sender]; // Saves gas for limited approvals.
+    uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
+    emit log_event(balanceBeforeWithdraw);
+    beforeWithdraw(assets, shares);
 
-            if (allowed != type(uint256).max) allowance[owner][msg.sender] = allowed - shares;
-        }
+    _burn(owner, shares);
 
-        // Check for rounding error since we round down in previewRedeem.
-        require((assets = previewRedeem(shares)) != 0, "ZERO_ASSETS");
+    emit Withdraw(msg.sender, receiver, owner, assets, shares);
+    emit log_event(asset.balanceOf(address(this)) - balanceBeforeWithdraw);
 
-        uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
+    asset.safeTransfer(receiver, asset.balanceOf(address(this)) - balanceBeforeWithdraw);
+  }
 
-        beforeWithdraw(assets, shares);
+  function redeem(
+    uint256 shares,
+    address receiver,
+    address owner
+  ) public override returns (uint256 assets) {
+    if (msg.sender != owner) {
+      uint256 allowed = allowance[owner][msg.sender]; // Saves gas for limited approvals.
 
-        _burn(owner, shares);
-
-        emit Withdraw(msg.sender, receiver, owner, assets, shares);
-
-        asset.safeTransfer(receiver, asset.balanceOf(address(this)) - balanceBeforeWithdraw);
+      if (allowed != type(uint256).max) allowance[owner][msg.sender] = allowed - shares;
     }
+
+    // Check for rounding error since we round down in previewRedeem.
+    require((assets = previewRedeem(shares)) != 0, "ZERO_ASSETS");
+
+    uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
+
+    beforeWithdraw(assets, shares);
+
+    _burn(owner, shares);
+
+    emit Withdraw(msg.sender, receiver, owner, assets, shares);
+
+    asset.safeTransfer(receiver, asset.balanceOf(address(this)) - balanceBeforeWithdraw);
+  }
 }
