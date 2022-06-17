@@ -242,7 +242,10 @@ contract BeefyERC4626UnitTest is BaseTest {
       uint256 assetsToWithdraw = amount / 2;
       beefyERC4626.withdraw(assetsToWithdraw, bob, bob);
       uint256 assetsWithdrawn = cakeLpToken.balanceOf(bob);
-      assertTrue(assetsToWithdraw - assetsWithdrawn < 10, "the assets withdrawn must be almost equal to the requested assets to withdraw");
+      assertTrue(
+        assetsToWithdraw - assetsWithdrawn < 10,
+        "the assets withdrawn must be almost equal to the requested assets to withdraw"
+      );
     }
 
     uint256 lockedFunds = cakeLpToken.balanceOf(address(beefyERC4626));
@@ -276,7 +279,10 @@ contract BeefyERC4626UnitTest is BaseTest {
       beefyERC4626.redeem(beefyERC4626SharesToRedeem, charlie, charlie);
       uint256 assetsRedeemed = cakeLpToken.balanceOf(charlie);
       uint256 assetsToRedeem = beefyERC4626.previewRedeem(beefyERC4626SharesToRedeem);
-      assertTrue(assetsToRedeem - assetsRedeemed < 10, "the assets redeemed must be almost equal to the requested assets to redeem");
+      assertTrue(
+        assetsToRedeem - assetsRedeemed < 10,
+        "the assets redeemed must be almost equal to the requested assets to redeem"
+      );
     }
 
     uint256 lockedFunds = cakeLpToken.balanceOf(address(beefyERC4626));
