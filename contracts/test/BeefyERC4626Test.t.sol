@@ -37,14 +37,11 @@ contract BeefyERC4626Test is WithPool, BaseTest {
   {}
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
-    vm.startPrank(0x1083926054069AaD75d7238E9B809b0eF9d94e5B);
-    underlyingToken.transfer(address(this), 100e18);
-    underlyingToken.transfer(address(1), 100e18);
-    vm.stopPrank();
     beefyVault = IBeefyVault(0xD2FeCe7Ff1B791F8fE7f35424165abB8BD1671f2);
     beefyERC4626 = new BeefyERC4626(underlyingToken, beefyVault, withdrawalFee);
     initalBeefyBalance = beefyVault.balance();
     initalBeefySupply = beefyVault.totalSupply();
+    sendUnderlyingToken(100e18, address(this));
   }
 
   function deposit(address _owner, uint256 amount) public {
@@ -54,26 +51,37 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     vm.stopPrank();
   }
 
-  function testInitializedValues() public {
+  function sendUnderlyingToken(uint256 amount, address recipient) public {
+    vm.startPrank(0x1083926054069AaD75d7238E9B809b0eF9d94e5B);
+    underlyingToken.transfer(recipient, amount);
+    vm.stopPrank();
+  }
+
+  function increaseAssetsInVault() public {
+    sendUnderlyingToken(1000e18, address(beefyVault));
+    beefyVault.earn();
+  }
+
+  function testInitializedValues() public shouldRun(forChains(BSC_MAINNET)) {
     assertEq(beefyERC4626.name(), "Midas Pancake LPs Vault");
     assertEq(beefyERC4626.symbol(), "mvCake-LP");
     assertEq(address(beefyERC4626.asset()), address(underlyingToken));
     assertEq(address(beefyERC4626.beefyVault()), address(beefyVault));
   }
 
-  function testPreviewDepositAndMintReturnTheSameValue() public {
+  function testPreviewDepositAndMintReturnTheSameValue() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 returnedShares = beefyERC4626.previewDeposit(depositAmount);
     assertEq(beefyERC4626.previewMint(returnedShares), depositAmount);
   }
 
-  function testPreviewWithdrawAndRedeemReturnTheSameValue() public {
+  function testPreviewWithdrawAndRedeemReturnTheSameValue() public shouldRun(forChains(BSC_MAINNET)) {
     deposit(address(this), depositAmount);
     uint256 withdrawalAmount = 10e18;
     uint256 reqShares = beefyERC4626.previewWithdraw(withdrawalAmount);
     assertEq(beefyERC4626.previewRedeem(reqShares), withdrawalAmount);
   }
 
-  function testDeposit() public {
+  function testDeposit() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 expectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
     uint256 expectedErc4626Shares = beefyERC4626.previewDeposit(depositAmount);
 
@@ -94,7 +102,35 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares);
   }
 
-  function testMint() public {
+  function testDepositWithIncreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
+    sendUnderlyingToken(depositAmount, address(this));
+
+    uint256 oldExpectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
+    uint256 oldExpected4626Shares = beefyERC4626.previewDeposit(depositAmount);
+
+    deposit();
+
+    // Increase the share price
+    increaseAssetsInVault();
+
+    uint256 expectedBeefyShares = (depositAmount * beefyVault.totalSupply()) / beefyVault.balance();
+    uint256 previewErc4626Shares = beefyERC4626.previewDeposit(depositAmount);
+    uint256 expected4626Shares = depositAmount.mulDivDown(beefyERC4626.totalSupply(), beefyERC4626.totalAssets());
+
+    deposit();
+
+    // Test that we minted the correct amount of token
+    assertEq(beefyERC4626.balanceOf(address(this)), oldExpected4626Shares + previewErc4626Shares);
+
+    // Test that we got less shares on the second mint after assets in the vault increased
+    assertLe(previewErc4626Shares, oldExpected4626Shares, "!new shares < old Shares");
+    assertEq(previewErc4626Shares, expected4626Shares, "!previewShares == expectedShares");
+
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(beefyVault.balanceOf(address(beefyERC4626)), oldExpectedBeefyShares + expectedBeefyShares);
+  }
+
+  function testMint() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 expectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
     uint256 mintAmount = beefyERC4626.previewDeposit(depositAmount);
 
@@ -116,7 +152,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares);
   }
 
-  function testWithdraw() public {
+  function testWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 beefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
 
     uint256 withdrawalAmount = 10e18;
@@ -131,7 +167,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
       beefyERC4626.totalSupply()
     );
 
-    beefyERC4626.withdraw(10e18, address(this), address(this));
+    beefyERC4626.withdraw(withdrawalAmount, address(this), address(this));
 
     // Test that the actual transfers worked
     assertEq(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount, "!user asset bal");
@@ -144,6 +180,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
 
     // Test that we burned the right amount of shares
     assertEq(beefyERC4626.balanceOf(address(this)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "!0");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     assertEq(
@@ -153,7 +190,51 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testRedeem() public {
+  function testWithdrawWithIncreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
+    sendUnderlyingToken(depositAmount, address(this));
+
+    uint256 beefyShareBal = (depositAmount * initalBeefySupply) / initalBeefyBalance;
+
+    deposit();
+
+    uint256 withdrawalAmount = 10e18;
+
+    uint256 oldExpectedErc4626SharesNeeded = beefyERC4626.previewWithdraw(withdrawalAmount);
+    uint256 oldExpectedBeefySharesNeeded = oldExpectedErc4626SharesNeeded.mulDivUp(
+      beefyVault.balanceOf(address(beefyERC4626)),
+      beefyERC4626.totalSupply()
+    );
+
+    beefyERC4626.withdraw(withdrawalAmount, address(this), address(this));
+
+    // Increase the share price
+    increaseAssetsInVault();
+
+    uint256 expectedErc4626SharesNeeded = beefyERC4626.previewWithdraw(withdrawalAmount);
+    uint256 expectedBeefySharesNeeded = expectedErc4626SharesNeeded.mulDivUp(
+      beefyVault.balanceOf(address(beefyERC4626)),
+      beefyERC4626.totalSupply()
+    );
+
+    beefyERC4626.withdraw(withdrawalAmount, address(this), address(this));
+
+    // Test that we minted the correct amount of token
+    assertEq(
+      beefyERC4626.balanceOf(address(this)),
+      depositAmount - (oldExpectedErc4626SharesNeeded + expectedErc4626SharesNeeded)
+    );
+
+    // Test that we got less shares on the second mint after assets in the vault increased
+    assertLe(expectedErc4626SharesNeeded, oldExpectedErc4626SharesNeeded, "!new shares < old Shares");
+
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(
+      beefyVault.balanceOf(address(beefyERC4626)),
+      beefyShareBal - (oldExpectedBeefySharesNeeded + expectedBeefySharesNeeded)
+    );
+  }
+
+  function testRedeem() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 beefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
 
     uint256 withdrawalAmount = 10e18;
@@ -435,9 +516,19 @@ contract BeefyERC4626UnitTest is BaseTest {
     vm.startPrank(user);
     cakeLpToken.approve(address(beefyERC4626), amount);
     beefyERC4626.deposit(amount, user);
-    // make sure the full amount is deposited and none is left
-    assertEq(cakeLpToken.balanceOf(user), 0, "should deposit the full balance of cakeLP of user");
-    assertEq(cakeLpToken.balanceOf(address(beefyERC4626)), 0, "should deposit the full balance of cakeLP of user");
+    vm.stopPrank();
+  }
+
+  function mint(address user, uint256 amount) internal {
+    // transfer to user exactly amount
+    vm.prank(alice);
+    cakeLpToken.transfer(user, amount);
+    assertEq(cakeLpToken.balanceOf(user), amount, "the full balance of cakeLP of user should equal amount");
+
+    // deposit the full amount to the plugin as user, check the result
+    vm.startPrank(user);
+    cakeLpToken.approve(address(beefyERC4626), amount);
+    beefyERC4626.mint(beefyERC4626.previewDeposit(amount), user);
     vm.stopPrank();
   }
 
@@ -447,7 +538,12 @@ contract BeefyERC4626UnitTest is BaseTest {
     cakeLpToken.transfer(alice, 100e18);
 
     deposit(bob, amount);
-    vm.startPrank(bob);
+    // make sure the full amount is deposited and none is left
+    assertEq(cakeLpToken.balanceOf(bob), 0, "should deposit the full balance of cakeLP of user");
+    assertEq(cakeLpToken.balanceOf(address(beefyERC4626)), 0, "should deposit the full balance of cakeLP of user");
+
+    // just testing if other users depositing would mess up the calcs
+    mint(charlie, amount);
 
     // test if the shares of the BeefyERC4626 equal to the assets deposited
     uint256 beefyERC4626SharesMintedToBob = beefyERC4626.balanceOf(bob);
@@ -458,10 +554,15 @@ contract BeefyERC4626UnitTest is BaseTest {
     );
 
     {
+      vm.startPrank(bob);
       uint256 assetsToWithdraw = amount / 2;
       beefyERC4626.withdraw(assetsToWithdraw, bob, bob);
       uint256 assetsWithdrawn = cakeLpToken.balanceOf(bob);
-      assertTrue(assetsToWithdraw - assetsWithdrawn < 10, "the assets withdrawn must be almost equal to the requested assets to withdraw");
+      assertTrue(
+        diff(assetsWithdrawn, assetsToWithdraw) < 100,
+        "the assets withdrawn must be almost equal to the requested assets to withdraw"
+      );
+      vm.stopPrank();
     }
 
     uint256 lockedFunds = cakeLpToken.balanceOf(address(beefyERC4626));
@@ -470,17 +571,20 @@ contract BeefyERC4626UnitTest is BaseTest {
     }
     // check if any funds remained locked in the BeefyERC4626
     assertTrue(lockedFunds < 10, "should transfer the full balance of the withdrawn cakeLP, some dust is acceptable");
-
-    vm.stopPrank();
   }
 
   function testTheBugRedeem(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
-    vm.assume(amount > 100 && amount < 1e19);
+    vm.assume(amount > 1e5 && amount < 1e19);
     vm.prank(beefyStrategyAddress);
     cakeLpToken.transfer(alice, 100e18);
 
     deposit(charlie, amount);
-    vm.startPrank(charlie);
+    // make sure the full amount is deposited and none is left
+    assertEq(cakeLpToken.balanceOf(charlie), 0, "should deposit the full balance of cakeLP of user");
+    assertEq(cakeLpToken.balanceOf(address(beefyERC4626)), 0, "should deposit the full balance of cakeLP of user");
+
+    // just testing if other users depositing would mess up the calcs
+    mint(bob, amount);
 
     // test if the shares of the BeefyERC4626 equal to the assets deposited
     uint256 beefyERC4626SharesMintedToCharlie = beefyERC4626.balanceOf(charlie);
@@ -491,11 +595,20 @@ contract BeefyERC4626UnitTest is BaseTest {
     );
 
     {
+      vm.startPrank(charlie);
       uint256 beefyERC4626SharesToRedeem = beefyERC4626.balanceOf(charlie);
       beefyERC4626.redeem(beefyERC4626SharesToRedeem, charlie, charlie);
       uint256 assetsRedeemed = cakeLpToken.balanceOf(charlie);
       uint256 assetsToRedeem = beefyERC4626.previewRedeem(beefyERC4626SharesToRedeem);
-      assertTrue(assetsToRedeem - assetsRedeemed < 10, "the assets redeemed must be almost equal to the requested assets to redeem");
+      {
+        emit log_uint(assetsRedeemed);
+        emit log_uint(assetsToRedeem);
+      }
+      assertTrue(
+        diff(assetsRedeemed, assetsToRedeem) * 1e4 < amount,
+        "the assets redeemed must be almost equal to the requested assets to redeem"
+      );
+      vm.stopPrank();
     }
 
     uint256 lockedFunds = cakeLpToken.balanceOf(address(beefyERC4626));
@@ -504,7 +617,13 @@ contract BeefyERC4626UnitTest is BaseTest {
     }
     // check if any funds remained locked in the BeefyERC4626
     assertTrue(lockedFunds < 10, "should transfer the full balance of the redeemed cakeLP, some dust is acceptable");
+  }
 
-    vm.stopPrank();
+  function diff(uint256 a, uint256 b) internal returns (uint256) {
+    if (a > b) {
+      return a - b;
+    } else {
+      return b - a;
+    }
   }
 }
