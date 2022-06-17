@@ -28,7 +28,7 @@ abstract contract MidasERC4626 is ERC4626, Ownable {
     }
 
     uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
-    
+
     beforeWithdraw(assets, shares);
 
     _burn(owner, shares);
