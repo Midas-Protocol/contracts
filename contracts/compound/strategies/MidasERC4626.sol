@@ -14,8 +14,6 @@ abstract contract MidasERC4626 is ERC4626, Ownable {
     string memory _symbol
   ) ERC4626(_asset, _name, _symbol) {}
 
-  event log_event(uint256 amount);
-
   function withdraw(
     uint256 assets,
     address receiver,
@@ -30,13 +28,12 @@ abstract contract MidasERC4626 is ERC4626, Ownable {
     }
 
     uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
-    emit log_event(balanceBeforeWithdraw);
+    
     beforeWithdraw(assets, shares);
 
     _burn(owner, shares);
 
     emit Withdraw(msg.sender, receiver, owner, assets, shares);
-    emit log_event(asset.balanceOf(address(this)) - balanceBeforeWithdraw);
 
     asset.safeTransfer(receiver, asset.balanceOf(address(this)) - balanceBeforeWithdraw);
   }
