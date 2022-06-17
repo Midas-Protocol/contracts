@@ -129,4 +129,51 @@ contract BeefyERC4626 is MidasERC4626 {
 
     return assets;
   }
+
+  function withdraw(
+    uint256 assets,
+    address receiver,
+    address owner
+  ) public override returns (uint256 shares) {
+    shares = previewWithdraw(assets); // No need to check for rounding error, previewWithdraw rounds up.
+
+    if (msg.sender != owner) {
+      uint256 allowed = allowance[owner][msg.sender]; // Saves gas for limited approvals.
+
+      if (allowed != type(uint256).max) allowance[owner][msg.sender] = allowed - shares;
+    }
+
+    beforeWithdraw(assets, shares);
+
+    _burn(owner, shares);
+
+    emit Withdraw(msg.sender, receiver, owner, assets, shares);
+    //    emit log_uint(assets);
+    //    emit log("HERE");
+    //    emit log_address(address(receiver));
+    asset.safeTransfer(receiver, asset.balanceOf(address(this)));
+  }
+
+  function redeem(
+    uint256 shares,
+    address receiver,
+    address owner
+  ) public override returns (uint256 assets) {
+    if (msg.sender != owner) {
+      uint256 allowed = allowance[owner][msg.sender]; // Saves gas for limited approvals.
+
+      if (allowed != type(uint256).max) allowance[owner][msg.sender] = allowed - shares;
+    }
+
+    // Check for rounding error since we round down in previewRedeem.
+    require((assets = previewRedeem(shares)) != 0, "ZERO_ASSETS");
+
+    beforeWithdraw(assets, shares);
+
+    _burn(owner, shares);
+
+    emit Withdraw(msg.sender, receiver, owner, assets, shares);
+
+    asset.safeTransfer(receiver, asset.balanceOf(address(this)));
+  }
 }

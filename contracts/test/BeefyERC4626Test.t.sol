@@ -351,7 +351,7 @@ contract BeefyERC4626UnitTest is BaseTest {
       emit log_uint(lockedFunds);
     }
     // check if any funds remained locked in the BeefyERC4626
-    assertTrue(lockedFunds < 10, "should transfer the full balance of the withdrawn cakeLP, some dust is acceptable");
+    assertTrue(lockedFunds == 0, "should transfer the full balance of the withdrawn cakeLP, some dust is acceptable");
   }
 
   function testTheBugRedeem(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
@@ -397,7 +397,7 @@ contract BeefyERC4626UnitTest is BaseTest {
       emit log_uint(lockedFunds);
     }
     // check if any funds remained locked in the BeefyERC4626
-    assertTrue(lockedFunds < 10, "should transfer the full balance of the redeemed cakeLP, some dust is acceptable");
+    assertTrue(lockedFunds == 0, "should transfer the full balance of the redeemed cakeLP, some dust is acceptable");
   }
 
   function diff(uint256 a, uint256 b) internal returns (uint256) {
