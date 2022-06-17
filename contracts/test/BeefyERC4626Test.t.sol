@@ -179,7 +179,10 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyERC4626.withdraw(withdrawalAmount, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertTrue(diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1, "!user asset bal");
+    assertTrue(
+      diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
+      "!user asset bal"
+    );
 
     // Test that the balance view calls work
     // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
@@ -261,7 +264,10 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyERC4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertTrue(diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1, "!user asset bal");
+    assertTrue(
+      diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
+      "!user asset bal"
+    );
 
     // Test that the balance view calls work
     // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
@@ -335,7 +341,10 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyERC4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertTrue(diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1, "!user asset bal");
+    assertTrue(
+      diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
+      "!user asset bal"
+    );
 
     // Test that the balance view calls work
     // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
@@ -409,7 +418,10 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyERC4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertTrue(diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1, "!user asset bal");
+    assertTrue(
+      diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
+      "!user asset bal"
+    );
 
     // Test that the balance view calls work
     // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
