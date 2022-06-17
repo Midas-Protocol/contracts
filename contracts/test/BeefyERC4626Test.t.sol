@@ -60,26 +60,26 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyVault.earn();
   }
 
-  function testInitializedValues() public {
+  function testInitializedValues() public shouldRun(forChains(BSC_MAINNET)) {
     assertEq(beefyERC4626.name(), "Midas Pancake LPs Vault");
     assertEq(beefyERC4626.symbol(), "mvCake-LP");
     assertEq(address(beefyERC4626.asset()), address(underlyingToken));
     assertEq(address(beefyERC4626.beefyVault()), address(beefyVault));
   }
 
-  function testPreviewDepositAndMintReturnTheSameValue() public {
+  function testPreviewDepositAndMintReturnTheSameValue() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 returnedShares = beefyERC4626.previewDeposit(depositAmount);
     assertEq(beefyERC4626.previewMint(returnedShares), depositAmount);
   }
 
-  function testPreviewWithdrawAndRedeemReturnTheSameValue() public {
+  function testPreviewWithdrawAndRedeemReturnTheSameValue() public shouldRun(forChains(BSC_MAINNET)) {
     deposit();
     uint256 withdrawalAmount = 10e18;
     uint256 reqShares = beefyERC4626.previewWithdraw(withdrawalAmount);
     assertEq(beefyERC4626.previewRedeem(reqShares), withdrawalAmount);
   }
 
-  function testDeposit() public {
+  function testDeposit() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 expectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
     uint256 expectedErc4626Shares = beefyERC4626.previewDeposit(depositAmount);
 
@@ -100,7 +100,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares);
   }
 
-  function testDepositWithIncreasedVaultValue() public {
+  function testDepositWithIncreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
     sendUnderlyingToken(depositAmount, address(this));
 
     uint256 oldExpectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
@@ -128,7 +128,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertEq(beefyVault.balanceOf(address(beefyERC4626)), oldExpectedBeefyShares + expectedBeefyShares);
   }
 
-  function testMint() public {
+  function testMint() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 expectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
     uint256 mintAmount = beefyERC4626.previewDeposit(depositAmount);
 
@@ -150,7 +150,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares);
   }
 
-  function testWithdraw() public {
+  function testWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 beefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
 
     uint256 withdrawalAmount = 10e18;
@@ -188,7 +188,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testWithdrawWithIncreasedVaultValue() public {
+  function testWithdrawWithIncreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
     sendUnderlyingToken(depositAmount, address(this));
 
     uint256 beefyShareBal = (depositAmount * initalBeefySupply) / initalBeefyBalance;
@@ -232,7 +232,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testRedeem() public {
+  function testRedeem() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 beefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
 
     uint256 withdrawalAmount = 10e18;
