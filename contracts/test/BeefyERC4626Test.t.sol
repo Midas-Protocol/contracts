@@ -268,6 +268,23 @@ contract BeefyERC4626Test is WithPool, BaseTest {
       "!beefy share balance"
     );
   }
+
+  function testEmergencyWithdrawFromStrategy() public {
+    sendUnderlyingToken(depositAmount, address(this));
+
+    deposit();
+
+    beefyERC4626.emergencyWithdrawFromStrategy();
+
+    assertEq(beefyERC4626.paused(), true, "!paused");
+
+    underlyingToken.approve(address(beefyERC4626), depositAmount);
+    vm.expectRevert("Pausable: paused");
+    beefyERC4626.deposit(depositAmount, address(this));
+
+    vm.expectRevert("Pausable: paused");
+    beefyERC4626.withdraw(1e18, address(this), address(this));
+  }
 }
 
 contract BeefyERC4626UnitTest is BaseTest {
