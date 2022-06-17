@@ -56,6 +56,8 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
       if (allowed != type(uint256).max) allowance[owner][msg.sender] = allowed - shares;
     }
 
+    uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
+
     beforeWithdraw(assets, shares);
 
     _burn(owner, shares);
