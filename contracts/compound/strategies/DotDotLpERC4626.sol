@@ -4,7 +4,7 @@ pragma solidity ^0.8.10;
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 
-import { ERC4626 } from "../../utils/ERC4626.sol";
+import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 
