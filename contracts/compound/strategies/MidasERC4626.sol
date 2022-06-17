@@ -62,7 +62,7 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
 
     emit Withdraw(msg.sender, receiver, owner, assets, shares);
 
-    asset.safeTransfer(receiver, assets);
+    asset.safeTransfer(receiver, asset.balanceOf(address(this)) - balanceBeforeWithdraw);
   }
 
   function redeem(
@@ -79,13 +79,15 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     // Check for rounding error since we round down in previewRedeem.
     require((assets = previewRedeem(shares)) != 0, "ZERO_ASSETS");
 
+    uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
+
     beforeWithdraw(assets, shares);
 
     _burn(owner, shares);
 
     emit Withdraw(msg.sender, receiver, owner, assets, shares);
 
-    asset.safeTransfer(receiver, assets);
+    asset.safeTransfer(receiver, asset.balanceOf(address(this)) - balanceBeforeWithdraw);
   }
 
   // Should withdraw all funds from the strategy and pause the contract
