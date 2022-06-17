@@ -42,11 +42,14 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     initalBeefyBalance = beefyVault.balance();
     initalBeefySupply = beefyVault.totalSupply();
     sendUnderlyingToken(100e18, address(this));
+    sendUnderlyingToken(100e18, address(1));
   }
 
-  function deposit() public {
-    underlyingToken.approve(address(beefyERC4626), depositAmount);
-    beefyERC4626.deposit(depositAmount, address(this));
+  function deposit(address _owner, uint256 amount) public {
+    vm.startPrank(_owner);
+    underlyingToken.approve(address(beefyERC4626), amount);
+    beefyERC4626.deposit(amount, _owner);
+    vm.stopPrank();
   }
 
   function sendUnderlyingToken(uint256 amount, address recipient) public {
@@ -73,7 +76,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
   }
 
   function testPreviewWithdrawAndRedeemReturnTheSameValue() public shouldRun(forChains(BSC_MAINNET)) {
-    deposit();
+    deposit(address(this), depositAmount);
     uint256 withdrawalAmount = 10e18;
     uint256 reqShares = beefyERC4626.previewWithdraw(withdrawalAmount);
     assertEq(beefyERC4626.previewRedeem(reqShares), withdrawalAmount);
@@ -83,7 +86,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     uint256 expectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
     uint256 expectedErc4626Shares = beefyERC4626.previewDeposit(depositAmount);
 
-    deposit();
+    deposit(address(this), depositAmount);
 
     // Test that the actual transfers worked
     assertEq(beefyVault.balance(), initalBeefyBalance + depositAmount);
@@ -106,7 +109,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     uint256 oldExpectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
     uint256 oldExpected4626Shares = beefyERC4626.previewDeposit(depositAmount);
 
-    deposit();
+    deposit(address(this), depositAmount);
 
     // Increase the share price
     increaseAssetsInVault();
@@ -115,7 +118,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     uint256 previewErc4626Shares = beefyERC4626.previewDeposit(depositAmount);
     uint256 expected4626Shares = depositAmount.mulDivDown(beefyERC4626.totalSupply(), beefyERC4626.totalAssets());
 
-    deposit();
+    deposit(address(this), depositAmount);
 
     // Test that we minted the correct amount of token
     assertEq(beefyERC4626.balanceOf(address(this)), oldExpected4626Shares + previewErc4626Shares);
@@ -126,6 +129,42 @@ contract BeefyERC4626Test is WithPool, BaseTest {
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     assertEq(beefyVault.balanceOf(address(beefyERC4626)), oldExpectedBeefyShares + expectedBeefyShares);
+  }
+
+  function testMultipleDeposit() public shouldRun(forChains(BSC_MAINNET)) {
+    uint256 expectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
+    uint256 expectedErc4626Shares = beefyERC4626.previewDeposit(depositAmount);
+
+    deposit(address(this), depositAmount);
+    deposit(address(1), depositAmount);
+
+    // Test that the actual transfers worked
+    assertEq(beefyVault.balance(), initalBeefyBalance + depositAmount * 2);
+
+    // Test that the balance view calls work
+    assertTrue(
+      depositAmount * 2 - beefyERC4626.totalAssets() <= 1,
+      "Beefy total Assets should be same as sum of deposited amounts"
+    );
+    assertTrue(
+      depositAmount - beefyERC4626.balanceOfUnderlying(address(this)) <= 1,
+      "Underlying token balance should be same as depositied amount"
+    );
+    assertTrue(
+      depositAmount - beefyERC4626.balanceOfUnderlying(address(1)) <= 1,
+      "Underlying token balance should be same as depositied amount"
+    );
+
+    // Test that we minted the correct amount of token
+    assertEq(beefyERC4626.balanceOf(address(this)), expectedErc4626Shares);
+    assertEq(beefyERC4626.balanceOf(address(1)), expectedErc4626Shares);
+    assertEq(beefyERC4626.totalSupply(), expectedErc4626Shares * 2);
+
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares * 2);
+
+    // Beefy ERC4626 should not have underlyingToken after deposit
+    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 1, "Beefy erc4626 locked amount checking");
   }
 
   function testMint() public shouldRun(forChains(BSC_MAINNET)) {
@@ -150,12 +189,57 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares);
   }
 
+  function testMultipleMint() public shouldRun(forChains(BSC_MAINNET)) {
+    uint256 expectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
+    uint256 mintAmount = beefyERC4626.previewDeposit(depositAmount);
+
+    underlyingToken.approve(address(beefyERC4626), depositAmount);
+    beefyERC4626.mint(mintAmount, address(this));
+
+    // Test that the actual transfers worked
+    assertEq(beefyVault.balance(), initalBeefyBalance + depositAmount);
+
+    // Test that the balance view calls work
+    assertEq(beefyERC4626.totalAssets(), depositAmount);
+    assertEq(beefyERC4626.balanceOfUnderlying(address(this)), depositAmount);
+
+    // Test that we minted the correct amount of token
+    assertEq(beefyERC4626.balanceOf(address(this)), mintAmount);
+    assertEq(beefyERC4626.totalSupply(), mintAmount);
+
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares);
+
+    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 1, "Beefy erc4626 locked amount checking");
+
+    vm.startPrank(address(1));
+    underlyingToken.approve(address(beefyERC4626), depositAmount);
+    beefyERC4626.mint(mintAmount, address(1));
+
+    // Test that the actual transfers worked
+    assertEq(beefyVault.balance(), initalBeefyBalance + depositAmount + depositAmount);
+
+    // Test that the balance view calls work
+    assertTrue(depositAmount + depositAmount - beefyERC4626.totalAssets() <= 1);
+    assertTrue(depositAmount - beefyERC4626.balanceOfUnderlying(address(1)) <= 1);
+
+    // Test that we minted the correct amount of token
+    assertEq(beefyERC4626.balanceOf(address(1)), mintAmount);
+    assertEq(beefyERC4626.totalSupply(), mintAmount + mintAmount);
+
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares * 2);
+
+    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 2, "Beefy erc4626 locked amount checking");
+    vm.stopPrank();
+  }
+
   function testWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 beefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
 
     uint256 withdrawalAmount = 10e18;
 
-    deposit();
+    deposit(address(this), depositAmount);
 
     uint256 assetBalBefore = underlyingToken.balanceOf(address(this));
     uint256 erc4626BalBefore = beefyERC4626.balanceOf(address(this));
@@ -178,7 +262,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
 
     // Test that we burned the right amount of shares
     assertEq(beefyERC4626.balanceOf(address(this)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
-    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "!0");
+    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 1, "!0");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     assertEq(
@@ -193,7 +277,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
 
     uint256 beefyShareBal = (depositAmount * initalBeefySupply) / initalBeefyBalance;
 
-    deposit();
+    deposit(address(this), depositAmount);
 
     uint256 withdrawalAmount = 10e18;
 
@@ -232,13 +316,87 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     );
   }
 
+  function testMultipleWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
+    uint256 beefyShares = ((depositAmount * initalBeefySupply) / initalBeefyBalance) * 2;
+
+    uint256 withdrawalAmount = 10e18;
+
+    deposit(address(this), depositAmount);
+    deposit(address(1), depositAmount);
+
+    uint256 assetBalBefore = underlyingToken.balanceOf(address(this));
+    uint256 erc4626BalBefore = beefyERC4626.balanceOf(address(this));
+    uint256 expectedErc4626SharesNeeded = beefyERC4626.previewWithdraw(withdrawalAmount);
+    uint256 expectedBeefySharesNeeded = expectedErc4626SharesNeeded.mulDivUp(
+      beefyVault.balanceOf(address(beefyERC4626)),
+      beefyERC4626.totalSupply()
+    );
+
+    beefyERC4626.withdraw(10e18, address(this), address(this));
+
+    // Test that the actual transfers worked
+    assertEq(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount, "!user asset bal");
+
+    // Test that the balance view calls work
+    // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
+    // uint256 expectedAssetsAfter = depositAmount - (expectedBeefySharesNeeded + (expectedBeefySharesNeeded / 1000));
+    //assertEq(beefyERC4626.totalAssets(), expectedAssetsAfter, "!erc4626 asset bal");
+    assertTrue(depositAmount * 2 - expectedErc4626SharesNeeded - beefyERC4626.totalSupply() < 1, "!totalSupply");
+
+    // Test that we burned the right amount of shares
+    assertEq(beefyERC4626.balanceOf(address(this)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
+
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(
+      beefyVault.balanceOf(address(beefyERC4626)),
+      beefyShares - expectedBeefySharesNeeded,
+      "!beefy share balance"
+    );
+
+    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 1, "Beefy erc4626 locked amount checking");
+
+    uint256 totalSupplyBefore = depositAmount * 2 - expectedErc4626SharesNeeded;
+    beefyShares = beefyShares - expectedBeefySharesNeeded;
+    assetBalBefore = underlyingToken.balanceOf(address(1));
+    erc4626BalBefore = beefyERC4626.balanceOf(address(1));
+    expectedErc4626SharesNeeded = beefyERC4626.previewWithdraw(withdrawalAmount);
+    expectedBeefySharesNeeded = expectedErc4626SharesNeeded.mulDivUp(
+      beefyVault.balanceOf(address(beefyERC4626)),
+      beefyERC4626.totalSupply()
+    );
+
+    vm.prank(address(1));
+    beefyERC4626.withdraw(10e18, address(1), address(1));
+
+    // Test that the actual transfers worked
+    assertEq(underlyingToken.balanceOf(address(1)), assetBalBefore + withdrawalAmount, "!user asset bal");
+
+    // Test that the balance view calls work
+    // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
+    // uint256 expectedAssetsAfter = depositAmount - (expectedBeefySharesNeeded + (expectedBeefySharesNeeded / 1000));
+    //assertEq(beefyERC4626.totalAssets(), expectedAssetsAfter, "!erc4626 asset bal");
+    assertEq(beefyERC4626.totalSupply(), totalSupplyBefore - expectedErc4626SharesNeeded, "!totalSupply");
+
+    // Test that we burned the right amount of shares
+    assertEq(beefyERC4626.balanceOf(address(1)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
+
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(
+      beefyVault.balanceOf(address(beefyERC4626)),
+      beefyShares - expectedBeefySharesNeeded,
+      "!beefy share balance"
+    );
+
+    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 2, "Beefy erc4626 locked amount checking");
+  }
+
   function testRedeem() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 beefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
 
     uint256 withdrawalAmount = 10e18;
     uint256 redeemAmount = beefyERC4626.previewWithdraw(withdrawalAmount);
 
-    deposit();
+    deposit(address(this), depositAmount);
 
     uint256 assetBalBefore = underlyingToken.balanceOf(address(this));
     uint256 erc4626BalBefore = beefyERC4626.balanceOf(address(this));
@@ -267,6 +425,77 @@ contract BeefyERC4626Test is WithPool, BaseTest {
       beefyShares - expectedBeefySharesNeeded,
       "!beefy share balance"
     );
+  }
+
+  function testMultipleRedeem() public shouldRun(forChains(BSC_MAINNET)) {
+    uint256 beefyShares = ((depositAmount * initalBeefySupply) / initalBeefyBalance) * 2;
+
+    uint256 withdrawalAmount = 10e18;
+    uint256 redeemAmount = beefyERC4626.previewWithdraw(withdrawalAmount);
+
+    deposit(address(this), depositAmount);
+    deposit(address(1), depositAmount);
+
+    uint256 assetBalBefore = underlyingToken.balanceOf(address(this));
+    uint256 erc4626BalBefore = beefyERC4626.balanceOf(address(this));
+    uint256 expectedBeefySharesNeeded = redeemAmount.mulDivUp(
+      beefyVault.balanceOf(address(beefyERC4626)),
+      beefyERC4626.totalSupply()
+    );
+
+    beefyERC4626.withdraw(10e18, address(this), address(this));
+
+    // Test that the actual transfers worked
+    assertEq(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount, "!user asset bal");
+
+    // Test that the balance view calls work
+    // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
+    // uint256 expectedAssetsAfter = depositAmount - (expectedBeefySharesNeeded + (expectedBeefySharesNeeded / 1000));
+    //assertEq(beefyERC4626.totalAssets(), expectedAssetsAfter, "!erc4626 asset bal");
+    assertEq(beefyERC4626.totalSupply(), depositAmount * 2 - redeemAmount, "!totalSupply");
+
+    // Test that we burned the right amount of shares
+    assertEq(beefyERC4626.balanceOf(address(this)), erc4626BalBefore - redeemAmount, "!erc4626 supply");
+
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(
+      beefyVault.balanceOf(address(beefyERC4626)),
+      beefyShares - expectedBeefySharesNeeded,
+      "!beefy share balance"
+    );
+    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 1, "Beefy erc4626 locked amount checking");
+
+    uint256 totalSupplyBefore = depositAmount * 2 - redeemAmount;
+    beefyShares -= expectedBeefySharesNeeded;
+    redeemAmount = beefyERC4626.previewWithdraw(withdrawalAmount);
+    assetBalBefore = underlyingToken.balanceOf(address(1));
+    erc4626BalBefore = beefyERC4626.balanceOf(address(1));
+    expectedBeefySharesNeeded = redeemAmount.mulDivUp(
+      beefyVault.balanceOf(address(beefyERC4626)),
+      beefyERC4626.totalSupply()
+    );
+    vm.prank(address(1));
+    beefyERC4626.withdraw(10e18, address(1), address(1));
+
+    // Test that the actual transfers worked
+    assertEq(underlyingToken.balanceOf(address(1)), assetBalBefore + withdrawalAmount, "!user asset bal");
+
+    // Test that the balance view calls work
+    // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
+    // uint256 expectedAssetsAfter = depositAmount - (expectedBeefySharesNeeded + (expectedBeefySharesNeeded / 1000));
+    //assertEq(beefyERC4626.totalAssets(), expectedAssetsAfter, "!erc4626 asset bal");
+    assertEq(beefyERC4626.totalSupply(), totalSupplyBefore - redeemAmount, "!totalSupply");
+
+    // Test that we burned the right amount of shares
+    assertEq(beefyERC4626.balanceOf(address(1)), erc4626BalBefore - redeemAmount, "!erc4626 supply");
+
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(
+      beefyVault.balanceOf(address(beefyERC4626)),
+      beefyShares - expectedBeefySharesNeeded,
+      "!beefy share balance"
+    );
+    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 2, "Beefy erc4626 locked amount checking");
   }
 
   function testPauseContract() public shouldRun(forChains(BSC_MAINNET)) {
