@@ -27,7 +27,7 @@ import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { MockERC4626 } from "../../compound/strategies/MockERC4626.sol";
 import { FuseSafeLiquidator } from "../../FuseSafeLiquidator.sol";
 import { MockERC4626Dynamic } from "../../compound/strategies/MockERC4626Dynamic.sol";
-import { ERC4626 } from "../../utils/ERC4626.sol";
+import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { FusePoolLens } from "../../FusePoolLens.sol";
 
 contract WithPool {
