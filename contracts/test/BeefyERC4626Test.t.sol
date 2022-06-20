@@ -319,7 +319,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares * 2);
 
     // Beefy ERC4626 should not have underlyingToken after deposit
-    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0);
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
   }
 
   function testMultipleWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
@@ -494,7 +494,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     // Test that the ERC4626 holds the expected amount of beefy shares
     assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares);
 
-    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0);
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
 
     vm.startPrank(address(1));
     underlyingToken.approve(address(beefyERC4626), depositAmount);
