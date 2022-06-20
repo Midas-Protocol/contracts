@@ -47,7 +47,7 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     uint256 assets,
     address receiver,
     address owner
-  ) public override whenNotPaused returns (uint256 shares) {
+  ) public override returns (uint256 shares) {
     shares = previewWithdraw(assets); // No need to check for rounding error, previewWithdraw rounds up.
 
     if (msg.sender != owner) {
@@ -56,19 +56,19 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
       if (allowed != type(uint256).max) allowance[owner][msg.sender] = allowed - shares;
     }
 
-    uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
+    if (!paused()) {
+      uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
 
-    beforeWithdraw(assets, shares);
+      beforeWithdraw(assets, shares);
+
+      assets = asset.balanceOf(address(this)) - balanceBeforeWithdraw;
+    }
 
     _burn(owner, shares);
 
     emit Withdraw(msg.sender, receiver, owner, assets, shares);
 
-    asset.safeTransfer(receiver, asset.balanceOf(address(this)) - balanceBeforeWithdraw);
-  }
-
-  function emergencyRedeem(uint256 shares) external returns (uint256) {
-    return redeem(shares, msg.sender, msg.sender);
+    asset.safeTransfer(receiver, assets);
   }
 
   function redeem(
@@ -86,32 +86,35 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     // Check for rounding error since we round down in previewRedeem.
     require((assets = previewRedeem(shares)) != 0, "ZERO_ASSETS");
 
-    uint256 assetsToTransfer;
     if (!paused()) {
       uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
+
       beforeWithdraw(assets, shares);
-      assetsToTransfer = asset.balanceOf(address(this)) - balanceBeforeWithdraw;
-    } else {
-      assetsToTransfer = supply == 0 ? shares : shares.mulDivUp(asset.balanceOf(address(this)), supply);
+
+      assets = asset.balanceOf(address(this)) - balanceBeforeWithdraw;
     }
 
     _burn(owner, shares);
 
     emit Withdraw(msg.sender, receiver, owner, assets, shares);
 
-    asset.safeTransfer(receiver, assetsToTransfer);
-
-    // TODO return assets or assetsToTransfer ?
+    asset.safeTransfer(receiver, assets);
   }
 
   // Should withdraw all funds from the strategy and pause the contract
   function emergencyWithdrawAndPause() external virtual onlyOwner {
-    beforeWithdraw(totalAssets(), totalSupply);
-    _pause();
+    revert("!implementation");
+
+    // Withdraw all assets from underlying strategy
+
+    // _pause();
   }
 
   function unpause() external virtual onlyOwner {
-    _unpause();
-    afterDeposit(asset.balanceOf(address(this)), totalSupply);
+    revert("!implementation");
+
+    // _unpause();
+
+    // Deposit all assets to underlying strategy
   }
 }

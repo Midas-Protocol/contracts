@@ -75,7 +75,10 @@ contract BeefyERC4626 is MidasERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    return beefyVault.balanceOf(address(this)).mulDivUp(beefyVault.balance(), beefyVault.totalSupply());
+    return
+      paused()
+        ? asset.balanceOf(address(this))
+        : beefyVault.balanceOf(address(this)).mulDivUp(beefyVault.balance(), beefyVault.totalSupply());
   }
 
   /// @notice Calculates the total amount of underlying tokens the account holds.
@@ -106,10 +109,12 @@ contract BeefyERC4626 is MidasERC4626 {
   function previewWithdraw(uint256 assets) public view override returns (uint256) {
     uint256 supply = totalSupply;
 
-    uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
-    if (assetsInBeefyVault < assets) {
-      uint256 _withdraw = assets - assetsInBeefyVault;
-      assets = assetsInBeefyVault + _withdraw.mulDivUp(BPS_DENOMINATOR, (BPS_DENOMINATOR - withdrawalFee));
+    if (!paused()) {
+      uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
+      if (assetsInBeefyVault < assets) {
+        uint256 _withdraw = assets - assetsInBeefyVault;
+        assets = assetsInBeefyVault + _withdraw.mulDivUp(BPS_DENOMINATOR, (BPS_DENOMINATOR - withdrawalFee));
+      }
     }
 
     return supply == 0 ? assets : assets.mulDivDown(supply, totalAssets());
@@ -119,9 +124,12 @@ contract BeefyERC4626 is MidasERC4626 {
   function previewRedeem(uint256 shares) public view override returns (uint256) {
     uint256 supply = totalSupply;
 
+    if (paused()) {
+      return supply == 0 ? shares : shares.mulDivUp(totalAssets(), supply);
+    }
+
     uint256 assets = convertToAssets(shares);
 
-    // TODO what if paused and balanceOf = 0?
     uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
     if (assetsInBeefyVault < assets) {
       uint256 _withdraw = assets - assetsInBeefyVault;
@@ -132,9 +140,14 @@ contract BeefyERC4626 is MidasERC4626 {
   }
 
   /* ========== EMERGENCY FUNCTIONS ========== */
-  // TODO we don't need to override this method
+
   function emergencyWithdrawAndPause() external override onlyOwner {
     beefyVault.withdraw(beefyVault.balanceOf(address(this)));
     _pause();
+  }
+
+  function unpause() external override onlyOwner {
+    _unpause();
+    beefyVault.deposit(asset.balanceOf(address(this)));
   }
 }
