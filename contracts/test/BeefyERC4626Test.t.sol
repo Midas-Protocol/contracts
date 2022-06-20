@@ -172,7 +172,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares * 2);
 
     // Beefy ERC4626 should not have underlyingToken after deposit
-    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 1, "Beefy erc4626 locked amount checking");
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
   }
 
   function testMint() public shouldRun(forChains(BSC_MAINNET)) {
@@ -273,7 +273,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
 
     // Test that we burned the right amount of shares
     assertEq(beefyERC4626.balanceOf(address(this)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
-    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0);
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     assertEq(
@@ -367,7 +367,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
       "!beefy share balance"
     );
 
-    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0);
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
 
     uint256 totalSupplyBefore = depositAmount * 2 - expectedErc4626SharesNeeded;
     beefyShares = beefyShares - expectedBeefySharesNeeded;
@@ -401,7 +401,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
       "!beefy share balance"
     );
 
-    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0);
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
   }
 
   function testRedeem() public shouldRun(forChains(BSC_MAINNET)) {
@@ -483,7 +483,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
       beefyShares - expectedBeefySharesNeeded,
       "!beefy share balance"
     );
-    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0);
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
 
     uint256 totalSupplyBefore = depositAmount * 2 - redeemAmount;
     beefyShares -= expectedBeefySharesNeeded;
@@ -515,7 +515,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
       beefyShares - expectedBeefySharesNeeded,
       "!beefy share balance"
     );
-    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0);
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
   }
 
   function testPauseContract() public shouldRun(forChains(BSC_MAINNET)) {
@@ -544,6 +544,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     deposit(address(this), depositAmount);
 
     uint256 expectedBal = beefyERC4626.previewRedeem(depositAmount);
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "!init 0");
 
     beefyERC4626.emergencyWithdrawAndPause();
 
@@ -649,7 +650,7 @@ contract BeefyERC4626UnitTest is BaseTest {
       emit log_uint(lockedFunds);
     }
     // check if any funds remained locked in the BeefyERC4626
-    assertEq(lockedFunds, 0);
+    assertEq(lockedFunds, 0, "should transfer the full balance of the withdrawn cakeLP, no dust is acceptable");
   }
 
   function testTheBugRedeem(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
@@ -695,7 +696,7 @@ contract BeefyERC4626UnitTest is BaseTest {
       emit log_uint(lockedFunds);
     }
     // check if any funds remained locked in the BeefyERC4626
-    assertEq(lockedFunds, 0);
+    assertEq(lockedFunds, 0, "should transfer the full balance of the redeemed cakeLP, no dust is acceptable");
   }
 
   function diff(uint256 a, uint256 b) internal returns (uint256) {
