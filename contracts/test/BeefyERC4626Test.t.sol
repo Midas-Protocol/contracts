@@ -36,6 +36,14 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     )
   {}
 
+  function diff(uint256 a, uint256 b) internal returns (uint256) {
+    if (a > b) {
+      return a - b;
+    } else {
+      return b - a;
+    }
+  }
+
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     beefyVault = IBeefyVault(0xD2FeCe7Ff1B791F8fE7f35424165abB8BD1671f2);
     beefyERC4626 = new BeefyERC4626(underlyingToken, beefyVault, withdrawalFee);
@@ -164,7 +172,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     assertEq(beefyVault.balanceOf(address(beefyERC4626)), expectedBeefyShares * 2);
 
     // Beefy ERC4626 should not have underlyingToken after deposit
-    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 1, "Beefy erc4626 locked amount checking");
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
   }
 
   function testMint() public shouldRun(forChains(BSC_MAINNET)) {
@@ -252,7 +260,10 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyERC4626.withdraw(withdrawalAmount, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertEq(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount, "!user asset bal");
+    assertTrue(
+      diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
+      "!user asset bal"
+    );
 
     // Test that the balance view calls work
     // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
@@ -262,7 +273,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
 
     // Test that we burned the right amount of shares
     assertEq(beefyERC4626.balanceOf(address(this)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
-    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 1, "!0");
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     assertEq(
@@ -335,7 +346,10 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyERC4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertEq(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount, "!user asset bal");
+    assertTrue(
+      diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
+      "!user asset bal"
+    );
 
     // Test that the balance view calls work
     // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
@@ -353,7 +367,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
       "!beefy share balance"
     );
 
-    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 1, "Beefy erc4626 locked amount checking");
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
 
     uint256 totalSupplyBefore = depositAmount * 2 - expectedErc4626SharesNeeded;
     beefyShares = beefyShares - expectedBeefySharesNeeded;
@@ -369,7 +383,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyERC4626.withdraw(10e18, address(1), address(1));
 
     // Test that the actual transfers worked
-    assertEq(underlyingToken.balanceOf(address(1)), assetBalBefore + withdrawalAmount, "!user asset bal");
+    assertTrue(diff(underlyingToken.balanceOf(address(1)), assetBalBefore + withdrawalAmount) <= 1, "!user asset bal");
 
     // Test that the balance view calls work
     // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
@@ -387,7 +401,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
       "!beefy share balance"
     );
 
-    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 2, "Beefy erc4626 locked amount checking");
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
   }
 
   function testRedeem() public shouldRun(forChains(BSC_MAINNET)) {
@@ -408,7 +422,10 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyERC4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertEq(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount, "!user asset bal");
+    assertTrue(
+      diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
+      "!user asset bal"
+    );
 
     // Test that the balance view calls work
     // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
@@ -446,7 +463,10 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyERC4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertEq(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount, "!user asset bal");
+    assertTrue(
+      diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
+      "!user asset bal"
+    );
 
     // Test that the balance view calls work
     // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
@@ -463,7 +483,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
       beefyShares - expectedBeefySharesNeeded,
       "!beefy share balance"
     );
-    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 1, "Beefy erc4626 locked amount checking");
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
 
     uint256 totalSupplyBefore = depositAmount * 2 - redeemAmount;
     beefyShares -= expectedBeefySharesNeeded;
@@ -478,7 +498,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyERC4626.withdraw(10e18, address(1), address(1));
 
     // Test that the actual transfers worked
-    assertEq(underlyingToken.balanceOf(address(1)), assetBalBefore + withdrawalAmount, "!user asset bal");
+    assertTrue(diff(underlyingToken.balanceOf(address(1)), assetBalBefore + withdrawalAmount) <= 1, "!user asset bal");
 
     // Test that the balance view calls work
     // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
@@ -495,15 +515,15 @@ contract BeefyERC4626Test is WithPool, BaseTest {
       beefyShares - expectedBeefySharesNeeded,
       "!beefy share balance"
     );
-    assertTrue(underlyingToken.balanceOf(address(beefyERC4626)) <= 2, "Beefy erc4626 locked amount checking");
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
   }
 
   function testPauseContract() public shouldRun(forChains(BSC_MAINNET)) {
-    sendUnderlyingToken(depositAmount, address(this));
+    uint256 withdrawAmount = 1e18;
 
-    deposit();
+    deposit(address(this), depositAmount);
 
-    beefyERC4626.emergencyWithdrawFromStrategyAndPauseContract();
+    beefyERC4626.emergencyWithdrawAndPause();
 
     underlyingToken.approve(address(beefyERC4626), depositAmount);
     vm.expectRevert("Pausable: paused");
@@ -512,35 +532,57 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     vm.expectRevert("Pausable: paused");
     beefyERC4626.mint(depositAmount, address(this));
 
-    vm.expectRevert("Pausable: paused");
-    beefyERC4626.withdraw(1e18, address(this), address(this));
+    uint256 expectedSharesNeeded = withdrawAmount.mulDivDown(beefyERC4626.totalSupply(), beefyERC4626.totalAssets());
+    beefyERC4626.withdraw(withdrawAmount, address(this), address(this));
 
-    vm.expectRevert("Pausable: paused");
-    beefyERC4626.redeem(1e18, address(this), address(this));
+    assertEq(beefyERC4626.balanceOf(address(this)), depositAmount - expectedSharesNeeded, "!withdraw share bal");
+    assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount, "!withdraw asset bal");
+
+    uint256 expectedAssets = withdrawAmount.mulDivUp(beefyERC4626.totalAssets(), beefyERC4626.totalSupply());
+    beefyERC4626.redeem(withdrawAmount, address(this), address(this));
+
+    assertEq(
+      beefyERC4626.balanceOf(address(this)),
+      depositAmount - withdrawAmount - expectedSharesNeeded,
+      "!redeem share bal"
+    );
+    assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount + expectedAssets, "!redeem asset bal");
   }
 
-  function testEmergencyWithdrawFromStrategyAndPauseContract() public shouldRun(forChains(BSC_MAINNET)) {
-    deposit();
-    uint256 expectedBal = beefyERC4626.previewRedeem(depositAmount);
+  function testEmergencyWithdrawAndPause() public shouldRun(forChains(BSC_MAINNET)) {
+    deposit(address(this), depositAmount);
 
-    beefyERC4626.emergencyWithdrawFromStrategyAndPauseContract();
+    uint256 expectedBal = beefyERC4626.previewRedeem(depositAmount);
+    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "!init 0");
+
+    beefyERC4626.emergencyWithdrawAndPause();
 
     assertEq(underlyingToken.balanceOf(address(beefyERC4626)), expectedBal, "!withdraws underlying");
-    assertEq(beefyERC4626.totalAssets(), 0, "!totalAssets == 0");
+    assertEq(beefyERC4626.totalAssets(), expectedBal, "!totalAssets == expectedBal");
   }
 
-  function testEmergencyWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
-    deposit();
-    uint256 expectedBal = beefyERC4626.previewRedeem(depositAmount);
+  function testEmergencyWithdrawAndRedeem() public shouldRun(forChains(BSC_MAINNET)) {
+    uint256 withdrawAmount = 1e18;
 
-    beefyERC4626.emergencyWithdrawFromStrategyAndPauseContract();
+    deposit(address(this), depositAmount);
 
-    beefyERC4626.emergencyWithdraw(depositAmount);
+    beefyERC4626.emergencyWithdrawAndPause();
 
-    assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "!no leftover");
-    assertEq(beefyERC4626.totalAssets(), 0, "!totalAssets == 0");
-    assertEq(beefyERC4626.totalSupply(), 0, "!totalSupply == 0");
-    assertEq(underlyingToken.balanceOf(address(this)), expectedBal, "!userBal");
+    uint256 expectedSharesNeeded = withdrawAmount.mulDivDown(beefyERC4626.totalSupply(), beefyERC4626.totalAssets());
+    beefyERC4626.withdraw(withdrawAmount, address(this), address(this));
+
+    assertEq(beefyERC4626.balanceOf(address(this)), depositAmount - expectedSharesNeeded, "!withdraw share bal");
+    assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount, "!withdraw asset bal");
+
+    uint256 expectedAssets = withdrawAmount.mulDivUp(beefyERC4626.totalAssets(), beefyERC4626.totalSupply());
+    beefyERC4626.redeem(withdrawAmount, address(this), address(this));
+
+    assertEq(
+      beefyERC4626.balanceOf(address(this)),
+      depositAmount - withdrawAmount - expectedSharesNeeded,
+      "!redeem share bal"
+    );
+    assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount + expectedAssets, "!redeem asset bal");
   }
 }
 
@@ -625,7 +667,7 @@ contract BeefyERC4626UnitTest is BaseTest {
       emit log_uint(lockedFunds);
     }
     // check if any funds remained locked in the BeefyERC4626
-    assertTrue(lockedFunds < 10, "should transfer the full balance of the withdrawn cakeLP, some dust is acceptable");
+    assertEq(lockedFunds, 0, "should transfer the full balance of the withdrawn cakeLP, no dust is acceptable");
   }
 
   function testTheBugRedeem(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
@@ -671,7 +713,7 @@ contract BeefyERC4626UnitTest is BaseTest {
       emit log_uint(lockedFunds);
     }
     // check if any funds remained locked in the BeefyERC4626
-    assertTrue(lockedFunds < 10, "should transfer the full balance of the redeemed cakeLP, some dust is acceptable");
+    assertEq(lockedFunds, 0, "should transfer the full balance of the redeemed cakeLP, no dust is acceptable");
   }
 
   function diff(uint256 a, uint256 b) internal returns (uint256) {

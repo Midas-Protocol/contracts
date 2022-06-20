@@ -75,7 +75,10 @@ contract BeefyERC4626 is MidasERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    return beefyVault.balanceOf(address(this)).mulDivUp(beefyVault.balance(), beefyVault.totalSupply());
+    return
+      paused()
+        ? asset.balanceOf(address(this))
+        : beefyVault.balanceOf(address(this)).mulDivUp(beefyVault.balance(), beefyVault.totalSupply());
   }
 
   /// @notice Calculates the total amount of underlying tokens the account holds.
@@ -106,10 +109,13 @@ contract BeefyERC4626 is MidasERC4626 {
   function previewWithdraw(uint256 assets) public view override returns (uint256) {
     uint256 supply = totalSupply;
 
-    uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
-    if (assetsInBeefyVault < assets) {
-      uint256 _withdraw = assets - assetsInBeefyVault;
-      assets = assetsInBeefyVault + _withdraw.mulDivUp(BPS_DENOMINATOR, (BPS_DENOMINATOR - withdrawalFee));
+    if (!paused()) {
+      // calculate the possible withdrawal fee when not in emergency
+      uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
+      if (assetsInBeefyVault < assets) {
+        uint256 _withdraw = assets - assetsInBeefyVault;
+        assets = assetsInBeefyVault + _withdraw.mulDivUp(BPS_DENOMINATOR, (BPS_DENOMINATOR - withdrawalFee));
+      }
     }
 
     return supply == 0 ? assets : assets.mulDivDown(supply, totalAssets());
@@ -119,21 +125,31 @@ contract BeefyERC4626 is MidasERC4626 {
   function previewRedeem(uint256 shares) public view override returns (uint256) {
     uint256 supply = totalSupply;
 
-    uint256 assets = convertToAssets(shares);
+    if (!paused()) {
+      // calculate the possible withdrawal fee when not in emergency
+      uint256 assets = convertToAssets(shares);
 
-    uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
-    if (assetsInBeefyVault < assets) {
-      uint256 _withdraw = assets - assetsInBeefyVault;
-      assets -= _withdraw.mulDivUp(withdrawalFee, BPS_DENOMINATOR);
+      uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
+      if (assetsInBeefyVault < assets) {
+        uint256 _withdraw = assets - assetsInBeefyVault;
+        assets -= _withdraw.mulDivUp(withdrawalFee, BPS_DENOMINATOR);
+      }
+
+      return assets;
+    } else {
+      return supply == 0 ? shares : shares.mulDivUp(totalAssets(), supply);
     }
-
-    return assets;
   }
 
   /* ========== EMERGENCY FUNCTIONS ========== */
 
-  function emergencyWithdrawFromStrategyAndPauseContract() external override onlyOwner {
+  function emergencyWithdrawAndPause() external override onlyOwner {
     beefyVault.withdraw(beefyVault.balanceOf(address(this)));
     _pause();
+  }
+
+  function unpause() external override onlyOwner {
+    _unpause();
+    beefyVault.deposit(asset.balanceOf(address(this)));
   }
 }

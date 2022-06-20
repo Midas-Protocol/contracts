@@ -47,7 +47,7 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     uint256 assets,
     address receiver,
     address owner
-  ) public override whenNotPaused returns (uint256 shares) {
+  ) public override returns (uint256 shares) {
     shares = previewWithdraw(assets); // No need to check for rounding error, previewWithdraw rounds up.
 
     if (msg.sender != owner) {
@@ -56,7 +56,13 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
       if (allowed != type(uint256).max) allowance[owner][msg.sender] = allowed - shares;
     }
 
-    beforeWithdraw(assets, shares);
+    if (!paused()) {
+      uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
+
+      beforeWithdraw(assets, shares);
+
+      assets = asset.balanceOf(address(this)) - balanceBeforeWithdraw;
+    }
 
     _burn(owner, shares);
 
@@ -69,7 +75,8 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     uint256 shares,
     address receiver,
     address owner
-  ) public override whenNotPaused returns (uint256 assets) {
+  ) public override returns (uint256 assets) {
+    uint256 supply = totalSupply;
     if (msg.sender != owner) {
       uint256 allowed = allowance[owner][msg.sender]; // Saves gas for limited approvals.
 
@@ -79,7 +86,13 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     // Check for rounding error since we round down in previewRedeem.
     require((assets = previewRedeem(shares)) != 0, "ZERO_ASSETS");
 
-    beforeWithdraw(assets, shares);
+    if (!paused()) {
+      uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
+
+      beforeWithdraw(assets, shares);
+
+      assets = asset.balanceOf(address(this)) - balanceBeforeWithdraw;
+    }
 
     _burn(owner, shares);
 
@@ -89,17 +102,19 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
   }
 
   // Should withdraw all funds from the strategy and pause the contract
-  function emergencyWithdrawFromStrategyAndPauseContract() external virtual onlyOwner {}
+  function emergencyWithdrawAndPause() external virtual onlyOwner {
+    revert("!implementation");
 
-  function unpause() external onlyOwner {
-    _unpause();
+    // Withdraw all assets from underlying strategy
+
+    // _pause();
   }
 
-  function emergencyWithdraw(uint256 shares) external {
-    uint256 supply = totalSupply; // Saves an extra SLOAD if totalSupply is non-zero.
+  function unpause() external virtual onlyOwner {
+    revert("!implementation");
 
-    asset.safeTransfer(msg.sender, supply == 0 ? shares : shares.mulDivUp(asset.balanceOf(address(this)), supply));
+    // _unpause();
 
-    _burn(msg.sender, shares);
+    // Deposit all assets to underlying strategy
   }
 }
