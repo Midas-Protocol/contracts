@@ -536,7 +536,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyERC4626.withdraw(1e18, address(this), address(this));
 
     // TODO redeem is not limited by pause
-//    vm.expectRevert("Pausable: paused");
+    //    vm.expectRevert("Pausable: paused");
     beefyERC4626.redeem(1e18, address(this), address(this));
   }
 

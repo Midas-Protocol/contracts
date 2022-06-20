@@ -132,7 +132,7 @@ contract BeefyERC4626 is MidasERC4626 {
   }
 
   /* ========== EMERGENCY FUNCTIONS ========== */
-// TODO we don't need to override this method
+  // TODO we don't need to override this method
   function emergencyWithdrawFromStrategyAndPauseContract() external override onlyOwner {
     beefyVault.withdraw(beefyVault.balanceOf(address(this)));
     _pause();
