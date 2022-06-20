@@ -110,6 +110,7 @@ contract BeefyERC4626 is MidasERC4626 {
     uint256 supply = totalSupply;
 
     if (!paused()) {
+      // calculate the possible withdrawal fee when not in emergency
       uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
       if (assetsInBeefyVault < assets) {
         uint256 _withdraw = assets - assetsInBeefyVault;
@@ -124,19 +125,20 @@ contract BeefyERC4626 is MidasERC4626 {
   function previewRedeem(uint256 shares) public view override returns (uint256) {
     uint256 supply = totalSupply;
 
-    if (paused()) {
+    if (!paused()) {
+      // calculate the possible withdrawal fee when not in emergency
+      uint256 assets = convertToAssets(shares);
+
+      uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
+      if (assetsInBeefyVault < assets) {
+        uint256 _withdraw = assets - assetsInBeefyVault;
+        assets -= _withdraw.mulDivUp(withdrawalFee, BPS_DENOMINATOR);
+      }
+
+      return assets;
+    } else {
       return supply == 0 ? shares : shares.mulDivUp(totalAssets(), supply);
     }
-
-    uint256 assets = convertToAssets(shares);
-
-    uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
-    if (assetsInBeefyVault < assets) {
-      uint256 _withdraw = assets - assetsInBeefyVault;
-      assets -= _withdraw.mulDivUp(withdrawalFee, BPS_DENOMINATOR);
-    }
-
-    return assets;
   }
 
   /* ========== EMERGENCY FUNCTIONS ========== */
