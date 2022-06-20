@@ -121,6 +121,7 @@ contract BeefyERC4626 is MidasERC4626 {
 
     uint256 assets = convertToAssets(shares);
 
+    // TODO what if paused and balanceOf = 0?
     uint256 assetsInBeefyVault = asset.balanceOf(address(beefyVault));
     if (assetsInBeefyVault < assets) {
       uint256 _withdraw = assets - assetsInBeefyVault;
@@ -131,8 +132,8 @@ contract BeefyERC4626 is MidasERC4626 {
   }
 
   /* ========== EMERGENCY FUNCTIONS ========== */
-
-  function emergencyWithdrawFromStrategyAndPauseContract() external override onlyOwner {
+  // TODO we don't need to override this method
+  function emergencyWithdrawAndPause() external override onlyOwner {
     beefyVault.withdraw(beefyVault.balanceOf(address(this)));
     _pause();
   }

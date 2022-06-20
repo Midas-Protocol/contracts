@@ -67,11 +67,16 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     asset.safeTransfer(receiver, asset.balanceOf(address(this)) - balanceBeforeWithdraw);
   }
 
+  function emergencyRedeem(uint256 shares) external returns (uint256) {
+    return redeem(shares, msg.sender, msg.sender);
+  }
+
   function redeem(
     uint256 shares,
     address receiver,
     address owner
-  ) public override whenNotPaused returns (uint256 assets) {
+  ) public override returns (uint256 assets) {
+    uint256 supply = totalSupply;
     if (msg.sender != owner) {
       uint256 allowed = allowance[owner][msg.sender]; // Saves gas for limited approvals.
 
@@ -81,29 +86,32 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     // Check for rounding error since we round down in previewRedeem.
     require((assets = previewRedeem(shares)) != 0, "ZERO_ASSETS");
 
-    uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
-
-    beforeWithdraw(assets, shares);
+    uint256 assetsToTransfer;
+    if (!paused()) {
+      uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
+      beforeWithdraw(assets, shares);
+      assetsToTransfer = asset.balanceOf(address(this)) - balanceBeforeWithdraw;
+    } else {
+      assetsToTransfer = supply == 0 ? shares : shares.mulDivUp(asset.balanceOf(address(this)), supply);
+    }
 
     _burn(owner, shares);
 
     emit Withdraw(msg.sender, receiver, owner, assets, shares);
 
-    asset.safeTransfer(receiver, asset.balanceOf(address(this)) - balanceBeforeWithdraw);
+    asset.safeTransfer(receiver, assetsToTransfer);
+
+    // TODO return assets or assetsToTransfer ?
   }
 
   // Should withdraw all funds from the strategy and pause the contract
-  function emergencyWithdrawFromStrategyAndPauseContract() external virtual onlyOwner {}
-
-  function unpause() external onlyOwner {
-    _unpause();
+  function emergencyWithdrawAndPause() external virtual onlyOwner {
+    beforeWithdraw(totalAssets(), totalSupply);
+    _pause();
   }
 
-  function emergencyWithdraw(uint256 shares) external {
-    uint256 supply = totalSupply; // Saves an extra SLOAD if totalSupply is non-zero.
-
-    asset.safeTransfer(msg.sender, supply == 0 ? shares : shares.mulDivUp(asset.balanceOf(address(this)), supply));
-
-    _burn(msg.sender, shares);
+  function unpause() external virtual onlyOwner {
+    _unpause();
+    afterDeposit(asset.balanceOf(address(this)), totalSupply);
   }
 }
