@@ -523,7 +523,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
 
     deposit(address(this), depositAmount);
 
-    beefyERC4626.emergencyWithdrawFromStrategyAndPauseContract();
+    beefyERC4626.emergencyWithdrawAndPause();
 
     underlyingToken.approve(address(beefyERC4626), depositAmount);
     vm.expectRevert("Pausable: paused");
@@ -540,12 +540,12 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     beefyERC4626.redeem(1e18, address(this), address(this));
   }
 
-  function testEmergencyWithdrawFromStrategyAndPauseContract() public shouldRun(forChains(BSC_MAINNET)) {
+  function testEmergencyWithdrawAndPause() public shouldRun(forChains(BSC_MAINNET)) {
     deposit(address(this), depositAmount);
 
     uint256 expectedBal = beefyERC4626.previewRedeem(depositAmount);
 
-    beefyERC4626.emergencyWithdrawFromStrategyAndPauseContract();
+    beefyERC4626.emergencyWithdrawAndPause();
 
     assertEq(underlyingToken.balanceOf(address(beefyERC4626)), expectedBal, "!withdraws underlying");
     assertEq(beefyERC4626.totalAssets(), 0, "!totalAssets == 0");
@@ -556,7 +556,7 @@ contract BeefyERC4626Test is WithPool, BaseTest {
 
     uint256 expectedBal = beefyERC4626.previewRedeem(depositAmount);
 
-    beefyERC4626.emergencyWithdrawFromStrategyAndPauseContract();
+    beefyERC4626.emergencyWithdrawAndPause();
 
     // TODO redeem shares, not assets
     beefyERC4626.emergencyRedeem(depositAmount);

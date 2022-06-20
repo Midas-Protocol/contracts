@@ -105,7 +105,7 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
   }
 
   // Should withdraw all funds from the strategy and pause the contract
-  function emergencyWithdrawFromStrategyAndPauseContract() external virtual onlyOwner {
+  function emergencyWithdrawAndPause() external virtual onlyOwner {
     beforeWithdraw(totalAssets(), totalSupply);
     _pause();
   }
