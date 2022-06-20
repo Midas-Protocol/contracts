@@ -56,7 +56,7 @@ jobs:
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
       FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
-      FORK_BLOCK_NUMBER: 18299335
+      FORK_BLOCK_NUMBER: 18766221
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -116,4 +116,4 @@ jobs:
         run: forge install
 
       - name: Run forge tests on Moonbeam
-        run: forge test --fork-url https://rpc.api.moonbeam.network --fork-block-number ${FORK_BLOCK_NUMBER}
+        run: forge test --fork-url https://moonbeam.api.onfinality.io/public --fork-block-number ${FORK_BLOCK_NUMBER}
