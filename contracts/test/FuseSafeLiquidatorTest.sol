@@ -59,11 +59,15 @@ contract FuseSafeLiquidatorTest is BaseTest {
     // in case these slots start to get used, please redeploy the FSL
     // with a larger storage gap to protect the owner variable of OwnableUpgradeable
     // from being overwritten by the FuseSafeLiquidator storage
-    for (uint i = 40; i < 51; i++) {
+    for (uint256 i = 40; i < 51; i++) {
       emit log_uint(i);
       address atSloti = address(uint160(uint256(vm.load(address(fsl), bytes32(i)))));
       emit log_address(atSloti);
-      assertEq(atSloti, address(0), "replace the FSL proxy/storage contract with a new one before the owner variable is overwritten");
+      assertEq(
+        atSloti,
+        address(0),
+        "replace the FSL proxy/storage contract with a new one before the owner variable is overwritten"
+      );
     }
   }
 }
