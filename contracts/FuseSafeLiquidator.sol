@@ -103,7 +103,6 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     }
   }
 
-
   /**
    * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
    */
