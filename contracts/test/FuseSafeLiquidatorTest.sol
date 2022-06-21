@@ -49,6 +49,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     IRedemptionStrategy strategy = new MockRedemptionStrategy();
     bytes memory strategyData = "";
 
+    vm.prank(fsl.owner());
     fsl._whitelistRedemptionStrategy(strategy, true);
     fsl.redeemCustomCollateral(underlyingCollateral, underlyingCollateralSeized, strategy, strategyData);
   }
