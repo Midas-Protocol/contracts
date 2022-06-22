@@ -240,23 +240,9 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
   }
 
   /**
-   * @dev Maps Ethereum accounts to arrays of Fuse pool Comptroller proxy contract addresses.
+   * @dev placeholder var to keep the storage gap
    */
-  mapping(address => address[]) private _bookmarks;
-
-  /**
-   * @notice Returns arrays of Fuse pool Unitroller (Comptroller proxy) contract addresses bookmarked by `account`.
-   */
-  function getBookmarks(address account) external view returns (address[] memory) {
-    return _bookmarks[account];
-  }
-
-  //  /**
-  //   * @notice Bookmarks a Fuse pool Unitroller (Comptroller proxy) contract addresses.
-  //   */
-  //  function bookmarkPool(address comptroller) external {
-  //    _bookmarks[msg.sender].push(comptroller);
-  //  }
+  mapping(address => address[]) private placeholder;
 
   /**
    * @notice Modify existing Fuse pool name.
