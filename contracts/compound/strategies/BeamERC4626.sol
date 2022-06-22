@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
-import { MidasERC4626 } from "./MidasERc4626.sol";
+import { MidasERC4626 } from "./MidasERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
