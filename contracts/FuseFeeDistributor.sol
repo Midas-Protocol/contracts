@@ -143,7 +143,7 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
     address comptroller = abi.decode(constructorData[0:32], (address));
     require(comptroller == msg.sender, "Comptroller is not sender.");
     // Deploy CEtherDelegator using msg.sender, underlying, and block.number as a salt
-    bytes32 salt = keccak256(abi.encodePacked(msg.sender, address(0), block.number));
+    bytes32 salt = keccak256(abi.encodePacked(msg.sender, address(0), ++marketsCounter));
 
     bytes memory cEtherDelegatorCreationCode = abi.encodePacked(type(CEtherDelegator).creationCode, constructorData);
     address proxy = Create2Upgradeable.deploy(0, salt, cEtherDelegatorCreationCode);
@@ -160,7 +160,7 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
     require(comptroller == msg.sender, "Comptroller is not sender.");
 
     // Deploy CErc20Delegator using msg.sender, underlying, and block.number as a salt
-    bytes32 salt = keccak256(abi.encodePacked(msg.sender, underlying, block.number));
+    bytes32 salt = keccak256(abi.encodePacked(msg.sender, underlying, ++marketsCounter));
 
     bytes memory cErc20DelegatorCreationCode = abi.encodePacked(type(CErc20Delegator).creationCode, constructorData);
     address proxy = Create2Upgradeable.deploy(0, salt, cErc20DelegatorCreationCode);
@@ -380,6 +380,11 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
    * @dev A value of 0 means unset whereas a negative value means 0.
    */
   mapping(address => int256) public customInterestFeeRates;
+
+  /**
+   * @dev used as salt for the creation of new markets
+   */
+  uint256 public marketsCounter;
 
   /**
    * @notice Returns the proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
