@@ -251,12 +251,12 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
     return _bookmarks[account];
   }
 
-//  /**
-//   * @notice Bookmarks a Fuse pool Unitroller (Comptroller proxy) contract addresses.
-//   */
-//  function bookmarkPool(address comptroller) external {
-//    _bookmarks[msg.sender].push(comptroller);
-//  }
+  //  /**
+  //   * @notice Bookmarks a Fuse pool Unitroller (Comptroller proxy) contract addresses.
+  //   */
+  //  function bookmarkPool(address comptroller) external {
+  //    _bookmarks[msg.sender].push(comptroller);
+  //  }
 
   /**
    * @notice Modify existing Fuse pool name.
