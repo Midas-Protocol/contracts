@@ -22,8 +22,6 @@ contract EllipsisERC4626Test is BaseTest {
     uint192 reward;
   }
 
-  // Vm public constant vm = Vm(HEVM_ADDRESS);
-
   address alice = address(10);
   address bob = address(20);
   address charlie = address(30);
