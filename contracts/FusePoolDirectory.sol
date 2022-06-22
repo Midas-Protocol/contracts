@@ -148,7 +148,7 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
     bytes memory unitrollerCreationCode = abi.encodePacked(type(Unitroller).creationCode, constructorData);
     address proxy = Create2Upgradeable.deploy(
       0,
-      keccak256(abi.encodePacked(msg.sender, name, block.number)),
+      keccak256(abi.encodePacked(msg.sender, name, pools.length)),
       unitrollerCreationCode
     );
 
