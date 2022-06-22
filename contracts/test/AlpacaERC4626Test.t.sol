@@ -24,7 +24,7 @@ contract AlpacaERC4626Test is BaseTest {
   address bob = address(20);
   address charlie = address(30);
 
-  function setUp() public {
+  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     testToken = MockERC20(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
     mockVault = MockVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063);
     alpacaERC4626 = new AlpacaERC4626(
@@ -34,7 +34,7 @@ contract AlpacaERC4626Test is BaseTest {
     );
   }
 
-  function testInitializedValues() public {
+  function testInitializedValues() public shouldRun(forChains(BSC_MAINNET)) {
     assertEq(alpacaERC4626.name(), "Midas Wrapped BNB Vault");
     assertEq(alpacaERC4626.symbol(), "mvWBNB");
     assertEq(address(alpacaERC4626.asset()), address(testToken));
