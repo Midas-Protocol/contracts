@@ -148,7 +148,7 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
     bytes memory unitrollerCreationCode = abi.encodePacked(type(Unitroller).creationCode, constructorData);
     address proxy = Create2Upgradeable.deploy(
       0,
-      keccak256(abi.encodePacked(msg.sender, name, pools.length)),
+      keccak256(abi.encodePacked(msg.sender, name, ++poolsCounter)),
       unitrollerCreationCode
     );
 
@@ -240,23 +240,9 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
   }
 
   /**
-   * @dev Maps Ethereum accounts to arrays of Fuse pool Comptroller proxy contract addresses.
+   * @dev placeholder var to keep the storage gap
    */
-  mapping(address => address[]) private _bookmarks;
-
-  /**
-   * @notice Returns arrays of Fuse pool Unitroller (Comptroller proxy) contract addresses bookmarked by `account`.
-   */
-  function getBookmarks(address account) external view returns (address[] memory) {
-    return _bookmarks[account];
-  }
-
-  /**
-   * @notice Bookmarks a Fuse pool Unitroller (Comptroller proxy) contract addresses.
-   */
-  function bookmarkPool(address comptroller) external {
-    _bookmarks[msg.sender].push(comptroller);
-  }
+  mapping(address => address[]) private placeholder;
 
   /**
    * @notice Modify existing Fuse pool name.
@@ -271,6 +257,11 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
    * @dev Maps Ethereum accounts to booleans indicating if they are a whitelisted admin.
    */
   mapping(address => bool) public adminWhitelist;
+
+  /**
+   * @dev used as salt for the creation of new pools
+   */
+  uint256 public poolsCounter;
 
   /**
    * @dev Event emitted when the admin whitelist is updated.
