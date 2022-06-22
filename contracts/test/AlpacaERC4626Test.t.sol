@@ -25,8 +25,8 @@ contract AlpacaERC4626Test is BaseTest {
   address charlie = address(30);
 
   function setUp() public {
-    testToken = new MockERC20("TestToken", "TST", 18);
-    mockVault = new MockVault(address(testToken), "MockVault", "MV", 18);
+    testToken = MockERC20(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
+    mockVault = MockVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063);
     alpacaERC4626 = new AlpacaERC4626(
       testToken,
       IAlpacaVault(address(mockVault)),
@@ -35,8 +35,8 @@ contract AlpacaERC4626Test is BaseTest {
   }
 
   function testInitializedValues() public {
-    assertEq(alpacaERC4626.name(), "Midas TestToken Vault");
-    assertEq(alpacaERC4626.symbol(), "mvTST");
+    assertEq(alpacaERC4626.name(), "Midas Wrapped BNB Vault");
+    assertEq(alpacaERC4626.symbol(), "mvWBNB");
     assertEq(address(alpacaERC4626.asset()), address(testToken));
     assertEq(address(alpacaERC4626.alpacaVault()), address(mockVault));
   }
@@ -69,7 +69,9 @@ contract AlpacaERC4626Test is BaseTest {
 
   function testTheBugWithdraw(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
     vm.assume(amount > 1e18 && amount < 1e19);
-    testToken.mint(alice, 100e18);
+    vm.prank(0x0eD7e52944161450477ee417DE9Cd3a859b14fD0);
+    testToken.transferFrom(0x0eD7e52944161450477ee417DE9Cd3a859b14fD0, alice, 100e18);
+    // testToken.mint(alice, 100e18);
 
     deposit(bob, amount);
     // make sure the full amount is deposited and none is left
@@ -109,7 +111,8 @@ contract AlpacaERC4626Test is BaseTest {
 
   function testTheBugRedeem(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
     vm.assume(amount > 1e18 && amount < 1e19);
-    testToken.mint(alice, 100e18);
+    vm.prank(0x0eD7e52944161450477ee417DE9Cd3a859b14fD0);
+    testToken.transferFrom(0x0eD7e52944161450477ee417DE9Cd3a859b14fD0, alice, 100e18);
 
     deposit(charlie, amount);
     // make sure the full amount is deposited and none is left
@@ -150,45 +153,5 @@ contract AlpacaERC4626Test is BaseTest {
     }
     // check if any funds remained locked in the BeefyERC4626
     assertEq(lockedFunds, 0, "should transfer the full balance of the redeemed cakeLP, no dust is acceptable");
-  }
-
-  function deposit() public {
-    testToken.mint(address(this), depositAmount);
-    testToken.approve(address(alpacaERC4626), depositAmount);
-    alpacaERC4626.deposit(depositAmount, address(this));
-  }
-
-  function testDeposit() public {
-    deposit();
-    //Test that the actual transfers worked
-    assertEq(testToken.balanceOf(address(this)), 0);
-    assertEq(testToken.balanceOf(address(mockVault)), depositAmount);
-
-    //Test that the balance view calls work
-    assertEq(alpacaERC4626.totalAssets(), depositAmount);
-    assertEq(alpacaERC4626.balanceOfUnderlying(address(this)), depositAmount);
-
-    //Test that we minted the correct amount of token
-    assertEq(alpacaERC4626.balanceOf(address(this)), depositAmount);
-  }
-
-  function testWithdraw() public {
-    deposit();
-    //Alpaca Vaults always need to have a totalSupply > 1e17 (MockVault #45)
-    uint256 withdrawAmount = depositAmount - 1e18;
-    alpacaERC4626.withdraw(withdrawAmount, address(this), address(this));
-
-    //Test that the actual transfers worked
-    assertEq(testToken.balanceOf(address(this)), withdrawAmount);
-    assertEq(testToken.balanceOf(address(mockVault)), 1e18);
-
-    //Test that the balance view calls work
-    // !!! This reverts since we divide by 0
-    // The contract works fine but the question would be if we want to return a 0 if supply is 0 or if we are fine that the view function errors
-    //assertEq(alpacaERC4626.totalAssets(), 0);
-    //assertEq(alpacaERC4626.balanceOfUnderlying(address(this)), 0);
-
-    // //Test that we burned the correct amount of token
-    assertEq(alpacaERC4626.balanceOf(address(this)), 1e18);
   }
 }

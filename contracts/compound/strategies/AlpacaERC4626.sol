@@ -88,8 +88,13 @@ contract AlpacaERC4626 is MidasERC4626 {
     wtoken.deposit{ value: msg.value }();
   }
 
+  function convertToAlpacaVaultShares(uint256 shares) public returns (uint256) {
+    uint256 supply = totalSupply;
+    return supply == 0 ? shares : shares.mulDivUp(alpacaVault.balanceOf(address(this)), supply);
+  }
+
   function beforeWithdraw(uint256, uint256 shares) internal override {
-    alpacaVault.withdraw(shares);
+    alpacaVault.withdraw(convertToAlpacaVaultShares(shares));
   }
 
   function emergencyWithdrawAndPause() external override onlyOwner {

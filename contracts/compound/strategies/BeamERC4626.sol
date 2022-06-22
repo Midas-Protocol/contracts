@@ -84,8 +84,8 @@ contract BeamERC4626 is MidasERC4626 {
     VAULT.deposit(POOL_ID, amount);
   }
 
-  function beforeWithdraw(uint256, uint256 shares) internal override {
-    VAULT.withdraw(POOL_ID, shares);
+  function beforeWithdraw(uint256 amount, uint256) internal override {
+    VAULT.withdraw(POOL_ID, amount);
   }
 
   function emergencyWithdrawAndPause() external override onlyOwner {
