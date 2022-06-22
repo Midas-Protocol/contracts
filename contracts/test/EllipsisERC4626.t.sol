@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
+import "./config/BaseTest.t.sol";
 
 import { EllipsisERC4626, ILpTokenStaker } from "../compound/strategies/EllipsisERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -14,14 +15,18 @@ import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 
-contract EllipsisERC4626Test is DSTest {
+contract EllipsisERC4626Test is BaseTest {
   struct RewardsCycle {
     uint32 start;
     uint32 end;
     uint192 reward;
   }
 
-  Vm public constant vm = Vm(HEVM_ADDRESS);
+  // Vm public constant vm = Vm(HEVM_ADDRESS);
+
+  address alice = address(10);
+  address bob = address(20);
+  address charlie = address(30);
 
   EllipsisERC4626 ellipsisERC4626;
   FlywheelCore flywheel;
@@ -74,6 +79,117 @@ contract EllipsisERC4626Test is DSTest {
     assertEq(address(marketKey), address(ellipsisERC4626));
     assertEq(testToken.allowance(address(ellipsisERC4626), address(mockLpTokenStaker)), type(uint256).max);
     assertEq(epsToken.allowance(address(ellipsisERC4626), address(flywheelRewards)), type(uint256).max);
+  }
+
+  function deposit(address user, uint256 amount) internal {
+    // transfer to user exactly amount
+    vm.prank(alice);
+    testToken.transfer(user, amount);
+    assertEq(testToken.balanceOf(user), amount, "the full balance of cakeLP of user should equal amount");
+
+    // deposit the full amount to the plugin as user, check the result
+    vm.startPrank(user);
+    testToken.approve(address(ellipsisERC4626), amount);
+    ellipsisERC4626.deposit(amount, user);
+    vm.stopPrank();
+  }
+
+  function mint(address user, uint256 amount) internal {
+    // transfer to user exactly amount
+    vm.prank(alice);
+    testToken.transfer(user, amount);
+    assertEq(testToken.balanceOf(user), amount, "the full balance of cakeLP of user should equal amount");
+
+    // deposit the full amount to the plugin as user, check the result
+    vm.startPrank(user);
+    testToken.approve(address(ellipsisERC4626), amount);
+    ellipsisERC4626.mint(ellipsisERC4626.previewDeposit(amount), user);
+    vm.stopPrank();
+  }
+
+  function testTheBugWithdraw(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
+    vm.assume(amount > 100 && amount < 1e19);
+    testToken.mint(alice, 100e18);
+
+    deposit(bob, amount);
+    // make sure the full amount is deposited and none is left
+    assertEq(testToken.balanceOf(bob), 0, "should deposit the full balance of cakeLP of user");
+    assertEq(testToken.balanceOf(address(ellipsisERC4626)), 0, "should deposit the full balance of cakeLP of user");
+
+    // just testing if other users depositing would mess up the calcs
+    mint(charlie, amount);
+
+    // test if the shares of the BeefyERC4626 equal to the assets deposited
+    uint256 beefyERC4626SharesMintedToBob = ellipsisERC4626.balanceOf(bob);
+    assertEq(
+      beefyERC4626SharesMintedToBob,
+      amount,
+      "the first minted shares in erc4626 are expected to equal the assets deposited"
+    );
+
+    {
+      vm.startPrank(bob);
+      uint256 assetsToWithdraw = amount / 2;
+      ellipsisERC4626.withdraw(assetsToWithdraw, bob, bob);
+      uint256 assetsWithdrawn = testToken.balanceOf(bob);
+      assertTrue(
+        diff(assetsWithdrawn, assetsToWithdraw) < 100,
+        "the assets withdrawn must be almost equal to the requested assets to withdraw"
+      );
+      vm.stopPrank();
+    }
+
+    uint256 lockedFunds = testToken.balanceOf(address(ellipsisERC4626));
+    {
+      emit log_uint(lockedFunds);
+    }
+    // check if any funds remained locked in the BeefyERC4626
+    assertEq(lockedFunds, 0, "should transfer the full balance of the withdrawn cakeLP, no dust is acceptable");
+  }
+
+  function testTheBugRedeem(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
+    vm.assume(amount > 1e5 && amount < 1e19);
+    testToken.mint(alice, 100e18);
+
+    deposit(charlie, amount);
+    // make sure the full amount is deposited and none is left
+    assertEq(testToken.balanceOf(charlie), 0, "should deposit the full balance of cakeLP of user");
+    assertEq(testToken.balanceOf(address(ellipsisERC4626)), 0, "should deposit the full balance of cakeLP of user");
+
+    // just testing if other users depositing would mess up the calcs
+    mint(bob, amount);
+
+    // test if the shares of the BeefyERC4626 equal to the assets deposited
+    uint256 beefyERC4626SharesMintedToCharlie = ellipsisERC4626.balanceOf(charlie);
+    assertEq(
+      beefyERC4626SharesMintedToCharlie,
+      amount,
+      "the first minted shares in erc4626 are expected to equal the assets deposited"
+    );
+
+    {
+      vm.startPrank(charlie);
+      uint256 beefyERC4626SharesToRedeem = ellipsisERC4626.balanceOf(charlie);
+      ellipsisERC4626.redeem(beefyERC4626SharesToRedeem, charlie, charlie);
+      uint256 assetsRedeemed = testToken.balanceOf(charlie);
+      uint256 assetsToRedeem = ellipsisERC4626.previewRedeem(beefyERC4626SharesToRedeem);
+      {
+        emit log_uint(assetsRedeemed);
+        emit log_uint(assetsToRedeem);
+      }
+      assertTrue(
+        diff(assetsRedeemed, assetsToRedeem) * 1e4 < amount,
+        "the assets redeemed must be almost equal to the requested assets to redeem"
+      );
+      vm.stopPrank();
+    }
+
+    uint256 lockedFunds = testToken.balanceOf(address(ellipsisERC4626));
+    {
+      emit log_uint(lockedFunds);
+    }
+    // check if any funds remained locked in the BeefyERC4626
+    assertEq(lockedFunds, 0, "should transfer the full balance of the redeemed cakeLP, no dust is acceptable");
   }
 
   function deposit() public {

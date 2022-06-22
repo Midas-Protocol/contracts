@@ -36,14 +36,6 @@ contract BeefyERC4626Test is WithPool, BaseTest {
     )
   {}
 
-  function diff(uint256 a, uint256 b) internal returns (uint256) {
-    if (a > b) {
-      return a - b;
-    } else {
-      return b - a;
-    }
-  }
-
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     beefyVault = IBeefyVault(0xD2FeCe7Ff1B791F8fE7f35424165abB8BD1671f2);
     beefyERC4626 = new BeefyERC4626(underlyingToken, beefyVault, withdrawalFee);
@@ -714,13 +706,5 @@ contract BeefyERC4626UnitTest is BaseTest {
     }
     // check if any funds remained locked in the BeefyERC4626
     assertEq(lockedFunds, 0, "should transfer the full balance of the redeemed cakeLP, no dust is acceptable");
-  }
-
-  function diff(uint256 a, uint256 b) internal returns (uint256) {
-    if (a > b) {
-      return a - b;
-    } else {
-      return b - a;
-    }
   }
 }

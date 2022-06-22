@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity >=0.8.0;
 
-import { ERC4626 } from "solmate/mixins/ERC4626.sol";
+import { MidasERC4626 } from "./MidasERC4626.sol";
 import "../../external/bomb/IXBomb.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 
@@ -13,7 +13,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
  * Stakes the deposited BOMB in the xBOMB token contract which mints xBOMB for the depositor
  * and that xBOMB can be redeemed for a better xBOMB/BOMB rate when BOMB rewards are accumulated
  */
-contract BombERC4626 is ERC4626 {
+contract BombERC4626 is MidasERC4626 {
   // the staking token through which the rewards are distributed and redeemed
   IXBomb public xbomb;
 
@@ -25,7 +25,7 @@ contract BombERC4626 is ERC4626 {
    * @param _xbombAddress the xBOMB contract address
    */
   constructor(ERC20 _asset, address _xbombAddress)
-    ERC4626(
+    MidasERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
       string(abi.encodePacked("mv", _asset.symbol()))
@@ -65,5 +65,15 @@ contract BombERC4626 is ERC4626 {
   /// @notice unstakes the specified amount of xBOMB shares from the xBOMB contract
   function beforeWithdraw(uint256, uint256 xbombShares) internal override {
     xbomb.leave(xbombShares);
+  }
+
+  function emergencyWithdrawAndPause() external override onlyOwner {
+    xbomb.leave(xbomb.balanceOf(address(this)));
+    _pause();
+  }
+
+  function unpause() external override onlyOwner {
+    _unpause();
+    xbomb.enter(asset.balanceOf(address(this)));
   }
 }

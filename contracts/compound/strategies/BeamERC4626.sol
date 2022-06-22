@@ -2,6 +2,7 @@
 pragma solidity ^0.8.10;
 
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
+import { MidasERC4626 } from "./MidasERc4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
@@ -20,12 +21,14 @@ interface IVault {
       uint256
     );
 
+  function balanceOf(address) external returns (uint256);
+
   function deposit(uint256 _pid, uint256 _amount) external;
 
   function withdraw(uint256 _pid, uint256 _amount) external;
 }
 
-contract BeamERC4626 is ERC4626 {
+contract BeamERC4626 is MidasERC4626 {
   using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
@@ -51,7 +54,7 @@ contract BeamERC4626 is ERC4626 {
     uint256 _poolId,
     ERC20 _rewardToken,
     IVault _vault
-  ) ERC4626(_asset, _asset.name(), _asset.symbol()) {
+  ) MidasERC4626(_asset, _asset.name(), _asset.symbol()) {
     VAULT = _vault;
     POOL_ID = _poolId;
     FLYWHEEL_CORE = _flyWheel;
@@ -83,5 +86,15 @@ contract BeamERC4626 is ERC4626 {
 
   function beforeWithdraw(uint256, uint256 shares) internal override {
     VAULT.withdraw(POOL_ID, shares);
+  }
+
+  function emergencyWithdrawAndPause() external override onlyOwner {
+    VAULT.withdraw(POOL_ID, VAULT.balanceOf(address(this)));
+    _pause();
+  }
+
+  function unpause() external override onlyOwner {
+    _unpause();
+    VAULT.deposit(POOL_ID, asset.balanceOf(address(this)));
   }
 }

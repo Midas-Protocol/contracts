@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
+import { MidasERC4626 } from "./MidasERC4626.sol";
 
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
@@ -30,7 +31,7 @@ interface IAlpacaVault {
  *
  * Wraps https://github.com/alpaca-finance/bsc-alpaca-contract/blob/main/contracts/6/protocol/Vault.sol
  */
-contract AlpacaERC4626 is ERC4626 {
+contract AlpacaERC4626 is MidasERC4626 {
   using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
@@ -52,7 +53,7 @@ contract AlpacaERC4626 is ERC4626 {
     IAlpacaVault _alpacaVault,
     IW_NATIVE _wtoken
   )
-    ERC4626(
+    MidasERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
       string(abi.encodePacked("mv", _asset.symbol()))
@@ -89,5 +90,15 @@ contract AlpacaERC4626 is ERC4626 {
 
   function beforeWithdraw(uint256, uint256 shares) internal override {
     alpacaVault.withdraw(shares);
+  }
+
+  function emergencyWithdrawAndPause() external override onlyOwner {
+    alpacaVault.withdraw(alpacaVault.balanceOf(address(this)));
+    _pause();
+  }
+
+  function unpause() external override onlyOwner {
+    _unpause();
+    alpacaVault.deposit(asset.balanceOf(address(this)));
   }
 }

@@ -5,6 +5,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
+import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 
@@ -17,6 +18,8 @@ interface IAutofarmV2 {
 
   //Returns underlying balance in strategies
   function stakedWantTokens(uint256 _pid, address _user) external view returns (uint256);
+
+  function balanceOf(address) external returns(uint256);
 }
 
 /**
@@ -27,7 +30,7 @@ interface IAutofarmV2 {
  * Wraps https://github.com/autofarmnetwork/AutofarmV2_CrossChain/blob/master/AutoFarmV2.sol
  *
  */
-contract AutofarmERC4626 is ERC4626 {
+contract AutofarmERC4626 is MidasERC4626 {
   using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
@@ -54,7 +57,7 @@ contract AutofarmERC4626 is ERC4626 {
     ERC20 _autoToken,
     IAutofarmV2 _autofarm
   )
-    ERC4626(
+    MidasERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
       string(abi.encodePacked("mv", _asset.symbol()))
@@ -91,5 +94,15 @@ contract AutofarmERC4626 is ERC4626 {
   /// @notice withdraws specified amount of underlying token if possible
   function beforeWithdraw(uint256 amount, uint256) internal override {
     autofarm.withdraw(poolId, amount);
+  }
+
+  function emergencyWithdrawAndPause() external override onlyOwner {
+    autofarm.withdraw(poolId, autofarm.balanceOf(address(this)));
+    _pause();
+  }
+
+  function unpause() external override onlyOwner {
+    _unpause();
+    autofarm.deposit(poolId, asset.balanceOf(address(this)));
   }
 }

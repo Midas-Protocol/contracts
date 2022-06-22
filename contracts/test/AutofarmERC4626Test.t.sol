@@ -3,6 +3,7 @@ pragma solidity >=0.4.23;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
+import "./config/BaseTest.t.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
@@ -18,9 +19,7 @@ import { MockAutofarmV2 } from "./mocks/autofarm/MockAutofarmV2.sol";
 import { IStrategy } from "./mocks/autofarm/IStrategy.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 
-contract AutofarmERC4626Test is DSTest {
-  Vm public constant vm = Vm(HEVM_ADDRESS);
-
+contract AutofarmERC4626Test is BaseTest {
   AutofarmERC4626 autofarmERC4626;
   FlywheelCore flywheel;
   FuseFlywheelDynamicRewards flywheelRewards;
@@ -35,6 +34,10 @@ contract AutofarmERC4626Test is DSTest {
   ERC20 marketKey;
   address tester = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
   uint256 startTs = block.timestamp;
+
+  address alice = address(10);
+  address bob = address(20);
+  address charlie = address(30);
 
   function setUp() public {
     testToken = new MockERC20("TestToken", "TST", 18);
@@ -79,6 +82,117 @@ contract AutofarmERC4626Test is DSTest {
     assertEq(address(marketKey), address(autofarmERC4626));
     assertEq(testToken.allowance(address(autofarmERC4626), address(mockAutofarm)), type(uint256).max);
     assertEq(autoToken.allowance(address(autofarmERC4626), address(flywheelRewards)), type(uint256).max);
+  }
+
+  function deposit(address user, uint256 amount) internal {
+    // transfer to user exactly amount
+    vm.prank(alice);
+    testToken.transfer(user, amount);
+    assertEq(testToken.balanceOf(user), amount, "the full balance of cakeLP of user should equal amount");
+
+    // deposit the full amount to the plugin as user, check the result
+    vm.startPrank(user);
+    testToken.approve(address(autofarmERC4626), amount);
+    autofarmERC4626.deposit(amount, user);
+    vm.stopPrank();
+  }
+
+  function mint(address user, uint256 amount) internal {
+    // transfer to user exactly amount
+    vm.prank(alice);
+    testToken.transfer(user, amount);
+    assertEq(testToken.balanceOf(user), amount, "the full balance of cakeLP of user should equal amount");
+
+    // deposit the full amount to the plugin as user, check the result
+    vm.startPrank(user);
+    testToken.approve(address(autofarmERC4626), amount);
+    autofarmERC4626.mint(autofarmERC4626.previewDeposit(amount), user);
+    vm.stopPrank();
+  }
+
+  function testTheBugWithdraw(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
+    vm.assume(amount > 100 && amount < 1e19);
+    testToken.mint(alice, 100e18);
+
+    deposit(bob, amount);
+    // make sure the full amount is deposited and none is left
+    assertEq(testToken.balanceOf(bob), 0, "should deposit the full balance of cakeLP of user");
+    assertEq(testToken.balanceOf(address(autofarmERC4626)), 0, "should deposit the full balance of cakeLP of user");
+
+    // just testing if other users depositing would mess up the calcs
+    mint(charlie, amount);
+
+    // test if the shares of the BeefyERC4626 equal to the assets deposited
+    uint256 beefyERC4626SharesMintedToBob = autofarmERC4626.balanceOf(bob);
+    assertEq(
+      beefyERC4626SharesMintedToBob,
+      amount,
+      "the first minted shares in erc4626 are expected to equal the assets deposited"
+    );
+
+    {
+      vm.startPrank(bob);
+      uint256 assetsToWithdraw = amount / 2;
+      autofarmERC4626.withdraw(assetsToWithdraw, bob, bob);
+      uint256 assetsWithdrawn = testToken.balanceOf(bob);
+      assertTrue(
+        diff(assetsWithdrawn, assetsToWithdraw) < 100,
+        "the assets withdrawn must be almost equal to the requested assets to withdraw"
+      );
+      vm.stopPrank();
+    }
+
+    uint256 lockedFunds = testToken.balanceOf(address(autofarmERC4626));
+    {
+      emit log_uint(lockedFunds);
+    }
+    // check if any funds remained locked in the BeefyERC4626
+    assertEq(lockedFunds, 0, "should transfer the full balance of the withdrawn cakeLP, no dust is acceptable");
+  }
+
+  function testTheBugRedeem(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
+    vm.assume(amount > 1e5 && amount < 1e19);
+    testToken.mint(alice, 100e18);
+
+    deposit(charlie, amount);
+    // make sure the full amount is deposited and none is left
+    assertEq(testToken.balanceOf(charlie), 0, "should deposit the full balance of cakeLP of user");
+    assertEq(testToken.balanceOf(address(autofarmERC4626)), 0, "should deposit the full balance of cakeLP of user");
+
+    // just testing if other users depositing would mess up the calcs
+    mint(bob, amount);
+
+    // test if the shares of the BeefyERC4626 equal to the assets deposited
+    uint256 beefyERC4626SharesMintedToCharlie = autofarmERC4626.balanceOf(charlie);
+    assertEq(
+      beefyERC4626SharesMintedToCharlie,
+      amount,
+      "the first minted shares in erc4626 are expected to equal the assets deposited"
+    );
+
+    {
+      vm.startPrank(charlie);
+      uint256 beefyERC4626SharesToRedeem = autofarmERC4626.balanceOf(charlie);
+      autofarmERC4626.redeem(beefyERC4626SharesToRedeem, charlie, charlie);
+      uint256 assetsRedeemed = testToken.balanceOf(charlie);
+      uint256 assetsToRedeem = autofarmERC4626.previewRedeem(beefyERC4626SharesToRedeem);
+      {
+        emit log_uint(assetsRedeemed);
+        emit log_uint(assetsToRedeem);
+      }
+      assertTrue(
+        diff(assetsRedeemed, assetsToRedeem) * 1e4 < amount,
+        "the assets redeemed must be almost equal to the requested assets to redeem"
+      );
+      vm.stopPrank();
+    }
+
+    uint256 lockedFunds = testToken.balanceOf(address(autofarmERC4626));
+    {
+      emit log_uint(lockedFunds);
+    }
+    // check if any funds remained locked in the BeefyERC4626
+    assertEq(lockedFunds, 0, "should transfer the full balance of the redeemed cakeLP, no dust is acceptable");
   }
 
   function deposit() public {
