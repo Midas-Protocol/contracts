@@ -19,7 +19,7 @@ interface IAutofarmV2 {
   //Returns underlying balance in strategies
   function stakedWantTokens(uint256 _pid, address _user) external view returns (uint256);
 
-  function balanceOf(address) external returns(uint256);
+  function balanceOf(address) external returns (uint256);
 }
 
 /**

@@ -13,7 +13,7 @@ interface ILpTokenStaker {
 
   function userInfo(address _token, address _user) external view returns (uint256, uint256);
 
-  function balanceOf(address) external returns(uint256);
+  function balanceOf(address) external returns (uint256);
 
   // Deposit LP tokens into the contract. Also triggers a claim.
   function deposit(
