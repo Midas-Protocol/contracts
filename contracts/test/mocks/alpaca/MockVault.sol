@@ -3,6 +3,7 @@
 pragma solidity >=0.8.0;
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
+import "./IVaultConfig.sol";
 
 contract MockVault is ERC20 {
   address public token;
@@ -11,6 +12,8 @@ contract MockVault is ERC20 {
   uint256 public vaultDebtVal;
   uint256 public lastAccrueTime;
   uint256 public reservePool;
+
+  IVaultConfig public config;
 
   constructor(
     address _token,
@@ -79,5 +82,9 @@ contract MockVault is ERC20 {
     //   SafeToken.safeTransferETH(to, amount);
     // } else {
     ERC20(token).transfer(to, amount);
+  }
+
+  function pendingInterest(uint256 value) public view returns (uint256) {
+
   }
 }
