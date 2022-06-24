@@ -20,17 +20,18 @@ contract AlpacaERC4626Test is BaseTest {
 
   uint256 depositAmount = 100e18;
 
+  address joy = 0x0eD7e52944161450477ee417DE9Cd3a859b14fD0;
   address alice = address(10);
   address bob = address(20);
   address charlie = address(30);
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
-    testToken = MockERC20(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
+    testToken = MockERC20(ap.getAddress("wtoken"));
     mockVault = MockVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063);
     alpacaERC4626 = new AlpacaERC4626(
       testToken,
       IAlpacaVault(address(mockVault)),
-      IW_NATIVE(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
+      IW_NATIVE(ap.getAddress("wtoken"))
     );
   }
 
@@ -45,7 +46,7 @@ contract AlpacaERC4626Test is BaseTest {
     // transfer to user exactly amount
     vm.prank(alice);
     testToken.transfer(user, amount);
-    assertEq(testToken.balanceOf(user), amount, "the full balance of cakeLP of user should equal amount");
+    assertEq(testToken.balanceOf(user), amount, "the full balance of underlying token of user should equal amount");
 
     // deposit the full amount to the plugin as user, check the result
     vm.startPrank(user);
@@ -58,7 +59,7 @@ contract AlpacaERC4626Test is BaseTest {
     // transfer to user exactly amount
     vm.prank(alice);
     testToken.transfer(user, amount);
-    assertEq(testToken.balanceOf(user), amount, "the full balance of cakeLP of user should equal amount");
+    assertEq(testToken.balanceOf(user), amount, "the full balance of underlying token of user should equal amount");
 
     // deposit the full amount to the plugin as user, check the result
     vm.startPrank(user);
@@ -69,22 +70,22 @@ contract AlpacaERC4626Test is BaseTest {
 
   function testTheBugWithdraw(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
     vm.assume(amount > 1e18 && amount < 1e19);
-    vm.prank(0x0eD7e52944161450477ee417DE9Cd3a859b14fD0);
-    testToken.transferFrom(0x0eD7e52944161450477ee417DE9Cd3a859b14fD0, alice, 100e18);
+    vm.prank(joy);
+    testToken.transferFrom(joy, alice, 100e18);
     // testToken.mint(alice, 100e18);
 
     deposit(bob, amount);
     // make sure the full amount is deposited and none is left
-    assertEq(testToken.balanceOf(bob), 0, "should deposit the full balance of cakeLP of user");
-    assertEq(testToken.balanceOf(address(alpacaERC4626)), 0, "should deposit the full balance of cakeLP of user");
+    assertEq(testToken.balanceOf(bob), 0, "should deposit the full balance of underlying token of user");
+    assertEq(testToken.balanceOf(address(alpacaERC4626)), 0, "should deposit the full balance of underlying token of user");
 
     // just testing if other users depositing would mess up the calcs
     mint(charlie, amount);
 
-    // test if the shares of the BeefyERC4626 equal to the assets deposited
-    uint256 beefyERC4626SharesMintedToBob = alpacaERC4626.balanceOf(bob);
+    // test if the shares of the alpacaERC4626 equal to the assets deposited
+    uint256 alpacaERC4626SharesMintedToBob = alpacaERC4626.balanceOf(bob);
     assertEq(
-      beefyERC4626SharesMintedToBob,
+      alpacaERC4626SharesMintedToBob,
       amount,
       "the first minted shares in erc4626 are expected to equal the assets deposited"
     );
@@ -105,37 +106,37 @@ contract AlpacaERC4626Test is BaseTest {
     {
       emit log_uint(lockedFunds);
     }
-    // check if any funds remained locked in the BeefyERC4626
-    assertEq(lockedFunds, 0, "should transfer the full balance of the withdrawn cakeLP, no dust is acceptable");
+    // check if any funds remained locked in the alpacaERC4626
+    assertEq(lockedFunds, 0, "should transfer the full balance of the withdrawn underlying token, no dust is acceptable");
   }
 
   function testTheBugRedeem(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
     vm.assume(amount > 1e18 && amount < 1e19);
-    vm.prank(0x0eD7e52944161450477ee417DE9Cd3a859b14fD0);
-    testToken.transferFrom(0x0eD7e52944161450477ee417DE9Cd3a859b14fD0, alice, 100e18);
+    vm.prank(joy);
+    testToken.transferFrom(joy, alice, 100e18);
 
     deposit(charlie, amount);
     // make sure the full amount is deposited and none is left
-    assertEq(testToken.balanceOf(charlie), 0, "should deposit the full balance of cakeLP of user");
-    assertEq(testToken.balanceOf(address(alpacaERC4626)), 0, "should deposit the full balance of cakeLP of user");
+    assertEq(testToken.balanceOf(charlie), 0, "should deposit the full balance of underlying token of user");
+    assertEq(testToken.balanceOf(address(alpacaERC4626)), 0, "should deposit the full balance of underlying token of user");
 
     // just testing if other users depositing would mess up the calcs
     mint(bob, amount);
 
-    // test if the shares of the BeefyERC4626 equal to the assets deposited
-    uint256 beefyERC4626SharesMintedToCharlie = alpacaERC4626.balanceOf(charlie);
+    // test if the shares of the alpacaERC4626 equal to the assets deposited
+    uint256 alpacaERC4626SharesMintedToCharlie = alpacaERC4626.balanceOf(charlie);
     assertEq(
-      beefyERC4626SharesMintedToCharlie,
+      alpacaERC4626SharesMintedToCharlie,
       amount,
       "the first minted shares in erc4626 are expected to equal the assets deposited"
     );
 
     {
       vm.startPrank(charlie);
-      uint256 beefyERC4626SharesToRedeem = alpacaERC4626.balanceOf(charlie);
-      alpacaERC4626.redeem(beefyERC4626SharesToRedeem, charlie, charlie);
+      uint256 alpacaERC4626SharesToRedeem = alpacaERC4626.balanceOf(charlie);
+      alpacaERC4626.redeem(alpacaERC4626SharesToRedeem, charlie, charlie);
       uint256 assetsRedeemed = testToken.balanceOf(charlie);
-      uint256 assetsToRedeem = alpacaERC4626.previewRedeem(beefyERC4626SharesToRedeem);
+      uint256 assetsToRedeem = alpacaERC4626.previewRedeem(alpacaERC4626SharesToRedeem);
       {
         emit log_uint(assetsRedeemed);
         emit log_uint(assetsToRedeem);
@@ -151,7 +152,7 @@ contract AlpacaERC4626Test is BaseTest {
     {
       emit log_uint(lockedFunds);
     }
-    // check if any funds remained locked in the BeefyERC4626
-    assertEq(lockedFunds, 0, "should transfer the full balance of the redeemed cakeLP, no dust is acceptable");
+    // check if any funds remained locked in the alpacaERC4626
+    assertEq(lockedFunds, 0, "should transfer the full balance of the redeemed underlying token, no dust is acceptable");
   }
 }

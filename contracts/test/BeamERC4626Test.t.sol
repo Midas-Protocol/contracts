@@ -49,6 +49,7 @@ contract BeamERC4626Test is BaseTest {
   address alice = address(10);
   address bob = address(20);
   address charlie = address(30);
+  address joy = 0x33Ad49856da25b8E2E2D762c411AEda0D1727918;
 
   function setUp() public shouldRun(forChains(MOONBEAM_MAINNET)) {
     testToken = MockBoringERC20(0x99588867e817023162F4d4829995299054a5fC57);
@@ -92,7 +93,7 @@ contract BeamERC4626Test is BaseTest {
     // transfer to user exactly amount
     vm.prank(alice);
     testToken.transfer(user, amount);
-    assertEq(testToken.balanceOf(user), amount, "the full balance of cakeLP of user should equal amount");
+    assertEq(testToken.balanceOf(user), amount, "the full balance of underlying token of user should equal amount");
 
     // deposit the full amount to the plugin as user, check the result
     vm.startPrank(user);
@@ -105,7 +106,7 @@ contract BeamERC4626Test is BaseTest {
     // transfer to user exactly amount
     vm.prank(alice);
     testToken.transfer(user, amount);
-    assertEq(testToken.balanceOf(user), amount, "the full balance of cakeLP of user should equal amount");
+    assertEq(testToken.balanceOf(user), amount, "the full balance of underlying token of user should equal amount");
 
     // deposit the full amount to the plugin as user, check the result
     vm.startPrank(user);
@@ -116,23 +117,23 @@ contract BeamERC4626Test is BaseTest {
 
   function testTheBugWithdraw(uint256 amount) public shouldRun(forChains(MOONBEAM_MAINNET)) {
     vm.assume(amount > 100 && amount < 1e19);
-    vm.prank(0x33Ad49856da25b8E2E2D762c411AEda0D1727918);
-    testToken.approve(0x33Ad49856da25b8E2E2D762c411AEda0D1727918, 100e18);
-    vm.prank(0x33Ad49856da25b8E2E2D762c411AEda0D1727918);
-    testToken.transferFrom(0x33Ad49856da25b8E2E2D762c411AEda0D1727918, alice, 100e18);
+    vm.prank(joy);
+    testToken.approve(joy, 100e18);
+    vm.prank(joy);
+    testToken.transferFrom(joy, alice, 100e18);
 
     deposit(bob, amount);
     // make sure the full amount is deposited and none is left
-    assertEq(testToken.balanceOf(bob), 0, "should deposit the full balance of cakeLP of user");
-    assertEq(testToken.balanceOf(address(beamErc4626)), 0, "should deposit the full balance of cakeLP of user");
+    assertEq(testToken.balanceOf(bob), 0, "should deposit the full balance of underlying token of user");
+    assertEq(testToken.balanceOf(address(beamErc4626)), 0, "should deposit the full balance of underlying token of user");
 
     // just testing if other users depositing would mess up the calcs
     mint(charlie, amount);
 
-    // test if the shares of the BeefyERC4626 equal to the assets deposited
-    uint256 beefyERC4626SharesMintedToBob = beamErc4626.balanceOf(bob);
+    // test if the shares of the beamErc4626 equal to the assets deposited
+    uint256 beamErc4626SharesMintedToBob = beamErc4626.balanceOf(bob);
     assertEq(
-      beefyERC4626SharesMintedToBob,
+      beamErc4626SharesMintedToBob,
       amount,
       "the first minted shares in erc4626 are expected to equal the assets deposited"
     );
@@ -153,39 +154,39 @@ contract BeamERC4626Test is BaseTest {
     {
       emit log_uint(lockedFunds);
     }
-    // check if any funds remained locked in the BeefyERC4626
-    assertEq(lockedFunds, 0, "should transfer the full balance of the withdrawn cakeLP, no dust is acceptable");
+    // check if any funds remained locked in the beamErc4626
+    assertEq(lockedFunds, 0, "should transfer the full balance of the withdrawn underlying token, no dust is acceptable");
   }
 
   function testTheBugRedeem(uint256 amount) public shouldRun(forChains(MOONBEAM_MAINNET)) {
     vm.assume(amount > 1e5 && amount < 1e19);
-    vm.prank(0x33Ad49856da25b8E2E2D762c411AEda0D1727918);
-    testToken.approve(0x33Ad49856da25b8E2E2D762c411AEda0D1727918, 100e18);
-    vm.prank(0x33Ad49856da25b8E2E2D762c411AEda0D1727918);
-    testToken.transferFrom(0x33Ad49856da25b8E2E2D762c411AEda0D1727918, alice, 100e18);
+    vm.prank(joy);
+    testToken.approve(joy, 100e18);
+    vm.prank(joy);
+    testToken.transferFrom(joy, alice, 100e18);
 
     deposit(charlie, amount);
     // make sure the full amount is deposited and none is left
-    assertEq(testToken.balanceOf(charlie), 0, "should deposit the full balance of cakeLP of user");
-    assertEq(testToken.balanceOf(address(beamErc4626)), 0, "should deposit the full balance of cakeLP of user");
+    assertEq(testToken.balanceOf(charlie), 0, "should deposit the full balance of underlying token of user");
+    assertEq(testToken.balanceOf(address(beamErc4626)), 0, "should deposit the full balance of underlying token of user");
 
     // just testing if other users depositing would mess up the calcs
     mint(bob, amount);
 
-    // test if the shares of the BeefyERC4626 equal to the assets deposited
-    uint256 beefyERC4626SharesMintedToCharlie = beamErc4626.balanceOf(charlie);
+    // test if the shares of the beamErc4626 equal to the assets deposited
+    uint256 beamErc4626SharesMintedToCharlie = beamErc4626.balanceOf(charlie);
     assertEq(
-      beefyERC4626SharesMintedToCharlie,
+      beamErc4626SharesMintedToCharlie,
       amount,
       "the first minted shares in erc4626 are expected to equal the assets deposited"
     );
 
     {
       vm.startPrank(charlie);
-      uint256 beefyERC4626SharesToRedeem = beamErc4626.balanceOf(charlie);
-      beamErc4626.redeem(beefyERC4626SharesToRedeem, charlie, charlie);
+      uint256 beamErc4626SharesToRedeem = beamErc4626.balanceOf(charlie);
+      beamErc4626.redeem(beamErc4626SharesToRedeem, charlie, charlie);
       uint256 assetsRedeemed = testToken.balanceOf(charlie);
-      uint256 assetsToRedeem = beamErc4626.previewRedeem(beefyERC4626SharesToRedeem);
+      uint256 assetsToRedeem = beamErc4626.previewRedeem(beamErc4626SharesToRedeem);
       {
         emit log_uint(assetsRedeemed);
         emit log_uint(assetsToRedeem);
@@ -201,15 +202,15 @@ contract BeamERC4626Test is BaseTest {
     {
       emit log_uint(lockedFunds);
     }
-    // check if any funds remained locked in the BeefyERC4626
-    assertEq(lockedFunds, 0, "should transfer the full balance of the redeemed cakeLP, no dust is acceptable");
+    // check if any funds remained locked in the beamErc4626
+    assertEq(lockedFunds, 0, "should transfer the full balance of the redeemed underlying token, no dust is acceptable");
   }
 
   function _deposit() internal {
-    vm.prank(0x457C5B8A6224F524d9f15fA6B6d70fCad8EBa623);
-    testToken.approve(0x457C5B8A6224F524d9f15fA6B6d70fCad8EBa623, depositAmount);
-    vm.prank(0x457C5B8A6224F524d9f15fA6B6d70fCad8EBa623);
-    testToken.transferFrom(0x457C5B8A6224F524d9f15fA6B6d70fCad8EBa623, address(this), depositAmount);
+    vm.prank(joy);
+    testToken.approve(joy, depositAmount);
+    vm.prank(joy);
+    testToken.transferFrom(joy, address(this), depositAmount);
     uint256 balance = testToken.balanceOf(address(this));
     testToken.approve(address(beamErc4626), depositAmount);
     flywheel.accrue(ERC20(beamErc4626), address(this));
