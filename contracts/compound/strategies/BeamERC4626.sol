@@ -7,6 +7,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
+import { IBoringERC20, IMultipleRewards } from "../../test/mocks/beam/MockVault.sol";
 
 interface IVault {
   // Info of each user.
@@ -17,6 +18,19 @@ interface IVault {
     returns (
       uint256,
       uint256,
+      uint256,
+      uint256
+    );
+  
+  function poolInfo(uint256 _pid)
+    external
+    view
+    returns (
+      IBoringERC20,
+      uint256,
+      uint256,
+      uint256,
+      uint16,
       uint256,
       uint256
     );
@@ -69,7 +83,9 @@ contract BeamERC4626 is MidasERC4626 {
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
     (uint256 amount, , , ) = VAULT.userInfo(POOL_ID, address(this));
-    return amount;
+    return paused()
+        ? asset.balanceOf(address(this))
+        : amount;
   }
 
   /// @notice Calculates the total amount of underlying tokens the account holds.
@@ -88,8 +104,10 @@ contract BeamERC4626 is MidasERC4626 {
     VAULT.withdraw(POOL_ID, amount);
   }
 
+  event amount(uint256);
   function emergencyWithdrawAndPause() external override onlyOwner {
-    VAULT.withdraw(POOL_ID, VAULT.balanceOf(address(this)));
+    (IBoringERC20 lpToken, , , , , , ) = VAULT.poolInfo(POOL_ID);
+    VAULT.withdraw(POOL_ID, lpToken.balanceOf(address(VAULT)));
     _pause();
   }
 
