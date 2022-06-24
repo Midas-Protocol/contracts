@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import "forge-std/Vm.sol";
 
 import { WETH } from "solmate/tokens/WETH.sol";
@@ -14,9 +14,7 @@ import "../../oracles/MasterPriceOracle.sol";
 import "../../oracles/default/UniswapTwapPriceOracleV2Factory.sol";
 import "../../utils/AddressesProvider.sol";
 
-abstract contract BaseTest is DSTest {
-  Vm public constant vm = Vm(HEVM_ADDRESS);
-
+abstract contract BaseTest is Test {
   uint256 constant BSC_MAINNET = 56;
   uint256 constant MOONBEAM_MAINNET = 1284;
 

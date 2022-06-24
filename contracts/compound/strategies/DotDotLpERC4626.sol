@@ -3,8 +3,7 @@ pragma solidity ^0.8.10;
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
-
-import { ERC4626 } from "solmate/mixins/ERC4626.sol";
+import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 
@@ -29,6 +28,8 @@ interface ILpDepositor {
     address[] calldata _tokens,
     uint256 _maxBondAmount
   ) external;
+
+  function depositTokens(address lpToken) external view returns (address);
 }
 
 /**
@@ -40,7 +41,7 @@ interface ILpDepositor {
  * and claims rewards from the same contract
  *
  */
-contract DotDotLpERC4626 is ERC4626 {
+contract DotDotLpERC4626 is MidasERC4626 {
   using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
@@ -65,7 +66,7 @@ contract DotDotLpERC4626 is ERC4626 {
     FlywheelCore _epxFlywheel,
     ILpDepositor _lpDepositor
   )
-    ERC4626(
+    MidasERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
       string(abi.encodePacked("mv", _asset.symbol()))
@@ -102,12 +103,28 @@ contract DotDotLpERC4626 is ERC4626 {
 
   function afterDeposit(uint256 amount, uint256) internal override {
     lpDepositor.deposit(address(this), address(asset), amount);
-    lpDepositor.claim(address(this), assetAsArray, 0);
+    //lpDepositor.claim(address(this), assetAsArray, 0);
   }
 
   /// @notice withdraws specified amount of underlying token if possible
   function beforeWithdraw(uint256 amount, uint256) internal override {
     lpDepositor.withdraw(address(this), address(asset), amount);
     lpDepositor.claim(address(this), assetAsArray, 0);
+  }
+
+  /* ========== EMERGENCY FUNCTIONS ========== */
+
+  function emergencyWithdrawAndPause() external override onlyOwner {
+    lpDepositor.withdraw(
+      address(this),
+      address(asset),
+      ERC20(lpDepositor.depositTokens(address(asset))).balanceOf(address(this))
+    );
+    _pause();
+  }
+
+  function unpause() external override onlyOwner {
+    _unpause();
+    lpDepositor.deposit(address(this), address(asset), asset.balanceOf(address(this)));
   }
 }

@@ -26,9 +26,6 @@ contract MockBnb is MockERC20 {
 }
 
 contract BombE2eTest is WithPool, BaseTest {
-  using stdStorage for StdStorage;
-  StdStorage internal stdstore;
-
   constructor()
     WithPool(
       MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
