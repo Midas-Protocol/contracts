@@ -55,9 +55,7 @@ contract DotDotERC4626Test is WithPool, BaseTest {
   {}
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
-    sendUnderlyingToken(100e18, address(this));
-
-    vm.warp(1);
+    sendUnderlyingToken(depositAmount, address(this));
 
     dddFlywheel = new FlywheelCore(
       dddToken,
@@ -89,7 +87,6 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     marketKey = ERC20(address(dotDotERC4626));
     dddFlywheel.addStrategyForRewards(marketKey);
     epxFlywheel.addStrategyForRewards(marketKey);
-    vm.warp(2);
   }
 
   function diff(uint256 a, uint256 b) internal returns (uint256) {
@@ -134,32 +131,28 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     assertEq(dotDotERC4626.previewRedeem(reqShares), withdrawalAmount);
   }
 
-  function testDepositOnly() public shouldRun(forChains(BSC_MAINNET)) {
+  function testDeposit() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 expectedDepositShare = depositAmount;
     uint256 expectedErc4626Shares = dotDotERC4626.previewDeposit(depositAmount);
 
-    emit log_uint(underlyingToken.balanceOf(address(this)));
-
     deposit(address(this), depositAmount);
 
-    // // Test that the actual transfers worked
-    // assertEq(lpDepositor.userBalances(address(this), address(underlyingToken)), depositAmount);
+    // Test that the actual transfers worked
+    assertEq(lpDepositor.userBalances(address(dotDotERC4626), address(underlyingToken)), depositAmount);
 
-    // // Test that the balance view calls work
-    // assertEq(dotDotERC4626.totalAssets(), depositAmount);
-    // assertEq(dotDotERC4626.balanceOfUnderlying(address(this)), depositAmount);
+    // Test that the balance view calls work
+    assertEq(dotDotERC4626.totalAssets(), depositAmount);
+    assertEq(dotDotERC4626.balanceOfUnderlying(address(this)), depositAmount);
 
-    // // Test that we minted the correct amount of token
-    // assertEq(dotDotERC4626.balanceOf(address(this)), expectedErc4626Shares);
-    // assertEq(dotDotERC4626.totalSupply(), expectedErc4626Shares);
+    // Test that we minted the correct amount of token
+    assertEq(dotDotERC4626.balanceOf(address(this)), expectedErc4626Shares);
+    assertEq(dotDotERC4626.totalSupply(), expectedErc4626Shares);
 
-    // // Test that the ERC4626 holds the expected amount of beefy shares
-    // assertEq(depositShare.balanceOf(address(dotDotERC4626)), expectedDepositShare);
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(depositShare.balanceOf(address(dotDotERC4626)), expectedDepositShare);
   }
 
   function testDepositWithIncreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
-    sendUnderlyingToken(depositAmount, address(this));
-
     // lpDepositor just mints the exact amount of depositShares as the user deposits in assets
     uint256 oldExpectedDepositShare = depositAmount;
     uint256 oldExpected4626Shares = dotDotERC4626.previewDeposit(depositAmount);
@@ -173,6 +166,7 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     uint256 previewErc4626Shares = dotDotERC4626.previewDeposit(depositAmount);
     uint256 expected4626Shares = depositAmount.mulDivDown(dotDotERC4626.totalSupply(), dotDotERC4626.totalAssets());
 
+    sendUnderlyingToken(depositAmount, address(this));
     deposit(address(this), depositAmount);
 
     // Test that we minted the correct amount of token
@@ -191,10 +185,12 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     uint256 expectedErc4626Shares = dotDotERC4626.previewDeposit(depositAmount);
 
     deposit(address(this), depositAmount);
+
+    sendUnderlyingToken(depositAmount, address(1));
     deposit(address(1), depositAmount);
 
     // Test that the actual transfers worked
-    assertEq(lpDepositor.userBalances(address(this), address(underlyingToken)), depositAmount * 2);
+    assertEq(lpDepositor.userBalances(address(dotDotERC4626), address(underlyingToken)), depositAmount * 2);
 
     // Test that the balance view calls work
     assertTrue(
@@ -230,7 +226,7 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     dotDotERC4626.mint(mintAmount, address(this));
 
     // Test that the actual transfers worked
-    assertEq(lpDepositor.userBalances(address(this), address(underlyingToken)), depositAmount);
+    assertEq(lpDepositor.userBalances(address(dotDotERC4626), address(underlyingToken)), depositAmount);
 
     // Test that the balance view calls work
     assertEq(dotDotERC4626.totalAssets(), depositAmount);
@@ -252,7 +248,7 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     dotDotERC4626.mint(mintAmount, address(this));
 
     // Test that the actual transfers worked
-    assertEq(lpDepositor.userBalances(address(this), address(underlyingToken)), depositAmount);
+    assertEq(lpDepositor.userBalances(address(dotDotERC4626), address(underlyingToken)), depositAmount);
 
     // Test that the balance view calls work
     assertEq(dotDotERC4626.totalAssets(), depositAmount);
@@ -269,10 +265,11 @@ contract DotDotERC4626Test is WithPool, BaseTest {
 
     vm.startPrank(address(1));
     underlyingToken.approve(address(dotDotERC4626), depositAmount);
+    sendUnderlyingToken(depositAmount, address(1));
     dotDotERC4626.mint(mintAmount, address(1));
 
     // Test that the actual transfers worked
-    assertEq(lpDepositor.userBalances(address(this), address(underlyingToken)), depositAmount + depositAmount);
+    assertEq(lpDepositor.userBalances(address(dotDotERC4626), address(underlyingToken)), depositAmount + depositAmount);
 
     // Test that the balance view calls work
     assertTrue(depositAmount + depositAmount - dotDotERC4626.totalAssets() <= 1);
@@ -328,8 +325,6 @@ contract DotDotERC4626Test is WithPool, BaseTest {
   }
 
   function testWithdrawWithIncreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
-    sendUnderlyingToken(depositAmount, address(this));
-
     uint256 beefyShareBal = depositAmount;
 
     deposit(address(this), depositAmount);
@@ -377,6 +372,8 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);
+
+    sendUnderlyingToken(depositAmount, address(1));
     deposit(address(1), depositAmount);
 
     uint256 assetBalBefore = underlyingToken.balanceOf(address(this));
@@ -489,6 +486,8 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     uint256 redeemAmount = dotDotERC4626.previewWithdraw(withdrawalAmount);
 
     deposit(address(this), depositAmount);
+
+    sendUnderlyingToken(depositAmount, address(1));
     deposit(address(1), depositAmount);
 
     uint256 assetBalBefore = underlyingToken.balanceOf(address(this));

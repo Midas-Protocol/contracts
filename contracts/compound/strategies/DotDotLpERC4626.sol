@@ -90,7 +90,7 @@ contract DotDotLpERC4626 is MidasERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    return lpDepositor.userBalances(address(this), address(asset));
+    return paused() ? asset.balanceOf(address(this)) : lpDepositor.userBalances(address(this), address(asset));
   }
 
   /// @notice Calculates the total amount of underlying tokens the user holds.
@@ -103,7 +103,7 @@ contract DotDotLpERC4626 is MidasERC4626 {
 
   function afterDeposit(uint256 amount, uint256) internal override {
     lpDepositor.deposit(address(this), address(asset), amount);
-    //lpDepositor.claim(address(this), assetAsArray, 0);
+    lpDepositor.claim(address(this), assetAsArray, 0);
   }
 
   /// @notice withdraws specified amount of underlying token if possible
