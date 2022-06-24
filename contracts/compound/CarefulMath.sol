@@ -65,7 +65,6 @@ contract CarefulMath {
    */
   function addUInt(uint256 a, uint256 b) internal pure returns (MathError, uint256) {
     uint256 c;
-
     unchecked {
       c = a + b;
     }
