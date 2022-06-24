@@ -28,11 +28,7 @@ contract AlpacaERC4626Test is BaseTest {
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     testToken = MockERC20(ap.getAddress("wtoken"));
     mockVault = MockVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063);
-    alpacaERC4626 = new AlpacaERC4626(
-      testToken,
-      IAlpacaVault(address(mockVault)),
-      IW_NATIVE(ap.getAddress("wtoken"))
-    );
+    alpacaERC4626 = new AlpacaERC4626(testToken, IAlpacaVault(address(mockVault)), IW_NATIVE(ap.getAddress("wtoken")));
   }
 
   function testInitializedValues() public shouldRun(forChains(BSC_MAINNET)) {
@@ -77,7 +73,11 @@ contract AlpacaERC4626Test is BaseTest {
     deposit(bob, amount);
     // make sure the full amount is deposited and none is left
     assertEq(testToken.balanceOf(bob), 0, "should deposit the full balance of underlying token of user");
-    assertEq(testToken.balanceOf(address(alpacaERC4626)), 0, "should deposit the full balance of underlying token of user");
+    assertEq(
+      testToken.balanceOf(address(alpacaERC4626)),
+      0,
+      "should deposit the full balance of underlying token of user"
+    );
 
     // just testing if other users depositing would mess up the calcs
     mint(charlie, amount);
@@ -107,7 +107,11 @@ contract AlpacaERC4626Test is BaseTest {
       emit log_uint(lockedFunds);
     }
     // check if any funds remained locked in the alpacaERC4626
-    assertEq(lockedFunds, 0, "should transfer the full balance of the withdrawn underlying token, no dust is acceptable");
+    assertEq(
+      lockedFunds,
+      0,
+      "should transfer the full balance of the withdrawn underlying token, no dust is acceptable"
+    );
   }
 
   function testTheBugRedeem(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
@@ -118,7 +122,11 @@ contract AlpacaERC4626Test is BaseTest {
     deposit(charlie, amount);
     // make sure the full amount is deposited and none is left
     assertEq(testToken.balanceOf(charlie), 0, "should deposit the full balance of underlying token of user");
-    assertEq(testToken.balanceOf(address(alpacaERC4626)), 0, "should deposit the full balance of underlying token of user");
+    assertEq(
+      testToken.balanceOf(address(alpacaERC4626)),
+      0,
+      "should deposit the full balance of underlying token of user"
+    );
 
     // just testing if other users depositing would mess up the calcs
     mint(bob, amount);
@@ -153,6 +161,10 @@ contract AlpacaERC4626Test is BaseTest {
       emit log_uint(lockedFunds);
     }
     // check if any funds remained locked in the alpacaERC4626
-    assertEq(lockedFunds, 0, "should transfer the full balance of the redeemed underlying token, no dust is acceptable");
+    assertEq(
+      lockedFunds,
+      0,
+      "should transfer the full balance of the redeemed underlying token, no dust is acceptable"
+    );
   }
 }
