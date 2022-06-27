@@ -426,9 +426,6 @@ contract BeamERC4626Test is BaseTest {
 
     vm.expectRevert("Pausable: paused");
     beamErc4626.mint(depositAmount, address(this));
-
-    emit log_uint(beamErc4626.totalSupply());
-    emit log_uint(beamErc4626.totalAssets());
   
     uint256 expectedSharesNeeded = withdrawAmount.mulDivDown(beamErc4626.totalSupply(), beamErc4626.totalAssets());
     beamErc4626.withdraw(withdrawAmount, address(this), address(this));
