@@ -433,7 +433,7 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount + expectedAssets, "!redeem asset bal");
   }
 
-  function testEmergencyWithdrawAndPause() public shouldRun(forChains(BSC_MAINNET)) {
+  function testAlpacaEmergencyWithdrawAndPause() public shouldRun(forChains(BSC_MAINNET)) {
     deposit(address(this), depositAmount);
 
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "!init 0");
@@ -442,7 +442,7 @@ contract AlpacaERC4626Test is BaseTest {
     alpacaERC4626.emergencyWithdrawAndPause();
 
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), expectedBal, "!withdraws underlying");
-    assertEq(alpacaERC4626.totalAssets(), 0, "!totalAssets == expectedBal");
+    assertEq(alpacaERC4626.totalAssets(), expectedBal, "!totalAssets == expectedBal");
   }
 
   function testAlpacaEmergencyWithdrawAndRedeem() public shouldRun(forChains(BSC_MAINNET)) {
