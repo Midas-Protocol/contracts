@@ -161,7 +161,6 @@ contract BoosterGaugesTest is DSTest {
 contract Booster3070SplitTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
 
-    VeMDSToken veToken;
     uint256 totalSupply = 1e5;
     uint256 rewardsForCycle = 1e5;
     address alice = address(0x10);
@@ -174,7 +173,6 @@ contract Booster3070SplitTest is DSTest {
     MockERC20 rewardToken;
 
     FuseFlywheelCore flywheel;
-    FlywheelGaugeRewards rewards;
     MockRewardsStream rewardsStream;
     FlywheelStaticRewards staticRewards;
     Flywheel3070Booster booster;
