@@ -21,7 +21,7 @@ interface IVault {
       uint256,
       uint256
     );
-  
+
   function poolInfo(uint256 _pid)
     external
     view
@@ -83,9 +83,7 @@ contract BeamERC4626 is MidasERC4626 {
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
     (uint256 amount, , , ) = VAULT.userInfo(POOL_ID, address(this));
-    return paused()
-        ? asset.balanceOf(address(this))
-        : amount;
+    return paused() ? asset.balanceOf(address(this)) : amount;
   }
 
   /// @notice Calculates the total amount of underlying tokens the account holds.
@@ -105,6 +103,7 @@ contract BeamERC4626 is MidasERC4626 {
   }
 
   event amount(uint256);
+
   function emergencyWithdrawAndPause() external override onlyOwner {
     (IBoringERC20 lpToken, , , , , , ) = VAULT.poolInfo(POOL_ID);
     VAULT.withdraw(POOL_ID, lpToken.balanceOf(address(VAULT)));
