@@ -89,7 +89,7 @@ contract BeamERC4626Test is BaseTest {
     vm.stopPrank();
   }
 
-  function getBeamCheckBalance() internal returns(uint256) {
+  function getBeamCheckBalance() internal returns (uint256) {
     (IBoringERC20 lpToken, , , , , , ) = mockBeamChef.poolInfo(0);
     return lpToken.balanceOf(address(mockBeamChef));
   }
@@ -228,10 +228,7 @@ contract BeamERC4626Test is BaseTest {
     beamErc4626.withdraw(withdrawalAmount, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertTrue(
-      diff(testToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
-      "!user asset bal"
-    );
+    assertTrue(diff(testToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1, "!user asset bal");
 
     assertEq(beamErc4626.totalSupply(), depositAmount - expectedErc4626SharesNeeded, "!totalSupply");
 
@@ -259,10 +256,7 @@ contract BeamERC4626Test is BaseTest {
     beamErc4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertTrue(
-      diff(testToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
-      "!user asset bal"
-    );
+    assertTrue(diff(testToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1, "!user asset bal");
 
     assertTrue(depositAmount * 2 - expectedErc4626SharesNeeded - beamErc4626.totalSupply() < 1, "!totalSupply");
 
@@ -270,11 +264,7 @@ contract BeamERC4626Test is BaseTest {
     assertEq(beamErc4626.balanceOf(address(this)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of Beam shares
-    assertEq(
-      getBeamCheckBalance(),
-      BeamShares - expectedBeamSharesNeeded,
-      "!Beam share balance"
-    );
+    assertEq(getBeamCheckBalance(), BeamShares - expectedBeamSharesNeeded, "!Beam share balance");
 
     assertEq(testToken.balanceOf(address(beamErc4626)), 0, "Beam erc4626 locked amount checking");
 
@@ -283,10 +273,7 @@ contract BeamERC4626Test is BaseTest {
     assetBalBefore = testToken.balanceOf(address(1));
     erc4626BalBefore = beamErc4626.balanceOf(address(1));
     expectedErc4626SharesNeeded = beamErc4626.previewWithdraw(withdrawalAmount);
-    expectedBeamSharesNeeded = expectedErc4626SharesNeeded.mulDivUp(
-      getBeamCheckBalance(),
-      beamErc4626.totalSupply()
-    );
+    expectedBeamSharesNeeded = expectedErc4626SharesNeeded.mulDivUp(getBeamCheckBalance(), beamErc4626.totalSupply());
 
     vm.prank(address(1));
     beamErc4626.withdraw(10e18, address(1), address(1));
@@ -300,11 +287,7 @@ contract BeamERC4626Test is BaseTest {
     assertEq(beamErc4626.balanceOf(address(1)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of Beam shares
-    assertEq(
-      getBeamCheckBalance(),
-      BeamShares - expectedBeamSharesNeeded,
-      "!Beam share balance"
-    );
+    assertEq(getBeamCheckBalance(), BeamShares - expectedBeamSharesNeeded, "!Beam share balance");
 
     assertEq(testToken.balanceOf(address(beamErc4626)), 0, "Beam erc4626 locked amount checking");
   }
@@ -319,30 +302,20 @@ contract BeamERC4626Test is BaseTest {
 
     uint256 assetBalBefore = testToken.balanceOf(address(this));
     uint256 erc4626BalBefore = beamErc4626.balanceOf(address(this));
-    uint256 expectedBeamSharesNeeded = redeemAmount.mulDivUp(
-      getBeamCheckBalance(),
-      beamErc4626.totalSupply()
-    );
+    uint256 expectedBeamSharesNeeded = redeemAmount.mulDivUp(getBeamCheckBalance(), beamErc4626.totalSupply());
 
     beamErc4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertTrue(
-      diff(testToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
-      "!user asset bal"
-    );
-    
+    assertTrue(diff(testToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1, "!user asset bal");
+
     assertEq(beamErc4626.totalSupply(), depositAmount - redeemAmount, "!totalSupply");
 
     // Test that we burned the right amount of shares
     assertEq(beamErc4626.balanceOf(address(this)), erc4626BalBefore - redeemAmount, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of Beam shares
-    assertEq(
-      getBeamCheckBalance(),
-      BeamShares - expectedBeamSharesNeeded,
-      "!Beam share balance"
-    );
+    assertEq(getBeamCheckBalance(), BeamShares - expectedBeamSharesNeeded, "!Beam share balance");
   }
 
   function testMultipleRedeem() public shouldRun(forChains(MOONBEAM_MAINNET)) {
@@ -356,18 +329,12 @@ contract BeamERC4626Test is BaseTest {
 
     uint256 assetBalBefore = testToken.balanceOf(address(this));
     uint256 erc4626BalBefore = beamErc4626.balanceOf(address(this));
-    uint256 expectedBeamSharesNeeded = redeemAmount.mulDivUp(
-      getBeamCheckBalance(),
-      beamErc4626.totalSupply()
-    );
+    uint256 expectedBeamSharesNeeded = redeemAmount.mulDivUp(getBeamCheckBalance(), beamErc4626.totalSupply());
 
     beamErc4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertTrue(
-      diff(testToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
-      "!user asset bal"
-    );
+    assertTrue(diff(testToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1, "!user asset bal");
 
     // Test that the balance view calls work
     assertEq(beamErc4626.totalSupply(), depositAmount * 2 - redeemAmount, "!totalSupply");
@@ -376,11 +343,7 @@ contract BeamERC4626Test is BaseTest {
     assertEq(beamErc4626.balanceOf(address(this)), erc4626BalBefore - redeemAmount, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of Beam shares
-    assertEq(
-      getBeamCheckBalance(),
-      BeamShares - expectedBeamSharesNeeded,
-      "!Beam share balance"
-    );
+    assertEq(getBeamCheckBalance(), BeamShares - expectedBeamSharesNeeded, "!Beam share balance");
     assertEq(testToken.balanceOf(address(beamErc4626)), 0, "Beam erc4626 locked amount checking");
 
     uint256 totalSupplyBefore = depositAmount * 2 - redeemAmount;
@@ -388,10 +351,7 @@ contract BeamERC4626Test is BaseTest {
     redeemAmount = beamErc4626.previewWithdraw(withdrawalAmount);
     assetBalBefore = testToken.balanceOf(address(1));
     erc4626BalBefore = beamErc4626.balanceOf(address(1));
-    expectedBeamSharesNeeded = redeemAmount.mulDivUp(
-      getBeamCheckBalance(),
-      beamErc4626.totalSupply()
-    );
+    expectedBeamSharesNeeded = redeemAmount.mulDivUp(getBeamCheckBalance(), beamErc4626.totalSupply());
     vm.prank(address(1));
     beamErc4626.withdraw(10e18, address(1), address(1));
 
@@ -405,11 +365,7 @@ contract BeamERC4626Test is BaseTest {
     assertEq(beamErc4626.balanceOf(address(1)), erc4626BalBefore - redeemAmount, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of Beam shares
-    assertEq(
-      getBeamCheckBalance(),
-      BeamShares - expectedBeamSharesNeeded,
-      "!Beam share balance"
-    );
+    assertEq(getBeamCheckBalance(), BeamShares - expectedBeamSharesNeeded, "!Beam share balance");
     assertEq(testToken.balanceOf(address(beamErc4626)), 0, "Beam erc4626 locked amount checking");
   }
 
@@ -426,7 +382,7 @@ contract BeamERC4626Test is BaseTest {
 
     vm.expectRevert("Pausable: paused");
     beamErc4626.mint(depositAmount, address(this));
-  
+
     uint256 expectedSharesNeeded = withdrawAmount.mulDivDown(beamErc4626.totalSupply(), beamErc4626.totalAssets());
     beamErc4626.withdraw(withdrawAmount, address(this), address(this));
 

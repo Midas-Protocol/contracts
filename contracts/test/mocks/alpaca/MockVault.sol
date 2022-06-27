@@ -84,7 +84,5 @@ contract MockVault is ERC20 {
     ERC20(token).transfer(to, amount);
   }
 
-  function pendingInterest(uint256 value) public view returns (uint256) {
-
-  }
+  function pendingInterest(uint256 value) public view returns (uint256) {}
 }

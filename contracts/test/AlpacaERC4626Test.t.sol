@@ -31,7 +31,11 @@ contract AlpacaERC4626Test is BaseTest {
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     underlyingToken = MockERC20(ap.getAddress("wtoken"));
     mockVault = MockVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063);
-    alpacaERC4626 = new AlpacaERC4626(underlyingToken, IAlpacaVault(address(mockVault)), IW_NATIVE(ap.getAddress("wtoken")));
+    alpacaERC4626 = new AlpacaERC4626(
+      underlyingToken,
+      IAlpacaVault(address(mockVault)),
+      IW_NATIVE(ap.getAddress("wtoken"))
+    );
     iniitalBeefyBalance = mockVault.totalToken();
     initialBeefySupply = mockVault.totalSupply();
     sendUnderlyingToken(100e18, address(this));
@@ -51,15 +55,14 @@ contract AlpacaERC4626Test is BaseTest {
     vm.stopPrank();
   }
 
-
   function increaseAssetsInVault() public {
     sendUnderlyingToken(1000e18, address(mockVault));
     // mockVault.earn();
   }
 
-  function getExpectedVaultShares(uint256 amount) internal returns(uint256) {
+  function getExpectedVaultShares(uint256 amount) internal returns (uint256) {
     uint256 total = mockVault.totalToken();
-    uint256 shares = total == 0 ? amount : amount * mockVault.totalSupply() / total;
+    uint256 shares = total == 0 ? amount : (amount * mockVault.totalSupply()) / total;
     return shares;
   }
 
@@ -172,7 +175,6 @@ contract AlpacaERC4626Test is BaseTest {
   }
 
   function testWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
-
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);
@@ -213,7 +215,6 @@ contract AlpacaERC4626Test is BaseTest {
   }
 
   function testMultipleWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
-
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);
@@ -290,7 +291,6 @@ contract AlpacaERC4626Test is BaseTest {
   }
 
   function testRedeem() public shouldRun(forChains(BSC_MAINNET)) {
-
     uint256 withdrawalAmount = 10e18;
     uint256 redeemAmount = alpacaERC4626.previewWithdraw(withdrawalAmount);
 
@@ -323,14 +323,12 @@ contract AlpacaERC4626Test is BaseTest {
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     assertTrue(
-      diff(mockVault.balanceOf(address(alpacaERC4626)),
-      beefyShares - expectedBeefySharesNeeded) <= 1,
+      diff(mockVault.balanceOf(address(alpacaERC4626)), beefyShares - expectedBeefySharesNeeded) <= 1,
       "!beefy share balance"
     );
   }
 
   function testMultipleRedeem() public shouldRun(forChains(BSC_MAINNET)) {
-
     uint256 withdrawalAmount = 10e18;
     uint256 redeemAmount = alpacaERC4626.previewWithdraw(withdrawalAmount);
 
@@ -364,8 +362,7 @@ contract AlpacaERC4626Test is BaseTest {
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     assertTrue(
-      diff(mockVault.balanceOf(address(alpacaERC4626)),
-      beefyShares - expectedBeefySharesNeeded) <= 1,
+      diff(mockVault.balanceOf(address(alpacaERC4626)), beefyShares - expectedBeefySharesNeeded) <= 1,
       "!beefy share balance"
     );
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "Beefy erc4626 locked amount checking");
@@ -396,8 +393,7 @@ contract AlpacaERC4626Test is BaseTest {
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     assertTrue(
-      diff(mockVault.balanceOf(address(alpacaERC4626)),
-      beefyShares - expectedBeefySharesNeeded) <= 1,
+      diff(mockVault.balanceOf(address(alpacaERC4626)), beefyShares - expectedBeefySharesNeeded) <= 1,
       "!beefy share balance"
     );
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "Beefy erc4626 locked amount checking");
