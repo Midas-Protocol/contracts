@@ -23,6 +23,7 @@ struct RewardsCycle {
 }
 
 // Using 2BRL
+// Tested on block 19052824
 contract DotDotERC4626Test is WithPool, BaseTest {
   using FixedPointMathLib for uint256;
 
@@ -43,6 +44,7 @@ contract DotDotERC4626Test is WithPool, BaseTest {
   uint256 depositAmount = 100e18;
   uint256 withdrawalFee = 10;
   uint256 BPS_DENOMINATOR = 10_000;
+  uint256 ACCEPTABLE_DIFF = 1000;
 
   uint192 expectedReward = 1e18;
   ERC20 marketKey;
@@ -112,6 +114,11 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     sendUnderlyingToken(1000e18, address(lpDepositor));
   }
 
+  function decreaseAssetsInVault() public {
+    vm.prank(0x5B74C99AA2356B4eAa7B85dC486843eDff8Dfdbe); //lpStaker
+    underlyingToken.transfer(address(1), 200e18); // transfer doesnt work
+  }
+
   function testInitializedValues() public shouldRun(forChains(BSC_MAINNET)) {
     assertEq(dotDotERC4626.name(), "Midas 2brl Vault");
     assertEq(dotDotERC4626.symbol(), "mv2brl");
@@ -131,7 +138,7 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     assertEq(dotDotERC4626.previewRedeem(reqShares), withdrawalAmount);
   }
 
-  function testDeposit() public shouldRun(forChains(BSC_MAINNET)) {
+  function testDepositOnly() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 expectedDepositShare = depositAmount;
     uint256 expectedErc4626Shares = dotDotERC4626.previewDeposit(depositAmount);
 
@@ -178,6 +185,36 @@ contract DotDotERC4626Test is WithPool, BaseTest {
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     assertEq(depositShare.balanceOf(address(dotDotERC4626)), oldExpectedDepositShare + expectedDepositShare);
+  }
+
+  function testDepositWithDecreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
+    // THIS TEST WILL ALWAYS FAIL
+    // A transfer out of the lpStaker will always fail.
+    // There also doesnt seem another way to reduce the balance of lpStaker so we cant test this scenario
+    /* =============== ACTUAL TEST =============== */
+    /*
+    uint256 oldExpecteDepositShares = depositAmount;
+    uint256 oldExpected4626Shares = dotDotERC4626.previewDeposit(depositAmount);
+    deposit(address(this), depositAmount);
+
+    // Decrease the share price
+    decreaseAssetsInVault();
+
+    uint256 expectedDepositShare = depositAmount;
+    uint256 previewErc4626Shares = dotDotERC4626.previewDeposit(depositAmount);
+    uint256 expected4626Shares = depositAmount.mulDivDown(dotDotERC4626.totalSupply(), dotDotERC4626.totalAssets());
+
+    sendUnderlyingToken(depositAmount, address(this));
+    deposit(address(this), depositAmount);
+
+    // Test that we minted the correct amount of token
+    assertEq(dotDotERC4626.balanceOf(address(this)), oldExpected4626Shares + previewErc4626Shares);
+    // Test that we got less shares on the second mint after assets in the vault increased
+    assertGt(previewErc4626Shares, oldExpected4626Shares, "!new shares > old Shares");
+    assertEq(previewErc4626Shares, expected4626Shares, "!previewShares == expectedShares");
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(depositShare.balanceOf(address(dotDotERC4626)), oldExpecteDepositShares + expectedDepositShare);
+    */
   }
 
   function testMultipleDeposit() public shouldRun(forChains(BSC_MAINNET)) {
@@ -325,7 +362,7 @@ contract DotDotERC4626Test is WithPool, BaseTest {
   }
 
   function testWithdrawWithIncreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
-    uint256 beefyShareBal = depositAmount;
+    uint256 depositShareBal = depositAmount;
 
     deposit(address(this), depositAmount);
 
@@ -362,8 +399,47 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     // Test that the ERC4626 holds the expected amount of beefy shares
     assertEq(
       depositShare.balanceOf(address(dotDotERC4626)),
-      beefyShareBal - (oldExpectedDepositSharesNeeded + ExpectedDepositSharesNeeded)
+      depositShareBal - (oldExpectedDepositSharesNeeded + ExpectedDepositSharesNeeded)
     );
+  }
+
+  function testWithdrawWithDecreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
+    // THIS TEST WILL ALWAYS FAIL
+    // A transfer out of the lpStaker will always fail.
+    // There also doesnt seem another way to reduce the balance of lpStaker so we cant test this scenario
+    /* =============== ACTUAL TEST =============== */
+    /*
+      sendUnderlyingToken(depositAmount, address(this));
+      uint256 depositShares = depositAmount;
+      deposit(address(this), depositAmount);
+      uint256 withdrawalAmount = 10e18;
+      uint256 oldExpectedErc4626SharesNeeded = dotDotERC4626.previewWithdraw(withdrawalAmount);
+      uint256 oldExpectedDepositSharesNeeded = oldExpectedErc4626SharesNeeded.mulDivUp(
+      depositShare.balanceOf(address(dotDotERC4626)),
+      dotDotERC4626.totalSupply()
+      );
+      dotDotERC4626.withdraw(withdrawalAmount, address(this), address(this));
+      // Increase the share price
+      decreaseAssetsInVault();
+      uint256 expectedErc4626SharesNeeded = dotDotERC4626.previewWithdraw(withdrawalAmount);
+      uint256 ExpectedDepositSharesNeeded = expectedErc4626SharesNeeded.mulDivUp(
+      depositShare.balanceOf(address(dotDotERC4626)),
+      dotDotERC4626.totalSupply()
+      );
+      dotDotERC4626.withdraw(withdrawalAmount, address(this), address(this));
+      // Test that we minted the correct amount of token
+      assertEq(
+        dotDotERC4626.balanceOf(address(this)),
+        depositAmount - (oldExpectedErc4626SharesNeeded + expectedErc4626SharesNeeded)
+      );
+      // Test that we got less shares on the second mint after assets in the vault increased
+      assertLe(expectedErc4626SharesNeeded, oldExpectedErc4626SharesNeeded, "!new shares < old Shares");
+      // Test that the ERC4626 holds the expected amount of beefy shares
+      assertEq(
+        depositShare.balanceOf(address(dotDotERC4626)),
+        depositShareBal - (oldExpectedDepositSharesNeeded + expectedDepositSharesNeeded)
+      );
+      */
   }
 
   function testMultipleWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
@@ -618,254 +694,86 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     );
     assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount + expectedAssets, "!redeem asset bal");
   }
+
+  function testAccumulatingRewardsOnDeposit() public {
+    deposit(address(this), depositAmount / 2);
+
+    vm.warp(block.timestamp + 150);
+    vm.roll(10);
+
+    deposit(address(this), depositAmount / 2);
+    assertTrue(diff(dddToken.balanceOf(address(dotDotERC4626)), 784432405373200) < ACCEPTABLE_DIFF);
+    assertTrue(diff(epxToken.balanceOf(address(dotDotERC4626)), 15688648107464900) < ACCEPTABLE_DIFF);
+  }
+
+  function testAccumulatingRewardsOnWithdrawal() public {
+    deposit(address(this), depositAmount);
+
+    vm.warp(block.timestamp + 150);
+    vm.roll(10);
+
+    dotDotERC4626.withdraw(1, address(this), address(this));
+
+    assertTrue(diff(dddToken.balanceOf(address(dotDotERC4626)), 1568848690905600) < ACCEPTABLE_DIFF);
+    assertTrue(diff(epxToken.balanceOf(address(dotDotERC4626)), 31376973818113700) < ACCEPTABLE_DIFF);
+  }
+
+  function testClaimRewards() public {
+    // Deposit funds, Rewards are 0
+    deposit(address(this), depositAmount);
+
+    (uint32 dddStart, uint32 dddEnd, uint192 dddReward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
+    (uint32 epxStart, uint32 epxEnd, uint192 epxReward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
+
+    // Rewards can be transfered in the next cycle
+    assertEq(dddEnd, 0);
+    assertEq(epxEnd, 0);
+
+    // Reward amount is still 0
+    assertEq(dddReward, 0);
+    assertEq(epxReward, 0);
+
+    vm.warp(block.timestamp + 150);
+    vm.roll(10);
+
+    // Call withdraw (could also be deposit() on the erc4626 or claim() on the epsStaker directly) to claim rewards
+    dotDotERC4626.withdraw(1, address(this), address(this));
+
+    // The ERC-4626 holds all rewarded token now
+    assertTrue(diff(dddToken.balanceOf(address(dotDotERC4626)), 1568848690905600) < ACCEPTABLE_DIFF);
+    assertTrue(diff(epxToken.balanceOf(address(dotDotERC4626)), 31376973818113700) < ACCEPTABLE_DIFF);
+
+    // Accrue rewards to send rewards to flywheelRewards
+    dddFlywheel.accrue(ERC20(dotDotERC4626), address(this));
+    epxFlywheel.accrue(ERC20(dotDotERC4626), address(this));
+    assertTrue(diff(dddToken.balanceOf(address(dddRewards)), 1568848690905600) < ACCEPTABLE_DIFF);
+    assertTrue(diff(epxToken.balanceOf(address(epxRewards)), 31376973818113700) < ACCEPTABLE_DIFF);
+
+    (dddStart, dddEnd, dddReward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
+    (epxStart, epxEnd, epxReward) = epxRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
+
+    // Rewards can be transfered in the next cycle
+    assertTrue(diff(dddEnd, 1656328306) < ACCEPTABLE_DIFF);
+    assertTrue(diff(epxEnd, 1656328306) < ACCEPTABLE_DIFF);
+
+    // Reward amount is expected value
+    assertTrue(diff(dddReward, 1568848690905600) < ACCEPTABLE_DIFF);
+    assertTrue(diff(epxReward, 31376973818113700) < ACCEPTABLE_DIFF);
+
+    vm.warp(block.timestamp + 150);
+    vm.roll(20);
+
+    // Finally accrue reward from last cycle
+    dddFlywheel.accrue(ERC20(dotDotERC4626), address(this));
+    epxFlywheel.accrue(ERC20(dotDotERC4626), address(this));
+
+    // Claim Rewards for the user
+    dddFlywheel.claimRewards(address(this));
+    epxFlywheel.claimRewards(address(this));
+
+    assertTrue(diff(dddToken.balanceOf(address(this)), 1568848690905600) < ACCEPTABLE_DIFF);
+    assertEq(dddToken.balanceOf(address(dddFlywheel)), 0);
+    assertTrue(diff(epxToken.balanceOf(address(this)), 31376973818113700) < ACCEPTABLE_DIFF);
+    assertEq(epxToken.balanceOf(address(epxFlywheel)), 0);
+  }
 }
-
-// contract DotDotLpERC4626Test is DSTest {
-//   struct RewardsCycle {
-//     uint32 start;
-//     uint32 end;
-//     uint192 reward;
-//   }
-
-//   Vm public constant vm = Vm(HEVM_ADDRESS);
-
-//   DotDotLpERC4626 dotDotERC4626;
-
-//   MockERC20 lpToken;
-
-//   MockERC20 dddToken;
-//   FlywheelCore dddFlywheel;
-//   FuseFlywheelDynamicRewards dddRewards;
-
-//   MockERC20 epxToken;
-//   FlywheelCore epxFlywheel;
-//   FuseFlywheelDynamicRewards epxRewards;
-
-//   MockLpDepositor mockLpDepositor;
-
-//   uint256 depositAmount = 100e18;
-//   uint192 expectedReward = 1e18;
-//   ERC20 marketKey;
-//   address tester = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
-
-//   function setUp() public {
-//     vm.warp(1);
-//     dddToken = new MockERC20("dddToken", "DDD", 18);
-//     dddFlywheel = new FlywheelCore(
-//       dddToken,
-//       IFlywheelRewards(address(0)),
-//       IFlywheelBooster(address(0)),
-//       address(this),
-//       Authority(address(0))
-//     );
-//     dddRewards = new FuseFlywheelDynamicRewards(dddFlywheel, 1);
-//     dddFlywheel.setFlywheelRewards(dddRewards);
-
-//     epxToken = new MockERC20("epxToken", "EPX", 18);
-//     epxFlywheel = new FlywheelCore(
-//       epxToken,
-//       IFlywheelRewards(address(0)),
-//       IFlywheelBooster(address(0)),
-//       address(this),
-//       Authority(address(0))
-//     );
-//     epxRewards = new FuseFlywheelDynamicRewards(epxFlywheel, 1);
-//     epxFlywheel.setFlywheelRewards(epxRewards);
-
-//     lpToken = new MockERC20("TestLpToken", "LP-TST", 18);
-//     mockLpDepositor = new MockLpDepositor(epxToken, dddToken, lpToken);
-
-//     dotDotERC4626 = new DotDotLpERC4626(
-//       lpToken,
-//       FlywheelCore(address(dddFlywheel)),
-//       FlywheelCore(address(epxFlywheel)),
-//       ILpDepositor(address(mockLpDepositor))
-//     );
-//     marketKey = ERC20(address(dotDotERC4626));
-//     dddFlywheel.addStrategyForRewards(marketKey);
-//     epxFlywheel.addStrategyForRewards(marketKey);
-//     vm.warp(2);
-//   }
-
-//   function testInitializedValues() public {
-//     assertEq(dotDotERC4626.name(), "Midas TestLpToken Vault");
-//     assertEq(dotDotERC4626.symbol(), "mvLP-TST");
-//     assertEq(address(dotDotERC4626.asset()), address(lpToken));
-//     assertEq(address(dotDotERC4626.lpDepositor()), address(mockLpDepositor));
-//     assertEq(address(marketKey), address(dotDotERC4626));
-//     assertEq(lpToken.allowance(address(dotDotERC4626), address(mockLpDepositor)), type(uint256).max);
-//     assertEq(dddToken.allowance(address(dotDotERC4626), address(dddRewards)), type(uint256).max);
-//     assertEq(epxToken.allowance(address(dotDotERC4626), address(epxRewards)), type(uint256).max);
-//   }
-
-//   function deposit() public {
-//     lpToken.mint(address(this), depositAmount);
-//     lpToken.approve(address(dotDotERC4626), depositAmount);
-//     // flywheelPreSupplierAction -- usually this would be done in Comptroller when supplying
-//     dddFlywheel.accrue(ERC20(dotDotERC4626), address(this));
-//     epxFlywheel.accrue(ERC20(dotDotERC4626), address(this));
-//     dotDotERC4626.deposit(depositAmount, address(this));
-//     // flywheelPreSupplierAction
-//     dddFlywheel.accrue(ERC20(dotDotERC4626), address(this));
-//     epxFlywheel.accrue(ERC20(dotDotERC4626), address(this));
-//   }
-
-//   function testDeposit() public {
-//     deposit();
-//     //Test that the actual transfers worked
-//     assertEq(lpToken.balanceOf(address(this)), 0);
-//     assertEq(lpToken.balanceOf(address(mockLpDepositor)), depositAmount);
-
-//     // //Test that the balance view calls work
-//     assertEq(dotDotERC4626.totalAssets(), depositAmount);
-//     assertEq(dotDotERC4626.balanceOfUnderlying(address(this)), depositAmount);
-
-//     // Test that we minted the correct amount of token
-//     assertEq(dotDotERC4626.balanceOf(address(this)), depositAmount);
-//   }
-
-//   function testWithdraw() public {
-//     deposit();
-//     dotDotERC4626.withdraw(depositAmount, address(this), address(this));
-
-//     //Test that the actual transfers worked
-//     assertEq(lpToken.balanceOf(address(this)), depositAmount);
-//     assertEq(lpToken.balanceOf(address(mockLpDepositor)), 0);
-
-//     // //Test that we burned the correct amount of token
-//     assertEq(dotDotERC4626.balanceOf(address(this)), 0);
-//   }
-
-//   function testAccumulatingRewardsOnDeposit() public {
-//     deposit();
-//     assertEq(dddToken.totalSupply(), expectedReward);
-//     assertEq(epxToken.totalSupply(), expectedReward);
-
-//     assertEq(dddToken.balanceOf(address(dotDotERC4626)), expectedReward);
-//     assertEq(epxToken.balanceOf(address(dotDotERC4626)), expectedReward);
-//   }
-
-//   function testAccumulatingRewardsOnWithdrawal() public {
-//     deposit();
-//     assertEq(dddToken.totalSupply(), expectedReward);
-//     assertEq(epxToken.totalSupply(), expectedReward);
-
-//     dotDotERC4626.withdraw(1, address(this), address(this));
-
-//     assertEq(dddToken.totalSupply(), expectedReward * 2);
-//     assertEq(epxToken.totalSupply(), expectedReward * 2);
-
-//     assertEq(dddToken.balanceOf(address(dotDotERC4626)), expectedReward * 2);
-//     assertEq(epxToken.balanceOf(address(dotDotERC4626)), expectedReward * 2);
-//   }
-
-//   function testClaimRewards() public {
-//     // Deposit funds, Rewards are 0
-//     deposit();
-
-//     // No EPS-token have yet been minted as rewards
-//     assertEq(dddToken.totalSupply(), expectedReward);
-//     assertEq(epxToken.totalSupply(), expectedReward);
-
-//     (uint32 dddStart, uint32 dddEnd, uint192 dddReward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
-//     (uint32 epxStart, uint32 epxEnd, uint192 epxReward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
-
-//     // Rewards can be transfered in the next cycle at time block.timestamp == 2
-//     assertEq(dddEnd, 3);
-//     assertEq(epxEnd, 3);
-
-//     // Reward amount is still 0
-//     assertEq(dddReward, 0);
-//     assertEq(epxReward, 0);
-
-//     vm.warp(3);
-
-//     // Call withdraw (could also be deposit() on the erc4626 or claim() on the epsStaker directly) to claim rewards
-//     dotDotERC4626.withdraw(1, address(this), address(this));
-
-//     // rewardsToken have been minted
-//     assertEq(dddToken.totalSupply(), expectedReward * 2);
-//     assertEq(epxToken.totalSupply(), expectedReward * 2);
-
-//     // The ERC-4626 holds all rewarded token now
-//     assertEq(dddToken.balanceOf(address(dotDotERC4626)), expectedReward * 2);
-//     assertEq(epxToken.balanceOf(address(dotDotERC4626)), expectedReward * 2);
-
-//     // Accrue rewards to send rewards to flywheelRewards
-//     dddFlywheel.accrue(ERC20(dotDotERC4626), address(this));
-//     epxFlywheel.accrue(ERC20(dotDotERC4626), address(this));
-//     assertEq(dddToken.balanceOf(address(dddRewards)), expectedReward * 2);
-//     assertEq(epxToken.balanceOf(address(epxRewards)), expectedReward * 2);
-
-//     (dddStart, dddEnd, dddReward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
-//     (epxStart, epxEnd, epxReward) = epxRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
-
-//     // Rewards can be transfered in the next cycle at time block.timestamp == 3
-//     assertEq(dddEnd, 4);
-//     assertEq(epxEnd, 4);
-
-//     // Reward amount is expected value
-//     assertEq(dddReward, expectedReward * 2);
-//     assertEq(epxReward, expectedReward * 2);
-
-//     vm.warp(4);
-
-//     // Finally accrue reward from last cycle
-//     dddFlywheel.accrue(ERC20(dotDotERC4626), address(this));
-//     epxFlywheel.accrue(ERC20(dotDotERC4626), address(this));
-
-//     // Claim Rewards for the user
-//     dddFlywheel.claimRewards(address(this));
-//     epxFlywheel.claimRewards(address(this));
-
-//     assertEq(dddToken.balanceOf(address(this)), (expectedReward * 2) - 1);
-//     assertEq(dddToken.balanceOf(address(dddFlywheel)), 0);
-//     assertEq(epxToken.balanceOf(address(this)), (expectedReward * 2) - 1);
-//     assertEq(epxToken.balanceOf(address(epxFlywheel)), 0);
-//   }
-
-//   function testClaimForMultipleUser() public {
-//     // Note: As shown in the previous test epx works in the same way as ddd so im gonna only test ddd in here
-
-//     deposit();
-//     vm.startPrank(tester);
-//     lpToken.mint(tester, depositAmount);
-//     lpToken.approve(address(dotDotERC4626), depositAmount);
-//     dotDotERC4626.deposit(depositAmount, tester);
-//     vm.stopPrank();
-
-//     assertEq(dddToken.totalSupply(), expectedReward * 2);
-
-//     (uint32 start, uint32 end, uint192 reward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
-
-//     assertEq(end, 3);
-
-//     assertEq(reward, 0);
-//     vm.warp(3);
-
-//     dotDotERC4626.withdraw(1, address(this), address(this));
-
-//     assertEq(dddToken.totalSupply(), expectedReward * 3);
-
-//     assertEq(dddToken.balanceOf(address(dotDotERC4626)), expectedReward * 3);
-
-//     dddFlywheel.accrue(ERC20(dotDotERC4626), address(this));
-//     assertEq(dddToken.balanceOf(address(dddRewards)), expectedReward * 3);
-
-//     (start, end, reward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
-
-//     assertEq(end, 4);
-
-//     assertEq(reward, expectedReward * 3);
-//     vm.warp(4);
-
-//     dddFlywheel.accrue(ERC20(dotDotERC4626), address(this), tester);
-
-//     dddFlywheel.claimRewards(address(this));
-//     dddFlywheel.claimRewards(tester);
-
-//     assertEq(dddToken.balanceOf(address(tester)), (expectedReward * 3) / 2);
-//     assertEq(dddToken.balanceOf(address(this)), ((expectedReward * 3) / 2) - 1);
-//     assertEq(dddToken.balanceOf(address(dddFlywheel)), 0);
-//   }
-// }

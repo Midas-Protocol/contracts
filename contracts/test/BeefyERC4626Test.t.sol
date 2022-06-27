@@ -479,38 +479,6 @@ contract BeefyERC4626Test is WithPool, BaseTest {
         beefyVault.balanceOf(address(beefyERC4626)),
         beefyShareBal - (oldExpectedBeefySharesNeeded + expectedBeefySharesNeeded)
       );
-    }
-    function testWithdrawWithDecreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
-      sendUnderlyingToken(depositAmount, address(this));
-      uint256 beefyShareBal = (depositAmount * initalBeefySupply) / initalBeefyBalance;
-      deposit(address(this), depositAmount);
-      uint256 withdrawalAmount = 10e18;
-      uint256 oldExpectedErc4626SharesNeeded = beefyERC4626.previewWithdraw(withdrawalAmount);
-      uint256 oldExpectedBeefySharesNeeded = oldExpectedErc4626SharesNeeded.mulDivUp(
-        beefyVault.balanceOf(address(beefyERC4626)),
-        beefyERC4626.totalSupply()
-      );
-      beefyERC4626.withdraw(withdrawalAmount, address(this), address(this));
-      // Decrease the share price
-      decreaseAssetsInVault();
-      uint256 expectedErc4626SharesNeeded = beefyERC4626.previewWithdraw(withdrawalAmount);
-      uint256 expectedBeefySharesNeeded = expectedErc4626SharesNeeded.mulDivUp(
-        beefyVault.balanceOf(address(beefyERC4626)),
-        beefyERC4626.totalSupply()
-      );
-      beefyERC4626.withdraw(withdrawalAmount, address(this), address(this));
-      // Test that we minted the correct amount of token
-      assertEq(
-        beefyERC4626.balanceOf(address(this)),
-        depositAmount - (oldExpectedErc4626SharesNeeded + expectedErc4626SharesNeeded)
-      );
-      // Test that we got less shares on the second mint after assets in the vault increased
-      assertGt(expectedErc4626SharesNeeded, oldExpectedErc4626SharesNeeded, "!new shares > old Shares");
-      // Test that the ERC4626 holds the expected amount of beefy shares
-      assertEq(
-        beefyVault.balanceOf(address(beefyERC4626)),
-        beefyShareBal - (oldExpectedBeefySharesNeeded + expectedBeefySharesNeeded)
-      );
       */
   }
 
