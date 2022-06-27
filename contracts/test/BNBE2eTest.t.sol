@@ -109,7 +109,7 @@ contract BNBE2eTest is WithPool, BaseTest {
     balance = erc4626.balanceOf(address(cToken));
     uint256 maxWithdraw = erc4626.previewWithdraw(1000);
     assertEq(balance, 1e18 - maxWithdraw);
-    assertEq(underlyingToken.balanceOf(address(this)), 10e18 - 1e18 + 1000);
+    assertEq(underlyingToken.balanceOf(address(this)), 10e18 - 1e18 + maxWithdraw);
   }
 
   function testDeployCErc20PluginRewardsDelegate() public shouldRun(forChains(BSC_MAINNET)) {
@@ -167,6 +167,6 @@ contract BNBE2eTest is WithPool, BaseTest {
     uint256 maxWithdraw = erc4626.previewWithdraw(1000);
     assertEq(cToken.totalBorrows(), 1000);
     assertEq(erc4626.balanceOf(address(cToken)), 10000000 - maxWithdraw);
-    assertEq(underlyingToken.balanceOf(address(this)), 10e18 - 10000000 + 1000);
+    assertEq(underlyingToken.balanceOf(address(this)), 10e18 - 10000000 + maxWithdraw);
   }
 }

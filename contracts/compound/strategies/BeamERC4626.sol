@@ -2,10 +2,12 @@
 pragma solidity ^0.8.10;
 
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
+import { MidasERC4626 } from "./MidasERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
+import { IBoringERC20, IMultipleRewards } from "../../test/mocks/beam/MockVault.sol";
 
 interface IVault {
   // Info of each user.
@@ -20,12 +22,27 @@ interface IVault {
       uint256
     );
 
+  function poolInfo(uint256 _pid)
+    external
+    view
+    returns (
+      IBoringERC20,
+      uint256,
+      uint256,
+      uint256,
+      uint16,
+      uint256,
+      uint256
+    );
+
+  function balanceOf(address) external returns (uint256);
+
   function deposit(uint256 _pid, uint256 _amount) external;
 
   function withdraw(uint256 _pid, uint256 _amount) external;
 }
 
-contract BeamERC4626 is ERC4626 {
+contract BeamERC4626 is MidasERC4626 {
   using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
@@ -51,7 +68,7 @@ contract BeamERC4626 is ERC4626 {
     uint256 _poolId,
     ERC20 _rewardToken,
     IVault _vault
-  ) ERC4626(_asset, _asset.name(), _asset.symbol()) {
+  ) MidasERC4626(_asset, _asset.name(), _asset.symbol()) {
     VAULT = _vault;
     POOL_ID = _poolId;
     FLYWHEEL_CORE = _flyWheel;
@@ -65,8 +82,12 @@ contract BeamERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    (uint256 amount, , , ) = VAULT.userInfo(POOL_ID, address(this));
-    return amount;
+    if (paused()) {
+      return asset.balanceOf(address(this));
+    } else {
+      (uint256 amount, , , ) = VAULT.userInfo(POOL_ID, address(this));
+      return amount;
+    }
   }
 
   /// @notice Calculates the total amount of underlying tokens the account holds.
@@ -81,7 +102,20 @@ contract BeamERC4626 is ERC4626 {
     VAULT.deposit(POOL_ID, amount);
   }
 
-  function beforeWithdraw(uint256, uint256 shares) internal override {
-    VAULT.withdraw(POOL_ID, shares);
+  function beforeWithdraw(uint256 amount, uint256) internal override {
+    VAULT.withdraw(POOL_ID, amount);
+  }
+
+  event amount(uint256);
+
+  function emergencyWithdrawAndPause() external override onlyOwner {
+    (IBoringERC20 lpToken, , , , , , ) = VAULT.poolInfo(POOL_ID);
+    VAULT.withdraw(POOL_ID, lpToken.balanceOf(address(VAULT)));
+    _pause();
+  }
+
+  function unpause() external override onlyOwner {
+    _unpause();
+    VAULT.deposit(POOL_ID, asset.balanceOf(address(this)));
   }
 }
