@@ -455,15 +455,17 @@ contract AlpacaERC4626Test is BaseTest {
     uint256 expectedSharesNeeded = withdrawAmount.mulDivDown(alpacaERC4626.totalSupply(), alpacaERC4626.totalAssets());
     alpacaERC4626.withdraw(withdrawAmount, address(this), address(this));
 
-    assertTrue(diff(alpacaERC4626.balanceOf(address(this)), depositAmount - expectedSharesNeeded) <= 1, "!withdraw share bal");
+    assertTrue(
+      diff(alpacaERC4626.balanceOf(address(this)), depositAmount - expectedSharesNeeded) <= 1,
+      "!withdraw share bal"
+    );
     assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount, "!withdraw asset bal");
 
     uint256 expectedAssets = withdrawAmount.mulDivUp(alpacaERC4626.totalAssets(), alpacaERC4626.totalSupply());
     alpacaERC4626.redeem(withdrawAmount, address(this), address(this));
 
     assertTrue(
-      diff(alpacaERC4626.balanceOf(address(this)),
-      depositAmount - withdrawAmount - expectedSharesNeeded) <= 1,
+      diff(alpacaERC4626.balanceOf(address(this)), depositAmount - withdrawAmount - expectedSharesNeeded) <= 1,
       "!redeem share bal"
     );
     assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount + expectedAssets, "!redeem asset bal");

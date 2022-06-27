@@ -69,7 +69,10 @@ contract AlpacaERC4626 is MidasERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    return paused() ?  wtoken.balanceOf(address(this)) : alpacaVault.balanceOf(address(this)).mulDivDown(alpacaVault.totalToken(), alpacaVault.totalSupply());
+    return
+      paused()
+        ? wtoken.balanceOf(address(this))
+        : alpacaVault.balanceOf(address(this)).mulDivDown(alpacaVault.totalToken(), alpacaVault.totalSupply());
   }
 
   /// @notice Calculates the total amount of underlying tokens the user holds.
