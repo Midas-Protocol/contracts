@@ -82,8 +82,12 @@ contract BeamERC4626 is MidasERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    (uint256 amount, , , ) = VAULT.userInfo(POOL_ID, address(this));
-    return paused() ? asset.balanceOf(address(this)) : amount;
+    if (paused()) {
+      return asset.balanceOf(address(this));
+    } else {
+      (uint256 amount, , , ) = VAULT.userInfo(POOL_ID, address(this));
+      return amount;
+    }
   }
 
   /// @notice Calculates the total amount of underlying tokens the account holds.

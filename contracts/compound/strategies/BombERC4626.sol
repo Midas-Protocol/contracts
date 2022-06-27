@@ -67,13 +67,13 @@ contract BombERC4626 is MidasERC4626 {
     xbomb.leave(xbombShares);
   }
 
-  function emergencyWithdrawAndPause() external override onlyOwner {
-    xbomb.leave(xbomb.balanceOf(address(this)));
-    _pause();
-  }
+  // function emergencyWithdrawAndPause() external override onlyOwner {
+  //   xbomb.leave(xbomb.balanceOf(address(this)));
+  //   _pause();
+  // }
 
-  function unpause() external override onlyOwner {
-    _unpause();
-    xbomb.enter(asset.balanceOf(address(this)));
-  }
+  // function unpause() external override onlyOwner {
+  //   _unpause();
+  //   xbomb.enter(asset.balanceOf(address(this)));
+  // }
 }

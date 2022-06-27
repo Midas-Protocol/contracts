@@ -99,13 +99,17 @@ contract EllipsisERC4626 is MidasERC4626 {
     lpTokenStaker.withdraw(address(asset), amount, true);
   }
 
-  function emergencyWithdrawAndPause() external override onlyOwner {
-    lpTokenStaker.withdraw(address(asset), lpTokenStaker.balanceOf(address(this)), true);
-    _pause();
-  }
+  /* Comment out for now
+   * Todo: needs test for verification
+   */
 
-  function unpause() external override onlyOwner {
-    _unpause();
-    lpTokenStaker.deposit(address(asset), asset.balanceOf(address(this)), true);
-  }
+  // function emergencyWithdrawAndPause() external override onlyOwner {
+  //   lpTokenStaker.withdraw(address(asset), lpTokenStaker.balanceOf(address(this)), true);
+  //   _pause();
+  // }
+
+  // function unpause() external override onlyOwner {
+  //   _unpause();
+  //   lpTokenStaker.deposit(address(asset), asset.balanceOf(address(this)), true);
+  // }
 }

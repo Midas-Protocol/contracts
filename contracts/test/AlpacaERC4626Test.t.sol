@@ -399,39 +399,39 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "Beefy erc4626 locked amount checking");
   }
 
-  // function testPauseContract() public shouldRun(forChains(BSC_MAINNET)) {
-  //   uint256 withdrawAmount = 1e18;
+  function testAlpacaPauseContract() public shouldRun(forChains(BSC_MAINNET)) {
+    uint256 withdrawAmount = 1e18;
 
-  //   deposit(address(this), depositAmount);
+    deposit(address(this), depositAmount);
 
-  //   alpacaERC4626.emergencyWithdrawAndPause();
+    alpacaERC4626.emergencyWithdrawAndPause();
 
-  //   underlyingToken.approve(address(alpacaERC4626), depositAmount);
-  //   vm.expectRevert("Pausable: paused");
-  //   alpacaERC4626.deposit(depositAmount, address(this));
+    underlyingToken.approve(address(alpacaERC4626), depositAmount);
+    vm.expectRevert("Pausable: paused");
+    alpacaERC4626.deposit(depositAmount, address(this));
 
-  //   vm.expectRevert("Pausable: paused");
-  //   alpacaERC4626.mint(depositAmount, address(this));
+    vm.expectRevert("Pausable: paused");
+    alpacaERC4626.mint(depositAmount, address(this));
 
-  //   emit log_uint(alpacaERC4626.totalSupply());
-  //   emit log_uint(alpacaERC4626.totalAssets());
+    emit log_uint(alpacaERC4626.totalSupply());
+    emit log_uint(alpacaERC4626.totalAssets());
 
-  //   uint256 expectedSharesNeeded = alpacaERC4626.previewWithdraw(withdrawAmount);
-  //   alpacaERC4626.withdraw(withdrawAmount, address(this), address(this));
+    uint256 expectedSharesNeeded = alpacaERC4626.previewWithdraw(withdrawAmount);
+    alpacaERC4626.withdraw(withdrawAmount, address(this), address(this));
 
-  //   assertEq(alpacaERC4626.balanceOf(address(this)), depositAmount - expectedSharesNeeded, "!withdraw share bal");
-  //   assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount, "!withdraw asset bal");
+    assertEq(alpacaERC4626.balanceOf(address(this)), depositAmount - expectedSharesNeeded, "!withdraw share bal");
+    assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount, "!withdraw asset bal");
 
-  //   uint256 expectedAssets = withdrawAmount.mulDivUp(alpacaERC4626.totalAssets(), alpacaERC4626.totalSupply());
-  //   alpacaERC4626.redeem(withdrawAmount, address(this), address(this));
+    uint256 expectedAssets = withdrawAmount.mulDivUp(alpacaERC4626.totalAssets(), alpacaERC4626.totalSupply());
+    alpacaERC4626.redeem(withdrawAmount, address(this), address(this));
 
-  //   assertEq(
-  //     alpacaERC4626.balanceOf(address(this)),
-  //     depositAmount - withdrawAmount - expectedSharesNeeded,
-  //     "!redeem share bal"
-  //   );
-  //   assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount + expectedAssets, "!redeem asset bal");
-  // }
+    assertEq(
+      alpacaERC4626.balanceOf(address(this)),
+      depositAmount - withdrawAmount - expectedSharesNeeded,
+      "!redeem share bal"
+    );
+    assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount + expectedAssets, "!redeem asset bal");
+  }
 
   function testEmergencyWithdrawAndPause() public shouldRun(forChains(BSC_MAINNET)) {
     deposit(address(this), depositAmount);
@@ -445,29 +445,29 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(alpacaERC4626.totalAssets(), 0, "!totalAssets == expectedBal");
   }
 
-  // function testEmergencyWithdrawAndRedeem() public shouldRun(forChains(BSC_MAINNET)) {
-  //   uint256 withdrawAmount = 1e18;
+  function testAlpacaEmergencyWithdrawAndRedeem() public shouldRun(forChains(BSC_MAINNET)) {
+    uint256 withdrawAmount = 1e18;
 
-  //   deposit(address(this), depositAmount);
+    deposit(address(this), depositAmount);
 
-  //   alpacaERC4626.emergencyWithdrawAndPause();
+    alpacaERC4626.emergencyWithdrawAndPause();
 
-  //   uint256 expectedSharesNeeded = withdrawAmount.mulDivDown(alpacaERC4626.totalSupply(), alpacaERC4626.totalAssets());
-  //   alpacaERC4626.withdraw(withdrawAmount, address(this), address(this));
+    uint256 expectedSharesNeeded = withdrawAmount.mulDivDown(alpacaERC4626.totalSupply(), alpacaERC4626.totalAssets());
+    alpacaERC4626.withdraw(withdrawAmount, address(this), address(this));
 
-  //   assertEq(alpacaERC4626.balanceOf(address(this)), depositAmount - expectedSharesNeeded, "!withdraw share bal");
-  //   assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount, "!withdraw asset bal");
+    assertTrue(diff(alpacaERC4626.balanceOf(address(this)), depositAmount - expectedSharesNeeded) <= 1, "!withdraw share bal");
+    assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount, "!withdraw asset bal");
 
-  //   uint256 expectedAssets = withdrawAmount.mulDivUp(alpacaERC4626.totalAssets(), alpacaERC4626.totalSupply());
-  //   alpacaERC4626.redeem(withdrawAmount, address(this), address(this));
+    uint256 expectedAssets = withdrawAmount.mulDivUp(alpacaERC4626.totalAssets(), alpacaERC4626.totalSupply());
+    alpacaERC4626.redeem(withdrawAmount, address(this), address(this));
 
-  //   assertEq(
-  //     alpacaERC4626.balanceOf(address(this)),
-  //     depositAmount - withdrawAmount - expectedSharesNeeded,
-  //     "!redeem share bal"
-  //   );
-  //   assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount + expectedAssets, "!redeem asset bal");
-  // }
+    assertTrue(
+      diff(alpacaERC4626.balanceOf(address(this)),
+      depositAmount - withdrawAmount - expectedSharesNeeded) <= 1,
+      "!redeem share bal"
+    );
+    assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount + expectedAssets, "!redeem asset bal");
+  }
 }
 
 contract AlpacaERC4626UnitTest is BaseTest {
