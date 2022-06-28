@@ -7,6 +7,7 @@ import { WETH } from "solmate/tokens/WETH.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { CurveLpTokenLiquidatorNoRegistry } from "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
+import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 import "../utils/IW_NATIVE.sol";
 import "../external/curve/ICurvePool.sol";
 import "./config/BaseTest.t.sol";

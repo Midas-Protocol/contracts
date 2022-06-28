@@ -1,18 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "forge-std/Test.sol";
 
-import { WETH } from "solmate/tokens/WETH.sol";
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-import { CurveLpTokenPriceOracleNoRegistry } from "../../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
-import "../../oracles/default/ChainlinkPriceOracleV2.sol";
-import "../../external/jarvis/ISynthereumLiquidityPool.sol";
-import "../../oracles/MasterPriceOracle.sol";
-import "../../oracles/default/UniswapTwapPriceOracleV2Factory.sol";
 import "../../utils/AddressesProvider.sol";
 
 abstract contract BaseTest is Test {
