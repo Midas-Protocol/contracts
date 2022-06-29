@@ -26,6 +26,7 @@ contract BeamE2eTest is WithPool, BaseTest {
   StdStorage internal stdstore;
   
   address wToken = 0xAcc15dC74880C9944775448304B263D191c6077F;
+  address uniswapRouter = 0x96b244391D98B62D19aE89b1A4dCcf0fc56970C7;
 
   constructor()
     WithPool(
@@ -105,7 +106,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     liquidator = new FuseSafeLiquidator();
     liquidator.initialize(
       0xAcc15dC74880C9944775448304B263D191c6077F,
-      0x96b244391D98B62D19aE89b1A4dCcf0fc56970C7,
+      uniswapRouter,
       0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b,
       0xcd3B51D98478D53F4515A306bE565c6EebeF1D58,
       "0xe31da4209ffcce713230a74b5287fa8ec84797c9e77e1f7cfeccea015cdc97ea"
@@ -141,47 +142,52 @@ contract BeamE2eTest is WithPool, BaseTest {
     // Account One Borrow
     vm.startPrank(accountOne);
     underlyingToken.approve(address(cToken), 1e36);
-    cToken.borrow(1);
+    cToken.borrow(10);
     vm.stopPrank();
-    assertEq(cToken.totalBorrows(), 1);
+    assertEq(cToken.totalBorrows(), 10);
     uint256 price1 = priceOracle.getUnderlyingPrice(ICToken(address(cToken)));
-    emit log_address(address(cToken));
-    emit log_address(address(cBeamToken));
-    emit log_uint(price1);
+
     vm.mockCall(
-      0x96b244391D98B62D19aE89b1A4dCcf0fc56970C7,
+      0x14C15B9ec83ED79f23BF71D51741f58b69ff1494,
       abi.encodeWithSelector(priceOracle.getUnderlyingPrice.selector, ICToken(address(cToken))),
       abi.encode(price1 * 1000)
     );
 
-    // IRedemptionStrategy[] memory strategies = new IRedemptionStrategy[](0);
-    // bytes[] memory abis = new bytes[](0);
+    IRedemptionStrategy[] memory strategies = new IRedemptionStrategy[](0);
+    bytes[] memory abis = new bytes[](0);
 
-    // vm.startPrank(accountOne);
-    // FusePoolLens.FusePoolAsset[] memory assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
-    // uint256 bnbBalance = cBnbToken.balanceOf(accountOne);
+    vm.startPrank(accountOne);
+    FusePoolLens.FusePoolAsset[] memory assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
+    uint256 beamBalance = cBeamToken.balanceOf(accountOne);
 
-    // liquidator.safeLiquidateToTokensWithFlashLoan(
-    //   accountOne,
-    //   9,
-    //   ICErc20(address(cToken)),
-    //   ICErc20(address(cBnbToken)),
-    //   0,
-    //   address(0),
-    //   IUniswapV2Router02(0x96b244391D98B62D19aE89b1A4dCcf0fc56970C7),
-    //   IUniswapV2Router02(0x96b244391D98B62D19aE89b1A4dCcf0fc56970C7),
-    //   strategies,
-    //   abis,
-    //   0
-    // );
+    emit log_uint(beamBalance);
+
+    // IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
+    // emit log_address(address(router));
+    // address factory = router.factory();
+    // emit log_address(factory);
+
+    liquidator.safeLiquidateToTokensWithFlashLoan(
+      accountOne,
+      9,
+      ICErc20(address(cToken)),
+      ICErc20(address(cBeamToken)),
+      0,
+      address(0),
+      IUniswapV2Router02(uniswapRouter),
+      IUniswapV2Router02(uniswapRouter),
+      strategies,
+      abis,
+      0
+    );
 
     // FusePoolLens.FusePoolAsset[] memory assetsDataAfter = poolLens.getPoolAssetsWithData(
     //   IComptroller(address(comptroller))
     // );
 
-    // uint256 bnbBalanceAfter = cBnbToken.balanceOf(accountOne);
+    // uint256 beamBalanceAfter = cBeamToken.balanceOf(accountOne);
 
-    // assertGt(bnbBalance, bnbBalanceAfter);
+    // assertGt(beamBalance, beamBalanceAfter);
     // assertGt(assetsData[1].supplyBalance, assetsDataAfter[1].supplyBalance);
 
     // vm.stopPrank();
