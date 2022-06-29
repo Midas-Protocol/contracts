@@ -30,14 +30,14 @@ interface IMiniChefV2 {
 }
 
 /**
- * @title Kinesis ERC4626 Contract
- * @notice ERC4626 wrapper for Kinesis
+ * @title MiniChef ERC4626 Contract
+ * @notice ERC4626 wrapper for MiniChef Contracts
  * @author RedVeil
  *
  * Wraps https://github.com/kinesis-labs/kinesis-contract/blob/main/contracts/rewards/MiniChefV2.sol
  *
  */
-contract KinesisERC4626 is ERC4626 {
+contract MiniChefERC4626 is ERC4626 {
   using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 

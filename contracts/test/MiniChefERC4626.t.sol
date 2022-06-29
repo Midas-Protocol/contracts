@@ -8,7 +8,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { KinesisERC4626, IMiniChefV2 } from "../compound/strategies/KinesisERC4626.sol";
+import { MiniChefERC4626, IMiniChefV2 } from "../compound/strategies/MiniChefERC4626.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
@@ -18,10 +18,10 @@ import { SimpleRewarder, IRewarder } from "./mocks/kinesis/SimpleRewarder.sol";
 import { IStrategy } from "./mocks/autofarm/IStrategy.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 
-contract KinesisERC4626Test is DSTest {
+contract MiniChefERC4626Test is DSTest {
   Vm public constant vm = Vm(HEVM_ADDRESS);
 
-  KinesisERC4626 kinesisERC4626;
+  MiniChefERC4626 miniChefERC4626;
   FlywheelCore flywheel;
   FuseFlywheelDynamicRewards flywheelRewards;
 
@@ -63,13 +63,13 @@ contract KinesisERC4626Test is DSTest {
     flywheelRewards = new FuseFlywheelDynamicRewards(flywheel, 1);
     flywheel.setFlywheelRewards(flywheelRewards);
 
-    kinesisERC4626 = new KinesisERC4626(
+    miniChefERC4626 = new MiniChefERC4626(
       lpToken,
       FlywheelCore(address(flywheel)),
       0,
       IMiniChefV2(address(mockMiniChef))
     );
-    marketKey = ERC20(address(kinesisERC4626));
+    marketKey = ERC20(address(miniChefERC4626));
     flywheel.addStrategyForRewards(marketKey);
 
     vm.warp(2);
@@ -77,23 +77,23 @@ contract KinesisERC4626Test is DSTest {
   }
 
   function testInitializedValues() public {
-    assertEq(kinesisERC4626.name(), "Midas TestToken Vault");
-    assertEq(kinesisERC4626.symbol(), "mvTST");
-    assertEq(address(kinesisERC4626.asset()), address(lpToken));
-    assertEq(address(kinesisERC4626.miniChef()), address(mockMiniChef));
-    assertEq(address(marketKey), address(kinesisERC4626));
-    assertEq(lpToken.allowance(address(kinesisERC4626), address(mockMiniChef)), type(uint256).max);
-    assertEq(rewardToken.allowance(address(kinesisERC4626), address(flywheelRewards)), type(uint256).max);
+    assertEq(miniChefERC4626.name(), "Midas TestToken Vault");
+    assertEq(miniChefERC4626.symbol(), "mvTST");
+    assertEq(address(miniChefERC4626.asset()), address(lpToken));
+    assertEq(address(miniChefERC4626.miniChef()), address(mockMiniChef));
+    assertEq(address(marketKey), address(miniChefERC4626));
+    assertEq(lpToken.allowance(address(miniChefERC4626), address(mockMiniChef)), type(uint256).max);
+    assertEq(rewardToken.allowance(address(miniChefERC4626), address(flywheelRewards)), type(uint256).max);
   }
 
   function deposit() public {
     lpToken.mint(address(this), depositAmount);
-    lpToken.approve(address(kinesisERC4626), depositAmount);
+    lpToken.approve(address(miniChefERC4626), depositAmount);
     // flywheelPreSupplierAction -- usually this would be done in Comptroller when supplying
-    flywheel.accrue(ERC20(kinesisERC4626), address(this));
-    kinesisERC4626.deposit(depositAmount, address(this));
+    flywheel.accrue(ERC20(miniChefERC4626), address(this));
+    miniChefERC4626.deposit(depositAmount, address(this));
     // flywheelPreSupplierAction
-    flywheel.accrue(ERC20(kinesisERC4626), address(this));
+    flywheel.accrue(ERC20(miniChefERC4626), address(this));
   }
 
   function testDeposit() public {
@@ -103,23 +103,23 @@ contract KinesisERC4626Test is DSTest {
     assertEq(lpToken.balanceOf(address(mockMiniChef)), depositAmount);
 
     // //Test that the balance view calls work
-    assertEq(kinesisERC4626.totalAssets(), depositAmount);
-    assertEq(kinesisERC4626.balanceOfUnderlying(address(this)), depositAmount);
+    assertEq(miniChefERC4626.totalAssets(), depositAmount);
+    assertEq(miniChefERC4626.balanceOfUnderlying(address(this)), depositAmount);
 
     // Test that we minted the correct amount of token
-    assertEq(kinesisERC4626.balanceOf(address(this)), depositAmount);
+    assertEq(miniChefERC4626.balanceOf(address(this)), depositAmount);
   }
 
   function testWithdraw() public {
     deposit();
-    kinesisERC4626.withdraw(depositAmount, address(this), address(this));
+    miniChefERC4626.withdraw(depositAmount, address(this), address(this));
 
     //Test that the actual transfers worked
     assertEq(lpToken.balanceOf(address(this)), depositAmount);
     assertEq(lpToken.balanceOf(address(mockMiniChef)), 0);
 
     // //Test that we burned the correct amount of token
-    assertEq(kinesisERC4626.balanceOf(address(this)), 0);
+    assertEq(miniChefERC4626.balanceOf(address(this)), 0);
   }
 
   function testAccumulatingRewardsOnDeposit() public {
@@ -129,7 +129,7 @@ contract KinesisERC4626Test is DSTest {
     vm.roll(3);
 
     deposit();
-    assertEq(rewardToken.balanceOf(address(kinesisERC4626)), rewardsStream * 2);
+    assertEq(rewardToken.balanceOf(address(miniChefERC4626)), rewardsStream * 2);
   }
 
   function testAccumulatingRewardsOnWithdrawal() public {
@@ -137,9 +137,9 @@ contract KinesisERC4626Test is DSTest {
     vm.warp(3);
     vm.roll(3);
 
-    kinesisERC4626.withdraw(1, address(this), address(this));
+    miniChefERC4626.withdraw(1, address(this), address(this));
 
-    assertEq(rewardToken.balanceOf(address(kinesisERC4626)), rewardsStream * 3);
+    assertEq(rewardToken.balanceOf(address(miniChefERC4626)), rewardsStream * 3);
   }
 
   function testClaimRewards() public {
@@ -148,13 +148,13 @@ contract KinesisERC4626Test is DSTest {
     vm.warp(3);
     vm.roll(3);
 
-    kinesisERC4626.withdraw(1, address(this), address(this));
+    miniChefERC4626.withdraw(1, address(this), address(this));
     // flywheelPreSupplierAction
-    flywheel.accrue(ERC20(kinesisERC4626), address(this));
+    flywheel.accrue(ERC20(miniChefERC4626), address(this));
     vm.warp(4);
     vm.roll(4);
 
-    flywheel.accrue(ERC20(kinesisERC4626), address(this));
+    flywheel.accrue(ERC20(miniChefERC4626), address(this));
     flywheel.claimRewards(address(this));
     assertEq(rewardToken.balanceOf(address(this)), (rewardsStream * 3) - 1);
   }
@@ -163,18 +163,18 @@ contract KinesisERC4626Test is DSTest {
     deposit();
     vm.startPrank(tester);
     lpToken.mint(tester, depositAmount);
-    lpToken.approve(address(kinesisERC4626), depositAmount);
-    kinesisERC4626.deposit(depositAmount, tester);
+    lpToken.approve(address(miniChefERC4626), depositAmount);
+    miniChefERC4626.deposit(depositAmount, tester);
     vm.stopPrank();
     vm.warp(3);
     vm.roll(3);
 
-    kinesisERC4626.withdraw(1, address(this), address(this));
-    flywheel.accrue(ERC20(kinesisERC4626), address(this));
+    miniChefERC4626.withdraw(1, address(this), address(this));
+    flywheel.accrue(ERC20(miniChefERC4626), address(this));
     vm.warp(4);
     vm.roll(4);
 
-    flywheel.accrue(ERC20(kinesisERC4626), address(this), tester);
+    flywheel.accrue(ERC20(miniChefERC4626), address(this), tester);
     flywheel.claimRewards(address(this));
     flywheel.claimRewards(tester);
 
