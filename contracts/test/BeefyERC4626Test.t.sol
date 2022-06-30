@@ -47,12 +47,7 @@ contract BeefyERC4626Test is BaseTest {
       )
     );
     // beefy vault for BUSD-BNB LP -
-    configs.push(
-      BeefyVaultConfig(
-        0xAd61143796D90FD5A61d89D63a546C7dB0a70475,
-        10
-      )
-    );
+    configs.push(BeefyVaultConfig(0xAd61143796D90FD5A61d89D63a546C7dB0a70475, 10));
     // beefy vault for BTCB-ETH LP
     configs.push(
       BeefyVaultConfig(
@@ -76,9 +71,8 @@ contract BeefyERC4626Test is BaseTest {
     );
   }
 
-
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
-//    uint8 _configIndexToTest = uint8(block.timestamp % configs.length);
+    //    uint8 _configIndexToTest = uint8(block.timestamp % configs.length);
     uint8 _configIndexToTest = 2;
     emit log_uint(_configIndexToTest);
 
