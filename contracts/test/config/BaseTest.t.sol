@@ -18,6 +18,12 @@ abstract contract BaseTest is Test {
   constructor() {
     if (block.chainid == BSC_MAINNET) {
       ap = AddressesProvider(0x01c97299b37E66c03419bC4Db24074a89FB36e6d);
+    } else if (block.chainid == BSC_CHAPEL) {
+      ap = AddressesProvider(0x38742363597fBaE312B0bdcC351fCc6107E9E27E);
+    } else if (block.chainid == MOONBEAM_MAINNET) {
+      ap = AddressesProvider(0x771ee5a72A57f3540E5b9A6A8C226C2a24A70Fae);
+    } else if (block.chainid == EVMOS_TESTNET) {
+      ap = AddressesProvider(0xB88C6a114F01a80Dc8465b55067C8D046C2F445A);
     } else {
       ap = new AddressesProvider();
     }
