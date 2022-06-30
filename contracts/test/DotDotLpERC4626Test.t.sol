@@ -687,7 +687,7 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount + expectedAssets, "!redeem asset bal");
   }
 
-  function testAccumulatingRewardsOnDeposit() public {
+  function testAccumulatingRewardsOnDeposit() public shouldRun(forChains(BSC_MAINNET)) {
     deposit(address(this), depositAmount / 2);
 
     vm.warp(block.timestamp + 150);
@@ -698,7 +698,7 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     assertGt(epxToken.balanceOf(address(dotDotERC4626)), 0.01 ether);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public {
+  function testAccumulatingRewardsOnWithdrawal() public shouldRun(forChains(BSC_MAINNET)) {
     deposit(address(this), depositAmount);
 
     vm.warp(block.timestamp + 150);
@@ -710,7 +710,7 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     assertGt(epxToken.balanceOf(address(dotDotERC4626)), 0.025 ether);
   }
 
-  function testClaimRewards() public {
+  function testClaimRewards() public shouldRun(forChains(BSC_MAINNET)) {
     // Deposit funds, Rewards are 0
     deposit(address(this), depositAmount);
 
