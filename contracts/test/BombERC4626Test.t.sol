@@ -13,7 +13,7 @@ contract BombERC4626Test is BaseTest {
   IERC20Upgradeable bombToken;
   IXBomb xbombToken = IXBomb(0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b);
   uint256 depositAmount = 100e18;
-  uint256 depositAmountRoundedDown = depositAmount - 1;
+  uint256 depositAmountRoundedDown = depositAmount - 2;
   address whale = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
@@ -45,8 +45,8 @@ contract BombERC4626Test is BaseTest {
     assertEq(bombToken.balanceOf(address(vault)), 0);
 
     //Test that the balance view calls work
-    assertEq(vault.totalAssets(), depositAmountRoundedDown);
-    assertEq(vault.balanceOfUnderlying(address(this)), depositAmountRoundedDown);
+    assertTrue(diff(vault.totalAssets(), depositAmountRoundedDown) <= 1);
+    assertTrue(diff(vault.balanceOfUnderlying(address(this)), depositAmountRoundedDown) <= 1);
 
     //Test that we minted the correct amount of tokens
     assertEq(vault.balanceOf(address(this)), vault.previewDeposit(depositAmount));
@@ -65,7 +65,7 @@ contract BombERC4626Test is BaseTest {
     // test that all vault assets are extracted and transferred to the depositor
     assertEq(vault.balanceOfUnderlying(address(this)), 0);
     assertEq(bombToken.balanceOf(address(vault)), 0);
-    assertEq(bombToken.balanceOf(address(this)), depositAmountRoundedDown);
+    assertTrue(diff(bombToken.balanceOf(address(this)), depositAmountRoundedDown) <= 1);
   }
 
   function redeem() internal {
@@ -81,6 +81,6 @@ contract BombERC4626Test is BaseTest {
     // test that all vault assets are extracted and transferred to the depositor
     assertEq(vault.balanceOfUnderlying(address(this)), 0);
     assertEq(bombToken.balanceOf(address(vault)), 0);
-    assertEq(bombToken.balanceOf(address(this)), depositAmountRoundedDown);
+    assertTrue(diff(bombToken.balanceOf(address(this)), depositAmountRoundedDown) <= 1);
   }
 }

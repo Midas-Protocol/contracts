@@ -4,7 +4,7 @@ pragma solidity ^0.8.10;
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 
-import { ERC4626 } from "../../utils/ERC4626.sol";
+import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 
@@ -55,9 +55,9 @@ contract DotDotLpERC4626 is ERC4626 {
   /**
      @notice Creates a new Vault that accepts a specific underlying token.
      @param _asset The ERC20 compliant token the Vault should accept.
-     @param _dddFlywheel TODO
-     @param _epxFlywheel TODO
-     @param _lpDepositor TODO
+     @param _dddFlywheel Flywheel to pull DDD rewards
+     @param _epxFlywheel Flywheel to pull EPX rewards
+     @param _lpDepositor DotDot deposit contract for LpToken
     */
   constructor(
     ERC20 _asset,

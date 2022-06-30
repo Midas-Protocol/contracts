@@ -30,6 +30,7 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
 
   /**
    * @notice Enum indicating the base currency of a Chainlink price feed.
+   * @dev ETH is interchangeable with the nativeToken of the current chain.
    */
   enum FeedBaseCurrency {
     ETH,
@@ -58,6 +59,10 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
 
   /**
    * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
+   * @param _admin The admin who can assign oracles to underlying tokens.
+   * @param _canAdminOverwrite Controls if `admin` can overwrite existing assignments of oracles to underlying tokens.
+   * @param _wtoken The Wrapped native asset address
+   * @param nativeTokenUsd Will this oracle return prices denominated in USD or in the native token.
    */
   constructor(
     address _admin,
@@ -128,7 +133,8 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
   }
 
   /**
-   * @dev Internal function returning the price in ETH of `underlying`.
+   * @notice Internal function returning the price in of `underlying`.
+   * @dev If the oracle got constructed with `nativeTokenUsd` = TRUE this will return a price denominated in USD otherwise in the native token
    */
   function _price(address underlying) internal view returns (uint256) {
     // Return 1e18 for WTOKEN
@@ -154,7 +160,8 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
   }
 
   /**
-   * @dev Returns the price in ETH of `underlying` (implements `BasePriceOracle`).
+   * @notice Returns the price in of `underlying` either in USD or the native token (implements `BasePriceOracle`).
+   * @dev If the oracle got constructed with `nativeTokenUsd` = TRUE this will return a price denominated in USD otherwise in the native token
    */
   function price(address underlying) external view override returns (uint256) {
     return _price(underlying);

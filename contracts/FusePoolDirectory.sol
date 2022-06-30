@@ -15,7 +15,17 @@ import "./compound/Unitroller.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FusePoolDirectory is a directory for Fuse interest rate pools.
  */
-contract FusePoolDirectory is OwnableUpgradeable {
+contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, ComptrollerErrorReporter {
+  /**
+   * @notice Emitted when pendingAdmin is changed
+   */
+  event NewPendingAdmin(address oldPendingAdmin, address newPendingAdmin);
+
+  /**
+   * @notice Emitted when pendingAdmin is accepted, which means admin is updated
+   */
+  event NewAdmin(address oldAdmin, address newAdmin);
+
   /**
    * @dev Initializes a deployer whitelist if desired.
    * @param _enforceDeployerWhitelist Boolean indicating if the deployer whitelist is to be enforced.
@@ -108,12 +118,12 @@ contract FusePoolDirectory is OwnableUpgradeable {
    * @dev Deploys a new Fuse pool and adds to the directory.
    * @param name The name of the pool.
    * @param implementation The Comptroller implementation contract address.
-   * @param constructorData The FuseFeeDistributor contract address.
+   * @param constructorData Encoded construction data for `Unitroller constructor()`
    * @param enforceWhitelist Boolean indicating if the pool's supplier/borrower whitelist is to be enforced.
    * @param closeFactor The pool's close factor (scaled by 1e18).
    * @param liquidationIncentive The pool's liquidation incentive (scaled by 1e18).
    * @param priceOracle The pool's PriceOracle contract address.
-   * @return The index of the registered Fuse pool and the Unitroller proxy address.
+   * @return Index of the registered Fuse pool and the Unitroller proxy address.
    */
   function deployPool(
     string memory name,
@@ -138,7 +148,7 @@ contract FusePoolDirectory is OwnableUpgradeable {
     bytes memory unitrollerCreationCode = abi.encodePacked(type(Unitroller).creationCode, constructorData);
     address proxy = Create2Upgradeable.deploy(
       0,
-      keccak256(abi.encodePacked(msg.sender, name, block.number)),
+      keccak256(abi.encodePacked(msg.sender, name, ++poolsCounter)),
       unitrollerCreationCode
     );
 
@@ -230,23 +240,9 @@ contract FusePoolDirectory is OwnableUpgradeable {
   }
 
   /**
-   * @dev Maps Ethereum accounts to arrays of Fuse pool Comptroller proxy contract addresses.
+   * @dev placeholder var to keep the storage gap
    */
-  mapping(address => address[]) private _bookmarks;
-
-  /**
-   * @notice Returns arrays of Fuse pool Unitroller (Comptroller proxy) contract addresses bookmarked by `account`.
-   */
-  function getBookmarks(address account) external view returns (address[] memory) {
-    return _bookmarks[account];
-  }
-
-  /**
-   * @notice Bookmarks a Fuse pool Unitroller (Comptroller proxy) contract addresses.
-   */
-  function bookmarkPool(address comptroller) external {
-    _bookmarks[msg.sender].push(comptroller);
-  }
+  mapping(address => address[]) private placeholder;
 
   /**
    * @notice Modify existing Fuse pool name.
@@ -261,6 +257,11 @@ contract FusePoolDirectory is OwnableUpgradeable {
    * @dev Maps Ethereum accounts to booleans indicating if they are a whitelisted admin.
    */
   mapping(address => bool) public adminWhitelist;
+
+  /**
+   * @dev used as salt for the creation of new pools
+   */
+  uint256 public poolsCounter;
 
   /**
    * @dev Event emitted when the admin whitelist is updated.
@@ -324,5 +325,56 @@ contract FusePoolDirectory is OwnableUpgradeable {
     }
 
     return (indexes, publicPools);
+  }
+
+  /**
+   * @notice Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
+   * @dev Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
+   * @param newPendingAdmin New pending admin.
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function _setPendingAdmin(address newPendingAdmin) public returns (uint256) {
+    // Check caller = admin
+    if (!hasAdminRights()) {
+      return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_ADMIN_OWNER_CHECK);
+    }
+
+    // Save current value, if any, for inclusion in log
+    address oldPendingAdmin = pendingAdmin;
+
+    // Store pendingAdmin with value newPendingAdmin
+    pendingAdmin = newPendingAdmin;
+
+    // Emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin)
+    emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin);
+
+    return uint256(Error.NO_ERROR);
+  }
+
+  /**
+   * @notice Accepts transfer of admin rights. msg.sender must be pendingAdmin
+   * @dev Admin function for pending admin to accept role and update admin
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function _acceptAdmin() public returns (uint256) {
+    // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
+    if (msg.sender != pendingAdmin) {
+      return fail(Error.UNAUTHORIZED, FailureInfo.ACCEPT_ADMIN_PENDING_ADMIN_CHECK);
+    }
+
+    // Save current values for inclusion in log
+    address oldAdmin = admin;
+    address oldPendingAdmin = pendingAdmin;
+
+    // Store admin with value pendingAdmin
+    admin = pendingAdmin;
+
+    // Clear the pending value
+    pendingAdmin = address(0);
+
+    emit NewAdmin(oldAdmin, admin);
+    emit NewPendingAdmin(oldPendingAdmin, pendingAdmin);
+
+    return uint256(Error.NO_ERROR);
   }
 }

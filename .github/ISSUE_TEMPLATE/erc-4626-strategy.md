@@ -24,3 +24,4 @@ Brief description of what this strategy enables
 - [ ] implement beforeWithdraw
 - [ ] implement afterDeposit
 - [ ] implement totalAssets
+- [ ] add forge tests

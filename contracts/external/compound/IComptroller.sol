@@ -65,4 +65,10 @@ interface IComptroller {
   function _setWhitelistStatuses(address[] calldata _suppliers, bool[] calldata statuses) external returns (uint256);
 
   function _toggleAutoImplementations(bool enabled) external returns (uint256);
+
+  function _deployMarket(
+    bool isCEther,
+    bytes memory constructorData,
+    uint256 collateralFactorMantissa
+  ) external returns (uint256);
 }

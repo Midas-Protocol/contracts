@@ -8,8 +8,9 @@ import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.s
 import "../../external/compound/IPriceOracle.sol";
 import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
-
-import "../../external/curve/ICurveRegistry.sol";
+import "../../compound/ErrorReporter.sol";
+import "../../compound/ComptrollerStorage.sol";
+import { ComptrollerErrorReporter } from "../../compound/ErrorReporter.sol";
 import "../../external/curve/ICurvePool.sol";
 
 import "../BasePriceOracle.sol";
@@ -20,7 +21,13 @@ import "../BasePriceOracle.sol";
  * @notice CurveLpTokenPriceOracle is a price oracle for Curve LP tokens (using the sender as a root oracle).
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
-contract CurveLpTokenPriceOracleNoRegistry is IPriceOracle, BasePriceOracle, OwnableUpgradeable {
+contract CurveLpTokenPriceOracleNoRegistry is
+  IPriceOracle,
+  BasePriceOracle,
+  OwnableUpgradeable,
+  UnitrollerAdminStorage,
+  ComptrollerErrorReporter
+{
   /**
    * @dev Maps Curve LP token addresses to underlying token addresses.
    */
@@ -32,15 +39,31 @@ contract CurveLpTokenPriceOracleNoRegistry is IPriceOracle, BasePriceOracle, Own
   mapping(address => address) public poolOf;
 
   /**
+   * @notice Emitted when pendingAdmin is changed
+   */
+  event NewPendingAdmin(address oldPendingAdmin, address newPendingAdmin);
+
+  /**
+   * @notice Emitted when pendingAdmin is accepted, which means admin is updated
+   */
+  event NewAdmin(address oldAdmin, address newAdmin);
+
+  /**
    * @dev Initializes an array of LP tokens and pools if desired.
    * @param _lpTokens Array of LP token addresses.
    * @param _pools Array of pool addresses.
+   * @param _poolUnderlyings The underlying token addresses of a pool
    */
   function initialize(
     address[] memory _lpTokens,
     address[] memory _pools,
     address[][] memory _poolUnderlyings
   ) public initializer {
+    require(
+      _lpTokens.length == _pools.length && _lpTokens.length == _poolUnderlyings.length,
+      "No LP tokens supplied or array lengths not equal."
+    );
+
     __Ownable_init();
     for (uint256 i = 0; i < _lpTokens.length; i++) {
       poolOf[_lpTokens[i]] = _pools[i];
@@ -106,5 +129,56 @@ contract CurveLpTokenPriceOracleNoRegistry is IPriceOracle, BasePriceOracle, Own
     require(pool == address(0), "This LP token is already registered.");
     poolOf[_lpToken] = _pool;
     underlyingTokens[_lpToken] = _underlyings;
+  }
+
+  /**
+   * @notice Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
+   * @dev Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
+   * @param newPendingAdmin New pending admin.
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function _setPendingAdmin(address newPendingAdmin) public returns (uint256) {
+    // Check caller = admin
+    if (!hasAdminRights()) {
+      return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_ADMIN_OWNER_CHECK);
+    }
+
+    // Save current value, if any, for inclusion in log
+    address oldPendingAdmin = pendingAdmin;
+
+    // Store pendingAdmin with value newPendingAdmin
+    pendingAdmin = newPendingAdmin;
+
+    // Emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin)
+    emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin);
+
+    return uint256(Error.NO_ERROR);
+  }
+
+  /**
+   * @notice Accepts transfer of admin rights. msg.sender must be pendingAdmin
+   * @dev Admin function for pending admin to accept role and update admin
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function _acceptAdmin() public returns (uint256) {
+    // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
+    if (msg.sender != pendingAdmin) {
+      return fail(Error.UNAUTHORIZED, FailureInfo.ACCEPT_ADMIN_PENDING_ADMIN_CHECK);
+    }
+
+    // Save current values for inclusion in log
+    address oldAdmin = admin;
+    address oldPendingAdmin = pendingAdmin;
+
+    // Store admin with value pendingAdmin
+    admin = pendingAdmin;
+
+    // Clear the pending value
+    pendingAdmin = address(0);
+
+    emit NewAdmin(oldAdmin, admin);
+    emit NewPendingAdmin(oldPendingAdmin, pendingAdmin);
+
+    return uint256(Error.NO_ERROR);
   }
 }

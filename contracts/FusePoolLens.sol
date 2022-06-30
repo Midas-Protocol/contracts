@@ -23,7 +23,16 @@ import "./oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
  */
 contract FusePoolLens is Initializable {
   /**
-   * @notice Constructor to set the `FusePoolDirectory` contract object.
+   * @notice Initialize the `FusePoolDirectory` contract object.
+   * @param _directory The FusePoolDirectory
+   * @param _name Name for the nativeToken
+   * @param _symbol Symbol for the nativeToken
+   * @param _hardcodedAddresses Underlying token addresses for a token like maker which are DSToken and/or use bytes32 for `symbol`
+   * @param _hardcodedNames Harcoded name for these tokens
+   * @param _hardcodedSymbols Harcoded symbol for these tokens
+   * @param _uniswapLPTokenNames Harcoded names for underlying uniswap LpToken
+   * @param _uniswapLPTokenSymbols Harcoded symbols for underlying uniswap LpToken
+   * @param _uniswapLPTokenDisplayNames Harcoded display names for underlying uniswap LpToken
    */
   function initialize(
     FusePoolDirectory _directory,
@@ -37,6 +46,15 @@ contract FusePoolLens is Initializable {
     string[] memory _uniswapLPTokenDisplayNames
   ) public initializer {
     require(address(_directory) != address(0), "FusePoolDirectory instance cannot be the zero address.");
+    require(
+      _hardcodedAddresses.length == _hardcodedNames.length && _hardcodedAddresses.length == _hardcodedSymbols.length,
+      "Hardcoded addresses lengths not equal."
+    );
+    require(
+      _uniswapLPTokenNames.length == _uniswapLPTokenSymbols.length &&
+        _uniswapLPTokenNames.length == _uniswapLPTokenDisplayNames.length,
+      "Uniswap LP token names lengths not equal."
+    );
 
     directory = _directory;
     name = _name;
@@ -352,21 +370,21 @@ contract FusePoolLens is Initializable {
     string memory _symbol = tokenContract.symbol();
 
     // Check for Uniswap V2/SushiSwap pair
-    for (uint256 i = 0; i < uniswapData.length; i++) {
-      try IUniswapV2Pair(token).token0() returns (address _token0) {
-        UniswapData memory ud = uniswapData[i];
-        bool isUniswapToken = keccak256(abi.encodePacked(_name)) == keccak256(abi.encodePacked(ud.name)) &&
-          keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked(ud.symbol));
+    // for (uint256 i = 0; i < uniswapData.length; i++) {
+    //   try IUniswapV2Pair(token).token0() returns (address _token0) {
+    //     UniswapData memory ud = uniswapData[i];
+    //     bool isUniswapToken = keccak256(abi.encodePacked(_name)) == keccak256(abi.encodePacked(ud.name)) &&
+    //       keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked(ud.symbol));
 
-        if (isUniswapToken) {
-          ERC20Upgradeable token0 = ERC20Upgradeable(_token0);
-          ERC20Upgradeable token1 = ERC20Upgradeable(IUniswapV2Pair(token).token1());
-          _name = string(abi.encodePacked(ud.displayName, " ", token0.symbol(), "/", token1.symbol(), " LP")); // add space
-          _symbol = string(abi.encodePacked(token0.symbol(), "-", token1.symbol()));
-          return (_name, _symbol);
-        }
-      } catch {}
-    }
+    //     if (isUniswapToken) {
+    //       ERC20Upgradeable token0 = ERC20Upgradeable(_token0);
+    //       ERC20Upgradeable token1 = ERC20Upgradeable(IUniswapV2Pair(token).token1());
+    //       _name = string(abi.encodePacked(ud.displayName, " ", token0.symbol(), "/", token1.symbol(), " LP")); // add space
+    //       _symbol = string(abi.encodePacked(token0.symbol(), "-", token1.symbol()));
+    //       return (_name, _symbol);
+    //     }
+    //   } catch {}
+    // }
 
     return (_name, _symbol);
   }
@@ -393,225 +411,12 @@ contract FusePoolLens is Initializable {
   }
 
   /**
-   * @notice Returns the borrowers of the specified Fuse pool.
-   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
-   * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
-   * @param comptroller The Comptroller proxy contract of the Fuse pool.
-   * @param maxHealth The maximum health (scaled by 1e18) for which to return data.
-   * @return An array of Fuse pool users, the pool's close factor, and the pool's liquidation incentive.
-   */
-  function getPoolUsersWithData(IComptroller comptroller, uint256 maxHealth)
-    external
-    returns (
-      FusePoolUser[] memory,
-      uint256,
-      uint256
-    )
-  {
-    address[] memory users = comptroller.getAllBorrowers();
-    uint256 arrayLength = 0;
-
-    for (uint256 i = 0; i < users.length; i++) {
-      uint256 totalBorrow = 0;
-      uint256 totalCollateral = 0;
-      FusePoolAsset[] memory assets = getPoolAssetsWithData(comptroller, comptroller.getAssetsIn(users[i]), users[i]);
-
-      for (uint256 j = 0; j < assets.length; j++) {
-        totalBorrow = totalBorrow + (assets[j].borrowBalance * assets[j].underlyingPrice) / 1e18;
-        if (assets[j].membership) {
-          totalCollateral =
-            totalCollateral +
-            (((assets[j].supplyBalance * assets[j].underlyingPrice) / 1e18) * assets[j].collateralFactor) /
-            1e18;
-        }
-      }
-
-      uint256 health = totalBorrow > 0 ? (totalCollateral * 1e18) / totalBorrow : 1e36;
-      if (health <= maxHealth) arrayLength++;
-    }
-
-    FusePoolUser[] memory detailedUsers = new FusePoolUser[](arrayLength);
-    uint256 index = 0;
-
-    for (uint256 i = 0; i < users.length; i++) {
-      uint256 totalBorrow = 0;
-      uint256 totalCollateral = 0;
-      FusePoolAsset[] memory assets = getPoolAssetsWithData(comptroller, comptroller.getAssetsIn(users[i]), users[i]);
-
-      for (uint256 j = 0; j < assets.length; j++) {
-        totalBorrow = totalBorrow + (assets[j].borrowBalance * assets[j].underlyingPrice) / 1e18;
-        if (assets[j].membership) {
-          totalCollateral =
-            totalCollateral +
-            (((assets[j].supplyBalance * assets[j].underlyingPrice) / 1e18) * assets[j].collateralFactor) /
-            1e18;
-        }
-      }
-
-      uint256 health = totalBorrow > 0 ? (totalCollateral * 1e18) / totalBorrow : 1e36;
-      if (health > maxHealth) continue;
-      detailedUsers[index] = FusePoolUser(users[i], totalBorrow, totalCollateral, health);
-      index++;
-    }
-
-    return (detailedUsers, comptroller.closeFactorMantissa(), comptroller.liquidationIncentiveMantissa());
-  }
-
-  /**
-   * @notice Returns the users of each public Fuse pool.
-   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
-   * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
-   * @param maxHealth The maximum health (scaled by 1e18) for which to return data.
-   * @return An array of pools' Comptroller proxy addresses, an array of arrays of Fuse pool users, an array of pools' close factors, an array of pools' liquidation incentives, and an array of booleans indicating if retrieving each pool's data failed.
-   */
-  function getPublicPoolUsersWithData(uint256 maxHealth)
-    external
-    returns (
-      IComptroller[] memory,
-      FusePoolUser[][] memory,
-      uint256[] memory,
-      uint256[] memory,
-      bool[] memory
-    )
-  {
-    // Get Comptroller addresses of all public pools
-    IComptroller[] memory comptrollers;
-
-    // Scope to avoid "stack too deep" error
-    {
-      (, FusePoolDirectory.FusePool[] memory publicPools) = directory.getPublicPools();
-      comptrollers = new IComptroller[](publicPools.length);
-      for (uint256 i = 0; i < publicPools.length; i++) comptrollers[i] = IComptroller(publicPools[i].comptroller);
-    }
-
-    // Get all public pools' data
-    (
-      FusePoolUser[][] memory users,
-      uint256[] memory closeFactors,
-      uint256[] memory liquidationIncentives,
-      bool[] memory errored
-    ) = getPoolUsersWithData(comptrollers, maxHealth);
-    return (comptrollers, users, closeFactors, liquidationIncentives, errored);
-  }
-
-  /**
-   * @notice Returns the users of the specified Fuse pools.
-   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
-   * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
-   * @param comptrollers The Comptroller proxy contracts of the Fuse pools.
-   * @param maxHealth The maximum health (scaled by 1e18) for which to return data.
-   * @return An array of arrays of Fuse pool users, an array of pools' close factors, an array of pools' liquidation incentives, and an array of booleans indicating if retrieving each pool's data failed.
-   */
-  function getPoolUsersWithData(IComptroller[] memory comptrollers, uint256 maxHealth)
-    public
-    returns (
-      FusePoolUser[][] memory,
-      uint256[] memory,
-      uint256[] memory,
-      bool[] memory
-    )
-  {
-    FusePoolUser[][] memory users = new FusePoolUser[][](comptrollers.length);
-    uint256[] memory closeFactors = new uint256[](comptrollers.length);
-    uint256[] memory liquidationIncentives = new uint256[](comptrollers.length);
-    bool[] memory errored = new bool[](comptrollers.length);
-
-    for (uint256 i = 0; i < comptrollers.length; i++) {
-      try this.getPoolUsersWithData(IComptroller(comptrollers[i]), maxHealth) returns (
-        FusePoolUser[] memory _users,
-        uint256 closeFactor,
-        uint256 liquidationIncentive
-      ) {
-        users[i] = _users;
-        closeFactors[i] = closeFactor;
-        liquidationIncentives[i] = liquidationIncentive;
-      } catch {
-        errored[i] = true;
-      }
-    }
-
-    return (users, closeFactors, liquidationIncentives, errored);
-  }
-
-  /**
    * @notice Returns arrays of FusePoolAsset for a specific user
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
   function getPoolAssetsByUser(IComptroller comptroller, address user) public returns (FusePoolAsset[] memory) {
     FusePoolAsset[] memory assets = getPoolAssetsWithData(comptroller, comptroller.getAssetsIn(user), user);
     return assets;
-  }
-
-  /**
-   * @notice Returns arrays of Fuse pool indexes and data supplied to by `account`.
-   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
-   */
-  function getPoolsBySupplier(address account)
-    public
-    view
-    returns (uint256[] memory, FusePoolDirectory.FusePool[] memory)
-  {
-    FusePoolDirectory.FusePool[] memory pools = directory.getAllPools();
-    uint256 arrayLength = 0;
-
-    for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller comptroller = IComptroller(pools[i].comptroller);
-
-      try comptroller.suppliers(account) returns (bool isSupplier) {
-        if (isSupplier) {
-          ICToken[] memory allMarkets = comptroller.getAllMarkets();
-
-          for (uint256 j = 0; j < allMarkets.length; j++)
-            if (allMarkets[j].balanceOf(account) > 0) {
-              arrayLength++;
-              break;
-            }
-        }
-      } catch {}
-    }
-
-    uint256[] memory indexes = new uint256[](arrayLength);
-    FusePoolDirectory.FusePool[] memory accountPools = new FusePoolDirectory.FusePool[](arrayLength);
-    uint256 index = 0;
-
-    for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller comptroller = IComptroller(pools[i].comptroller);
-
-      try comptroller.suppliers(account) returns (bool isSupplier) {
-        if (isSupplier) {
-          ICToken[] memory allMarkets = comptroller.getAllMarkets();
-
-          for (uint256 j = 0; j < allMarkets.length; j++)
-            if (allMarkets[j].balanceOf(account) > 0) {
-              indexes[index] = i;
-              accountPools[index] = pools[i];
-              index++;
-              break;
-            }
-        }
-      } catch {}
-    }
-
-    return (indexes, accountPools);
-  }
-
-  /**
-   * @notice Returns arrays of the indexes of Fuse pools supplied to by `account`, data, total supply balances (in ETH), total borrow balances (in ETH), arrays of underlying token addresses, arrays of underlying asset symbols, and booleans indicating if retrieving each pool's data failed.
-   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
-   * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
-   */
-  function getPoolsBySupplierWithData(address account)
-    external
-    returns (
-      uint256[] memory,
-      FusePoolDirectory.FusePool[] memory,
-      FusePoolData[] memory,
-      bool[] memory
-    )
-  {
-    (uint256[] memory indexes, FusePoolDirectory.FusePool[] memory accountPools) = getPoolsBySupplier(account);
-    (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(accountPools);
-    return (indexes, accountPools, data, errored);
   }
 
   /**
@@ -672,6 +477,11 @@ contract FusePoolLens is Initializable {
     return (indexes, accountPools, data, errored);
   }
 
+  /**
+   * @notice Verify that the price of `underlying` of the given cToken matches KeydonixUniswapTwapPriceOracle
+   * @param cToken The cToken which price we want to verify
+   * @param proofData UniswapOracle.ProofData
+   */
   function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
     IPriceOracle oracle = IComptroller(cToken.comptroller()).oracle();
     return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);

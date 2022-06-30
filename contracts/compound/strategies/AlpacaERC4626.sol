@@ -3,9 +3,11 @@ pragma solidity ^0.8.10;
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
+import { MidasERC4626 } from "./MidasERC4626.sol";
 
-import { ERC4626 } from "../../utils/ERC4626.sol";
+import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { IW_NATIVE } from "../../utils/IW_NATIVE.sol";
 
 interface IAlpacaVault {
   /// @notice Return the total ERC20 entitled to the token holders. Be careful of unaccrued interests.
@@ -29,13 +31,14 @@ interface IAlpacaVault {
  *
  * Wraps https://github.com/alpaca-finance/bsc-alpaca-contract/blob/main/contracts/6/protocol/Vault.sol
  */
-contract AlpacaERC4626 is ERC4626 {
+contract AlpacaERC4626 is MidasERC4626 {
   using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
 
   IAlpacaVault public immutable alpacaVault;
+  IW_NATIVE wtoken;
 
   /* ========== CONSTRUCTOR ========== */
 
@@ -43,16 +46,21 @@ contract AlpacaERC4626 is ERC4626 {
      @notice Creates a new Vault that accepts a specific underlying token.
      @param _asset The ERC20 compliant token the Vault should accept.
      @param _alpacaVault The Alpaca Vault contract.
+     @param _wtoken the wrapped native asset token contract address.
     */
-  constructor(ERC20 _asset, IAlpacaVault _alpacaVault)
-    ERC4626(
+  constructor(
+    ERC20 _asset,
+    IAlpacaVault _alpacaVault,
+    IW_NATIVE _wtoken
+  )
+    MidasERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
       string(abi.encodePacked("mv", _asset.symbol()))
     )
   {
     alpacaVault = _alpacaVault;
-
+    wtoken = _wtoken;
     asset.approve(address(alpacaVault), type(uint256).max);
   }
 
@@ -61,7 +69,10 @@ contract AlpacaERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    return alpacaVault.balanceOf(address(this)).mulDivDown(alpacaVault.totalToken(), alpacaVault.totalSupply());
+    return
+      paused()
+        ? wtoken.balanceOf(address(this))
+        : alpacaVault.balanceOf(address(this)).mulDivDown(alpacaVault.totalToken(), alpacaVault.totalSupply());
   }
 
   /// @notice Calculates the total amount of underlying tokens the user holds.
@@ -76,7 +87,26 @@ contract AlpacaERC4626 is ERC4626 {
     alpacaVault.deposit(amount);
   }
 
+  receive() external payable {
+    wtoken.deposit{ value: msg.value }();
+  }
+
+  function convertToAlpacaVaultShares(uint256 shares) public returns (uint256) {
+    uint256 supply = totalSupply;
+    return supply == 0 ? shares : shares.mulDivUp(alpacaVault.balanceOf(address(this)), supply);
+  }
+
   function beforeWithdraw(uint256, uint256 shares) internal override {
-    alpacaVault.withdraw(shares);
+    alpacaVault.withdraw(convertToAlpacaVaultShares(shares));
+  }
+
+  function emergencyWithdrawAndPause() external override onlyOwner {
+    alpacaVault.withdraw(alpacaVault.balanceOf(address(this)));
+    _pause();
+  }
+
+  function unpause() external override onlyOwner {
+    _unpause();
+    alpacaVault.deposit(asset.balanceOf(address(this)));
   }
 }

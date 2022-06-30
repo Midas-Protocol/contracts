@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -29,7 +29,7 @@ import "./external/compound/IComptroller.sol";
  * @notice FuseSafeLiquidator safely liquidates unhealthy borrowers (with flashloan support).
  * @dev Do not transfer NATIVE or tokens directly to this address. Only send NATIVE here when using a method, and only approve tokens for transfer to here when using a method. Direct NATIVE transfers will be rejected and direct token transfers will be lost.
  */
-contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
+contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   using AddressUpgradeable for address payable;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -59,12 +59,12 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
   address public BTC_TOKEN;
 
   /**
-   * @dev Wrapped BTC token to use for flash loans
+   * @dev Hash code of the pair used by `UNISWAP_V2_ROUTER_02`
    */
   bytes PAIR_INIT_HASH_CODE;
 
   /**
-   * @dev UniswapV2Router02 contract object.
+   * @dev UniswapV2Router02 contract object. (Is interchangable with any UniV2 forks)
    */
   IUniswapV2Router02 public UNISWAP_V2_ROUTER_02;
 
@@ -75,6 +75,8 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
    */
   address private _liquidatorProfitExchangeSource;
 
+  mapping(address => bool) public redemptionStrategiesWhitelist;
+
   function initialize(
     address _wtoken,
     address _uniswapV2router,
@@ -82,6 +84,8 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     address _btcToken,
     bytes memory _uniswapPairInitHashCode
   ) external initializer {
+    __Ownable_init();
+
     require(_uniswapV2router != address(0), "UniswapV2Factory not defined.");
     W_NATIVE_ADDRESS = _wtoken;
     UNISWAP_V2_ROUTER_02_ADDRESS = _uniswapV2router;
@@ -90,6 +94,13 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     W_NATIVE = IW_NATIVE(W_NATIVE_ADDRESS);
     UNISWAP_V2_ROUTER_02 = IUniswapV2Router02(UNISWAP_V2_ROUTER_02_ADDRESS);
     PAIR_INIT_HASH_CODE = _uniswapPairInitHashCode;
+  }
+
+  function _becomeImplementation(bytes calldata data) external {
+    if (owner() == address(0)) {
+      address newOwner = abi.decode(data, (address));
+      _transferOwnership(newOwner);
+    }
   }
 
   /**
@@ -113,7 +124,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
    * @param from The input ERC20 token address (or the zero address if NATIVE) to exchange from.
    * @param to The output ERC20 token address (or the zero address if NATIVE) to exchange to.
    * @param minOutputAmount The minimum output amount of `to` necessary to complete the exchange without reversion.
-   * @param uniswapV2Router The UniswapV2Router02 to use.
+   * @param uniswapV2Router The UniswapV2Router02 to use. (Is interchangable with any UniV2 forks)
    */
   function exchangeAllEthOrTokens(
     address from,
@@ -170,7 +181,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
    * @dev Internal function to exchange the entire balance of `from` to at least `minOutputAmount` of `to`.
    * @param from The input ERC20 token address (or the zero address if NATIVE) to exchange from.
    * @param outputAmount The output amount of NATIVE.
-   * @param uniswapV2Router The UniswapV2Router02 to use.
+   * @param uniswapV2Router The UniswapV2Router02 to use. (Is interchangable with any UniV2 forks)
    */
   function exchangeToExactEth(
     address from,
@@ -208,7 +219,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
    * @param cTokenCollateral The cToken collateral to be liquidated.
    * @param minOutputAmount The minimum amount of collateral to seize (or the minimum exchange output if applicable) required for execution. Reverts if this condition is not met.
    * @param exchangeSeizedTo If set to an address other than `cTokenCollateral`, exchange seized collateral to this ERC20 token contract address (or the zero address for NATIVE).
-   * @param uniswapV2Router The UniswapV2Router to use to convert the seized underlying collateral.
+   * @param uniswapV2Router The UniswapV2Router to use to convert the seized underlying collateral. (Is interchangable with any UniV2 forks)
    * @param redemptionStrategies The IRedemptionStrategy contracts to use, if any, to redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
    * @param strategyData The data for the chosen IRedemptionStrategy contracts, if any.
    */
@@ -278,7 +289,7 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
    * @param cErc20Collateral The cErc20 collateral contract to be liquidated.
    * @param minOutputAmount The minimum amount of collateral to seize (or the minimum exchange output if applicable) required for execution. Reverts if this condition is not met.
    * @param exchangeSeizedTo If set to an address other than `cTokenCollateral`, exchange seized collateral to this ERC20 token contract address (or the zero address for NATIVE).
-   * @param uniswapV2Router The UniswapV2Router to use to convert the seized underlying collateral.
+   * @param uniswapV2Router The UniswapV2Router to use to convert the seized underlying collateral. (Is interchangable with any UniV2 forks)
    * @param redemptionStrategies The IRedemptionStrategy contracts to use, if any, to redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
    * @param strategyData The data for the chosen IRedemptionStrategy contracts, if any.
    */
@@ -365,8 +376,8 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
    * @param cTokenCollateral The cToken collateral contract to be liquidated.
    * @param minProfitAmount The minimum amount of profit required for execution (in terms of `exchangeProfitTo`). Reverts if this condition is not met.
    * @param exchangeProfitTo If set to an address other than `cTokenCollateral`, exchange seized collateral to this ERC20 token contract address (or the zero address for NATIVE).
-   * @param uniswapV2RouterForBorrow The UniswapV2Router to use to convert the NATIVE to the underlying borrow (and flashloan the underlying borrow for NATIVE).
-   * @param uniswapV2RouterForCollateral The UniswapV2Router to use to convert the underlying collateral to NATIVE.
+   * @param uniswapV2RouterForBorrow The UniswapV2Router to use to convert the NATIVE to the underlying borrow (and flashloan the underlying borrow for NATIVE). (Is interchangable with any UniV2 forks)
+   * @param uniswapV2RouterForCollateral The UniswapV2Router to use to convert the underlying collateral to NATIVE. (Is interchangable with any UniV2 forks)
    * @param redemptionStrategies The IRedemptionStrategy contracts to use, if any, to redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
    * @param strategyData The data for the chosen IRedemptionStrategy contracts, if any.
    */
@@ -937,6 +948,34 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
   }
 
   /**
+   * @dev for security reasons only whitelisted redemption strategies may be used.
+   * Each whitelisted redemption strategy has to be checked to not be able to
+   * call `selfdestruct` with the `delegatecall` call in `redeemCustomCollateral`
+   */
+  function _whitelistRedemptionStrategy(IRedemptionStrategy strategy, bool whitelisted) external onlyOwner {
+    redemptionStrategiesWhitelist[address(strategy)] = whitelisted;
+  }
+
+  /**
+   * @dev for security reasons only whitelisted redemption strategies may be used.
+   * Each whitelisted redemption strategy has to be checked to not be able to
+   * call `selfdestruct` with the `delegatecall` call in `redeemCustomCollateral`
+   */
+  function _whitelistRedemptionStrategies(IRedemptionStrategy[] calldata strategies, bool[] calldata whitelisted)
+    external
+    onlyOwner
+  {
+    require(
+      strategies.length > 0 && strategies.length == whitelisted.length,
+      "list of strategies empty or whitelist does not match its length"
+    );
+
+    for (uint256 i = 0; i < strategies.length; i++) {
+      redemptionStrategiesWhitelist[address(strategies[i])] = whitelisted[i];
+    }
+  }
+
+  /**
    * @dev Redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
    * Public visibility because we have to call this function externally if called from a payable FuseSafeLiquidator function (for some reason delegatecall fails when called with msg.value > 0).
    */
@@ -946,6 +985,8 @@ contract FuseSafeLiquidator is Initializable, IUniswapV2Callee {
     IRedemptionStrategy strategy,
     bytes memory strategyData
   ) public returns (IERC20Upgradeable, uint256) {
+    require(redemptionStrategiesWhitelist[address(strategy)], "only whitelisted redemption strategies can be used");
+
     bytes memory returndata = _functionDelegateCall(
       address(strategy),
       abi.encodeWithSelector(strategy.redeem.selector, underlyingCollateral, underlyingCollateralSeized, strategyData)

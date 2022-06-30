@@ -39,7 +39,11 @@ contract UniswapTwapPriceOracleV2 is Initializable, IPriceOracle, BasePriceOracl
   address public baseToken;
 
   /**
-   * @dev Constructor that sets the UniswapTwapPriceOracleV2Root, UniswapV2Factory, and base token.
+   * @dev Initalize that sets the UniswapTwapPriceOracleV2Root, UniswapV2Factory, and base token.
+   * @param _rootOracle Sets `UniswapTwapPriceOracleV2Root`
+   * @param _uniswapV2Factory Sets `UniswapV2Factory`
+   * @param _baseToken The token on which to base TWAPs (its price must be available via `msg.sender`).
+   * @param _wtoken The Wrapped native asset address
    */
   function initialize(
     address _rootOracle,

@@ -133,7 +133,7 @@ Once this is done, you can run the integration tests:
 ```
 FORK_URL_BSC=https://speedy-nodes-nyc.moralis.io/2d2926c3e761369208fba31f/bsc/mainnet/archive
 # this is well before the deployment of our contracts, so you should start with a fresh set of contracts
-FORK_BLOCK_NUMBER=14621736
+FORK_BLOCK_NUMBER=18766221
 FORK_CHAIN_ID=56
 ```
 

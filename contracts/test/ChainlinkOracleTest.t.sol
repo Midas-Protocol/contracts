@@ -7,11 +7,13 @@ import "../oracles/default/ChainlinkPriceOracleV2.sol";
 import "./config/BaseTest.t.sol";
 
 contract ChainlinkOraclesTest is BaseTest {
-  function setUp() public {}
+  ChainlinkPriceOracleV2 oracle;
+
+  function setUp() public {
+    oracle = ChainlinkPriceOracleV2(ap.getAddress("chainlinkOracle"));
+  }
 
   function testPriceFeed(address testedTokenAddress, address aggregatorAddress) internal returns (uint256 price) {
-    ChainlinkPriceOracleV2 oracle = chainConfig.chainlinkOracle;
-
     address[] memory underlyings = new address[](1);
     underlyings[0] = testedTokenAddress;
     AggregatorV3Interface[] memory aggregators = new AggregatorV3Interface[](1);
