@@ -42,9 +42,6 @@ contract UniswapLpTokenBaseTest is BaseTest {
   function testBombBtcLpTokenOraclePrice() public shouldRun(forChains(BSC_MAINNET)) {
     address lpToken = 0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6; // Lp BOMB-BTCB
 
-    emit log_address(address(ap));
-    emit log_address(address(mpo));
-
     uint256 price = getLpTokenPrice(lpToken);
     assertTrue(price > 0);
   }
