@@ -13,9 +13,7 @@ abstract contract BaseTest is Test {
   uint256 constant EVMOS_TESTNET = 9000;
   uint256 constant BSC_CHAPEL = 97;
 
-  // TODO instantiate from the deployed delegator/storage address
-  // when there is an on-chain AddressesProvider instance to use
-  AddressesProvider ap = new AddressesProvider();
+  AddressesProvider public ap = AddressesProvider(0x01c97299b37E66c03419bC4Db24074a89FB36e6d);
 
   constructor() {
     // TODO remove the config code
