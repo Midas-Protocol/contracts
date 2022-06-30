@@ -4,7 +4,7 @@ pragma solidity ^0.8.10;
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 
-import { ERC4626 } from "solmate/mixins/ERC4626.sol";
+import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 
@@ -12,6 +12,8 @@ interface ILpTokenStaker {
   function rewardToken() external view returns (address);
 
   function userInfo(address _token, address _user) external view returns (uint256, uint256);
+
+  function balanceOf(address) external returns (uint256);
 
   // Deposit LP tokens into the contract. Also triggers a claim.
   function deposit(
@@ -37,7 +39,7 @@ interface ILpTokenStaker {
  * and claims rewards from https://github.com/ellipsis-finance/ellipsis/blob/master/contracts/EpsStaker.sol
  *
  */
-contract EllipsisERC4626 is ERC4626 {
+contract EllipsisERC4626 is MidasERC4626 {
   using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
@@ -58,7 +60,7 @@ contract EllipsisERC4626 is ERC4626 {
     FlywheelCore _flywheel,
     ILpTokenStaker _lpTokenStaker
   )
-    ERC4626(
+    MidasERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
       string(abi.encodePacked("mv", _asset.symbol()))
@@ -96,4 +98,18 @@ contract EllipsisERC4626 is ERC4626 {
   function beforeWithdraw(uint256 amount, uint256) internal override {
     lpTokenStaker.withdraw(address(asset), amount, true);
   }
+
+  /* Comment out for now
+   * Todo: needs test for verification
+   */
+
+  // function emergencyWithdrawAndPause() external override onlyOwner {
+  //   lpTokenStaker.withdraw(address(asset), lpTokenStaker.balanceOf(address(this)), true);
+  //   _pause();
+  // }
+
+  // function unpause() external override onlyOwner {
+  //   _unpause();
+  //   lpTokenStaker.deposit(address(asset), asset.balanceOf(address(this)), true);
+  // }
 }
