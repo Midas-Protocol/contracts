@@ -59,14 +59,12 @@ contract BeamERC4626 is MidasERC4626 {
      @param _asset The ERC20 compliant token the Vault should accept.
      @param _flyWheel flyWheelCore that handling rewards for pool.
      @param _poolId pool id on beamswap.
-     @param _rewardToken reward token. Used to getting rewards from flyWheel.
      @param _vault The Vault contract.
     */
   constructor(
     ERC20 _asset,
     FlywheelCore _flyWheel,
     uint256 _poolId,
-    ERC20 _rewardToken,
     IVault _vault
   ) MidasERC4626(_asset, _asset.name(), _asset.symbol()) {
     VAULT = _vault;
@@ -74,7 +72,7 @@ contract BeamERC4626 is MidasERC4626 {
     FLYWHEEL_CORE = _flyWheel;
 
     asset.approve(address(VAULT), type(uint256).max);
-    _rewardToken.approve(address(_flyWheel.flywheelRewards()), type(uint256).max);
+    ERC20(_flyWheel.rewardToken()).approve(address(_flyWheel.flywheelRewards()), type(uint256).max);
   }
 
   /* ========== VIEWS ========== */
