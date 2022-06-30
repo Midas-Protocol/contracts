@@ -14,6 +14,7 @@ import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
+import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
 
 contract MockBeam is MockERC20 {
   constructor() MockERC20("test", "test", 8) {}
@@ -145,41 +146,55 @@ contract BeamE2eTest is WithPool, BaseTest {
     cToken.borrow(10);
     vm.stopPrank();
     assertEq(cToken.totalBorrows(), 10);
-    uint256 price1 = priceOracle.getUnderlyingPrice(ICToken(address(cToken)));
+    {
+      uint256 price1 = priceOracle.getUnderlyingPrice(ICToken(address(cToken)));
 
-    vm.mockCall(
-      0x14C15B9ec83ED79f23BF71D51741f58b69ff1494,
-      abi.encodeWithSelector(priceOracle.getUnderlyingPrice.selector, ICToken(address(cToken))),
-      abi.encode(price1 * 1000)
-    );
+      vm.mockCall(
+        0x14C15B9ec83ED79f23BF71D51741f58b69ff1494,
+        abi.encodeWithSelector(priceOracle.getUnderlyingPrice.selector, ICToken(address(cToken))),
+        abi.encode(price1 * 10)
+      );
+    }
 
-    IRedemptionStrategy[] memory strategies = new IRedemptionStrategy[](0);
-    bytes[] memory abis = new bytes[](0);
+    {
+      IRedemptionStrategy[] memory strategies = new IRedemptionStrategy[](1);
+      UniswapLpTokenLiquidator lpLiquidator = new UniswapLpTokenLiquidator();
+      strategies[0] = lpLiquidator;
+      address[] memory swapToken0Path = new address[](2);
+      swapToken0Path[0] = IUniswapV2Pair(address(underlyingToken)).token0();
+      swapToken0Path[1] = IUniswapV2Pair(address(underlyingToken)).token1();
+      address[] memory swapToken1Path = new address[](2);
+      swapToken0Path[1] = IUniswapV2Pair(address(underlyingToken)).token0();
+      swapToken0Path[0] = IUniswapV2Pair(address(underlyingToken)).token1();
+      
+      bytes[] memory abis = new bytes[](1);
+      abis[0] = abi.encode(
+        IUniswapV2Router02(uniswapRouter),
+        swapToken0Path,
+        swapToken1Path
+      );
 
-    vm.startPrank(accountOne);
-    FusePoolLens.FusePoolAsset[] memory assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
-    uint256 beamBalance = cBeamToken.balanceOf(accountOne);
+      vm.startPrank(accountOne);
+      // FusePoolLens.FusePoolAsset[] memory assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
+      // uint256 beamBalance = cBeamToken.balanceOf(accountOne);
 
-    emit log_uint(beamBalance);
-
-    // IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
-    // emit log_address(address(router));
-    // address factory = router.factory();
-    // emit log_address(factory);
-
-    liquidator.safeLiquidateToTokensWithFlashLoan(
-      accountOne,
-      9,
-      ICErc20(address(cToken)),
-      ICErc20(address(cBeamToken)),
-      0,
-      address(0),
-      IUniswapV2Router02(uniswapRouter),
-      IUniswapV2Router02(uniswapRouter),
-      strategies,
-      abis,
-      0
-    );
+      // emit log_uint(beamBalance);
+      
+      underlyingToken.approve(address(cToken), 1);
+      liquidator.safeLiquidateToTokensWithFlashLoan(
+        accountOne,
+        1,
+        ICErc20(address(cToken)),
+        ICErc20(address(cBeamToken)),
+        0,
+        address(0),
+        IUniswapV2Router02(uniswapRouter),
+        IUniswapV2Router02(uniswapRouter),
+        strategies,
+        abis,
+        0
+      );
+    }
 
     // FusePoolLens.FusePoolAsset[] memory assetsDataAfter = poolLens.getPoolAssetsWithData(
     //   IComptroller(address(comptroller))

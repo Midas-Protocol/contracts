@@ -73,10 +73,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
         abi.encodeWithSelector(IUniswapV2Pair.token1.selector)
       );
       if (success) {
-        if (EIP20Interface(IUniswapV2Pair(underlying).token0()).balanceOf(from) > 0)
-          _underlying = IUniswapV2Pair(underlying).token0();
-        else if (EIP20Interface(IUniswapV2Pair(underlying).token1()).balanceOf(from) > 0)
-          _underlying = IUniswapV2Pair(underlying).token1();
+        _underlying = IUniswapV2Pair(underlying).token1();
       }
     }
     require(EIP20Interface(_underlying).transferFrom(from, address(this), amount), "send");

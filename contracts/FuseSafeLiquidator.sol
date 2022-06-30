@@ -839,10 +839,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
         abi.encodeWithSelector(IUniswapV2Pair.token0.selector)
       );
       if (vars.success) {
-        vars.token0 = IERC20Upgradeable(IUniswapV2Pair(address(underlyingBorrow)).token0());
         vars.token1 = IERC20Upgradeable(IUniswapV2Pair(address(underlyingBorrow)).token1());
-
-        safeApprove(vars.token0, address(cErc20), repayAmount);
         safeApprove(vars.token1, address(cErc20), repayAmount);
       } else {
         safeApprove(underlyingBorrow, address(cErc20), repayAmount);
