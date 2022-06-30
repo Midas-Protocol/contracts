@@ -44,7 +44,7 @@ abstract contract BaseTest is Test {
     return block.chainid == id0 || block.chainid == id1;
   }
 
-  function diff(uint256 a, uint256 b) internal returns (uint256) {
+  function diff(uint256 a, uint256 b) internal pure returns (uint256) {
     if (a > b) {
       return a - b;
     } else {

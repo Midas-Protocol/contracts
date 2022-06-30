@@ -26,7 +26,6 @@ contract BeefyERC4626Test is BaseTest {
 
   struct BeefyVaultConfig {
     address beefyVaultAddress;
-    address cakeLPAddress;
     uint256 withdrawalFee;
   }
 
@@ -37,59 +36,54 @@ contract BeefyERC4626Test is BaseTest {
     configs.push(
       BeefyVaultConfig(
         0x94E85B8E050F3F281CB9597cc0144F1F7AF1fe9B, // old val 0xD2FeCe7Ff1B791F8fE7f35424165abB8BD1671f2
-        0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6,
         10
       )
     );
     // beefy vault for CAKE-BNB LP
     configs.push(
       BeefyVaultConfig(
-        0xb26642B6690E4c4c9A6dAd6115ac149c700C7dfE,
-        0x0eD7e52944161450477ee417DE9Cd3a859b14fD0,
+        0xb26642B6690E4c4c9A6dAd6115ac149c700C7dfE, // 0x0eD7e52944161450477ee417DE9Cd3a859b14fD0 CAKE-WBNB pair
         10
       )
     );
-    // beefy vault for BUSD-BNB LP
+    // beefy vault for BUSD-BNB LP -
     configs.push(
       BeefyVaultConfig(
         0xAd61143796D90FD5A61d89D63a546C7dB0a70475,
-        0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16,
         10
       )
     );
     // beefy vault for BTCB-ETH LP
     configs.push(
       BeefyVaultConfig(
-        0xEf43E54Bb4221106953951238FC301a1f8939490,
-        0xD171B26E4484402de70e3Ea256bE5A2630d7e88D,
+        0xEf43E54Bb4221106953951238FC301a1f8939490, // 0xD171B26E4484402de70e3Ea256bE5A2630d7e88D BTCB-ETH pair
         10
       )
     );
     // beefy vault for ETH-BNB LP
     configs.push(
       BeefyVaultConfig(
-        0x0eb78598851D08218d54fCe965ee2bf29C288fac,
-        0x74E4716E431f45807DCF19f284c7aA99F18a4fbc,
+        0x0eb78598851D08218d54fCe965ee2bf29C288fac, // 0x74E4716E431f45807DCF19f284c7aA99F18a4fbc WBNB-ETH pair
         10
       )
     );
     // beefy vault for USDC-BUSD LP
     configs.push(
       BeefyVaultConfig(
-        0x9260c62866f36638964551A8f480C3aAAa4693fd,
-        0x2354ef4DF11afacb85a5C7f98B624072ECcddbB1,
+        0x9260c62866f36638964551A8f480C3aAAa4693fd, // 0x2354ef4DF11afacb85a5C7f98B624072ECcddbB1 USDC-BUSD pair
         10
       )
     );
   }
 
+
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
 //    uint8 _configIndexToTest = uint8(block.timestamp % configs.length);
-    uint8 _configIndexToTest = 5;
+    uint8 _configIndexToTest = 2;
     emit log_uint(_configIndexToTest);
 
-    underlyingToken = ERC20(configs[_configIndexToTest].cakeLPAddress);
     beefyVault = IBeefyVault(configs[_configIndexToTest].beefyVaultAddress);
+    underlyingToken = beefyVault.want();
     beefyERC4626 = new BeefyERC4626(underlyingToken, beefyVault, configs[_configIndexToTest].withdrawalFee);
 
     initialBeefyBalance = beefyVault.balance();
@@ -758,9 +752,13 @@ contract BeefyERC4626Test is BaseTest {
     {
       vm.startPrank(alice);
       uint256 beefyERC4626SharesToRedeem = beefyERC4626.balanceOf(alice);
+      uint256 assetsToRedeem = beefyERC4626.previewRedeem(beefyERC4626SharesToRedeem);
       beefyERC4626.redeem(beefyERC4626SharesToRedeem, alice, alice);
       uint256 assetsRedeemed = underlyingToken.balanceOf(alice);
-      uint256 assetsToRedeem = beefyERC4626.previewRedeem(beefyERC4626SharesToRedeem);
+      {
+        emit log_uint(assetsRedeemed);
+        emit log_uint(assetsToRedeem);
+      }
       assertTrue(
         diff(assetsRedeemed, assetsToRedeem) * 1e4 < amount,
         "the assets redeemed must be almost equal to the requested assets to redeem"
