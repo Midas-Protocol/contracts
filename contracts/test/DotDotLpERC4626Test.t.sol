@@ -91,14 +91,6 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     epxFlywheel.addStrategyForRewards(marketKey);
   }
 
-  function diff(uint256 a, uint256 b) internal returns (uint256) {
-    if (a > b) {
-      return a - b;
-    } else {
-      return b - a;
-    }
-  }
-
   function deposit(address _owner, uint256 amount) public {
     vm.startPrank(_owner);
     underlyingToken.approve(address(dotDotERC4626), amount);
