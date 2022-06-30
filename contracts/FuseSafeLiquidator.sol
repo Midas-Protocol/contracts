@@ -405,7 +405,11 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
       pair = IUniswapV2Pair(
         IUniswapV2Factory(uniswapV2RouterForBorrow.factory()).getPair(underlyingBorrow, W_NATIVE_ADDRESS)
       );
-      token0IsUnderlyingBorrow = pair.token0() == underlyingBorrow;
+      if (address(pair) != address(0)) {
+        token0IsUnderlyingBorrow = pair.token0() == underlyingBorrow;
+      } else {
+        pair = IUniswapV2Pair(underlyingBorrow);
+      }
     }
     pair.swap(
       token0IsUnderlyingBorrow ? repayAmount : 0,
@@ -417,6 +421,9 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     // Exchange profit, send NATIVE to coinbase if necessary, and transfer seized funds
     return distributeProfit(exchangeProfitTo, minProfitAmount, ethToCoinbase);
   }
+
+  event log_address(address _address);
+  event log_uint(uint256);
 
   function safeLiquidateToEthWithFlashLoan(
     address borrower,
@@ -623,6 +630,18 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   }
 
   /**
+   * @dev Callback function for BeamSwap flashloans.
+   */
+  function BeamSwapCall(
+    address sender,
+    uint256 amount0,
+    uint256 amount1,
+    bytes calldata data
+  ) external {
+    uniswapV2Call(sender, amount0, amount1, data);
+  }
+
+  /**
    * @dev Fetches and sorts the reserves for a pair.
    * Original code from PancakeLibrary.
    */
@@ -787,6 +806,15 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     return address(underlyingCollateral);
   }
 
+  event log_bool(bool);
+
+  struct PostFlashLoanTokensData {
+    IERC20Upgradeable token0;
+    IERC20Upgradeable token1;
+    bool success;
+    bytes ret;
+  }
+
   /**
    * @dev Liquidate unhealthy token borrow, exchange seized collateral, return flashloaned funds, and exchange profit.
    */
@@ -804,8 +832,22 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     bytes[] memory strategyData
   ) private returns (address) {
     // Approve repayAmount to cErc20
+    PostFlashLoanTokensData memory vars;
     IERC20Upgradeable underlyingBorrow = IERC20Upgradeable(cErc20.underlying());
-    safeApprove(underlyingBorrow, address(cErc20), repayAmount);
+    {
+      (vars.success, vars.ret) = address(underlyingBorrow).staticcall(
+        abi.encodeWithSelector(IUniswapV2Pair.token0.selector)
+      );
+      if (vars.success) {
+        vars.token0 = IERC20Upgradeable(IUniswapV2Pair(address(underlyingBorrow)).token0());
+        vars.token1 = IERC20Upgradeable(IUniswapV2Pair(address(underlyingBorrow)).token1());
+
+        safeApprove(vars.token0, address(cErc20), repayAmount);
+        safeApprove(vars.token1, address(cErc20), repayAmount);
+      } else {
+        safeApprove(underlyingBorrow, address(cErc20), repayAmount);
+      }
+    }
 
     // Liquidate NATIVE borrow using flashloaned NATIVE
     require(cErc20.liquidateBorrow(borrower, repayAmount, cTokenCollateral) == 0, "Liquidation failed.");

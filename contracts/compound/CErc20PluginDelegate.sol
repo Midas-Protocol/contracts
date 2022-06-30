@@ -4,6 +4,8 @@ pragma solidity >=0.8.0;
 import "./CErc20Delegate.sol";
 import "./EIP20Interface.sol";
 import "./IERC4626.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import "../external/uniswap/IUniswapV2Pair.sol";
 
 /**
  * @title Rari's CErc20Plugin's Contract
@@ -27,7 +29,6 @@ contract CErc20PluginDelegate is CErc20Delegate {
    */
   function _becomeImplementation(bytes calldata data) external virtual override {
     require(msg.sender == address(this) || hasAdminRights());
-
     address _plugin = abi.decode(data, (address));
 
     require(_plugin != address(0), "0");
@@ -66,7 +67,19 @@ contract CErc20PluginDelegate is CErc20Delegate {
    */
   function doTransferIn(address from, uint256 amount) internal override returns (uint256) {
     // Perform the EIP-20 transfer in
-    require(EIP20Interface(underlying).transferFrom(from, address(this), amount), "send");
+    address _underlying = underlying;
+    {
+      (bool success, bytes memory ret) = address(underlying).staticcall(
+        abi.encodeWithSelector(IUniswapV2Pair.token1.selector)
+      );
+      if (success) {
+        if (EIP20Interface(IUniswapV2Pair(underlying).token0()).balanceOf(from) > 0)
+          _underlying = IUniswapV2Pair(underlying).token0();
+        else if (EIP20Interface(IUniswapV2Pair(underlying).token1()).balanceOf(from) > 0)
+          _underlying = IUniswapV2Pair(underlying).token1();
+      }
+    }
+    require(EIP20Interface(_underlying).transferFrom(from, address(this), amount), "send");
 
     deposit(amount);
     return amount;
