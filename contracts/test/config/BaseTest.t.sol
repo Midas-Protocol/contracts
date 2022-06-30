@@ -77,4 +77,12 @@ abstract contract BaseTest is Test {
   function forChains(uint256 id0, uint256 id1) public view returns (bool) {
     return block.chainid == id0 || block.chainid == id1;
   }
+
+  function diff(uint256 a, uint256 b) internal returns (uint256) {
+    if (a > b) {
+      return a - b;
+    } else {
+      return b - a;
+    }
+  }
 }

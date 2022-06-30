@@ -15,4 +15,6 @@ interface IW_NATIVE {
     address to,
     uint256 amount
   ) external returns (bool);
+
+  function balanceOf(address) external view returns (uint256);
 }
