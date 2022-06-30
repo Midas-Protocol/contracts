@@ -12,9 +12,9 @@ contract TwapOraclesBaseTest is BaseTest {
   MasterPriceOracle mpo;
 
   function setUp() public {
-    uniswapV2Factory = IUniswapV2Factory(ap.getAddress("uniswapV2Factory"));
-    twapPriceOracleFactory = UniswapTwapPriceOracleV2Factory(ap.getAddress("twapOraclesFactory"));
-    mpo = MasterPriceOracle(ap.getAddress("masterPriceOracle"));
+    uniswapV2Factory = IUniswapV2Factory(ap.getAddress("IUniswapV2Factory"));
+    twapPriceOracleFactory = UniswapTwapPriceOracleV2Factory(ap.getAddress("UniswapTwapPriceOracleV2Factory"));
+    mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
   }
 
   function getTokenTwapPrice(address tokenAddress, address baseTokenAddress) internal returns (uint256) {

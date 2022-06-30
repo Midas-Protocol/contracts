@@ -461,9 +461,9 @@ contract BeefyERC4626Test is BaseTest {
     assertEq(beefyERC4626.balanceOf(address(this)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertEq(
+    assertTrue(diff(
       beefyVault.balanceOf(address(beefyERC4626)),
-      beefyShares - expectedBeefySharesNeeded,
+      beefyShares - expectedBeefySharesNeeded) <= 1,
       "!beefy share balance"
     );
 
@@ -495,9 +495,9 @@ contract BeefyERC4626Test is BaseTest {
     assertEq(beefyERC4626.balanceOf(alice), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertEq(
+    assertTrue(diff(
       beefyVault.balanceOf(address(beefyERC4626)),
-      beefyShares - expectedBeefySharesNeeded,
+      beefyShares - expectedBeefySharesNeeded) <= 1,
       "!beefy share balance"
     );
 

@@ -13,11 +13,14 @@ abstract contract BaseTest is Test {
   uint256 constant EVMOS_TESTNET = 9000;
   uint256 constant BSC_CHAPEL = 97;
 
-  AddressesProvider public ap = AddressesProvider(0x01c97299b37E66c03419bC4Db24074a89FB36e6d);
+  AddressesProvider public ap;
 
   constructor() {
-    // TODO remove the config code
-    // when there is an on-chain AddressesProvider instance to use
+    if (block.chainid == BSC_MAINNET) {
+      ap = AddressesProvider(0x01c97299b37E66c03419bC4Db24074a89FB36e6d);
+    } else {
+      ap = new AddressesProvider();
+    }
     configureAddressesProvider();
   }
 

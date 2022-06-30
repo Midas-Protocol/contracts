@@ -247,9 +247,9 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(alpacaERC4626.balanceOf(address(this)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertEq(
+    assertTrue(diff(
       mockVault.balanceOf(address(alpacaERC4626)),
-      beefyShares - expectedBeefySharesNeeded,
+      beefyShares - expectedBeefySharesNeeded) <= 1,
       "!beefy share balance"
     );
 
@@ -281,9 +281,9 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(alpacaERC4626.balanceOf(address(1)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertEq(
+    assertTrue(diff(
       mockVault.balanceOf(address(alpacaERC4626)),
-      beefyShares - expectedBeefySharesNeeded,
+      beefyShares - expectedBeefySharesNeeded) <= 1,
       "!beefy share balance"
     );
 

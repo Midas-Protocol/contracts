@@ -17,13 +17,12 @@ contract UniswapLpTokenBaseTest is BaseTest {
 
   function setUp() public {
     wtoken = ap.getAddress("wtoken");
-    mpo = MasterPriceOracle(ap.getAddress("masterPriceOracle"));
+    mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
   }
 
   function getLpTokenPrice(address lpToken) internal returns (uint256) {
     if (address(mpo.oracles(lpToken)) == address(0)) {
       uniswapLpTokenPriceOracle = new UniswapLpTokenPriceOracle(wtoken); // BTCB
-      IUniswapV2Pair pair = IUniswapV2Pair(lpToken);
 
       address[] memory underlyings = new address[](1);
       IPriceOracle[] memory oracles = new IPriceOracle[](1);
@@ -42,6 +41,9 @@ contract UniswapLpTokenBaseTest is BaseTest {
 
   function testBombBtcLpTokenOraclePrice() public shouldRun(forChains(BSC_MAINNET)) {
     address lpToken = 0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6; // Lp BOMB-BTCB
+
+    emit log_address(address(ap));
+    emit log_address(address(mpo));
 
     uint256 price = getLpTokenPrice(lpToken);
     assertTrue(price > 0);
