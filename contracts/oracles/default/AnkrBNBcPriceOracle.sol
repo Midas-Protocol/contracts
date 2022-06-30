@@ -33,7 +33,7 @@ contract AnkrBNBcPriceOracle is IPriceOracle, BasePriceOracle {
   }
 
   function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
-     // Return 1e18 for ETH
+    // Return 1e18 for ETH
     if (cToken.isCEther()) return 1e18;
 
     // Get underlying token address
@@ -63,7 +63,7 @@ contract AnkrBNBcPriceOracle is IPriceOracle, BasePriceOracle {
     if (success) {
       uint256 BusdBnbPrice = MASTER_PRICE_ORACLE.price(USD_TOKEN);
 
-      return uint256(price) / 10**18 * BusdBnbPrice;
+      return (uint256(price) / 10**18) * BusdBnbPrice;
     }
 
     return 0;
