@@ -702,8 +702,8 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     vm.roll(10);
 
     deposit(address(this), depositAmount / 2);
-    assertGte(dddToken.balanceOf(address(dotDotERC4626)), 0.0007 ether);
-    assertGte(epxToken.balanceOf(address(dotDotERC4626)), 0.01 ether);
+    assertGt(dddToken.balanceOf(address(dotDotERC4626)), 0.0007 ether);
+    assertGt(epxToken.balanceOf(address(dotDotERC4626)), 0.01 ether);
   }
 
   function testAccumulatingRewardsOnWithdrawal() public {
@@ -714,8 +714,8 @@ contract DotDotERC4626Test is WithPool, BaseTest {
 
     dotDotERC4626.withdraw(1, address(this), address(this));
 
-    assertGte(dddToken.balanceOf(address(dotDotERC4626)), 0.001 ether);
-    assertGte(epxToken.balanceOf(address(dotDotERC4626)), 0.025 ether);
+    assertGt(dddToken.balanceOf(address(dotDotERC4626)), 0.001 ether);
+    assertGt(epxToken.balanceOf(address(dotDotERC4626)), 0.025 ether);
   }
 
   function testClaimRewards() public {
@@ -740,25 +740,25 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     dotDotERC4626.withdraw(1, address(this), address(this));
 
     // The ERC-4626 holds all rewarded token now
-    assertGte(dddToken.balanceOf(address(dotDotERC4626)), 0.001 ether);
-    assertGte(epxToken.balanceOf(address(dotDotERC4626)), 0.025 ether);
+    assertGt(dddToken.balanceOf(address(dotDotERC4626)), 0.001 ether);
+    assertGt(epxToken.balanceOf(address(dotDotERC4626)), 0.025 ether);
 
     // Accrue rewards to send rewards to flywheelRewards
     dddFlywheel.accrue(ERC20(dotDotERC4626), address(this));
     epxFlywheel.accrue(ERC20(dotDotERC4626), address(this));
-    assertGte(dddToken.balanceOf(address(dddRewards)), 0.001 ether);
-    assertGte(epxToken.balanceOf(address(epxRewards)), 0.025 ether);
+    assertGt(dddToken.balanceOf(address(dddRewards)), 0.001 ether);
+    assertGt(epxToken.balanceOf(address(epxRewards)), 0.025 ether);
 
     (dddStart, dddEnd, dddReward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
     (epxStart, epxEnd, epxReward) = epxRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
 
     // Rewards can be transfered in the next cycle
-    assertGte(dddEnd, 1000000000);
-    assertGte(epxEnd, 1000000000);
+    assertGt(dddEnd, 1000000000);
+    assertGt(epxEnd, 1000000000);
 
     // Reward amount is expected value
-    assertGte(dddReward, 0.001 ether);
-    assertGte(epxReward, 0.025 ether);
+    assertGt(dddReward, 0.001 ether);
+    assertGt(epxReward, 0.025 ether);
 
     vm.warp(block.timestamp + 150);
     vm.roll(20);
@@ -771,8 +771,8 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     dddFlywheel.claimRewards(address(this));
     epxFlywheel.claimRewards(address(this));
 
-    assertGte(dddToken.balanceOf(address(this)), 0.001 ether);
+    assertGt(dddToken.balanceOf(address(this)), 0.001 ether);
     assertEq(dddToken.balanceOf(address(dddFlywheel)), 0);
-    assertGte(epxToken.balanceOf(address(this)), 0.025 ether);
+    assertGt(epxToken.balanceOf(address(this)), 0.025 ether);
   }
 }
