@@ -5,7 +5,7 @@ import "./helpers/WithPool.sol";
 import "./config/BaseTest.t.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
+import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
@@ -114,7 +114,7 @@ contract BNBE2eTest is WithPool, BaseTest {
 
   function testDeployCErc20PluginRewardsDelegate() public shouldRun(forChains(BSC_MAINNET)) {
     MockERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
-    FuseFlywheelDynamicRewards rewards;
+    FuseFlywheelDynamicRewardsPlugin rewards;
     FuseFlywheelCore flywheel = new FuseFlywheelCore(
       underlyingToken,
       IFlywheelRewards(address(2)),
@@ -122,7 +122,7 @@ contract BNBE2eTest is WithPool, BaseTest {
       address(this),
       Authority(address(0))
     );
-    rewards = new FuseFlywheelDynamicRewards(flywheel, 1);
+    rewards = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
     flywheel.setFlywheelRewards(rewards);
 
     AlpacaERC4626 erc4626 = new AlpacaERC4626(

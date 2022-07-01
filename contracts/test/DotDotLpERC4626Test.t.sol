@@ -9,7 +9,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { MockLpDepositor } from "./mocks/dotdot/MockLpDepositor.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
-import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
+import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
@@ -29,11 +29,11 @@ contract DotDotLpERC4626Test is DSTest {
 
   MockERC20 dddToken;
   FlywheelCore dddFlywheel;
-  FuseFlywheelDynamicRewards dddRewards;
+  FuseFlywheelDynamicRewardsPlugin dddRewards;
 
   MockERC20 epxToken;
   FlywheelCore epxFlywheel;
-  FuseFlywheelDynamicRewards epxRewards;
+  FuseFlywheelDynamicRewardsPlugin epxRewards;
 
   MockLpDepositor mockLpDepositor;
 
@@ -52,7 +52,7 @@ contract DotDotLpERC4626Test is DSTest {
       address(this),
       Authority(address(0))
     );
-    dddRewards = new FuseFlywheelDynamicRewards(dddFlywheel, 1);
+    dddRewards = new FuseFlywheelDynamicRewardsPlugin(dddFlywheel, 1);
     dddFlywheel.setFlywheelRewards(dddRewards);
 
     epxToken = new MockERC20("epxToken", "EPX", 18);
@@ -63,7 +63,7 @@ contract DotDotLpERC4626Test is DSTest {
       address(this),
       Authority(address(0))
     );
-    epxRewards = new FuseFlywheelDynamicRewards(epxFlywheel, 1);
+    epxRewards = new FuseFlywheelDynamicRewardsPlugin(epxFlywheel, 1);
     epxFlywheel.setFlywheelRewards(epxRewards);
 
     lpToken = new MockERC20("TestLpToken", "LP-TST", 18);

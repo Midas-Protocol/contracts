@@ -12,7 +12,7 @@ import { Authority } from "solmate/auth/Auth.sol";
 import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
-import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
+import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 
 contract MockBoringERC20 is MockERC20 {
   constructor(
@@ -43,7 +43,7 @@ contract BeamERC4626Test is BaseTest {
   MockERC20 glintToken;
   ERC20 marketKey;
   FlywheelCore flywheel;
-  FuseFlywheelDynamicRewards flywheelRewards;
+  FuseFlywheelDynamicRewardsPlugin flywheelRewards;
 
   uint256 depositAmount = 100e18;
   address joy = 0x33Ad49856da25b8E2E2D762c411AEda0D1727918;
@@ -66,7 +66,7 @@ contract BeamERC4626Test is BaseTest {
       Authority(address(0))
     );
 
-    flywheelRewards = new FuseFlywheelDynamicRewards(flywheel, 1);
+    flywheelRewards = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
     flywheel.setFlywheelRewards(flywheelRewards);
 
     beamErc4626 = new BeamERC4626(testToken, flywheel, 0, IVault(address(mockBeamChef)));
@@ -445,7 +445,7 @@ contract BeamERC4626UnitTest is BaseTest {
   MockERC20 glintToken;
   ERC20 marketKey;
   FlywheelCore flywheel;
-  FuseFlywheelDynamicRewards flywheelRewards;
+  FuseFlywheelDynamicRewardsPlugin flywheelRewards;
 
   uint256 depositAmount = 100;
 
@@ -469,7 +469,7 @@ contract BeamERC4626UnitTest is BaseTest {
       Authority(address(0))
     );
 
-    flywheelRewards = new FuseFlywheelDynamicRewards(flywheel, 1);
+    flywheelRewards = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
     flywheel.setFlywheelRewards(flywheelRewards);
 
     beamErc4626 = new BeamERC4626(testToken, flywheel, 0, IVault(address(mockBeamChef)));
