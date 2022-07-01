@@ -405,18 +405,14 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
       pair = IUniswapV2Pair(
         IUniswapV2Factory(uniswapV2RouterForBorrow.factory()).getPair(underlyingBorrow, W_NATIVE_ADDRESS)
       );
-      if (address(pair) != address(0)) {
-        token0IsUnderlyingBorrow = pair.token0() == underlyingBorrow;
-      } else {
-        pair = IUniswapV2Pair(underlyingBorrow);
-      }
+      token0IsUnderlyingBorrow = pair.token0() == underlyingBorrow;
     }
     pair.swap(
       token0IsUnderlyingBorrow ? repayAmount : 0,
       !token0IsUnderlyingBorrow ? repayAmount : 0,
       address(this),
       msg.data
-    );
+    );  
 
     // Exchange profit, send NATIVE to coinbase if necessary, and transfer seized funds
     return distributeProfit(exchangeProfitTo, minProfitAmount, ethToCoinbase);
@@ -833,18 +829,8 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   ) private returns (address) {
     // Approve repayAmount to cErc20
     PostFlashLoanTokensData memory vars;
-    IERC20Upgradeable underlyingBorrow = IERC20Upgradeable(cErc20.underlying());
-    {
-      (vars.success, vars.ret) = address(underlyingBorrow).staticcall(
-        abi.encodeWithSelector(IUniswapV2Pair.token0.selector)
-      );
-      if (vars.success) {
-        vars.token1 = IERC20Upgradeable(IUniswapV2Pair(address(underlyingBorrow)).token1());
-        safeApprove(vars.token1, address(cErc20), repayAmount);
-      } else {
-        safeApprove(underlyingBorrow, address(cErc20), repayAmount);
-      }
-    }
+    IERC20Upgradeable underlyingBorrow = IERC20Upgradeable(cErc20.underlying()); // Beam LP token.
+    safeApprove(underlyingBorrow, address(cErc20), repayAmount);
 
     // Liquidate NATIVE borrow using flashloaned NATIVE
     require(cErc20.liquidateBorrow(borrower, repayAmount, cTokenCollateral) == 0, "Liquidation failed.");

@@ -141,9 +141,9 @@ contract BeamE2eTest is WithPool, BaseTest {
     assertEq(cBeamToken.totalSupply(), 1000e18 * 5);
 
     // Account One Borrow
-    vm.startPrank(accountOne);
+    vm.startPrank(accountTwo);
     underlyingToken.approve(address(cToken), 1e36);
-    cToken.borrow(10);
+    cBeamToken.borrow(10);
     vm.stopPrank();
     assertEq(cToken.totalBorrows(), 10);
     {
