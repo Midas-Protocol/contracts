@@ -14,6 +14,7 @@ import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
+import { ICErc20 } from "../external/compound/ICErc20.sol";
 
 interface MockXBomb {
   function getExchangeRate() external returns (uint256);
@@ -26,9 +27,6 @@ contract MockBnb is MockERC20 {
 }
 
 contract BombE2eTest is WithPool, BaseTest {
-  using stdStorage for StdStorage;
-  StdStorage internal stdstore;
-
   constructor()
     WithPool(
       MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),

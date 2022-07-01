@@ -17,13 +17,12 @@ contract UniswapLpTokenBaseTest is BaseTest {
 
   function setUp() public {
     wtoken = ap.getAddress("wtoken");
-    mpo = MasterPriceOracle(ap.getAddress("masterPriceOracle"));
+    mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
   }
 
   function getLpTokenPrice(address lpToken) internal returns (uint256) {
     if (address(mpo.oracles(lpToken)) == address(0)) {
       uniswapLpTokenPriceOracle = new UniswapLpTokenPriceOracle(wtoken); // BTCB
-      IUniswapV2Pair pair = IUniswapV2Pair(lpToken);
 
       address[] memory underlyings = new address[](1);
       IPriceOracle[] memory oracles = new IPriceOracle[](1);
