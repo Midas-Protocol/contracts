@@ -10,7 +10,7 @@ contract ChainlinkOraclesTest is BaseTest {
   ChainlinkPriceOracleV2 oracle;
 
   function setUp() public {
-    oracle = ChainlinkPriceOracleV2(ap.getAddress("chainlinkOracle"));
+    oracle = ChainlinkPriceOracleV2(ap.getAddress("ChainlinkPriceOracleV2"));
   }
 
   function testPriceFeed(address testedTokenAddress, address aggregatorAddress) internal returns (uint256 price) {
