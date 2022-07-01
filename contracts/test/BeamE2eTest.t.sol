@@ -25,7 +25,7 @@ contract MockBeamERC20 is MockERC20 {
 contract BeamE2eTest is WithPool, BaseTest {
   using stdStorage for StdStorage;
   StdStorage internal stdstore;
-  
+
   address wToken = 0xAcc15dC74880C9944775448304B263D191c6077F;
   address mPriceOracle = 0x14C15B9ec83ED79f23BF71D51741f58b69ff1494;
   address uniswapRouter = 0x96b244391D98B62D19aE89b1A4dCcf0fc56970C7;
@@ -51,13 +51,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     MockBeamERC20 asset;
   }
 
-
-  constructor()
-    WithPool(
-      MasterPriceOracle(mPriceOracle),
-      MockERC20(0x99588867e817023162F4d4829995299054a5fC57)
-    )
-  {}
+  constructor() WithPool(MasterPriceOracle(mPriceOracle), MockERC20(0x99588867e817023162F4d4829995299054a5fC57)) {}
 
   function setUp() public shouldRun(forChains(MOONBEAM_MAINNET)) {
     vm.prank(0x33Ad49856da25b8E2E2D762c411AEda0D1727918);
@@ -137,7 +131,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     vm.prank(bob);
     vars.asset.transfer(accountOne, 10000000);
 
-    /* 
+    /*
      * CToken Supply
      */
 
@@ -171,8 +165,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     vars.cTokens[0] = address(cToken);
     comptroller.enterMarkets(vars.cTokens);
     vm.stopPrank();
-  
-    
+
     /**
      * Borrowing
      */
@@ -209,11 +202,7 @@ contract BeamE2eTest is WithPool, BaseTest {
       vars.abis = new bytes[](1);
       vars.swapToken0Path[0] = IUniswapV2Pair(address(underlyingToken)).token0();
       vars.swapToken0Path[1] = IUniswapV2Pair(address(underlyingToken)).token1();
-      vars.abis[0] = abi.encode(
-        IUniswapV2Router02(uniswapRouter),
-        vars.swapToken0Path,
-        vars.swapToken1Path
-      );
+      vars.abis[0] = abi.encode(IUniswapV2Router02(uniswapRouter), vars.swapToken0Path, vars.swapToken1Path);
 
       vm.startPrank(accountTwo);
       vars.assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
@@ -235,9 +224,7 @@ contract BeamE2eTest is WithPool, BaseTest {
         vars.abis,
         0
       );
-      vars.assetsDataAfter = poolLens.getPoolAssetsWithData(
-        IComptroller(address(comptroller))
-      );
+      vars.assetsDataAfter = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
 
       uint256 beamBalanceAfter = cTokenLP.balanceOf(accountTwo);
 

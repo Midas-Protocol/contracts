@@ -412,7 +412,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
       !token0IsUnderlyingBorrow ? repayAmount : 0,
       address(this),
       msg.data
-    );  
+    );
 
     // Exchange profit, send NATIVE to coinbase if necessary, and transfer seized funds
     return distributeProfit(exchangeProfitTo, minProfitAmount, ethToCoinbase);
