@@ -353,7 +353,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address cToken,
     address redeemer,
     uint256 redeemTokens
-  ) internal returns (uint256) {
+  ) internal view returns (uint256) {
     if (!markets[cToken].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
     }
@@ -467,7 +467,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       0,
       borrowAmount
     );
-    emit error_log(1234);
     if (err != Error.NO_ERROR) {
       return uint256(err);
     }
@@ -868,7 +867,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
      */
   function getAccountLiquidity(address account)
     public
-    // view
+    view
     returns (
       uint256,
       uint256,
@@ -893,7 +892,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
      */
   function getAccountLiquidityInternal(address account)
     internal
-    // view
+    view
     returns (
       Error,
       uint256,
@@ -920,7 +919,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 borrowAmount
   )
     public
-    // view
+    view
     returns (
       uint256,
       uint256,
@@ -936,8 +935,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     return (uint256(err), liquidity, shortfall);
   }
 
-  event error_log(uint256 value);
-  event error_address(address _address);
   /**
      * @notice Determine what the account liquidity would be if the given amounts were redeemed/borrowed
      * @param cTokenModify The market to hypothetically redeem/borrow in
@@ -957,7 +954,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 borrowAmount
   )
     internal
-    // view
+    view
     returns (
       Error,
       uint256,
@@ -969,14 +966,11 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     // For each asset the account is in
     CToken[] memory assets = accountAssets[account];
-    emit error_log(assets.length);
     for (uint256 i = 0; i < assets.length; i++) {
       CToken asset = assets[i];
-      emit error_address(address(asset));
 
       // Read the balances and exchange rate from the cToken
       (oErr, vars.cTokenBalance, vars.borrowBalance, vars.exchangeRateMantissa) = asset.getAccountSnapshot(account);
-      emit error_log(123123123);
       if (oErr != 0) {
         // semi-opaque error code, we assume NO_ERROR == 0 is invariant between upgrades
         return (Error.SNAPSHOT_ERROR, 0, 0);
@@ -986,25 +980,16 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
       // Get the normalized price of the asset
       vars.oraclePriceMantissa = oracle.getUnderlyingPrice(asset);
-      emit error_log(vars.oraclePriceMantissa);
       if (vars.oraclePriceMantissa == 0) {
         return (Error.PRICE_ERROR, 0, 0);
       }
       vars.oraclePrice = Exp({ mantissa: vars.oraclePriceMantissa });
 
-      emit error_log(vars.oraclePrice.mantissa);
-      emit error_log(vars.collateralFactor.mantissa);
-      emit error_log(vars.exchangeRate.mantissa);
-
       // Pre-compute a conversion factor from tokens -> ether (normalized price value)
       vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
-      emit error_log(vars.tokensToDenom.mantissa);
-      emit error_log(vars.cTokenBalance);
-
 
       // sumCollateral += tokensToDenom * cTokenBalance
       vars.sumCollateral = mul_ScalarTruncateAddUInt(vars.tokensToDenom, vars.cTokenBalance, vars.sumCollateral);
-      emit error_log(vars.sumCollateral);
 
       // sumBorrowPlusEffects += oraclePrice * borrowBalance
       vars.sumBorrowPlusEffects = mul_ScalarTruncateAddUInt(
@@ -1012,10 +997,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         vars.borrowBalance,
         vars.sumBorrowPlusEffects
       );
-      emit error_log(vars.borrowBalance);
-      emit error_log(vars.sumBorrowPlusEffects);
-      emit error_address(address(cTokenModify));
-
 
       // Calculate effects of interacting with cTokenModify
       if (asset == cTokenModify) {
@@ -1035,9 +1016,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
           vars.sumBorrowPlusEffects
         );
       }
-
-      emit error_log(vars.sumBorrowPlusEffects);
-      
     }
 
     // These are safe, as the underflow condition is checked first

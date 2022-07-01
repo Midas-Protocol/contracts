@@ -802,15 +802,6 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     return address(underlyingCollateral);
   }
 
-  event log_bool(bool);
-
-  struct PostFlashLoanTokensData {
-    IERC20Upgradeable token0;
-    IERC20Upgradeable token1;
-    bool success;
-    bytes ret;
-  }
-
   /**
    * @dev Liquidate unhealthy token borrow, exchange seized collateral, return flashloaned funds, and exchange profit.
    */
@@ -828,7 +819,6 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     bytes[] memory strategyData
   ) private returns (address) {
     // Approve repayAmount to cErc20
-    PostFlashLoanTokensData memory vars;
     IERC20Upgradeable underlyingBorrow = IERC20Upgradeable(cErc20.underlying()); // Beam LP token.
     safeApprove(underlyingBorrow, address(cErc20), repayAmount);
 
