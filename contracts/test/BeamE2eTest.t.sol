@@ -4,6 +4,8 @@ pragma solidity >=0.8.0;
 import "./helpers/WithPool.sol";
 import "./config/BaseTest.t.sol";
 import "forge-std/Test.sol";
+import "../external/uniswap/IUniswapV2Pair.sol";
+import { ICErc20 } from "../external/compound/ICErc20.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
@@ -24,7 +26,6 @@ contract MockBeamERC20 is MockERC20 {
 
 contract BeamE2eTest is WithPool, BaseTest {
   using stdStorage for StdStorage;
-  StdStorage internal stdstore;
 
   address wToken = 0xAcc15dC74880C9944775448304B263D191c6077F;
   address mPriceOracle = 0x14C15B9ec83ED79f23BF71D51741f58b69ff1494;
