@@ -418,9 +418,6 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     return distributeProfit(exchangeProfitTo, minProfitAmount, ethToCoinbase);
   }
 
-  event log_address(address _address);
-  event log_uint(uint256);
-
   function safeLiquidateToEthWithFlashLoan(
     address borrower,
     uint256 repayAmount,

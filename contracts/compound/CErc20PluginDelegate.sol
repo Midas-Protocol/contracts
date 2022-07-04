@@ -4,7 +4,6 @@ pragma solidity >=0.8.0;
 import "./CErc20Delegate.sol";
 import "./EIP20Interface.sol";
 import "./IERC4626.sol";
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "../external/uniswap/IUniswapV2Pair.sol";
 
 /**
