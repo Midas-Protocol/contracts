@@ -75,11 +75,19 @@ contract BeamE2eTest is WithPool, BaseTest {
     vm.roll(1);
     cToken.mint(10e18);
     assertEq(cToken.totalSupply(), 10e18 * 5, "CToken total supply should be same as deposited amount * exchange rate");
-    assertEq(underlyingToken.balanceOf(address(cToken)), 10e18, "Underlying balance of cToken should be same as minted amount");
+    assertEq(
+      underlyingToken.balanceOf(address(cToken)),
+      10e18,
+      "Underlying balance of cToken should be same as minted amount"
+    );
 
     cToken.borrow(1000);
     assertEq(cToken.totalBorrows(), 1000, "Total borrowed amount should be same as borrowed amount");
-    assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10e18 + 1000, "Underlying balance should be same as intial amount - minted amount + borrowed amount");
+    assertEq(
+      underlyingToken.balanceOf(address(this)),
+      100e18 - 10e18 + 1000,
+      "Underlying balance should be same as intial amount - minted amount + borrowed amount"
+    );
   }
 
   function testGetPoolAssetsData() public shouldRun(forChains(MOONBEAM_MAINNET)) {
@@ -148,7 +156,11 @@ contract BeamE2eTest is WithPool, BaseTest {
     cTokenLP.mint(10e18);
     vm.stopPrank();
 
-    assertEq(cTokenLP.totalSupply(), 10e18 * 5, "Lp token total supply should be same as deposited amount * exchange rate");
+    assertEq(
+      cTokenLP.totalSupply(),
+      10e18 * 5,
+      "Lp token total supply should be same as deposited amount * exchange rate"
+    );
     assertEq(cToken.totalSupply(), 10000000 * 5, "token supply should be same as deposited amount * excahnge rate");
 
     /**
@@ -229,8 +241,16 @@ contract BeamE2eTest is WithPool, BaseTest {
 
       uint256 beamBalanceAfter = cTokenLP.balanceOf(accountTwo);
 
-      assertGt(beamBalance, beamBalanceAfter, "Lp token balance of accountTwo before should be greater than the balance after liquidation");
-      assertGt(vars.assetsData[0].supplyBalance, vars.assetsDataAfter[0].supplyBalance, "Lp ctoken total supply before should be greater than the supply after liquidation");
+      assertGt(
+        beamBalance,
+        beamBalanceAfter,
+        "Lp token balance of accountTwo before should be greater than the balance after liquidation"
+      );
+      assertGt(
+        vars.assetsData[0].supplyBalance,
+        vars.assetsDataAfter[0].supplyBalance,
+        "Lp ctoken total supply before should be greater than the supply after liquidation"
+      );
     }
   }
 
@@ -253,7 +273,11 @@ contract BeamE2eTest is WithPool, BaseTest {
     vm.roll(1);
 
     cToken.mint(10e18);
-    assertEq(cToken.totalSupply(), 10e18 * 5, "CToken total supply should be same as the minted balance * exchange rate");
+    assertEq(
+      cToken.totalSupply(),
+      10e18 * 5,
+      "CToken total supply should be same as the minted balance * exchange rate"
+    );
     uint256 balance = erc4626.balanceOf(address(cToken));
     assertEq(balance, 10e18, "ERC4626 balance of cToken should be same as minted amount");
     vm.roll(1);
@@ -262,6 +286,10 @@ contract BeamE2eTest is WithPool, BaseTest {
     assertEq(cToken.totalBorrows(), 1000, "CToken total borrowed amount should be same as borrowed amount");
     balance = erc4626.balanceOf(address(cToken));
     assertEq(balance, 10e18 - 1000, "ERC4626 balance of cToken should be same as initial amount - borrowed amount");
-    assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10e18 + 1000, "underlying balance should be same as initial amount - minted amount + borrowed amount");
+    assertEq(
+      underlyingToken.balanceOf(address(this)),
+      100e18 - 10e18 + 1000,
+      "underlying balance should be same as initial amount - minted amount + borrowed amount"
+    );
   }
 }
