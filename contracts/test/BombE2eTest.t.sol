@@ -6,7 +6,7 @@ import "./config/BaseTest.t.sol";
 import "forge-std/Test.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
+import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
@@ -221,7 +221,7 @@ contract BombE2eTest is WithPool, BaseTest {
 
   function testDeployCErc20PluginRewardsDelegate() public shouldRun(forChains(BSC_MAINNET)) {
     MockERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
-    FuseFlywheelDynamicRewardsPlugin rewards;
+    FuseFlywheelDynamicRewards rewards;
     FuseFlywheelCore flywheel = new FuseFlywheelCore(
       underlyingToken,
       IFlywheelRewards(address(0)),
@@ -229,7 +229,7 @@ contract BombE2eTest is WithPool, BaseTest {
       address(this),
       Authority(address(0))
     );
-    rewards = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
+    rewards = new FuseFlywheelDynamicRewards(flywheel, 1);
     flywheel.setFlywheelRewards(rewards);
 
     MockERC4626Dynamic mockERC4626Dynamic = new MockERC4626Dynamic(

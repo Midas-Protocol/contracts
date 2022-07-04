@@ -10,7 +10,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { MockLpTokenStaker, IERC20Mintable } from "./mocks/ellipsis/MockLpTokenStaker.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
-import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
+import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
@@ -28,7 +28,7 @@ contract EllipsisERC4626Test is BaseTest {
 
   EllipsisERC4626 ellipsisERC4626;
   FlywheelCore flywheel;
-  FuseFlywheelDynamicRewardsPlugin flywheelRewards;
+  FuseFlywheelDynamicRewards flywheelRewards;
 
   MockERC20 testToken;
   MockERC20 epsToken;
@@ -56,7 +56,7 @@ contract EllipsisERC4626Test is BaseTest {
       Authority(address(0))
     );
 
-    flywheelRewards = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
+    flywheelRewards = new FuseFlywheelDynamicRewards(flywheel, 1);
     flywheel.setFlywheelRewards(flywheelRewards);
 
     ellipsisERC4626 = new EllipsisERC4626(

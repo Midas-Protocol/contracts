@@ -17,12 +17,12 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { MockStrategy } from "./mocks/autofarm/MockStrategy.sol";
 import { MockAutofarmV2 } from "./mocks/autofarm/MockAutofarmV2.sol";
 import { IStrategy } from "./mocks/autofarm/IStrategy.sol";
-import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
+import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 
 contract AutofarmERC4626Test is BaseTest {
   AutofarmERC4626 autofarmERC4626;
   FlywheelCore flywheel;
-  FuseFlywheelDynamicRewardsPlugin flywheelRewards;
+  FuseFlywheelDynamicRewards flywheelRewards;
 
   MockERC20 testToken;
   MockERC20 autoToken;
@@ -55,7 +55,7 @@ contract AutofarmERC4626Test is BaseTest {
       Authority(address(0))
     );
 
-    flywheelRewards = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
+    flywheelRewards = new FuseFlywheelDynamicRewards(flywheel, 1);
     flywheel.setFlywheelRewards(flywheelRewards);
 
     autofarmERC4626 = new AutofarmERC4626(
