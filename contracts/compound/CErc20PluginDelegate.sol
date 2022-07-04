@@ -4,6 +4,7 @@ pragma solidity >=0.8.0;
 import "./CErc20Delegate.sol";
 import "./EIP20Interface.sol";
 import "./IERC4626.sol";
+import "../external/uniswap/IUniswapV2Pair.sol";
 
 /**
  * @title Rari's CErc20Plugin's Contract
@@ -27,7 +28,6 @@ contract CErc20PluginDelegate is CErc20Delegate {
    */
   function _becomeImplementation(bytes calldata data) external virtual override {
     require(msg.sender == address(this) || hasAdminRights());
-
     address _plugin = abi.decode(data, (address));
 
     require(_plugin != address(0), "0");
