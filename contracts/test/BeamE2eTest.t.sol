@@ -30,9 +30,9 @@ contract BeamE2eTest is WithPool, BaseTest {
   address wToken = 0xAcc15dC74880C9944775448304B263D191c6077F;
   address mPriceOracle = 0x14C15B9ec83ED79f23BF71D51741f58b69ff1494;
   address uniswapRouter = 0x96b244391D98B62D19aE89b1A4dCcf0fc56970C7;
-  address USDC = 0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b;
-  address accountOne = address(1);
-  address accountTwo = address(2);
+  address usdc = 0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b;
+  address john = address(1);
+  address david = address(2);
   address joey = 0x33Ad49856da25b8E2E2D762c411AEda0D1727918;
   address bob = 0x739ca6D71365a08f584c8FC4e1029045Fa8ABC4B;
 
@@ -112,7 +112,7 @@ contract BeamE2eTest is WithPool, BaseTest {
   function testBeamCErc20Liquidation() public shouldRun(forChains(MOONBEAM_MAINNET)) {
     LiquidationData memory vars;
     vars.erc4626 = new MockERC4626(ERC20(address(underlyingToken)));
-    vars.asset = MockBeamERC20(USDC);
+    vars.asset = MockBeamERC20(usdc);
 
     deployCErc20PluginDelegate(vars.erc4626, 0.9e18);
     deployCErc20Delegate(address(vars.asset), "BNB", "bnb", 0.1e18);
@@ -128,30 +128,30 @@ contract BeamE2eTest is WithPool, BaseTest {
     vars.liquidator.initialize(
       wToken,
       uniswapRouter,
-      USDC,
+      usdc,
       0xcd3B51D98478D53F4515A306bE565c6EebeF1D58,
       "0xe31da4209ffcce713230a74b5287fa8ec84797c9e77e1f7cfeccea015cdc97ea"
     );
 
     // Tokens supply
     vm.prank(joey);
-    underlyingToken.transfer(accountTwo, 1000e18);
+    underlyingToken.transfer(david, 1000e18);
 
     vm.prank(bob);
-    vars.asset.transfer(accountOne, 10000000);
+    vars.asset.transfer(john, 10000000);
 
     /*
      * CToken Supply
      */
 
     // Account One Supply
-    vm.startPrank(accountOne);
+    vm.startPrank(john);
     vars.asset.approve(address(cToken), 1e36);
     cToken.mint(10000000);
     vm.stopPrank();
 
     // Account Two Supply
-    vm.startPrank(accountTwo);
+    vm.startPrank(david);
     underlyingToken.approve(address(cTokenLP), 1e36);
     cTokenLP.mint(10e18);
     vm.stopPrank();
@@ -169,12 +169,12 @@ contract BeamE2eTest is WithPool, BaseTest {
 
     vars.cTokens = new address[](1);
 
-    vm.startPrank(accountTwo);
+    vm.startPrank(david);
     vars.cTokens[0] = address(cTokenLP);
     comptroller.enterMarkets(vars.cTokens);
     vm.stopPrank();
 
-    vm.startPrank(accountOne);
+    vm.startPrank(john);
     vars.cTokens[0] = address(cToken);
     comptroller.enterMarkets(vars.cTokens);
     vm.stopPrank();
@@ -183,7 +183,7 @@ contract BeamE2eTest is WithPool, BaseTest {
      * Borrowing
      */
 
-    vm.prank(accountTwo);
+    vm.prank(david);
     cToken.borrow(100000);
 
     assertEq(cToken.totalBorrows(), 100000, "Total borroed amount should be same as actual borrowed amount");
@@ -217,15 +217,15 @@ contract BeamE2eTest is WithPool, BaseTest {
       vars.swapToken0Path[1] = IUniswapV2Pair(address(underlyingToken)).token1();
       vars.abis[0] = abi.encode(IUniswapV2Router02(uniswapRouter), vars.swapToken0Path, vars.swapToken1Path);
 
-      vm.startPrank(accountTwo);
+      vm.startPrank(david);
       vars.assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
-      uint256 beamBalance = cTokenLP.balanceOf(accountTwo);
+      uint256 beamBalance = cTokenLP.balanceOf(david);
 
       /**
        * Liquidation
        */
       vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-        accountTwo,
+        david,
         400,
         ICErc20(address(cToken)),
         ICErc20(address(cTokenLP)),
@@ -239,12 +239,12 @@ contract BeamE2eTest is WithPool, BaseTest {
       );
       vars.assetsDataAfter = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
 
-      uint256 beamBalanceAfter = cTokenLP.balanceOf(accountTwo);
+      uint256 beamBalanceAfter = cTokenLP.balanceOf(david);
 
       assertGt(
         beamBalance,
         beamBalanceAfter,
-        "Lp token balance of accountTwo before should be greater than the balance after liquidation"
+        "Lp token balance of david before should be greater than the balance after liquidation"
       );
       assertGt(
         vars.assetsData[0].supplyBalance,
