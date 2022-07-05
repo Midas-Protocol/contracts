@@ -314,7 +314,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
    * @notice Returns the current total borrows plus accrued interest
    * @return The total borrows with interest
    */
-  function totalBorrowsCurrent() external override nonReentrant(false) returns (uint256) {
+  function totalBorrowsCurrent() external override returns (uint256) {
     require(accrueInterest() == uint256(Error.NO_ERROR), "accrue interest failed");
     return totalBorrows;
   }
@@ -1636,12 +1636,12 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     // Emit NewMarketInterestRateModel(oldInterestRateModel, newInterestRateModel)
     emit NewMarketInterestRateModel(oldInterestRateModel, newInterestRateModel);
 
-    // Attempt to reset interest checkpoints on old IRM
-    if (address(oldInterestRateModel) != address(0))
-      address(oldInterestRateModel).call(abi.encodeWithSignature("resetInterestCheckpoints()"));
-
-    // Attempt to add first interest checkpoint on new IRM
-    address(newInterestRateModel).call(abi.encodeWithSignature("checkpointInterest()"));
+//    // Attempt to reset interest checkpoints on old IRM
+//    if (address(oldInterestRateModel) != address(0))
+//      address(oldInterestRateModel).call(abi.encodeWithSignature("resetInterestCheckpoints()"));
+//
+//    // Attempt to add first interest checkpoint on new IRM
+//    address(newInterestRateModel).call(abi.encodeWithSignature("checkpointInterest()"));
 
     return uint256(Error.NO_ERROR);
   }
