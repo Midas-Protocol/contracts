@@ -1636,13 +1636,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     // Emit NewMarketInterestRateModel(oldInterestRateModel, newInterestRateModel)
     emit NewMarketInterestRateModel(oldInterestRateModel, newInterestRateModel);
 
-//    // Attempt to reset interest checkpoints on old IRM
-//    if (address(oldInterestRateModel) != address(0))
-//      address(oldInterestRateModel).call(abi.encodeWithSignature("resetInterestCheckpoints()"));
-//
-//    // Attempt to add first interest checkpoint on new IRM
-//    address(newInterestRateModel).call(abi.encodeWithSignature("checkpointInterest()"));
-
     return uint256(Error.NO_ERROR);
   }
 
