@@ -76,7 +76,6 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     address receiver,
     address owner
   ) public override returns (uint256 assets) {
-    uint256 supply = totalSupply;
     if (msg.sender != owner) {
       uint256 allowed = allowance[owner][msg.sender]; // Saves gas for limited approvals.
 

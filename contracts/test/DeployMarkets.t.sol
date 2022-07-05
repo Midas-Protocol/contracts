@@ -7,7 +7,7 @@ import "forge-std/Test.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
+import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
 import "fuse-flywheel/FuseFlywheelCore.sol";
 
@@ -49,7 +49,7 @@ contract DeployMarketsTest is Test {
   FusePoolDirectory fusePoolDirectory;
 
   FuseFlywheelCore flywheel;
-  FuseFlywheelDynamicRewards rewards;
+  FuseFlywheelDynamicRewardsPlugin rewards;
 
   ERC20 marketKey;
 
@@ -230,7 +230,7 @@ contract DeployMarketsTest is Test {
       address(this),
       Authority(address(0))
     );
-    rewards = new FuseFlywheelDynamicRewards(flywheel, 1);
+    rewards = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
     flywheel.setFlywheelRewards(rewards);
 
     mockERC4626Dynamic = new MockERC4626Dynamic(ERC20(address(underlyingToken)), FlywheelCore(address(flywheel)));

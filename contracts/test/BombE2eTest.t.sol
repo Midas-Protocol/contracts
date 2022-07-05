@@ -14,6 +14,7 @@ import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
+import { ICErc20 } from "../external/compound/ICErc20.sol";
 
 interface MockXBomb {
   function getExchangeRate() external returns (uint256);

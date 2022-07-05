@@ -623,6 +623,18 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   }
 
   /**
+   * @dev Callback function for BeamSwap flashloans.
+   */
+  function BeamSwapCall(
+    address sender,
+    uint256 amount0,
+    uint256 amount1,
+    bytes calldata data
+  ) external {
+    uniswapV2Call(sender, amount0, amount1, data);
+  }
+
+  /**
    * @dev Fetches and sorts the reserves for a pair.
    * Original code from PancakeLibrary.
    */
@@ -804,7 +816,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     bytes[] memory strategyData
   ) private returns (address) {
     // Approve repayAmount to cErc20
-    IERC20Upgradeable underlyingBorrow = IERC20Upgradeable(cErc20.underlying());
+    IERC20Upgradeable underlyingBorrow = IERC20Upgradeable(cErc20.underlying()); // Beam LP token.
     safeApprove(underlyingBorrow, address(cErc20), repayAmount);
 
     // Liquidate NATIVE borrow using flashloaned NATIVE
