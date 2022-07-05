@@ -27,10 +27,17 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @param data The encoded arguments for becoming
    */
   function _becomeImplementation(bytes calldata data) external virtual override {
-    require(msg.sender == address(this) || hasAdminRights());
-    address _plugin = abi.decode(data, (address));
+    require(msg.sender == address(this) || hasAdminRights(), "needs admin rights");
 
+    address _plugin = abi.decode(data, (address));
     require(_plugin != address(0), "0");
+
+    require(
+      IFuseFeeDistributor(fuseAdmin).pluginImplementationWhitelist(
+      address(this),
+      _plugin
+    ), "new plugin needs to be whitelisted");
+
 
     if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
       plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));

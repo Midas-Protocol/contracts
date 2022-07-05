@@ -15,6 +15,11 @@ interface IFuseFeeDistributor {
     view
     returns (bool);
 
+  function pluginImplementationWhitelist(address oldImplementation, address newImplementation)
+    external
+    view
+    returns (bool);
+
   function cErc20DelegateWhitelist(
     address oldImplementation,
     address newImplementation,
