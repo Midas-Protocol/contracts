@@ -732,7 +732,10 @@ contract DotDotERC4626Test is WithPool, BaseTest {
 
   function testClaimRewards() public shouldRun(forChains(BSC_MAINNET)) {
     // Deposit funds, Rewards are 0
-    deposit(address(this), depositAmount);
+    vm.startPrank(address(this));
+    underlyingToken.approve(marketAddress, depositAmount);
+    CErc20(marketAddress).mint(depositAmount);
+    vm.stopPrank();
 
     (uint32 dddStart, uint32 dddEnd, uint192 dddReward) = dddRewards.rewardsCycle(ERC20(address(marketAddress)));
     (uint32 epxStart, uint32 epxEnd, uint192 epxReward) = dddRewards.rewardsCycle(ERC20(address(marketAddress)));
@@ -748,16 +751,9 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     vm.warp(block.timestamp + 150);
     vm.roll(10);
 
-    // Call withdraw (could also be deposit() on the erc4626 or claim() on the epsStaker directly) to claim rewards
-    dotDotERC4626.withdraw(1, address(this), address(this));
-
-    // The ERC-4626 holds all rewarded token now
-    assertGt(dddToken.balanceOf(address(dotDotERC4626)), 0.001 ether);
-    assertGt(epxToken.balanceOf(address(dotDotERC4626)), 0.025 ether);
-
-    emit log_address(marketAddress);
-    emit log_address(address(this));
-    emit log_address(address(cErc20PluginRewardsDelegate));
+    // Call accrue as proxy for withdraw/deposit to claim rewards
+    dddFlywheel.accrue(ERC20(marketAddress), address(this));
+    epxFlywheel.accrue(ERC20(marketAddress), address(this));
 
     // Accrue rewards to send rewards to flywheelRewards
     dddFlywheel.accrue(ERC20(marketAddress), address(this));
