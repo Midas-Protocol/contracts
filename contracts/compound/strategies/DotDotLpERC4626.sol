@@ -6,6 +6,7 @@ import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
+import { RewardsClaimer } from "fuse-flywheel/utils/RewardsClaimer.sol";
 
 interface ILpDepositor {
   // user -> pool -> deposit amount
@@ -64,13 +65,16 @@ contract DotDotLpERC4626 is MidasERC4626 {
     ERC20 _asset,
     FlywheelCore _dddFlywheel,
     FlywheelCore _epxFlywheel,
-    ILpDepositor _lpDepositor
+    ILpDepositor _lpDepositor,
+    address _rewardsDestination,
+    ERC20[] memory _rewardTokens
   )
     MidasERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
       string(abi.encodePacked("mv", _asset.symbol()))
     )
+    RewardsClaimer(_rewardsDestination, _rewardTokens)
   {
     dddFlywheel = _dddFlywheel;
     epxFlywheel = _epxFlywheel;
@@ -78,9 +82,6 @@ contract DotDotLpERC4626 is MidasERC4626 {
 
     // lpDepositor wants an address array for claiming
     assetAsArray.push(address(_asset));
-
-    ERC20(dddFlywheel.rewardToken()).approve(address(dddFlywheel.flywheelRewards()), type(uint256).max);
-    ERC20(epxFlywheel.rewardToken()).approve(address(epxFlywheel.flywheelRewards()), type(uint256).max);
 
     asset.approve(address(lpDepositor), type(uint256).max);
   }
@@ -109,6 +110,10 @@ contract DotDotLpERC4626 is MidasERC4626 {
   /// @notice withdraws specified amount of underlying token if possible
   function beforeWithdraw(uint256 amount, uint256) internal override {
     lpDepositor.withdraw(address(this), address(asset), amount);
+    lpDepositor.claim(address(this), assetAsArray, 0);
+  }
+
+  function beforeClaim() internal override {
     lpDepositor.claim(address(this), assetAsArray, 0);
   }
 
