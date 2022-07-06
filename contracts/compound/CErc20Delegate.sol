@@ -90,7 +90,9 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     require(hasAdminRights(), "!admin");
 
     // Set implementation
-    _setImplementationInternal(implementation_, allowResign, becomeImplementationData);
+    if (implementation != implementation_) {
+      _setImplementationInternal(implementation_, allowResign, becomeImplementationData);
+    }
   }
 
   /**
