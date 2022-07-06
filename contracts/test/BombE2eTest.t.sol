@@ -241,7 +241,7 @@ contract BombE2eTest is WithPool, BaseTest {
     flywheel.addStrategyForRewards(marketKey);
 
     vm.roll(1);
-    deployCErc20PluginRewardsDelegate(mockERC4626Dynamic, flywheel, 0.9e18);
+    deployCErc20PluginRewardsDelegate(mockERC4626Dynamic, 0.9e18);
 
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));

@@ -13,7 +13,6 @@ contract BeefyERC4626Test is BaseTest {
   using FixedPointMathLib for uint256;
 
   BeefyERC4626 beefyERC4626;
-  IBeefyVault beefyVault;
   ERC20 underlyingToken;
   uint256 initialBeefyBalance;
   uint256 initialBeefySupply;
@@ -23,6 +22,10 @@ contract BeefyERC4626Test is BaseTest {
 
   address alice = address(10);
   address bob = address(20);
+
+  IBeefyVault beefyVault; // ERC4626 => underlyingToken => beefyStrategy
+  address beefyStrategy = 0xEeBcd7E1f008C52fe5804B306832B7DD317e163D; // beefyStrategy => underlyingToken => lpChef
+  address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B; // beefyStrategy => underlyingToken => .
 
   struct BeefyVaultConfig {
     address beefyVaultAddress;
@@ -112,7 +115,7 @@ contract BeefyERC4626Test is BaseTest {
   }
 
   function decreaseAssetsInVault() public {
-    vm.prank(bombLpChef);
+    vm.prank(lpChef);
     underlyingToken.transfer(address(1), 200e18);
   }
 

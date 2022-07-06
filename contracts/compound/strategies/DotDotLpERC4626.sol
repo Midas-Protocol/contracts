@@ -42,7 +42,7 @@ interface ILpDepositor {
  * and claims rewards from the same contract
  *
  */
-contract DotDotLpERC4626 is MidasERC4626 {
+contract DotDotLpERC4626 is MidasERC4626, RewardsClaimer {
   using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 

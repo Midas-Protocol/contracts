@@ -10,7 +10,7 @@ import { DotDotLpERC4626, ILpDepositor } from "../compound/strategies/DotDotLpER
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockLpDepositor } from "./mocks/dotdot/MockLpDepositor.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
-import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
+import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
@@ -35,11 +35,11 @@ contract DotDotERC4626Test is WithPool, BaseTest {
 
   ERC20 dddToken = ERC20(0x84c97300a190676a19D1E13115629A11f8482Bd1);
   FlywheelCore dddFlywheel;
-  FuseFlywheelDynamicRewards dddRewards;
+  FuseFlywheelDynamicRewardsPlugin dddRewards;
 
   ERC20 epxToken = ERC20(0xAf41054C1487b0e5E2B9250C0332eCBCe6CE9d71);
   FlywheelCore epxFlywheel;
-  FuseFlywheelDynamicRewards epxRewards;
+  FuseFlywheelDynamicRewardsPlugin epxRewards;
 
   uint256 depositAmount = 100e18;
   uint256 withdrawalFee = 10;
@@ -47,7 +47,10 @@ contract DotDotERC4626Test is WithPool, BaseTest {
   uint256 ACCEPTABLE_DIFF = 1000;
 
   uint192 expectedReward = 1e18;
+  address marketAddress;
   ERC20 marketKey;
+
+  ERC20[] rewardsToken;
 
   constructor()
     WithPool(
@@ -57,6 +60,7 @@ contract DotDotERC4626Test is WithPool, BaseTest {
   {}
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
+    setUpPool("dotdot-test", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));
 
     dddFlywheel = new FlywheelCore(
@@ -66,7 +70,7 @@ contract DotDotERC4626Test is WithPool, BaseTest {
       address(this),
       Authority(address(0))
     );
-    dddRewards = new FuseFlywheelDynamicRewards(dddFlywheel, 1);
+    dddRewards = new FuseFlywheelDynamicRewardsPlugin(dddFlywheel, 1);
     dddFlywheel.setFlywheelRewards(dddRewards);
 
     epxFlywheel = new FlywheelCore(
@@ -76,19 +80,35 @@ contract DotDotERC4626Test is WithPool, BaseTest {
       address(this),
       Authority(address(0))
     );
-    epxRewards = new FuseFlywheelDynamicRewards(epxFlywheel, 1);
+    epxRewards = new FuseFlywheelDynamicRewardsPlugin(epxFlywheel, 1);
     epxFlywheel.setFlywheelRewards(epxRewards);
+
+    rewardsToken.push(ERC20(FlywheelCore(address(dddFlywheel)).rewardToken()));
+    rewardsToken.push(ERC20(FlywheelCore(address(epxFlywheel)).rewardToken()));
 
     dotDotERC4626 = new DotDotLpERC4626(
       underlyingToken,
       FlywheelCore(address(dddFlywheel)),
       FlywheelCore(address(epxFlywheel)),
-      ILpDepositor(address(lpDepositor))
+      ILpDepositor(address(lpDepositor)),
+      address(this),
+      rewardsToken
     );
 
-    marketKey = ERC20(address(dotDotERC4626));
+    deployCErc20PluginRewardsDelegate(ERC4626(address(dotDotERC4626)), 0.9e18);
+    marketAddress = address(comptroller.cTokensByUnderlying(address(underlyingToken)));
+    CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
+    cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(dotDotERC4626)));
+    assertEq(address(cToken.plugin()), address(dotDotERC4626));
+
+    cToken.approve(address(dddToken), address(dddRewards));
+    cToken.approve(address(epxToken), address(epxRewards));
+
+    marketKey = ERC20(marketAddress);
+
     dddFlywheel.addStrategyForRewards(marketKey);
     epxFlywheel.addStrategyForRewards(marketKey);
+    dotDotERC4626.setRewardDestination(marketAddress);
   }
 
   function deposit(address _owner, uint256 amount) public {
@@ -714,8 +734,8 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     // Deposit funds, Rewards are 0
     deposit(address(this), depositAmount);
 
-    (uint32 dddStart, uint32 dddEnd, uint192 dddReward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
-    (uint32 epxStart, uint32 epxEnd, uint192 epxReward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
+    (uint32 dddStart, uint32 dddEnd, uint192 dddReward) = dddRewards.rewardsCycle(ERC20(address(marketAddress)));
+    (uint32 epxStart, uint32 epxEnd, uint192 epxReward) = dddRewards.rewardsCycle(ERC20(address(marketAddress)));
 
     // Rewards can be transfered in the next cycle
     assertEq(dddEnd, 0);
@@ -735,14 +755,18 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     assertGt(dddToken.balanceOf(address(dotDotERC4626)), 0.001 ether);
     assertGt(epxToken.balanceOf(address(dotDotERC4626)), 0.025 ether);
 
+    emit log_address(marketAddress);
+    emit log_address(address(this));
+    emit log_address(address(cErc20PluginRewardsDelegate));
+
     // Accrue rewards to send rewards to flywheelRewards
-    dddFlywheel.accrue(ERC20(dotDotERC4626), address(this));
-    epxFlywheel.accrue(ERC20(dotDotERC4626), address(this));
+    dddFlywheel.accrue(ERC20(marketAddress), address(this));
+    epxFlywheel.accrue(ERC20(marketAddress), address(this));
     assertGt(dddToken.balanceOf(address(dddRewards)), 0.001 ether);
     assertGt(epxToken.balanceOf(address(epxRewards)), 0.025 ether);
 
-    (dddStart, dddEnd, dddReward) = dddRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
-    (epxStart, epxEnd, epxReward) = epxRewards.rewardsCycle(ERC20(address(dotDotERC4626)));
+    (dddStart, dddEnd, dddReward) = dddRewards.rewardsCycle(ERC20(marketAddress));
+    (epxStart, epxEnd, epxReward) = epxRewards.rewardsCycle(ERC20(marketAddress));
 
     // Rewards can be transfered in the next cycle
     assertGt(dddEnd, 1000000000);
@@ -756,8 +780,8 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     vm.roll(20);
 
     // Finally accrue reward from last cycle
-    dddFlywheel.accrue(ERC20(dotDotERC4626), address(this));
-    epxFlywheel.accrue(ERC20(dotDotERC4626), address(this));
+    dddFlywheel.accrue(ERC20(marketAddress), address(this));
+    epxFlywheel.accrue(ERC20(marketAddress), address(this));
 
     // Claim Rewards for the user
     dddFlywheel.claimRewards(address(this));
