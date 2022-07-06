@@ -29,6 +29,7 @@ import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 import { MockERC4626 } from "../compound/strategies/MockERC4626.sol";
 import { MockERC4626Dynamic } from "../compound/strategies/MockERC4626Dynamic.sol";
+import "./config/BaseTest.t.sol";
 
 contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
@@ -288,5 +289,61 @@ contract DeployMarketsTest is Test {
     assertEq(underlyingToken.balanceOf(address(mockERC4626Dynamic)), 10000000 - 1000);
     assertEq(mockERC4626Dynamic.balanceOf(address(cToken)), 10000000 - 1000);
     assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10000000 + 1000);
+  }
+}
+
+contract CErc20DelegateTest is BaseTest {
+
+  Comptroller comptroller;
+
+  CErc20Delegate cErc20Delegate;
+  CErc20PluginDelegate cErc20PluginDelegate;
+  CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
+
+  CErc20 cErc20;
+  FuseFeeDistributor fuseAdmin;
+  FusePoolDirectory fusePoolDirectory;
+
+  address[] implementationsSet;
+
+  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
+    // TODO set these in the addresses provider
+    fusePoolDirectory = FusePoolDirectory(0x295d7347606F4bd810C8296bb8d75D657001fcf7);
+    fuseAdmin = FuseFeeDistributor(payable(0xFc1f56C58286E7215701A773b61bFf2e18A177dE));
+  }
+
+  function testMarketImplementations() public shouldRun(forChains(BSC_MAINNET)) {
+    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      Comptroller comptroller = Comptroller(pools[i].comptroller);
+      CToken[] memory markets = comptroller.getAllMarkets();
+      for (uint8 j = 0; j < markets.length; j++) {
+        CErc20Delegate delegate = CErc20Delegate(address(markets[j]));
+        address implementation = delegate.implementation();
+
+//        emit log_address(implementation);
+        bool added = false;
+        for (uint8 k = 0; k < implementationsSet.length; k++) {
+          if (implementationsSet[k] == implementation) {
+            added = true;
+          }
+        }
+
+        if (!added) implementationsSet.push(implementation);
+      }
+    }
+
+    emit log("listing the set");
+    for (uint8 k = 0; k < implementationsSet.length; k++) {
+      (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData)
+        = fuseAdmin.latestCErc20Delegate(implementationsSet[k]);
+
+      bool whitelisted = fuseAdmin.cErc20DelegateWhitelist(implementationsSet[k], latestCErc20Delegate, allowResign);
+            emit log_address(implementationsSet[k]);
+      //      if (whitelisted) emit log("whitelisted");
+
+      assertTrue(whitelisted || implementationsSet[k] == latestCErc20Delegate, "no whitelisted implementation for old implementation");
+    }
   }
 }
