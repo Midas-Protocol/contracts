@@ -13,7 +13,6 @@ contract BeefyERC4626Test is BaseTest {
   using FixedPointMathLib for uint256;
 
   BeefyERC4626 beefyERC4626;
-  IBeefyVault beefyVault;
   ERC20 underlyingToken;
   uint256 initialBeefyBalance;
   uint256 initialBeefySupply;
@@ -23,6 +22,10 @@ contract BeefyERC4626Test is BaseTest {
 
   address alice = address(10);
   address bob = address(20);
+
+  IBeefyVault beefyVault; // ERC4626 => underlyingToken => beefyStrategy
+  address beefyStrategy = 0xEeBcd7E1f008C52fe5804B306832B7DD317e163D; // beefyStrategy => underlyingToken => lpChef
+  address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B; // beefyStrategy => underlyingToken => .
 
   struct BeefyVaultConfig {
     address beefyVaultAddress;
@@ -111,6 +114,11 @@ contract BeefyERC4626Test is BaseTest {
     beefyVault.earn();
   }
 
+  function decreaseAssetsInVault() public {
+    vm.prank(lpChef);
+    underlyingToken.transfer(address(1), 200e18);
+  }
+
   function testInitializedValues() public shouldRun(forChains(BSC_MAINNET)) {
     assertEq(beefyERC4626.name(), "Midas Pancake LPs Vault");
     assertEq(beefyERC4626.symbol(), "mvCake-LP");
@@ -133,7 +141,6 @@ contract BeefyERC4626Test is BaseTest {
   function testDeposit() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 expectedBeefyShares = (depositAmount * initialBeefySupply) / initialBeefyBalance;
     uint256 expectedErc4626Shares = beefyERC4626.previewDeposit(depositAmount);
-
     deposit(address(this), depositAmount);
 
     // Test that the actual transfers worked
@@ -178,6 +185,34 @@ contract BeefyERC4626Test is BaseTest {
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     assertEq(beefyVault.balanceOf(address(beefyERC4626)), oldExpectedBeefyShares + expectedBeefyShares);
+  }
+
+  function testDepositWithDecreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
+    // THIS TEST WILL ALWAYS FAIL
+    // Beefys contracts assume that assets will only increase or be reduced via withdraw.
+    // They dont handle the case of an exploit or similar in which assets reduce without IOU supply reducing.
+    // So in the case this should happen our contracts cant deal with it gracefully.
+    // This should never happen since beefys contracts just send the token along to a staking contract which simply adds rewards to the underlying balances
+    /* =============== ACTUAL TEST =============== */
+    /*
+    sendUnderlyingToken(depositAmount, address(this));
+    uint256 oldExpectedBeefyShares = (depositAmount * initalBeefySupply) / initalBeefyBalance;
+    uint256 oldExpected4626Shares = beefyERC4626.previewDeposit(depositAmount);
+    deposit(address(this), depositAmount);
+    // Decrease the share price
+    decreaseAssetsInVault();
+    uint256 expectedBeefyShares = (depositAmount * beefyVault.totalSupply()) / beefyVault.balance();
+    uint256 previewErc4626Shares = beefyERC4626.previewDeposit(depositAmount);
+    uint256 expected4626Shares = depositAmount.mulDivDown(beefyERC4626.totalSupply(), beefyERC4626.totalAssets());
+    deposit(address(this), depositAmount);
+    // Test that we minted the correct amount of token
+    assertEq(beefyERC4626.balanceOf(address(this)), oldExpected4626Shares + previewErc4626Shares);
+    // Test that we got less shares on the second mint after assets in the vault increased
+    assertGt(previewErc4626Shares, oldExpected4626Shares, "!new shares > old Shares");
+    assertEq(previewErc4626Shares, expected4626Shares, "!previewShares == expectedShares");
+    // Test that the ERC4626 holds the expected amount of beefy shares
+    assertEq(beefyVault.balanceOf(address(beefyERC4626)), oldExpectedBeefyShares + expectedBeefyShares);
+    */
   }
 
   function testMultipleDeposit() public shouldRun(forChains(BSC_MAINNET)) {
@@ -500,6 +535,47 @@ contract BeefyERC4626Test is BaseTest {
     );
 
     assertEq(underlyingToken.balanceOf(address(beefyERC4626)), 0, "Beefy erc4626 locked amount checking");
+  }
+
+  function testWithdrawWithDecreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
+    // THIS TEST WILL ALWAYS FAIL
+    // Beefys contracts assume that assets will only increase or be reduced via withdraw.
+    // They dont handle the case of an exploit or similar in which assets reduce without IOU supply reducing.
+    // So in the case this should happen our contracts cant deal with it gracefully.
+    // This should never happen since beefys contracts just send the token along to a staking contract which simply adds rewards to the underlying balances
+    /* =============== ACTUAL TEST =============== */
+    /*
+      sendUnderlyingToken(depositAmount, address(this));
+      uint256 beefyShareBal = (depositAmount * initalBeefySupply) / initalBeefyBalance;
+      deposit(address(this), depositAmount);
+      uint256 withdrawalAmount = 10e18;
+      uint256 oldExpectedErc4626SharesNeeded = beefyERC4626.previewWithdraw(withdrawalAmount);
+      uint256 oldExpectedBeefySharesNeeded = oldExpectedErc4626SharesNeeded.mulDivUp(
+        beefyVault.balanceOf(address(beefyERC4626)),
+        beefyERC4626.totalSupply()
+      );
+      beefyERC4626.withdraw(withdrawalAmount, address(this), address(this));
+      // Increase the share price
+      increaseAssetsInVault();
+      uint256 expectedErc4626SharesNeeded = beefyERC4626.previewWithdraw(withdrawalAmount);
+      uint256 expectedBeefySharesNeeded = expectedErc4626SharesNeeded.mulDivUp(
+        beefyVault.balanceOf(address(beefyERC4626)),
+        beefyERC4626.totalSupply()
+      );
+      beefyERC4626.withdraw(withdrawalAmount, address(this), address(this));
+      // Test that we minted the correct amount of token
+      assertEq(
+        beefyERC4626.balanceOf(address(this)),
+        depositAmount - (oldExpectedErc4626SharesNeeded + expectedErc4626SharesNeeded)
+      );
+      // Test that we got less shares on the second mint after assets in the vault increased
+      assertLe(expectedErc4626SharesNeeded, oldExpectedErc4626SharesNeeded, "!new shares < old Shares");
+      // Test that the ERC4626 holds the expected amount of beefy shares
+      assertEq(
+        beefyVault.balanceOf(address(beefyERC4626)),
+        beefyShareBal - (oldExpectedBeefySharesNeeded + expectedBeefySharesNeeded)
+      );
+      */
   }
 
   function testRedeem() public shouldRun(forChains(BSC_MAINNET)) {

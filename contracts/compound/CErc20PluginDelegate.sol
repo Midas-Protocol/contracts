@@ -30,24 +30,24 @@ contract CErc20PluginDelegate is CErc20Delegate {
     require(msg.sender == address(this) || hasAdminRights(), "needs admin rights");
 
     address _plugin = abi.decode(data, (address));
-    require(_plugin != address(0), "0");
+    if (_plugin != address(0)) {
+      require(
+        IFuseFeeDistributor(fuseAdmin).pluginImplementationWhitelist(address(this), _plugin),
+        "new plugin needs to be whitelisted"
+      );
 
-    require(
-      IFuseFeeDistributor(fuseAdmin).pluginImplementationWhitelist(address(this), _plugin),
-      "new plugin needs to be whitelisted"
-    );
+      if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
+        plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
+      }
 
-    if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
-      plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
-    }
+      plugin = IERC4626(_plugin);
 
-    plugin = IERC4626(_plugin);
+      EIP20Interface(underlying).approve(_plugin, type(uint256).max);
 
-    EIP20Interface(underlying).approve(_plugin, type(uint256).max);
-
-    uint256 amount = EIP20Interface(underlying).balanceOf(address(this));
-    if (amount != 0) {
-      deposit(amount);
+      uint256 amount = EIP20Interface(underlying).balanceOf(address(this));
+      if (amount != 0) {
+        deposit(amount);
+      }
     }
   }
 

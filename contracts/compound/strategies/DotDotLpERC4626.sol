@@ -3,10 +3,10 @@ pragma solidity ^0.8.10;
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
-
-import { ERC4626 } from "solmate/mixins/ERC4626.sol";
+import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
+import { RewardsClaimer } from "fuse-flywheel/utils/RewardsClaimer.sol";
 
 interface ILpDepositor {
   // user -> pool -> deposit amount
@@ -29,6 +29,8 @@ interface ILpDepositor {
     address[] calldata _tokens,
     uint256 _maxBondAmount
   ) external;
+
+  function depositTokens(address lpToken) external view returns (address);
 }
 
 /**
@@ -40,7 +42,7 @@ interface ILpDepositor {
  * and claims rewards from the same contract
  *
  */
-contract DotDotLpERC4626 is ERC4626 {
+contract DotDotLpERC4626 is MidasERC4626, RewardsClaimer {
   using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
@@ -63,13 +65,16 @@ contract DotDotLpERC4626 is ERC4626 {
     ERC20 _asset,
     FlywheelCore _dddFlywheel,
     FlywheelCore _epxFlywheel,
-    ILpDepositor _lpDepositor
+    ILpDepositor _lpDepositor,
+    address _rewardsDestination,
+    ERC20[] memory _rewardTokens
   )
-    ERC4626(
+    MidasERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
       string(abi.encodePacked("mv", _asset.symbol()))
     )
+    RewardsClaimer(_rewardsDestination, _rewardTokens)
   {
     dddFlywheel = _dddFlywheel;
     epxFlywheel = _epxFlywheel;
@@ -77,9 +82,6 @@ contract DotDotLpERC4626 is ERC4626 {
 
     // lpDepositor wants an address array for claiming
     assetAsArray.push(address(_asset));
-
-    ERC20(dddFlywheel.rewardToken()).approve(address(dddFlywheel.flywheelRewards()), type(uint256).max);
-    ERC20(epxFlywheel.rewardToken()).approve(address(epxFlywheel.flywheelRewards()), type(uint256).max);
 
     asset.approve(address(lpDepositor), type(uint256).max);
   }
@@ -89,7 +91,7 @@ contract DotDotLpERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    return lpDepositor.userBalances(address(this), address(asset));
+    return paused() ? asset.balanceOf(address(this)) : lpDepositor.userBalances(address(this), address(asset));
   }
 
   /// @notice Calculates the total amount of underlying tokens the user holds.
@@ -109,5 +111,25 @@ contract DotDotLpERC4626 is ERC4626 {
   function beforeWithdraw(uint256 amount, uint256) internal override {
     lpDepositor.withdraw(address(this), address(asset), amount);
     lpDepositor.claim(address(this), assetAsArray, 0);
+  }
+
+  function beforeClaim() internal override {
+    lpDepositor.claim(address(this), assetAsArray, 0);
+  }
+
+  /* ========== EMERGENCY FUNCTIONS ========== */
+
+  function emergencyWithdrawAndPause() external override onlyOwner {
+    lpDepositor.withdraw(
+      address(this),
+      address(asset),
+      ERC20(lpDepositor.depositTokens(address(asset))).balanceOf(address(this))
+    );
+    _pause();
+  }
+
+  function unpause() external override onlyOwner {
+    _unpause();
+    lpDepositor.deposit(address(this), address(asset), asset.balanceOf(address(this)));
   }
 }
