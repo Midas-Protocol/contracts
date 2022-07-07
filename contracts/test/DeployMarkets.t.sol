@@ -293,7 +293,6 @@ contract DeployMarketsTest is Test {
 }
 
 contract CErc20DelegateTest is BaseTest {
-
   Comptroller comptroller;
 
   CErc20Delegate cErc20Delegate;
@@ -322,7 +321,7 @@ contract CErc20DelegateTest is BaseTest {
         CErc20Delegate delegate = CErc20Delegate(address(markets[j]));
         address implementation = delegate.implementation();
 
-//        emit log_address(implementation);
+        //        emit log_address(implementation);
         bool added = false;
         for (uint8 k = 0; k < implementationsSet.length; k++) {
           if (implementationsSet[k] == implementation) {
@@ -336,14 +335,17 @@ contract CErc20DelegateTest is BaseTest {
 
     emit log("listing the set");
     for (uint8 k = 0; k < implementationsSet.length; k++) {
-      (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData)
-        = fuseAdmin.latestCErc20Delegate(implementationsSet[k]);
+      (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = fuseAdmin
+        .latestCErc20Delegate(implementationsSet[k]);
 
       bool whitelisted = fuseAdmin.cErc20DelegateWhitelist(implementationsSet[k], latestCErc20Delegate, allowResign);
-            emit log_address(implementationsSet[k]);
+      emit log_address(implementationsSet[k]);
       //      if (whitelisted) emit log("whitelisted");
 
-      assertTrue(whitelisted || implementationsSet[k] == latestCErc20Delegate, "no whitelisted implementation for old implementation");
+      assertTrue(
+        whitelisted || implementationsSet[k] == latestCErc20Delegate,
+        "no whitelisted implementation for old implementation"
+      );
     }
   }
 }

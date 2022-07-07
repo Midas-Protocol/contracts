@@ -33,11 +33,9 @@ contract CErc20PluginDelegate is CErc20Delegate {
     require(_plugin != address(0), "0");
 
     require(
-      IFuseFeeDistributor(fuseAdmin).pluginImplementationWhitelist(
-      address(this),
-      _plugin
-    ), "new plugin needs to be whitelisted");
-
+      IFuseFeeDistributor(fuseAdmin).pluginImplementationWhitelist(address(this), _plugin),
+      "new plugin needs to be whitelisted"
+    );
 
     if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
       plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));

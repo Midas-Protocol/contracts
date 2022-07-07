@@ -267,9 +267,9 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
    */
   function latestPluginImplementation(address oldImplementation) external view returns (address) {
     return
-    _latestPluginImplementation[oldImplementation] != address(0)
-    ? _latestPluginImplementation[oldImplementation]
-    : oldImplementation;
+      _latestPluginImplementation[oldImplementation] != address(0)
+        ? _latestPluginImplementation[oldImplementation]
+        : oldImplementation;
   }
 
   /**
@@ -277,10 +277,7 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
    * @param oldImplementation The old plugin implementation address to upgrade from.
    * @param newImplementation Latest plugin implementation address.
    */
-  function _setLatestPluginImplementation(address oldImplementation, address newImplementation)
-  external
-  onlyOwner
-  {
+  function _setLatestPluginImplementation(address oldImplementation, address newImplementation) external onlyOwner {
     _latestPluginImplementation[oldImplementation] = newImplementation;
   }
 
@@ -297,8 +294,8 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   ) external onlyOwner {
     require(
       newImplementations.length > 0 &&
-      newImplementations.length == oldImplementations.length &&
-      newImplementations.length == statuses.length,
+        newImplementations.length == oldImplementations.length &&
+        newImplementations.length == statuses.length,
       "No plugin implementations supplied or array lengths not equal."
     );
     for (uint256 i = 0; i < newImplementations.length; i++)
