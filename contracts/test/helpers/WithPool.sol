@@ -183,7 +183,7 @@ contract WithPool {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20Delegate),
+        address(cErc20PluginDelegate),
         abi.encode(address(_erc4626)),
         uint256(1),
         uint256(0)
@@ -192,11 +192,7 @@ contract WithPool {
     );
   }
 
-  function deployCErc20PluginRewardsDelegate(
-    ERC4626 _mockERC4626Dynamic,
-    FuseFlywheelCore _flywheel,
-    uint256 _collateralFactorMantissa
-  ) public {
+  function deployCErc20PluginRewardsDelegate(ERC4626 _mockERC4626Dynamic, uint256 _collateralFactorMantissa) public {
     comptroller._deployMarket(
       false,
       abi.encode(
@@ -206,8 +202,8 @@ contract WithPool {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20Delegate),
-        abi.encode(address(_mockERC4626Dynamic), address(_flywheel), address(underlyingToken)),
+        address(cErc20PluginRewardsDelegate),
+        abi.encode(address(_mockERC4626Dynamic)),
         uint256(1),
         uint256(0)
       ),
