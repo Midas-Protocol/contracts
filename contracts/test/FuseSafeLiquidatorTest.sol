@@ -55,15 +55,15 @@ contract FuseSafeLiquidatorTest is BaseTest {
   }
 
   function testUpgrade() public {
-//    emit log_address(fsl.owner());
+    //    emit log_address(fsl.owner());
 
     // in case these slots start to get used, please redeploy the FSL
     // with a larger storage gap to protect the owner variable of OwnableUpgradeable
     // from being overwritten by the FuseSafeLiquidator storage
     for (uint256 i = 40; i < 51; i++) {
-//      emit log_uint(i);
+      //      emit log_uint(i);
       address atSloti = address(uint160(uint256(vm.load(address(fsl), bytes32(i)))));
-//      emit log_address(atSloti);
+      //      emit log_address(atSloti);
       assertEq(
         atSloti,
         address(0),
