@@ -198,6 +198,12 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
+    address[] memory plugins = new address[](1);
+    plugins[0] = address(mockERC4626);
+    bool[] memory arrayOfTrue = new bool[](1);
+    arrayOfTrue[0] = true;
+    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
+
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
@@ -235,6 +241,12 @@ contract DeployMarketsTest is Test {
     flywheel.setFlywheelRewards(rewards);
 
     mockERC4626Dynamic = new MockERC4626Dynamic(ERC20(address(underlyingToken)), FlywheelCore(address(flywheel)));
+
+    address[] memory plugins = new address[](1);
+    plugins[0] = address(mockERC4626Dynamic);
+    bool[] memory arrayOfTrue = new bool[](1);
+    arrayOfTrue[0] = true;
+    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
 
     marketKey = ERC20(address(mockERC4626Dynamic));
     flywheel.addStrategyForRewards(marketKey);
