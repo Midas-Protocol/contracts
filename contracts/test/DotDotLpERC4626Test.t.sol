@@ -131,17 +131,8 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     underlyingToken.transfer(address(1), 200e18); // transfer doesnt work
   }
 
-  function returnString(string memory a) public view returns (string memory) {
-    return a;
-  }
-
-  function testFail() public shouldRun(forChains(BSC_MAINNET)) {
-    assertEq(uint8(1), uint8(0));
-    assertEq(this.returnString("a"), this.returnString("b"));
-  }
-
   function testInitializedValues() public shouldRun(forChains(BSC_MAINNET)) {
-    assertEq(dotDotERC4626.name(), "Midas 3brl Vault");
+    assertEq(dotDotERC4626.name(), "Midas 2brl Vault");
     assertEq(dotDotERC4626.symbol(), "mv2brl");
     assertEq(address(dotDotERC4626.asset()), address(underlyingToken));
     assertEq(address(dotDotERC4626.lpDepositor()), address(lpDepositor));
