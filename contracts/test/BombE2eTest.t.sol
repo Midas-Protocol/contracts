@@ -86,6 +86,12 @@ contract BombE2eTest is WithPool, BaseTest {
     MockERC4626 erc4626 = MockERC4626(0x92C6C8278509A69f5d601Eea1E6273F304311bFe);
     MockBnb bnb = MockBnb(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
 
+    address[] memory plugins = new address[](1);
+    plugins[0] = address(erc4626);
+    bool[] memory arrayOfTrue = new bool[](1);
+    arrayOfTrue[0] = true;
+    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
+
     deployCErc20PluginDelegate(erc4626, 0.9e18);
     deployCErc20Delegate(address(bnb), "BNB", "bnb", 0.9e18);
 
@@ -186,6 +192,12 @@ contract BombE2eTest is WithPool, BaseTest {
 
   function testDeployCErc20PluginDelegate() public shouldRun(forChains(BSC_MAINNET)) {
     MockERC4626 erc4626 = MockERC4626(0x92C6C8278509A69f5d601Eea1E6273F304311bFe);
+
+    address[] memory plugins = new address[](1);
+    plugins[0] = address(erc4626);
+    bool[] memory arrayOfTrue = new bool[](1);
+    arrayOfTrue[0] = true;
+    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
 
     vm.roll(1);
     deployCErc20PluginDelegate(erc4626, 0.9e18);
