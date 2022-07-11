@@ -180,6 +180,12 @@ contract DeployMarketsTest is Test {
   function testDeployCErc20PluginDelegate() public {
     mockERC4626 = new MockERC4626(ERC20(address(underlyingToken)));
 
+    address[] memory plugins = new address[](1);
+    plugins[0] = address(mockERC4626);
+    bool[] memory arrayOfTrue = new bool[](1);
+    arrayOfTrue[0] = true;
+    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
+
     vm.roll(1);
     comptroller._deployMarket(
       false,
@@ -198,17 +204,10 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    address[] memory plugins = new address[](1);
-    plugins[0] = address(mockERC4626);
-    bool[] memory arrayOfTrue = new bool[](1);
-    arrayOfTrue[0] = true;
-    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
-
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
-    cToken._setImplementationSafe(address(cErc20PluginDelegate), false, abi.encode(address(mockERC4626)));
-    assertEq(address(cToken.plugin()), address(mockERC4626));
+    assertEq(address(cToken.plugin()), address(mockERC4626), "!plugin == erc4626");
 
     underlyingToken.approve(address(cToken), 1e36);
     address[] memory cTokens = new address[](1);
@@ -272,12 +271,7 @@ contract DeployMarketsTest is Test {
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
 
-    cToken._setImplementationSafe(
-      address(cErc20PluginRewardsDelegate),
-      false,
-      abi.encode(address(mockERC4626Dynamic), address(flywheel), address(underlyingToken))
-    );
-    assertEq(address(cToken.plugin()), address(mockERC4626Dynamic));
+    assertEq(address(cToken.plugin()), address(mockERC4626Dynamic), "!plugin == erc4626");
     assertEq(underlyingToken.allowance(address(cToken), address(mockERC4626Dynamic)), type(uint256).max);
     assertEq(underlyingToken.allowance(address(cToken), address(flywheel)), 0);
 

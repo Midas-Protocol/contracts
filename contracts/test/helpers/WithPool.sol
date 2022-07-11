@@ -174,6 +174,12 @@ contract WithPool {
   }
 
   function deployCErc20PluginDelegate(ERC4626 _erc4626, uint256 _collateralFactorMantissa) public {
+    address[] memory plugins = new address[](1);
+    plugins[0] = address(_erc4626);
+    bool[] memory arrayOfTrue = new bool[](1);
+    arrayOfTrue[0] = true;
+    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
+
     comptroller._deployMarket(
       false,
       abi.encode(
@@ -193,6 +199,12 @@ contract WithPool {
   }
 
   function deployCErc20PluginRewardsDelegate(ERC4626 _mockERC4626Dynamic, uint256 _collateralFactorMantissa) public {
+    address[] memory plugins = new address[](1);
+    plugins[0] = address(_mockERC4626Dynamic);
+    bool[] memory arrayOfTrue = new bool[](1);
+    arrayOfTrue[0] = true;
+    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
+
     comptroller._deployMarket(
       false,
       abi.encode(

@@ -263,7 +263,6 @@ contract BeamE2eTest is WithPool, BaseTest {
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
-    cToken._setImplementationSafe(address(cErc20PluginDelegate), false, abi.encode(address(erc4626)));
     assertEq(address(cToken.plugin()), address(erc4626));
 
     underlyingToken.approve(address(cToken), 1e36);

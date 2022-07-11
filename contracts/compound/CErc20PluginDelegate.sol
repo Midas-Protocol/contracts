@@ -31,15 +31,15 @@ contract CErc20PluginDelegate is CErc20Delegate {
 
     address _plugin = abi.decode(data, (address));
     if (_plugin != address(0)) {
-      if (address(plugin) != address(0)) {
-        require(
-          IFuseFeeDistributor(fuseAdmin).pluginImplementationWhitelist(address(plugin), _plugin),
-          "plugin implementation not whitelisted"
-        );
+      address oldImplementation = address(plugin) != address(0) ? address(plugin) : _plugin;
 
-        if (plugin.balanceOf(address(this)) != 0) {
-          plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
-        }
+      require(
+        IFuseFeeDistributor(fuseAdmin).pluginImplementationWhitelist(oldImplementation, _plugin),
+        "plugin implementation not whitelisted"
+      );
+
+      if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
+        plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
       }
 
       plugin = IERC4626(_plugin);

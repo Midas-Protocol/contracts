@@ -98,8 +98,6 @@ contract BombE2eTest is WithPool, BaseTest {
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[0]));
 
-    cToken._setImplementationSafe(address(cErc20PluginDelegate), false, abi.encode(address(erc4626)));
-
     CErc20Delegate cBnbToken = CErc20Delegate(address(allMarkets[1]));
 
     address[] memory cTokens = new address[](2);
@@ -193,19 +191,12 @@ contract BombE2eTest is WithPool, BaseTest {
   function testDeployCErc20PluginDelegate() public shouldRun(forChains(BSC_MAINNET)) {
     MockERC4626 erc4626 = MockERC4626(0x92C6C8278509A69f5d601Eea1E6273F304311bFe);
 
-    address[] memory plugins = new address[](1);
-    plugins[0] = address(erc4626);
-    bool[] memory arrayOfTrue = new bool[](1);
-    arrayOfTrue[0] = true;
-    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
-
     vm.roll(1);
     deployCErc20PluginDelegate(erc4626, 0.9e18);
 
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
-    cToken._setImplementationSafe(address(cErc20PluginDelegate), false, abi.encode(address(erc4626)));
     assertEq(address(cToken.plugin()), address(erc4626));
 
     underlyingToken.approve(address(cToken), 1e36);
@@ -258,11 +249,6 @@ contract BombE2eTest is WithPool, BaseTest {
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
 
-    cToken._setImplementationSafe(
-      address(cErc20PluginRewardsDelegate),
-      false,
-      abi.encode(address(mockERC4626Dynamic), address(flywheel), address(underlyingToken))
-    );
     assertEq(address(cToken.plugin()), address(mockERC4626Dynamic));
     assertEq(underlyingToken.allowance(address(cToken), address(mockERC4626Dynamic)), type(uint256).max);
     assertEq(underlyingToken.allowance(address(cToken), address(flywheel)), 0);
