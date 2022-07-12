@@ -399,10 +399,7 @@ contract DeployMarketsTest is Test {
 
     address implBefore = address(cToken.plugin());
     whitelistPlugin(address(pluginA), address(pluginB));
-    fuseAdmin._setLatestPluginImplementation(
-      address(pluginA),
-      address(pluginB)
-    );
+    fuseAdmin._setLatestPluginImplementation(address(pluginA), address(pluginB));
     fuseAdmin._upgradePluginToLatestImplementation(address(cToken));
     address implAfter = address(cToken.plugin());
 
@@ -419,11 +416,7 @@ contract DeployMarketsTest is Test {
     newCErc20Implementations[0] = address(newImpl);
     arrayOfTrue[0] = true;
 
-    fuseAdmin._editPluginImplementationWhitelist(
-      oldCErC20Implementations,
-      newCErc20Implementations,
-      arrayOfTrue
-    );
+    fuseAdmin._editPluginImplementationWhitelist(oldCErC20Implementations, newCErc20Implementations, arrayOfTrue);
   }
 }
 
