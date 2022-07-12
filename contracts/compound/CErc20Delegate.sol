@@ -19,13 +19,12 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
    * @notice Called by the delegator on a delegate to initialize it for duty
    * @param data The encoded bytes data for any initialization
    */
-  function _becomeImplementation(bytes calldata data) external virtual override {
-    require(msg.sender == address(this) || hasAdminRights(), "!self");
+  function _becomeImplementation(bytes memory data) public virtual override {
+    require(hasAdminRights(), "only admins can call _becomeImplementation");
 
     // Make sure admin storage is set up correctly
-    __admin = payable(0);
-    __adminHasRights = false;
-    __fuseAdminHasRights = false;
+    __adminHasRights = true;
+    __fuseAdminHasRights = true;
   }
 
   /**
@@ -64,12 +63,16 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     // Store new implementation
     implementation = implementation_;
 
-    // Call _becomeImplementation externally (delegating to new delegate's code)
-    _functionCall(
-      address(this),
-      abi.encodeWithSignature("_becomeImplementation(bytes)", becomeImplementationData),
-      "!become"
-    );
+    if (oldImplementation == address(0)) {
+      // no need to delegate when initializing
+      _becomeImplementation(becomeImplementationData);
+    } else {
+      // Call _becomeImplementation externally (delegating to new delegate's code)
+      delegateTo(
+        implementation_,
+        abi.encodeWithSignature("_becomeImplementation(bytes)", becomeImplementationData)
+      );
+    }
 
     // Emit event
     emit NewImplementation(oldImplementation, implementation);
@@ -100,12 +103,13 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
    * @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary
    */
   function _prepare() external payable override {
-    if (msg.sender != address(this) && ComptrollerV3Storage(address(comptroller)).autoImplementation()) {
+    if (hasAdminRights() && ComptrollerV3Storage(address(comptroller)).autoImplementation()) {
       (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = IFuseFeeDistributor(
         fuseAdmin
       ).latestCErc20Delegate(implementation);
-      if (implementation != latestCErc20Delegate)
+      if (implementation != latestCErc20Delegate) {
         _setImplementationInternal(latestCErc20Delegate, allowResign, becomeImplementationData);
+      }
     }
   }
 }

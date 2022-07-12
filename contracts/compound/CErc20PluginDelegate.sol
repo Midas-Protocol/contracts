@@ -15,6 +15,8 @@ import "../external/uniswap/IUniswapV2Pair.sol";
  * It is also capable of delegating reward functionality to a PluginRewardsDistributor
  */
 contract CErc20PluginDelegate is CErc20Delegate {
+  event NewPluginImplementation(address oldImpl, address newImpl);
+
   /**
    * @notice Plugin address
    */
@@ -26,8 +28,12 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @notice Delegate interface to become the implementation
    * @param data The encoded arguments for becoming
    */
-  function _becomeImplementation(bytes calldata data) external virtual override {
-    require(msg.sender == address(this) || hasAdminRights(), "needs admin rights");
+  function _becomeImplementation(bytes memory data) public virtual override {
+    require(hasAdminRights(), "only admins can call _becomeImplementation");
+
+    // Make sure admin storage is set up correctly
+    __adminHasRights = true;
+    __fuseAdminHasRights = true;
 
     address _plugin = abi.decode(data, (address));
     if (_plugin != address(0)) {
@@ -50,6 +56,8 @@ contract CErc20PluginDelegate is CErc20Delegate {
       if (amount != 0) {
         deposit(amount);
       }
+
+      emit NewPluginImplementation(address(plugin), _plugin);
     }
   }
 

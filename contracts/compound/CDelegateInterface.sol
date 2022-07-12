@@ -31,11 +31,28 @@ abstract contract CDelegateInterface is CDelegationStorage {
    * @dev Should revert if any issues arise which make it unfit for delegation
    * @param data The encoded bytes data for any initialization
    */
-  function _becomeImplementation(bytes calldata data) external virtual;
+  function _becomeImplementation(bytes calldata data) public virtual;
 
   /**
    * @notice Function called before all delegator functions
    * @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary
    */
   function _prepare() external payable virtual;
+
+  /**
+   * @notice Internal method to delegate execution to another contract
+   * @dev It returns to the external caller whatever the implementation returns or forwards reverts
+   * @param callee The contract to delegatecall
+   * @param data The raw data to delegatecall
+   * @return The returned bytes from the delegatecall
+   */
+  function delegateTo(address callee, bytes memory data) internal returns (bytes memory) {
+    (bool success, bytes memory returnData) = callee.delegatecall(data);
+    assembly {
+      if eq(success, 0) {
+        revert(add(returnData, 0x20), returndatasize())
+      }
+    }
+    return returnData;
+  }
 }
