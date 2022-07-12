@@ -233,8 +233,8 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   ) external onlyOwner {
     require(
       newImplementations.length > 0 &&
-      newImplementations.length == oldImplementations.length &&
-      newImplementations.length == statuses.length,
+        newImplementations.length == oldImplementations.length &&
+        newImplementations.length == statuses.length,
       "No plugin implementations supplied or array lengths not equal."
     );
     for (uint256 i = 0; i < newImplementations.length; i++)
@@ -256,9 +256,9 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   ) external onlyOwner {
     require(
       newImplementations.length > 0 &&
-      newImplementations.length == oldImplementations.length &&
-      newImplementations.length == allowResign.length &&
-      newImplementations.length == statuses.length,
+        newImplementations.length == oldImplementations.length &&
+        newImplementations.length == allowResign.length &&
+        newImplementations.length == statuses.length,
       "No CEtherDelegate implementations supplied or array lengths not equal."
     );
     for (uint256 i = 0; i < newImplementations.length; i++)
@@ -280,9 +280,9 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   ) external onlyOwner {
     require(
       newImplementations.length > 0 &&
-      newImplementations.length == oldImplementations.length &&
-      newImplementations.length == allowResign.length &&
-      newImplementations.length == statuses.length,
+        newImplementations.length == oldImplementations.length &&
+        newImplementations.length == allowResign.length &&
+        newImplementations.length == statuses.length,
       "No CErc20Delegate implementations supplied or array lengths not equal."
     );
     for (uint256 i = 0; i < newImplementations.length; i++)
@@ -302,8 +302,8 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   ) external onlyOwner {
     require(
       newImplementations.length > 0 &&
-      newImplementations.length == oldImplementations.length &&
-      newImplementations.length == statuses.length,
+        newImplementations.length == oldImplementations.length &&
+        newImplementations.length == statuses.length,
       "No Comptroller implementations supplied or array lengths not equal."
     );
     for (uint256 i = 0; i < newImplementations.length; i++)
@@ -315,9 +315,9 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
    */
   function latestComptrollerImplementation(address oldImplementation) external view returns (address) {
     return
-    _latestComptrollerImplementation[oldImplementation] != address(0)
-    ? _latestComptrollerImplementation[oldImplementation]
-    : oldImplementation;
+      _latestComptrollerImplementation[oldImplementation] != address(0)
+        ? _latestComptrollerImplementation[oldImplementation]
+        : oldImplementation;
   }
 
   /**
@@ -326,8 +326,8 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
    * @param newImplementation Latest `Comptroller` implementation address.
    */
   function _setLatestComptrollerImplementation(address oldImplementation, address newImplementation)
-  external
-  onlyOwner
+    external
+    onlyOwner
   {
     _latestComptrollerImplementation[oldImplementation] = newImplementation;
   }
