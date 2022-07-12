@@ -296,6 +296,135 @@ contract DeployMarketsTest is Test {
     assertEq(mockERC4626Dynamic.balanceOf(address(cToken)), 10000000 - 1000);
     assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10000000 + 1000);
   }
+
+  function testUpgradeCDelegatorToLatestImplementation() public {
+    mockERC4626 = new MockERC4626(ERC20(address(underlyingToken)));
+
+    address[] memory plugins = new address[](1);
+    plugins[0] = address(mockERC4626);
+    bool[] memory arrayOfTrue = new bool[](1);
+    arrayOfTrue[0] = true;
+    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
+
+    vm.roll(1);
+    comptroller._deployMarket(
+      false,
+      abi.encode(
+        address(underlyingToken),
+        ComptrollerInterface(address(comptroller)),
+        payable(address(fuseAdmin)),
+        InterestRateModel(address(interestModel)),
+        "cUnderlyingToken",
+        "CUT",
+        address(cErc20PluginDelegate),
+        abi.encode(address(mockERC4626)),
+        uint256(1),
+        uint256(0)
+      ),
+      0.9e18
+    );
+
+    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
+
+    assertEq(address(cToken.plugin()), address(mockERC4626), "!plugin == erc4626");
+
+    address implBefore = cToken.implementation();
+    // just testing to replace the plugin delegate with the plugin rewards delegate
+    whitelistCErc20Delegate(address(cErc20PluginDelegate), address(cErc20PluginRewardsDelegate));
+    fuseAdmin._setLatestCErc20Delegate(
+      address(cErc20PluginDelegate),
+      address(cErc20PluginRewardsDelegate),
+      false,
+      abi.encode(address(0))
+    );
+    fuseAdmin._upgradeCDelegatorToLatestImplementation(address(cToken));
+    address implAfter = cToken.implementation();
+
+    assertEq(implBefore, address(cErc20PluginDelegate), "the old impl should be the plugin delegate");
+    assertEq(implAfter, address(cErc20PluginRewardsDelegate), "the new impl should be the plugin rewards delegate");
+  }
+
+  function whitelistCErc20Delegate(address oldImpl, address newImpl) public {
+    bool[] memory arrayOfTrue = new bool[](1);
+    bool[] memory arrayOfFalse = new bool[](1);
+    address[] memory oldCErC20Implementations = new address[](1);
+    address[] memory newCErc20Implementations = new address[](1);
+
+    arrayOfTrue[0] = true;
+    arrayOfFalse[0] = false;
+    oldCErC20Implementations[0] = address(oldImpl);
+    newCErc20Implementations[0] = address(newImpl);
+
+    fuseAdmin._editCErc20DelegateWhitelist(
+      oldCErC20Implementations,
+      newCErc20Implementations,
+      arrayOfFalse,
+      arrayOfTrue
+    );
+  }
+
+  function testUpgradePluginToLatestImplementation() public {
+    MockERC4626 pluginA = new MockERC4626(ERC20(address(underlyingToken)));
+    MockERC4626 pluginB = new MockERC4626(ERC20(address(underlyingToken)));
+
+    address[] memory plugins = new address[](1);
+    plugins[0] = address(pluginA);
+    bool[] memory arrayOfTrue = new bool[](1);
+    arrayOfTrue[0] = true;
+    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
+
+    vm.roll(1);
+    comptroller._deployMarket(
+      false,
+      abi.encode(
+        address(underlyingToken),
+        ComptrollerInterface(address(comptroller)),
+        payable(address(fuseAdmin)),
+        InterestRateModel(address(interestModel)),
+        "cUnderlyingToken",
+        "CUT",
+        address(cErc20PluginDelegate),
+        abi.encode(address(pluginA)),
+        uint256(1),
+        uint256(0)
+      ),
+      0.9e18
+    );
+
+    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
+
+    assertEq(address(cToken.plugin()), address(pluginA), "!plugin == erc4626");
+
+    address implBefore = address(cToken.plugin());
+    whitelistPlugin(address(pluginA), address(pluginB));
+    fuseAdmin._setLatestPluginImplementation(
+      address(pluginA),
+      address(pluginB)
+    );
+    fuseAdmin._upgradePluginToLatestImplementation(address(cToken));
+    address implAfter = address(cToken.plugin());
+
+    assertEq(implBefore, address(pluginA), "the old impl should be the A plugin");
+    assertEq(implAfter, address(pluginB), "the new impl should be the B plugin");
+  }
+
+  function whitelistPlugin(address oldImpl, address newImpl) public {
+    address[] memory oldCErC20Implementations = new address[](1);
+    address[] memory newCErc20Implementations = new address[](1);
+    bool[] memory arrayOfTrue = new bool[](1);
+
+    oldCErC20Implementations[0] = address(oldImpl);
+    newCErc20Implementations[0] = address(newImpl);
+    arrayOfTrue[0] = true;
+
+    fuseAdmin._editPluginImplementationWhitelist(
+      oldCErC20Implementations,
+      newCErc20Implementations,
+      arrayOfTrue
+    );
+  }
 }
 
 contract CErc20DelegateTest is BaseTest {

@@ -440,15 +440,11 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   /**
    * @dev Upgrades an upgradeable market to the latest implementation
    * @param cDelegator the proxy address
-   * @param oldImplementation the old implementation address
    * @return if the implementation was upgraded or not
    */
-  function _upgradeCDelegatorToLatestImplementation(address cDelegator, address oldImplementation)
-    external
-    onlyOwner
-    returns (bool)
-  {
-    // a simple query by an admin should trigger _prepare() and the upgrade to the latest implementation
+  function _upgradeCDelegatorToLatestImplementation(address cDelegator) external onlyOwner returns (bool) {
+    address oldImplementation = CDelegateInterface(cDelegator).implementation();
+    CDelegateInterface(cDelegator)._prepare();
     address newImplementation = CDelegateInterface(cDelegator).implementation();
     return newImplementation != oldImplementation;
   }
@@ -456,18 +452,13 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   /**
    * @dev Upgrades a plugin of a CErc20PluginDelegate market to the latest implementation
    * @param cDelegator the proxy address
-   * @param becomeImplementationData the ABI encoded _becomeImplementation data
    * @return if the plugin was upgraded or not
    */
-  function _upgradePluginToLatestImplementation(address cDelegator, bytes calldata becomeImplementationData)
-    external
-    onlyOwner
-    returns (bool)
-  {
+  function _upgradePluginToLatestImplementation(address cDelegator) external onlyOwner returns (bool) {
     CErc20PluginDelegate market = CErc20PluginDelegate(cDelegator);
 
     address oldPluginAddress = address(market.plugin());
-    market._becomeImplementation(becomeImplementationData);
+    market._becomeImplementation(abi.encode(_latestPluginImplementation[oldPluginAddress]));
     address newPluginAddress = address(market.plugin());
 
     return newPluginAddress != oldPluginAddress;
