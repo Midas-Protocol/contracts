@@ -1,20 +1,20 @@
 ---
 name: Feature Request
-about: Suggest an idea for this project
+about: For any new feature requests (resolves an issue, UX improvement or addition,
+  etc)
 title: 'FEATURE: '
 labels: ":sparkles: [Feature]"
 assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+<ins>**Is your feature request related to a problem? Please describe with screenshots, if possible.**</ins> <br>
+[ ] Yes
+[ ] No
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+<ins>**Describe the solution or new feature you'd like.**</ins>  _How can we improve our product?  What will bring more users to our protocol?_ <br>
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+<ins>**Describe alternatives that would satisfy requirements.**</ins> _What's an alternative that could satisfy the same requirements I was looking for?  Will it be harder?  Will it require more resources?._ <br>
+
+<ins>**Additional context.**</ins> <br> _Any information that's relevant that doesn't fit in the categories above?_ <br>
