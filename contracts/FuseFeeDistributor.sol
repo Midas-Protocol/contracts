@@ -318,6 +318,27 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   mapping(address => CDelegateUpgradeData) public _latestCErc20Delegate;
 
   /**
+   * @dev Latest CEtherDelegate implementation for each existing implementation.
+   */
+  mapping(address => CDelegateUpgradeData) public _latestCEtherDelegate;
+
+  /**
+   * @notice Maps Unitroller (Comptroller proxy) addresses to the proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
+   * @dev A value of 0 means unset whereas a negative value means 0.
+   */
+  mapping(address => int256) public customInterestFeeRates;
+
+  /**
+   * @dev used as salt for the creation of new markets
+   */
+  uint256 public marketsCounter;
+
+  /**
+   * @dev Latest Plugin implementation for each existing implementation.
+   */
+  mapping(address => address) public _latestPluginImplementation;
+
+  /**
    * @dev Latest CErc20Delegate implementation for each existing implementation.
    */
   function latestCErc20Delegate(address oldImplementation)
@@ -336,11 +357,6 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
         ? (data.implementation, data.allowResign, data.becomeImplementationData)
         : (oldImplementation, false, emptyBytes);
   }
-
-  /**
-   * @dev Latest CEtherDelegate implementation for each existing implementation.
-   */
-  mapping(address => CDelegateUpgradeData) public _latestCEtherDelegate;
 
   /**
    * @dev Latest CEtherDelegate implementation for each existing implementation.
@@ -405,11 +421,6 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   /**
    * @dev Latest Plugin implementation for each existing implementation.
    */
-  mapping(address => address) internal _latestPluginImplementation;
-
-  /**
-   * @dev Latest Plugin implementation for each existing implementation.
-   */
   function latestPluginImplementation(address oldImplementation) external view returns (address) {
     return
       _latestPluginImplementation[oldImplementation] != address(0)
@@ -461,17 +472,6 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
 
     return newPluginAddress != oldPluginAddress;
   }
-
-  /**
-   * @notice Maps Unitroller (Comptroller proxy) addresses to the proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
-   * @dev A value of 0 means unset whereas a negative value means 0.
-   */
-  mapping(address => int256) public customInterestFeeRates;
-
-  /**
-   * @dev used as salt for the creation of new markets
-   */
-  uint256 public marketsCounter;
 
   /**
    * @notice Returns the proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
