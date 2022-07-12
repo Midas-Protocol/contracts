@@ -68,10 +68,7 @@ contract CEtherDelegate is CDelegateInterface, CEther {
       _becomeImplementation(becomeImplementationData);
     } else {
       // Call _becomeImplementation externally (delegating to new delegate's code)
-      delegateTo(
-        implementation_,
-        abi.encodeWithSignature("_becomeImplementation(bytes)", becomeImplementationData)
-      );
+      delegateTo(implementation_, abi.encodeWithSignature("_becomeImplementation(bytes)", becomeImplementationData));
     }
 
     // Emit event

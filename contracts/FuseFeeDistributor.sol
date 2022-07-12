@@ -12,6 +12,7 @@ import "./compound/ErrorReporter.sol";
 import "./compound/ComptrollerStorage.sol";
 import "./compound/CEtherDelegator.sol";
 import "./compound/CErc20Delegator.sol";
+import "./compound/CErc20PluginDelegate.sol";
 
 /**
  * @title FuseFeeDistributor
@@ -258,30 +259,6 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   mapping(address => mapping(address => bool)) public pluginImplementationWhitelist;
 
   /**
-   * @dev Latest Plugin implementation for each existing implementation.
-   */
-  mapping(address => address) internal _latestPluginImplementation;
-
-  /**
-   * @dev Latest Plugin implementation for each existing implementation.
-   */
-  function latestPluginImplementation(address oldImplementation) external view returns (address) {
-    return
-      _latestPluginImplementation[oldImplementation] != address(0)
-        ? _latestPluginImplementation[oldImplementation]
-        : oldImplementation;
-  }
-
-  /**
-   * @dev Sets the latest plugin upgrade implementation address.
-   * @param oldImplementation The old plugin implementation address to upgrade from.
-   * @param newImplementation Latest plugin implementation address.
-   */
-  function _setLatestPluginImplementation(address oldImplementation, address newImplementation) external onlyOwner {
-    _latestPluginImplementation[oldImplementation] = newImplementation;
-  }
-
-  /**
    * @dev Adds/removes plugin implementations to the whitelist.
    * @param oldImplementations The old plugin implementation addresses to upgrade from for each `newImplementations` to upgrade to.
    * @param newImplementations Array of plugin implementations to be whitelisted/unwhitelisted.
@@ -341,11 +318,6 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   mapping(address => CDelegateUpgradeData) public _latestCErc20Delegate;
 
   /**
-   * @dev Latest CEtherDelegate implementation for each existing implementation.
-   */
-  mapping(address => CDelegateUpgradeData) public _latestCEtherDelegate;
-
-  /**
    * @dev Latest CErc20Delegate implementation for each existing implementation.
    */
   function latestCErc20Delegate(address oldImplementation)
@@ -364,6 +336,11 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
         ? (data.implementation, data.allowResign, data.becomeImplementationData)
         : (oldImplementation, false, emptyBytes);
   }
+
+  /**
+   * @dev Latest CEtherDelegate implementation for each existing implementation.
+   */
+  mapping(address => CDelegateUpgradeData) public _latestCEtherDelegate;
 
   /**
    * @dev Latest CEtherDelegate implementation for each existing implementation.
@@ -423,6 +400,66 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
       allowResign,
       becomeImplementationData
     );
+  }
+
+  /**
+   * @dev Latest Plugin implementation for each existing implementation.
+   */
+  mapping(address => address) internal _latestPluginImplementation;
+
+  /**
+   * @dev Latest Plugin implementation for each existing implementation.
+   */
+  function latestPluginImplementation(address oldImplementation) external view returns (address) {
+    return
+      _latestPluginImplementation[oldImplementation] != address(0)
+        ? _latestPluginImplementation[oldImplementation]
+        : oldImplementation;
+  }
+
+  /**
+   * @dev Sets the latest plugin upgrade implementation address.
+   * @param oldImplementation The old plugin implementation address to upgrade from.
+   * @param newImplementation Latest plugin implementation address.
+   */
+  function _setLatestPluginImplementation(address oldImplementation, address newImplementation) external onlyOwner {
+    _latestPluginImplementation[oldImplementation] = newImplementation;
+  }
+
+  /**
+   * @dev Upgrades an upgradeable market to the latest implementation
+   * @param cDelegator the proxy address
+   * @param oldImplementation the old implementation address
+   * @return if the implementation was upgraded or not
+   */
+  function _upgradeCDelegatorToLatestImplementation(address cDelegator, address oldImplementation)
+    external
+    onlyOwner
+    returns (bool)
+  {
+    // a simple query by an admin should trigger _prepare() and the upgrade to the latest implementation
+    address newImplementation = CDelegateInterface(cDelegator).implementation();
+    return newImplementation != oldImplementation;
+  }
+
+  /**
+   * @dev Upgrades a plugin of a CErc20PluginDelegate market to the latest implementation
+   * @param cDelegator the proxy address
+   * @param becomeImplementationData the ABI encoded _becomeImplementation data
+   * @return if the plugin was upgraded or not
+   */
+  function _upgradePluginToLatestImplementation(address cDelegator, bytes calldata becomeImplementationData)
+    external
+    onlyOwner
+    returns (bool)
+  {
+    CErc20PluginDelegate market = CErc20PluginDelegate(cDelegator);
+
+    address oldPluginAddress = address(market.plugin());
+    market._becomeImplementation(becomeImplementationData);
+    address newPluginAddress = address(market.plugin());
+
+    return newPluginAddress != oldPluginAddress;
   }
 
   /**
