@@ -196,7 +196,7 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20Delegate),
+        address(cErc20PluginDelegate),
         abi.encode(address(mockERC4626)),
         uint256(1),
         uint256(0)
@@ -260,7 +260,7 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20Delegate),
+        address(cErc20PluginRewardsDelegate),
         abi.encode(address(mockERC4626Dynamic), address(flywheel), address(underlyingToken)),
         uint256(1),
         uint256(0)

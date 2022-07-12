@@ -175,54 +175,9 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   mapping(address => mapping(address => bool)) public comptrollerImplementationWhitelist;
 
   /**
-   * @dev Adds/removes Comptroller implementations to the whitelist.
-   * @param oldImplementations The old `Comptroller` implementation addresses to upgrade from for each `newImplementations` to upgrade to.
-   * @param newImplementations Array of `Comptroller` implementations to be whitelisted/unwhitelisted.
-   * @param statuses Array of whitelist statuses corresponding to `implementations`.
-   */
-  function _editComptrollerImplementationWhitelist(
-    address[] calldata oldImplementations,
-    address[] calldata newImplementations,
-    bool[] calldata statuses
-  ) external onlyOwner {
-    require(
-      newImplementations.length > 0 &&
-        newImplementations.length == oldImplementations.length &&
-        newImplementations.length == statuses.length,
-      "No Comptroller implementations supplied or array lengths not equal."
-    );
-    for (uint256 i = 0; i < newImplementations.length; i++)
-      comptrollerImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
-  }
-
-  /**
    * @dev Whitelisted CErc20Delegate implementation contract addresses and `allowResign` values for each existing implementation.
    */
   mapping(address => mapping(address => mapping(bool => bool))) public cErc20DelegateWhitelist;
-
-  /**
-   * @dev Adds/removes CErc20Delegate implementations to the whitelist.
-   * @param oldImplementations The old `CErc20Delegate` implementation addresses to upgrade from for each `newImplementations` to upgrade to.
-   * @param newImplementations Array of `CErc20Delegate` implementations to be whitelisted/unwhitelisted.
-   * @param allowResign Array of `allowResign` values corresponding to `newImplementations` to be whitelisted/unwhitelisted.
-   * @param statuses Array of whitelist statuses corresponding to `newImplementations`.
-   */
-  function _editCErc20DelegateWhitelist(
-    address[] calldata oldImplementations,
-    address[] calldata newImplementations,
-    bool[] calldata allowResign,
-    bool[] calldata statuses
-  ) external onlyOwner {
-    require(
-      newImplementations.length > 0 &&
-        newImplementations.length == oldImplementations.length &&
-        newImplementations.length == allowResign.length &&
-        newImplementations.length == statuses.length,
-      "No CErc20Delegate implementations supplied or array lengths not equal."
-    );
-    for (uint256 i = 0; i < newImplementations.length; i++)
-      cErc20DelegateWhitelist[oldImplementations[i]][newImplementations[i]][allowResign[i]] = statuses[i];
-  }
 
   /**
    * @dev Whitelisted CEtherDelegate implementation contract addresses and `allowResign` values for each existing implementation.
@@ -230,87 +185,9 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   mapping(address => mapping(address => mapping(bool => bool))) public cEtherDelegateWhitelist;
 
   /**
-   * @dev Adds/removes CEtherDelegate implementations to the whitelist.
-   * @param oldImplementations The old `CEtherDelegate` implementation addresses to upgrade from for each `newImplementations` to upgrade to.
-   * @param newImplementations Array of `CEtherDelegate` implementations to be whitelisted/unwhitelisted.
-   * @param allowResign Array of `allowResign` values corresponding to `newImplementations` to be whitelisted/unwhitelisted.
-   * @param statuses Array of whitelist statuses corresponding to `newImplementations`.
-   */
-  function _editCEtherDelegateWhitelist(
-    address[] calldata oldImplementations,
-    address[] calldata newImplementations,
-    bool[] calldata allowResign,
-    bool[] calldata statuses
-  ) external onlyOwner {
-    require(
-      newImplementations.length > 0 &&
-        newImplementations.length == oldImplementations.length &&
-        newImplementations.length == allowResign.length &&
-        newImplementations.length == statuses.length,
-      "No CEtherDelegate implementations supplied or array lengths not equal."
-    );
-    for (uint256 i = 0; i < newImplementations.length; i++)
-      cEtherDelegateWhitelist[oldImplementations[i]][newImplementations[i]][allowResign[i]] = statuses[i];
-  }
-
-  /**
-   * @dev Whitelisted Plugin implementation contract addresses for each existing implementation.
-   */
-  mapping(address => mapping(address => bool)) public pluginImplementationWhitelist;
-
-  /**
-   * @dev Adds/removes plugin implementations to the whitelist.
-   * @param oldImplementations The old plugin implementation addresses to upgrade from for each `newImplementations` to upgrade to.
-   * @param newImplementations Array of plugin implementations to be whitelisted/unwhitelisted.
-   * @param statuses Array of whitelist statuses corresponding to `implementations`.
-   */
-  function _editPluginImplementationWhitelist(
-    address[] calldata oldImplementations,
-    address[] calldata newImplementations,
-    bool[] calldata statuses
-  ) external onlyOwner {
-    require(
-      newImplementations.length > 0 &&
-        newImplementations.length == oldImplementations.length &&
-        newImplementations.length == statuses.length,
-      "No plugin implementations supplied or array lengths not equal."
-    );
-    for (uint256 i = 0; i < newImplementations.length; i++)
-      pluginImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
-  }
-
-  /**
    * @dev Latest Comptroller implementation for each existing implementation.
    */
   mapping(address => address) internal _latestComptrollerImplementation;
-
-  /**
-   * @dev Latest Comptroller implementation for each existing implementation.
-   */
-  function latestComptrollerImplementation(address oldImplementation) external view returns (address) {
-    return
-      _latestComptrollerImplementation[oldImplementation] != address(0)
-        ? _latestComptrollerImplementation[oldImplementation]
-        : oldImplementation;
-  }
-
-  /**
-   * @dev Sets the latest `Comptroller` upgrade implementation address.
-   * @param oldImplementation The old `Comptroller` implementation address to upgrade from.
-   * @param newImplementation Latest `Comptroller` implementation address.
-   */
-  function _setLatestComptrollerImplementation(address oldImplementation, address newImplementation)
-    external
-    onlyOwner
-  {
-    _latestComptrollerImplementation[oldImplementation] = newImplementation;
-  }
-
-  struct CDelegateUpgradeData {
-    address implementation;
-    bool allowResign;
-    bytes becomeImplementationData;
-  }
 
   /**
    * @dev Latest CErc20Delegate implementation for each existing implementation.
@@ -337,6 +214,129 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
    * @dev Latest Plugin implementation for each existing implementation.
    */
   mapping(address => address) public _latestPluginImplementation;
+
+  /**
+   * @dev Whitelisted Plugin implementation contract addresses for each existing implementation.
+   */
+  mapping(address => mapping(address => bool)) public pluginImplementationWhitelist;
+
+  /**
+   * @dev Adds/removes plugin implementations to the whitelist.
+   * @param oldImplementations The old plugin implementation addresses to upgrade from for each `newImplementations` to upgrade to.
+   * @param newImplementations Array of plugin implementations to be whitelisted/unwhitelisted.
+   * @param statuses Array of whitelist statuses corresponding to `implementations`.
+   */
+  function _editPluginImplementationWhitelist(
+    address[] calldata oldImplementations,
+    address[] calldata newImplementations,
+    bool[] calldata statuses
+  ) external onlyOwner {
+    require(
+      newImplementations.length > 0 &&
+      newImplementations.length == oldImplementations.length &&
+      newImplementations.length == statuses.length,
+      "No plugin implementations supplied or array lengths not equal."
+    );
+    for (uint256 i = 0; i < newImplementations.length; i++)
+      pluginImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
+  }
+
+  /**
+   * @dev Adds/removes CEtherDelegate implementations to the whitelist.
+   * @param oldImplementations The old `CEtherDelegate` implementation addresses to upgrade from for each `newImplementations` to upgrade to.
+   * @param newImplementations Array of `CEtherDelegate` implementations to be whitelisted/unwhitelisted.
+   * @param allowResign Array of `allowResign` values corresponding to `newImplementations` to be whitelisted/unwhitelisted.
+   * @param statuses Array of whitelist statuses corresponding to `newImplementations`.
+   */
+  function _editCEtherDelegateWhitelist(
+    address[] calldata oldImplementations,
+    address[] calldata newImplementations,
+    bool[] calldata allowResign,
+    bool[] calldata statuses
+  ) external onlyOwner {
+    require(
+      newImplementations.length > 0 &&
+      newImplementations.length == oldImplementations.length &&
+      newImplementations.length == allowResign.length &&
+      newImplementations.length == statuses.length,
+      "No CEtherDelegate implementations supplied or array lengths not equal."
+    );
+    for (uint256 i = 0; i < newImplementations.length; i++)
+      cEtherDelegateWhitelist[oldImplementations[i]][newImplementations[i]][allowResign[i]] = statuses[i];
+  }
+
+  /**
+   * @dev Adds/removes CErc20Delegate implementations to the whitelist.
+   * @param oldImplementations The old `CErc20Delegate` implementation addresses to upgrade from for each `newImplementations` to upgrade to.
+   * @param newImplementations Array of `CErc20Delegate` implementations to be whitelisted/unwhitelisted.
+   * @param allowResign Array of `allowResign` values corresponding to `newImplementations` to be whitelisted/unwhitelisted.
+   * @param statuses Array of whitelist statuses corresponding to `newImplementations`.
+   */
+  function _editCErc20DelegateWhitelist(
+    address[] calldata oldImplementations,
+    address[] calldata newImplementations,
+    bool[] calldata allowResign,
+    bool[] calldata statuses
+  ) external onlyOwner {
+    require(
+      newImplementations.length > 0 &&
+      newImplementations.length == oldImplementations.length &&
+      newImplementations.length == allowResign.length &&
+      newImplementations.length == statuses.length,
+      "No CErc20Delegate implementations supplied or array lengths not equal."
+    );
+    for (uint256 i = 0; i < newImplementations.length; i++)
+      cErc20DelegateWhitelist[oldImplementations[i]][newImplementations[i]][allowResign[i]] = statuses[i];
+  }
+
+  /**
+   * @dev Adds/removes Comptroller implementations to the whitelist.
+   * @param oldImplementations The old `Comptroller` implementation addresses to upgrade from for each `newImplementations` to upgrade to.
+   * @param newImplementations Array of `Comptroller` implementations to be whitelisted/unwhitelisted.
+   * @param statuses Array of whitelist statuses corresponding to `implementations`.
+   */
+  function _editComptrollerImplementationWhitelist(
+    address[] calldata oldImplementations,
+    address[] calldata newImplementations,
+    bool[] calldata statuses
+  ) external onlyOwner {
+    require(
+      newImplementations.length > 0 &&
+      newImplementations.length == oldImplementations.length &&
+      newImplementations.length == statuses.length,
+      "No Comptroller implementations supplied or array lengths not equal."
+    );
+    for (uint256 i = 0; i < newImplementations.length; i++)
+      comptrollerImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
+  }
+
+  /**
+   * @dev Latest Comptroller implementation for each existing implementation.
+   */
+  function latestComptrollerImplementation(address oldImplementation) external view returns (address) {
+    return
+    _latestComptrollerImplementation[oldImplementation] != address(0)
+    ? _latestComptrollerImplementation[oldImplementation]
+    : oldImplementation;
+  }
+
+  /**
+   * @dev Sets the latest `Comptroller` upgrade implementation address.
+   * @param oldImplementation The old `Comptroller` implementation address to upgrade from.
+   * @param newImplementation Latest `Comptroller` implementation address.
+   */
+  function _setLatestComptrollerImplementation(address oldImplementation, address newImplementation)
+  external
+  onlyOwner
+  {
+    _latestComptrollerImplementation[oldImplementation] = newImplementation;
+  }
+
+  struct CDelegateUpgradeData {
+    address implementation;
+    bool allowResign;
+    bytes becomeImplementationData;
+  }
 
   /**
    * @dev Latest CErc20Delegate implementation for each existing implementation.
