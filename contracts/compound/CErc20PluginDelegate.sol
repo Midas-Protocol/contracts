@@ -32,13 +32,23 @@ contract CErc20PluginDelegate is CErc20Delegate {
     require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
 
     address _plugin = abi.decode(data, (address));
-    if (_plugin != address(0)) {
-      updatePlugin(_plugin);
+
+    if (_plugin == address(0) && address(plugin) != address(0)) {
+      // if no new plugin address is given, use the latest implementation
+      _plugin = IFuseFeeDistributor(fuseAdmin).latestPluginImplementation(address(plugin));
+    }
+
+    if (_plugin != address(0) && _plugin != address(plugin)) {
+      _updatePlugin(_plugin);
     }
   }
 
-  function updatePlugin(address _plugin) public {
-    require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call updatePlugin");
+  /**
+   * @notice Update the plugin implementation to a whitelisted implementation
+   * @param _plugin The address of the plugin implementation to use
+   */
+  function _updatePlugin(address _plugin) public {
+    require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _updatePlugin");
 
     address oldImplementation = address(plugin) != address(0) ? address(plugin) : _plugin;
 

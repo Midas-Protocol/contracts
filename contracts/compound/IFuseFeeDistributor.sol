@@ -52,6 +52,8 @@ interface IFuseFeeDistributor {
       bytes memory becomeImplementationData
     );
 
+  function latestPluginImplementation(address oldImplementation) external view returns (address);
+
   function deployCEther(bytes calldata constructorData) external returns (address);
 
   function deployCErc20(bytes calldata constructorData) external returns (address);

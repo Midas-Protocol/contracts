@@ -446,7 +446,7 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
     CErc20PluginDelegate market = CErc20PluginDelegate(cDelegator);
 
     address oldPluginAddress = address(market.plugin());
-    market.updatePlugin(_latestPluginImplementation[oldPluginAddress]);
+    market._updatePlugin(_latestPluginImplementation[oldPluginAddress]);
     address newPluginAddress = address(market.plugin());
 
     return newPluginAddress != oldPluginAddress;

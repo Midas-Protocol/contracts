@@ -289,7 +289,7 @@ contract DeployMarketsTest is Test {
     assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10000000 + 1000);
   }
 
-  function testAutImplementations() public {
+  function testAutImplementationCErc20Delegate() public {
     mockERC4626 = new MockERC4626(ERC20(address(underlyingToken)));
 
     whitelistPlugin(address(mockERC4626), address(mockERC4626));
@@ -324,19 +324,20 @@ contract DeployMarketsTest is Test {
       address(cErc20PluginDelegate),
       address(cErc20PluginRewardsDelegate),
       false,
-      abi.encode(address(0))
+      abi.encode(address(0)) // should trigger use of latest implementation
     );
 
     // trigger the auto implementations
     vm.prank(address(7));
     cToken.accrueInterest();
+
     address implAfter = cToken.implementation();
 
     assertEq(implBefore, address(cErc20PluginDelegate), "the old impl should be the plugin delegate");
     assertEq(implAfter, address(cErc20PluginRewardsDelegate), "the new impl should be the plugin rewards delegate");
   }
 
-  function testUpgradePluginToLatestImplementation() public {
+  function testAutImplementationPlugin() public {
     MockERC4626 pluginA = new MockERC4626(ERC20(address(underlyingToken)));
     MockERC4626 pluginB = new MockERC4626(ERC20(address(underlyingToken)));
 
@@ -365,14 +366,70 @@ contract DeployMarketsTest is Test {
 
     assertEq(address(cToken.plugin()), address(pluginA), "!plugin == erc4626");
 
-    address implBefore = address(cToken.plugin());
+    address pluginImplBefore = address(cToken.plugin());
     whitelistPlugin(address(pluginA), address(pluginB));
     fuseAdmin._setLatestPluginImplementation(address(pluginA), address(pluginB));
     fuseAdmin._upgradePluginToLatestImplementation(address(cToken));
-    address implAfter = address(cToken.plugin());
+    address pluginImplAfter = address(cToken.plugin());
 
-    assertEq(implBefore, address(pluginA), "the old impl should be the A plugin");
-    assertEq(implAfter, address(pluginB), "the new impl should be the B plugin");
+    assertEq(pluginImplBefore, address(pluginA), "the old impl should be the A plugin");
+    assertEq(pluginImplAfter, address(pluginB), "the new impl should be the B plugin");
+  }
+
+  function testAutImplementationCErc20PluginDelegate() public {
+    MockERC4626 pluginA = new MockERC4626(ERC20(address(underlyingToken)));
+    MockERC4626 pluginB = new MockERC4626(ERC20(address(underlyingToken)));
+
+    whitelistPlugin(address(pluginA), address(pluginA));
+
+    vm.roll(1);
+    comptroller._deployMarket(
+      false,
+      abi.encode(
+        address(underlyingToken),
+        ComptrollerInterface(address(comptroller)),
+        payable(address(fuseAdmin)),
+        InterestRateModel(address(interestModel)),
+        "cUnderlyingToken",
+        "CUT",
+        address(cErc20PluginDelegate),
+        abi.encode(address(pluginA)),
+        uint256(1),
+        uint256(0)
+      ),
+      0.9e18
+    );
+
+    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
+
+    assertEq(address(cToken.plugin()), address(pluginA), "!plugin == erc4626");
+
+    address pluginImplBefore = address(cToken.plugin());
+    address implBefore = cToken.implementation();
+
+    // just testing to replace the plugin delegate with the plugin rewards delegate
+    whitelistCErc20Delegate(address(cErc20PluginDelegate), address(cErc20PluginRewardsDelegate));
+    fuseAdmin._setLatestCErc20Delegate(
+      address(cErc20PluginDelegate),
+      address(cErc20PluginRewardsDelegate),
+      false,
+      abi.encode(address(0)) // should trigger use of latest implementation
+    );
+    whitelistPlugin(address(pluginA), address(pluginB));
+    fuseAdmin._setLatestPluginImplementation(address(pluginA), address(pluginB));
+
+    // trigger the auto implementations from a non-admin address
+    vm.prank(address(7));
+    cToken.accrueInterest();
+
+    address pluginImplAfter = address(cToken.plugin());
+    address implAfter = cToken.implementation();
+
+    assertEq(pluginImplBefore, address(pluginA), "the old impl should be the A plugin");
+    assertEq(pluginImplAfter, address(pluginB), "the new impl should be the B plugin");
+    assertEq(implBefore, address(cErc20PluginDelegate), "the old impl should be the plugin delegate");
+    assertEq(implAfter, address(cErc20PluginRewardsDelegate), "the new impl should be the plugin rewards delegate");
   }
 
   // TODO refactor DeployMarketsTest to extend WithPool
