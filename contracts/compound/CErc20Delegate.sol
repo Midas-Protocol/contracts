@@ -104,9 +104,7 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
    * @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary
    */
   function _prepare() external payable override {
-    if (
-      msg.sender != address(this) && ComptrollerV3Storage(address(comptroller)).autoImplementation()
-    ) {
+    if (msg.sender != address(this) && ComptrollerV3Storage(address(comptroller)).autoImplementation()) {
       (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = IFuseFeeDistributor(
         fuseAdmin
       ).latestCErc20Delegate(implementation);

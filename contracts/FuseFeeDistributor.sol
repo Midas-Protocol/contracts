@@ -438,18 +438,6 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   }
 
   /**
-   * @dev Upgrades an upgradeable market to the latest implementation
-   * @param cDelegator the proxy address
-   * @return if the implementation was upgraded or not
-   */
-  function _upgradeCDelegatorToLatestImplementation(address cDelegator) external onlyOwner returns (bool) {
-    address oldImplementation = CDelegateInterface(cDelegator).implementation();
-    CDelegateInterface(cDelegator)._prepare();
-    address newImplementation = CDelegateInterface(cDelegator).implementation();
-    return newImplementation != oldImplementation;
-  }
-
-  /**
    * @dev Upgrades a plugin of a CErc20PluginDelegate market to the latest implementation
    * @param cDelegator the proxy address
    * @return if the plugin was upgraded or not
