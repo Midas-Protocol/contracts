@@ -29,7 +29,7 @@ import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 import { MockERC4626 } from "../compound/strategies/MockERC4626.sol";
 import { MockERC4626Dynamic } from "../compound/strategies/MockERC4626Dynamic.sol";
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
@@ -180,11 +180,7 @@ contract DeployMarketsTest is Test {
   function testDeployCErc20PluginDelegate() public {
     mockERC4626 = new MockERC4626(ERC20(address(underlyingToken)));
 
-    address[] memory plugins = new address[](1);
-    plugins[0] = address(mockERC4626);
-    bool[] memory arrayOfTrue = new bool[](1);
-    arrayOfTrue[0] = true;
-    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
+    whitelistPlugin(address(mockERC4626), address(mockERC4626));
 
     vm.roll(1);
     comptroller._deployMarket(
@@ -241,11 +237,7 @@ contract DeployMarketsTest is Test {
 
     mockERC4626Dynamic = new MockERC4626Dynamic(ERC20(address(underlyingToken)), FlywheelCore(address(flywheel)));
 
-    address[] memory plugins = new address[](1);
-    plugins[0] = address(mockERC4626Dynamic);
-    bool[] memory arrayOfTrue = new bool[](1);
-    arrayOfTrue[0] = true;
-    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
+    whitelistPlugin(address(mockERC4626Dynamic), address(mockERC4626Dynamic));
 
     marketKey = ERC20(address(mockERC4626Dynamic));
     flywheel.addStrategyForRewards(marketKey);
@@ -300,11 +292,7 @@ contract DeployMarketsTest is Test {
   function testUpgradeCDelegatorToLatestImplementation() public {
     mockERC4626 = new MockERC4626(ERC20(address(underlyingToken)));
 
-    address[] memory plugins = new address[](1);
-    plugins[0] = address(mockERC4626);
-    bool[] memory arrayOfTrue = new bool[](1);
-    arrayOfTrue[0] = true;
-    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
+    whitelistPlugin(address(mockERC4626), address(mockERC4626));
 
     vm.roll(1);
     comptroller._deployMarket(
@@ -345,34 +333,11 @@ contract DeployMarketsTest is Test {
     assertEq(implAfter, address(cErc20PluginRewardsDelegate), "the new impl should be the plugin rewards delegate");
   }
 
-  function whitelistCErc20Delegate(address oldImpl, address newImpl) public {
-    bool[] memory arrayOfTrue = new bool[](1);
-    bool[] memory arrayOfFalse = new bool[](1);
-    address[] memory oldCErC20Implementations = new address[](1);
-    address[] memory newCErc20Implementations = new address[](1);
-
-    arrayOfTrue[0] = true;
-    arrayOfFalse[0] = false;
-    oldCErC20Implementations[0] = address(oldImpl);
-    newCErc20Implementations[0] = address(newImpl);
-
-    fuseAdmin._editCErc20DelegateWhitelist(
-      oldCErC20Implementations,
-      newCErc20Implementations,
-      arrayOfFalse,
-      arrayOfTrue
-    );
-  }
-
   function testUpgradePluginToLatestImplementation() public {
     MockERC4626 pluginA = new MockERC4626(ERC20(address(underlyingToken)));
     MockERC4626 pluginB = new MockERC4626(ERC20(address(underlyingToken)));
 
-    address[] memory plugins = new address[](1);
-    plugins[0] = address(pluginA);
-    bool[] memory arrayOfTrue = new bool[](1);
-    arrayOfTrue[0] = true;
-    fuseAdmin._editPluginImplementationWhitelist(plugins, plugins, arrayOfTrue);
+    whitelistPlugin(address(pluginA), address(pluginA));
 
     vm.roll(1);
     comptroller._deployMarket(
@@ -407,6 +372,7 @@ contract DeployMarketsTest is Test {
     assertEq(implAfter, address(pluginB), "the new impl should be the B plugin");
   }
 
+  // TODO refactor DeployMarketsTest to extend WithPool
   function whitelistPlugin(address oldImpl, address newImpl) public {
     address[] memory oldCErC20Implementations = new address[](1);
     address[] memory newCErc20Implementations = new address[](1);
@@ -417,6 +383,25 @@ contract DeployMarketsTest is Test {
     arrayOfTrue[0] = true;
 
     fuseAdmin._editPluginImplementationWhitelist(oldCErC20Implementations, newCErc20Implementations, arrayOfTrue);
+  }
+
+  function whitelistCErc20Delegate(address oldImpl, address newImpl) public {
+    bool[] memory arrayOfTrue = new bool[](1);
+    bool[] memory arrayOfFalse = new bool[](1);
+    address[] memory oldCErC20Implementations = new address[](1);
+    address[] memory newCErc20Implementations = new address[](1);
+
+    arrayOfTrue[0] = true;
+    arrayOfFalse[0] = false;
+    oldCErC20Implementations[0] = address(oldImpl);
+    newCErc20Implementations[0] = address(newImpl);
+
+    fuseAdmin._editCErc20DelegateWhitelist(
+      oldCErC20Implementations,
+      newCErc20Implementations,
+      arrayOfFalse,
+      arrayOfTrue
+    );
   }
 }
 

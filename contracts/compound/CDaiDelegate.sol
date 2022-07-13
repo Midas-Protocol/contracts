@@ -40,11 +40,7 @@ contract CDaiDelegate is CErc20Delegate {
    * @param potAddress_ DAI Savings Rate (DSR) pot address
    */
   function _becomeImplementation(address daiJoinAddress_, address potAddress_) public {
-    require(hasAdminRights(), "only admins can call _becomeImplementation");
-
-    // Make sure admin storage is set up correctly
-    __adminHasRights = true;
-    __fuseAdminHasRights = true;
+    require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
 
     // Get dai and vat and sanity check the underlying
     DaiJoinLike daiJoin = DaiJoinLike(daiJoinAddress_);

@@ -29,36 +29,38 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @param data The encoded arguments for becoming
    */
   function _becomeImplementation(bytes memory data) public virtual override {
-    require(hasAdminRights(), "only admins can call _becomeImplementation");
-
-    // Make sure admin storage is set up correctly
-    __adminHasRights = true;
-    __fuseAdminHasRights = true;
+    require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
 
     address _plugin = abi.decode(data, (address));
     if (_plugin != address(0)) {
-      address oldImplementation = address(plugin) != address(0) ? address(plugin) : _plugin;
-
-      require(
-        IFuseFeeDistributor(fuseAdmin).pluginImplementationWhitelist(oldImplementation, _plugin),
-        "plugin implementation not whitelisted"
-      );
-
-      if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
-        plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
-      }
-
-      plugin = IERC4626(_plugin);
-
-      EIP20Interface(underlying).approve(_plugin, type(uint256).max);
-
-      uint256 amount = EIP20Interface(underlying).balanceOf(address(this));
-      if (amount != 0) {
-        deposit(amount);
-      }
-
-      emit NewPluginImplementation(address(plugin), _plugin);
+      updatePlugin(_plugin);
     }
+  }
+
+  function updatePlugin(address _plugin) public {
+    require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call updatePlugin");
+
+    address oldImplementation = address(plugin) != address(0) ? address(plugin) : _plugin;
+
+    require(
+      IFuseFeeDistributor(fuseAdmin).pluginImplementationWhitelist(oldImplementation, _plugin),
+      "plugin implementation not whitelisted"
+    );
+
+    if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
+      plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
+    }
+
+    plugin = IERC4626(_plugin);
+
+    EIP20Interface(underlying).approve(_plugin, type(uint256).max);
+
+    uint256 amount = EIP20Interface(underlying).balanceOf(address(this));
+    if (amount != 0) {
+      deposit(amount);
+    }
+
+    emit NewPluginImplementation(address(plugin), _plugin);
   }
 
   /*** CToken Overrides ***/
