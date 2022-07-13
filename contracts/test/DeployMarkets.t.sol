@@ -333,6 +333,53 @@ contract DeployMarketsTest is Test {
     assertEq(implAfter, address(cErc20PluginRewardsDelegate), "the new impl should be the plugin rewards delegate");
   }
 
+  function testAutImplementations() public {
+    mockERC4626 = new MockERC4626(ERC20(address(underlyingToken)));
+
+    whitelistPlugin(address(mockERC4626), address(mockERC4626));
+
+    vm.roll(1);
+    comptroller._deployMarket(
+      false,
+      abi.encode(
+        address(underlyingToken),
+        ComptrollerInterface(address(comptroller)),
+        payable(address(fuseAdmin)),
+        InterestRateModel(address(interestModel)),
+        "cUnderlyingToken",
+        "CUT",
+        address(cErc20PluginDelegate),
+        abi.encode(address(mockERC4626)),
+        uint256(1),
+        uint256(0)
+      ),
+      0.9e18
+    );
+
+    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
+
+    assertEq(address(cToken.plugin()), address(mockERC4626), "!plugin == erc4626");
+
+    address implBefore = cToken.implementation();
+    // just testing to replace the plugin delegate with the plugin rewards delegate
+    whitelistCErc20Delegate(address(cErc20PluginDelegate), address(cErc20PluginRewardsDelegate));
+    fuseAdmin._setLatestCErc20Delegate(
+      address(cErc20PluginDelegate),
+      address(cErc20PluginRewardsDelegate),
+      false,
+      abi.encode(address(0))
+    );
+
+    // trigger the auto implementations
+    vm.prank(address(7));
+    cToken.accrueInterest();
+    address implAfter = cToken.implementation();
+
+    assertEq(implBefore, address(cErc20PluginDelegate), "the old impl should be the plugin delegate");
+    assertEq(implAfter, address(cErc20PluginRewardsDelegate), "the new impl should be the plugin rewards delegate");
+  }
+
   function testUpgradePluginToLatestImplementation() public {
     MockERC4626 pluginA = new MockERC4626(ERC20(address(underlyingToken)));
     MockERC4626 pluginB = new MockERC4626(ERC20(address(underlyingToken)));

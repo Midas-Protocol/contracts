@@ -29,6 +29,8 @@ contract CDaiDelegate is CErc20Delegate {
    * @param data The encoded arguments for becoming
    */
   function _becomeImplementation(bytes calldata data) public override {
+    require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
+
     // Decode data
     (address daiJoinAddress_, address potAddress_) = abi.decode(data, (address, address));
     return _becomeImplementation(daiJoinAddress_, potAddress_);
