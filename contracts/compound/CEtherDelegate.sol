@@ -21,10 +21,6 @@ contract CEtherDelegate is CDelegateInterface, CEther {
    */
   function _becomeImplementation(bytes memory data) public override {
     require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
-
-    // Make sure admin storage is set up correctly
-    __adminHasRights = true;
-    __fuseAdminHasRights = true;
   }
 
   /**
