@@ -60,7 +60,7 @@ contract CEtherDelegate is CDelegateInterface, CEther {
     implementation = implementation_;
 
     if (address(this).code.length == 0) {
-      // cannot delegate to self with an external call when initializing
+      // cannot delegate to self with an external call when constructing
       _becomeImplementation(becomeImplementationData);
     } else {
       // Call _becomeImplementation externally (delegating to new delegate's code)
