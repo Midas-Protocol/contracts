@@ -30,6 +30,7 @@ import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 import { MockERC4626 } from "../compound/strategies/MockERC4626.sol";
 import { MockERC4626Dynamic } from "../compound/strategies/MockERC4626Dynamic.sol";
 import { BaseTest } from "./config/BaseTest.t.sol";
+import { IERC4626 } from "../compound/IERC4626.sol";
 
 contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
@@ -477,6 +478,7 @@ contract CErc20DelegateTest is BaseTest {
   FusePoolDirectory fusePoolDirectory;
 
   address[] implementationsSet;
+  address[] pluginsSet;
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     // TODO set these in the addresses provider
@@ -494,7 +496,6 @@ contract CErc20DelegateTest is BaseTest {
         CErc20Delegate delegate = CErc20Delegate(address(markets[j]));
         address implementation = delegate.implementation();
 
-        //        emit log_address(implementation);
         bool added = false;
         for (uint8 k = 0; k < implementationsSet.length; k++) {
           if (implementationsSet[k] == implementation) {
@@ -509,16 +510,58 @@ contract CErc20DelegateTest is BaseTest {
     emit log("listing the set");
     for (uint8 k = 0; k < implementationsSet.length; k++) {
       (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = fuseAdmin
-        .latestCErc20Delegate(implementationsSet[k]);
+      .latestCErc20Delegate(implementationsSet[k]);
 
       bool whitelisted = fuseAdmin.cErc20DelegateWhitelist(implementationsSet[k], latestCErc20Delegate, allowResign);
       emit log_address(implementationsSet[k]);
-      //      if (whitelisted) emit log("whitelisted");
 
       assertTrue(
         whitelisted || implementationsSet[k] == latestCErc20Delegate,
         "no whitelisted implementation for old implementation"
       );
     }
+  }
+
+  function testPluginImplementations() public shouldRun(forChains(BSC_MAINNET)) {
+    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
+
+    try fuseAdmin.latestPluginImplementation(address(0)) {
+      for (uint8 i = 0; i < pools.length; i++) {
+        Comptroller comptroller = Comptroller(pools[i].comptroller);
+        CToken[] memory markets = comptroller.getAllMarkets();
+        for (uint8 j = 0; j < markets.length; j++) {
+          CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));
+
+          address plugin;
+          try delegate.plugin() returns (IERC4626 _plugin) {
+            plugin = address(_plugin);
+          } catch {
+            continue;
+          }
+
+          bool added = false;
+          for (uint8 k = 0; k < pluginsSet.length; k++) {
+            if (pluginsSet[k] == plugin) {
+              added = true;
+            }
+          }
+
+          if (!added) pluginsSet.push(plugin);
+        }
+      }
+
+      emit log("listing the set");
+      for (uint8 k = 0; k < pluginsSet.length; k++) {
+        address latestPluginImpl = fuseAdmin.latestPluginImplementation(pluginsSet[k]);
+
+        bool whitelisted = fuseAdmin.pluginImplementationWhitelist(pluginsSet[k], latestPluginImpl);
+        emit log_address(pluginsSet[k]);
+
+        assertTrue(
+          whitelisted || pluginsSet[k] == latestPluginImpl,
+          "no whitelisted implementation for old implementation"
+        );
+      }
+    } catch {}
   }
 }
