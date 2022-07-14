@@ -411,9 +411,6 @@ contract AlpacaERC4626Test is BaseTest {
     vm.expectRevert("Pausable: paused");
     alpacaERC4626.mint(depositAmount, address(this));
 
-    emit log_uint(alpacaERC4626.totalSupply());
-    emit log_uint(alpacaERC4626.totalAssets());
-
     uint256 expectedSharesNeeded = alpacaERC4626.previewWithdraw(withdrawAmount);
     alpacaERC4626.withdraw(withdrawAmount, address(this), address(this));
 

@@ -98,8 +98,7 @@ contract DotDotERC4626Test is WithPool, BaseTest {
     deployCErc20PluginRewardsDelegate(ERC4626(address(dotDotERC4626)), 0.9e18);
     marketAddress = address(comptroller.cTokensByUnderlying(address(underlyingToken)));
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
-    cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(dotDotERC4626)));
-    assertEq(address(cToken.plugin()), address(dotDotERC4626));
+    assertEq(address(cToken.plugin()), address(dotDotERC4626), "!plugin == erc4626");
 
     cToken.approve(address(dddToken), address(dddRewards));
     cToken.approve(address(epxToken), address(epxRewards));

@@ -89,7 +89,6 @@ contract BNBE2eTest is WithPool, BaseTest {
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
-    cToken._setImplementationSafe(address(cErc20PluginDelegate), false, abi.encode(address(erc4626)));
     assertEq(address(cToken.plugin()), address(erc4626));
 
     underlyingToken.approve(address(cToken), 1e36);
@@ -140,11 +139,6 @@ contract BNBE2eTest is WithPool, BaseTest {
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
 
-    cToken._setImplementationSafe(
-      address(cErc20PluginRewardsDelegate),
-      false,
-      abi.encode(address(erc4626), address(flywheel), address(underlyingToken))
-    );
     assertEq(address(cToken.plugin()), address(erc4626));
     assertEq(underlyingToken.allowance(address(cToken), address(erc4626)), type(uint256).max);
     assertEq(underlyingToken.allowance(address(cToken), address(flywheel)), 0);
