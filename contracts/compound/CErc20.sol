@@ -3,10 +3,6 @@ pragma solidity >=0.8.0;
 
 import "./CToken.sol";
 
-interface CompLike {
-  function delegate(address delegatee) external;
-}
-
 /**
  * @title Compound's CErc20 Contract
  * @notice CTokens which wrap an EIP-20 underlying
