@@ -174,6 +174,8 @@ contract WithPool {
   }
 
   function deployCErc20PluginDelegate(ERC4626 _erc4626, uint256 _collateralFactorMantissa) public {
+    whitelistPlugin(address(_erc4626), address(_erc4626));
+
     comptroller._deployMarket(
       false,
       abi.encode(
@@ -193,6 +195,8 @@ contract WithPool {
   }
 
   function deployCErc20PluginRewardsDelegate(ERC4626 _mockERC4626Dynamic, uint256 _collateralFactorMantissa) public {
+    whitelistPlugin(address(_mockERC4626Dynamic), address(_mockERC4626Dynamic));
+
     comptroller._deployMarket(
       false,
       abi.encode(
@@ -209,5 +213,17 @@ contract WithPool {
       ),
       _collateralFactorMantissa
     );
+  }
+
+  function whitelistPlugin(address oldImpl, address newImpl) public {
+    address[] memory oldCErC20Implementations = new address[](1);
+    address[] memory newCErc20Implementations = new address[](1);
+    bool[] memory arrayOfTrue = new bool[](1);
+
+    oldCErC20Implementations[0] = address(oldImpl);
+    newCErc20Implementations[0] = address(newImpl);
+    arrayOfTrue[0] = true;
+
+    fuseAdmin._editPluginImplementationWhitelist(oldCErC20Implementations, newCErc20Implementations, arrayOfTrue);
   }
 }

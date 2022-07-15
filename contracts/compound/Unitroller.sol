@@ -96,29 +96,6 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
   }
 
   /**
-   * @notice Toggles Fuse admin rights.
-   * @param hasRights Boolean indicating if the Fuse admin is to have rights.
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _toggleFuseAdminRights(bool hasRights) external returns (uint256) {
-    // Check caller = admin
-    if (!hasAdminRights()) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.TOGGLE_ADMIN_RIGHTS_OWNER_CHECK);
-    }
-
-    // Check that rights have not already been set to the desired value
-    if (fuseAdminHasRights == hasRights) return uint256(Error.NO_ERROR);
-
-    // Set fuseAdminHasRights
-    fuseAdminHasRights = hasRights;
-
-    // Emit FuseAdminRightsToggled()
-    emit FuseAdminRightsToggled(fuseAdminHasRights);
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
    * @notice Toggles admin rights.
    * @param hasRights Boolean indicating if the admin is to have rights.
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
