@@ -480,13 +480,18 @@ contract CErc20DelegateTest is BaseTest {
   address[] implementationsSet;
   address[] pluginsSet;
 
+  address[] pluginRewardsDelegates;
+  address[] pluginDelegates;
+  address[] delegates;
+
+
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     // TODO set these in the addresses provider
     fusePoolDirectory = FusePoolDirectory(0x295d7347606F4bd810C8296bb8d75D657001fcf7);
     fuseAdmin = FuseFeeDistributor(payable(0xFc1f56C58286E7215701A773b61bFf2e18A177dE));
   }
 
-  function testMarketImplementations() public shouldRun(forChains(BSC_MAINNET)) {
+  function testLatestImplementationsWhitelisted() public shouldRun(forChains(BSC_MAINNET)) {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
@@ -519,6 +524,56 @@ contract CErc20DelegateTest is BaseTest {
         whitelisted || implementationsSet[k] == latestCErc20Delegate,
         "no whitelisted implementation for old implementation"
       );
+    }
+  }
+
+  function printMarketImplementations() public shouldRun(forChains(BSC_MAINNET)) {
+    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      Comptroller comptroller = Comptroller(pools[i].comptroller);
+      CToken[] memory markets = comptroller.getAllMarkets();
+      for (uint8 j = 0; j < markets.length; j++) {
+        CErc20Delegate delegate = CErc20Delegate(address(markets[j]));
+        address implementation = delegate.implementation();
+
+        emit log("");
+        emit log("market");
+        emit log_address(address(delegate));
+        emit log("implementation");
+        emit log_address(implementation);
+
+        CErc20PluginRewardsDelegate testing = CErc20PluginRewardsDelegate(address(markets[j]));
+        try testing.claim() {
+          // pluginRewardsDelegates.push(address(markets[j]));
+          pluginRewardsDelegates.push(implementation);
+          continue;
+        } catch {
+        }
+        try testing.plugin() {
+          // pluginDelegates.push(address(markets[j]));
+          pluginDelegates.push(implementation);
+          continue;
+        } catch {
+        }
+        // delegates.push(address(markets[j]));
+        delegates.push(implementation);
+      }
+    }
+
+    emit log("listing the plugin rewards delegates");
+    for (uint8 k = 0; k < pluginRewardsDelegates.length; k++) {
+      emit log_address(pluginRewardsDelegates[k]);
+    }
+
+    emit log("listing the plugin delegates");
+    for (uint8 k = 0; k < pluginDelegates.length; k++) {
+      emit log_address(pluginDelegates[k]);
+    }
+
+    emit log("listing the delegates");
+    for (uint8 k = 0; k < delegates.length; k++) {
+      emit log_address(delegates[k]);
     }
   }
 
