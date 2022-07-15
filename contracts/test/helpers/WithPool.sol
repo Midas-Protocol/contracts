@@ -31,7 +31,7 @@ import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { FusePoolLens } from "../../FusePoolLens.sol";
 
 contract WithPool {
-  MockERC20 underlyingToken;
+  MockERC20 public underlyingToken;
   CErc20 cErc20;
   CToken cToken;
   CErc20Delegate cErc20Delegate;
@@ -64,7 +64,7 @@ contract WithPool {
 
   event log_address1(address add);
 
-  constructor(MasterPriceOracle _masterPriceOracle, MockERC20 _underlyingToken) {
+  function setUpWithPool(MasterPriceOracle _masterPriceOracle, MockERC20 _underlyingToken) public {
     priceOracle = _masterPriceOracle;
     underlyingToken = _underlyingToken;
     setUpBaseContracts();
