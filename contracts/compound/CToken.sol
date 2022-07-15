@@ -1414,69 +1414,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
   }
 
   /**
-   * @notice Accrues interest and reduces reserves by transferring to admin
-   * @param reduceAmount Amount of reduction to reserves
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _reduceReserves(uint256 reduceAmount) external override nonReentrant(false) returns (uint256) {
-    uint256 error = accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted reduce reserves failed.
-      return fail(Error(error), FailureInfo.REDUCE_RESERVES_ACCRUE_INTEREST_FAILED);
-    }
-    // _reduceReservesFresh emits reserve-reduction-specific logs on errors, so we don't need to.
-    return _reduceReservesFresh(reduceAmount);
-  }
-
-  /**
-   * @notice Reduces reserves by transferring to admin
-   * @dev Requires fresh interest accrual
-   * @param reduceAmount Amount of reduction to reserves
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _reduceReservesFresh(uint256 reduceAmount) internal returns (uint256) {
-    // totalReserves - reduceAmount
-    uint256 totalReservesNew;
-
-    // Check caller is admin
-    if (!hasAdminRights()) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.REDUCE_RESERVES_ADMIN_CHECK);
-    }
-
-    // We fail gracefully unless market's block number equals current block number
-    if (accrualBlockNumber != getBlockNumber()) {
-      return fail(Error.MARKET_NOT_FRESH, FailureInfo.REDUCE_RESERVES_FRESH_CHECK);
-    }
-
-    // Fail gracefully if protocol has insufficient underlying cash
-    if (getCashPrior() < reduceAmount) {
-      return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.REDUCE_RESERVES_CASH_NOT_AVAILABLE);
-    }
-
-    // Check reduceAmount ≤ reserves[n] (totalReserves)
-    if (reduceAmount > totalReserves) {
-      return fail(Error.BAD_INPUT, FailureInfo.REDUCE_RESERVES_VALIDATION);
-    }
-
-    /////////////////////////
-    // EFFECTS & INTERACTIONS
-    // (No safe failures beyond this point)
-
-    // We checked reduceAmount <= totalReserves above, so this should never revert.
-    totalReservesNew = sub_(totalReserves, reduceAmount);
-
-    // Store reserves[n+1] = reserves[n] - reduceAmount
-    totalReserves = totalReservesNew;
-
-    // doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
-    doTransferOut(msg.sender, reduceAmount);
-
-    emit ReservesReduced(msg.sender, reduceAmount, totalReservesNew);
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
    * @notice Accrues interest and reduces Fuse fees by transferring to Fuse
    * @param withdrawAmount Amount of fees to withdraw
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
