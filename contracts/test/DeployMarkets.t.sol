@@ -484,7 +484,6 @@ contract CErc20DelegateTest is BaseTest {
   address[] pluginDelegates;
   address[] delegates;
 
-
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     // TODO set these in the addresses provider
     fusePoolDirectory = FusePoolDirectory(0x295d7347606F4bd810C8296bb8d75D657001fcf7);
@@ -548,14 +547,12 @@ contract CErc20DelegateTest is BaseTest {
           // pluginRewardsDelegates.push(address(markets[j]));
           pluginRewardsDelegates.push(implementation);
           continue;
-        } catch {
-        }
+        } catch {}
         try testing.plugin() {
           // pluginDelegates.push(address(markets[j]));
           pluginDelegates.push(implementation);
           continue;
-        } catch {
-        }
+        } catch {}
         // delegates.push(address(markets[j]));
         delegates.push(implementation);
       }
