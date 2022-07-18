@@ -74,7 +74,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     // );
   }
 
-  function testPreviewDepositAndMintReturnTheSameValue() public shouldRun(forChains(BSC_MAINNET)) {
+  function testPreviewDepositAndMintReturnTheSameValue() public {
     uint256 returnedShares = plugin.previewDeposit(depositAmount);
     assertApproxEqAbs(
       plugin.previewMint(returnedShares),
@@ -84,7 +84,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testPreviewWithdrawAndRedeemReturnTheSameValue() public shouldRun(forChains(BSC_MAINNET)) {
+  function testPreviewWithdrawAndRedeemReturnTheSameValue() public {
     deposit(address(this), depositAmount);
     uint256 withdrawalAmount = 10e18;
     uint256 reqShares = plugin.previewWithdraw(withdrawalAmount);
@@ -96,7 +96,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testDeposit() public shouldRun(forChains(BSC_MAINNET)) {
+  function testDeposit() public {
     uint256 expectedDepositShare = this.getExpectedDepositShares();
     uint256 expectedErc4626Shares = plugin.previewDeposit(depositAmount);
 
@@ -147,7 +147,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testDepositWithIncreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
+  function testDepositWithIncreasedVaultValue() public {
     // lpDepositor just mints the exact amount of depositShares as the user deposits in assets
     uint256 oldExpectedDepositShare = this.getExpectedDepositShares();
     uint256 oldExpected4626Shares = plugin.previewDeposit(depositAmount);
@@ -194,7 +194,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testDepositWithDecreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
+  function testDepositWithDecreasedVaultValue() public {
     // THIS TEST WILL ALWAYS FAIL
     // A transfer out of the lpStaker will always fail.
     // There also doesnt seem another way to reduce the balance of lpStaker so we cant test this scenario
@@ -224,7 +224,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     */
   }
 
-  function testMultipleDeposit() public shouldRun(forChains(BSC_MAINNET)) {
+  function testMultipleDeposit() public {
     uint256 expectedDepositShare = this.getExpectedDepositShares();
     uint256 expectedErc4626Shares = plugin.previewDeposit(depositAmount);
 
@@ -296,7 +296,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testMint() public shouldRun(forChains(BSC_MAINNET)) {
+  function testMint() public {
     uint256 expectedDepositShare = this.getExpectedDepositShares();
     uint256 mintAmount = plugin.previewDeposit(depositAmount);
 
@@ -348,7 +348,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testMultipleMint() public shouldRun(forChains(BSC_MAINNET)) {
+  function testMultipleMint() public {
     uint256 expectedDepositShare = this.getExpectedDepositShares();
     uint256 mintAmount = plugin.previewDeposit(depositAmount);
 
@@ -462,7 +462,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     vm.stopPrank();
   }
 
-  function testWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
+  function testWithdraw() public {
     uint256 depositShares = this.getExpectedDepositShares();
 
     uint256 withdrawalAmount = 10e18;
@@ -516,7 +516,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testWithdrawWithIncreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
+  function testWithdrawWithIncreasedVaultValue() public {
     uint256 depositShareBal = this.getExpectedDepositShares();
 
     deposit(address(this), depositAmount);
@@ -566,7 +566,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testWithdrawWithDecreasedVaultValue() public shouldRun(forChains(BSC_MAINNET)) {
+  function testWithdrawWithDecreasedVaultValue() public {
     // THIS TEST WILL ALWAYS FAIL
     // A transfer out of the lpStaker will always fail.
     // There also doesnt seem another way to reduce the balance of lpStaker so we cant test this scenario
@@ -605,7 +605,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       */
   }
 
-  function testMultipleWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
+  function testMultipleWithdraw() public {
     uint256 depositShares = this.getExpectedDepositShares() * 2;
 
     uint256 withdrawalAmount = 10e18;
@@ -720,7 +720,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testRedeem() public shouldRun(forChains(BSC_MAINNET)) {
+  function testRedeem() public {
     uint256 depositShares = this.getExpectedDepositShares();
 
     uint256 withdrawalAmount = 10e18;
@@ -770,7 +770,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testMultipleRedeem() public shouldRun(forChains(BSC_MAINNET)) {
+  function testMultipleRedeem() public {
     uint256 depositShares = this.getExpectedDepositShares() * 2;
 
     uint256 withdrawalAmount = 10e18;
@@ -875,7 +875,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testPauseContract() public shouldRun(forChains(BSC_MAINNET)) {
+  function testPauseContract() public {
     uint256 withdrawAmount = 1e18;
 
     deposit(address(this), depositAmount);
@@ -922,7 +922,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testEmergencyWithdrawAndPause() public shouldRun(forChains(BSC_MAINNET)) {
+  function testEmergencyWithdrawAndPause() public {
     deposit(address(this), depositAmount);
 
     uint256 expectedBal = plugin.previewRedeem(depositAmount);
@@ -944,7 +944,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     );
   }
 
-  function testEmergencyWithdrawAndRedeem() public shouldRun(forChains(BSC_MAINNET)) {
+  function testEmergencyWithdrawAndRedeem() public {
     uint256 withdrawAmount = 1e18;
 
     deposit(address(this), depositAmount);
