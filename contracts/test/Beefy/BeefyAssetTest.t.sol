@@ -7,10 +7,10 @@ import "../helpers/WithPool.sol";
 import "../config/BaseTest.t.sol";
 
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { BeefyERC4626Test } from "./BeefyERC4626Test.t.sol";
+import { BeefyERC4626Test } from "./BeefyERC4626Test.sol";
 import { BeefyTestConfig, BeefyTestConfigStorage } from "./BeefyTestConfig.sol";
 import { MidasERC4626, BeefyERC4626, IBeefyVault } from "../../compound/strategies/BeefyERC4626.sol";
-import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.t.sol";
+import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 
