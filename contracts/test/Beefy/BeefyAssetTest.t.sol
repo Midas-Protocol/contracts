@@ -18,18 +18,18 @@ contract BeefyAssetTest is AbstractAssetTest {
   constructor() {
     test = AbstractERC4626Test(address(new BeefyERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new BeefyTestConfigStorage()));
-    runTest = forChains(BSC_MAINNET);
+    shouldRunTest = forChains(BSC_MAINNET);
   }
 
-  function setUp() public override shouldRun(runTest) {}
+  function setUp() public override shouldRun(shouldRunTest) {}
 
-  function setUpTestContract(bytes calldata testConfig) public override shouldRun(runTest) {
+  function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
     (address beefyVault, ) = abi.decode(testConfig, (address, uint256));
 
     test.setUp(MockERC20(address(IBeefyVault(beefyVault).want())).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override shouldRun(runTest) {
+  function testInitializedValues() public override shouldRun(shouldRunTest) {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 

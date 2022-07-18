@@ -19,12 +19,12 @@ contract DotDotAssetTest is AbstractAssetTest {
   constructor() {
     test = AbstractERC4626Test(address(new DotDotERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new DotDotTestConfigStorage()));
-    runTest = forChains(BSC_MAINNET);
+    shouldRunTest = forChains(BSC_MAINNET);
   }
 
-  function setUp() public override shouldRun(runTest) {}
+  function setUp() public override shouldRun(shouldRunTest) {}
 
-  function setUpTestContract(bytes calldata testConfig) public override shouldRun(runTest) {
+  function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
     (address masterPriceOracle, address asset) = abi.decode(testConfig, (address, address));
 
     test.setUpWithPool(MasterPriceOracle(masterPriceOracle), MockERC20(asset));
@@ -32,7 +32,7 @@ contract DotDotAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override shouldRun(runTest) {
+  function testInitializedValues() public override shouldRun(shouldRunTest) {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
@@ -44,15 +44,15 @@ contract DotDotAssetTest is AbstractAssetTest {
     }
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(runTest) {
+  function testAccumulatingRewardsOnDeposit() public shouldRun(shouldRunTest) {
     this.runTest(DotDotERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(runTest) {
+  function testAccumulatingRewardsOnWithdrawal() public shouldRun(shouldRunTest) {
     this.runTest(DotDotERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 
-  function testClaimRewards() public shouldRun(runTest) {
+  function testClaimRewards() public shouldRun(shouldRunTest) {
     this.runTest(DotDotERC4626Test(address(test)).testClaimRewards);
   }
 }
