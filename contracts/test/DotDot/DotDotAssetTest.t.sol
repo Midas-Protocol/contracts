@@ -7,7 +7,7 @@ import "../helpers/WithPool.sol";
 import "../config/BaseTest.t.sol";
 
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { DotDotERC4626Test } from "./DotDotLpERC4626Test.t.sol";
+import { DotDotERC4626Test } from "./DotDotLpERC4626Test.sol";
 import { DotDotTestConfig, DotDotTestConfigStorage } from "./DotDotTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.t.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";

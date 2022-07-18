@@ -49,7 +49,7 @@ jobs:
         run: forge install
 
       - name: Run forge tests
-        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotLpERC4626Test'
+        run: forge test --no-match-contract 'Abstract'
 
   build-and-test-bsc:
     needs: [lint]
@@ -72,7 +72,7 @@ jobs:
         run: forge install
 
       - name: Run forge tests on BSC
-        run: forge test --fork-url ${FORK_URL_BSC} --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotLpERC4626Test'
+        run: forge test --fork-url ${FORK_URL_BSC} --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract'
 
   build-and-test-evmostestnet:
     needs: [lint]
@@ -94,7 +94,7 @@ jobs:
         run: forge install
 
       - name: Run forge tests on Evmos Testnet
-        run: forge test --fork-url https://eth.bd.evmos.dev:8545 --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotLpERC4626Test'
+        run: forge test --fork-url https://eth.bd.evmos.dev:8545 --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract'
 
   build-and-test-moonbeam:
     needs: [lint]
@@ -116,4 +116,4 @@ jobs:
         run: forge install
 
       - name: Run forge tests on Moonbeam
-        run: forge test --fork-url https://moonbeam.api.onfinality.io/public --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotLpERC4626Test'
+        run: forge test --fork-url https://moonbeam.api.onfinality.io/public --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract'
