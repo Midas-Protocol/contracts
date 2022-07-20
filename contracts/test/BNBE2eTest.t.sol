@@ -14,12 +14,12 @@ import { IW_NATIVE } from "../utils/IW_NATIVE.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 
 contract BNBE2eTest is WithPool, BaseTest {
-  constructor()
-    WithPool(
+  constructor() WithPool() {
+    super.setUpWithPool(
       MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
       MockERC20(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
-    )
-  {}
+    );
+  }
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     vm.prank(0xF8aaE8D5dd1d7697a4eC6F561737e68a2ab8539e);

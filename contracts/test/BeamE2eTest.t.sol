@@ -52,7 +52,9 @@ contract BeamE2eTest is WithPool, BaseTest {
     MockBeamERC20 asset;
   }
 
-  constructor() WithPool(MasterPriceOracle(mPriceOracle), MockERC20(0x99588867e817023162F4d4829995299054a5fC57)) {}
+  constructor() WithPool() {
+    super.setUpWithPool(MasterPriceOracle(mPriceOracle), MockERC20(0x99588867e817023162F4d4829995299054a5fC57));
+  }
 
   function setUp() public shouldRun(forChains(MOONBEAM_MAINNET)) {
     vm.prank(joey);

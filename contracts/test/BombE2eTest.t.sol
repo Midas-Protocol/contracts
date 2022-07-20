@@ -27,12 +27,12 @@ contract MockBnb is MockERC20 {
 }
 
 contract BombE2eTest is WithPool, BaseTest {
-  constructor()
-    WithPool(
+  constructor() WithPool() {
+    super.setUpWithPool(
       MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
       MockERC20(0x522348779DCb2911539e76A1042aA922F9C47Ee3)
-    )
-  {}
+    );
+  }
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     vm.prank(0xcd6cD62F11F9417FBD44dc0a44F891fd3E869234);
