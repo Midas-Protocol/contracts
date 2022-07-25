@@ -11,11 +11,7 @@ interface IAnkrBNBR {
 contract AnkrBNBInterestRateModel is InterestRateModel {
   using SafeMath for uint256;
 
-  event NewInterestParams(
-    uint256 baseRatePerBlock,
-    uint256 jumpMultiplierPerBlock,
-    uint256 kink
-  );
+  event NewInterestParams(uint256 baseRatePerBlock, uint256 jumpMultiplierPerBlock, uint256 kink);
 
   address public ANKR_BNB_R;
 
@@ -63,11 +59,7 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
     emit NewInterestParams(baseRatePerBlock, jumpMultiplierPerBlock, kink);
   }
 
-  function indexOfRatio(uint256 timestamp)
-    internal
-    pure
-    returns (uint8 index)
-  {
+  function indexOfRatio(uint256 timestamp) internal pure returns (uint8 index) {
     uint256 epochPeriod = timestamp / 1 days;
     return uint8(epochPeriod % 8);
   }
@@ -111,9 +103,9 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
   }
 
   function getSupplyRate(
-    uint256 cash, 
-    uint256 borrows, 
-    uint256 reserves, 
+    uint256 cash,
+    uint256 borrows,
+    uint256 reserves,
     uint256 reserveFactorMantissa
   ) public view override returns (uint256) {
     uint256 oneMinusReserveFactor = uint256(1e18).sub(reserveFactorMantissa);
