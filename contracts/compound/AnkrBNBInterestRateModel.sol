@@ -65,11 +65,6 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
     emit NewInterestParams(baseRatePerBlock, jumpMultiplierPerBlock, kink);
   }
 
-  function indexOfRatio(uint256 timestamp) internal pure returns (uint8 index) {
-    uint256 epochPeriod = timestamp / 1 days;
-    return uint8(epochPeriod % 8);
-  }
-
   /**
    * @notice Calculates the utilization rate of the market: `borrows / (cash + borrows - reserves)`
    * @param cash The amount of cash in the market
