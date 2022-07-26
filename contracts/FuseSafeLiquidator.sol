@@ -96,11 +96,23 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     PAIR_INIT_HASH_CODE = _uniswapPairInitHashCode;
   }
 
-  function _becomeImplementation(bytes calldata data) external {
-    if (owner() == address(0)) {
-      address newOwner = abi.decode(data, (address));
-      _transferOwnership(newOwner);
-    }
+  function _becomeImplementation(bytes calldata data) external onlyOwner {
+    (
+      address _wtoken,
+      address _uniswapV2router,
+      address _stableToken,
+      address _btcToken,
+      bytes memory _uniswapPairInitHashCode
+    ) = abi.decode(data, (address, address, address, address, bytes));
+
+    require(_uniswapV2router != address(0), "UniswapV2Factory not defined.");
+    W_NATIVE_ADDRESS = _wtoken;
+    UNISWAP_V2_ROUTER_02_ADDRESS = _uniswapV2router;
+    STABLE_TOKEN = _stableToken;
+    BTC_TOKEN = _btcToken;
+    W_NATIVE = IW_NATIVE(W_NATIVE_ADDRESS);
+    UNISWAP_V2_ROUTER_02 = IUniswapV2Router02(UNISWAP_V2_ROUTER_02_ADDRESS);
+    PAIR_INIT_HASH_CODE = _uniswapPairInitHashCode;
   }
 
   /**
