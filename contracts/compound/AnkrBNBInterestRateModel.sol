@@ -35,12 +35,15 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
    */
   uint256 public kink;
 
+  uint8 public day;
+
   /**
    * @notice Construct an interest rate model
    * @param _blocksPerYear The approximate number of blocks per year
    * @param baseRatePerYear The approximate target base APR, as a mantissa (scaled by 1e18)
    * @param jumpMultiplierPerYear The multiplierPerBlock after hitting a specified utilization point
    * @param kink_ The utilization point at which the jump multiplier is applied
+   * @param _day The day period for average apr
    * @param _abnbr Address for Ankr BNB stacking rate
    */
   constructor(
@@ -48,12 +51,15 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
     uint256 baseRatePerYear,
     uint256 jumpMultiplierPerYear,
     uint256 kink_,
+    uint8 _day,
     address _abnbr
   ) {
+    require(_day > 0 && _day < 8, "_day should be from 1 to 7");
     blocksPerYear = _blocksPerYear;
     baseRatePerBlock = baseRatePerYear.div(blocksPerYear);
     jumpMultiplierPerBlock = jumpMultiplierPerYear.div(blocksPerYear);
     kink = kink_;
+    day = _day;
     ANKR_BNB_R = _abnbr;
 
     emit NewInterestParams(baseRatePerBlock, jumpMultiplierPerBlock, kink);
@@ -84,14 +90,17 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
     return borrows.mul(1e18).div(cash.add(borrows).sub(reserves));
   }
 
+  function getMultiplierPerBlock() public view returns (uint256) {
+    return IAnkrBNBR(ANKR_BNB_R).averagePercentageRate(day);
+  }
+
   function getBorrowRate(
     uint256 cash,
     uint256 borrows,
     uint256 reserves
   ) public view override returns (uint256) {
     uint256 util = utilizationRate(cash, borrows, reserves);
-    uint8 day = indexOfRatio(block.timestamp);
-    uint256 multiplierPerBlock = IAnkrBNBR(ANKR_BNB_R).averagePercentageRate(day);
+    uint256 multiplierPerBlock = getMultiplierPerBlock();
 
     if (util <= kink) {
       return util.mul(multiplierPerBlock).div(1e18).add(baseRatePerBlock);
