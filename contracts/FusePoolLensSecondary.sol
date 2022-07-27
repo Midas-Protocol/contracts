@@ -166,7 +166,7 @@ contract FusePoolLensSecondary is Initializable {
     // Get max borrow/redeem
     uint256 maxBorrowOrRedeemAmount;
 
-    if (!isBorrow && !comptroller.checkMembership(msg.sender, cTokenModify)) {
+    if (!isBorrow && !comptroller.checkMembership(account, cTokenModify)) {
       // Max redeem = balance of underlying if not used as collateral
       maxBorrowOrRedeemAmount = balanceOfUnderlying;
     } else {
