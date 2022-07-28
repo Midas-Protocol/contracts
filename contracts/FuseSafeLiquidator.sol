@@ -583,71 +583,13 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
       uint256 flashLoanReturnAmount = (vars.repayAmount * 1000) / 997;
       if ((vars.repayAmount * 1000) % 997 > 0) flashLoanReturnAmount++; // Round up if division resulted in a remainder
 
-      fundDebtRepaymentAndLiquidate(
-        vars.flashLoanFundingToken,
-        vars.fundsConversionStrategies,
-        vars.fundsConversionStrategiesData,
-        vars.repayAmount,
-        ICErc20(vars.cErc20),
-        vars.borrower,
-        ICToken(vars.cTokenCollateral)
-      );
-
       // Post token flashloan
       // Cache liquidation profit token (or the zero address for NATIVE) for use as source for exchange later
       _liquidatorProfitExchangeSource = postFlashLoanTokens(
-        vars.repayAmount,
-        ICErc20(vars.cErc20),
-        ICToken(vars.cTokenCollateral),
-        vars.minProfitAmount,
-        vars.exchangeProfitTo,
-        IERC20Upgradeable(vars.flashLoanFundingToken),
-        flashLoanReturnAmount,
-        vars.uniswapV2RouterForBorrow,
-        vars.uniswapV2RouterForCollateral,
-        vars.redemptionStrategies,
-        vars.strategyData
+        vars,
+        flashLoanReturnAmount
       );
     }
-  }
-
-  function fundDebtRepaymentAndLiquidate(
-    address flashLoanFundingToken,
-    IFundsConversionStrategy[] memory fundsConversionStrategies,
-    bytes[] memory fundsConversionStrategiesData,
-    uint256 repayAmount,
-    ICErc20 cErc20,
-    address borrower,
-    ICToken cTokenCollateral
-  ) internal returns (IERC20Upgradeable debtRepaymentToken, uint256 debtRepaymentAmount) {
-    if (fundsConversionStrategies.length > 0) {
-      require(
-        fundsConversionStrategies.length == fundsConversionStrategiesData.length,
-        "Funding IFundsConversionStrategy contract array and strategy data bytes array must be the same length."
-      );
-      debtRepaymentToken = IERC20Upgradeable(flashLoanFundingToken);
-      debtRepaymentAmount = debtRepaymentToken.balanceOf(address(this));
-      for (uint256 i = 0; i < fundsConversionStrategies.length; i++)
-        (debtRepaymentToken, debtRepaymentAmount) = redeemCustomCollateral(
-          debtRepaymentToken,
-          debtRepaymentAmount,
-          fundsConversionStrategies[i],
-          fundsConversionStrategiesData[i]
-        );
-    }
-
-    address underlyingBorrow = cErc20.underlying();
-    // TODO repay as much as possible?
-    require(debtRepaymentAmount >= repayAmount, "debt repayment amount not enough");
-    require(address(debtRepaymentToken) == underlyingBorrow, "the debt repayment funds should be converted to the underlying debt token");
-    // TODO move to other fn?
-    // Approve repayAmount to cErc20
-    safeApprove(IERC20Upgradeable(underlyingBorrow), address(cErc20), repayAmount);
-
-    // Liquidate NATIVE borrow using flashloaned NATIVE
-    require(cErc20.liquidateBorrow(borrower, repayAmount, cTokenCollateral) == 0, "Liquidation failed.");
-
-    return (debtRepaymentToken, debtRepaymentAmount);
   }
 
   /**
@@ -843,36 +785,57 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    * @dev Liquidate unhealthy token borrow, exchange seized collateral, return flashloaned funds, and exchange profit.
    */
   function postFlashLoanTokens(
-    uint256 repayAmount,
-    ICErc20 cErc20,
-    ICToken cTokenCollateral,
-    uint256 minProfitAmount,
-    address exchangeProfitTo,
-    IERC20Upgradeable flashLoanFundingToken,
-    uint256 flashLoanReturnAmount,
-    IUniswapV2Router02 uniswapV2RouterForBorrow,
-    IUniswapV2Router02 uniswapV2RouterForCollateral,
-    IRedemptionStrategy[] memory redemptionStrategies,
-    bytes[] memory strategyData
+    LiquidateToTokensWithFlashLoanVars memory vars,
+    uint256 flashLoanReturnAmount
   ) private returns (address) {
+    {
+      IERC20Upgradeable debtRepaymentToken = IERC20Upgradeable(vars.flashLoanFundingToken);
+      uint256 debtRepaymentAmount = debtRepaymentToken.balanceOf(address(this));
+      if (vars.fundsConversionStrategies.length > 0) {
+        require(
+          vars.fundsConversionStrategies.length == vars.fundsConversionStrategiesData.length,
+          "Funding IFundsConversionStrategy contract array and strategy data bytes array must be the same length."
+        );
+        for (uint256 i = 0; i < vars.fundsConversionStrategies.length; i++)
+          (debtRepaymentToken, debtRepaymentAmount) = redeemCustomCollateral(
+            debtRepaymentToken,
+            debtRepaymentAmount,
+            vars.fundsConversionStrategies[i],
+            vars.fundsConversionStrategiesData[i]
+          );
+      }
+
+      address underlyingBorrow = vars.cErc20.underlying();
+      // TODO repay as much as possible?
+      require(debtRepaymentAmount >= vars.repayAmount, "debt repayment amount not enough");
+      require(address(debtRepaymentToken) == underlyingBorrow, "the debt repayment funds should be converted to the underlying debt token");
+      // TODO move to other fn?
+      // Approve repayAmount to cErc20
+      safeApprove(IERC20Upgradeable(underlyingBorrow), address(vars.cErc20), vars.repayAmount);
+
+      // Liquidate NATIVE borrow using flashloaned NATIVE
+      require(vars.cErc20.liquidateBorrow(vars.borrower, vars.repayAmount, vars.cTokenCollateral) == 0, "Liquidation failed.");
+    }
+
+
     // Redeem seized cTokens for underlying asset
-    uint256 seizedCTokenAmount = cTokenCollateral.balanceOf(address(this));
+    uint256 seizedCTokenAmount = vars.cTokenCollateral.balanceOf(address(this));
     require(seizedCTokenAmount > 0, "No cTokens seized.");
-    uint256 redeemResult = cTokenCollateral.redeem(seizedCTokenAmount);
+    uint256 redeemResult = vars.cTokenCollateral.redeem(seizedCTokenAmount);
     require(redeemResult == 0, "Error calling redeeming seized cToken: error code not equal to 0");
 
     // Repay flashloan
     return
       repayTokenFlashLoan(
-        repayAmount,
-        cTokenCollateral,
-        exchangeProfitTo,
-        flashLoanFundingToken,
+        vars.repayAmount,
+        vars.cTokenCollateral,
+        vars.exchangeProfitTo,
+        vars.flashLoanFundingToken,
         flashLoanReturnAmount,
-        uniswapV2RouterForBorrow,
-        uniswapV2RouterForCollateral,
-        redemptionStrategies,
-        strategyData
+        vars.uniswapV2RouterForBorrow,
+        vars.uniswapV2RouterForCollateral,
+        vars.redemptionStrategies,
+        vars.strategyData
       );
   }
 
@@ -883,7 +846,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     uint256 repayAmount,
     ICToken cTokenCollateral,
     address exchangeProfitTo,
-    IERC20Upgradeable flashLoanFundingToken,
+    address fundingTokenAddress,
     uint256 flashLoanReturnAmount,
     IUniswapV2Router02 uniswapV2RouterForBorrow,
     IUniswapV2Router02 uniswapV2RouterForCollateral,
@@ -898,7 +861,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
       uint256 wethRequired = getAmountsIn(
         uniswapV2RouterForBorrow.factory(),
         repayAmount,
-        array(W_NATIVE_ADDRESS, address(flashLoanFundingToken))
+        array(W_NATIVE_ADDRESS, fundingTokenAddress)
       )[0];
 
       // Repay flashloan
@@ -931,8 +894,9 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
           );
       }
 
+      IERC20Upgradeable flashLoanFundingToken = IERC20Upgradeable(fundingTokenAddress);
       // Check which side of the flashloan to repay
-      if (address(underlyingCollateral) == address(flashLoanFundingToken)) {
+      if (address(underlyingCollateral) == fundingTokenAddress) {
         // Repay flashloan on borrow side with collateral
         require(
           flashLoanReturnAmount <= flashLoanFundingToken.balanceOf(address(this)),
@@ -950,7 +914,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
         uint256 wethRequired = getAmountsIn(
           uniswapV2RouterForBorrow.factory(),
           repayAmount,
-          array(W_NATIVE_ADDRESS, address(flashLoanFundingToken))
+          array(W_NATIVE_ADDRESS, fundingTokenAddress)
         )[0];
 
         if (address(underlyingCollateral) != W_NATIVE_ADDRESS) {
@@ -1019,7 +983,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
       redemptionStrategiesWhitelist[address(strategies[i])] = whitelisted[i];
     }
   }
-  
+
   /**
    * @dev Redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
    * Public visibility because we have to call this function externally if called from a payable FuseSafeLiquidator function (for some reason delegatecall fails when called with msg.value > 0).
