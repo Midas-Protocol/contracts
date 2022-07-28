@@ -13,6 +13,7 @@ import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
+import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
@@ -223,21 +224,29 @@ contract BeamE2eTest is WithPool, BaseTest {
       vars.assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
       uint256 beamBalance = cTokenLP.balanceOf(david);
 
+      IFundsConversionStrategy[] memory fundingStrategies = new IFundsConversionStrategy[](0);
+      bytes[] memory data = new bytes[](0);
+
       /**
        * Liquidation
        */
       vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-        david,
-        400,
-        ICErc20(address(cToken)),
-        ICErc20(address(cTokenLP)),
-        0,
-        address(0),
-        IUniswapV2Router02(uniswapRouter),
-        IUniswapV2Router02(uniswapRouter),
-        vars.strategies,
-        vars.abis,
-        0
+        FuseSafeLiquidator.LiquidateToTokensWithFlashLoanVars(
+          david,
+          400,
+          ICErc20(address(cToken)),
+          ICErc20(address(cTokenLP)),
+          0,
+          address(0),
+          address(underlyingToken),
+          IUniswapV2Router02(uniswapRouter),
+          IUniswapV2Router02(uniswapRouter),
+          vars.strategies,
+          vars.abis,
+          0,
+          fundingStrategies,
+          data
+        )
       );
       vars.assetsDataAfter = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
 
