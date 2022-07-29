@@ -31,25 +31,43 @@ contract JarvisSynthereumLiquidator is IRedemptionStrategy {
     // approve so the pool can pull out the input tokens
     inputToken.approve(address(pool), inputAmount);
 
-    if (pool.emergencyShutdownPrice() > 0) {
-      // emergency shutdowns cannot be reverted, so this corner case must be covered
-      (, uint256 collateralSettled) = pool.settleEmergencyShutdown();
-      outputAmount = collateralSettled;
+    if (inputToken == pool.syntheticToken()) {
       outputToken = IERC20Upgradeable(address(pool.collateralToken()));
-    } else {
-      // redeem the underlying BUSD
-      // fetch the estimated redeemable collateral in BUSD, less the fee paid
-      (uint256 redeemableCollateralAmount, ) = pool.getRedeemTradeInfo(inputAmount);
 
+      if (pool.emergencyShutdownPrice() > 0) {
+        // emergency shutdowns cannot be reverted, so this corner case must be covered
+        (, uint256 collateralSettled) = pool.settleEmergencyShutdown();
+        outputAmount = collateralSettled;
+        outputToken = IERC20Upgradeable(address(pool.collateralToken()));
+      } else {
+        // redeem the underlying BUSD
+        // fetch the estimated redeemable collateral in BUSD, less the fee paid
+        (uint256 redeemableCollateralAmount, ) = pool.getRedeemTradeInfo(inputAmount);
+
+        // Expiration time of the transaction
+        uint256 expirationTime = block.timestamp + txExpirationPeriod;
+
+        (uint256 collateralAmountReceived, uint256 feePaid) = pool.redeem(
+          ISynthereumLiquidityPool.RedeemParams(inputAmount, redeemableCollateralAmount, expirationTime, address(this))
+        );
+
+        outputAmount = collateralAmountReceived;
+      }
+    } else if (inputToken == pool.collateralToken()) {
+      outputToken = IERC20Upgradeable(address(pool.syntheticToken()));
+
+      // mint jBRL from the supplied bUSD
+      (uint256 synthTokensReceived, ) = pool.getMintTradeInfo(inputAmount);
       // Expiration time of the transaction
       uint256 expirationTime = block.timestamp + txExpirationPeriod;
 
-      (uint256 collateralAmountReceived, uint256 feePaid) = pool.redeem(
-        ISynthereumLiquidityPool.RedeemParams(inputAmount, redeemableCollateralAmount, expirationTime, address(this))
+      (uint256 syntheticTokensMinted, uint256 feePaid) = pool.mint(
+        ISynthereumLiquidityPool.MintParams(synthTokensReceived, inputAmount, expirationTime, address(this))
       );
 
-      outputAmount = collateralAmountReceived;
-      outputToken = IERC20Upgradeable(address(pool.collateralToken()));
+      outputAmount = syntheticTokensMinted;
+    } else {
+      revert("unknown input token");
     }
   }
 }

@@ -8,6 +8,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20
 
 import "./liquidators/IRedemptionStrategy.sol";
 import "./liquidators/IFundsConversionStrategy.sol";
+import "./liquidators/JarvisLiquidatorFunder.sol";
 
 import "./external/compound/ICToken.sol";
 
@@ -412,7 +413,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
       IUniswapV2Factory(vars.uniswapV2RouterForBorrow.factory()).getPair(vars.flashLoanFundingToken, W_NATIVE_ADDRESS)
     );
 
-    IFundsConversionStrategy fcs = IFundsConversionStrategy(address(0));
+    IFundsConversionStrategy fcs = vars.fundsConversionStrategies[0];
     uint256 swapAmount = fcs.estimateInputAmount(vars.repayAmount);
     bool token0IsFlashLoanFundingToken = pair.token0() == vars.flashLoanFundingToken;
 
@@ -530,7 +531,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     uint256 amount1,
     bytes calldata data
   ) public override {
-    address cToken = abi.decode(data[68:100], (address));
+    address cToken = abi.decode(data[100:132], (address));
 
     // Liquidate unhealthy borrow, exchange seized collateral, return flashloaned funds, and exchange profit
     if (ICToken(cToken).isCEther()) {
@@ -579,16 +580,9 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
           )
         );
 
-      // Calculate flashloan return amount
-      uint256 flashLoanReturnAmount = (vars.repayAmount * 1000) / 997;
-      if ((vars.repayAmount * 1000) % 997 > 0) flashLoanReturnAmount++; // Round up if division resulted in a remainder
-
       // Post token flashloan
       // Cache liquidation profit token (or the zero address for NATIVE) for use as source for exchange later
-      _liquidatorProfitExchangeSource = postFlashLoanTokens(
-        vars,
-        flashLoanReturnAmount
-      );
+      _liquidatorProfitExchangeSource = postFlashLoanTokens(vars);
     }
   }
 
@@ -784,10 +778,15 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   /**
    * @dev Liquidate unhealthy token borrow, exchange seized collateral, return flashloaned funds, and exchange profit.
    */
-  function postFlashLoanTokens(
-    LiquidateToTokensWithFlashLoanVars memory vars,
-    uint256 flashLoanReturnAmount
-  ) private returns (address) {
+  function postFlashLoanTokens(LiquidateToTokensWithFlashLoanVars memory vars) private returns (address) {
+    // TODO
+    IFundsConversionStrategy fcs = vars.fundsConversionStrategies[0];
+    uint256 swapAmount = fcs.estimateInputAmount(vars.repayAmount);
+
+    // Calculate flashloan return amount
+    uint256 flashLoanReturnAmount = (swapAmount * 1000) / 997;
+    if ((swapAmount * 1000) % 997 > 0) flashLoanReturnAmount++; // Round up if division resulted in a remainder
+
     {
       IERC20Upgradeable debtRepaymentToken = IERC20Upgradeable(vars.flashLoanFundingToken);
       uint256 debtRepaymentAmount = debtRepaymentToken.balanceOf(address(this));
