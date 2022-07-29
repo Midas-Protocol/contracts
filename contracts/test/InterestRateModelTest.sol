@@ -27,7 +27,7 @@ contract InterestRateModeLest is BaseTest {
     whitepaperInterestRateModel = new WhitePaperInterestRateModel(10512000, 0.2e17, 0.2e18);
   }
 
-  function _convertToPerYear(uint256 value) internal returns(uint256){
+  function _convertToPerYear(uint256 value) internal returns (uint256) {
     return value * 10512000;
   }
 
