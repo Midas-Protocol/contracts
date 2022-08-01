@@ -397,8 +397,8 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     IRedemptionStrategy[] redemptionStrategies;
     bytes[] strategyData;
     uint256 ethToCoinbase;
-    IFundsConversionStrategy[] fundsConversionStrategies;
-    bytes[] fundsConversionStrategiesData;
+    IFundsConversionStrategy[] debtFundingStrategies;
+    bytes[] debtFundingStrategiesData;
   }
 
   /**
@@ -412,14 +412,25 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     IUniswapV2Pair pair = IUniswapV2Pair(
       IUniswapV2Factory(vars.uniswapV2RouterForBorrow.factory()).getPair(vars.flashLoanFundingToken, W_NATIVE_ADDRESS)
     );
-
-    IFundsConversionStrategy fcs = vars.fundsConversionStrategies[0];
-    uint256 swapAmount = fcs.estimateInputAmount(vars.repayAmount);
     bool token0IsFlashLoanFundingToken = pair.token0() == vars.flashLoanFundingToken;
 
+    // TODO: estimate flashSwapAmount outside the contract call and give as input?
+    uint256 flashSwapAmount = vars.repayAmount;
+    if (vars.debtFundingStrategies.length > 0) {
+      require(
+        vars.debtFundingStrategies.length == vars.debtFundingStrategiesData.length,
+        "Funding IFundsConversionStrategy contract array and strategy data bytes array must be the same length."
+      );
+      // loop backwards to estimate the initial input from the final expected output
+      for (uint256 i = vars.debtFundingStrategies.length; i > 0; i--) {
+        IFundsConversionStrategy fcs = vars.debtFundingStrategies[i-1];
+        flashSwapAmount = fcs.estimateInputAmount(flashSwapAmount);
+      }
+    }
+
     pair.swap(
-      token0IsFlashLoanFundingToken ? swapAmount : 0,
-      !token0IsFlashLoanFundingToken ? swapAmount : 0,
+      token0IsFlashLoanFundingToken ? flashSwapAmount : 0,
+      !token0IsFlashLoanFundingToken ? flashSwapAmount : 0,
       address(this),
       msg.data
     );
@@ -779,49 +790,48 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    * @dev Liquidate unhealthy token borrow, exchange seized collateral, return flashloaned funds, and exchange profit.
    */
   function postFlashLoanTokens(LiquidateToTokensWithFlashLoanVars memory vars) private returns (address) {
-    // TODO
-    IFundsConversionStrategy fcs = vars.fundsConversionStrategies[0];
-    uint256 swapAmount = fcs.estimateInputAmount(vars.repayAmount);
+    uint256 flashSwapAmount = vars.repayAmount;
+    IERC20Upgradeable debtRepaymentToken = IERC20Upgradeable(vars.flashLoanFundingToken);
+    uint256 debtRepaymentAmount = debtRepaymentToken.balanceOf(address(this));
 
-    // Calculate flashloan return amount
-    uint256 flashLoanReturnAmount = (swapAmount * 1000) / 997;
-    if ((swapAmount * 1000) % 997 > 0) flashLoanReturnAmount++; // Round up if division resulted in a remainder
-
-    {
-      IERC20Upgradeable debtRepaymentToken = IERC20Upgradeable(vars.flashLoanFundingToken);
-      uint256 debtRepaymentAmount = debtRepaymentToken.balanceOf(address(this));
-      if (vars.fundsConversionStrategies.length > 0) {
-        require(
-          vars.fundsConversionStrategies.length == vars.fundsConversionStrategiesData.length,
-          "Funding IFundsConversionStrategy contract array and strategy data bytes array must be the same length."
-        );
-        for (uint256 i = 0; i < vars.fundsConversionStrategies.length; i++)
-          (debtRepaymentToken, debtRepaymentAmount) = redeemCustomCollateral(
-            debtRepaymentToken,
-            debtRepaymentAmount,
-            vars.fundsConversionStrategies[i],
-            vars.fundsConversionStrategiesData[i]
-          );
+    if (vars.debtFundingStrategies.length > 0) {
+      // loop backwards to estimate the initial input from the final expected output
+      for (uint256 i = vars.debtFundingStrategies.length; i > 0; i--) {
+        IFundsConversionStrategy fcs = vars.debtFundingStrategies[i-1];
+        flashSwapAmount = fcs.estimateInputAmount(flashSwapAmount);
       }
 
+      for (uint256 i = 0; i < vars.debtFundingStrategies.length; i++)
+        (debtRepaymentToken, debtRepaymentAmount) = redeemCustomCollateral(
+          debtRepaymentToken,
+          debtRepaymentAmount,
+          vars.debtFundingStrategies[i],
+          vars.debtFundingStrategiesData[i]
+        );
+    }
+
+    // Calculate flashloan return amount
+    uint256 flashLoanReturnAmount = (flashSwapAmount * 1000) / 997;
+    if ((flashSwapAmount * 1000) % 997 > 0) flashLoanReturnAmount++; // Round up if division resulted in a remainder
+
+    // Approve the debt repayment transfer, liquidate and redeem the seized collateral
+    {
       address underlyingBorrow = vars.cErc20.underlying();
       // TODO repay as much as possible?
       require(debtRepaymentAmount >= vars.repayAmount, "debt repayment amount not enough");
       require(address(debtRepaymentToken) == underlyingBorrow, "the debt repayment funds should be converted to the underlying debt token");
-      // TODO move to other fn?
       // Approve repayAmount to cErc20
       safeApprove(IERC20Upgradeable(underlyingBorrow), address(vars.cErc20), vars.repayAmount);
 
-      // Liquidate NATIVE borrow using flashloaned NATIVE
+      // Liquidate borrow
       require(vars.cErc20.liquidateBorrow(vars.borrower, vars.repayAmount, vars.cTokenCollateral) == 0, "Liquidation failed.");
+
+      // Redeem seized cTokens for underlying asset
+      uint256 seizedCTokenAmount = vars.cTokenCollateral.balanceOf(address(this));
+      require(seizedCTokenAmount > 0, "No cTokens seized.");
+      uint256 redeemResult = vars.cTokenCollateral.redeem(seizedCTokenAmount);
+      require(redeemResult == 0, "Error calling redeeming seized cToken: error code not equal to 0");
     }
-
-
-    // Redeem seized cTokens for underlying asset
-    uint256 seizedCTokenAmount = vars.cTokenCollateral.balanceOf(address(this));
-    require(seizedCTokenAmount > 0, "No cTokens seized.");
-    uint256 redeemResult = vars.cTokenCollateral.redeem(seizedCTokenAmount);
-    require(redeemResult == 0, "Error calling redeeming seized cToken: error code not equal to 0");
 
     // Repay flashloan
     return
