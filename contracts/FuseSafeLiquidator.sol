@@ -124,6 +124,15 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   }
 
   /**
+   * @dev Internal function to approve
+   */
+  function justApprove(IERC20Upgradeable token,
+    address to,
+    uint256 amount) private {
+    token.approve(to, amount);
+  }
+
+  /**
    * @dev Internal function to exchange the entire balance of `from` to at least `minOutputAmount` of `to`.
    * @param from The input ERC20 token address (or the zero address if NATIVE) to exchange from.
    * @param to The output ERC20 token address (or the zero address if NATIVE) to exchange to.
@@ -159,7 +168,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
       // Approve input tokens
       IERC20Upgradeable fromToken = IERC20Upgradeable(from);
       uint256 inputBalance = fromToken.balanceOf(address(this));
-      safeApprove(fromToken, address(uniswapV2Router), inputBalance);
+      justApprove(fromToken, address(uniswapV2Router), inputBalance);
 
       // Exchange from tokens to NATIVE or tokens
       if (to == address(0))
@@ -202,7 +211,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
       // Approve input tokens
       IERC20Upgradeable fromToken = IERC20Upgradeable(from);
       uint256 inputBalance = fromToken.balanceOf(address(this));
-      safeApprove(fromToken, address(uniswapV2Router), inputBalance);
+      justApprove(fromToken, address(uniswapV2Router), inputBalance);
 
       // Exchange from tokens to NATIVE
       uniswapV2Router.swapTokensForExactETH(
@@ -242,7 +251,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     require(repayAmount > 0, "Repay amount (transaction value) must be greater than 0.");
     IERC20Upgradeable underlying = IERC20Upgradeable(cErc20.underlying());
     underlying.safeTransferFrom(msg.sender, address(this), repayAmount);
-    safeApprove(underlying, address(cErc20), repayAmount);
+    justApprove(underlying, address(cErc20), repayAmount);
     require(cErc20.liquidateBorrow(borrower, repayAmount, cTokenCollateral) == 0, "Liquidation failed.");
 
     // Redeem seized cToken collateral if necessary
@@ -746,7 +755,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
           W_NATIVE.deposit{ value: flashSwapReturnAmount }();
         } else {
           // Approve to Uniswap router
-          safeApprove(underlyingCollateral, address(uniswapV2Router), underlyingCollateralSeized);
+          justApprove(underlyingCollateral, address(uniswapV2Router), underlyingCollateralSeized);
 
           // Swap collateral tokens for W_NATIVE via Uniswap router
           if (exchangeProfitTo == address(underlyingCollateral))
@@ -820,7 +829,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
         "the debt repayment funds should be converted to the underlying debt token"
       );
       // Approve repayAmount to cErc20
-      safeApprove(IERC20Upgradeable(underlyingBorrow), address(vars.cErc20), vars.repayAmount);
+      justApprove(IERC20Upgradeable(underlyingBorrow), address(vars.cErc20), vars.repayAmount);
 
       // Liquidate borrow
       require(
@@ -930,7 +939,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
 
         if (address(underlyingCollateral) != W_NATIVE_ADDRESS) {
           // Approve to Uniswap router
-          safeApprove(underlyingCollateral, address(uniswapV2RouterForCollateral), underlyingCollateralSeized);
+          justApprove(underlyingCollateral, address(uniswapV2RouterForCollateral), underlyingCollateralSeized);
 
           // Swap collateral tokens for W_NATIVE to be repaid via Uniswap router
           if (exchangeProfitTo == address(underlyingCollateral))
