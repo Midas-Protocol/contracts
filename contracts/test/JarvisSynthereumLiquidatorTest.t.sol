@@ -11,7 +11,7 @@ interface IMockERC20 is IERC20Upgradeable {
 }
 
 contract JarvisSynthereumLiquidatorTest is BaseTest {
-  JarvisSynthereumLiquidator private jarvisLiquidator;
+  JarvisSynthereumLiquidator private liquidator;
 
   // TODO in the addresses provider?
   ISynthereumLiquidityPool synthereumLiquiditiyPool =
@@ -25,15 +25,15 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
   function setUp() public {
     uint64 expirationPeriod = 60 * 40; // 40 mins
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
-    jarvisLiquidator = new JarvisSynthereumLiquidator(synthereumLiquiditiyPool, expirationPeriod);
+    liquidator = new JarvisSynthereumLiquidator(synthereumLiquiditiyPool, expirationPeriod);
   }
 
   function testRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
     vm.prank(minter);
-    jBRLToken.mint(address(jarvisLiquidator), 10e18);
+    jBRLToken.mint(address(liquidator), 10e18);
 
-    (uint256 redeemableAmount, ) = jarvisLiquidator.pool().getRedeemTradeInfo(10e18);
-    (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, "");
+    (uint256 redeemableAmount, ) = liquidator.pool().getRedeemTradeInfo(10e18);
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(jBRLToken, 10e18, "");
 
     // should be BUSD
     assertEq(address(outputToken), address(bUSD));
@@ -41,16 +41,16 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
   }
 
   function testEmergencyRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
-    ISynthereumLiquidityPool pool = jarvisLiquidator.pool();
+    ISynthereumLiquidityPool pool = liquidator.pool();
     address manager = pool.synthereumFinder().getImplementationAddress("Manager");
     vm.prank(manager);
     pool.emergencyShutdown();
 
     vm.prank(minter);
-    jBRLToken.mint(address(jarvisLiquidator), 10e18);
+    jBRLToken.mint(address(liquidator), 10e18);
 
-    (uint256 redeemableAmount, uint256 fee) = jarvisLiquidator.pool().getRedeemTradeInfo(10e18);
-    (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, "");
+    (uint256 redeemableAmount, uint256 fee) = liquidator.pool().getRedeemTradeInfo(10e18);
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(jBRLToken, 10e18, "");
 
     // should be BUSD
     assertEq(address(outputToken), address(bUSD));
@@ -91,7 +91,7 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
     }
     {
       // jbrl -> busd
-      redemptionStrategies[1] = jarvisLiquidator;
+      redemptionStrategies[1] = liquidator;
       strategyData[1] = "";
     }
 
