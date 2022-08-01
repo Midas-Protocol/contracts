@@ -77,6 +77,7 @@ contract MidasFlywheelCore is FlywheelCore {
 
   /**
    * @notice Update performanceFee and/or feeRecipient
+   * @dev Claim rewards first from the previous feeRecipient before changing it
    */
   function updateFeeSettings(uint256 _performanceFee, address _feeRecipient) external requiresAuth {
     emit UpdatedFeeSettings(performanceFee, _performanceFee, feeRecipient, _feeRecipient);
