@@ -231,7 +231,7 @@ contract BeamE2eTest is WithPool, BaseTest {
        * Liquidation
        */
       vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-        FuseSafeLiquidator.LiquidateToTokensWithFlashLoanVars(
+        FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
           david,
           400,
           ICErc20(address(cToken)),

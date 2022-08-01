@@ -180,7 +180,7 @@ contract BombE2eTest is WithPool, BaseTest {
     uint256 bnbBalance = cBnbToken.balanceOf(accountOne);
 
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-      FuseSafeLiquidator.LiquidateToTokensWithFlashLoanVars(
+      FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
         accountOne,
         9,
         ICErc20(address(cToken)),

@@ -66,7 +66,7 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
   function testLiquidate2brl() public shouldRun(forChains(BSC_MAINNET)) {
     if (block.number != 19821878) return;
 
-    FuseSafeLiquidator.LiquidateToTokensWithFlashLoanVars memory vars;
+    FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars memory vars;
 
     address _wtoken = 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c;
     address _uniswapV2router = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
@@ -87,9 +87,9 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
     vars.redemptionStrategies = new IRedemptionStrategy[](0);
     vars.strategyData = new bytes[](0);
     vars.debtFundingStrategies = new IFundsConversionStrategy[](0);
-//    vars.fundsConversionStrategies[0] = new JarvisLiquidatorFunder(ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49), 60 * 40);
+    //    vars.fundsConversionStrategies[0] = new JarvisLiquidatorFunder(ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49), 60 * 40);
     vars.debtFundingStrategiesData = new bytes[](0);
-    vars.flashLoanFundingToken = _stableToken; // bUSD
+    vars.flashSwapFundingToken = _stableToken; // bUSD
 
     vm.prank(address(bUSD));
     bUSD.transfer(deployer, vars.repayAmount);
@@ -188,7 +188,10 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
     vars.strategies = new IRedemptionStrategy[](0);
     vars.abis = new bytes[](0);
     IFundsConversionStrategy[] memory fundingStrategies = new IFundsConversionStrategy[](1);
-    fundingStrategies[0] = new JarvisLiquidatorFunder(ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49), 60 * 40);
+    fundingStrategies[0] = new JarvisLiquidatorFunder(
+      ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49),
+      60 * 40
+    );
     bytes[] memory data = new bytes[](1);
     data[0] = "";
     vars.liquidator._whitelistRedemptionStrategy(fundingStrategies[0], true);
@@ -197,7 +200,7 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
     // liquidate
     vm.prank(accountTwo);
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-      FuseSafeLiquidator.LiquidateToTokensWithFlashLoanVars(
+      FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
         accountOne,
         repayAmount,
         ICErc20(address(cTokenJBRL)),
