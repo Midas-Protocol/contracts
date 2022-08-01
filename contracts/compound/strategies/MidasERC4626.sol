@@ -10,11 +10,30 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
   using FixedPointMathLib for uint256;
   using SafeTransferLib for ERC20;
 
+  /* ========== STATE VARIABLES ========== */
+
+  uint256 public vaultShareHWM = 1e18;
+  uint256 public performanceFee = 5e16; // 5%
+  address public feeRecipient; // TODO whats the default address?
+
+  /* ========== EVENTS ========== */
+
+  event UpdatedFeeSettings(
+    uint256 oldPerformanceFee,
+    uint256 newPerformanceFee,
+    address oldFeeRecipient,
+    address newFeeRecipient
+  );
+
+  /* ========== CONSTRUCTOR ========== */
+
   constructor(
     ERC20 _asset,
     string memory _name,
     string memory _symbol
   ) ERC4626(_asset, _name, _symbol) {}
+
+  /* ========== DEPOSIT/WITHDRAW FUNCTIONS ========== */
 
   function deposit(uint256 assets, address receiver) public override whenNotPaused returns (uint256 shares) {
     // Check for rounding error since we round down in previewDeposit.
@@ -99,6 +118,49 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
 
     asset.safeTransfer(receiver, assets);
   }
+
+  /* ========== FEE FUNCTIONS ========== */
+
+  /**
+   * @notice Performance fee that has accrued since last fee harvest.
+   * @return Accrued performance fee in underlying `asset` token.
+   * @dev Performance fee is based on a vault share high water mark value. If vault share value has increased above the
+   *   HWM in a fee period, issue fee shares to the vault equal to the performance fee.
+   */
+  function takePerformanceFee() onlyOwner {
+    uint256 currentAssets = totalAssets();
+    uint256 shareValue = convertToAssets(10**asset.decimals());
+
+    if (shareValue > vaultShareHWM) {
+      // chache value
+      uint256 supply = totalSupply;
+
+      uint256 accruedPerformanceFee = (performanceFee * (shareValue - vaultShareHWM) * supply) / 1e36;
+      _mint(address(this), (accruedPerformanceFee * supply) / (currentAssets - accruedPerformanceFee));
+
+      vaultShareHWM = convertToAssets(10**asset.decimals());
+    }
+  }
+
+  /**
+   * @notice Transfer accrued fees to rewards manager contract. Caller must be a registered keeper.
+   * @dev We must make sure that feeRecipient is not address(0) before withdrawing fees
+   */
+  function withdrawAccruedFees() external onlyOwner {
+    redeem(balanceOf[address(this)], feeRecipient, address(this));
+  }
+
+  /**
+   * @notice Update performanceFee and/or feeRecipient
+   */
+  function updateFeeSettings(uint256 _performanceFee, address _feeRecipient) external onlyOwner {
+    emit UpdatedFeeSettings(performanceFee, _performanceFee, feeRecipient, _feeRecipient);
+
+    performanceFee = _performanceFee;
+    feeRecipient = _feeRecipient;
+  }
+
+  /* ========== EMERGENCY FUNCTIONS ========== */
 
   // Should withdraw all funds from the strategy and pause the contract
   function emergencyWithdrawAndPause() external virtual onlyOwner {
