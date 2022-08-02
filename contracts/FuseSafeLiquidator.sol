@@ -126,9 +126,11 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   /**
    * @dev Internal function to approve
    */
-  function justApprove(IERC20Upgradeable token,
+  function justApprove(
+    IERC20Upgradeable token,
     address to,
-    uint256 amount) private {
+    uint256 amount
+  ) private {
     token.approve(to, amount);
   }
 
