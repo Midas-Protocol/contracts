@@ -10,6 +10,9 @@ import "./IRedemptionStrategy.sol";
  * @author Veliko Minkov <veliko@midascapital.xyz>
  */
 contract XBombLiquidator is IRedemptionStrategy {
+  address xbomb = 0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b;
+  IERC20Upgradeable bomb = IERC20Upgradeable(0x522348779DCb2911539e76A1042aA922F9C47Ee3);
+
   /**
    * @notice Redeems xBOMB for the underlying BOMB reward tokens.
    * @param inputToken The input wrapped token to be redeemed for an underlying token.
@@ -23,12 +26,20 @@ contract XBombLiquidator is IRedemptionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    IXBomb xBomb = IXBomb(address(inputToken));
+    if (address(inputToken) == xbomb) {
+      // burns the xBOMB and returns the underlying BOMB to the liquidator
+      IXBomb(xbomb).leave(inputAmount);
 
-    // burns the xBOMB and returns the underlying BOMB to the liquidator
-    xBomb.leave(inputAmount);
+      outputToken = bomb;
+      outputAmount = outputToken.balanceOf(address(this));
+    } else if (inputToken == bomb) {
+      // mints xBOMB
+      IXBomb(xbomb).enter(inputAmount);
 
-    outputToken = IERC20Upgradeable(address(xBomb.reward()));
-    outputAmount = xBomb.reward().balanceOf(address(this));
+      outputToken = IERC20Upgradeable(xbomb);
+      outputAmount = outputToken.balanceOf(address(this));
+    } else {
+      revert("unknown input token");
+    }
   }
 }
