@@ -320,6 +320,45 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
   }
 
   /**
+   * @notice Returns arrays of all verified Fuse pool indexes and data for which the account is whitelisted
+   * @param the account who is whitelised in the returned verified whitelist-enabled pools.
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getVerifiedPoolsOfWhitelistedAccount(address account)
+    external
+    view
+    returns (uint256[] memory, FusePool[] memory)
+  {
+    uint256 arrayLength = 0;
+    for (uint256 i = 0; i < pools.length; i++) {
+      IComptroller comptroller = IComptroller(pools[i].comptroller);
+
+      try comptroller.enforceWhitelist() returns (bool enforceWhitelist) {
+        if (!enforceWhitelist || !comptroller.whitelist(account)) continue;
+      } catch {}
+
+      arrayLength++;
+    }
+
+    uint256[] memory indexes = new uint256[](arrayLength);
+    FusePool[] memory accountWhitelistedPools = new FusePool[](arrayLength);
+    uint256 index = 0;
+
+    for (uint256 i = 0; i < pools.length; i++) {
+      IComptroller comptroller = IComptroller(pools[i].comptroller);
+      try comptroller.enforceWhitelist() returns (bool enforceWhitelist) {
+        if (!enforceWhitelist || !comptroller.whitelist(account)) continue;
+      } catch {}
+
+      indexes[index] = i;
+      accountWhitelistedPools[index] = pools[i];
+      index++;
+    }
+
+    return (indexes, accountWhitelistedPools);
+  }
+
+  /**
    * @notice Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
    * @dev Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
    * @param newPendingAdmin New pending admin.
