@@ -321,7 +321,7 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
 
   /**
    * @notice Returns arrays of all verified Fuse pool indexes and data for which the account is whitelisted
-   * @param the account who is whitelised in the returned verified whitelist-enabled pools.
+   * @param account who is whitelised in the returned verified whitelist-enabled pools.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
   function getVerifiedPoolsOfWhitelistedAccount(address account)
