@@ -28,7 +28,7 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
   /**
    * @notice The multiplierPerBlock after hitting a specified utilization point
    */
-  uint256 public jumpMultiplierPerBlock;
+  uint256 public multiplierPerBlock;
 
   /**
    * @notice The utilization point at which the jump multiplier is applied
@@ -41,7 +41,7 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
    * @notice Construct an interest rate model
    * @param _blocksPerYear The approximate number of blocks per year
    * @param baseRatePerYear The approximate target base APR, as a mantissa (scaled by 1e18)
-   * @param jumpMultiplierPerYear The multiplierPerBlock after hitting a specified utilization point
+   * @param _multiplierPerYear The multiplierPerBlock after hitting a specified utilization point
    * @param kink_ The utilization point at which the jump multiplier is applied
    * @param _day The day period for average apr
    * @param _abnbr Address for Ankr BNB stacking rate
@@ -49,7 +49,7 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
   constructor(
     uint256 _blocksPerYear,
     uint256 baseRatePerYear,
-    uint256 jumpMultiplierPerYear,
+    uint256 _multiplierPerYear,
     uint256 kink_,
     uint8 _day,
     address _abnbr
@@ -57,12 +57,12 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
     require(_day > 0 && _day < 8, "_day should be from 1 to 7");
     blocksPerYear = _blocksPerYear;
     baseRatePerBlock = baseRatePerYear.div(blocksPerYear);
-    jumpMultiplierPerBlock = jumpMultiplierPerYear.div(blocksPerYear);
+    multiplierPerBlock = _multiplierPerYear.div(blocksPerYear);
     kink = kink_;
     day = _day;
     ANKR_BNB_R = _abnbr;
 
-    emit NewInterestParams(baseRatePerBlock, jumpMultiplierPerBlock, kink);
+    emit NewInterestParams(baseRatePerBlock, multiplierPerBlock, kink);
   }
 
   /**
@@ -85,8 +85,8 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
     return borrows.mul(1e18).div(cash.add(borrows).sub(reserves));
   }
 
-  function getMultiplierPerBlock() public view returns (uint256) {
-    return IAnkrBNBR(ANKR_BNB_R).averagePercentageRate(day);
+  function getJumpMultiplierPerBlock() public view returns (uint256) {
+    return IAnkrBNBR(ANKR_BNB_R).averagePercentageRate(day).div(blocksPerYear);
   }
 
   function getBorrowRate(
@@ -95,7 +95,7 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
     uint256 reserves
   ) public view override returns (uint256) {
     uint256 util = utilizationRate(cash, borrows, reserves);
-    uint256 multiplierPerBlock = getMultiplierPerBlock();
+    uint256 jumpMultiplierPerBlock = getJumpMultiplierPerBlock();
 
     if (util <= kink) {
       return util.mul(multiplierPerBlock).div(1e18).add(baseRatePerBlock);

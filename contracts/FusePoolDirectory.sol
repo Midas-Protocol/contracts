@@ -280,7 +280,7 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
   }
 
   /**
-   * @notice Returns arrays of all public Fuse pool indexes and data with whitelisted admins.
+   * @notice Returns arrays of all Fuse pool indexes and data with whitelisted admins.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
   function getPublicPoolsByVerification(bool whitelistedAdmin)
@@ -293,12 +293,8 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
     for (uint256 i = 0; i < pools.length; i++) {
       IComptroller comptroller = IComptroller(pools[i].comptroller);
 
-      try comptroller.enforceWhitelist() returns (bool enforceWhitelist) {
-        if (enforceWhitelist) continue;
-
-        try comptroller.admin() returns (address admin) {
-          if (whitelistedAdmin != adminWhitelist[admin]) continue;
-        } catch {}
+      try comptroller.admin() returns (address admin) {
+        if (whitelistedAdmin != adminWhitelist[admin]) continue;
       } catch {}
 
       arrayLength++;
@@ -311,12 +307,8 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
     for (uint256 i = 0; i < pools.length; i++) {
       IComptroller comptroller = IComptroller(pools[i].comptroller);
 
-      try comptroller.enforceWhitelist() returns (bool enforceWhitelist) {
-        if (enforceWhitelist) continue;
-
-        try comptroller.admin() returns (address admin) {
-          if (whitelistedAdmin != adminWhitelist[admin]) continue;
-        } catch {}
+      try comptroller.admin() returns (address admin) {
+        if (whitelistedAdmin != adminWhitelist[admin]) continue;
       } catch {}
 
       indexes[index] = i;
@@ -325,6 +317,45 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
     }
 
     return (indexes, publicPools);
+  }
+
+  /**
+   * @notice Returns arrays of all verified Fuse pool indexes and data for which the account is whitelisted
+   * @param account who is whitelised in the returned verified whitelist-enabled pools.
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getVerifiedPoolsOfWhitelistedAccount(address account)
+    external
+    view
+    returns (uint256[] memory, FusePool[] memory)
+  {
+    uint256 arrayLength = 0;
+    for (uint256 i = 0; i < pools.length; i++) {
+      IComptroller comptroller = IComptroller(pools[i].comptroller);
+
+      try comptroller.enforceWhitelist() returns (bool enforceWhitelist) {
+        if (!enforceWhitelist || !comptroller.whitelist(account)) continue;
+      } catch {}
+
+      arrayLength++;
+    }
+
+    uint256[] memory indexes = new uint256[](arrayLength);
+    FusePool[] memory accountWhitelistedPools = new FusePool[](arrayLength);
+    uint256 index = 0;
+
+    for (uint256 i = 0; i < pools.length; i++) {
+      IComptroller comptroller = IComptroller(pools[i].comptroller);
+      try comptroller.enforceWhitelist() returns (bool enforceWhitelist) {
+        if (!enforceWhitelist || !comptroller.whitelist(account)) continue;
+      } catch {}
+
+      indexes[index] = i;
+      accountWhitelistedPools[index] = pools[i];
+      index++;
+    }
+
+    return (indexes, accountWhitelistedPools);
   }
 
   /**
