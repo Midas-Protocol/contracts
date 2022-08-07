@@ -94,7 +94,7 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - name: Run forge tests on Moonbeam
+      - name: Run forge tests on Polygon
         run: forge test --fork-url https://rpc.ankr.com/polygon --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test'
 
   build-and-test-evmostestnet:
