@@ -3,6 +3,8 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
+import { MasterPriceOracle } from "../MasterPriceOracle.sol";
+
 import "../../external/compound/IPriceOracle.sol";
 import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
@@ -19,9 +21,21 @@ import "../BasePriceOracle.sol";
  */
 contract GelatoGUniPriceOracle is IPriceOracle {
   /**
-   * @dev WETH contract address.
+   * @dev The Wrapped native asset address.
    */
-  address private constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+  address public immutable WTOKEN;
+  /**
+   * @notice MasterPriceOracle for backup for USD price.
+   */
+  MasterPriceOracle public immutable MASTER_PRICE_ORACLE;
+
+  /**
+   * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
+   */
+  constructor(MasterPriceOracle masterPriceOracle, address wtoken) {
+    MASTER_PRICE_ORACLE = masterPriceOracle;
+    WTOKEN = wtoken;
+  }
 
   /**
    * @notice Get the LP token price price for an underlying token address.
@@ -54,9 +68,9 @@ contract GelatoGUniPriceOracle is IPriceOracle {
     address token1 = pool.token1();
 
     // Get underlying token prices
-    uint256 p0 = token0 == WETH_ADDRESS ? 1e18 : BasePriceOracle(msg.sender).price(token0);
+    uint256 p0 = token0 == WTOKEN ? 1e18 : MASTER_PRICE_ORACLE.price(token0);
     require(p0 > 0, "Failed to retrieve price for G-UNI underlying token0.");
-    uint256 p1 = token1 == WETH_ADDRESS ? 1e18 : BasePriceOracle(msg.sender).price(token1);
+    uint256 p1 = token1 == WTOKEN ? 1e18 : MASTER_PRICE_ORACLE.price(token1);
     require(p1 > 0, "Failed to retrieve price for G-UNI underlying token1.");
 
     // Get conversion factors
