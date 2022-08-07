@@ -24,16 +24,11 @@ contract GelatoGUniPriceOracle is IPriceOracle {
    * @dev The Wrapped native asset address.
    */
   address public immutable WTOKEN;
-  /**
-   * @notice MasterPriceOracle for backup for USD price.
-   */
-  MasterPriceOracle public immutable MASTER_PRICE_ORACLE;
 
   /**
    * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
    */
-  constructor(MasterPriceOracle masterPriceOracle, address wtoken) {
-    MASTER_PRICE_ORACLE = masterPriceOracle;
+  constructor(address wtoken) {
     WTOKEN = wtoken;
   }
 
@@ -68,9 +63,9 @@ contract GelatoGUniPriceOracle is IPriceOracle {
     address token1 = pool.token1();
 
     // Get underlying token prices
-    uint256 p0 = token0 == WTOKEN ? 1e18 : MASTER_PRICE_ORACLE.price(token0);
+    uint256 p0 = token0 == WTOKEN ? 1e18 : BasePriceOracle(msg.sender).price(token0);
     require(p0 > 0, "Failed to retrieve price for G-UNI underlying token0.");
-    uint256 p1 = token1 == WTOKEN ? 1e18 : MASTER_PRICE_ORACLE.price(token1);
+    uint256 p1 = token1 == WTOKEN ? 1e18 : BasePriceOracle(msg.sender).price(token1);
     require(p1 > 0, "Failed to retrieve price for G-UNI underlying token1.");
 
     // Get conversion factors
