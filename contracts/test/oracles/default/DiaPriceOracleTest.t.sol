@@ -81,7 +81,7 @@ contract DiaPriceOracleTest is BaseTest {
   function testDiaPriceOracleWithMasterPriceOracleBsc() public shouldRun(forChains(BSC_MAINNET)) {
     oracle = DiaPriceOracle(0x944e833dC2Af9fc58D5cfA99B9D8666c843Ad58C);
 
-    // miMATIC
+    // miMATIC (MAI)
     uint256 price = oracle.price(0x3F56e0c36d275367b8C502090EDF38289b3dEa0d);
     assertApproxEqAbs(price, 3086017057904017, 1e12);
     masterPriceOracle = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
