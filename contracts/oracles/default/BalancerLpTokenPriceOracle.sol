@@ -8,9 +8,12 @@ import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
 
 import "../../external/balancer/IBalancerPool.sol";
+import "../../external/balancer/IBalancerVault.sol";
 import "../../external/balancer/BNum.sol";
 
 import "../BasePriceOracle.sol";
+
+import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 
 /**
  * @title BalancerLpTokenPriceOracle
@@ -20,10 +23,23 @@ import "../BasePriceOracle.sol";
  */
 contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
   /**
+   * @notice MasterPriceOracle for backup for USD price.
+   */
+  MasterPriceOracle public immutable MASTER_PRICE_ORACLE;
+
+  /**
+   * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
+   */
+  constructor(MasterPriceOracle masterPriceOracle) {
+    MASTER_PRICE_ORACLE = masterPriceOracle;
+  }
+
+  /**
    * @notice Get the LP token price price for an underlying token address.
    * @param underlying The underlying token address for which to get the price (set to zero address for ETH).
    * @return Price denominated in ETH (scaled by 1e18).
    */
+
   function price(address underlying) external view override returns (uint256) {
     return _price(underlying);
   }
@@ -46,23 +62,33 @@ contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
    */
   function _price(address underlying) internal view virtual returns (uint256) {
     IBalancerPool pool = IBalancerPool(underlying);
-    require(pool.getNumTokens() == 2, "Balancer pool must have exactly 2 tokens.");
-    address[] memory tokens = pool.getFinalTokens();
-    address tokenA = tokens[0];
-    address tokenB = tokens[1];
-    uint256 pxA = BasePriceOracle(msg.sender).price(tokenA);
-    uint256 pxB = BasePriceOracle(msg.sender).price(tokenB);
+
+    bytes32 poolId = pool.getPoolId();
+    IBalancerVault vault = IBalancerVault(address(pool.getVault()));
+    (IERC20[] memory tokens, uint256[] memory balances, ) = vault.getPoolTokens(poolId);
+
+    require(tokens.length == 2, "Oracle suitable only for Balancer Pools of 2 tokens");
+
+    address tokenA = address(tokens[0]);
+    address tokenB = address(tokens[1]);
+
+    uint256[] memory weights = pool.getNormalizedWeights();
+
+    uint256 pxA = MASTER_PRICE_ORACLE.price(tokenA);
+    uint256 pxB = MASTER_PRICE_ORACLE.price(tokenA);
+
     uint8 decimalsA = ERC20Upgradeable(tokenA).decimals();
     uint8 decimalsB = ERC20Upgradeable(tokenB).decimals();
+
     if (decimalsA < 18) pxA = pxA * (10**(18 - uint256(decimalsA)));
     if (decimalsA > 18) pxA = pxA / (10**(uint256(decimalsA) - 18));
     if (decimalsB < 18) pxB = pxB * (10**(18 - uint256(decimalsB)));
     if (decimalsB > 18) pxB = pxB / (10**(uint256(decimalsB) - 18));
     (uint256 fairResA, uint256 fairResB) = computeFairReserves(
-      pool.getBalance(tokenA),
-      pool.getBalance(tokenB),
-      pool.getNormalizedWeight(tokenA),
-      pool.getNormalizedWeight(tokenB),
+      balances[0],
+      balances[1],
+      weights[0],
+      weights[1],
       pxA,
       pxB
     );
@@ -88,7 +114,7 @@ contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
     uint256 wB,
     uint256 pxA,
     uint256 pxB
-  ) internal pure returns (uint256 fairResA, uint256 fairResB) {
+  ) public pure returns (uint256 fairResA, uint256 fairResB) {
     // NOTE: wA + wB = 1 (normalize weights)
     // constant product = resA^wA * resB^wB
     // constraints:
