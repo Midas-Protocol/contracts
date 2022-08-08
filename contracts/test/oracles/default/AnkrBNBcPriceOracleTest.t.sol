@@ -19,6 +19,6 @@ contract AnkrBNBcPriceOracleTest is BaseTest {
 
   function testPrice() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 price = oracle.price(0xE85aFCcDaFBE7F2B096f268e31ccE3da8dA2990A);
-    assertEq(price, 1010564646063132300);
+    assertEq(price, 995823931874178844);
   }
 }
