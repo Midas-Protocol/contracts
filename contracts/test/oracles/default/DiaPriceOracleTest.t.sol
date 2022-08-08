@@ -83,7 +83,7 @@ contract DiaPriceOracleTest is BaseTest {
 
     // miMATIC (MAI)
     uint256 price = oracle.price(0x3F56e0c36d275367b8C502090EDF38289b3dEa0d);
-    assertApproxEqAbs(price, 3086017057904017, 1e12);
+    assertApproxEqAbs(price, 3086017057904017, 1e14);
     masterPriceOracle = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
 
     // compare to BUSD, ensure price does not deviate too much
