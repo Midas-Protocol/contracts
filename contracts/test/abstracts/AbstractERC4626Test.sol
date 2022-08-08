@@ -245,8 +245,8 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     assertApproxEqAbs(
       depositAmount * 2 - plugin.totalAssets(),
       1,
-      uint256(1),
-      string(abi.encodePacked("DotDot total Assets should be same as sum of deposited amounts ", testPreFix))
+      uint256(2),
+      string(abi.encodePacked("Total Assets should be same as sum of deposited amounts ", testPreFix))
     );
     assertApproxEqAbs(
       depositAmount - plugin.convertToAssets(plugin.balanceOf(address(this))),
@@ -421,7 +421,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     assertApproxEqAbs(
       depositAmount + depositAmount - plugin.totalAssets(),
       1,
-      uint256(1),
+      uint256(2),
       string(abi.encodePacked("!2.totalAssets ", testPreFix))
     );
     assertApproxEqAbs(
