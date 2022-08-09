@@ -6,15 +6,15 @@ import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import "./config/BaseTest.t.sol";
-import "../liquidators/JarvisSynthereumLiquidator.sol";
+import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../FuseSafeLiquidator.sol";
 
 interface IMockERC20 is IERC20Upgradeable {
   function mint(address _address, uint256 amount) external;
 }
 
-contract JarvisSynthereumLiquidatorTest is BaseTest {
-  JarvisSynthereumLiquidator private jarvisLiquidator;
+contract JarvisLiquidatorFunderTest is BaseTest {
+  JarvisLiquidatorFunder private jarvisLiquidator;
 
   // TODO in the addresses provider?
   ISynthereumLiquidityPool synthereumLiquiditiyPool =
@@ -34,15 +34,18 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
     uint256[] memory times = new uint256[](1);
     times[0] = expirationPeriod;
 
-    jarvisLiquidator = new JarvisSynthereumLiquidator();
-    jarvisLiquidator.initialize(pools, times);
+    jarvisLiquidator = new JarvisLiquidatorFunder();
+  }
+  
+  function getPool(address inputToken) internal view returns (ISynthereumLiquidityPool) {
+    return synthereumLiquiditiyPool;
   }
 
   function testRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
     vm.prank(minter);
     jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
-    (uint256 redeemableAmount, ) = jarvisLiquidator.getPool(address(jBRLToken)).getRedeemTradeInfo(10e18);
+    (uint256 redeemableAmount, ) = getPool(address(jBRLToken)).getRedeemTradeInfo(10e18);
     (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, "");
 
     // should be BUSD
@@ -51,7 +54,7 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
   }
 
   function testEmergencyRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
-    ISynthereumLiquidityPool pool = jarvisLiquidator.getPool(address(jBRLToken));
+    ISynthereumLiquidityPool pool = getPool(address(jBRLToken));
     address manager = pool.synthereumFinder().getImplementationAddress("Manager");
     vm.prank(manager);
     pool.emergencyShutdown();
@@ -59,7 +62,7 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
     vm.prank(minter);
     jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
-    (uint256 redeemableAmount, uint256 fee) = jarvisLiquidator.getPool(address(jBRLToken)).getRedeemTradeInfo(10e18);
+    (uint256 redeemableAmount, uint256 fee) = getPool(address(jBRLToken)).getRedeemTradeInfo(10e18);
     (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, "");
 
     // should be BUSD
@@ -138,14 +141,33 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
     // prepare the liquidation
     vars.strategies = new IRedemptionStrategy[](0);
     vars.abis = new bytes[](0);
+
     IFundsConversionStrategy[] memory fundingStrategies = new IFundsConversionStrategy[](1);
-    fundingStrategies[0] = new JarvisLiquidatorFunder(
-      ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49),
-      60 * 40
-    );
     bytes[] memory data = new bytes[](1);
-    data[0] = "";
-    vars.liquidator._whitelistRedemptionStrategy(fundingStrategies[0], true);
+    data[0] = abi.encode(address(jBRLToken), address(synthereumLiquiditiyPool), 60 * 40);
+    {
+      fundingStrategies[0] = jarvisLiquidator;
+
+      address synth = address(synthereumLiquiditiyPool.syntheticToken());
+      address collat = address(synthereumLiquiditiyPool.collateralToken());
+      ISynthereumLiquidityPool synthPool = getPool(synth);
+      ISynthereumLiquidityPool collateralPool = getPool(collat);
+      emit log("synth token");
+      emit log_address(synth);
+      emit log("collat token");
+      emit log_address(collat);
+      emit log("synth pool");
+      emit log_address(address(synthPool));
+      emit log("collat pool");
+      emit log_address(address(collateralPool));
+      emit log("jarvisLiquidator");
+      emit log_address(address(jarvisLiquidator));
+
+//      jarvisLiquidator.redeem(bUSD, 19584276414621932903, data[0]);
+
+      vars.liquidator._whitelistRedemptionStrategy(fundingStrategies[0], true);
+    }
+
     uint256 repayAmount = borrowAmount / 10;
 
     // liquidate

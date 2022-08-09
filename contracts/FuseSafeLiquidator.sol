@@ -430,8 +430,10 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
       );
       // loop backwards to estimate the initial input from the final expected output
       for (uint256 i = vars.debtFundingStrategies.length; i > 0; i--) {
+        bytes memory strategyData = vars.debtFundingStrategiesData[i - 1];
+        address inputToken = abi.decode(strategyData, (address));
         IFundsConversionStrategy fcs = vars.debtFundingStrategies[i - 1];
-        flashSwapAmount = fcs.estimateInputAmount(flashSwapAmount);
+        flashSwapAmount = fcs.estimateInputAmount(flashSwapAmount, strategyData);
       }
     }
 
@@ -797,8 +799,10 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     if (vars.debtFundingStrategies.length > 0) {
       // loop backwards to estimate the initial input from the final expected output
       for (uint256 i = vars.debtFundingStrategies.length; i > 0; i--) {
+        bytes memory strategyData = vars.debtFundingStrategiesData[i - 1];
+        address inputToken = abi.decode(strategyData, (address));
         IFundsConversionStrategy fcs = vars.debtFundingStrategies[i - 1];
-        flashSwapAmount = fcs.estimateInputAmount(flashSwapAmount);
+        flashSwapAmount = fcs.estimateInputAmount(flashSwapAmount, strategyData);
       }
 
       for (uint256 i = 0; i < vars.debtFundingStrategies.length; i++)
