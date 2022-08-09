@@ -12,7 +12,7 @@ import { Authority } from "solmate/auth/Auth.sol";
 import { FixedPointMathLib } from "../../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../../abstracts/AbstractERC4626Test.sol";
 
-contract BeefyERC4626Test is AbstractERC4626Test {
+contract BeefyBscERC4626Test is AbstractERC4626Test {
   using FixedPointMathLib for uint256;
 
   uint256 withdrawalFee = 10;

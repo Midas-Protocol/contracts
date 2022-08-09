@@ -8,7 +8,7 @@ struct BeefyTestConfig {
   uint256 withdrawalFee;
 }
 
-contract BeefyTestConfigStorage is ITestConfigStorage {
+contract BeefyBscTestConfigStorage is ITestConfigStorage {
   BeefyTestConfig[] internal testConfigs;
 
   constructor() {
