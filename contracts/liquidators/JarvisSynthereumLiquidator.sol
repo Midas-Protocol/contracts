@@ -20,7 +20,7 @@ contract JarvisSynthereumLiquidator is IRedemptionStrategy {
   /**
    * @dev Redeems `inputToken` for `outputToken` where `inputAmount` < `outputAmount`
    * @param inputToken Address of the token
-   * @param inputAmount Sets `UniswapV2Factory`
+   * @param inputAmount input amount
    * @param strategyData unused in this contract
    */
   function redeem(

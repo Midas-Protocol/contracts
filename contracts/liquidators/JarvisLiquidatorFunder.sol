@@ -13,7 +13,7 @@ contract JarvisLiquidatorFunder is IFundsConversionStrategy, JarvisSynthereumLiq
     JarvisSynthereumLiquidator(_pool, _txExpirationPeriod)
   {}
 
-  function estimateInputAmount(uint256 outputAmount) external returns (uint256 inputAmount) {
+  function estimateInputAmount(uint256 outputAmount) external view returns (uint256 inputAmount) {
     // synthTokensReceived / ONE = outputAmount / inputAmount
     // => inputAmount = (ONE * outputAmount) / synthTokensReceived
     (uint256 synthTokensReceived, ) = pool.getMintTradeInfo(ONE);
