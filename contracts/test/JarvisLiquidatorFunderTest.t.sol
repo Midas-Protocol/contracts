@@ -45,8 +45,9 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     vm.prank(minter);
     jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
+    bytes memory data = abi.encode(address(jBRLToken), address(synthereumLiquiditiyPool), 60 * 40);
     (uint256 redeemableAmount, ) = getPool(address(jBRLToken)).getRedeemTradeInfo(10e18);
-    (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, "");
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, data);
 
     // should be BUSD
     assertEq(address(outputToken), address(bUSD));
@@ -62,8 +63,9 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     vm.prank(minter);
     jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
+    bytes memory data = abi.encode(address(jBRLToken), address(synthereumLiquiditiyPool), 60 * 40);
     (uint256 redeemableAmount, uint256 fee) = getPool(address(jBRLToken)).getRedeemTradeInfo(10e18);
-    (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, "");
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, data);
 
     // should be BUSD
     assertEq(address(outputToken), address(bUSD));
