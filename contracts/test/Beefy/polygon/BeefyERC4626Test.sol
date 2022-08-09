@@ -31,7 +31,6 @@ contract BeefyPolygonERC4626Test is AbstractERC4626Test {
     underlyingToken = MockERC20(address(beefyVault.want()));
     plugin = MidasERC4626(address(new BeefyERC4626(underlyingToken, beefyVault, _withdrawalFee)));
 
-
     initialStrategyBalance = beefyVault.balance();
     initialStrategySupply = beefyVault.totalSupply();
 

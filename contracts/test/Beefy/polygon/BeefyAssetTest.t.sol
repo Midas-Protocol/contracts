@@ -16,7 +16,8 @@ import { ITestConfigStorage } from "../../abstracts/ITestConfigStorage.sol";
 
 interface IBeefyStrategy {
   function owner() external returns (address);
-  function setHarvestOnDeposit(bool) external ;
+
+  function setHarvestOnDeposit(bool) external;
 }
 
 contract BeefyPolygonAssetTest is AbstractAssetTest {
