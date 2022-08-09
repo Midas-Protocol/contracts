@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
+import { ITestConfigStorage } from "../../abstracts/ITestConfigStorage.sol";
 
 struct BeefyTestConfig {
   address beefyVault;

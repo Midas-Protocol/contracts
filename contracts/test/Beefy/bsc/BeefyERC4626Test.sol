@@ -3,14 +3,14 @@ pragma solidity ^0.8.0;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import "../../helpers/WithPool.sol";
+import "../../config/BaseTest.t.sol";
 
-import { MidasERC4626, BeefyERC4626, IBeefyVault } from "../../compound/strategies/BeefyERC4626.sol";
+import { MidasERC4626, BeefyERC4626, IBeefyVault } from "../../../compound/strategies/BeefyERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Authority } from "solmate/auth/Auth.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
-import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
+import { FixedPointMathLib } from "../../../utils/FixedPointMathLib.sol";
+import { AbstractERC4626Test } from "../../abstracts/AbstractERC4626Test.sol";
 
 contract BeefyERC4626Test is AbstractERC4626Test {
   using FixedPointMathLib for uint256;
