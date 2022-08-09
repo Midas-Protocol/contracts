@@ -14,8 +14,6 @@ abstract contract BaseTest is Test {
   uint256 constant EVMOS_TESTNET = 9000;
   uint256 constant BSC_CHAPEL = 97;
 
-  uint256 constant POLYGON_MAINNET = 137;
-
   AddressesProvider public ap;
 
   constructor() {
