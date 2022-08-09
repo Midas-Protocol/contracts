@@ -1,20 +1,37 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { OwnableUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
+
 import "./IRedemptionStrategy.sol";
 import "../external/jarvis/ISynthereumLiquidityPool.sol";
 
-contract JarvisSynthereumLiquidator is IRedemptionStrategy {
-  ISynthereumLiquidityPool public immutable pool;
-  uint64 public immutable txExpirationPeriod;
+contract JarvisSynthereumLiquidator is OwnableUpgradeable, IRedemptionStrategy {
+  struct JarvisLiquidator {
+    ISynthereumLiquidityPool pool;
+    uint256 txExpirationPeriod;
+  }
 
-  constructor(ISynthereumLiquidityPool _pool, uint64 _txExpirationPeriod) {
-    pool = _pool;
+  mapping(address => JarvisLiquidator) public pools;
 
-    // check added per the audit comments
-    require(_txExpirationPeriod >= 60 * 10, "at least 10 mins expiration period required");
-    // time limit to include the tx in a block as anti-slippage measure
-    txExpirationPeriod = _txExpirationPeriod;
+  /**
+   * @dev Initializes a deployer whitelist if desired.
+   * @param _pools Jarvis pools used for redeeming the collatoral
+   * @param _txExpirationPeriods Expiration periods for the redeeming
+   */
+  function initialize(ISynthereumLiquidityPool[] memory _pools, uint256[] memory _txExpirationPeriods)
+    public
+    initializer
+  {
+    __Ownable_init();
+    require(_pools.length == _txExpirationPeriods.length, "length of input arrays must be equal");
+
+    for (uint256 i = 0; i < _pools.length; i++) {
+      require(_txExpirationPeriods[i] >= 60 * 10, "at least 10 mins expiration period required");
+      IERC20Upgradeable inputToken = ISynthereumLiquidityPool(_pools[i]).syntheticToken();
+      pools[address(inputToken)] = JarvisLiquidator({ pool: _pools[i], txExpirationPeriod: _txExpirationPeriods[i] });
+    }
   }
 
   /**
@@ -29,6 +46,9 @@ contract JarvisSynthereumLiquidator is IRedemptionStrategy {
     bytes memory strategyData
   ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
     // approve so the pool can pull out the input tokens
+    ISynthereumLiquidityPool pool = pools[address(inputToken)].pool;
+    uint256 txExpirationPeriod = pools[address(inputToken)].txExpirationPeriod;
+
     inputToken.approve(address(pool), inputAmount);
 
     if (pool.emergencyShutdownPrice() > 0) {
