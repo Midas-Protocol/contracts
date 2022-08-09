@@ -73,11 +73,11 @@ contract JarvisSynthereumLiquidator is OwnableUpgradeable, IRedemptionStrategy {
     }
   }
 
- /**
-  * @dev get the corresponding pool of a synthetic/collateral token
-  * @param inputToken the synthetic or collateral token
-  */
-  function getPool(address inputToken) public returns(ISynthereumLiquidityPool) {
+  /**
+   * @dev get the corresponding pool of a synthetic/collateral token
+   * @param inputToken the synthetic or collateral token
+   */
+  function getPool(address inputToken) public returns (ISynthereumLiquidityPool) {
     return pools[inputToken].pool;
   }
 }
