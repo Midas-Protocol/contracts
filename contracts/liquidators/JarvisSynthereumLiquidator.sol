@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { OwnableUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
+
 import "./IRedemptionStrategy.sol";
 import "../external/jarvis/ISynthereumLiquidityPool.sol";
 
-contract JarvisSynthereumLiquidator is IRedemptionStrategy {
+contract JarvisSynthereumLiquidator is OwnableUpgradeable, IRedemptionStrategy {
   struct JarvisLiquidator {
     ISynthereumLiquidityPool pool;
     uint256 txExpirationPeriod;
@@ -12,19 +15,22 @@ contract JarvisSynthereumLiquidator is IRedemptionStrategy {
 
   mapping(address => JarvisLiquidator) public pools;
 
-  constructor(
-    ISynthereumLiquidityPool[] memory _pools,
-    address[] memory _inputTokens,
-    uint256[] memory _txExpirationPeriods
-  ) {
-    require(
-      _pools.length == _inputTokens.length && _inputTokens.length == _txExpirationPeriods.length,
-      "length of input arrays must be equal"
-    );
+  /**
+   * @dev Initializes a deployer whitelist if desired.
+   * @param _pools Jarvis pools used for redeeming the collatoral
+   * @param _txExpirationPeriods Expiration periods for the redeeming
+   */
+  function initialize(ISynthereumLiquidityPool[] memory _pools, uint256[] memory _txExpirationPeriods)
+    public
+    initializer
+  {
+    __Ownable_init();
+    require(_pools.length == _txExpirationPeriods.length, "length of input arrays must be equal");
 
     for (uint256 i = 0; i < _pools.length; i++) {
       require(_txExpirationPeriods[i] >= 60 * 10, "at least 10 mins expiration period required");
-      pools[_inputTokens[i]] = JarvisLiquidator({ pool: _pools[i], txExpirationPeriod: _txExpirationPeriods[i] });
+      IERC20Upgradeable inputToken = ISynthereumLiquidityPool(_pools[i]).syntheticToken();
+      pools[address(inputToken)] = JarvisLiquidator({ pool: _pools[i], txExpirationPeriod: _txExpirationPeriods[i] });
     }
   }
 
