@@ -28,14 +28,21 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     uint64 expirationPeriod = 60 * 40; // 40 mins
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
-    jarvisLiquidator = new JarvisSynthereumLiquidator(synthereumLiquiditiyPool, expirationPeriod);
+
+    ISynthereumLiquidityPool[] memory pools = new ISynthereumLiquidityPool[](1);
+    pools[0] = synthereumLiquiditiyPool;
+    uint256[] memory times = new uint256[](1);
+    times[0] = expirationPeriod;
+
+    jarvisLiquidator = new JarvisSynthereumLiquidator();
+    jarvisLiquidator.initialize(pools, times);
   }
 
   function testRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
     vm.prank(minter);
     jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
-    (uint256 redeemableAmount, ) = jarvisLiquidator.pool().getRedeemTradeInfo(10e18);
+    (uint256 redeemableAmount, ) = jarvisLiquidator.getPool(address(jBRLToken)).getRedeemTradeInfo(10e18);
     (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, "");
 
     // should be BUSD
@@ -44,7 +51,7 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
   }
 
   function testEmergencyRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
-    ISynthereumLiquidityPool pool = jarvisLiquidator.pool();
+    ISynthereumLiquidityPool pool = jarvisLiquidator.getPool(address(jBRLToken));
     address manager = pool.synthereumFinder().getImplementationAddress("Manager");
     vm.prank(manager);
     pool.emergencyShutdown();
@@ -52,7 +59,7 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
     vm.prank(minter);
     jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
-    (uint256 redeemableAmount, uint256 fee) = jarvisLiquidator.pool().getRedeemTradeInfo(10e18);
+    (uint256 redeemableAmount, uint256 fee) = jarvisLiquidator.getPool(address(jBRLToken)).getRedeemTradeInfo(10e18);
     (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, "");
 
     // should be BUSD
