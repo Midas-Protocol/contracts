@@ -36,7 +36,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
 
     jarvisLiquidator = new JarvisLiquidatorFunder();
   }
-  
+
   function getPool(address inputToken) internal view returns (ISynthereumLiquidityPool) {
     return synthereumLiquiditiyPool;
   }
@@ -147,31 +147,12 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     IFundsConversionStrategy[] memory fundingStrategies = new IFundsConversionStrategy[](1);
     bytes[] memory data = new bytes[](1);
     data[0] = abi.encode(address(jBRLToken), address(synthereumLiquiditiyPool), 60 * 40);
-    {
-      fundingStrategies[0] = jarvisLiquidator;
+    fundingStrategies[0] = jarvisLiquidator;
 
-      address synth = address(synthereumLiquiditiyPool.syntheticToken());
-      address collat = address(synthereumLiquiditiyPool.collateralToken());
-      ISynthereumLiquidityPool synthPool = getPool(synth);
-      ISynthereumLiquidityPool collateralPool = getPool(collat);
-      emit log("synth token");
-      emit log_address(synth);
-      emit log("collat token");
-      emit log_address(collat);
-      emit log("synth pool");
-      emit log_address(address(synthPool));
-      emit log("collat pool");
-      emit log_address(address(collateralPool));
-      emit log("jarvisLiquidator");
-      emit log_address(address(jarvisLiquidator));
-
-//      jarvisLiquidator.redeem(bUSD, 19584276414621932903, data[0]);
-
-      vars.liquidator._whitelistRedemptionStrategy(fundingStrategies[0], true);
-    }
+    // all strategies need to be whitelisted
+    vars.liquidator._whitelistRedemptionStrategy(fundingStrategies[0], true);
 
     uint256 repayAmount = borrowAmount / 10;
-
     // liquidate
     vm.prank(accountTwo);
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(

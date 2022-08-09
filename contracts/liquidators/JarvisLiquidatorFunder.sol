@@ -67,12 +67,16 @@ contract JarvisLiquidatorFunder is IFundsConversionStrategy {
     }
   }
 
- /**
-  * @dev Estimates the needed input amount of the input token for the conversion to return the desired output amount.
-  * @param outputAmount the desired output amount
-  * @param strategyData the input token
-  */
-  function estimateInputAmount(uint256 outputAmount, bytes memory strategyData) external view returns (uint256 inputAmount) {
+  /**
+   * @dev Estimates the needed input amount of the input token for the conversion to return the desired output amount.
+   * @param outputAmount the desired output amount
+   * @param strategyData the input token
+   */
+  function estimateInputAmount(uint256 outputAmount, bytes memory strategyData)
+    external
+    view
+    returns (uint256 inputAmount)
+  {
     uint256 ONE = 1e18;
     (address inputTokenAddress, address poolAddress, ) = abi.decode(strategyData, (address, address, uint256));
 
