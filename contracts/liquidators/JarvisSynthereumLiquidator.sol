@@ -16,8 +16,8 @@ contract JarvisSynthereumLiquidator is OwnableUpgradeable, IRedemptionStrategy {
   mapping(address => JarvisLiquidator) public pools;
 
   /**
-   * @dev Initializes a deployer whitelist if desired.
-   * @param _pools Jarvis pools used for redeeming the collatoral
+   * @dev Initializes a set of pools to convert between synthetic and collateral tokens.
+   * @param _pools Jarvis pools used for redeeming the collateral
    * @param _txExpirationPeriods Expiration periods for the redeeming
    */
   function initialize(ISynthereumLiquidityPool[] memory _pools, uint256[] memory _txExpirationPeriods)
