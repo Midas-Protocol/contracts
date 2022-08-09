@@ -96,14 +96,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     PAIR_INIT_HASH_CODE = _uniswapPairInitHashCode;
   }
 
-  function _becomeImplementation(bytes calldata data) external {
-    if (msg.sender == owner()) {
-      address newOwner = abi.decode(data, (address));
-      if (owner() != newOwner) {
-        _transferOwnership(newOwner);
-      }
-    }
-  }
+  function _becomeImplementation(bytes calldata data) external {}
 
   /**
    * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.

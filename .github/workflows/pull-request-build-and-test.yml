@@ -56,7 +56,7 @@ jobs:
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
       FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
-      FORK_BLOCK_NUMBER: 19895214
+      FORK_BLOCK_NUMBER: 20238373
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -73,6 +73,29 @@ jobs:
 
       - name: Run forge tests on BSC
         run: forge test --fork-url ${FORK_URL_BSC} --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|BeefyPolygonERC4626Test|DotDotERC4626Test'
+
+  build-and-test-polygon:
+    needs: [lint]
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      FORK_URL_POLYGON: "${{ secrets.FORK_URL_POLYGON }}"
+      FORK_BLOCK_NUMBER: 31624814
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - name: Run forge tests on Polygon
+        run: forge test --fork-url https://rpc.ankr.com/polygon --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test'
 
   build-and-test-evmostestnet:
     needs: [lint]
