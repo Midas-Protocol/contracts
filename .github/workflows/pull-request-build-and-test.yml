@@ -95,7 +95,7 @@ jobs:
         run: forge install
 
       - name: Run forge tests on Polygon
-        run: forge test --fork-url https://rpc.ankr.com/polygon --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test'
+        run: forge test --fork-url https://rpc.ankr.com/polygon --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|BeefyPolygonERC4626Test|DotDotERC4626Test'
 
   build-and-test-evmostestnet:
     needs: [lint]
