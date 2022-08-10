@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "../external/bomb/IXBomb.sol";
-import "../liquidators/XBombLiquidator.sol";
+import "../liquidators/XBombLiquidatorFunder.sol";
 import "./config/BaseTest.t.sol";
 
 contract XBombLiquidatorTest is BaseTest {
@@ -10,10 +10,10 @@ contract XBombLiquidatorTest is BaseTest {
   address holder = 0x6aE0Fb5D98911cF5AF6A8CE0AeCE426227d41103;
   IXBomb xbombToken = IXBomb(0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b);
   address bombTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
-  XBombLiquidator liquidator;
+  XBombLiquidatorFunder liquidator;
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
-    liquidator = new XBombLiquidator();
+    liquidator = new XBombLiquidatorFunder();
   }
 
   function testRedeem() public shouldRun(forChains(BSC_MAINNET)) {

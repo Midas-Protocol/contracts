@@ -21,6 +21,22 @@ contract JarvisLiquidatorFunder is IFundsConversionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    return _convert(inputToken, inputAmount, strategyData);
+  }
+
+  function convert(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    bytes memory strategyData
+  ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    return _convert(inputToken, inputAmount, strategyData);
+  }
+
+  function _convert(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    bytes memory strategyData
+  ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
     (, address poolAddress, uint256 txExpirationPeriod) = abi.decode(strategyData, (address, address, uint256));
     ISynthereumLiquidityPool pool = ISynthereumLiquidityPool(poolAddress);
 
