@@ -9,7 +9,7 @@ interface IMockERC20 is IERC20Upgradeable {
 }
 
 contract JarvisSynthereumLiquidatorTest is BaseTest {
-  JarvisSynthereumLiquidator private liquidator;
+  JarvisSynthereumLiquidator private jarvisLiquidator;
 
   // TODO in the addresses provider?
   ISynthereumLiquidityPool synthereumLiquiditiyPool =
@@ -20,18 +20,25 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
 
   IERC20Upgradeable bUSD;
 
-  function setUp() public {
+  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     uint64 expirationPeriod = 60 * 40; // 40 mins
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
-    liquidator = new JarvisSynthereumLiquidator(synthereumLiquiditiyPool, expirationPeriod);
+
+    ISynthereumLiquidityPool[] memory pools = new ISynthereumLiquidityPool[](1);
+    pools[0] = synthereumLiquiditiyPool;
+    uint256[] memory times = new uint256[](1);
+    times[0] = expirationPeriod;
+
+    jarvisLiquidator = new JarvisSynthereumLiquidator();
+    jarvisLiquidator.initialize(pools, times);
   }
 
   function testRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
     vm.prank(minter);
-    jBRLToken.mint(address(liquidator), 10e18);
+    jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
-    (uint256 redeemableAmount, ) = liquidator.pool().getRedeemTradeInfo(10e18);
-    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(jBRLToken, 10e18, "");
+    (uint256 redeemableAmount, ) = jarvisLiquidator.getPool(address(jBRLToken)).getRedeemTradeInfo(10e18);
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, "");
 
     // should be BUSD
     assertEq(address(outputToken), address(bUSD));
@@ -39,16 +46,16 @@ contract JarvisSynthereumLiquidatorTest is BaseTest {
   }
 
   function testEmergencyRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
-    ISynthereumLiquidityPool pool = liquidator.pool();
+    ISynthereumLiquidityPool pool = jarvisLiquidator.getPool(address(jBRLToken));
     address manager = pool.synthereumFinder().getImplementationAddress("Manager");
     vm.prank(manager);
     pool.emergencyShutdown();
 
     vm.prank(minter);
-    jBRLToken.mint(address(liquidator), 10e18);
+    jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
-    (uint256 redeemableAmount, uint256 fee) = liquidator.pool().getRedeemTradeInfo(10e18);
-    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(jBRLToken, 10e18, "");
+    (uint256 redeemableAmount, uint256 fee) = jarvisLiquidator.getPool(address(jBRLToken)).getRedeemTradeInfo(10e18);
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, "");
 
     // should be BUSD
     assertEq(address(outputToken), address(bUSD));
