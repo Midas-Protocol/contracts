@@ -7,7 +7,7 @@ import "../../helpers/WithPool.sol";
 import "../../config/BaseTest.t.sol";
 
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { BeefyPolygonERC4626Test } from "./BeefyERC4626Test.sol";
+import { BeefyERC4626Test } from "../BeefyERC4626Test.sol";
 import { BeefyTestConfig, BeefyPolygonTestConfigStorage } from "./BeefyTestConfig.sol";
 import { MidasERC4626, BeefyERC4626, IBeefyVault } from "../../../compound/strategies/BeefyERC4626.sol";
 import { AbstractAssetTest } from "../../abstracts/AbstractAssetTest.sol";
@@ -21,8 +21,9 @@ interface IBeefyStrategy {
 }
 
 contract BeefyPolygonAssetTest is AbstractAssetTest {
+  address lpChef = 0x2FAe83B3916e1467C970C113399ee91B31412bCD;
   constructor() {
-    test = AbstractERC4626Test(address(new BeefyPolygonERC4626Test()));
+    test = AbstractERC4626Test(address(new BeefyERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new BeefyPolygonTestConfigStorage()));
     shouldRunTest = forChains(POLYGON_MAINNET);
   }
@@ -30,14 +31,14 @@ contract BeefyPolygonAssetTest is AbstractAssetTest {
   function setUp() public override shouldRun(shouldRunTest) {}
 
   function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
-    (address beefyVault, ) = abi.decode(testConfig, (address, uint256));
+    (address beefyVault, uint256 withdrawalFee) = abi.decode(testConfig, (address, uint256));
 
     // Polygon beefy strategy has harvest on deposit option so set it false to make sure the deposit works properly.
     IBeefyStrategy strategy = IBeefyStrategy(IBeefyVault(beefyVault).strategy());
     vm.prank(strategy.owner());
     strategy.setHarvestOnDeposit(false);
 
-    test.setUp(MockERC20(address(IBeefyVault(beefyVault).want())).symbol(), testConfig);
+    test.setUp(MockERC20(address(IBeefyVault(beefyVault).want())).symbol(), abi.encode(beefyVault, withdrawalFee, lpChef, shouldRunTest));
   }
 
   function testInitializedValues() public override shouldRun(shouldRunTest) {
