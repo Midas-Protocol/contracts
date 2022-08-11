@@ -15,7 +15,8 @@ import { AbstractERC4626Test } from "../../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../../abstracts/ITestConfigStorage.sol";
 
 contract BeefyBscAssetTest is AbstractAssetTest {
-  address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B; 
+  address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
+
   constructor() {
     test = AbstractERC4626Test(address(new BeefyERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new BeefyBscTestConfigStorage()));
@@ -27,7 +28,10 @@ contract BeefyBscAssetTest is AbstractAssetTest {
   function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
     (address beefyVault, uint256 withdrawalFee) = abi.decode(testConfig, (address, uint256));
 
-    test.setUp(MockERC20(address(IBeefyVault(beefyVault).want())).symbol(), abi.encode(beefyVault, withdrawalFee, lpChef, shouldRunTest));
+    test.setUp(
+      MockERC20(address(IBeefyVault(beefyVault).want())).symbol(),
+      abi.encode(beefyVault, withdrawalFee, lpChef, shouldRunTest)
+    );
   }
 
   function testInitializedValues() public override shouldRun(shouldRunTest) {

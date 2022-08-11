@@ -26,7 +26,10 @@ contract BeefyERC4626Test is AbstractERC4626Test {
   function setUp(string memory _testPreFix, bytes calldata data) public override {
     testPreFix = _testPreFix;
 
-    (address _beefyVault, uint256 _withdrawalFee, address _lpChef, bool _shouldRunTest) = abi.decode(data, (address, uint256, address, bool));
+    (address _beefyVault, uint256 _withdrawalFee, address _lpChef, bool _shouldRunTest) = abi.decode(
+      data,
+      (address, uint256, address, bool)
+    );
 
     lpChef = _lpChef;
     shouldRunTest = _shouldRunTest;

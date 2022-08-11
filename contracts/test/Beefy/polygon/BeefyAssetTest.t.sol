@@ -22,6 +22,7 @@ interface IBeefyStrategy {
 
 contract BeefyPolygonAssetTest is AbstractAssetTest {
   address lpChef = 0x2FAe83B3916e1467C970C113399ee91B31412bCD;
+
   constructor() {
     test = AbstractERC4626Test(address(new BeefyERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new BeefyPolygonTestConfigStorage()));
@@ -38,7 +39,10 @@ contract BeefyPolygonAssetTest is AbstractAssetTest {
     vm.prank(strategy.owner());
     strategy.setHarvestOnDeposit(false);
 
-    test.setUp(MockERC20(address(IBeefyVault(beefyVault).want())).symbol(), abi.encode(beefyVault, withdrawalFee, lpChef, shouldRunTest));
+    test.setUp(
+      MockERC20(address(IBeefyVault(beefyVault).want())).symbol(),
+      abi.encode(beefyVault, withdrawalFee, lpChef, shouldRunTest)
+    );
   }
 
   function testInitializedValues() public override shouldRun(shouldRunTest) {
