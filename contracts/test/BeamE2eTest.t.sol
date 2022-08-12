@@ -238,7 +238,7 @@ contract BeamE2eTest is WithPool, BaseTest {
           ICErc20(address(cTokenLP)),
           0,
           address(0),
-          address(wToken),
+          cToken.underlying(),
           IUniswapV2Router02(uniswapRouter),
           IUniswapV2Router02(uniswapRouter),
           vars.strategies,
