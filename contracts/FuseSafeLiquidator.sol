@@ -79,6 +79,11 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
 
   mapping(address => bool) public redemptionStrategiesWhitelist;
 
+  /**
+   * @dev Percentage of the flash swap fee, measured in basis points.
+   */
+  uint8 public flashSwapFee;
+
   function initialize(
     address _wtoken,
     address _uniswapV2router,
@@ -98,7 +103,17 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     PAIR_INIT_HASH_CODE = _uniswapPairInitHashCode;
   }
 
-  function _becomeImplementation(bytes calldata data) external {}
+  function _becomeImplementation(bytes calldata data) external {
+    // initialize this value only once
+    if (flashSwapFee == 0) {
+      uint8 _flashSwapFee = abi.decode(data, (uint8));
+      if (_flashSwapFee != 0) {
+        flashSwapFee = _flashSwapFee;
+      } else {
+        flashSwapFee = 30;
+      }
+    }
+  }
 
   /**
    * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
@@ -628,8 +643,8 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     bytes[] memory strategyData
   ) private returns (address) {
     // Calculate flashloan return amount
-    uint256 flashSwapReturnAmount = (flashSwapAmount * 1000) / 997;
-    if ((flashSwapAmount * 1000) % 997 > 0) flashSwapReturnAmount++; // Round up if division resulted in a remainder
+    uint256 flashSwapReturnAmount = (flashSwapAmount * 10000) / (10000 - flashSwapFee);
+    if ((flashSwapAmount * 10000) % (10000 - flashSwapFee) > 0) flashSwapReturnAmount++; // Round up if division resulted in a remainder
 
     // Swap cTokenCollateral for cErc20 via Uniswap
     if (cTokenCollateral.isCEther()) {

@@ -64,6 +64,7 @@ library UniswapV2Library {
   ) internal pure returns (uint256 amountOut) {
     require(amountIn > 0, "UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT");
     require(reserveIn > 0 && reserveOut > 0, "UniswapV2Library: INSUFFICIENT_LIQUIDITY");
+    // TODO parameterize
     uint256 amountInWithFee = amountIn * 997;
     uint256 numerator = amountInWithFee * reserveOut;
     uint256 denominator = reserveIn * 1000 + amountInWithFee;
@@ -79,6 +80,7 @@ library UniswapV2Library {
     require(amountOut > 0, "UniswapV2Library: INSUFFICIENT_OUTPUT_AMOUNT");
     require(reserveIn > 0 && reserveOut > 0, "UniswapV2Library: INSUFFICIENT_LIQUIDITY");
     uint256 numerator = reserveIn * amountOut * 1000;
+    // TODO parameterize
     uint256 denominator = (reserveOut - amountOut) * 997;
     amountIn = numerator / denominator + 1;
   }

@@ -60,6 +60,7 @@ library PancakeLibrary {
   ) internal pure returns (uint256 amountOut) {
     require(amountIn > 0, "PancakeLibrary: INSUFFICIENT_INPUT_AMOUNT");
     require(reserveIn > 0 && reserveOut > 0, "PancakeLibrary: INSUFFICIENT_LIQUIDITY");
+    // TODO parameterize
     uint256 amountInWithFee = amountIn * 9975;
     uint256 numerator = amountInWithFee * reserveOut;
     uint256 denominator = reserveIn * 1000 + amountInWithFee;
@@ -75,6 +76,7 @@ library PancakeLibrary {
     require(amountOut > 0, "PancakeLibrary: INSUFFICIENT_OUTPUT_AMOUNT");
     require(reserveIn > 0 && reserveOut > 0, "PancakeLibrary: INSUFFICIENT_LIQUIDITY");
     uint256 numerator = reserveIn * amountOut * 1000;
+    // TODO parameterize
     uint256 denominator = (reserveOut - amountOut) * 997;
     amountIn = numerator / denominator + 1;
   }
