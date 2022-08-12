@@ -123,10 +123,10 @@ contract BombE2eTest is WithPool, BaseTest {
     // setting up liquidator
     vars.liquidator = new FuseSafeLiquidator();
     vars.liquidator.initialize(
-      0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c,
-      0x10ED43C718714eb63d5aA57B78B54704E256024E,
-      0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56,
-      0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c,
+      ap.getAddress("wtoken"),
+      ap.getAddress("IUniswapV2Factory"),
+      ap.getAddress("bUSD"),
+      0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c, // BTCB
       "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5"
     );
     vars.liquidator._becomeImplementation(abi.encode(25));

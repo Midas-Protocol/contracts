@@ -132,7 +132,7 @@ contract BeamE2eTest is WithPool, BaseTest {
       wToken,
       uniswapRouter,
       usdc,
-      0xcd3B51D98478D53F4515A306bE565c6EebeF1D58,
+      0xcd3B51D98478D53F4515A306bE565c6EebeF1D58, // glint
       "0xe31da4209ffcce713230a74b5287fa8ec84797c9e77e1f7cfeccea015cdc97ea"
     );
     vars.liquidator._becomeImplementation(abi.encode(30));
