@@ -81,13 +81,12 @@ contract JarvisLiquidatorFunderTest is BaseTest {
 
   function testJbrlLiquidation() public shouldRun(forChains(BSC_MAINNET)) {
     LiquidationData memory vars;
-    vm.roll(block.number + 1);
 
     // setting up a new liquidator
     vars.liquidator = new FuseSafeLiquidator();
     vars.liquidator.initialize(
       ap.getAddress("wtoken"),
-      ap.getAddress("IUniswapV2Factory"),
+      0x10ED43C718714eb63d5aA57B78B54704E256024E,
       ap.getAddress("bUSD"),
       0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c, // BTCB
       "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5"

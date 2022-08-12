@@ -79,6 +79,12 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   mapping(address => bool) public redemptionStrategiesWhitelist;
 
   /**
+   * @dev Cached flash swap amount.
+   * For use in `repayTokenFlashLoan` after it is set by `safeLiquidateToTokensWithFlashLoan`.
+   */
+  uint256 private _flashSwapAmount;
+
+  /**
    * @dev Percentage of the flash swap fee, measured in basis points.
    */
   uint8 public flashSwapFee;
@@ -396,22 +402,23 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
         vars.debtFundingStrategies.length == vars.debtFundingStrategiesData.length,
         "Funding IFundsConversionStrategy contract array and strategy data bytes array must be the same length."
       );
-      // TODO avoid the double calculation of the flashSwapAmount
       // loop backwards to estimate the initial input from the final expected output
       for (uint256 i = vars.debtFundingStrategies.length; i > 0; i--) {
         bytes memory strategyData = vars.debtFundingStrategiesData[i - 1];
-        address inputToken = abi.decode(strategyData, (address));
         IFundsConversionStrategy fcs = vars.debtFundingStrategies[i - 1];
         flashSwapAmount = fcs.estimateInputAmount(flashSwapAmount, strategyData);
       }
     }
 
+    _flashSwapAmount = flashSwapAmount;
     pair.swap(
       token0IsFlashSwapFundingToken ? flashSwapAmount : 0,
       !token0IsFlashSwapFundingToken ? flashSwapAmount : 0,
       address(this),
       msg.data
     );
+    // TODO no need to reset it?
+    // _flashSwapAmount = 0;
 
     // Exchange profit, send NATIVE to coinbase if necessary, and transfer seized funds
     return distributeProfit(vars.exchangeProfitTo, vars.minProfitAmount, vars.ethToCoinbase);
@@ -534,20 +541,10 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    * @dev Liquidate unhealthy token borrow, exchange seized collateral, return flashloaned funds, and exchange profit.
    */
   function postFlashLoanTokens(LiquidateToTokensWithFlashSwapVars memory vars) private returns (address) {
-    uint256 flashSwapAmount = vars.repayAmount;
     IERC20Upgradeable debtRepaymentToken = IERC20Upgradeable(vars.flashSwapFundingToken);
     uint256 debtRepaymentAmount = debtRepaymentToken.balanceOf(address(this));
 
     if (vars.debtFundingStrategies.length > 0) {
-      // TODO avoid the double calculation of the flashSwapAmount
-      // loop backwards to estimate the initial input from the final expected output
-      for (uint256 i = vars.debtFundingStrategies.length; i > 0; i--) {
-        bytes memory strategyData = vars.debtFundingStrategiesData[i - 1];
-        address inputToken = abi.decode(strategyData, (address));
-        IFundsConversionStrategy fcs = vars.debtFundingStrategies[i - 1];
-        flashSwapAmount = fcs.estimateInputAmount(flashSwapAmount, strategyData);
-      }
-
       for (uint256 i = 0; i < vars.debtFundingStrategies.length; i++)
         (debtRepaymentToken, debtRepaymentAmount) = convertCustomFunds(
           debtRepaymentToken,
@@ -587,7 +584,6 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
         vars.cTokenCollateral,
         vars.exchangeProfitTo,
         vars.flashSwapFundingToken,
-        flashSwapAmount,
         vars.uniswapV2RouterForBorrow,
         vars.uniswapV2RouterForCollateral,
         vars.redemptionStrategies,
@@ -602,15 +598,14 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     ICToken cTokenCollateral,
     address exchangeProfitTo,
     address fundingTokenAddress,
-    uint256 flashSwapAmount,
     IUniswapV2Router02 uniswapV2RouterForBorrow,
     IUniswapV2Router02 uniswapV2RouterForCollateral,
     IRedemptionStrategy[] memory redemptionStrategies,
     bytes[] memory strategyData
   ) private returns (address) {
     // Calculate flashloan return amount
-    uint256 flashSwapReturnAmount = (flashSwapAmount * 10000) / (10000 - flashSwapFee);
-    if ((flashSwapAmount * 10000) % (10000 - flashSwapFee) > 0) flashSwapReturnAmount++; // Round up if division resulted in a remainder
+    uint256 flashSwapReturnAmount = (_flashSwapAmount * 10000) / (10000 - flashSwapFee);
+    if ((_flashSwapAmount * 10000) % (10000 - flashSwapFee) > 0) flashSwapReturnAmount++; // Round up if division resulted in a remainder
 
     // Swap cTokenCollateral for cErc20 via Uniswap
     if (cTokenCollateral.isCEther()) {
