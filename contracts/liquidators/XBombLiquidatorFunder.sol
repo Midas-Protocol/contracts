@@ -60,18 +60,13 @@ contract XBombLiquidatorFunder is IFundsConversionStrategy {
     }
   }
 
-
   /**
    * @dev Estimates the needed input amount of the input token for the conversion to return the desired output amount.
    * @param outputAmount the desired output amount
    * @param strategyData the input token
    */
-  function estimateInputAmount(uint256 outputAmount, bytes memory strategyData)
-  external
-  view
-  returns (uint256)
-  {
-    (address inputTokenAddress) = abi.decode(strategyData, (address));
+  function estimateInputAmount(uint256 outputAmount, bytes memory strategyData) external view returns (uint256) {
+    address inputTokenAddress = abi.decode(strategyData, (address));
     if (inputTokenAddress == xbomb) {
       // what amount of staked/xbomb equals the desired output amount of bomb?
       return IXBomb(xbomb).toSTAKED(outputAmount);
