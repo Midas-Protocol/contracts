@@ -568,7 +568,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
       }
 
       for (uint256 i = 0; i < vars.debtFundingStrategies.length; i++)
-        (debtRepaymentToken, debtRepaymentAmount) = redeemCustomCollateral(
+        (debtRepaymentToken, debtRepaymentAmount) = convertCustomFunds(
           debtRepaymentToken,
           debtRepaymentAmount,
           vars.debtFundingStrategies[i],
@@ -759,6 +759,21 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     bytes memory returndata = _functionDelegateCall(
       address(strategy),
       abi.encodeWithSelector(strategy.redeem.selector, underlyingCollateral, underlyingCollateralSeized, strategyData)
+    );
+    return abi.decode(returndata, (IERC20Upgradeable, uint256));
+  }
+
+  function convertCustomFunds(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    IFundsConversionStrategy strategy,
+    bytes memory strategyData
+  ) public returns (IERC20Upgradeable, uint256) {
+    require(redemptionStrategiesWhitelist[address(strategy)], "only whitelisted redemption strategies can be used");
+
+    bytes memory returndata = _functionDelegateCall(
+      address(strategy),
+      abi.encodeWithSelector(strategy.convert.selector, inputToken, inputAmount, strategyData)
     );
     return abi.decode(returndata, (IERC20Upgradeable, uint256));
   }
