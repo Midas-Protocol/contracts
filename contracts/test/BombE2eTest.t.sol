@@ -129,6 +129,7 @@ contract BombE2eTest is WithPool, BaseTest {
       0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c,
       "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5"
     );
+    vars.liquidator._becomeImplementation(abi.encode(25));
     address accountOne = address(1);
     address accountTwo = address(2);
 
