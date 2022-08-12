@@ -26,13 +26,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
 
   constructor() {}
 
-  function setUp(string memory _testPreFix, bytes calldata data) public virtual {
-    testPreFix = _testPreFix;
-
-    //do smth with data
-
-    sendUnderlyingToken(depositAmount, address(this));
-  }
+  function setUp(string memory _testPreFix, bytes calldata data) public virtual;
 
   function deposit(address _owner, uint256 amount) public {
     vm.startPrank(_owner);
@@ -49,11 +43,11 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
 
   function decreaseAssetsInVault() public virtual {}
 
-  function getDepositShares() public view virtual returns (uint256) {}
+  function getDepositShares() public view virtual returns (uint256);
 
-  function getStrategyBalance() public view virtual returns (uint256) {}
+  function getStrategyBalance() public view virtual returns (uint256);
 
-  function getExpectedDepositShares() public view virtual returns (uint256) {}
+  function getExpectedDepositShares() public view virtual returns (uint256);
 
   function testInitializedValues(string memory assetName, string memory assetSymbol) public virtual {
     assertEq(

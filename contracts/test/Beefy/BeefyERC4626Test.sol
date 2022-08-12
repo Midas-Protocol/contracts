@@ -23,7 +23,7 @@ contract BeefyERC4626Test is AbstractERC4626Test {
 
   constructor() AbstractERC4626Test() {}
 
-  function setUp(string memory _testPreFix, bytes calldata data) public override shouldRun(forChains(BSC_MAINNET)) {
+  function setUp(string memory _testPreFix, bytes calldata data) public override {
     testPreFix = _testPreFix;
 
     (address _beefyVault, uint256 _withdrawalFee, address _lpChef, bool _shouldRunTest) = abi.decode(
@@ -31,16 +31,18 @@ contract BeefyERC4626Test is AbstractERC4626Test {
       (address, uint256, address, bool)
     );
 
-    lpChef = _lpChef;
-    shouldRunTest = _shouldRunTest;
-    beefyVault = IBeefyVault(_beefyVault);
-    underlyingToken = MockERC20(address(beefyVault.want()));
-    plugin = MidasERC4626(address(new BeefyERC4626(underlyingToken, beefyVault, _withdrawalFee)));
+    if (_shouldRunTest) {
+      lpChef = _lpChef;
+      shouldRunTest = _shouldRunTest;
+      beefyVault = IBeefyVault(_beefyVault);
+      underlyingToken = MockERC20(address(beefyVault.want()));
+      plugin = MidasERC4626(address(new BeefyERC4626(underlyingToken, beefyVault, _withdrawalFee)));
 
-    initialStrategyBalance = beefyVault.balance();
-    initialStrategySupply = beefyVault.totalSupply();
+      initialStrategyBalance = beefyVault.balance();
+      initialStrategySupply = beefyVault.totalSupply();
 
-    sendUnderlyingToken(depositAmount, address(this));
+      sendUnderlyingToken(depositAmount, address(this));
+    }
   }
 
   function increaseAssetsInVault() public override {
