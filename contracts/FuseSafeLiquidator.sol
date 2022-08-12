@@ -22,7 +22,6 @@ import "./external/uniswap/IUniswapV2Callee.sol";
 import "./external/uniswap/IUniswapV2Pair.sol";
 import "./external/uniswap/IUniswapV2Factory.sol";
 import "./external/uniswap/UniswapV2Library.sol";
-import "./external/pcs/PancakeLibrary.sol";
 import "./external/compound/IComptroller.sol";
 
 /**
@@ -532,39 +531,6 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   }
 
   /**
-   * @dev Fetches and sorts the reserves for a pair.
-   * Original code from PancakeLibrary.
-   */
-  function getReserves(
-    address factory,
-    address tokenA,
-    address tokenB
-  ) private view returns (uint256 reserveA, uint256 reserveB) {
-    (address token0, ) = PancakeLibrary.sortTokens(tokenA, tokenB);
-    (uint256 reserve0, uint256 reserve1, ) = IUniswapV2Pair(IUniswapV2Factory(factory).getPair(tokenA, tokenB))
-      .getReserves();
-    (reserveA, reserveB) = tokenA == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
-  }
-
-  /**
-   * @dev Performs chained getAmountIn calculations on any number of pairs.
-   * Original code from PancakeLibrary.
-   */
-  function getAmountsIn(
-    address factory,
-    uint256 amountOut,
-    address[] memory path
-  ) private view returns (uint256[] memory amounts) {
-    require(path.length >= 2, "PancakeLibrary: INVALID_PATH");
-    amounts = new uint256[](path.length);
-    amounts[amounts.length - 1] = amountOut;
-    for (uint256 i = path.length - 1; i > 0; i--) {
-      (uint256 reserveIn, uint256 reserveOut) = getReserves(factory, path[i - 1], path[i]);
-      amounts[i - 1] = PancakeLibrary.getAmountIn(amounts[i], reserveIn, reserveOut);
-    }
-  }
-
-  /**
    * @dev Liquidate unhealthy token borrow, exchange seized collateral, return flashloaned funds, and exchange profit.
    */
   function postFlashLoanTokens(LiquidateToTokensWithFlashSwapVars memory vars) private returns (address) {
@@ -686,10 +652,11 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
         return address(underlyingCollateral);
       } else {
         // Get W_NATIVE required to repay flashloan
-        uint256 wethRequired = getAmountsIn(
+        uint256 wethRequired = UniswapV2Library.getAmountsIn(
           uniswapV2RouterForBorrow.factory(),
           flashSwapReturnAmount,
-          array(W_NATIVE_ADDRESS, fundingTokenAddress)
+          array(W_NATIVE_ADDRESS, fundingTokenAddress),
+          flashSwapFee
         )[0];
 
         if (address(underlyingCollateral) != W_NATIVE_ADDRESS) {
