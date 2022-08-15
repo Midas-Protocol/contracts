@@ -24,7 +24,7 @@ contract BeefyPolygonAssetTest is AbstractAssetTest {
   address lpChef = 0x2FAe83B3916e1467C970C113399ee91B31412bCD;
 
   constructor() {
-    test = AbstractERC4626Test(address(new BeefyERC4626Test()));
+    test = new BeefyERC4626Test();
     testConfigStorage = ITestConfigStorage(address(new BeefyPolygonTestConfigStorage()));
     shouldRunTest = forChains(POLYGON_MAINNET);
   }
