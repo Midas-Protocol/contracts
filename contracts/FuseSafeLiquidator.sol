@@ -94,7 +94,8 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     address _uniswapV2router,
     address _stableToken,
     address _btcToken,
-    bytes memory _uniswapPairInitHashCode
+    bytes memory _uniswapPairInitHashCode,
+    uint8 _flashSwapFee
   ) external initializer {
     __Ownable_init();
 
@@ -106,6 +107,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     W_NATIVE = IW_NATIVE(W_NATIVE_ADDRESS);
     UNISWAP_V2_ROUTER_02 = IUniswapV2Router02(UNISWAP_V2_ROUTER_02_ADDRESS);
     PAIR_INIT_HASH_CODE = _uniswapPairInitHashCode;
+    flashSwapFee = _flashSwapFee;
   }
 
   function _becomeImplementation(bytes calldata data) external {

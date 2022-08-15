@@ -29,8 +29,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
       fsl = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
     } else {
       fsl = new FuseSafeLiquidator();
-      fsl.initialize(address(1), address(2), address(3), address(4), "");
-      fsl._becomeImplementation(abi.encode(30));
+      fsl.initialize(address(1), address(2), address(3), address(4), "", 30);
     }
   }
 
