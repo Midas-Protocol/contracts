@@ -683,6 +683,8 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
             );
         }
 
+        emit LogIt(wethRequired);
+
         // Repay flashloan
         require(
           wethRequired <= IERC20Upgradeable(W_NATIVE_ADDRESS).balanceOf(address(this)),
@@ -698,6 +700,8 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
       }
     }
   }
+
+  event LogIt(uint256 amount);
 
   /**
    * @dev for security reasons only whitelisted redemption strategies may be used.
