@@ -48,4 +48,24 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     assertGt(outputAmount, 0);
     assertEq(outputToken.balanceOf(address(liquidator)), outputAmount);
   }
+
+  function testRedeem2Brl() public shouldRun(forChains(BSC_MAINNET)) {
+    IERC20Upgradeable twobrl = IERC20Upgradeable(0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9);
+    address whale2brl = 0x6219b46d6a5B5BfB4Ec433a9F96DB3BF4076AEE1;
+    vm.prank(whale2brl);
+    twobrl.transfer(address(liquidator), 123456);
+
+    address poolOf2Brl = curveLPTokenPriceOracleNoRegistry.poolOf(address(twobrl));
+
+    require(poolOf2Brl != address(0), "could not find the pool for 2brl");
+
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
+      twobrl,
+      123456,
+      abi.encode(uint8(0), bUSD)
+    );
+    assertEq(address(outputToken), address(bUSD));
+    assertGt(outputAmount, 0);
+    assertEq(outputToken.balanceOf(address(liquidator)), outputAmount);
+  }
 }

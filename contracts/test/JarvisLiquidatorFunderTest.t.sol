@@ -83,15 +83,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     LiquidationData memory vars;
 
     // setting up a new liquidator
-    vars.liquidator = new FuseSafeLiquidator();
-    vars.liquidator.initialize(
-      ap.getAddress("wtoken"),
-      0x10ED43C718714eb63d5aA57B78B54704E256024E,
-      ap.getAddress("bUSD"),
-      0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c, // BTCB
-      "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
-      25
-    );
+    vars.liquidator = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
 
     Comptroller comptroller = Comptroller(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
 
@@ -149,6 +141,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     fundingStrategies[0] = jarvisLiquidator;
 
     // all strategies need to be whitelisted
+    vm.prank(ap.owner());
     vars.liquidator._whitelistRedemptionStrategy(fundingStrategies[0], true);
 
     uint256 repayAmount = borrowAmount / 10;
