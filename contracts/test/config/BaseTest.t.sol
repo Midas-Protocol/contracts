@@ -43,7 +43,10 @@ abstract contract BaseTest is Test {
     if (run) {
       _;
     }
-    return;
+  }
+
+  modifier shouldFailIfNot(uint256 id0) {
+    require(block.chainid == id0, "wrong chain");
   }
 
   function forChains(uint256 id0) public view returns (bool) {
