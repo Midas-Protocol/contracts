@@ -18,7 +18,7 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
   address private lpTokenWhale = 0x8D7408C2b3154F9f97fc6dd24cd36143908d1E52;
   IERC20Upgradeable lpToken = IERC20Upgradeable(0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452);
   CurveLpTokenPriceOracleNoRegistry curveLPTokenPriceOracleNoRegistry =
-    CurveLpTokenPriceOracleNoRegistry(0x44ea7bAB9121D97630b5DB0F92aAd75cA5A401a3);
+    CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
 
   IERC20Upgradeable bUSD;
   WETH wtoken;
@@ -62,9 +62,9 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       twobrl,
       123456,
-      abi.encode(uint8(0), bUSD)
+      abi.encode(uint8(0), 0x316622977073BBC3dF32E7d2A9B3c77596a0a603)
     );
-    assertEq(address(outputToken), address(bUSD));
+    assertEq(address(outputToken), 0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
     assertGt(outputAmount, 0);
     assertEq(outputToken.balanceOf(address(liquidator)), outputAmount);
   }

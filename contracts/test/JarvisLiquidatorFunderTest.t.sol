@@ -168,13 +168,11 @@ contract JarvisLiquidatorFunderTest is BaseTest {
   }
 
   function dealBUSD(address to, uint256 amount) internal {
-    address busdAddress = address(bUSD);
     vm.prank(0x0000000000000000000000000000000000001004); // whale
     bUSD.transfer(to, amount);
   }
 
   function dealJBRL(address to, uint256 amount) internal {
-    address jbrlAddress = address(jBRLToken);
     vm.prank(0xad51e40D8f255dba1Ad08501D6B1a6ACb7C188f3); // whale
     jBRLToken.transfer(to, amount);
   }

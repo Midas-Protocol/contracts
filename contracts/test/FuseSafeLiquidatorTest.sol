@@ -82,23 +82,6 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 
-  function getPoolAndBorrower(uint256 random, LiquidationData memory vars) internal returns (Comptroller, address) {
-    if (vars.pools.length == 0) revert("no pools to pick from");
-
-    uint256 i = random % vars.pools.length; // random pool
-    Comptroller comptroller = Comptroller(vars.pools[i].comptroller);
-    address[] memory borrowers = comptroller.getAllBorrowers();
-
-    if (borrowers.length == 0) {
-      return (Comptroller(address(0)), address(0));
-    } else {
-      uint256 k = random % borrowers.length; // random borrower
-      address borrower = borrowers[k];
-
-      return (comptroller, borrower);
-    }
-  }
-
   struct LiquidationData {
     FusePoolDirectory.FusePool[] pools;
     address[] cTokens;
@@ -115,7 +98,24 @@ contract FuseSafeLiquidatorTest is BaseTest {
     address borrower;
   }
 
-  function getDebtAndCollateralMarkets(LiquidationData memory vars, address borrower)
+  function getPoolAndBorrower(uint256 random, LiquidationData memory vars) internal view returns (Comptroller, address) {
+    if (vars.pools.length == 0) revert("no pools to pick from");
+
+    uint256 i = random % vars.pools.length; // random pool
+    Comptroller comptroller = Comptroller(vars.pools[i].comptroller);
+    address[] memory borrowers = comptroller.getAllBorrowers();
+
+    if (borrowers.length == 0) {
+      return (Comptroller(address(0)), address(0));
+    } else {
+      uint256 k = random % borrowers.length; // random borrower
+      address borrower = borrowers[k];
+
+      return (comptroller, borrower);
+    }
+  }
+
+  function setUpDebtAndCollateralMarkets(uint256 random, LiquidationData memory vars)
     internal
     returns (
       CErc20Delegate debt,
@@ -125,7 +125,8 @@ contract FuseSafeLiquidatorTest is BaseTest {
   {
     // debt
     for (uint256 m = 0; m < vars.markets.length; m++) {
-      borrowAmount = vars.markets[m].borrowBalanceStored(vars.borrower);
+      uint256 marketIndexWithOffset = (random + m) % vars.markets.length;
+      borrowAmount = vars.markets[marketIndexWithOffset].borrowBalanceStored(vars.borrower);
       if (borrowAmount > 0) {
         debt = CErc20Delegate(address(vars.markets[m]));
         break;
@@ -134,35 +135,31 @@ contract FuseSafeLiquidatorTest is BaseTest {
 
     if (address(debt) != address(0)) {
       uint256 shortfall = 0;
-      // collateral
-      for (uint256 n = 0; n < vars.markets.length; n++) {
-        if (vars.markets[n].balanceOf(vars.borrower) > 0) {
-          if (address(vars.markets[n]) == address(debt)) continue;
+      // reduce the collateral for each market of the borrower
+      // until there is shortfall for which to be liquidated
+      for (uint256 m = 0; m < vars.markets.length; m++) {
+        uint256 marketIndexWithOffset = (random - m) % vars.markets.length;
+        if (vars.markets[marketIndexWithOffset].balanceOf(vars.borrower) > 0) {
+          if (address(vars.markets[marketIndexWithOffset]) == address(debt)) continue;
 
-          collateral = CErc20Delegate(address(vars.markets[n]));
-          // some time passes, the collateral prices change
-          {
-            vm.roll(block.number + 100);
+          collateral = CErc20Delegate(address(vars.markets[marketIndexWithOffset]));
 
-            MasterPriceOracle mpo = MasterPriceOracle(address(vars.comptroller.oracle()));
-            uint256 priceCollateral = mpo.getUnderlyingPrice(ICToken(address(collateral)));
-            vm.mockCall(
-              address(mpo),
-              abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, ICToken(address(collateral))),
-              abi.encode(priceCollateral / 100)
-            );
-          }
+          // the collateral prices change
+          MasterPriceOracle mpo = MasterPriceOracle(address(vars.comptroller.oracle()));
+          uint256 priceCollateral = mpo.getUnderlyingPrice(ICToken(address(collateral)));
+          vm.mockCall(
+            address(mpo),
+            abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, ICToken(address(collateral))),
+            abi.encode(priceCollateral / 15)
+          );
 
-          {
-            (, , shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
-
-            if (shortfall == 0) {
-              emit log("collateral still enough");
-              continue;
-            } else {
-              emit log("has shortfall");
-              break;
-            }
+          (, , shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
+          if (shortfall == 0) {
+            emit log("collateral still enough");
+            continue;
+          } else {
+            emit log("has shortfall");
+            break;
           }
         }
       }
@@ -172,7 +169,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
 
   function testAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
     // TODO: random=1235458268881087
-    vm.assume(random > 1);
+    vm.assume(random > 100);
 
     LiquidationData memory vars;
     uint256 borrowAmount;
@@ -190,20 +187,27 @@ contract FuseSafeLiquidatorTest is BaseTest {
     );
     vars.pools = FusePoolDirectory(0x295d7347606F4bd810C8296bb8d75D657001fcf7).getAllPools();
 
+    // get a random pool and a random borrower from it
     (vars.comptroller, vars.borrower) = getPoolAndBorrower(random, vars);
+
+    if (address(vars.comptroller) == address(0) || vars.borrower == address(0)) {
+      // fuzz test another number
+      return;
+    }
+
+    // find a market in which the borrower has debt and reduce his collateral price
     if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
       vars.markets = vars.comptroller.getAllMarkets();
-      (vars.debtMarket, vars.collateralMarket, borrowAmount) = getDebtAndCollateralMarkets(vars, vars.borrower);
+      (vars.debtMarket, vars.collateralMarket, borrowAmount) = setUpDebtAndCollateralMarkets(random, vars);
     }
 
     emit log("debt and collateral markets");
     emit log_address(address(vars.debtMarket));
     emit log_address(address(vars.collateralMarket));
 
-    uint8 i = 1;
-    while (address(vars.debtMarket) == address(0) || address(vars.collateralMarket) == address(0)) {
-      if (i >= vars.pools.length) revert("no pools left for testing");
-      testAnyLiquidation(random + i++);
+    if (address(vars.debtMarket) == address(0) || address(vars.collateralMarket) == address(0)) {
+      // fuzz test another number
+      return;
     }
 
     // prepare the liquidation
@@ -237,17 +241,24 @@ contract FuseSafeLiquidatorTest is BaseTest {
     // prepare the redemption strategies
     if (vars.collateralMarket.underlying() == 0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9) {
       // 2brl
-      vars.strategies = new IRedemptionStrategy[](1);
+      vars.strategies = new IRedemptionStrategy[](2);
       vars.strategies[0] = new CurveLpTokenLiquidatorNoRegistry(
         WETH(payable(ap.getAddress("wtoken"))),
-        CurveLpTokenPriceOracleNoRegistry(0x44ea7bAB9121D97630b5DB0F92aAd75cA5A401a3)
+        CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA)
       );
-      vars.redemptionDatas = new bytes[](1);
-      vars.redemptionDatas[0] = abi.encode(uint8(0), ap.getAddress("bUSD"));
+      vars.strategies[1] = new JarvisLiquidatorFunder();
+      vars.redemptionDatas = new bytes[](2);
+      vars.redemptionDatas[0] = abi.encode(uint8(0), 0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
+      vars.redemptionDatas[1] = abi.encode(
+        address(0x316622977073BBC3dF32E7d2A9B3c77596a0a603),
+        0x0fD8170Dc284CD558325029f6AEc1538c7d99f49,
+        60 * 40
+      );
 
       // all strategies need to be whitelisted
       vm.prank(vars.liquidator.owner());
       vars.liquidator._whitelistRedemptionStrategy(vars.strategies[0], true);
+      vars.liquidator._whitelistRedemptionStrategy(vars.strategies[1], true);
     } else {
       vars.strategies = new IRedemptionStrategy[](0);
       vars.redemptionDatas = new bytes[](0);
