@@ -40,7 +40,6 @@ abstract contract BaseTest is Test {
     if (run) {
       _;
     }
-    return;
   }
 
   function forChains(uint256 id0) public view returns (bool) {
