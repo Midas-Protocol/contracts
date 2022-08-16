@@ -141,7 +141,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
     assertEq(dddFlywheel.feeRecipient(), newFeeRecipient, "!feeRecipient == newFeeRecipient");
   }
 
-  function testFail__UpdateFeeSettings() public shouldRun(forChains(BSC_MAINNET)) shouldFailIfNot(BSC_MAINNET) {
+  function testFail__UpdateFeeSettings() public shouldFailIfNot(BSC_MAINNET) {
     vm.startPrank(feeRecipient);
     vm.expectRevert("Owned: Only Owner");
 

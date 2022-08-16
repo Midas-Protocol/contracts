@@ -48,6 +48,7 @@ abstract contract BaseTest is Test {
 
   modifier shouldFailIfNot(uint256 id0) {
     if (block.chainid != id0) revert("failing");
+    _;
   }
 
   function forChains(uint256 id0) public view returns (bool) {
