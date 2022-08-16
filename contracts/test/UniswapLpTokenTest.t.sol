@@ -15,12 +15,10 @@ contract UniswapLpTokenBaseTest is BaseTest {
   UniswapLpTokenPriceOracle uniswapLpTokenPriceOracle;
   MasterPriceOracle mpo;
   address wtoken;
-  IERC20Upgradeable bUSD;
 
   function setUp() public {
     wtoken = ap.getAddress("wtoken");
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-    bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
   }
 
   function getLpTokenPrice(address lpToken) internal returns (uint256) {
@@ -61,33 +59,5 @@ contract UniswapLpTokenBaseTest is BaseTest {
 
     uint256 price = getLpTokenPrice(lpToken);
     assertTrue(price > 0);
-  }
-
-  function testSwapExactTokensForTokens() public shouldRun(forChains(BSC_MAINNET)) {
-    if (block.number != 20487787) return;
-
-    address uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
-
-    uint256 amountIn = 18593176693441909018;
-    uint256 amountOutMin = 6156221938835092;
-    address[] memory path = new address[](2);
-    path[0] = address(bUSD);
-    path[1] = address(wtoken);
-
-    dealBUSD(address(this), amountIn);
-    bUSD.approve(uniswapRouter, amountIn);
-
-    IUniswapV2Router02(uniswapRouter).swapExactTokensForTokens(
-      amountIn,
-      amountOutMin,
-      path,
-      address(this),
-      block.timestamp
-    );
-  }
-
-  function dealBUSD(address to, uint256 amount) internal {
-    vm.prank(0x0000000000000000000000000000000000001004); // whale
-    bUSD.transfer(to, amount);
   }
 }
