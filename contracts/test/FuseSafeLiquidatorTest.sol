@@ -13,10 +13,10 @@ import { WETH } from "solmate/tokens/WETH.sol";
 import "../FuseSafeLiquidator.sol";
 import "../FusePoolLens.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import "../../lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 import "./config/BaseTest.t.sol";
 import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../liquidators/CurveLpTokenLiquidator.sol";
+import "../liquidators/UniswapLpTokenLiquidator.sol";
 import "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
 
 contract MockRedemptionStrategy is IRedemptionStrategy {
@@ -32,6 +32,7 @@ contract MockRedemptionStrategy is IRedemptionStrategy {
 contract FuseSafeLiquidatorTest is BaseTest {
   FuseSafeLiquidator fsl;
   address alice = address(10);
+  address uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
 
   function setUp() public {
     if (block.chainid == BSC_MAINNET) {
@@ -98,7 +99,11 @@ contract FuseSafeLiquidatorTest is BaseTest {
     address borrower;
   }
 
-  function getPoolAndBorrower(uint256 random, LiquidationData memory vars) internal view returns (Comptroller, address) {
+  function getPoolAndBorrower(uint256 random, LiquidationData memory vars)
+    internal
+    view
+    returns (Comptroller, address)
+  {
     if (vars.pools.length == 0) revert("no pools to pick from");
 
     uint256 i = random % vars.pools.length; // random pool
@@ -128,14 +133,16 @@ contract FuseSafeLiquidatorTest is BaseTest {
       uint256 marketIndexWithOffset = (random + m) % vars.markets.length;
       borrowAmount = vars.markets[marketIndexWithOffset].borrowBalanceStored(vars.borrower);
       if (borrowAmount > 0) {
-        debt = CErc20Delegate(address(vars.markets[m]));
+        debt = CErc20Delegate(address(vars.markets[marketIndexWithOffset]));
         break;
       }
     }
 
     if (address(debt) != address(0)) {
+      emit log("debt market is");
+      emit log_address(address(debt));
+
       uint256 shortfall = 0;
-      uint256 liquidity = 0;
       // reduce the collateral for each market of the borrower
       // until there is shortfall for which to be liquidated
       for (uint256 m = 0; m < vars.markets.length; m++) {
@@ -154,7 +161,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
             abi.encode(priceCollateral / 5)
           );
 
-          (, liquidity, shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
+          (, , shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
           if (shortfall == 0) {
             emit log("collateral still enough");
             continue;
@@ -164,7 +171,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
           }
         }
       }
-      if (shortfall == 0 || (shortfall > liquidity)) {
+      if (shortfall == 0) {
         return (CErc20Delegate(address(0)), CErc20Delegate(address(0)), 0);
       }
     }
@@ -181,7 +188,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     vars.liquidator = new FuseSafeLiquidator();
     vars.liquidator.initialize(
       ap.getAddress("wtoken"),
-      0x10ED43C718714eb63d5aA57B78B54704E256024E,
+      uniswapRouter,
       ap.getAddress("bUSD"),
       0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c, // BTCB
       "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
@@ -261,6 +268,18 @@ contract FuseSafeLiquidatorTest is BaseTest {
       vm.prank(vars.liquidator.owner());
       vars.liquidator._whitelistRedemptionStrategy(vars.strategies[0], true);
       vars.liquidator._whitelistRedemptionStrategy(vars.strategies[1], true);
+    } else if (vars.collateralMarket.underlying() == 0xd99c7F6C65857AC913a8f880A4cb84032AB2FC5b) {
+      vars.strategies = new IRedemptionStrategy[](1);
+      vars.strategies[0] = new UniswapLpTokenLiquidator();
+      vars.redemptionDatas = new bytes[](1);
+      address[] memory swapToken0Path = new address[](0);
+      address[] memory swapToken1Path = new address[](2);
+      swapToken1Path[0] = ap.getAddress("wtoken");
+      swapToken1Path[1] = 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d; // USDC
+      vars.redemptionDatas[0] = abi.encode(uniswapRouter, swapToken0Path, swapToken1Path);
+      // all strategies need to be whitelisted
+      vm.prank(vars.liquidator.owner());
+      vars.liquidator._whitelistRedemptionStrategy(vars.strategies[0], true);
     } else {
       vars.strategies = new IRedemptionStrategy[](0);
       vars.redemptionDatas = new bytes[](0);
@@ -277,8 +296,8 @@ contract FuseSafeLiquidatorTest is BaseTest {
         0,
         exchangeTo,
         flashSwapFundingToken,
-        IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E),
-        IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E),
+        IUniswapV2Router02(uniswapRouter),
+        IUniswapV2Router02(uniswapRouter),
         vars.strategies,
         vars.redemptionDatas,
         0,
