@@ -168,7 +168,6 @@ contract FuseSafeLiquidatorTest is BaseTest {
   }
 
   function testAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
-    // TODO: random=1235458268881087
     vm.assume(random > 100);
 
     LiquidationData memory vars;
