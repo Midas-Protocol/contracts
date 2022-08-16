@@ -82,18 +82,17 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 
-
   function getPoolAndBorrower(uint256 random, LiquidationData memory vars) internal returns (Comptroller, address) {
     if (vars.pools.length == 0) revert("no pools to pick from");
 
-    uint i = random % vars.pools.length; // random pool
+    uint256 i = random % vars.pools.length; // random pool
     Comptroller comptroller = Comptroller(vars.pools[i].comptroller);
     address[] memory borrowers = comptroller.getAllBorrowers();
 
     if (borrowers.length == 0) {
       return (Comptroller(address(0)), address(0));
     } else {
-      uint k = random % borrowers.length; // random borrower
+      uint256 k = random % borrowers.length; // random borrower
       address borrower = borrowers[k];
 
       return (comptroller, borrower);
@@ -116,9 +115,16 @@ contract FuseSafeLiquidatorTest is BaseTest {
     address borrower;
   }
 
-  function getDebtAndCollateralMarkets(LiquidationData memory vars, address borrower) internal returns (CErc20Delegate debt, CErc20Delegate collateral, uint256 borrowAmount) {
+  function getDebtAndCollateralMarkets(LiquidationData memory vars, address borrower)
+    internal
+    returns (
+      CErc20Delegate debt,
+      CErc20Delegate collateral,
+      uint256 borrowAmount
+    )
+  {
     // debt
-    for (uint m = 0; m < vars.markets.length; m++) {
+    for (uint256 m = 0; m < vars.markets.length; m++) {
       borrowAmount = vars.markets[m].borrowBalanceStored(vars.borrower);
       if (borrowAmount > 0) {
         debt = CErc20Delegate(address(vars.markets[m]));
@@ -129,7 +135,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     if (address(debt) != address(0)) {
       uint256 shortfall = 0;
       // collateral
-      for (uint n = 0; n < vars.markets.length; n++) {
+      for (uint256 n = 0; n < vars.markets.length; n++) {
         if (vars.markets[n].balanceOf(vars.borrower) > 0) {
           if (address(vars.markets[n]) == address(debt)) continue;
 
@@ -148,11 +154,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
           }
 
           {
-            (
-              ,
-              ,
-              shortfall
-            ) = vars.comptroller.getAccountLiquidity(vars.borrower);
+            (, , shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
 
             if (shortfall == 0) {
               emit log("collateral still enough");
@@ -168,14 +170,15 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 
-  function testAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) { // TODO: random=1235458268881087
+  function testAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
+    // TODO: random=1235458268881087
     vm.assume(random > 1);
 
     LiquidationData memory vars;
     uint256 borrowAmount;
 
     // setting up a new liquidator
-//    vars.liquidator = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
+    //    vars.liquidator = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
     vars.liquidator = new FuseSafeLiquidator();
     vars.liquidator.initialize(
       ap.getAddress("wtoken"),
@@ -188,7 +191,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     vars.pools = FusePoolDirectory(0x295d7347606F4bd810C8296bb8d75D657001fcf7).getAllPools();
 
     (vars.comptroller, vars.borrower) = getPoolAndBorrower(random, vars);
-    if (address(vars.comptroller) != address (0) && vars.borrower != address(0)) {
+    if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
       vars.markets = vars.comptroller.getAllMarkets();
       (vars.debtMarket, vars.collateralMarket, borrowAmount) = getDebtAndCollateralMarkets(vars, vars.borrower);
     }
@@ -208,10 +211,15 @@ contract FuseSafeLiquidatorTest is BaseTest {
     address flashSwapFundingToken;
 
     // prepare the funding strategies
-    if (vars.debtMarket.underlying() == 0x316622977073BBC3dF32E7d2A9B3c77596a0a603) { // jbrl
+    if (vars.debtMarket.underlying() == 0x316622977073BBC3dF32E7d2A9B3c77596a0a603) {
+      // jbrl
       vars.fundingStrategies = new IFundsConversionStrategy[](1);
       vars.fundingDatas = new bytes[](1);
-      vars.fundingDatas[0] = abi.encode(address(0x316622977073BBC3dF32E7d2A9B3c77596a0a603), 0x0fD8170Dc284CD558325029f6AEc1538c7d99f49, 60 * 40);
+      vars.fundingDatas[0] = abi.encode(
+        address(0x316622977073BBC3dF32E7d2A9B3c77596a0a603),
+        0x0fD8170Dc284CD558325029f6AEc1538c7d99f49,
+        60 * 40
+      );
       vars.fundingStrategies[0] = new JarvisLiquidatorFunder();
       flashSwapFundingToken = ap.getAddress("bUSD");
 
@@ -227,9 +235,13 @@ contract FuseSafeLiquidatorTest is BaseTest {
     exchangeTo = flashSwapFundingToken;
 
     // prepare the redemption strategies
-    if (vars.collateralMarket.underlying() == 0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9) { // 2brl
+    if (vars.collateralMarket.underlying() == 0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9) {
+      // 2brl
       vars.strategies = new IRedemptionStrategy[](1);
-      vars.strategies[0] = new CurveLpTokenLiquidatorNoRegistry(WETH(payable(ap.getAddress("wtoken"))), CurveLpTokenPriceOracleNoRegistry(0x44ea7bAB9121D97630b5DB0F92aAd75cA5A401a3));
+      vars.strategies[0] = new CurveLpTokenLiquidatorNoRegistry(
+        WETH(payable(ap.getAddress("wtoken"))),
+        CurveLpTokenPriceOracleNoRegistry(0x44ea7bAB9121D97630b5DB0F92aAd75cA5A401a3)
+      );
       vars.redemptionDatas = new bytes[](1);
       vars.redemptionDatas[0] = abi.encode(uint8(0), ap.getAddress("bUSD"));
 
