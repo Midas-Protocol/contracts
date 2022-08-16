@@ -12,7 +12,7 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
 
   /* ========== STATE VARIABLES ========== */
 
-  uint256 public vaultShareHWM = 1e18;
+  uint256 public vaultShareHWM;
   uint256 public performanceFee = 5e16; // 5%
   address public feeRecipient; // TODO whats the default address?
 
@@ -31,7 +31,9 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     ERC20 _asset,
     string memory _name,
     string memory _symbol
-  ) ERC4626(_asset, _name, _symbol) {}
+  ) ERC4626(_asset, _name, _symbol) {
+    vaultShareHWM = 10**_asset.decimals();
+  }
 
   /* ========== DEPOSIT/WITHDRAW FUNCTIONS ========== */
 
@@ -122,24 +124,22 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
   /* ========== FEE FUNCTIONS ========== */
 
   /**
-   * @notice Performance fee that has accrued since last fee harvest.
-   * @return Accrued performance fee in underlying `asset` token.
+   * @notice Take the performance fee that has accrued since last fee harvest.
    * @dev Performance fee is based on a vault share high water mark value. If vault share value has increased above the
    *   HWM in a fee period, issue fee shares to the vault equal to the performance fee.
    */
-  function takePerformanceFee() onlyOwner {
+  function takePerformanceFee() external onlyOwner {
     uint256 currentAssets = totalAssets();
     uint256 shareValue = convertToAssets(10**asset.decimals());
 
-    if (shareValue > vaultShareHWM) {
-      // chache value
-      uint256 supply = totalSupply;
+    require(shareValue > vaultShareHWM, "shareValue !> vaultShareHWM");
+    // chache value
+    uint256 supply = totalSupply;
 
-      uint256 accruedPerformanceFee = (performanceFee * (shareValue - vaultShareHWM) * supply) / 1e36;
-      _mint(address(this), (accruedPerformanceFee * supply) / (currentAssets - accruedPerformanceFee));
+    uint256 accruedPerformanceFee = (performanceFee * (shareValue - vaultShareHWM) * supply) / 1e36;
+    _mint(feeRecipient, (accruedPerformanceFee * supply) / (currentAssets - accruedPerformanceFee));
 
-      vaultShareHWM = convertToAssets(10**asset.decimals());
-    }
+    vaultShareHWM = convertToAssets(10**asset.decimals());
   }
 
   /**
@@ -147,7 +147,7 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
    * @dev We must make sure that feeRecipient is not address(0) before withdrawing fees
    */
   function withdrawAccruedFees() external onlyOwner {
-    redeem(balanceOf[address(this)], feeRecipient, address(this));
+    redeem(balanceOf[feeRecipient], feeRecipient, feeRecipient);
   }
 
   /**
@@ -157,7 +157,18 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     emit UpdatedFeeSettings(performanceFee, _performanceFee, feeRecipient, _feeRecipient);
 
     performanceFee = _performanceFee;
-    feeRecipient = _feeRecipient;
+
+    if (_feeRecipient != feeRecipient) {
+      uint256 oldFees = balanceOf[feeRecipient];
+
+      _burn(feeRecipient, oldFees);
+      allowance[feeRecipient][owner()] = 0;
+
+      feeRecipient = _feeRecipient;
+
+      _mint(feeRecipient, oldFees);
+      allowance[feeRecipient][owner()] = type(uint256).max;
+    }
   }
 
   /* ========== EMERGENCY FUNCTIONS ========== */
