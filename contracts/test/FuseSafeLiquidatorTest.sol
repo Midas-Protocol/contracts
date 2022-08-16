@@ -135,6 +135,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
 
     if (address(debt) != address(0)) {
       uint256 shortfall = 0;
+      uint256 liquidity = 0;
       // reduce the collateral for each market of the borrower
       // until there is shortfall for which to be liquidated
       for (uint256 m = 0; m < vars.markets.length; m++) {
@@ -150,10 +151,10 @@ contract FuseSafeLiquidatorTest is BaseTest {
           vm.mockCall(
             address(mpo),
             abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, ICToken(address(collateral))),
-            abi.encode(priceCollateral / 15)
+            abi.encode(priceCollateral / 5)
           );
 
-          (, , shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
+          (, liquidity, shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
           if (shortfall == 0) {
             emit log("collateral still enough");
             continue;
@@ -163,12 +164,14 @@ contract FuseSafeLiquidatorTest is BaseTest {
           }
         }
       }
-      if (shortfall == 0) return (CErc20Delegate(address(0)), CErc20Delegate(address(0)), 0);
+      if (shortfall == 0 || (shortfall > liquidity)) {
+        return (CErc20Delegate(address(0)), CErc20Delegate(address(0)), 0);
+      }
     }
   }
 
   function testAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
-    vm.assume(random > 100);
+    vm.assume(random > 100 && random < type(uint64).max);
 
     LiquidationData memory vars;
     uint256 borrowAmount;
