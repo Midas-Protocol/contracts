@@ -9,7 +9,6 @@ import "../oracles/default/UniswapLpTokenPriceOracle.sol";
 import "./config/BaseTest.t.sol";
 import "../external/uniswap/IUniswapV2Pair.sol";
 import "../external/uniswap/IUniswapV2Factory.sol";
-import "../external/uniswap/IUniswapV2Router02.sol";
 
 contract UniswapLpTokenBaseTest is BaseTest {
   UniswapLpTokenPriceOracle uniswapLpTokenPriceOracle;
