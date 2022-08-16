@@ -390,8 +390,9 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     // Input validation
     require(vars.repayAmount > 0, "Repay amount must be greater than 0.");
 
+    address token1 = vars.flashSwapFundingToken != W_NATIVE_ADDRESS ? W_NATIVE_ADDRESS : STABLE_TOKEN;
     IUniswapV2Pair pair = IUniswapV2Pair(
-      IUniswapV2Factory(vars.uniswapV2RouterForBorrow.factory()).getPair(vars.flashSwapFundingToken, W_NATIVE_ADDRESS)
+      IUniswapV2Factory(vars.uniswapV2RouterForBorrow.factory()).getPair(vars.flashSwapFundingToken, token1)
     );
     bool token0IsFlashSwapFundingToken = pair.token0() == vars.flashSwapFundingToken;
 
@@ -646,13 +647,18 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
         // Return the profited token (same as collateral and borrow)
         return address(underlyingCollateral);
       } else {
-        // Get W_NATIVE required to repay flashloan
-        uint256 wethRequired = UniswapV2Library.getAmountsIn(
-          uniswapV2RouterForBorrow.factory(),
-          flashSwapReturnAmount,
-          array(W_NATIVE_ADDRESS, fundingTokenAddress),
-          flashSwapFee
-        )[0];
+        uint256 wethRequired;
+        if (fundingTokenAddress == W_NATIVE_ADDRESS) {
+          wethRequired = flashSwapReturnAmount;
+        } else {
+          // Get W_NATIVE required to repay flashloan
+          wethRequired = UniswapV2Library.getAmountsIn(
+            uniswapV2RouterForBorrow.factory(),
+            flashSwapReturnAmount,
+            array(W_NATIVE_ADDRESS, fundingTokenAddress),
+            flashSwapFee
+          )[0];
+        }
 
         if (address(underlyingCollateral) != W_NATIVE_ADDRESS) {
           // Approve to Uniswap router
