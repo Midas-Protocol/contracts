@@ -71,7 +71,6 @@ contract ERC4626PerformanceFeeTest is BaseTest {
   }
 
   function testFail__UpdateFeeSettings() public shouldRun(forChains(BSC_MAINNET)) {
-    if (block.chainid != 56) return;
     vm.startPrank(address(10));
     vm.expectRevert("Owned: Only Owner");
     plugin.updateFeeSettings(100, address(10));
@@ -124,7 +123,6 @@ contract ERC4626PerformanceFeeTest is BaseTest {
   }
 
   function testFail__WithdrawAccruedFees() public shouldRun(forChains(BSC_MAINNET)) {
-    if (block.chainid != 56) return;
     vm.startPrank(address(10));
     vm.expectRevert("Owned");
     plugin.withdrawAccruedFees();
