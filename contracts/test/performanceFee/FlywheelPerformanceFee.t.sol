@@ -55,7 +55,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
 
   ERC20[] rewardsToken;
 
-  function setUp() public {
+  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     dddFlywheel = new MidasFlywheelCore(
       dddToken,
       IFlywheelRewards(address(0)),
@@ -126,12 +126,12 @@ contract FlywheelPerformanceFeeTest is BaseTest {
 
   /* --------------------- FLYWHEEL PERFORMANCE FEE TESTS --------------------- */
 
-  function test__initializedValues() public {
+  function test__initializedValues() public shouldRun(forChains(BSC_MAINNET)) {
     assertEq(dddFlywheel.performanceFee(), PERFORMANCE_FEE, "!perFee");
     assertEq(dddFlywheel.feeRecipient(), address(0), "!feeRecipient");
   }
 
-  function test__UpdateFeeSettings() public {
+  function test__UpdateFeeSettings() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 newPerfFee = 100;
     address newFeeRecipient = feeRecipient;
 
@@ -141,14 +141,14 @@ contract FlywheelPerformanceFeeTest is BaseTest {
     assertEq(dddFlywheel.feeRecipient(), newFeeRecipient, "!feeRecipient == newFeeRecipient");
   }
 
-  function testFail__UpdateFeeSettings() public {
+  function testFail__UpdateFeeSettings() public shouldRun(forChains(BSC_MAINNET)) {
     vm.startPrank(feeRecipient);
     vm.expectRevert("Owned: Only Owner");
 
     dddFlywheel.updateFeeSettings(100, feeRecipient);
   }
 
-  function test__TakePerformanceFeeInUnderlyingAsset() public {
+  function test__TakePerformanceFeeInUnderlyingAsset() public shouldRun(forChains(BSC_MAINNET)) {
     createPerformanceFee();
 
     uint256 expectedPerformanceFee = (rewardAmount * dddFlywheel.performanceFee()) / 1e18;
@@ -166,7 +166,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
     );
   }
 
-  function test__WithdrawAccruedFees() public {
+  function test__WithdrawAccruedFees() public shouldRun(forChains(BSC_MAINNET)) {
     dddFlywheel.updateFeeSettings(PERFORMANCE_FEE, feeRecipient);
 
     createPerformanceFee();
