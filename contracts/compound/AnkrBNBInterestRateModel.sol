@@ -98,9 +98,9 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
     uint256 jumpMultiplierPerBlock = getJumpMultiplierPerBlock();
 
     if (util <= kink) {
-      return util.mul(multiplierPerBlock).div(1e18).add(baseRatePerBlock.div(100));
+      return util.mul(multiplierPerBlock).div(1e18).add(baseRatePerBlock);
     } else {
-      uint256 normalRate = kink.mul(multiplierPerBlock).div(1e18).add(baseRatePerBlock.div(100));
+      uint256 normalRate = kink.mul(multiplierPerBlock).div(1e18).add(baseRatePerBlock);
       uint256 excessUtil = util.sub(kink);
       return excessUtil.mul(jumpMultiplierPerBlock).div(1e18).add(normalRate);
     }

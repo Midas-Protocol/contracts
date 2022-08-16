@@ -381,7 +381,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
    * @notice Accrue interest then return the up-to-date exchange rate
    * @return Calculated exchange rate scaled by 1e18
    */
-  function exchangeRateCurrent() public override nonReentrant(false) returns (uint256) {
+  function exchangeRateCurrent() public override returns (uint256) {
     require(accrueInterest() == uint256(Error.NO_ERROR), "accrue interest failed");
     return exchangeRateStored();
   }
