@@ -37,71 +37,71 @@ contract AbstractAssetTest is BaseTest {
     // }
   }
 
-  function testPreviewDepositAndMintReturnTheSameValue() public shouldRun(shouldRunTest) {
-    this.runTest(test.testPreviewDepositAndMintReturnTheSameValue);
-  }
+  // function testPreviewDepositAndMintReturnTheSameValue() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testPreviewDepositAndMintReturnTheSameValue);
+  // }
 
-  function testPreviewWithdrawAndRedeemReturnTheSameValue() public shouldRun(shouldRunTest) {
-    this.runTest(test.testPreviewWithdrawAndRedeemReturnTheSameValue);
-  }
+  // function testPreviewWithdrawAndRedeemReturnTheSameValue() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testPreviewWithdrawAndRedeemReturnTheSameValue);
+  // }
 
-  function testDeposit() public shouldRun(shouldRunTest) {
-    this.runTest(test.testDeposit);
-  }
+  // function testDeposit() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testDeposit);
+  // }
 
-  function testDepositWithIncreasedVaultValue() public shouldRun(shouldRunTest) {
-    this.runTest(test.testDepositWithIncreasedVaultValue);
-  }
+  // function testDepositWithIncreasedVaultValue() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testDepositWithIncreasedVaultValue);
+  // }
 
-  function testDepositWithDecreasedVaultValue() public shouldRun(shouldRunTest) {
-    this.runTest(test.testDepositWithDecreasedVaultValue);
-  }
+  // function testDepositWithDecreasedVaultValue() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testDepositWithDecreasedVaultValue);
+  // }
 
-  function testMultipleDeposit() public shouldRun(shouldRunTest) {
-    this.runTest(test.testMultipleDeposit);
-  }
+  // function testMultipleDeposit() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testMultipleDeposit);
+  // }
 
-  function testMint() public shouldRun(shouldRunTest) {
-    this.runTest(test.testMint);
-  }
+  // function testMint() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testMint);
+  // }
 
-  function testMultipleMint() public shouldRun(shouldRunTest) {
-    this.runTest(test.testMultipleMint);
-  }
+  // function testMultipleMint() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testMultipleMint);
+  // }
 
-  function testWithdraw() public shouldRun(shouldRunTest) {
-    this.runTest(test.testWithdraw);
-  }
+  // function testWithdraw() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testWithdraw);
+  // }
 
-  function testWithdrawWithIncreasedVaultValue() public shouldRun(shouldRunTest) {
-    this.runTest(test.testWithdrawWithIncreasedVaultValue);
-  }
+  // function testWithdrawWithIncreasedVaultValue() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testWithdrawWithIncreasedVaultValue);
+  // }
 
-  function testWithdrawWithDecreasedVaultValue() public shouldRun(shouldRunTest) {
-    this.runTest(test.testWithdrawWithDecreasedVaultValue);
-  }
+  // function testWithdrawWithDecreasedVaultValue() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testWithdrawWithDecreasedVaultValue);
+  // }
 
-  function testMultipleWithdraw() public shouldRun(shouldRunTest) {
-    this.runTest(test.testMultipleWithdraw);
-  }
+  // function testMultipleWithdraw() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testMultipleWithdraw);
+  // }
 
-  function testRedeem() public shouldRun(shouldRunTest) {
-    this.runTest(test.testRedeem);
-  }
+  // function testRedeem() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testRedeem);
+  // }
 
-  function testMultipleRedeem() public shouldRun(shouldRunTest) {
-    this.runTest(test.testMultipleRedeem);
-  }
+  // function testMultipleRedeem() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testMultipleRedeem);
+  // }
 
-  function testPauseContract() public shouldRun(shouldRunTest) {
-    this.runTest(test.testPauseContract);
-  }
+  // function testPauseContract() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testPauseContract);
+  // }
 
-  function testEmergencyWithdrawAndPause() public shouldRun(shouldRunTest) {
-    this.runTest(test.testEmergencyWithdrawAndPause);
-  }
+  // function testEmergencyWithdrawAndPause() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testEmergencyWithdrawAndPause);
+  // }
 
-  function testEmergencyWithdrawAndRedeem() public shouldRun(shouldRunTest) {
-    this.runTest(test.testEmergencyWithdrawAndRedeem);
-  }
+  // function testEmergencyWithdrawAndRedeem() public shouldRun(shouldRunTest) {
+  //   this.runTest(test.testEmergencyWithdrawAndRedeem);
+  // }
 }
