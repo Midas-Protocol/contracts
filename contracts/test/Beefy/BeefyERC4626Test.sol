@@ -31,16 +31,18 @@ contract BeefyERC4626Test is AbstractERC4626Test {
       (address, uint256, address, bool)
     );
 
-    lpChef = _lpChef;
-    shouldRunTest = _shouldRunTest;
-    beefyVault = IBeefyVault(_beefyVault);
-    underlyingToken = MockERC20(address(beefyVault.want()));
-    plugin = MidasERC4626(address(new BeefyERC4626(underlyingToken, beefyVault, _withdrawalFee)));
+    if (_shouldRunTest) {
+      lpChef = _lpChef;
+      shouldRunTest = _shouldRunTest;
+      beefyVault = IBeefyVault(_beefyVault);
+      underlyingToken = MockERC20(address(beefyVault.want()));
+      plugin = MidasERC4626(address(new BeefyERC4626(underlyingToken, beefyVault, _withdrawalFee)));
 
-    initialStrategyBalance = beefyVault.balance();
-    initialStrategySupply = beefyVault.totalSupply();
+      initialStrategyBalance = beefyVault.balance();
+      initialStrategySupply = beefyVault.totalSupply();
 
-    sendUnderlyingToken(depositAmount, address(this));
+      sendUnderlyingToken(depositAmount, address(this));
+    }
   }
 
   function increaseAssetsInVault() public override {
