@@ -71,7 +71,7 @@ contract ERC4626PerformanceFeeTest is BaseTest {
   }
 
   function testFail__UpdateFeeSettings() public shouldRun(forChains(BSC_MAINNET)) {
-    if (block.chainid != BSC_MAINNET) return fail();
+    require(block.chainid == BSC_MAINNET, "only runs on bsc");
 
     vm.startPrank(address(10));
     vm.expectRevert("Owned: Only Owner");
