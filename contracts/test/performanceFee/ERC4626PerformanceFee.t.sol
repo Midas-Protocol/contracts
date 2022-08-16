@@ -83,16 +83,12 @@ contract ERC4626PerformanceFeeTest is BaseTest {
     uint256 oldSupply = plugin.totalSupply();
 
     uint256 accruedPerformanceFee = (oldAssets - DEPOSIT_AMOUNT).mulDivDown(PERFORMANCE_FEE, 1e18);
-    uint256 expectedFeeShares = accruedPerformanceFee.mulDivDown(oldSupply, (oldAssets - accruedPerformanceFee));
+    uint256 expectedFeeShares = accruedPerformanceFee.mulDivDown(oldSupply, (oldAssets - accruedPerformanceFee)) - 1;
 
     plugin.takePerformanceFee();
 
-    assertEq(
-      plugin.totalSupply() - oldSupply,
-      expectedFeeShares - 1,
-      "totalSupply increase didnt match expectedFeeShares"
-    );
-    assertEq(plugin.balanceOf(plugin.feeRecipient()), expectedFeeShares - 1, "!feeRecipient shares");
+    assertEq(plugin.totalSupply() - oldSupply, expectedFeeShares, "totalSupply increase didnt match expectedFeeShares");
+    assertEq(plugin.balanceOf(plugin.feeRecipient()), expectedFeeShares, "!feeRecipient shares");
     assertEq(plugin.totalAssets(), oldAssets, "totalAssets should not change");
   }
 
@@ -105,16 +101,12 @@ contract ERC4626PerformanceFeeTest is BaseTest {
     uint256 oldSupply = plugin.totalSupply();
 
     uint256 accruedPerformanceFee = (oldAssets - DEPOSIT_AMOUNT).mulDivDown(PERFORMANCE_FEE, 1e18);
-    uint256 expectedFeeShares = accruedPerformanceFee.mulDivDown(oldSupply, (oldAssets - accruedPerformanceFee));
+    uint256 expectedFeeShares = accruedPerformanceFee.mulDivDown(oldSupply, (oldAssets - accruedPerformanceFee)) - 1;
 
     plugin.takePerformanceFee();
 
-    assertEq(
-      plugin.totalSupply() - oldSupply,
-      expectedFeeShares - 1,
-      "totalSupply increase didnt match expectedFeeShares"
-    );
-    assertEq(plugin.balanceOf(plugin.feeRecipient()), expectedFeeShares - 1, "!feeShares minted");
+    assertEq(plugin.totalSupply() - oldSupply, expectedFeeShares, "totalSupply increase didnt match expectedFeeShares");
+    assertEq(plugin.balanceOf(plugin.feeRecipient()), expectedFeeShares, "!feeShares minted");
 
     plugin.withdrawAccruedFees();
 
