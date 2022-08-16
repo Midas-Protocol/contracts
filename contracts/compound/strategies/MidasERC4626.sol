@@ -137,7 +137,7 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     uint256 supply = totalSupply;
 
     uint256 accruedPerformanceFee = (performanceFee * (shareValue - vaultShareHWM) * supply) / 1e36;
-    _mint(feeRecipient, (accruedPerformanceFee * supply) / (currentAssets - accruedPerformanceFee));
+    _mint(feeRecipient, accruedPerformanceFee.mulDivDown(supply, (currentAssets - accruedPerformanceFee)));
 
     vaultShareHWM = convertToAssets(10**asset.decimals());
   }
