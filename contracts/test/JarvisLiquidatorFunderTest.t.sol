@@ -141,7 +141,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     fundingStrategies[0] = jarvisLiquidator;
 
     // all strategies need to be whitelisted
-    vm.prank(ap.owner());
+    vm.prank(vars.liquidator.owner());
     vars.liquidator._whitelistRedemptionStrategy(fundingStrategies[0], true);
 
     uint256 repayAmount = borrowAmount / 10;
