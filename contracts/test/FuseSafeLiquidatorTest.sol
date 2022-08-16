@@ -229,11 +229,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
       flashSwapFundingToken = ap.getAddress("bUSD");
       vars.fundingStrategies = new IFundsConversionStrategy[](1);
       vars.fundingDatas = new bytes[](1);
-      vars.fundingDatas[0] = abi.encode(
-        flashSwapFundingToken,
-        0x0fD8170Dc284CD558325029f6AEc1538c7d99f49,
-        60 * 40
-      );
+      vars.fundingDatas[0] = abi.encode(flashSwapFundingToken, 0x0fD8170Dc284CD558325029f6AEc1538c7d99f49, 60 * 40);
       vars.fundingStrategies[0] = new JarvisLiquidatorFunder();
 
       // all strategies need to be whitelisted
