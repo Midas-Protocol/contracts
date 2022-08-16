@@ -31,8 +31,6 @@ contract MidasFlywheelCore is Auth {
   /// @notice optional booster module for calculating virtual balances on strategies
   IFlywheelBooster public flywheelBooster;
 
-  event Log(string message, uint256 value);
-
   constructor(
     ERC20 _rewardToken,
     IFlywheelRewards _flywheelRewards,
@@ -226,22 +224,21 @@ contract MidasFlywheelCore is Auth {
     uint256 strategyRewardsAccrued = flywheelRewards.getAccruedRewards(strategy, state.lastUpdatedTimestamp);
 
     rewardsState = state;
-    emit Log("strategyRewardsAccrued ", strategyRewardsAccrued);
+
     if (strategyRewardsAccrued > 0) {
       // use the booster or token supply to calculate reward index denominator
       uint256 supplyTokens = address(flywheelBooster) != address(0)
         ? flywheelBooster.boostedTotalSupply(strategy)
         : strategy.totalSupply();
-      emit Log("supplyTokens ", supplyTokens);
 
       uint256 accruedFees = (strategyRewardsAccrued * performanceFee) / ONE;
+
       rewardsAccrued[feeRecipient] += accruedFees;
       strategyRewardsAccrued -= accruedFees;
 
       uint224 deltaIndex;
 
       if (supplyTokens != 0) deltaIndex = ((strategyRewardsAccrued * ONE) / supplyTokens).safeCastTo224();
-      emit Log("deltaIndex ", deltaIndex);
 
       // accumulate rewards per token onto the index, multiplied by fixed-point factor
       rewardsState = RewardsState({

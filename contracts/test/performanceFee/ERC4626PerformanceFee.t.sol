@@ -70,9 +70,7 @@ contract ERC4626PerformanceFeeTest is BaseTest {
     assertEq(plugin.feeRecipient(), newFeeRecipient, "!feeRecipient == newFeeRecipient");
   }
 
-  function testFail__UpdateFeeSettings() public shouldRun(forChains(BSC_MAINNET)) {
-    require(block.chainid == BSC_MAINNET, "only runs on bsc");
-
+  function testFail__UpdateFeeSettings() public shouldRunTestFail(forChains(BSC_MAINNET)) {
     vm.startPrank(address(10));
     vm.expectRevert("Owned: Only Owner");
     plugin.updateFeeSettings(100, address(10));
@@ -116,7 +114,7 @@ contract ERC4626PerformanceFeeTest is BaseTest {
     assertEq(plugin.totalSupply(), oldSupply, "!totalSupply == oldSupply");
   }
 
-  function testFail__WithdrawAccruedFees() public shouldRun(forChains(BSC_MAINNET)) {
+  function testFail__WithdrawAccruedFees() public shouldRunTestFail(forChains(BSC_MAINNET)) {
     if (block.chainid != BSC_MAINNET) return fail();
 
     vm.startPrank(address(10));

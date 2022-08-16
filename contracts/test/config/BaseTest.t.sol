@@ -45,8 +45,8 @@ abstract contract BaseTest is Test {
     }
   }
 
-  modifier shouldFailIfNot(uint256 id0) {
-    require(block.chainid == id0, "wrong chain");
+  modifier shouldRunTestFail(bool run) {
+    require(run, "test should fail");
     _;
   }
 
