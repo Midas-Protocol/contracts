@@ -8,6 +8,8 @@ import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import "./config/BaseTest.t.sol";
 import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../FuseSafeLiquidator.sol";
+import "../external/uniswap/IUniswapV2Pair.sol";
+import "../external/uniswap/IUniswapV2Factory.sol";
 
 interface IMockERC20 is IERC20Upgradeable {
   function mint(address _address, uint256 amount) external;
@@ -77,16 +79,20 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     bytes[] abis;
     CToken[] allMarkets;
     FuseSafeLiquidator liquidator;
+    IFundsConversionStrategy[] fundingStrategies;
+    bytes[] data;
   }
 
   function testJbrlLiquidation() public shouldRun(forChains(BSC_MAINNET)) {
     LiquidationData memory vars;
+    IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
 
     // setting up a new liquidator
+//    vars.liquidator = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
     vars.liquidator = new FuseSafeLiquidator();
     vars.liquidator.initialize(
       ap.getAddress("wtoken"),
-      0x10ED43C718714eb63d5aA57B78B54704E256024E,
+      address(uniswapRouter),
       ap.getAddress("bUSD"),
       0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c, // BTCB
       "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
@@ -143,13 +149,17 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     vars.strategies = new IRedemptionStrategy[](0);
     vars.abis = new bytes[](0);
 
-    IFundsConversionStrategy[] memory fundingStrategies = new IFundsConversionStrategy[](1);
-    bytes[] memory data = new bytes[](1);
-    data[0] = abi.encode(address(jBRLToken), address(synthereumLiquiditiyPool), 60 * 40);
-    fundingStrategies[0] = jarvisLiquidator;
+    vars.fundingStrategies = new IFundsConversionStrategy[](1);
+    vars.data = new bytes[](1);
+    vars.data[0] = abi.encode(ap.getAddress("bUSD"), address(synthereumLiquiditiyPool), 60 * 40);
+    vars.fundingStrategies[0] = jarvisLiquidator;
 
     // all strategies need to be whitelisted
-    vars.liquidator._whitelistRedemptionStrategy(fundingStrategies[0], true);
+    vm.prank(vars.liquidator.owner());
+    vars.liquidator._whitelistRedemptionStrategy(vars.fundingStrategies[0], true);
+
+    address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(address(bUSD), ap.getAddress("wtoken"));
+    IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
     uint256 repayAmount = borrowAmount / 10;
     // liquidate
@@ -160,28 +170,26 @@ contract JarvisLiquidatorFunderTest is BaseTest {
         repayAmount,
         ICErc20(address(cTokenJBRL)),
         ICErc20(address(cTokenBUSD)),
+        flashSwapPair,
         0,
         address(0),
-        address(bUSD),
-        IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E),
-        IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E),
+        uniswapRouter,
+        uniswapRouter,
         vars.strategies,
         vars.abis,
         0,
-        fundingStrategies,
-        data
+        vars.fundingStrategies,
+        vars.data
       )
     );
   }
 
   function dealBUSD(address to, uint256 amount) internal {
-    address busdAddress = address(bUSD);
     vm.prank(0x0000000000000000000000000000000000001004); // whale
     bUSD.transfer(to, amount);
   }
 
   function dealJBRL(address to, uint256 amount) internal {
-    address jbrlAddress = address(jBRLToken);
     vm.prank(0xad51e40D8f255dba1Ad08501D6B1a6ACb7C188f3); // whale
     jBRLToken.transfer(to, amount);
   }
