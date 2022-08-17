@@ -88,7 +88,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
 
     // setting up a new liquidator
-//    vars.liquidator = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
+    //    vars.liquidator = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
     vars.liquidator = new FuseSafeLiquidator();
     vars.liquidator.initialize(
       ap.getAddress("wtoken"),
