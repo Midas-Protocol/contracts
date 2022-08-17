@@ -85,9 +85,19 @@ contract JarvisLiquidatorFunderTest is BaseTest {
 
   function testJbrlLiquidation() public shouldRun(forChains(BSC_MAINNET)) {
     LiquidationData memory vars;
+    IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
 
     // setting up a new liquidator
-    vars.liquidator = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
+//    vars.liquidator = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
+    vars.liquidator = new FuseSafeLiquidator();
+    vars.liquidator.initialize(
+      ap.getAddress("wtoken"),
+      address(uniswapRouter),
+      ap.getAddress("bUSD"),
+      0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c, // BTCB
+      "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
+      25
+    );
 
     Comptroller comptroller = Comptroller(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
 
@@ -141,14 +151,13 @@ contract JarvisLiquidatorFunderTest is BaseTest {
 
     vars.fundingStrategies = new IFundsConversionStrategy[](1);
     vars.data = new bytes[](1);
-    vars.data[0] = abi.encode(address(jBRLToken), address(synthereumLiquiditiyPool), 60 * 40);
+    vars.data[0] = abi.encode(ap.getAddress("bUSD"), address(synthereumLiquiditiyPool), 60 * 40);
     vars.fundingStrategies[0] = jarvisLiquidator;
 
     // all strategies need to be whitelisted
     vm.prank(vars.liquidator.owner());
     vars.liquidator._whitelistRedemptionStrategy(vars.fundingStrategies[0], true);
 
-    IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
     address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(address(bUSD), ap.getAddress("wtoken"));
     IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
