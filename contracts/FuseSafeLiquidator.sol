@@ -85,12 +85,15 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   uint256 private _flashSwapAmount;
 
   /**
+   * @dev Cached flash swap token.
+   * For use in `repayTokenFlashLoan` after it is set by `safeLiquidateToTokensWithFlashLoan`.
+   */
+  address private _flashSwapToken;
+
+  /**
    * @dev Percentage of the flash swap fee, measured in basis points.
    */
   uint8 public flashSwapFee;
-
-  // TODO
-  address private _flashSwapToken;
 
   function initialize(
     address _wtoken,
@@ -114,14 +117,11 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   }
 
   function _becomeImplementation(bytes calldata data) external {
-    // initialize this value only once
-    if (flashSwapFee == 0) {
-      uint8 _flashSwapFee = abi.decode(data, (uint8));
-      if (_flashSwapFee != 0) {
-        flashSwapFee = _flashSwapFee;
-      } else {
-        flashSwapFee = 30;
-      }
+    uint8 _flashSwapFee = abi.decode(data, (uint8));
+    if (_flashSwapFee != 0) {
+      flashSwapFee = _flashSwapFee;
+    } else {
+      flashSwapFee = 30;
     }
   }
 
