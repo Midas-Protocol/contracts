@@ -230,8 +230,10 @@ contract BeamE2eTest is WithPool, BaseTest {
       bytes[] memory data = new bytes[](0);
 
       IUniswapV2Router02 uniswapRouterContract = IUniswapV2Router02(uniswapRouter);
-      address pairAddress = IUniswapV2Factory(uniswapRouterContract.factory())
-                                .getPair(cToken.underlying(), ap.getAddress("wtoken"));
+      address pairAddress = IUniswapV2Factory(uniswapRouterContract.factory()).getPair(
+        cToken.underlying(),
+        ap.getAddress("wtoken")
+      );
       IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
       /**

@@ -186,8 +186,10 @@ contract BombE2eTest is WithPool, BaseTest {
     uint256 bnbBalance = cBnbToken.balanceOf(accountOne);
 
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
-    address pairAddress = IUniswapV2Factory(uniswapRouter.factory())
-                            .getPair(address(underlyingToken), ap.getAddress("wtoken"));
+    address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(
+      address(underlyingToken),
+      ap.getAddress("wtoken")
+    );
     IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(

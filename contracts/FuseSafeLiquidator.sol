@@ -411,7 +411,6 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
       }
     }
 
-
     _flashSwapAmount = flashSwapAmount;
     _flashSwapToken = address(flashSwapFundingToken);
 

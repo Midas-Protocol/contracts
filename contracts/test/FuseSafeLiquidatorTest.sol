@@ -183,7 +183,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
   function testAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
     vm.assume(random > 100 && random < type(uint64).max);
 
-//    random = 122460273;
+    //    random = 122460273;
 
     LiquidationData memory vars;
 
@@ -200,8 +200,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     );
     vars.pools = FusePoolDirectory(0x295d7347606F4bd810C8296bb8d75D657001fcf7).getAllPools();
 
-
-    while(true) {
+    while (true) {
       // get a random pool and a random borrower from it
       (vars.comptroller, vars.borrower) = getPoolAndBorrower(random, vars);
 
@@ -240,8 +239,10 @@ contract FuseSafeLiquidatorTest is BaseTest {
 
     if (vars.flashSwapFundingToken != ap.getAddress("wtoken")) {
       IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
-      address pairAddress = IUniswapV2Factory(router.factory())
-          .getPair(vars.flashSwapFundingToken, ap.getAddress("wtoken"));
+      address pairAddress = IUniswapV2Factory(router.factory()).getPair(
+        vars.flashSwapFundingToken,
+        ap.getAddress("wtoken")
+      );
       vars.flashSwapPair = IUniswapV2Pair(pairAddress);
     } else {
       vars.flashSwapPair = FIRST_PAIR;
@@ -253,8 +254,10 @@ contract FuseSafeLiquidatorTest is BaseTest {
     if (vars.collateralMarket.underlying() == 0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9) {
       // 2brl
       add2BrlRedemptionStrategies(vars);
-    } else if (vars.collateralMarket.underlying() == 0xd99c7F6C65857AC913a8f880A4cb84032AB2FC5b
-            || vars.collateralMarket.underlying() == 0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16) {
+    } else if (
+      vars.collateralMarket.underlying() == 0xd99c7F6C65857AC913a8f880A4cb84032AB2FC5b ||
+      vars.collateralMarket.underlying() == 0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16
+    ) {
       // Uniswap LP
       addUniswapLPRedemptionStrategies(vars, IUniswapV2Pair(vars.collateralMarket.underlying()));
     } else {

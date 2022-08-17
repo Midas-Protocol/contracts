@@ -149,8 +149,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     vars.liquidator._whitelistRedemptionStrategy(vars.fundingStrategies[0], true);
 
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
-    address pairAddress = IUniswapV2Factory(uniswapRouter.factory())
-                              .getPair(address(bUSD), ap.getAddress("wtoken"));
+    address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(address(bUSD), ap.getAddress("wtoken"));
     IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
     uint256 repayAmount = borrowAmount / 10;
