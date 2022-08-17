@@ -520,7 +520,7 @@ contract AlpacaERC4626UnitTest is BaseTest {
   }
 
   function testTheBugWithdraw(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
-    vm.assume(amount > 1e18 && amount < 1e19);
+    amount = 1e18 + (amount % 1e19);
     vm.prank(joy);
     testToken.transferFrom(joy, alice, 100e18);
     // testToken.mint(alice, 100e18);
@@ -570,7 +570,7 @@ contract AlpacaERC4626UnitTest is BaseTest {
   }
 
   function testTheBugRedeem(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
-    vm.assume(amount > 1e18 && amount < 1e19);
+    amount = 1e18 + (amount % 1e19);
     vm.prank(joy);
     testToken.transferFrom(joy, alice, 100e18);
 
