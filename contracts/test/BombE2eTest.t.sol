@@ -17,6 +17,8 @@ import { IComptroller } from "../external/compound/IComptroller.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
 import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
+import "../external/uniswap/IUniswapV2Pair.sol";
+import "../external/uniswap/IUniswapV2Factory.sol";
 
 interface MockXBomb {
   function getExchangeRate() external returns (uint256);
@@ -50,6 +52,8 @@ contract BombE2eTest is WithPool, BaseTest {
     FuseSafeLiquidator liquidator;
     MockERC4626 erc4626;
     MockBnb asset;
+    IFundsConversionStrategy[] fundingStrategies;
+    bytes[] data;
   }
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
@@ -174,12 +178,17 @@ contract BombE2eTest is WithPool, BaseTest {
 
     vars.strategies = new IRedemptionStrategy[](0);
     vars.abis = new bytes[](0);
-    IFundsConversionStrategy[] memory fundingStrategies = new IFundsConversionStrategy[](0);
-    bytes[] memory data = new bytes[](0);
+    vars.fundingStrategies = new IFundsConversionStrategy[](0);
+    vars.data = new bytes[](0);
 
     vm.startPrank(accountOne);
     FusePoolLens.FusePoolAsset[] memory assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
     uint256 bnbBalance = cBnbToken.balanceOf(accountOne);
+
+    IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+    address pairAddress = IUniswapV2Factory(uniswapRouter.factory())
+                            .getPair(address(underlyingToken), ap.getAddress("wtoken"));
+    IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
       FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
@@ -187,16 +196,16 @@ contract BombE2eTest is WithPool, BaseTest {
         9,
         ICErc20(address(cToken)),
         ICErc20(address(cBnbToken)),
+        flashSwapPair,
         0,
         address(0),
-        address(underlyingToken),
-        IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E),
-        IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E),
+        uniswapRouter,
+        uniswapRouter,
         vars.strategies,
         vars.abis,
         0,
-        fundingStrategies,
-        data
+        vars.fundingStrategies,
+        vars.data
       )
     );
 

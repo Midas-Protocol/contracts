@@ -8,6 +8,8 @@ import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import "./config/BaseTest.t.sol";
 import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../FuseSafeLiquidator.sol";
+import "../external/uniswap/IUniswapV2Pair.sol";
+import "../external/uniswap/IUniswapV2Factory.sol";
 
 interface IMockERC20 is IERC20Upgradeable {
   function mint(address _address, uint256 amount) external;
@@ -77,6 +79,8 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     bytes[] abis;
     CToken[] allMarkets;
     FuseSafeLiquidator liquidator;
+    IFundsConversionStrategy[] fundingStrategies;
+    bytes[] data;
   }
 
   function testJbrlLiquidation() public shouldRun(forChains(BSC_MAINNET)) {
@@ -135,14 +139,19 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     vars.strategies = new IRedemptionStrategy[](0);
     vars.abis = new bytes[](0);
 
-    IFundsConversionStrategy[] memory fundingStrategies = new IFundsConversionStrategy[](1);
-    bytes[] memory data = new bytes[](1);
-    data[0] = abi.encode(address(jBRLToken), address(synthereumLiquiditiyPool), 60 * 40);
-    fundingStrategies[0] = jarvisLiquidator;
+    vars.fundingStrategies = new IFundsConversionStrategy[](1);
+    vars.data = new bytes[](1);
+    vars.data[0] = abi.encode(address(jBRLToken), address(synthereumLiquiditiyPool), 60 * 40);
+    vars.fundingStrategies[0] = jarvisLiquidator;
 
     // all strategies need to be whitelisted
     vm.prank(vars.liquidator.owner());
-    vars.liquidator._whitelistRedemptionStrategy(fundingStrategies[0], true);
+    vars.liquidator._whitelistRedemptionStrategy(vars.fundingStrategies[0], true);
+
+    IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+    address pairAddress = IUniswapV2Factory(uniswapRouter.factory())
+                              .getPair(address(bUSD), ap.getAddress("wtoken"));
+    IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
     uint256 repayAmount = borrowAmount / 10;
     // liquidate
@@ -153,16 +162,16 @@ contract JarvisLiquidatorFunderTest is BaseTest {
         repayAmount,
         ICErc20(address(cTokenJBRL)),
         ICErc20(address(cTokenBUSD)),
+        flashSwapPair,
         0,
         address(0),
-        address(bUSD),
-        IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E),
-        IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E),
+        uniswapRouter,
+        uniswapRouter,
         vars.strategies,
         vars.abis,
         0,
-        fundingStrategies,
-        data
+        vars.fundingStrategies,
+        vars.data
       )
     );
   }

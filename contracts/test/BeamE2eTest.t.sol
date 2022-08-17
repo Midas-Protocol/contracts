@@ -5,6 +5,7 @@ import "./helpers/WithPool.sol";
 import "./config/BaseTest.t.sol";
 import "forge-std/Test.sol";
 import "../external/uniswap/IUniswapV2Pair.sol";
+import "../external/uniswap/IUniswapV2Factory.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -228,6 +229,11 @@ contract BeamE2eTest is WithPool, BaseTest {
       IFundsConversionStrategy[] memory fundingStrategies = new IFundsConversionStrategy[](0);
       bytes[] memory data = new bytes[](0);
 
+      IUniswapV2Router02 uniswapRouterContract = IUniswapV2Router02(uniswapRouter);
+      address pairAddress = IUniswapV2Factory(uniswapRouterContract.factory())
+                                .getPair(cToken.underlying(), ap.getAddress("wtoken"));
+      IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
+
       /**
        * Liquidation
        */
@@ -237,9 +243,9 @@ contract BeamE2eTest is WithPool, BaseTest {
           400,
           ICErc20(address(cToken)),
           ICErc20(address(cTokenLP)),
+          flashSwapPair,
           0,
           address(0),
-          cToken.underlying(),
           IUniswapV2Router02(uniswapRouter),
           IUniswapV2Router02(uniswapRouter),
           vars.strategies,
