@@ -6,6 +6,7 @@ import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { RewardsClaimer } from "fuse-flywheel/utils/RewardsClaimer.sol";
 
 interface IGuniPool {
   function deposit(uint256) external;
@@ -17,26 +18,30 @@ interface IGuniPool {
   function totalStake() external view returns (uint256);
 
   function _users(address) external view returns (uint256, uint256);
+
+  function pendingMIMO(address) external view returns (uint256);
+
+  function releaseMIMO(address) external;
 }
 
-contract ArrakisERC4626 is MidasERC4626 {
+contract ArrakisERC4626 is MidasERC4626, RewardsClaimer {
   using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
   IGuniPool public immutable pool;
   FlywheelCore public immutable flywheel;
 
-  constructor(ERC20 _asset, FlywheelCore _flywheel, IGuniPool _pool)
+  constructor(ERC20 _asset, FlywheelCore _flywheel, IGuniPool _pool, address _rewardsDestination, ERC20[] memory _rewardTokens)
     MidasERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
       string(abi.encodePacked("mv", _asset.symbol()))
     )
+    RewardsClaimer(_rewardsDestination, _rewardTokens)
   {
     pool = _pool;
     flywheel = _flywheel;
     asset.approve(address(pool), type(uint256).max);
-    ERC20(flywheel.rewardToken()).approve(address(flywheel.flywheelRewards()), type(uint256).max); 
   }
 
   function totalAssets() public view override returns (uint256) {
@@ -53,6 +58,10 @@ contract ArrakisERC4626 is MidasERC4626 {
 
   function beforeWithdraw(uint256 amount, uint256) internal override {
     pool.withdraw(amount);
+  }
+
+  function beforeClaim() internal override {
+    pool.releaseMIMO(address(this));
   }
 
   function emergencyWithdrawAndPause() external override onlyOwner {

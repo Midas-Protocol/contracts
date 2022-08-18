@@ -13,8 +13,6 @@ import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 
-// Using 2BRL
-// Tested on block 19052824
 contract ArrakisAssetTest is AbstractAssetTest {
   address masterPriceOracle = 0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31; // master price oracle
 
@@ -50,11 +48,11 @@ contract ArrakisAssetTest is AbstractAssetTest {
     this.runTest(ArrakisERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  // function testAccumulatingRewardsOnWithdrawal() public shouldRun(shouldRunTest) {
-  //   this.runTest(ArrakisERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
-  // }
+  function testAccumulatingRewardsOnWithdrawal() public shouldRun(shouldRunTest) {
+    this.runTest(ArrakisERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
+  }
 
-  // function testClaimRewards() public shouldRun(shouldRunTest) {
-  //   this.runTest(ArrakisERC4626Test(address(test)).testClaimRewards);
-  // }
+  function testClaimRewards() public shouldRun(shouldRunTest) {
+    this.runTest(ArrakisERC4626Test(address(test)).testClaimRewards);
+  }
 }

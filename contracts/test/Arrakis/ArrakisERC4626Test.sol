@@ -23,35 +23,18 @@ struct RewardsCycle {
   uint192 reward;
 }
 
-// Using 2BRL
-// Tested on block 19052824
 contract ArrakisERC4626Test is AbstractERC4626Test {
   using FixedPointMathLib for uint256;
 
-  uint256 withdrawalFee = 10;
-
-  IGuniPool pool; // ERC4626 => underlyingToken => beefyStrategy
+  IGuniPool pool;
   FlywheelCore flywheel;
   FuseFlywheelDynamicRewardsPlugin flywheelRewards;
-  address beefyStrategy = 0xEeBcd7E1f008C52fe5804B306832B7DD317e163D; // beefyStrategy => underlyingToken => lpChef
-  address bob = 0xbB60ADbe38B4e6ab7fb0f9546C2C1b665B86af11; // beefyStrategy => underlyingToken => .
-  // address JRT_MIMO = 0xAFC780bb79E308990c7387AB8338160bA8071B67; // reward token
-  address JRT_MIMO = 0xADAC33f543267c4D59a8c299cF804c303BC3e4aC;
+  address mimoToken = 0xADAC33f543267c4D59a8c299cF804c303BC3e4aC;
   address marketAddress;
   ERC20 marketKey;
+  ERC20[] rewardTokens;
 
-  constructor() WithPool() {
-    flywheel = new FlywheelCore(
-      ERC20(JRT_MIMO),
-      FlywheelDynamicRewards(address(0)),
-      IFlywheelBooster(address(0)),
-      address(this),
-      Authority(address(0))
-    );
-
-    flywheelRewards = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
-    flywheel.setFlywheelRewards(flywheelRewards);
-  }
+  constructor() WithPool() {}
 
   function setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("arrakis-test ", false, 0.1e18, 1.1e18);
@@ -59,32 +42,49 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
 
     testPreFix = _testPreFix;
 
+    flywheel = new FlywheelCore(
+      ERC20(mimoToken),
+      IFlywheelRewards(address(0)),
+      IFlywheelBooster(address(0)),
+      address(this),
+      Authority(address(0))
+    );
+
+    flywheelRewards = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
+    flywheel.setFlywheelRewards(flywheelRewards);
+
     (address _asset, address _pool) = abi.decode(data, (address, address));
 
     pool = IGuniPool(_pool);
-    underlyingToken = MockERC20(_asset);
 
-    plugin = MidasERC4626(address(new ArrakisERC4626(underlyingToken, flywheel, pool)));
+    rewardTokens.push(ERC20(flywheel.rewardToken()));
+
+    plugin = MidasERC4626(
+      address(
+        new ArrakisERC4626(
+          underlyingToken, 
+          flywheel, 
+          pool, 
+          address(this), 
+          rewardTokens
+        )
+      )
+    );
 
     initialStrategyBalance = pool.totalStake();
-    // initialStrategySupply = pool.totalSupply();
-    emit log("0");
+
     deployCErc20PluginRewardsDelegate(ERC4626(address(plugin)), 0.9e18);
-    emit log("1");
     marketAddress = address(comptroller.cTokensByUnderlying(address(underlyingToken)));
-    emit log("2");
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
-    emit log("3");
     cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(plugin)));
-    emit log("4");
     assertEq(address(cToken.plugin()), address(plugin));
   
-    emit log("5");
-    cToken.approve(address(JRT_MIMO), address(flywheelRewards));
+    cToken.approve(address(mimoToken), address(flywheelRewards));
 
-    emit log("6");
-    flywheel.addStrategyForRewards(ERC20(address(plugin)));
-    
+    marketKey = ERC20(marketAddress);
+
+    flywheel.addStrategyForRewards(marketKey);
+    ArrakisERC4626(address(plugin)).setRewardDestination(marketAddress);
   }
 
   function increaseAssetsInVault() public override {
@@ -107,7 +107,6 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
   }
 
   function getExpectedDepositShares() public view override returns (uint256) {
-    // return (depositAmount * pool.totalStake()) / pool.balanceOf();
     return depositAmount;
   }
 
@@ -134,18 +133,82 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testAccumulatingRewardsOnDeposit() public {
+  function testAccumulatingRewardsOnDeposit() public shouldRun(forChains(POLYGON_MAINNET)) {
     deposit(address(this), depositAmount / 2);
+    deal(address(mimoToken), address(this), 100e18);
+    ERC20(mimoToken).transfer(address(pool), 100e18);
 
-    vm.warp(block.timestamp + 150000);
-    // vm.roll(10);
+    uint256 expectedReward = pool.pendingMIMO(address(plugin));
 
     deposit(address(this), depositAmount / 2);
-    // (uint256 amount, ) = ArrakisERC4626(address(plugin)).pool()._users(address(plugin));
-    // emit log_uint(amount);
-    emit log("reward token amount");
-    emit log_uint(ERC20(JRT_MIMO).balanceOf(address(plugin)));
-    emit log_uint(ERC20(JRT_MIMO).balanceOf(address(this)));
-    assertGt(ERC20(JRT_MIMO).balanceOf(address(plugin)), 0.0006 ether, string(abi.encodePacked("!dddBal ", testPreFix)));
+  
+    assertEq(ERC20(mimoToken).balanceOf(address(plugin)), expectedReward, string(abi.encodePacked("!mimoBal ", testPreFix)));
+  }
+
+  function testAccumulatingRewardsOnWithdrawal() public shouldRun(forChains(POLYGON_MAINNET)) {
+    deposit(address(this), depositAmount);
+    deal(address(mimoToken), address(this), 100e18);
+    ERC20(mimoToken).transfer(address(pool), 100e18);
+
+    uint256 expectedReward = pool.pendingMIMO(address(plugin));
+
+    plugin.withdraw(1, address(this), address(this));
+  
+    assertEq(ERC20(mimoToken).balanceOf(address(plugin)), expectedReward, string(abi.encodePacked("!mimoBal ", testPreFix)));
+  }
+
+  function testClaimRewards() public shouldRun(forChains(POLYGON_MAINNET)) {
+    vm.startPrank(address(this));
+    underlyingToken.approve(marketAddress, depositAmount);
+    CErc20(marketAddress).mint(depositAmount);
+    vm.stopPrank();
+
+    deal(address(mimoToken), address(this), 100e18);
+    ERC20(mimoToken).transfer(address(pool), 100e18);
+    uint256 expectedReward = pool.pendingMIMO(address(plugin));
+  
+    (uint32 mimoStart, uint32 mimoEnd, uint192 mimoReward) = flywheelRewards.rewardsCycle(ERC20(address(marketAddress)));
+
+    // Rewards can be transfered in the next cycle
+    assertEq(mimoEnd, 0, string(abi.encodePacked("!mimoEnd ", testPreFix)));
+
+    // Reward amount is still 0
+    assertEq(mimoReward, 0, string(abi.encodePacked("!mimoReward ", testPreFix)));
+
+    vm.warp(block.timestamp + 150);
+    vm.roll(20);
+
+    // Call accrue as proxy for withdraw/deposit to claim rewards
+    flywheel.accrue(ERC20(marketAddress), address(this));
+    
+    // Accrue rewards to send rewards to flywheelRewards
+    flywheel.accrue(ERC20(marketAddress), address(this));
+
+    (mimoStart, mimoEnd, mimoReward) = flywheelRewards.rewardsCycle(ERC20(address(marketAddress)));
+
+    // Rewards can be transfered in the next cycle
+    assertGt(mimoEnd, 1000000000, string(abi.encodePacked("!2.mimoEnd ", testPreFix)));
+    assertApproxEqAbs(
+      mimoReward,
+      expectedReward,
+      uint256(1000),
+      string(abi.encodePacked("!2.mimoReward ", testPreFix))
+    );
+
+    vm.warp(block.timestamp + 150);
+    vm.roll(20);
+
+    flywheel.accrue(ERC20(marketAddress), address(this));
+
+    // Claim Rewards for the user
+    flywheel.claimRewards(address(this));
+
+    assertApproxEqAbs(
+      ERC20(mimoToken).balanceOf(address(this)),
+      expectedReward,
+      uint256(1000),
+      string(abi.encodePacked("!mimoBal User ", testPreFix))
+    );
+    assertEq(ERC20(mimoToken).balanceOf(address(flywheel)), 0, string(abi.encodePacked("!mimoBal Flywheel ", testPreFix)));
   }
 }
