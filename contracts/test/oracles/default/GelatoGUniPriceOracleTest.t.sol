@@ -26,8 +26,8 @@ contract GelatoGUniPriceOracleTest is BaseTest {
     vm.prank(address(mpo));
     uint256 price_WBTC_WETH = oracle.price(WBTC_WETH_ARRAKIS_VAULT);
 
-    assertEq(price_PAR_USDC, 76016294973523748455787);
-    assertEq(price_WBTC_WETH, 418765256266739298501535819);
+    assertEq(price_PAR_USDC, 78039149688749857849871);
+    assertEq(price_WBTC_WETH, 448601424267609461887094567);
     assertGt(price_WBTC_WETH, price_PAR_USDC);
   }
 }
