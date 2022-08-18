@@ -13,7 +13,7 @@ contract ArrakisTestConfigStorage is ITestConfigStorage {
 
   constructor() {
     // PAR/USDC
-    
+
     testConfigs.push(
       ArrakisTestConfig(0x528330fF7c358FE1bAe348D23849CCed8edA5917, 0xC1DF4E2fd282e39346422e40C403139CD633Aacd)
     );

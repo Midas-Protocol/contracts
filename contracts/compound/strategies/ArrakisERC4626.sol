@@ -31,7 +31,13 @@ contract ArrakisERC4626 is MidasERC4626, RewardsClaimer {
   IGuniPool public immutable pool;
   FlywheelCore public immutable flywheel;
 
-  constructor(ERC20 _asset, FlywheelCore _flywheel, IGuniPool _pool, address _rewardsDestination, ERC20[] memory _rewardTokens)
+  constructor(
+    ERC20 _asset,
+    FlywheelCore _flywheel,
+    IGuniPool _pool,
+    address _rewardsDestination,
+    ERC20[] memory _rewardTokens
+  )
     MidasERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
