@@ -126,6 +126,11 @@ contract JarvisERC4626Test is AbstractERC4626Test {
       address(vault),
       string(abi.encodePacked("!vault ", testPreFix))
     );
+    assertEq(
+      JarvisERC4626(address(plugin)).poolId(),
+      poolId,
+      string(abi.encodePacked("!poolId", testPreFix))
+    );
   }
 
   function testAccumulatingRewardsOnDeposit() public shouldRun(forChains(POLYGON_MAINNET)) {
