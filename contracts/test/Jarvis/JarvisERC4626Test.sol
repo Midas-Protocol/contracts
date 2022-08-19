@@ -61,7 +61,9 @@ contract JarvisERC4626Test is AbstractERC4626Test {
 
     rewardTokens.push(ERC20(flywheel.rewardToken()));
 
-    plugin = MidasERC4626(address(new JarvisERC4626(underlyingToken, flywheel, vault, poolId, address(this), rewardTokens)));
+    plugin = MidasERC4626(
+      address(new JarvisERC4626(underlyingToken, flywheel, vault, poolId, address(this), rewardTokens))
+    );
 
     initialStrategyBalance = getStrategyBalance();
 
