@@ -33,6 +33,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
   address marketAddress;
   ERC20 marketKey;
   ERC20[] rewardTokens;
+  uint256 poolId;
 
   constructor() WithPool() {}
 
@@ -53,13 +54,14 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     flywheelRewards = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
     flywheel.setFlywheelRewards(flywheelRewards);
 
-    (address _asset, address _vault) = abi.decode(data, (address, address));
+    (address _asset, address _vault, uint256 _poolId) = abi.decode(data, (address, address, uint256));
 
+    poolId = _poolId;
     vault = IElysianFields(_vault);
 
     rewardTokens.push(ERC20(flywheel.rewardToken()));
 
-    plugin = MidasERC4626(address(new JarvisERC4626(underlyingToken, flywheel, vault, 0, address(this), rewardTokens)));
+    plugin = MidasERC4626(address(new JarvisERC4626(underlyingToken, flywheel, vault, poolId, address(this), rewardTokens)));
 
     initialStrategyBalance = getStrategyBalance();
 
@@ -89,7 +91,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
   }
 
   function getDepositShares() public view override returns (uint256) {
-    (uint256 amount, ) = vault.userInfo(0, address(plugin));
+    (uint256 amount, ) = vault.userInfo(poolId, address(plugin));
     return amount;
   }
 
@@ -129,7 +131,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     deal(address(jrtMimoSep22Token), address(this), 100e18);
     ERC20(jrtMimoSep22Token).transfer(address(vault), 100e18);
 
-    uint256 expectedReward = vault.pendingRwd(0, address(plugin));
+    uint256 expectedReward = vault.pendingRwd(poolId, address(plugin));
 
     deposit(address(this), depositAmount / 2);
 
@@ -145,7 +147,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     deal(address(jrtMimoSep22Token), address(this), 100e18);
     ERC20(jrtMimoSep22Token).transfer(address(vault), 100e18);
 
-    uint256 expectedReward = vault.pendingRwd(0, address(plugin));
+    uint256 expectedReward = vault.pendingRwd(poolId, address(plugin));
 
     plugin.withdraw(1, address(this), address(this));
 
@@ -164,7 +166,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
 
     deal(address(jrtMimoSep22Token), address(this), 100e18);
     ERC20(jrtMimoSep22Token).transfer(address(vault), 100e18);
-    uint256 expectedReward = vault.pendingRwd(0, address(plugin));
+    uint256 expectedReward = vault.pendingRwd(poolId, address(plugin));
 
     (uint32 mimoStart, uint32 mimoEnd, uint192 mimoReward) = flywheelRewards.rewardsCycle(
       ERC20(address(marketAddress))
