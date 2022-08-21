@@ -49,14 +49,14 @@ jobs:
         run: forge install
 
       - name: Run forge tests
-        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test'
+        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test'
 
   build-and-test-bsc:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
       FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
-      FORK_BLOCK_NUMBER: 19895214
+      FORK_BLOCK_NUMBER: 20238373
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -72,7 +72,30 @@ jobs:
         run: forge install
 
       - name: Run forge tests on BSC
-        run: forge test --fork-url ${FORK_URL_BSC} --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test'
+        run: forge test --fork-url ${FORK_URL_BSC} --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test'
+
+  build-and-test-polygon:
+    needs: [lint]
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      FORK_URL_POLYGON: "${{ secrets.FORK_URL_POLYGON }}"
+      FORK_BLOCK_NUMBER: 32016397
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - name: Run forge tests on Polygon
+        run: forge test --fork-url https://rpc.ankr.com/polygon --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test'
 
   build-and-test-evmostestnet:
     needs: [lint]
@@ -94,7 +117,7 @@ jobs:
         run: forge install
 
       - name: Run forge tests on Evmos Testnet
-        run: forge test --fork-url https://eth.bd.evmos.dev:8545 --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test'
+        run: forge test --fork-url https://eth.bd.evmos.dev:8545 --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test'
 
   build-and-test-moonbeam:
     needs: [lint]
@@ -116,4 +139,4 @@ jobs:
         run: forge install
 
       - name: Run forge tests on Moonbeam
-        run: forge test --fork-url https://moonbeam.api.onfinality.io/public --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test'
+        run: forge test --fork-url https://moonbeam.api.onfinality.io/public --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test'

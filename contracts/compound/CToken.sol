@@ -618,6 +618,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
       Exp({ mantissa: vars.exchangeRateMantissa })
     );
     require(vars.mathErr == MathError.NO_ERROR, "MINT_EXCHANGE_CALCULATION_FAILED");
+    require(vars.mintTokens > 0, "MINT_ZERO_CTOKENS_REJECTED");
 
     /*
      * We calculate the new total supply of cTokens and minter token balance, checking for overflow:

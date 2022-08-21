@@ -26,13 +26,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
 
   constructor() {}
 
-  function setUp(string memory _testPreFix, bytes calldata data) public virtual {
-    testPreFix = _testPreFix;
-
-    //do smth with data
-
-    sendUnderlyingToken(depositAmount, address(this));
-  }
+  function setUp(string memory _testPreFix, bytes calldata data) public virtual;
 
   function deposit(address _owner, uint256 amount) public {
     vm.startPrank(_owner);
@@ -49,11 +43,11 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
 
   function decreaseAssetsInVault() public virtual {}
 
-  function getDepositShares() public view virtual returns (uint256) {}
+  function getDepositShares() public view virtual returns (uint256);
 
-  function getStrategyBalance() public view virtual returns (uint256) {}
+  function getStrategyBalance() public view virtual returns (uint256);
 
-  function getExpectedDepositShares() public view virtual returns (uint256) {}
+  function getExpectedDepositShares() public view virtual returns (uint256);
 
   function testInitializedValues(string memory assetName, string memory assetSymbol) public virtual {
     assertEq(
@@ -245,19 +239,19 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     assertApproxEqAbs(
       depositAmount * 2 - plugin.totalAssets(),
       1,
-      uint256(1),
-      string(abi.encodePacked("DotDot total Assets should be same as sum of deposited amounts ", testPreFix))
+      uint256(10),
+      string(abi.encodePacked("Total Assets should be same as sum of deposited amounts ", testPreFix))
     );
     assertApproxEqAbs(
       depositAmount - plugin.convertToAssets(plugin.balanceOf(address(this))),
       1,
-      uint256(1),
+      uint256(10),
       string(abi.encodePacked("Underlying token balance should be same as deposited amount ", testPreFix))
     );
     assertApproxEqAbs(
       depositAmount - plugin.convertToAssets(plugin.balanceOf(address(1))),
       1,
-      uint256(1),
+      uint256(10),
       string(abi.encodePacked("Underlying token balance should be same as deposited amount ", testPreFix))
     );
 
@@ -421,7 +415,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     assertApproxEqAbs(
       depositAmount + depositAmount - plugin.totalAssets(),
       1,
-      uint256(1),
+      uint256(10),
       string(abi.encodePacked("!2.totalAssets ", testPreFix))
     );
     assertApproxEqAbs(
@@ -630,7 +624,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       underlyingToken.balanceOf(address(this)),
       assetBalBefore + withdrawalAmount,
       uint256(10),
-      string(abi.encodePacked("!user asset bal ", testPreFix))
+      string(abi.encodePacked("!1.user asset bal", testPreFix))
     );
 
     // Test that the balance view calls work
@@ -640,7 +634,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     assertApproxEqAbs(
       depositAmount * 2 - expectedErc4626SharesNeeded,
       plugin.totalSupply(),
-      1,
+      10,
       string(abi.encodePacked("!totalSupply ", testPreFix))
     );
 
@@ -649,7 +643,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       plugin.balanceOf(address(this)),
       erc4626BalBefore - expectedErc4626SharesNeeded,
       uint256(10),
-      string(abi.encodePacked("!erc4626 supply ", testPreFix))
+      string(abi.encodePacked("!1.erc4626 supply ", testPreFix))
     );
 
     // Test that the ERC4626 holds the expected amount of dotDot shares
@@ -657,14 +651,14 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       this.getDepositShares(),
       depositShares - ExpectedDepositSharesNeeded,
       uint256(10),
-      string(abi.encodePacked("!dotDot share balance ", testPreFix))
+      string(abi.encodePacked("!1.dotDot share balance ", testPreFix))
     );
 
     assertApproxEqAbs(
       underlyingToken.balanceOf(address(plugin)),
       1,
       1,
-      string(abi.encodePacked("DotDot erc4626 locked amount checking ", testPreFix))
+      string(abi.encodePacked("1.DotDot erc4626 locked amount checking ", testPreFix))
     );
 
     uint256 totalSupplyBefore = depositAmount * 2 - expectedErc4626SharesNeeded;
@@ -682,7 +676,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       underlyingToken.balanceOf(address(1)),
       assetBalBefore + withdrawalAmount,
       uint256(10),
-      string(abi.encodePacked("!user asset bal ", testPreFix))
+      string(abi.encodePacked("!2.user asset bal ", testPreFix))
     );
 
     // Test that the balance view calls work
@@ -693,7 +687,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       plugin.totalSupply(),
       totalSupplyBefore - expectedErc4626SharesNeeded,
       uint256(10),
-      string(abi.encodePacked("!totalSupply ", testPreFix))
+      string(abi.encodePacked("!2.totalSupply ", testPreFix))
     );
 
     // Test that we burned the right amount of shares
@@ -701,7 +695,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       plugin.balanceOf(address(1)),
       erc4626BalBefore - expectedErc4626SharesNeeded,
       uint256(10),
-      string(abi.encodePacked("!erc4626 supply ", testPreFix))
+      string(abi.encodePacked("!2.erc4626 supply ", testPreFix))
     );
 
     // Test that the ERC4626 holds the expected amount of dotDot shares
@@ -709,14 +703,14 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       this.getDepositShares(),
       depositShares - ExpectedDepositSharesNeeded,
       uint256(10),
-      string(abi.encodePacked("!dotDot share balance ", testPreFix))
+      string(abi.encodePacked("!2.dotDot share balance ", testPreFix))
     );
 
     assertApproxEqAbs(
       underlyingToken.balanceOf(address(plugin)),
       2,
       2,
-      string(abi.encodePacked("DotDot erc4626 locked amount checking ", testPreFix))
+      string(abi.encodePacked("2.DotDot erc4626 locked amount checking ", testPreFix))
     );
   }
 
@@ -792,7 +786,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       underlyingToken.balanceOf(address(this)),
       assetBalBefore + withdrawalAmount,
       uint256(10),
-      string(abi.encodePacked("!user asset bal ", testPreFix))
+      string(abi.encodePacked("!1.user asset bal ", testPreFix))
     );
 
     // Test that the balance view calls work
@@ -803,7 +797,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       plugin.totalSupply(),
       depositAmount * 2 - redeemAmount,
       uint256(10),
-      string(abi.encodePacked("!totalSupply ", testPreFix))
+      string(abi.encodePacked("!1.totalSupply ", testPreFix))
     );
 
     // Test that we burned the right amount of shares
@@ -811,7 +805,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       plugin.balanceOf(address(this)),
       erc4626BalBefore - redeemAmount,
       uint256(10),
-      string(abi.encodePacked("!erc4626 supply ", testPreFix))
+      string(abi.encodePacked("!1.erc4626 supply ", testPreFix))
     );
 
     // Test that the ERC4626 holds the expected amount of dotDot shares
@@ -819,11 +813,11 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       this.getDepositShares(),
       depositShares - ExpectedDepositSharesNeeded,
       uint256(10),
-      string(abi.encodePacked("!dotDot share balance ", testPreFix))
+      string(abi.encodePacked("!1.dotDot share balance ", testPreFix))
     );
     assertTrue(
       underlyingToken.balanceOf(address(plugin)) <= 1,
-      string(abi.encodePacked("DotDot erc4626 locked amount checking ", testPreFix))
+      string(abi.encodePacked("1.DotDot erc4626 locked amount checking ", testPreFix))
     );
 
     uint256 totalSupplyBefore = depositAmount * 2 - redeemAmount;
@@ -840,7 +834,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       underlyingToken.balanceOf(address(1)),
       assetBalBefore + withdrawalAmount,
       uint256(10),
-      string(abi.encodePacked("!user asset bal ", testPreFix))
+      string(abi.encodePacked("!2.user asset bal ", testPreFix))
     );
 
     // Test that the balance view calls work
@@ -851,7 +845,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       plugin.totalSupply(),
       totalSupplyBefore - redeemAmount,
       uint256(10),
-      string(abi.encodePacked("!totalSupply ", testPreFix))
+      string(abi.encodePacked("!2.totalSupply ", testPreFix))
     );
 
     // Test that we burned the right amount of shares
@@ -859,7 +853,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       plugin.balanceOf(address(1)),
       erc4626BalBefore - redeemAmount,
       uint256(10),
-      string(abi.encodePacked("!erc4626 supply ", testPreFix))
+      string(abi.encodePacked("!2.erc4626 supply ", testPreFix))
     );
 
     // Test that the ERC4626 holds the expected amount of dotDot shares
@@ -867,11 +861,11 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       this.getDepositShares(),
       depositShares - ExpectedDepositSharesNeeded,
       uint256(10),
-      string(abi.encodePacked("!dotDot share balance ", testPreFix))
+      string(abi.encodePacked("!2.dotDot share balance ", testPreFix))
     );
     assertTrue(
       underlyingToken.balanceOf(address(plugin)) <= 2,
-      string(abi.encodePacked("DotDot erc4626 locked amount checking ", testPreFix))
+      string(abi.encodePacked("2.DotDot erc4626 locked amount checking ", testPreFix))
     );
   }
 
