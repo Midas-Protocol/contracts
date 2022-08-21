@@ -23,14 +23,11 @@ struct RewardsCycle {
   uint192 reward;
 }
 
-// Using 2BRL
 // Tested on block 19052824
-contract DotDotERC4626Test is AbstractERC4626Test {
+contract StellaERC4626Test is AbstractERC4626Test {
   using FixedPointMathLib for uint256;
 
-  address whale = 0x0BC3a8239B0a63E945Ea1bd6722Ba747b9557e56;
-
-  ILpDepositor lpDepositor = ILpDepositor(0x8189F0afdBf8fE6a9e13c69bA35528ac6abeB1af);
+  ILpDepositor lpDepositor = ILpDepositor(0x8189F0afdBf8fE6a9e13c69bA35528ac6abeB1af); // what you deposit the LP into
   ERC20 depositShare = ERC20(0xEFF5b0E496dC7C26fFaA014cEa0d2Baa83DB11c4);
 
   ERC20 dddToken = ERC20(0x84c97300a190676a19D1E13115629A11f8482Bd1);
@@ -123,6 +120,8 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     underlyingToken.transfer(address(1), 200e18); // transfer doesnt work
   }
 
+  // figure out how to get balance of plugin in LP staker contract
+  // make sure it is not balance of underlying, rather balance of shares
   function getDepositShares() public view override returns (uint256) {
     return depositShare.balanceOf(address(plugin));
   }
