@@ -4,10 +4,9 @@ pragma solidity >=0.8.0;
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
-import "../external/curve/ICurveRegistry.sol";
 import "../external/curve/ICurvePool.sol";
 
-import "../utils/IW_NATIVE.sol";
+import { WETH } from "solmate/tokens/WETH.sol";
 
 import "./IRedemptionStrategy.sol";
 
@@ -19,25 +18,10 @@ import "./IRedemptionStrategy.sol";
 contract CurveSwapLiquidator is IRedemptionStrategy {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
-  /**
-   * @dev W_NATIVE contract object.
-   */
-  IW_NATIVE private constant W_NATIVE = IW_NATIVE(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+  WETH public immutable W_NATIVE;
 
-  /**
-   * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
-   */
-  function safeApprove(
-    IERC20Upgradeable token,
-    address to,
-    uint256 minAmount
-  ) private {
-    uint256 allowance = token.allowance(address(this), to);
-
-    if (allowance < minAmount) {
-      if (allowance > 0) token.safeApprove(to, 0);
-      token.safeApprove(to, type(uint256).max);
-    }
+  constructor(address wnative) {
+    W_NATIVE = WETH(payable(wnative));
   }
 
   /**
@@ -52,14 +36,45 @@ contract CurveSwapLiquidator is IRedemptionStrategy {
     IERC20Upgradeable inputToken,
     uint256 inputAmount,
     bytes memory strategyData
-  ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+  ) external override returns (IERC20Upgradeable, uint256) {
+    return _redeem(inputToken, inputAmount, strategyData);
+  }
+
+  function estimateInputAmount(uint256 outputAmount, bytes memory strategyData)
+  external
+  view
+  returns (IERC20Upgradeable inputToken, uint256 inputAmount) {
+    // TODO binary search for the input amount?
+    //    (ICurvePool curvePool, int128 i, int128 j, address jToken) = abi.decode(
+    //      strategyData,
+    //      (ICurvePool, int128, int128, address)
+    //    );
+    //    inputToken = IERC20Upgradeable(curvePool.coins(uint128(i)));
+    //    inputAmount = curvePool.get_dy(j, i, outputAmount);
+
+    return (IERC20Upgradeable(address(0)), 0);
+  }
+
+  function convert(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    bytes memory strategyData
+  ) external returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    return _redeem(inputToken, inputAmount, strategyData);
+  }
+
+  function _redeem(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    bytes memory strategyData
+  ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
     // Exchange and store output
     (ICurvePool curvePool, int128 i, int128 j, address jToken) = abi.decode(
       strategyData,
       (ICurvePool, int128, int128, address)
     );
     outputToken = IERC20Upgradeable(jToken == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE ? address(0) : jToken);
-    safeApprove(inputToken, address(curvePool), inputAmount);
+    inputToken.approve(address(curvePool), inputAmount);
     outputAmount = curvePool.exchange(i, j, inputAmount, 0);
 
     // Convert to W_NATIVE if ETH because `FuseSafeLiquidator.repayTokenFlashLoan` only supports tokens (not ETH) as output from redemptions (reverts on line 24 because `underlyingCollateral` is the zero address)
