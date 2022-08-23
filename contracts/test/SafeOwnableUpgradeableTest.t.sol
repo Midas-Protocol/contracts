@@ -6,38 +6,37 @@ import "./config/BaseTest.t.sol";
 import "../utils/SafeOwnableUpgradeable.sol";
 
 contract SomeOwnable is SafeOwnableUpgradeable {
-    function initialize() public initializer {
-        __Ownable_init();
-    }
+  function initialize() public initializer {
+    __Ownable_init();
+  }
 }
 
 contract SafeOwnableUpgradeableTest is BaseTest {
+  function testSafeOwnableUpgradeable() public {
+    SomeOwnable someOwnable = new SomeOwnable();
+    someOwnable.initialize();
 
-    function testSafeOwnableUpgradeable() public {
-        SomeOwnable someOwnable = new SomeOwnable();
-        someOwnable.initialize();
+    address joe = address(1234);
 
-        address joe = address(1234);
+    address initOwner = someOwnable.owner();
+    assertEq(initOwner, address(this), "owner init value");
 
-        address initOwner = someOwnable.owner();
-        assertEq(initOwner, address(this), "owner init value");
+    vm.expectRevert("not used anymore");
+    someOwnable.transferOwnership(joe);
 
-        vm.expectRevert("not used anymore");
-        someOwnable.transferOwnership(joe);
+    vm.expectRevert("not used anymore");
+    someOwnable.renounceOwnership();
 
-        vm.expectRevert("not used anymore");
-        someOwnable.renounceOwnership();
+    someOwnable._setPendingOwner(joe);
 
-        someOwnable._setPendingOwner(joe);
+    address currentOwner = someOwnable.owner();
+    assertEq(currentOwner, address(this), "owner should not change yet");
 
-        address currentOwner = someOwnable.owner();
-        assertEq(currentOwner, address(this), "owner should not change yet");
+    vm.prank(joe);
+    someOwnable._acceptOwner();
 
-        vm.prank(joe);
-        someOwnable._acceptOwner();
+    address ownerAfter = someOwnable.owner();
 
-        address ownerAfter = someOwnable.owner();
-
-        assertEq(ownerAfter, joe, "ownership transfer failed");
-    }
+    assertEq(ownerAfter, joe, "ownership transfer failed");
+  }
 }
