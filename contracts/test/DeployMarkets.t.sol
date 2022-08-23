@@ -540,7 +540,7 @@ contract CErc20DelegateTest is BaseTest {
     for (uint8 k = 0; k < implementationsSet.length; k++) {
       emit log_address(implementationsSet[k]);
       (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = fuseAdmin
-      .latestCErc20Delegate(implementationsSet[k]);
+        .latestCErc20Delegate(implementationsSet[k]);
 
       bool whitelisted = fuseAdmin.cErc20DelegateWhitelist(implementationsSet[k], latestCErc20Delegate, allowResign);
 
