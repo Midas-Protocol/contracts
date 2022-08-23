@@ -9,6 +9,7 @@ import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTok
 
 import "openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
+// TODO: exclude test from CI
 contract ContractsUpgradesTest is BaseTest {
 
     // taken from ERC1967Upgrade
