@@ -79,7 +79,6 @@ jobs:
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
       FORK_URL_POLYGON: "${{ secrets.FORK_URL_POLYGON }}"
-      # FORK_BLOCK_NUMBER: 32016397
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
