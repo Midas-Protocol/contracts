@@ -8,8 +8,9 @@ import { ICToken } from "../../external/compound/ICToken.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 import { BasePriceOracle } from "../BasePriceOracle.sol";
-import { IPyth } from "./IPyth.sol";
-import { PythStructs } from "./PythStructs.sol";
+import { IPyth } from "@pythnetwork/pyth-sdk-solidity/IPyth.sol";
+import { PythStructs } from "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
+import { Pyth } from "pyth-neon/PythOracle.sol";
 
 /**
  * @title DiaPriceOracle
