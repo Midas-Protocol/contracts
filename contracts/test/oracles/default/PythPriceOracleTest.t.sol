@@ -13,23 +13,12 @@ contract PythOraclesTest is BaseTest {
     oracle = PythPriceOracle(ap.getAddress("PythPriceOracle"));
   }
 
-  function testPriceFeed(address testedTokenAddress, address aggregatorAddress) internal returns (uint256 price) {
-    address[] memory underlyings = new address[](1);
-    underlyings[0] = testedTokenAddress;
-    AggregatorV3Interface[] memory aggregators = new AggregatorV3Interface[](1);
-    AggregatorV3Interface feed = AggregatorV3Interface(aggregatorAddress);
-    aggregators[0] = feed;
+  function testPriceFeed(address testedTokenAddress, bytes32 feedId) internal returns (uint256 price) {}
 
-    vm.prank(oracle.admin());
-    oracle.setPriceFeeds(underlyings, aggregators, PythPriceOracleV2.FeedBaseCurrency.USD);
+  function testJBRLPrice() public shouldRun(forChains(NEON_DEVNET)) {
+    address wETH = 0x65976a250187cb1D21b7e3693aCF102d61c86177;
+    string memory wETH_PRICE_FEED = "EdVCmQ9FSPcVe5YySXDPCRmc8aDQLKJ9xvYBMZPie1Vw";
 
-    price = oracle.price(testedTokenAddress);
-  }
-
-  function testJBRLPrice() public shouldRun(forChains(BSC_MAINNET)) {
-    address jBRLAddress = 0x316622977073BBC3dF32E7d2A9B3c77596a0a603;
-    address jBRLAggregatorAddress = 0x5cb1Cb3eA5FB46de1CE1D0F3BaDB3212e8d8eF48;
-
-    assert(testPriceFeed(jBRLAddress, jBRLAggregatorAddress) > 0);
+    assert(testPriceFeed(wETH, bytes32(bytes(wETH_PRICE_FEED))) > 0);
   }
 }
