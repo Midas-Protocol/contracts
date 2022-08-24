@@ -480,13 +480,42 @@ contract CErc20DelegateTest is BaseTest {
   address[] implementationsSet;
   address[] pluginsSet;
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
-    // TODO set these in the addresses provider
-    fusePoolDirectory = FusePoolDirectory(0x295d7347606F4bd810C8296bb8d75D657001fcf7);
-    fuseAdmin = FuseFeeDistributor(payable(0xFc1f56C58286E7215701A773b61bFf2e18A177dE));
+  function setUp() public {
+    fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
   }
 
-  function testMarketImplementations() public shouldRun(forChains(BSC_MAINNET)) {
+  function testPoolImplementations() public shouldRun(forChains(POLYGON_MAINNET, BSC_MAINNET)) {
+    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      Comptroller comptroller = Comptroller(pools[i].comptroller);
+      address implementation = comptroller.comptrollerImplementation();
+
+      bool added = false;
+      for (uint8 k = 0; k < implementationsSet.length; k++) {
+        if (implementationsSet[k] == implementation) {
+          added = true;
+        }
+      }
+
+      if (!added) implementationsSet.push(implementation);
+    }
+
+    emit log("listing the set");
+    for (uint8 k = 0; k < implementationsSet.length; k++) {
+      emit log_address(implementationsSet[k]);
+
+      address latestImpl = fuseAdmin.latestComptrollerImplementation(implementationsSet[k]);
+      bool whitelisted = fuseAdmin.comptrollerImplementationWhitelist(implementationsSet[k], latestImpl);
+      assertTrue(
+        whitelisted || implementationsSet[k] == latestImpl,
+        "latest implementation for old implementation not whitelisted"
+      );
+    }
+  }
+
+  function testMarketImplementations() public shouldRun(forChains(POLYGON_MAINNET, BSC_MAINNET)) {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
@@ -509,11 +538,11 @@ contract CErc20DelegateTest is BaseTest {
 
     emit log("listing the set");
     for (uint8 k = 0; k < implementationsSet.length; k++) {
+      emit log_address(implementationsSet[k]);
       (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = fuseAdmin
         .latestCErc20Delegate(implementationsSet[k]);
 
       bool whitelisted = fuseAdmin.cErc20DelegateWhitelist(implementationsSet[k], latestCErc20Delegate, allowResign);
-      emit log_address(implementationsSet[k]);
 
       assertTrue(
         whitelisted || implementationsSet[k] == latestCErc20Delegate,
@@ -522,46 +551,44 @@ contract CErc20DelegateTest is BaseTest {
     }
   }
 
-  function testPluginImplementations() public shouldRun(forChains(BSC_MAINNET)) {
+  function testPluginImplementations() public shouldRun(forChains(POLYGON_MAINNET, BSC_MAINNET)) {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
-    try fuseAdmin.latestPluginImplementation(address(0)) {
-      for (uint8 i = 0; i < pools.length; i++) {
-        Comptroller comptroller = Comptroller(pools[i].comptroller);
-        CToken[] memory markets = comptroller.getAllMarkets();
-        for (uint8 j = 0; j < markets.length; j++) {
-          CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));
+    for (uint8 i = 0; i < pools.length; i++) {
+      Comptroller comptroller = Comptroller(pools[i].comptroller);
+      CToken[] memory markets = comptroller.getAllMarkets();
+      for (uint8 j = 0; j < markets.length; j++) {
+        CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));
 
-          address plugin;
-          try delegate.plugin() returns (IERC4626 _plugin) {
-            plugin = address(_plugin);
-          } catch {
-            continue;
-          }
-
-          bool added = false;
-          for (uint8 k = 0; k < pluginsSet.length; k++) {
-            if (pluginsSet[k] == plugin) {
-              added = true;
-            }
-          }
-
-          if (!added) pluginsSet.push(plugin);
+        address plugin;
+        try delegate.plugin() returns (IERC4626 _plugin) {
+          plugin = address(_plugin);
+        } catch {
+          continue;
         }
+
+        bool added = false;
+        for (uint8 k = 0; k < pluginsSet.length; k++) {
+          if (pluginsSet[k] == plugin) {
+            added = true;
+          }
+        }
+
+        if (!added) pluginsSet.push(plugin);
       }
+    }
 
-      emit log("listing the set");
-      for (uint8 k = 0; k < pluginsSet.length; k++) {
-        address latestPluginImpl = fuseAdmin.latestPluginImplementation(pluginsSet[k]);
+    emit log("listing the set");
+    for (uint8 k = 0; k < pluginsSet.length; k++) {
+      address latestPluginImpl = fuseAdmin.latestPluginImplementation(pluginsSet[k]);
 
-        bool whitelisted = fuseAdmin.pluginImplementationWhitelist(pluginsSet[k], latestPluginImpl);
-        emit log_address(pluginsSet[k]);
+      bool whitelisted = fuseAdmin.pluginImplementationWhitelist(pluginsSet[k], latestPluginImpl);
+      emit log_address(pluginsSet[k]);
 
-        assertTrue(
-          whitelisted || pluginsSet[k] == latestPluginImpl,
-          "no whitelisted implementation for old implementation"
-        );
-      }
-    } catch {}
+      assertTrue(
+        whitelisted || pluginsSet[k] == latestPluginImpl,
+        "no whitelisted implementation for old implementation"
+      );
+    }
   }
 }
