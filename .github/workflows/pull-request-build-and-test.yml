@@ -78,7 +78,7 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FORK_URL_POLYGON: "${{ secrets.FORK_URL_POLYGON }}"
+      FORK_URL_POLYGON: https://polygon-mainnet.g.alchemy.com/v2/CBh9wOzGY0JRX8wNYOWtEo_Ac374pn78 #"${{ secrets.FORK_URL_POLYGON }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
