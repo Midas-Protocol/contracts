@@ -105,7 +105,7 @@ contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePriceO
     address[] memory _underlyings
   ) external onlyOwner {
     address pool = poolOf[_lpToken];
-    require(pool == address(0), "This LP token is already registered.");
+//    require(pool == address(0), "This LP token is already registered.");
     poolOf[_lpToken] = _pool;
     underlyingTokens[_lpToken] = _underlyings;
   }
