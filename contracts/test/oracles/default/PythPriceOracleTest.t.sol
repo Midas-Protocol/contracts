@@ -15,7 +15,7 @@ contract PythOraclesTest is BaseTest {
 
   function testPriceFeed(address testedTokenAddress, bytes32 feedId) internal returns (uint256 price) {}
 
-  function testJBRLPrice() public shouldRun(forChains(NEON_DEVNET)) {
+  function testwETHPrice() public shouldRun(forChains(NEON_DEVNET)) {
     address wETH = 0x65976a250187cb1D21b7e3693aCF102d61c86177;
     string memory wETH_PRICE_FEED = "EdVCmQ9FSPcVe5YySXDPCRmc8aDQLKJ9xvYBMZPie1Vw";
 
