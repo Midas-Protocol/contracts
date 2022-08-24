@@ -18,24 +18,31 @@ contract BeefyERC4626Test is AbstractERC4626Test {
   uint256 withdrawalFee = 10;
 
   IBeefyVault beefyVault; // ERC4626 => underlyingToken => beefyStrategy
-  address beefyStrategy = 0xEeBcd7E1f008C52fe5804B306832B7DD317e163D; // beefyStrategy => underlyingToken => lpChef
-  address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B; // beefyStrategy => underlyingToken => .
+  address lpChef; // beefyStrategy => underlyingToken => .
+  bool shouldRunTest;
 
   constructor() AbstractERC4626Test() {}
 
   function setUp(string memory _testPreFix, bytes calldata data) public override {
     testPreFix = _testPreFix;
 
-    (address _beefyVault, uint256 _withdrawalFee) = abi.decode(data, (address, uint256));
+    (address _beefyVault, uint256 _withdrawalFee, address _lpChef, bool _shouldRunTest) = abi.decode(
+      data,
+      (address, uint256, address, bool)
+    );
 
-    beefyVault = IBeefyVault(_beefyVault);
-    underlyingToken = MockERC20(address(beefyVault.want()));
-    plugin = MidasERC4626(address(new BeefyERC4626(underlyingToken, beefyVault, _withdrawalFee)));
+    if (_shouldRunTest) {
+      lpChef = _lpChef;
+      shouldRunTest = _shouldRunTest;
+      beefyVault = IBeefyVault(_beefyVault);
+      underlyingToken = MockERC20(address(beefyVault.want()));
+      plugin = MidasERC4626(address(new BeefyERC4626(underlyingToken, beefyVault, _withdrawalFee)));
 
-    initialStrategyBalance = beefyVault.balance();
-    initialStrategySupply = beefyVault.totalSupply();
+      initialStrategyBalance = beefyVault.balance();
+      initialStrategySupply = beefyVault.totalSupply();
 
-    sendUnderlyingToken(depositAmount, address(this));
+      sendUnderlyingToken(depositAmount, address(this));
+    }
   }
 
   function increaseAssetsInVault() public override {
@@ -63,7 +70,7 @@ contract BeefyERC4626Test is AbstractERC4626Test {
   function testInitializedValues(string memory assetName, string memory assetSymbol)
     public
     override
-    shouldRun(forChains(BSC_MAINNET))
+    shouldRun(shouldRunTest)
   {
     assertEq(
       plugin.name(),

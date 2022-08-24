@@ -11,10 +11,14 @@ import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
+import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
+import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
+import "../external/uniswap/IUniswapV2Pair.sol";
+import "../external/uniswap/IUniswapV2Factory.sol";
 
 interface MockXBomb {
   function getExchangeRate() external returns (uint256);
@@ -32,6 +36,24 @@ contract BombE2eTest is WithPool, BaseTest {
       MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
       MockERC20(0x522348779DCb2911539e76A1042aA922F9C47Ee3)
     );
+  }
+
+  struct LiquidationData {
+    address[] cTokens;
+    uint256 oraclePrice;
+    FusePoolLens.FusePoolAsset[] assetsData;
+    FusePoolLens.FusePoolAsset[] assetsDataAfter;
+    IRedemptionStrategy[] strategies;
+    UniswapLpTokenLiquidator lpLiquidator;
+    address[] swapToken0Path;
+    address[] swapToken1Path;
+    bytes[] abis;
+    CToken[] allMarkets;
+    FuseSafeLiquidator liquidator;
+    MockERC4626 erc4626;
+    MockBnb asset;
+    IFundsConversionStrategy[] fundingStrategies;
+    bytes[] data;
   }
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
@@ -82,34 +104,37 @@ contract BombE2eTest is WithPool, BaseTest {
   }
 
   function testCErc20Liquidation() public shouldRun(forChains(BSC_MAINNET)) {
+    LiquidationData memory vars;
     vm.roll(1);
-    MockERC4626 erc4626 = MockERC4626(0x92C6C8278509A69f5d601Eea1E6273F304311bFe);
-    MockBnb bnb = MockBnb(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
+    vars.erc4626 = MockERC4626(0x92C6C8278509A69f5d601Eea1E6273F304311bFe);
+    vars.asset = MockBnb(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
 
-    whitelistPlugin(address(erc4626), address(erc4626));
+    whitelistPlugin(address(vars.erc4626), address(vars.erc4626));
 
-    deployCErc20PluginDelegate(erc4626, 0.9e18);
-    deployCErc20Delegate(address(bnb), "BNB", "bnb", 0.9e18);
+    deployCErc20PluginDelegate(vars.erc4626, 0.9e18);
+    deployCErc20Delegate(address(vars.asset), "BNB", "bnb", 0.9e18);
 
-    CToken[] memory allMarkets = comptroller.getAllMarkets();
-    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[0]));
+    vars.allMarkets = comptroller.getAllMarkets();
+    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(vars.allMarkets[0]));
 
-    CErc20Delegate cBnbToken = CErc20Delegate(address(allMarkets[1]));
+    CErc20Delegate cBnbToken = CErc20Delegate(address(vars.allMarkets[1]));
 
-    address[] memory cTokens = new address[](2);
-    cTokens[0] = address(cToken);
-    cTokens[1] = address(cBnbToken);
-    comptroller.enterMarkets(cTokens);
+    vars.cTokens = new address[](2);
+    vars.cTokens[0] = address(cToken);
+    vars.cTokens[1] = address(cBnbToken);
+    comptroller.enterMarkets(vars.cTokens);
 
     // setting up liquidator
-    liquidator = new FuseSafeLiquidator();
-    liquidator.initialize(
-      0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c,
+    vars.liquidator = new FuseSafeLiquidator();
+    vars.liquidator.initialize(
+      ap.getAddress("wtoken"),
       0x10ED43C718714eb63d5aA57B78B54704E256024E,
-      0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56,
-      0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c,
-      "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5"
+      ap.getAddress("bUSD"),
+      0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c, // BTCB
+      "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
+      25
     );
+
     address accountOne = address(1);
     address accountTwo = address(2);
 
@@ -121,12 +146,12 @@ contract BombE2eTest is WithPool, BaseTest {
     // Account One Supply
     vm.deal(accountOne, 1000000000000e18);
     vm.startPrank(accountOne);
-    bnb.deposit{ value: 1000000000000e18 }();
+    vars.asset.deposit{ value: 1000000000000e18 }();
     vm.stopPrank();
 
     // Account One Supply
     vm.startPrank(accountOne);
-    bnb.approve(address(cBnbToken), 1e36);
+    vars.asset.approve(address(cBnbToken), 1e36);
     cBnbToken.mint(1e17);
     vm.stopPrank();
 
@@ -151,25 +176,39 @@ contract BombE2eTest is WithPool, BaseTest {
       abi.encode(price1 * 1000)
     );
 
-    IRedemptionStrategy[] memory strategies = new IRedemptionStrategy[](0);
-    bytes[] memory abis = new bytes[](0);
+    vars.strategies = new IRedemptionStrategy[](0);
+    vars.abis = new bytes[](0);
+    vars.fundingStrategies = new IFundsConversionStrategy[](0);
+    vars.data = new bytes[](0);
 
     vm.startPrank(accountOne);
     FusePoolLens.FusePoolAsset[] memory assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
     uint256 bnbBalance = cBnbToken.balanceOf(accountOne);
 
-    liquidator.safeLiquidateToTokensWithFlashLoan(
-      accountOne,
-      9,
-      ICErc20(address(cToken)),
-      ICErc20(address(cBnbToken)),
-      0,
-      address(0),
-      IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E),
-      IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E),
-      strategies,
-      abis,
-      0
+    IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+    address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(
+      address(underlyingToken),
+      ap.getAddress("wtoken")
+    );
+    IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
+
+    vars.liquidator.safeLiquidateToTokensWithFlashLoan(
+      FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
+        accountOne,
+        9,
+        ICErc20(address(cToken)),
+        ICErc20(address(cBnbToken)),
+        flashSwapPair,
+        0,
+        address(0),
+        uniswapRouter,
+        uniswapRouter,
+        vars.strategies,
+        vars.abis,
+        0,
+        vars.fundingStrategies,
+        vars.data
+      )
     );
 
     FusePoolLens.FusePoolAsset[] memory assetsDataAfter = poolLens.getPoolAssetsWithData(
