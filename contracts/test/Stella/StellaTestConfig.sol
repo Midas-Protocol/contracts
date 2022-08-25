@@ -3,23 +3,28 @@ pragma solidity ^0.8.0;
 
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 
-struct DotDotTestConfig {
-  address masterPriceOracle;
+struct StellaTestConfig {
   address asset;
+  uint256 poolId;
+  address[] rewardTokens;
 }
 
-contract DotDotTestConfigStorage is ITestConfigStorage {
-  DotDotTestConfig[] internal testConfigs;
+contract StellaTestConfigStorage is ITestConfigStorage {
+  StellaTestConfig[] internal testConfigs;
 
   constructor() {
     // 2JBRL
+    address[] memory rewardTokens = new address[](2);
+    rewardTokens[0] = 0x0E358838ce72d5e61E0018a2ffaC4bEC5F4c88d2; // STELLA token
+    rewardTokens[1] = 0x3795C36e7D12A8c252A20C5a7B455f7c57b60283; // CLEAR token
+
     testConfigs.push(
-      DotDotTestConfig(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA, 0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9)
+      StellaTestConfig(0x2f6F833fAb26Bf7F81827064f67ea4844BdEa03F, 0, rewardTokens)
     );
   }
 
   function getTestConfig(uint256 i) public view returns (bytes memory) {
-    return abi.encode(testConfigs[i].masterPriceOracle, testConfigs[i].asset);
+    return abi.encode(testConfigs[i].asset, testConfigs[i].poolId, testConfigs[i].rewardTokens);
   }
 
   function getTestConfigLength() public view returns (uint256) {

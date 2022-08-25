@@ -7,8 +7,8 @@ import "../helpers/WithPool.sol";
 import "../config/BaseTest.t.sol";
 
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { DotDotERC4626Test } from "./DotDotLpERC4626Test.sol";
-import { DotDotTestConfig, DotDotTestConfigStorage } from "./DotDotTestConfig.sol";
+import { StellaERC4626Test } from "./StellaLpERC4626Test.sol";
+import { StellaTestConfig, StellaTestConfigStorage } from "./StellaTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
@@ -16,16 +16,18 @@ import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 // Using 2BRL
 // Tested on block 19052824
 contract StellaAssetTest is AbstractAssetTest {
+  address masterPriceOracle = 0x14C15B9ec83ED79f23BF71D51741f58b69ff1494; // master price oracle
+
   constructor() {
-    test = AbstractERC4626Test(address(new DotDotERC4626Test()));
-    testConfigStorage = ITestConfigStorage(address(new DotDotTestConfigStorage()));
-    shouldRunTest = forChains(BSC_MAINNET);
+    test = AbstractERC4626Test(address(new StellaERC4626Test()));
+    testConfigStorage = ITestConfigStorage(address(new StellaTestConfigStorage()));
+    shouldRunTest = forChains(MOONBEAM_MAINNET);
   }
 
   function setUp() public override shouldRun(shouldRunTest) {}
 
   function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
-    (address masterPriceOracle, address asset) = abi.decode(testConfig, (address, address));
+    (address asset, uint256 poolId, address[] memory rewardTokens) = abi.decode(testConfig, (address, uint256, address[]));
 
     test.setUpWithPool(MasterPriceOracle(masterPriceOracle), MockERC20(asset));
 
@@ -38,21 +40,21 @@ contract StellaAssetTest is AbstractAssetTest {
 
       this.setUpTestContract(testConfig);
 
-      (, address asset) = abi.decode(testConfig, (address, address));
+      (address asset, , ) = abi.decode(testConfig, (address, uint256, address[]));
 
       test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
     }
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(shouldRunTest) {
-    this.runTest(DotDotERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
-  }
+  // function testAccumulatingRewardsOnDeposit() public shouldRun(shouldRunTest) {
+  //   this.runTest(StellaERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
+  // }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(shouldRunTest) {
-    this.runTest(DotDotERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
-  }
+  // function testAccumulatingRewardsOnWithdrawal() public shouldRun(shouldRunTest) {
+  //   this.runTest(StellaERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
+  // }
 
-  function testClaimRewards() public shouldRun(shouldRunTest) {
-    this.runTest(DotDotERC4626Test(address(test)).testClaimRewards);
-  }
+  // function testClaimRewards() public shouldRun(shouldRunTest) {
+  //   this.runTest(StellaERC4626Test(address(test)).testClaimRewards);
+  // }
 }
