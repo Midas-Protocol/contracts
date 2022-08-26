@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { OwnableUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { FixedPointMathLib } from "../utils/FixedPointMathLib.sol";
 import { IFundsConversionStrategy } from "./IFundsConversionStrategy.sol";
@@ -91,12 +90,12 @@ contract JarvisLiquidatorFunder is IFundsConversionStrategy {
   function estimateInputAmount(uint256 outputAmount, bytes memory strategyData)
     external
     view
-    returns (uint256 inputAmount)
+    returns (IERC20Upgradeable inputToken, uint256 inputAmount)
   {
     uint256 ONE = 1e18;
     (address inputTokenAddress, address poolAddress, ) = abi.decode(strategyData, (address, address, uint256));
 
-    IERC20Upgradeable inputToken = IERC20Upgradeable(inputTokenAddress);
+    inputToken = IERC20Upgradeable(inputTokenAddress);
     ISynthereumLiquidityPool pool = ISynthereumLiquidityPool(poolAddress);
     if (inputToken == pool.syntheticToken()) {
       // collateralAmountReceived / ONE = outputAmount / inputAmount
