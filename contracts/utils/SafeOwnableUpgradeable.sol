@@ -3,18 +3,15 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 
+/**
+ * @dev Ownable extension that requires a two-step process of setting the pending owner and the owner accepting it.
+ * @notice Existing OwnableUpgradeable contracts cannot be upgraded due to the extra storage variable
+ * that will shift the other.
+ */
 abstract contract SafeOwnableUpgradeable is OwnableUpgradeable {
-  // keep these storage vars to offset a past storage layout mistake
-  address[4] private __gapVars;
-
-  function _resetGap() public onlyOwner {
-    __gapVars[0] = address(0);
-    __gapVars[1] = address(0);
-    __gapVars[2] = address(0);
-    __gapVars[3] = address(0);
-    pendingOwner = address(0);
-  }
-
+  /**
+   * @notice Pending owner of this contract
+   */
   address public pendingOwner;
 
   /**
