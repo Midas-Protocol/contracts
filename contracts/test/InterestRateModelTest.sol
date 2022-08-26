@@ -12,9 +12,15 @@ import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateM
 contract InterestRateModelTest is BaseTest {
   AnkrBNBInterestRateModel ankrBnbInterestRateModel2;
   JumpRateModel jumpRateModel;
+  JumpRateModel mimoRateModel;
   WhitePaperInterestRateModel whitepaperInterestRateModel;
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
+  function setUp() public shouldRun(forChains(BSC_MAINNET, POLYGON_MAINNET)) {
+    setUpBsc();
+    setUpPolygon();
+  }
+
+  function setUpBsc() public shouldRun(forChains(BSC_MAINNET)) {
     ankrBnbInterestRateModel2 = new AnkrBNBInterestRateModel(
       10512000,
       0.256e17,
@@ -23,12 +29,45 @@ contract InterestRateModelTest is BaseTest {
       3,
       0xBb1Aa6e59E5163D8722a122cd66EBA614b59df0d
     );
-    jumpRateModel = new JumpRateModel(10512000, 0.2e17, 0.2e18, 2e18, 0.9e18);
+    jumpRateModel = new JumpRateModel(10512000, 0.2e17, 0.18e18, 4e18, 0.8e18);
     whitepaperInterestRateModel = new WhitePaperInterestRateModel(10512000, 0.2e17, 0.2e18);
+  }
+
+  function setUpPolygon() public shouldRun(forChains(POLYGON_MAINNET)) {
+    mimoRateModel = new JumpRateModel(13665600, 2e18, 0.4e17, 4e18, 0.8e18);
+    jumpRateModel = new JumpRateModel(13665600, 0.2e17, 0.18e18, 2e18, 0.8e18);
   }
 
   function _convertToPerYear(uint256 value) internal returns (uint256) {
     return value * 10512000;
+  }
+
+  function _convertToPerYearBsc(uint256 value) internal returns (uint256) {
+    return value * 13665600;
+  }
+
+  function testJumpRateBorrowRateBsc() public shouldRun(forChains(POLYGON_MAINNET)) {
+    uint256 borrowRate = mimoRateModel.getBorrowRate(0, 0, 5e18);
+    assertGe(_convertToPerYearBsc(borrowRate), 0);
+    assertLe(_convertToPerYearBsc(borrowRate), 100e18);
+    borrowRate = mimoRateModel.getBorrowRate(1e18, 10e18, 5e18);
+    assertGe(_convertToPerYearBsc(borrowRate), 0);
+    assertLe(_convertToPerYearBsc(borrowRate), 100e18);
+    borrowRate = mimoRateModel.getBorrowRate(2e18, 10e18, 5e18);
+    assertGe(_convertToPerYearBsc(borrowRate), 0);
+    assertLe(_convertToPerYearBsc(borrowRate), 100e18);
+    borrowRate = mimoRateModel.getBorrowRate(3e18, 10e18, 5e18);
+    assertGe(_convertToPerYearBsc(borrowRate), 0);
+    assertLe(_convertToPerYearBsc(borrowRate), 100e18);
+    borrowRate = mimoRateModel.getBorrowRate(4e18, 10e18, 5e18);
+    assertGe(_convertToPerYearBsc(borrowRate), 0);
+    assertLe(_convertToPerYearBsc(borrowRate), 100e18);
+    borrowRate = mimoRateModel.getBorrowRate(5e18, 10e18, 5e18);
+    assertGe(_convertToPerYearBsc(borrowRate), 0);
+    assertLe(_convertToPerYearBsc(borrowRate), 100e18);
+    borrowRate = mimoRateModel.getBorrowRate(6e18, 10e18, 5e18);
+    assertGe(_convertToPerYearBsc(borrowRate), 0);
+    assertLe(_convertToPerYearBsc(borrowRate), 100e18);
   }
 
   function testJumpRateBorrowRate() public shouldRun(forChains(BSC_MAINNET)) {
