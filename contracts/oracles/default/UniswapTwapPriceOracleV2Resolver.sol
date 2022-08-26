@@ -14,16 +14,16 @@ contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
   }
 
   // need to store as arrays for the UniswapTwapPriceOracleV2Root workable functions
-  address[] calldata pairs,
-  address[] calldata baseTokens,
-  uint256[] calldata minPeriods,
-  uint256[] calldata deviationThresholds
+  address[] pairs;
+  address[] baseTokens;
+  uint256[] minPeriods;
+  uint256[] deviationThresholds;
 
   UniswapTwapPriceOracleV2Root public root;
   uint256 public lastUpdate;
 
-  constructor(PairConfig[] _pairConfigs, UniswapTwapPriceOracleV2Root _root) public {
-    for (uint i = 0; i < _pairConfigs.length; i++) {
+  constructor(PairConfig[] memory _pairConfigs, UniswapTwapPriceOracleV2Root _root) public {
+    for (uint256 i = 0; i < _pairConfigs.length; i++) {
       pairs[i] = _pairConfigs[i].pair;
       baseTokens[i] = _pairConfigs[i].baseToken;
       minPeriods[i] = _pairConfigs[i].minPeriod;
@@ -36,52 +36,52 @@ contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
     root = _root;
   }
 
-  function removeFromPairs(uint256 index) external onlyOwner returns (PairConfig[]) {
-    if (index >= pairConfigs.length) return;
+  function removeFromPairs(uint256 index) external onlyOwner {
+    if (index >= pairs.length) return;
 
-    for (uint256 i = index; i < pairConfigs.length - 1; i++) {
-      pairConfigs[i] = pairConfigs[i + 1];
+    for (uint256 i = index; i < pairs.length - 1; i++) {
+      pairs[i] = pairs[i + 1];
+      baseTokens[i] = baseTokens[i + 1];
+      minPeriods[i] = minPeriods[i + 1];
+      deviationThresholds[i] = deviationThresholds[i + 1];
     }
-    pairConfigs.pop();
-    return pairConfigs;
+    pairs.pop();
+    baseTokens.pop();
+    minPeriods.pop();
+    deviationThresholds.pop();
   }
 
-  function addPair(PairConfig pair) external onlyOwner returns (PairConfig[]) {
-    pairConfigs.push(pair);
-    return pairConfigs;
+  function addPair(PairConfig calldata pair) external onlyOwner {
+    pairs.push(pair.pair);
+    baseTokens.push(pair.baseToken);
+    minPeriods.push(pair.minPeriod);
+    deviationThresholds.push(pair.deviationThreshold);
   }
 
-  function getWorkablePairs() public view returns (PairConfig[] memory workablePairs) {
-    bool[] memory pairs = root.workable(
-      address[] calldata pairs,
-      address[] calldata baseTokens,
-      uint256[] calldata minPeriods,
-      uint256[] calldata deviationThresholds
-    );
+  function getWorkablePairs() public view returns (address[] memory) {
+    bool[] memory workable = root.workable(pairs, baseTokens, minPeriods, deviationThresholds);
+    address[] memory workablePairs = new address[](workable.length);
 
-    for (uint i = 0; i < pairs.length; i++) {
-      if (pairs[i]) {
-        workablePairs.push(pairConfigs[i]);
+    for (uint256 i = 0; i < workable.length; i++) {
+      if (workable[i]) {
+        workablePairs[i] = pairs[i];
       }
     }
+    return workablePairs;
   }
 
-  function updatePairs(PairConfig[] calldata workablePairs) external {
+  function updatePairs(address[] calldata workablePairs) external {
     if (workablePairs.length == 0) return;
     root.update(workablePairs);
   }
 
   function checker() external view override returns (bool canExec, bytes memory execPayload) {
-    PairConfig[] memory workablePairs = getWorkablePairs();
+    address[] memory workablePairs = getWorkablePairs();
     if (workablePairs.length == 0) {
       return (false, bytes("No workable pairs"));
-    } 
-    
-    if (block.timestamp < lastUpdate + minUpdateInterval) {
-      return (false, bytes("Not enough time has passed"));
     }
-    
+
     canExec = true;
-    execPayload = abi.encodeWithSignature("updatePairs()", workablePairs);
+    execPayload = abi.encodeWithSelector(this.updatePairs.selector, workablePairs);
   }
 }
