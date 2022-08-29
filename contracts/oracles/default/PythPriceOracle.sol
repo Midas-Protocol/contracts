@@ -118,9 +118,36 @@ contract PythPriceOracle is IPriceOracle, BasePriceOracle {
           priceFeedIds[underlying] == "",
           "Admin cannot overwrite existing assignments of price feeds to underlying tokens."
         );
-
       // Set feed and base currency
       priceFeedIds[underlying] = feedIds[i];
+    }
+  }
+
+  event log_uint(uint128);
+
+  function price1(address underlying) public returns (uint256) {
+    // Return 1e18 for WTOKEN
+    if (underlying == WTOKEN || underlying == address(0)) return 1e18;
+
+    // Get token/native price from Oracle
+    bytes32 feed = priceFeedIds[underlying];
+    require(feed != "", "No oracle price feed found for this underlying ERC20 token.");
+
+    if (NATIVE_TOKEN_USD_FEED == "") {
+      // Get price from MasterPriceOracle
+      uint256 usdNativeTokenPrice = MASTER_PRICE_ORACLE.price(USD_TOKEN);
+      uint256 nativeTokenUsdPrice = 1e36 / usdNativeTokenPrice; // 18 decimals -- TODO: doublecheck
+      PythStructs.Price memory tokenUsdPrice = PYTH.getCurrentPrice(feed); // 8 decimals ---  TODO: doublecheck
+      return
+        tokenUsdPrice.price >= 0 ? (uint256(uint64(tokenUsdPrice.price)) * 1e28) / uint256(nativeTokenUsdPrice) : 0;
+    } else {
+      PythStructs.Price memory pythPrice = PYTH.getCurrentPrice(NATIVE_TOKEN_USD_FEED);
+      emit log_uint(uint128(uint64(pythPrice.price)));
+      uint128 nativeTokenUsdPrice = uint128(uint64(PYTH.getCurrentPrice(NATIVE_TOKEN_USD_FEED).price));
+      emit log_uint(nativeTokenUsdPrice);
+      if (nativeTokenUsdPrice <= 0) return 0;
+      uint128 tokenUsdPrice = uint128(uint64(PYTH.getCurrentPrice(feed).price));
+      return tokenUsdPrice >= 0 ? (uint256(tokenUsdPrice) * 1e18) / uint256(nativeTokenUsdPrice) : 0;
     }
   }
 
