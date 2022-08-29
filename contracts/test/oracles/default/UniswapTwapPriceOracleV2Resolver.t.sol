@@ -27,14 +27,14 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
     return mpo.price(tokenAddress);
   }
 
-  // DDD EPX
-  function testDddEpxPriceUpdate() public shouldRun(forChains(BSC_MAINNET)) {
-    address ddd = 0x84c97300a190676a19D1E13115629A11f8482Bd1; // DDD
-    address epx = 0xAf41054C1487b0e5E2B9250C0332eCBCe6CE9d71; // EPX
+  // BUSD DAI
+  function testBusdDaiPriceUpdate() public shouldRun(forChains(BSC_MAINNET)) {
+    address WBNB_BUSD = 0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16; // WBNB-BUSD
+    address WBNB_DAI = 0xc7c3cCCE4FA25700fD5574DA7E200ae28BBd36A3; // WBNB-DAI
     address wbnb = 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c; // WBNB
 
     UniswapTwapPriceOracleV2Resolver.PairConfig memory pairConfig = UniswapTwapPriceOracleV2Resolver.PairConfig({
-      pair: ddd,
+      pair: WBNB_BUSD,
       baseToken: wbnb,
       minPeriod: 1800,
       deviationThreshold: 50000000000000000
@@ -42,7 +42,7 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
 
     resolver.addPair(pairConfig);
     pairConfig = UniswapTwapPriceOracleV2Resolver.PairConfig({
-      pair: epx,
+      pair: WBNB_DAI,
       baseToken: wbnb,
       minPeriod: 1800,
       deviationThreshold: 50000000000000000
@@ -58,7 +58,7 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
 
     resolver.updatePairs(workablePairs);
 
-    assertTrue(getTokenTwapPrice(ddd) > 0);
-    assertTrue(getTokenTwapPrice(epx) > 0);
+    assertTrue(getTokenTwapPrice(WBNB_BUSD) > 0);
+    assertTrue(getTokenTwapPrice(WBNB_DAI) > 0);
   }
 }
