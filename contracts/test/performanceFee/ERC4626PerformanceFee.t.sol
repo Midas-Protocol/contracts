@@ -7,10 +7,11 @@ import "../helpers/WithPool.sol";
 import "../config/BaseTest.t.sol";
 
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
-import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { DotDotERC4626Test } from "../DotDot/DotDotLpERC4626Test.sol";
 import { IBeefyVault, BeefyERC4626 } from "../../compound/strategies/BeefyERC4626.sol";
 import { MidasERC4626 } from "../../compound/strategies/MidasERC4626.sol";
+
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 contract ERC4626PerformanceFeeTest is BaseTest {
   using FixedPointMathLib for uint256;
@@ -19,15 +20,16 @@ contract ERC4626PerformanceFeeTest is BaseTest {
   uint256 DEPOSIT_AMOUNT = 100e18;
   uint256 BPS_DENOMINATOR = 10_000;
 
-  MidasERC4626 plugin;
-  MockERC20 underlyingToken;
+  BeefyERC4626 plugin;
+  ERC20Upgradeable underlyingToken;
   IBeefyVault beefyVault = IBeefyVault(0x94E85B8E050F3F281CB9597cc0144F1F7AF1fe9B); // BOMB-BTCB LP
   address beefyStrategy = 0xEeBcd7E1f008C52fe5804B306832B7DD317e163D;
   address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
-    underlyingToken = MockERC20(address(beefyVault.want()));
-    plugin = MidasERC4626(address(new BeefyERC4626(underlyingToken, beefyVault, 10)));
+    underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
+    plugin = new BeefyERC4626();
+    plugin.initialize(underlyingToken, beefyVault, 10);
   }
 
   /* --------------------- HELPER FUNCTIONS --------------------- */

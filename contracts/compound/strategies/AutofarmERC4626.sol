@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.10;
 
-import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
-
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
+
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 interface IAutofarmV2 {
   function AUTO() external view returns (address);
@@ -31,38 +31,33 @@ interface IAutofarmV2 {
  *
  */
 contract AutofarmERC4626 is MidasERC4626 {
-  using SafeTransferLib for ERC20;
+  using SafeERC20Upgradeable for ERC20Upgradeable;
   using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
-  uint256 public immutable poolId;
-  IAutofarmV2 public immutable autofarm;
-  FlywheelCore public immutable flywheel;
+  uint256 public poolId;
+  IAutofarmV2 public autofarm;
+  FlywheelCore public flywheel;
 
   /* ========== CONSTRUCTOR ========== */
 
   /**
      @notice Creates a new Vault that accepts a specific underlying token.
-     @param _asset The ERC20 compliant token the Vault should accept.
+     @param asset The ERC20 compliant token the Vault should accept.
      @param _flywheel Flywheel to pull AUTO rewards
      @param _poolId The poolId in AutofarmV2
      @param _autoToken The AUTO token. Used to approve flywheel
      @param _autofarm The autofarm contract.
 
     */
-  constructor(
-    ERC20 _asset,
+  function initialize(
+    ERC20Upgradeable asset,
     FlywheelCore _flywheel,
     uint256 _poolId,
-    ERC20 _autoToken,
+    ERC20Upgradeable _autoToken,
     IAutofarmV2 _autofarm
-  )
-    MidasERC4626(
-      _asset,
-      string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
-      string(abi.encodePacked("mv", _asset.symbol()))
-    )
-  {
+  ) public initializer {
+    __MidasER4626_init(asset);
     poolId = _poolId;
     autofarm = _autofarm;
     flywheel = _flywheel;
@@ -82,7 +77,7 @@ contract AutofarmERC4626 is MidasERC4626 {
   /// @notice Calculates the total amount of underlying tokens the user holds.
   /// @return The total amount of underlying tokens the user holds.
   function balanceOfUnderlying(address account) public view returns (uint256) {
-    return convertToAssets(balanceOf[account]);
+    return convertToAssets(balanceOf(account));
   }
 
   /* ========== INTERNAL FUNCTIONS ========== */

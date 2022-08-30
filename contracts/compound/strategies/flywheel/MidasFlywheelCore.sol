@@ -21,7 +21,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   address public feeRecipient; // TODO whats the default address?
 
   /// @notice The token to reward
-  ERC20 public immutable rewardToken;
+  ERC20 public rewardToken;
 
   /// @notice append-only list of strategies added
   ERC20[] public allStrategies;

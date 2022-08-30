@@ -34,7 +34,7 @@ contract BombE2eTest is WithPool, BaseTest {
   constructor() WithPool() {
     super.setUpWithPool(
       MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
-      MockERC20(0x522348779DCb2911539e76A1042aA922F9C47Ee3)
+      ERC20Upgradeable(0x522348779DCb2911539e76A1042aA922F9C47Ee3)
     );
   }
 
@@ -58,7 +58,7 @@ contract BombE2eTest is WithPool, BaseTest {
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     vm.prank(0xcd6cD62F11F9417FBD44dc0a44F891fd3E869234);
-    underlyingToken.mint(address(this), 100e18);
+    MockERC20(address(underlyingToken)).mint(address(this), 100e18);
     setUpPool("bsc-test", false, 0.1e18, 1.1e18);
   }
 
@@ -111,7 +111,7 @@ contract BombE2eTest is WithPool, BaseTest {
 
     whitelistPlugin(address(vars.erc4626), address(vars.erc4626));
 
-    deployCErc20PluginDelegate(vars.erc4626, 0.9e18);
+    deployCErc20PluginDelegate(address(vars.erc4626), 0.9e18);
     deployCErc20Delegate(address(vars.asset), "BNB", "bnb", 0.9e18);
 
     vars.allMarkets = comptroller.getAllMarkets();
@@ -142,7 +142,7 @@ contract BombE2eTest is WithPool, BaseTest {
     secondary.initialize(fusePoolDirectory);
 
     vm.prank(0xcd6cD62F11F9417FBD44dc0a44F891fd3E869234);
-    underlyingToken.mint(accountTwo, 1000000000000e18);
+    MockERC20(address(underlyingToken)).mint(accountTwo, 1000000000000e18);
     // Account One Supply
     vm.deal(accountOne, 1000000000000e18);
     vm.startPrank(accountOne);
@@ -227,7 +227,7 @@ contract BombE2eTest is WithPool, BaseTest {
     MockERC4626 erc4626 = MockERC4626(0x92C6C8278509A69f5d601Eea1E6273F304311bFe);
 
     vm.roll(1);
-    deployCErc20PluginDelegate(erc4626, 0.9e18);
+    deployCErc20PluginDelegate(address(erc4626), 0.9e18);
 
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
@@ -261,7 +261,7 @@ contract BombE2eTest is WithPool, BaseTest {
     MockERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
     FuseFlywheelDynamicRewards rewards;
     FuseFlywheelCore flywheel = new FuseFlywheelCore(
-      underlyingToken,
+      ERC20(address(underlyingToken)),
       IFlywheelRewards(address(0)),
       IFlywheelBooster(address(0)),
       address(this),
@@ -279,7 +279,7 @@ contract BombE2eTest is WithPool, BaseTest {
     flywheel.addStrategyForRewards(marketKey);
 
     vm.roll(1);
-    deployCErc20PluginRewardsDelegate(mockERC4626Dynamic, 0.9e18);
+    deployCErc20PluginRewardsDelegate(address(mockERC4626Dynamic), 0.9e18);
 
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));

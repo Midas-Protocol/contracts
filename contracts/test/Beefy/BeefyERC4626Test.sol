@@ -11,6 +11,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 contract BeefyERC4626Test is AbstractERC4626Test {
   using FixedPointMathLib for uint256;
@@ -35,8 +36,10 @@ contract BeefyERC4626Test is AbstractERC4626Test {
       lpChef = _lpChef;
       shouldRunTest = _shouldRunTest;
       beefyVault = IBeefyVault(_beefyVault);
-      underlyingToken = MockERC20(address(beefyVault.want()));
-      plugin = MidasERC4626(address(new BeefyERC4626(underlyingToken, beefyVault, _withdrawalFee)));
+      underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
+      BeefyERC4626 beefyERC4626 = new BeefyERC4626();
+      beefyERC4626.initialize(underlyingToken, beefyVault, _withdrawalFee);
+      plugin = beefyERC4626;
 
       initialStrategyBalance = beefyVault.balance();
       initialStrategySupply = beefyVault.totalSupply();

@@ -17,6 +17,8 @@ import { Authority } from "solmate/auth/Auth.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+
 struct RewardsCycle {
   uint32 start;
   uint32 end;
@@ -48,7 +50,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
   address marketAddress;
   ERC20 marketKey;
 
-  ERC20[] rewardsToken;
+  ERC20Upgradeable[] rewardsToken;
 
   constructor() WithPool() {}
 
@@ -78,27 +80,27 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     epxRewards = new FuseFlywheelDynamicRewardsPlugin(epxFlywheel, 1);
     epxFlywheel.setFlywheelRewards(epxRewards);
 
-    rewardsToken.push(ERC20(FlywheelCore(address(dddFlywheel)).rewardToken()));
-    rewardsToken.push(ERC20(FlywheelCore(address(epxFlywheel)).rewardToken()));
+    ERC20 dddFlywheelRewardToken = FlywheelCore(address(dddFlywheel)).rewardToken();
+    rewardsToken.push(ERC20Upgradeable(address(dddFlywheelRewardToken)));
+    ERC20 epxFlywheelRewardToken = FlywheelCore(address(epxFlywheel)).rewardToken();
+    rewardsToken.push(ERC20Upgradeable(address(epxFlywheelRewardToken)));
 
-    plugin = MidasERC4626(
-      address(
-        new DotDotLpERC4626(
-          underlyingToken,
-          FlywheelCore(address(dddFlywheel)),
-          FlywheelCore(address(epxFlywheel)),
-          ILpDepositor(address(lpDepositor)),
-          address(this),
-          rewardsToken
-        )
-      )
+    DotDotLpERC4626 dotDotLpERC4626 = new DotDotLpERC4626();
+    dotDotLpERC4626.initialize(
+      underlyingToken,
+      FlywheelCore(address(dddFlywheel)),
+      FlywheelCore(address(epxFlywheel)),
+      ILpDepositor(address(lpDepositor)),
+      address(this),
+      rewardsToken
     );
+    plugin = dotDotLpERC4626;
 
     // Just set it explicitly to 0. Just wanted to make clear that this is not forgotten but expected to be 0
     initialStrategyBalance = 0;
     initialStrategySupply = 0;
 
-    deployCErc20PluginRewardsDelegate(ERC4626(address(plugin)), 0.9e18);
+    deployCErc20PluginRewardsDelegate(address(plugin), 0.9e18);
     marketAddress = address(comptroller.cTokensByUnderlying(address(underlyingToken)));
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
     cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(plugin)));
@@ -128,7 +130,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
   }
 
   function getStrategyBalance() public view override returns (uint256) {
-    return lpDepositor.userBalances(address(plugin), address(underlyingToken));
+    return lpDepositor.userBalances(address(plugin), underlyingToken);
   }
 
   function getExpectedDepositShares() public view override returns (uint256) {

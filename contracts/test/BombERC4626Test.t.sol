@@ -4,6 +4,7 @@ pragma solidity >=0.8.0;
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import "../compound/strategies/BombERC4626.sol";
 import "./config/BaseTest.t.sol";
@@ -18,7 +19,8 @@ contract BombERC4626Test is BaseTest {
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     bombToken = IERC20Upgradeable(address(xbombToken.reward()));
-    vault = new BombERC4626(ERC20(address(bombToken)), address(xbombToken));
+    vault = new BombERC4626();
+    vault.initialize(ERC20Upgradeable(address(bombToken)), address(xbombToken));
 
     // get some tokens from a whale
     vm.prank(whale);

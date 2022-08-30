@@ -17,6 +17,8 @@ import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+
 struct RewardsCycle {
   uint32 start;
   uint32 end;
@@ -32,7 +34,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
   address jrtMimoSep22Token = 0xAFC780bb79E308990c7387AB8338160bA8071B67;
   address marketAddress;
   ERC20 marketKey;
-  ERC20[] rewardTokens;
+  ERC20Upgradeable[] rewardTokens;
   uint256 poolId;
 
   constructor() WithPool() {}
@@ -59,15 +61,15 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     poolId = _poolId;
     vault = IElysianFields(_vault);
 
-    rewardTokens.push(ERC20(flywheel.rewardToken()));
+    rewardTokens.push(ERC20Upgradeable(address(flywheel.rewardToken())));
 
-    plugin = MidasERC4626(
-      address(new JarvisERC4626(underlyingToken, flywheel, vault, poolId, address(this), rewardTokens))
-    );
+    JarvisERC4626 jarvisERC4626 = new JarvisERC4626();
+    jarvisERC4626.initialize(underlyingToken, flywheel, vault, poolId, address(this), rewardTokens);
+    plugin = jarvisERC4626;
 
     initialStrategyBalance = getStrategyBalance();
 
-    deployCErc20PluginRewardsDelegate(ERC4626(address(plugin)), 0.9e18);
+    deployCErc20PluginRewardsDelegate(address(plugin), 0.9e18);
     marketAddress = address(comptroller.cTokensByUnderlying(address(underlyingToken)));
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
     cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(plugin)));
@@ -98,7 +100,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
   }
 
   function getStrategyBalance() public view override returns (uint256) {
-    return ERC20(underlyingToken).balanceOf(address(vault));
+    return underlyingToken.balanceOf(address(vault));
   }
 
   function getExpectedDepositShares() public view override returns (uint256) {

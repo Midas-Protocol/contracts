@@ -13,6 +13,7 @@ import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewar
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 contract MockBoringERC20 is MockERC20 {
   constructor(
@@ -39,7 +40,7 @@ contract BeamERC4626Test is BaseTest {
 
   BeamERC4626 beamErc4626;
   MockVault mockBeamChef;
-  MockBoringERC20 testToken;
+  ERC20Upgradeable testToken;
   MockERC20 glintToken;
   ERC20 marketKey;
   FlywheelCore flywheel;
@@ -52,7 +53,7 @@ contract BeamERC4626Test is BaseTest {
   uint256 initialBeamSupply = 0;
 
   function setUp() public shouldRun(forChains(MOONBEAM_MAINNET)) {
-    testToken = MockBoringERC20(0x99588867e817023162F4d4829995299054a5fC57);
+    testToken = ERC20Upgradeable(0x99588867e817023162F4d4829995299054a5fC57);
     glintToken = MockERC20(0xcd3B51D98478D53F4515A306bE565c6EebeF1D58);
     mockBeamChef = new MockVault(IBoringERC20(address(testToken)), 0, address(0), 0, address(0));
     vm.warp(1);
@@ -69,7 +70,8 @@ contract BeamERC4626Test is BaseTest {
     flywheelRewards = new FuseFlywheelDynamicRewards(flywheel, 1);
     flywheel.setFlywheelRewards(flywheelRewards);
 
-    beamErc4626 = new BeamERC4626(testToken, flywheel, 0, IVault(address(mockBeamChef)));
+    beamErc4626 = new BeamERC4626();
+    beamErc4626.initialize(testToken, flywheel, 0, IVault(address(mockBeamChef)));
     marketKey = ERC20(address(beamErc4626));
     flywheel.addStrategyForRewards(marketKey);
 
@@ -441,7 +443,7 @@ contract BeamERC4626UnitTest is BaseTest {
   using stdStorage for StdStorage;
   BeamERC4626 beamErc4626;
   MockVault mockBeamChef;
-  MockBoringERC20 testToken;
+  ERC20Upgradeable testToken;
   MockERC20 glintToken;
   ERC20 marketKey;
   FlywheelCore flywheel;
@@ -455,7 +457,7 @@ contract BeamERC4626UnitTest is BaseTest {
   address joy = 0x33Ad49856da25b8E2E2D762c411AEda0D1727918;
 
   function setUp() public shouldRun(forChains(MOONBEAM_MAINNET)) {
-    testToken = MockBoringERC20(0x99588867e817023162F4d4829995299054a5fC57);
+    testToken = ERC20Upgradeable(0x99588867e817023162F4d4829995299054a5fC57);
     glintToken = MockERC20(0xcd3B51D98478D53F4515A306bE565c6EebeF1D58);
     mockBeamChef = new MockVault(IBoringERC20(address(testToken)), 0, address(0), 0, address(0));
     vm.warp(1);
@@ -472,7 +474,8 @@ contract BeamERC4626UnitTest is BaseTest {
     flywheelRewards = new FuseFlywheelDynamicRewards(flywheel, 1);
     flywheel.setFlywheelRewards(flywheelRewards);
 
-    beamErc4626 = new BeamERC4626(testToken, flywheel, 0, IVault(address(mockBeamChef)));
+    beamErc4626 = new BeamERC4626();
+    beamErc4626.initialize(testToken, flywheel, 0, IVault(address(mockBeamChef)));
     marketKey = ERC20(address(beamErc4626));
     flywheel.addStrategyForRewards(marketKey);
 
@@ -486,7 +489,7 @@ contract BeamERC4626UnitTest is BaseTest {
     assertEq(beamErc4626.name(), testToken.name());
     assertEq(beamErc4626.symbol(), testToken.symbol());
     assertEq(address(beamErc4626.asset()), address(testToken));
-    assertEq(address(beamErc4626.VAULT()), address(mockBeamChef));
+    assertEq(address(beamErc4626.vault()), address(mockBeamChef));
     assertEq(address(marketKey), address(beamErc4626));
     assertEq(testToken.allowance(address(beamErc4626), address(mockBeamChef)), type(uint256).max);
     assertEq(glintToken.allowance(address(beamErc4626), address(flywheelRewards)), type(uint256).max);
@@ -632,9 +635,9 @@ contract BeamERC4626UnitTest is BaseTest {
     testToken.transferFrom(joy, address(this), depositAmount);
     uint256 balance = testToken.balanceOf(address(this));
     testToken.approve(address(beamErc4626), depositAmount);
-    flywheel.accrue(ERC20(beamErc4626), address(this));
+    flywheel.accrue(ERC20(address(beamErc4626)), address(this));
     beamErc4626.deposit(depositAmount, address(this));
-    flywheel.accrue(ERC20(beamErc4626), address(this));
+    flywheel.accrue(ERC20(address(beamErc4626)), address(this));
   }
 
   function testDeposit() public shouldRun(forChains(MOONBEAM_MAINNET)) {

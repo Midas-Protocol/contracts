@@ -3,17 +3,16 @@ pragma solidity >=0.8.0;
 
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 
-import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import { PausableUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/security/PausableUpgradeable.sol";
 import { ERC4626Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
-import { IERC20MetadataUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 import { SafeOwnableUpgradeable } from "../../utils/SafeOwnableUpgradeable.sol";
 
 abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, ERC4626Upgradeable {
   using FixedPointMathLib for uint256;
-  using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
+  using SafeERC20Upgradeable for ERC20Upgradeable;
 
   /* ========== STATE VARIABLES ========== */
 
@@ -30,22 +29,22 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
     address newFeeRecipient
   );
 
-  /* ========== CONSTRUCTOR ========== */
-
-  function initialize(
-    ERC20Upgradeable _asset,
-    string memory _name,
-    string memory _symbol
-  ) public initializer {
+  /* ========== INITIALIZERS ========== */
+  function __MidasER4626_init(
+    ERC20Upgradeable _asset
+  ) internal onlyInitializing {
     __Context_init();
-    __ERC20_init(_name, _symbol);
+    __ERC20_init(
+      string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
+      string(abi.encodePacked("mv", _asset.symbol()))
+    );
     __ERC4626_init(_asset);
 
     vaultShareHWM = 10**_asset.decimals();
   }
 
-  function _asset() internal view returns (IERC20MetadataUpgradeable) {
-    return IERC20MetadataUpgradeable(super.asset());
+  function _asset() internal view returns (ERC20Upgradeable) {
+    return ERC20Upgradeable(super.asset());
   }
 
   /* ========== DEPOSIT/WITHDRAW FUNCTIONS ========== */
