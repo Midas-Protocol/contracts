@@ -81,15 +81,16 @@ contract ContractsUpgradesTest is BaseTest {
     // before upgrade
     FuseFeeDistributor oldImpl = FuseFeeDistributor(payable(contractToTest));
     uint256 marketsCounterBefore = oldImpl.marketsCounter();
+    address ownerBefore = oldImpl.owner();
 
     (address latestCErc20DelegateBefore, bool allowResign, bytes memory becomeImplementationData) = oldImpl
       .latestCErc20Delegate(oldCercDelegate);
-    bool whitelistedBefore = oldImpl.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateBefore, false);
+//    bool whitelistedBefore = oldImpl.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateBefore, false);
 
     emit log_uint(marketsCounterBefore);
-    emit log_address(latestCErc20DelegateBefore);
-    if (whitelistedBefore) emit log("whitelisted before");
-    else emit log("should be whitelisted");
+    emit log_address(ownerBefore);
+//    if (whitelistedBefore) emit log("whitelisted before");
+//    else emit log("should be whitelisted");
 
     // upgrade
     {
@@ -106,17 +107,20 @@ contract ContractsUpgradesTest is BaseTest {
     FuseFeeDistributor ffd = FuseFeeDistributor(payable(contractToTest));
 
     uint256 marketsCounterAfter = ffd.marketsCounter();
+    address ownerAfter = ffd.owner();
     (address latestCErc20DelegateAfter, bool allowResignAfter, bytes memory becomeImplementationDataAfter) = ffd
       .latestCErc20Delegate(oldCercDelegate);
-    bool whitelistedAfter = ffd.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateAfter, false);
+//    bool whitelistedAfter = ffd.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateAfter, false);
 
     emit log_uint(marketsCounterAfter);
-    emit log_address(latestCErc20DelegateAfter);
-    if (whitelistedAfter) emit log("whitelisted After");
-    else emit log("should be whitelisted");
+    emit log_address(ownerAfter);
+//    if (whitelistedAfter) emit log("whitelisted After");
+//    else emit log("should be whitelisted");
 
     assertEq(latestCErc20DelegateBefore, latestCErc20DelegateAfter, "latest delegates do not match");
     assertEq(marketsCounterBefore, marketsCounterAfter, "markets counter does not match");
-    assertEq(whitelistedBefore, whitelistedAfter, "whitelisted status does not match");
+//    assertEq(whitelistedBefore, whitelistedAfter, "whitelisted status does not match");
+
+    assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 }
