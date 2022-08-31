@@ -23,9 +23,9 @@ contract InterestRateModelTest is BaseTest {
   function setUpBsc() public shouldRun(forChains(BSC_MAINNET)) {
     ankrBnbInterestRateModel2 = new AnkrBNBInterestRateModel(
       10512000,
-      0.256e17,
-      0.32e17,
-      0.8e18,
+      0.5e18,
+      3e18,
+      0.85e18,
       3,
       0xBb1Aa6e59E5163D8722a122cd66EBA614b59df0d
     );
@@ -119,47 +119,62 @@ contract InterestRateModelTest is BaseTest {
   }
 
   function testAnkrBNBBorrowModel2Rate() public shouldRun(forChains(BSC_MAINNET)) {
-    uint256 borrowRate = ankrBnbInterestRateModel2.getBorrowRate(3e18, 8e18, 1e18);
-    uint256 util = ankrBnbInterestRateModel2.utilizationRate(3e18, 8e18, 1e18);
-    assertEq(util, 0.8e18); // utilization 80
-    assertGe(_convertToPerYear(borrowRate), 0);
-    assertLe(_convertToPerYear(borrowRate), 100e18);
-    borrowRate = ankrBnbInterestRateModel2.getBorrowRate(800e18, 8e18, 8e18);
-    util = ankrBnbInterestRateModel2.utilizationRate(800e18, 8e18, 8e18);
+    uint256 borrowRate = ankrBnbInterestRateModel2.getBorrowRate(800e18, 8e18, 8e18);
+    uint256 util = ankrBnbInterestRateModel2.utilizationRate(800e18, 8e18, 8e18);
     assertEq(util, 0.1e17); // utilization 1
     assertGe(_convertToPerYear(borrowRate), 0);
     assertLe(_convertToPerYear(borrowRate), 100e18);
+    emit log_uint(borrowRate);
     borrowRate = ankrBnbInterestRateModel2.getBorrowRate(80e18, 8e18, 8e18);
     util = ankrBnbInterestRateModel2.utilizationRate(80e18, 8e18, 8e18);
     assertEq(util, 0.1e18); // utilization 10
     assertGe(_convertToPerYear(borrowRate), 0);
     assertLe(_convertToPerYear(borrowRate), 100e18);
+    emit log_uint(borrowRate);
     borrowRate = ankrBnbInterestRateModel2.getBorrowRate(40e18, 8e18, 8e18);
     util = ankrBnbInterestRateModel2.utilizationRate(40e18, 8e18, 8e18);
     assertEq(util, 0.2e18); // utilization 20
     assertGe(_convertToPerYear(borrowRate), 0);
     assertLe(_convertToPerYear(borrowRate), 100e18);
+    emit log_uint(borrowRate);
+    borrowRate = ankrBnbInterestRateModel2.getBorrowRate(3e18, 8e18, 1e18);
+    util = ankrBnbInterestRateModel2.utilizationRate(3e18, 8e18, 1e18);
+    assertEq(util, 0.8e18); // utilization 80
+    assertGe(_convertToPerYear(borrowRate), 0);
+    assertLe(_convertToPerYear(borrowRate), 100e18);
+    emit log_uint(borrowRate);
+    borrowRate = ankrBnbInterestRateModel2.getBorrowRate(8e18, 7.2e18, 7.2e18);
+    util = ankrBnbInterestRateModel2.utilizationRate(8e18, 7.2e18, 7.2e18);
+    assertEq(util, 0.9e18); // utilization 90
+    assertGe(_convertToPerYear(borrowRate), 0);
+    assertLe(_convertToPerYear(borrowRate), 100e18);
+    emit log_uint(borrowRate);
   }
 
   function testAnkrBNBSupplyModel2Rate() public shouldRun(forChains(BSC_MAINNET)) {
-    uint256 supplyRate = ankrBnbInterestRateModel2.getSupplyRate(3e18, 8e18, 1e18, 0.17e18);
+    uint256 supplyRate = ankrBnbInterestRateModel2.getSupplyRate(3e18, 8e18, 1e18, 0.1e18);
     uint256 util = ankrBnbInterestRateModel2.utilizationRate(3e18, 8e18, 1e18);
     assertEq(util, 0.8e18); // utilization 80
     assertGe(_convertToPerYear(supplyRate), 0);
     assertLe(_convertToPerYear(supplyRate), 100e18);
-    supplyRate = ankrBnbInterestRateModel2.getSupplyRate(800e18, 8e18, 8e18, 0.17e18);
+    supplyRate = ankrBnbInterestRateModel2.getSupplyRate(800e18, 8e18, 8e18, 0.1e18);
     util = ankrBnbInterestRateModel2.utilizationRate(800e18, 8e18, 8e18);
     assertEq(util, 0.1e17); // utilization 1
     assertGe(_convertToPerYear(supplyRate), 0);
     assertLe(_convertToPerYear(supplyRate), 100e18);
-    supplyRate = ankrBnbInterestRateModel2.getSupplyRate(80e18, 8e18, 8e18, 0.17e18);
+    supplyRate = ankrBnbInterestRateModel2.getSupplyRate(80e18, 8e18, 8e18, 0.1e18);
     util = ankrBnbInterestRateModel2.utilizationRate(80e18, 8e18, 8e18);
     assertEq(util, 0.1e18); // utilization 10
     assertGe(_convertToPerYear(supplyRate), 0);
     assertLe(_convertToPerYear(supplyRate), 100e18);
-    supplyRate = ankrBnbInterestRateModel2.getSupplyRate(40e18, 8e18, 8e18, 0.17e18);
+    supplyRate = ankrBnbInterestRateModel2.getSupplyRate(40e18, 8e18, 8e18, 0.1e18);
     util = ankrBnbInterestRateModel2.utilizationRate(40e18, 8e18, 8e18);
     assertEq(util, 0.2e18); // utilization 20
+    assertGe(_convertToPerYear(supplyRate), 0);
+    assertLe(_convertToPerYear(supplyRate), 100e18);
+    supplyRate = ankrBnbInterestRateModel2.getSupplyRate(8e18, 7.2e18, 7.2e18, 0.1e18);
+    util = ankrBnbInterestRateModel2.utilizationRate(8e18, 7.2e18, 7.2e18);
+    assertEq(util, 0.9e18); // utilization 90
     assertGe(_convertToPerYear(supplyRate), 0);
     assertLe(_convertToPerYear(supplyRate), 100e18);
   }
