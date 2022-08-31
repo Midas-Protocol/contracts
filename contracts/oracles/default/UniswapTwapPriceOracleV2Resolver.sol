@@ -23,6 +23,8 @@ contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
   address wToken;
   uint256 public lastUpdate;
 
+  receive() external payable {}
+
   constructor(PairConfig[] memory _pairConfigs, UniswapTwapPriceOracleV2Root _root, address _wToken) public {
     for (uint256 i = 0; i < _pairConfigs.length; i++) {
       pairs[i] = _pairConfigs[i].pair;
@@ -75,11 +77,6 @@ contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
   function updatePairs(address[] calldata workablePairs) external {
     if (workablePairs.length == 0) return;
     root.update(workablePairs);
-  }
-
-  function deposit() external payable {
-    require(ERC20(wToken).balanceOf(msg.sender) >= msg.value, "insufficient funds");
-    ERC20(wToken).transferFrom(msg.sender, address(this), msg.value);
   }
 
   function checker() external view override returns (bool canExec, bytes memory execPayload) {
