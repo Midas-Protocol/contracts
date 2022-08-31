@@ -15,7 +15,7 @@ import "./utils/PatchedStorage.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FusePoolDirectory is a directory for Fuse interest rate pools.
  */
-contract FusePoolDirectory is PatchedStorage, SafeOwnableUpgradeable {
+contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   /**
    * @dev Initializes a deployer whitelist if desired.
    * @param _enforceDeployerWhitelist Boolean indicating if the deployer whitelist is to be enforced.
