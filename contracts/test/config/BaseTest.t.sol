@@ -45,6 +45,11 @@ abstract contract BaseTest is Test {
     }
   }
 
+  modifier shouldRunTestFail(bool run) {
+    require(run, "test should fail");
+    _;
+  }
+
   function forChains(uint256 id0) public view returns (bool) {
     return block.chainid == id0;
   }
