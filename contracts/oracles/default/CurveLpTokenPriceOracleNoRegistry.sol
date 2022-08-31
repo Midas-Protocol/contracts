@@ -17,7 +17,7 @@ import "../BasePriceOracle.sol";
  * @notice CurveLpTokenPriceOracle is a price oracle for Curve LP tokens (using the sender as a root oracle).
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
-contract CurveLpTokenPriceOracleNoRegistry is PatchedStorage, SafeOwnableUpgradeable, BasePriceOracle {
+contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedStorage, BasePriceOracle {
   /**
    * @dev Maps Curve LP token addresses to underlying token addresses.
    */
