@@ -20,12 +20,11 @@ contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
   uint256[] deviationThresholds;
 
   UniswapTwapPriceOracleV2Root public root;
-  address wToken;
   uint256 public lastUpdate;
 
   receive() external payable {}
 
-  constructor(PairConfig[] memory _pairConfigs, UniswapTwapPriceOracleV2Root _root, address _wToken) public {
+  constructor(PairConfig[] memory _pairConfigs, UniswapTwapPriceOracleV2Root _root) public {
     for (uint256 i = 0; i < _pairConfigs.length; i++) {
       pairs[i] = _pairConfigs[i].pair;
       baseTokens[i] = _pairConfigs[i].baseToken;
@@ -33,7 +32,6 @@ contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
       deviationThresholds[i] = _pairConfigs[i].deviationThreshold;
     }
     root = _root;
-    wToken = _wToken;
   }
 
   function changeRoot(UniswapTwapPriceOracleV2Root _root) external onlyOwner {
