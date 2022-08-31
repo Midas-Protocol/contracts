@@ -5,25 +5,72 @@ import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "../../../oracles/default/PythPriceOracle.sol";
 import "../../config/BaseTest.t.sol";
+import { MockPyth } from "@pythnetwork/pyth-sdk-solidity/MockPyth.sol";
+import { PythStructs } from "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
 import { Pyth } from "pyth-neon/PythOracle.sol";
 
 contract PythOraclesTest is BaseTest {
   PythPriceOracle oracle;
-  Pyth pythOracle;
+  MockPyth pythOracle;
+  
+  bytes32 nativeTokenPriceFeed = bytes32(bytes("7f57ca775216655022daa88e41c380529211cde01a1517735dbcf30e4a02bdaa"));
+  int64 nativeTokenPrice = 0.5e18;
+  bytes32 tokenPriceFeed = bytes32(bytes("ca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6"));
+  int64 tokenPrice = 1e18;
+
+  address token = 0x65976a250187cb1D21b7e3693aCF102d61c86177;
 
   function setUp() public {
-    pythOracle = Pyth(0x22a60682c2ACe5CbE57433De0BBAc292107Ca5b2);
-    emit log_address(address(pythOracle));
+    pythOracle = new MockPyth(0);
+
+    PythStructs.PriceFeed memory mockFeed = PythStructs.PriceFeed(
+      tokenPriceFeed,
+      tokenPriceFeed,
+      tokenPrice,
+      0,
+      0,
+      PythStructs.PriceStatus.TRADING,
+      0,
+      0,
+      0,
+      0,
+      uint64(block.timestamp),
+      0,
+      0,
+      0
+    );
+
+    PythStructs.PriceFeed memory mockFeed1 = PythStructs.PriceFeed(
+      nativeTokenPriceFeed,
+      nativeTokenPriceFeed,
+      nativeTokenPrice,
+      0,
+      0,
+      PythStructs.PriceStatus.TRADING,
+      0,
+      0,
+      0,
+      0,
+      uint64(block.timestamp),
+      0,
+      0,
+      0
+    );
+
+    bytes[] memory feedData = new bytes[](2);
+    feedData[0] = abi.encode(mockFeed);
+    feedData[1] = abi.encode(mockFeed1);
+    pythOracle.updatePriceFeeds(feedData);
+
     oracle = new PythPriceOracle(
       address(this),
       true,
       address(0),
       address(pythOracle),
-      bytes32(bytes("7f57ca775216655022daa88e41c380529211cde01a1517735dbcf30e4a02bdaa")),
+      nativeTokenPriceFeed,
       MasterPriceOracle(address(0)),
       address(0)
     );
-    // oracle = PythPriceOracle(ap.getAddress("PythPriceOracle"));
   }
 
   function testPriceFeed(address testedTokenAddress, bytes32 feedId) internal returns (uint256 price) {
@@ -31,19 +78,12 @@ contract PythOraclesTest is BaseTest {
     underlyings[0] = testedTokenAddress;
     bytes32[] memory feedIds = new bytes32[](1);
     feedIds[0] = feedId;
-    emit log_uint(1);
     oracle.setPriceFeeds(underlyings, feedIds);
-    emit log_uint(111);
-    price = oracle.price1(testedTokenAddress);
-    emit log_uint(price);
+
+    price = oracle.price(testedTokenAddress);
   }
 
-  function testwETHPrice() public shouldRun(forChains(NEON_DEVNET)) {
-    address wETH = 0x65976a250187cb1D21b7e3693aCF102d61c86177;
-    bytes32 wETH_PRICE_FEED = 0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6;
-    // emit log_bytes(wETH_PRICE_FEED);
-    // emit log_bytes32(bytes32(bytes(wETH_PRICE_FEED)));
-
-    assert(testPriceFeed(wETH, wETH_PRICE_FEED) > 0);
+  function testTokenPrice() public shouldRun(forChains(NEON_DEVNET)) {
+    assertEq(testPriceFeed(token, tokenPriceFeed), uint256(uint64(tokenPrice / nativeTokenPrice * 1e18)));
   }
 }
