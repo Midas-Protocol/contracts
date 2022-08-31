@@ -18,10 +18,10 @@ contract BombERC4626 is MidasERC4626 {
   // the staking token through which the rewards are distributed and redeemed
   IXBomb public xbomb;
 
-  /* ========== CONSTRUCTOR ========== */
+  /* ========== INITIALIZER ========== */
 
   /**
-   * @notice Creates a new Vault that accepts a specific underlying token.
+     @notice Initializes the Vault.
    * @param asset The BOMB ERC20-compliant token the Vault should accept.
    * @param _xbombAddress the xBOMB contract address
    */

@@ -5,7 +5,6 @@ import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 interface IBeefyVault {
   function want() external view returns (ERC20Upgradeable);
@@ -38,7 +37,6 @@ interface IBeefyVault {
  * Wraps https://github.com/beefyfinance/beefy-contracts/blob/master/contracts/BIFI/vaults/BeefyVaultV6.sol
  */
 contract BeefyERC4626 is MidasERC4626 {
-  using SafeERC20Upgradeable for ERC20Upgradeable;
   using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
@@ -48,10 +46,10 @@ contract BeefyERC4626 is MidasERC4626 {
 
   uint256 BPS_DENOMINATOR = 10_000;
 
-  /* ========== CONSTRUCTOR ========== */
+  /* ========== INITIALIZER ========== */
 
   /**
-     @notice Creates a new Vault that accepts a specific underlying token.
+     @notice Initializes the Vault.
      @param asset The ERC20 compliant token the Vault should accept.
      @param _beefyVault The Beefy Vault contract.
      @param _withdrawalFee of the beefyVault in BPS

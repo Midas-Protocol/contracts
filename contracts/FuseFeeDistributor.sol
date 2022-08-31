@@ -28,7 +28,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable {
    */
   function initialize(uint256 _defaultInterestFeeRate) public initializer {
     require(_defaultInterestFeeRate <= 1e18, "Interest fee rate cannot be more than 100%.");
-    __Ownable_init();
+    __SafeOwnable_init();
     defaultInterestFeeRate = _defaultInterestFeeRate;
     maxSupplyEth = type(uint256).max;
     maxUtilizationRate = type(uint256).max;

@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.10;
 
-import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { MidasERC4626 } from "./MidasERC4626.sol";
 
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { IW_NATIVE } from "../../utils/IW_NATIVE.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 interface IAlpacaVault {
   /// @notice Return the total ERC20 entitled to the token holders. Be careful of unaccrued interests.
@@ -33,7 +31,6 @@ interface IAlpacaVault {
  * Wraps https://github.com/alpaca-finance/bsc-alpaca-contract/blob/main/contracts/6/protocol/Vault.sol
  */
 contract AlpacaERC4626 is MidasERC4626 {
-  using SafeERC20Upgradeable for ERC20Upgradeable;
   using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
@@ -41,10 +38,10 @@ contract AlpacaERC4626 is MidasERC4626 {
   IAlpacaVault public alpacaVault;
   IW_NATIVE wtoken;
 
-  /* ========== CONSTRUCTOR ========== */
+  /* ========== INITIALIZER ========== */
 
   /**
-     @notice Creates a new Vault that accepts a specific underlying token.
+     @notice Initializes the Vault.
      @param asset The ERC20 compliant token the Vault should accept.
      @param _alpacaVault The Alpaca Vault contract.
      @param _wtoken the wrapped native asset token contract address.

@@ -7,7 +7,6 @@ import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { RewardsClaimer } from "./RewardsClaimer.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 interface IElysianFields {
   function deposit(uint256, uint256) external;
@@ -22,7 +21,6 @@ interface IElysianFields {
 }
 
 contract JarvisERC4626 is MidasERC4626, RewardsClaimer {
-  using SafeERC20Upgradeable for ERC20Upgradeable;
   using FixedPointMathLib for uint256;
 
   uint256 public poolId;

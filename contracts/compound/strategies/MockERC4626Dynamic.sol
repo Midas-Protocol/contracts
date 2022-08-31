@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
@@ -15,16 +14,15 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
  *
  */
 contract MockERC4626Dynamic is ERC4626 {
-  using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
   FlywheelCore public immutable flywheel;
 
-  /* ========== CONSTRUCTOR ========== */
+  /* ========== INITIALIZER ========== */
 
   /**
-     @notice Creates a new Vault that accepts a specific underlying token.
+     @notice Initializes the Vault.
      @param _asset The ERC20 compliant token the Vault should accept.
      @param _flywheel Flywheel to pull in rewardsToken
     */

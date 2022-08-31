@@ -21,7 +21,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable {
    * @param _deployerWhitelist Array of Ethereum accounts to be whitelisted.
    */
   function initialize(bool _enforceDeployerWhitelist, address[] memory _deployerWhitelist) public initializer {
-    __Ownable_init();
+    __SafeOwnable_init();
     enforceDeployerWhitelist = _enforceDeployerWhitelist;
     for (uint256 i = 0; i < _deployerWhitelist.length; i++) deployerWhitelist[_deployerWhitelist[i]] = true;
   }

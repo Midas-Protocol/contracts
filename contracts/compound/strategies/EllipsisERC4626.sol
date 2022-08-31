@@ -6,7 +6,6 @@ import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 interface ILpTokenStaker {
   function rewardToken() external view returns (ERC20Upgradeable);
@@ -40,17 +39,16 @@ interface ILpTokenStaker {
  *
  */
 contract EllipsisERC4626 is MidasERC4626 {
-  using SafeERC20Upgradeable for ERC20Upgradeable;
   using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
   ILpTokenStaker public lpTokenStaker;
   FlywheelCore public flywheel;
 
-  /* ========== CONSTRUCTOR ========== */
+  /* ========== INITIALIZER ========== */
 
   /**
-     @notice Creates a new Vault that accepts a specific underlying token.
+     @notice Initializes the Vault.
      @param asset The ERC20 compliant token the Vault should accept.
      @param _flywheel Flywheel to pull EPX rewards
      @param _lpTokenStaker LpTokenStaker contract from Ellipsis

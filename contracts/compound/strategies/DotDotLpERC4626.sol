@@ -7,7 +7,6 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { RewardsClaimer } from "./RewardsClaimer.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 interface ILpDepositor {
   // user -> pool -> deposit amount
@@ -44,7 +43,6 @@ interface ILpDepositor {
  *
  */
 contract DotDotLpERC4626 is MidasERC4626, RewardsClaimer {
-  using SafeERC20Upgradeable for ERC20Upgradeable;
   using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
@@ -53,10 +51,10 @@ contract DotDotLpERC4626 is MidasERC4626, RewardsClaimer {
   ILpDepositor public lpDepositor;
   ERC20Upgradeable[] public assetAsArray;
 
-  /* ========== CONSTRUCTOR ========== */
+  /* ========== INITIALIZER ========== */
 
   /**
-     @notice Creates a new Vault that accepts a specific underlying token.
+     @notice Initializes the Vault.
      @param asset The ERC20 compliant token the Vault should accept.
      @param _dddFlywheel Flywheel to pull DDD rewards
      @param _epxFlywheel Flywheel to pull EPX rewards

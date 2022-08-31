@@ -50,6 +50,8 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     IFlywheelBooster _flywheelBooster,
     address _owner
   ) public initializer {
+    __SafeOwnable_init();
+
     rewardToken = _rewardToken;
     flywheelRewards = _flywheelRewards;
     flywheelBooster = _flywheelBooster;
