@@ -91,7 +91,7 @@ contract ContractsUpgradesTest is BaseTest {
     address ownerBefore = oldImpl.owner();
 
     (address latestCErc20DelegateBefore, bool allowResign, bytes memory becomeImplementationData) = oldImpl
-    .latestCErc20Delegate(oldCercDelegate);
+      .latestCErc20Delegate(oldCercDelegate);
     //    bool whitelistedBefore = oldImpl.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateBefore, false);
 
     emit log_uint(marketsCounterBefore);
@@ -116,7 +116,7 @@ contract ContractsUpgradesTest is BaseTest {
     uint256 marketsCounterAfter = ffd.marketsCounter();
     address ownerAfter = ffd.owner();
     (address latestCErc20DelegateAfter, bool allowResignAfter, bytes memory becomeImplementationDataAfter) = ffd
-    .latestCErc20Delegate(oldCercDelegate);
+      .latestCErc20Delegate(oldCercDelegate);
     //    bool whitelistedAfter = ffd.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateAfter, false);
 
     emit log_uint(marketsCounterAfter);
