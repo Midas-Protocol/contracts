@@ -192,14 +192,14 @@ contract LiquidityMiningTest is DSTest {
   }
 
   function testFlywheelAccess() public {
-//    address mainnetFuse = 0x613Ea1dC49E83eAd05db49DcFcF57b22Fb5510bD;
-//    address ourJFiat = 0x31d76A64Bc8BbEffb601fac5884372DEF910F044;
+    //    address mainnetFuse = 0x613Ea1dC49E83eAd05db49DcFcF57b22Fb5510bD;
+    //    address ourJFiat = 0x31d76A64Bc8BbEffb601fac5884372DEF910F044;
     address fpdFuse = 0x835482FE0532f169024d5E9410199369aAD5C77E;
     address ourFpd = 0x295d7347606F4bd810C8296bb8d75D657001fcf7;
 
     FusePoolDirectory fpd = FusePoolDirectory(fpdFuse);
     FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
-    for (uint k = 0; k < pools.length; k++) {
+    for (uint256 k = 0; k < pools.length; k++) {
       Comptroller pool = Comptroller(pools[k].comptroller);
       address[] memory flywheels = pool.getRewardsDistributors();
 
@@ -213,11 +213,10 @@ contract LiquidityMiningTest is DSTest {
           emit log_address(pools[k].comptroller);
           emit log(pools[k].name);
         } catch {
-//          emit log("reverted for");
-//          emit log_uint(i);
+          //          emit log("reverted for");
+          //          emit log_uint(i);
         }
       }
     }
-
   }
 }

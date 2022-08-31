@@ -53,8 +53,7 @@ contract AlpacaERC4626 is MidasERC4626 {
     ERC20Upgradeable asset,
     IAlpacaVault _alpacaVault,
     IW_NATIVE _wtoken
-  ) public initializer
-  {
+  ) public initializer {
     __MidasER4626_init(asset);
 
     alpacaVault = _alpacaVault;

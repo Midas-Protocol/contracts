@@ -59,12 +59,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     dddFlywheel = new MidasFlywheelCore();
-    dddFlywheel.initialize(
-      dddToken,
-      IFlywheelRewards(address(0)),
-      IFlywheelBooster(address(0)),
-      address(this)
-    );
+    dddFlywheel.initialize(dddToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
     dddRewards = new FuseFlywheelDynamicRewards(FlywheelCore(address(dddFlywheel)), 1);
     dddFlywheel.setFlywheelRewards(dddRewards);
 

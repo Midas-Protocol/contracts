@@ -65,8 +65,7 @@ contract BeamERC4626 is MidasERC4626 {
     FlywheelCore _flyWheel,
     uint256 _poolId,
     IVault _vault
-  ) public initializer
-  {
+  ) public initializer {
     __MidasER4626_init(asset);
 
     vault = _vault;

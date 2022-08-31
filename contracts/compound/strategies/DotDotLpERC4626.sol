@@ -117,11 +117,7 @@ contract DotDotLpERC4626 is MidasERC4626, RewardsClaimer {
   /* ========== EMERGENCY FUNCTIONS ========== */
 
   function emergencyWithdrawAndPause() external override onlyOwner {
-    lpDepositor.withdraw(
-      address(this),
-      _asset(),
-      lpDepositor.depositTokens(_asset()).balanceOf(address(this))
-    );
+    lpDepositor.withdraw(address(this), _asset(), lpDepositor.depositTokens(_asset()).balanceOf(address(this)));
     _pause();
   }
 
