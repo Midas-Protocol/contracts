@@ -25,11 +25,15 @@ contract ERC4626PerformanceFeeTest is BaseTest {
   IBeefyVault beefyVault = IBeefyVault(0x94E85B8E050F3F281CB9597cc0144F1F7AF1fe9B); // BOMB-BTCB LP
   address beefyStrategy = 0xEeBcd7E1f008C52fe5804B306832B7DD317e163D;
   address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
+  address newFeeRecipient = address(5);
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
     plugin = new BeefyERC4626();
     plugin.initialize(underlyingToken, beefyVault, 10);
+
+    uint256 currentPerformanceFee = plugin.performanceFee();
+    plugin.updateFeeSettings(currentPerformanceFee, newFeeRecipient);
   }
 
   /* --------------------- HELPER FUNCTIONS --------------------- */
@@ -58,7 +62,7 @@ contract ERC4626PerformanceFeeTest is BaseTest {
 
   function test__initializedValues() public shouldRun(forChains(BSC_MAINNET)) {
     assertEq(plugin.performanceFee(), PERFORMANCE_FEE, "!perFee");
-    assertEq(plugin.feeRecipient(), address(0), "!feeRecipient");
+    assertEq(plugin.feeRecipient(), newFeeRecipient, "!feeRecipient");
   }
 
   function test__UpdateFeeSettings() public shouldRun(forChains(BSC_MAINNET)) {

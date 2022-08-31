@@ -40,7 +40,6 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
     );
     __ERC4626_init(_asset);
 
-    feeRecipient = owner();
     vaultShareHWM = 10**_asset.decimals();
   }
 
@@ -166,21 +165,23 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
   /**
    * @notice Update performanceFee and/or feeRecipient
    */
-  function updateFeeSettings(uint256 _performanceFee, address _feeRecipient) external onlyOwner {
-    emit UpdatedFeeSettings(performanceFee, _performanceFee, feeRecipient, _feeRecipient);
+  function updateFeeSettings(uint256 newPerformanceFee, address newFeeRecipient) external onlyOwner {
+    emit UpdatedFeeSettings(performanceFee, newPerformanceFee, feeRecipient, newFeeRecipient);
 
-    performanceFee = _performanceFee;
+    performanceFee = newPerformanceFee;
 
-    if (_feeRecipient != feeRecipient) {
-      uint256 oldFees = balanceOf(feeRecipient);
+    if (newFeeRecipient != feeRecipient) {
+      if (feeRecipient != address(0)) {
+        uint256 oldFees = balanceOf(feeRecipient);
 
-      _burn(feeRecipient, oldFees);
-      _approve(feeRecipient, owner(), 0);
+        _burn(feeRecipient, oldFees);
+        _approve(feeRecipient, owner(), 0);
 
-      feeRecipient = _feeRecipient;
+        _mint(newFeeRecipient, oldFees);
+        _approve(newFeeRecipient, owner(), type(uint256).max);
+      }
 
-      _mint(feeRecipient, oldFees);
-      _approve(feeRecipient, owner(), type(uint256).max);
+      feeRecipient = newFeeRecipient;
     }
   }
 
