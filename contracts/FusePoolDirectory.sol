@@ -8,13 +8,14 @@ import "./external/compound/IUnitroller.sol";
 import "./external/compound/IPriceOracle.sol";
 import "./compound/Unitroller.sol";
 import "./midas/SafeOwnableUpgradeable.sol";
+import "./utils/PatchedStorage.sol";
 
 /**
  * @title FusePoolDirectory
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FusePoolDirectory is a directory for Fuse interest rate pools.
  */
-contract FusePoolDirectory is SafeOwnableUpgradeable {
+contract FusePoolDirectory is PatchedStorage, SafeOwnableUpgradeable {
   /**
    * @dev Initializes a deployer whitelist if desired.
    * @param _enforceDeployerWhitelist Boolean indicating if the deployer whitelist is to be enforced.

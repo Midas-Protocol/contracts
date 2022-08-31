@@ -12,13 +12,14 @@ import "./compound/CEtherDelegator.sol";
 import "./compound/CErc20Delegator.sol";
 import "./compound/CErc20PluginDelegate.sol";
 import "./midas/SafeOwnableUpgradeable.sol";
+import "./utils/PatchedStorage.sol";
 
 /**
  * @title FuseFeeDistributor
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FuseFeeDistributor controls and receives protocol fees from Fuse pools and relays admin actions to Fuse pools.
  */
-contract FuseFeeDistributor is SafeOwnableUpgradeable {
+contract FuseFeeDistributor is PatchedStorage, SafeOwnableUpgradeable {
   using AddressUpgradeable for address;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
