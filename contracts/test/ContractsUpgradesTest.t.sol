@@ -78,6 +78,7 @@ contract ContractsUpgradesTest is BaseTest {
     emit log_uint(poolsAfter.length);
 
     assertEq(lenBefore, lenAfter, "pools count does not match");
+    assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
   function testFuseFeeDistributorUpgrade() public shouldRun(forChains(BSC_MAINNET)) {
