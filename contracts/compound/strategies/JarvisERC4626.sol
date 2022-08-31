@@ -4,7 +4,7 @@ pragma solidity ^0.8.10;
 import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
-import { RewardsClaimer } from "fuse-flywheel/utils/RewardsClaimer.sol";
+import { RewardsClaimer } from "./RewardsClaimer.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
