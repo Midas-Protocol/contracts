@@ -55,6 +55,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     flywheelBooster = _flywheelBooster;
 
     _transferOwnership(_owner);
+    feeRecipient = owner();
   }
 
   /*///////////////////////////////////////////////////////////////

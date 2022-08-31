@@ -40,6 +40,7 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
     );
     __ERC4626_init(_asset);
 
+    feeRecipient = owner();
     vaultShareHWM = 10**_asset.decimals();
   }
 
