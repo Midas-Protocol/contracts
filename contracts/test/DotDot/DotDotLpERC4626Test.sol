@@ -6,7 +6,7 @@ import "forge-std/Vm.sol";
 import "../helpers/WithPool.sol";
 import "../config/BaseTest.t.sol";
 
-import { MidasERC4626, DotDotLpERC4626, ILpDepositor } from "../../compound/strategies/DotDotLpERC4626.sol";
+import { MidasERC4626, DotDotLpERC4626, ILpDepositor } from "../../midas/strategies/DotDotLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockLpDepositor } from "../mocks/dotdot/MockLpDepositor.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";

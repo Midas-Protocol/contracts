@@ -5,7 +5,7 @@ import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "./config/BaseTest.t.sol";
 
-import { EllipsisERC4626, ILpTokenStaker } from "../compound/strategies/EllipsisERC4626.sol";
+import { EllipsisERC4626, ILpTokenStaker } from "../midas/strategies/EllipsisERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { MockLpTokenStaker, IERC20Mintable } from "./mocks/ellipsis/MockLpTokenStaker.sol";

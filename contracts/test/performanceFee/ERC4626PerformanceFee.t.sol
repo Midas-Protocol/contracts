@@ -8,8 +8,8 @@ import "../config/BaseTest.t.sol";
 
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 import { DotDotERC4626Test } from "../DotDot/DotDotLpERC4626Test.sol";
-import { IBeefyVault, BeefyERC4626 } from "../../compound/strategies/BeefyERC4626.sol";
-import { MidasERC4626 } from "../../compound/strategies/MidasERC4626.sol";
+import { IBeefyVault, BeefyERC4626 } from "../../midas/strategies/BeefyERC4626.sol";
+import { MidasERC4626 } from "../../midas/strategies/MidasERC4626.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 

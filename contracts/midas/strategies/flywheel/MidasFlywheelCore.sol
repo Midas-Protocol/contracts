@@ -8,7 +8,7 @@ import { SafeCastLib } from "solmate/utils/SafeCastLib.sol";
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 
-import { SafeOwnableUpgradeable } from "../../../utils/SafeOwnableUpgradeable.sol";
+import { SafeOwnableUpgradeable } from "../../../midas/SafeOwnableUpgradeable.sol";
 
 contract MidasFlywheelCore is SafeOwnableUpgradeable {
   using SafeTransferLib for ERC20;

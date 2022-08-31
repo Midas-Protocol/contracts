@@ -11,7 +11,7 @@ import "./compound/ComptrollerStorage.sol";
 import "./compound/CEtherDelegator.sol";
 import "./compound/CErc20Delegator.sol";
 import "./compound/CErc20PluginDelegate.sol";
-import "./utils/SafeOwnableUpgradeable.sol";
+import "./midas/SafeOwnableUpgradeable.sol";
 
 /**
  * @title FuseFeeDistributor

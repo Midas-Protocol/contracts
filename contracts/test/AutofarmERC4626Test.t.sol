@@ -9,7 +9,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 
-import { AutofarmERC4626, IAutofarmV2 } from "../compound/strategies/AutofarmERC4626.sol";
+import { AutofarmERC4626, IAutofarmV2 } from "../midas/strategies/AutofarmERC4626.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";

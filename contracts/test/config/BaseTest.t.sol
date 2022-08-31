@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "forge-std/Vm.sol";
 import "forge-std/Test.sol";
 
-import "../../utils/AddressesProvider.sol";
+import "../../midas/AddressesProvider.sol";
 
 abstract contract BaseTest is Test {
   uint256 constant BSC_MAINNET = 56;

@@ -2,7 +2,7 @@
 pragma solidity >=0.4.23;
 
 import "./config/BaseTest.t.sol";
-import "../compound/strategies/BeamERC4626.sol";
+import "../midas/strategies/BeamERC4626.sol";
 import "./mocks/beam/MockVault.sol";
 import "forge-std/Test.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";

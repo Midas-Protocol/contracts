@@ -8,7 +8,7 @@ import { ERC4626Upgradeable } from "openzeppelin-contracts-upgradeable/contracts
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
-import { SafeOwnableUpgradeable } from "../../utils/SafeOwnableUpgradeable.sol";
+import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
 
 abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, ERC4626Upgradeable {
   using FixedPointMathLib for uint256;

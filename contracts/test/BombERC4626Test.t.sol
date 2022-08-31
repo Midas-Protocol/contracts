@@ -6,7 +6,7 @@ import "forge-std/Vm.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../compound/strategies/BombERC4626.sol";
+import "../midas/strategies/BombERC4626.sol";
 import "./config/BaseTest.t.sol";
 
 contract BombERC4626Test is BaseTest {

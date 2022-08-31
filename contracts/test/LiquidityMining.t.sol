@@ -190,31 +190,4 @@ contract LiquidityMiningTest is DSTest {
     // user balance should accumulate from both rewards
     require(rewardToken.balanceOf(user) == userRewards + userRewards2, "balance mismatch");
   }
-
-  function testFlywheelAccess() public {
-    //    address mainnetFuse = 0x613Ea1dC49E83eAd05db49DcFcF57b22Fb5510bD;
-    address fpdFuse = 0x835482FE0532f169024d5E9410199369aAD5C77E;
-
-    FusePoolDirectory fpd = FusePoolDirectory(fpdFuse);
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
-    for (uint256 k = 0; k < pools.length; k++) {
-      Comptroller pool = Comptroller(pools[k].comptroller);
-      address[] memory flywheels = pool.getRewardsDistributors();
-
-      for (uint8 i = 0; i < flywheels.length; i++) {
-        FuseFlywheelCore ffc = FuseFlywheelCore(flywheels[i]);
-
-        try ffc.addMarketForRewards(ERC20(address(1))) {
-          emit log("added the rewards for ");
-          emit log_uint(i);
-          emit log("pool that has an exploitable flywheel");
-          emit log_address(pools[k].comptroller);
-          emit log(pools[k].name);
-        } catch {
-          emit log("reverted for");
-          emit log_uint(i);
-        }
-      }
-    }
-  }
 }

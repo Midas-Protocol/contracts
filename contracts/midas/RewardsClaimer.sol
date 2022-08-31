@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 import { Initializable } from "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -19,8 +19,8 @@ contract RewardsClaimer is Initializable {
   ERC20Upgradeable[] public rewardTokens;
 
   function __RewardsClaimer_init(address _rewardDestination, ERC20Upgradeable[] memory _rewardTokens)
-    internal
-    onlyInitializing
+  internal
+  onlyInitializing
   {
     rewardDestination = _rewardDestination;
     rewardTokens = _rewardTokens;

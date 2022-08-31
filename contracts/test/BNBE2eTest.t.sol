@@ -9,7 +9,7 @@ import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDy
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
-import { AlpacaERC4626, IAlpacaVault } from "../compound/strategies/AlpacaERC4626.sol";
+import { AlpacaERC4626, IAlpacaVault } from "../midas/strategies/AlpacaERC4626.sol";
 import { IW_NATIVE } from "../utils/IW_NATIVE.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 

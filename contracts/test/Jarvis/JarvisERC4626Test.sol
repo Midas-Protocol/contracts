@@ -6,7 +6,7 @@ import "forge-std/Vm.sol";
 import "../helpers/WithPool.sol";
 import "../config/BaseTest.t.sol";
 
-import { MidasERC4626, JarvisERC4626, IElysianFields } from "../../compound/strategies/JarvisERC4626.sol";
+import { MidasERC4626, JarvisERC4626, IElysianFields } from "../../midas/strategies/JarvisERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";

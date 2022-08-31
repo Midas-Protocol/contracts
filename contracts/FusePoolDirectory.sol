@@ -7,7 +7,7 @@ import "./external/compound/IComptroller.sol";
 import "./external/compound/IUnitroller.sol";
 import "./external/compound/IPriceOracle.sol";
 import "./compound/Unitroller.sol";
-import "./utils/SafeOwnableUpgradeable.sol";
+import "./midas/SafeOwnableUpgradeable.sol";
 
 /**
  * @title FusePoolDirectory

@@ -6,7 +6,7 @@ import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
 import "../../external/curve/ICurvePool.sol";
-import "../../utils/SafeOwnableUpgradeable.sol";
+import "../../midas/SafeOwnableUpgradeable.sol";
 
 import "../BasePriceOracle.sol";
 

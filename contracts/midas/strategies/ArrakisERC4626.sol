@@ -4,54 +4,49 @@ pragma solidity ^0.8.10;
 import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
-import { RewardsClaimer } from "./RewardsClaimer.sol";
+import { RewardsClaimer } from "../RewardsClaimer.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-interface IElysianFields {
-  function deposit(uint256, uint256) external;
+interface IGuniPool {
+  function deposit(uint256) external;
 
-  function withdraw(uint256, uint256) external;
+  function withdraw(uint256) external;
 
-  function userInfo(uint256, address) external view returns (uint256, uint256);
+  function stake(address) external view returns (uint256);
 
-  function pendingRwd(uint256, address) external view returns (uint256);
+  function totalStake() external view returns (uint256);
 
-  function safeRewardTransfer(address, uint256) external;
+  function _users(address) external view returns (uint256, uint256);
+
+  function pendingMIMO(address) external view returns (uint256);
+
+  function releaseMIMO(address) external;
 }
 
-contract JarvisERC4626 is MidasERC4626, RewardsClaimer {
+contract ArrakisERC4626 is MidasERC4626, RewardsClaimer {
   using FixedPointMathLib for uint256;
 
-  uint256 public poolId;
-  IElysianFields public vault;
+  IGuniPool public pool;
   FlywheelCore public flywheel;
 
   function initialize(
     ERC20Upgradeable asset,
     FlywheelCore _flywheel,
-    IElysianFields _vault,
-    uint256 _poolId,
+    IGuniPool _pool,
     address _rewardsDestination,
     ERC20Upgradeable[] memory _rewardTokens
   ) public initializer {
     __MidasER4626_init(asset);
     __RewardsClaimer_init(_rewardsDestination, _rewardTokens);
 
-    vault = _vault;
+    pool = _pool;
     flywheel = _flywheel;
-    poolId = _poolId;
-    asset.approve(address(vault), type(uint256).max);
+    asset.approve(address(pool), type(uint256).max);
   }
 
   function totalAssets() public view override returns (uint256) {
-    if (paused()) {
-      return _asset().balanceOf(address(this));
-    }
-
-    (uint256 amount, ) = vault.userInfo(poolId, address(this));
-
-    return amount;
+    return paused() ? _asset().balanceOf(address(this)) : pool.stake(address(this));
   }
 
   function balanceOfUnderlying(address account) public view returns (uint256) {
@@ -59,26 +54,24 @@ contract JarvisERC4626 is MidasERC4626, RewardsClaimer {
   }
 
   function afterDeposit(uint256 amount, uint256) internal override {
-    vault.deposit(poolId, amount);
+    pool.deposit(amount);
   }
 
   function beforeWithdraw(uint256 amount, uint256) internal override {
-    vault.withdraw(poolId, amount);
+    pool.withdraw(amount);
   }
 
   function beforeClaim() internal override {
-    uint256 pendingRwd = vault.pendingRwd(poolId, address(this));
-    vault.safeRewardTransfer(address(this), pendingRwd);
+    pool.releaseMIMO(address(this));
   }
 
   function emergencyWithdrawAndPause() external override onlyOwner {
-    (uint256 amount, ) = vault.userInfo(poolId, address(this));
-    vault.withdraw(poolId, amount);
+    pool.withdraw(pool.stake(address(this)));
     _pause();
   }
 
   function unpause() external override onlyOwner {
     _unpause();
-    vault.deposit(poolId, _asset().balanceOf(address(this)));
+    pool.deposit(_asset().balanceOf(address(this)));
   }
 }

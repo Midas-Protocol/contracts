@@ -6,7 +6,7 @@ import "forge-std/Vm.sol";
 import "../helpers/WithPool.sol";
 import "../config/BaseTest.t.sol";
 
-import { MidasERC4626, BeefyERC4626, IBeefyVault } from "../../compound/strategies/BeefyERC4626.sol";
+import { MidasERC4626, BeefyERC4626, IBeefyVault } from "../../midas/strategies/BeefyERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
