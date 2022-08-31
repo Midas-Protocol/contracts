@@ -486,8 +486,17 @@ contract BeamERC4626UnitTest is BaseTest {
   }
 
   function testInitializedValues() public shouldRun(forChains(MOONBEAM_MAINNET)) {
-    assertEq(beamErc4626.name(), testToken.name());
-    assertEq(beamErc4626.symbol(), testToken.symbol());
+    assertEq(
+      beamErc4626.name(),
+      string(abi.encodePacked("Midas ", testToken.name(), " Vault")),
+      string(abi.encodePacked("!name ", testToken.name()))
+    );
+    assertEq(
+      beamErc4626.symbol(),
+      string(abi.encodePacked("mv", testToken.symbol())),
+      string(abi.encodePacked("!symbol ", testToken.symbol()))
+    );
+
     assertEq(address(beamErc4626.asset()), address(testToken));
     assertEq(address(beamErc4626.vault()), address(mockBeamChef));
     assertEq(address(marketKey), address(beamErc4626));
