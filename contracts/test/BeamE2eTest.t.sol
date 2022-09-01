@@ -55,7 +55,7 @@ contract BeamE2eTest is WithPool, BaseTest {
   }
 
   constructor() WithPool() {
-    super.setUpWithPool(MasterPriceOracle(mPriceOracle), MockERC20(0x99588867e817023162F4d4829995299054a5fC57));
+    super.setUpWithPool(MasterPriceOracle(mPriceOracle), ERC20Upgradeable(0x99588867e817023162F4d4829995299054a5fC57));
   }
 
   function setUp() public shouldRun(forChains(MOONBEAM_MAINNET)) {
@@ -118,7 +118,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     vars.erc4626 = new MockERC4626(ERC20(address(underlyingToken)));
     vars.asset = MockBeamERC20(usdc);
 
-    deployCErc20PluginDelegate(vars.erc4626, 0.9e18);
+    deployCErc20PluginDelegate(address(vars.erc4626), 0.9e18);
     deployCErc20Delegate(address(vars.asset), "BNB", "bnb", 0.1e18);
 
     vars.allMarkets = comptroller.getAllMarkets();
@@ -278,7 +278,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     MockERC4626 erc4626 = new MockERC4626(ERC20(address(underlyingToken)));
 
     vm.roll(1);
-    deployCErc20PluginDelegate(erc4626, 0.9e18);
+    deployCErc20PluginDelegate(address(erc4626), 0.9e18);
 
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));

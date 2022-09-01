@@ -1,30 +1,29 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.10;
 
-import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
-
 import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 
-interface ILpTokenStaker {
-  function rewardToken() external view returns (address);
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-  function userInfo(address _token, address _user) external view returns (uint256, uint256);
+interface ILpTokenStaker {
+  function rewardToken() external view returns (ERC20Upgradeable);
+
+  function userInfo(ERC20Upgradeable _token, address _user) external view returns (uint256, uint256);
 
   function balanceOf(address) external returns (uint256);
 
   // Deposit LP tokens into the contract. Also triggers a claim.
   function deposit(
-    address _token,
+    ERC20Upgradeable _token,
     uint256 _amount,
     bool _claimRewards
   ) external returns (uint256);
 
   // Withdraw LP tokens. Also triggers a claim.
   function withdraw(
-    address _token,
+    ERC20Upgradeable _token,
     uint256 _amount,
     bool _claimRewards
   ) external returns (uint256);
@@ -40,37 +39,32 @@ interface ILpTokenStaker {
  *
  */
 contract EllipsisERC4626 is MidasERC4626 {
-  using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
-  ILpTokenStaker public immutable lpTokenStaker;
-  FlywheelCore public immutable flywheel;
+  ILpTokenStaker public lpTokenStaker;
+  FlywheelCore public flywheel;
 
-  /* ========== CONSTRUCTOR ========== */
+  /* ========== INITIALIZER ========== */
 
   /**
-     @notice Creates a new Vault that accepts a specific underlying token.
-     @param _asset The ERC20 compliant token the Vault should accept.
+     @notice Initializes the Vault.
+     @param asset The ERC20 compliant token the Vault should accept.
      @param _flywheel Flywheel to pull EPX rewards
      @param _lpTokenStaker LpTokenStaker contract from Ellipsis
     */
-  constructor(
-    ERC20 _asset,
+  function initialize(
+    ERC20Upgradeable asset,
     FlywheelCore _flywheel,
     ILpTokenStaker _lpTokenStaker
-  )
-    MidasERC4626(
-      _asset,
-      string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
-      string(abi.encodePacked("mv", _asset.symbol()))
-    )
-  {
+  ) public initializer {
+    __MidasER4626_init(asset);
+
     lpTokenStaker = _lpTokenStaker;
     flywheel = _flywheel;
 
     asset.approve(address(lpTokenStaker), type(uint256).max);
-    ERC20(lpTokenStaker.rewardToken()).approve(address(flywheel.flywheelRewards()), type(uint256).max);
+    lpTokenStaker.rewardToken().approve(address(flywheel.flywheelRewards()), type(uint256).max);
   }
 
   /* ========== VIEWS ========== */
@@ -78,25 +72,25 @@ contract EllipsisERC4626 is MidasERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    (uint256 amount, ) = lpTokenStaker.userInfo(address(asset), address(this));
+    (uint256 amount, ) = lpTokenStaker.userInfo(_asset(), address(this));
     return amount;
   }
 
   /// @notice Calculates the total amount of underlying tokens the user holds.
   /// @return The total amount of underlying tokens the user holds.
   function balanceOfUnderlying(address account) public view returns (uint256) {
-    return convertToAssets(balanceOf[account]);
+    return convertToAssets(balanceOf(account));
   }
 
   /* ========== INTERNAL FUNCTIONS ========== */
 
   function afterDeposit(uint256 amount, uint256) internal override {
-    lpTokenStaker.deposit(address(asset), amount, true);
+    lpTokenStaker.deposit(_asset(), amount, true);
   }
 
   /// @notice withdraws specified amount of underlying token if possible
   function beforeWithdraw(uint256 amount, uint256) internal override {
-    lpTokenStaker.withdraw(address(asset), amount, true);
+    lpTokenStaker.withdraw(_asset(), amount, true);
   }
 
   /* Comment out for now
@@ -104,12 +98,12 @@ contract EllipsisERC4626 is MidasERC4626 {
    */
 
   // function emergencyWithdrawAndPause() external override onlyOwner {
-  //   lpTokenStaker.withdraw(address(asset), lpTokenStaker.balanceOf(address(this)), true);
+  //   lpTokenStaker.withdraw(_asset(), lpTokenStaker.balanceOf(address(this)), true);
   //   _pause();
   // }
 
   // function unpause() external override onlyOwner {
   //   _unpause();
-  //   lpTokenStaker.deposit(address(asset), asset.balanceOf(address(this)), true);
+  //   lpTokenStaker.deposit(_asset(), _asset().balanceOf(address(this)), true);
   // }
 }

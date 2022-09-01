@@ -6,7 +6,7 @@ import "forge-std/Vm.sol";
 import "../helpers/WithPool.sol";
 import "../config/BaseTest.t.sol";
 
-import { MidasERC4626, ArrakisERC4626, IGuniPool } from "../../compound/strategies/ArrakisERC4626.sol";
+import { MidasERC4626, ArrakisERC4626, IGuniPool } from "../../midas/strategies/ArrakisERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
@@ -16,6 +16,7 @@ import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 struct RewardsCycle {
   uint32 start;
@@ -32,7 +33,7 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
   address mimoToken = 0xADAC33f543267c4D59a8c299cF804c303BC3e4aC;
   address marketAddress;
   ERC20 marketKey;
-  ERC20[] rewardTokens;
+  ERC20Upgradeable[] rewardTokens;
 
   constructor() WithPool() {}
 
@@ -57,13 +58,15 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
 
     pool = IGuniPool(_pool);
 
-    rewardTokens.push(ERC20(flywheel.rewardToken()));
+    rewardTokens.push(ERC20Upgradeable(address(flywheel.rewardToken())));
 
-    plugin = MidasERC4626(address(new ArrakisERC4626(underlyingToken, flywheel, pool, address(this), rewardTokens)));
+    ArrakisERC4626 arrakisERC4626 = new ArrakisERC4626();
+    arrakisERC4626.initialize(ERC20Upgradeable(address(underlyingToken)), flywheel, pool, address(this), rewardTokens);
 
+    plugin = arrakisERC4626;
     initialStrategyBalance = pool.totalStake();
 
-    deployCErc20PluginRewardsDelegate(ERC4626(address(plugin)), 0.9e18);
+    deployCErc20PluginRewardsDelegate(address(plugin), 0.9e18);
     marketAddress = address(comptroller.cTokensByUnderlying(address(underlyingToken)));
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
     cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(plugin)));

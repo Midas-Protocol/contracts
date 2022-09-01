@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity >=0.8.0;
 
-import "solmate/mixins/ERC4626.sol";
-import "solmate/tokens/ERC20.sol";
-import { Ownable } from "openzeppelin-contracts/contracts/access/Ownable.sol";
-import { Pausable } from "@openzeppelin/contracts/security/Pausable.sol";
+import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 
-abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
+import { PausableUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/security/PausableUpgradeable.sol";
+import { ERC4626Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
+
+import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
+
+abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, ERC4626Upgradeable {
   using FixedPointMathLib for uint256;
-  using SafeTransferLib for ERC20;
+  using SafeERC20Upgradeable for ERC20Upgradeable;
 
   /* ========== STATE VARIABLES ========== */
 
@@ -25,14 +29,23 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     address newFeeRecipient
   );
 
-  /* ========== CONSTRUCTOR ========== */
+  /* ========== INITIALIZER ========== */
 
-  constructor(
-    ERC20 _asset,
-    string memory _name,
-    string memory _symbol
-  ) ERC4626(_asset, _name, _symbol) {
+  function __MidasER4626_init(ERC20Upgradeable _asset) internal onlyInitializing {
+    __SafeOwnable_init();
+    __Pausable_init();
+    __Context_init();
+    __ERC20_init(
+      string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
+      string(abi.encodePacked("mv", _asset.symbol()))
+    );
+    __ERC4626_init(_asset);
+
     vaultShareHWM = 10**_asset.decimals();
+  }
+
+  function _asset() internal view returns (ERC20Upgradeable) {
+    return ERC20Upgradeable(super.asset());
   }
 
   /* ========== DEPOSIT/WITHDRAW FUNCTIONS ========== */
@@ -42,7 +55,7 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     require((shares = previewDeposit(assets)) != 0, "ZERO_SHARES");
 
     // Need to transfer before minting or ERC777s could reenter.
-    asset.safeTransferFrom(msg.sender, address(this), assets);
+    _asset().safeTransferFrom(msg.sender, address(this), assets);
 
     _mint(receiver, shares);
 
@@ -55,7 +68,7 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     assets = previewMint(shares); // No need to check for rounding error, previewMint rounds up.
 
     // Need to transfer before minting or ERC777s could reenter.
-    asset.safeTransferFrom(msg.sender, address(this), assets);
+    _asset().safeTransferFrom(msg.sender, address(this), assets);
 
     _mint(receiver, shares);
 
@@ -72,24 +85,24 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     shares = previewWithdraw(assets); // No need to check for rounding error, previewWithdraw rounds up.
 
     if (msg.sender != owner) {
-      uint256 allowed = allowance[owner][msg.sender]; // Saves gas for limited approvals.
+      uint256 allowed = allowance(owner, msg.sender); // Saves gas for limited approvals.
 
-      if (allowed != type(uint256).max) allowance[owner][msg.sender] = allowed - shares;
+      if (allowed != type(uint256).max) _approve(owner, msg.sender, allowed - shares);
     }
 
     if (!paused()) {
-      uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
+      uint256 balanceBeforeWithdraw = _asset().balanceOf(address(this));
 
       beforeWithdraw(assets, shares);
 
-      assets = asset.balanceOf(address(this)) - balanceBeforeWithdraw;
+      assets = _asset().balanceOf(address(this)) - balanceBeforeWithdraw;
     }
 
     _burn(owner, shares);
 
     emit Withdraw(msg.sender, receiver, owner, assets, shares);
 
-    asset.safeTransfer(receiver, assets);
+    _asset().safeTransfer(receiver, assets);
   }
 
   function redeem(
@@ -98,27 +111,27 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
     address owner
   ) public override returns (uint256 assets) {
     if (msg.sender != owner) {
-      uint256 allowed = allowance[owner][msg.sender]; // Saves gas for limited approvals.
+      uint256 allowed = allowance(owner, msg.sender); // Saves gas for limited approvals.
 
-      if (allowed != type(uint256).max) allowance[owner][msg.sender] = allowed - shares;
+      if (allowed != type(uint256).max) _approve(owner, msg.sender, allowed - shares);
     }
 
     // Check for rounding error since we round down in previewRedeem.
     require((assets = previewRedeem(shares)) != 0, "ZERO_ASSETS");
 
     if (!paused()) {
-      uint256 balanceBeforeWithdraw = asset.balanceOf(address(this));
+      uint256 balanceBeforeWithdraw = _asset().balanceOf(address(this));
 
       beforeWithdraw(assets, shares);
 
-      assets = asset.balanceOf(address(this)) - balanceBeforeWithdraw;
+      assets = _asset().balanceOf(address(this)) - balanceBeforeWithdraw;
     }
 
     _burn(owner, shares);
 
     emit Withdraw(msg.sender, receiver, owner, assets, shares);
 
-    asset.safeTransfer(receiver, assets);
+    _asset().safeTransfer(receiver, assets);
   }
 
   /* ========== FEE FUNCTIONS ========== */
@@ -130,16 +143,16 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
    */
   function takePerformanceFee() external onlyOwner {
     uint256 currentAssets = totalAssets();
-    uint256 shareValue = convertToAssets(10**asset.decimals());
+    uint256 shareValue = convertToAssets(10**_asset().decimals());
 
     require(shareValue > vaultShareHWM, "shareValue !> vaultShareHWM");
     // chache value
-    uint256 supply = totalSupply;
+    uint256 supply = totalSupply();
 
     uint256 accruedPerformanceFee = (performanceFee * (shareValue - vaultShareHWM) * supply) / 1e36;
     _mint(feeRecipient, accruedPerformanceFee.mulDivDown(supply, (currentAssets - accruedPerformanceFee)));
 
-    vaultShareHWM = convertToAssets(10**asset.decimals());
+    vaultShareHWM = convertToAssets(10**_asset().decimals());
   }
 
   /**
@@ -147,27 +160,29 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
    * @dev We must make sure that feeRecipient is not address(0) before withdrawing fees
    */
   function withdrawAccruedFees() external onlyOwner {
-    redeem(balanceOf[feeRecipient], feeRecipient, feeRecipient);
+    redeem(balanceOf(feeRecipient), feeRecipient, feeRecipient);
   }
 
   /**
    * @notice Update performanceFee and/or feeRecipient
    */
-  function updateFeeSettings(uint256 _performanceFee, address _feeRecipient) external onlyOwner {
-    emit UpdatedFeeSettings(performanceFee, _performanceFee, feeRecipient, _feeRecipient);
+  function updateFeeSettings(uint256 newPerformanceFee, address newFeeRecipient) external onlyOwner {
+    emit UpdatedFeeSettings(performanceFee, newPerformanceFee, feeRecipient, newFeeRecipient);
 
-    performanceFee = _performanceFee;
+    performanceFee = newPerformanceFee;
 
-    if (_feeRecipient != feeRecipient) {
-      uint256 oldFees = balanceOf[feeRecipient];
+    if (newFeeRecipient != feeRecipient) {
+      if (feeRecipient != address(0)) {
+        uint256 oldFees = balanceOf(feeRecipient);
 
-      _burn(feeRecipient, oldFees);
-      allowance[feeRecipient][owner()] = 0;
+        _burn(feeRecipient, oldFees);
+        _approve(feeRecipient, owner(), 0);
 
-      feeRecipient = _feeRecipient;
+        _mint(newFeeRecipient, oldFees);
+        _approve(newFeeRecipient, owner(), type(uint256).max);
+      }
 
-      _mint(feeRecipient, oldFees);
-      allowance[feeRecipient][owner()] = type(uint256).max;
+      feeRecipient = newFeeRecipient;
     }
   }
 
@@ -189,4 +204,10 @@ abstract contract MidasERC4626 is ERC4626, Ownable, Pausable {
 
     // Deposit all assets to underlying strategy
   }
+
+  /* ========== INTERNAL HOOKS LOGIC ========== */
+
+  function beforeWithdraw(uint256 assets, uint256 shares) internal virtual {}
+
+  function afterDeposit(uint256 assets, uint256 shares) internal virtual {}
 }

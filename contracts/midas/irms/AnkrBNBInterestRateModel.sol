@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { InterestRateModel } from "./InterestRateModel.sol";
-import { SafeMath } from "./SafeMath.sol";
+import { InterestRateModel } from "../../compound/InterestRateModel.sol";
+import { SafeMath } from "../../compound/SafeMath.sol";
 
 interface IAnkrBNBR {
   function averagePercentageRate(uint256 day) external view returns (uint256);
@@ -85,11 +85,11 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
   }
 
   function getAnkrRate() public view returns (uint256) {
-    return IAnkrBNBR(ANKR_BNB_R).averagePercentageRate(day).div(blocksPerYear).div(100);
+    return IAnkrBNBR(ANKR_BNB_R).averagePercentageRate(day).div(blocksPerYear);
   }
 
   function getMultiplierPerBlock() public view returns (uint256) {
-    return getAnkrRate().mul(1e18).mul(100).div(kink);
+    return getAnkrRate().mul(1e18).div(kink);
   }
 
   function getBaseRatePerBlock() public view returns (uint256) {
@@ -103,7 +103,7 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
   ) public view returns (uint256) {
     uint256 util = utilizationRate(cash, borrows, reserves);
     uint256 excessUtil = util.sub(kink);
-    return excessUtil.mul(jumpMultiplierPerBlock).div(1e18).mul(100);
+    return excessUtil.mul(jumpMultiplierPerBlock).div(1e18);
   }
 
   function getBorrowRate(

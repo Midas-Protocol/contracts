@@ -5,7 +5,7 @@ import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "./config/BaseTest.t.sol";
 
-import { AnkrBNBInterestRateModel, IAnkrBNBR } from "../compound/AnkrBNBInterestRateModel.sol";
+import { AnkrBNBInterestRateModel, IAnkrBNBR } from "../midas/irms/AnkrBNBInterestRateModel.sol";
 import { JumpRateModel } from "../compound/JumpRateModel.sol";
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
 
@@ -23,7 +23,7 @@ contract InterestRateModelTest is BaseTest {
   }
 
   function setUpBsc() public shouldRun(forChains(BSC_MAINNET)) {
-    ankrBnbInterestRateModel2 = new AnkrBNBInterestRateModel(10512000, 0.5e18, 3e18, 0.85e18, day, ANKR_BNB_R);
+    ankrBnbInterestRateModel2 = new AnkrBNBInterestRateModel(10512000, 0.5e16, 3e20, 0.85e18, day, ANKR_BNB_R);
     jumpRateModel = new JumpRateModel(10512000, 0.2e17, 0.18e18, 4e18, 0.8e18);
     whitepaperInterestRateModel = new WhitePaperInterestRateModel(10512000, 0.2e17, 0.2e18);
   }
