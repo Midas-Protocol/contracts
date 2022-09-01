@@ -19,7 +19,7 @@ import "./utils/PatchedStorage.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FuseFeeDistributor controls and receives protocol fees from Fuse pools and relays admin actions to Fuse pools.
  */
-contract FuseFeeDistributor is PatchedStorage, SafeOwnableUpgradeable {
+contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   using AddressUpgradeable for address;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
