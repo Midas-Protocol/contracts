@@ -12,7 +12,7 @@ import { Pyth } from "pyth-neon/PythOracle.sol";
 contract PythOraclesTest is BaseTest {
   PythPriceOracle oracle;
   MockPyth pythOracle;
-  
+
   bytes32 nativeTokenPriceFeed = bytes32(bytes("7f57ca775216655022daa88e41c380529211cde01a1517735dbcf30e4a02bdaa"));
   int64 nativeTokenPrice = 0.5e18;
   bytes32 tokenPriceFeed = bytes32(bytes("ca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6"));
@@ -84,6 +84,6 @@ contract PythOraclesTest is BaseTest {
   }
 
   function testTokenPrice() public shouldRun(forChains(NEON_DEVNET)) {
-    assertEq(testPriceFeed(token, tokenPriceFeed), uint256(uint64(tokenPrice / nativeTokenPrice * 1e18)));
+    assertEq(testPriceFeed(token, tokenPriceFeed), uint256(uint64((tokenPrice / nativeTokenPrice) * 1e18)));
   }
 }

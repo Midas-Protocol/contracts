@@ -13,12 +13,12 @@ import { PythStructs } from "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
 import { Pyth } from "pyth-neon/PythOracle.sol";
 
 /**
- * @title DiaPriceOracle
- * @notice Returns prices from DIA.
+ * @title PythPriceOracle
+ * @notice Returns prices from Pyth.
  * @dev Implements `PriceOracle`.
  * @author Rahul Sethuram <rahul@midascapital.xyz> (https://github.com/rhlsthrm)
  */
-contract PythPriceOracle is IPriceOracle, BasePriceOracle {
+contract PythPriceOracle is BasePriceOracle {
   /**
    * @notice Maps ERC20 token addresses to Pyth price IDs.
    */
