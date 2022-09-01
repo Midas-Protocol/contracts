@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "forge-std/Vm.sol";
 import "forge-std/Test.sol";
 
-import "../../utils/AddressesProvider.sol";
+import "../../midas/AddressesProvider.sol";
 
 abstract contract BaseTest is Test {
   uint256 constant BSC_MAINNET = 56;
@@ -46,6 +46,11 @@ abstract contract BaseTest is Test {
     if (run) {
       _;
     }
+  }
+
+  modifier shouldRunTestFail(bool run) {
+    require(run, "test should fail");
+    _;
   }
 
   function forChains(uint256 id0) public view returns (bool) {

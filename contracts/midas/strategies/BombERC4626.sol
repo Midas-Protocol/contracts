@@ -3,7 +3,8 @@ pragma solidity >=0.8.0;
 
 import { MidasERC4626 } from "./MidasERC4626.sol";
 import "../../external/bomb/IXBomb.sol";
-import { ERC20 } from "solmate/tokens/ERC20.sol";
+
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 /**
  * @title Bomb ERC4626 Contract
@@ -17,22 +18,18 @@ contract BombERC4626 is MidasERC4626 {
   // the staking token through which the rewards are distributed and redeemed
   IXBomb public xbomb;
 
-  /* ========== CONSTRUCTOR ========== */
+  /* ========== INITIALIZER ========== */
 
   /**
-   * @notice Creates a new Vault that accepts a specific underlying token.
-   * @param _asset The BOMB ERC20-compliant token the Vault should accept.
+     @notice Initializes the Vault.
+   * @param asset The BOMB ERC20-compliant token the Vault should accept.
    * @param _xbombAddress the xBOMB contract address
    */
-  constructor(ERC20 _asset, address _xbombAddress)
-    MidasERC4626(
-      _asset,
-      string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
-      string(abi.encodePacked("mv", _asset.symbol()))
-    )
-  {
+  function initialize(ERC20Upgradeable asset, address _xbombAddress) public initializer {
+    __MidasER4626_init(asset);
+
     xbomb = IXBomb(_xbombAddress);
-    _asset.approve(address(xbomb), type(uint256).max);
+    asset.approve(address(xbomb), type(uint256).max);
   }
 
   /* ========== VIEWS ========== */
@@ -46,7 +43,7 @@ contract BombERC4626 is MidasERC4626 {
   /// @notice Calculates the total amount of underlying tokens the user holds.
   /// @return The total amount of underlying tokens the user holds.
   function balanceOfUnderlying(address account) public view returns (uint256) {
-    return convertToAssets(balanceOf[account]);
+    return convertToAssets(balanceOf(account));
   }
 
   /// @notice Calculates the number of xBOMB shares that will be minted for the specified BOMB deposit.
