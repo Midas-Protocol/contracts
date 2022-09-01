@@ -24,14 +24,15 @@ import { FuseFeeDistributor } from "../../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
 import { MockPriceOracle } from "../../oracles/1337/MockPriceOracle.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
-import { MockERC4626 } from "../../compound/strategies/MockERC4626.sol";
+import { MockERC4626 } from "../../midas/strategies/MockERC4626.sol";
 import { FuseSafeLiquidator } from "../../FuseSafeLiquidator.sol";
-import { MockERC4626Dynamic } from "../../compound/strategies/MockERC4626Dynamic.sol";
+import { MockERC4626Dynamic } from "../../midas/strategies/MockERC4626Dynamic.sol";
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { FusePoolLens } from "../../FusePoolLens.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 contract WithPool {
-  MockERC20 public underlyingToken;
+  ERC20Upgradeable public underlyingToken;
   CErc20 cErc20;
   CToken cToken;
   CErc20Delegate cErc20Delegate;
@@ -64,7 +65,7 @@ contract WithPool {
 
   event log_address1(address add);
 
-  function setUpWithPool(MasterPriceOracle _masterPriceOracle, MockERC20 _underlyingToken) public {
+  function setUpWithPool(MasterPriceOracle _masterPriceOracle, ERC20Upgradeable _underlyingToken) public {
     priceOracle = _masterPriceOracle;
     underlyingToken = _underlyingToken;
     setUpBaseContracts();
@@ -173,8 +174,8 @@ contract WithPool {
     );
   }
 
-  function deployCErc20PluginDelegate(ERC4626 _erc4626, uint256 _collateralFactorMantissa) public {
-    whitelistPlugin(address(_erc4626), address(_erc4626));
+  function deployCErc20PluginDelegate(address _erc4626, uint256 _collateralFactorMantissa) public {
+    whitelistPlugin(_erc4626, _erc4626);
 
     comptroller._deployMarket(
       false,
@@ -186,7 +187,7 @@ contract WithPool {
         "cUnderlyingToken",
         "CUT",
         address(cErc20PluginDelegate),
-        abi.encode(address(_erc4626)),
+        abi.encode(_erc4626),
         uint256(1),
         uint256(0)
       ),
@@ -194,8 +195,8 @@ contract WithPool {
     );
   }
 
-  function deployCErc20PluginRewardsDelegate(ERC4626 _mockERC4626Dynamic, uint256 _collateralFactorMantissa) public {
-    whitelistPlugin(address(_mockERC4626Dynamic), address(_mockERC4626Dynamic));
+  function deployCErc20PluginRewardsDelegate(address _mockERC4626Dynamic, uint256 _collateralFactorMantissa) public {
+    whitelistPlugin(_mockERC4626Dynamic, _mockERC4626Dynamic);
 
     comptroller._deployMarket(
       false,
@@ -207,7 +208,7 @@ contract WithPool {
         "cUnderlyingToken",
         "CUT",
         address(cErc20PluginRewardsDelegate),
-        abi.encode(address(_mockERC4626Dynamic)),
+        abi.encode(_mockERC4626Dynamic),
         uint256(1),
         uint256(0)
       ),

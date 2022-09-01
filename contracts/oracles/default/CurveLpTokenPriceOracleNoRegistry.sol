@@ -6,7 +6,7 @@ import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
 import "../../external/curve/ICurvePool.sol";
-import "../../utils/SafeOwnableUpgradeable.sol";
+import "../../midas/SafeOwnableUpgradeable.sol";
 import "../../utils/PatchedStorage.sol";
 
 import "../BasePriceOracle.sol";
@@ -44,7 +44,7 @@ contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedSto
       "No LP tokens supplied or array lengths not equal."
     );
 
-    __Ownable_init();
+    __SafeOwnable_init();
     for (uint256 i = 0; i < _lpTokens.length; i++) {
       poolOf[_lpTokens[i]] = _pools[i];
       underlyingTokens[_lpTokens[i]] = _poolUnderlyings[i];

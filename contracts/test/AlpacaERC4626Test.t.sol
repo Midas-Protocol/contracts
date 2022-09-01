@@ -5,10 +5,11 @@ import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "./config/BaseTest.t.sol";
 
-import { ERC20 } from "solmate/tokens/ERC20.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 
-import { AlpacaERC4626, IAlpacaVault } from "../compound/strategies/AlpacaERC4626.sol";
+import { AlpacaERC4626, IAlpacaVault } from "../midas/strategies/AlpacaERC4626.sol";
 import { MockVault } from "./mocks/alpaca/MockVault.sol";
 import { IVaultConfig } from "./mocks/alpaca/IVaultConfig.sol";
 import { IW_NATIVE } from "../utils/IW_NATIVE.sol";
@@ -18,7 +19,7 @@ contract AlpacaERC4626Test is BaseTest {
   using FixedPointMathLib for uint256;
   AlpacaERC4626 alpacaERC4626;
 
-  MockERC20 underlyingToken;
+  ERC20Upgradeable underlyingToken;
   MockVault mockVault;
 
   uint256 depositAmount = 100e18;
@@ -29,13 +30,10 @@ contract AlpacaERC4626Test is BaseTest {
   uint256 initialBeefySupply = 0;
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
-    underlyingToken = MockERC20(ap.getAddress("wtoken"));
+    underlyingToken = ERC20Upgradeable(ap.getAddress("wtoken"));
     mockVault = MockVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063);
-    alpacaERC4626 = new AlpacaERC4626(
-      underlyingToken,
-      IAlpacaVault(address(mockVault)),
-      IW_NATIVE(ap.getAddress("wtoken"))
-    );
+    alpacaERC4626 = new AlpacaERC4626();
+    alpacaERC4626.initialize(underlyingToken, IAlpacaVault(address(mockVault)), IW_NATIVE(ap.getAddress("wtoken")));
     iniitalBeefyBalance = mockVault.totalToken();
     initialBeefySupply = mockVault.totalSupply();
     sendUnderlyingToken(100e18, address(this));

@@ -7,7 +7,7 @@ import "./external/compound/IComptroller.sol";
 import "./external/compound/IUnitroller.sol";
 import "./external/compound/IPriceOracle.sol";
 import "./compound/Unitroller.sol";
-import "./utils/SafeOwnableUpgradeable.sol";
+import "./midas/SafeOwnableUpgradeable.sol";
 import "./utils/PatchedStorage.sol";
 
 /**
@@ -22,7 +22,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
    * @param _deployerWhitelist Array of Ethereum accounts to be whitelisted.
    */
   function initialize(bool _enforceDeployerWhitelist, address[] memory _deployerWhitelist) public initializer {
-    __Ownable_init();
+    __SafeOwnable_init();
     enforceDeployerWhitelist = _enforceDeployerWhitelist;
     for (uint256 i = 0; i < _deployerWhitelist.length; i++) deployerWhitelist[_deployerWhitelist[i]] = true;
   }

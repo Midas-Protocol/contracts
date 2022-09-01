@@ -1,12 +1,12 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.10;
 
-import { SafeTransferLib, ERC20 } from "solmate/utils/SafeTransferLib.sol";
+import { Initializable } from "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
+import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-/// @title Rewards Claiming Contract
-/// @author joeysantoro
-contract RewardsClaimer {
-  using SafeTransferLib for ERC20;
+contract RewardsClaimer is Initializable {
+  using SafeERC20Upgradeable for ERC20Upgradeable;
 
   event RewardDestinationUpdate(address indexed newDestination);
 
@@ -16,9 +16,12 @@ contract RewardsClaimer {
   address public rewardDestination;
 
   /// @notice the array of reward tokens to send to
-  ERC20[] public rewardTokens;
+  ERC20Upgradeable[] public rewardTokens;
 
-  constructor(address _rewardDestination, ERC20[] memory _rewardTokens) {
+  function __RewardsClaimer_init(address _rewardDestination, ERC20Upgradeable[] memory _rewardTokens)
+    internal
+    onlyInitializing
+  {
     rewardDestination = _rewardDestination;
     rewardTokens = _rewardTokens;
   }
@@ -27,10 +30,15 @@ contract RewardsClaimer {
   function claimRewards() public {
     beforeClaim(); // hook to accrue/pull in rewards, if needed
 
+    uint256 len = rewardTokens.length;
     // send all tokens to destination
-    for (uint256 i = 0; i < rewardTokens.length; i++) {
-      ERC20 token = rewardTokens[i];
-      emit ClaimRewards(address(token), _transferAll(token, rewardDestination));
+    for (uint256 i = 0; i < len; i++) {
+      ERC20Upgradeable token = rewardTokens[i];
+      uint256 amount = token.balanceOf(address(this));
+
+      token.safeTransfer(rewardDestination, amount);
+
+      emit ClaimRewards(address(token), amount);
     }
   }
 
@@ -44,8 +52,4 @@ contract RewardsClaimer {
 
   /// @notice hook to accrue/pull in rewards, if needed
   function beforeClaim() internal virtual {}
-
-  function _transferAll(ERC20 token, address to) internal returns (uint256 amount) {
-    token.safeTransfer(to, amount = token.balanceOf(address(this)));
-  }
 }

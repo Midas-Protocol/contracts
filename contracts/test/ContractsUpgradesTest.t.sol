@@ -105,7 +105,7 @@ contract ContractsUpgradesTest is BaseTest {
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(contractToTest));
       bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
       address admin = address(uint160(uint256(bytesAtSlot)));
-      //            emit log_address(admin);
+      // emit log_address(admin);
       vm.prank(admin);
       proxy.upgradeTo(address(newImpl));
     }
