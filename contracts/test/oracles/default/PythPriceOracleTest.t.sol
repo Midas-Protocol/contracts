@@ -62,8 +62,8 @@ contract PythOraclesTest is BaseTest {
     feedData[1] = abi.encode(mockNativeTokenFeed);
     pythOracle.updatePriceFeeds(feedData);
 
-    oracle = new PythPriceOracle(
-      address(this),
+    oracle = new PythPriceOracle();
+    oracle.initialize(
       true,
       address(0),
       address(pythOracle),

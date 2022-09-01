@@ -11,6 +11,7 @@ import { BasePriceOracle } from "../BasePriceOracle.sol";
 import { IPyth } from "@pythnetwork/pyth-sdk-solidity/IPyth.sol";
 import { PythStructs } from "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
 import { Pyth } from "pyth-neon/PythOracle.sol";
+import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
 
 /**
  * @title PythPriceOracle
@@ -18,26 +19,21 @@ import { Pyth } from "pyth-neon/PythOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author Rahul Sethuram <rahul@midascapital.xyz> (https://github.com/rhlsthrm)
  */
-contract PythPriceOracle is BasePriceOracle {
+contract PythPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
   /**
    * @notice Maps ERC20 token addresses to Pyth price IDs.
    */
   mapping(address => bytes32) public priceFeedIds;
 
   /**
-   * @dev The administrator of this `MasterPriceOracle`.
-   */
-  address public admin;
-
-  /**
    * @dev Controls if `admin` can overwrite existing assignments of oracles to underlying tokens.
    */
-  bool public immutable CAN_ADMIN_OVERWRITE;
+  bool public CAN_ADMIN_OVERWRITE;
 
   /**
    * @dev The Wrapped native asset address.
    */
-  address public immutable WTOKEN;
+  address public WTOKEN;
 
   /**
    * @notice DIA NATIVE/USD price feed contracts.
@@ -47,25 +43,24 @@ contract PythPriceOracle is BasePriceOracle {
   /**
    * @notice MasterPriceOracle for backup for USD price.
    */
-  MasterPriceOracle public immutable MASTER_PRICE_ORACLE;
-  address public immutable USD_TOKEN; // token to use as USD price (i.e. USDC)
+  MasterPriceOracle public MASTER_PRICE_ORACLE;
+  address public USD_TOKEN; // token to use as USD price (i.e. USDC)
 
   /**
    * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
    */
 
-  IPyth public immutable PYTH;
+  IPyth public PYTH;
 
-  constructor(
-    address _admin,
+  function initialize (
     bool canAdminOverwrite,
     address wtoken,
     address pythAddress,
     bytes32 nativeTokenUsdFeed,
     MasterPriceOracle masterPriceOracle,
     address usdToken
-  ) {
-    admin = _admin;
+  ) public initializer {
+    __SafeOwnable_init();
     CAN_ADMIN_OVERWRITE = canAdminOverwrite;
     WTOKEN = wtoken;
     NATIVE_TOKEN_USD_FEED = nativeTokenUsdFeed;
@@ -75,33 +70,11 @@ contract PythPriceOracle is BasePriceOracle {
   }
 
   /**
-   * @dev Changes the admin and emits an event.
-   */
-  function changeAdmin(address newAdmin) external onlyAdmin {
-    address oldAdmin = admin;
-    admin = newAdmin;
-    emit NewAdmin(oldAdmin, newAdmin);
-  }
-
-  /**
-   * @dev Event emitted when `admin` is changed.
-   */
-  event NewAdmin(address oldAdmin, address newAdmin);
-
-  /**
-   * @dev Modifier that checks if `msg.sender == admin`.
-   */
-  modifier onlyAdmin() {
-    require(msg.sender == admin, "Sender is not the admin.");
-    _;
-  }
-
-  /**
    * @dev Admin-only function to set price feeds.
    * @param underlyings Underlying token addresses for which to set price feeds.
    * @param feedIds The Pyth Network feed IDs`.
    */
-  function setPriceFeeds(address[] memory underlyings, bytes32[] memory feedIds) external onlyAdmin {
+  function setPriceFeeds(address[] memory underlyings, bytes32[] memory feedIds) external onlyOwner {
     // Input validation
     require(
       underlyings.length > 0 && underlyings.length == feedIds.length,
