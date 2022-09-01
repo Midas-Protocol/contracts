@@ -139,3 +139,25 @@ jobs:
 
       - name: Run forge tests on Moonbeam
         run: forge test --fork-url https://moonbeam.api.onfinality.io/public --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test'
+
+  build-and-test-neondevnet:
+    needs: [lint]
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      FORK_BLOCK_NUMBER: 159103730
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - name: Run forge tests on Neon Devnet
+        run: forge test --fork-url https://proxy.devnet.neonlabs.org/solana --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test'
