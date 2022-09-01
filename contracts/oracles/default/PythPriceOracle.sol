@@ -52,7 +52,7 @@ contract PythPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
 
   IPyth public PYTH;
 
-  function initialize (
+  function initialize(
     bool canAdminOverwrite,
     address wtoken,
     address pythAddress,
