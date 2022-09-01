@@ -23,7 +23,7 @@ contract PythOraclesTest is BaseTest {
   function setUp() public {
     pythOracle = new MockPyth(0);
 
-    PythStructs.PriceFeed memory mockFeed = PythStructs.PriceFeed(
+    PythStructs.PriceFeed memory mockTokenFeed = PythStructs.PriceFeed(
       tokenPriceFeed,
       tokenPriceFeed,
       tokenPrice,
@@ -40,7 +40,7 @@ contract PythOraclesTest is BaseTest {
       0
     );
 
-    PythStructs.PriceFeed memory mockFeed1 = PythStructs.PriceFeed(
+    PythStructs.PriceFeed memory mockNativeTokenFeed = PythStructs.PriceFeed(
       nativeTokenPriceFeed,
       nativeTokenPriceFeed,
       nativeTokenPrice,
@@ -58,8 +58,8 @@ contract PythOraclesTest is BaseTest {
     );
 
     bytes[] memory feedData = new bytes[](2);
-    feedData[0] = abi.encode(mockFeed);
-    feedData[1] = abi.encode(mockFeed1);
+    feedData[0] = abi.encode(mockTokenFeed);
+    feedData[1] = abi.encode(mockNativeTokenFeed);
     pythOracle.updatePriceFeeds(feedData);
 
     oracle = new PythPriceOracle(
