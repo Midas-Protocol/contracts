@@ -1,36 +1,36 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.10;
 
-import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
-import { RewardsClaimer } from "fuse-flywheel/utils/RewardsClaimer.sol";
+import { RewardsClaimer } from "../RewardsClaimer.sol";
+
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 interface ILpDepositor {
   // user -> pool -> deposit amount
-  function userBalances(address _user, address _token) external view returns (uint256);
+  function userBalances(address _user, ERC20Upgradeable _token) external view returns (uint256);
 
   function deposit(
     address _user,
-    address _token,
+    ERC20Upgradeable _token,
     uint256 _amount
   ) external;
 
   function withdraw(
     address _receiver,
-    address _token,
+    ERC20Upgradeable _token,
     uint256 _amount
   ) external;
 
   function claim(
     address _receiver,
-    address[] calldata _tokens,
+    ERC20Upgradeable[] calldata _tokens,
     uint256 _maxBondAmount
   ) external;
 
-  function depositTokens(address lpToken) external view returns (address);
+  function depositTokens(ERC20Upgradeable lpToken) external view returns (ERC20Upgradeable);
 }
 
 /**
@@ -43,45 +43,40 @@ interface ILpDepositor {
  *
  */
 contract DotDotLpERC4626 is MidasERC4626, RewardsClaimer {
-  using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
-  FlywheelCore public immutable dddFlywheel;
-  FlywheelCore public immutable epxFlywheel;
-  ILpDepositor public immutable lpDepositor;
-  address[] public assetAsArray;
+  FlywheelCore public dddFlywheel;
+  FlywheelCore public epxFlywheel;
+  ILpDepositor public lpDepositor;
+  ERC20Upgradeable[] public assetAsArray;
 
-  /* ========== CONSTRUCTOR ========== */
+  /* ========== INITIALIZER ========== */
 
   /**
-     @notice Creates a new Vault that accepts a specific underlying token.
-     @param _asset The ERC20 compliant token the Vault should accept.
+     @notice Initializes the Vault.
+     @param asset The ERC20 compliant token the Vault should accept.
      @param _dddFlywheel Flywheel to pull DDD rewards
      @param _epxFlywheel Flywheel to pull EPX rewards
      @param _lpDepositor DotDot deposit contract for LpToken
     */
-  constructor(
-    ERC20 _asset,
+  function initialize(
+    ERC20Upgradeable asset,
     FlywheelCore _dddFlywheel,
     FlywheelCore _epxFlywheel,
     ILpDepositor _lpDepositor,
     address _rewardsDestination,
-    ERC20[] memory _rewardTokens
-  )
-    MidasERC4626(
-      _asset,
-      string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
-      string(abi.encodePacked("mv", _asset.symbol()))
-    )
-    RewardsClaimer(_rewardsDestination, _rewardTokens)
-  {
+    ERC20Upgradeable[] memory _rewardTokens
+  ) public initializer {
+    __MidasER4626_init(asset);
+    __RewardsClaimer_init(_rewardsDestination, _rewardTokens);
+
     dddFlywheel = _dddFlywheel;
     epxFlywheel = _epxFlywheel;
     lpDepositor = _lpDepositor;
 
     // lpDepositor wants an address array for claiming
-    assetAsArray.push(address(_asset));
+    assetAsArray.push(asset);
 
     asset.approve(address(lpDepositor), type(uint256).max);
   }
@@ -91,25 +86,25 @@ contract DotDotLpERC4626 is MidasERC4626, RewardsClaimer {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    return paused() ? asset.balanceOf(address(this)) : lpDepositor.userBalances(address(this), address(asset));
+    return paused() ? _asset().balanceOf(address(this)) : lpDepositor.userBalances(address(this), _asset());
   }
 
   /// @notice Calculates the total amount of underlying tokens the user holds.
   /// @return The total amount of underlying tokens the user holds.
   function balanceOfUnderlying(address account) public view returns (uint256) {
-    return convertToAssets(balanceOf[account]);
+    return convertToAssets(balanceOf(account));
   }
 
   /* ========== INTERNAL FUNCTIONS ========== */
 
   function afterDeposit(uint256 amount, uint256) internal override {
-    lpDepositor.deposit(address(this), address(asset), amount);
+    lpDepositor.deposit(address(this), _asset(), amount);
     lpDepositor.claim(address(this), assetAsArray, 0);
   }
 
   /// @notice withdraws specified amount of underlying token if possible
   function beforeWithdraw(uint256 amount, uint256) internal override {
-    lpDepositor.withdraw(address(this), address(asset), amount);
+    lpDepositor.withdraw(address(this), _asset(), amount);
     lpDepositor.claim(address(this), assetAsArray, 0);
   }
 
@@ -120,16 +115,12 @@ contract DotDotLpERC4626 is MidasERC4626, RewardsClaimer {
   /* ========== EMERGENCY FUNCTIONS ========== */
 
   function emergencyWithdrawAndPause() external override onlyOwner {
-    lpDepositor.withdraw(
-      address(this),
-      address(asset),
-      ERC20(lpDepositor.depositTokens(address(asset))).balanceOf(address(this))
-    );
+    lpDepositor.withdraw(address(this), _asset(), lpDepositor.depositTokens(_asset()).balanceOf(address(this)));
     _pause();
   }
 
   function unpause() external override onlyOwner {
     _unpause();
-    lpDepositor.deposit(address(this), address(asset), asset.balanceOf(address(this)));
+    lpDepositor.deposit(address(this), _asset(), _asset().balanceOf(address(this)));
   }
 }

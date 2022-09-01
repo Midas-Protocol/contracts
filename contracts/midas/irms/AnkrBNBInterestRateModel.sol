@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { InterestRateModel } from "./InterestRateModel.sol";
-import { SafeMath } from "./SafeMath.sol";
+import { InterestRateModel } from "../../compound/InterestRateModel.sol";
+import { SafeMath } from "../../compound/SafeMath.sol";
 
 interface IAnkrBNBR {
   function averagePercentageRate(uint256 day) external view returns (uint256);

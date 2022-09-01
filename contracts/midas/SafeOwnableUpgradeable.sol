@@ -14,6 +14,10 @@ abstract contract SafeOwnableUpgradeable is OwnableUpgradeable {
    */
   address public pendingOwner;
 
+  function __SafeOwnable_init() internal onlyInitializing {
+    __Ownable_init();
+  }
+
   /**
    * @notice Emitted when pendingOwner is changed
    */
