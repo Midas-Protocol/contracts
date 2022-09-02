@@ -85,7 +85,7 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
   }
 
   function getAnkrRate() public view returns (uint256) {
-    return IAnkrBNBR(ANKR_BNB_R).averagePercentageRate(day).div(blocksPerYear);
+    return IAnkrBNBR(ANKR_BNB_R).averagePercentageRate(day).div(100).div(blocksPerYear);
   }
 
   function getMultiplierPerBlock() public view returns (uint256) {
