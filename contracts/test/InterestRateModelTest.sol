@@ -138,7 +138,12 @@ contract InterestRateModelTest is BaseTest {
     borrowRate = ankrBnbInterestRateModel2.getBorrowRate(8e18, 7.2e18, 7.2e18);
     util = ankrBnbInterestRateModel2.utilizationRate(8e18, 7.2e18, 7.2e18);
     assertEq(util, 0.9e18); // utilization 90
-    assertApproxEqAbs(_convertToPerYear(borrowRate) * 100, 20.4468e18, uint256(1e14), "!borrow rate for utilization 90");
+    assertApproxEqAbs(
+      _convertToPerYear(borrowRate) * 100,
+      20.4468e18,
+      uint256(1e14),
+      "!borrow rate for utilization 90"
+    );
   }
 
   function testAnkrBNBSupplyModel2Rate() public shouldRun(forChains(BSC_MAINNET)) {
@@ -166,7 +171,12 @@ contract InterestRateModelTest is BaseTest {
     supplyRate = ankrBnbInterestRateModel2.getSupplyRate(8e18, 7.2e18, 7.2e18, 0.1e18);
     util = ankrBnbInterestRateModel2.utilizationRate(8e18, 7.2e18, 7.2e18);
     assertEq(util, 0.9e18); // utilization 90
-    assertApproxEqAbs(_convertToPerYear(supplyRate) * 100, 16.5619e18, uint256(1e14), "!supply rate for utilization 90");
+    assertApproxEqAbs(
+      _convertToPerYear(supplyRate) * 100,
+      16.5619e18,
+      uint256(1e14),
+      "!supply rate for utilization 90"
+    );
   }
 
   function testWhitepaperBorrowRate() public shouldRun(forChains(BSC_MAINNET)) {
