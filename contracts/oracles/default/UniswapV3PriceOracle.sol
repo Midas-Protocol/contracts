@@ -29,10 +29,6 @@ contract UniswapV3PriceOracle is IPriceOracle {
   mapping(address => AssetConfig) public poolFeeds;
 
   /**
-   * @dev wtoken contract address.
-   */
-  address public immutable wtoken;
-  /**
    * @dev The administrator of this `MasterPriceOracle`.
    */
   address public admin;
@@ -42,24 +38,17 @@ contract UniswapV3PriceOracle is IPriceOracle {
    */
   bool public canAdminOverwrite;
 
-  /**
-   * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
-   */
-
   struct AssetConfig {
     address poolAddress;
     uint32 twapWindow;
   }
 
-  constructor(
-    address _admin,
-    bool _canAdminOverwrite,
-    address _wtoken,
-    address nativeTokenUsd
-  ) {
+  /**
+   * @dev Constructor to set admin, canAdminOverwrite and wtoken address
+   */
+  constructor(address _admin, bool _canAdminOverwrite) {
     admin = _admin;
     canAdminOverwrite = _canAdminOverwrite;
-    wtoken = _wtoken;
   }
 
   /**
@@ -107,7 +96,7 @@ contract UniswapV3PriceOracle is IPriceOracle {
           "Admin cannot overwrite existing assignments of price feeds to underlying tokens."
         );
 
-      // Set feed and base currency
+      // Set asset config for underlying
       poolFeeds[underlying] = assetConfig[i];
     }
   }
@@ -122,9 +111,9 @@ contract UniswapV3PriceOracle is IPriceOracle {
   }
 
   /**
-   * @notice Returns the price in ETH of the token underlying `cToken`.
+   * @notice Returns the price in WTOKEN of the token underlying `cToken`.
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
-   * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
+   * @return Price in WTOKEN of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
   function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
     address underlying = ICErc20(address(cToken)).underlying();
