@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@uniswap-v3-core/contracts/interfaces/IUniswapV3Pool.sol";
-import "@uniswap-v3-core/contracts/libraries/TickMath.sol";
-import "@uniswap-v3-core/contracts/libraries/FixedPoint96.sol";
-import "@uniswap-v3-core/contracts/libraries/FullMath.sol";
-
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
 import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
 
-import "../../external/uniswap/IUniswapV2Pair.sol";
+import "../../external/uniswap/TickMath.sol";
+import "../../external/uniswap/FullMath.sol";
+import "../../external/uniswap/IUniswapV3Pool.sol";
+import "../../external/uniswap/FixedPoint96.sol";
 
 import "../BasePriceOracle.sol";
 
@@ -40,7 +38,7 @@ contract UniswapV3PriceOracle is IPriceOracle {
 
   struct AssetConfig {
     address poolAddress;
-    uint32 twapWindow;
+    uint256 twapWindow;
   }
 
   /**
@@ -92,7 +90,7 @@ contract UniswapV3PriceOracle is IPriceOracle {
       // Check for existing oracle if !canAdminOverwrite
       if (!canAdminOverwrite)
         require(
-          address(poolFeeds[underlying]) == address(0),
+          poolFeeds[underlying].poolAddress == address(0),
           "Admin cannot overwrite existing assignments of price feeds to underlying tokens."
         );
 
@@ -127,14 +125,18 @@ contract UniswapV3PriceOracle is IPriceOracle {
    */
   function _price(address token) internal view virtual returns (uint256) {
     uint32[] memory secondsAgos = new uint32[](2);
+    uint256 twapWindow = poolFeeds[token].twapWindow;
+
     secondsAgos[0] = uint32(poolFeeds[token].twapWindow);
     secondsAgos[1] = 0;
 
     IUniswapV3Pool pool = IUniswapV3Pool(poolFeeds[token].poolAddress);
     (int56[] memory tickCumulatives, ) = pool.observe(secondsAgos);
 
-    // tick(imprecise as it's an integer) to price
-    sqrtPriceX96 = TickMath.getSqrtRatioAtTick(int24((tickCumulatives[1] - tickCumulatives[0]) / twapInterval));
+    int24 tick = int24((tickCumulatives[1] - tickCumulatives[0]) / int56(int256(twapWindow)));
+    uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick(tick);
+
+    return getPriceX96FromSqrtPriceX96(sqrtPriceX96);
   }
 
   function getPriceX96FromSqrtPriceX96(uint160 sqrtPriceX96) public pure returns (uint256 priceX96) {
