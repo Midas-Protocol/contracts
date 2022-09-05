@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
-import "@uniswap/v3-core/contracts/libraries/TickMath.sol";
-import "@uniswap/v3-core/contracts/libraries/FixedPoint96.sol";
-import "@uniswap/v3-core/contracts/libraries/FullMath.sol";
+import "@uniswap-v3-core/contracts/interfaces/IUniswapV3Pool.sol";
+import "@uniswap-v3-core/contracts/libraries/TickMath.sol";
+import "@uniswap-v3-core/contracts/libraries/FixedPoint96.sol";
+import "@uniswap-v3-core/contracts/libraries/FullMath.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
@@ -15,48 +15,6 @@ import "../../external/compound/ICErc20.sol";
 import "../../external/uniswap/IUniswapV2Pair.sol";
 
 import "../BasePriceOracle.sol";
-
-interface IUniswapV3Factory {
-  function getPool(
-    address tokenA,
-    address tokenB,
-    uint24 fee
-  ) external view returns (address pool);
-}
-
-interface IUniswapV3Pool {
-  function slot0()
-    external
-    view
-    returns (
-      uint160 sqrtPriceX96,
-      int24 tick,
-      uint16 observationIndex,
-      uint16 observationCardinality,
-      uint16 observationCardinalityNext,
-      uint8 feeProtocol,
-      bool unlocked
-    );
-
-  function liquidity() external view returns (uint128);
-
-  function observe(uint32[] calldata secondsAgos)
-    external
-    view
-    returns (int56[] memory tickCumulatives, uint160[] memory liquidityCumulatives);
-
-  function observations(uint256 index)
-    external
-    view
-    returns (
-      uint32 blockTimestamp,
-      int56 tickCumulative,
-      uint160 liquidityCumulative,
-      bool initialized
-    );
-
-  function increaseObservationCardinalityNext(uint16 observationCardinalityNext) external;
-}
 
 /**
  * @title UniswapV3PriceOracle
@@ -155,9 +113,9 @@ contract UniswapV3PriceOracle is IPriceOracle {
   }
 
   /**
-   * @notice Get the LP token price price for an underlying token address.
-   * @param underlying The underlying token address for which to get the price (set to zero address for ETH)
-   * @return Price denominated in ETH (scaled by 1e18)
+   * @notice Get the token price price for an underlying token address.
+   * @param underlying The underlying token address for which to get the price (set to zero address for WTOKEN)
+   * @return Price denominated in WTOKEN (scaled by 1e18)
    */
   function price(address underlying) external view returns (uint256) {
     return _price(underlying);
@@ -176,7 +134,7 @@ contract UniswapV3PriceOracle is IPriceOracle {
   }
 
   /**
-   * @dev Fetches the fair LP token/ETH price from Uniswap, with 18 decimals of precision.
+   * @dev Fetches the price for a token from Uniswap v3
    */
   function _price(address token) internal view virtual returns (uint256) {
     uint32[] memory secondsAgos = new uint32[](2);
