@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "forge-std/Vm.sol";
 import "forge-std/Test.sol";
 
-import "../../utils/AddressesProvider.sol";
+import "../../midas/AddressesProvider.sol";
 
 abstract contract BaseTest is Test {
   uint256 constant BSC_MAINNET = 56;
@@ -13,6 +13,7 @@ abstract contract BaseTest is Test {
 
   uint256 constant EVMOS_TESTNET = 9000;
   uint256 constant BSC_CHAPEL = 97;
+  uint256 constant NEON_DEVNET = 245022926;
 
   AddressesProvider public ap;
 
@@ -27,6 +28,8 @@ abstract contract BaseTest is Test {
       ap = AddressesProvider(0xB88C6a114F01a80Dc8465b55067C8D046C2F445A);
     } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
+    } else if (block.chainid == NEON_DEVNET) {
+      ap = AddressesProvider(0xC4b1512c1eeDd272e0F68737aCd7a1F11F3cA0eF);
     } else {
       ap = new AddressesProvider();
     }
@@ -43,6 +46,11 @@ abstract contract BaseTest is Test {
     if (run) {
       _;
     }
+  }
+
+  modifier shouldRunTestFail(bool run) {
+    require(run, "test should fail");
+    _;
   }
 
   function forChains(uint256 id0) public view returns (bool) {

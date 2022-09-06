@@ -27,8 +27,8 @@ import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
-import { MockERC4626 } from "../compound/strategies/MockERC4626.sol";
-import { MockERC4626Dynamic } from "../compound/strategies/MockERC4626Dynamic.sol";
+import { MockERC4626 } from "../midas/strategies/MockERC4626.sol";
+import { MockERC4626Dynamic } from "../midas/strategies/MockERC4626Dynamic.sol";
 import { BaseTest } from "./config/BaseTest.t.sol";
 import { IERC4626 } from "../compound/IERC4626.sol";
 
