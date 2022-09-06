@@ -34,7 +34,12 @@ contract ChainlinkOraclesTest is BaseTest {
   }
 
   function testLocalChainlinkUSDCPrice() public shouldRun(forChains(POLYGON_MAINNET)) {
-    oracle = new ChainlinkPriceOracleV2(address(this), true, 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270, 0xAB594600376Ec9fD91F8e885dADF0CE036862dE0);
+    oracle = new ChainlinkPriceOracleV2(
+      address(this),
+      true,
+      0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270,
+      0xAB594600376Ec9fD91F8e885dADF0CE036862dE0
+    );
     address USDCAddress = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
     address USDCAggregatorAddress = 0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7;
     uint256 price = testPriceFeed(USDCAddress, USDCAggregatorAddress);
