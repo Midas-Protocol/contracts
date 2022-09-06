@@ -17,8 +17,6 @@ contract UniswapV3PriceOracleTest is BaseTest {
 
   function setUp() public {
     oracle = UniswapV3PriceOracle(ap.getAddress("UniswapV3PriceOracle"));
-
-    // gOHM, GMX, DPX, MAGIC
   }
 
   function testPriceFeed(address[] memory underlyings, UniswapV3PriceOracle.AssetConfig[] memory configs)
