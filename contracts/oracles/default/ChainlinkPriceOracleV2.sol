@@ -154,7 +154,8 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
       (, int256 tokenUsdPrice, , , ) = feed.latestRoundData();
       return
         tokenUsdPrice >= 0
-          ? ((uint256(tokenUsdPrice) * 1e18 * (10**uint256(NATIVE_TOKEN_USD_PRICE_FEED.decimals()))) / (10**uint256(feed.decimals()))) / uint256(nativeTokenUsdPrice)
+          ? ((uint256(tokenUsdPrice) * 1e18 * (10**uint256(NATIVE_TOKEN_USD_PRICE_FEED.decimals()))) /
+            (10**uint256(feed.decimals()))) / uint256(nativeTokenUsdPrice)
           : 0;
     }
   }
