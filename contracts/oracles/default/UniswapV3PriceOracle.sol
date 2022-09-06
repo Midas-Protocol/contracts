@@ -27,7 +27,7 @@ contract UniswapV3PriceOracle is IPriceOracle {
   mapping(address => AssetConfig) public poolFeeds;
 
   /**
-   * @dev The administrator of this `MasterPriceOracle`.
+   * @dev The administrator of this `UniswapV3PriceOracle`.
    */
   address public admin;
 
@@ -127,7 +127,7 @@ contract UniswapV3PriceOracle is IPriceOracle {
     uint32[] memory secondsAgos = new uint32[](2);
     uint256 twapWindow = poolFeeds[token].twapWindow;
 
-    secondsAgos[0] = uint32(poolFeeds[token].twapWindow);
+    secondsAgos[0] = uint32(twapWindow);
     secondsAgos[1] = 0;
 
     IUniswapV3Pool pool = IUniswapV3Pool(poolFeeds[token].poolAddress);
