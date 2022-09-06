@@ -33,7 +33,7 @@ contract ChainlinkOraclesTest is BaseTest {
     assert(testPriceFeed(jBRLAddress, jBRLAggregatorAddress) > 0);
   }
 
-  function testLocalChainlinkUSDCPrice() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testPolygonChainlinkUSDCPrice() public shouldRun(forChains(POLYGON_MAINNET)) {
     oracle = new ChainlinkPriceOracleV2(
       address(this),
       true,
@@ -44,6 +44,34 @@ contract ChainlinkOraclesTest is BaseTest {
     address USDCAggregatorAddress = 0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7;
     uint256 price = testPriceFeed(USDCAddress, USDCAggregatorAddress);
     uint256 underlyingPrice = oracle.getUnderlyingPrice(ICToken(0xEf335e0faC86fe2860e7fC2cc620Adad094F3eF4));
+    assertEq(price, underlyingPrice);
+  }
+
+  function testBSCChainlinkUSDCPrice() public shouldRun(forChains(BSC_MAINNET)) {
+    oracle = new ChainlinkPriceOracleV2(
+      address(this),
+      true,
+      0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c,
+      0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE
+    );
+    address USDCAddress = 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d;
+    address USDCAggregatorAddress = 0x51597f405303C4377E36123cBc172b13269EA163;
+    uint256 price = testPriceFeed(USDCAddress, USDCAggregatorAddress);
+    uint256 underlyingPrice = oracle.getUnderlyingPrice(ICToken(0x8D5bE2768c335e88b71E4e913189AEE7104f01B4));
+    assertEq(price, underlyingPrice);
+  }
+
+  function testBSCChainlinkUSDTPrice() public shouldRun(forChains(BSC_MAINNET)) {
+    oracle = new ChainlinkPriceOracleV2(
+      address(this),
+      true,
+      0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c,
+      0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE
+    );
+    address USDCAddress = 0x55d398326f99059fF775485246999027B3197955;
+    address USDCAggregatorAddress = 0xB97Ad0E74fa7d920791E90258A6E2085088b4320;
+    uint256 price = testPriceFeed(USDCAddress, USDCAggregatorAddress);
+    uint256 underlyingPrice = oracle.getUnderlyingPrice(ICToken(0x1F73754c135d5B9fDE674806f43AeDfA2c7eaDb5));
     assertEq(price, underlyingPrice);
   }
 }

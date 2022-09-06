@@ -180,9 +180,6 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
     // Get underlying token address
     address underlying = ICErc20(address(cToken)).underlying();
 
-    // Get price
-    uint256 chainlinkPrice = _price(underlying);
-
-    return chainlinkPrice;
+    return _price(underlying);
   }
 }
