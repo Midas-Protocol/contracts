@@ -22,8 +22,6 @@ contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
   UniswapTwapPriceOracleV2Root public root;
   uint256 public lastUpdate;
 
-  receive() external payable {}
-
   constructor(PairConfig[] memory _pairConfigs, UniswapTwapPriceOracleV2Root _root) public {
     for (uint256 i = 0; i < _pairConfigs.length; i++) {
       pairs[i] = _pairConfigs[i].pair;
@@ -62,7 +60,14 @@ contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
 
   function getWorkablePairs() public view returns (address[] memory) {
     bool[] memory workable = root.workable(pairs, baseTokens, minPeriods, deviationThresholds);
-    address[] memory workablePairs = new address[](workable.length);
+    uint256 workableCount = 0;
+    for (uint256 i = 0; i < workable.length; i += 1) {
+      if (workable[i]) {
+        workableCount += 1;
+      }
+    }
+  
+    address[] memory workablePairs = new address[](workableCount);
 
     for (uint256 i = 0; i < workable.length; i++) {
       if (workable[i]) {
