@@ -28,7 +28,7 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
   }
 
   function testUniswapTwapResolve() public shouldRun(forChains(MOONBEAM_MAINNET)) {
-    UniswapTwapPriceOracleV2Resolver resolver = UniswapTwapPriceOracleV2Resolver(0x84514D194192851e5080940824623Db973A0d557);
+    UniswapTwapPriceOracleV2Resolver resolver = UniswapTwapPriceOracleV2Resolver(0x6B98340336cE524835F14d354a36ad880Ef30782);
     address[] memory pairs1 = new address[](2);
     address[] memory baseTokens = new address[](2);
     uint256[] memory minPeriods = new uint256[](2);
