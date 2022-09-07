@@ -42,12 +42,7 @@ contract ChainlinkOraclesTest is BaseTest {
   }
 
   function testPolygonChainlinkUSDCPrice() public shouldRun(forChains(POLYGON_MAINNET)) {
-    oracle = new ChainlinkPriceOracleV2(
-      address(this),
-      true,
-      ap.getAddress("wtoken"),
-      usdNativeFeedPolygon
-    );
+    oracle = new ChainlinkPriceOracleV2(address(this), true, ap.getAddress("wtoken"), usdNativeFeedPolygon);
     setUpOracleFeed(usdcPolygon, usdcFeedPolygon);
     uint256 price = oracle.price(usdcPolygon);
     uint256 underlyingPrice = oracle.getUnderlyingPrice(usdcMarketPolygon);
@@ -60,12 +55,7 @@ contract ChainlinkOraclesTest is BaseTest {
   }
 
   function testBSCChainlinkUSDCPrice() public shouldRun(forChains(BSC_MAINNET)) {
-    oracle = new ChainlinkPriceOracleV2(
-      address(this),
-      true,
-      ap.getAddress("wtoken"),
-      usdNativeFeedBsc
-    );
+    oracle = new ChainlinkPriceOracleV2(address(this), true, ap.getAddress("wtoken"), usdNativeFeedBsc);
     setUpOracleFeed(usdcBsc, usdcFeedBsc);
     uint256 price = oracle.price(usdcBsc);
     uint256 underlyingPrice = oracle.getUnderlyingPrice(usdcMarketBsc);
@@ -73,12 +63,7 @@ contract ChainlinkOraclesTest is BaseTest {
   }
 
   function testBSCChainlinkUSDTPrice() public shouldRun(forChains(BSC_MAINNET)) {
-    oracle = new ChainlinkPriceOracleV2(
-      address(this),
-      true,
-      ap.getAddress("wtoken"),
-      usdNativeFeedBsc
-    );
+    oracle = new ChainlinkPriceOracleV2(address(this), true, ap.getAddress("wtoken"), usdNativeFeedBsc);
     setUpOracleFeed(usdtBsc, usdtFeedBsc);
     uint256 price = oracle.price(usdtBsc);
     uint256 underlyingPrice = oracle.getUnderlyingPrice(usdtMarketBsc);
