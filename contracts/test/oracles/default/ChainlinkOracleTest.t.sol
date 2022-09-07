@@ -55,6 +55,8 @@ contract ChainlinkOraclesTest is BaseTest {
   }
 
   function testBSCChainlinkUSDCPrice() public shouldRun(forChains(BSC_MAINNET)) {
+    vm.rollFork(21118900);
+
     oracle = new ChainlinkPriceOracleV2(address(this), true, ap.getAddress("wtoken"), usdNativeFeedBsc);
     setUpOracleFeed(usdcBsc, usdcFeedBsc);
     uint256 price = oracle.price(usdcBsc);
@@ -63,6 +65,8 @@ contract ChainlinkOraclesTest is BaseTest {
   }
 
   function testBSCChainlinkUSDTPrice() public shouldRun(forChains(BSC_MAINNET)) {
+    vm.rollFork(21118900);
+
     oracle = new ChainlinkPriceOracleV2(address(this), true, ap.getAddress("wtoken"), usdNativeFeedBsc);
     setUpOracleFeed(usdtBsc, usdtFeedBsc);
     uint256 price = oracle.price(usdtBsc);
@@ -71,6 +75,8 @@ contract ChainlinkOraclesTest is BaseTest {
   }
 
   function testUsdcUsdtDeviationBsc() public shouldRun(forChains(BSC_MAINNET)) {
+    vm.rollFork(21118900);
+
     setUpOracleFeed(usdtBsc, usdtFeedBsc);
     setUpOracleFeed(usdcBsc, usdcFeedBsc);
 
