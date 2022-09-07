@@ -157,6 +157,8 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
           ? ((uint256(tokenUsdPrice) * 1e18 * (10**uint256(NATIVE_TOKEN_USD_PRICE_FEED.decimals()))) /
             (10**uint256(feed.decimals()))) / uint256(nativeTokenUsdPrice)
           : 0;
+    } else {
+      revert("unknown base currency");
     }
   }
 
