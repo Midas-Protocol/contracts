@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.10;
 
+import { ERC20 } from "solmate/tokens/ERC20.sol";
+import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
+import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { MidasFlywheelCore } from "./MidasFlywheelCore.sol";
 
 contract MidasFlywheel is MidasFlywheelCore {
@@ -8,12 +11,14 @@ contract MidasFlywheel is MidasFlywheelCore {
 
   bool public constant isFlywheel = true;
 
-  constructor(
+  function initialize(
     ERC20 _rewardToken,
     IFlywheelRewards _flywheelRewards,
     IFlywheelBooster _flywheelBooster,
-    address _owner,
-  ) MidasFlywheelCore(_rewardToken, _flywheelRewards, _flywheelBooster, _owner) {}
+    address _owner
+  ) public override initializer {
+    super.initialize(_rewardToken, _flywheelRewards, _flywheelBooster, _owner);
+  }
 
   function flywheelPreSupplierAction(ERC20 market, address supplier) external {
     accrue(market, supplier);
