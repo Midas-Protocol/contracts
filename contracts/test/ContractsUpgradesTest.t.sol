@@ -51,6 +51,9 @@ contract ContractsUpgradesTest is BaseTest {
     // before upgrade
     FusePoolDirectory oldImpl = FusePoolDirectory(contractToTest);
     FusePoolDirectory.FusePool[] memory poolsBefore = oldImpl.getAllPools();
+    address ownerBefore = oldImpl.owner();
+    emit log_address(ownerBefore);
+
     uint256 lenBefore = poolsBefore.length;
     emit log_uint(lenBefore);
 
@@ -67,11 +70,15 @@ contract ContractsUpgradesTest is BaseTest {
 
     // after upgrade
     FusePoolDirectory newImpl = FusePoolDirectory(contractToTest);
+    address ownerAfter = newImpl.owner();
+    emit log_address(ownerAfter);
+
     FusePoolDirectory.FusePool[] memory poolsAfter = oldImpl.getAllPools();
     uint256 lenAfter = poolsAfter.length;
     emit log_uint(poolsAfter.length);
 
     assertEq(lenBefore, lenAfter, "pools count does not match");
+    assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
   function testFuseFeeDistributorUpgrade() public shouldRun(forChains(BSC_MAINNET)) {
@@ -81,15 +88,16 @@ contract ContractsUpgradesTest is BaseTest {
     // before upgrade
     FuseFeeDistributor oldImpl = FuseFeeDistributor(payable(contractToTest));
     uint256 marketsCounterBefore = oldImpl.marketsCounter();
+    address ownerBefore = oldImpl.owner();
 
     (address latestCErc20DelegateBefore, bool allowResign, bytes memory becomeImplementationData) = oldImpl
       .latestCErc20Delegate(oldCercDelegate);
-    bool whitelistedBefore = oldImpl.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateBefore, false);
+    //    bool whitelistedBefore = oldImpl.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateBefore, false);
 
     emit log_uint(marketsCounterBefore);
-    emit log_address(latestCErc20DelegateBefore);
-    if (whitelistedBefore) emit log("whitelisted before");
-    else emit log("should be whitelisted");
+    emit log_address(ownerBefore);
+    //    if (whitelistedBefore) emit log("whitelisted before");
+    //    else emit log("should be whitelisted");
 
     // upgrade
     {
@@ -97,7 +105,7 @@ contract ContractsUpgradesTest is BaseTest {
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(contractToTest));
       bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
       address admin = address(uint160(uint256(bytesAtSlot)));
-      //            emit log_address(admin);
+      // emit log_address(admin);
       vm.prank(admin);
       proxy.upgradeTo(address(newImpl));
     }
@@ -106,17 +114,20 @@ contract ContractsUpgradesTest is BaseTest {
     FuseFeeDistributor ffd = FuseFeeDistributor(payable(contractToTest));
 
     uint256 marketsCounterAfter = ffd.marketsCounter();
+    address ownerAfter = ffd.owner();
     (address latestCErc20DelegateAfter, bool allowResignAfter, bytes memory becomeImplementationDataAfter) = ffd
       .latestCErc20Delegate(oldCercDelegate);
-    bool whitelistedAfter = ffd.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateAfter, false);
+    //    bool whitelistedAfter = ffd.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateAfter, false);
 
     emit log_uint(marketsCounterAfter);
-    emit log_address(latestCErc20DelegateAfter);
-    if (whitelistedAfter) emit log("whitelisted After");
-    else emit log("should be whitelisted");
+    emit log_address(ownerAfter);
+    //    if (whitelistedAfter) emit log("whitelisted After");
+    //    else emit log("should be whitelisted");
 
     assertEq(latestCErc20DelegateBefore, latestCErc20DelegateAfter, "latest delegates do not match");
     assertEq(marketsCounterBefore, marketsCounterAfter, "markets counter does not match");
-    assertEq(whitelistedBefore, whitelistedAfter, "whitelisted status does not match");
+    //    assertEq(whitelistedBefore, whitelistedAfter, "whitelisted status does not match");
+
+    assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 }

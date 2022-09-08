@@ -2,14 +2,15 @@
 pragma solidity 0.8.10;
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { Auth, Authority } from "solmate/auth/Auth.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { SafeCastLib } from "solmate/utils/SafeCastLib.sol";
 
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 
-contract MidasFlywheelCore is Auth {
+import { SafeOwnableUpgradeable } from "../../../midas/SafeOwnableUpgradeable.sol";
+
+contract MidasFlywheelCore is SafeOwnableUpgradeable {
   using SafeTransferLib for ERC20;
   using SafeCastLib for uint256;
 
@@ -20,7 +21,7 @@ contract MidasFlywheelCore is Auth {
   address public feeRecipient; // TODO whats the default address?
 
   /// @notice The token to reward
-  ERC20 public immutable rewardToken;
+  ERC20 public rewardToken;
 
   /// @notice append-only list of strategies added
   ERC20[] public allStrategies;
@@ -31,16 +32,31 @@ contract MidasFlywheelCore is Auth {
   /// @notice optional booster module for calculating virtual balances on strategies
   IFlywheelBooster public flywheelBooster;
 
-  constructor(
+  /// @notice The accrued but not yet transferred rewards for each user
+  mapping(address => uint256) public rewardsAccrued;
+
+  /// @notice the fixed point factor of flywheel
+  uint224 public constant ONE = 1e18;
+
+  /// @notice The strategy index and last updated per strategy
+  mapping(ERC20 => RewardsState) public strategyState;
+
+  /// @notice user index per strategy
+  mapping(ERC20 => mapping(address => uint224)) public userIndex;
+
+  function initialize(
     ERC20 _rewardToken,
     IFlywheelRewards _flywheelRewards,
     IFlywheelBooster _flywheelBooster,
-    address _owner,
-    Authority _authority
-  ) Auth(_owner, _authority) {
+    address _owner
+  ) public initializer {
+    __SafeOwnable_init();
+
     rewardToken = _rewardToken;
     flywheelRewards = _flywheelRewards;
     flywheelBooster = _flywheelBooster;
+
+    _transferOwnership(_owner);
   }
 
   /*///////////////////////////////////////////////////////////////
@@ -62,9 +78,6 @@ contract MidasFlywheelCore is Auth {
       @param amount the amount of rewards claimed
     */
   event ClaimRewards(address indexed user, uint256 amount);
-
-  /// @notice The accrued but not yet transferred rewards for each user
-  mapping(address => uint256) public rewardsAccrued;
 
   /** 
       @notice accrue rewards for a single user on a strategy
@@ -130,7 +143,7 @@ contract MidasFlywheelCore is Auth {
   event AddStrategy(address indexed newStrategy);
 
   /// @notice initialize a new strategy
-  function addStrategyForRewards(ERC20 strategy) external requiresAuth {
+  function addStrategyForRewards(ERC20 strategy) external onlyOwner {
     _addStrategyForRewards(strategy);
   }
 
@@ -153,7 +166,7 @@ contract MidasFlywheelCore is Auth {
   event FlywheelRewardsUpdate(address indexed newFlywheelRewards);
 
   /// @notice swap out the flywheel rewards contract
-  function setFlywheelRewards(IFlywheelRewards newFlywheelRewards) external requiresAuth {
+  function setFlywheelRewards(IFlywheelRewards newFlywheelRewards) external onlyOwner {
     uint256 oldRewardBalance = rewardToken.balanceOf(address(flywheelRewards));
     if (oldRewardBalance > 0) {
       rewardToken.safeTransferFrom(address(flywheelRewards), address(newFlywheelRewards), oldRewardBalance);
@@ -171,7 +184,7 @@ contract MidasFlywheelCore is Auth {
   event FlywheelBoosterUpdate(address indexed newBooster);
 
   /// @notice swap out the flywheel booster contract
-  function setBooster(IFlywheelBooster newBooster) external requiresAuth {
+  function setBooster(IFlywheelBooster newBooster) external onlyOwner {
     flywheelBooster = newBooster;
 
     emit FlywheelBoosterUpdate(address(newBooster));
@@ -188,7 +201,7 @@ contract MidasFlywheelCore is Auth {
    * @notice Update performanceFee and/or feeRecipient
    * @dev Claim rewards first from the previous feeRecipient before changing it
    */
-  function updateFeeSettings(uint256 _performanceFee, address _feeRecipient) external requiresAuth {
+  function updateFeeSettings(uint256 _performanceFee, address _feeRecipient) external onlyOwner {
     emit UpdatedFeeSettings(performanceFee, _performanceFee, feeRecipient, _feeRecipient);
 
     performanceFee = _performanceFee;
@@ -205,15 +218,6 @@ contract MidasFlywheelCore is Auth {
     /// @notice The timestamp the index was last updated at
     uint32 lastUpdatedTimestamp;
   }
-
-  /// @notice the fixed point factor of flywheel
-  uint224 public constant ONE = 1e18;
-
-  /// @notice The strategy index and last updated per strategy
-  mapping(ERC20 => RewardsState) public strategyState;
-
-  /// @notice user index per strategy
-  mapping(ERC20 => mapping(address => uint224)) public userIndex;
 
   /// @notice accumulate global rewards on a strategy
   function accrueStrategy(ERC20 strategy, RewardsState memory state)

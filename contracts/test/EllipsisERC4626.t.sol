@@ -5,7 +5,7 @@ import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "./config/BaseTest.t.sol";
 
-import { EllipsisERC4626, ILpTokenStaker } from "../compound/strategies/EllipsisERC4626.sol";
+import { EllipsisERC4626, ILpTokenStaker } from "../midas/strategies/EllipsisERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { MockLpTokenStaker, IERC20Mintable } from "./mocks/ellipsis/MockLpTokenStaker.sol";
@@ -14,6 +14,8 @@ import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDy
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
+
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 contract EllipsisERC4626Test is BaseTest {
   struct RewardsCycle {
@@ -59,8 +61,9 @@ contract EllipsisERC4626Test is BaseTest {
     flywheelRewards = new FuseFlywheelDynamicRewards(flywheel, 1);
     flywheel.setFlywheelRewards(flywheelRewards);
 
-    ellipsisERC4626 = new EllipsisERC4626(
-      testToken,
+    ellipsisERC4626 = new EllipsisERC4626();
+    ellipsisERC4626.initialize(
+      ERC20Upgradeable(address(testToken)),
       FlywheelCore(address(flywheel)),
       ILpTokenStaker(address(mockLpTokenStaker))
     );
@@ -194,10 +197,10 @@ contract EllipsisERC4626Test is BaseTest {
     testToken.mint(address(this), depositAmount);
     testToken.approve(address(ellipsisERC4626), depositAmount);
     // flywheelPreSupplierAction -- usually this would be done in Comptroller when supplying
-    flywheel.accrue(ERC20(ellipsisERC4626), address(this));
+    flywheel.accrue(ERC20(address(ellipsisERC4626)), address(this));
     ellipsisERC4626.deposit(depositAmount, address(this));
     // flywheelPreSupplierAction
-    flywheel.accrue(ERC20(ellipsisERC4626), address(this));
+    flywheel.accrue(ERC20(address(ellipsisERC4626)), address(this));
   }
 
   function testDeposit() public {
@@ -276,7 +279,7 @@ contract EllipsisERC4626Test is BaseTest {
     assertEq(epsToken.balanceOf(address(ellipsisERC4626)), rewardsStream);
 
     // Accrue rewards to send rewards to flywheelRewards
-    flywheel.accrue(ERC20(ellipsisERC4626), address(this));
+    flywheel.accrue(ERC20(address(ellipsisERC4626)), address(this));
     assertEq(epsToken.balanceOf(address(flywheelRewards)), rewardsStream);
 
     (start, end, reward) = flywheelRewards.rewardsCycle(ERC20(address(ellipsisERC4626)));
@@ -289,7 +292,7 @@ contract EllipsisERC4626Test is BaseTest {
     vm.warp(4);
 
     // Finally accrue reward from last cycle
-    flywheel.accrue(ERC20(ellipsisERC4626), address(this));
+    flywheel.accrue(ERC20(address(ellipsisERC4626)), address(this));
 
     // Claim Rewards for the user
     flywheel.claimRewards(address(this));
@@ -322,7 +325,7 @@ contract EllipsisERC4626Test is BaseTest {
 
     assertEq(epsToken.balanceOf(address(ellipsisERC4626)), rewardsStream);
 
-    flywheel.accrue(ERC20(ellipsisERC4626), address(this));
+    flywheel.accrue(ERC20(address(ellipsisERC4626)), address(this));
     assertEq(epsToken.balanceOf(address(flywheelRewards)), rewardsStream);
 
     (start, end, reward) = flywheelRewards.rewardsCycle(ERC20(address(ellipsisERC4626)));
@@ -332,7 +335,7 @@ contract EllipsisERC4626Test is BaseTest {
     assertEq(reward, rewardsStream);
     vm.warp(4);
 
-    flywheel.accrue(ERC20(ellipsisERC4626), address(this), tester);
+    flywheel.accrue(ERC20(address(ellipsisERC4626)), address(this), tester);
 
     flywheel.claimRewards(address(this));
     flywheel.claimRewards(tester);

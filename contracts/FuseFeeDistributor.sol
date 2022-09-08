@@ -11,14 +11,15 @@ import "./compound/ComptrollerStorage.sol";
 import "./compound/CEtherDelegator.sol";
 import "./compound/CErc20Delegator.sol";
 import "./compound/CErc20PluginDelegate.sol";
-import "./utils/SafeOwnableUpgradeable.sol";
+import "./midas/SafeOwnableUpgradeable.sol";
+import "./utils/PatchedStorage.sol";
 
 /**
  * @title FuseFeeDistributor
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FuseFeeDistributor controls and receives protocol fees from Fuse pools and relays admin actions to Fuse pools.
  */
-contract FuseFeeDistributor is SafeOwnableUpgradeable {
+contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   using AddressUpgradeable for address;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -28,7 +29,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable {
    */
   function initialize(uint256 _defaultInterestFeeRate) public initializer {
     require(_defaultInterestFeeRate <= 1e18, "Interest fee rate cannot be more than 100%.");
-    __Ownable_init();
+    __SafeOwnable_init();
     defaultInterestFeeRate = _defaultInterestFeeRate;
     maxSupplyEth = type(uint256).max;
     maxUtilizationRate = type(uint256).max;
