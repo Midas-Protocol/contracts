@@ -41,7 +41,10 @@ contract StellaERC4626Test is AbstractERC4626Test {
   function setUp(string memory _testPreFix, bytes calldata testConfig) public override {
     setUpPool("stella-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));
-    (address asset, uint256 _poolId, address[] memory _rewardTokens) = abi.decode(testConfig, (address, uint256, address[]));
+    (address asset, uint256 _poolId, address[] memory _rewardTokens) = abi.decode(
+      testConfig,
+      (address, uint256, address[])
+    );
 
     testPreFix = _testPreFix;
     poolId = _poolId;
@@ -57,7 +60,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
       FuseFlywheelDynamicRewardsPlugin _reward = new FuseFlywheelDynamicRewardsPlugin(_flywheel, 1);
       flywheels.push(_flywheel);
       rewards.push(_reward);
-      _flywheel.setFlywheelRewards(_reward);  
+      _flywheel.setFlywheelRewards(_reward);
 
       rewardsToken.push(ERC20(_rewardTokens[i]));
     }
@@ -107,7 +110,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
   // figure out how to get balance of plugin in LP staker contract
   // make sure it is not balance of underlying, rather balance of shares
   function getDepositShares() public view override returns (uint256) {
-    (uint256 amount, , ,) = distributor.userInfo(poolId, address(plugin));
+    (uint256 amount, , , ) = distributor.userInfo(poolId, address(plugin));
     return amount;
   }
 
@@ -148,7 +151,12 @@ contract StellaERC4626Test is AbstractERC4626Test {
     vm.warp(block.timestamp + 150);
     vm.roll(10);
 
-    (address[] memory addresses, string[] memory symbols, uint256[] memory decimals, uint256[] memory amounts) = distributor.pendingTokens(poolId, address(plugin));
+    (
+      address[] memory addresses,
+      string[] memory symbols,
+      uint256[] memory decimals,
+      uint256[] memory amounts
+    ) = distributor.pendingTokens(poolId, address(plugin));
 
     deposit(address(this), depositAmount / 2);
 
@@ -164,7 +172,12 @@ contract StellaERC4626Test is AbstractERC4626Test {
     vm.warp(block.timestamp + 150);
     vm.roll(10);
 
-    (address[] memory addresses, string[] memory symbols, uint256[] memory decimals, uint256[] memory amounts) = distributor.pendingTokens(poolId, address(plugin));
+    (
+      address[] memory addresses,
+      string[] memory symbols,
+      uint256[] memory decimals,
+      uint256[] memory amounts
+    ) = distributor.pendingTokens(poolId, address(plugin));
 
     plugin.withdraw(poolId, address(this), address(this));
 
@@ -182,7 +195,6 @@ contract StellaERC4626Test is AbstractERC4626Test {
     vm.stopPrank();
 
     for (uint256 i = 0; i < rewards.length; i += 1) {
-
       (uint32 start, uint32 end, uint192 reward) = rewards[i].rewardsCycle(ERC20(address(marketAddress)));
 
       // Rewards can be transfered in the next cycle
@@ -197,7 +209,12 @@ contract StellaERC4626Test is AbstractERC4626Test {
       // Call accrue as proxy for withdraw/deposit to claim rewards
       flywheels[i].accrue(ERC20(marketAddress), address(this));
 
-      (address[] memory addresses, string[] memory symbols, uint256[] memory decimals, uint256[] memory amounts) = distributor.pendingTokens(poolId, address(plugin));
+      (
+        address[] memory addresses,
+        string[] memory symbols,
+        uint256[] memory decimals,
+        uint256[] memory amounts
+      ) = distributor.pendingTokens(poolId, address(plugin));
       uint256 pendingIndex = 0;
 
       for (uint256 j = 0; j < addresses.length; j += 1) {
@@ -209,8 +226,16 @@ contract StellaERC4626Test is AbstractERC4626Test {
       // Claim Rewards for the user
       flywheels[i].claimRewards(address(this));
 
-      assertEq(rewardsToken[i].balanceOf(address(this)), amounts[pendingIndex], string(abi.encodePacked("!Bal User ", testPreFix)));
-      assertEq(rewardsToken[i].balanceOf(address(flywheels[i])), 0, string(abi.encodePacked("!Bal Flywheel ", testPreFix)));
+      assertEq(
+        rewardsToken[i].balanceOf(address(this)),
+        amounts[pendingIndex],
+        string(abi.encodePacked("!Bal User ", testPreFix))
+      );
+      assertEq(
+        rewardsToken[i].balanceOf(address(flywheels[i])),
+        0,
+        string(abi.encodePacked("!Bal Flywheel ", testPreFix))
+      );
     }
   }
 }

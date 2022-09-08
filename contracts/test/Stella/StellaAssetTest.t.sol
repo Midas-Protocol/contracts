@@ -27,7 +27,10 @@ contract StellaAssetTest is AbstractAssetTest {
   function setUp() public override shouldRun(shouldRunTest) {}
 
   function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
-    (address asset, uint256 poolId, address[] memory rewardTokens) = abi.decode(testConfig, (address, uint256, address[]));
+    (address asset, uint256 poolId, address[] memory rewardTokens) = abi.decode(
+      testConfig,
+      (address, uint256, address[])
+    );
 
     test.setUpWithPool(MasterPriceOracle(masterPriceOracle), MockERC20(asset));
 

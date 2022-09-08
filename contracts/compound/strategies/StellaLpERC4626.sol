@@ -13,19 +13,25 @@ interface IStellaDistributorV2 {
 
   function withdraw(uint256 _pid, uint256 _amount) external;
 
-  function userInfo(uint256 _pid, address _owner) external view returns (
-    uint256 amount, // How many LP tokens the user has provided.
-    uint256 rewardDebt, // Reward debt. See explanation below.
-    uint256 rewardLockedUp, // Reward locked up.
-    uint256 nextHarvestUntil // When can the user harvest again.
-  );
+  function userInfo(uint256 _pid, address _owner)
+    external
+    view
+    returns (
+      uint256 amount, // How many LP tokens the user has provided.
+      uint256 rewardDebt, // Reward debt. See explanation below.
+      uint256 rewardLockedUp, // Reward locked up.
+      uint256 nextHarvestUntil // When can the user harvest again.
+    );
 
-  function pendingTokens(uint256 _pid, address _user) external view returns (
-    address[] memory addresses,
-    string[] memory symbols,
-    uint256[] memory decimals,
-    uint256[] memory amounts
-  );
+  function pendingTokens(uint256 _pid, address _user)
+    external
+    view
+    returns (
+      address[] memory addresses,
+      string[] memory symbols,
+      uint256[] memory decimals,
+      uint256[] memory amounts
+    );
 
   function poolTotalLp(uint256 _pid) external view returns (uint256);
 }
@@ -46,7 +52,7 @@ contract StellaLpERC4626 is MidasERC4626, RewardsClaimer {
     uint256 _poolId,
     address _rewardsDestination,
     ERC20[] memory _rewardTokens
-  ) 
+  )
     MidasERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
