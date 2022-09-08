@@ -11,15 +11,6 @@ contract MidasFlywheel is MidasFlywheelCore {
 
   bool public constant isFlywheel = true;
 
-  function initialize(
-    ERC20 _rewardToken,
-    IFlywheelRewards _flywheelRewards,
-    IFlywheelBooster _flywheelBooster,
-    address _owner
-  ) public override initializer {
-    super.initialize(_rewardToken, _flywheelRewards, _flywheelBooster, _owner);
-  }
-
   function flywheelPreSupplierAction(ERC20 market, address supplier) external {
     accrue(market, supplier);
   }
