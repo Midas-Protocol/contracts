@@ -13,13 +13,13 @@ contract StellaTestConfigStorage is ITestConfigStorage {
   StellaTestConfig[] internal testConfigs;
 
   constructor() {
-    // 2JBRL
+    // ATOM/GLMR
     address[] memory rewardTokens = new address[](2);
     rewardTokens[0] = 0x0E358838ce72d5e61E0018a2ffaC4bEC5F4c88d2; // STELLA token
-    rewardTokens[1] = 0x3795C36e7D12A8c252A20C5a7B455f7c57b60283; // CLEAR token
+    rewardTokens[1] = 0xAcc15dC74880C9944775448304B263D191c6077F; // WGLMR token
 
     testConfigs.push(
-      StellaTestConfig(0x2f6F833fAb26Bf7F81827064f67ea4844BdEa03F, 0, rewardTokens)
+      StellaTestConfig(0xf4C10263f2A4B1f75b8a5FD5328fb61605321639, 5, rewardTokens)
     );
   }
 

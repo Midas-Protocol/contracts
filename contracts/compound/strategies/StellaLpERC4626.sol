@@ -84,6 +84,10 @@ contract StellaLpERC4626 is MidasERC4626, RewardsClaimer {
     distributor.withdraw(poolId, amount);
   }
 
+  function beforeClaim() internal override {
+    distributor.deposit(poolId, 0);
+  }
+
   function emergencyWithdrawAndPause() external override onlyOwner {
     (uint256 amount, , , ) = distributor.userInfo(poolId, address(this));
     distributor.withdraw(poolId, amount);

@@ -46,15 +46,15 @@ contract StellaAssetTest is AbstractAssetTest {
     }
   }
 
-  // function testAccumulatingRewardsOnDeposit() public shouldRun(shouldRunTest) {
-  //   this.runTest(StellaERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
-  // }
+  function testAccumulatingRewardsOnDeposit() public shouldRun(shouldRunTest) {
+    this.runTest(StellaERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
+  }
 
-  // function testAccumulatingRewardsOnWithdrawal() public shouldRun(shouldRunTest) {
-  //   this.runTest(StellaERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
-  // }
+  function testAccumulatingRewardsOnWithdrawal() public shouldRun(shouldRunTest) {
+    this.runTest(StellaERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
+  }
 
-  // function testClaimRewards() public shouldRun(shouldRunTest) {
-  //   this.runTest(StellaERC4626Test(address(test)).testClaimRewards);
-  // }
+  function testClaimRewards() public shouldRun(shouldRunTest) {
+    this.runTest(StellaERC4626Test(address(test)).testClaimRewards);
+  }
 }

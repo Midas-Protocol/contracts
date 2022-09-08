@@ -27,27 +27,13 @@ contract StellaERC4626Test is AbstractERC4626Test {
   using FixedPointMathLib for uint256;
 
   IStellaDistributorV2 distributor = IStellaDistributorV2(0xF3a5454496E26ac57da879bf3285Fa85DEBF0388); // what you deposit the LP into
-  ERC20 depositShare = ERC20(0xEFF5b0E496dC7C26fFaA014cEa0d2Baa83DB11c4);
 
   FlywheelCore[] flywheels;
   FuseFlywheelDynamicRewardsPlugin[] rewards;
 
-  ERC20 dddToken = ERC20(0x84c97300a190676a19D1E13115629A11f8482Bd1);
-  FlywheelCore dddFlywheel;
-  FuseFlywheelDynamicRewardsPlugin dddRewards;
-
-  ERC20 epxToken = ERC20(0xAf41054C1487b0e5E2B9250C0332eCBCe6CE9d71);
-  FlywheelCore epxFlywheel;
-  FuseFlywheelDynamicRewardsPlugin epxRewards;
-
-  uint256 withdrawalFee = 10;
-  uint256 ACCEPTABLE_DIFF = 1000;
   uint256 poolId;
-
-  uint192 expectedReward = 1e18;
   address marketAddress;
   ERC20 marketKey;
-
   ERC20[] rewardsToken;
 
   constructor() WithPool() {}
@@ -90,7 +76,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
     );
 
     // Just set it explicitly to 0. Just wanted to make clear that this is not forgotten but expected to be 0
-    initialStrategyBalance = 0;
+    initialStrategyBalance = getStrategyBalance();
     initialStrategySupply = 0;
 
     deployCErc20PluginRewardsDelegate(ERC4626(address(plugin)), 0.9e18);
@@ -156,85 +142,75 @@ contract StellaERC4626Test is AbstractERC4626Test {
     );
   }
 
-  // function testAccumulatingRewardsOnDeposit() public {
-  //   deposit(address(this), depositAmount / 2);
+  function testAccumulatingRewardsOnDeposit() public {
+    deposit(address(this), depositAmount / 2);
 
-  //   vm.warp(block.timestamp + 150);
-  //   vm.roll(10);
+    vm.warp(block.timestamp + 150);
+    vm.roll(10);
 
-  //   deposit(address(this), depositAmount / 2);
-  //   assertGt(dddToken.balanceOf(address(plugin)), 0.0006 ether, string(abi.encodePacked("!dddBal ", testPreFix)));
-  //   assertGt(epxToken.balanceOf(address(plugin)), 0.01 ether, string(abi.encodePacked("!epxBal ", testPreFix)));
-  // }
+    (address[] memory addresses, string[] memory symbols, uint256[] memory decimals, uint256[] memory amounts) = distributor.pendingTokens(poolId, address(plugin));
 
-  // function testAccumulatingRewardsOnWithdrawal() public {
-  //   deposit(address(this), depositAmount);
+    deposit(address(this), depositAmount / 2);
 
-  //   vm.warp(block.timestamp + 150);
-  //   vm.roll(10);
+    for (uint256 i = 0; i < addresses.length; i += 1) {
+      uint256 actualAmount = ERC20(addresses[i]).balanceOf(address(plugin));
+      assertEq(actualAmount, amounts[i], string(abi.encodePacked("!rewardBal ", symbols[i], testPreFix)));
+    }
+  }
 
-  //   plugin.withdraw(1, address(this), address(this));
+  function testAccumulatingRewardsOnWithdrawal() public {
+    deposit(address(this), depositAmount);
 
-  //   assertGt(dddToken.balanceOf(address(plugin)), 0.001 ether, string(abi.encodePacked("!dddBal ", testPreFix)));
-  //   assertGt(epxToken.balanceOf(address(plugin)), 0.025 ether, string(abi.encodePacked("!epxBal ", testPreFix)));
-  // }
+    vm.warp(block.timestamp + 150);
+    vm.roll(10);
 
-  // function testClaimRewards() public {
-  //   // Deposit funds, Rewards are 0
-  //   vm.startPrank(address(this));
-  //   underlyingToken.approve(marketAddress, depositAmount);
-  //   CErc20(marketAddress).mint(depositAmount);
-  //   vm.stopPrank();
+    (address[] memory addresses, string[] memory symbols, uint256[] memory decimals, uint256[] memory amounts) = distributor.pendingTokens(poolId, address(plugin));
 
-  //   (uint32 dddStart, uint32 dddEnd, uint192 dddReward) = dddRewards.rewardsCycle(ERC20(address(marketAddress)));
-  //   (uint32 epxStart, uint32 epxEnd, uint192 epxReward) = dddRewards.rewardsCycle(ERC20(address(marketAddress)));
+    plugin.withdraw(poolId, address(this), address(this));
 
-  //   // Rewards can be transfered in the next cycle
-  //   assertEq(dddEnd, 0, string(abi.encodePacked("!dddEnd ", testPreFix)));
-  //   assertEq(epxEnd, 0, string(abi.encodePacked("!epxEnd ", testPreFix)));
+    for (uint256 i = 0; i < addresses.length; i += 1) {
+      uint256 actualAmount = ERC20(addresses[i]).balanceOf(address(plugin));
+      assertEq(actualAmount, amounts[i], string(abi.encodePacked("!rewardBal ", symbols[i], testPreFix)));
+    }
+  }
 
-  //   // Reward amount is still 0
-  //   assertEq(dddReward, 0, string(abi.encodePacked("!dddReward ", testPreFix)));
-  //   assertEq(epxReward, 0, string(abi.encodePacked("!epxReward ", testPreFix)));
+  function testClaimRewards() public {
+    // Deposit funds, Rewards are 0
+    vm.startPrank(address(this));
+    underlyingToken.approve(marketAddress, depositAmount);
+    CErc20(marketAddress).mint(depositAmount);
+    vm.stopPrank();
 
-  //   vm.warp(block.timestamp + 150);
-  //   vm.roll(10);
+    for (uint256 i = 0; i < rewards.length; i += 1) {
 
-  //   // Call accrue as proxy for withdraw/deposit to claim rewards
-  //   dddFlywheel.accrue(ERC20(marketAddress), address(this));
-  //   epxFlywheel.accrue(ERC20(marketAddress), address(this));
+      (uint32 start, uint32 end, uint192 reward) = rewards[i].rewardsCycle(ERC20(address(marketAddress)));
 
-  //   // Accrue rewards to send rewards to flywheelRewards
-  //   dddFlywheel.accrue(ERC20(marketAddress), address(this));
-  //   epxFlywheel.accrue(ERC20(marketAddress), address(this));
-  //   assertGt(dddToken.balanceOf(address(dddRewards)), 0.001 ether, string(abi.encodePacked("!dddBal ", testPreFix)));
-  //   assertGt(epxToken.balanceOf(address(epxRewards)), 0.025 ether, string(abi.encodePacked("!epxBal ", testPreFix)));
+      // Rewards can be transfered in the next cycle
+      assertEq(end, 0, string(abi.encodePacked("!End ", testPreFix)));
 
-  //   (dddStart, dddEnd, dddReward) = dddRewards.rewardsCycle(ERC20(marketAddress));
-  //   (epxStart, epxEnd, epxReward) = epxRewards.rewardsCycle(ERC20(marketAddress));
+      // Reward amount is still 0
+      assertEq(reward, 0, string(abi.encodePacked("!Reward ", testPreFix)));
 
-  //   // Rewards can be transfered in the next cycle
-  //   assertGt(dddEnd, 1000000000, string(abi.encodePacked("!2.dddEnd ", testPreFix)));
-  //   assertGt(epxEnd, 1000000000, string(abi.encodePacked("!2.epxEnd ", testPreFix)));
+      vm.warp(block.timestamp + 150);
+      vm.roll(10);
 
-  //   // Reward amount is expected value
-  //   assertGt(dddReward, 0.001 ether, string(abi.encodePacked("!2.dddReward ", testPreFix)));
-  //   assertGt(epxReward, 0.025 ether, string(abi.encodePacked("!2.epxReward ", testPreFix)));
+      // Call accrue as proxy for withdraw/deposit to claim rewards
+      flywheels[i].accrue(ERC20(marketAddress), address(this));
 
-  //   vm.warp(block.timestamp + 150);
-  //   vm.roll(20);
+      (address[] memory addresses, string[] memory symbols, uint256[] memory decimals, uint256[] memory amounts) = distributor.pendingTokens(poolId, address(plugin));
+      uint256 pendingIndex = 0;
 
-  //   // Finally accrue reward from last cycle
-  //   dddFlywheel.accrue(ERC20(marketAddress), address(this));
-  //   epxFlywheel.accrue(ERC20(marketAddress), address(this));
+      for (uint256 j = 0; j < addresses.length; j += 1) {
+        if (addresses[j] == address(rewardsToken[i])) {
+          pendingIndex = j;
+        }
+      }
 
-  //   // Claim Rewards for the user
-  //   dddFlywheel.claimRewards(address(this));
-  //   epxFlywheel.claimRewards(address(this));
+      // Claim Rewards for the user
+      flywheels[i].claimRewards(address(this));
 
-  //   assertGt(dddToken.balanceOf(address(this)), 0.001 ether, string(abi.encodePacked("!dddBal User ", testPreFix)));
-  //   assertEq(dddToken.balanceOf(address(dddFlywheel)), 0, string(abi.encodePacked("!dddBal Flywheel ", testPreFix)));
-  //   assertGt(epxToken.balanceOf(address(this)), 0.025 ether, string(abi.encodePacked("!epxBal User ", testPreFix)));
-  //   assertEq(epxToken.balanceOf(address(dddFlywheel)), 0, string(abi.encodePacked("!epxBal Flywheel ", testPreFix)));
-  // }
+      assertEq(rewardsToken[i].balanceOf(address(this)), amounts[pendingIndex], string(abi.encodePacked("!Bal User ", testPreFix)));
+      assertEq(rewardsToken[i].balanceOf(address(flywheels[i])), 0, string(abi.encodePacked("!Bal Flywheel ", testPreFix)));
+    }
+  }
 }
