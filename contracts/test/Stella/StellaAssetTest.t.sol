@@ -32,7 +32,7 @@ contract StellaAssetTest is AbstractAssetTest {
       (address, uint256, address[])
     );
 
-    test.setUpWithPool(MasterPriceOracle(masterPriceOracle), MockERC20(asset));
+    test.setUpWithPool(MasterPriceOracle(masterPriceOracle), ERC20Upgradeable(asset));
 
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }

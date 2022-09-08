@@ -6,8 +6,9 @@ import "forge-std/Vm.sol";
 import "../helpers/WithPool.sol";
 import "../config/BaseTest.t.sol";
 
-import { MidasERC4626, StellaLpERC4626, IStellaDistributorV2 } from "../../compound/strategies/StellaLpERC4626.sol";
+import { MidasERC4626, StellaLpERC4626, IStellaDistributorV2 } from "../../midas/strategies/StellaLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
@@ -34,7 +35,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
   uint256 poolId;
   address marketAddress;
   ERC20 marketKey;
-  ERC20[] rewardsToken;
+  ERC20Upgradeable[] rewardsToken;
 
   constructor() WithPool() {}
 
@@ -62,27 +63,26 @@ contract StellaERC4626Test is AbstractERC4626Test {
       rewards.push(_reward);
       _flywheel.setFlywheelRewards(_reward);
 
-      rewardsToken.push(ERC20(_rewardTokens[i]));
+      rewardsToken.push(ERC20Upgradeable(_rewardTokens[i]));
     }
 
-    plugin = MidasERC4626(
-      address(
-        new StellaLpERC4626(
-          underlyingToken,
-          flywheels,
-          IStellaDistributorV2(address(distributor)),
-          poolId,
-          address(this),
-          rewardsToken
-        )
-      )
+    StellaLpERC4626 stellaLpERC4626 = new StellaLpERC4626();
+    stellaLpERC4626.initialize(
+      ERC20Upgradeable(address(underlyingToken)),
+      flywheels,
+      IStellaDistributorV2(address(distributor)),
+      poolId,
+      address(this),
+      rewardsToken
     );
+
+    plugin = stellaLpERC4626;
 
     // Just set it explicitly to 0. Just wanted to make clear that this is not forgotten but expected to be 0
     initialStrategyBalance = getStrategyBalance();
     initialStrategySupply = 0;
 
-    deployCErc20PluginRewardsDelegate(ERC4626(address(plugin)), 0.9e18);
+    deployCErc20PluginRewardsDelegate(address(plugin), 0.9e18);
     marketAddress = address(comptroller.cTokensByUnderlying(address(underlyingToken)));
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
     cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(plugin)));

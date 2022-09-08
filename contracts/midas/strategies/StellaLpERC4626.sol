@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.10;
 
-import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
-import { RewardsClaimer } from "fuse-flywheel/utils/RewardsClaimer.sol";
+import { RewardsClaimer } from "../RewardsClaimer.sol";
+
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 interface IStellaDistributorV2 {
   function deposit(uint256 _pid, uint256 _amount) external;
@@ -37,41 +38,36 @@ interface IStellaDistributorV2 {
 }
 
 contract StellaLpERC4626 is MidasERC4626, RewardsClaimer {
-  using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
   FlywheelCore[] public flywheels;
-  IStellaDistributorV2 public immutable distributor;
-  uint256 public immutable poolId;
+  IStellaDistributorV2 public distributor;
+  uint256 public poolId;
   address[] public assetsAsArray;
 
-  constructor(
-    ERC20 _asset,
+  function initialize(
+    ERC20Upgradeable _asset,
     FlywheelCore[] memory _flywheels,
     IStellaDistributorV2 _distributor,
     uint256 _poolId,
     address _rewardsDestination,
-    ERC20[] memory _rewardTokens
-  )
-    MidasERC4626(
-      _asset,
-      string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
-      string(abi.encodePacked("mv", _asset.symbol))
-    )
-    RewardsClaimer(_rewardsDestination, _rewardTokens)
-  {
+    ERC20Upgradeable[] memory _rewardTokens
+  ) public initializer {
+    __MidasER4626_init(_asset);
+    __RewardsClaimer_init(_rewardsDestination, _rewardTokens);
+
     flywheels = _flywheels;
     distributor = _distributor;
     poolId = _poolId;
 
     assetsAsArray.push(address(_asset));
 
-    asset.approve(address(distributor), type(uint256).max);
+    _asset.approve(address(distributor), type(uint256).max);
   }
 
   function totalAssets() public view override returns (uint256) {
     if (paused()) {
-      return asset.balanceOf(address(this));
+      return _asset().balanceOf(address(this));
     } else {
       (uint256 amount, , , ) = distributor.userInfo(poolId, address(this));
       return amount;
@@ -79,7 +75,7 @@ contract StellaLpERC4626 is MidasERC4626, RewardsClaimer {
   }
 
   function balanceOfUnderlying(address account) public view returns (uint256) {
-    return convertToAssets(balanceOf[account]);
+    return convertToAssets(balanceOf(account));
   }
 
   function afterDeposit(uint256 amount, uint256) internal override {
@@ -102,6 +98,6 @@ contract StellaLpERC4626 is MidasERC4626, RewardsClaimer {
 
   function unpause() external override onlyOwner {
     _unpause();
-    distributor.deposit(poolId, asset.balanceOf(address(this)));
+    distributor.deposit(poolId, _asset().balanceOf(address(this)));
   }
 }
