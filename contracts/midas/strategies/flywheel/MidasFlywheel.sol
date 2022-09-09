@@ -2,8 +2,6 @@
 pragma solidity 0.8.10;
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
-import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { MidasFlywheelCore } from "./MidasFlywheelCore.sol";
 
 contract MidasFlywheel is MidasFlywheelCore {
@@ -11,25 +9,25 @@ contract MidasFlywheel is MidasFlywheelCore {
 
   bool public constant isFlywheel = true;
 
-  function flywheelPreSupplierAction(ERC20 market, address supplier) external {
-    accrue(market, supplier);
+  function flywheelPreSupplierAction(address market, address supplier) external {
+    accrue(ERC20(market), supplier);
   }
 
-  function flywheelPreBorrowerAction(ERC20 market, address borrower) external {}
+  function flywheelPreBorrowerAction(address market, address borrower) external {}
 
   function flywheelPreTransferAction(
-    ERC20 market,
+    address market,
     address src,
     address dst
   ) external {
-    accrue(market, src, dst);
+    accrue(ERC20(market), src, dst);
   }
 
   function compAccrued(address user) external view returns (uint256) {
     return rewardsAccrued[user];
   }
 
-  function addMarketForRewards(ERC20 strategy) external {
+  function addMarketForRewards(ERC20 strategy) external onlyOwner {
     _addStrategyForRewards(strategy);
   }
 

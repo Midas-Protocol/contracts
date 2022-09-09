@@ -9,8 +9,9 @@ import "./PriceOracle.sol";
 import "./ComptrollerInterface.sol";
 import "./ComptrollerStorage.sol";
 import "./Unitroller.sol";
-import "./RewardsDistributorDelegate.sol";
 import "./IFuseFeeDistributor.sol";
+
+import "../midas/strategies/flywheel/MidasFlywheel.sol";
 
 /**
  * @title Compound's Comptroller Contract
@@ -811,7 +812,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    */
   function flywheelPreSupplierAction(address cToken, address supplier) internal {
     for (uint256 i = 0; i < rewardsDistributors.length; i++)
-      RewardsDistributorDelegate(rewardsDistributors[i]).flywheelPreSupplierAction(cToken, supplier);
+      MidasFlywheel(rewardsDistributors[i]).flywheelPreSupplierAction(cToken, supplier);
   }
 
   /**
@@ -821,7 +822,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    */
   function flywheelPreBorrowerAction(address cToken, address borrower) internal {
     for (uint256 i = 0; i < rewardsDistributors.length; i++)
-      RewardsDistributorDelegate(rewardsDistributors[i]).flywheelPreBorrowerAction(cToken, borrower);
+      MidasFlywheel(rewardsDistributors[i]).flywheelPreBorrowerAction(cToken, borrower);
   }
 
   /**
@@ -836,7 +837,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address dst
   ) internal {
     for (uint256 i = 0; i < rewardsDistributors.length; i++)
-      RewardsDistributorDelegate(rewardsDistributors[i]).flywheelPreTransferAction(cToken, src, dst);
+      MidasFlywheel(rewardsDistributors[i]).flywheelPreTransferAction(cToken, src, dst);
   }
 
   /*** Liquidity/Liquidation Calculations ***/
@@ -1080,7 +1081,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
 
     // Check marker method
-    require(RewardsDistributorDelegate(distributor).isRewardsDistributor(), "marker method returned false");
+    require(MidasFlywheel(distributor).isRewardsDistributor(), "marker method returned false");
 
     // Check for existing RewardsDistributor
     for (uint256 i = 0; i < rewardsDistributors.length; i++)
@@ -1610,6 +1611,26 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    */
   function getRewardsDistributors() external view returns (address[] memory) {
     return rewardsDistributors;
+  }
+
+  /**
+   * @notice Returns true if the old flyhwheel was found and replaced
+   * @dev Replaces and old flywheel with a new one
+   * @param oldFlywheel The address of the flywheel to replace
+   * @param newFlywheel The address of the new flywheel to add
+   */
+  function replaceFlywheel(address oldFlywheel, address newFlywheel) external returns (bool) {
+    require(hasAdminRights(), "should have admin rights");
+    require(newFlywheel != address(0), "zero address for new flywheel");
+    require(newFlywheel != oldFlywheel, "same flywheel");
+
+    for (uint256 i = 0; i < rewardsDistributors.length; i++)
+      if (oldFlywheel == rewardsDistributors[i]) {
+        rewardsDistributors[i] = newFlywheel;
+        return true;
+      }
+
+    return false;
   }
 
   /**
