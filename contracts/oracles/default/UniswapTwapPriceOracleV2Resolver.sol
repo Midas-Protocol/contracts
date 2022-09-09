@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { IResolver } from "ops/interfaces/IResolver.sol";
 import { UniswapTwapPriceOracleV2Root } from "./UniswapTwapPriceOracleV2Root.sol";
-import { Ownable } from "openzeppelin-contracts/contracts/access/Ownable.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
   struct PairConfig {
@@ -22,7 +22,7 @@ contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
   UniswapTwapPriceOracleV2Root public root;
   uint256 public lastUpdate;
 
-  constructor(PairConfig[] memory _pairConfigs, UniswapTwapPriceOracleV2Root _root) public {
+  constructor(PairConfig[] memory _pairConfigs, UniswapTwapPriceOracleV2Root _root) {
     for (uint256 i = 0; i < _pairConfigs.length; i++) {
       pairs[i] = _pairConfigs[i].pair;
       baseTokens[i] = _pairConfigs[i].baseToken;
@@ -30,6 +30,20 @@ contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
       deviationThresholds[i] = _pairConfigs[i].deviationThreshold;
     }
     root = _root;
+  }
+
+  function getPairs() external view returns (PairConfig[] memory) {
+    PairConfig[] memory pairConfigs = new PairConfig[](pairs.length);
+    for (uint256 i = 0; i < pairs.length; i++) {
+      PairConfig memory pairConfig = PairConfig({
+        pair: pairs[i],
+        baseToken: baseTokens[i],
+        minPeriod: minPeriods[i],
+        deviationThreshold: deviationThresholds[i]
+      });
+      pairConfigs[i] = pairConfig;
+    }
+    return pairConfigs;
   }
 
   function changeRoot(UniswapTwapPriceOracleV2Root _root) external onlyOwner {
@@ -66,7 +80,7 @@ contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
         workableCount += 1;
       }
     }
-  
+
     address[] memory workablePairs = new address[](workableCount);
 
     for (uint256 i = 0; i < workable.length; i++) {

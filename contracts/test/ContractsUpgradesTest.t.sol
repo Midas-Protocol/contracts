@@ -7,7 +7,7 @@ import "../FuseFeeDistributor.sol";
 import "../FusePoolDirectory.sol";
 import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 
-import "openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 // TODO: exclude test from CI
 contract ContractsUpgradesTest is BaseTest {
