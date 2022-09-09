@@ -7,7 +7,7 @@ import "./config/BaseTest.t.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
-import { Comptroller } from "../../compound/Comptroller.sol";
+import { Comptroller } from "../compound/Comptroller.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 
