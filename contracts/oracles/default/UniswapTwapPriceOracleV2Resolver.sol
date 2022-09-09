@@ -32,6 +32,20 @@ contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
     root = _root;
   }
 
+  function getPairs() external view returns (PairConfig[] memory) {
+    PairConfig[] memory pairConfigs = new PairConfig[](pairs.length);
+    for (uint256 i = 0; i < pairs.length; i++) {
+      PairConfig memory pairConfig = PairConfig({
+        pair: pairs[i],
+        baseToken: baseTokens[i],
+        minPeriod: minPeriods[i],
+        deviationThreshold: deviationThresholds[i]
+      });
+      pairConfigs[i] = pairConfig;
+    }
+    return pairConfigs;
+  }
+
   function changeRoot(UniswapTwapPriceOracleV2Root _root) external onlyOwner {
     root = _root;
   }
