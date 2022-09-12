@@ -464,12 +464,16 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     uint256 cashPrior = getCashPrior();
 
     /* Calculate the current borrow interest rate */
+    uint256 totalFees = add_(totalAdminFees, totalFuseFees);
     uint256 borrowRateMantissa = interestRateModel.getBorrowRate(
       cashPrior,
       totalBorrows,
-      add_(totalReserves, add_(totalAdminFees, totalFuseFees))
+      add_(totalReserves, totalFees)
     );
-    require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
+    if (borrowRateMantissa > borrowRateMaxMantissa) {
+      if (cashPrior > totalFees) revert("borrow rate is absurdly high");
+      else borrowRateMantissa = borrowRateMaxMantissa;
+    }
 
     /* Calculate the number of blocks elapsed since the last accrual */
     (MathError mathErr, uint256 blockDelta) = subUInt(currentBlockNumber, accrualBlockNumber);
