@@ -170,19 +170,18 @@ contract FusePoolLens is Initializable {
    * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
    */
   function getPoolsOfUserWithData(address user)
-  external
-  returns (
-    uint256[] memory,
-    FusePoolDirectory.FusePool[] memory,
-    FusePoolData[] memory,
-    bool[] memory
-  )
+    external
+    returns (
+      uint256[] memory,
+      FusePoolDirectory.FusePool[] memory,
+      FusePoolData[] memory,
+      bool[] memory
+    )
   {
     (uint256[] memory indexes, FusePoolDirectory.FusePool[] memory userPools) = directory.getPoolsOfUser(user);
     (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(userPools);
     return (indexes, userPools, data, errored);
   }
-
 
   /**
    * @notice Internal function returning arrays of requested Fuse pool indexes, data, total supply balances (in ETH), total borrow balances (in ETH), arrays of underlying token addresses, arrays of underlying asset symbols, and booleans indicating if retrieving each pool's data failed.
