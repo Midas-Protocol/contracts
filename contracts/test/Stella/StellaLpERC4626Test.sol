@@ -58,7 +58,10 @@ contract StellaERC4626Test is AbstractERC4626Test {
         IFlywheelBooster(address(0)),
         address(this)
       );
-      FuseFlywheelDynamicRewardsPlugin _reward = new FuseFlywheelDynamicRewardsPlugin(FlywheelCore(address(_flywheel)), 1);
+      FuseFlywheelDynamicRewardsPlugin _reward = new FuseFlywheelDynamicRewardsPlugin(
+        FlywheelCore(address(_flywheel)),
+        1
+      );
       flywheels.push(_flywheel);
       rewards.push(_reward);
       _flywheel.setFlywheelRewards(_reward);
