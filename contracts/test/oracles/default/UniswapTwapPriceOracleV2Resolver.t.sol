@@ -43,15 +43,11 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
       emit log_named_uint("STELLA_WGLMR last time: ", lastTime);
       (uint32 timestamp, uint256 price0Cumulative, uint256 price1Cumulative) = twapPriceOracleRoot.observations(STELLA_WGLMR, 0);
       emit log_named_uint("STELLA_WGLMR observations timestamp: ", timestamp);
-      emit log_uint(block.timestamp);
       emit log_named_bytes("STELLA_WGLMR observations timestamp diff: ", abi.encode(block.timestamp - timestamp > 15 minutes));
       emit log_named_uint("STELLA_WGLMR observations price0Cumulative: ", price0Cumulative);
     }
     UniswapTwapPriceOracleV2Resolver.PairConfig[] memory pairConfigs = new UniswapTwapPriceOracleV2Resolver.PairConfig[](0);
-
-    emit log("before resolver");
     resolver = new UniswapTwapPriceOracleV2Resolver(pairConfigs, twapPriceOracleRoot);
-    emit log("after resolver");
   
     UniswapTwapPriceOracleV2Resolver.PairConfig memory pairConfig = UniswapTwapPriceOracleV2Resolver.PairConfig({
       pair: STELLA_WGLMR,
