@@ -12,10 +12,10 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
-import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
+import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
 
 struct RewardsCycle {
   uint32 start;
@@ -29,7 +29,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
 
   IStellaDistributorV2 distributor = IStellaDistributorV2(0xF3a5454496E26ac57da879bf3285Fa85DEBF0388); // what you deposit the LP into
 
-  FlywheelCore[] flywheels;
+  MidasFlywheelCore[] flywheels;
   FuseFlywheelDynamicRewardsPlugin[] rewards;
 
   uint256 poolId;
@@ -51,14 +51,14 @@ contract StellaERC4626Test is AbstractERC4626Test {
     poolId = _poolId;
 
     for (uint256 i = 0; i < _rewardTokens.length; i += 1) {
-      FlywheelCore _flywheel = new FlywheelCore(
+      MidasFlywheelCore _flywheel = new MidasFlywheelCore();
+      _flywheel.initialize(
         ERC20(_rewardTokens[i]),
         IFlywheelRewards(address(0)),
         IFlywheelBooster(address(0)),
-        address(this),
-        Authority(address(0))
+        address(this)
       );
-      FuseFlywheelDynamicRewardsPlugin _reward = new FuseFlywheelDynamicRewardsPlugin(_flywheel, 1);
+      FuseFlywheelDynamicRewardsPlugin _reward = new FuseFlywheelDynamicRewardsPlugin(FlywheelCore(address(_flywheel)), 1);
       flywheels.push(_flywheel);
       rewards.push(_reward);
       _flywheel.setFlywheelRewards(_reward);

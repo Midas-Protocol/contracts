@@ -5,6 +5,7 @@ import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
+import { MidasFlywheelCore } from "./flywheel/MidasFlywheelCore.sol";
 import { RewardsClaimer } from "../RewardsClaimer.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
@@ -40,14 +41,14 @@ interface IStellaDistributorV2 {
 contract StellaLpERC4626 is MidasERC4626, RewardsClaimer {
   using FixedPointMathLib for uint256;
 
-  FlywheelCore[] public flywheels;
+  MidasFlywheelCore[] public flywheels;
   IStellaDistributorV2 public distributor;
   uint256 public poolId;
   address[] public assetsAsArray;
 
   function initialize(
     ERC20Upgradeable _asset,
-    FlywheelCore[] memory _flywheels,
+    MidasFlywheelCore[] memory _flywheels,
     IStellaDistributorV2 _distributor,
     uint256 _poolId,
     address _rewardsDestination,
