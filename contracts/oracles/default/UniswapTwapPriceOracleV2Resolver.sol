@@ -82,10 +82,11 @@ contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
     }
 
     address[] memory workablePairs = new address[](workableCount);
+    uint256 j = 0;
 
-    for (uint256 i = 0; i < workableCount; i++) {
+    for (uint256 i = 0; i < workable.length; i++) {
       if (workable[i]) {
-        workablePairs[i] = pairs[i];
+        workablePairs[j ++] = pairs[i];
       }
     }
     return workablePairs;
