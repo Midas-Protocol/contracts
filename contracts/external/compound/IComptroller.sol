@@ -58,6 +58,8 @@ interface IComptroller {
 
   function enforceWhitelist() external view returns (bool);
 
+  function isUserOfPool(address user) external view returns (bool);
+
   function whitelist(address account) external view returns (bool);
 
   function _setWhitelistEnforcement(bool enforce) external returns (uint256);
