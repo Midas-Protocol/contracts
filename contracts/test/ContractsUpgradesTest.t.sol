@@ -161,12 +161,7 @@ contract ContractsUpgradesTest is BaseTest {
 
     address oldImpl = maiMarket.implementation();
     vm.prank(ffd.owner());
-    ffd._editCErc20DelegateWhitelist(
-      asArray(oldImpl),
-      asArray(address(newImpl)),
-      asArray(false),
-      asArray(true)
-    );
+    ffd._editCErc20DelegateWhitelist(asArray(oldImpl), asArray(address(newImpl)), asArray(false), asArray(true));
 
     vm.prank(ellipsisPool.admin());
     maiMarket._setImplementationSafe(address(newImpl), false, "");
