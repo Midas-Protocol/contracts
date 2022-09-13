@@ -1633,6 +1633,17 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     return false;
   }
 
+  function isUserOfPool(address user) public view returns (bool) {
+    for (uint256 i = 0; i < allMarkets.length; i++) {
+      address marketAddress = address(allMarkets[i]);
+      if (markets[marketAddress].accountMembership[user]) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   /**
    * @notice Returns true if the given cToken market has been deprecated
    * @dev All borrows in a deprecated cToken market can be immediately liquidated
