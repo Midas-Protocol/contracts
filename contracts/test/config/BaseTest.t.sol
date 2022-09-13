@@ -68,4 +68,22 @@ abstract contract BaseTest is Test {
       return b - a;
     }
   }
+
+  function asArray(address value) public pure returns (address[] memory) {
+    address[] memory array = new address[](1);
+    array[0] = value;
+    return array;
+  }
+
+  function asArray(bool value) public pure returns (bool[] memory) {
+    bool[] memory array = new bool[](1);
+    array[0] = value;
+    return array;
+  }
+
+  function asArray(uint256 value) public pure returns (uint256[] memory) {
+    uint256[] memory array = new uint256[](1);
+    array[0] = value;
+    return array;
+  }
 }
