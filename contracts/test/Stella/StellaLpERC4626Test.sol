@@ -72,7 +72,6 @@ contract StellaERC4626Test is AbstractERC4626Test {
     StellaLpERC4626 stellaLpERC4626 = new StellaLpERC4626();
     stellaLpERC4626.initialize(
       ERC20Upgradeable(address(underlyingToken)),
-      flywheels,
       IStellaDistributorV2(address(distributor)),
       poolId,
       address(this),
