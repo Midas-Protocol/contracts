@@ -56,8 +56,4 @@ contract StellaAssetTest is AbstractAssetTest {
   function testAccumulatingRewardsOnWithdrawal() public shouldRun(shouldRunTest) {
     this.runTest(StellaERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
-
-  function testClaimRewards() public shouldRun(shouldRunTest) {
-    this.runTest(StellaERC4626Test(address(test)).testClaimRewards);
-  }
 }

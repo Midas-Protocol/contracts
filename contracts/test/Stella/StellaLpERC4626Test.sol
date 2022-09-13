@@ -9,13 +9,8 @@ import "../config/BaseTest.t.sol";
 import { MidasERC4626, StellaLpERC4626, IStellaDistributorV2 } from "../../midas/strategies/StellaLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
-import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
-import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
-import { Authority } from "solmate/auth/Auth.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
-import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
 
 struct RewardsCycle {
   uint32 start;
@@ -28,9 +23,6 @@ contract StellaERC4626Test is AbstractERC4626Test {
   using FixedPointMathLib for uint256;
 
   IStellaDistributorV2 distributor = IStellaDistributorV2(0xF3a5454496E26ac57da879bf3285Fa85DEBF0388); // what you deposit the LP into
-
-  MidasFlywheelCore[] flywheels;
-  FuseFlywheelDynamicRewardsPlugin[] rewards;
 
   uint256 poolId;
   address marketAddress;
@@ -51,21 +43,6 @@ contract StellaERC4626Test is AbstractERC4626Test {
     poolId = _poolId;
 
     for (uint256 i = 0; i < _rewardTokens.length; i += 1) {
-      MidasFlywheelCore _flywheel = new MidasFlywheelCore();
-      _flywheel.initialize(
-        ERC20(_rewardTokens[i]),
-        IFlywheelRewards(address(0)),
-        IFlywheelBooster(address(0)),
-        address(this)
-      );
-      FuseFlywheelDynamicRewardsPlugin _reward = new FuseFlywheelDynamicRewardsPlugin(
-        FlywheelCore(address(_flywheel)),
-        1
-      );
-      flywheels.push(_flywheel);
-      rewards.push(_reward);
-      _flywheel.setFlywheelRewards(_reward);
-
       rewardsToken.push(ERC20Upgradeable(_rewardTokens[i]));
     }
 
@@ -91,11 +68,6 @@ contract StellaERC4626Test is AbstractERC4626Test {
     assertEq(address(cToken.plugin()), address(plugin));
 
     marketKey = ERC20(marketAddress);
-
-    for (uint256 i = 0; i < _rewardTokens.length; i += 1) {
-      cToken.approve(address(_rewardTokens[i]), address(rewards[i]));
-      flywheels[i].addStrategyForRewards(marketKey);
-    }
 
     StellaLpERC4626(address(plugin)).setRewardDestination(marketAddress);
   }
@@ -186,58 +158,6 @@ contract StellaERC4626Test is AbstractERC4626Test {
     for (uint256 i = 0; i < addresses.length; i += 1) {
       uint256 actualAmount = ERC20(addresses[i]).balanceOf(address(plugin));
       assertEq(actualAmount, amounts[i], string(abi.encodePacked("!rewardBal ", symbols[i], testPreFix)));
-    }
-  }
-
-  function testClaimRewards() public {
-    // Deposit funds, Rewards are 0
-    vm.startPrank(address(this));
-    underlyingToken.approve(marketAddress, depositAmount);
-    CErc20(marketAddress).mint(depositAmount);
-    vm.stopPrank();
-
-    for (uint256 i = 0; i < rewards.length; i += 1) {
-      (uint32 start, uint32 end, uint192 reward) = rewards[i].rewardsCycle(ERC20(address(marketAddress)));
-
-      // Rewards can be transfered in the next cycle
-      assertEq(end, 0, string(abi.encodePacked("!End ", testPreFix)));
-
-      // Reward amount is still 0
-      assertEq(reward, 0, string(abi.encodePacked("!Reward ", testPreFix)));
-
-      vm.warp(block.timestamp + 150);
-      vm.roll(10);
-
-      // Call accrue as proxy for withdraw/deposit to claim rewards
-      flywheels[i].accrue(ERC20(marketAddress), address(this));
-
-      (
-        address[] memory addresses,
-        string[] memory symbols,
-        uint256[] memory decimals,
-        uint256[] memory amounts
-      ) = distributor.pendingTokens(poolId, address(plugin));
-      uint256 pendingIndex = 0;
-
-      for (uint256 j = 0; j < addresses.length; j += 1) {
-        if (addresses[j] == address(rewardsToken[i])) {
-          pendingIndex = j;
-        }
-      }
-
-      // Claim Rewards for the user
-      flywheels[i].claimRewards(address(this));
-
-      assertEq(
-        rewardsToken[i].balanceOf(address(this)),
-        amounts[pendingIndex],
-        string(abi.encodePacked("!Bal User ", testPreFix))
-      );
-      assertEq(
-        rewardsToken[i].balanceOf(address(flywheels[i])),
-        0,
-        string(abi.encodePacked("!Bal Flywheel ", testPreFix))
-      );
     }
   }
 }
