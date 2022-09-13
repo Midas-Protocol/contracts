@@ -130,4 +130,42 @@ contract ContractsUpgradesTest is BaseTest {
 
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
+
+  function testMaiMarketUpgrade() public shouldRun(forChains(BSC_MAINNET)) {
+    vm.rollFork(21290084);
+
+    address fpdAddress = 0x295d7347606F4bd810C8296bb8d75D657001fcf7; // FusePoolDirectory
+    FusePoolDirectory fpd = FusePoolDirectory(fpdAddress);
+
+    address payable ffdAddress = payable(0xFc1f56C58286E7215701A773b61bFf2e18A177dE); // FFD proxy
+    FuseFeeDistributor ffd = FuseFeeDistributor(ffdAddress);
+
+    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+
+    Comptroller ellipsisPool = Comptroller(pools[9].comptroller);
+    CToken[] memory markets = ellipsisPool.getAllMarkets();
+
+    CErc20Delegate maiMarket = CErc20Delegate(address(0));
+    for (uint8 i = 0; i < markets.length; i++) {
+      if (CErc20Delegate(address(markets[i])).underlying() == 0x3F56e0c36d275367b8C502090EDF38289b3dEa0d) {
+        maiMarket = CErc20Delegate(address(markets[i]));
+        break;
+      }
+    }
+
+    // should fail
+    vm.expectRevert("borrow rate is absurdly high");
+    maiMarket.accrueInterest();
+
+    CErc20Delegate newImpl = new CErc20Delegate();
+
+    address oldImpl = maiMarket.implementation();
+    vm.prank(ffd.owner());
+    ffd._editCErc20DelegateWhitelist(asArray(oldImpl), asArray(address(newImpl)), asArray(false), asArray(true));
+
+    vm.prank(ellipsisPool.admin());
+    maiMarket._setImplementationSafe(address(newImpl), false, "");
+
+    maiMarket.accrueInterest();
+  }
 }
