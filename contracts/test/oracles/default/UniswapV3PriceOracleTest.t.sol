@@ -48,7 +48,6 @@ contract UniswapV3PriceOracleTest is BaseTest {
     configs[0] = UniswapV3PriceOracle.AssetConfig(0x80A9ae39310abf666A87C743d6ebBD0E8C42158E, 10 minutes); // GMX-ETH
     configs[1] = UniswapV3PriceOracle.AssetConfig(0xb52781C275431bD48d290a4318e338FE0dF89eb9, 10 minutes); // DPX-ETH
     configs[2] = UniswapV3PriceOracle.AssetConfig(0x7e7FB3CCEcA5F2ac952eDF221fd2a9f62E411980, 10 minutes); // MAGIC-ETH
-    
 
     uint256[] memory prices = testPriceFeed(underlyings, configs);
     bool[] memory cardinalityChecks = testCardinality(configs);
@@ -56,12 +55,16 @@ contract UniswapV3PriceOracleTest is BaseTest {
       assertGt(prices[i], 0, "!Price Error ");
     }
 
-    for (uint256 i = 0; i < cardinalityChecks.length; i ++) {
+    for (uint256 i = 0; i < cardinalityChecks.length; i++) {
       assertEq(cardinalityChecks[i], true, "!Cardinality Error");
     }
   }
 
-  function testCardinality(UniswapV3PriceOracle.AssetConfig[] memory configs) internal shouldRun(forChains(ARBITRUM_ONE)) returns (bool[] memory) {
+  function testCardinality(UniswapV3PriceOracle.AssetConfig[] memory configs)
+    internal
+    shouldRun(forChains(ARBITRUM_ONE))
+    returns (bool[] memory)
+  {
     bool[] memory checks = new bool[](configs.length);
     for (uint256 i = 0; i < configs.length; i += 1) {
       (, , , uint16 observationCardinality, , , ) = IUniswapV3Pool(configs[i].poolAddress).slot0();
