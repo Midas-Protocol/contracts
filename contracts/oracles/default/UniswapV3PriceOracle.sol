@@ -10,7 +10,6 @@ import "../../external/compound/ICErc20.sol";
 import "../../external/uniswap/TickMath.sol";
 import "../../external/uniswap/FullMath.sol";
 import "../../external/uniswap/IUniswapV3Pool.sol";
-import "../../external/uniswap/FixedPoint96.sol";
 
 import "../BasePriceOracle.sol";
 
@@ -140,6 +139,6 @@ contract UniswapV3PriceOracle is IPriceOracle {
   }
 
   function getPriceX96FromSqrtPriceX96(uint160 sqrtPriceX96) public pure returns (uint256 priceX96) {
-    return FullMath.mulDiv(sqrtPriceX96, sqrtPriceX96, FixedPoint96.Q96);
+    return FullMath.mulDiv(sqrtPriceX96, sqrtPriceX96, uint(2**(96*2)) / 1e18);
   }
 }
