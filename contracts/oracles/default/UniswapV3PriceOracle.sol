@@ -135,10 +135,15 @@ contract UniswapV3PriceOracle is IPriceOracle {
     int24 tick = int24((tickCumulatives[1] - tickCumulatives[0]) / int56(int256(twapWindow)));
     uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick(tick);
 
-    return getPriceX96FromSqrtPriceX96(sqrtPriceX96);
+    return getPriceX96FromSqrtPriceX96(pool.token0(), token, sqrtPriceX96);
   }
 
-  function getPriceX96FromSqrtPriceX96(uint160 sqrtPriceX96) public pure returns (uint256 priceX96) {
-    return FullMath.mulDiv(sqrtPriceX96, sqrtPriceX96, uint256(2**(96 * 2)) / 1e18);
+  function getPriceX96FromSqrtPriceX96(address token0, address priceToken, uint160 sqrtPriceX96) public pure returns (uint256 price) {
+    if (token0 == priceToken) {
+        price = FullMath.mulDiv(sqrtPriceX96, sqrtPriceX96, uint(2**(96*2)) / 1e18);
+    } else {
+        price = FullMath.mulDiv(sqrtPriceX96, sqrtPriceX96, uint(2**(96*2)) / 1e18);
+        price = 1e36 / price;
+    }
   }
 }

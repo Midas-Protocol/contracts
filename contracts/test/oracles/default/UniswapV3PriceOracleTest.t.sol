@@ -43,14 +43,14 @@ contract UniswapV3PriceOracleTest is BaseTest {
 
     underlyings[0] = 0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a; // GMX
     underlyings[1] = 0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55; // DPX
-    underlyings[2] = 0x2c852D3334188BE136bFC540EF2bB8C37b590BAD; // MAGIC
+    underlyings[2] = 0x539bdE0d7Dbd336b79148AA742883198BBF60342; // MAGIC
 
     configs[0] = UniswapV3PriceOracle.AssetConfig(0x80A9ae39310abf666A87C743d6ebBD0E8C42158E, 10 minutes); // GMX-ETH
     configs[1] = UniswapV3PriceOracle.AssetConfig(0xb52781C275431bD48d290a4318e338FE0dF89eb9, 10 minutes); // DPX-ETH
     configs[2] = UniswapV3PriceOracle.AssetConfig(0x7e7FB3CCEcA5F2ac952eDF221fd2a9f62E411980, 10 minutes); // MAGIC-ETH
 
     uint256[] memory expPrices = new uint256[](3);
-    expPrices[0] = 33951184968863373073;
+    expPrices[0] = 29454052956239962;
     expPrices[1] = 229758513048633921;
     expPrices[2] = 259750963795418;
 
