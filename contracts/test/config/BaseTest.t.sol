@@ -10,6 +10,7 @@ abstract contract BaseTest is Test {
   uint256 constant BSC_MAINNET = 56;
   uint256 constant MOONBEAM_MAINNET = 1284;
   uint256 constant POLYGON_MAINNET = 137;
+  uint256 constant ARBITRUM_ONE = 42161;
 
   uint256 constant EVMOS_TESTNET = 9000;
   uint256 constant BSC_CHAPEL = 97;
@@ -30,6 +31,8 @@ abstract contract BaseTest is Test {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
     } else if (block.chainid == NEON_DEVNET) {
       ap = AddressesProvider(0xC4b1512c1eeDd272e0F68737aCd7a1F11F3cA0eF);
+    } else if (block.chainid == ARBITRUM_ONE) {
+      ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else {
       ap = new AddressesProvider();
     }
