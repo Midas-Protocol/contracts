@@ -10,6 +10,7 @@ abstract contract BaseTest is Test {
   uint256 constant BSC_MAINNET = 56;
   uint256 constant MOONBEAM_MAINNET = 1284;
   uint256 constant POLYGON_MAINNET = 137;
+  uint256 constant ARBITRUM_ONE = 42161;
 
   uint256 constant EVMOS_TESTNET = 9000;
   uint256 constant BSC_CHAPEL = 97;
