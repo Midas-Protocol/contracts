@@ -9,6 +9,7 @@ interface ISwapRouter {
     address tokenOut;
     uint24 fee;
     address recipient;
+    //    uint256 deadline;
     uint256 amountIn;
     uint256 amountOutMinimum;
     uint160 sqrtPriceLimitX96;
@@ -54,4 +55,6 @@ interface ISwapRouter {
   function exactOutput(ExactOutputParams calldata params) external returns (uint256 amountIn);
 
   function factory() external returns (address);
+
+  function multicall(uint256 deadline, bytes[] calldata data) external payable returns (bytes[] memory);
 }

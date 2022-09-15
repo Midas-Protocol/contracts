@@ -5,77 +5,84 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 
 import "./config/BaseTest.t.sol";
 import "../external/uniswap/ISwapRouter.sol";
+import "../liquidators/UniswapV3Liquidator.sol";
 
 contract UniswapV3LiquidatorTest is BaseTest {
+  IERC20Upgradeable usdc;
+  IERC20Upgradeable weth;
+  ISwapRouter swapRouter;
 
-  function testExactInputSingle() public shouldRun(forChains(ARBITRUM_ONE)) {
-    address univ3RouterAddress = 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45;
-    address wethAddress = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
-    address wethWhale = 0x905dfCD5649217c42684f23958568e533C711Aa3;
-    address usdcAddress = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8;
-    address usdcWhale = 0x1714400FF23dB4aF24F9fd64e7039e6597f18C2b;
+  address univ3RouterAddress;
+  address usdcAddress;
+  address wethAddress;
+  address usdcWhale;
+  address wethWhale;
 
-    ISwapRouter swapRouter = ISwapRouter(univ3RouterAddress);
+  function setUp() public {
+    if (block.chainid == ARBITRUM_ONE) {
+      wethAddress = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
+      usdcAddress = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8;
+      univ3RouterAddress = 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45;
+      usdcWhale = 0x1714400FF23dB4aF24F9fd64e7039e6597f18C2b;
+      wethWhale = 0x905dfCD5649217c42684f23958568e533C711Aa3;
 
-//    IERC20Upgradeable usdc = IERC20Upgradeable(usdcAddress);
-//    vm.prank(usdcWhale);
-//    usdc.transfer(address(this), 1e18);
+      usdc = IERC20Upgradeable(usdcAddress);
+      weth = IERC20Upgradeable(wethAddress);
+      swapRouter = ISwapRouter(univ3RouterAddress);
+    } else if (block.chainid == POLYGON_MAINNET) {
+      univ3RouterAddress = 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45;
+      usdcAddress = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+      wethAddress = 0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619;
+      usdcWhale = 0xf89d7b9c864f589bbF53a82105107622B35EaA40;
+      wethWhale = 0x80A9ae39310abf666A87C743d6ebBD0E8C42158E;
 
-//    IERC20Upgradeable weth = IERC20Upgradeable(wethAddress);
-//    vm.prank(wethWhale);
-//    weth.transfer(address(this), 1e18);
+      usdc = IERC20Upgradeable(usdcAddress);
+      weth = IERC20Upgradeable(wethAddress);
+      swapRouter = ISwapRouter(univ3RouterAddress);
+    }
+  }
 
-//    swapRouter.exactInputSingle(ISwapRouter.ExactInputSingleParams(
-//      usdcAddress,
-//      wethAddress,
-//      1,
-//      address(this),
-////      block.timestamp,
-//      1e18,
-//      1e8,
-//      0
-//    ));
+  function testUniV3LiquidatorPolygon() public shouldRun(forChains(POLYGON_MAINNET)) {
+    vm.rollFork(33132779);
 
-//    {
-//      vm.rollFork(24646173);
-//      vm.prank(0x2B9E2F8E8EffbEf24772443aee13C2610398a5f5);
-//      swapRouter.exactInputSingle(ISwapRouter.ExactInputSingleParams(
-//          0x82aF49447D8a07e3bd95BD0d56f35241523fBab1,
-//          0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8,
-//          500,
-//          0x2B9E2F8E8EffbEf24772443aee13C2610398a5f5,
-//        //      block.timestamp,
-//          4799635426512674361,
-//          7595244899,
-//          0
-//        ));
-//    }
+    UniswapV3Liquidator liquidator = new UniswapV3Liquidator();
+    uint256 fee = 500;
 
+    dealUSDC(1e8, address(liquidator)); // 6 decimals
 
-//    ISwapRouter.ExactInputParams memory params = ISwapRouter.ExactInputParams(
-//      "",
-//      address(this),
-//  //    block.timestamp,
-//      1e18,
-//      1
-//      );
-//    swapRouter.exactInput(params);
-//
-//    address factory = swapRouter.factory();
-//    emit log_address(factory);
+    bytes memory strategyData = abi.encode(swapRouter, weth, fee);
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(usdc, 1e8, strategyData);
 
-    // https://arbiscan.io//tx/0xb0662614c764446408d95c523a72c8cd08a0c914eb92d65daeeb79f1c966f25e
-      {
-        vm.rollFork(24717561);
-        vm.prank(0x1026Df41A10BB5057D4F08261d907893f2D5F78B);
-        swapRouter.exactInput(ISwapRouter.ExactInputParams(
-          hex"82af49447d8a07e3bd95bd0d56f35241523fbab10001f4ff970a61a04b1ca14834a43f5de4533ebddb5cc8",
-          0x1026Df41A10BB5057D4F08261d907893f2D5F78B,
-//          1663243551091,
-          549473985016579686,
-          895450280
-         ));
-      }
+    assertEq(address(outputToken), address(weth), "the output token does not match");
 
+    uint256 expectedOutputAmount = 62720847622000374; // price is around $1600 per ETH at the time
+    assertEq(outputAmount, expectedOutputAmount, "the output amount does not match");
+  }
+
+  function testUniV3LiquidatorArbitrum() public shouldRun(forChains(ARBITRUM_ONE)) {
+    vm.rollFork(24726528);
+
+    UniswapV3Liquidator liquidator = new UniswapV3Liquidator();
+    uint256 fee = 500;
+
+    dealUSDC(1e8, address(liquidator)); // 6 decimals
+
+    bytes memory strategyData = abi.encode(swapRouter, weth, fee);
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(usdc, 1e8, strategyData);
+
+    assertEq(address(outputToken), address(weth), "the output token does not match");
+
+    uint256 expectedOutputAmount = 62880235405687447; // price is around $1600 per ETH at the time
+    assertEq(outputAmount, expectedOutputAmount, "the output amount does not match");
+  }
+
+  function dealUSDC(uint256 amount, address to) internal {
+    vm.prank(usdcWhale);
+    usdc.transfer(to, amount);
+  }
+
+  function dealWETH(uint256 amount, address to) internal {
+    vm.prank(wethWhale);
+    weth.transfer(to, amount);
   }
 }
