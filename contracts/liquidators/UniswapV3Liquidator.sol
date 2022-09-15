@@ -59,7 +59,7 @@ contract UniswapV3Liquidator is IRedemptionStrategy {
         _outputToken,
         fee,
         address(this),
-        block.timestamp,
+//        block.timestamp,
         inputAmount,
         0,
         0
