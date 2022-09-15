@@ -15,7 +15,6 @@ abstract contract BaseTest is Test {
   uint256 constant EVMOS_TESTNET = 9000;
   uint256 constant BSC_CHAPEL = 97;
   uint256 constant NEON_DEVNET = 245022926;
-  uint256 constant ARBITRUM_ONE = 42161;
 
   AddressesProvider public ap;
 
