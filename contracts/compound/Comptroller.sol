@@ -1607,10 +1607,23 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   }
 
   /**
-   * @notice Returns an array of all RewardsDistributors
+   * @notice Returns an array of all accruing and non-accruing flywheels
    */
   function getRewardsDistributors() external view returns (address[] memory) {
-    return rewardsDistributors;
+    address[] memory allFlywheels = new address[](rewardsDistributors.length + nonAccruingRewardsDistributors.length);
+
+    uint8 i = 0;
+    while (i < rewardsDistributors.length) {
+      allFlywheels[i] = rewardsDistributors[i];
+      i++;
+    }
+    uint8 j = 0;
+    while (j < nonAccruingRewardsDistributors.length) {
+      allFlywheels[i + j] = nonAccruingRewardsDistributors[j];
+      j++;
+    }
+
+    return allFlywheels;
   }
 
   /**
@@ -1629,6 +1642,34 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         rewardsDistributors[i] = newFlywheel;
         return true;
       }
+
+    return false;
+  }
+
+  /**
+   * @notice Returns true if the accruing flyhwheel was found and replaced
+   * @dev Adds a flywheel to the non-accruing list and if already in the accruing, removes it from that list
+   * @param flywheelAddress The address of the flywheel to add to the non-accruing
+   */
+  function addNonAccruingFlywheel(address flywheelAddress) external returns (bool) {
+    require(hasAdminRights(), "should have admin rights");
+    require(flywheelAddress != address(0), "zero address for non-accruing flywheel");
+
+    for (uint256 i = 0; i < nonAccruingRewardsDistributors.length; i++) {
+      require(flywheelAddress != nonAccruingRewardsDistributors[i], "flywheel already added to the non-accruing");
+    }
+
+    // add it to the non-accruing
+    nonAccruingRewardsDistributors.push(flywheelAddress);
+
+    // remove it from the accruing
+    for (uint256 i = 0; i < rewardsDistributors.length; i++) {
+      if (flywheelAddress == rewardsDistributors[i]) {
+        rewardsDistributors[i] = rewardsDistributors[rewardsDistributors.length - 1];
+        rewardsDistributors.pop();
+        return true;
+      }
+    }
 
     return false;
   }
