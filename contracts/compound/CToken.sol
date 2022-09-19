@@ -9,6 +9,8 @@ import "./EIP20Interface.sol";
 import "./EIP20NonStandardInterface.sol";
 import "./InterestRateModel.sol";
 import "../external/compound/IComptroller.sol";
+import "../external/compound/ICErc20.sol";
+import "../oracles/BasePriceOracle.sol";
 
 /**
  * @title Compound's CToken Contract
@@ -695,7 +697,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
     // Get the normalized price of the asset
     IComptroller _comptroller = IComptroller(address(comptroller));
-    uint256 conversionFactor = _comptroller.oracle().getUnderlyingPrice(ICToken(address(this)));
+    uint256 conversionFactor = BasePriceOracle(address(_comptroller.oracle())).price(ICErc20(address(this)).underlying());
     require(conversionFactor > 0, "Oracle price error.");
 
     // Pre-compute a conversion factor from tokens -> ether (normalized price value)
