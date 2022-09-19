@@ -697,7 +697,9 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
     // Get the normalized price of the asset
     IComptroller _comptroller = IComptroller(address(comptroller));
-    uint256 conversionFactor = BasePriceOracle(address(_comptroller.oracle())).price(ICErc20(address(this)).underlying());
+    uint256 conversionFactor = BasePriceOracle(address(_comptroller.oracle())).price(
+      ICErc20(address(this)).underlying()
+    );
     require(conversionFactor > 0, "Oracle price error.");
 
     // Pre-compute a conversion factor from tokens -> ether (normalized price value)
