@@ -147,11 +147,7 @@ contract ContractsUpgradesTest is BaseTest {
     Comptroller newImpl = new Comptroller(payable(address(ffd)));
 
     // upgrade the comptroller
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(currentImpl),
-      asArray(address(newImpl)),
-      asArray(true)
-    );
+    ffd._editComptrollerImplementationWhitelist(asArray(currentImpl), asArray(address(newImpl)), asArray(true));
 
     Unitroller proxy = Unitroller(payable(address(jarvisPool)));
     proxy._setPendingImplementation(address(newImpl));
