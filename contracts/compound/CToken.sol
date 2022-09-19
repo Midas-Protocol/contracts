@@ -690,9 +690,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     uint256 accountTokensNew;
   }
 
-  function _getMaxRedeem(
-    uint256 liquidity
-  ) internal view returns (uint256) {
+  function _getMaxRedeem(uint256 liquidity) internal view returns (uint256) {
     if (liquidity <= 0) return 0; // No available account liquidity, so no more borrow/redeem
 
     // Get the normalized price of the asset
@@ -735,9 +733,10 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
       (uint256 err, uint256 liquidity, ) = IComptroller(address(comptroller)).getAccountLiquidity(redeemer);
 
       uint256 _balanceOfUnderlying = balanceOfUnderlying(redeemer);
-      
+
       if (err != 0) {
-        return failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_EXCHANGE_AMOUNT_CALCULATION_FAILED, uint256(vars.mathErr));
+        return
+          failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_EXCHANGE_AMOUNT_CALCULATION_FAILED, uint256(vars.mathErr));
       }
 
       if (!IComptroller(address(comptroller)).checkMembership(redeemer, ICToken(address(this)))) {
