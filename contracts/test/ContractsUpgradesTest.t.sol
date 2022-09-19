@@ -132,6 +132,8 @@ contract ContractsUpgradesTest is BaseTest {
   }
 
   function testNonAccruingFlywheelsUpgrade() public shouldRun(forChains(BSC_MAINNET)) {
+    vm.rollFork(21475000);
+
     address oldFw1 = 0xC6431455AeE17a08D6409BdFB18c4bc73a4069E4;
     address oldFw2 = 0x851Cc0037B6923e60dC81Fa79Ac0799cC983492c;
 
