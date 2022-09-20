@@ -8,7 +8,6 @@ import "./Exponential.sol";
 import "./EIP20Interface.sol";
 import "./EIP20NonStandardInterface.sol";
 import "./InterestRateModel.sol";
-import "../external/compound/ICErc20.sol";
 import "../oracles/BasePriceOracle.sol";
 
 /**
@@ -697,7 +696,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     // Get the normalized price of the asset
     CTokenComptrollerInterface _comptroller = CTokenComptrollerInterface(address(comptroller));
     uint256 conversionFactor = BasePriceOracle(address(_comptroller.oracle())).price(
-      ICErc20(address(this)).underlying()
+      CErc20Interface(address(this)).underlying()
     );
     require(conversionFactor > 0, "Oracle price error.");
 
