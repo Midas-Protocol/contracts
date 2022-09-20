@@ -300,34 +300,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   }
 
   /**
-   * @notice Validates mint and reverts on rejection. May emit logs.
-   * @param cToken Asset being minted
-   * @param minter The address minting the tokens
-   * @param actualMintAmount The amount of the underlying asset being minted
-   * @param mintTokens The number of tokens being minted
-   */
-  function mintVerify(
-    address cToken,
-    address minter,
-    uint256 actualMintAmount,
-    uint256 mintTokens
-  ) external override {
-    // Shh - currently unused
-    cToken;
-    minter;
-    actualMintAmount;
-    mintTokens;
-
-    // Shh - we don't ever want this hook to be marked pure
-    if (false) {
-      maxAssets = maxAssets;
-    }
-
-    // Add minter to suppliers mapping
-    suppliers[minter] = true;
-  }
-
-  /**
    * @notice Checks if the account should be allowed to redeem tokens in the given market
    * @param cToken The market to verify the redeem against
    * @param redeemer The account which would redeem the tokens
@@ -402,6 +374,65 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     if (redeemTokens == 0 && redeemAmount > 0) {
       revert("redeemTokens zero");
     }
+  }
+
+  function getMaxRedeemOrBorrow(
+    address account,
+    address cToken,
+    bool isBorrow
+  ) external override returns (uint256) {
+    CToken cTokenModify = CToken(cToken);
+    // Accrue interest
+    uint256 balanceOfUnderlying = cTokenModify.balanceOfUnderlying(account);
+
+    // Get account liquidity
+    (Error err, uint256 liquidity, uint256 shortfall) = getAccountLiquidityInternal(account);
+    require(err == Error.NO_ERROR, "error when calculating account liquidity.");
+    if (shortfall > 0) return 0; // Shortfall, so no more borrow/redeem
+
+    // Get max borrow/redeem
+    uint256 maxBorrowOrRedeemAmount;
+
+    if (!isBorrow && !markets[address(cTokenModify)].accountMembership[account]) {
+      // Max redeem = balance of underlying if not used as collateral
+      maxBorrowOrRedeemAmount = balanceOfUnderlying;
+    } else {
+      // Avoid "stack too deep" error by separating this logic
+      maxBorrowOrRedeemAmount = _getMaxRedeemOrBorrow(liquidity, cTokenModify, isBorrow);
+
+      // Redeem only: max out at underlying balance
+      if (!isBorrow && balanceOfUnderlying < maxBorrowOrRedeemAmount) maxBorrowOrRedeemAmount = balanceOfUnderlying;
+    }
+
+    // Get max borrow or redeem considering cToken liquidity
+    uint256 cTokenLiquidity = cTokenModify.getCash();
+
+    // Return the minimum of the two maximums
+    return maxBorrowOrRedeemAmount <= cTokenLiquidity ? maxBorrowOrRedeemAmount : cTokenLiquidity;
+  }
+
+  /**
+   * @dev Portion of the logic in `getMaxRedeemOrBorrow` above separated to avoid "stack too deep" errors.
+   */
+  function _getMaxRedeemOrBorrow(
+    uint256 liquidity,
+    CToken cTokenModify,
+    bool isBorrow
+  ) internal view returns (uint256) {
+    if (liquidity <= 0) return 0; // No available account liquidity, so no more borrow/redeem
+
+    // Get the normalized price of the asset
+    uint256 conversionFactor = oracle.getUnderlyingPrice(cTokenModify);
+    require(conversionFactor > 0, "Oracle price error.");
+
+    // Pre-compute a conversion factor from tokens -> ether (normalized price value)
+    if (!isBorrow) {
+      uint256 collateralFactorMantissa = markets[address(cTokenModify)].collateralFactorMantissa;
+      conversionFactor = (collateralFactorMantissa * conversionFactor) / 1e18;
+    }
+
+    // Get max borrow or redeem considering excess account liquidity
+    return (liquidity * 1e18) / conversionFactor;
   }
 
   /**
@@ -506,45 +537,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   }
 
   /**
-   * @notice Checks if the account should be allowed to borrow the underlying asset of the given market
-   * @param cToken Asset whose underlying is being borrowed
-   * @param exchangeRateMantissa Underlying/cToken exchange rate
-   * @param accountTokens Initial account cToken balance
-   * @param accountTokens Underlying amount to mint
-   */
-  function mintWithinLimits(
-    address cToken,
-    uint256 exchangeRateMantissa,
-    uint256 accountTokens,
-    uint256 mintAmount
-  ) external override returns (uint256) {
-    // Return no error
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Validates borrow and reverts on rejection. May emit logs.
-   * @param cToken Asset whose underlying is being borrowed
-   * @param borrower The address borrowing the underlying
-   * @param borrowAmount The amount of the underlying asset requested to borrow
-   */
-  function borrowVerify(
-    address cToken,
-    address borrower,
-    uint256 borrowAmount
-  ) external override {
-    // Shh - currently unused
-    cToken;
-    borrower;
-    borrowAmount;
-
-    // Shh - we don't ever want this hook to be marked pure
-    if (false) {
-      maxAssets = maxAssets;
-    }
-  }
-
-  /**
    * @notice Checks if the account should be allowed to repay a borrow in the given market
    * @param cToken The market to verify the repay against
    * @param payer The account which would repay the asset
@@ -572,33 +564,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     flywheelPreBorrowerAction(cToken, borrower);
 
     return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Validates repayBorrow and reverts on rejection. May emit logs.
-   * @param cToken Asset being repaid
-   * @param payer The address repaying the borrow
-   * @param borrower The address of the borrower
-   * @param actualRepayAmount The amount of underlying being repaid
-   */
-  function repayBorrowVerify(
-    address cToken,
-    address payer,
-    address borrower,
-    uint256 actualRepayAmount,
-    uint256 borrowerIndex
-  ) external override {
-    // Shh - currently unused
-    cToken;
-    payer;
-    borrower;
-    actualRepayAmount;
-    borrowerIndex;
-
-    // Shh - we don't ever want this hook to be marked pure
-    if (false) {
-      maxAssets = maxAssets;
-    }
   }
 
   /**
@@ -652,36 +617,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   }
 
   /**
-   * @notice Validates liquidateBorrow and reverts on rejection. May emit logs.
-   * @param cTokenBorrowed Asset which was borrowed by the borrower
-   * @param cTokenCollateral Asset which was used as collateral and will be seized
-   * @param liquidator The address repaying the borrow and seizing the collateral
-   * @param borrower The address of the borrower
-   * @param actualRepayAmount The amount of underlying being repaid
-   */
-  function liquidateBorrowVerify(
-    address cTokenBorrowed,
-    address cTokenCollateral,
-    address liquidator,
-    address borrower,
-    uint256 actualRepayAmount,
-    uint256 seizeTokens
-  ) external override {
-    // Shh - currently unused
-    cTokenBorrowed;
-    cTokenCollateral;
-    liquidator;
-    borrower;
-    actualRepayAmount;
-    seizeTokens;
-
-    // Shh - we don't ever want this hook to be marked pure
-    if (false) {
-      maxAssets = maxAssets;
-    }
-  }
-
-  /**
    * @notice Checks if the seizing of assets should be allowed to occur
    * @param cTokenCollateral Asset which was used as collateral and will be seized
    * @param cTokenBorrowed Asset which was borrowed by the borrower
@@ -721,34 +656,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   }
 
   /**
-   * @notice Validates seize and reverts on rejection. May emit logs.
-   * @param cTokenCollateral Asset which was used as collateral and will be seized
-   * @param cTokenBorrowed Asset which was borrowed by the borrower
-   * @param liquidator The address repaying the borrow and seizing the collateral
-   * @param borrower The address of the borrower
-   * @param seizeTokens The number of collateral tokens to seize
-   */
-  function seizeVerify(
-    address cTokenCollateral,
-    address cTokenBorrowed,
-    address liquidator,
-    address borrower,
-    uint256 seizeTokens
-  ) external override {
-    // Shh - currently unused
-    cTokenCollateral;
-    cTokenBorrowed;
-    liquidator;
-    borrower;
-    seizeTokens;
-
-    // Shh - we don't ever want this hook to be marked pure
-    if (false) {
-      maxAssets = maxAssets;
-    }
-  }
-
-  /**
    * @notice Checks if the account should be allowed to transfer tokens in the given market
    * @param cToken The market to verify the transfer against
    * @param src The account which sources the tokens
@@ -776,31 +683,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     flywheelPreTransferAction(cToken, src, dst);
 
     return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Validates transfer and reverts on rejection. May emit logs.
-   * @param cToken Asset being transferred
-   * @param src The account which sources the tokens
-   * @param dst The account which receives the tokens
-   * @param transferTokens The number of cTokens to transfer
-   */
-  function transferVerify(
-    address cToken,
-    address src,
-    address dst,
-    uint256 transferTokens
-  ) external override {
-    // Shh - currently unused
-    cToken;
-    src;
-    dst;
-    transferTokens;
-
-    // Shh - we don't ever want this hook to be marked pure
-    if (false) {
-      maxAssets = maxAssets;
-    }
   }
 
   /*** Flywheel Hooks ***/
@@ -1607,28 +1489,60 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   }
 
   /**
-   * @notice Returns an array of all RewardsDistributors
+   * @notice Returns an array of all accruing and non-accruing flywheels
    */
   function getRewardsDistributors() external view returns (address[] memory) {
-    return rewardsDistributors;
+    address[] memory allFlywheels = new address[](rewardsDistributors.length + nonAccruingRewardsDistributors.length);
+
+    uint8 i = 0;
+    while (i < rewardsDistributors.length) {
+      allFlywheels[i] = rewardsDistributors[i];
+      i++;
+    }
+    uint8 j = 0;
+    while (j < nonAccruingRewardsDistributors.length) {
+      allFlywheels[i + j] = nonAccruingRewardsDistributors[j];
+      j++;
+    }
+
+    return allFlywheels;
   }
 
   /**
-   * @notice Returns true if the old flyhwheel was found and replaced
-   * @dev Replaces and old flywheel with a new one
-   * @param oldFlywheel The address of the flywheel to replace
-   * @param newFlywheel The address of the new flywheel to add
+   * @notice Returns true if the accruing flyhwheel was found and replaced
+   * @dev Adds a flywheel to the non-accruing list and if already in the accruing, removes it from that list
+   * @param flywheelAddress The address of the flywheel to add to the non-accruing
    */
-  function replaceFlywheel(address oldFlywheel, address newFlywheel) external returns (bool) {
+  function addNonAccruingFlywheel(address flywheelAddress) external returns (bool) {
     require(hasAdminRights(), "should have admin rights");
-    require(newFlywheel != address(0), "zero address for new flywheel");
-    require(newFlywheel != oldFlywheel, "same flywheel");
+    require(flywheelAddress != address(0), "zero address for non-accruing flywheel");
 
-    for (uint256 i = 0; i < rewardsDistributors.length; i++)
-      if (oldFlywheel == rewardsDistributors[i]) {
-        rewardsDistributors[i] = newFlywheel;
+    for (uint256 i = 0; i < nonAccruingRewardsDistributors.length; i++) {
+      require(flywheelAddress != nonAccruingRewardsDistributors[i], "flywheel already added to the non-accruing");
+    }
+
+    // add it to the non-accruing
+    nonAccruingRewardsDistributors.push(flywheelAddress);
+
+    // remove it from the accruing
+    for (uint256 i = 0; i < rewardsDistributors.length; i++) {
+      if (flywheelAddress == rewardsDistributors[i]) {
+        rewardsDistributors[i] = rewardsDistributors[rewardsDistributors.length - 1];
+        rewardsDistributors.pop();
         return true;
       }
+    }
+
+    return false;
+  }
+
+  function isUserOfPool(address user) public view returns (bool) {
+    for (uint256 i = 0; i < allMarkets.length; i++) {
+      address marketAddress = address(allMarkets[i]);
+      if (markets[marketAddress].accountMembership[user]) {
+        return true;
+      }
+    }
 
     return false;
   }

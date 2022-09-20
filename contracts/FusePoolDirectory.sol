@@ -215,6 +215,38 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
+   * @notice Returns arrays of all public Fuse pool indexes and data.
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getPoolsOfUser(address user) external view returns (uint256[] memory, FusePool[] memory) {
+    uint256 arrayLength = 0;
+
+    for (uint256 i = 0; i < pools.length; i++) {
+      try IComptroller(pools[i].comptroller).isUserOfPool(user) returns (bool isUsing) {
+        if (!isUsing) continue;
+      } catch {}
+
+      arrayLength++;
+    }
+
+    uint256[] memory indexes = new uint256[](arrayLength);
+    FusePool[] memory poolsOfUser = new FusePool[](arrayLength);
+    uint256 index = 0;
+
+    for (uint256 i = 0; i < pools.length; i++) {
+      try IComptroller(pools[i].comptroller).isUserOfPool(user) returns (bool isUsing) {
+        if (!isUsing) continue;
+      } catch {}
+
+      indexes[index] = i;
+      poolsOfUser[index] = pools[i];
+      index++;
+    }
+
+    return (indexes, poolsOfUser);
+  }
+
+  /**
    * @notice Returns arrays of Fuse pool indexes and data created by `account`.
    */
   function getPoolsByAccount(address account) external view returns (uint256[] memory, FusePool[] memory) {

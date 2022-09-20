@@ -130,4 +130,52 @@ contract ContractsUpgradesTest is BaseTest {
 
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
+
+  function testNonAccruingFlywheelsUpgrade() public shouldRun(forChains(BSC_MAINNET)) {
+    vm.rollFork(21475000);
+
+    address oldFw1 = 0xC6431455AeE17a08D6409BdFB18c4bc73a4069E4;
+    address oldFw2 = 0x851Cc0037B6923e60dC81Fa79Ac0799cC983492c;
+
+    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+
+    address expectedImplPrior = 0xe1b488B01cA2143A08A800a92FEA38d661fC31D4;
+    Comptroller jarvisPool = Comptroller(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
+    address currentImpl = jarvisPool.comptrollerImplementation();
+    assertEq(currentImpl, expectedImplPrior, "impl prior does not match, this test can be removed");
+
+    vm.startPrank(ffd.owner());
+    // deploy the new comptroller impl
+    Comptroller newImpl = new Comptroller(payable(address(ffd)));
+
+    // upgrade the comptroller
+    ffd._editComptrollerImplementationWhitelist(asArray(currentImpl), asArray(address(newImpl)), asArray(true));
+
+    Unitroller proxy = Unitroller(payable(address(jarvisPool)));
+    proxy._setPendingImplementation(address(newImpl));
+    newImpl._become(proxy);
+
+    address[] memory currentFlywheels = jarvisPool.getRewardsDistributors();
+
+    // add the two flywheels to the non-accruing
+    {
+      bool replaced1 = jarvisPool.addNonAccruingFlywheel(oldFw1);
+      assertTrue(replaced1, "didn't replace the first flyhweel");
+      bool replaced2 = jarvisPool.addNonAccruingFlywheel(oldFw2);
+      assertTrue(replaced2, "didn't replace the second flyhweel");
+    }
+
+    address[] memory updatedFlywheels = jarvisPool.getRewardsDistributors();
+    assertEq(currentFlywheels.length, updatedFlywheels.length, "flywheels arrays length don't match");
+
+    // attempt to add the two flywheels to the non-accruing, should fail
+    {
+      vm.expectRevert("flywheel already added to the non-accruing");
+      bool replaced1 = jarvisPool.addNonAccruingFlywheel(oldFw1);
+      vm.expectRevert("flywheel already added to the non-accruing");
+      bool replaced2 = jarvisPool.addNonAccruingFlywheel(oldFw2);
+    }
+
+    vm.stopPrank();
+  }
 }

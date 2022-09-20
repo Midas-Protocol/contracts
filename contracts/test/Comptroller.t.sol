@@ -47,43 +47,4 @@ contract ComptrollerTest is BaseTest {
     emit Failure(1, 2, 0);
     comptroller._addRewardsDistributor(address(flywheel));
   }
-
-  function test__replaceFlywheel() external {
-    comptroller._addRewardsDistributor(address(flywheel));
-
-    address newFlywheel = createNewFlywheel();
-    comptroller.replaceFlywheel(address(flywheel), newFlywheel);
-
-    assertEq(comptroller.rewardsDistributors(0), newFlywheel);
-  }
-
-  function test__replaceFlywheelRevertsIfNonOwner() external {
-    comptroller._addRewardsDistributor(address(flywheel));
-
-    address newFlywheel = createNewFlywheel();
-
-    vm.startPrank(nonOwner);
-    vm.expectRevert("should have admin rights");
-    comptroller.replaceFlywheel(address(flywheel), newFlywheel);
-
-    assertEq(comptroller.rewardsDistributors(0), address(flywheel));
-  }
-
-  function test__replaceFlywheelRevertsIfNewFlywheelIsAddressZero() external {
-    comptroller._addRewardsDistributor(address(flywheel));
-
-    vm.expectRevert("zero address for new flywheel");
-    comptroller.replaceFlywheel(address(flywheel), address(0));
-
-    assertEq(comptroller.rewardsDistributors(0), address(flywheel));
-  }
-
-  function test__replaceFlywheelRevertsIfNewFLywheelIsTheSameAddress() external {
-    comptroller._addRewardsDistributor(address(flywheel));
-
-    vm.expectRevert("same flywheel");
-    comptroller.replaceFlywheel(address(flywheel), address(flywheel));
-
-    assertEq(comptroller.rewardsDistributors(0), address(flywheel));
-  }
 }

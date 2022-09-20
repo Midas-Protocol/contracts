@@ -201,7 +201,7 @@ contract BeamE2eTest is WithPool, BaseTest {
       vm.mockCall(
         mPriceOracle,
         abi.encodeWithSelector(priceOracle.getUnderlyingPrice.selector, ICToken(address(cToken))),
-        abi.encode(vars.oraclePrice * 40)
+        abi.encode(vars.oraclePrice * 40e12)
       );
     }
 
