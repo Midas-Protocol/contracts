@@ -78,62 +78,75 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     MockERC20(address(underlyingToken)).mint(accountTwo, 1000000000000e18);
     // Account One Supply
     vm.deal(accountOne, 1000000000000e18);
-    vm.startPrank(accountOne);
+    vm.prank(accountOne);
     vars.asset.deposit{ value: 5000000000e18 }();
-    vm.stopPrank();
     vm.deal(accountThree, 1000000000000e18);
-    vm.startPrank(accountThree);
+    vm.prank(accountThree);
     vars.asset.deposit{ value: 5000000000e18 }();
-    vm.stopPrank();
 
-    vm.startPrank(0x5a52E96BAcdaBb82fd05763E25335261B270Efcb);
+    vm.prank(0x5a52E96BAcdaBb82fd05763E25335261B270Efcb);
     MockERC20(address(vars.usdc)).transfer(accountTwo, 10000e18);
-    vm.stopPrank();
 
     // Account One Supply
-    vm.startPrank(accountOne);
-    vars.asset.approve(address(cBnbToken), 1e36);
-    cBnbToken.mint(1e18);
-    vars.cTokens[0] = address(cBnbToken);
-    comptroller.enterMarkets(vars.cTokens);
-    vm.stopPrank();
+    {
+      emit log("Account One Supply");
+      vm.startPrank(accountOne);
+      vars.asset.approve(address(cBnbToken), 1e36);
+      cBnbToken.mint(1e18);
+      vars.cTokens[0] = address(cBnbToken);
+      comptroller.enterMarkets(vars.cTokens);
+      vm.stopPrank();
+    }
 
     // Account Three Supply
-    vm.startPrank(accountThree);
-    vars.asset.approve(address(cBnbToken), 1e36);
-    cBnbToken.mint(1e18);
-    vars.cTokens[0] = address(cBnbToken);
-    comptroller.enterMarkets(vars.cTokens);
-    vm.stopPrank();
+    {
+      emit log("Account Three Supply");
+      vm.startPrank(accountThree);
+      vars.asset.approve(address(cBnbToken), 1e36);
+      cBnbToken.mint(1e18);
+      vars.cTokens[0] = address(cBnbToken);
+      comptroller.enterMarkets(vars.cTokens);
+      vm.stopPrank();
+    }
 
     // Account Two Supply
-    vm.startPrank(accountTwo);
-    vars.usdc.approve(address(cToken), 1e36);
-    cToken.mint(1000e18);
-    vars.cTokens[0] = address(cToken);
-    comptroller.enterMarkets(vars.cTokens);
-    vm.stopPrank();
-    assertEq(cToken.totalSupply(), 1000e18 * 5);
-    assertEq(cBnbToken.totalSupply(), 1e18 * 5 * 2);
+    {
+      emit log("Account Two Supply");
+      vm.startPrank(accountTwo);
+      vars.usdc.approve(address(cToken), 1e36);
+      cToken.mint(1000e18);
+      vars.cTokens[0] = address(cToken);
+      comptroller.enterMarkets(vars.cTokens);
+      vm.stopPrank();
+      assertEq(cToken.totalSupply(), 1000e18 * 5);
+      assertEq(cBnbToken.totalSupply(), 1e18 * 5 * 2);
+    }
 
-    vm.startPrank(accountTwo);
-    vars.usdc.approve(address(cBnbToken), 1e36);
-    cBnbToken.borrow(0.5e16);
-    vm.stopPrank();
+    // Account Two Borrow
+    {
+      emit log("Account Two Borrow");
+      vm.startPrank(accountTwo);
+      vars.usdc.approve(address(cBnbToken), 1e36);
+      cBnbToken.borrow(0.5e16);
+      vm.stopPrank();
+    }
 
     // Account One Borrow
-    vm.startPrank(accountOne);
-    vars.usdc.approve(address(cToken), 1e36);
-    cToken.borrow(0.5e18);
-    assertEq(cToken.totalBorrows(), 0.5e18);
+    {
+      emit log("Account One Borrow");
+      vm.startPrank(accountOne);
+      vars.usdc.approve(address(cToken), 1e36);
+      cToken.borrow(0.5e18);
+      assertEq(cToken.totalBorrows(), 0.5e18);
 
-    uint256 maxWithdraw = poolLensSecondary.getMaxRedeem(accountOne, ICToken(address(cBnbToken)));
+      uint256 maxWithdraw = poolLensSecondary.getMaxRedeem(accountOne, ICToken(address(cBnbToken)));
 
-    uint256 beforeBnbBalance = vars.asset.balanceOf(accountOne);
-    cBnbToken.redeemUnderlying(type(uint256).max);
-    uint256 afterBnbBalance = vars.asset.balanceOf(accountOne);
+      uint256 beforeBnbBalance = vars.asset.balanceOf(accountOne);
+      cBnbToken.redeemUnderlying(type(uint256).max);
+      uint256 afterBnbBalance = vars.asset.balanceOf(accountOne);
 
-    assertEq(afterBnbBalance - beforeBnbBalance, maxWithdraw);
-    vm.stopPrank();
+      assertEq(afterBnbBalance - beforeBnbBalance, maxWithdraw);
+      vm.stopPrank();
+    }
   }
 }
