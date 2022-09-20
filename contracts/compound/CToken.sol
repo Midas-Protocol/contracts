@@ -8,7 +8,6 @@ import "./Exponential.sol";
 import "./EIP20Interface.sol";
 import "./EIP20NonStandardInterface.sol";
 import "./InterestRateModel.sol";
-import "../external/compound/IComptroller.sol";
 import "../external/compound/ICErc20.sol";
 import "../oracles/BasePriceOracle.sol";
 
@@ -696,7 +695,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     if (liquidity <= 0) return 0; // No available account liquidity, so no more borrow/redeem
 
     // Get the normalized price of the asset
-    IComptroller _comptroller = IComptroller(address(comptroller));
+    CTokenComptrollerInterface _comptroller = CTokenComptrollerInterface(address(comptroller));
     uint256 conversionFactor = BasePriceOracle(address(_comptroller.oracle())).price(
       ICErc20(address(this)).underlying()
     );
@@ -733,8 +732,10 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
       return failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_EXCHANGE_RATE_READ_FAILED, uint256(vars.mathErr));
     }
 
+    CTokenComptrollerInterface _comptroller = CTokenComptrollerInterface(address(comptroller));
+
     if (redeemAmountIn == type(uint256).max) {
-      (uint256 err, uint256 liquidity, ) = IComptroller(address(comptroller)).getAccountLiquidity(redeemer);
+      (uint256 err, uint256 liquidity, ) = _comptroller.getAccountLiquidity(redeemer);
 
       uint256 _balanceOfUnderlying = balanceOfUnderlying(redeemer);
 
@@ -743,7 +744,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
           failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_EXCHANGE_AMOUNT_CALCULATION_FAILED, uint256(vars.mathErr));
       }
 
-      if (!IComptroller(address(comptroller)).checkMembership(redeemer, ICToken(address(this)))) {
+      if (!_comptroller.checkMembership(redeemer, this)) {
         redeemAmountIn = _balanceOfUnderlying;
       } else {
         redeemAmountIn = _getMaxRedeem(liquidity);
