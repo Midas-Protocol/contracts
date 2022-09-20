@@ -577,28 +577,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   }
 
   /**
-   * @notice Validates borrow and reverts on rejection. May emit logs.
-   * @param cToken Asset whose underlying is being borrowed
-   * @param borrower The address borrowing the underlying
-   * @param borrowAmount The amount of the underlying asset requested to borrow
-   */
-  function borrowVerify(
-    address cToken,
-    address borrower,
-    uint256 borrowAmount
-  ) external override {
-    // Shh - currently unused
-    cToken;
-    borrower;
-    borrowAmount;
-
-    // Shh - we don't ever want this hook to be marked pure
-    if (false) {
-      maxAssets = maxAssets;
-    }
-  }
-
-  /**
    * @notice Checks if the account should be allowed to repay a borrow in the given market
    * @param cToken The market to verify the repay against
    * @param payer The account which would repay the asset
@@ -626,33 +604,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     flywheelPreBorrowerAction(cToken, borrower);
 
     return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Validates repayBorrow and reverts on rejection. May emit logs.
-   * @param cToken Asset being repaid
-   * @param payer The address repaying the borrow
-   * @param borrower The address of the borrower
-   * @param actualRepayAmount The amount of underlying being repaid
-   */
-  function repayBorrowVerify(
-    address cToken,
-    address payer,
-    address borrower,
-    uint256 actualRepayAmount,
-    uint256 borrowerIndex
-  ) external override {
-    // Shh - currently unused
-    cToken;
-    payer;
-    borrower;
-    actualRepayAmount;
-    borrowerIndex;
-
-    // Shh - we don't ever want this hook to be marked pure
-    if (false) {
-      maxAssets = maxAssets;
-    }
   }
 
   /**
@@ -706,36 +657,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   }
 
   /**
-   * @notice Validates liquidateBorrow and reverts on rejection. May emit logs.
-   * @param cTokenBorrowed Asset which was borrowed by the borrower
-   * @param cTokenCollateral Asset which was used as collateral and will be seized
-   * @param liquidator The address repaying the borrow and seizing the collateral
-   * @param borrower The address of the borrower
-   * @param actualRepayAmount The amount of underlying being repaid
-   */
-  function liquidateBorrowVerify(
-    address cTokenBorrowed,
-    address cTokenCollateral,
-    address liquidator,
-    address borrower,
-    uint256 actualRepayAmount,
-    uint256 seizeTokens
-  ) external override {
-    // Shh - currently unused
-    cTokenBorrowed;
-    cTokenCollateral;
-    liquidator;
-    borrower;
-    actualRepayAmount;
-    seizeTokens;
-
-    // Shh - we don't ever want this hook to be marked pure
-    if (false) {
-      maxAssets = maxAssets;
-    }
-  }
-
-  /**
    * @notice Checks if the seizing of assets should be allowed to occur
    * @param cTokenCollateral Asset which was used as collateral and will be seized
    * @param cTokenBorrowed Asset which was borrowed by the borrower
@@ -775,34 +696,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   }
 
   /**
-   * @notice Validates seize and reverts on rejection. May emit logs.
-   * @param cTokenCollateral Asset which was used as collateral and will be seized
-   * @param cTokenBorrowed Asset which was borrowed by the borrower
-   * @param liquidator The address repaying the borrow and seizing the collateral
-   * @param borrower The address of the borrower
-   * @param seizeTokens The number of collateral tokens to seize
-   */
-  function seizeVerify(
-    address cTokenCollateral,
-    address cTokenBorrowed,
-    address liquidator,
-    address borrower,
-    uint256 seizeTokens
-  ) external override {
-    // Shh - currently unused
-    cTokenCollateral;
-    cTokenBorrowed;
-    liquidator;
-    borrower;
-    seizeTokens;
-
-    // Shh - we don't ever want this hook to be marked pure
-    if (false) {
-      maxAssets = maxAssets;
-    }
-  }
-
-  /**
    * @notice Checks if the account should be allowed to transfer tokens in the given market
    * @param cToken The market to verify the transfer against
    * @param src The account which sources the tokens
@@ -830,31 +723,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     flywheelPreTransferAction(cToken, src, dst);
 
     return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Validates transfer and reverts on rejection. May emit logs.
-   * @param cToken Asset being transferred
-   * @param src The account which sources the tokens
-   * @param dst The account which receives the tokens
-   * @param transferTokens The number of cTokens to transfer
-   */
-  function transferVerify(
-    address cToken,
-    address src,
-    address dst,
-    uint256 transferTokens
-  ) external override {
-    // Shh - currently unused
-    cToken;
-    src;
-    dst;
-    transferTokens;
-
-    // Shh - we don't ever want this hook to be marked pure
-    if (false) {
-      maxAssets = maxAssets;
-    }
   }
 
   /*** Flywheel Hooks ***/
