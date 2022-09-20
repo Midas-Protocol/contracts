@@ -73,4 +73,10 @@ interface IComptroller {
     bytes memory constructorData,
     uint256 collateralFactorMantissa
   ) external returns (uint256);
+
+  function getMaxRedeemOrBorrow(
+    address account,
+    ICToken cTokenModify,
+    bool isBorrow
+  ) external returns (uint256);
 }

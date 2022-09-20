@@ -8,6 +8,7 @@ import "./Exponential.sol";
 import "./EIP20Interface.sol";
 import "./EIP20NonStandardInterface.sol";
 import "./InterestRateModel.sol";
+import "../oracles/BasePriceOracle.sol";
 
 /**
  * @title Compound's CToken Contract
@@ -232,7 +233,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
    * @param owner The address of the account to query
    * @return The amount of underlying owned by `owner`
    */
-  function balanceOfUnderlying(address owner) external override returns (uint256) {
+  function balanceOfUnderlying(address owner) public override returns (uint256) {
     Exp memory exchangeRate = Exp({ mantissa: exchangeRateCurrent() });
     (MathError mErr, uint256 balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
     require(mErr == MathError.NO_ERROR, "balance could not be calculated");
@@ -710,6 +711,10 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateStoredInternal();
     if (vars.mathErr != MathError.NO_ERROR) {
       return failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_EXCHANGE_RATE_READ_FAILED, uint256(vars.mathErr));
+    }
+
+    if (redeemAmountIn == type(uint256).max) {
+      redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, address(this), false);
     }
 
     /* If redeemTokensIn > 0: */

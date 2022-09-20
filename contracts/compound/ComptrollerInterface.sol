@@ -5,6 +5,12 @@ abstract contract ComptrollerInterface {
   /// @notice Indicator that this is a Comptroller contract (for inspection)
   bool public constant isComptroller = true;
 
+  function getMaxRedeemOrBorrow(
+    address account,
+    address cToken,
+    bool isBorrow
+  ) external virtual returns (uint256);
+
   /*** Assets You Are In ***/
 
   function enterMarkets(address[] calldata cTokens) external virtual returns (uint256[] memory);
