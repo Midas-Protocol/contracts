@@ -79,4 +79,4 @@ interface IComptroller {
     ICToken cTokenModify,
     bool isBorrow
   ) external returns (uint256);
-  }
+}

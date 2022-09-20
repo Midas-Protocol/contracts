@@ -714,11 +714,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     }
 
     if (redeemAmountIn == type(uint256).max) {
-      redeemAmountIn = comptroller.getMaxRedeemOrBorrow(
-        redeemer,
-        address(this),
-        false
-      );
+      redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, address(this), false);
     }
 
     /* If redeemTokensIn > 0: */
