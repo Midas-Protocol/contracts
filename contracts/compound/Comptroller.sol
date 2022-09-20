@@ -300,29 +300,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   }
 
   /**
-   * @notice Validates mint and reverts on rejection. May emit logs.
-   * @param cToken Asset being minted
-   * @param minter The address minting the tokens
-   * @param actualMintAmount The amount of the underlying asset being minted
-   * @param mintTokens The number of tokens being minted
-   */
-  function mintVerify(
-    address cToken,
-    address minter,
-    uint256 actualMintAmount,
-    uint256 mintTokens
-  ) external override {
-    // Shh - currently unused
-    cToken;
-    minter;
-    actualMintAmount;
-    mintTokens;
-
-    // Add minter to suppliers mapping
-    suppliers[minter] = true;
-  }
-
-  /**
    * @notice Checks if the account should be allowed to redeem tokens in the given market
    * @param cToken The market to verify the redeem against
    * @param redeemer The account which would redeem the tokens
@@ -555,23 +532,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       if (borrowBalanceEth < minBorrowEth) return uint256(Error.BORROW_BELOW_MIN);
     }
 
-    // Return no error
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Checks if the account should be allowed to borrow the underlying asset of the given market
-   * @param cToken Asset whose underlying is being borrowed
-   * @param exchangeRateMantissa Underlying/cToken exchange rate
-   * @param accountTokens Initial account cToken balance
-   * @param accountTokens Underlying amount to mint
-   */
-  function mintWithinLimits(
-    address cToken,
-    uint256 exchangeRateMantissa,
-    uint256 accountTokens,
-    uint256 mintAmount
-  ) external override returns (uint256) {
     // Return no error
     return uint256(Error.NO_ERROR);
   }
@@ -1546,26 +1506,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
 
     return allFlywheels;
-  }
-
-  /**
-   * @notice Returns true if the old flyhwheel was found and replaced
-   * @dev Replaces and old flywheel with a new one
-   * @param oldFlywheel The address of the flywheel to replace
-   * @param newFlywheel The address of the new flywheel to add
-   */
-  function replaceFlywheel(address oldFlywheel, address newFlywheel) external returns (bool) {
-    require(hasAdminRights(), "should have admin rights");
-    require(newFlywheel != address(0), "zero address for new flywheel");
-    require(newFlywheel != oldFlywheel, "same flywheel");
-
-    for (uint256 i = 0; i < rewardsDistributors.length; i++)
-      if (oldFlywheel == rewardsDistributors[i]) {
-        rewardsDistributors[i] = newFlywheel;
-        return true;
-      }
-
-    return false;
   }
 
   /**

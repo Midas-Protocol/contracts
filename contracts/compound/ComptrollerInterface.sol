@@ -25,20 +25,6 @@ abstract contract ComptrollerInterface {
     uint256 mintAmount
   ) external virtual returns (uint256);
 
-  function mintWithinLimits(
-    address cToken,
-    uint256 exchangeRateMantissa,
-    uint256 accountTokens,
-    uint256 mintAmount
-  ) external virtual returns (uint256);
-
-  function mintVerify(
-    address cToken,
-    address minter,
-    uint256 mintAmount,
-    uint256 mintTokens
-  ) external virtual;
-
   function redeemAllowed(
     address cToken,
     address redeemer,
