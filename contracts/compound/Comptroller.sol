@@ -318,11 +318,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     actualMintAmount;
     mintTokens;
 
-    // Shh - we don't ever want this hook to be marked pure
-    if (false) {
-      maxAssets = maxAssets;
-    }
-
     // Add minter to suppliers mapping
     suppliers[minter] = true;
   }
@@ -402,6 +397,65 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     if (redeemTokens == 0 && redeemAmount > 0) {
       revert("redeemTokens zero");
     }
+  }
+
+  function getMaxRedeemOrBorrow(
+    address account,
+    address cToken,
+    bool isBorrow
+  ) external override returns (uint256) {
+    CToken cTokenModify = CToken(cToken);
+    // Accrue interest
+    uint256 balanceOfUnderlying = cTokenModify.balanceOfUnderlying(account);
+
+    // Get account liquidity
+    (Error err, uint256 liquidity, uint256 shortfall) = getAccountLiquidityInternal(account);
+    require(err == Error.NO_ERROR, "error when calculating account liquidity.");
+    if (shortfall > 0) return 0; // Shortfall, so no more borrow/redeem
+
+    // Get max borrow/redeem
+    uint256 maxBorrowOrRedeemAmount;
+
+    if (!isBorrow && !markets[address(cTokenModify)].accountMembership[account]) {
+      // Max redeem = balance of underlying if not used as collateral
+      maxBorrowOrRedeemAmount = balanceOfUnderlying;
+    } else {
+      // Avoid "stack too deep" error by separating this logic
+      maxBorrowOrRedeemAmount = _getMaxRedeemOrBorrow(liquidity, cTokenModify, isBorrow);
+
+      // Redeem only: max out at underlying balance
+      if (!isBorrow && balanceOfUnderlying < maxBorrowOrRedeemAmount) maxBorrowOrRedeemAmount = balanceOfUnderlying;
+    }
+
+    // Get max borrow or redeem considering cToken liquidity
+    uint256 cTokenLiquidity = cTokenModify.getCash();
+
+    // Return the minimum of the two maximums
+    return maxBorrowOrRedeemAmount <= cTokenLiquidity ? maxBorrowOrRedeemAmount : cTokenLiquidity;
+  }
+
+  /**
+   * @dev Portion of the logic in `getMaxRedeemOrBorrow` above separated to avoid "stack too deep" errors.
+   */
+  function _getMaxRedeemOrBorrow(
+    uint256 liquidity,
+    CToken cTokenModify,
+    bool isBorrow
+  ) internal view returns (uint256) {
+    if (liquidity <= 0) return 0; // No available account liquidity, so no more borrow/redeem
+
+    // Get the normalized price of the asset
+    uint256 conversionFactor = oracle.getUnderlyingPrice(cTokenModify);
+    require(conversionFactor > 0, "Oracle price error.");
+
+    // Pre-compute a conversion factor from tokens -> ether (normalized price value)
+    if (!isBorrow) {
+      uint256 collateralFactorMantissa = markets[address(cTokenModify)].collateralFactorMantissa;
+      conversionFactor = (collateralFactorMantissa * conversionFactor) / 1e18;
+    }
+
+    // Get max borrow or redeem considering excess account liquidity
+    return (liquidity * 1e18) / conversionFactor;
   }
 
   /**

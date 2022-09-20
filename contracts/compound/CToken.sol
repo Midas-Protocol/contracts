@@ -690,24 +690,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     uint256 accountTokensNew;
   }
 
-  function _getMaxRedeem(uint256 liquidity) internal view returns (uint256) {
-    if (liquidity <= 0) return 0; // No available account liquidity, so no more borrow/redeem
-
-    // Get the normalized price of the asset
-    CTokenComptrollerInterface _comptroller = CTokenComptrollerInterface(address(comptroller));
-    uint256 conversionFactor = BasePriceOracle(address(_comptroller.oracle())).price(
-      CErc20Interface(address(this)).underlying()
-    );
-    require(conversionFactor > 0, "Oracle price error.");
-
-    // Pre-compute a conversion factor from tokens -> ether (normalized price value)
-    (, uint256 collateralFactorMantissa) = _comptroller.markets(address(this));
-    conversionFactor = (collateralFactorMantissa * conversionFactor) / 1e18;
-
-    // Get max borrow or redeem considering excess account liquidity
-    return (liquidity * 1e18) / conversionFactor;
-  }
-
   /**
    * @notice User redeems cTokens in exchange for the underlying asset
    * @dev Assumes interest has already been accrued up to the current block
@@ -731,30 +713,14 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
       return failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_EXCHANGE_RATE_READ_FAILED, uint256(vars.mathErr));
     }
 
-    CTokenComptrollerInterface _comptroller = CTokenComptrollerInterface(address(comptroller));
-
     if (redeemAmountIn == type(uint256).max) {
-      (uint256 err, uint256 liquidity, ) = _comptroller.getAccountLiquidity(redeemer);
-
-      uint256 _balanceOfUnderlying = balanceOfUnderlying(redeemer);
-
-      if (err != 0) {
-        return
-          failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_EXCHANGE_AMOUNT_CALCULATION_FAILED, uint256(vars.mathErr));
-      }
-
-      if (!_comptroller.checkMembership(redeemer, this)) {
-        redeemAmountIn = _balanceOfUnderlying;
-      } else {
-        redeemAmountIn = _getMaxRedeem(liquidity);
-
-        if (_balanceOfUnderlying < redeemAmountIn) redeemAmountIn = _balanceOfUnderlying;
-      }
-
-      uint256 cTokenLiquidity = getCashPrior();
-
-      redeemAmountIn = redeemAmountIn <= cTokenLiquidity ? redeemAmountIn : cTokenLiquidity;
+      redeemAmountIn = comptroller.getMaxRedeemOrBorrow(
+        redeemer,
+        address(this),
+        false
+      );
     }
+
     /* If redeemTokensIn > 0: */
     if (redeemTokensIn > 0) {
       /*

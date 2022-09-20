@@ -1,32 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./PriceOracle.sol";
-import "./CToken.sol";
-
-abstract contract CTokenComptrollerInterface {
-  function checkMembership(address account, CToken cToken) external view virtual returns (bool);
-
-  function getAccountLiquidity(address account)
-    external
-    view
-    virtual
-    returns (
-      uint256,
-      uint256,
-      uint256
-    );
-
-  function oracle() external view virtual returns (PriceOracle);
-
-  function markets(address cToken) external view virtual returns (bool, uint256);
-}
-
 abstract contract ComptrollerInterface {
   /// @notice Indicator that this is a Comptroller contract (for inspection)
   bool public constant isComptroller = true;
 
-  /*** Assets You Are In ***/
+  function getMaxRedeemOrBorrow(
+    address account,
+    address cToken,
+    bool isBorrow
+  ) external virtual returns (uint256);
+
+    /*** Assets You Are In ***/
 
   function enterMarkets(address[] calldata cTokens) external virtual returns (uint256[] memory);
 
