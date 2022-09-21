@@ -744,31 +744,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
   /**
      * @notice Determine the current account liquidity wrt collateral requirements
-     * @return (possible error code (semi-opaque),
-                account liquidity in excess of collateral requirements,
-     *          account shortfall below collateral requirements)
-     */
-  function getAccountLiquidity(address account)
-    public
-    view
-    returns (
-      uint256,
-      uint256,
-      uint256
-    )
-  {
-    (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
-      account,
-      CToken(address(0)),
-      0,
-      0
-    );
-
-    return (uint256(err), liquidity, shortfall);
-  }
-
-  /**
-     * @notice Determine the current account liquidity wrt collateral requirements
      * @return (possible error code,
                 account liquidity in excess of collateral requirements,
      *          account shortfall below collateral requirements)
