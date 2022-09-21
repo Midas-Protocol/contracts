@@ -3,10 +3,6 @@ pragma solidity >=0.8.0;
 
 import "./CToken.sol";
 
-interface CompLike {
-  function delegate(address delegatee) external;
-}
-
 /**
  * @title Compound's CErc20 Contract
  * @notice CTokens which wrap an EIP-20 underlying
@@ -192,15 +188,5 @@ contract CErc20 is CToken, CErc20Interface {
   function _callOptionalReturn(bytes memory data, string memory errorMessage) internal {
     bytes memory returndata = _functionCall(underlying, data, errorMessage);
     if (returndata.length > 0) require(abi.decode(returndata, (bool)), errorMessage);
-  }
-
-  /**
-   * @notice Admin call to delegate the votes of the COMP-like underlying
-   * @param compLikeDelegatee The address to delegate votes to
-   * @dev CTokens whose underlying are not CompLike should revert here
-   */
-  function _delegateCompLikeTo(address compLikeDelegatee) external {
-    require(hasAdminRights(), "only the admin may set the comp-like delegate");
-    CompLike(underlying).delegate(compLikeDelegatee);
   }
 }

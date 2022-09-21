@@ -32,7 +32,7 @@ contract CErc20Delegator is CDelegationStorage {
     bytes memory becomeImplementationData,
     uint256 reserveFactorMantissa_,
     uint256 adminFeeMantissa_
-  ) public {
+  ) {
     // First delegate gets to initialize the delegator (i.e. storage contract)
     delegateTo(
       implementation_,

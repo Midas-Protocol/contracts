@@ -1,38 +1,28 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.sol";
 
 import "./external/compound/IComptroller.sol";
 import "./external/compound/IUnitroller.sol";
 import "./external/compound/IPriceOracle.sol";
 import "./compound/Unitroller.sol";
+import "./midas/SafeOwnableUpgradeable.sol";
+import "./utils/PatchedStorage.sol";
 
 /**
  * @title FusePoolDirectory
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FusePoolDirectory is a directory for Fuse interest rate pools.
  */
-contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, ComptrollerErrorReporter {
-  /**
-   * @notice Emitted when pendingAdmin is changed
-   */
-  event NewPendingAdmin(address oldPendingAdmin, address newPendingAdmin);
-
-  /**
-   * @notice Emitted when pendingAdmin is accepted, which means admin is updated
-   */
-  event NewAdmin(address oldAdmin, address newAdmin);
-
+contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   /**
    * @dev Initializes a deployer whitelist if desired.
    * @param _enforceDeployerWhitelist Boolean indicating if the deployer whitelist is to be enforced.
    * @param _deployerWhitelist Array of Ethereum accounts to be whitelisted.
    */
   function initialize(bool _enforceDeployerWhitelist, address[] memory _deployerWhitelist) public initializer {
-    __Ownable_init();
+    __SafeOwnable_init();
     enforceDeployerWhitelist = _enforceDeployerWhitelist;
     for (uint256 i = 0; i < _deployerWhitelist.length; i++) deployerWhitelist[_deployerWhitelist[i]] = true;
   }
@@ -225,6 +215,38 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
   }
 
   /**
+   * @notice Returns arrays of all public Fuse pool indexes and data.
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getPoolsOfUser(address user) external view returns (uint256[] memory, FusePool[] memory) {
+    uint256 arrayLength = 0;
+
+    for (uint256 i = 0; i < pools.length; i++) {
+      try IComptroller(pools[i].comptroller).isUserOfPool(user) returns (bool isUsing) {
+        if (!isUsing) continue;
+      } catch {}
+
+      arrayLength++;
+    }
+
+    uint256[] memory indexes = new uint256[](arrayLength);
+    FusePool[] memory poolsOfUser = new FusePool[](arrayLength);
+    uint256 index = 0;
+
+    for (uint256 i = 0; i < pools.length; i++) {
+      try IComptroller(pools[i].comptroller).isUserOfPool(user) returns (bool isUsing) {
+        if (!isUsing) continue;
+      } catch {}
+
+      indexes[index] = i;
+      poolsOfUser[index] = pools[i];
+      index++;
+    }
+
+    return (indexes, poolsOfUser);
+  }
+
+  /**
    * @notice Returns arrays of Fuse pool indexes and data created by `account`.
    */
   function getPoolsByAccount(address account) external view returns (uint256[] memory, FusePool[] memory) {
@@ -280,7 +302,7 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
   }
 
   /**
-   * @notice Returns arrays of all public Fuse pool indexes and data with whitelisted admins.
+   * @notice Returns arrays of all Fuse pool indexes and data with whitelisted admins.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
   function getPublicPoolsByVerification(bool whitelistedAdmin)
@@ -293,12 +315,8 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
     for (uint256 i = 0; i < pools.length; i++) {
       IComptroller comptroller = IComptroller(pools[i].comptroller);
 
-      try comptroller.enforceWhitelist() returns (bool enforceWhitelist) {
-        if (enforceWhitelist) continue;
-
-        try comptroller.admin() returns (address admin) {
-          if (whitelistedAdmin != adminWhitelist[admin]) continue;
-        } catch {}
+      try comptroller.admin() returns (address admin) {
+        if (whitelistedAdmin != adminWhitelist[admin]) continue;
       } catch {}
 
       arrayLength++;
@@ -311,12 +329,8 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
     for (uint256 i = 0; i < pools.length; i++) {
       IComptroller comptroller = IComptroller(pools[i].comptroller);
 
-      try comptroller.enforceWhitelist() returns (bool enforceWhitelist) {
-        if (enforceWhitelist) continue;
-
-        try comptroller.admin() returns (address admin) {
-          if (whitelistedAdmin != adminWhitelist[admin]) continue;
-        } catch {}
+      try comptroller.admin() returns (address admin) {
+        if (whitelistedAdmin != adminWhitelist[admin]) continue;
       } catch {}
 
       indexes[index] = i;
@@ -328,53 +342,41 @@ contract FusePoolDirectory is OwnableUpgradeable, UnitrollerAdminStorage, Comptr
   }
 
   /**
-   * @notice Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
-   * @dev Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
-   * @param newPendingAdmin New pending admin.
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   * @notice Returns arrays of all verified Fuse pool indexes and data for which the account is whitelisted
+   * @param account who is whitelised in the returned verified whitelist-enabled pools.
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function _setPendingAdmin(address newPendingAdmin) public returns (uint256) {
-    // Check caller = admin
-    if (!hasAdminRights()) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_ADMIN_OWNER_CHECK);
+  function getVerifiedPoolsOfWhitelistedAccount(address account)
+    external
+    view
+    returns (uint256[] memory, FusePool[] memory)
+  {
+    uint256 arrayLength = 0;
+    for (uint256 i = 0; i < pools.length; i++) {
+      IComptroller comptroller = IComptroller(pools[i].comptroller);
+
+      try comptroller.enforceWhitelist() returns (bool enforceWhitelist) {
+        if (!enforceWhitelist || !comptroller.whitelist(account)) continue;
+      } catch {}
+
+      arrayLength++;
     }
 
-    // Save current value, if any, for inclusion in log
-    address oldPendingAdmin = pendingAdmin;
+    uint256[] memory indexes = new uint256[](arrayLength);
+    FusePool[] memory accountWhitelistedPools = new FusePool[](arrayLength);
+    uint256 index = 0;
 
-    // Store pendingAdmin with value newPendingAdmin
-    pendingAdmin = newPendingAdmin;
+    for (uint256 i = 0; i < pools.length; i++) {
+      IComptroller comptroller = IComptroller(pools[i].comptroller);
+      try comptroller.enforceWhitelist() returns (bool enforceWhitelist) {
+        if (!enforceWhitelist || !comptroller.whitelist(account)) continue;
+      } catch {}
 
-    // Emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin)
-    emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin);
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Accepts transfer of admin rights. msg.sender must be pendingAdmin
-   * @dev Admin function for pending admin to accept role and update admin
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _acceptAdmin() public returns (uint256) {
-    // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
-    if (msg.sender != pendingAdmin) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.ACCEPT_ADMIN_PENDING_ADMIN_CHECK);
+      indexes[index] = i;
+      accountWhitelistedPools[index] = pools[i];
+      index++;
     }
 
-    // Save current values for inclusion in log
-    address oldAdmin = admin;
-    address oldPendingAdmin = pendingAdmin;
-
-    // Store admin with value pendingAdmin
-    admin = pendingAdmin;
-
-    // Clear the pending value
-    pendingAdmin = address(0);
-
-    emit NewAdmin(oldAdmin, admin);
-    emit NewPendingAdmin(oldPendingAdmin, pendingAdmin);
-
-    return uint256(Error.NO_ERROR);
+    return (indexes, accountWhitelistedPools);
   }
 }

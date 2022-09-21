@@ -322,8 +322,6 @@ abstract contract CTokenInterface is CTokenStorage {
 
   function _setReserveFactor(uint256 newReserveFactorMantissa) external virtual returns (uint256);
 
-  function _reduceReserves(uint256 reduceAmount) external virtual returns (uint256);
-
   function _setInterestRateModel(InterestRateModel newInterestRateModel) public virtual returns (uint256);
 }
 
