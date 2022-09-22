@@ -53,12 +53,13 @@ contract AlpacaERC4626 is MidasERC4626 {
   ) public initializer {
     __MidasER4626_init(asset);
 
+    performanceFee = 5e16;
     alpacaVault = _alpacaVault;
     wtoken = _wtoken;
     _asset().approve(address(alpacaVault), type(uint256).max);
   }
 
-  function reinitialize() public reinitializer(2) {
+  function reinitialize() public reinitializer(2) onlyOwner {
     performanceFee = 5e16;
   }
 

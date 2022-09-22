@@ -38,13 +38,14 @@ contract JarvisERC4626 is MidasERC4626, RewardsClaimer {
     __MidasER4626_init(asset);
     __RewardsClaimer_init(_rewardsDestination, _rewardTokens);
 
+    performanceFee = 5e16;
     vault = _vault;
     flywheel = _flywheel;
     poolId = _poolId;
     asset.approve(address(vault), type(uint256).max);
   }
 
-  function reinitialize() public reinitializer(2) {
+  function reinitialize() public reinitializer(2) onlyOwner {
     performanceFee = 5e16;
   }
 

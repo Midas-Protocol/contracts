@@ -40,12 +40,13 @@ contract ArrakisERC4626 is MidasERC4626, RewardsClaimer {
     __MidasER4626_init(asset);
     __RewardsClaimer_init(_rewardsDestination, _rewardTokens);
 
+    performanceFee = 5e16;
     pool = _pool;
     flywheel = _flywheel;
     asset.approve(address(pool), type(uint256).max);
   }
 
-  function reinitialize() public reinitializer(2) {
+  function reinitialize() public reinitializer(2) onlyOwner {
     performanceFee = 5e16;
   }
 

@@ -60,6 +60,7 @@ contract EllipsisERC4626 is MidasERC4626 {
   ) public initializer {
     __MidasER4626_init(asset);
 
+    performanceFee = 5e16;
     lpTokenStaker = _lpTokenStaker;
     flywheel = _flywheel;
 
@@ -67,7 +68,7 @@ contract EllipsisERC4626 is MidasERC4626 {
     lpTokenStaker.rewardToken().approve(address(flywheel.flywheelRewards()), type(uint256).max);
   }
 
-  function reinitialize() public reinitializer(2) {
+  function reinitialize() public reinitializer(2) onlyOwner {
     performanceFee = 5e16;
   }
 

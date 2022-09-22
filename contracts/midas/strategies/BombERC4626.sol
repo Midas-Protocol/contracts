@@ -28,11 +28,12 @@ contract BombERC4626 is MidasERC4626 {
   function initialize(ERC20Upgradeable asset, address _xbombAddress) public initializer {
     __MidasER4626_init(asset);
 
+    performanceFee = 5e16;
     xbomb = IXBomb(_xbombAddress);
     asset.approve(address(xbomb), type(uint256).max);
   }
 
-  function reinitialize() public reinitializer(2) {
+  function reinitialize() public reinitializer(2) onlyOwner {
     performanceFee = 5e16;
   }
 

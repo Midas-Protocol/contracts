@@ -66,6 +66,7 @@ contract BeamERC4626 is MidasERC4626 {
   ) public initializer {
     __MidasER4626_init(asset);
 
+    performanceFee = 5e16;
     vault = _vault;
     poolId = _poolId;
     flywheelCore = _flyWheel;
@@ -74,7 +75,7 @@ contract BeamERC4626 is MidasERC4626 {
     _flyWheel.rewardToken().approve(address(_flyWheel.flywheelRewards()), type(uint256).max);
   }
 
-  function reinitialize() public reinitializer(2) {
+  function reinitialize() public reinitializer(2) onlyOwner {
     performanceFee = 5e16;
   }
 

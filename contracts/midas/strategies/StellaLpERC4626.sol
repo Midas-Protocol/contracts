@@ -53,6 +53,7 @@ contract StellaLpERC4626 is MidasERC4626, RewardsClaimer {
     __MidasER4626_init(_asset);
     __RewardsClaimer_init(_rewardsDestination, _rewardTokens);
 
+    performanceFee = 5e16;
     distributor = _distributor;
     poolId = _poolId;
 
@@ -61,7 +62,7 @@ contract StellaLpERC4626 is MidasERC4626, RewardsClaimer {
     _asset.approve(address(distributor), type(uint256).max);
   }
 
-  function reinitialize() public reinitializer(2) {
+  function reinitialize() public reinitializer(2) onlyOwner {
     performanceFee = 5e16;
   }
 
