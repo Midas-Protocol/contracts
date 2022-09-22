@@ -94,6 +94,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
       address(this),
       rewardsToken
     );
+    dotDotLpERC4626.reinitialize();
     plugin = dotDotLpERC4626;
 
     // Just set it explicitly to 0. Just wanted to make clear that this is not forgotten but expected to be 0
