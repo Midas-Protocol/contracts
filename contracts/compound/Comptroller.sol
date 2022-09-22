@@ -1279,10 +1279,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    * @param newSupplyCaps The new supply cap values in underlying to be set. A value of 0 corresponds to unlimited supplying.
    */
   function _setMarketSupplyCaps(CToken[] calldata cTokens, uint256[] calldata newSupplyCaps) external {
-    require(
-      msg.sender == admin || msg.sender == borrowCapGuardian,
-      "!admin"
-    );
+    require(msg.sender == admin || msg.sender == borrowCapGuardian, "!admin");
 
     uint256 numMarkets = cTokens.length;
     uint256 numSupplyCaps = newSupplyCaps.length;
@@ -1302,10 +1299,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    * @param newBorrowCaps The new borrow cap values in underlying to be set. A value of 0 corresponds to unlimited borrowing.
    */
   function _setMarketBorrowCaps(CToken[] calldata cTokens, uint256[] calldata newBorrowCaps) external {
-    require(
-      msg.sender == admin || msg.sender == borrowCapGuardian,
-      "!admin"
-    );
+    require(msg.sender == admin || msg.sender == borrowCapGuardian, "!admin");
 
     uint256 numMarkets = cTokens.length;
     uint256 numBorrowCaps = newBorrowCaps.length;
