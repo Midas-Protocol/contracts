@@ -1233,11 +1233,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     fuseAdminHasRights = true;
 
     // Deploy via Fuse admin
-    CToken cToken = CToken(
-      isCEther
-        ? IFuseFeeDistributor(fuseAdmin).deployCEther(constructorData)
-        : IFuseFeeDistributor(fuseAdmin).deployCErc20(constructorData)
-    );
+    CToken cToken = CToken(IFuseFeeDistributor(fuseAdmin).deployCErc20(constructorData));
     // Reset Fuse admin rights to the original value
     fuseAdminHasRights = oldFuseAdminHasRights;
     // Support market here in the Comptroller
