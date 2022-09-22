@@ -61,6 +61,10 @@ contract StellaLpERC4626 is MidasERC4626, RewardsClaimer {
     _asset.approve(address(distributor), type(uint256).max);
   }
 
+  function reinitialize() public reinitializer(2) {
+    performanceFee = 5e16;
+  }
+
   function totalAssets() public view override returns (uint256) {
     if (paused()) {
       return _asset().balanceOf(address(this));

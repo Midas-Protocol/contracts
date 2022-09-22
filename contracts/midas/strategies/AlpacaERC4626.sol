@@ -58,6 +58,10 @@ contract AlpacaERC4626 is MidasERC4626 {
     _asset().approve(address(alpacaVault), type(uint256).max);
   }
 
+  function reinitialize() public reinitializer(2) {
+    performanceFee = 5e16;
+  }
+
   /* ========== VIEWS ========== */
 
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
