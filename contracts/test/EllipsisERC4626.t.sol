@@ -67,6 +67,7 @@ contract EllipsisERC4626Test is BaseTest {
       FlywheelCore(address(flywheel)),
       ILpTokenStaker(address(mockLpTokenStaker))
     );
+    ellipsisERC4626.reinitialize();
     marketKey = ERC20(address(ellipsisERC4626));
     flywheel.addStrategyForRewards(marketKey);
     vm.warp(2);

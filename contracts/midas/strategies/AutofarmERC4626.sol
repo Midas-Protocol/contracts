@@ -59,8 +59,13 @@ contract AutofarmERC4626 is MidasERC4626 {
     autofarm = _autofarm;
     flywheel = _flywheel;
 
+    performanceFee = 5e16;
     asset.approve(address(autofarm), type(uint256).max);
     _autoToken.approve(address(flywheel.flywheelRewards()), type(uint256).max);
+  }
+
+  function reinitialize() public reinitializer(2) onlyOwner {
+    performanceFee = 5e16;
   }
 
   /* ========== VIEWS ========== */
