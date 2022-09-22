@@ -453,7 +453,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 borrowAmount
   ) external override returns (uint256) {
     // Pausing is a very serious situation - we revert to sound the alarms
-    require(!borrowGuardianPaused[cToken], "!borrow");
+    require(!borrowGuardianPaused[cToken], "!borrow:paused");
 
     // Make sure market is listed
     if (!markets[cToken].isListed) {
@@ -462,7 +462,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     if (!markets[cToken].accountMembership[borrower]) {
       // only cTokens may call borrowAllowed if borrower not in market
-      require(msg.sender == cToken, "!cToken");
+      require(msg.sender == cToken, "!ctoken");
 
       // attempt to add borrower to the market
       Error err = addToMarketInternal(CToken(msg.sender), borrower);
@@ -491,7 +491,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       uint256 totalBorrows = CToken(cToken).totalBorrows();
       (MathError mathErr, uint256 nextTotalBorrows) = addUInt(totalBorrows, borrowAmount);
       if (mathErr != MathError.NO_ERROR) return uint256(Error.MATH_ERROR);
-      require(nextTotalBorrows < borrowCap, "!borrow");
+      require(nextTotalBorrows < borrowCap, "!borrow:cap");
     }
 
     // Keep the flywheel moving
@@ -599,7 +599,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     /* allow accounts to be liquidated if the market is deprecated */
     if (isDeprecated(CToken(cTokenBorrowed))) {
-      require(borrowBalance >= repayAmount, "!borrowBalance");
+      require(borrowBalance >= repayAmount, "!borrow>repay");
     } else {
       /* The borrower must have shortfall in order to be liquidatable */
       (Error err, , uint256 shortfall) = getHypotheticalAccountLiquidityInternal(borrower, CToken(address(0)), 0, 0);
@@ -637,7 +637,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 seizeTokens
   ) external override returns (uint256) {
     // Pausing is a very serious situation - we revert to sound the alarms
-    require(!seizeGuardianPaused, "!seize");
+    require(!seizeGuardianPaused, "!seize:paused");
 
     // Shh - currently unused
     liquidator;
@@ -675,7 +675,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 transferTokens
   ) external override returns (uint256) {
     // Pausing is a very serious situation - we revert to sound the alarms
-    require(!transferGuardianPaused, "!transfer");
+    require(!transferGuardianPaused, "!transfer:paused");
 
     // Currently the only consideration is whether or not
     //  the src is allowed to redeem this many tokens
@@ -925,11 +925,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
 
     // Check marker method
-    require(MidasFlywheel(distributor).isRewardsDistributor(), "!false");
+    require(MidasFlywheel(distributor).isRewardsDistributor(), "!isRewardsDistributor");
 
     // Check for existing RewardsDistributor
-    for (uint256 i = 0; i < rewardsDistributors.length; i++)
-      require(distributor != rewardsDistributors[i], "!already added");
+    for (uint256 i = 0; i < rewardsDistributors.length; i++) require(distributor != rewardsDistributors[i], "!added");
 
     // Add RewardsDistributor to array
     rewardsDistributors.push(distributor);
@@ -1152,7 +1151,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return fail(Error.MARKET_ALREADY_LISTED, FailureInfo.SUPPORT_MARKET_EXISTS);
     }
     // Sanity check to make sure its really a CToken
-    require(cToken.isCToken(), "!false");
+    require(cToken.isCToken(), "!market:isctoken");
 
     // Check cToken.comptroller == this
     require(address(cToken.comptroller()) == address(this), "!comptroller");
@@ -1317,7 +1316,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    * @param newBorrowCapGuardian The address of the new Borrow Cap Guardian
    */
   function _setBorrowCapGuardian(address newBorrowCapGuardian) external {
-    require(msg.sender == admin, "only admin can set borrow cap guardian");
+    require(msg.sender == admin, "!admin");
 
     // Save current value for inclusion in log
     address oldBorrowCapGuardian = borrowCapGuardian;
