@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { IERC20MetadataUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import { FixedPointMathLib } from "../utils/FixedPointMathLib.sol";
 import { IFundsConversionStrategy } from "./IFundsConversionStrategy.sol";
 import { ISynthereumLiquidityPool } from "../external/jarvis/ISynthereumLiquidityPool.sol";
@@ -92,10 +93,16 @@ contract JarvisLiquidatorFunder is IFundsConversionStrategy {
     view
     returns (IERC20Upgradeable inputToken, uint256 inputAmount)
   {
-    uint256 ONE = 1e18;
     (address inputTokenAddress, address poolAddress, ) = abi.decode(strategyData, (address, address, uint256));
 
     inputToken = IERC20Upgradeable(inputTokenAddress);
+
+    uint8 decimals = 18;
+    try IERC20MetadataUpgradeable(inputTokenAddress).decimals() returns (uint8 dec) {
+      decimals = dec;
+    } catch {}
+    uint256 ONE = 10 ** decimals;
+
     ISynthereumLiquidityPool pool = ISynthereumLiquidityPool(poolAddress);
     if (inputToken == pool.syntheticToken()) {
       // collateralAmountReceived / ONE = outputAmount / inputAmount
