@@ -324,7 +324,11 @@ contract FuseSafeLiquidatorTest is BaseTest {
     vars.liquidator._whitelistRedemptionStrategy(vars.strategies[1], true);
   }
 
-  function addUniswapV2RedemptionStrategies(LiquidationData memory vars, address inputToken, address outputToken) internal {
+  function addUniswapV2RedemptionStrategies(
+    LiquidationData memory vars,
+    address inputToken,
+    address outputToken
+  ) internal {
     vars.strategies = new IRedemptionStrategy[](1);
     vars.strategies[0] = new UniswapV2Liquidator();
     vars.redemptionDatas = new bytes[](1);
@@ -385,7 +389,12 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 
-  function testPolygonAnyLiquidation(uint256 random) public shouldRun(false/*forChains(POLYGON_MAINNET)*/) {
+  function testPolygonAnyLiquidation(uint256 random)
+    public
+    shouldRun(
+      false /*forChains(POLYGON_MAINNET)*/
+    )
+  {
     vm.assume(random > 100 && random < type(uint64).max);
 
     LiquidationData memory vars;
@@ -419,11 +428,11 @@ contract FuseSafeLiquidatorTest is BaseTest {
         }
 
         if (address(vars.debtMarket) != address(0) && address(vars.collateralMarket) != address(0)) {
-//          if (vars.debtMarket.underlying() == 0xBD1fe73e1f12bD2bc237De9b626F056f21f86427) { // TODO remove when done testing MAI
-            emit log("found testable markets at random number");
-            emit log_uint(random);
-            break;
-//          }
+          //          if (vars.debtMarket.underlying() == 0xBD1fe73e1f12bD2bc237De9b626F056f21f86427) { // TODO remove when done testing MAI
+          emit log("found testable markets at random number");
+          emit log_uint(random);
+          break;
+          //          }
         }
       }
       random++;
@@ -463,7 +472,8 @@ contract FuseSafeLiquidatorTest is BaseTest {
     exchangeTo = vars.flashSwapFundingToken;
 
     // prepare the redemption strategies
-    if (vars.collateralMarket.underlying() == 0xa3Fa99A148fA48D14Ed51d610c367C61876997F1 && false) { // MAI
+    if (vars.collateralMarket.underlying() == 0xa3Fa99A148fA48D14Ed51d610c367C61876997F1 && false) {
+      // MAI
       // Uniswap
       addUniswapV2RedemptionStrategies(vars, 0xa3Fa99A148fA48D14Ed51d610c367C61876997F1, ap.getAddress("USDC"));
     } else {

@@ -101,7 +101,7 @@ contract JarvisLiquidatorFunder is IFundsConversionStrategy {
     try IERC20MetadataUpgradeable(inputTokenAddress).decimals() returns (uint8 dec) {
       decimals = dec;
     } catch {}
-    uint256 ONE = 10 ** decimals;
+    uint256 ONE = 10**decimals;
 
     ISynthereumLiquidityPool pool = ISynthereumLiquidityPool(poolAddress);
     if (inputToken == pool.syntheticToken()) {
