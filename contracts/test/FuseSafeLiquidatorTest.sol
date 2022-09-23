@@ -45,7 +45,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     } else {
       uniswapRouter = ap.getAddress("IUniswapV2Router02");
       fsl = new FuseSafeLiquidator();
-      fsl.initialize(address(1), uniswapRouter, address(3), address(4), "", 30);
+      fsl.initialize(address(1), address(2), address(3), address(4), "", 30);
     }
   }
 
