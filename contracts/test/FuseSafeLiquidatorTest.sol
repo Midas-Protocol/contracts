@@ -164,7 +164,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
             abi.encode(priceCollateral / 5)
           );
 
-          (, , shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
+          (, , shortfall) = vars.comptroller.getHypotheticalAccountLiquidity(vars.borrower, address(0), 0, 0);
           if (shortfall == 0) {
             emit log("collateral still enough");
             continue;

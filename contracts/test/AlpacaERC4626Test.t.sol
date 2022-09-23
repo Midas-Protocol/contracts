@@ -34,6 +34,7 @@ contract AlpacaERC4626Test is BaseTest {
     mockVault = MockVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063);
     alpacaERC4626 = new AlpacaERC4626();
     alpacaERC4626.initialize(underlyingToken, IAlpacaVault(address(mockVault)), IW_NATIVE(ap.getAddress("wtoken")));
+    alpacaERC4626.reinitialize();
     iniitalBeefyBalance = mockVault.totalToken();
     initialBeefySupply = mockVault.totalSupply();
     sendUnderlyingToken(100e18, address(this));

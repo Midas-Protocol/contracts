@@ -54,6 +54,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
       address(this),
       rewardsToken
     );
+    stellaLpERC4626.reinitialize();
 
     plugin = stellaLpERC4626;
 
