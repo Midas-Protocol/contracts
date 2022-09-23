@@ -41,10 +41,11 @@ contract FuseSafeLiquidatorTest is BaseTest {
       fsl = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
     } else if (block.chainid == POLYGON_MAINNET) {
       uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
+      fsl = FuseSafeLiquidator(payable(0x37b3890B9b3a5e158EAFDA243d4640c5349aFC15));
     } else {
-      fsl = new FuseSafeLiquidator();
       uniswapRouter = ap.getAddress("IUniswapV2Router02");
-      fsl.initialize(address(1), address(2), address(3), address(4), "", 30);
+      fsl = new FuseSafeLiquidator();
+      fsl.initialize(address(1), uniswapRouter, address(3), address(4), "", 30);
     }
   }
 
