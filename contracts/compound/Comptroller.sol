@@ -407,8 +407,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Get max borrow or redeem considering cToken liquidity
     uint256 cTokenLiquidity = cTokenModify.getCash();
 
+    uint maxAmount = (maxBorrowOrRedeemAmount * 10**cTokenModify.decimals()) / 1e18;
+
     // Return the minimum of the two maximums
-    return maxBorrowOrRedeemAmount <= cTokenLiquidity ? maxBorrowOrRedeemAmount : cTokenLiquidity;
+    return maxAmount <= cTokenLiquidity ? maxAmount : cTokenLiquidity;
   }
 
   /**

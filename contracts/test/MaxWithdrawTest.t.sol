@@ -40,6 +40,7 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     CToken[] allMarkets;
     MockAsset asset;
     MockAsset usdc;
+    MockAsset dai;
   }
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
