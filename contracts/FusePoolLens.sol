@@ -362,6 +362,7 @@ contract FusePoolLens is Initializable {
       asset.adminFee = cToken.adminFeeMantissa();
       asset.fuseFee = cToken.fuseFeeMantissa();
       asset.borrowGuardianPaused = comptroller.borrowGuardianPaused(address(cToken));
+      asset.mintGuardianPaused = comptroller.mintGuardianPaused(address(cToken));
 
       // Add to assets array and increment index
       detailedAssets[index] = asset;
