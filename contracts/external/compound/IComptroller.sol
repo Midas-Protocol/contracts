@@ -48,6 +48,8 @@ interface IComptroller {
 
   function borrowGuardianPaused(address cToken) external view returns (bool);
 
+  function mintGuardianPaused(address cToken) external view returns (bool);
+
   function getRewardsDistributors() external view returns (IRewardsDistributor[] memory);
 
   function getAllMarkets() external view returns (ICToken[] memory);
