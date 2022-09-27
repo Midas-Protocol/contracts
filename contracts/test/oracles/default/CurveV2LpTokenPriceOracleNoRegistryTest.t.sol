@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// 0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA// SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
 import "ds-test/test.sol";
@@ -10,7 +10,6 @@ import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 
 contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
   CurveV2LpTokenPriceOracleNoRegistry oracle;
-  address busd;
   address epsJCHFBUSD_lp = 0x5887cEa5e2bb7dD36F0C06Da47A8Df918c289A29;
   address epsJCHFBUSD_pool = 0xBcA6E25937B0F7E0FD8130076b6B218F595E32e2;
   ICToken epsJCHFBUSD_c = ICToken(0x1F0452D6a8bb9EAbC53Fa6809Fa0a060Dd531267);
@@ -18,7 +17,6 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
 
   function setUp() public {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-    busd = ap.getAddress("bUSD");
   }
 
   function setUpCurveOracle(address lpToken, address pool) public {
@@ -28,7 +26,7 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
     pools[0] = pool;
 
     vm.prank(mpo.admin());
-    oracle.initialize(lpTokens, pools, busd, mpo);
+    oracle.initialize(lpTokens, pools);
   }
 
   function testCurveLpTokenPriceOracleNoRegistry() public shouldRun(forChains(BSC_MAINNET)) {
@@ -39,11 +37,11 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
     setUpCurveOracle(epsJCHFBUSD_lp, epsJCHFBUSD_pool);
 
     ICurveV2Pool pool = ICurveV2Pool(epsJCHFBUSD_pool);
-    uint256 lp_price = (pool.lp_price() / 10**18) * mpo.price(busd);
+    uint256 lp_price = pool.lp_price();
     uint256 price = oracle.price(epsJCHFBUSD_lp);
     uint256 ulPrice = oracle.getUnderlyingPrice(epsJCHFBUSD_c);
     assertEq(price, ulPrice);
     assertEq(price, lp_price);
-    assertEq(price, 7273352757129158);
+    assertEq(price, 2012556774399901376);
   }
 }
