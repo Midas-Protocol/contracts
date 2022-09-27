@@ -7,15 +7,15 @@ import { IFundsConversionStrategy } from "./IFundsConversionStrategy.sol";
 
 import "../external/uniswap/ISwapRouter.sol";
 import "../external/uniswap/IUniswapV3Factory.sol";
-import "../external/uniswap/IQuoterV2.sol";
+import "../external/uniswap/Quoter/Quoter.sol";
 
 contract UniswapV3Liquidator is IFundsConversionStrategy {
   using FixedPointMathLib for uint256;
   ISwapRouter swapRouter;
   IUniswapV3Factory factory;
-  IQuoterV2 quoter;
+  Quoter quoter;
 
-  constructor(ISwapRouter _router, IUniswapV3Factory _factory, IQuoterV2 _quoter) {
+  constructor(ISwapRouter _router, IUniswapV3Factory _factory, Quoter _quoter) {
     swapRouter = _router;
     factory = _factory;
     quoter = _quoter;
@@ -48,25 +48,25 @@ contract UniswapV3Liquidator is IFundsConversionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    // (address _outputToken, uint24 fee) = abi.decode(
-    //   strategyData,
-    //   (address, uint24)
-    // );
-    // outputToken = IERC20Upgradeable(_outputToken);
+    (address _outputToken, uint24 fee) = abi.decode(
+      strategyData,
+      (address, uint24)
+    );
+    outputToken = IERC20Upgradeable(_outputToken);
 
-    // ISwapRouter.ExactInputSingleParams memory params =
-    //   ISwapRouter.ExactInputSingleParams({
-    //       tokenIn: address(inputToken),
-    //       tokenOut: _outputToken,
-    //       fee: fee,
-    //       recipient: address(this),
-    //       deadline: block.timestamp,
-    //       amountIn: inputAmount,
-    //       amountOutMinimum: 0,
-    //       sqrtPriceLimitX96: 0
-    //   });
+    ISwapRouter.ExactInputSingleParams memory params =
+      ISwapRouter.ExactInputSingleParams(
+          address(inputToken),
+          _outputToken,
+          fee,
+          address(this),
+          // block.timestamp,
+          inputAmount,
+          0,
+          0
+      );
     
-    // outputAmount = swapRouter.exactInputSingle(params);
+    outputAmount = swapRouter.exactInputSingle(params);
   }
 
   /**
@@ -79,21 +79,11 @@ contract UniswapV3Liquidator is IFundsConversionStrategy {
     view
     returns (IERC20Upgradeable inputToken, uint256 inputAmount)
   {
-    // (address _inputToken, address _outputToken, uint24 fee, uint256 amountInMaximum) = abi.decode(
-    //   strategyData,
-    //   (address, address, uint24)
-    // );
+    (address _inputToken, address _outputToken, uint24 fee) = abi.decode(
+      strategyData,
+      (address, address, uint24)
+    );
 
-    // IQuoterV2.QuoteExactOutputSingleParams memory params = 
-    //   IQuoterV2.QuoteExactOutputSingleParams({
-    //     tokenIn: _inputToken,
-    //     tokenOut: _outputToken,
-    //     amount: outputAmount,
-    //     fee: fee,
-    //     sqrtPriceLimitX96: 0
-    //   });
-    
-    // (inputAmount, , , ) = quoter.quoteExactOutputSingle(params);
-    // inputToken = IERC20Upgradeable(_inputToken);
+    inputAmount = quoter.estimateMinSwapUniswapV3(_inputToken, _outputToken, outputAmount, fee);
   }
 }
