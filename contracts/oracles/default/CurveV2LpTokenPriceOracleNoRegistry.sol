@@ -17,7 +17,7 @@ import "../BasePriceOracle.sol";
  * @notice CurveLpTokenPriceOracleNoRegistry is a price oracle for Curve V2 LP tokens (using the sender as a root oracle).
  * @dev Implements the `PriceOracle` interface used by Midas pools (and Compound v2).
  */
-contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedStorage, BasePriceOracle {
+contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePriceOracle {
   /**
    * @dev Maps Curve LP token addresses to pool addresses.
    */
