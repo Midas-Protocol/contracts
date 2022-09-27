@@ -6,8 +6,12 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 import { ICToken } from "../../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import "../../midas/SafeOwnableUpgradeable.sol";
 import "../../external/compound/IPriceOracle.sol";
 import "../BasePriceOracle.sol";
+
+import "forge-std/Vm.sol";
+import "forge-std/Test.sol";
 
 interface DiaStDotOracle {
   function stDOTPrice() external view returns (uint256);
@@ -15,21 +19,21 @@ interface DiaStDotOracle {
   function wstDOTPrice() external view returns (uint256);
 }
 
-contract DiaStDotPriceOracle is IPriceOracle, BasePriceOracle {
-  MasterPriceOracle public immutable MASTER_PRICE_ORACLE;
-  DiaStDotOracle private immutable DIA_STDOT_ORACLE;
-  address public immutable ST_DOT;
-  address public immutable WST_DOT;
-  address public immutable USD_TOKEN;
-  uint256 private lastPrice = 0;
+contract DiaStDotPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
+  MasterPriceOracle public MASTER_PRICE_ORACLE;
+  DiaStDotOracle public DIA_STDOT_ORACLE;
+  address public ST_DOT;
+  address public WST_DOT;
+  address public USD_TOKEN;
 
-  constructor(
-    DiaStDotOracle _diaStDotOracle,
+  function initialize(
     MasterPriceOracle masterPriceOracle,
+    DiaStDotOracle _diaStDotOracle,
     address _stDot,
     address _wstDot,
     address usdToken
-  ) {
+  ) public initializer {
+    __SafeOwnable_init();
     MASTER_PRICE_ORACLE = masterPriceOracle;
     DIA_STDOT_ORACLE = _diaStDotOracle;
     ST_DOT = _stDot;
@@ -43,14 +47,7 @@ contract DiaStDotPriceOracle is IPriceOracle, BasePriceOracle {
 
     require(underlying == ST_DOT || underlying == WST_DOT, "Invalid underlying");
     // Get price in base 18 decimals
-    uint256 oraclePrice = _price(underlying);
-
-    // Format and return price
-    uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
-    return
-      underlyingDecimals <= 18
-        ? uint256(oraclePrice) * (10**(18 - underlyingDecimals))
-        : uint256(oraclePrice) / (10**(underlyingDecimals - 18));
+    return _price(underlying);
   }
 
   function price(address underlying) external view override returns (uint256) {
@@ -58,24 +55,18 @@ contract DiaStDotPriceOracle is IPriceOracle, BasePriceOracle {
     return _price(underlying);
   }
 
-  function __price(address underlying) internal view returns (uint256) {
-    if (underlying == ST_DOT) {
-      return DIA_STDOT_ORACLE.stDOTPrice();
-    } else if (underlying == WST_DOT) {
-      return DIA_STDOT_ORACLE.wstDOTPrice();
-    } else {
-      return 0;
-    }
-  }
-
   function _price(address underlying) internal view returns (uint256) {
-    // aBNBc/BUSD price
-    uint256 oraclePrice = __price(underlying);
-    if (oraclePrice == 0) {
+    uint256 oraclePrice;
+    // stDOTPrice() and wstDOTPrice() are 8-decimal feeds
+    if (underlying == ST_DOT) {
+      oraclePrice = (DIA_STDOT_ORACLE.stDOTPrice() * 1e10);
+    } else if (underlying == WST_DOT) {
+      oraclePrice = (DIA_STDOT_ORACLE.wstDOTPrice() * 1e10);
+    } else {
       return 0;
     }
     // Get USD price
     uint256 wGlmrUsdPrice = MASTER_PRICE_ORACLE.price(USD_TOKEN);
-    return (uint256(oraclePrice) / 10**18) * wGlmrUsdPrice;
+    return (uint256(oraclePrice) * wGlmrUsdPrice) / 10**18;
   }
 }
