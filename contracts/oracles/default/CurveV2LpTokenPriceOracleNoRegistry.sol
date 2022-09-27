@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { EIP20Interface } from "../../compound/EIP20Interface.sol";
+import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 
 import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
@@ -18,6 +19,8 @@ import "../BasePriceOracle.sol";
  * @dev Implements the `PriceOracle` interface used by Midas pools (and Compound v2).
  */
 contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePriceOracle {
+  address public USD_TOKEN;
+  MasterPriceOracle public MASTER_PRICE_ORACLE;
   /**
    * @dev Maps Curve LP token addresses to pool addresses.
    */
@@ -28,9 +31,18 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
    * @param _lpTokens Array of LP token addresses.
    * @param _pools Array of pool addresses.
    */
-  function initialize(address[] memory _lpTokens, address[] memory _pools) public initializer {
+  function initialize(
+    address[] memory _lpTokens,
+    address[] memory _pools,
+    address usdToken,
+    MasterPriceOracle masterPriceOracle
+  ) public initializer {
     require(_lpTokens.length == _pools.length, "No LP tokens supplied or array lengths not equal.");
     __SafeOwnable_init();
+
+    USD_TOKEN = usdToken;
+    MASTER_PRICE_ORACLE = masterPriceOracle;
+
     for (uint256 i = 0; i < _pools.length; i++) {
       poolOf[_lpTokens[i]] = _pools[i];
     }
@@ -64,7 +76,9 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
   function _price(address lpToken) internal view returns (uint256) {
     address pool = poolOf[lpToken];
     require(pool != address(0), "LP token is not registered.");
-    return ICurveV2Pool(pool).lp_price();
+    uint256 usdPrice = ICurveV2Pool(pool).lp_price();
+    uint256 bnbUsdPrice = MASTER_PRICE_ORACLE.price(USD_TOKEN);
+    return (usdPrice / 10**18) * bnbUsdPrice;
   }
 
   /**
