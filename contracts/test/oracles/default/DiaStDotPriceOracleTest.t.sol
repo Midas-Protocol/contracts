@@ -46,6 +46,10 @@ contract DiaStDotPriceOracleTest is BaseTest {
     emit log_uint(ulPriceStDot);
     uint256 priceWstDot = oracle.price(wstDot);
 
+    // (13799919586975046579 / 1e18) * 0,45 = 6,209
+    // at Block Number 1959099, price of GLMR ~ 0,45 USD, price of DOT ~ 6,36 USD
+    // stDot trades at a discount
+
     assertEq(priceStDot, 13799919586975046579);
     assertEq(priceStDot, ulPriceStDot);
 
