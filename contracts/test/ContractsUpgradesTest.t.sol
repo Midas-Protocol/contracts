@@ -148,6 +148,13 @@ contract ContractsUpgradesTest is BaseTest {
       asArray(true)
     );
 
+    vm.prank(ffd.owner());
+    ffd._editPluginImplementationWhitelist(
+      asArray(currentDelegate),
+      asArray(address(newDelegate)),
+      asArray(true)
+    );
+
     bytes memory newPluginBytes = abi.encode(newPlugin);
     vm.prank(plugin.owner());
     market._setImplementationSafe(address(newDelegate), false, newPluginBytes);
