@@ -165,4 +165,7 @@ contract ComptrollerV3Storage is ComptrollerV2Storage {
 
   /// @dev Whether or not _notEntered has been initialized
   bool internal _notEnteredInitialized;
+
+  /// @notice RewardsDistributor to list for claiming, but not to notify of flywheel changes.
+  address[] public nonAccruingRewardsDistributors;
 }

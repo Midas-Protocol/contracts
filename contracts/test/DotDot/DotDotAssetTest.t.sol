@@ -27,7 +27,7 @@ contract DotDotAssetTest is AbstractAssetTest {
   function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
     (address masterPriceOracle, address asset) = abi.decode(testConfig, (address, address));
 
-    test.setUpWithPool(MasterPriceOracle(masterPriceOracle), MockERC20(asset));
+    test.setUpWithPool(MasterPriceOracle(masterPriceOracle), ERC20Upgradeable(asset));
 
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }

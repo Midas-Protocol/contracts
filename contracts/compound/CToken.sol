@@ -8,6 +8,7 @@ import "./Exponential.sol";
 import "./EIP20Interface.sol";
 import "./EIP20NonStandardInterface.sol";
 import "./InterestRateModel.sol";
+import "../oracles/BasePriceOracle.sol";
 
 /**
  * @title Compound's CToken Contract
@@ -232,7 +233,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
    * @param owner The address of the account to query
    * @return The amount of underlying owned by `owner`
    */
-  function balanceOfUnderlying(address owner) external override returns (uint256) {
+  function balanceOfUnderlying(address owner) public override returns (uint256) {
     Exp memory exchangeRate = Exp({ mantissa: exchangeRateCurrent() });
     (MathError mErr, uint256 balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
     require(mErr == MathError.NO_ERROR, "balance could not be calculated");
@@ -464,12 +465,16 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     uint256 cashPrior = getCashPrior();
 
     /* Calculate the current borrow interest rate */
+    uint256 totalFees = add_(totalAdminFees, totalFuseFees);
     uint256 borrowRateMantissa = interestRateModel.getBorrowRate(
       cashPrior,
       totalBorrows,
-      add_(totalReserves, add_(totalAdminFees, totalFuseFees))
+      add_(totalReserves, totalFees)
     );
-    require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
+    if (borrowRateMantissa > borrowRateMaxMantissa) {
+      if (cashPrior > totalFees) revert("borrow rate is absurdly high");
+      else borrowRateMantissa = borrowRateMaxMantissa;
+    }
 
     /* Calculate the number of blocks elapsed since the last accrual */
     (MathError mathErr, uint256 blockDelta) = subUInt(currentBlockNumber, accrualBlockNumber);
@@ -618,6 +623,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
       Exp({ mantissa: vars.exchangeRateMantissa })
     );
     require(vars.mathErr == MathError.NO_ERROR, "MINT_EXCHANGE_CALCULATION_FAILED");
+    require(vars.mintTokens > 0, "MINT_ZERO_CTOKENS_REJECTED");
 
     /*
      * We calculate the new total supply of cTokens and minter token balance, checking for overflow:
@@ -637,7 +643,8 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     emit Transfer(address(this), minter, vars.mintTokens);
 
     /* We call the defense hook */
-    comptroller.mintVerify(address(this), minter, vars.actualMintAmount, vars.mintTokens);
+    // unused function
+    // comptroller.mintVerify(address(this), minter, vars.actualMintAmount, vars.mintTokens);
 
     return (uint256(Error.NO_ERROR), vars.actualMintAmount);
   }
@@ -705,6 +712,10 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateStoredInternal();
     if (vars.mathErr != MathError.NO_ERROR) {
       return failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_EXCHANGE_RATE_READ_FAILED, uint256(vars.mathErr));
+    }
+
+    if (redeemAmountIn == type(uint256).max) {
+      redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, address(this), false);
     }
 
     /* If redeemTokensIn > 0: */

@@ -165,6 +165,25 @@ contract FusePoolLens is Initializable {
   }
 
   /**
+   * @notice Returns arrays of the indexes of Fuse pools used by `user`, data, total supply balances (in ETH), total borrow balances (in ETH), arrays of underlying token addresses, arrays of underlying asset symbols, and booleans indicating if retrieving each pool's data failed.
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
+   */
+  function getPoolsOfUserWithData(address user)
+    external
+    returns (
+      uint256[] memory,
+      FusePoolDirectory.FusePool[] memory,
+      FusePoolData[] memory,
+      bool[] memory
+    )
+  {
+    (uint256[] memory indexes, FusePoolDirectory.FusePool[] memory userPools) = directory.getPoolsOfUser(user);
+    (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(userPools);
+    return (indexes, userPools, data, errored);
+  }
+
+  /**
    * @notice Internal function returning arrays of requested Fuse pool indexes, data, total supply balances (in ETH), total borrow balances (in ETH), arrays of underlying token addresses, arrays of underlying asset symbols, and booleans indicating if retrieving each pool's data failed.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
@@ -264,6 +283,7 @@ contract FusePoolLens is Initializable {
     uint256 adminFee;
     uint256 fuseFee;
     bool borrowGuardianPaused;
+    bool mintGuardianPaused;
   }
 
   /**
@@ -343,6 +363,7 @@ contract FusePoolLens is Initializable {
       asset.adminFee = cToken.adminFeeMantissa();
       asset.fuseFee = cToken.fuseFeeMantissa();
       asset.borrowGuardianPaused = comptroller.borrowGuardianPaused(address(cToken));
+      asset.mintGuardianPaused = comptroller.mintGuardianPaused(address(cToken));
 
       // Add to assets array and increment index
       detailedAssets[index] = asset;

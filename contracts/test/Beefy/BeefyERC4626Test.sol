@@ -6,11 +6,12 @@ import "forge-std/Vm.sol";
 import "../helpers/WithPool.sol";
 import "../config/BaseTest.t.sol";
 
-import { MidasERC4626, BeefyERC4626, IBeefyVault } from "../../compound/strategies/BeefyERC4626.sol";
+import { MidasERC4626, BeefyERC4626, IBeefyVault } from "../../midas/strategies/BeefyERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 contract BeefyERC4626Test is AbstractERC4626Test {
   using FixedPointMathLib for uint256;
@@ -18,24 +19,34 @@ contract BeefyERC4626Test is AbstractERC4626Test {
   uint256 withdrawalFee = 10;
 
   IBeefyVault beefyVault; // ERC4626 => underlyingToken => beefyStrategy
-  address beefyStrategy = 0xEeBcd7E1f008C52fe5804B306832B7DD317e163D; // beefyStrategy => underlyingToken => lpChef
-  address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B; // beefyStrategy => underlyingToken => .
+  address lpChef; // beefyStrategy => underlyingToken => .
+  bool shouldRunTest;
 
   constructor() AbstractERC4626Test() {}
 
   function setUp(string memory _testPreFix, bytes calldata data) public override {
     testPreFix = _testPreFix;
 
-    (address _beefyVault, uint256 _withdrawalFee) = abi.decode(data, (address, uint256));
+    (address _beefyVault, uint256 _withdrawalFee, address _lpChef, bool _shouldRunTest) = abi.decode(
+      data,
+      (address, uint256, address, bool)
+    );
 
-    beefyVault = IBeefyVault(_beefyVault);
-    underlyingToken = MockERC20(address(beefyVault.want()));
-    plugin = MidasERC4626(address(new BeefyERC4626(underlyingToken, beefyVault, _withdrawalFee)));
+    if (_shouldRunTest) {
+      lpChef = _lpChef;
+      shouldRunTest = _shouldRunTest;
+      beefyVault = IBeefyVault(_beefyVault);
+      underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
+      BeefyERC4626 beefyERC4626 = new BeefyERC4626();
+      beefyERC4626.initialize(underlyingToken, beefyVault, _withdrawalFee);
+      beefyERC4626.reinitialize();
+      plugin = beefyERC4626;
 
-    initialStrategyBalance = beefyVault.balance();
-    initialStrategySupply = beefyVault.totalSupply();
+      initialStrategyBalance = beefyVault.balance();
+      initialStrategySupply = beefyVault.totalSupply();
 
-    sendUnderlyingToken(depositAmount, address(this));
+      sendUnderlyingToken(depositAmount, address(this));
+    }
   }
 
   function increaseAssetsInVault() public override {
@@ -63,7 +74,7 @@ contract BeefyERC4626Test is AbstractERC4626Test {
   function testInitializedValues(string memory assetName, string memory assetSymbol)
     public
     override
-    shouldRun(forChains(BSC_MAINNET))
+    shouldRun(shouldRunTest)
   {
     assertEq(
       plugin.name(),

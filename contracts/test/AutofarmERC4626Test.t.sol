@@ -9,7 +9,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 
-import { AutofarmERC4626, IAutofarmV2 } from "../compound/strategies/AutofarmERC4626.sol";
+import { AutofarmERC4626, IAutofarmV2 } from "../midas/strategies/AutofarmERC4626.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
@@ -18,6 +18,8 @@ import { MockStrategy } from "./mocks/autofarm/MockStrategy.sol";
 import { MockAutofarmV2 } from "./mocks/autofarm/MockAutofarmV2.sol";
 import { IStrategy } from "./mocks/autofarm/IStrategy.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
+
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 contract AutofarmERC4626Test is BaseTest {
   AutofarmERC4626 autofarmERC4626;
@@ -58,13 +60,15 @@ contract AutofarmERC4626Test is BaseTest {
     flywheelRewards = new FuseFlywheelDynamicRewards(flywheel, 1);
     flywheel.setFlywheelRewards(flywheelRewards);
 
-    autofarmERC4626 = new AutofarmERC4626(
-      testToken,
+    autofarmERC4626 = new AutofarmERC4626();
+    autofarmERC4626.initialize(
+      ERC20Upgradeable(address(testToken)),
       FlywheelCore(address(flywheel)),
       0,
-      autoToken,
+      ERC20Upgradeable(address(autoToken)),
       IAutofarmV2(address(mockAutofarm))
     );
+    autofarmERC4626.reinitialize();
     marketKey = ERC20(address(autofarmERC4626));
     flywheel.addStrategyForRewards(marketKey);
 
@@ -215,10 +219,10 @@ contract AutofarmERC4626Test is BaseTest {
     testToken.mint(address(this), depositAmount);
     testToken.approve(address(autofarmERC4626), depositAmount);
     // flywheelPreSupplierAction -- usually this would be done in Comptroller when supplying
-    flywheel.accrue(ERC20(autofarmERC4626), address(this));
+    flywheel.accrue(ERC20(address(autofarmERC4626)), address(this));
     autofarmERC4626.deposit(depositAmount, address(this));
     // flywheelPreSupplierAction
-    flywheel.accrue(ERC20(autofarmERC4626), address(this));
+    flywheel.accrue(ERC20(address(autofarmERC4626)), address(this));
   }
 
   function testDeposit() public {
@@ -277,11 +281,11 @@ contract AutofarmERC4626Test is BaseTest {
 
     autofarmERC4626.withdraw(1, address(this), address(this));
     // flywheelPreSupplierAction
-    flywheel.accrue(ERC20(autofarmERC4626), address(this));
+    flywheel.accrue(ERC20(address(autofarmERC4626)), address(this));
     vm.warp(4);
     vm.roll(4);
 
-    flywheel.accrue(ERC20(autofarmERC4626), address(this));
+    flywheel.accrue(ERC20(address(autofarmERC4626)), address(this));
     flywheel.claimRewards(address(this));
     assertEq(autoToken.balanceOf(address(this)), rewardsStream - 1);
   }
@@ -297,11 +301,11 @@ contract AutofarmERC4626Test is BaseTest {
     vm.roll(3);
 
     autofarmERC4626.withdraw(1, address(this), address(this));
-    flywheel.accrue(ERC20(autofarmERC4626), address(this));
+    flywheel.accrue(ERC20(address(autofarmERC4626)), address(this));
     vm.warp(4);
     vm.roll(4);
 
-    flywheel.accrue(ERC20(autofarmERC4626), address(this), tester);
+    flywheel.accrue(ERC20(address(autofarmERC4626)), address(this), tester);
     flywheel.claimRewards(address(this));
     flywheel.claimRewards(tester);
 

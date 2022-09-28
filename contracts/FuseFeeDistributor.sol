@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -13,25 +11,17 @@ import "./compound/ComptrollerStorage.sol";
 import "./compound/CEtherDelegator.sol";
 import "./compound/CErc20Delegator.sol";
 import "./compound/CErc20PluginDelegate.sol";
+import "./midas/SafeOwnableUpgradeable.sol";
+import "./utils/PatchedStorage.sol";
 
 /**
  * @title FuseFeeDistributor
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FuseFeeDistributor controls and receives protocol fees from Fuse pools and relays admin actions to Fuse pools.
  */
-contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdminStorage, ComptrollerErrorReporter {
+contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   using AddressUpgradeable for address;
   using SafeERC20Upgradeable for IERC20Upgradeable;
-
-  /**
-   * @notice Emitted when pendingAdmin is changed
-   */
-  event NewPendingAdmin(address oldPendingAdmin, address newPendingAdmin);
-
-  /**
-   * @notice Emitted when pendingAdmin is accepted, which means admin is updated
-   */
-  event NewAdmin(address oldAdmin, address newAdmin);
 
   /**
    * @dev Initializer that sets initial values of state variables.
@@ -39,7 +29,7 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
    */
   function initialize(uint256 _defaultInterestFeeRate) public initializer {
     require(_defaultInterestFeeRate <= 1e18, "Interest fee rate cannot be more than 100%.");
-    __Ownable_init();
+    __SafeOwnable_init();
     defaultInterestFeeRate = _defaultInterestFeeRate;
     maxSupplyEth = type(uint256).max;
     maxUtilizationRate = type(uint256).max;
@@ -133,22 +123,6 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   function _callPool(address[] calldata targets, bytes calldata data) external onlyOwner {
     require(targets.length > 0, "No target addresses specified.");
     for (uint256 i = 0; i < targets.length; i++) targets[i].functionCall(data);
-  }
-
-  /**
-   * @dev Deploys a CToken for the underlying nativeToken of the current chain
-   * @param constructorData Encoded construction data for `CToken initialize()`
-   */
-  function deployCEther(bytes calldata constructorData) external returns (address) {
-    // Make sure comptroller == msg.sender
-    address comptroller = abi.decode(constructorData[0:32], (address));
-    require(comptroller == msg.sender, "Comptroller is not sender.");
-    // Deploy CEtherDelegator using msg.sender, underlying, and block.number as a salt
-    bytes32 salt = keccak256(abi.encodePacked(msg.sender, address(0), ++marketsCounter));
-
-    bytes memory cEtherDelegatorCreationCode = abi.encodePacked(type(CEtherDelegator).creationCode, constructorData);
-    address proxy = Create2Upgradeable.deploy(0, salt, cEtherDelegatorCreationCode);
-    return proxy;
   }
 
   /**
@@ -476,56 +450,5 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   function _setCustomInterestFeeRate(address comptroller, int256 rate) external onlyOwner {
     require(rate <= 1e18, "Interest fee rate cannot be more than 100%.");
     customInterestFeeRates[comptroller] = rate;
-  }
-
-  /**
-   * @notice Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
-   * @dev Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
-   * @param newPendingAdmin New pending admin.
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _setPendingAdmin(address newPendingAdmin) public returns (uint256) {
-    // Check caller = admin
-    if (!hasAdminRights()) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_ADMIN_OWNER_CHECK);
-    }
-
-    // Save current value, if any, for inclusion in log
-    address oldPendingAdmin = pendingAdmin;
-
-    // Store pendingAdmin with value newPendingAdmin
-    pendingAdmin = newPendingAdmin;
-
-    // Emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin)
-    emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin);
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Accepts transfer of admin rights. msg.sender must be pendingAdmin
-   * @dev Admin function for pending admin to accept role and update admin
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _acceptAdmin() public returns (uint256) {
-    // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
-    if (msg.sender != pendingAdmin) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.ACCEPT_ADMIN_PENDING_ADMIN_CHECK);
-    }
-
-    // Save current values for inclusion in log
-    address oldAdmin = admin;
-    address oldPendingAdmin = pendingAdmin;
-
-    // Store admin with value pendingAdmin
-    admin = pendingAdmin;
-
-    // Clear the pending value
-    pendingAdmin = address(0);
-
-    emit NewAdmin(oldAdmin, admin);
-    emit NewPendingAdmin(oldPendingAdmin, pendingAdmin);
-
-    return uint256(Error.NO_ERROR);
   }
 }

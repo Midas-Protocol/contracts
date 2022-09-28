@@ -5,6 +5,7 @@ import "./helpers/WithPool.sol";
 import "./config/BaseTest.t.sol";
 import "forge-std/Test.sol";
 import "../external/uniswap/IUniswapV2Pair.sol";
+import "../external/uniswap/IUniswapV2Factory.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -13,6 +14,7 @@ import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
+import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
@@ -53,7 +55,7 @@ contract BeamE2eTest is WithPool, BaseTest {
   }
 
   constructor() WithPool() {
-    super.setUpWithPool(MasterPriceOracle(mPriceOracle), MockERC20(0x99588867e817023162F4d4829995299054a5fC57));
+    super.setUpWithPool(MasterPriceOracle(mPriceOracle), ERC20Upgradeable(0x99588867e817023162F4d4829995299054a5fC57));
   }
 
   function setUp() public shouldRun(forChains(MOONBEAM_MAINNET)) {
@@ -116,7 +118,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     vars.erc4626 = new MockERC4626(ERC20(address(underlyingToken)));
     vars.asset = MockBeamERC20(usdc);
 
-    deployCErc20PluginDelegate(vars.erc4626, 0.9e18);
+    deployCErc20PluginDelegate(address(vars.erc4626), 0.9e18);
     deployCErc20Delegate(address(vars.asset), "BNB", "bnb", 0.1e18);
 
     vars.allMarkets = comptroller.getAllMarkets();
@@ -131,8 +133,9 @@ contract BeamE2eTest is WithPool, BaseTest {
       wToken,
       uniswapRouter,
       usdc,
-      0xcd3B51D98478D53F4515A306bE565c6EebeF1D58,
-      "0xe31da4209ffcce713230a74b5287fa8ec84797c9e77e1f7cfeccea015cdc97ea"
+      0xcd3B51D98478D53F4515A306bE565c6EebeF1D58, // glint
+      "0xe31da4209ffcce713230a74b5287fa8ec84797c9e77e1f7cfeccea015cdc97ea",
+      30
     );
 
     // Tokens supply
@@ -198,7 +201,7 @@ contract BeamE2eTest is WithPool, BaseTest {
       vm.mockCall(
         mPriceOracle,
         abi.encodeWithSelector(priceOracle.getUnderlyingPrice.selector, ICToken(address(cToken))),
-        abi.encode(vars.oraclePrice * 40)
+        abi.encode(vars.oraclePrice * 40e12)
       );
     }
 
@@ -223,21 +226,36 @@ contract BeamE2eTest is WithPool, BaseTest {
       vars.assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
       uint256 beamBalance = cTokenLP.balanceOf(david);
 
+      IFundsConversionStrategy[] memory fundingStrategies = new IFundsConversionStrategy[](0);
+      bytes[] memory data = new bytes[](0);
+
+      IUniswapV2Router02 uniswapRouterContract = IUniswapV2Router02(uniswapRouter);
+      address pairAddress = IUniswapV2Factory(uniswapRouterContract.factory()).getPair(
+        cToken.underlying(),
+        ap.getAddress("wtoken")
+      );
+      IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
+
       /**
        * Liquidation
        */
       vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-        david,
-        400,
-        ICErc20(address(cToken)),
-        ICErc20(address(cTokenLP)),
-        0,
-        address(0),
-        IUniswapV2Router02(uniswapRouter),
-        IUniswapV2Router02(uniswapRouter),
-        vars.strategies,
-        vars.abis,
-        0
+        FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
+          david,
+          400,
+          ICErc20(address(cToken)),
+          ICErc20(address(cTokenLP)),
+          flashSwapPair,
+          0,
+          address(0),
+          IUniswapV2Router02(uniswapRouter),
+          IUniswapV2Router02(uniswapRouter),
+          vars.strategies,
+          vars.abis,
+          0,
+          fundingStrategies,
+          data
+        )
       );
       vars.assetsDataAfter = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
 
@@ -260,7 +278,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     MockERC4626 erc4626 = new MockERC4626(ERC20(address(underlyingToken)));
 
     vm.roll(1);
-    deployCErc20PluginDelegate(erc4626, 0.9e18);
+    deployCErc20PluginDelegate(address(erc4626), 0.9e18);
 
     CToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));

@@ -4,15 +4,17 @@ pragma solidity >=0.8.0;
 import "forge-std/Vm.sol";
 import "forge-std/Test.sol";
 
-import "../../utils/AddressesProvider.sol";
+import "../../midas/AddressesProvider.sol";
 
 abstract contract BaseTest is Test {
   uint256 constant BSC_MAINNET = 56;
   uint256 constant MOONBEAM_MAINNET = 1284;
+  uint256 constant POLYGON_MAINNET = 137;
+  uint256 constant ARBITRUM_ONE = 42161;
 
   uint256 constant EVMOS_TESTNET = 9000;
   uint256 constant BSC_CHAPEL = 97;
-  uint256 constant POLYGON_MAINNET = 137;
+  uint256 constant NEON_DEVNET = 245022926;
 
   AddressesProvider public ap;
 
@@ -27,6 +29,10 @@ abstract contract BaseTest is Test {
       ap = AddressesProvider(0xB88C6a114F01a80Dc8465b55067C8D046C2F445A);
     } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
+    } else if (block.chainid == NEON_DEVNET) {
+      ap = AddressesProvider(0xC4b1512c1eeDd272e0F68737aCd7a1F11F3cA0eF);
+    } else if (block.chainid == ARBITRUM_ONE) {
+      ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else {
       ap = new AddressesProvider();
     }
@@ -45,6 +51,11 @@ abstract contract BaseTest is Test {
     }
   }
 
+  modifier shouldRunTestFail(bool run) {
+    require(run, "test should fail");
+    _;
+  }
+
   function forChains(uint256 id0) public view returns (bool) {
     return block.chainid == id0;
   }
@@ -59,5 +70,23 @@ abstract contract BaseTest is Test {
     } else {
       return b - a;
     }
+  }
+
+  function asArray(address value) public pure returns (address[] memory) {
+    address[] memory array = new address[](1);
+    array[0] = value;
+    return array;
+  }
+
+  function asArray(bool value) public pure returns (bool[] memory) {
+    bool[] memory array = new bool[](1);
+    array[0] = value;
+    return array;
+  }
+
+  function asArray(uint256 value) public pure returns (uint256[] memory) {
+    uint256[] memory array = new uint256[](1);
+    array[0] = value;
+    return array;
   }
 }
