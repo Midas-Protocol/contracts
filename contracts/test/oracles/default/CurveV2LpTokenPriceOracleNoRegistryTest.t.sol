@@ -39,11 +39,11 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
     setUpCurveOracle(epsJCHFBUSD_lp, epsJCHFBUSD_pool);
 
     ICurveV2Pool pool = ICurveV2Pool(epsJCHFBUSD_pool);
-    uint256 lp_price = (pool.lp_price() / 10**18) * mpo.price(busd);
+    uint256 lp_price = (pool.lp_price() * mpo.price(busd)) / 10**18;
     uint256 price = oracle.price(epsJCHFBUSD_lp);
     uint256 ulPrice = oracle.getUnderlyingPrice(epsJCHFBUSD_c);
     assertEq(price, ulPrice);
     assertEq(price, lp_price);
-    assertEq(price, 7273352757129158);
+    assertEq(price, 7319017681980243);
   }
 }

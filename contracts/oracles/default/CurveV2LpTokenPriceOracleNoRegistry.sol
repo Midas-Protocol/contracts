@@ -78,7 +78,7 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
     require(pool != address(0), "LP token is not registered.");
     uint256 usdPrice = ICurveV2Pool(pool).lp_price();
     uint256 bnbUsdPrice = masterPriceOracle.price(usdToken);
-    return (usdPrice / 10**18) * bnbUsdPrice;
+    return (usdPrice * bnbUsdPrice) / 10**18;
   }
 
   /**
