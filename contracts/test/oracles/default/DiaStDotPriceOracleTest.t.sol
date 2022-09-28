@@ -12,7 +12,7 @@ contract DiaStDotPriceOracleTest is BaseTest {
   address stDot = 0xFA36Fe1dA08C89eC72Ea1F0143a35bFd5DAea108;
   ICToken stDot_c = ICToken(0x02bb982447B7Bb158952059F8cd2ab076D4B283B); // stDot cToken from pool 1
   address wstDot = 0x191cf2602Ca2e534c5Ccae7BCBF4C46a704bb949;
-  address bUSD = 0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b;
+  address multiUsdc = 0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b;
 
   function setUp() public {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
@@ -29,7 +29,7 @@ contract DiaStDotPriceOracleTest is BaseTest {
     oracle.initialize(
       MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
       DiaStDotOracle(0xFEfe38321199e016c8d5e734A40eCCC0DBeC3711),
-      bUSD // multiUSDC
+      multiUsdc
     );
   }
 
