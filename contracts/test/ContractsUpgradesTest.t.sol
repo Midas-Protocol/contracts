@@ -161,9 +161,9 @@ contract ContractsUpgradesTest is BaseTest {
 
     assertEq(plugin.paused(), true, "pause did not succeed");
 
-//    vm.prank(plugin.owner());
-//    plugin.unpause();
-//
-//    assertEq(plugin.paused(), false, "unpause did not succeed");
+    //    vm.prank(plugin.owner());
+    //    plugin.unpause();
+    //
+    //    assertEq(plugin.paused(), false, "unpause did not succeed");
   }
 }
