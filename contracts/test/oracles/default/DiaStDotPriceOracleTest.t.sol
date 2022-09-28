@@ -14,36 +14,28 @@ contract DiaStDotPriceOracleTest is BaseTest {
   address wstDot = 0x191cf2602Ca2e534c5Ccae7BCBF4C46a704bb949;
   address bUSD = 0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b;
 
-  function setUp() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function setUp() public {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+    if (block.chainid == MOONBEAM_MAINNET) {
+      setUpOracle();
+    }
   }
 
   function setUpOracle() public {
-    emit log_address(address(mpo));
-    emit log_address(address(mpo.admin()));
+    vm.rollFork(1959099);
 
+    oracle = new DiaStDotPriceOracle(stDot, wstDot);
     vm.prank(mpo.admin());
     oracle.initialize(
       MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
       DiaStDotOracle(0xFEfe38321199e016c8d5e734A40eCCC0DBeC3711),
-      stDot, // stDOT
-      wstDot, // wstDOT
       bUSD // multiUSDC
     );
   }
 
   function testDiaStDotOraclePrice() public shouldRun(forChains(MOONBEAM_MAINNET)) {
-    vm.rollFork(1959099);
-
-    oracle = new DiaStDotPriceOracle();
-
-    setUpOracle();
-
     uint256 priceStDot = oracle.price(stDot);
     uint256 ulPriceStDot = oracle.getUnderlyingPrice(stDot_c);
-
-    emit log_uint(priceStDot);
-    emit log_uint(ulPriceStDot);
     uint256 priceWstDot = oracle.price(wstDot);
 
     // (13799919586975046579 / 1e18) * 0,45 = 6,209
@@ -52,7 +44,6 @@ contract DiaStDotPriceOracleTest is BaseTest {
 
     assertEq(priceStDot, 13799919586975046579);
     assertEq(priceStDot, ulPriceStDot);
-
     assertEq(priceWstDot, 16554440075616894830);
   }
 }
