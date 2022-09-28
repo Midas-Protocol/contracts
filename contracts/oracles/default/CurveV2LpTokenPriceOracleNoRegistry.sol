@@ -8,7 +8,6 @@ import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
 import "../../external/curve/ICurveV2Pool.sol";
 import "../../midas/SafeOwnableUpgradeable.sol";
-import "../../utils/PatchedStorage.sol";
 
 import "../BasePriceOracle.sol";
 
