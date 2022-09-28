@@ -20,25 +20,27 @@ interface DiaStDotOracle {
 }
 
 contract DiaStDotPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
-  MasterPriceOracle public MASTER_PRICE_ORACLE;
-  DiaStDotOracle public DIA_STDOT_ORACLE;
-  address public ST_DOT;
-  address public WST_DOT;
-  address public USD_TOKEN;
+  MasterPriceOracle public masterPriceOracle;
+  DiaStDotOracle public diaStDotOracle;
+  address public usdToken;
+
+  address public immutable ST_DOT;
+  address public immutable WST_DOT;
+
+  constructor(address stDot, address wstDot) {
+    ST_DOT = stDot;
+    WST_DOT = wstDot;
+  }
 
   function initialize(
-    MasterPriceOracle masterPriceOracle,
+    MasterPriceOracle _masterPriceOracle,
     DiaStDotOracle _diaStDotOracle,
-    address _stDot,
-    address _wstDot,
-    address usdToken
+    address _usdToken
   ) public initializer {
     __SafeOwnable_init();
-    MASTER_PRICE_ORACLE = masterPriceOracle;
-    DIA_STDOT_ORACLE = _diaStDotOracle;
-    ST_DOT = _stDot;
-    WST_DOT = _wstDot;
-    USD_TOKEN = usdToken;
+    masterPriceOracle = _masterPriceOracle;
+    diaStDotOracle = _diaStDotOracle;
+    usdToken = _usdToken;
   }
 
   function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
@@ -59,14 +61,14 @@ contract DiaStDotPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
     uint256 oraclePrice;
     // stDOTPrice() and wstDOTPrice() are 8-decimal feeds
     if (underlying == ST_DOT) {
-      oraclePrice = (DIA_STDOT_ORACLE.stDOTPrice() * 1e10);
+      oraclePrice = (diaStDotOracle.stDOTPrice() * 1e10);
     } else if (underlying == WST_DOT) {
-      oraclePrice = (DIA_STDOT_ORACLE.wstDOTPrice() * 1e10);
+      oraclePrice = (diaStDotOracle.wstDOTPrice() * 1e10);
     } else {
       return 0;
     }
     // Get USD price
-    uint256 wGlmrUsdPrice = MASTER_PRICE_ORACLE.price(USD_TOKEN);
+    uint256 wGlmrUsdPrice = masterPriceOracle.price(usdToken);
     return (uint256(oraclePrice) * wGlmrUsdPrice) / 10**18;
   }
 }
