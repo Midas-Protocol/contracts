@@ -52,9 +52,9 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
    * @param _usdToken stable toklen address
    * @param _masterPriceOracle mpo addresses.
    */
-  function reinitialize(address _usdToken, MasterPriceOracle _masterPriceOracle) public reinitializer(2) onlyOwner {
+  function reinitialize(address _usdToken, address _masterPriceOracle) public reinitializer(2) onlyOwnerOrAdmin {
     usdToken = _usdToken;
-    masterPriceOracle = _masterPriceOracle;
+    masterPriceOracle = MasterPriceOracle(_masterPriceOracle);
   }
 
   /**
