@@ -10,6 +10,7 @@ import "../../external/compound/ICErc20.sol";
 import "../../external/balancer/IBalancerPool.sol";
 import "../../external/balancer/IBalancerVault.sol";
 import "../../external/balancer/BNum.sol";
+import "../../midas/SafeOwnableUpgradeable.sol";
 
 import "../BasePriceOracle.sol";
 
@@ -17,21 +18,27 @@ import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 
 /**
  * @title BalancerLpTokenPriceOracle
- * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
+ * @author David Lucid <carlo@midascapital.xyz> (https://github.com/carl)
  * @notice BalancerLpTokenPriceOracle is a price oracle for Balancer LP tokens.
- * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
+ * @dev Implements the `PriceOracle` interface used by Midas pools (and Compound v2).
  */
-contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
+contract BalancerLpTokenPriceOracle is SafeOwnableUpgradeable, BasePriceOracle, BNum {
   /**
    * @notice MasterPriceOracle for backup for USD price.
    */
-  MasterPriceOracle public immutable MASTER_PRICE_ORACLE;
+  MasterPriceOracle public masterPriceOracle;
+
+  function initialize(MasterPriceOracle _masterPriceOracle) public initializer {
+    __SafeOwnable_init();
+    masterPriceOracle = _masterPriceOracle;
+  }
 
   /**
-   * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
+   * @dev Re-initializes the pool in case of address changes
+   * @param _masterPriceOracle mpo addresses.
    */
-  constructor(MasterPriceOracle masterPriceOracle) {
-    MASTER_PRICE_ORACLE = masterPriceOracle;
+  function reinitialize(address _masterPriceOracle) public reinitializer(2) onlyOwnerOrAdmin {
+    masterPriceOracle = MasterPriceOracle(_masterPriceOracle);
   }
 
   /**
@@ -62,7 +69,6 @@ contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
    */
   function _price(address underlying) internal view virtual returns (uint256) {
     IBalancerPool pool = IBalancerPool(underlying);
-
     bytes32 poolId = pool.getPoolId();
     IBalancerVault vault = IBalancerVault(address(pool.getVault()));
     (IERC20[] memory tokens, uint256[] memory balances, ) = vault.getPoolTokens(poolId);
@@ -74,8 +80,8 @@ contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
 
     uint256[] memory weights = pool.getNormalizedWeights();
 
-    uint256 pxA = MASTER_PRICE_ORACLE.price(tokenA);
-    uint256 pxB = MASTER_PRICE_ORACLE.price(tokenA);
+    uint256 pxA = masterPriceOracle.price(tokenA);
+    uint256 pxB = masterPriceOracle.price(tokenB);
 
     uint8 decimalsA = ERC20Upgradeable(tokenA).decimals();
     uint8 decimalsB = ERC20Upgradeable(tokenB).decimals();
@@ -94,19 +100,16 @@ contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
     );
     // use fairReserveA and fairReserveB to compute LP token price
     // LP price = (fairResA * pxA + fairResB * pxB) / totalLPSupply
-    return (fairResA * pxA + fairResB * pxB) / pool.totalSupply();
+    return ((fairResA * pxA) + (fairResB * pxB)) / pool.totalSupply();
   }
 
-  /**
-   * @dev Returns fair reserve amounts given spot reserves, weights, and fair prices.
-   * Source: https://github.com/AlphaFinanceLab/homora-v2/blob/master/contracts/oracle/BalancerPairOracle.sol
-   * @param resA Reserve of the first asset
-   * @param resB Reserev of the second asset
-   * @param wA Weight of the first asset
-   * @param wB Weight of the second asset
-   * @param pxA Fair price of the first asset
-   * @param pxB Fair price of the second asset
-   */
+  /// @dev Return fair reserve amounts given spot reserves, weights, and fair prices.
+  /// @param resA Reserve of the first asset
+  /// @param resB Reserve of the second asset
+  /// @param wA Weight of the first asset
+  /// @param wB Weight of the second asset
+  /// @param pxA Fair price of the first asset
+  /// @param pxB Fair price of the second asset
   function computeFairReserves(
     uint256 resA,
     uint256 resB,
@@ -114,7 +117,7 @@ contract BalancerLpTokenPriceOracle is IPriceOracle, BasePriceOracle, BNum {
     uint256 wB,
     uint256 pxA,
     uint256 pxB
-  ) public pure returns (uint256 fairResA, uint256 fairResB) {
+  ) internal pure returns (uint256 fairResA, uint256 fairResB) {
     // NOTE: wA + wB = 1 (normalize weights)
     // constant product = resA^wA * resB^wB
     // constraints:

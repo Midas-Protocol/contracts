@@ -10,49 +10,40 @@ import "../../../external/balancer/IBalancerPool.sol";
 import "../../../external/balancer/IBalancerVault.sol";
 
 contract BalancerLpTokenPriceOracleTest is BaseTest {
-  BalancerLpTokenPriceOracle private oracle;
+  BalancerLpTokenPriceOracle oracle;
+  MasterPriceOracle mpo;
+
+  address wbtc = 0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6;
+  address weth = 0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619;
+  address wbtcWeth5050 = 0xCF354603A9AEbD2Ff9f33E1B04246d8Ea204ae95;
+
+  address mimoPar8020 = 0x82d7f08026e21c7713CfAd1071df7C8271B17Eae;
+  address mimoPar8020_c = 0x82d7f08026e21c7713CfAd1071df7C8271B17Eae;
+  address mimo = 0xADAC33f543267c4D59a8c299cF804c303BC3e4aC;
+  address par = 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128;
 
   function setUp() public shouldRun(forChains(POLYGON_MAINNET)) {
-    oracle = new BalancerLpTokenPriceOracle();
+    mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+  }
+
+  function setUpBalancerOracle() public {
+    vm.prank(mpo.admin());
+    oracle.initialize(mpo);
   }
 
   function testPriceBalancer() public shouldRun(forChains(POLYGON_MAINNET)) {
-    IBalancerPool pool = IBalancerPool(0x82d7f08026e21c7713CfAd1071df7C8271B17Eae);
+    vm.rollFork(33672239);
 
-    bytes32 poolId = pool.getPoolId();
+    oracle = new BalancerLpTokenPriceOracle();
 
-    IBalancerVault vault = IBalancerVault(address(pool.getVault()));
-    (IERC20[] memory tokens, uint256[] memory balances, uint256 lastChangedBlock) = vault.getPoolTokens(poolId);
+    setUpBalancerOracle();
 
-    emit log_uint(tokens.length);
-    emit log_uint(tokens.length);
+    // uint256 lp_price = (pool.lp_price() * mpo.price(busd)) / 10**18;
+    uint256 price = oracle.price(wbtcWeth5050);
 
-    address tokenA = address(tokens[0]);
-    address tokenB = address(tokens[1]);
-
-    emit log_address(tokenA);
-    emit log_address(tokenB);
-
-    uint256[] memory weights = pool.getNormalizedWeights();
-    emit log_array(balances);
-    emit log_array(weights);
-    (uint256 fairResA, uint256 fairResB) = oracle.computeFairReserves(
-      balances[0],
-      balances[1],
-      weights[0],
-      weights[1],
-      1e18,
-      2e18
-    );
-    emit log_uint(fairResA);
-    emit log_uint(fairResB);
-    uint256 price = (fairResA * 1e18 + fairResB * 2e18) / pool.totalSupply();
-    emit log_uint(price);
-    // uint8 decimalsA = ERC20Upgradeable(tokenA).decimals();
-    // uint8 decimalsB = ERC20Upgradeable(tokenB).decimals();
-
-    uint256 price1 = oracle.price(address(0x82d7f08026e21c7713CfAd1071df7C8271B17Eae));
-    emit log_uint(price);
-    assertEq(price, price1);
+    // (65,4 / 0,012664670) = 5.290,307 USD / wbtcWeth5050
+    // 5.290,307 / 0,75 =  7.053,7426666667 wbtcWeth5050 / MATIC
+    // 7.053,7426666 * 10**18 ~ 7e21
+    assertEq(price, 6890799881956030175228);
   }
 }
