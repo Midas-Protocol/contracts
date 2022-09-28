@@ -133,6 +133,8 @@ contract ContractsUpgradesTest is BaseTest {
   }
 
   function testJarvisEurPluginUpdate() public shouldRun(forChains(POLYGON_MAINNET)) {
+    vm.rollFork(21719370);
+
     CErc20PluginDelegate market = CErc20PluginDelegate(0xCC7eab2605972128752396241e46C281e0405a27);
     BeefyERC4626 plugin = BeefyERC4626(0x74bA0D32B7430a2aad36e48B7aAD57bf233bDDa6);
     address newPlugin = 0x9F82D802FB4940743C543041b86220A9096A7522;
@@ -145,13 +147,6 @@ contract ContractsUpgradesTest is BaseTest {
       asArray(currentDelegate),
       asArray(address(newDelegate)),
       asArray(false),
-      asArray(true)
-    );
-
-    vm.prank(ffd.owner());
-    ffd._editPluginImplementationWhitelist(
-      asArray(currentDelegate),
-      asArray(address(newDelegate)),
       asArray(true)
     );
 
