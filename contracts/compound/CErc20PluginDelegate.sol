@@ -67,9 +67,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
 
     uint256 amount = EIP20Interface(underlying).balanceOf(address(this));
     if (amount != 0) {
-      if (address(this) != 0xCC7eab2605972128752396241e46C281e0405a27) {
-        deposit(amount);
-      }
+      deposit(amount);
     }
 
     emit NewPluginImplementation(address(plugin), _plugin);

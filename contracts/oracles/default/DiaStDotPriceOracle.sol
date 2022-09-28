@@ -43,6 +43,22 @@ contract DiaStDotPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
     usdToken = _usdToken;
   }
 
+  /**
+   * @dev Re-initializes the pool in case of address changes
+   * @param _usdToken stable toklen address
+   * @param _diaStDotOracle dia oracle address
+   * @param _masterPriceOracle mpo addresses.
+   */
+  function reinitialize(
+    MasterPriceOracle _masterPriceOracle,
+    DiaStDotOracle _diaStDotOracle,
+    address _usdToken
+  ) public reinitializer(2) onlyOwner {
+    masterPriceOracle = _masterPriceOracle;
+    diaStDotOracle = _diaStDotOracle;
+    usdToken = _usdToken;
+  }
+
   function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
     // Get underlying token address
     address underlying = ICErc20(address(cToken)).underlying();

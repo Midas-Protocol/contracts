@@ -48,6 +48,16 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
   }
 
   /**
+   * @dev Re-initializes the pool in case of address changes
+   * @param _usdToken stable toklen address
+   * @param _masterPriceOracle mpo addresses.
+   */
+  function reinitialize(address _usdToken, address _masterPriceOracle) public reinitializer(2) onlyOwnerOrAdmin {
+    usdToken = _usdToken;
+    masterPriceOracle = MasterPriceOracle(_masterPriceOracle);
+  }
+
+  /**
    * @notice Get the LP token price price for an underlying token address.
    * @param underlying The underlying token address for which to get the price (set to zero address for ETH).
    * @return Price denominated in ETH (scaled by 1e18).
