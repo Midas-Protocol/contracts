@@ -31,6 +31,8 @@ contract BalancerLpTokenPriceOracleTest is BaseTest {
     oracle.initialize(mpo);
   }
 
+  // TODO: add test for mimo / par pair, when we deploy the MIMO DIA price oracle
+  // See: https://github.com/Midas-Protocol/monorepo/issues/476
   function testPriceBalancer() public shouldRun(forChains(POLYGON_MAINNET)) {
     vm.rollFork(33672239);
 
@@ -40,6 +42,9 @@ contract BalancerLpTokenPriceOracleTest is BaseTest {
 
     // uint256 lp_price = (pool.lp_price() * mpo.price(busd)) / 10**18;
     uint256 price = oracle.price(wbtcWeth5050);
+
+    // Based on this tx: https://polygonscan.com/tx/0xbd0a897bfef2e08bda92effcac2fedfb2a36e18d603ae46f4c294196f492ad8c
+    // 65 USD$ worth of liquidity was removed for 0,012664670 wbtcWeth5050 tokens
 
     // (65,4 / 0,012664670) = 5.290,307 USD / wbtcWeth5050
     // 5.290,307 / 0,75 =  7.053,7426666667 wbtcWeth5050 / MATIC
