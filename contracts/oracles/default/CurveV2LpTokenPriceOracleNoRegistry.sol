@@ -19,8 +19,8 @@ import "../BasePriceOracle.sol";
  * @dev Implements the `PriceOracle` interface used by Midas pools (and Compound v2).
  */
 contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePriceOracle {
-  address public USD_TOKEN;
-  MasterPriceOracle public MASTER_PRICE_ORACLE;
+  address public usdToken;
+  MasterPriceOracle public masterPriceOracle;
   /**
    * @dev Maps Curve LP token addresses to pool addresses.
    */
@@ -34,14 +34,14 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
   function initialize(
     address[] memory _lpTokens,
     address[] memory _pools,
-    address usdToken,
-    MasterPriceOracle masterPriceOracle
+    address _usdToken,
+    MasterPriceOracle _masterPriceOracle
   ) public initializer {
     require(_lpTokens.length == _pools.length, "No LP tokens supplied or array lengths not equal.");
     __SafeOwnable_init();
 
-    USD_TOKEN = usdToken;
-    MASTER_PRICE_ORACLE = masterPriceOracle;
+    usdToken = _usdToken;
+    masterPriceOracle = _masterPriceOracle;
 
     for (uint256 i = 0; i < _pools.length; i++) {
       poolOf[_lpTokens[i]] = _pools[i];
@@ -77,7 +77,7 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
     address pool = poolOf[lpToken];
     require(pool != address(0), "LP token is not registered.");
     uint256 usdPrice = ICurveV2Pool(pool).lp_price();
-    uint256 bnbUsdPrice = MASTER_PRICE_ORACLE.price(USD_TOKEN);
+    uint256 bnbUsdPrice = masterPriceOracle.price(usdToken);
     return (usdPrice / 10**18) * bnbUsdPrice;
   }
 
