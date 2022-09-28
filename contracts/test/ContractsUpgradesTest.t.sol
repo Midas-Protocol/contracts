@@ -172,6 +172,8 @@ contract ContractsUpgradesTest is BaseTest {
   }
 
   function testCurveLpOracle() public shouldRun(forChains(BSC_MAINNET)) {
+    vm.rollFork(21721830);
+
     address oracleAddress = 0x97A6E1182A85380BaeF265F9BbADd6296515Dccf;
 
     CurveV2LpTokenPriceOracleNoRegistry oracle = CurveV2LpTokenPriceOracleNoRegistry(oracleAddress);
