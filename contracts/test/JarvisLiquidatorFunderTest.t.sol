@@ -10,6 +10,7 @@ import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../FuseSafeLiquidator.sol";
 import "../external/uniswap/IUniswapV2Pair.sol";
 import "../external/uniswap/IUniswapV2Factory.sol";
+import "../compound/CTokenInterfaces.sol";
 
 interface IMockERC20 is IERC20Upgradeable {
   function mint(address _address, uint256 amount) external;
@@ -77,7 +78,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     address[] cTokens;
     IRedemptionStrategy[] strategies;
     bytes[] abis;
-    CToken[] allMarkets;
+    CTokenInterface[] allMarkets;
     FuseSafeLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
     bytes[] data;
