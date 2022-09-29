@@ -10,9 +10,6 @@ import "../../midas/SafeOwnableUpgradeable.sol";
 import "../../external/compound/IPriceOracle.sol";
 import "../BasePriceOracle.sol";
 
-import "forge-std/Vm.sol";
-import "forge-std/Test.sol";
-
 interface DiaStDotOracle {
   function stDOTPrice() external view returns (uint256);
 
