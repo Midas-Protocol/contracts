@@ -3,8 +3,9 @@ pragma solidity 0.8.10;
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MidasFlywheelCore } from "./MidasFlywheelCore.sol";
+import "./IMidasFlywheel.sol";
 
-contract MidasFlywheel is MidasFlywheelCore {
+contract MidasFlywheel is MidasFlywheelCore, IMidasFlywheel {
   bool public constant isRewardsDistributor = true;
 
   bool public constant isFlywheel = true;
@@ -31,7 +32,7 @@ contract MidasFlywheel is MidasFlywheelCore {
     _addStrategyForRewards(strategy);
   }
 
-  function marketState(ERC20 strategy) external view returns (RewardsState memory) {
-    return strategyState[strategy];
+  function marketState(ERC20 strategy) external view returns (uint224, uint32) {
+    return (strategyState[strategy].index, strategyState[strategy].lastUpdatedTimestamp);
   }
 }

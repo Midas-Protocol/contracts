@@ -10,7 +10,7 @@ import "./ComptrollerStorage.sol";
 import "./Unitroller.sol";
 import "./IFuseFeeDistributor.sol";
 
-import "../midas/strategies/flywheel/MidasFlywheel.sol";
+import "../midas/strategies/flywheel/IMidasFlywheel.sol";
 
 /**
  * @title Compound's Comptroller Contract
@@ -700,7 +700,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    */
   function flywheelPreSupplierAction(address cToken, address supplier) internal {
     for (uint256 i = 0; i < rewardsDistributors.length; i++)
-      MidasFlywheel(rewardsDistributors[i]).flywheelPreSupplierAction(cToken, supplier);
+      IMidasFlywheel(rewardsDistributors[i]).flywheelPreSupplierAction(cToken, supplier);
   }
 
   /**
@@ -710,7 +710,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    */
   function flywheelPreBorrowerAction(address cToken, address borrower) internal {
     for (uint256 i = 0; i < rewardsDistributors.length; i++)
-      MidasFlywheel(rewardsDistributors[i]).flywheelPreBorrowerAction(cToken, borrower);
+      IMidasFlywheel(rewardsDistributors[i]).flywheelPreBorrowerAction(cToken, borrower);
   }
 
   /**
@@ -725,7 +725,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address dst
   ) internal {
     for (uint256 i = 0; i < rewardsDistributors.length; i++)
-      MidasFlywheel(rewardsDistributors[i]).flywheelPreTransferAction(cToken, src, dst);
+      IMidasFlywheel(rewardsDistributors[i]).flywheelPreTransferAction(cToken, src, dst);
   }
 
   /*** Liquidity/Liquidation Calculations ***/
@@ -926,7 +926,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
 
     // Check marker method
-    require(MidasFlywheel(distributor).isRewardsDistributor(), "!isRewardsDistributor");
+    require(IMidasFlywheel(distributor).isRewardsDistributor(), "!isRewardsDistributor");
 
     // Check for existing RewardsDistributor
     for (uint256 i = 0; i < rewardsDistributors.length; i++) require(distributor != rewardsDistributors[i], "!added");
