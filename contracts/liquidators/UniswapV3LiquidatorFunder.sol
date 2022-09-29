@@ -9,7 +9,7 @@ import "../external/uniswap/ISwapRouter.sol";
 import "../external/uniswap/IUniswapV3Factory.sol";
 import "../external/uniswap/Quoter/Quoter.sol";
 
-contract UniswapV3Liquidator is IFundsConversionStrategy {
+contract UniswapV3LiquidatorFunder is IFundsConversionStrategy {
   using FixedPointMathLib for uint256;
   ISwapRouter swapRouter;
   IUniswapV3Factory factory;
@@ -48,9 +48,9 @@ contract UniswapV3Liquidator is IFundsConversionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    (address _outputToken, uint24 fee) = abi.decode(
+    (, address _outputToken, uint24 fee) = abi.decode(
       strategyData,
-      (address, uint24)
+      (address, address, uint24)
     );
     outputToken = IERC20Upgradeable(_outputToken);
 
@@ -60,7 +60,7 @@ contract UniswapV3Liquidator is IFundsConversionStrategy {
           _outputToken,
           fee,
           address(this),
-          // block.timestamp,
+          block.timestamp,
           inputAmount,
           0,
           0
@@ -85,5 +85,6 @@ contract UniswapV3Liquidator is IFundsConversionStrategy {
     );
 
     inputAmount = quoter.estimateMinSwapUniswapV3(_inputToken, _outputToken, outputAmount, fee);
+    inputToken = IERC20Upgradeable(_inputToken);
   }
 }
