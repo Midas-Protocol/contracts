@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./CTokenInterfaces.sol";
-import "./ErrorReporter.sol";
-import "./Exponential.sol";
-import "./PriceOracle.sol";
-import "./ComptrollerInterface.sol";
-import "./ComptrollerStorage.sol";
-import "./Unitroller.sol";
-import "./IFuseFeeDistributor.sol";
-
-import "../midas/strategies/flywheel/IMidasFlywheel.sol";
+import { CTokenInterface } from "./CTokenInterfaces.sol";
+import { ComptrollerErrorReporter } from  "./ErrorReporter.sol";
+import { Exponential } from  "./Exponential.sol";
+import { PriceOracle } from  "./PriceOracle.sol";
+import { ComptrollerInterface } from  "./ComptrollerInterface.sol";
+import { ComptrollerV3Storage } from  "./ComptrollerStorage.sol";
+import { Unitroller } from  "./Unitroller.sol";
+import { IFuseFeeDistributor } from  "./IFuseFeeDistributor.sol";
+import { IMidasFlywheel } from  "../midas/strategies/flywheel/IMidasFlywheel.sol";
 
 /**
  * @title Compound's Comptroller Contract
