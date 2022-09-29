@@ -93,7 +93,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     address[] cTokens;
     IRedemptionStrategy[] strategies;
     bytes[] redemptionDatas;
-    CToken[] markets;
+    CTokenInterface[] markets;
     address[] borrowers;
     FuseSafeLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
