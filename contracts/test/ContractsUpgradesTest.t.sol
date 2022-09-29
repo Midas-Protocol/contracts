@@ -155,14 +155,4 @@ contract ContractsUpgradesTest is BaseTest {
       proxy.upgradeToAndCall(address(newImpl), data);
     }
   }
-
-  function testMissingPlugin() public {
-    address marketAddress = 0x1F0452D6a8bb9EAbC53Fa6809Fa0a060Dd531267;
-    CErc20PluginDelegate market = CErc20PluginDelegate(marketAddress);
-
-    emit log("plugin");
-    emit log_address(address(market.plugin()));
-    emit log("implementation");
-    emit log_address(address(market.implementation()));
-  }
 }
