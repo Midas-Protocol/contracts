@@ -2,14 +2,14 @@
 pragma solidity >=0.8.0;
 
 import { CTokenInterface } from "./CTokenInterfaces.sol";
-import { ComptrollerErrorReporter } from  "./ErrorReporter.sol";
-import { Exponential } from  "./Exponential.sol";
-import { PriceOracle } from  "./PriceOracle.sol";
-import { ComptrollerInterface } from  "./ComptrollerInterface.sol";
-import { ComptrollerV3Storage } from  "./ComptrollerStorage.sol";
-import { Unitroller } from  "./Unitroller.sol";
-import { IFuseFeeDistributor } from  "./IFuseFeeDistributor.sol";
-import { IMidasFlywheel } from  "../midas/strategies/flywheel/IMidasFlywheel.sol";
+import { ComptrollerErrorReporter } from "./ErrorReporter.sol";
+import { Exponential } from "./Exponential.sol";
+import { PriceOracle } from "./PriceOracle.sol";
+import { ComptrollerInterface } from "./ComptrollerInterface.sol";
+import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
+import { Unitroller } from "./Unitroller.sol";
+import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
+import { IMidasFlywheel } from "../midas/strategies/flywheel/IMidasFlywheel.sol";
 
 /**
  * @title Compound's Comptroller Contract
@@ -33,7 +33,11 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   event NewCloseFactor(uint256 oldCloseFactorMantissa, uint256 newCloseFactorMantissa);
 
   /// @notice Emitted when a collateral factor is changed by admin
-  event NewCollateralFactor(CTokenInterface cToken, uint256 oldCollateralFactorMantissa, uint256 newCollateralFactorMantissa);
+  event NewCollateralFactor(
+    CTokenInterface cToken,
+    uint256 oldCollateralFactorMantissa,
+    uint256 newCollateralFactorMantissa
+  );
 
   /// @notice Emitted when liquidation incentive is changed by admin
   event NewLiquidationIncentive(uint256 oldLiquidationIncentiveMantissa, uint256 newLiquidationIncentiveMantissa);
@@ -602,7 +606,12 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       require(borrowBalance >= repayAmount, "!borrow>repay");
     } else {
       /* The borrower must have shortfall in order to be liquidatable */
-      (Error err, , uint256 shortfall) = getHypotheticalAccountLiquidityInternal(borrower, CTokenInterface(address(0)), 0, 0);
+      (Error err, , uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
+        borrower,
+        CTokenInterface(address(0)),
+        0,
+        0
+      );
       if (err != Error.NO_ERROR) {
         return uint256(err);
       }
@@ -1243,7 +1252,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     allMarkets[assetIndex] = allMarkets[allMarkets.length - 1];
     allMarkets.pop();
 
-    cTokensByUnderlying[cToken.isCEther() ? address(0) : CErc20Interface(address(cToken)).underlying()] = CTokenInterface(address(0));
+    cTokensByUnderlying[
+      cToken.isCEther() ? address(0) : CErc20Interface(address(cToken)).underlying()
+    ] = CTokenInterface(address(0));
     emit MarketUnlisted(cToken);
 
     return uint256(Error.NO_ERROR);
