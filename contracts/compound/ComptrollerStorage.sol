@@ -73,7 +73,7 @@ contract ComptrollerV1Storage is UnitrollerAdminStorage {
   /**
    * @notice Per-account mapping of "assets you are in", capped by maxAssets
    */
-  mapping(address => CToken[]) public accountAssets;
+  mapping(address => CTokenInterface[]) public accountAssets;
 }
 
 contract ComptrollerV2Storage is ComptrollerV1Storage {
@@ -95,7 +95,7 @@ contract ComptrollerV2Storage is ComptrollerV1Storage {
   mapping(address => Market) public markets;
 
   /// @notice A list of all markets
-  CToken[] public allMarkets;
+  CTokenInterface[] public allMarkets;
 
   /**
    * @dev Maps borrowers to booleans indicating if they have entered any markets
@@ -114,7 +114,7 @@ contract ComptrollerV2Storage is ComptrollerV1Storage {
   mapping(address => bool) public suppliers;
 
   /// @notice All cTokens addresses mapped by their underlying token addresses
-  mapping(address => CToken) public cTokensByUnderlying;
+  mapping(address => CTokenInterface) public cTokensByUnderlying;
 
   /// @notice Whether or not the supplier whitelist is enforced
   bool public enforceWhitelist;

@@ -4,6 +4,7 @@ pragma solidity >=0.8.0;
 import "./helpers/WithPool.sol";
 import "./config/BaseTest.t.sol";
 import "forge-std/Test.sol";
+import "../compound/CTokenInterfaces.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
@@ -48,7 +49,7 @@ contract BombE2eTest is WithPool, BaseTest {
     address[] swapToken0Path;
     address[] swapToken1Path;
     bytes[] abis;
-    CToken[] allMarkets;
+    CTokenInterface[] allMarkets;
     FuseSafeLiquidator liquidator;
     MockERC4626 erc4626;
     MockBnb asset;
@@ -66,7 +67,7 @@ contract BombE2eTest is WithPool, BaseTest {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
-    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
     assertEq(cToken.name(), "cUnderlyingToken");
     underlyingToken.approve(address(cToken), 1e36);
@@ -88,7 +89,7 @@ contract BombE2eTest is WithPool, BaseTest {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
-    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
     assertEq(cToken.name(), "cUnderlyingToken");
     underlyingToken.approve(address(cToken), 1e36);
@@ -229,7 +230,7 @@ contract BombE2eTest is WithPool, BaseTest {
     vm.roll(1);
     deployCErc20PluginDelegate(address(erc4626), 0.9e18);
 
-    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(erc4626));
@@ -281,7 +282,7 @@ contract BombE2eTest is WithPool, BaseTest {
     vm.roll(1);
     deployCErc20PluginRewardsDelegate(address(mockERC4626Dynamic), 0.9e18);
 
-    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(mockERC4626Dynamic));
