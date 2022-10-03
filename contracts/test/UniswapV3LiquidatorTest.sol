@@ -22,7 +22,7 @@ contract UniswapV3LiquidatorTest is BaseTest {
     if (block.chainid == ARBITRUM_ONE) {
       wethAddress = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
       usdcAddress = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8;
-      univ3RouterAddress = 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45;
+      univ3RouterAddress = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
       usdcWhale = 0x1714400FF23dB4aF24F9fd64e7039e6597f18C2b;
       wethWhale = 0x905dfCD5649217c42684f23958568e533C711Aa3;
 
@@ -30,7 +30,7 @@ contract UniswapV3LiquidatorTest is BaseTest {
       weth = IERC20Upgradeable(wethAddress);
       swapRouter = ISwapRouter(univ3RouterAddress);
     } else if (block.chainid == POLYGON_MAINNET) {
-      univ3RouterAddress = 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45;
+      univ3RouterAddress = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
       usdcAddress = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
       wethAddress = 0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619;
       usdcWhale = 0xf89d7b9c864f589bbF53a82105107622B35EaA40;
