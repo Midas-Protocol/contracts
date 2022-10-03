@@ -836,12 +836,16 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
 
       // sumCollateral += tokensToDenom * cTokenBalance
-      vars.sumCollateral = mul_ScalarTruncateAddUInt(vars.tokensToDenom, vars.cTokenBalance * 1e18 / 10**asset.decimals(), vars.sumCollateral);
+      vars.sumCollateral = mul_ScalarTruncateAddUInt(
+        vars.tokensToDenom,
+        (vars.cTokenBalance * 1e18) / 10**asset.decimals(),
+        vars.sumCollateral
+      );
 
       // sumBorrowPlusEffects += oraclePrice * borrowBalance
       vars.sumBorrowPlusEffects = mul_ScalarTruncateAddUInt(
         vars.oraclePrice,
-        vars.borrowBalance * 1e18 / 10**asset.decimals(),
+        (vars.borrowBalance * 1e18) / 10**asset.decimals(),
         vars.sumBorrowPlusEffects
       );
 
@@ -851,7 +855,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         // sumBorrowPlusEffects += tokensToDenom * redeemTokens
         vars.sumBorrowPlusEffects = mul_ScalarTruncateAddUInt(
           vars.tokensToDenom,
-          redeemTokens * 1e18 / 10**asset.decimals(),
+          (redeemTokens * 1e18) / 10**asset.decimals(),
           vars.sumBorrowPlusEffects
         );
 
@@ -859,7 +863,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         // sumBorrowPlusEffects += oraclePrice * borrowAmount
         vars.sumBorrowPlusEffects = mul_ScalarTruncateAddUInt(
           vars.oraclePrice,
-          borrowAmount * 1e18 / 10**asset.decimals(),
+          (borrowAmount * 1e18) / 10**asset.decimals(),
           vars.sumBorrowPlusEffects
         );
       }

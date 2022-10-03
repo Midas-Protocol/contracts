@@ -17,7 +17,6 @@ import "../external/uniswap/Quoter/Quoter.sol";
 import "../external/uniswap/IUniswapV3Pool.sol";
 import "../external/uniswap/ISwapRouter.sol";
 
-
 interface IMockERC20 is IERC20Upgradeable {
   function mint(address _address, uint256 amount) external;
 }
@@ -25,8 +24,7 @@ interface IMockERC20 is IERC20Upgradeable {
 contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
   UniswapV3LiquidatorFunder private uniswapv3Liquidator;
 
-  IUniswapV3Pool pool =
-    IUniswapV3Pool(0x80A9ae39310abf666A87C743d6ebBD0E8C42158E);
+  IUniswapV3Pool pool = IUniswapV3Pool(0x80A9ae39310abf666A87C743d6ebBD0E8C42158E);
 
   address minter = 0x68863dDE14303BcED249cA8ec6AF85d4694dea6A;
   IMockERC20 gmxToken = IMockERC20(0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a);
@@ -50,10 +48,8 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
     Quoter quoter = new Quoter(0x1F98431c8aD98523631AE4a59f267346ea31F984);
 
     setUpPool("gmx-test", false, 0.1e18, 1.1e18);
-    
-    uniswapv3Liquidator = new UniswapV3LiquidatorFunder(
-      quoter
-    );
+
+    uniswapv3Liquidator = new UniswapV3LiquidatorFunder(quoter);
   }
 
   function getPool(address inputToken) internal view returns (IUniswapV3Pool) {
@@ -164,7 +160,10 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
     vm.prank(vars.liquidator.owner());
     vars.liquidator._whitelistRedemptionStrategy(vars.fundingStrategies[0], true);
 
-    address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(address(usdcToken), ap.getAddress("wtoken"));
+    address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(
+      address(usdcToken),
+      ap.getAddress("wtoken")
+    );
     IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
     uint256 repayAmount = 1e6;

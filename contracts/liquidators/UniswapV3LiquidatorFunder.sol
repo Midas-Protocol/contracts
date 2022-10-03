@@ -53,18 +53,17 @@ contract UniswapV3LiquidatorFunder is IFundsConversionStrategy {
 
     inputToken.approve(address(swapRouter), inputAmount);
 
-    ISwapRouter.ExactInputSingleParams memory params =
-      ISwapRouter.ExactInputSingleParams(
-          address(inputToken),
-          _outputToken,
-          fee,
-          address(this),
-          block.timestamp,
-          inputAmount,
-          0,
-          0
-      );
-    
+    ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams(
+      address(inputToken),
+      _outputToken,
+      fee,
+      address(this),
+      block.timestamp,
+      inputAmount,
+      0,
+      0
+    );
+
     outputAmount = swapRouter.exactInputSingle(params);
   }
 
@@ -78,7 +77,7 @@ contract UniswapV3LiquidatorFunder is IFundsConversionStrategy {
     view
     returns (IERC20Upgradeable inputToken, uint256 inputAmount)
   {
-    (address _inputToken, address _outputToken, uint24 fee,) = abi.decode(
+    (address _inputToken, address _outputToken, uint24 fee, ) = abi.decode(
       strategyData,
       (address, address, uint24, ISwapRouter)
     );
