@@ -167,7 +167,7 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FORK_BLOCK_NUMBER: 24616387
+      FORK_BLOCK_NUMBER: 28152234
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
