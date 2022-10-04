@@ -13,7 +13,7 @@ contract SimplePriceOracle is PriceOracle {
     uint256 newPriceMantissa
   );
 
-  function getUnderlyingPrice(CToken cToken) public view override returns (uint256) {
+  function getUnderlyingPrice(CTokenInterface cToken) public view override returns (uint256) {
     if (compareStrings(cToken.symbol(), "cETH")) {
       return 1e18;
     } else {
