@@ -1166,7 +1166,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     require(address(cToken.comptroller()) == address(this), "!comptroller");
 
     // Make sure market is not already listed
-    address underlying = cToken.isCEther() ? address(0) : CErc20Interface(address(cToken)).underlying();
+    address underlying = CErc20Interface(address(cToken)).underlying();
 
     if (address(cTokensByUnderlying[underlying]) != address(0)) {
       return fail(Error.MARKET_ALREADY_LISTED, FailureInfo.SUPPORT_MARKET_EXISTS);
@@ -1253,7 +1253,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     allMarkets.pop();
 
     cTokensByUnderlying[
-      cToken.isCEther() ? address(0) : CErc20Interface(address(cToken)).underlying()
+      CErc20Interface(address(cToken)).underlying()
     ] = CTokenInterface(address(0));
     emit MarketUnlisted(cToken);
 

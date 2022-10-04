@@ -128,12 +128,6 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     require(implementation != address(0), "No Comptroller implementation contract address specified.");
     require(priceOracle != address(0), "No PriceOracle contract address specified.");
 
-    // Deploy CEtherDelegator using msg.sender, underlying, and block.number as a salt
-    //        bytes32 salt = keccak256(abi.encodePacked(msg.sender, address(0), block.number));
-    //
-
-    //        address proxy = Create2Upgradeable.deploy(0, salt, cEtherDelegatorCreationCode);
-
     // Deploy Unitroller using msg.sender, name, and block.number as a salt
     bytes memory unitrollerCreationCode = abi.encodePacked(type(Unitroller).creationCode, constructorData);
     address proxy = Create2Upgradeable.deploy(
