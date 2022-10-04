@@ -1252,9 +1252,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     allMarkets[assetIndex] = allMarkets[allMarkets.length - 1];
     allMarkets.pop();
 
-    cTokensByUnderlying[
-      CErc20Interface(address(cToken)).underlying()
-    ] = CTokenInterface(address(0));
+    cTokensByUnderlying[CErc20Interface(address(cToken)).underlying()] = CTokenInterface(address(0));
     emit MarketUnlisted(cToken);
 
     return uint256(Error.NO_ERROR);
