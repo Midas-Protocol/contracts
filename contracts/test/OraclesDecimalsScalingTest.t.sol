@@ -31,17 +31,32 @@ contract OraclesDecimalsScalingTest is BaseTest {
           address marketAddress = address(markets[j]);
           CErc20Delegate market = CErc20Delegate(marketAddress);
           address underlying = market.underlying();
+
+          if (isSkipped(underlying)) {
+            emit log("the oracle for this underlying cannot be tested");
+            emit log_address(underlying);
+            continue;
+          }
+
           uint256 oraclePrice = mpo.price(underlying);
           uint256 scaledPrice = mpo.getUnderlyingPrice(ICToken(marketAddress));
 
-          uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
-          uint256 expectedScaledPrice = underlyingDecimals <= 18
-            ? uint256(oraclePrice) * (10**(18 - underlyingDecimals))
-            : uint256(oraclePrice) / (10**(underlyingDecimals - 18));
+          uint8 decimals = ERC20Upgradeable(underlying).decimals();
+          uint256 expectedScaledPrice = decimals <= 18
+            ? uint256(oraclePrice) * (10**(18 - decimals))
+            : uint256(oraclePrice) / (10**(decimals - 18));
 
           assertEq(scaledPrice, expectedScaledPrice, "the comptroller expects prices to be scaled by 1e(36-decimals)");
         }
       }
     }
+  }
+
+  function isSkipped(address token) internal returns (bool) {
+    return
+      token == 0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080 // xcDOT
+      || token == 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685 // xcDOT-stDOT LP token
+      || token == 0xa927E1e1E044CA1D9fe1854585003477331fE2Af // WGLMR_xcDOT stella LP token
+    ;
   }
 }
