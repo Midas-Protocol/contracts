@@ -29,7 +29,7 @@ contract SimplePriceOracle is PriceOracle {
     }
   }
 
-  function setUnderlyingPrice(CToken cToken, uint256 underlyingPriceMantissa) public {
+  function setUnderlyingPrice(CTokenInterface cToken, uint256 underlyingPriceMantissa) public {
     address asset = ICErc20(address(cToken)).underlying();
     emit PricePosted(asset, prices[asset], underlyingPriceMantissa, underlyingPriceMantissa);
     prices[asset] = underlyingPriceMantissa;
