@@ -18,7 +18,7 @@ import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 
 /**
  * @title BalancerLpTokenPriceOracle
- * @author David Lucid <carlo@midascapital.xyz> (https://github.com/carl)
+ * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
  * @notice BalancerLpTokenPriceOracle is a price oracle for Balancer LP tokens.
  * @dev Implements the `PriceOracle` interface used by Midas pools (and Compound v2).
  */
@@ -31,14 +31,6 @@ contract BalancerLpTokenPriceOracle is SafeOwnableUpgradeable, BasePriceOracle, 
   function initialize(MasterPriceOracle _masterPriceOracle) public initializer {
     __SafeOwnable_init();
     masterPriceOracle = _masterPriceOracle;
-  }
-
-  /**
-   * @dev Re-initializes the pool in case of address changes
-   * @param _masterPriceOracle mpo addresses.
-   */
-  function reinitialize(address _masterPriceOracle) public reinitializer(2) onlyOwnerOrAdmin {
-    masterPriceOracle = MasterPriceOracle(_masterPriceOracle);
   }
 
   /**
