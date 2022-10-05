@@ -18,7 +18,7 @@ contract OraclesDecimalsScalingTest is BaseTest {
   function setUp() public {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
- }
+  }
 
   function testOraclesDecimals() public {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
@@ -35,8 +35,8 @@ contract OraclesDecimalsScalingTest is BaseTest {
 
         uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
         uint256 expectedScaledPrice = underlyingDecimals <= 18
-        ? uint256(oraclePrice) * (10**(18 - underlyingDecimals))
-        : uint256(oraclePrice) / (10**(underlyingDecimals - 18));
+          ? uint256(oraclePrice) * (10**(18 - underlyingDecimals))
+          : uint256(oraclePrice) / (10**(underlyingDecimals - 18));
 
         assertEq(scaledPrice, expectedScaledPrice, "the comptroller expects prices to be scaled by 1e(36-decimals)");
       }

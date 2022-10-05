@@ -84,8 +84,8 @@ contract BorrowLimitationTest is BaseTest, WithPool {
   function testBorrowLimitation() public shouldRun(forChains(ARBITRUM_ONE)) {
     LiquidationData memory vars;
 
-//    deployCErc20Delegate(address(usdcToken), "USDC", "usdcToken", 0.9e18);
-//    deployCErc20Delegate(address(gmxToken), "GMX", "gmx", 0.9e18);
+    //    deployCErc20Delegate(address(usdcToken), "USDC", "usdcToken", 0.9e18);
+    //    deployCErc20Delegate(address(gmxToken), "GMX", "gmx", 0.9e18);
 
     vars.allMarkets = comptroller.getAllMarkets();
 
