@@ -30,6 +30,8 @@ contract BorrowLimitationTest is BaseTest, WithPool {
   }
 
   function setUp() public shouldRun(forChains(ARBITRUM_ONE)) {
+    vm.rollFork(28492082);
+
     setUpPool("gmx-test", false, 0.1e18, 1.1e18);
 
     deployCErc20Delegate(address(usdcToken), "USDC", "usdcToken", 0.9e18);
