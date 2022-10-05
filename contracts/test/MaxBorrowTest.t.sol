@@ -10,6 +10,7 @@ import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
+import "../compound/CTokenInterfaces.sol";
 
 contract MockAsset is MockERC20 {
   constructor() MockERC20("test", "test", 8) {}
@@ -27,7 +28,7 @@ contract MaxWithdrawTestPolygon is WithPool, BaseTest {
 
   struct LiquidationData {
     address[] cTokens;
-    CToken[] allMarkets;
+    CTokenInterface[] allMarkets;
     MockAsset usdc;
     MockAsset dai;
   }

@@ -134,43 +134,6 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
-  function testJarvisEurPluginUpdate() public shouldRun(forChains(POLYGON_MAINNET)) {
-    vm.rollFork(33663260);
-
-    CErc20PluginDelegate market = CErc20PluginDelegate(0xCC7eab2605972128752396241e46C281e0405a27);
-    BeefyERC4626 plugin = BeefyERC4626(0x74bA0D32B7430a2aad36e48B7aAD57bf233bDDa6);
-    address newPlugin = 0x9F82D802FB4940743C543041b86220A9096A7522;
-
-    address currentDelegate = market.implementation();
-    CErc20PluginDelegate newDelegate = new CErc20PluginDelegate();
-    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
-    vm.prank(ffd.owner());
-    ffd._editCErc20DelegateWhitelist(
-      asArray(currentDelegate),
-      asArray(address(newDelegate)),
-      asArray(false),
-      asArray(true)
-    );
-
-    bytes memory newPluginBytes = abi.encode(newPlugin);
-    vm.prank(plugin.owner());
-    market._setImplementationSafe(address(newDelegate), false, newPluginBytes);
-
-    address delegateAfter = market.implementation();
-
-    assertEq(delegateAfter, address(newDelegate), "upgrade did not succeed");
-
-    vm.prank(plugin.owner());
-    plugin.emergencyWithdrawAndPause();
-
-    assertEq(plugin.paused(), true, "pause did not succeed");
-
-    //    vm.prank(plugin.owner());
-    //    plugin.unpause();
-    //
-    //    assertEq(plugin.paused(), false, "unpause did not succeed");
-  }
-
   function testCurveLpOracle() public shouldRun(forChains(BSC_MAINNET)) {
     vm.rollFork(21721830);
 

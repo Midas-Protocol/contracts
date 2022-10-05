@@ -8,7 +8,6 @@ import "./Exponential.sol";
 import "./EIP20Interface.sol";
 import "./EIP20NonStandardInterface.sol";
 import "./InterestRateModel.sol";
-import "../oracles/BasePriceOracle.sol";
 
 /**
  * @title Compound's CToken Contract

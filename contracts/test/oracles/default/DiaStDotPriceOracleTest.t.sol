@@ -24,13 +24,14 @@ contract DiaStDotPriceOracleTest is BaseTest {
   function setUpOracle() public {
     vm.rollFork(1959099);
 
-    oracle = new DiaStDotPriceOracle(stDot, wstDot);
+    oracle = new DiaStDotPriceOracle();
     vm.prank(mpo.admin());
     oracle.initialize(
       MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
       DiaStDotOracle(0xFEfe38321199e016c8d5e734A40eCCC0DBeC3711),
       multiUsdc
     );
+    oracle.reinitialize();
   }
 
   function testDiaStDotOraclePrice() public shouldRun(forChains(MOONBEAM_MAINNET)) {

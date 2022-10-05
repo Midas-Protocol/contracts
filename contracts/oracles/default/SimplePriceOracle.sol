@@ -2,7 +2,8 @@
 pragma solidity >=0.8.0;
 
 import "../../compound/PriceOracle.sol";
-import "../../compound/CErc20.sol";
+import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 contract SimplePriceOracle is PriceOracle {
   mapping(address => uint256) prices;
@@ -13,16 +14,23 @@ contract SimplePriceOracle is PriceOracle {
     uint256 newPriceMantissa
   );
 
-  function getUnderlyingPrice(CToken cToken) public view override returns (uint256) {
+  function getUnderlyingPrice(CTokenInterface cToken) public view override returns (uint256) {
     if (compareStrings(cToken.symbol(), "cETH")) {
       return 1e18;
     } else {
-      return prices[address(CErc20(address(cToken)).underlying())];
+      address underlying = ICErc20(address(cToken)).underlying();
+      uint256 oraclePrice = prices[underlying];
+
+      uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
+      return
+        underlyingDecimals <= 18
+          ? uint256(oraclePrice) * (10**(18 - underlyingDecimals))
+          : uint256(oraclePrice) / (10**(underlyingDecimals - 18));
     }
   }
 
   function setUnderlyingPrice(CToken cToken, uint256 underlyingPriceMantissa) public {
-    address asset = address(CErc20(address(cToken)).underlying());
+    address asset = ICErc20(address(cToken)).underlying();
     emit PricePosted(asset, prices[asset], underlyingPriceMantissa, underlyingPriceMantissa);
     prices[asset] = underlyingPriceMantissa;
   }
