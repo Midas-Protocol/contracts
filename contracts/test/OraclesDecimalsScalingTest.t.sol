@@ -21,24 +21,26 @@ contract OraclesDecimalsScalingTest is BaseTest {
   }
 
   function testOraclesDecimals() public {
-    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
+    if (address(fusePoolDirectory) != address(0)) {
+      FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
-    for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(pools[i].comptroller);
-      CTokenInterface[] memory markets = comptroller.getAllMarkets();
-      for (uint8 j = 0; j < markets.length; j++) {
-        address marketAddress = address(markets[j]);
-        CErc20Delegate market = CErc20Delegate(marketAddress);
-        address underlying = market.underlying();
-        uint256 oraclePrice = mpo.price(underlying);
-        uint256 scaledPrice = mpo.getUnderlyingPrice(ICToken(marketAddress));
+      for (uint8 i = 0; i < pools.length; i++) {
+        Comptroller comptroller = Comptroller(pools[i].comptroller);
+        CTokenInterface[] memory markets = comptroller.getAllMarkets();
+        for (uint8 j = 0; j < markets.length; j++) {
+          address marketAddress = address(markets[j]);
+          CErc20Delegate market = CErc20Delegate(marketAddress);
+          address underlying = market.underlying();
+          uint256 oraclePrice = mpo.price(underlying);
+          uint256 scaledPrice = mpo.getUnderlyingPrice(ICToken(marketAddress));
 
-        uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
-        uint256 expectedScaledPrice = underlyingDecimals <= 18
+          uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
+          uint256 expectedScaledPrice = underlyingDecimals <= 18
           ? uint256(oraclePrice) * (10**(18 - underlyingDecimals))
           : uint256(oraclePrice) / (10**(underlyingDecimals - 18));
 
-        assertEq(scaledPrice, expectedScaledPrice, "the comptroller expects prices to be scaled by 1e(36-decimals)");
+          assertEq(scaledPrice, expectedScaledPrice, "the comptroller expects prices to be scaled by 1e(36-decimals)");
+        }
       }
     }
   }
