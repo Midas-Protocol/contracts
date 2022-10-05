@@ -69,7 +69,6 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
   }
 
   function testGMXLiquidation() public shouldRun(forChains(ARBITRUM_ONE)) {
-
     LiquidationData memory vars;
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506);
 
