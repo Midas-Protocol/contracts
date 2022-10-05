@@ -348,7 +348,7 @@ contract FusePoolLens is Initializable {
       asset.borrowBalance = cToken.borrowBalanceStored(user); // We would use borrowBalanceCurrent but we already accrue interest above
       asset.membership = comptroller.checkMembership(user, cToken);
       asset.exchangeRate = cToken.exchangeRateStored(); // We would use exchangeRateCurrent but we already accrue interest above
-      asset.underlyingPrice = oracle.getUnderlyingPrice(cToken);
+      asset.underlyingPrice = oracle.price(asset.underlyingToken);
 
       // Get oracle for this cToken
       asset.oracle = address(oracle);
