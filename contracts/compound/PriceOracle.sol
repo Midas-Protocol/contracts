@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./CToken.sol";
+import "./CTokenInterfaces.sol";
 
 abstract contract PriceOracle {
   /// @notice Indicator that this is a PriceOracle contract (for inspection)
