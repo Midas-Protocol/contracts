@@ -40,14 +40,6 @@ contract ChainlinkOraclesTest is BaseTest {
     oracle.setPriceFeeds(underlyings, aggregators, ChainlinkPriceOracleV2.FeedBaseCurrency.USD);
   }
 
-  function testPolygonChainlinkUSDCPrice() public shouldRun(forChains(POLYGON_MAINNET)) {
-    oracle = new ChainlinkPriceOracleV2(address(this), true, ap.getAddress("wtoken"), usdNativeFeedPolygon);
-    setUpOracleFeed(usdcPolygon, usdcFeedPolygon);
-    uint256 price = oracle.price(usdcPolygon);
-    uint256 underlyingPrice = oracle.getUnderlyingPrice(usdcMarketPolygon);
-    assertEq(price, underlyingPrice);
-  }
-
   function testJBRLPrice() public shouldRun(forChains(BSC_MAINNET)) {
     setUpOracleFeed(jBRLBsc, jBRLFeedBsc);
     assert(oracle.price(jBRLBsc) > 0);
