@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { CToken } from "../compound/CToken.sol";
+import "../compound/CTokenInterfaces.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
@@ -29,9 +29,11 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
   address minter = 0x68863dDE14303BcED249cA8ec6AF85d4694dea6A;
   IMockERC20 gmxToken = IMockERC20(0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a);
 
-  IERC20Upgradeable usdcToken = IERC20Upgradeable(0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8);
+  IMockERC20 usdcToken = IMockERC20(0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8);
 
   constructor() WithPool() {
+    // vm.rollFork(28152234);
+
     super.setUpWithPool(
       MasterPriceOracle(0xd4D0cA503E8befAbE4b75aAC36675Bc1cFA533D1),
       ERC20Upgradeable(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1)
@@ -60,13 +62,14 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
     address[] cTokens;
     IRedemptionStrategy[] strategies;
     bytes[] abis;
-    CToken[] allMarkets;
+    CTokenInterface[] allMarkets;
     FuseSafeLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
     bytes[] data;
   }
 
   function testGMXLiquidation() public shouldRun(forChains(ARBITRUM_ONE)) {
+
     LiquidationData memory vars;
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506);
 
@@ -124,7 +127,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
 
     // set borrow enable
     vm.startPrank(address(this));
-    comptroller._setBorrowPaused(CToken(address(cTokenGMX)), false);
+    comptroller._setBorrowPaused(CTokenInterface(address(cTokenGMX)), false);
     vm.stopPrank();
 
     // Account One borrow GMX
