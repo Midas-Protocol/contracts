@@ -16,11 +16,11 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 contract BeefyERC4626Test is AbstractERC4626Test {
   using FixedPointMathLib for uint256;
 
-  uint256 withdrawalFee = 10;
+  uint256 public withdrawalFee = 10;
 
-  IBeefyVault beefyVault; // ERC4626 => underlyingToken => beefyStrategy
-  address lpChef; // beefyStrategy => underlyingToken => .
-  bool shouldRunTest;
+  IBeefyVault public beefyVault; // ERC4626 => underlyingToken => beefyStrategy
+  address public lpChef; // beefyStrategy => underlyingToken => .
+  bool public shouldRunTest;
 
   constructor() AbstractERC4626Test() {}
 

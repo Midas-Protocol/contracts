@@ -14,15 +14,15 @@ import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 abstract contract AbstractERC4626Test is WithPool, BaseTest {
   using FixedPointMathLib for uint256;
 
-  MidasERC4626 plugin;
+  MidasERC4626 public plugin;
 
-  string testPreFix;
+  string public testPreFix;
 
-  uint256 depositAmount = 100e18;
-  uint256 BPS_DENOMINATOR = 10_000;
+  uint256 public depositAmount = 100e18;
+  uint256 public BPS_DENOMINATOR = 10_000;
 
-  uint256 initialStrategyBalance;
-  uint256 initialStrategySupply;
+  uint256 public initialStrategyBalance;
+  uint256 public initialStrategySupply;
 
   constructor() {}
 

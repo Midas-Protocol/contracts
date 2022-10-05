@@ -3,5 +3,5 @@ src = 'contracts'
 bytecode_hash = 'none'
 solc_version = "0.8.10"
 libs = ["lib"]
-
+fs_permissions = [{ access = "read-write", path = "./"}]
 # See more config options https://github.com/gakonst/foundry/tree/master/config
