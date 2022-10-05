@@ -21,13 +21,8 @@ contract DiaStDotPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
   DiaStDotOracle public diaStDotOracle;
   address public usdToken;
 
-  address public immutable ST_DOT;
-  address public immutable WST_DOT;
-
-  constructor(address stDot, address wstDot) {
-    ST_DOT = stDot;
-    WST_DOT = wstDot;
-  }
+  address public stDot;
+  address public wstDot;
 
   function initialize(
     MasterPriceOracle _masterPriceOracle,
@@ -42,48 +37,34 @@ contract DiaStDotPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
 
   /**
    * @dev Re-initializes the pool in case of address changes
-   * @param _usdToken stable toklen address
-   * @param _diaStDotOracle dia oracle address
-   * @param _masterPriceOracle mpo addresses.
    */
-  function reinitialize(
-    MasterPriceOracle _masterPriceOracle,
-    DiaStDotOracle _diaStDotOracle,
-    address _usdToken
-  ) public reinitializer(2) onlyOwner {
-    masterPriceOracle = _masterPriceOracle;
-    diaStDotOracle = _diaStDotOracle;
-    usdToken = _usdToken;
+  function reinitialize() public reinitializer(3) onlyOwnerOrAdmin {
+    stDot = 0xFA36Fe1dA08C89eC72Ea1F0143a35bFd5DAea108;
+    wstDot = 0x191cf2602Ca2e534c5Ccae7BCBF4C46a704bb949;
   }
 
   function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
     // Get underlying token address
     address underlying = ICErc20(address(cToken)).underlying();
 
-    require(underlying == ST_DOT || underlying == WST_DOT, "Invalid underlying");
+    require(underlying == stDot || underlying == wstDot, "Invalid underlying");
 
-    uint256 oraclePrice = _price(underlying);
-    // stDOTPrice() and wstDOTPrice() are 8-decimal feeds
-    if (underlying == ST_DOT) {
-      return oraclePrice * 1e10;
-    } else if (underlying == WST_DOT) {
-      return oraclePrice * 1e10;
-    } else {
-      return 0;
-    }
+    // Get price in base 18 decimals
+    return _price(underlying);
   }
 
   function price(address underlying) external view override returns (uint256) {
-    require(underlying == ST_DOT || underlying == WST_DOT, "Invalid underlying");
+    require(underlying == stDot || underlying == wstDot, "Invalid underlying");
     return _price(underlying);
   }
 
   function _price(address underlying) internal view returns (uint256) {
     uint256 oraclePrice;
-    if (underlying == ST_DOT) {
-      oraclePrice = diaStDotOracle.stDOTPrice();
-    } else if (underlying == WST_DOT) {
-      oraclePrice = diaStDotOracle.wstDOTPrice();
+    // stDOTPrice() and wstDOTPrice() are 8-decimal feeds
+    if (underlying == stDot) {
+      oraclePrice = (diaStDotOracle.stDOTPrice() * 1e10);
+    } else if (underlying == wstDot) {
+      oraclePrice = (diaStDotOracle.wstDOTPrice() * 1e10);
     } else {
       return 0;
     }
