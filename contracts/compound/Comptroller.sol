@@ -895,8 +895,12 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 actualRepayAmount
   ) external view override returns (uint256, uint256) {
     /* Read oracle prices for borrowed and collateral markets */
-    uint256 priceBorrowedMantissa = BasePriceOracle(address(oracle)).price(CErc20Interface(address(cTokenBorrowed)).underlying());
-    uint256 priceCollateralMantissa = BasePriceOracle(address(oracle)).price(CErc20Interface(address(cTokenCollateral)).underlying());
+    uint256 priceBorrowedMantissa = BasePriceOracle(address(oracle)).price(
+      CErc20Interface(address(cTokenBorrowed)).underlying()
+    );
+    uint256 priceCollateralMantissa = BasePriceOracle(address(oracle)).price(
+      CErc20Interface(address(cTokenCollateral)).underlying()
+    );
     if (priceBorrowedMantissa == 0 || priceCollateralMantissa == 0) {
       return (uint256(Error.PRICE_ERROR), 0);
     }
