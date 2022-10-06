@@ -39,7 +39,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
   }
 
   function setUp() public shouldRun(forChains(ARBITRUM_ONE)) {
-    vm.rollFork(28654955);
+    vm.rollFork(28739891);
 
     uint64 expirationPeriod = 60 * 40; // 40 mins
     IUniswapV3Pool[] memory pools = new IUniswapV3Pool[](1);
