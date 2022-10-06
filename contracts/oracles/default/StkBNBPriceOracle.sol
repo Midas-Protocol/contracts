@@ -21,6 +21,7 @@ contract StkBNBPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
     // Get underlying token address
     address underlying = ICErc20(address(cToken)).underlying();
     require(underlying == stkBnb, "Invalid underlying");
+    // no need to scale as stkBNB has 18 decimals
     return _price();
   }
 
