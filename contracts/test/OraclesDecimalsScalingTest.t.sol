@@ -16,6 +16,19 @@ contract OraclesDecimalsScalingTest is BaseTest {
   FusePoolDirectory fusePoolDirectory;
 
   function setUp() public {
+    // TODO remove rollFork and run it for the latest block
+    if (block.chainid == BSC_MAINNET) {
+      vm.rollFork(21945844);
+    } else if (block.chainid == ARBITRUM_ONE) {
+      vm.rollFork(28654955);
+    } else if (block.chainid == MOONBEAM_MAINNET) {
+      vm.rollFork(2019256);
+    } else if (block.chainid == POLYGON_MAINNET) {
+      vm.rollFork(33996000);
+    } else if (block.chainid == NEON_DEVNET) {
+      vm.rollFork(166906532);
+    }
+
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
   }
