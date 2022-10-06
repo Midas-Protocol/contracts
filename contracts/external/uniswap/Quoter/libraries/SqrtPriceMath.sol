@@ -4,7 +4,7 @@ pragma solidity >=0.5.0;
 import "./LowGasSafeMath.sol";
 import "./SafeCast.sol";
 
-import "./FullMath.sol";
+import "../../FullMath.sol";
 import "./UnsafeMath.sol";
 import "./FixedPoint96.sol";
 import "./BitMath.sol";
