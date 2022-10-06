@@ -49,8 +49,9 @@ contract DiaStDotPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
 
     require(underlying == stDot || underlying == wstDot, "Invalid underlying");
 
-    // Get price in base 18 decimals
-    return _price(underlying);
+    // scaling the already scaled to 1e18 price by 1e(18-decimals)
+    // decimals for both stDOT and wstDOT is 10
+    return _price(underlying) * 1e8;
   }
 
   function price(address underlying) external view override returns (uint256) {
@@ -71,6 +72,6 @@ contract DiaStDotPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
 
     // Get USD price
     uint256 wGlmrUsdPrice = masterPriceOracle.price(usdToken);
-    return (uint256(oraclePrice) * wGlmrUsdPrice) / 10**18;
+    return (uint256(oraclePrice) * wGlmrUsdPrice) / 1e18;
   }
 }
