@@ -32,8 +32,6 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
   IMockERC20 usdcToken = IMockERC20(0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8);
 
   constructor() WithPool() {
-    // vm.rollFork(28152234);
-
     super.setUpWithPool(
       MasterPriceOracle(0xd4D0cA503E8befAbE4b75aAC36675Bc1cFA533D1),
       ERC20Upgradeable(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1)
@@ -41,6 +39,8 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
   }
 
   function setUp() public shouldRun(forChains(ARBITRUM_ONE)) {
+    vm.rollFork(28654955);
+
     uint64 expirationPeriod = 60 * 40; // 40 mins
     IUniswapV3Pool[] memory pools = new IUniswapV3Pool[](1);
     pools[0] = pool;
