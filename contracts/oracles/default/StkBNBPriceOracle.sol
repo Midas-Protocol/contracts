@@ -20,17 +20,8 @@ contract StkBNBPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
   function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
     // Get underlying token address
     address underlying = ICErc20(address(cToken)).underlying();
-
     require(underlying == stkBnb, "Invalid underlying");
-
-    uint256 stkBnbPrice = _price();
-
-    // scale by decimals (18 for stkBNB)
-    uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
-    return
-      underlyingDecimals <= 18
-        ? uint256(stkBnbPrice) * (10**(18 - underlyingDecimals))
-        : uint256(stkBnbPrice) / (10**(underlyingDecimals - 18));
+    return _price();
   }
 
   function price(address underlying) external view override returns (uint256) {
