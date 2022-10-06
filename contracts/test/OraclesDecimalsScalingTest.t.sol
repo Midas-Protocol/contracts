@@ -22,7 +22,7 @@ contract OraclesDecimalsScalingTest is BaseTest {
     } else if (block.chainid == ARBITRUM_ONE) {
       vm.rollFork(28654955);
     } else if (block.chainid == MOONBEAM_MAINNET) {
-      vm.rollFork(2019256);
+      vm.rollFork(2020022);
     } else if (block.chainid == POLYGON_MAINNET) {
       vm.rollFork(33996000);
     } else if (block.chainid == NEON_DEVNET) {
