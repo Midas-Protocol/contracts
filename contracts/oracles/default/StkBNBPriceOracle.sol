@@ -2,31 +2,19 @@
 pragma solidity >=0.8.0;
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-
 import { ICToken } from "../../external/compound/ICToken.sol";
 import { IStakePool, ExchangeRateData } from "../../external/pstake/IStakePool.sol";
-
-import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
+
 import "../../midas/SafeOwnableUpgradeable.sol";
-import "../../external/compound/IPriceOracle.sol";
 import "../BasePriceOracle.sol";
 
 contract StkBNBPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
-  MasterPriceOracle public masterPriceOracle;
   IStakePool public stakingPool = IStakePool(0xC228CefDF841dEfDbD5B3a18dFD414cC0dbfa0D8);
   address public stkBnb = 0xc2E9d07F66A89c44062459A47a0D2Dc038E4fb16;
 
-  function initialize(MasterPriceOracle _masterPriceOracle) public initializer {
+  function initialize() public initializer {
     __SafeOwnable_init();
-    masterPriceOracle = _masterPriceOracle;
-  }
-
-  /**
-   * @dev Re-initializes the pool in case of address changes
-   */
-  function reinitialize(MasterPriceOracle _masterPriceOracle) public reinitializer(1) onlyOwnerOrAdmin {
-    masterPriceOracle = _masterPriceOracle;
   }
 
   function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {

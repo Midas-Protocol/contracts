@@ -23,13 +23,13 @@ contract StkBNBPriceOracleTest is BaseTest {
 
     oracle = new StkBNBPriceOracle();
     vm.prank(mpo.admin());
-    oracle.initialize(MasterPriceOracle(ap.getAddress("MasterPriceOracle")));
+    oracle.initialize();
   }
 
   function testStkBnbOraclePrice() public shouldRun(forChains(BSC_MAINNET)) {
     uint256 priceStkBnb = oracle.price(stkBnb);
 
-    assertLt(priceStkBnb, 1e18);
+    assertGt(priceStkBnb, 1e18);
     assertEq(priceStkBnb, 1006482474298479702);
   }
 }
