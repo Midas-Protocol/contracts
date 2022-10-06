@@ -38,7 +38,7 @@ contract DiaStDotPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
   /**
    * @dev Re-initializes the pool in case of address changes
    */
-  function reinitialize() public reinitializer(3) onlyOwnerOrAdmin {
+  function reinitialize() public reinitializer(4) onlyOwnerOrAdmin {
     stDot = 0xFA36Fe1dA08C89eC72Ea1F0143a35bFd5DAea108;
     wstDot = 0x191cf2602Ca2e534c5Ccae7BCBF4C46a704bb949;
   }
