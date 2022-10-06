@@ -84,8 +84,6 @@ contract BeefyERC4626AccuralTest is BaseTest {
     depositVault(accountOne, DEPOSIT_AMOUNT);
     deposit(accountTwo, DEPOSIT_AMOUNT);
 
-    uint256 withdrawalShare = plugin.convertToBeefyVaultShares(10e18);
-
     increaseAssetsInVault();
 
     vm.warp(block.number + 150);
@@ -117,9 +115,8 @@ contract BeefyERC4626AccuralTest is BaseTest {
     depositVault(accountOne, DEPOSIT_AMOUNT);
     deposit(accountTwo, DEPOSIT_AMOUNT);
 
-    uint256 withdrawalShare = plugin.convertToBeefyVaultShares(10e18);
-
-    increaseAssetsInVault();
+    // increasing assets in erc4626
+    deposit(accountThree, DEPOSIT_AMOUNT);
 
     vm.warp(block.number + 150);
 
