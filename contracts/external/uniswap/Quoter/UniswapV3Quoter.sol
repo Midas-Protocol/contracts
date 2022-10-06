@@ -6,8 +6,8 @@ import "./libraries/SafeCast.sol";
 import "./libraries/Tick.sol";
 import "./libraries/TickBitmap.sol";
 
-import "./libraries/FullMath.sol";
-import "./libraries/TickMath.sol";
+import "../FullMath.sol";
+import "../TickMath.sol";
 import "./libraries/LiquidityMath.sol";
 import "./libraries/SqrtPriceMath.sol";
 import "./libraries/SwapMath.sol";
