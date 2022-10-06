@@ -36,7 +36,6 @@ contract DiaStDotPriceOracleTest is BaseTest {
 
   function testDiaStDotOraclePrice() public shouldRun(forChains(MOONBEAM_MAINNET)) {
     uint256 priceStDot = oracle.price(stDot);
-    uint256 ulPriceStDot = oracle.getUnderlyingPrice(stDot_c);
     uint256 priceWstDot = oracle.price(wstDot);
 
     // (13799919586975046579 / 1e18) * 0,45 = 6,209
@@ -44,7 +43,6 @@ contract DiaStDotPriceOracleTest is BaseTest {
     // stDot trades at a discount
 
     assertEq(priceStDot, 13799919586975046579);
-    assertEq(priceStDot, ulPriceStDot);
     assertEq(priceWstDot, 16554440075616894830);
   }
 }
