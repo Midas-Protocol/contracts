@@ -4,7 +4,7 @@ pragma solidity >=0.5.0;
 import "./LowGasSafeMath.sol";
 import "./SafeCast.sol";
 
-import "./TickMath.sol";
+import "../../TickMath.sol";
 import "./LiquidityMath.sol";
 
 /// @title Tick

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0;
 
-import "./FullMath.sol";
+import "../../FullMath.sol";
 import "./SqrtPriceMath.sol";
 
 /// @title Computes the result of a swap within ticks
