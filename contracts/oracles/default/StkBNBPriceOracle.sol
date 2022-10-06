@@ -27,7 +27,10 @@ contract StkBNBPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
 
     // scale by decimals (18 for stkBNB)
     uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
-    return uint256(stkBnbPrice) * (10**(18 - underlyingDecimals));
+    return
+      underlyingDecimals <= 18
+        ? uint256(stkBnbPrice) * (10**(18 - underlyingDecimals))
+        : uint256(stkBnbPrice) / (10**(underlyingDecimals - 18));
   }
 
   function price(address underlying) external view override returns (uint256) {
