@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../oracles/BasePriceOracle.sol";
 import { CTokenInterface, CErc20Interface } from "./CTokenInterfaces.sol";
 import { ComptrollerErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
@@ -895,12 +894,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 actualRepayAmount
   ) external view override returns (uint256, uint256) {
     /* Read oracle prices for borrowed and collateral markets */
-    uint256 priceBorrowedMantissa = BasePriceOracle(address(oracle)).price(
-      CErc20Interface(address(cTokenBorrowed)).underlying()
-    );
-    uint256 priceCollateralMantissa = BasePriceOracle(address(oracle)).price(
-      CErc20Interface(address(cTokenCollateral)).underlying()
-    );
+    uint256 priceBorrowedMantissa = oracle.getUnderlyingPrice(CTokenInterface(cTokenBorrowed));
+    uint256 priceCollateralMantissa = oracle.getUnderlyingPrice(CTokenInterface(cTokenCollateral));
     if (priceBorrowedMantissa == 0 || priceCollateralMantissa == 0) {
       return (uint256(Error.PRICE_ERROR), 0);
     }

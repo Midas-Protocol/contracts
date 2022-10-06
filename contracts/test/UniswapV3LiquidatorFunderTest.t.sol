@@ -168,7 +168,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
     );
     IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
-    uint256 repayAmount = 1e6;
+    uint256 repayAmount = 9e7;
     // liquidate
     vm.prank(accountTwo);
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
