@@ -33,20 +33,11 @@ contract ChainlinkOraclesTest is BaseTest {
   function setUpOracleFeed(address testedTokenAddress, address aggregatorAddress) internal {
     address[] memory underlyings = new address[](1);
     underlyings[0] = testedTokenAddress;
-    AggregatorV3Interface[] memory aggregators = new AggregatorV3Interface[](1);
-    AggregatorV3Interface feed = AggregatorV3Interface(aggregatorAddress);
-    aggregators[0] = feed;
+    address[] memory aggregators = new address[](1);
+    aggregators[0] = aggregatorAddress;
 
     vm.prank(oracle.admin());
     oracle.setPriceFeeds(underlyings, aggregators, ChainlinkPriceOracleV2.FeedBaseCurrency.USD);
-  }
-
-  function testPolygonChainlinkUSDCPrice() public shouldRun(forChains(POLYGON_MAINNET)) {
-    oracle = new ChainlinkPriceOracleV2(address(this), true, ap.getAddress("wtoken"), usdNativeFeedPolygon);
-    setUpOracleFeed(usdcPolygon, usdcFeedPolygon);
-    uint256 price = oracle.price(usdcPolygon);
-    uint256 underlyingPrice = oracle.getUnderlyingPrice(usdcMarketPolygon);
-    assertEq(price, underlyingPrice);
   }
 
   function testJBRLPrice() public shouldRun(forChains(BSC_MAINNET)) {

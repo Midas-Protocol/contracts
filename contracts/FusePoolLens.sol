@@ -6,6 +6,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeabl
 
 import "./external/compound/IComptroller.sol";
 import "./external/compound/IPriceOracle.sol";
+import "./oracles/BasePriceOracle.sol";
 import "./external/compound/ICToken.sol";
 import "./external/compound/ICErc20.sol";
 import "./external/compound/IRewardsDistributor.sol";
@@ -309,7 +310,7 @@ contract FusePoolLens is Initializable {
 
     FusePoolAsset[] memory detailedAssets = new FusePoolAsset[](arrayLength);
     uint256 index = 0;
-    IPriceOracle oracle = comptroller.oracle();
+    BasePriceOracle oracle = BasePriceOracle(address(comptroller.oracle()));
 
     for (uint256 i = 0; i < cTokens.length; i++) {
       // Check if market is listed and get collateral factor
@@ -348,7 +349,7 @@ contract FusePoolLens is Initializable {
       asset.borrowBalance = cToken.borrowBalanceStored(user); // We would use borrowBalanceCurrent but we already accrue interest above
       asset.membership = comptroller.checkMembership(user, cToken);
       asset.exchangeRate = cToken.exchangeRateStored(); // We would use exchangeRateCurrent but we already accrue interest above
-      asset.underlyingPrice = oracle.getUnderlyingPrice(cToken);
+      asset.underlyingPrice = oracle.price(asset.underlyingToken);
 
       // Get oracle for this cToken
       asset.oracle = address(oracle);

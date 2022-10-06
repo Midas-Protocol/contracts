@@ -20,6 +20,7 @@ import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidato
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 import "../external/uniswap/IUniswapV2Pair.sol";
 import "../external/uniswap/IUniswapV2Factory.sol";
+import "../compound/CTokenInterfaces.sol";
 
 contract MockAsset is MockERC20 {
   constructor() MockERC20("test", "test", 8) {}
@@ -37,7 +38,7 @@ contract MaxWithdrawTest is WithPool, BaseTest {
 
   struct LiquidationData {
     address[] cTokens;
-    CToken[] allMarkets;
+    CTokenInterface[] allMarkets;
     MockAsset asset;
     MockAsset usdc;
   }
