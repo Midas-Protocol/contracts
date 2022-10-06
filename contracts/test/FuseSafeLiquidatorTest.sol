@@ -211,10 +211,8 @@ contract FuseSafeLiquidatorTest is BaseTest {
 
       if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
         // find a market in which the borrower has debt and reduce his collateral price
-        if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
-          vars.markets = vars.comptroller.getAllMarkets();
-          (vars.debtMarket, vars.collateralMarket, vars.borrowAmount) = setUpDebtAndCollateralMarkets(random, vars);
-        }
+        vars.markets = vars.comptroller.getAllMarkets();
+        (vars.debtMarket, vars.collateralMarket, vars.borrowAmount) = setUpDebtAndCollateralMarkets(random, vars);
 
         if (address(vars.debtMarket) != address(0) && address(vars.collateralMarket) != address(0)) {
           emit log("found testable markets at random number");
