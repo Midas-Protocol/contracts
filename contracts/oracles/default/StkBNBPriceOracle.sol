@@ -10,11 +10,13 @@ import "../../midas/SafeOwnableUpgradeable.sol";
 import "../BasePriceOracle.sol";
 
 contract StkBNBPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
-  IStakePool public stakingPool = IStakePool(0xC228CefDF841dEfDbD5B3a18dFD414cC0dbfa0D8);
-  address public stkBnb = 0xc2E9d07F66A89c44062459A47a0D2Dc038E4fb16;
+  IStakePool public stakingPool;
+  address public stkBnb;
 
   function initialize() public initializer {
     __SafeOwnable_init();
+    stakingPool = IStakePool(0xC228CefDF841dEfDbD5B3a18dFD414cC0dbfa0D8);
+    stkBnb = 0xc2E9d07F66A89c44062459A47a0D2Dc038E4fb16;
   }
 
   function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
