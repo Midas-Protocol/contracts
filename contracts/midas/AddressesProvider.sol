@@ -13,7 +13,8 @@ contract AddressesProvider is OwnableUpgradeable {
   mapping(string => address) private _addresses;
   mapping(address => Contract) public flywheelRewards;
   mapping(address => Contract) public plugins;
-  mapping(string => mapping(address => address)) private _keyspaceAddresses;
+  mapping(address => Contract) public redemptionStrategies;
+  mapping(address => Contract) public fundingStrategies;
 
   /// @dev Initializer to set the admin that can set and change contracts addresses
   function initialize(address owner) public initializer {
@@ -23,7 +24,7 @@ contract AddressesProvider is OwnableUpgradeable {
 
   event AddressSet(string id, address indexed newAddress);
 
-  event KeyspaceAddressSet(string keyspace, address indexed key, address indexed value);
+  event ContractSet(address indexed key, string contractType, address contractAddress);
 
   /**
    * @dev The contract address and a string that uniquely identifies the contract's interface
@@ -45,6 +46,7 @@ contract AddressesProvider is OwnableUpgradeable {
     string calldata contractInterface
   ) public onlyOwner {
     flywheelRewards[rewardToken] = Contract(flywheelRewardsModule, contractInterface);
+    emit ContractSet(rewardToken, contractInterface, flywheelRewardsModule);
   }
 
   /**
@@ -59,6 +61,37 @@ contract AddressesProvider is OwnableUpgradeable {
     string calldata contractInterface
   ) public onlyOwner {
     plugins[asset] = Contract(plugin, contractInterface);
+    emit ContractSet(asset, contractInterface, plugin);
+  }
+
+  /**
+   * @dev sets the address and contract interface ID of the redemption strategy for the asset
+   * @param asset the asset address
+   * @param strategy redemption strategy address
+   * @param contractInterface a string that uniquely identifies the contract's interface
+   */
+  function setRedemptionStrategy(
+    address asset,
+    address strategy,
+    string calldata contractInterface
+  ) public onlyOwner {
+    redemptionStrategies[asset] = Contract(strategy, contractInterface);
+    emit ContractSet(asset, contractInterface, strategy);
+  }
+
+  /**
+   * @dev sets the address and contract interface ID of the funding strategy for the asset
+   * @param asset the asset address
+   * @param strategy funding strategy address
+   * @param contractInterface a string that uniquely identifies the contract's interface
+   */
+  function setFundingStrategy(
+    address asset,
+    address strategy,
+    string calldata contractInterface
+  ) public onlyOwner {
+    fundingStrategies[asset] = Contract(strategy, contractInterface);
+    emit ContractSet(asset, contractInterface, strategy);
   }
 
   /**
@@ -72,39 +105,10 @@ contract AddressesProvider is OwnableUpgradeable {
   }
 
   /**
-   * @dev Sets an address for a key in keyspace replacing the address saved in the addresses map
-   * @param keyspace The keyspace
-   * @param keys The key addresses
-   * @param values The value addresses
-   */
-  function setKeyspaceAddresses(
-    string calldata keyspace,
-    address[] calldata keys,
-    address[] calldata values
-  ) external onlyOwner {
-    require(keys.length == values.length, "Array lengths must be equal.");
-
-    for (uint8 i = 0; i < keys.length; i++) {
-      address key = keys[i];
-      address value = values[i];
-      _keyspaceAddresses[keyspace][key] = value;
-      emit KeyspaceAddressSet(keyspace, key, value);
-    }
-  }
-
-  /**
    * @dev Returns an address by id
    * @return The address
    */
   function getAddress(string calldata id) public view returns (address) {
     return _addresses[id];
-  }
-
-  /**
-   * @dev Returns the address by its keyspace and key
-   * @return The address
-   */
-  function getKeyspaceAddress(string calldata keyspace, address key) public view returns (address) {
-    return _keyspaceAddresses[keyspace][key];
   }
 }
