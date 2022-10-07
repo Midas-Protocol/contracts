@@ -87,12 +87,7 @@ contract BeefyERC4626AccuralTest is BaseTest {
     uint256 accountOneBalance = underlyingToken.balanceOf(accountOne);
     uint256 accountTwoBalance = underlyingToken.balanceOf(accountTwo);
 
-    assertApproxEqAbs(
-      accountOneBalance,
-      accountTwoBalance,
-      1e17,
-      string(abi.encodePacked("!withdrwal balance"))
-    );
+    assertApproxEqAbs(accountOneBalance, accountTwoBalance, 1e17, string(abi.encodePacked("!withdrwal balance")));
   }
 
   function testAccuralERC4626Amount() public shouldRun(forChains(BSC_MAINNET)) {
@@ -125,12 +120,6 @@ contract BeefyERC4626AccuralTest is BaseTest {
     uint256 accountOneBalance = underlyingToken.balanceOf(accountOne);
     uint256 accountTwoBalance = underlyingToken.balanceOf(accountTwo);
 
-    assertApproxEqAbs(
-      accountOneBalance,
-      accountTwoBalance,
-      1e17,
-      string(abi.encodePacked("!withdrwal balance"))
-    );
+    assertApproxEqAbs(accountOneBalance, accountTwoBalance, 1e17, string(abi.encodePacked("!withdrwal balance")));
   }
-
 }
