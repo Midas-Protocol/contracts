@@ -50,9 +50,9 @@ contract UniswapV3PriceOracleTest is BaseTest {
     configs[2] = UniswapV3PriceOracle.AssetConfig(0x7e7FB3CCEcA5F2ac952eDF221fd2a9f62E411980, 10 minutes); // MAGIC-ETH
 
     uint256[] memory expPrices = new uint256[](3);
-    expPrices[0] = 28595032162723193;
-    expPrices[1] = 159771868813370590;
-    expPrices[2] = 245924868150919;
+    expPrices[0] = 32862298144082680;
+    expPrices[1] = 195358615523128821;
+    expPrices[2] = 277666292419248;
 
     uint256[] memory prices = testPriceFeed(underlyings, configs);
     bool[] memory cardinalityChecks = testCardinality(configs);
