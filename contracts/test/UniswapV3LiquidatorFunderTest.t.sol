@@ -39,14 +39,6 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
   }
 
   function setUp() public shouldRun(forChains(ARBITRUM_ONE)) {
-    vm.rollFork(28739891);
-
-    uint64 expirationPeriod = 60 * 40; // 40 mins
-    IUniswapV3Pool[] memory pools = new IUniswapV3Pool[](1);
-    pools[0] = pool;
-    uint256[] memory times = new uint256[](1);
-    times[0] = expirationPeriod;
-
     Quoter quoter = new Quoter(0x1F98431c8aD98523631AE4a59f267346ea31F984);
 
     setUpPool("gmx-test", false, 0.1e18, 1.1e18);
