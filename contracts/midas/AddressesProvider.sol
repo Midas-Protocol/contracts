@@ -13,6 +13,7 @@ contract AddressesProvider is OwnableUpgradeable {
   mapping(string => address) private _addresses;
   mapping(address => Contract) public flywheelRewards;
   mapping(address => Contract) public plugins;
+  mapping(string => mapping(address => address)) private _keyspaceAddresses;
 
   /// @dev Initializer to set the admin that can set and change contracts addresses
   function initialize(address owner) public initializer {
@@ -21,6 +22,8 @@ contract AddressesProvider is OwnableUpgradeable {
   }
 
   event AddressSet(string id, address indexed newAddress);
+
+  event KeyspaceAddressSet(string keyspace, address indexed key, address indexed value);
 
   /**
    * @dev The contract address and a string that uniquely identifies the contract's interface
@@ -69,10 +72,39 @@ contract AddressesProvider is OwnableUpgradeable {
   }
 
   /**
+   * @dev Sets an address for a key in keyspace replacing the address saved in the addresses map
+   * @param keyspace The keyspace
+   * @param keys The key addresses
+   * @param values The value addresses
+   */
+  function setKeyspaceAddresses(
+    string calldata keyspace,
+    address[] calldata keys,
+    address[] calldata values
+  ) external onlyOwner {
+    require(keys.length == values.length, "Array lengths must be equal.");
+
+    for (uint8 i = 0; i < keys.length; i++) {
+      address key = keys[i];
+      address value = values[i];
+      _keyspaceAddresses[keyspace][key] = value;
+      emit KeyspaceAddressSet(keyspace, key, value);
+    }
+  }
+
+  /**
    * @dev Returns an address by id
    * @return The address
    */
   function getAddress(string calldata id) public view returns (address) {
     return _addresses[id];
+  }
+
+  /**
+   * @dev Returns the address by its keyspace and key
+   * @return The address
+   */
+  function getKeyspaceAddress(string calldata keyspace, address key) public view returns (address) {
+    return _keyspaceAddresses[keyspace][key];
   }
 }
