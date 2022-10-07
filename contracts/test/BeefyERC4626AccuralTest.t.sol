@@ -21,16 +21,12 @@ interface IBeefyStrategy {
 contract BeefyERC4626AccuralTest is BaseTest {
   using FixedPointMathLib for uint256;
 
-  uint256 PERFORMANCE_FEE = 5e16;
   uint256 DEPOSIT_AMOUNT = 100e18;
-  uint256 BPS_DENOMINATOR = 10_000;
 
   BeefyERC4626 plugin;
   ERC20Upgradeable underlyingToken;
   IBeefyVault beefyVault = IBeefyVault(0x94E85B8E050F3F281CB9597cc0144F1F7AF1fe9B); // BOMB-BTCB LP
   address beefyStrategy = 0xEeBcd7E1f008C52fe5804B306832B7DD317e163D;
-  address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
-  address newFeeRecipient = address(5);
 
   address accountOne = address(1);
   address accountTwo = address(2);
@@ -41,9 +37,6 @@ contract BeefyERC4626AccuralTest is BaseTest {
     plugin = new BeefyERC4626();
     plugin.initialize(underlyingToken, beefyVault, 10);
     plugin.reinitialize();
-
-    // uint256 currentPerformanceFee = plugin.performanceFee();
-    // plugin.updateFeeSettings(currentPerformanceFee, newFeeRecipient);
   }
 
   /* --------------------- HELPER FUNCTIONS --------------------- */
@@ -67,24 +60,25 @@ contract BeefyERC4626AccuralTest is BaseTest {
     beefyVault.earn();
   }
 
-  function createPerformanceFee() public {
-    deal(address(underlyingToken), address(this), DEPOSIT_AMOUNT);
-
-    deposit(address(this), DEPOSIT_AMOUNT);
-
-    increaseAssetsInVault();
-  }
-
-  /* --------------------- ERC4626 PERFORMANCE FEE TESTS --------------------- */
+  /* --------------------- ERC4626 ACCURAL TESTS --------------------- */
 
   function testAccuralVaultAmount() public shouldRun(forChains(BSC_MAINNET)) {
-    deal(address(underlyingToken), accountOne, 100e18);
-    deal(address(underlyingToken), accountTwo, 100e18);
+    deal(address(underlyingToken), accountOne, DEPOSIT_AMOUNT);
+    deal(address(underlyingToken), accountTwo, DEPOSIT_AMOUNT);
+    deal(address(underlyingToken), accountThree, DEPOSIT_AMOUNT);
 
     depositVault(accountOne, DEPOSIT_AMOUNT);
     deposit(accountTwo, DEPOSIT_AMOUNT);
+    deposit(accountThree, DEPOSIT_AMOUNT);
 
+    // increase vault balance
     increaseAssetsInVault();
+
+    vm.warp(block.number + 150);
+
+    // decrease vault balance
+    vm.prank(accountThree);
+    beefyVault.withdrawAll();
 
     vm.warp(block.number + 150);
 
@@ -108,15 +102,21 @@ contract BeefyERC4626AccuralTest is BaseTest {
   }
 
   function testAccuralERC4626Amount() public shouldRun(forChains(BSC_MAINNET)) {
-    deal(address(underlyingToken), accountOne, 100e18);
-    deal(address(underlyingToken), accountTwo, 100e18);
-    deal(address(underlyingToken), accountThree, 100e18);
+    deal(address(underlyingToken), accountOne, DEPOSIT_AMOUNT);
+    deal(address(underlyingToken), accountTwo, DEPOSIT_AMOUNT);
+    deal(address(underlyingToken), accountThree, DEPOSIT_AMOUNT);
 
     depositVault(accountOne, DEPOSIT_AMOUNT);
     deposit(accountTwo, DEPOSIT_AMOUNT);
 
     // increasing assets in erc4626
     deposit(accountThree, DEPOSIT_AMOUNT);
+
+    vm.warp(block.number + 150);
+
+    // decrease assets in erc4626
+    vm.prank(accountThree);
+    plugin.withdraw(DEPOSIT_AMOUNT / 2, accountThree, accountThree);
 
     vm.warp(block.number + 150);
 
