@@ -12,12 +12,6 @@ import { MidasERC4626 } from "../midas/strategies/MidasERC4626.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-interface IBeefyStrategy {
-  function withdrwalFee() external returns (uint256);
-
-  function WITHDRAWAL_MAX() external returns (uint256);
-}
-
 contract BeefyERC4626AccuralTest is BaseTest {
   using FixedPointMathLib for uint256;
 
