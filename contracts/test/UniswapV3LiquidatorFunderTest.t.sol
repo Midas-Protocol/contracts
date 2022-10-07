@@ -31,6 +31,8 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
 
   IMockERC20 usdcToken = IMockERC20(0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8);
 
+  Quoter quoter;
+
   constructor() WithPool() {
     super.setUpWithPool(
       MasterPriceOracle(0xd4D0cA503E8befAbE4b75aAC36675Bc1cFA533D1),
@@ -39,11 +41,11 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
   }
 
   function setUp() public shouldRun(forChains(ARBITRUM_ONE)) {
-    Quoter quoter = new Quoter(0x1F98431c8aD98523631AE4a59f267346ea31F984);
+    quoter = new Quoter(0x1F98431c8aD98523631AE4a59f267346ea31F984);
 
     setUpPool("gmx-test", false, 0.1e18, 1.1e18);
 
-    uniswapv3Liquidator = new UniswapV3LiquidatorFunder(quoter);
+    uniswapv3Liquidator = new UniswapV3LiquidatorFunder();
   }
 
   function getPool(address inputToken) internal view returns (IUniswapV3Pool) {
@@ -147,7 +149,13 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
 
     vars.fundingStrategies = new IFundsConversionStrategy[](1);
     vars.data = new bytes[](1);
-    vars.data[0] = abi.encode(usdcToken, gmxToken, 3000, ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564));
+    vars.data[0] = abi.encode(
+      usdcToken,
+      gmxToken,
+      3000,
+      ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564),
+      quoter
+    );
     vars.fundingStrategies[0] = uniswapv3Liquidator;
 
     // all strategies need to be whitelisted

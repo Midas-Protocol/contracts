@@ -10,11 +10,6 @@ import "../external/uniswap/Quoter/Quoter.sol";
 
 contract UniswapV3LiquidatorFunder is IFundsConversionStrategy {
   using FixedPointMathLib for uint256;
-  Quoter quoter;
-
-  constructor(Quoter _quoter) {
-    quoter = _quoter;
-  }
 
   /**
    * @dev Redeems `inputToken` for `outputToken` where `inputAmount` < `outputAmount`
@@ -38,16 +33,14 @@ contract UniswapV3LiquidatorFunder is IFundsConversionStrategy {
     return _convert(inputToken, inputAmount, strategyData);
   }
 
-  event log_address(address swapRouter);
-
   function _convert(
     IERC20Upgradeable inputToken,
     uint256 inputAmount,
     bytes memory strategyData
   ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    (, address _outputToken, uint24 fee, ISwapRouter swapRouter) = abi.decode(
+    (, address _outputToken, uint24 fee, ISwapRouter swapRouter, ) = abi.decode(
       strategyData,
-      (address, address, uint24, ISwapRouter)
+      (address, address, uint24, ISwapRouter, Quoter)
     );
     outputToken = IERC20Upgradeable(_outputToken);
 
@@ -77,9 +70,9 @@ contract UniswapV3LiquidatorFunder is IFundsConversionStrategy {
     view
     returns (IERC20Upgradeable inputToken, uint256 inputAmount)
   {
-    (address _inputToken, address _outputToken, uint24 fee, ) = abi.decode(
+    (address _inputToken, address _outputToken, uint24 fee, , Quoter quoter) = abi.decode(
       strategyData,
-      (address, address, uint24, ISwapRouter)
+      (address, address, uint24, ISwapRouter, Quoter)
     );
 
     inputAmount = quoter.estimateMinSwapUniswapV3(_inputToken, _outputToken, outputAmount, fee);
