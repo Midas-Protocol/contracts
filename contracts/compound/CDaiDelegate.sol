@@ -28,8 +28,8 @@ contract CDaiDelegate is CErc20Delegate {
    * @notice Delegate interface to become the implementation
    * @param data The encoded arguments for becoming
    */
-  function _becomeImplementation(bytes calldata data) external override {
-    require(msg.sender == address(this) || hasAdminRights(), "only self or admin may call _becomeImplementation");
+  function _becomeImplementation(bytes calldata data) public override {
+    require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
 
     // Decode data
     (address daiJoinAddress_, address potAddress_) = abi.decode(data, (address, address));
@@ -41,7 +41,9 @@ contract CDaiDelegate is CErc20Delegate {
    * @param daiJoinAddress_ DAI adapter address
    * @param potAddress_ DAI Savings Rate (DSR) pot address
    */
-  function _becomeImplementation(address daiJoinAddress_, address potAddress_) internal {
+  function _becomeImplementation(address daiJoinAddress_, address potAddress_) public {
+    require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
+
     // Get dai and vat and sanity check the underlying
     DaiJoinLike daiJoin = DaiJoinLike(daiJoinAddress_);
     PotLike pot = PotLike(potAddress_);

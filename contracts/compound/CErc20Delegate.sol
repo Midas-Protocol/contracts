@@ -19,13 +19,8 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
    * @notice Called by the delegator on a delegate to initialize it for duty
    * @param data The encoded bytes data for any initialization
    */
-  function _becomeImplementation(bytes calldata data) external virtual override {
-    require(msg.sender == address(this) || hasAdminRights(), "!self");
-
-    // Make sure admin storage is set up correctly
-    __admin = payable(0);
-    __adminHasRights = false;
-    __fuseAdminHasRights = false;
+  function _becomeImplementation(bytes memory data) public virtual override {
+    require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
   }
 
   /**
@@ -64,12 +59,17 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     // Store new implementation
     implementation = implementation_;
 
-    // Call _becomeImplementation externally (delegating to new delegate's code)
-    _functionCall(
-      address(this),
-      abi.encodeWithSignature("_becomeImplementation(bytes)", becomeImplementationData),
-      "!become"
-    );
+    if (address(this).code.length == 0) {
+      // cannot delegate to self with an external call when constructing
+      _becomeImplementation(becomeImplementationData);
+    } else {
+      // Call _becomeImplementation externally (delegating to new delegate's code)
+      _functionCall(
+        address(this),
+        abi.encodeWithSignature("_becomeImplementation(bytes)", becomeImplementationData),
+        "!become"
+      );
+    }
 
     // Emit event
     emit NewImplementation(oldImplementation, implementation);
@@ -90,7 +90,9 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     require(hasAdminRights(), "!admin");
 
     // Set implementation
-    _setImplementationInternal(implementation_, allowResign, becomeImplementationData);
+    if (implementation != implementation_) {
+      _setImplementationInternal(implementation_, allowResign, becomeImplementationData);
+    }
   }
 
   /**
@@ -102,8 +104,9 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
       (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = IFuseFeeDistributor(
         fuseAdmin
       ).latestCErc20Delegate(implementation);
-      if (implementation != latestCErc20Delegate)
+      if (implementation != latestCErc20Delegate) {
         _setImplementationInternal(latestCErc20Delegate, allowResign, becomeImplementationData);
+      }
     }
   }
 }

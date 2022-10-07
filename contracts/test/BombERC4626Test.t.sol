@@ -4,8 +4,9 @@ pragma solidity >=0.8.0;
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../compound/strategies/BombERC4626.sol";
+import "../midas/strategies/BombERC4626.sol";
 import "./config/BaseTest.t.sol";
 
 contract BombERC4626Test is BaseTest {
@@ -18,7 +19,9 @@ contract BombERC4626Test is BaseTest {
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     bombToken = IERC20Upgradeable(address(xbombToken.reward()));
-    vault = new BombERC4626(ERC20(address(bombToken)), address(xbombToken));
+    vault = new BombERC4626();
+    vault.initialize(ERC20Upgradeable(address(bombToken)), address(xbombToken));
+    vault.reinitialize();
 
     // get some tokens from a whale
     vm.prank(whale);
@@ -45,8 +48,8 @@ contract BombERC4626Test is BaseTest {
     assertEq(bombToken.balanceOf(address(vault)), 0);
 
     //Test that the balance view calls work
-    assertEq(vault.totalAssets(), depositAmountRoundedDown);
-    assertEq(vault.balanceOfUnderlying(address(this)), depositAmountRoundedDown);
+    assertTrue(diff(vault.totalAssets(), depositAmountRoundedDown) <= 1);
+    assertTrue(diff(vault.balanceOfUnderlying(address(this)), depositAmountRoundedDown) <= 1);
 
     //Test that we minted the correct amount of tokens
     assertEq(vault.balanceOf(address(this)), vault.previewDeposit(depositAmount));
@@ -65,7 +68,7 @@ contract BombERC4626Test is BaseTest {
     // test that all vault assets are extracted and transferred to the depositor
     assertEq(vault.balanceOfUnderlying(address(this)), 0);
     assertEq(bombToken.balanceOf(address(vault)), 0);
-    assertEq(bombToken.balanceOf(address(this)), depositAmountRoundedDown);
+    assertTrue(diff(bombToken.balanceOf(address(this)), depositAmountRoundedDown) <= 1);
   }
 
   function redeem() internal {
@@ -81,6 +84,6 @@ contract BombERC4626Test is BaseTest {
     // test that all vault assets are extracted and transferred to the depositor
     assertEq(vault.balanceOfUnderlying(address(this)), 0);
     assertEq(bombToken.balanceOf(address(vault)), 0);
-    assertEq(bombToken.balanceOf(address(this)), depositAmountRoundedDown);
+    assertTrue(diff(bombToken.balanceOf(address(this)), depositAmountRoundedDown) <= 1);
   }
 }

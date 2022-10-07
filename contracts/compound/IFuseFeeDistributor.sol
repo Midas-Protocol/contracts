@@ -15,6 +15,11 @@ interface IFuseFeeDistributor {
     view
     returns (bool);
 
+  function pluginImplementationWhitelist(address oldImplementation, address newImplementation)
+    external
+    view
+    returns (bool);
+
   function cErc20DelegateWhitelist(
     address oldImplementation,
     address newImplementation,
@@ -47,7 +52,7 @@ interface IFuseFeeDistributor {
       bytes memory becomeImplementationData
     );
 
-  function deployCEther(bytes calldata constructorData) external returns (address);
+  function latestPluginImplementation(address oldImplementation) external view returns (address);
 
   function deployCErc20(bytes calldata constructorData) external returns (address);
 
