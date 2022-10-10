@@ -19,14 +19,14 @@ contract BeefyERC4626AccuralTest is BaseTest {
 
   BeefyERC4626 plugin;
   ERC20Upgradeable underlyingToken;
-  IBeefyVault beefyVault = IBeefyVault(0x94E85B8E050F3F281CB9597cc0144F1F7AF1fe9B); // BOMB-BTCB LP
-  address beefyStrategy = 0xEeBcd7E1f008C52fe5804B306832B7DD317e163D;
+  IBeefyVault beefyVault = IBeefyVault(0x122E09FdD2FF73C8CEa51D432c45A474BAa1518a); // jJPY-JPYC LP
+  address beefyStrategy = 0xD9c0E8672b498bb28eFe95cEAa0D4E32e57Cc206;
 
   address accountOne = address(1);
   address accountTwo = address(2);
   address accountThree = address(3);
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
+  function setUp() public shouldRun(forChains(POLYGON_MAINNET)) {
     underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
     plugin = new BeefyERC4626();
     plugin.initialize(underlyingToken, beefyVault, 10);
@@ -56,7 +56,7 @@ contract BeefyERC4626AccuralTest is BaseTest {
 
   /* --------------------- ERC4626 ACCURAL TESTS --------------------- */
 
-  function testAccuralVaultAmount() public shouldRun(forChains(BSC_MAINNET)) {
+  function testAccuralVaultAmount() public shouldRun(forChains(POLYGON_MAINNET)) {
     deal(address(underlyingToken), accountOne, DEPOSIT_AMOUNT);
     deal(address(underlyingToken), accountTwo, DEPOSIT_AMOUNT);
     deal(address(underlyingToken), accountThree, DEPOSIT_AMOUNT);
@@ -90,7 +90,7 @@ contract BeefyERC4626AccuralTest is BaseTest {
     assertApproxEqAbs(accountOneBalance, accountTwoBalance, 1e17, string(abi.encodePacked("!withdrwal balance")));
   }
 
-  function testAccuralERC4626Amount() public shouldRun(forChains(BSC_MAINNET)) {
+  function testAccuralERC4626Amount() public shouldRun(forChains(POLYGON_MAINNET)) {
     deal(address(underlyingToken), accountOne, DEPOSIT_AMOUNT);
     deal(address(underlyingToken), accountTwo, DEPOSIT_AMOUNT);
     deal(address(underlyingToken), accountThree, DEPOSIT_AMOUNT);
