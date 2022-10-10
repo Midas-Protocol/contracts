@@ -126,22 +126,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @dev Deploys a CToken for the underlying nativeToken of the current chain
-   * @param constructorData Encoded construction data for `CToken initialize()`
-   */
-  function deployCEther(bytes calldata constructorData) external returns (address) {
-    // Make sure comptroller == msg.sender
-    address comptroller = abi.decode(constructorData[0:32], (address));
-    require(comptroller == msg.sender, "Comptroller is not sender.");
-    // Deploy CEtherDelegator using msg.sender, underlying, and block.number as a salt
-    bytes32 salt = keccak256(abi.encodePacked(msg.sender, address(0), ++marketsCounter));
-
-    bytes memory cEtherDelegatorCreationCode = abi.encodePacked(type(CEtherDelegator).creationCode, constructorData);
-    address proxy = Create2Upgradeable.deploy(0, salt, cEtherDelegatorCreationCode);
-    return proxy;
-  }
-
-  /**
    * @dev Deploys a CToken for an underlying ERC20
    * @param constructorData Encoded construction data for `CToken initialize()`
    */

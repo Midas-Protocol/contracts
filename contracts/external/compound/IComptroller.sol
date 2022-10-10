@@ -48,6 +48,8 @@ interface IComptroller {
 
   function borrowGuardianPaused(address cToken) external view returns (bool);
 
+  function mintGuardianPaused(address cToken) external view returns (bool);
+
   function getRewardsDistributors() external view returns (IRewardsDistributor[] memory);
 
   function getAllMarkets() external view returns (ICToken[] memory);
@@ -57,6 +59,8 @@ interface IComptroller {
   function suppliers(address account) external view returns (bool);
 
   function enforceWhitelist() external view returns (bool);
+
+  function isUserOfPool(address user) external view returns (bool);
 
   function whitelist(address account) external view returns (bool);
 
@@ -70,5 +74,11 @@ interface IComptroller {
     bool isCEther,
     bytes memory constructorData,
     uint256 collateralFactorMantissa
+  ) external returns (uint256);
+
+  function getMaxRedeemOrBorrow(
+    address account,
+    ICToken cTokenModify,
+    bool isBorrow
   ) external returns (uint256);
 }

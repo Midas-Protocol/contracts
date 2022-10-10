@@ -10,6 +10,7 @@ import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
 import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
 import "fuse-flywheel/FuseFlywheelCore.sol";
+import "../compound/CTokenInterfaces.sol";
 
 import { CErc20 } from "../compound/CErc20.sol";
 import { CToken } from "../compound/CToken.sol";
@@ -107,7 +108,7 @@ contract LiquidityMiningTest is DSTest {
       0.9e18
     );
 
-    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
   }
 

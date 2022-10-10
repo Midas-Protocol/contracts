@@ -68,14 +68,14 @@ contract DiaPriceOracleTest is BaseTest {
     setUpWithNativeFeed();
     setUpOraclesMoonbeam();
     uint256 price = oracle.price(address(1));
-    assertEq(price, 244216545344000000000);
+    assertEq(price, 325929279276000000000);
   }
 
   function testDiaPriceOracleWithMasterPriceOracleMoonbeam() public shouldRun(forChains(MOONBEAM_MAINNET)) {
     setUpWithMasterPriceOracle();
     setUpOraclesMoonbeam();
     uint256 price = oracle.price(address(1));
-    assertEq(price, 244216545344000000000);
+    assertEq(price, 325929279276000000000);
   }
 
   function testDiaPriceOracleWithMasterPriceOracleBsc() public shouldRun(forChains(BSC_MAINNET)) {

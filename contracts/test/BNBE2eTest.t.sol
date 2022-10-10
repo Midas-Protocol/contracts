@@ -3,6 +3,7 @@ pragma solidity >=0.8.0;
 
 import "./helpers/WithPool.sol";
 import "./config/BaseTest.t.sol";
+import "../compound/CTokenInterfaces.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
@@ -34,7 +35,7 @@ contract BNBE2eTest is WithPool, BaseTest {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
-    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
     assertEq(cToken.name(), "cUnderlyingToken");
     underlyingToken.approve(address(cToken), 1e36);
@@ -57,7 +58,7 @@ contract BNBE2eTest is WithPool, BaseTest {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
-    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
     assertEq(cToken.name(), "cUnderlyingToken");
     underlyingToken.approve(address(cToken), 1e36);
@@ -85,11 +86,12 @@ contract BNBE2eTest is WithPool, BaseTest {
       IAlpacaVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063),
       IW_NATIVE(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
     );
+    erc4626.reinitialize();
 
     vm.roll(1);
     deployCErc20PluginDelegate(address(erc4626), 0.9e18);
 
-    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(erc4626));
@@ -133,6 +135,7 @@ contract BNBE2eTest is WithPool, BaseTest {
       IAlpacaVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063),
       IW_NATIVE(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
     );
+    erc4626.reinitialize();
 
     ERC20 marketKey = ERC20(address(erc4626));
     flywheel.addStrategyForRewards(marketKey);
@@ -140,7 +143,7 @@ contract BNBE2eTest is WithPool, BaseTest {
     vm.roll(1);
     deployCErc20PluginRewardsDelegate(address(erc4626), 0.9e18);
 
-    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(erc4626));

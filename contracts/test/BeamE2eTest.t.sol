@@ -6,8 +6,9 @@ import "./config/BaseTest.t.sol";
 import "forge-std/Test.sol";
 import "../external/uniswap/IUniswapV2Pair.sol";
 import "../external/uniswap/IUniswapV2Factory.sol";
-import { ICErc20 } from "../external/compound/ICErc20.sol";
+import "../compound/CTokenInterfaces.sol";
 
+import { ICErc20 } from "../external/compound/ICErc20.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
@@ -48,7 +49,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     address[] swapToken0Path;
     address[] swapToken1Path;
     bytes[] abis;
-    CToken[] allMarkets;
+    CTokenInterface[] allMarkets;
     FuseSafeLiquidator liquidator;
     MockERC4626 erc4626;
     MockBeamERC20 asset;
@@ -68,7 +69,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
-    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
     assertEq(cToken.name(), "cUnderlyingToken");
     underlyingToken.approve(address(cToken), 1e36);
@@ -98,7 +99,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
-    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
     assertEq(cToken.name(), "cUnderlyingToken");
     underlyingToken.approve(address(cToken), 1e36);
@@ -201,7 +202,7 @@ contract BeamE2eTest is WithPool, BaseTest {
       vm.mockCall(
         mPriceOracle,
         abi.encodeWithSelector(priceOracle.getUnderlyingPrice.selector, ICToken(address(cToken))),
-        abi.encode(vars.oraclePrice * 40)
+        abi.encode(vars.oraclePrice * 40e12)
       );
     }
 
@@ -280,7 +281,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     vm.roll(1);
     deployCErc20PluginDelegate(address(erc4626), 0.9e18);
 
-    CToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(erc4626));
