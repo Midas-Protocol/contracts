@@ -10,7 +10,7 @@ import "../../midas/SafeOwnableUpgradeable.sol";
  * @title Compound's JumpRateModel Contract
  * @author Compound
  */
-contract JumpRateModel is SafeOwnableUpgradeable, InterestRateModel {
+contract UpgreadableJumpRateModel is SafeOwnableUpgradeable, InterestRateModel {
   using SafeMath for uint256;
 
   event NewInterestParams(
