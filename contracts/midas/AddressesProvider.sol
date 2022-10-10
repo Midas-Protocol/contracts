@@ -13,6 +13,8 @@ contract AddressesProvider is OwnableUpgradeable {
   mapping(string => address) private _addresses;
   mapping(address => Contract) public flywheelRewards;
   mapping(address => Contract) public plugins;
+  mapping(address => Contract) public redemptionStrategies;
+  mapping(address => Contract) public fundingStrategies;
 
   /// @dev Initializer to set the admin that can set and change contracts addresses
   function initialize(address owner) public initializer {
@@ -21,6 +23,8 @@ contract AddressesProvider is OwnableUpgradeable {
   }
 
   event AddressSet(string id, address indexed newAddress);
+
+  event ContractSet(address indexed key, string contractType, address contractAddress);
 
   /**
    * @dev The contract address and a string that uniquely identifies the contract's interface
@@ -42,6 +46,7 @@ contract AddressesProvider is OwnableUpgradeable {
     string calldata contractInterface
   ) public onlyOwner {
     flywheelRewards[rewardToken] = Contract(flywheelRewardsModule, contractInterface);
+    emit ContractSet(rewardToken, contractInterface, flywheelRewardsModule);
   }
 
   /**
@@ -56,6 +61,37 @@ contract AddressesProvider is OwnableUpgradeable {
     string calldata contractInterface
   ) public onlyOwner {
     plugins[asset] = Contract(plugin, contractInterface);
+    emit ContractSet(asset, contractInterface, plugin);
+  }
+
+  /**
+   * @dev sets the address and contract interface ID of the redemption strategy for the asset
+   * @param asset the asset address
+   * @param strategy redemption strategy address
+   * @param contractInterface a string that uniquely identifies the contract's interface
+   */
+  function setRedemptionStrategy(
+    address asset,
+    address strategy,
+    string calldata contractInterface
+  ) public onlyOwner {
+    redemptionStrategies[asset] = Contract(strategy, contractInterface);
+    emit ContractSet(asset, contractInterface, strategy);
+  }
+
+  /**
+   * @dev sets the address and contract interface ID of the funding strategy for the asset
+   * @param asset the asset address
+   * @param strategy funding strategy address
+   * @param contractInterface a string that uniquely identifies the contract's interface
+   */
+  function setFundingStrategy(
+    address asset,
+    address strategy,
+    string calldata contractInterface
+  ) public onlyOwner {
+    fundingStrategies[asset] = Contract(strategy, contractInterface);
+    emit ContractSet(asset, contractInterface, strategy);
   }
 
   /**
