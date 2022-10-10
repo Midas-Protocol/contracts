@@ -4,13 +4,22 @@ pragma solidity >=0.8.0;
 import "../../compound/InterestRateModel.sol";
 import "../../compound/SafeMath.sol";
 
-import "../../midas/SafeOwnableUpgradeable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title Compound's JumpRateModel Contract
  * @author Compound
  */
-contract UpgreadableJumpRateModel is SafeOwnableUpgradeable, InterestRateModel {
+
+struct InterestRateModelParams {
+  uint256 blocksPerYear; // The approximate number of blocks per year
+  uint256 baseRatePerYear; // The approximate target base APR, as a mantissa (scaled by 1e18)
+  uint256 multiplierPerYear; // The rate of increase in interest rate wrt utilization (scaled by 1e18)
+  uint256 jumpMultiplierPerYear; // The multiplierPerBlock after hitting a specified utilization point
+  uint256 kink; // The utilization point at which the jump multiplier is applied
+}
+
+contract UpgreadableJumpRateModel is Ownable, InterestRateModel {
   using SafeMath for uint256;
 
   event NewInterestParams(
@@ -19,14 +28,6 @@ contract UpgreadableJumpRateModel is SafeOwnableUpgradeable, InterestRateModel {
     uint256 jumpMultiplierPerBlock,
     uint256 kink
   );
-
-  struct InterestRateModelParams {
-    uint256 blocksPerYear; // The approximate number of blocks per year
-    uint256 baseRatePerYear; // The approximate target base APR, as a mantissa (scaled by 1e18)
-    uint256 multiplierPerYear; // The rate of increase in interest rate wrt utilization (scaled by 1e18)
-    uint256 jumpMultiplierPerYear; // The multiplierPerBlock after hitting a specified utilization point
-    uint256 kink; // The utilization point at which the jump multiplier is applied
-  }
 
   /**
    * @notice The approximate number of blocks per year that is assumed by the interest rate model
@@ -55,11 +56,9 @@ contract UpgreadableJumpRateModel is SafeOwnableUpgradeable, InterestRateModel {
 
   /**
    * @notice Initialise an interest rate model
-   
    */
 
-  function initialize(InterestRateModelParams memory params) public initializer {
-    __SafeOwnable_init();
+  constructor(InterestRateModelParams memory params) {
     blocksPerYear = params.blocksPerYear;
     baseRatePerBlock = params.baseRatePerYear.div(blocksPerYear);
     multiplierPerBlock = params.multiplierPerYear.div(blocksPerYear);
@@ -89,7 +88,7 @@ contract UpgreadableJumpRateModel is SafeOwnableUpgradeable, InterestRateModel {
     return borrows.mul(1e18).div(cash.add(borrows).sub(reserves));
   }
 
-  function _setIrmParameters(InterestRateModelParams memory params) public onlyOwnerOrAdmin {
+  function _setIrmParameters(InterestRateModelParams memory params) public onlyOwner {
     blocksPerYear = params.blocksPerYear;
     baseRatePerBlock = params.baseRatePerYear.div(blocksPerYear);
     multiplierPerBlock = params.multiplierPerYear.div(blocksPerYear);
