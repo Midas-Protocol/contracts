@@ -19,7 +19,7 @@ struct InterestRateModelParams {
   uint256 kink; // The utilization point at which the jump multiplier is applied
 }
 
-contract UpgreadableJumpRateModel is Ownable, InterestRateModel {
+contract AdjustableJumpRateModel is Ownable, InterestRateModel {
   using SafeMath for uint256;
 
   event NewInterestParams(

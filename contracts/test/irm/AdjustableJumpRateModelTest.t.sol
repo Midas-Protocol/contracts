@@ -5,10 +5,10 @@ import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "../config/BaseTest.t.sol";
 
-import { UpgreadableJumpRateModel, InterestRateModelParams } from "../../midas/irms/UpgreadableJumpRateModel.sol";
+import { AdjustableJumpRateModel, InterestRateModelParams } from "../../midas/irms/AdjustableJumpRateModel.sol";
 
 contract InterestRateModelTest is BaseTest {
-  UpgreadableJumpRateModel upgreadableJumpRateModel;
+  AdjustableJumpRateModel adjustableJumpRateModel;
   InterestRateModelParams params;
   InterestRateModelParams newParams;
 
@@ -20,12 +20,12 @@ contract InterestRateModelTest is BaseTest {
       jumpMultiplierPerYear: 4e18,
       kink: 0.8e18
     });
-    upgreadableJumpRateModel = new UpgreadableJumpRateModel(params);
+    adjustableJumpRateModel = new AdjustableJumpRateModel(params);
   }
 
   function testUpdateJrmParams() public {
-    assertEq(upgreadableJumpRateModel.blocksPerYear(), params.blocksPerYear);
-    assertEq(upgreadableJumpRateModel.baseRatePerBlock(), params.baseRatePerYear / params.blocksPerYear);
+    assertEq(adjustableJumpRateModel.blocksPerYear(), params.blocksPerYear);
+    assertEq(adjustableJumpRateModel.baseRatePerBlock(), params.baseRatePerYear / params.blocksPerYear);
 
     newParams = InterestRateModelParams({
       blocksPerYear: 512000,
@@ -35,10 +35,10 @@ contract InterestRateModelTest is BaseTest {
       kink: 0.8e18
     });
 
-    upgreadableJumpRateModel._setIrmParameters(newParams);
+    adjustableJumpRateModel._setIrmParameters(newParams);
     vm.roll(1);
 
-    assertEq(upgreadableJumpRateModel.blocksPerYear(), newParams.blocksPerYear);
-    assertEq(upgreadableJumpRateModel.baseRatePerBlock(), newParams.baseRatePerYear / newParams.blocksPerYear);
+    assertEq(adjustableJumpRateModel.blocksPerYear(), newParams.blocksPerYear);
+    assertEq(adjustableJumpRateModel.baseRatePerBlock(), newParams.baseRatePerYear / newParams.blocksPerYear);
   }
 }
