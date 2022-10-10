@@ -513,51 +513,50 @@ contract FuseSafeLiquidatorTest is BaseTest {
   }
 
   function addPolygonStrategies(LiquidationData memory vars) internal {
-    if (isFundedAsset(vars.debtMarket.underlying())) {
+    address debtToken = vars.debtMarket.underlying();
+    vars.flashSwapFundingToken = debtToken;
+
+    (address addr, string memory contractInterface) = ap.fundingStrategies(debtToken);
+
+    uint8 i = 0;
+    while (true) {
+      address debtToken = vars.debtMarket.underlying();
+      // fundingStrategy = ap.fundingStrategies(debtToken);
+      i++;
+
+
+      // address outputToken = IFundsConversionStrategy(addr).estimateInputAmount();
+
+      break;
+    }
+
+    if (addr != address(0)) {
       // TODO
+      vars.fundingStrategies = new IFundsConversionStrategy[](1);
+      vars.fundingDatas = new bytes[](1);
+
+      vars.fundingStrategies[0] = IFundsConversionStrategy(addr);
+
+      if (vars.flashSwapFundingToken != ap.getAddress("wtoken")) {
+        IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
+        address pairAddress = IUniswapV2Factory(router.factory()).getPair(
+          vars.flashSwapFundingToken,
+          ap.getAddress("wtoken")
+        );
+
+        require(pairAddress != address(0), "funding strategies needed to obtain the flash swap funding token");
+
+        vars.flashSwapPair = IUniswapV2Pair(pairAddress);
+      } else {
+        vars.flashSwapPair = FIRST_PAIR;
+      }
+
+
+      // vars.flashSwapFundingToken = outputToken;
     } else {
       vars.fundingStrategies = new IFundsConversionStrategy[](0);
       vars.fundingDatas = new bytes[](0);
       vars.flashSwapFundingToken = vars.debtMarket.underlying();
-    }
-  }
-
-  /*
-const JEUR = "0x4e3Decbb3645551B8A19f0eA1678079FCB33fB4c";
-const JJPY = "0x8343091F2499FD4b6174A46D067A920a3b851FF9";
-const JPYC = "0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB";
-const JCAD = "0x8ca194A3b22077359b5732DE53373D4afC11DeE3";
-const JSGD = "0xa926db7a4CC0cb1736D5ac60495ca8Eb7214B503";
-const JCHF = "0xbD1463F02f61676d53fd183C2B19282BFF93D099";
-const JMXN = "0xBD1fe73e1f12bD2bc237De9b626F056f21f86427";
-const JGBP = "0x767058F11800FBA6A682E73A6e79ec5eB74Fac8c";
-const JCNY = "0x84526c812D8f6c4fD6C1a5B68713AFF50733E772";
-const JAUD = "0xCB7F1Ef7246D1497b985f7FC45A1A31F04346133";
-const JNZD = "0x6b526Daf03B4C47AF2bcc5860B12151823Ff70E0";
-const JPLN = "0x08E6d1F0c4877Ef2993Ad733Fc6F1D022d0E9DBf";
-const JSEK = "0x197E5d6CcfF265AC3E303a34Db360ee1429f5d1A";
-const JKRW = "0xa22f6bc96f13bcC84dF36109c973d3c0505a067E";
-const JPHP = "0x486880FB16408b47f928F472f57beC55AC6089d1";
-
-  */
-  function isFundedAsset(address underlying) internal returns (bool) {
-    if (block.chainid == POLYGON_MAINNET) {
-      return
-      underlying == 0xBD1fe73e1f12bD2bc237De9b626F056f21f86427 // jMXN
-      ||
-      underlying == 0x4e3Decbb3645551B8A19f0eA1678079FCB33fB4c // JEUR
-      ||
-      underlying == 0x8343091F2499FD4b6174A46D067A920a3b851FF9 // JJPY
-      ||
-      underlying == 0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB // JPYC
-      ||
-      underlying == 0x8ca194A3b22077359b5732DE53373D4afC11DeE3 // JCAD
-      ||
-      underlying == 0xa926db7a4CC0cb1736D5ac60495ca8Eb7214B503 // JSGD
-      ||
-      underlying == 0xbD1463F02f61676d53fd183C2B19282BFF93D099; // JCHF
-    } else {
-      return false;
     }
   }
 }
