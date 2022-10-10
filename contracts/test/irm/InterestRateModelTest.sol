@@ -3,11 +3,11 @@ pragma solidity >=0.8.0;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
-import "./config/BaseTest.t.sol";
+import "../config/BaseTest.t.sol";
 
-import { AnkrBNBInterestRateModel, IAnkrBNBR } from "../midas/irms/AnkrBNBInterestRateModel.sol";
-import { JumpRateModel } from "../compound/JumpRateModel.sol";
-import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
+import { AnkrBNBInterestRateModel, IAnkrBNBR } from "../../midas/irms/AnkrBNBInterestRateModel.sol";
+import { JumpRateModel } from "../../compound/JumpRateModel.sol";
+import { WhitePaperInterestRateModel } from "../../compound/WhitePaperInterestRateModel.sol";
 
 contract InterestRateModelTest is BaseTest {
   AnkrBNBInterestRateModel ankrBnbInterestRateModel2;
