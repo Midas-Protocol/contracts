@@ -31,7 +31,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
   constructor() WithPool() {
     super.setUpWithPool(
       MasterPriceOracle(0xFC43A2A797f731dad53D6BC4Fe9300d68F480203), // MasterPriceOracle
-      ERC20Upgradeable(0x7ff459CE3092e8A866aA06DA88D291E2E31230C1) // USDC
+      ERC20Upgradeable(0x6Ab1F83c0429A1322D7ECDFdDf54CE6D179d911f) // MORA
     );
   }
 
@@ -48,13 +48,13 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     CTokenInterface[] allMarkets;
     FuseSafeLiquidator liquidator;
     MockERC20 erc20;
-    MockERC20 asset;
+    MockWNeon asset;
     IFundsConversionStrategy[] fundingStrategies;
     bytes[] data;
   }
 
   function setUp() public shouldRun(forChains(NEON_DEVNET)) {
-    vm.prank(0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E); // whale
+    vm.prank(0xaFA9ba8282Db9eE8c89A63C99b093a9843436767); // MORA Owner
     MockERC20(address(underlyingToken)).mint(address(this), 1e18);
     setUpPool("neondevnet-test", false, 0.1e18, 1.1e18);
   }
@@ -104,7 +104,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     LiquidationData memory vars;
     vm.roll(1);
     vars.erc20 = MockERC20(0x6Ab1F83c0429A1322D7ECDFdDf54CE6D179d911f); // MORA
-    vars.asset = MockERC20(0x7ff459CE3092e8A866aA06DA88D291E2E31230C1); // USDC
+    vars.asset = MockWNeon(0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5); // WNEON
 
     deployCErc20Delegate(address(vars.erc20), "MORA", "MoraSwap", 0.9e18);
     deployCErc20Delegate(address(vars.asset), "WNEON", "Wrapped Neon", 0.9e18);
@@ -136,13 +136,12 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     FusePoolLensSecondary secondary = new FusePoolLensSecondary();
     secondary.initialize(fusePoolDirectory);
 
-    vm.prank(0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E);
-    MockERC20(address(underlyingToken)).mint(accountTwo, 1000000000000e18);
+    vm.prank(0xaFA9ba8282Db9eE8c89A63C99b093a9843436767);
+    MockERC20(address(underlyingToken)).mint(accountTwo, 10000e18);
     // Account One Supply
-    vm.deal(accountOne, 1000000000000e18);
+    vm.deal(accountOne, 10000e18);
     vm.startPrank(accountOne);
-
-    // vars.asset.deposit{ value: 1000000000000e18 }();
+    vars.asset.deposit{ value: 10000e18 }();
     vm.stopPrank();
 
     // Account One Supply
