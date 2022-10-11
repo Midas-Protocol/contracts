@@ -24,7 +24,6 @@ contract BeefyERC4626AccuralTest is BaseTest {
 
   address accountOne = address(1);
   address accountTwo = address(2);
-  address accountThree = address(3);
 
   function setUp() public shouldRun(forChains(POLYGON_MAINNET)) {
     underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
@@ -56,26 +55,18 @@ contract BeefyERC4626AccuralTest is BaseTest {
 
   /* --------------------- ERC4626 ACCURAL TESTS --------------------- */
 
-  function testAccuralVaultAmount() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testAccuralIsEqual() public shouldRun(forChains(POLYGON_MAINNET)) {
     deal(address(underlyingToken), accountOne, DEPOSIT_AMOUNT);
     deal(address(underlyingToken), accountTwo, DEPOSIT_AMOUNT);
-    deal(address(underlyingToken), accountThree, DEPOSIT_AMOUNT);
 
     depositVault(accountOne, DEPOSIT_AMOUNT);
     deposit(accountTwo, DEPOSIT_AMOUNT);
-    deposit(accountThree, DEPOSIT_AMOUNT);
 
     // increase vault balance
     increaseAssetsInVault();
 
     vm.warp(block.number + 150);
 
-    // decrease vault balance
-    vm.prank(accountThree);
-    beefyVault.withdrawAll();
-
-    vm.warp(block.number + 150);
-
     vm.prank(accountOne);
     beefyVault.withdrawAll();
 
@@ -87,39 +78,6 @@ contract BeefyERC4626AccuralTest is BaseTest {
     uint256 accountOneBalance = underlyingToken.balanceOf(accountOne);
     uint256 accountTwoBalance = underlyingToken.balanceOf(accountTwo);
 
-    assertApproxEqAbs(accountOneBalance, accountTwoBalance, 1e17, string(abi.encodePacked("!withdrwal balance")));
-  }
-
-  function testAccuralERC4626Amount() public shouldRun(forChains(POLYGON_MAINNET)) {
-    deal(address(underlyingToken), accountOne, DEPOSIT_AMOUNT);
-    deal(address(underlyingToken), accountTwo, DEPOSIT_AMOUNT);
-    deal(address(underlyingToken), accountThree, DEPOSIT_AMOUNT);
-
-    depositVault(accountOne, DEPOSIT_AMOUNT);
-    deposit(accountTwo, DEPOSIT_AMOUNT);
-
-    // increasing assets in erc4626
-    deposit(accountThree, DEPOSIT_AMOUNT);
-
-    vm.warp(block.number + 150);
-
-    // decrease assets in erc4626
-    vm.prank(accountThree);
-    plugin.withdraw(DEPOSIT_AMOUNT / 2, accountThree, accountThree);
-
-    vm.warp(block.number + 150);
-
-    vm.prank(accountOne);
-    beefyVault.withdrawAll();
-
-    uint256 erc4626Share = ERC20Upgradeable(plugin).balanceOf(accountTwo);
-
-    vm.prank(accountTwo);
-    plugin.redeem(erc4626Share, accountTwo, accountTwo);
-
-    uint256 accountOneBalance = underlyingToken.balanceOf(accountOne);
-    uint256 accountTwoBalance = underlyingToken.balanceOf(accountTwo);
-
-    assertApproxEqAbs(accountOneBalance, accountTwoBalance, 1e17, string(abi.encodePacked("!withdrwal balance")));
+    assertEq(accountOneBalance, accountTwoBalance, string(abi.encodePacked("!withdrawal balance")));
   }
 }
