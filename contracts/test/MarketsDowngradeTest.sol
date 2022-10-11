@@ -13,7 +13,7 @@ contract MarketsDowngradeTest is BaseTest {
   // taken from ERC1967Upgrade
   bytes32 internal constant _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
 
-  function testDowngradeMarket() public {
+  function testDowngradeMarket() public shouldRun(forChains(POLYGON_MAINNET)) {
     address eurParAddress = 0x30b32BbfcA3A81922F88809F53E625b5EE5286f6; // PAR-jEUR LP
     address usdcParAddress = 0xa5A14c3814d358230a56e8f011B8fc97A508E890; // G-UNI USDC-PAR
     address twoNzdAddress = 0x7AB807F3FBeca9eb22a1A7a490bdC353D85DED41; // jNZD-NZDS
