@@ -48,14 +48,14 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     CTokenInterface[] allMarkets;
     FuseSafeLiquidator liquidator;
     MockERC20 erc20;
-    MockWNeon asset;
+    MockERC20 asset;
     IFundsConversionStrategy[] fundingStrategies;
     bytes[] data;
   }
 
   function setUp() public shouldRun(forChains(NEON_DEVNET)) {
     vm.prank(0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E); // whale
-    MockERC20(address(underlyingToken)).mint(address(this), 100e18);
+    MockERC20(address(underlyingToken)).mint(address(this), 1e18);
     setUpPool("neondevnet-test", false, 0.1e18, 1.1e18);
   }
 
@@ -104,7 +104,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     LiquidationData memory vars;
     vm.roll(1);
     vars.erc20 = MockERC20(0x6Ab1F83c0429A1322D7ECDFdDf54CE6D179d911f); // MORA
-    vars.asset = MockWNeon(0xece5782B5Bad3ED189Ba5C3099e01790cBAA3C96); // WNEON
+    vars.asset = MockERC20(0x7ff459CE3092e8A866aA06DA88D291E2E31230C1); // USDC
 
     deployCErc20Delegate(address(vars.erc20), "MORA", "MoraSwap", 0.9e18);
     deployCErc20Delegate(address(vars.asset), "WNEON", "Wrapped Neon", 0.9e18);
@@ -147,7 +147,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     // Account One Supply
     vm.startPrank(accountOne);
     vars.asset.approve(address(cWNeonToken), 1e36);
-    cWNeonToken.mint(1e17);
+    cWNeonToken.mint(1e14);
     vm.stopPrank();
 
     // Account Two Supply
