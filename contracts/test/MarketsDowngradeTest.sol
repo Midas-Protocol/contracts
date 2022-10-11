@@ -42,24 +42,32 @@ contract MarketsDowngradeTest is BaseTest {
     emit log("withdrawn assets are");
     emit log_uint(assets);
 
-
-    // upgrade
-    {
+    if (market == twoNzdAddress) {
       BeefyERC4626 newImpl = new BeefyERC4626();
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(pluginAddress));
       bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
       address admin = address(uint160(uint256(bytesAtSlot)));
       //            emit log_address(admin);
+      bytes memory data = abi.encodeWithSelector(newImpl.reinitialize.selector);
       vm.prank(admin);
-      proxy.upgradeTo(address(newImpl));
+      proxy.upgradeToAndCall(address(newImpl), data);
     }
 
+    uint256 previewRedeem = asMidasPlugin.previewRedeem(asMidasPlugin.totalSupply());
 
-    vm.prank(asMidasPlugin.owner());
-    asMidasPlugin.shutdown(market);
+    if (market == twoNzdAddress) {
+      vm.prank(asMidasPlugin.owner());
+      asMidasPlugin.shutdown(market);
+    }
+
+    assets = ERC20Upgradeable(underlying).balanceOf(market);
 
     emit log("withdrawn assets are");
-    assets = ERC20Upgradeable(underlying).balanceOf(market);
     emit log_uint(assets);
+
+    emit log("preview redeemed assets are");
+    emit log_uint(previewRedeem);
+
+    assertEq(assets, previewRedeem, "mismatch between preview and actual total redeem");
   }
 }
