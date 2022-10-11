@@ -122,7 +122,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     // setting up liquidator
     vars.liquidator = new FuseSafeLiquidator();
     vars.liquidator.initialize(
-      ap.getAddress("wtoken"),
+      0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5, // wneon
       0x696d73D7262223724d60B2ce9d6e20fc31DfC56B, // moraswap router
       0x7ff459CE3092e8A866aA06DA88D291E2E31230C1, // USDC
       0x6fbF8F06Ebce724272813327255937e7D1E72298, // wWBTC
@@ -183,7 +183,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x696d73D7262223724d60B2ce9d6e20fc31DfC56B);
     address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(
       address(underlyingToken),
-      ap.getAddress("wtoken")
+      0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5
     );
     IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
