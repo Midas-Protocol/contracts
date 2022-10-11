@@ -15,6 +15,7 @@ contract AddressesProvider is OwnableUpgradeable {
   mapping(address => Contract) public plugins;
   mapping(address => Contract) public redemptionStrategies;
   mapping(address => Contract) public fundingStrategies;
+  mapping(address => JarvisPool) public jarvisPools;
 
   /// @dev Initializer to set the admin that can set and change contracts addresses
   function initialize(address owner) public initializer {
@@ -32,6 +33,13 @@ contract AddressesProvider is OwnableUpgradeable {
   struct Contract {
     address addr;
     string contractInterface;
+  }
+
+  struct JarvisPool {
+    address syntheticToken;
+    address collateralToken;
+    address liquidityPool;
+    uint256 expirationTime;
   }
 
   /**
@@ -92,6 +100,22 @@ contract AddressesProvider is OwnableUpgradeable {
   ) public onlyOwner {
     fundingStrategies[asset] = Contract(strategy, contractInterface);
     emit ContractSet(asset, contractInterface, strategy);
+  }
+
+  /**
+   * @dev configures the Jarvis pool of a Jarvis synthetic token
+   * @param syntheticToken the synthetic token address
+   * @param collateralToken the collateral token address
+   * @param liquidityPool the liquidity pool address
+   * @param expirationTime the operation expiration time
+   */
+  function setJarvisPool(
+    address syntheticToken,
+    address collateralToken,
+    address liquidityPool,
+    uint256 expirationTime
+  ) public onlyOwner {
+    jarvisPools[syntheticToken] = JarvisPool(syntheticToken, collateralToken, liquidityPool, expirationTime);
   }
 
   /**
