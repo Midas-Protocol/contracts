@@ -1422,6 +1422,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
     return uint256(Error.NO_ERROR);
   }
+
   /**
    * @notice Accrues interest and reduces Fuse fees by transferring to Fuse
    * @param withdrawAmount Amount of fees to withdraw
@@ -1533,7 +1534,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
     return uint256(Error.NO_ERROR);
   }
-  
+
   /**
    * @notice accrues interest and updates the interest rate model using _setInterestRateModelFresh
    * @dev Admin function to accrue interest and update the interest rate model
