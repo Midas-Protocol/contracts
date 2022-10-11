@@ -56,10 +56,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
       plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
     }
 
-    if (
-      address(plugin) == twoNzdPluginAddress ||
-      address(plugin) == eurParPluginAddress
-    ) {
+    if (address(plugin) == twoNzdPluginAddress || address(plugin) == eurParPluginAddress) {
       plugin = IERC4626(address(0));
       return;
     }
