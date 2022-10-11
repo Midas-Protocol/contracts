@@ -141,13 +141,14 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     // Account One Supply
     vm.deal(accountOne, 1000000000000e18);
     vm.startPrank(accountOne);
-    vars.asset.deposit{ value: 1000000000000e18 }();
+
+    // vars.asset.deposit{ value: 1000000000000e18 }();
     vm.stopPrank();
 
     // Account One Supply
     vm.startPrank(accountOne);
     vars.asset.approve(address(cWNeonToken), 1e36);
-    cWNeonToken.mint(1e14);
+    cWNeonToken.mint(1e17);
     vm.stopPrank();
 
     // Account Two Supply
