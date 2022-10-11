@@ -49,6 +49,17 @@ contract CErc20PluginDelegate is CErc20Delegate {
    */
   function _updatePlugin(address _plugin) public {
     require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _updatePlugin");
+    address twoNzdPluginAddress = 0xE44986cf07E92D8135179Fb3bbc5ed9C17195f2F; // jNZD-NZDS
+    address eurParPluginAddress = 0x57eB88582696581B95A46D46c52F8c33d5ef7373; // PAR-jEUR LP
+
+    if (address(plugin) == eurParPluginAddress) {
+      plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
+    }
+
+    if (address(plugin) == twoNzdPluginAddress || address(plugin) == eurParPluginAddress) {
+      plugin = IERC4626(address(0));
+      return;
+    }
 
     address oldImplementation = address(plugin) != address(0) ? address(plugin) : _plugin;
 

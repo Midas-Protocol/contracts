@@ -207,6 +207,13 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
     // Deposit all assets to underlying strategy
   }
 
+  function shutdown(address market) external onlyOwner whenPaused returns (uint256) {
+    ERC20Upgradeable theAsset = _asset();
+    uint256 endBalance = theAsset.balanceOf(address(this));
+    theAsset.transfer(market, endBalance);
+    return endBalance;
+  }
+
   /* ========== INTERNAL HOOKS LOGIC ========== */
 
   function beforeWithdraw(uint256 assets, uint256 shares) internal virtual {}
