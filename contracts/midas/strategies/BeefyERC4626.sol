@@ -44,7 +44,7 @@ contract BeefyERC4626 is MidasERC4626 {
   IBeefyVault public beefyVault;
   uint256 public withdrawalFee;
 
-  uint256 BPS_DENOMINATOR = 10_000;
+  uint256 BPS_DENOMINATOR;
 
   /* ========== INITIALIZER ========== */
 
@@ -60,10 +60,18 @@ contract BeefyERC4626 is MidasERC4626 {
     uint256 _withdrawalFee
   ) public initializer {
     __MidasER4626_init(asset);
+
+    BPS_DENOMINATOR = 10_000;
+    performanceFee = 5e16;
     beefyVault = _beefyVault;
     withdrawalFee = _withdrawalFee;
 
     asset.approve(address(beefyVault), type(uint256).max);
+  }
+
+  function reinitialize() public reinitializer(2) onlyOwner {
+    BPS_DENOMINATOR = 10_000;
+    performanceFee = 5e16;
   }
 
   /* ========== VIEWS ========== */

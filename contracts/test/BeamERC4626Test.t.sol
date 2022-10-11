@@ -72,6 +72,7 @@ contract BeamERC4626Test is BaseTest {
 
     beamErc4626 = new BeamERC4626();
     beamErc4626.initialize(testToken, flywheel, 0, IVault(address(mockBeamChef)));
+    beamErc4626.reinitialize();
     marketKey = ERC20(address(beamErc4626));
     flywheel.addStrategyForRewards(marketKey);
 
@@ -476,6 +477,7 @@ contract BeamERC4626UnitTest is BaseTest {
 
     beamErc4626 = new BeamERC4626();
     beamErc4626.initialize(testToken, flywheel, 0, IVault(address(mockBeamChef)));
+    beamErc4626.reinitialize();
     marketKey = ERC20(address(beamErc4626));
     flywheel.addStrategyForRewards(marketKey);
 

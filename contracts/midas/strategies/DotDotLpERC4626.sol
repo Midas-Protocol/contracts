@@ -71,6 +71,7 @@ contract DotDotLpERC4626 is MidasERC4626, RewardsClaimer {
     __MidasER4626_init(asset);
     __RewardsClaimer_init(_rewardsDestination, _rewardTokens);
 
+    performanceFee = 5e16;
     dddFlywheel = _dddFlywheel;
     epxFlywheel = _epxFlywheel;
     lpDepositor = _lpDepositor;
@@ -79,6 +80,10 @@ contract DotDotLpERC4626 is MidasERC4626, RewardsClaimer {
     assetAsArray.push(asset);
 
     asset.approve(address(lpDepositor), type(uint256).max);
+  }
+
+  function reinitialize() public reinitializer(2) onlyOwner {
+    performanceFee = 5e16;
   }
 
   /* ========== VIEWS ========== */
