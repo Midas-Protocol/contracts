@@ -14,6 +14,8 @@ import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 
 contract CurveAssetTest is AbstractAssetTest {
+  address masterPriceOracle = 0x14C15B9ec83ED79f23BF71D51741f58b69ff1494; // master price oracle moonbean
+
   constructor() {
     test = AbstractERC4626Test(address(new CurveERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new CurveTestConfigStorage()));
@@ -23,10 +25,7 @@ contract CurveAssetTest is AbstractAssetTest {
   function setUp() public override shouldRun(shouldRunTest) {}
 
   function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
-    (address masterPriceOracle, address gauge, address asset, address[] memory rewardsToken) = abi.decode(
-      testConfig,
-      (address, address, address, address[])
-    );
+    (, address asset, ) = abi.decode(testConfig, (address, address, address[]));
 
     test.setUpWithPool(MasterPriceOracle(masterPriceOracle), ERC20Upgradeable(asset));
 
