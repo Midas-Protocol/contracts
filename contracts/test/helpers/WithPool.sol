@@ -41,7 +41,6 @@ contract WithPool {
   CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
 
   Comptroller comptroller;
-  Comptroller comptroller1;
   WhitePaperInterestRateModel interestModel;
 
   FuseFeeDistributor fuseAdmin;

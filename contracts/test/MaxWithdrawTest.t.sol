@@ -29,13 +29,6 @@ contract MockAsset is MockERC20 {
 }
 
 contract MaxWithdrawTest is WithPool, BaseTest {
-  constructor() WithPool() {
-    super.setUpWithPool(
-      MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
-      ERC20Upgradeable(ap.getAddress("wtoken"))
-    );
-  }
-
   struct LiquidationData {
     address[] cTokens;
     CTokenInterface[] allMarkets;
@@ -44,6 +37,14 @@ contract MaxWithdrawTest is WithPool, BaseTest {
   }
 
   function setUp() public shouldRun(forChains(BSC_MAINNET, POLYGON_MAINNET)) {
+    // TODO should run for the latest block
+    vm.rollFork(34252820);
+
+    super.setUpWithPool(
+      MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
+      ERC20Upgradeable(ap.getAddress("wtoken"))
+    );
+
     deal(address(underlyingToken), address(this), 100e18);
     setUpPool("bsc-test", false, 0.1e18, 1.1e18);
   }
