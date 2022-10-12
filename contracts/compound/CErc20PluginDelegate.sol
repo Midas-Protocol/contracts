@@ -112,7 +112,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
     plugin.withdraw(amount, to, address(this));
   }
 
-  function contractType() external override virtual returns (string memory) {
+  function contractType() external virtual override returns (string memory) {
     return "CErc20PluginDelegate";
   }
 }
