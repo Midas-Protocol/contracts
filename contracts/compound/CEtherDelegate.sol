@@ -106,4 +106,8 @@ contract CEtherDelegate is CDelegateInterface, CEther {
         _setImplementationInternal(latestCEtherDelegate, allowResign, becomeImplementationData);
     }
   }
+
+  function contractType() external override returns (string memory) {
+    return "CEtherDelegate";
+  }
 }
