@@ -111,4 +111,8 @@ contract CErc20PluginDelegate is CErc20Delegate {
   function doTransferOut(address to, uint256 amount) internal override {
     plugin.withdraw(amount, to, address(this));
   }
+
+  function contractType() external virtual override returns (string memory) {
+    return "CErc20PluginDelegate";
+  }
 }

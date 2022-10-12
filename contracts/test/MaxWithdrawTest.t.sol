@@ -29,13 +29,6 @@ contract MockAsset is MockERC20 {
 }
 
 contract MaxWithdrawTest is WithPool, BaseTest {
-  constructor() WithPool() {
-    super.setUpWithPool(
-      MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
-      ERC20Upgradeable(0x522348779DCb2911539e76A1042aA922F9C47Ee3)
-    );
-  }
-
   struct LiquidationData {
     address[] cTokens;
     CTokenInterface[] allMarkets;
@@ -43,9 +36,20 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     MockAsset usdc;
   }
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
-    vm.prank(0xcd6cD62F11F9417FBD44dc0a44F891fd3E869234);
-    MockERC20(address(underlyingToken)).mint(address(this), 100e18);
+  function setUp() public shouldRun(forChains(BSC_MAINNET, POLYGON_MAINNET)) {
+    // TODO should run for the latest block
+    if (block.chainid == POLYGON_MAINNET) {
+      vm.rollFork(34252820);
+    } else if (block.chainid == BSC_MAINNET) {
+      vm.rollFork(22113750);
+    }
+
+    super.setUpWithPool(
+      MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
+      ERC20Upgradeable(ap.getAddress("wtoken"))
+    );
+
+    deal(address(underlyingToken), address(this), 100e18);
     setUpPool("bsc-test", false, 0.1e18, 1.1e18);
   }
 
@@ -75,18 +79,10 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     FusePoolLensSecondary secondary = new FusePoolLensSecondary();
     secondary.initialize(fusePoolDirectory);
 
-    vm.prank(0xcd6cD62F11F9417FBD44dc0a44F891fd3E869234);
-    MockERC20(address(underlyingToken)).mint(accountTwo, 1000000000000e18);
     // Account One Supply
-    vm.deal(accountOne, 1000000000000e18);
-    vm.prank(accountOne);
-    vars.asset.deposit{ value: 5000000000e18 }();
-    vm.deal(accountThree, 1000000000000e18);
-    vm.prank(accountThree);
-    vars.asset.deposit{ value: 5000000000e18 }();
-
-    vm.prank(0x5a52E96BAcdaBb82fd05763E25335261B270Efcb);
-    MockERC20(address(vars.usdc)).transfer(accountTwo, 10000e18);
+    deal(address(vars.asset), accountOne, 5000000000e18);
+    deal(address(vars.asset), accountThree, 5000000000e18);
+    deal(address(vars.usdc), accountTwo, 10000e18);
 
     // Account One Supply
     {
@@ -147,6 +143,104 @@ contract MaxWithdrawTest is WithPool, BaseTest {
       uint256 afterBnbBalance = vars.asset.balanceOf(accountOne);
 
       assertEq(afterBnbBalance - beforeBnbBalance, maxWithdraw);
+      vm.stopPrank();
+    }
+  }
+
+  function testMIIMOMaxWithdraw() public shouldRun(forChains(POLYGON_MAINNET)) {
+    FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
+    poolLensSecondary.initialize(fusePoolDirectory);
+
+    LiquidationData memory vars;
+    vm.roll(1);
+    vars.asset = MockAsset(0xADAC33f543267c4D59a8c299cF804c303BC3e4aC);
+    vars.usdc = MockAsset(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174);
+
+    deployCErc20Delegate(address(vars.asset), "MIMO", "mimo", 0.9e18);
+    deployCErc20Delegate(address(vars.usdc), "USDC", "usdc", 0.9e18);
+
+    vars.allMarkets = comptroller.getAllMarkets();
+    CErc20Delegate cMimoToken = CErc20Delegate(address(vars.allMarkets[0]));
+
+    CErc20Delegate cToken = CErc20Delegate(address(vars.allMarkets[1]));
+
+    vars.cTokens = new address[](1);
+
+    address accountOne = address(1);
+    address accountTwo = address(2);
+    address accountThree = address(3);
+
+    FusePoolLensSecondary secondary = new FusePoolLensSecondary();
+    secondary.initialize(fusePoolDirectory);
+
+    deal(address(vars.asset), accountOne, 5000000000e18);
+    deal(address(vars.asset), accountThree, 5000000000e18);
+    deal(address(vars.usdc), accountTwo, 10000e6);
+
+    // Account One Supply
+    {
+      emit log("Account One Supply");
+      vm.startPrank(accountOne);
+      vars.asset.approve(address(cMimoToken), 1e36);
+      cMimoToken.mint(10000000e18);
+      vars.cTokens[0] = address(cMimoToken);
+      comptroller.enterMarkets(vars.cTokens);
+      vm.stopPrank();
+    }
+
+    // Account Three Supply
+    {
+      emit log("Account Three Supply");
+      vm.startPrank(accountThree);
+      vars.asset.approve(address(cMimoToken), 1e36);
+      cMimoToken.mint(10000000e18);
+      vars.cTokens[0] = address(cMimoToken);
+      comptroller.enterMarkets(vars.cTokens);
+      vm.stopPrank();
+    }
+
+    // Account Two Supply
+    {
+      emit log("Account Two Supply");
+      vm.startPrank(accountTwo);
+      vars.usdc.approve(address(cToken), 1e36);
+      cToken.mint(1000e6);
+      vars.cTokens[0] = address(cToken);
+      comptroller.enterMarkets(vars.cTokens);
+      vm.stopPrank();
+      assertEq(cToken.totalSupply(), 1000e6 * 5);
+      assertEq(cMimoToken.totalSupply(), 10000000e18 * 5 * 2);
+    }
+
+    // Account Two Borrow
+    {
+      emit log("Account Two Borrow");
+      vm.startPrank(accountTwo);
+      vars.asset.approve(address(cMimoToken), 1e36);
+
+      uint256 maxBorrow = poolLensSecondary.getMaxBorrow(accountTwo, ICToken(address(cToken)));
+      emit log_uint(maxBorrow);
+      cMimoToken.borrow(maxBorrow);
+      assertEq(cMimoToken.totalBorrows(), maxBorrow);
+
+      vm.stopPrank();
+    }
+
+    // Account One Borrow
+    {
+      emit log("Account One Borrow");
+      vm.startPrank(accountOne);
+      vars.usdc.approve(address(cToken), 1e36);
+      cToken.borrow(0.5e6);
+      assertEq(cToken.totalBorrows(), 0.5e6);
+
+      uint256 maxWithdraw = poolLensSecondary.getMaxRedeem(accountOne, ICToken(address(cMimoToken)));
+
+      uint256 beforeMimoBalance = vars.asset.balanceOf(accountOne);
+      cMimoToken.redeemUnderlying(type(uint256).max);
+      uint256 afterMimoBalance = vars.asset.balanceOf(accountOne);
+
+      assertEq(afterMimoBalance - beforeMimoBalance, maxWithdraw);
       vm.stopPrank();
     }
   }
