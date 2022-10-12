@@ -56,8 +56,10 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     require(initialExchangeRateMantissa > 0, "!exchangeRate>0");
 
     // Set the comptroller
-    uint256 err = _setComptroller(comptroller_);
-    require(err == uint256(Error.NO_ERROR), "!comptroller:set");
+    // Ensure invoke comptroller.isComptroller() returns true
+    require(newComptroller.isComptroller(), "marker method returned false");
+    // Set market's comptroller to newComptroller
+    comptroller = newComptroller;
 
     // Initialize block number and borrow index (block number mocks depend on comptroller being set)
     accrualBlockNumber = getBlockNumber();
@@ -1294,25 +1296,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
   }
 
   /*** Admin Functions ***/
-
-  /**
-   * @notice Sets a new comptroller for the market
-   * @dev Internal function to set a new comptroller
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _setComptroller(ComptrollerInterface newComptroller) internal returns (uint256) {
-    ComptrollerInterface oldComptroller = comptroller;
-    // Ensure invoke comptroller.isComptroller() returns true
-    require(newComptroller.isComptroller(), "!notComptroller");
-
-    // Set market's comptroller to newComptroller
-    comptroller = newComptroller;
-
-    // Emit NewComptroller(oldComptroller, newComptroller)
-    emit NewComptroller(oldComptroller, newComptroller);
-
-    return uint256(Error.NO_ERROR);
-  }
 
   /**
    * @notice accrues interest and sets a new admin fee for the protocol using _setAdminFeeFresh
