@@ -221,11 +221,6 @@ abstract contract CTokenInterface is CTokenStorage {
   /*** Admin Events ***/
 
   /**
-   * @notice Event emitted when comptroller is changed
-   */
-  event NewComptroller(ComptrollerInterface oldComptroller, ComptrollerInterface newComptroller);
-
-  /**
    * @notice Event emitted when interestRateModel is changed
    */
   event NewMarketInterestRateModel(InterestRateModel oldInterestRateModel, InterestRateModel newInterestRateModel);

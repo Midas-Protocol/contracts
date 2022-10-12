@@ -15,4 +15,8 @@ contract CErc20PluginRewardsDelegate is CErc20PluginDelegate {
 
     EIP20Interface(_token).approve(_spender, type(uint256).max);
   }
+
+  function contractType() external override returns (string memory) {
+    return "CErc20PluginRewardsDelegate";
+  }
 }
