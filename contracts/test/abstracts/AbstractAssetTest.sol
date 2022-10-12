@@ -49,12 +49,12 @@ contract AbstractAssetTest is BaseTest {
     this.runTest(test.testDeposit);
   }
 
-  function testDepositWithIncreasedVaultValue() public shouldRun(shouldRunTest) {
-    this.runTest(test.testDepositWithIncreasedVaultValue);
+  function testDepositWithIncreasedVaultValue() public virtual shouldRun(shouldRunTest) {
+    //this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public shouldRun(shouldRunTest) {
-    this.runTest(test.testDepositWithDecreasedVaultValue);
+  function testDepositWithDecreasedVaultValue() public virtual shouldRun(shouldRunTest) {
+    //this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
   function testMultipleDeposit() public shouldRun(shouldRunTest) {
@@ -73,12 +73,12 @@ contract AbstractAssetTest is BaseTest {
     this.runTest(test.testWithdraw);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public shouldRun(shouldRunTest) {
-    this.runTest(test.testWithdrawWithIncreasedVaultValue);
+  function testWithdrawWithIncreasedVaultValue() public virtual shouldRun(shouldRunTest) {
+    //this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public shouldRun(shouldRunTest) {
-    this.runTest(test.testWithdrawWithDecreasedVaultValue);
+  function testWithdrawWithDecreasedVaultValue() public virtual shouldRun(shouldRunTest) {
+    //this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 
   function testMultipleWithdraw() public shouldRun(shouldRunTest) {

@@ -7,25 +7,26 @@ import "../helpers/WithPool.sol";
 import "../config/BaseTest.t.sol";
 
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { DotDotERC4626Test } from "./DotDotLpERC4626Test.sol";
-import { DotDotTestConfig, DotDotTestConfigStorage } from "./DotDotTestConfig.sol";
+import { CurveERC4626Test } from "./CurveERC4626Test.sol";
+import { CurveTestConfig, CurveTestConfigStorage } from "./CurveTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 
-// Using 2BRL
-// Tested on block 19052824
-contract DotDotAssetTest is AbstractAssetTest {
+contract CurveAssetTest is AbstractAssetTest {
   constructor() {
-    test = AbstractERC4626Test(address(new DotDotERC4626Test()));
-    testConfigStorage = ITestConfigStorage(address(new DotDotTestConfigStorage()));
-    shouldRunTest = forChains(BSC_MAINNET);
+    test = AbstractERC4626Test(address(new CurveERC4626Test()));
+    testConfigStorage = ITestConfigStorage(address(new CurveTestConfigStorage()));
+    shouldRunTest = forChains(MOONBEAM_MAINNET);
   }
 
   function setUp() public override shouldRun(shouldRunTest) {}
 
   function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
-    (address masterPriceOracle, address asset) = abi.decode(testConfig, (address, address));
+    (address masterPriceOracle, address gauge, address asset, address[] memory rewardsToken) = abi.decode(
+      testConfig,
+      (address, address, address, address[])
+    );
 
     test.setUpWithPool(MasterPriceOracle(masterPriceOracle), ERC20Upgradeable(asset));
 
@@ -44,31 +45,35 @@ contract DotDotAssetTest is AbstractAssetTest {
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
-    this.runTest(test.testDepositWithIncreasedVaultValue);
+  function testDepositWithIncreasedVaultValue() public override shouldRun(false) {
+    // Cant Increase Assets in Vault
+    assertTrue(true);
   }
 
-  function testDepositWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
-    this.runTest(test.testDepositWithDecreasedVaultValue);
+  function testDepositWithDecreasedVaultValue() public override shouldRun(false) {
+    // Cant Decrease Assets in Vault
+    assertTrue(true);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
-    this.runTest(test.testWithdrawWithIncreasedVaultValue);
+  function testWithdrawWithIncreasedVaultValue() public override shouldRun(false) {
+    // Cant Increase Assets in Vault
+    assertTrue(true);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
-    this.runTest(test.testWithdrawWithDecreasedVaultValue);
+  function testWithdrawWithDecreasedVaultValue() public override shouldRun(false) {
+    // Cant Decrease Assets in Vault
+    assertTrue(true);
   }
 
   function testAccumulatingRewardsOnDeposit() public shouldRun(shouldRunTest) {
-    this.runTest(DotDotERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
+    this.runTest(CurveERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
   function testAccumulatingRewardsOnWithdrawal() public shouldRun(shouldRunTest) {
-    this.runTest(DotDotERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
+    this.runTest(CurveERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 
   function testClaimRewards() public shouldRun(shouldRunTest) {
-    this.runTest(DotDotERC4626Test(address(test)).testClaimRewards);
+    this.runTest(CurveERC4626Test(address(test)).testClaimRewards);
   }
 }
