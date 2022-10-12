@@ -72,9 +72,6 @@ contract BeefyERC4626 is MidasERC4626 {
   function reinitialize() public reinitializer(3) onlyOwnerOrAdmin {
     BPS_DENOMINATOR = 10_000;
     performanceFee = 5e16;
-    if (address(this) != 0x6B8B935dfC9Dcd0754eced708b1b633BF73FE854) {
-      withdrawalFee = 0;
-    }
   }
 
   /* ========== VIEWS ========== */
