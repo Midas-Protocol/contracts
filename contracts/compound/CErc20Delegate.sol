@@ -20,7 +20,7 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
    * @param data The encoded bytes data for any initialization
    */
   function _becomeImplementation(bytes memory data) public virtual override {
-    require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
+    require(msg.sender == address(this) || hasAdminRights(), "!self || !admin");
   }
 
   /**
