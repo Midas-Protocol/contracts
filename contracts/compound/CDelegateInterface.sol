@@ -38,4 +38,6 @@ abstract contract CDelegateInterface is CDelegationStorage {
    * @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary
    */
   function _prepare() external payable virtual;
+
+  function contractType() external virtual returns (string memory);
 }

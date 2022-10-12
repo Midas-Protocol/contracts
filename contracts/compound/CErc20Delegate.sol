@@ -109,4 +109,8 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
       }
     }
   }
+
+  function contractType() external virtual override returns (string memory) {
+    return "CErc20Delegate";
+  }
 }
