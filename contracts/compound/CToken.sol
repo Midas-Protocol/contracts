@@ -56,10 +56,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     require(initialExchangeRateMantissa > 0, "!exchangeRate>0");
 
     // Set the comptroller
-    // Ensure invoke comptroller.isComptroller() returns true
-    require(newComptroller.isComptroller(), "marker method returned false");
-    // Set market's comptroller to newComptroller
-    comptroller = newComptroller;
+    comptroller = comptroller_;
 
     // Initialize block number and borrow index (block number mocks depend on comptroller being set)
     accrualBlockNumber = getBlockNumber();
