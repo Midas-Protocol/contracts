@@ -38,7 +38,11 @@ contract MaxWithdrawTest is WithPool, BaseTest {
 
   function setUp() public shouldRun(forChains(BSC_MAINNET, POLYGON_MAINNET)) {
     // TODO should run for the latest block
-    vm.rollFork(34252820);
+    if (block.chainid == POLYGON_MAINNET) {
+      vm.rollFork(34252820);
+    } else if (block.chainid == BSC_MAINNET) {
+      vm.rollFork(22113750);
+    }
 
     super.setUpWithPool(
       MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
