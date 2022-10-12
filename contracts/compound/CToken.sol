@@ -66,7 +66,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     borrowIndex = mantissaOne;
 
     // Set the interest rate model (depends on block number / borrow index)
-    err = _setInterestRateModelFresh(interestRateModel_);
+    uint256 err = _setInterestRateModelFresh(interestRateModel_);
     require(err == uint256(Error.NO_ERROR), "!irm:set");
 
     name = name_;
