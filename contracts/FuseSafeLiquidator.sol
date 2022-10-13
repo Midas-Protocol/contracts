@@ -539,6 +539,15 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     uniswapV2Call(sender, amount0, amount1, data);
   }
 
+  function moraswapCall(
+    address sender,
+    uint256 amount0,
+    uint256 amount1,
+    bytes calldata data
+  ) external {
+    uniswapV2Call(sender, amount0, amount1, data);
+  }
+
   /**
    * @dev Liquidate unhealthy token borrow, exchange seized collateral, return flashloaned funds, and exchange profit.
    */
