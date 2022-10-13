@@ -28,10 +28,14 @@ contract MockWNeon is MockERC20 {
 }
 
 contract NeondevnetE2ETest is WithPool, BaseTest {
+  address mpo = 0xFC43A2A797f731dad53D6BC4Fe9300d68F480203;
+  address moraToken = 0x6Ab1F83c0429A1322D7ECDFdDf54CE6D179d911f;
+  address wtoken = 0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5;
+
   constructor() WithPool() {
     super.setUpWithPool(
-      MasterPriceOracle(0xFC43A2A797f731dad53D6BC4Fe9300d68F480203), // MasterPriceOracle
-      ERC20Upgradeable(0x6Ab1F83c0429A1322D7ECDFdDf54CE6D179d911f) // MORA
+      MasterPriceOracle(mpo), // MasterPriceOracle
+      ERC20Upgradeable(moraToken) // MORA
     );
   }
 
@@ -51,15 +55,15 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     MockWNeon asset;
     IFundsConversionStrategy[] fundingStrategies;
     bytes[] data;
+    uint256 price2;
   }
 
   function setUp() public shouldRun(forChains(NEON_DEVNET)) {
-    vm.prank(0xaFA9ba8282Db9eE8c89A63C99b093a9843436767); // MORA Owner
-    MockERC20(address(underlyingToken)).mint(address(this), 1e18);
+    deal(address(underlyingToken), address(this), 10e18);
     setUpPool("neondevnet-test", false, 0.1e18, 1.1e18);
   }
 
-  function testDeployCErc20Delegate() public shouldRun(forChains(NEON_DEVNET)) {
+  function testNeonDeployCErc20Delegate() public shouldRun(forChains(NEON_DEVNET)) {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
@@ -78,10 +82,10 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
 
     cToken.borrow(1000);
     assertEq(cToken.totalBorrows(), 1000);
-    assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10e18 + 1000);
+    assertEq(underlyingToken.balanceOf(address(this)), 1000);
   }
 
-  function testGetPoolAssetsData() public shouldRun(forChains(NEON_DEVNET)) {
+  function testNeonGetPoolAssetsData() public shouldRun(forChains(NEON_DEVNET)) {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
@@ -100,29 +104,26 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     assertEq(assets[0].supplyBalance, 10e18);
   }
 
-  function testCErc20Liquidation() public shouldRun(forChains(NEON_DEVNET)) {
+  function testNeonCErc20Liquidation() public shouldRun(forChains(NEON_DEVNET)) {
     LiquidationData memory vars;
     vm.roll(1);
-    vars.erc20 = MockERC20(0x6Ab1F83c0429A1322D7ECDFdDf54CE6D179d911f); // MORA
-    vars.asset = MockWNeon(0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5); // WNEON
+    vars.erc20 = MockERC20(moraToken); // MORA
+    vars.asset = MockWNeon(wtoken); // WNEON
 
     deployCErc20Delegate(address(vars.erc20), "MORA", "MoraSwap", 0.9e18);
     deployCErc20Delegate(address(vars.asset), "WNEON", "Wrapped Neon", 0.9e18);
 
     vars.allMarkets = comptroller.getAllMarkets();
-    CErc20Delegate cToken = CErc20Delegate(address(vars.allMarkets[0]));
 
+    CErc20Delegate cToken = CErc20Delegate(address(vars.allMarkets[0]));
     CErc20Delegate cWNeonToken = CErc20Delegate(address(vars.allMarkets[1]));
 
-    vars.cTokens = new address[](2);
-    vars.cTokens[0] = address(cToken);
-    vars.cTokens[1] = address(cWNeonToken);
-    comptroller.enterMarkets(vars.cTokens);
+    vars.cTokens = new address[](1);
 
     // setting up liquidator
     vars.liquidator = new FuseSafeLiquidator();
     vars.liquidator.initialize(
-      0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5, // wneon
+      wtoken, // wneon
       0x696d73D7262223724d60B2ce9d6e20fc31DfC56B, // moraswap router
       0x7ff459CE3092e8A866aA06DA88D291E2E31230C1, // USDC
       0x6fbF8F06Ebce724272813327255937e7D1E72298, // wWBTC
@@ -136,39 +137,41 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     FusePoolLensSecondary secondary = new FusePoolLensSecondary();
     secondary.initialize(fusePoolDirectory);
 
-    vm.prank(0xaFA9ba8282Db9eE8c89A63C99b093a9843436767);
-    MockERC20(address(underlyingToken)).mint(accountTwo, 10000e18);
-    // Account One Supply
-    vm.deal(accountOne, 10000e18);
-    vm.startPrank(accountOne);
-    vars.asset.deposit{ value: 10000e18 }();
-    vm.stopPrank();
+    // Accounts pre supply
+    deal(address(underlyingToken), accountTwo, 10000e18);
+    deal(address(vars.asset), accountOne, 10000e18);
 
     // Account One Supply
     vm.startPrank(accountOne);
     vars.asset.approve(address(cWNeonToken), 1e36);
     cWNeonToken.mint(1e17);
+    vars.cTokens[0] = address(cWNeonToken);
+    comptroller.enterMarkets(vars.cTokens);
     vm.stopPrank();
 
     // Account Two Supply
     vm.startPrank(accountTwo);
     underlyingToken.approve(address(cToken), 1e36);
     cToken.mint(10e18);
+    vars.cTokens[0] = address(cToken);
+    comptroller.enterMarkets(vars.cTokens);
     vm.stopPrank();
+
     assertEq(cToken.totalSupply(), 10e18 * 5);
     assertEq(cWNeonToken.totalSupply(), 1e17 * 5);
 
     // Account One Borrow
     vm.startPrank(accountOne);
     underlyingToken.approve(address(cToken), 1e36);
-    cToken.borrow(100);
+    cToken.borrow(1e16);
     vm.stopPrank();
-    assertEq(cToken.totalBorrows(), 100);
-    uint256 price1 = priceOracle.getUnderlyingPrice(ICToken(address(cToken)));
+    assertEq(cToken.totalBorrows(), 1e16);
+
+    vars.price2 = priceOracle.getUnderlyingPrice(ICToken(address(cWNeonToken)));
     vm.mockCall(
-      0xFC43A2A797f731dad53D6BC4Fe9300d68F480203, // MPO
-      abi.encodeWithSelector(priceOracle.getUnderlyingPrice.selector, ICToken(address(cToken))),
-      abi.encode(price1 * 1000)
+      mpo, // MPO
+      abi.encodeWithSelector(priceOracle.getUnderlyingPrice.selector, ICToken(address(cWNeonToken))),
+      abi.encode(vars.price2 / 1000)
     );
 
     vars.strategies = new IRedemptionStrategy[](0);
@@ -178,7 +181,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
 
     vm.startPrank(accountOne);
     FusePoolLens.FusePoolAsset[] memory assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
-    uint256 bnbBalance = cWNeonToken.balanceOf(accountOne);
+    uint256 neonBalance = cWNeonToken.balanceOf(accountOne);
 
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x696d73D7262223724d60B2ce9d6e20fc31DfC56B);
     address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(
@@ -190,7 +193,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
       FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
         accountOne,
-        9,
+        9e14,
         ICErc20(address(cToken)),
         ICErc20(address(cWNeonToken)),
         flashSwapPair,
@@ -210,9 +213,9 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
       IComptroller(address(comptroller))
     );
 
-    uint256 bnbBalanceAfter = cWNeonToken.balanceOf(accountOne);
+    uint256 neonBalanceAfter = cWNeonToken.balanceOf(accountOne);
 
-    assertGt(bnbBalance, bnbBalanceAfter);
+    assertGt(neonBalance, neonBalanceAfter);
     assertGt(assetsData[1].supplyBalance, assetsDataAfter[1].supplyBalance);
 
     vm.stopPrank();
