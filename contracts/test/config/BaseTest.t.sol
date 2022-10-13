@@ -30,7 +30,7 @@ abstract contract BaseTest is Test {
     } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
     } else if (block.chainid == NEON_DEVNET) {
-      ap = AddressesProvider(0xC4b1512c1eeDd272e0F68737aCd7a1F11F3cA0eF);
+      ap = AddressesProvider(0xd4D0cA503E8befAbE4b75aAC36675Bc1cFA533D1);
     } else if (block.chainid == ARBITRUM_ONE) {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else {

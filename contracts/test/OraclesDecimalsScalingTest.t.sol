@@ -26,7 +26,7 @@ contract OraclesDecimalsScalingTest is BaseTest {
     } else if (block.chainid == POLYGON_MAINNET) {
       vm.rollFork(33996000);
     } else if (block.chainid == NEON_DEVNET) {
-      vm.rollFork(166906532);
+      vm.rollFork(167826388);
     }
 
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
