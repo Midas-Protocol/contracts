@@ -405,11 +405,11 @@ contract FuseSafeLiquidatorTest is BaseTest {
       ap.getAddress("wtoken"),
       uniswapRouter,
       ap.getAddress("USDC"),
-      0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6, // WBTC
+      ap.getAddress("wBTCToken"),
       "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
       30
     );
-    vars.pools = FusePoolDirectory(0x9A161e68EC0d5364f4d09A6080920DAFF6FFf250).getAllPools();
+    vars.pools = FusePoolDirectory(ap.getAddress("FusePoolDirectory")).getAllPools();
 
     while (true) {
       // get a random pool and a random borrower from it
@@ -441,16 +441,6 @@ contract FuseSafeLiquidatorTest is BaseTest {
     address exchangeTo;
 
     addPolygonStrategies(vars);
-
-    // prepare the funding strategies
-    if (vars.debtMarket.underlying() == 0xBD1fe73e1f12bD2bc237De9b626F056f21f86427) {
-      // jMXN
-      addJmxnFundingStrategy(vars);
-    } else {
-      vars.fundingStrategies = new IFundsConversionStrategy[](0);
-      vars.fundingDatas = new bytes[](0);
-      vars.flashSwapFundingToken = vars.debtMarket.underlying();
-    }
 
     if (vars.flashSwapFundingToken != ap.getAddress("wtoken")) {
       IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
@@ -512,51 +502,61 @@ contract FuseSafeLiquidatorTest is BaseTest {
     vars.liquidator._whitelistRedemptionStrategy(vars.fundingStrategies[0], true);
   }
 
+  IFundsConversionStrategy[] fundingStrategies;
+  bytes[] fundingDatas;
+
   function addPolygonStrategies(LiquidationData memory vars) internal {
     address debtToken = vars.debtMarket.underlying();
-    vars.flashSwapFundingToken = debtToken;
 
-    (address addr, string memory contractInterface) = ap.fundingStrategies(debtToken);
-
-    uint8 i = 0;
+    uint i = 0;
     while (true) {
+      emit log("debt token");
+      emit log_address(debtToken);
+      if (i > 10) revert("endless loop bad");
       address debtToken = vars.debtMarket.underlying();
-      // fundingStrategy = ap.fundingStrategies(debtToken);
-      i++;
+      IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
+      address pairAddress = IUniswapV2Factory(router.factory()).getPair(
+        debtToken,
+        ap.getAddress("wtoken")
+      );
 
+      if(pairAddress != address(0)) {
+        vars.flashSwapPair = IUniswapV2Pair(pairAddress);
+        vars.flashSwapFundingToken = debtToken;
+        break;
+      } else {
+        (address addr, string memory contractInterface) = ap.fundingStrategies(debtToken);
 
-      // address outputToken = IFundsConversionStrategy(addr).estimateInputAmount();
+        if (compareStrings(contractInterface, "JarvisLiquidatorFunder")) {
+          (
+          address syntheticToken,
+          address collateralToken,
+          address liquidityPool,
+          uint256 expirationTime
+          ) = ap.jarvisPools(debtToken);
 
-      break;
+          debtToken = collateralToken;
+
+          fundingStrategies.push(new JarvisLiquidatorFunder());
+          bytes memory strategyData = abi.encode(syntheticToken, liquidityPool, expirationTime);
+          fundingDatas.push(strategyData);
+        // } else if (compareStrings(contractInterface, "SomeOtherFunder")) {
+          // bytes memory strategyData = abi.encode(strategySpecificParams);
+          // (IERC20Upgradeable inputToken, uint256 inputAmount) = IFundsConversionStrategy(addr).estimateInputAmount(debtToken, strategyData);
+          // debtToken = inputToken;
+          // fundingStrategies.push(new SomeOtherFunder());
+        } else {
+          revert("unknown polygon debt token");
+        }
+      }
     }
 
-    if (addr != address(0)) {
-      // TODO
-      vars.fundingStrategies = new IFundsConversionStrategy[](1);
-      vars.fundingDatas = new bytes[](1);
+    vars.fundingStrategies = fundingStrategies;
+    vars.fundingDatas = fundingDatas;
 
-      vars.fundingStrategies[0] = IFundsConversionStrategy(addr);
-
-      if (vars.flashSwapFundingToken != ap.getAddress("wtoken")) {
-        IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
-        address pairAddress = IUniswapV2Factory(router.factory()).getPair(
-          vars.flashSwapFundingToken,
-          ap.getAddress("wtoken")
-        );
-
-        require(pairAddress != address(0), "funding strategies needed to obtain the flash swap funding token");
-
-        vars.flashSwapPair = IUniswapV2Pair(pairAddress);
-      } else {
-        vars.flashSwapPair = FIRST_PAIR;
-      }
-
-
-      // vars.flashSwapFundingToken = outputToken;
-    } else {
-      vars.fundingStrategies = new IFundsConversionStrategy[](0);
-      vars.fundingDatas = new bytes[](0);
-      vars.flashSwapFundingToken = vars.debtMarket.underlying();
+    // TODO
+    if (vars.flashSwapFundingToken == ap.getAddress("wtoken")) {
+      vars.flashSwapPair = FIRST_PAIR;
     }
   }
 }
