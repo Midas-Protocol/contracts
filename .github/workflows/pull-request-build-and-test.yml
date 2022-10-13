@@ -49,7 +49,7 @@ jobs:
         run: forge install
 
       - name: Run forge tests
-        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test'
+        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
 
   build-and-test-bsc:
     needs: [lint]
@@ -95,7 +95,7 @@ jobs:
         run: forge install
 
       - name: Run forge tests on Polygon
-        run: forge test --fork-url ${FORK_URL_POLYGON} --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|ERC4626Test'
+        run: forge test --fork-url ${FORK_URL_POLYGON} --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
 
   build-and-test-evmostestnet:
     needs: [lint]
@@ -117,7 +117,7 @@ jobs:
         run: forge install
 
       - name: Run forge tests on Evmos Testnet
-        run: forge test --fork-url https://eth.bd.evmos.dev:8545 --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test'
+        run: forge test --fork-url https://eth.bd.evmos.dev:8545 --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
 
   build-and-test-moonbeam:
     needs: [lint]
@@ -139,7 +139,7 @@ jobs:
         run: forge install
 
       - name: Run forge tests on Moonbeam
-        run: forge test --fork-url https://moonbeam.api.onfinality.io/public --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test'
+        run: forge test --fork-url https://moonbeam.api.onfinality.io/public --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
 
   build-and-test-neondevnet:
     needs: [lint]
@@ -161,7 +161,7 @@ jobs:
         run: forge install
 
       - name: Run forge tests on Neon Devnet
-        run: forge test --fork-url https://proxy.devnet.neonlabs.org/solana --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test'
+        run: forge test --fork-url https://proxy.devnet.neonlabs.org/solana --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
 
   build-and-test-arbitrum:
     needs: [lint]
@@ -183,4 +183,4 @@ jobs:
         run: forge install
 
       - name: Run forge tests on Arbitrum
-        run: forge test --fork-url https://rpc.ankr.com/arbitrum --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test'
+        run: forge test --fork-url https://rpc.ankr.com/arbitrum --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
