@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
-
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "../helpers/WithPool.sol";
@@ -12,20 +11,32 @@ import { CurveTestConfig, CurveTestConfigStorage } from "./CurveTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
+import { MockPriceOracle, IPriceOracle } from "../../oracles/1337/MockPriceOracle.sol";
 
 contract CurveAssetTest is AbstractAssetTest {
-  address masterPriceOracle = 0x14C15B9ec83ED79f23BF71D51741f58b69ff1494; // master price oracle moonbean
+  address masterPriceOracle = 0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31; // master price oracle polygon
+  address[] underlyingsForOracle;
+  IPriceOracle[] oracles;
 
   constructor() {
     test = AbstractERC4626Test(address(new CurveERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new CurveTestConfigStorage()));
-    shouldRunTest = forChains(MOONBEAM_MAINNET);
+    shouldRunTest = forChains(POLYGON_MAINNET);
   }
 
   function setUp() public override shouldRun(shouldRunTest) {}
 
   function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
     (, address asset, ) = abi.decode(testConfig, (address, address, address[]));
+
+    // Set up new oracle
+    MockPriceOracle curveOracle = new MockPriceOracle(60);
+
+    underlyingsForOracle.push(asset);
+    oracles.push(IPriceOracle(address(curveOracle)));
+
+    vm.prank(0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E); // Prank deployer with access rights to mpo
+    MasterPriceOracle(masterPriceOracle).add(underlyingsForOracle, oracles);
 
     test.setUpWithPool(MasterPriceOracle(masterPriceOracle), ERC20Upgradeable(asset));
 

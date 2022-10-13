@@ -26,8 +26,6 @@ struct RewardsCycle {
 contract CurveERC4626Test is AbstractERC4626Test {
   using FixedPointMathLib for uint256;
 
-  address internal whale = 0x0BC3a8239B0a63E945Ea1bd6722Ba747b9557e56;
-
   IChildGauge public gauge;
 
   FlywheelCore[] internal flywheels;
@@ -45,7 +43,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
   constructor() WithPool() {}
 
   function setUp(string memory _testPreFix, bytes calldata data) public override {
-    if (block.chainid == MOONBEAM_MAINNET) {
+    if (block.chainid == POLYGON_MAINNET) {
       setUpPool("curve-test ", false, 0.1e18, 1.1e18);
       sendUnderlyingToken(depositAmount, address(this));
       (address _gauge, address _asset, address[] memory _rewardsToken) = abi.decode(
@@ -56,27 +54,21 @@ contract CurveERC4626Test is AbstractERC4626Test {
         rewardsToken.push(ERC20Upgradeable(_rewardsToken[i]));
       }
       gauge = IChildGauge(_gauge);
-
       testPreFix = _testPreFix;
-
       CurveGaugeERC4626 curveERC4626 = new CurveGaugeERC4626();
       curveERC4626.initialize(ERC20Upgradeable(_asset), gauge, address(this), rewardsToken);
       curveERC4626.reinitialize();
       plugin = curveERC4626;
-
       // Just set it explicitly to 0. Just wanted to make clear that this is not forgotten but expected to be 0
       initialStrategyBalance = 0;
       initialStrategySupply = 0;
-
       deployCErc20PluginRewardsDelegate(address(plugin), 0.9e18);
       marketAddress = address(comptroller.cTokensByUnderlying(address(underlyingToken)));
       CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
       cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(plugin)));
       assertEq(address(cToken.plugin()), address(plugin));
-
       marketKey = ERC20(marketAddress);
       CurveGaugeERC4626(address(plugin)).setRewardDestination(marketAddress);
-
       for (uint8 i; i < _rewardsToken.length; i++) {
         FlywheelCore flywheel = new FlywheelCore(
           ERC20(_rewardsToken[i]),
@@ -89,7 +81,6 @@ contract CurveERC4626Test is AbstractERC4626Test {
         flywheel.setFlywheelRewards(rewardsPlugin);
         flywheels.push(flywheel);
         rewardsPlugins.push(rewardsPlugin);
-
         cToken.approve(_rewardsToken[i], address(rewardsPlugin));
         flywheel.addStrategyForRewards(marketKey);
       }
@@ -119,7 +110,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
   function testInitializedValues(string memory assetName, string memory assetSymbol)
     public
     override
-    shouldRun(forChains(MOONBEAM_MAINNET))
+    shouldRun(forChains(POLYGON_MAINNET))
   {
     assertEq(
       plugin.name(),
@@ -139,7 +130,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function testAccumulatingRewardsOnDeposit() public shouldRun(forChains(POLYGON_MAINNET)) {
     deposit(address(this), depositAmount / 2);
 
     vm.warp(block.timestamp + 150);
@@ -159,7 +150,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
     }
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function testAccumulatingRewardsOnWithdrawal() public shouldRun(forChains(POLYGON_MAINNET)) {
     deposit(address(this), depositAmount);
 
     vm.warp(block.timestamp + 150);
@@ -180,7 +171,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
     }
   }
 
-  function testClaimRewards() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function testClaimRewards() public shouldRun(forChains(POLYGON_MAINNET)) {
     // Deposit funds, Rewards are 0
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);
@@ -191,7 +182,11 @@ contract CurveERC4626Test is AbstractERC4626Test {
       (uint32 cycleStart, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(
         ERC20(address(marketAddress))
       );
+
+      // Rewards can be transfered in the next cycle
       assertEq(cycleEnd, 0, string(abi.encodePacked("!cycleEnd-", vm.toString(i), " ", testPreFix)));
+
+      // Reward amount is still 0
       assertEq(cycleReward, 0, string(abi.encodePacked("!cycleReward-", vm.toString(i), " ", testPreFix)));
 
       cycleRewards.push(cycleReward);
@@ -201,7 +196,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
     vm.roll(10);
 
     for (uint8 i; i < flywheels.length; i++) {
-      uint256 prevRewardAmount = rewardsToken[i].balanceOf(address(flywheels[i]));
+      uint256 prevRewardAmount = rewardsToken[i].balanceOf(address(rewardsPlugins[i]));
 
       // Call accrue as proxy for withdraw/deposit to claim rewards
       flywheels[i].accrue(ERC20(marketAddress), address(this));
@@ -210,7 +205,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
       flywheels[i].accrue(ERC20(marketAddress), address(this));
 
       assertGt(
-        rewardsToken[i].balanceOf(address(flywheels[i])),
+        rewardsToken[i].balanceOf(address(rewardsPlugins[i])),
         prevRewardAmount,
         string(abi.encodePacked("!rewardBal-", vm.toString(i), " ", testPreFix))
       );
@@ -218,12 +213,16 @@ contract CurveERC4626Test is AbstractERC4626Test {
       (uint32 cycleStart, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(
         ERC20(address(marketAddress))
       );
-      assertEq(cycleEnd, 1000000000, string(abi.encodePacked("!2.cycleEnd-", vm.toString(i), " ", testPreFix)));
-      assertEq(
+      // Rewards can be transfered in the next cycle
+      assertEq(cycleEnd, 1663093678, string(abi.encodePacked("!2.cycleEnd-", vm.toString(i), " ", testPreFix)));
+
+      // Rewards can be transfered in the next cycle
+      assertGt(
         cycleReward,
         cycleRewards[i],
         string(abi.encodePacked("!2.cycleReward-", vm.toString(i), " ", testPreFix))
       );
+      cycleRewards[i] = cycleReward;
     }
 
     vm.warp(block.timestamp + 150);
@@ -233,14 +232,12 @@ contract CurveERC4626Test is AbstractERC4626Test {
       // Finally accrue reward from last cycle
       flywheels[i].accrue(ERC20(marketAddress), address(this));
 
-      uint256 accruedRewards = rewardsToken[i].balanceOf(address(flywheels[i]));
-
       // Claim Rewards for the user
       flywheels[i].claimRewards(address(this));
 
       assertEq(
         rewardsToken[i].balanceOf(address(this)),
-        accruedRewards,
+        cycleRewards[i],
         string(abi.encodePacked("!RewardBal User-", vm.toString(i), " ", testPreFix))
       );
       assertEq(
