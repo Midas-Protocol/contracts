@@ -35,7 +35,7 @@ contract CurveAssetTest is AbstractAssetTest {
     underlyingsForOracle.push(asset);
     oracles.push(IPriceOracle(address(curveOracle)));
 
-    vm.prank(0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E); // Prank deployer with access rights to mpo
+    vm.prank(MasterPriceOracle(masterPriceOracle).admin());
     MasterPriceOracle(masterPriceOracle).add(underlyingsForOracle, oracles);
 
     test.setUpWithPool(MasterPriceOracle(masterPriceOracle), ERC20Upgradeable(asset));

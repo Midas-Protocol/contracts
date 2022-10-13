@@ -32,8 +32,6 @@ contract CurveERC4626Test is AbstractERC4626Test {
   FuseFlywheelDynamicRewardsPlugin[] internal rewardsPlugins;
   ERC20Upgradeable[] internal rewardsToken;
 
-  uint256 internal withdrawalFee = 10;
-  uint256 internal ACCEPTABLE_DIFF = 1000;
   uint256[] internal rewardAmounts;
   uint192[] internal cycleRewards;
 
@@ -42,48 +40,43 @@ contract CurveERC4626Test is AbstractERC4626Test {
 
   constructor() WithPool() {}
 
-  function setUp(string memory _testPreFix, bytes calldata data) public override {
-    if (block.chainid == POLYGON_MAINNET) {
-      setUpPool("curve-test ", false, 0.1e18, 1.1e18);
-      sendUnderlyingToken(depositAmount, address(this));
-      (address _gauge, address _asset, address[] memory _rewardsToken) = abi.decode(
-        data,
-        (address, address, address[])
+  function setUp(string memory _testPreFix, bytes calldata data) public override shouldRun(forChains(POLYGON_MAINNET)) {
+    setUpPool("curve-test ", false, 0.1e18, 1.1e18);
+    sendUnderlyingToken(depositAmount, address(this));
+    (address _gauge, address _asset, address[] memory _rewardsToken) = abi.decode(data, (address, address, address[]));
+    for (uint8 i; i < _rewardsToken.length; i++) {
+      rewardsToken.push(ERC20Upgradeable(_rewardsToken[i]));
+    }
+    gauge = IChildGauge(_gauge);
+    testPreFix = _testPreFix;
+    CurveGaugeERC4626 curveERC4626 = new CurveGaugeERC4626();
+    curveERC4626.initialize(ERC20Upgradeable(_asset), gauge, address(this), rewardsToken);
+    curveERC4626.reinitialize();
+    plugin = curveERC4626;
+    // Just set it explicitly to 0. Just wanted to make clear that this is not forgotten but expected to be 0
+    initialStrategyBalance = 0;
+    initialStrategySupply = 0;
+    deployCErc20PluginRewardsDelegate(address(plugin), 0.9e18);
+    marketAddress = address(comptroller.cTokensByUnderlying(address(underlyingToken)));
+    CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
+    cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(plugin)));
+    assertEq(address(cToken.plugin()), address(plugin));
+    marketKey = ERC20(marketAddress);
+    CurveGaugeERC4626(address(plugin)).setRewardDestination(marketAddress);
+    for (uint8 i; i < _rewardsToken.length; i++) {
+      FlywheelCore flywheel = new FlywheelCore(
+        ERC20(_rewardsToken[i]),
+        IFlywheelRewards(address(0)),
+        IFlywheelBooster(address(0)),
+        address(this),
+        Authority(address(0))
       );
-      for (uint8 i; i < _rewardsToken.length; i++) {
-        rewardsToken.push(ERC20Upgradeable(_rewardsToken[i]));
-      }
-      gauge = IChildGauge(_gauge);
-      testPreFix = _testPreFix;
-      CurveGaugeERC4626 curveERC4626 = new CurveGaugeERC4626();
-      curveERC4626.initialize(ERC20Upgradeable(_asset), gauge, address(this), rewardsToken);
-      curveERC4626.reinitialize();
-      plugin = curveERC4626;
-      // Just set it explicitly to 0. Just wanted to make clear that this is not forgotten but expected to be 0
-      initialStrategyBalance = 0;
-      initialStrategySupply = 0;
-      deployCErc20PluginRewardsDelegate(address(plugin), 0.9e18);
-      marketAddress = address(comptroller.cTokensByUnderlying(address(underlyingToken)));
-      CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
-      cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(plugin)));
-      assertEq(address(cToken.plugin()), address(plugin));
-      marketKey = ERC20(marketAddress);
-      CurveGaugeERC4626(address(plugin)).setRewardDestination(marketAddress);
-      for (uint8 i; i < _rewardsToken.length; i++) {
-        FlywheelCore flywheel = new FlywheelCore(
-          ERC20(_rewardsToken[i]),
-          IFlywheelRewards(address(0)),
-          IFlywheelBooster(address(0)),
-          address(this),
-          Authority(address(0))
-        );
-        FuseFlywheelDynamicRewardsPlugin rewardsPlugin = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
-        flywheel.setFlywheelRewards(rewardsPlugin);
-        flywheels.push(flywheel);
-        rewardsPlugins.push(rewardsPlugin);
-        cToken.approve(_rewardsToken[i], address(rewardsPlugin));
-        flywheel.addStrategyForRewards(marketKey);
-      }
+      FuseFlywheelDynamicRewardsPlugin rewardsPlugin = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
+      flywheel.setFlywheelRewards(rewardsPlugin);
+      flywheels.push(flywheel);
+      rewardsPlugins.push(rewardsPlugin);
+      cToken.approve(_rewardsToken[i], address(rewardsPlugin));
+      flywheel.addStrategyForRewards(marketKey);
     }
   }
 

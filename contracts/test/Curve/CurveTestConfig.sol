@@ -14,12 +14,12 @@ contract CurveTestConfigStorage is ITestConfigStorage {
   address[] internal tempRewardsToken;
 
   constructor() {
-    // stMATIC-f
+    // Matic/stMatic
     tempRewardsToken.push(0xC3C7d422809852031b44ab29EEC9F1EfF2A58756); // LDO
     testConfigs.push(
       CurveTestConfig(
-        0x9633E0749faa6eC6d992265368B88698d6a93Ac0,
-        0xe7CEA2F6d7b120174BF3A9Bc98efaF1fF72C997d,
+        0x9633E0749faa6eC6d992265368B88698d6a93Ac0, // Matic/stMatic Gauge
+        0xe7CEA2F6d7b120174BF3A9Bc98efaF1fF72C997d, // Matic/stMatic LpToken
         tempRewardsToken
       )
     );
