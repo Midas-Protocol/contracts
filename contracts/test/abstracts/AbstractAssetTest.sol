@@ -15,8 +15,6 @@ contract AbstractAssetTest is BaseTest {
   ITestConfigStorage public testConfigStorage;
   bool public shouldRunTest;
 
-  constructor() {}
-
   function setUp() public virtual shouldRun(shouldRunTest) {}
 
   function setUpTestContract(bytes calldata testConfig) public virtual shouldRun(shouldRunTest) {

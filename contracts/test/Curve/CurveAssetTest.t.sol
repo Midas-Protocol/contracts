@@ -14,7 +14,7 @@ import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 import { MockPriceOracle, IPriceOracle } from "../../oracles/1337/MockPriceOracle.sol";
 
 contract CurveAssetTest is AbstractAssetTest {
-  address masterPriceOracle = 0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31; // master price oracle polygon
+  address masterPriceOracle;
   address[] underlyingsForOracle;
   IPriceOracle[] oracles;
 
@@ -24,7 +24,9 @@ contract CurveAssetTest is AbstractAssetTest {
     shouldRunTest = forChains(POLYGON_MAINNET);
   }
 
-  function setUp() public override shouldRun(shouldRunTest) {}
+  function setUp() public override shouldRun(shouldRunTest) {
+    masterPriceOracle = ap.getAddress("MasterPriceOracle");
+  }
 
   function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
     (, address asset, ) = abi.decode(testConfig, (address, address, address[]));
