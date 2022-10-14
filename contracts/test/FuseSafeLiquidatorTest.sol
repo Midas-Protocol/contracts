@@ -391,13 +391,13 @@ contract FuseSafeLiquidatorTest is BaseTest {
   }
 
   address ageurJeurPool = 0x2fFbCE9099cBed86984286A54e5932414aF4B717; // AGEUR_JEUR
-  address jeurParPool   = 0x0f110c55EfE62c16D553A3d3464B77e1853d0e97; // JEUR_PAR
-  address jjpyJpycPool  = 0xaA91CDD7abb47F821Cf07a2d38Cc8668DEAf1bdc; // JJPY_JPYC
-  address jcadCadcPool  = 0xA69b0D5c0C401BBA2d5162138613B5E38584F63F; // JCAD_CADC
-  address jsgdXsgdPool  = 0xeF75E9C7097842AcC5D0869E1dB4e5fDdf4BFDDA; // JSGD_XSGD
-  address jnzdNzdsPool  = 0x976A750168801F58E8AEdbCfF9328138D544cc09; // JNZD_NZDS
-  address jeurEurtPool  = 0x2C3cc8e698890271c8141be9F6fD6243d56B39f1; // JEUR_EUR
-  address eureJeurPool  = 0x2F3E9CA3bFf85B91D9fe6a9f3e8F9B1A6a4c3cF4; // EURE_JEUR
+  address jeurParPool = 0x0f110c55EfE62c16D553A3d3464B77e1853d0e97; // JEUR_PAR
+  address jjpyJpycPool = 0xaA91CDD7abb47F821Cf07a2d38Cc8668DEAf1bdc; // JJPY_JPYC
+  address jcadCadcPool = 0xA69b0D5c0C401BBA2d5162138613B5E38584F63F; // JCAD_CADC
+  address jsgdXsgdPool = 0xeF75E9C7097842AcC5D0869E1dB4e5fDdf4BFDDA; // JSGD_XSGD
+  address jnzdNzdsPool = 0x976A750168801F58E8AEdbCfF9328138D544cc09; // JNZD_NZDS
+  address jeurEurtPool = 0x2C3cc8e698890271c8141be9F6fD6243d56B39f1; // JEUR_EUR
+  address eureJeurPool = 0x2F3E9CA3bFf85B91D9fe6a9f3e8F9B1A6a4c3cF4; // EURE_JEUR
 
   struct CurveSwapPool {
     address pool;
@@ -427,10 +427,9 @@ contract FuseSafeLiquidatorTest is BaseTest {
         ap.setRedemptionStrategy(curveSwapPools[i].pool, address(curveSwapLiquidator), "CurveSwapLiquidator");
       }
     }
- }
+  }
 
-  function testPolygonAnyLiquidation(uint256 random) public shouldRun(forChains(POLYGON_MAINNET))
-  {
+  function testPolygonAnyLiquidation(uint256 random) public shouldRun(forChains(POLYGON_MAINNET)) {
     vm.assume(random > 100 && random < type(uint64).max);
 
     LiquidationData memory vars;
@@ -523,35 +522,35 @@ contract FuseSafeLiquidatorTest is BaseTest {
       vars.strategies = redemptionStrategies;
     }
 
-//    if (vars.collateralMarket.underlying() == 0xa3Fa99A148fA48D14Ed51d610c367C61876997F1) {
-//      // MAI
-//      // Uniswap
-//      addUniswapV2RedemptionStrategies(vars, 0xa3Fa99A148fA48D14Ed51d610c367C61876997F1, ap.getAddress("USDC"));
-//    }
+    //    if (vars.collateralMarket.underlying() == 0xa3Fa99A148fA48D14Ed51d610c367C61876997F1) {
+    //      // MAI
+    //      // Uniswap
+    //      addUniswapV2RedemptionStrategies(vars, 0xa3Fa99A148fA48D14Ed51d610c367C61876997F1, ap.getAddress("USDC"));
+    //    }
 
     // liquidate
     vm.prank(ap.owner());
     try
-    vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-      FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
-        vars.borrower,
-        vars.borrowAmount / 100, //repayAmount,
-        ICErc20(address(vars.debtMarket)),
-        ICErc20(address(vars.collateralMarket)),
-        vars.flashSwapPair,
-        0,
-        exchangeTo,
-        IUniswapV2Router02(uniswapRouter),
-        IUniswapV2Router02(uniswapRouter),
-        vars.strategies,
-        vars.redemptionDatas,
-        0,
-        vars.fundingStrategies,
-        vars.fundingDatas
+      vars.liquidator.safeLiquidateToTokensWithFlashLoan(
+        FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
+          vars.borrower,
+          vars.borrowAmount / 100, //repayAmount,
+          ICErc20(address(vars.debtMarket)),
+          ICErc20(address(vars.collateralMarket)),
+          vars.flashSwapPair,
+          0,
+          exchangeTo,
+          IUniswapV2Router02(uniswapRouter),
+          IUniswapV2Router02(uniswapRouter),
+          vars.strategies,
+          vars.redemptionDatas,
+          0,
+          vars.fundingStrategies,
+          vars.fundingDatas
+        )
       )
-    )
     {
-// noop
+      // noop
     } catch Error(string memory reason) {
       if (compareStrings(reason, "Number of tokens less than minimum limit")) {
         emit log("jarvis pool failing, that's ok");
@@ -594,12 +593,9 @@ contract FuseSafeLiquidatorTest is BaseTest {
     if (compareStrings(strategyContract, "JarvisLiquidatorFunder")) {
       // TODO remove replacement when fixed
       strategy = jarvisLiquidator;
-      (
-        address syntheticToken,
-        address collateralToken,
-        address liquidityPool,
-        uint256 expirationTime
-      ) = ap.jarvisPools(inputToken);
+      (address syntheticToken, address collateralToken, address liquidityPool, uint256 expirationTime) = ap.jarvisPools(
+        inputToken
+      );
       outputToken = collateralToken;
       strategyData = abi.encode(syntheticToken, liquidityPool, expirationTime);
     } else if (compareStrings(strategyContract, "CurveSwapLiquidator")) {
@@ -635,18 +631,15 @@ contract FuseSafeLiquidatorTest is BaseTest {
   function addPolygonStrategies(LiquidationData memory vars) internal {
     address debtToken = vars.debtMarket.underlying();
 
-    uint i = 0;
+    uint256 i = 0;
     while (true) {
       emit log("debt token");
       emit log_address(debtToken);
       if (i++ > 10) revert("endless loop bad");
       IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
-      address pairAddress = IUniswapV2Factory(router.factory()).getPair(
-        debtToken,
-        ap.getAddress("wtoken")
-      );
+      address pairAddress = IUniswapV2Factory(router.factory()).getPair(debtToken, ap.getAddress("wtoken"));
 
-      if(pairAddress != address(0)) {
+      if (pairAddress != address(0)) {
         vars.flashSwapPair = IUniswapV2Pair(pairAddress);
         vars.flashSwapFundingToken = debtToken;
         break;
@@ -654,12 +647,8 @@ contract FuseSafeLiquidatorTest is BaseTest {
         (address addr, string memory contractInterface) = ap.fundingStrategies(debtToken);
 
         if (compareStrings(contractInterface, "JarvisLiquidatorFunder")) {
-          (
-          address syntheticToken,
-          address collateralToken,
-          address liquidityPool,
-          uint256 expirationTime
-          ) = ap.jarvisPools(debtToken);
+          (address syntheticToken, address collateralToken, address liquidityPool, uint256 expirationTime) = ap
+            .jarvisPools(debtToken);
 
           debtToken = collateralToken;
 
@@ -669,7 +658,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
           fundingStrategies.push(strategy);
           bytes memory strategyData = abi.encode(collateralToken, liquidityPool, expirationTime);
           fundingDatas.push(strategyData);
-        // } else if (compareStrings(contractInterface, "SomeOtherFunder")) {
+          // } else if (compareStrings(contractInterface, "SomeOtherFunder")) {
           // bytes memory strategyData = abi.encode(strategySpecificParams);
           // (IERC20Upgradeable inputToken, uint256 inputAmount) = IFundsConversionStrategy(addr).estimateInputAmount(10**(debtToken.decimals()), strategyData);
           // debtToken = inputToken;
