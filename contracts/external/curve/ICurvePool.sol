@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-interface ICurvePool {
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+
+interface ICurvePool is IERC20Upgradeable {
   function get_virtual_price() external view returns (uint256);
 
   function remove_liquidity_one_coin(
     uint256 _token_amount,
     int128 i,
     uint256 min_amount
-  ) external;
+  ) external returns (uint256);
 
   function exchange(
     int128 i,

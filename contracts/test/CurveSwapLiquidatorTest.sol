@@ -13,7 +13,7 @@ contract CurveSwapLiquidatorTest is BaseTest {
   CurveSwapLiquidator private csl;
 
   function setUp() public {
-    csl = new CurveSwapLiquidator(ap.getAddress("wtoken"));
+    csl = new CurveSwapLiquidator();
   }
 
   function not_working_TestRedeem() public shouldRun(forChains(MOONBEAM_MAINNET)) {
