@@ -22,6 +22,7 @@ contract CurveLpTokenLiquidatorNoRegistry is IRedemptionStrategy {
   WETH public immutable W_NATIVE;
   CurveLpTokenPriceOracleNoRegistry public immutable oracle; // oracle contains registry
 
+  // TODO remove state vars
   constructor(WETH wnative, CurveLpTokenPriceOracleNoRegistry _oracle) {
     W_NATIVE = wnative;
     oracle = _oracle;
