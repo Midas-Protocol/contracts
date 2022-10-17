@@ -433,7 +433,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
 
   function testPolygonAnyLiquidation(uint256 random) public shouldRun(forChains(POLYGON_MAINNET)) {
     vm.assume(random > 100 && random < type(uint64).max);
-//    uint256 random = 1486;
+    //    uint256 random = 1486;
 
     LiquidationData memory vars;
 
@@ -655,7 +655,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
       } else {
         if (compareStrings(contractInterface, "JarvisLiquidatorFunder")) {
           (address syntheticToken, address collateralToken, address liquidityPool, uint256 expirationTime) = ap
-          .jarvisPools(debtToken);
+            .jarvisPools(debtToken);
 
           debtToken = collateralToken;
 
