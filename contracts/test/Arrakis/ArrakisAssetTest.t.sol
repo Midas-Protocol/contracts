@@ -44,6 +44,22 @@ contract ArrakisAssetTest is AbstractAssetTest {
     }
   }
 
+  function testDepositWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
+    this.runTest(test.testDepositWithIncreasedVaultValue);
+  }
+
+  function testDepositWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
+    this.runTest(test.testDepositWithDecreasedVaultValue);
+  }
+
+  function testWithdrawWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
+    this.runTest(test.testWithdrawWithIncreasedVaultValue);
+  }
+
+  function testWithdrawWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
+    this.runTest(test.testWithdrawWithDecreasedVaultValue);
+  }
+
   function testAccumulatingRewardsOnDeposit() public shouldRun(shouldRunTest) {
     this.runTest(ArrakisERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }

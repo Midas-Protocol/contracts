@@ -47,4 +47,20 @@ contract BeefyBscAssetTest is AbstractAssetTest {
       test.testInitializedValues(asset.name(), asset.symbol());
     }
   }
+
+  function testDepositWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
+    this.runTest(test.testDepositWithIncreasedVaultValue);
+  }
+
+  function testDepositWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
+    this.runTest(test.testDepositWithDecreasedVaultValue);
+  }
+
+  function testWithdrawWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
+    this.runTest(test.testWithdrawWithIncreasedVaultValue);
+  }
+
+  function testWithdrawWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
+    this.runTest(test.testWithdrawWithDecreasedVaultValue);
+  }
 }
