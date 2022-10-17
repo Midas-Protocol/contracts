@@ -433,6 +433,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
 
   function testPolygonAnyLiquidation(uint256 random) public shouldRun(forChains(POLYGON_MAINNET)) {
     vm.assume(random > 100 && random < type(uint64).max);
+//    uint256 random = 1486;
 
     LiquidationData memory vars;
 
@@ -639,18 +640,22 @@ contract FuseSafeLiquidatorTest is BaseTest {
       emit log_address(debtToken);
       if (i++ > 10) revert("endless loop bad");
       IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
-      address pairAddress = IUniswapV2Factory(router.factory()).getPair(debtToken, ap.getAddress("wtoken"));
 
-      if (pairAddress != address(0)) {
-        vars.flashSwapPair = IUniswapV2Pair(pairAddress);
-        vars.flashSwapFundingToken = debtToken;
-        break;
+      (address addr, string memory contractInterface) = ap.fundingStrategies(debtToken);
+
+      if (addr == address(0)) {
+        address pairAddress = IUniswapV2Factory(router.factory()).getPair(debtToken, ap.getAddress("wtoken"));
+        if (pairAddress != address(0)) {
+          vars.flashSwapPair = IUniswapV2Pair(pairAddress);
+          vars.flashSwapFundingToken = debtToken;
+          break;
+        } else {
+          revert("no pair for flash swap");
+        }
       } else {
-        (address addr, string memory contractInterface) = ap.fundingStrategies(debtToken);
-
         if (compareStrings(contractInterface, "JarvisLiquidatorFunder")) {
           (address syntheticToken, address collateralToken, address liquidityPool, uint256 expirationTime) = ap
-            .jarvisPools(debtToken);
+          .jarvisPools(debtToken);
 
           debtToken = collateralToken;
 
