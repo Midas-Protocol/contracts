@@ -51,7 +51,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
     testPreFix = _testPreFix;
     CurveGaugeERC4626 curveERC4626 = new CurveGaugeERC4626();
     curveERC4626.initialize(ERC20Upgradeable(_asset), gauge, address(this), rewardsToken);
-    curveERC4626.reinitialize();
+
     plugin = curveERC4626;
     // Just set it explicitly to 0. Just wanted to make clear that this is not forgotten but expected to be 0
     initialStrategyBalance = 0;
