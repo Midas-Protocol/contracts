@@ -39,7 +39,8 @@ contract CurveSwapLiquidator is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(jToken);
     inputToken.approve(address(curvePool), inputAmount);
     if (inputToken == curvePool) {
-      outputAmount = curvePool.remove_liquidity_one_coin(curvePool.balanceOf(address(this)), j, 0);
+      curvePool.remove_liquidity_one_coin(curvePool.balanceOf(address(this)), j, 0);
+      outputAmount = address(outputToken) == address(0) ? address(this).balance : outputToken.balanceOf(address(this));
     } else {
       outputAmount = curvePool.exchange(i, j, inputAmount, 0);
     }

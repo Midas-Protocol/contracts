@@ -17,18 +17,6 @@ import "./IRedemptionStrategy.sol";
  */
 contract CurveLpTokenLiquidatorNoRegistry is IRedemptionStrategy {
   /**
-   * @dev W_NATIVE contract object.
-   */
-  WETH public immutable W_NATIVE;
-  CurveLpTokenPriceOracleNoRegistry public immutable oracle; // oracle contains registry
-
-  // TODO remove state vars
-  constructor(WETH wnative, CurveLpTokenPriceOracleNoRegistry _oracle) {
-    W_NATIVE = wnative;
-    oracle = _oracle;
-  }
-
-  /**
    * @notice Redeems custom collateral `token` for an underlying token.
    * @param inputToken The input wrapped token to be redeemed for an underlying token.
    * @param inputAmount The amount of the input wrapped token to be redeemed for an underlying token.
@@ -41,18 +29,26 @@ contract CurveLpTokenLiquidatorNoRegistry is IRedemptionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    (uint8 curveCoinIndex, address underlying) = abi.decode(strategyData, (uint8, address));
+    (uint8 curveCoinIndex, address underlying, address payable wNative, address _oracle) = abi.decode(
+      strategyData,
+      (uint8, address, address, address)
+    );
+    WETH W_NATIVE = WETH(wNative);
+    // oracle contains registry
+    CurveLpTokenPriceOracleNoRegistry oracle = CurveLpTokenPriceOracleNoRegistry(_oracle);
 
     // Remove liquidity from Curve pool in the form of one coin only (and store output as new collateral)
     ICurvePool curvePool = ICurvePool(oracle.poolOf(address(inputToken)));
     curvePool.remove_liquidity_one_coin(inputAmount, int128(int8(curveCoinIndex)), 1);
-    outputToken = IERC20Upgradeable(underlying == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE ? address(0) : underlying);
-    outputAmount = address(outputToken) == address(0) ? address(this).balance : outputToken.balanceOf(address(this));
 
-    // Convert to W_NATIVE if ETH because `FuseSafeLiquidator.repayTokenFlashLoan` only supports tokens (not ETH) as output from redemptions (reverts on line 24 because `underlyingCollateral` is the zero address)
-    if (address(outputToken) == address(0)) {
-      W_NATIVE.deposit{ value: outputAmount }();
-      return (IERC20Upgradeable(address(W_NATIVE)), outputAmount);
+    if (underlying == address(0)) {
+      W_NATIVE.deposit{ value: address(this).balance }();
+      outputToken = IERC20Upgradeable(wNative);
+    } else {
+      outputToken = IERC20Upgradeable(underlying);
     }
+    outputAmount = outputToken.balanceOf(address(this));
+
+    return (outputToken, outputAmount);
   }
 }

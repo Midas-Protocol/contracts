@@ -10,7 +10,7 @@ interface ICurvePool is IERC20Upgradeable {
     uint256 _token_amount,
     int128 i,
     uint256 min_amount
-  ) external returns (uint256);
+  ) external;
 
   function exchange(
     int128 i,

@@ -306,13 +306,15 @@ contract FuseSafeLiquidatorTest is BaseTest {
 
   function add2BrlRedemptionStrategies(LiquidationData memory vars) internal {
     vars.strategies = new IRedemptionStrategy[](2);
-    vars.strategies[0] = new CurveLpTokenLiquidatorNoRegistry(
-      WETH(payable(ap.getAddress("wtoken"))),
-      CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA)
-    );
+    vars.strategies[0] = new CurveLpTokenLiquidatorNoRegistry();
     vars.strategies[1] = new JarvisLiquidatorFunder();
     vars.redemptionDatas = new bytes[](2);
-    vars.redemptionDatas[0] = abi.encode(uint8(0), 0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
+    vars.redemptionDatas[0] = abi.encode(
+      uint8(0),
+      0x316622977073BBC3dF32E7d2A9B3c77596a0a603,
+      ap.getAddress("wtoken"),
+      0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA
+    );
     vars.redemptionDatas[1] = abi.encode(
       address(0x316622977073BBC3dF32E7d2A9B3c77596a0a603),
       0x0fD8170Dc284CD558325029f6AEc1538c7d99f49,
