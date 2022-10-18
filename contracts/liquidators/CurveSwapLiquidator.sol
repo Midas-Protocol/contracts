@@ -47,8 +47,7 @@ contract CurveSwapLiquidator is IRedemptionStrategy {
 
     // Convert to W_NATIVE if ETH because `FuseSafeLiquidator.repayTokenFlashLoan` only supports tokens (not ETH) as output from redemptions (reverts on line 24 because `underlyingCollateral` is the zero address)
     if (address(outputToken) == address(0)) {
-      WETH W_NATIVE = WETH(wtoken);
-      W_NATIVE.deposit{ value: outputAmount }();
+      WETH(wtoken).deposit{ value: outputAmount }();
       return (IERC20Upgradeable(wtoken), outputAmount);
     }
   }
