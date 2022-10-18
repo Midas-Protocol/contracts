@@ -64,8 +64,4 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     assertGt(outputAmount, 0);
     assertEq(outputToken.balanceOf(address(liquidator)), outputAmount);
   }
-
-  function testRedeemNativeCollateral() public shouldRun(forChains(BSC_MAINNET)) {
-    require(false, "TODO implement");
-  }
 }
