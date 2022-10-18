@@ -555,49 +555,28 @@ contract AnyLiquidationTest is BaseTest {
       address wtoken = ap.getAddress("wtoken");
       address stable = ap.getAddress("usd");
       address wbtc = ap.getAddress("wBTCToken");
-      bool wtokenFound;
-      uint8 wtokenIndex;
-      bool stableFound;
-      uint8 stableIndex;
-      bool wBtcFound;
-      uint8 wBtcIndex;
+
+      address preferredToken = curveOracle.underlyingTokens(inputToken, 0);
+      uint8 outputTokenIndex = 0;
 
       uint8 i = 0;
       while (true) {
         try curveOracle.underlyingTokens(inputToken, i) returns (address underlying) {
           if (underlying == wtoken) {
-            wtokenFound = true;
-            wtokenIndex = i;
+            preferredToken = wtoken;
+            outputTokenIndex = i;
             break;
           } else if (underlying == stable) {
-            stableFound = true;
-            stableIndex = i;
-          } else if (underlying == wbtc) {
-            wBtcFound = true;
-            wBtcIndex = i;
-          // } else if (underlying == address(0)) {
-          //  break;
+            preferredToken = stable;
+            outputTokenIndex = i;
+          } else if (preferredToken == address(0) && underlying == wbtc) {
+            preferredToken = wbtc;
+            outputTokenIndex = i;
           }
         } catch {
           break;
         }
         i++;
-      }
-
-      address preferredToken;
-      uint8 outputTokenIndex;
-      if (wtokenFound) {
-        preferredToken = wtoken;
-        outputTokenIndex = wtokenIndex;
-      } else if (stableFound) {
-        preferredToken = stable;
-        outputTokenIndex = stableIndex;
-      } else if (wBtcFound) {
-        preferredToken = wbtc;
-        outputTokenIndex = wBtcIndex;
-      } else {
-        preferredToken = curveOracle.underlyingTokens(inputToken, 0);
-        outputTokenIndex = 0;
       }
 
       // TODO use curveOracle.getUnderlyingTokens()
