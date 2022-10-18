@@ -595,9 +595,9 @@ contract AnyLiquidationTest is BaseTest {
       }
 
       // TODO use curveOracle.getUnderlyingTokens()
-//      address[] memory underlyingTokens = curveOracle.getUnderlyingTokens(inputToken);
-//
-//      (preferredToken, outputTokenIndex) = pickPreferredToken(underlyingTokens);
+      //      address[] memory underlyingTokens = curveOracle.getUnderlyingTokens(inputToken);
+      //
+      //      (preferredToken, outputTokenIndex) = pickPreferredToken(underlyingTokens);
       outputToken = preferredToken;
       strategyData = abi.encode(outputTokenIndex, outputToken, ap.getAddress("wtoken"), address(curveOracle));
     } else {
