@@ -552,42 +552,48 @@ contract AnyLiquidationTest is BaseTest {
       // TODO use already deployed strategies when they are redeployed
       strategy = curveLpTokenLiquidatorNoRegistry;
 
-      address wtokenFound;
+      address wtoken = ap.getAddress("wtoken");
+      address stable = ap.getAddress("usd");
+      address wbtc = ap.getAddress("wBTCToken");
+      bool wtokenFound;
       uint8 wtokenIndex;
-      address stableFound;
+      bool stableFound;
       uint8 stableIndex;
-      address wBtcFound;
+      bool wBtcFound;
       uint8 wBtcIndex;
 
       uint8 i = 0;
       while (true) {
         try curveOracle.underlyingTokens(inputToken, i) returns (address underlying) {
-          if (underlying == ap.getAddress("wtoken")) {
-            wtokenFound = underlying;
+          if (underlying == wtoken) {
+            wtokenFound = true;
             wtokenIndex = i;
             break;
-          } else if (underlying == ap.getAddress("usd")) {
-            stableFound = underlying;
+          } else if (underlying == stable) {
+            stableFound = true;
             stableIndex = i;
-          } else if (underlying == ap.getAddress("wBTCToken")) {
-            wBtcFound = underlying;
+          } else if (underlying == wbtc) {
+            wBtcFound = true;
             wBtcIndex = i;
+          // } else if (underlying == address(0)) {
+          //  break;
           }
         } catch {
           break;
         }
+        i++;
       }
 
       address preferredToken;
       uint8 outputTokenIndex;
-      if (wtokenFound != address(0)) {
-        preferredToken = wtokenFound;
+      if (wtokenFound) {
+        preferredToken = wtoken;
         outputTokenIndex = wtokenIndex;
-      } else if (stableFound != address(0)) {
-        preferredToken = stableFound;
+      } else if (stableFound) {
+        preferredToken = stable;
         outputTokenIndex = stableIndex;
-      } else if (wBtcFound != address(0)) {
-        preferredToken = wBtcFound;
+      } else if (wBtcFound) {
+        preferredToken = wbtc;
         outputTokenIndex = wBtcIndex;
       } else {
         preferredToken = curveOracle.underlyingTokens(inputToken, 0);
