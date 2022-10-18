@@ -257,17 +257,11 @@ contract AnyLiquidationTest is BaseTest {
 
   function testAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
     vm.assume(random > 100 && random < type(uint64).max);
-    // uint256 random = 1689;
     doTestAnyLiquidation(random);
   }
 
-  function testPolygonAnyLiquidation()
-    public
-    /*uint256 random*/
-    shouldRun(forChains(POLYGON_MAINNET))
-  {
-    //    vm.assume(random > 100 && random < type(uint64).max);
-    uint256 random = block.number % 1000;
+  function testPolygonAnyLiquidation(uint256 random) public shouldRun(forChains(POLYGON_MAINNET)) {
+    vm.assume(random > 100 && random < type(uint64).max);
     doTestAnyLiquidation(random);
   }
 
