@@ -93,6 +93,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
 contract AnyLiquidationTest is BaseTest {
   FuseSafeLiquidator fsl;
   address uniswapRouter;
+  CurveLpTokenPriceOracleNoRegistry curveOracle;
   CurveSwapPool[] curveSwapPools;
 
   IFundsConversionStrategy[] fundingStrategies;
@@ -122,6 +123,7 @@ contract AnyLiquidationTest is BaseTest {
       mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
       mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
       configureBscRedemptionStrategies();
+      curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
       fsl.initialize(
         ap.getAddress("wtoken"),
         uniswapRouter,
@@ -135,6 +137,7 @@ contract AnyLiquidationTest is BaseTest {
       mostLiquidPair1 = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827); // USDC/WMATIC
       mostLiquidPair2 = IUniswapV2Pair(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
       address usdcPolygon = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+      curveOracle = CurveLpTokenPriceOracleNoRegistry(0xaCF3E1C6f2D6Ff12B8aEE44413D6834774B3f7A3);
       fsl.initialize(
         ap.getAddress("wtoken"),
         uniswapRouter,
@@ -155,7 +158,11 @@ contract AnyLiquidationTest is BaseTest {
       (address addr, ) = ap.redemptionStrategies(twoBrlAddress);
       if (addr == address(0)) {
         vm.prank(ap.owner());
-        ap.setRedemptionStrategy(twoBrlAddress, address(curveLpTokenLiquidatorNoRegistry), "CurveLpTokenLiquidatorNoRegistry");
+        ap.setRedemptionStrategy(
+          twoBrlAddress,
+          address(curveLpTokenLiquidatorNoRegistry),
+          "CurveLpTokenLiquidatorNoRegistry"
+        );
       }
     }
 
@@ -164,7 +171,11 @@ contract AnyLiquidationTest is BaseTest {
       (address addr, ) = ap.redemptionStrategies(threeBrlAddress);
       if (addr == address(0)) {
         vm.prank(ap.owner());
-        ap.setRedemptionStrategy(threeBrlAddress, address(curveLpTokenLiquidatorNoRegistry), "CurveLpTokenLiquidatorNoRegistry");
+        ap.setRedemptionStrategy(
+          threeBrlAddress,
+          address(curveLpTokenLiquidatorNoRegistry),
+          "CurveLpTokenLiquidatorNoRegistry"
+        );
       }
     }
 
@@ -189,7 +200,7 @@ contract AnyLiquidationTest is BaseTest {
     {
       address jBrl = 0x316622977073BBC3dF32E7d2A9B3c77596a0a603;
       (address addr, ) = ap.redemptionStrategies(jBrl);
-      if (addr == address(0)) { // TODO is it?
+      if (addr == address(0)) {
         vm.prank(ap.owner());
         ap.setRedemptionStrategy(jBrl, address(jarvisLiquidator), "JarvisLiquidatorFunder");
       }
@@ -215,8 +226,7 @@ contract AnyLiquidationTest is BaseTest {
       curveSwapPools.push(CurveSwapPool(jnzdNzdsPool, 0));
       curveSwapPools.push(CurveSwapPool(jeurEurtPool, 1));
       curveSwapPools.push(CurveSwapPool(eureJeurPool, 1));
-    } else if (block.chainid == BSC_MAINNET) {
-    }
+    } else if (block.chainid == BSC_MAINNET) {}
 
     curveSwapLiquidator = new CurveSwapLiquidator();
 
@@ -236,7 +246,11 @@ contract AnyLiquidationTest is BaseTest {
     doTestAnyLiquidation(random);
   }
 
-  function testPolygonAnyLiquidation(/*uint256 random*/) public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testPolygonAnyLiquidation()
+    public
+    /*uint256 random*/
+    shouldRun(forChains(POLYGON_MAINNET))
+  {
     //    vm.assume(random > 100 && random < type(uint64).max);
     uint256 random = block.number % 1000;
     doTestAnyLiquidation(random);
@@ -388,7 +402,10 @@ contract AnyLiquidationTest is BaseTest {
       vars.flashSwapFundingToken = debtTokenToFund;
       if (vars.flashSwapFundingToken != ap.getAddress("wtoken")) {
         IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
-        address pairAddress = IUniswapV2Factory(router.factory()).getPair(vars.flashSwapFundingToken, ap.getAddress("wtoken"));
+        address pairAddress = IUniswapV2Factory(router.factory()).getPair(
+          vars.flashSwapFundingToken,
+          ap.getAddress("wtoken")
+        );
         if (pairAddress != address(0)) {
           vars.flashSwapPair = IUniswapV2Pair(pairAddress);
         } else {
@@ -531,20 +548,58 @@ contract AnyLiquidationTest is BaseTest {
       }
 
       outputToken = ap.getAddress("wtoken");
-    }
-    else if (compareStrings(strategyContract, "CurveLpTokenLiquidatorNoRegistry")) {
+    } else if (compareStrings(strategyContract, "CurveLpTokenLiquidatorNoRegistry")) {
       // TODO use already deployed strategies when they are redeployed
       strategy = curveLpTokenLiquidatorNoRegistry;
-      address jBrl = 0x316622977073BBC3dF32E7d2A9B3c77596a0a603;
-      CurveLpTokenPriceOracleNoRegistry oracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
 
-      strategyData = abi.encode(
-        uint8(0),
-        jBrl,
-        ap.getAddress("wtoken"),
-        address(oracle)
-      );
-      outputToken = jBrl;
+      address wtokenFound;
+      uint8 wtokenIndex;
+      address stableFound;
+      uint8 stableIndex;
+      address wBtcFound;
+      uint8 wBtcIndex;
+
+      uint8 i = 0;
+      while (true) {
+        try curveOracle.underlyingTokens(inputToken, i) returns (address underlying) {
+          if (underlying == ap.getAddress("wtoken")) {
+            wtokenFound = underlying;
+            wtokenIndex = i;
+            break;
+          } else if (underlying == ap.getAddress("usd")) {
+            stableFound = underlying;
+            stableIndex = i;
+          } else if (underlying == ap.getAddress("wBTCToken")) {
+            wBtcFound = underlying;
+            wBtcIndex = i;
+          }
+        } catch {
+          break;
+        }
+      }
+
+      address preferredToken;
+      uint8 outputTokenIndex;
+      if (wtokenFound != address(0)) {
+        preferredToken = wtokenFound;
+        outputTokenIndex = wtokenIndex;
+      } else if (stableFound != address(0)) {
+        preferredToken = stableFound;
+        outputTokenIndex = stableIndex;
+      } else if (wBtcFound != address(0)) {
+        preferredToken = wBtcFound;
+        outputTokenIndex = wBtcIndex;
+      } else {
+        preferredToken = curveOracle.underlyingTokens(inputToken, 0);
+        outputTokenIndex = 0;
+      }
+
+      // TODO use curveOracle.getUnderlyingTokens()
+//      address[] memory underlyingTokens = curveOracle.getUnderlyingTokens(inputToken);
+//
+//      (preferredToken, outputTokenIndex) = pickPreferredToken(underlyingTokens);
+      outputToken = preferredToken;
+      strategyData = abi.encode(outputTokenIndex, outputToken, ap.getAddress("wtoken"), address(curveOracle));
     } else {
       revert("unknown collateral");
     }
@@ -556,12 +611,24 @@ contract AnyLiquidationTest is BaseTest {
     return outputToken;
   }
 
+  function pickPreferredToken(address[] memory tokens) internal returns (address, uint8) {
+    for (uint8 i = 0; i < tokens.length; i++) {
+      if (tokens[i] == ap.getAddress("wtoken")) return (ap.getAddress("wtoken"), i);
+    }
+    for (uint8 i = 0; i < tokens.length; i++) {
+      if (tokens[i] == ap.getAddress("usd")) return (ap.getAddress("usd"), i);
+    }
+    for (uint8 i = 0; i < tokens.length; i++) {
+      if (tokens[i] == ap.getAddress("wBTCToken")) return (ap.getAddress("wBTCToken"), i);
+    }
+    return (tokens[0], 0);
+  }
+
   function addFundingStrategy(
     LiquidationData memory vars,
     address debtToken,
     string memory strategyContract
   ) internal returns (address) {
-
     if (compareStrings(strategyContract, "JarvisLiquidatorFunder")) {
       (, address collateralToken, address liquidityPool, uint256 expirationTime) = ap.jarvisPools(debtToken);
 
