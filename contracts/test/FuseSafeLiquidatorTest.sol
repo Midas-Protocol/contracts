@@ -102,10 +102,10 @@ contract AnyLiquidationTest is BaseTest {
   IRedemptionStrategy[] redemptionStrategies;
   bytes[] redemptionDatas;
 
-  CurveSwapLiquidator curveSwapLiquidator = new CurveSwapLiquidator();
-  JarvisLiquidatorFunder jarvisLiquidator = new JarvisLiquidatorFunder();
-  UniswapV2Liquidator uniswapV2Liquidator = new UniswapV2Liquidator();
-  CurveLpTokenLiquidatorNoRegistry curveLpTokenLiquidatorNoRegistry = new CurveLpTokenLiquidatorNoRegistry();
+  CurveSwapLiquidator curveSwapLiquidator;
+  JarvisLiquidatorFunder jarvisLiquidator;
+  UniswapV2Liquidator uniswapV2Liquidator;
+  CurveLpTokenLiquidatorNoRegistry curveLpTokenLiquidatorNoRegistry;
 
   IUniswapV2Pair mostLiquidPair1;
   IUniswapV2Pair mostLiquidPair2;
@@ -116,16 +116,27 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   function setUp() public {
-    // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-    fsl = new FuseSafeLiquidator();
     if (block.chainid == BSC_MAINNET) {
       // TODO run for the latest block number
       vm.rollFork(22277940);
+    } else if (block.chainid == POLYGON_MAINNET) {
+      // TODO run for the latest block number
+      vm.rollFork(34489980);
+    }
+
+    curveSwapLiquidator = new CurveSwapLiquidator();
+    jarvisLiquidator = new JarvisLiquidatorFunder();
+    uniswapV2Liquidator = new UniswapV2Liquidator();
+    curveLpTokenLiquidatorNoRegistry = new CurveLpTokenLiquidatorNoRegistry();
+
+    if (block.chainid == BSC_MAINNET) {
       uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
       mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
       mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
       configureBscRedemptionStrategies();
       curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
+      // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+      fsl = new FuseSafeLiquidator();
       fsl.initialize(
         ap.getAddress("wtoken"),
         uniswapRouter,
@@ -135,13 +146,13 @@ contract AnyLiquidationTest is BaseTest {
         25
       );
     } else if (block.chainid == POLYGON_MAINNET) {
-      // TODO run for the latest block number
-      vm.rollFork(34489980);
       uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
       mostLiquidPair1 = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827); // USDC/WMATIC
       mostLiquidPair2 = IUniswapV2Pair(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
       address usdcPolygon = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
       curveOracle = CurveLpTokenPriceOracleNoRegistry(0xaCF3E1C6f2D6Ff12B8aEE44413D6834774B3f7A3);
+      // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+      fsl = new FuseSafeLiquidator();
       fsl.initialize(
         ap.getAddress("wtoken"),
         uniswapRouter,
