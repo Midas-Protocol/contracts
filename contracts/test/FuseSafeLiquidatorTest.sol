@@ -8,17 +8,19 @@ import { CToken } from "../compound/CToken.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
+
 import { WETH } from "solmate/tokens/WETH.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 import "../FuseSafeLiquidator.sol";
-import "../FusePoolLens.sol";
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import "../FusePoolDirectory.sol";
 import "./config/BaseTest.t.sol";
 import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../liquidators/CurveLpTokenLiquidator.sol";
 import "../liquidators/UniswapLpTokenLiquidator.sol";
 import "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
 import "../liquidators/UniswapV2Liquidator.sol";
+import "../liquidators/CurveSwapLiquidator.sol";
 
 contract MockRedemptionStrategy is IRedemptionStrategy {
   function redeem(
@@ -32,7 +34,6 @@ contract MockRedemptionStrategy is IRedemptionStrategy {
 
 contract FuseSafeLiquidatorTest is BaseTest {
   FuseSafeLiquidator fsl;
-  address alice = address(10);
   address uniswapRouter;
 
   function setUp() public {
@@ -86,6 +87,182 @@ contract FuseSafeLiquidatorTest is BaseTest {
         "replace the FSL proxy/storage contract with a new one before the owner variable is overwritten"
       );
     }
+  }
+}
+
+contract AnyLiquidationTest is BaseTest {
+  FuseSafeLiquidator fsl;
+  address uniswapRouter;
+  CurveLpTokenPriceOracleNoRegistry curveOracle;
+  CurveSwapPool[] curveSwapPools;
+
+  IFundsConversionStrategy[] fundingStrategies;
+  bytes[] fundingDatas;
+
+  IRedemptionStrategy[] redemptionStrategies;
+  bytes[] redemptionDatas;
+
+  CurveSwapLiquidator curveSwapLiquidator;
+  JarvisLiquidatorFunder jarvisLiquidator;
+  UniswapV2Liquidator uniswapV2Liquidator;
+  CurveLpTokenLiquidatorNoRegistry curveLpTokenLiquidatorNoRegistry;
+
+  IUniswapV2Pair mostLiquidPair1;
+  IUniswapV2Pair mostLiquidPair2;
+
+  struct CurveSwapPool {
+    address pool;
+    int128 preferredCoin;
+  }
+
+  function setUp() public {
+    if (block.chainid == BSC_MAINNET) {
+      // TODO run for the latest block number
+      vm.rollFork(22277940);
+    } else if (block.chainid == POLYGON_MAINNET) {
+      // TODO run for the latest block number
+      vm.rollFork(34489980);
+    }
+
+    curveSwapLiquidator = new CurveSwapLiquidator();
+    jarvisLiquidator = new JarvisLiquidatorFunder();
+    uniswapV2Liquidator = new UniswapV2Liquidator();
+    curveLpTokenLiquidatorNoRegistry = new CurveLpTokenLiquidatorNoRegistry();
+
+    if (block.chainid == BSC_MAINNET) {
+      uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
+      mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
+      mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
+      configureBscRedemptionStrategies();
+      curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
+      // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+      fsl = new FuseSafeLiquidator();
+      fsl.initialize(
+        ap.getAddress("wtoken"),
+        uniswapRouter,
+        ap.getAddress("bUSD"),
+        ap.getAddress("wBTCToken"),
+        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
+        25
+      );
+    } else if (block.chainid == POLYGON_MAINNET) {
+      uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
+      mostLiquidPair1 = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827); // USDC/WMATIC
+      mostLiquidPair2 = IUniswapV2Pair(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
+      address usdcPolygon = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+      curveOracle = CurveLpTokenPriceOracleNoRegistry(0xaCF3E1C6f2D6Ff12B8aEE44413D6834774B3f7A3);
+      // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+      fsl = new FuseSafeLiquidator();
+      fsl.initialize(
+        ap.getAddress("wtoken"),
+        uniswapRouter,
+        usdcPolygon,
+        ap.getAddress("wBTCToken"),
+        "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
+        30
+      );
+    } else {
+      uniswapRouter = ap.getAddress("IUniswapV2Router02");
+    }
+    configureCurveSwapPools();
+  }
+
+  function configureBscRedemptionStrategies() internal {
+    {
+      address twoBrlAddress = 0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9;
+      (address addr, ) = ap.redemptionStrategies(twoBrlAddress);
+      if (addr == address(0)) {
+        vm.prank(ap.owner());
+        ap.setRedemptionStrategy(
+          twoBrlAddress,
+          address(curveLpTokenLiquidatorNoRegistry),
+          "CurveLpTokenLiquidatorNoRegistry"
+        );
+      }
+    }
+
+    {
+      address threeBrlAddress = 0x27b5Fc5333246F63280dA8e3e533512EfA747c13;
+      (address addr, ) = ap.redemptionStrategies(threeBrlAddress);
+      if (addr == address(0)) {
+        vm.prank(ap.owner());
+        ap.setRedemptionStrategy(
+          threeBrlAddress,
+          address(curveLpTokenLiquidatorNoRegistry),
+          "CurveLpTokenLiquidatorNoRegistry"
+        );
+      }
+    }
+
+    {
+      address wbnbUsdcCakeAddress = 0xd99c7F6C65857AC913a8f880A4cb84032AB2FC5b;
+      (address addr, ) = ap.redemptionStrategies(wbnbUsdcCakeAddress);
+      if (addr == address(0)) {
+        vm.prank(ap.owner());
+        ap.setRedemptionStrategy(wbnbUsdcCakeAddress, address(uniswapV2Liquidator), "UniswapV2Liquidator");
+      }
+    }
+
+    {
+      address busdWbnbCakeAddress = 0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16;
+      (address addr, ) = ap.redemptionStrategies(busdWbnbCakeAddress);
+      if (addr == address(0)) {
+        vm.prank(ap.owner());
+        ap.setRedemptionStrategy(busdWbnbCakeAddress, address(uniswapV2Liquidator), "UniswapV2Liquidator");
+      }
+    }
+
+    {
+      address jBrl = 0x316622977073BBC3dF32E7d2A9B3c77596a0a603;
+      (address addr, ) = ap.redemptionStrategies(jBrl);
+      if (addr == address(0)) {
+        vm.prank(ap.owner());
+        ap.setRedemptionStrategy(jBrl, address(jarvisLiquidator), "JarvisLiquidatorFunder");
+      }
+    }
+  }
+
+  // TODO remove after the next deploy configures the AP accordingly
+  function configureCurveSwapPools() internal {
+    if (block.chainid == POLYGON_MAINNET) {
+      address ageurJeurPool = 0x2fFbCE9099cBed86984286A54e5932414aF4B717; // AGEUR_JEUR
+      address jeurParPool = 0x0f110c55EfE62c16D553A3d3464B77e1853d0e97; // JEUR_PAR
+      address jjpyJpycPool = 0xaA91CDD7abb47F821Cf07a2d38Cc8668DEAf1bdc; // JJPY_JPYC
+      address jcadCadcPool = 0xA69b0D5c0C401BBA2d5162138613B5E38584F63F; // JCAD_CADC
+      address jsgdXsgdPool = 0xeF75E9C7097842AcC5D0869E1dB4e5fDdf4BFDDA; // JSGD_XSGD
+      address jnzdNzdsPool = 0x976A750168801F58E8AEdbCfF9328138D544cc09; // JNZD_NZDS
+      address jeurEurtPool = 0x2C3cc8e698890271c8141be9F6fD6243d56B39f1; // JEUR_EUR
+      address eureJeurPool = 0x2F3E9CA3bFf85B91D9fe6a9f3e8F9B1A6a4c3cF4; // EURE_JEUR
+      curveSwapPools.push(CurveSwapPool(ageurJeurPool, 1));
+      curveSwapPools.push(CurveSwapPool(jeurParPool, 1));
+      curveSwapPools.push(CurveSwapPool(jjpyJpycPool, 0));
+      curveSwapPools.push(CurveSwapPool(jcadCadcPool, 0));
+      curveSwapPools.push(CurveSwapPool(jsgdXsgdPool, 0));
+      curveSwapPools.push(CurveSwapPool(jnzdNzdsPool, 0));
+      curveSwapPools.push(CurveSwapPool(jeurEurtPool, 1));
+      curveSwapPools.push(CurveSwapPool(eureJeurPool, 1));
+    } else if (block.chainid == BSC_MAINNET) {}
+
+    curveSwapLiquidator = new CurveSwapLiquidator();
+
+    for (uint8 i = 0; i < curveSwapPools.length; i++) {
+      (address addr, ) = ap.redemptionStrategies(curveSwapPools[i].pool);
+      if (addr == address(0)) {
+        // TODO add the curve swap pools to the AP redemptionStrategies
+        vm.prank(ap.owner());
+        ap.setRedemptionStrategy(curveSwapPools[i].pool, address(curveSwapLiquidator), "CurveSwapLiquidator");
+      }
+    }
+  }
+
+  function testAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
+    vm.assume(random > 100 && random < type(uint64).max);
+    doTestAnyLiquidation(random);
+  }
+
+  function testPolygonAnyLiquidation(uint256 random) public shouldRun(forChains(POLYGON_MAINNET)) {
+    vm.assume(random > 100 && random < type(uint64).max);
+    doTestAnyLiquidation(random);
   }
 
   struct LiquidationData {
@@ -185,25 +362,11 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 
-  function testAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
-    vm.assume(random > 100 && random < type(uint64).max);
-
-    //    random = 122460273;
-
+  function doTestAnyLiquidation(uint256 random) internal {
     LiquidationData memory vars;
+    vars.liquidator = fsl;
 
-    // setting up a new liquidator
-    //    vars.liquidator = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
-    vars.liquidator = new FuseSafeLiquidator();
-    vars.liquidator.initialize(
-      ap.getAddress("wtoken"),
-      uniswapRouter,
-      ap.getAddress("bUSD"),
-      0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c, // BTCB
-      "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
-      25
-    );
-    vars.pools = FusePoolDirectory(0x295d7347606F4bd810C8296bb8d75D657001fcf7).getAllPools();
+    vars.pools = FusePoolDirectory(ap.getAddress("FusePoolDirectory")).getAllPools();
 
     while (true) {
       // get a random pool and a random borrower from it
@@ -211,10 +374,8 @@ contract FuseSafeLiquidatorTest is BaseTest {
 
       if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
         // find a market in which the borrower has debt and reduce his collateral price
-        if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
-          vars.markets = vars.comptroller.getAllMarkets();
-          (vars.debtMarket, vars.collateralMarket, vars.borrowAmount) = setUpDebtAndCollateralMarkets(random, vars);
-        }
+        vars.markets = vars.comptroller.getAllMarkets();
+        (vars.debtMarket, vars.collateralMarket, vars.borrowAmount) = setUpDebtAndCollateralMarkets(random, vars);
 
         if (address(vars.debtMarket) != address(0) && address(vars.collateralMarket) != address(0)) {
           emit log("found testable markets at random number");
@@ -230,289 +391,256 @@ contract FuseSafeLiquidatorTest is BaseTest {
     emit log_address(address(vars.collateralMarket));
 
     // prepare the liquidation
-    address exchangeTo;
 
-    // prepare the funding strategies
-    if (vars.debtMarket.underlying() == 0x316622977073BBC3dF32E7d2A9B3c77596a0a603) {
-      // jbrl
-      addJbrlFundingStrategy(vars);
-    } else {
-      vars.fundingStrategies = new IFundsConversionStrategy[](0);
-      vars.fundingDatas = new bytes[](0);
-      vars.flashSwapFundingToken = vars.debtMarket.underlying();
+    // add funding strategies
+    {
+      address debtTokenToFund = vars.debtMarket.underlying();
+
+      uint256 i = 0;
+      while (true) {
+        emit log("debt token");
+        emit log_address(debtTokenToFund);
+        if (i++ > 10) revert("endless loop bad");
+
+        (address addr, string memory strategyContract) = ap.fundingStrategies(debtTokenToFund);
+        if (addr == address(0)) break;
+
+        debtTokenToFund = addFundingStrategy(vars, debtTokenToFund, strategyContract);
+      }
+
+      vars.flashSwapFundingToken = debtTokenToFund;
+      if (vars.flashSwapFundingToken != ap.getAddress("wtoken")) {
+        IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
+        address pairAddress = IUniswapV2Factory(router.factory()).getPair(
+          vars.flashSwapFundingToken,
+          ap.getAddress("wtoken")
+        );
+        if (pairAddress != address(0)) {
+          vars.flashSwapPair = IUniswapV2Pair(pairAddress);
+        } else {
+          revert("no pair for flash swap funding");
+        }
+      } else {
+        vars.flashSwapPair = IUniswapV2Pair(mostLiquidPair1);
+      }
+
+      vars.fundingStrategies = fundingStrategies;
+      vars.fundingDatas = fundingDatas;
     }
 
-    if (vars.flashSwapFundingToken != ap.getAddress("wtoken")) {
-      IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
-      address pairAddress = IUniswapV2Factory(router.factory()).getPair(
-        vars.flashSwapFundingToken,
-        ap.getAddress("wtoken")
-      );
-      vars.flashSwapPair = IUniswapV2Pair(pairAddress);
-    } else {
-      vars.flashSwapPair = FIRST_PAIR;
-    }
+    emit log("flash swap funding token is");
+    emit log_address(vars.flashSwapFundingToken);
 
-    exchangeTo = vars.flashSwapFundingToken;
+    address exchangeCollateralTo = vars.flashSwapFundingToken;
 
-    // prepare the redemption strategies
-    if (vars.collateralMarket.underlying() == 0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9) {
-      // 2brl
-      add2BrlRedemptionStrategies(vars);
-    } else if (
-      vars.collateralMarket.underlying() == 0xd99c7F6C65857AC913a8f880A4cb84032AB2FC5b ||
-      vars.collateralMarket.underlying() == 0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16
-    ) {
-      // Uniswap LP
-      addUniswapLPRedemptionStrategies(vars, IUniswapV2Pair(vars.collateralMarket.underlying()));
-    } else {
-      vars.strategies = new IRedemptionStrategy[](0);
-      vars.redemptionDatas = new bytes[](0);
+    // add the redemption strategies
+    if (exchangeCollateralTo != address(0)) {
+      address collateralTokenToRedeem = vars.collateralMarket.underlying();
+      while (collateralTokenToRedeem != exchangeCollateralTo) {
+        (address addr, string memory contractInterface) = ap.redemptionStrategies(collateralTokenToRedeem);
+        if (addr == address(0)) break;
+        collateralTokenToRedeem = addRedemptionStrategy(
+          vars,
+          IRedemptionStrategy(addr),
+          contractInterface,
+          collateralTokenToRedeem
+        );
+      }
+      vars.redemptionDatas = redemptionDatas;
+      vars.strategies = redemptionStrategies;
     }
 
     // liquidate
     vm.prank(ap.owner());
-    vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-      FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
-        vars.borrower,
-        vars.borrowAmount / 100, //repayAmount,
-        ICErc20(address(vars.debtMarket)),
-        ICErc20(address(vars.collateralMarket)),
-        vars.flashSwapPair,
-        0,
-        exchangeTo,
-        IUniswapV2Router02(uniswapRouter),
-        IUniswapV2Router02(uniswapRouter),
-        vars.strategies,
-        vars.redemptionDatas,
-        0,
-        vars.fundingStrategies,
-        vars.fundingDatas
+    try
+      vars.liquidator.safeLiquidateToTokensWithFlashLoan(
+        FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
+          vars.borrower,
+          vars.borrowAmount / 100, //repayAmount,
+          ICErc20(address(vars.debtMarket)),
+          ICErc20(address(vars.collateralMarket)),
+          vars.flashSwapPair,
+          0,
+          exchangeCollateralTo,
+          IUniswapV2Router02(uniswapRouter),
+          IUniswapV2Router02(uniswapRouter),
+          vars.strategies,
+          vars.redemptionDatas,
+          0,
+          vars.fundingStrategies,
+          vars.fundingDatas
+        )
       )
-    );
-  }
-
-  function addJbrlFundingStrategy(LiquidationData memory vars) internal {
-    vars.flashSwapFundingToken = ap.getAddress("bUSD");
-    vars.fundingStrategies = new IFundsConversionStrategy[](1);
-    vars.fundingDatas = new bytes[](1);
-    vars.fundingDatas[0] = abi.encode(vars.flashSwapFundingToken, 0x0fD8170Dc284CD558325029f6AEc1538c7d99f49, 60 * 40);
-    vars.fundingStrategies[0] = new JarvisLiquidatorFunder();
-
-    // all strategies need to be whitelisted
-    vm.prank(vars.liquidator.owner());
-    vars.liquidator._whitelistRedemptionStrategy(vars.fundingStrategies[0], true);
-  }
-
-  function add2BrlRedemptionStrategies(LiquidationData memory vars) internal {
-    vars.strategies = new IRedemptionStrategy[](2);
-    vars.strategies[0] = new CurveLpTokenLiquidatorNoRegistry(
-      WETH(payable(ap.getAddress("wtoken"))),
-      CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA)
-    );
-    vars.strategies[1] = new JarvisLiquidatorFunder();
-    vars.redemptionDatas = new bytes[](2);
-    vars.redemptionDatas[0] = abi.encode(uint8(0), 0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
-    vars.redemptionDatas[1] = abi.encode(
-      address(0x316622977073BBC3dF32E7d2A9B3c77596a0a603),
-      0x0fD8170Dc284CD558325029f6AEc1538c7d99f49,
-      60 * 40
-    );
-
-    // all strategies need to be whitelisted
-    vm.prank(vars.liquidator.owner());
-    vars.liquidator._whitelistRedemptionStrategy(vars.strategies[0], true);
-    vars.liquidator._whitelistRedemptionStrategy(vars.strategies[1], true);
-  }
-
-  function addUniswapV2RedemptionStrategies(
-    LiquidationData memory vars,
-    address inputToken,
-    address outputToken
-  ) internal {
-    vars.strategies = new IRedemptionStrategy[](1);
-    vars.strategies[0] = new UniswapV2Liquidator();
-    vars.redemptionDatas = new bytes[](1);
-
-    address[] memory swapPath = new address[](2);
-    swapPath[0] = inputToken;
-    swapPath[1] = outputToken;
-
-    bytes memory strategyData = abi.encode(uniswapRouter, swapPath);
-    vars.redemptionDatas[0] = strategyData;
-
-    vm.prank(vars.liquidator.owner());
-    vars.liquidator._whitelistRedemptionStrategy(vars.strategies[0], true);
-  }
-
-  function addUniswapLPRedemptionStrategies(LiquidationData memory vars, IUniswapV2Pair pair) internal {
-    vars.strategies = new IRedemptionStrategy[](1);
-    vars.strategies[0] = new UniswapLpTokenLiquidator();
-    vars.redemptionDatas = new bytes[](1);
-
-    address[] memory swapToken0Path;
-    address[] memory swapToken1Path;
-
-    if (pair.token0() == ap.getAddress("wtoken")) {
-      swapToken0Path = new address[](0);
-      swapToken1Path = new address[](2);
-
-      swapToken1Path[0] = pair.token1();
-      swapToken1Path[1] = pair.token0();
-    } else {
-      swapToken0Path = new address[](2);
-      swapToken1Path = new address[](0);
-
-      swapToken0Path[0] = pair.token0();
-      swapToken0Path[1] = pair.token1();
-    }
-
-    vars.redemptionDatas[0] = abi.encode(uniswapRouter, swapToken0Path, swapToken1Path);
-    // all strategies need to be whitelisted
-    vm.prank(vars.liquidator.owner());
-    vars.liquidator._whitelistRedemptionStrategy(vars.strategies[0], true);
-
-    if (address(vars.flashSwapPair) == address(pair)) {
-      emit log("toggling the flashswap pair");
-      emit log_address(address(pair));
-      toggleFlashSwapPair(vars);
+    {
+      // noop
+    } catch Error(string memory reason) {
+      if (compareStrings(reason, "Number of tokens less than minimum limit")) {
+        emit log("jarvis pool failing, that's ok");
+      } else {
+        revert(reason);
+      }
     }
   }
-
-  IUniswapV2Pair FIRST_PAIR = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
-  IUniswapV2Pair SECOND_PAIR = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
 
   function toggleFlashSwapPair(LiquidationData memory vars) internal {
-    if (address(vars.flashSwapPair) == address(FIRST_PAIR)) {
-      vars.flashSwapPair = SECOND_PAIR;
+    if (address(vars.flashSwapPair) == address(mostLiquidPair1)) {
+      vars.flashSwapPair = mostLiquidPair2;
     } else {
-      vars.flashSwapPair = FIRST_PAIR;
+      vars.flashSwapPair = mostLiquidPair1;
     }
   }
 
-  function testPolygonAnyLiquidation(uint256 random)
-    public
-    shouldRun(
-      false /*forChains(POLYGON_MAINNET)*/
-    )
-  {
-    vm.assume(random > 100 && random < type(uint64).max);
+  function addRedemptionStrategy(
+    LiquidationData memory vars,
+    IRedemptionStrategy strategy,
+    string memory strategyContract,
+    address inputToken
+  ) internal returns (address) {
+    bytes memory strategyData;
+    address outputToken;
 
-    LiquidationData memory vars;
+    if (compareStrings(strategyContract, "JarvisLiquidatorFunder")) {
+      // TODO use already deployed strategies when they are redeployed
+      strategy = jarvisLiquidator;
+      (address syntheticToken, address collateralToken, address liquidityPool, uint256 expirationTime) = ap.jarvisPools(
+        inputToken
+      );
+      outputToken = collateralToken;
+      strategyData = abi.encode(syntheticToken, liquidityPool, expirationTime);
+    } else if (compareStrings(strategyContract, "CurveSwapLiquidator")) {
+      // TODO use already deployed strategies when they are redeployed
+      strategy = curveSwapLiquidator;
 
-    address usdcPolygon = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
-    vm.prank(ap.owner());
-    ap.setAddress("USDC", usdcPolygon);
+      int128 outputIndex;
+      int128 inputIndex;
 
-    // setting up a new liquidator
-    //    vars.liquidator = FuseSafeLiquidator(payable());
-    vars.liquidator = new FuseSafeLiquidator();
-    vars.liquidator.initialize(
-      ap.getAddress("wtoken"),
-      uniswapRouter,
-      ap.getAddress("USDC"),
-      0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6, // WBTC
-      "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
-      30
-    );
-    vars.pools = FusePoolDirectory(0x9A161e68EC0d5364f4d09A6080920DAFF6FFf250).getAllPools();
-
-    while (true) {
-      // get a random pool and a random borrower from it
-      (vars.comptroller, vars.borrower) = getPoolAndBorrower(random, vars);
-
-      if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
-        // find a market in which the borrower has debt and reduce his collateral price
-        if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
-          vars.markets = vars.comptroller.getAllMarkets();
-          (vars.debtMarket, vars.collateralMarket, vars.borrowAmount) = setUpDebtAndCollateralMarkets(random, vars);
-        }
-
-        if (address(vars.debtMarket) != address(0) && address(vars.collateralMarket) != address(0)) {
-          //          if (vars.debtMarket.underlying() == 0xBD1fe73e1f12bD2bc237De9b626F056f21f86427) { // TODO remove when done testing MAI
-          emit log("found testable markets at random number");
-          emit log_uint(random);
+      for (uint8 i = 0; i < curveSwapPools.length; i++) {
+        CurveSwapPool memory csp = curveSwapPools[i];
+        if (csp.pool == inputToken) {
+          outputIndex = csp.preferredCoin;
+          inputIndex = csp.preferredCoin == 0 ? int128(1) : int128(0);
+          ICurvePool curvePool = ICurvePool(csp.pool);
+          outputToken = curvePool.coins(outputIndex == 0 ? 0 : 1);
           break;
-          //          }
         }
       }
-      random++;
-    }
 
-    emit log("debt and collateral markets");
-    emit log_address(address(vars.debtMarket));
-    emit log_address(address(vars.collateralMarket));
+      strategyData = abi.encode(inputToken, inputIndex, outputIndex, outputToken, ap.getAddress("wtoken"));
+    } else if (compareStrings(strategyContract, "UniswapV2Liquidator")) {
+      // TODO use already deployed strategies when they are redeployed
+      strategy = uniswapV2Liquidator;
 
-    // prepare the liquidation
-    address exchangeTo;
+      IUniswapV2Pair pair = IUniswapV2Pair(inputToken);
+      address[] memory swapToken0Path;
+      address[] memory swapToken1Path;
 
-    // prepare the funding strategies
-    if (vars.debtMarket.underlying() == 0xBD1fe73e1f12bD2bc237De9b626F056f21f86427) {
-      // jMXN
-      addJmxnFundingStrategy(vars);
+      if (pair.token0() == ap.getAddress("wtoken")) {
+        swapToken0Path = new address[](0);
+        swapToken1Path = new address[](2);
+
+        swapToken1Path[0] = pair.token1();
+        swapToken1Path[1] = pair.token0();
+      } else {
+        swapToken0Path = new address[](2);
+        swapToken1Path = new address[](0);
+
+        swapToken0Path[0] = pair.token0();
+        swapToken0Path[1] = pair.token1();
+      }
+
+      strategyData = abi.encode(uniswapRouter, swapToken0Path, swapToken1Path);
+
+      if (address(vars.flashSwapPair) == address(pair)) {
+        emit log("toggling the flashswap pair");
+        emit log_address(address(pair));
+        toggleFlashSwapPair(vars);
+      }
+
+      outputToken = ap.getAddress("wtoken");
+    } else if (compareStrings(strategyContract, "CurveLpTokenLiquidatorNoRegistry")) {
+      // TODO use already deployed strategies when they are redeployed
+      strategy = curveLpTokenLiquidatorNoRegistry;
+
+      address wtoken = ap.getAddress("wtoken");
+      address stable = ap.getAddress("usd");
+      address wbtc = ap.getAddress("wBTCToken");
+
+      address preferredToken = curveOracle.underlyingTokens(inputToken, 0);
+      uint8 outputTokenIndex = 0;
+
+      uint8 i = 0;
+      while (true) {
+        try curveOracle.underlyingTokens(inputToken, i) returns (address underlying) {
+          if (underlying == wtoken) {
+            preferredToken = wtoken;
+            outputTokenIndex = i;
+            break;
+          } else if (underlying == stable) {
+            preferredToken = stable;
+            outputTokenIndex = i;
+          } else if (preferredToken == address(0) && underlying == wbtc) {
+            preferredToken = wbtc;
+            outputTokenIndex = i;
+          }
+        } catch {
+          break;
+        }
+        i++;
+      }
+
+      // TODO use curveOracle.getUnderlyingTokens()
+      //      address[] memory underlyingTokens = curveOracle.getUnderlyingTokens(inputToken);
+      //
+      //      (preferredToken, outputTokenIndex) = pickPreferredToken(underlyingTokens);
+      outputToken = preferredToken;
+      strategyData = abi.encode(outputTokenIndex, outputToken, ap.getAddress("wtoken"), address(curveOracle));
     } else {
-      vars.fundingStrategies = new IFundsConversionStrategy[](0);
-      vars.fundingDatas = new bytes[](0);
-      vars.flashSwapFundingToken = vars.debtMarket.underlying();
+      revert("unknown collateral");
     }
 
-    if (vars.flashSwapFundingToken != ap.getAddress("wtoken")) {
-      IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
-      address pairAddress = IUniswapV2Factory(router.factory()).getPair(
-        vars.flashSwapFundingToken,
-        ap.getAddress("wtoken")
-      );
+    vars.liquidator._whitelistRedemptionStrategy(strategy, true);
+    redemptionStrategies.push(strategy);
+    redemptionDatas.push(strategyData);
 
-      require(pairAddress != address(0), "funding strategies needed to obtain the flash swap funding token");
-
-      vars.flashSwapPair = IUniswapV2Pair(pairAddress);
-    } else {
-      vars.flashSwapPair = FIRST_PAIR;
-    }
-
-    exchangeTo = vars.flashSwapFundingToken;
-
-    // prepare the redemption strategies
-    if (vars.collateralMarket.underlying() == 0xa3Fa99A148fA48D14Ed51d610c367C61876997F1 && false) {
-      // MAI
-      // Uniswap
-      addUniswapV2RedemptionStrategies(vars, 0xa3Fa99A148fA48D14Ed51d610c367C61876997F1, ap.getAddress("USDC"));
-    } else {
-      vars.strategies = new IRedemptionStrategy[](0);
-      vars.redemptionDatas = new bytes[](0);
-    }
-
-    // liquidate
-    vm.prank(ap.owner());
-    vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-      FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
-        vars.borrower,
-        vars.borrowAmount / 100, //repayAmount,
-        ICErc20(address(vars.debtMarket)),
-        ICErc20(address(vars.collateralMarket)),
-        vars.flashSwapPair,
-        0,
-        exchangeTo,
-        IUniswapV2Router02(uniswapRouter),
-        IUniswapV2Router02(uniswapRouter),
-        vars.strategies,
-        vars.redemptionDatas,
-        0,
-        vars.fundingStrategies,
-        vars.fundingDatas
-      )
-    );
+    return outputToken;
   }
 
-  function addJmxnFundingStrategy(LiquidationData memory vars) internal {
-    vars.flashSwapFundingToken = ap.getAddress("USDC");
-    vars.fundingStrategies = new IFundsConversionStrategy[](1);
-    vars.fundingDatas = new bytes[](1);
-    vars.fundingDatas[0] = abi.encode(vars.flashSwapFundingToken, 0x25E9F976f5020F6BF2d417b231e5f414b7700E31, 60 * 40);
-    vars.fundingStrategies[0] = new JarvisLiquidatorFunder();
+  function pickPreferredToken(address[] memory tokens) internal returns (address, uint8) {
+    for (uint8 i = 0; i < tokens.length; i++) {
+      if (tokens[i] == ap.getAddress("wtoken")) return (ap.getAddress("wtoken"), i);
+    }
+    for (uint8 i = 0; i < tokens.length; i++) {
+      if (tokens[i] == ap.getAddress("usd")) return (ap.getAddress("usd"), i);
+    }
+    for (uint8 i = 0; i < tokens.length; i++) {
+      if (tokens[i] == ap.getAddress("wBTCToken")) return (ap.getAddress("wBTCToken"), i);
+    }
+    return (tokens[0], 0);
+  }
 
-    // all strategies need to be whitelisted
-    vm.prank(vars.liquidator.owner());
-    vars.liquidator._whitelistRedemptionStrategy(vars.fundingStrategies[0], true);
+  function addFundingStrategy(
+    LiquidationData memory vars,
+    address debtToken,
+    string memory strategyContract
+  ) internal returns (address) {
+    if (compareStrings(strategyContract, "JarvisLiquidatorFunder")) {
+      (, address collateralToken, address liquidityPool, uint256 expirationTime) = ap.jarvisPools(debtToken);
+
+      // TODO use already deployed strategies when they are redeployed
+      IFundsConversionStrategy strategy = new JarvisLiquidatorFunder();
+      vars.liquidator._whitelistRedemptionStrategy(strategy, true);
+      fundingStrategies.push(strategy);
+
+      bytes memory strategyData = abi.encode(collateralToken, liquidityPool, expirationTime);
+      fundingDatas.push(strategyData);
+      // } else if (compareStrings(strategyContract, "SomeOtherFunder")) {
+      // bytes memory strategyData = abi.encode(strategySpecificParams);
+      // (IERC20Upgradeable inputToken, uint256 inputAmount) = IFundsConversionStrategy(addr).estimateInputAmount(10**(debtToken.decimals()), strategyData);
+      // fundingStrategies.push(new SomeOtherFunder());
+      // return inputToken;
+      return collateralToken;
+    } else {
+      revert("unknown debt token");
+    }
   }
 }

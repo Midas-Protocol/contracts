@@ -25,13 +25,8 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     wtoken = WETH(payable(ap.getAddress("wtoken")));
-    liquidator = new CurveLpTokenLiquidatorNoRegistry(wtoken, curveLPTokenPriceOracleNoRegistry);
+    liquidator = new CurveLpTokenLiquidatorNoRegistry();
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
-  }
-
-  function testInitializedValues() public shouldRun(forChains(BSC_MAINNET)) {
-    assertEq(address(liquidator.W_NATIVE()), address(wtoken));
-    assertEq(address(liquidator.oracle()), address(curveLPTokenPriceOracleNoRegistry));
   }
 
   // tested with bsc block number 16233661
@@ -42,11 +37,12 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       lpToken,
       1234,
-      abi.encode(uint8(0), bUSD)
+      abi.encode(uint8(0), bUSD, wtoken, curveLPTokenPriceOracleNoRegistry)
     );
-    assertEq(address(outputToken), address(bUSD));
-    assertGt(outputAmount, 0);
-    assertEq(outputToken.balanceOf(address(liquidator)), outputAmount);
+
+    assertEq(address(outputToken), address(bUSD), "!outputToken");
+    assertGt(outputAmount, 0, "!outputAmount>0");
+    assertEq(outputToken.balanceOf(address(liquidator)), outputAmount, "!outputAmount");
   }
 
   function testRedeem2Brl() public shouldRun(forChains(BSC_MAINNET)) {
@@ -62,7 +58,7 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       twobrl,
       123456,
-      abi.encode(uint8(0), 0x316622977073BBC3dF32E7d2A9B3c77596a0a603)
+      abi.encode(uint8(0), 0x316622977073BBC3dF32E7d2A9B3c77596a0a603, wtoken, curveLPTokenPriceOracleNoRegistry)
     );
     assertEq(address(outputToken), 0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
     assertGt(outputAmount, 0);

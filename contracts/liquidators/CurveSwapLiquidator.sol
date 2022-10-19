@@ -18,12 +18,6 @@ import "./IRedemptionStrategy.sol";
 contract CurveSwapLiquidator is IRedemptionStrategy {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
-  WETH public immutable W_NATIVE;
-
-  constructor(address wnative) {
-    W_NATIVE = WETH(payable(wnative));
-  }
-
   /**
    * @notice Redeems custom collateral `token` for an underlying token.
    * @param inputToken The input wrapped token to be redeemed for an underlying token.
@@ -38,18 +32,23 @@ contract CurveSwapLiquidator is IRedemptionStrategy {
     bytes memory strategyData
   ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
     // Exchange and store output
-    (ICurvePool curvePool, int128 i, int128 j, address jToken) = abi.decode(
+    (ICurvePool curvePool, int128 i, int128 j, address jToken, address payable wtoken) = abi.decode(
       strategyData,
-      (ICurvePool, int128, int128, address)
+      (ICurvePool, int128, int128, address, address)
     );
     outputToken = IERC20Upgradeable(jToken);
     inputToken.approve(address(curvePool), inputAmount);
-    outputAmount = curvePool.exchange(i, j, inputAmount, 0);
+    if (inputToken == curvePool) {
+      curvePool.remove_liquidity_one_coin(curvePool.balanceOf(address(this)), j, 0);
+      outputAmount = address(outputToken) == address(0) ? address(this).balance : outputToken.balanceOf(address(this));
+    } else {
+      outputAmount = curvePool.exchange(i, j, inputAmount, 0);
+    }
 
     // Convert to W_NATIVE if ETH because `FuseSafeLiquidator.repayTokenFlashLoan` only supports tokens (not ETH) as output from redemptions (reverts on line 24 because `underlyingCollateral` is the zero address)
     if (address(outputToken) == address(0)) {
-      W_NATIVE.deposit{ value: outputAmount }();
-      return (IERC20Upgradeable(address(W_NATIVE)), outputAmount);
+      WETH(wtoken).deposit{ value: outputAmount }();
+      return (IERC20Upgradeable(wtoken), outputAmount);
     }
   }
 }
