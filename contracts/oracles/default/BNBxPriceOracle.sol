@@ -9,6 +9,13 @@ import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import "../../midas/SafeOwnableUpgradeable.sol";
 import "../BasePriceOracle.sol";
 
+/**
+ * @title BNBxPriceOracle
+ * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
+ * @notice BNBxPriceOracle is a price oracle for BNBx liquid staked tokens.
+ * @dev Implements the `PriceOracle` interface used by Midas pools (and Compound v2).
+ */
+
 contract BNBxPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
   IStakeManager public stakeManager;
   address public BNBx;
