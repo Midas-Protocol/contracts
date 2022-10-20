@@ -255,7 +255,7 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
-  function testAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
+  function testBscAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
     vm.assume(random > 100 && random < type(uint64).max);
     doTestAnyLiquidation(random);
   }
@@ -500,17 +500,12 @@ contract AnyLiquidationTest is BaseTest {
     address outputToken;
 
     if (compareStrings(strategyContract, "JarvisLiquidatorFunder")) {
-      // TODO use already deployed strategies when they are redeployed
-      strategy = jarvisLiquidator;
       (address syntheticToken, address collateralToken, address liquidityPool, uint256 expirationTime) = ap.jarvisPools(
         inputToken
       );
       outputToken = collateralToken;
       strategyData = abi.encode(syntheticToken, liquidityPool, expirationTime);
     } else if (compareStrings(strategyContract, "CurveSwapLiquidator")) {
-      // TODO use already deployed strategies when they are redeployed
-      strategy = curveSwapLiquidator;
-
       int128 outputIndex;
       int128 inputIndex;
 
@@ -527,9 +522,6 @@ contract AnyLiquidationTest is BaseTest {
 
       strategyData = abi.encode(inputToken, inputIndex, outputIndex, outputToken, ap.getAddress("wtoken"));
     } else if (compareStrings(strategyContract, "UniswapV2Liquidator")) {
-      // TODO use already deployed strategies when they are redeployed
-      strategy = uniswapV2Liquidator;
-
       IUniswapV2Pair pair = IUniswapV2Pair(inputToken);
       address[] memory swapToken0Path;
       address[] memory swapToken1Path;
@@ -558,9 +550,6 @@ contract AnyLiquidationTest is BaseTest {
 
       outputToken = ap.getAddress("wtoken");
     } else if (compareStrings(strategyContract, "CurveLpTokenLiquidatorNoRegistry")) {
-      // TODO use already deployed strategies when they are redeployed
-      strategy = curveLpTokenLiquidatorNoRegistry;
-
       address wtoken = ap.getAddress("wtoken");
       address stable = ap.getAddress("usd");
       address wbtc = ap.getAddress("wBTCToken");
