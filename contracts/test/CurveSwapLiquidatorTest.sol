@@ -16,7 +16,7 @@ contract CurveSwapLiquidatorTest is BaseTest {
     vm.createSelectFork("moonbeam", 1824921);
     setAddressProvider("moonbeam");
 
-    csl = new CurveSwapLiquidator(ap.getAddress("wtoken"));
+    csl = new CurveSwapLiquidator();
     address pool = 0x0fFc46cD9716a96d8D89E1965774A70Dcb851E50; // xcDOT-stDOT
     address xcDotAddress = 0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080; // 0
     address stDotAddress = 0xFA36Fe1dA08C89eC72Ea1F0143a35bFd5DAea108; // 1
@@ -40,7 +40,7 @@ contract CurveSwapLiquidatorTest is BaseTest {
   function testRedeemMAI() public {
     vm.createSelectFork("bsc", 20238373);
     setAddressProvider("bsc");
-    csl = new CurveSwapLiquidator(ap.getAddress("wtoken"));
+    csl = new CurveSwapLiquidator();
 
     address maiAddress = 0x3F56e0c36d275367b8C502090EDF38289b3dEa0d;
     address val3EPSAddress = 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5;

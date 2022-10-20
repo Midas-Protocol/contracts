@@ -41,18 +41,17 @@ contract FuseSafeLiquidatorTest is BaseTest {
     setAddressProvider(network);
   }
 
-  // function testBsc(uint256 random) public {
-  //   setNetworkValues("bsc", 20238373);
-  //   uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
-  //   fsl = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
+  function testBsc() public {
+    setNetworkValues("bsc", 20238373);
+    uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
+    fsl = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
 
-  //   testWhitelistRevert();
-  //   testWhitelist();
-  //   testUpgrade();
-  //   testAnyLiquidation(random);
-  // }
+    testWhitelistRevert();
+    testWhitelist();
+    testUpgrade();
+  }
 
-  function testPolygon(uint256 random) public {
+  function testPolygon() public {
     setNetworkValues("polygon", 33063212);
     uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
     fsl = FuseSafeLiquidator(payable(0x37b3890B9b3a5e158EAFDA243d4640c5349aFC15));
@@ -125,57 +124,138 @@ contract AnyLiquidationTest is BaseTest {
     int128 preferredCoin;
   }
 
-  function setUp() public {
-    if (block.chainid == BSC_MAINNET) {
-      // TODO run for the latest block number
-      vm.rollFork(22277940);
-    } else if (block.chainid == POLYGON_MAINNET) {
-      // TODO run for the latest block number
-      vm.rollFork(34489980);
-    }
-
-    curveSwapLiquidator = new CurveSwapLiquidator();
-    jarvisLiquidator = new JarvisLiquidatorFunder();
-    uniswapV2Liquidator = new UniswapV2Liquidator();
-    curveLpTokenLiquidatorNoRegistry = new CurveLpTokenLiquidatorNoRegistry();
-
-    if (block.chainid == BSC_MAINNET) {
-      uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
-      mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
-      mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
-      configureBscRedemptionStrategies();
-      curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
-      // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      fsl = new FuseSafeLiquidator();
-      fsl.initialize(
-        ap.getAddress("wtoken"),
-        uniswapRouter,
-        ap.getAddress("bUSD"),
-        ap.getAddress("wBTCToken"),
-        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
-        25
-      );
-    } else if (block.chainid == POLYGON_MAINNET) {
-      uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
-      mostLiquidPair1 = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827); // USDC/WMATIC
-      mostLiquidPair2 = IUniswapV2Pair(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
-      address usdcPolygon = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
-      curveOracle = CurveLpTokenPriceOracleNoRegistry(0xaCF3E1C6f2D6Ff12B8aEE44413D6834774B3f7A3);
-      // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      fsl = new FuseSafeLiquidator();
-      fsl.initialize(
-        ap.getAddress("wtoken"),
-        uniswapRouter,
-        usdcPolygon,
-        ap.getAddress("wBTCToken"),
-        "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
-        30
-      );
-    } else {
-      uniswapRouter = ap.getAddress("IUniswapV2Router02");
-    }
-    configureCurveSwapPools();
+  function setNetworkValues(string memory network, uint256 forkBlockNumber) internal {
+    vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
+    setAddressProvider(network);
   }
+
+  function testBsc(uint256 random) public {
+    setNetworkValues("bsc", 22277940);
+    uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
+    mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
+    mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
+    configureBscRedemptionStrategies();
+    curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
+    // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+    fsl = new FuseSafeLiquidator();
+    fsl.initialize(
+      ap.getAddress("wtoken"),
+      uniswapRouter,
+      ap.getAddress("bUSD"),
+      ap.getAddress("wBTCToken"),
+      "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
+      25
+    );
+    configureCurveSwapPools();
+
+    testAnyLiquidation(random);
+  }
+
+  function testPolygon(uint256 random) public {
+    setNetworkValues("polygon", 34489980);
+    uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
+    mostLiquidPair1 = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827); // USDC/WMATIC
+    mostLiquidPair2 = IUniswapV2Pair(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
+    address usdcPolygon = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+    curveOracle = CurveLpTokenPriceOracleNoRegistry(0xaCF3E1C6f2D6Ff12B8aEE44413D6834774B3f7A3);
+    // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+    fsl = new FuseSafeLiquidator();
+    fsl.initialize(
+      ap.getAddress("wtoken"),
+      uniswapRouter,
+      usdcPolygon,
+      ap.getAddress("wBTCToken"),
+      "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
+      30
+    );
+    address ageurJeurPool = 0x2fFbCE9099cBed86984286A54e5932414aF4B717; // AGEUR_JEUR
+    address jeurParPool = 0x0f110c55EfE62c16D553A3d3464B77e1853d0e97; // JEUR_PAR
+    address jjpyJpycPool = 0xaA91CDD7abb47F821Cf07a2d38Cc8668DEAf1bdc; // JJPY_JPYC
+    address jcadCadcPool = 0xA69b0D5c0C401BBA2d5162138613B5E38584F63F; // JCAD_CADC
+    address jsgdXsgdPool = 0xeF75E9C7097842AcC5D0869E1dB4e5fDdf4BFDDA; // JSGD_XSGD
+    address jnzdNzdsPool = 0x976A750168801F58E8AEdbCfF9328138D544cc09; // JNZD_NZDS
+    address jeurEurtPool = 0x2C3cc8e698890271c8141be9F6fD6243d56B39f1; // JEUR_EUR
+    address eureJeurPool = 0x2F3E9CA3bFf85B91D9fe6a9f3e8F9B1A6a4c3cF4; // EURE_JEUR
+    curveSwapPools.push(CurveSwapPool(ageurJeurPool, 1));
+    curveSwapPools.push(CurveSwapPool(jeurParPool, 1));
+    curveSwapPools.push(CurveSwapPool(jjpyJpycPool, 0));
+    curveSwapPools.push(CurveSwapPool(jcadCadcPool, 0));
+    curveSwapPools.push(CurveSwapPool(jsgdXsgdPool, 0));
+    curveSwapPools.push(CurveSwapPool(jnzdNzdsPool, 0));
+    curveSwapPools.push(CurveSwapPool(jeurEurtPool, 1));
+    curveSwapPools.push(CurveSwapPool(eureJeurPool, 1));
+    configureCurveSwapPools();
+
+    testAnyLiquidation(random);
+  }
+
+  // function setUp() public {
+  //   if (block.chainid == BSC_MAINNET) {
+  //     // TODO run for the latest block number
+  //     vm.rollFork(22277940);
+  //   } else if (block.chainid == POLYGON_MAINNET) {
+  //     // TODO run for the latest block number
+  //     vm.rollFork(34489980);
+  //   }
+
+  //   curveSwapLiquidator = new CurveSwapLiquidator();
+  //   jarvisLiquidator = new JarvisLiquidatorFunder();
+  //   uniswapV2Liquidator = new UniswapV2Liquidator();
+  //   curveLpTokenLiquidatorNoRegistry = new CurveLpTokenLiquidatorNoRegistry();
+
+  //   if (block.chainid == BSC_MAINNET) {
+  //     uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
+  //     mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
+  //     mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
+  //     configureBscRedemptionStrategies();
+  //     curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
+  //     // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+  //     fsl = new FuseSafeLiquidator();
+  //     fsl.initialize(
+  //       ap.getAddress("wtoken"),
+  //       uniswapRouter,
+  //       ap.getAddress("bUSD"),
+  //       ap.getAddress("wBTCToken"),
+  //       "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
+  //       25
+  //     );
+  //   } else if (block.chainid == POLYGON_MAINNET) {
+  //     uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
+  //     mostLiquidPair1 = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827); // USDC/WMATIC
+  //     mostLiquidPair2 = IUniswapV2Pair(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
+  //     address usdcPolygon = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+  //     curveOracle = CurveLpTokenPriceOracleNoRegistry(0xaCF3E1C6f2D6Ff12B8aEE44413D6834774B3f7A3);
+  //     // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+  //     fsl = new FuseSafeLiquidator();
+  //     fsl.initialize(
+  //       ap.getAddress("wtoken"),
+  //       uniswapRouter,
+  //       usdcPolygon,
+  //       ap.getAddress("wBTCToken"),
+  //       "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
+  //       30
+  //     );
+  //     address ageurJeurPool = 0x2fFbCE9099cBed86984286A54e5932414aF4B717; // AGEUR_JEUR
+  //     address jeurParPool = 0x0f110c55EfE62c16D553A3d3464B77e1853d0e97; // JEUR_PAR
+  //     address jjpyJpycPool = 0xaA91CDD7abb47F821Cf07a2d38Cc8668DEAf1bdc; // JJPY_JPYC
+  //     address jcadCadcPool = 0xA69b0D5c0C401BBA2d5162138613B5E38584F63F; // JCAD_CADC
+  //     address jsgdXsgdPool = 0xeF75E9C7097842AcC5D0869E1dB4e5fDdf4BFDDA; // JSGD_XSGD
+  //     address jnzdNzdsPool = 0x976A750168801F58E8AEdbCfF9328138D544cc09; // JNZD_NZDS
+  //     address jeurEurtPool = 0x2C3cc8e698890271c8141be9F6fD6243d56B39f1; // JEUR_EUR
+  //     address eureJeurPool = 0x2F3E9CA3bFf85B91D9fe6a9f3e8F9B1A6a4c3cF4; // EURE_JEUR
+  //     curveSwapPools.push(CurveSwapPool(ageurJeurPool, 1));
+  //     curveSwapPools.push(CurveSwapPool(jeurParPool, 1));
+  //     curveSwapPools.push(CurveSwapPool(jjpyJpycPool, 0));
+  //     curveSwapPools.push(CurveSwapPool(jcadCadcPool, 0));
+  //     curveSwapPools.push(CurveSwapPool(jsgdXsgdPool, 0));
+  //     curveSwapPools.push(CurveSwapPool(jnzdNzdsPool, 0));
+  //     curveSwapPools.push(CurveSwapPool(jeurEurtPool, 1));
+  //     curveSwapPools.push(CurveSwapPool(eureJeurPool, 1));
+  //   } else {
+  //     uniswapRouter = ap.getAddress("IUniswapV2Router02");
+  //   }
+  //   configureCurveSwapPools();
+  // }
 
   function configureBscRedemptionStrategies() internal {
     {
@@ -234,25 +314,6 @@ contract AnyLiquidationTest is BaseTest {
 
   // TODO remove after the next deploy configures the AP accordingly
   function configureCurveSwapPools() internal {
-    if (block.chainid == POLYGON_MAINNET) {
-      address ageurJeurPool = 0x2fFbCE9099cBed86984286A54e5932414aF4B717; // AGEUR_JEUR
-      address jeurParPool = 0x0f110c55EfE62c16D553A3d3464B77e1853d0e97; // JEUR_PAR
-      address jjpyJpycPool = 0xaA91CDD7abb47F821Cf07a2d38Cc8668DEAf1bdc; // JJPY_JPYC
-      address jcadCadcPool = 0xA69b0D5c0C401BBA2d5162138613B5E38584F63F; // JCAD_CADC
-      address jsgdXsgdPool = 0xeF75E9C7097842AcC5D0869E1dB4e5fDdf4BFDDA; // JSGD_XSGD
-      address jnzdNzdsPool = 0x976A750168801F58E8AEdbCfF9328138D544cc09; // JNZD_NZDS
-      address jeurEurtPool = 0x2C3cc8e698890271c8141be9F6fD6243d56B39f1; // JEUR_EUR
-      address eureJeurPool = 0x2F3E9CA3bFf85B91D9fe6a9f3e8F9B1A6a4c3cF4; // EURE_JEUR
-      curveSwapPools.push(CurveSwapPool(ageurJeurPool, 1));
-      curveSwapPools.push(CurveSwapPool(jeurParPool, 1));
-      curveSwapPools.push(CurveSwapPool(jjpyJpycPool, 0));
-      curveSwapPools.push(CurveSwapPool(jcadCadcPool, 0));
-      curveSwapPools.push(CurveSwapPool(jsgdXsgdPool, 0));
-      curveSwapPools.push(CurveSwapPool(jnzdNzdsPool, 0));
-      curveSwapPools.push(CurveSwapPool(jeurEurtPool, 1));
-      curveSwapPools.push(CurveSwapPool(eureJeurPool, 1));
-    } else if (block.chainid == BSC_MAINNET) {}
-
     curveSwapLiquidator = new CurveSwapLiquidator();
 
     for (uint8 i = 0; i < curveSwapPools.length; i++) {
@@ -265,12 +326,7 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
-  function testAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
-    vm.assume(random > 100 && random < type(uint64).max);
-    doTestAnyLiquidation(random);
-  }
-
-  function testPolygonAnyLiquidation(uint256 random) public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testAnyLiquidation(uint256 random) internal {
     vm.assume(random > 100 && random < type(uint64).max);
     doTestAnyLiquidation(random);
   }
@@ -372,11 +428,7 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
-  function testAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
-    vm.assume(random > 100 && random < type(uint64).max);
-
-    //    random = 122460273;
-
+  function doTestAnyLiquidation(uint256 random) internal {
     LiquidationData memory vars;
     vars.liquidator = fsl;
 
@@ -564,33 +616,16 @@ contract AnyLiquidationTest is BaseTest {
 
       strategyData = abi.encode(uniswapRouter, swapToken0Path, swapToken1Path);
 
-    if (address(vars.flashSwapPair) == address(pair)) {
-      emit log("toggling the flashswap pair");
-      emit log_address(address(pair));
-      toggleFlashSwapPair(vars);
-    }
-  }
+      if (address(vars.flashSwapPair) == address(pair)) {
+        emit log("toggling the flashswap pair");
+        emit log_address(address(pair));
+        toggleFlashSwapPair(vars);
+      }
 
-  IUniswapV2Pair FIRST_PAIR = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
-  IUniswapV2Pair SECOND_PAIR = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
-
-  function toggleFlashSwapPair(LiquidationData memory vars) internal {
-    if (address(vars.flashSwapPair) == address(FIRST_PAIR)) {
-      vars.flashSwapPair = SECOND_PAIR;
-    } else {
-      vars.flashSwapPair = FIRST_PAIR;
-    }
-  }
-
-  function testPolygonAnyLiquidation(uint256 random)
-    public
-    shouldRun(
-      false /*forChains(POLYGON_MAINNET)*/
-    )
-  {
-    vm.assume(random > 100 && random < type(uint64).max);
-
-    LiquidationData memory vars;
+      outputToken = ap.getAddress("wtoken");
+    } else if (compareStrings(strategyContract, "CurveLpTokenLiquidatorNoRegistry")) {
+      // TODO use already deployed strategies when they are redeployed
+      strategy = curveLpTokenLiquidatorNoRegistry;
 
       address wtoken = ap.getAddress("wtoken");
       address stable = ap.getAddress("usd");
@@ -599,27 +634,25 @@ contract AnyLiquidationTest is BaseTest {
       address preferredToken = curveOracle.underlyingTokens(inputToken, 0);
       uint8 outputTokenIndex = 0;
 
-    while (true) {
-      // get a random pool and a random borrower from it
-      (vars.comptroller, vars.borrower) = getPoolAndBorrower(random, vars);
-
-      if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
-        // find a market in which the borrower has debt and reduce his collateral price
-        if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
-          vars.markets = vars.comptroller.getAllMarkets();
-          (vars.debtMarket, vars.collateralMarket, vars.borrowAmount) = setUpDebtAndCollateralMarkets(random, vars);
-        }
-
-        if (address(vars.debtMarket) != address(0) && address(vars.collateralMarket) != address(0)) {
-          //          if (vars.debtMarket.underlying() == 0xBD1fe73e1f12bD2bc237De9b626F056f21f86427) { // TODO remove when done testing MAI
-          emit log("found testable markets at random number");
-          emit log_uint(random);
+      uint8 i = 0;
+      while (true) {
+        try curveOracle.underlyingTokens(inputToken, i) returns (address underlying) {
+          if (underlying == wtoken) {
+            preferredToken = wtoken;
+            outputTokenIndex = i;
+            break;
+          } else if (underlying == stable) {
+            preferredToken = stable;
+            outputTokenIndex = i;
+          } else if (preferredToken == address(0) && underlying == wbtc) {
+            preferredToken = wbtc;
+            outputTokenIndex = i;
+          }
+        } catch {
           break;
-          //          }
         }
+        i++;
       }
-      random++;
-    }
 
       // TODO use curveOracle.getUnderlyingTokens()
       //      address[] memory underlyingTokens = curveOracle.getUnderlyingTokens(inputToken);

@@ -32,11 +32,6 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
   }
 
-  function testInitializedValues() public {
-    assertEq(address(liquidator.W_NATIVE()), address(wtoken));
-    assertEq(address(liquidator.oracle()), address(curveLPTokenPriceOracleNoRegistry));
-  }
-
   // tested with bsc block number 16233661
   function testRedeemToken() public {
     vm.prank(lpTokenWhale);
