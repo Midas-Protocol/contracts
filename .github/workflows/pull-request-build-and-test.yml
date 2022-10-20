@@ -34,6 +34,12 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
+      BSC_MAINNET_RPC_URL: "${{ secrets.BSC_MAINNET_RPC_URL }}"
+      POLYGON_MAINNET_RPC_URL: "${{ secrets.POLYGON_MAINNET_RPC_URL }}"
+      MOONBEAM_MAINNET_RPC_URL: "${{ secrets.MOONBEAM_MAINNET_RPC_URL }}"
+      ARBITRUM_MAINNET_RPC_URL: "${{ secrets.ARBITRUM_MAINNET_RPC_URL }}"
+      NEON_DEVNET_RPC_URL: "${{ secrets.NEON_DEVNET_RPC_URL }}"
+      EVMOS_TESTNET_RPC_URL: "${{ secrets.EVMOS_TESTNET_RPC_URL }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
