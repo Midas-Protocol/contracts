@@ -118,10 +118,10 @@ contract AnyLiquidationTest is BaseTest {
   function setUp() public {
     if (block.chainid == BSC_MAINNET) {
       // TODO run for the latest block number
-      vm.rollFork(22340200);
+      vm.rollFork(22348250);
     } else if (block.chainid == POLYGON_MAINNET) {
       // TODO run for the latest block number
-      vm.rollFork(34579090);
+      vm.rollFork(34590300);
     }
 
     curveSwapLiquidator = new CurveSwapLiquidator();
