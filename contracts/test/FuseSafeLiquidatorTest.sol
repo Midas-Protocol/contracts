@@ -125,12 +125,16 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   function setNetworkValues(string memory network, uint256 forkBlockNumber) internal {
-    vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
+    vm.createSelectFork(vm.rpcUrl(network));
     setAddressProvider(network);
   }
 
   function testBsc(uint256 random) public {
     setNetworkValues("bsc", 22277940);
+    curveSwapLiquidator = new CurveSwapLiquidator();
+    jarvisLiquidator = new JarvisLiquidatorFunder();
+    uniswapV2Liquidator = new UniswapV2Liquidator();
+    curveLpTokenLiquidatorNoRegistry = new CurveLpTokenLiquidatorNoRegistry();
     uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
     mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
     mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
@@ -153,6 +157,11 @@ contract AnyLiquidationTest is BaseTest {
 
   function testPolygon(uint256 random) public {
     setNetworkValues("polygon", 34489980);
+    vm.rollFork(34489980);
+    curveSwapLiquidator = new CurveSwapLiquidator();
+    jarvisLiquidator = new JarvisLiquidatorFunder();
+    uniswapV2Liquidator = new UniswapV2Liquidator();
+    curveLpTokenLiquidatorNoRegistry = new CurveLpTokenLiquidatorNoRegistry();
     uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
     mostLiquidPair1 = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827); // USDC/WMATIC
     mostLiquidPair2 = IUniswapV2Pair(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
