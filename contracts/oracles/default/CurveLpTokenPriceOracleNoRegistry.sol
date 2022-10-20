@@ -110,4 +110,13 @@ contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedSto
     poolOf[_lpToken] = _pool;
     underlyingTokens[_lpToken] = _underlyings;
   }
+
+  /**
+   * @dev getter for the underlying tokens
+   * @param lpToken the LP token address.
+   * @return _underlyings Underlying addresses.
+   */
+  function getUnderlyingTokens(address lpToken) public view returns (address[] memory) {
+    return underlyingTokens[lpToken];
+  }
 }

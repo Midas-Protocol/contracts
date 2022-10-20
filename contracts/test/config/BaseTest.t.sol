@@ -58,6 +58,10 @@ abstract contract BaseTest is Test {
     }
   }
 
+  function compareStrings(string memory a, string memory b) public view returns (bool) {
+    return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
+  }
+
   function asArray(address value) public pure returns (address[] memory) {
     address[] memory array = new address[](1);
     array[0] = value;

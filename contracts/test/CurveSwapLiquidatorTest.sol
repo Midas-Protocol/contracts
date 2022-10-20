@@ -30,7 +30,7 @@ contract CurveSwapLiquidatorTest is BaseTest {
     uint256 xcForSt = curvePool.get_dy(0, 1, 1e10);
     emit log_uint(xcForSt);
 
-    bytes memory data = abi.encode(pool, 0, 1, stDotAddress);
+    bytes memory data = abi.encode(pool, 0, 1, stDotAddress, ap.getAddress("wtoken"));
     (IERC20Upgradeable shouldBeStDot, uint256 stDotOutput) = csl.redeem(xcDot, 1e10, data);
     assertEq(address(shouldBeStDot), stDotAddress, "output token does not match");
 
@@ -61,7 +61,7 @@ contract CurveSwapLiquidatorTest is BaseTest {
 
     dealMai(mai, address(csl), inputAmount);
 
-    bytes memory data = abi.encode(poolAddress, 0, 1, val3EPSAddress);
+    bytes memory data = abi.encode(poolAddress, 0, 1, val3EPSAddress, ap.getAddress("wtoken"));
     (IERC20Upgradeable shouldBeVal3EPS, uint256 outputAmount) = csl.redeem(mai, inputAmount, data);
     assertEq(address(shouldBeVal3EPS), val3EPSAddress, "output token does not match");
 
