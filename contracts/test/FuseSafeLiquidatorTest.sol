@@ -118,10 +118,10 @@ contract AnyLiquidationTest is BaseTest {
   function setUp() public {
     if (block.chainid == BSC_MAINNET) {
       // TODO run for the latest block number
-      vm.rollFork(22277940);
+      vm.rollFork(22340200);
     } else if (block.chainid == POLYGON_MAINNET) {
       // TODO run for the latest block number
-      vm.rollFork(34489980);
+      vm.rollFork(34579090);
     }
 
     curveSwapLiquidator = new CurveSwapLiquidator();
@@ -133,7 +133,7 @@ contract AnyLiquidationTest is BaseTest {
       uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
       mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
       mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
-      configureBscRedemptionStrategies();
+      // configureBscRedemptionStrategies();
       curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
       // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
       fsl = new FuseSafeLiquidator();
@@ -164,7 +164,7 @@ contract AnyLiquidationTest is BaseTest {
     } else {
       uniswapRouter = ap.getAddress("IUniswapV2Router02");
     }
-    configureCurveSwapPools();
+    // configureCurveSwapPools();
   }
 
   function configureBscRedemptionStrategies() internal {
