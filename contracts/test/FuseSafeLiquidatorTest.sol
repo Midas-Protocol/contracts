@@ -35,21 +35,33 @@ contract FuseSafeLiquidatorTest is BaseTest {
   address alice = address(10);
   address uniswapRouter;
 
-  function setUp() public {
-    if (block.chainid == BSC_MAINNET) {
-      uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
-      fsl = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
-    } else if (block.chainid == POLYGON_MAINNET) {
-      uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
-      fsl = FuseSafeLiquidator(payable(0x37b3890B9b3a5e158EAFDA243d4640c5349aFC15));
-    } else {
-      uniswapRouter = ap.getAddress("IUniswapV2Router02");
-      fsl = new FuseSafeLiquidator();
-      fsl.initialize(address(1), address(2), address(3), address(4), "", 30);
-    }
+  function setNetworkValues(string memory network, uint256 forkBlockNumber) internal {
+    vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
+    setAddressProvider(network);
   }
 
-  function testWhitelistRevert() public {
+  // function testBsc(uint256 random) public {
+  //   setNetworkValues("bsc", 20238373);
+  //   uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
+  //   fsl = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
+
+  //   testWhitelistRevert();
+  //   testWhitelist();
+  //   testUpgrade();
+  //   testAnyLiquidation(random);
+  // }
+
+  function testPolygon(uint256 random) public {
+    setNetworkValues("polygon", 33063212);
+    uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
+    fsl = FuseSafeLiquidator(payable(0x37b3890B9b3a5e158EAFDA243d4640c5349aFC15));
+
+    testWhitelistRevert();
+    testWhitelist();
+    testUpgrade();
+  }
+
+  function testWhitelistRevert() internal {
     IERC20Upgradeable underlyingCollateral = IERC20Upgradeable(address(0));
     uint256 underlyingCollateralSeized = 1;
     IRedemptionStrategy strategy = new MockRedemptionStrategy();
@@ -59,7 +71,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     fsl.redeemCustomCollateral(underlyingCollateral, underlyingCollateralSeized, strategy, strategyData);
   }
 
-  function testWhitelist() public {
+  function testWhitelist() internal {
     IERC20Upgradeable underlyingCollateral = IERC20Upgradeable(address(0));
     uint256 underlyingCollateralSeized = 1;
     IRedemptionStrategy strategy = new MockRedemptionStrategy();
@@ -70,9 +82,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     fsl.redeemCustomCollateral(underlyingCollateral, underlyingCollateralSeized, strategy, strategyData);
   }
 
-  function testUpgrade() public {
-    //    emit log_address(fsl.owner());
-
+  function testUpgrade() internal {
     // in case these slots start to get used, please redeploy the FSL
     // with a larger storage gap to protect the owner variable of OwnableUpgradeable
     // from being overwritten by the FuseSafeLiquidator storage
@@ -185,10 +195,8 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 
-  function testAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
+  function testAnyLiquidation(uint256 random) internal {
     vm.assume(random > 100 && random < type(uint64).max);
-
-    //    random = 122460273;
 
     LiquidationData memory vars;
 
@@ -390,12 +398,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 
-  function testPolygonAnyLiquidation(uint256 random)
-    public
-    shouldRun(
-      false /*forChains(POLYGON_MAINNET)*/
-    )
-  {
+  function testPolygonAnyLiquidation(uint256 random) internal {
     vm.assume(random > 100 && random < type(uint64).max);
 
     LiquidationData memory vars;
@@ -429,11 +432,12 @@ contract FuseSafeLiquidatorTest is BaseTest {
         }
 
         if (address(vars.debtMarket) != address(0) && address(vars.collateralMarket) != address(0)) {
-          //          if (vars.debtMarket.underlying() == 0xBD1fe73e1f12bD2bc237De9b626F056f21f86427) { // TODO remove when done testing MAI
-          emit log("found testable markets at random number");
-          emit log_uint(random);
-          break;
-          //          }
+          if (vars.debtMarket.underlying() == 0xBD1fe73e1f12bD2bc237De9b626F056f21f86427) {
+            // TODO remove when done testing MAI
+            emit log("found testable markets at random number");
+            emit log_uint(random);
+            break;
+          }
         }
       }
       random++;

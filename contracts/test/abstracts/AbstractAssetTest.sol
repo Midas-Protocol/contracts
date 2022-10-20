@@ -13,93 +13,92 @@ import { ITestConfigStorage } from "./ITestConfigStorage.sol";
 contract AbstractAssetTest is BaseTest {
   AbstractERC4626Test public test;
   ITestConfigStorage public testConfigStorage;
-  bool public shouldRunTest;
 
-  function setUp() public virtual shouldRun(shouldRunTest) {}
+  function setUp() public virtual {}
 
-  function setUpTestContract(bytes calldata testConfig) public virtual shouldRun(shouldRunTest) {
+  function setUpTestContract(bytes calldata testConfig) public virtual {
     // test.setUp(MockERC20(address(IBeefyVault(testConfig.beefyVault).want())).symbol(), testConfig);
   }
 
-  function runTest(function() external test) public shouldRun(shouldRunTest) {
+  function runTest(function() external test) public {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       this.setUpTestContract(testConfigStorage.getTestConfig(i));
       test();
     }
   }
 
-  function testInitializedValues() public virtual shouldRun(shouldRunTest) {
+  function testInitializedValues() public virtual {
     // for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
     //   this.setUpTestContract(testConfigs[i]);
     //   test.testInitializedValues(asset.name(), asset.symbol());
     // }
   }
 
-  function testPreviewDepositAndMintReturnTheSameValue() public shouldRun(shouldRunTest) {
+  function testPreviewDepositAndMintReturnTheSameValue() public {
     this.runTest(test.testPreviewDepositAndMintReturnTheSameValue);
   }
 
-  function testPreviewWithdrawAndRedeemReturnTheSameValue() public shouldRun(shouldRunTest) {
+  function testPreviewWithdrawAndRedeemReturnTheSameValue() public {
     this.runTest(test.testPreviewWithdrawAndRedeemReturnTheSameValue);
   }
 
-  function testDeposit() public shouldRun(shouldRunTest) {
+  function testDeposit() public {
     this.runTest(test.testDeposit);
   }
 
-  function testDepositWithIncreasedVaultValue() public virtual shouldRun(shouldRunTest) {
-    //this.runTest(test.testDepositWithIncreasedVaultValue);
+  function testDepositWithIncreasedVaultValue() public virtual {
+    this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public virtual shouldRun(shouldRunTest) {
-    //this.runTest(test.testDepositWithDecreasedVaultValue);
+  function testDepositWithDecreasedVaultValue() public virtual {
+    this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testMultipleDeposit() public shouldRun(shouldRunTest) {
+  function testMultipleDeposit() public {
     this.runTest(test.testMultipleDeposit);
   }
 
-  function testMint() public shouldRun(shouldRunTest) {
+  function testMint() public {
     this.runTest(test.testMint);
   }
 
-  function testMultipleMint() public shouldRun(shouldRunTest) {
+  function testMultipleMint() public {
     this.runTest(test.testMultipleMint);
   }
 
-  function testWithdraw() public shouldRun(shouldRunTest) {
+  function testWithdraw() public {
     this.runTest(test.testWithdraw);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public virtual shouldRun(shouldRunTest) {
-    //this.runTest(test.testWithdrawWithIncreasedVaultValue);
+  function testWithdrawWithIncreasedVaultValue() public virtual {
+    this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public virtual shouldRun(shouldRunTest) {
-    //this.runTest(test.testWithdrawWithDecreasedVaultValue);
+  function testWithdrawWithDecreasedVaultValue() public virtual {
+    this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 
-  function testMultipleWithdraw() public shouldRun(shouldRunTest) {
+  function testMultipleWithdraw() public {
     this.runTest(test.testMultipleWithdraw);
   }
 
-  function testRedeem() public shouldRun(shouldRunTest) {
+  function testRedeem() public {
     this.runTest(test.testRedeem);
   }
 
-  function testMultipleRedeem() public shouldRun(shouldRunTest) {
+  function testMultipleRedeem() public {
     this.runTest(test.testMultipleRedeem);
   }
 
-  function testPauseContract() public shouldRun(shouldRunTest) {
+  function testPauseContract() public {
     this.runTest(test.testPauseContract);
   }
 
-  function testEmergencyWithdrawAndPause() public shouldRun(shouldRunTest) {
+  function testEmergencyWithdrawAndPause() public {
     this.runTest(test.testEmergencyWithdrawAndPause);
   }
 
-  function testEmergencyWithdrawAndRedeem() public shouldRun(shouldRunTest) {
+  function testEmergencyWithdrawAndRedeem() public {
     this.runTest(test.testEmergencyWithdrawAndRedeem);
   }
 }

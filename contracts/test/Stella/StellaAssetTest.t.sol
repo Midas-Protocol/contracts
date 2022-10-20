@@ -21,12 +21,13 @@ contract StellaAssetTest is AbstractAssetTest {
   constructor() {
     test = AbstractERC4626Test(address(new StellaERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new StellaTestConfigStorage()));
-    shouldRunTest = forChains(MOONBEAM_MAINNET);
+    vm.createSelectFork("moonbeam", 1824921);
+    setAddressProvider("moonbeam");
   }
 
-  function setUp() public override shouldRun(shouldRunTest) {}
+  function setUp() public override {}
 
-  function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
+  function setUpTestContract(bytes calldata testConfig) public override {
     (address asset, uint256 poolId, address[] memory rewardTokens) = abi.decode(
       testConfig,
       (address, uint256, address[])
@@ -37,7 +38,7 @@ contract StellaAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override shouldRun(shouldRunTest) {
+  function testInitializedValues() public override {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
@@ -49,27 +50,27 @@ contract StellaAssetTest is AbstractAssetTest {
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testDepositWithIncreasedVaultValue() public override {
     this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testDepositWithDecreasedVaultValue() public override {
     this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testWithdrawWithIncreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testWithdrawWithDecreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(shouldRunTest) {
+  function testAccumulatingRewardsOnDeposit() public {
     this.runTest(StellaERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(shouldRunTest) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     this.runTest(StellaERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 }

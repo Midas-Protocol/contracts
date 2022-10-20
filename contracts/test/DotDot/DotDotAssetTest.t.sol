@@ -17,14 +17,15 @@ import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 // Tested on block 19052824
 contract DotDotAssetTest is AbstractAssetTest {
   constructor() {
+    vm.createSelectFork("bsc", 20238373);
+    setAddressProvider("bsc");
     test = AbstractERC4626Test(address(new DotDotERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new DotDotTestConfigStorage()));
-    shouldRunTest = forChains(BSC_MAINNET);
   }
 
-  function setUp() public override shouldRun(shouldRunTest) {}
+  function setUp() public override {}
 
-  function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
+  function setUpTestContract(bytes calldata testConfig) public override {
     (address masterPriceOracle, address asset) = abi.decode(testConfig, (address, address));
 
     test.setUpWithPool(MasterPriceOracle(masterPriceOracle), ERC20Upgradeable(asset));
@@ -32,7 +33,7 @@ contract DotDotAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override shouldRun(shouldRunTest) {
+  function testInitializedValues() public override {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
@@ -44,31 +45,31 @@ contract DotDotAssetTest is AbstractAssetTest {
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testDepositWithIncreasedVaultValue() public override {
     this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testDepositWithDecreasedVaultValue() public override {
     this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testWithdrawWithIncreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testWithdrawWithDecreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(shouldRunTest) {
+  function testAccumulatingRewardsOnDeposit() public {
     this.runTest(DotDotERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(shouldRunTest) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     this.runTest(DotDotERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 
-  function testClaimRewards() public shouldRun(shouldRunTest) {
+  function testClaimRewards() public {
     this.runTest(DotDotERC4626Test(address(test)).testClaimRewards);
   }
 }

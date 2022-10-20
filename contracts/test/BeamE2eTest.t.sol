@@ -56,16 +56,18 @@ contract BeamE2eTest is WithPool, BaseTest {
   }
 
   constructor() WithPool() {
+    vm.createSelectFork("moonbeam", 1824921);
+    setAddressProvider("moonbeam");
     super.setUpWithPool(MasterPriceOracle(mPriceOracle), ERC20Upgradeable(0x99588867e817023162F4d4829995299054a5fC57));
   }
 
-  function setUp() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function setUp() public {
     vm.prank(joey);
     underlyingToken.transfer(address(this), 100e18);
     setUpPool("beam-test", false, 0.1e18, 1.1e18);
   }
 
-  function testDeployCErc20Delegate() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function testDeployCErc20Delegate() public {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
@@ -95,7 +97,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     );
   }
 
-  function testGetPoolAssetsData() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function testGetPoolAssetsData() public {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
@@ -114,7 +116,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     assertEq(assets[0].supplyBalance, 10e18, "Asset's supply balance should be same as minted balance");
   }
 
-  function testBeamCErc20Liquidation() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function testBeamCErc20Liquidation() public {
     LiquidationData memory vars;
     vars.erc4626 = new MockERC4626(ERC20(address(underlyingToken)));
     vars.asset = MockBeamERC20(usdc);
@@ -275,7 +277,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     }
   }
 
-  function testBeamDeployCErc20PluginDelegate() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function testBeamDeployCErc20PluginDelegate() public {
     MockERC4626 erc4626 = new MockERC4626(ERC20(address(underlyingToken)));
 
     vm.roll(1);

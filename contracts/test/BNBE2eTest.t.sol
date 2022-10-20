@@ -17,21 +17,22 @@ import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 contract BNBE2eTest is WithPool, BaseTest {
-  constructor() WithPool() {
-    super.setUpWithPool(
+  uint256 mainnetForkBlockNumber = 20238373;
+
+  function setUp() public {
+    createSelectFork("bsc", mainnetForkBlockNumber);
+
+    setUpWithPool(
       MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
       ERC20Upgradeable(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
     );
-  }
-
-  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
     vm.prank(0xF8aaE8D5dd1d7697a4eC6F561737e68a2ab8539e);
     underlyingToken.transferFrom(0xF8aaE8D5dd1d7697a4eC6F561737e68a2ab8539e, address(this), 10e18);
     uint256 balance = underlyingToken.balanceOf(address(this));
     setUpPool("bsc-test", false, 0.1e18, 1.1e18);
   }
 
-  function testDeployCErc20Delegate() public shouldRun(forChains(BSC_MAINNET)) {
+  function testDeployCErc20Delegate() public {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
@@ -54,7 +55,7 @@ contract BNBE2eTest is WithPool, BaseTest {
     assertEq(underlyingToken.balanceOf(address(this)), 1000);
   }
 
-  function testGetPoolAssetsData() public shouldRun(forChains(BSC_MAINNET)) {
+  function testGetPoolAssetsData() public {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
@@ -79,7 +80,7 @@ contract BNBE2eTest is WithPool, BaseTest {
     assertEq(assets[0].supplyBalance, 10e18);
   }
 
-  function testDeployCErc20PluginDelegate() public shouldRun(forChains(BSC_MAINNET)) {
+  function testDeployCErc20PluginDelegate() public {
     AlpacaERC4626 erc4626 = new AlpacaERC4626();
     erc4626.initialize(
       ERC20Upgradeable(address(underlyingToken)),
@@ -116,7 +117,7 @@ contract BNBE2eTest is WithPool, BaseTest {
     assertEq(underlyingToken.balanceOf(address(this)), 10e18 - 1e18 + maxWithdraw);
   }
 
-  function testDeployCErc20PluginRewardsDelegate() public shouldRun(forChains(BSC_MAINNET)) {
+  function testDeployCErc20PluginRewardsDelegate() public {
     MockERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
     FuseFlywheelDynamicRewards rewards;
     FuseFlywheelCore flywheel = new FuseFlywheelCore(

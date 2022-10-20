@@ -23,19 +23,22 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
   IERC20Upgradeable bUSD;
   WETH wtoken;
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
+  function setUp() public {
+    vm.createSelectFork("bsc", 20238373);
+    setAddressProvider("bsc");
+
     wtoken = WETH(payable(ap.getAddress("wtoken")));
     liquidator = new CurveLpTokenLiquidatorNoRegistry(wtoken, curveLPTokenPriceOracleNoRegistry);
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
   }
 
-  function testInitializedValues() public shouldRun(forChains(BSC_MAINNET)) {
+  function testInitializedValues() public {
     assertEq(address(liquidator.W_NATIVE()), address(wtoken));
     assertEq(address(liquidator.oracle()), address(curveLPTokenPriceOracleNoRegistry));
   }
 
   // tested with bsc block number 16233661
-  function testRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
+  function testRedeemToken() public {
     vm.prank(lpTokenWhale);
     lpToken.transfer(address(liquidator), 1234);
 
@@ -49,7 +52,7 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     assertEq(outputToken.balanceOf(address(liquidator)), outputAmount);
   }
 
-  function testRedeem2Brl() public shouldRun(forChains(BSC_MAINNET)) {
+  function testRedeem2Brl() public {
     IERC20Upgradeable twobrl = IERC20Upgradeable(0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9);
     address whale2brl = 0x6219b46d6a5B5BfB4Ec433a9F96DB3BF4076AEE1;
     vm.prank(whale2brl);

@@ -54,7 +54,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
 
   constructor() WithPool() {}
 
-  function setUp(string memory _testPreFix, bytes calldata) public override shouldRun(forChains(BSC_MAINNET)) {
+  function setUp(string memory _testPreFix, bytes calldata) public override {
     setUpPool("dotdot-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));
 
@@ -138,11 +138,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     return depositAmount;
   }
 
-  function testInitializedValues(string memory assetName, string memory assetSymbol)
-    public
-    override
-    shouldRun(forChains(BSC_MAINNET))
-  {
+  function testInitializedValues(string memory assetName, string memory assetSymbol) public override {
     assertEq(
       plugin.name(),
       string(abi.encodePacked("Midas ", assetName, " Vault")),
@@ -161,7 +157,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(forChains(BSC_MAINNET)) {
+  function testAccumulatingRewardsOnDeposit() public {
     deposit(address(this), depositAmount / 2);
 
     vm.warp(block.timestamp + 150);
@@ -172,7 +168,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     assertGt(epxToken.balanceOf(address(plugin)), 0.01 ether, string(abi.encodePacked("!epxBal ", testPreFix)));
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(forChains(BSC_MAINNET)) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     deposit(address(this), depositAmount);
 
     vm.warp(block.timestamp + 150);
@@ -184,7 +180,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     assertGt(epxToken.balanceOf(address(plugin)), 0.025 ether, string(abi.encodePacked("!epxBal ", testPreFix)));
   }
 
-  function testClaimRewards() public shouldRun(forChains(BSC_MAINNET)) {
+  function testClaimRewards() public {
     // Deposit funds, Rewards are 0
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);

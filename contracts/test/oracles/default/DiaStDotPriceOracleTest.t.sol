@@ -15,15 +15,13 @@ contract DiaStDotPriceOracleTest is BaseTest {
   address multiUsdc = 0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b;
 
   function setUp() public {
+    vm.createSelectFork("moonbeam", 1959099);
+    setAddressProvider("moonbeam");
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-    if (block.chainid == MOONBEAM_MAINNET) {
-      setUpOracle();
-    }
+    setUpOracle();
   }
 
   function setUpOracle() public {
-    vm.rollFork(1959099);
-
     oracle = new DiaStDotPriceOracle();
     vm.prank(mpo.admin());
     oracle.initialize(
@@ -34,7 +32,7 @@ contract DiaStDotPriceOracleTest is BaseTest {
     oracle.reinitialize();
   }
 
-  function testDiaStDotOraclePrice() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function testDiaStDotOraclePrice() public {
     uint256 priceStDot = oracle.price(stDot);
     uint256 priceWstDot = oracle.price(wstDot);
 

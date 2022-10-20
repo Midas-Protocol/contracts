@@ -17,11 +17,14 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
   MasterPriceOracle mpo;
 
   function setUp() public {
+    vm.createSelectFork(vm.rpcUrl("bsc"), 20238373);
+    setAddressProvider("bsc");
+
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     busd = ap.getAddress("bUSD");
   }
 
-  function setUpCurveOracle(address lpToken, address pool) public {
+  function setUpCurveOracle(address lpToken, address pool) internal {
     address[] memory lpTokens = new address[](1);
     lpTokens[0] = lpToken;
     address[] memory pools = new address[](1);
@@ -31,7 +34,7 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
     oracle.initialize(lpTokens, pools, busd, mpo);
   }
 
-  function testCurveLpTokenPriceOracleNoRegistry() public shouldRun(forChains(BSC_MAINNET)) {
+  function testCurveLpTokenPriceOracleNoRegistry() public {
     vm.rollFork(21675481);
 
     oracle = new CurveV2LpTokenPriceOracleNoRegistry();
