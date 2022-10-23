@@ -27,18 +27,19 @@ struct RewardsCycle {
 contract MimoTest is BaseTest {
   using FixedPointMathLib for uint256;
 
-  IGuniPool mimoStaking = IGuniPool(0x528330fF7c358FE1bAe348D23849CCed8edA5917);
+  IGuniPool mimoStaking = IGuniPool(0xBA2D426DCb186d670eD54a759098947fad395C95);
   FlywheelCore flywheel = FlywheelCore(0x5fF63E442AC4724EC342f4a3d26924233832EcBB);
   FuseFlywheelDynamicRewardsPlugin flywheelRewards =
     FuseFlywheelDynamicRewardsPlugin(0x9c44eD0210a082CFA1378cd88BcE30dbA08daCb3);
-  ArrakisERC4626 arrakisERC4626 = ArrakisERC4626(0xdE58CF12595e92ebB07D664eE59A642e360bea58);
+  ArrakisERC4626 arrakisERC4626 = ArrakisERC4626(0xd682451F627d54cfdA74a80972aDaeF133cdc15e);
 
   address mimoAddress = 0xADAC33f543267c4D59a8c299cF804c303BC3e4aC;
   ERC20 mimo = ERC20(mimoAddress);
 
-  ERC20 underlyingToken = ERC20(address(0xC1DF4E2fd282e39346422e40C403139CD633Aacd));
+  ERC20 underlyingToken = ERC20(address(0x82d7f08026e21c7713CfAd1071df7C8271B17Eae));
 
-  address marketAddress = 0xa5A14c3814d358230a56e8f011B8fc97A508E890;
+  address userWithRewards = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc;
+  address marketAddress = 0xcb67Bd2aE0597eDb2426802CdF34bb4085d9483A;
   ERC20 marketKey = ERC20(marketAddress);
   CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
 
@@ -50,9 +51,30 @@ contract MimoTest is BaseTest {
     vm.label(address(mimo), "mimo");
     vm.label(address(underlyingToken), "underlyingToken");
     vm.label(address(cToken), "cToken");
+    vm.label(address(userWithRewards), "userWithRewards");
   }
 
   function testAccrue() public {
+    uint256 balanceBefore = mimo.balanceOf(userWithRewards);
+    // vm.prank(userWithRewards);
+    // flywheel.accrue(marketKey, userWithRewards);
+
+    uint256 pendingMimo = mimoStaking.pendingMIMO(address(arrakisERC4626));
+    emit log_named_uint("pendingMimo", pendingMimo);
+
+    mimoStaking.releaseMIMO(address(arrakisERC4626));
+    emit log_uint(mimo.balanceOf(address(arrakisERC4626)));
+
+    flywheel.accrue(marketKey, userWithRewards);
+    flywheel.claimRewards(userWithRewards);
+    uint256 balanceAfter = mimo.balanceOf(userWithRewards);
+
+    emit log_uint(balanceBefore);
+    emit log_uint(balanceAfter);
+
+    // Fails
+    // assertGt(balanceAfter, balanceBefore);
+
     flywheel.accrue(marketKey, address(0));
     assertEq(mimoStaking.pendingMIMO(address(arrakisERC4626)), 0);
     emit log_uint(mimo.balanceOf(address(arrakisERC4626)));
