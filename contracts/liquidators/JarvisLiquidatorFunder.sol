@@ -46,7 +46,13 @@ contract JarvisLiquidatorFunder is IFundsConversionStrategy {
     if (inputToken == pool.syntheticToken()) {
       outputToken = IERC20Upgradeable(address(pool.collateralToken()));
 
-      if (pool.emergencyShutdownPrice() > 0) {
+      uint256 shutdownPrice = 0;
+      // TODO figure out why this method was removed and what to use instead
+      try pool.emergencyShutdownPrice() returns (uint256 price) {
+        shutdownPrice = price;
+      } catch {}
+
+      if (shutdownPrice > 0) {
         // emergency shutdowns cannot be reverted, so this corner case must be covered
         (, uint256 collateralSettled) = pool.settleEmergencyShutdown();
         outputAmount = collateralSettled;

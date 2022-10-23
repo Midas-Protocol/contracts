@@ -15,10 +15,10 @@ contract PythOraclesTest is BaseTest {
 
   bytes32 nativeTokenPriceFeed = bytes32(bytes("7f57ca775216655022daa88e41c380529211cde01a1517735dbcf30e4a02bdaa"));
   int64 nativeTokenPrice = 0.5e18;
-  bytes32 tokenPriceFeed = bytes32(bytes("ca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6"));
+  bytes32 tokenPriceFeed = bytes32(bytes("41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722"));
   int64 tokenPrice = 1e18;
 
-  address token = 0x65976a250187cb1D21b7e3693aCF102d61c86177;
+  address token = 0x7ff459CE3092e8A866aA06DA88D291E2E31230C1;
 
   function setUp() public {
     pythOracle = new MockPyth(0);
