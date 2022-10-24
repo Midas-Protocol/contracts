@@ -65,28 +65,65 @@ contract MimoTest is BaseTest {
     mimoStaking.releaseMIMO(address(arrakisERC4626));
     emit log_uint(mimo.balanceOf(address(arrakisERC4626)));
 
-    flywheel.accrue(marketKey, userWithRewards);
-    flywheel.claimRewards(userWithRewards);
-    uint256 balanceAfter = mimo.balanceOf(userWithRewards);
+    // Before first accrual
+    (uint224 rewardsIndex, uint32 timestamp) = flywheel.strategyState(marketKey);
+    emit log("strategyState");
+    emit log_uint(rewardsIndex);
+    emit log_uint(timestamp);
+    (uint32 mimoStart, uint32 mimoEnd, uint192 mimoReward) = flywheelRewards.rewardsCycle(
+      ERC20(address(marketAddress))
+    );
+    emit log("rewardsCycle");
+    emit log_uint(mimoStart);
+    emit log_uint(mimoEnd);
+    emit log_uint(mimoReward);
+    (rewardsIndex, timestamp) = flywheel.strategyState(marketKey);
+    emit log("strategyState");
+    emit log_uint(rewardsIndex);
+    emit log_uint(timestamp);
 
-    emit log_uint(balanceBefore);
-    emit log_uint(balanceAfter);
-
-    // Fails
-    // assertGt(balanceAfter, balanceBefore);
-
+    // First accrual to pick up rewards which can be pulled in the next cycle
     flywheel.accrue(marketKey, address(0));
+    (rewardsIndex, timestamp) = flywheel.strategyState(marketKey);
+    emit log("strategyState");
+    emit log_uint(rewardsIndex);
+    emit log_uint(timestamp);
+    (mimoStart, mimoEnd, mimoReward) = flywheelRewards.rewardsCycle(ERC20(address(marketAddress)));
+    emit log("rewardsCycle");
+    emit log_uint(mimoStart);
+    emit log_uint(mimoEnd);
+    emit log_uint(mimoReward);
     assertEq(mimoStaking.pendingMIMO(address(arrakisERC4626)), 0);
     emit log_uint(mimo.balanceOf(address(arrakisERC4626)));
     emit log_uint(mimo.balanceOf(address(flywheelRewards)));
     emit log_uint(mimo.balanceOf(address(flywheel)));
     emit log_uint(mimo.balanceOf(address(cToken)));
     vm.warp(block.timestamp + 150);
-    flywheel.accrue(marketKey, address(0));
+
+    // Second accrual with no new rewards BUT it pulls tokens from last cycle
+    // We also accrue the userState for `userWithRewards` so that they can claim
+    flywheel.accrue(marketKey, userWithRewards);
+    (rewardsIndex, timestamp) = flywheel.strategyState(marketKey);
+    emit log("strategyState");
+    emit log_uint(rewardsIndex);
+    emit log_uint(timestamp);
+    (mimoStart, mimoEnd, mimoReward) = flywheelRewards.rewardsCycle(ERC20(address(marketAddress)));
+    emit log("rewardsCycle");
+    emit log_uint(mimoStart);
+    emit log_uint(mimoEnd);
+    emit log_uint(mimoReward);
     emit log("------");
     emit log_uint(mimo.balanceOf(address(arrakisERC4626)));
     emit log_uint(mimo.balanceOf(address(flywheelRewards)));
     emit log_uint(mimo.balanceOf(address(flywheel)));
     emit log_uint(mimo.balanceOf(address(cToken)));
+
+    // Claim Rewards for user
+    flywheel.claimRewards(userWithRewards);
+    uint256 balanceAfter = mimo.balanceOf(userWithRewards);
+    emit log("------");
+    emit log_uint(balanceBefore);
+    emit log_uint(balanceAfter);
+    assertGt(balanceAfter, balanceBefore);
   }
 }
