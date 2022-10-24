@@ -124,10 +124,9 @@ contract AnyLiquidationTest is BaseTest {
 
   function configureAp() internal {
     // TODO in the deploy script?
-    address inputToken;
-    address outputToken;
-    (address addr, string memory contractInterface) = ap.redemptionStrategies(inputToken);
-    ap.setRedemptionStrategy(inputToken, addr, contractInterface, outputToken);
+//    address inputToken;
+//    address outputToken;
+//    ap.setRedemptionStrategy(inputToken, addr, contractInterface, outputToken);
   }
 
   function setUp() public {
@@ -341,11 +340,12 @@ contract AnyLiquidationTest is BaseTest {
         emit log_address(debtTokenToFund);
         if (i++ > 10) revert("endless loop bad");
 
-        (address addr, string memory strategyContract) = ap.fundingStrategies(debtTokenToFund);
-        if (addr == address(0)) break;
+        //(address addr, string memory strategyContract) = ap.fundingStrategies(debtTokenToFund);
+        AddressesProvider.FundingStrategy memory strategy = ap.getFundingStrategy(debtTokenToFund);
+        if (strategy.addr == address(0)) break;
 
-        address inputToken = ap.fundingStrategiesOutputTokens(debtTokenToFund);
-        debtTokenToFund = addFundingStrategy(vars, IFundsConversionStrategy(addr), debtTokenToFund, strategyContract, inputToken);
+        //address inputToken = ap.fundingStrategiesOutputTokens(debtTokenToFund);
+        debtTokenToFund = addFundingStrategy(vars, IFundsConversionStrategy(strategy.addr), debtTokenToFund, strategy.contractInterface, strategy.inputToken);
       }
 
       vars.flashSwapFundingToken = debtTokenToFund;
@@ -377,12 +377,10 @@ contract AnyLiquidationTest is BaseTest {
     if (exchangeCollateralTo != address(0)) {
       address collateralTokenToRedeem = vars.collateralMarket.underlying();
       while (collateralTokenToRedeem != exchangeCollateralTo) {
-        (address addr, string memory contractInterface) = ap.redemptionStrategies(
-          collateralTokenToRedeem
-        );
-        if (addr == address(0)) break;
-        address outputToken = ap.redemptionStrategiesOutputTokens(collateralTokenToRedeem);
-        collateralTokenToRedeem = addRedemptionStrategy(vars, IRedemptionStrategy(addr), contractInterface, collateralTokenToRedeem, outputToken);
+        //(address addr, string memory contractInterface) = ap.redemptionStrategies(collateralTokenToRedeem);
+        AddressesProvider.RedemptionStrategy memory strategy = ap.getRedemptionStrategy(collateralTokenToRedeem);
+        if (strategy.addr == address(0)) break;
+        collateralTokenToRedeem = addRedemptionStrategy(vars, IRedemptionStrategy(strategy.addr), strategy.contractInterface, collateralTokenToRedeem, strategy.outputToken);
       }
       vars.redemptionDatas = redemptionDatas;
       vars.strategies = redemptionStrategies;
@@ -474,21 +472,32 @@ contract AnyLiquidationTest is BaseTest {
       //
       //      strategyData = abi.encode(uniswapRouter, swapPath);
     } else if (compareStrings(strategyContract, "JarvisLiquidatorFunder")) {
-      (address syntheticToken, address collateralToken, address liquidityPool, uint256 expirationTime) = ap.jarvisPools(
-        inputToken
-      );
-      outputToken = collateralToken;
-      strategyData = abi.encode(syntheticToken, liquidityPool, expirationTime);
+      AddressesProvider.JarvisPool[] memory pools = ap.getJarvisPools();
+      for (uint256 i = 0; i < pools.length; i++) {
+        AddressesProvider.JarvisPool memory pool = pools[i];
+        if (pool.syntheticToken == inputToken) {
+          strategyData = abi.encode(pool.syntheticToken, pool.liquidityPool, pool.expirationTime);
+          outputToken = pool.collateralToken;
+          break;
+        }
+      }
     } else if (compareStrings(strategyContract, "CurveSwapLiquidator")) {
       int128 outputIndex = -1;
       int128 inputIndex = -1;
+      outputToken = strategyOutputToken;
 
-      (address[] memory coins, uint8 preferredCoin) = ap.getCurveSwapPool(inputToken);
-      outputIndex = int128(int8(preferredCoin));
-      for (uint256 i = 0; i < coins.length; i++) {
-        if (coins[i] == inputToken) {
-          inputIndex = int128(int256(i));
-          break;
+      AddressesProvider.CurveSwapPool[] memory curveSwapPools = ap.getCurveSwapPools();
+      for (uint256 i = 0; i < curveSwapPools.length; i++) {
+        address poolAddress = curveSwapPools[i].poolAddress;
+        ICurvePool curvePool = ICurvePool(poolAddress);
+        try curvePool.coins(i) returns (address coin) {
+          if (coin == outputToken) outputIndex = int128(uint128(i));
+          else if (coin == inputToken) inputIndex = int128(uint128(i));
+        } catch { break; }
+        if (poolAddress == inputToken) {
+          emit log_address(inputToken);
+          emit log_address(strategyOutputToken);
+          revert("use the CurveLpTokenLiquidatorNoRegistry for the redemption of LP tokens");
         }
       }
 
@@ -538,19 +547,27 @@ contract AnyLiquidationTest is BaseTest {
   ) internal returns (address) {
     address expectedInputToken;
     if (compareStrings(strategyContract, "JarvisLiquidatorFunder")) {
-      (, address collateralToken, address liquidityPool, uint256 expirationTime) = ap.jarvisPools(debtToken);
-      bytes memory strategyData = abi.encode(collateralToken, liquidityPool, expirationTime);
+      AddressesProvider.JarvisPool[] memory pools = ap.getJarvisPools();
+      bytes memory strategyData;
+
+      for (uint256 i = 0; i < pools.length; i++) {
+        AddressesProvider.JarvisPool memory pool = pools[i];
+        if (pool.syntheticToken == debtToken) {
+          strategyData = abi.encode(pool.collateralToken, pool.liquidityPool, pool.expirationTime);
+          expectedInputToken = pool.collateralToken;
+          break;
+        }
+      }
       fundingDatas.push(strategyData);
 
       vars.liquidator._whitelistRedemptionStrategy(strategy, true);
       fundingStrategies.push(strategy);
 
-      // } else if (compareStrings(strategyContract, "SomeOtherFunder")) {
-      // bytes memory strategyData = abi.encode(strategySpecificParams);
-      // (IERC20Upgradeable inputToken, uint256 inputAmount) = IFundsConversionStrategy(addr).estimateInputAmount(10**(debtToken.decimals()), strategyData);
-      // fundingStrategies.push(new SomeOtherFunder());
-      // return inputToken;
-      expectedInputToken = collateralToken;
+    // } else if (compareStrings(strategyContract, "SomeOtherFunder")) {
+    // bytes memory strategyData = abi.encode(strategySpecificParams);
+    // (IERC20Upgradeable inputToken, uint256 inputAmount) = IFundsConversionStrategy(addr).estimateInputAmount(10**(debtToken.decimals()), strategyData);
+    // fundingStrategies.push(new SomeOtherFunder());
+    // return inputToken;
     } else {
       emit log(strategyContract);
       emit log_address(debtToken);
