@@ -127,16 +127,16 @@ contract AnyLiquidationTest is BaseTest {
     address inputToken;
     address outputToken;
     (address addr, string memory contractInterface) = ap.redemptionStrategies(inputToken);
-    ap.setRedemptionStrategy(addr, contractInterface, outputToken);
+    ap.setRedemptionStrategy(inputToken, addr, contractInterface, outputToken);
   }
 
   function setUp() public {
     if (block.chainid == BSC_MAINNET) {
-      // TODO run for the latest block number
-      vm.rollFork(22348250);
+//      // TODO run for the latest block number
+//      vm.rollFork(22348250);
     } else if (block.chainid == POLYGON_MAINNET) {
-      // TODO run for the latest block number
-      vm.rollFork(34590300);
+//      // TODO run for the latest block number
+//      vm.rollFork(34590300);
     }
 
     upgradeAp();
