@@ -13,10 +13,13 @@ contract AddressesProvider is OwnableUpgradeable {
   mapping(string => address) private _addresses;
   mapping(address => Contract) public flywheelRewards;
   mapping(address => Contract) public plugins;
+
+  /* BEGIN DEPRECATED - keep to not break storage layout */
   mapping(address => Contract) public redemptionStrategies;
   mapping(address => Contract) public fundingStrategies;
   mapping(address => JarvisPool) private jarvisPools;
-  mapping(address => CurveSwapPool) private curveSwapPools;
+  /* END DEPRECATED */
+
   JarvisPool[] public jarvisPoolsConfig;
   CurveSwapPool[] public curveSwapPoolsConfig;
   mapping(address => RedemptionStrategy) public redemptionStrategiesConfig;

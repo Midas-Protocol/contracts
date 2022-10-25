@@ -6,6 +6,9 @@ import "forge-std/Test.sol";
 
 import "../../midas/AddressesProvider.sol";
 
+import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+
 abstract contract BaseTest is Test {
   uint256 constant BSC_MAINNET = 56;
   uint256 constant MOONBEAM_MAINNET = 1284;
@@ -17,6 +20,7 @@ abstract contract BaseTest is Test {
   uint256 constant NEON_DEVNET = 245022926;
 
   AddressesProvider public ap;
+  ProxyAdmin public dpa;
 
   constructor() {
     if (block.chainid == BSC_MAINNET) {
@@ -34,14 +38,20 @@ abstract contract BaseTest is Test {
     } else if (block.chainid == ARBITRUM_ONE) {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else {
-      ap = new AddressesProvider();
+      dpa = new ProxyAdmin();
+      AddressesProvider logic = new AddressesProvider();
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+        address(logic),
+        address(dpa),
+        abi.encodeWithSelector(ap.initialize.selector, address(this))
+      );
+      ap = AddressesProvider(address(proxy));
     }
-    configureAddressesProvider();
-  }
-
-  function configureAddressesProvider() internal {
     if (ap.owner() == address(0)) {
       ap.initialize(address(this));
+    }
+    if (address(dpa) == address(0)) {
+      dpa = ProxyAdmin(ap.getAddress("DefaultProxyAdmin"));
     }
   }
 

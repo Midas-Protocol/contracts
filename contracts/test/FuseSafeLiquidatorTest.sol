@@ -11,7 +11,6 @@ import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 
 import { WETH } from "solmate/tokens/WETH.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import "../FuseSafeLiquidator.sol";
 import "../FusePoolDirectory.sol";
