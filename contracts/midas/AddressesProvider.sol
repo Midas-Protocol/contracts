@@ -142,10 +142,7 @@ contract AddressesProvider is OwnableUpgradeable {
     jarvisPoolsConfig.push(JarvisPool(syntheticToken, collateralToken, liquidityPool, expirationTime));
   }
 
-  function setCurveSwapPool(
-    address poolAddress,
-    address[] calldata coins
-  ) public onlyOwner {
+  function setCurveSwapPool(address poolAddress, address[] calldata coins) public onlyOwner {
     curveSwapPoolsConfig.push(CurveSwapPool(poolAddress, coins));
   }
 

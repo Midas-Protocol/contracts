@@ -124,18 +124,18 @@ contract AnyLiquidationTest is BaseTest {
 
   function configureAp() internal {
     // TODO in the deploy script?
-//    address inputToken;
-//    address outputToken;
-//    ap.setRedemptionStrategy(inputToken, addr, contractInterface, outputToken);
+    //    address inputToken;
+    //    address outputToken;
+    //    ap.setRedemptionStrategy(inputToken, addr, contractInterface, outputToken);
   }
 
   function setUp() public {
     if (block.chainid == BSC_MAINNET) {
-//      // TODO run for the latest block number
-//      vm.rollFork(22348250);
+      //      // TODO run for the latest block number
+      //      vm.rollFork(22348250);
     } else if (block.chainid == POLYGON_MAINNET) {
-//      // TODO run for the latest block number
-//      vm.rollFork(34590300);
+      //      // TODO run for the latest block number
+      //      vm.rollFork(34590300);
     }
 
     upgradeAp();
@@ -345,7 +345,13 @@ contract AnyLiquidationTest is BaseTest {
         if (strategy.addr == address(0)) break;
 
         //address inputToken = ap.fundingStrategiesOutputTokens(debtTokenToFund);
-        debtTokenToFund = addFundingStrategy(vars, IFundsConversionStrategy(strategy.addr), debtTokenToFund, strategy.contractInterface, strategy.inputToken);
+        debtTokenToFund = addFundingStrategy(
+          vars,
+          IFundsConversionStrategy(strategy.addr),
+          debtTokenToFund,
+          strategy.contractInterface,
+          strategy.inputToken
+        );
       }
 
       vars.flashSwapFundingToken = debtTokenToFund;
@@ -380,7 +386,13 @@ contract AnyLiquidationTest is BaseTest {
         //(address addr, string memory contractInterface) = ap.redemptionStrategies(collateralTokenToRedeem);
         AddressesProvider.RedemptionStrategy memory strategy = ap.getRedemptionStrategy(collateralTokenToRedeem);
         if (strategy.addr == address(0)) break;
-        collateralTokenToRedeem = addRedemptionStrategy(vars, IRedemptionStrategy(strategy.addr), strategy.contractInterface, collateralTokenToRedeem, strategy.outputToken);
+        collateralTokenToRedeem = addRedemptionStrategy(
+          vars,
+          IRedemptionStrategy(strategy.addr),
+          strategy.contractInterface,
+          collateralTokenToRedeem,
+          strategy.outputToken
+        );
       }
       vars.redemptionDatas = redemptionDatas;
       vars.strategies = redemptionStrategies;
@@ -493,7 +505,9 @@ contract AnyLiquidationTest is BaseTest {
         try curvePool.coins(i) returns (address coin) {
           if (coin == outputToken) outputIndex = int128(uint128(i));
           else if (coin == inputToken) inputIndex = int128(uint128(i));
-        } catch { break; }
+        } catch {
+          break;
+        }
         if (poolAddress == inputToken) {
           emit log_address(inputToken);
           emit log_address(strategyOutputToken);
@@ -563,11 +577,11 @@ contract AnyLiquidationTest is BaseTest {
       vars.liquidator._whitelistRedemptionStrategy(strategy, true);
       fundingStrategies.push(strategy);
 
-    // } else if (compareStrings(strategyContract, "SomeOtherFunder")) {
-    // bytes memory strategyData = abi.encode(strategySpecificParams);
-    // (IERC20Upgradeable inputToken, uint256 inputAmount) = IFundsConversionStrategy(addr).estimateInputAmount(10**(debtToken.decimals()), strategyData);
-    // fundingStrategies.push(new SomeOtherFunder());
-    // return inputToken;
+      // } else if (compareStrings(strategyContract, "SomeOtherFunder")) {
+      // bytes memory strategyData = abi.encode(strategySpecificParams);
+      // (IERC20Upgradeable inputToken, uint256 inputAmount) = IFundsConversionStrategy(addr).estimateInputAmount(10**(debtToken.decimals()), strategyData);
+      // fundingStrategies.push(new SomeOtherFunder());
+      // return inputToken;
     } else {
       emit log(strategyContract);
       emit log_address(debtToken);
