@@ -123,11 +123,11 @@ contract AnyLiquidationTest is BaseTest {
 
   function setUp() public {
     if (block.chainid == BSC_MAINNET) {
-      //      // TODO run for the latest block number
-      //      vm.rollFork(22348250);
+      // TODO run for the latest block number
+      vm.rollFork(22486200);
     } else if (block.chainid == POLYGON_MAINNET) {
-      //      // TODO run for the latest block number
-      //      vm.rollFork(34590300);
+      // TODO run for the latest block number
+      vm.rollFork(34788300);
     }
 
     upgradeAp();
