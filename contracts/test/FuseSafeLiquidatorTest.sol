@@ -121,13 +121,6 @@ contract AnyLiquidationTest is BaseTest {
     proxy.upgradeTo(address(newImpl));
   }
 
-  function configureAp() internal {
-    // TODO in the deploy script?
-    //    address inputToken;
-    //    address outputToken;
-    //    ap.setRedemptionStrategy(inputToken, addr, contractInterface, outputToken);
-  }
-
   function setUp() public {
     if (block.chainid == BSC_MAINNET) {
       //      // TODO run for the latest block number
@@ -138,7 +131,6 @@ contract AnyLiquidationTest is BaseTest {
     }
 
     upgradeAp();
-    configureAp();
 
     curveSwapLiquidator = new CurveSwapLiquidator();
     jarvisLiquidator = new JarvisLiquidatorFunder();
