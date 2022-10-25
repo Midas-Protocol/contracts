@@ -38,15 +38,9 @@ contract CurveSwapLiquidator is IRedemptionStrategy {
     );
     outputToken = IERC20Upgradeable(jToken);
     inputToken.approve(address(curvePool), inputAmount);
-    // TODO use only the CurveLpTokenLiquidatorNoRegistry strategy
-    // if (inputToken == curvePool) {
-    //   curvePool.remove_liquidity_one_coin(curvePool.balanceOf(address(this)), j, 1);
-    //   outputAmount = address(outputToken) == address(0) ? address(this).balance : outputToken.balanceOf(address(this));
-    // } else {
     outputAmount = curvePool.exchange(i, j, inputAmount, 0);
-    // }
 
-    // Convert to W_NATIVE if ETH because `FuseSafeLiquidator.repayTokenFlashLoan` only supports tokens (not ETH) as output from redemptions (reverts on line 24 because `underlyingCollateral` is the zero address)
+    // Convert to W_NATIVE if ETH
     if (address(outputToken) == address(0)) {
       WETH(wtoken).deposit{ value: outputAmount }();
       return (IERC20Upgradeable(wtoken), outputAmount);

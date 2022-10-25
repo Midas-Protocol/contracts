@@ -30,7 +30,7 @@ contract UniswapV2LiquidatorFunderTest is BaseTest {
       strategyData
     );
 
-    emit log_uint(inputMaiRequired);
+    assertApproxEqAbs(inputMaiRequired, outputUsdcExpected, 1e9);
     assertEq(address(inputToken), maiAddress, "!mai address");
   }
 }
