@@ -174,7 +174,6 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
     performanceFee = newPerformanceFee;
 
     if (newFeeRecipient != feeRecipient) {
-      if (feeRecipient != address(0)) {
         uint256 oldFees = balanceOf(feeRecipient);
 
         _burn(feeRecipient, oldFees);
