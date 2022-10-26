@@ -122,34 +122,34 @@ contract AnyLiquidationTest is BaseTest {
 
     uniswapRouter = ap.getAddress("IUniswapV2Router02");
 
-  if (block.chainid == BSC_MAINNET) {
+    if (block.chainid == BSC_MAINNET) {
       mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
       mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
       curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
       fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-//      fsl = new FuseSafeLiquidator();
-//      fsl.initialize(
-//        ap.getAddress("wtoken"),
-//        uniswapRouter,
-//        ap.getAddress("stableToken"),
-//        ap.getAddress("wBTCToken"),
-//        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
-//        25
-//      );
+      //      fsl = new FuseSafeLiquidator();
+      //      fsl.initialize(
+      //        ap.getAddress("wtoken"),
+      //        uniswapRouter,
+      //        ap.getAddress("stableToken"),
+      //        ap.getAddress("wBTCToken"),
+      //        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
+      //        25
+      //      );
     } else if (block.chainid == POLYGON_MAINNET) {
       mostLiquidPair1 = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827); // USDC/WMATIC
       mostLiquidPair2 = IUniswapV2Pair(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
       curveOracle = CurveLpTokenPriceOracleNoRegistry(0xaCF3E1C6f2D6Ff12B8aEE44413D6834774B3f7A3);
       fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-//      fsl = new FuseSafeLiquidator();
-//      fsl.initialize(
-//        ap.getAddress("wtoken"),
-//        uniswapRouter,
-//        ap.getAddress("stableToken"),
-//        ap.getAddress("wBTCToken"),
-//        "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
-//        30
-//      );
+      //      fsl = new FuseSafeLiquidator();
+      //      fsl.initialize(
+      //        ap.getAddress("wtoken"),
+      //        uniswapRouter,
+      //        ap.getAddress("stableToken"),
+      //        ap.getAddress("wBTCToken"),
+      //        "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
+      //        30
+      //      );
     }
   }
 
