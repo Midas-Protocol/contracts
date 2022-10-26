@@ -68,7 +68,6 @@ contract AutofarmERC4626Test is BaseTest {
       ERC20Upgradeable(address(autoToken)),
       IAutofarmV2(address(mockAutofarm))
     );
-    autofarmERC4626.reinitialize();
     marketKey = ERC20(address(autofarmERC4626));
     flywheel.addStrategyForRewards(marketKey);
 

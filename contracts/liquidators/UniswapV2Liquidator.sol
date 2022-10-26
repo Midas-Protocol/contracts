@@ -45,6 +45,14 @@ contract UniswapV2Liquidator is IRedemptionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    return _convert(inputToken, inputAmount, strategyData);
+  }
+
+  function _convert(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    bytes memory strategyData
+  ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
     // Get Uniswap router and path
     (IUniswapV2Router02 uniswapV2Router, address[] memory swapPath) = abi.decode(
       strategyData,

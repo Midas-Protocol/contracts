@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0;
 
 import "./IFuseFeeDistributor.sol";
-import "./CToken.sol";
 import "./PriceOracle.sol";
 
 contract UnitrollerAdminStorage {

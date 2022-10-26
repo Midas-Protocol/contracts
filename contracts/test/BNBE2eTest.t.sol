@@ -86,7 +86,6 @@ contract BNBE2eTest is WithPool, BaseTest {
       IAlpacaVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063),
       IW_NATIVE(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
     );
-    erc4626.reinitialize();
 
     vm.roll(1);
     deployCErc20PluginDelegate(address(erc4626), 0.9e18);
@@ -135,7 +134,6 @@ contract BNBE2eTest is WithPool, BaseTest {
       IAlpacaVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063),
       IW_NATIVE(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
     );
-    erc4626.reinitialize();
 
     ERC20 marketKey = ERC20(address(erc4626));
     flywheel.addStrategyForRewards(marketKey);

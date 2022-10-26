@@ -62,7 +62,6 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
 
     ArrakisERC4626 arrakisERC4626 = new ArrakisERC4626();
     arrakisERC4626.initialize(ERC20Upgradeable(address(underlyingToken)), flywheel, pool, address(this), rewardTokens);
-    arrakisERC4626.reinitialize();
 
     plugin = arrakisERC4626;
     initialStrategyBalance = pool.totalStake();
