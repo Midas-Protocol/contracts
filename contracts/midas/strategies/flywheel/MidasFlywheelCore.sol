@@ -204,6 +204,10 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   function updateFeeSettings(uint256 _performanceFee, address _feeRecipient) external onlyOwner {
     emit UpdatedFeeSettings(performanceFee, _performanceFee, feeRecipient, _feeRecipient);
 
+    if (feeRecipient != _feeRecipient) {
+      rewardsAccrued[_feeRecipient] = rewardsAccrued[feeRecipient];
+      rewardsAccrued[feeRecipient] = 0;
+    }
     performanceFee = _performanceFee;
     feeRecipient = _feeRecipient;
   }
