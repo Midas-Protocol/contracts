@@ -29,7 +29,6 @@ contract BeefyERC4626AccuralTest is BaseTest {
     underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
     plugin = new BeefyERC4626();
     plugin.initialize(underlyingToken, beefyVault, 10);
-    plugin.reinitialize();
   }
 
   /* --------------------- HELPER FUNCTIONS --------------------- */

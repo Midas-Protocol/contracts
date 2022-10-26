@@ -68,10 +68,6 @@ contract EllipsisERC4626 is MidasERC4626 {
     lpTokenStaker.rewardToken().approve(address(flywheel.flywheelRewards()), type(uint256).max);
   }
 
-  function reinitialize() public reinitializer(2) onlyOwner {
-    performanceFee = 5e16;
-  }
-
   /* ========== VIEWS ========== */
 
   /// @notice Calculates the total amount of underlying tokens the Vault holds.

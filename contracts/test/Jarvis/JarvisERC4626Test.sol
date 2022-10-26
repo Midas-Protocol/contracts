@@ -65,7 +65,6 @@ contract JarvisERC4626Test is AbstractERC4626Test {
 
     JarvisERC4626 jarvisERC4626 = new JarvisERC4626();
     jarvisERC4626.initialize(underlyingToken, flywheel, vault, poolId, address(this), rewardTokens);
-    jarvisERC4626.reinitialize();
     plugin = jarvisERC4626;
 
     initialStrategyBalance = getStrategyBalance();

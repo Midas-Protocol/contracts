@@ -12,6 +12,8 @@ contract UniswapV2LiquidatorFunderTest is BaseTest {
   address uniswapV2Router;
 
   function setUp() public shouldRun(forChains(BSC_MAINNET)) {
+    vm.rollFork(22501630);
+
     uv2lf = new UniswapV2LiquidatorFunder();
     uniswapV2Router = ap.getAddress("IUniswapV2Router02");
     usdcAddress = 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d;

@@ -45,10 +45,6 @@ contract JarvisERC4626 is MidasERC4626, RewardsClaimer {
     asset.approve(address(vault), type(uint256).max);
   }
 
-  function reinitialize() public reinitializer(2) onlyOwner {
-    performanceFee = 5e16;
-  }
-
   function totalAssets() public view override returns (uint256) {
     if (paused()) {
       return _asset().balanceOf(address(this));
