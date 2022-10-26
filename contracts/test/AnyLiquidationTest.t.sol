@@ -124,9 +124,9 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   function getPoolAndBorrower(uint256 random, LiquidationData memory vars)
-  internal
-  view
-  returns (Comptroller, address)
+    internal
+    view
+    returns (Comptroller, address)
   {
     if (vars.pools.length == 0) revert("no pools to pick from");
 
@@ -145,12 +145,12 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   function setUpDebtAndCollateralMarkets(uint256 random, LiquidationData memory vars)
-  internal
-  returns (
-    CErc20Delegate debt,
-    CErc20Delegate collateral,
-    uint256 borrowAmount
-  )
+    internal
+    returns (
+      CErc20Delegate debt,
+      CErc20Delegate collateral,
+      uint256 borrowAmount
+    )
   {
     // debt
     for (uint256 m = 0; m < vars.markets.length; m++) {
@@ -299,24 +299,24 @@ contract AnyLiquidationTest is BaseTest {
     // liquidate
     vm.prank(ap.owner());
     try
-    vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-      FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
-        vars.borrower,
-        vars.borrowAmount / 100, //repayAmount,
-        ICErc20(address(vars.debtMarket)),
-        ICErc20(address(vars.collateralMarket)),
-        vars.flashSwapPair,
-        0,
-        exchangeCollateralTo,
-        IUniswapV2Router02(uniswapRouter),
-        IUniswapV2Router02(uniswapRouter),
-        vars.strategies,
-        vars.redemptionDatas,
-        0,
-        vars.fundingStrategies,
-        vars.fundingDatas
+      vars.liquidator.safeLiquidateToTokensWithFlashLoan(
+        FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
+          vars.borrower,
+          vars.borrowAmount / 100, //repayAmount,
+          ICErc20(address(vars.debtMarket)),
+          ICErc20(address(vars.collateralMarket)),
+          vars.flashSwapPair,
+          0,
+          exchangeCollateralTo,
+          IUniswapV2Router02(uniswapRouter),
+          IUniswapV2Router02(uniswapRouter),
+          vars.strategies,
+          vars.redemptionDatas,
+          0,
+          vars.fundingStrategies,
+          vars.fundingDatas
+        )
       )
-    )
     {
       // noop
     } catch Error(string memory reason) {
