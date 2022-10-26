@@ -17,9 +17,7 @@ import "../FusePoolDirectory.sol";
 import "./config/BaseTest.t.sol";
 import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../liquidators/CurveLpTokenLiquidator.sol";
-import "../liquidators/UniswapLpTokenLiquidator.sol";
 import "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
-import "../liquidators/UniswapV2Liquidator.sol";
 import "../liquidators/CurveSwapLiquidator.sol";
 
 contract MockRedemptionStrategy is IRedemptionStrategy {
@@ -72,15 +70,11 @@ contract FuseSafeLiquidatorTest is BaseTest {
   }
 
   function testUpgrade() public {
-    //    emit log_address(fsl.owner());
-
     // in case these slots start to get used, please redeploy the FSL
     // with a larger storage gap to protect the owner variable of OwnableUpgradeable
     // from being overwritten by the FuseSafeLiquidator storage
     for (uint256 i = 40; i < 51; i++) {
-      //      emit log_uint(i);
       address atSloti = address(uint160(uint256(vm.load(address(fsl), bytes32(i)))));
-      //      emit log_address(atSloti);
       assertEq(
         atSloti,
         address(0),
@@ -101,11 +95,6 @@ contract AnyLiquidationTest is BaseTest {
   IRedemptionStrategy[] redemptionStrategies;
   bytes[] redemptionDatas;
 
-  CurveSwapLiquidator curveSwapLiquidator;
-  JarvisLiquidatorFunder jarvisLiquidator;
-  UniswapV2Liquidator uniswapV2Liquidator;
-  CurveLpTokenLiquidatorNoRegistry curveLpTokenLiquidatorNoRegistry;
-
   IUniswapV2Pair mostLiquidPair1;
   IUniswapV2Pair mostLiquidPair2;
 
@@ -116,7 +105,6 @@ contract AnyLiquidationTest is BaseTest {
     TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ap)));
     bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
     address admin = address(uint160(uint256(bytesAtSlot)));
-    //            emit log_address(admin);
     vm.prank(admin);
     proxy.upgradeTo(address(newImpl));
   }
@@ -132,52 +120,55 @@ contract AnyLiquidationTest is BaseTest {
 
     upgradeAp();
 
-    curveSwapLiquidator = new CurveSwapLiquidator();
-    jarvisLiquidator = new JarvisLiquidatorFunder();
-    uniswapV2Liquidator = new UniswapV2Liquidator();
-    curveLpTokenLiquidatorNoRegistry = new CurveLpTokenLiquidatorNoRegistry();
+    uniswapRouter = ap.getAddress("IUniswapV2Router02");
 
-    if (block.chainid == BSC_MAINNET) {
-      uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
+  if (block.chainid == BSC_MAINNET) {
       mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
       mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
       curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
-      // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      fsl = new FuseSafeLiquidator();
-      fsl.initialize(
-        ap.getAddress("wtoken"),
-        uniswapRouter,
-        ap.getAddress("stableToken"),
-        ap.getAddress("wBTCToken"),
-        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
-        25
-      );
+      fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+//      fsl = new FuseSafeLiquidator();
+//      fsl.initialize(
+//        ap.getAddress("wtoken"),
+//        uniswapRouter,
+//        ap.getAddress("stableToken"),
+//        ap.getAddress("wBTCToken"),
+//        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
+//        25
+//      );
     } else if (block.chainid == POLYGON_MAINNET) {
-      uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
       mostLiquidPair1 = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827); // USDC/WMATIC
       mostLiquidPair2 = IUniswapV2Pair(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
       curveOracle = CurveLpTokenPriceOracleNoRegistry(0xaCF3E1C6f2D6Ff12B8aEE44413D6834774B3f7A3);
-      // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      fsl = new FuseSafeLiquidator();
-      fsl.initialize(
-        ap.getAddress("wtoken"),
-        uniswapRouter,
-        ap.getAddress("stableToken"),
-        ap.getAddress("wBTCToken"),
-        "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
-        30
-      );
-    } else {
-      uniswapRouter = ap.getAddress("IUniswapV2Router02");
+      fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+//      fsl = new FuseSafeLiquidator();
+//      fsl.initialize(
+//        ap.getAddress("wtoken"),
+//        uniswapRouter,
+//        ap.getAddress("stableToken"),
+//        ap.getAddress("wBTCToken"),
+//        "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
+//        30
+//      );
     }
   }
 
   function testBscAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
+    // TODO update the setup after the next redeploy
+    if (block.number <= 22486200) {
+      return;
+    }
+
     vm.assume(random > 100 && random < type(uint64).max);
     doTestAnyLiquidation(random);
   }
 
   function testPolygonAnyLiquidation(uint256 random) public shouldRun(forChains(POLYGON_MAINNET)) {
+    // TODO update the setup after the next redeploy
+    if (block.number <= 34788300) {
+      return;
+    }
+
     vm.assume(random > 100 && random < type(uint64).max);
     doTestAnyLiquidation(random);
   }
@@ -319,11 +310,9 @@ contract AnyLiquidationTest is BaseTest {
         emit log_address(debtTokenToFund);
         if (i++ > 10) revert("endless loop bad");
 
-        //(address addr, string memory strategyContract) = ap.fundingStrategies(debtTokenToFund);
         AddressesProvider.FundingStrategy memory strategy = ap.getFundingStrategy(debtTokenToFund);
         if (strategy.addr == address(0)) break;
 
-        //address inputToken = ap.fundingStrategiesOutputTokens(debtTokenToFund);
         debtTokenToFund = addFundingStrategy(
           vars,
           IFundsConversionStrategy(strategy.addr),
@@ -362,7 +351,6 @@ contract AnyLiquidationTest is BaseTest {
     if (exchangeCollateralTo != address(0)) {
       address collateralTokenToRedeem = vars.collateralMarket.underlying();
       while (collateralTokenToRedeem != exchangeCollateralTo) {
-        //(address addr, string memory contractInterface) = ap.redemptionStrategies(collateralTokenToRedeem);
         AddressesProvider.RedemptionStrategy memory strategy = ap.getRedemptionStrategy(collateralTokenToRedeem);
         if (strategy.addr == address(0)) break;
         collateralTokenToRedeem = addRedemptionStrategy(
