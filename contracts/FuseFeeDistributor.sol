@@ -108,7 +108,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     IComptroller comptroller = IComptroller(address(_ctoken.comptroller()));
     uint256 underlyingPriceEth = comptroller.oracle().getUnderlyingPrice(ICToken(address(_ctoken)));
     uint256 underlyingDecimals = _ctoken.decimals();
-    uint256 borrowBalanceEth = underlyingPriceEth * borrowBalance / 10**underlyingDecimals;
+    uint256 borrowBalanceEth = (underlyingPriceEth * borrowBalance) / 10**underlyingDecimals;
     if (borrowBalanceEth > minBorrowEth) {
       return 0;
     }
