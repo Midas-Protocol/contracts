@@ -8,6 +8,8 @@ import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.so
 
 import "./compound/ErrorReporter.sol";
 import "./compound/ComptrollerStorage.sol";
+import "./external/compound/ICToken.sol";
+import "./external/compound/IComptroller.sol";
 import "./compound/CEtherDelegator.sol";
 import "./compound/CErc20Delegator.sol";
 import "./compound/CErc20PluginDelegate.sol";
@@ -98,6 +100,19 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     minBorrowEth = _minBorrowEth;
     maxSupplyEth = _maxSupplyEth;
     maxUtilizationRate = _maxUtilizationRate;
+  }
+
+  function getMinBorrowEth(CTokenInterface _ctoken) public view returns (uint256) {
+    (, , uint256 borrowBalance, ) = _ctoken.getAccountSnapshot(_msgSender());
+    if (borrowBalance == 0) return minBorrowEth;
+    IComptroller comptroller = IComptroller(address(_ctoken.comptroller()));
+    uint256 underlyingPriceEth = comptroller.oracle().getUnderlyingPrice(ICToken(address(_ctoken)));
+    uint256 underlyingDecimals = _ctoken.decimals();
+    uint256 borrowBalanceEth = underlyingPriceEth * borrowBalance / 10**underlyingDecimals;
+    if (borrowBalanceEth > minBorrowEth) {
+      return 0;
+    }
+    return minBorrowEth - borrowBalanceEth;
   }
 
   /**
