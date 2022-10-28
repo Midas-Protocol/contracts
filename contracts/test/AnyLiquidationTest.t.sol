@@ -20,16 +20,12 @@ contract AnyLiquidationTest is BaseTest {
   // FuseSafeLiquidator fsl;
   // address uniswapRouter;
   // CurveLpTokenPriceOracleNoRegistry curveOracle;
-
   // IFundsConversionStrategy[] fundingStrategies;
   // bytes[] fundingDatas;
-
   // IRedemptionStrategy[] redemptionStrategies;
   // bytes[] redemptionDatas;
-
   // IUniswapV2Pair mostLiquidPair1;
   // IUniswapV2Pair mostLiquidPair2;
-
   // function upgradeAp() internal {
   //   bytes32 _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
   //   AddressesProvider newImpl = new AddressesProvider();
@@ -40,7 +36,6 @@ contract AnyLiquidationTest is BaseTest {
   //   vm.prank(admin);
   //   proxy.upgradeTo(address(newImpl));
   // }
-
   // function setUp() public {
   //   if (block.chainid == BSC_MAINNET) {
   //     // TODO run for the latest block number
@@ -49,11 +44,8 @@ contract AnyLiquidationTest is BaseTest {
   //     // TODO run for the latest block number
   //     vm.rollFork(34788300);
   //   }
-
   //   upgradeAp();
-
   //   uniswapRouter = ap.getAddress("IUniswapV2Router02");
-
   //   if (block.chainid == BSC_MAINNET) {
   //     mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
   //     mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
@@ -84,27 +76,22 @@ contract AnyLiquidationTest is BaseTest {
   //     //      );
   //   }
   // }
-
   // function testBscAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
   //   // TODO update the setup after the next redeploy
   //   if (block.number <= 22486200) {
   //     return;
   //   }
-
   //   vm.assume(random > 100 && random < type(uint64).max);
   //   doTestAnyLiquidation(random);
   // }
-
   // function testPolygonAnyLiquidation(uint256 random) public shouldRun(forChains(POLYGON_MAINNET)) {
   //   // TODO update the setup after the next redeploy
   //   if (block.number <= 34788300) {
   //     return;
   //   }
-
   //   vm.assume(random > 100 && random < type(uint64).max);
   //   doTestAnyLiquidation(random);
   // }
-
   // struct LiquidationData {
   //   FusePoolDirectory.FusePool[] pools;
   //   address[] cTokens;
@@ -123,28 +110,23 @@ contract AnyLiquidationTest is BaseTest {
   //   address flashSwapFundingToken;
   //   IUniswapV2Pair flashSwapPair;
   // }
-
   // function getPoolAndBorrower(uint256 random, LiquidationData memory vars)
   //   internal
   //   view
   //   returns (Comptroller, address)
   // {
   //   if (vars.pools.length == 0) revert("no pools to pick from");
-
   //   uint256 i = random % vars.pools.length; // random pool
   //   Comptroller comptroller = Comptroller(vars.pools[i].comptroller);
   //   address[] memory borrowers = comptroller.getAllBorrowers();
-
   //   if (borrowers.length == 0) {
   //     return (Comptroller(address(0)), address(0));
   //   } else {
   //     uint256 k = random % borrowers.length; // random borrower
   //     address borrower = borrowers[k];
-
   //     return (comptroller, borrower);
   //   }
   // }
-
   // function setUpDebtAndCollateralMarkets(uint256 random, LiquidationData memory vars)
   //   internal
   //   returns (
@@ -162,11 +144,9 @@ contract AnyLiquidationTest is BaseTest {
   //       break;
   //     }
   //   }
-
   //   if (address(debt) != address(0)) {
   //     emit log("debt market is");
   //     emit log_address(address(debt));
-
   //     uint256 shortfall = 0;
   //     // reduce the collateral for each market of the borrower
   //     // until there is shortfall for which to be liquidated
@@ -174,9 +154,7 @@ contract AnyLiquidationTest is BaseTest {
   //       uint256 marketIndexWithOffset = (random - m) % vars.markets.length;
   //       if (vars.markets[marketIndexWithOffset].balanceOf(vars.borrower) > 0) {
   //         if (address(vars.markets[marketIndexWithOffset]) == address(debt)) continue;
-
   //         collateral = CErc20Delegate(address(vars.markets[marketIndexWithOffset]));
-
   //         // the collateral prices change
   //         MasterPriceOracle mpo = MasterPriceOracle(address(vars.comptroller.oracle()));
   //         uint256 priceCollateral = mpo.getUnderlyingPrice(ICToken(address(collateral)));
@@ -185,7 +163,6 @@ contract AnyLiquidationTest is BaseTest {
   //           abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, ICToken(address(collateral))),
   //           abi.encode(priceCollateral / 5)
   //         );
-
   //         (, , shortfall) = vars.comptroller.getHypotheticalAccountLiquidity(vars.borrower, address(0), 0, 0);
   //         if (shortfall == 0) {
   //           emit log("collateral still enough");
@@ -201,22 +178,17 @@ contract AnyLiquidationTest is BaseTest {
   //     }
   //   }
   // }
-
   // function doTestAnyLiquidation(uint256 random) internal {
   //   LiquidationData memory vars;
   //   vars.liquidator = fsl;
-
   //   vars.pools = FusePoolDirectory(ap.getAddress("FusePoolDirectory")).getAllPools();
-
   //   while (true) {
   //     // get a random pool and a random borrower from it
   //     (vars.comptroller, vars.borrower) = getPoolAndBorrower(random, vars);
-
   //     if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
   //       // find a market in which the borrower has debt and reduce his collateral price
   //       vars.markets = vars.comptroller.getAllMarkets();
   //       (vars.debtMarket, vars.collateralMarket, vars.borrowAmount) = setUpDebtAndCollateralMarkets(random, vars);
-
   //       if (address(vars.debtMarket) != address(0) && address(vars.collateralMarket) != address(0)) {
   //         emit log("found testable markets at random number");
   //         emit log_uint(random);
@@ -225,26 +197,20 @@ contract AnyLiquidationTest is BaseTest {
   //     }
   //     random++;
   //   }
-
   //   emit log("debt and collateral markets");
   //   emit log_address(address(vars.debtMarket));
   //   emit log_address(address(vars.collateralMarket));
-
   //   // prepare the liquidation
-
   //   // add funding strategies
   //   {
   //     address debtTokenToFund = vars.debtMarket.underlying();
-
   //     uint256 i = 0;
   //     while (true) {
   //       emit log("debt token");
   //       emit log_address(debtTokenToFund);
   //       if (i++ > 10) revert("endless loop bad");
-
   //       AddressesProvider.FundingStrategy memory strategy = ap.getFundingStrategy(debtTokenToFund);
   //       if (strategy.addr == address(0)) break;
-
   //       debtTokenToFund = addFundingStrategy(
   //         vars,
   //         IFundsConversionStrategy(strategy.addr),
@@ -253,7 +219,6 @@ contract AnyLiquidationTest is BaseTest {
   //         strategy.inputToken
   //       );
   //     }
-
   //     vars.flashSwapFundingToken = debtTokenToFund;
   //     if (vars.flashSwapFundingToken != ap.getAddress("wtoken")) {
   //       IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
@@ -269,16 +234,12 @@ contract AnyLiquidationTest is BaseTest {
   //     } else {
   //       vars.flashSwapPair = IUniswapV2Pair(mostLiquidPair1);
   //     }
-
   //     vars.fundingStrategies = fundingStrategies;
   //     vars.fundingDatas = fundingDatas;
   //   }
-
   //   emit log("flash swap funding token is");
   //   emit log_address(vars.flashSwapFundingToken);
-
   //   address exchangeCollateralTo = vars.flashSwapFundingToken;
-
   //   // add the redemption strategies
   //   if (exchangeCollateralTo != address(0)) {
   //     address collateralTokenToRedeem = vars.collateralMarket.underlying();
@@ -296,7 +257,6 @@ contract AnyLiquidationTest is BaseTest {
   //     vars.redemptionDatas = redemptionDatas;
   //     vars.strategies = redemptionStrategies;
   //   }
-
   //   // liquidate
   //   vm.prank(ap.owner());
   //   try
@@ -328,7 +288,6 @@ contract AnyLiquidationTest is BaseTest {
   //     }
   //   }
   // }
-
   // function toggleFlashSwapPair(LiquidationData memory vars) internal {
   //   if (address(vars.flashSwapPair) == address(mostLiquidPair1)) {
   //     vars.flashSwapPair = mostLiquidPair2;
@@ -336,7 +295,6 @@ contract AnyLiquidationTest is BaseTest {
   //     vars.flashSwapPair = mostLiquidPair1;
   //   }
   // }
-
   // function addRedemptionStrategy(
   //   LiquidationData memory vars,
   //   IRedemptionStrategy strategy,
@@ -346,36 +304,29 @@ contract AnyLiquidationTest is BaseTest {
   // ) internal returns (address) {
   //   address outputToken;
   //   bytes memory strategyData;
-
   //   if (compareStrings(strategyContract, "UniswapLpTokenLiquidator")) {
   //     IUniswapV2Pair pair = IUniswapV2Pair(inputToken);
   //     address[] memory swapToken0Path;
   //     address[] memory swapToken1Path;
-
   //     if (pair.token0() == strategyOutputToken) {
   //       swapToken0Path = new address[](0);
   //       swapToken1Path = new address[](2);
-
   //       swapToken1Path[0] = pair.token1();
   //       swapToken1Path[1] = pair.token0();
   //       outputToken = swapToken1Path[1];
   //     } else {
   //       swapToken0Path = new address[](2);
   //       swapToken1Path = new address[](0);
-
   //       swapToken0Path[0] = pair.token0();
   //       swapToken0Path[1] = pair.token1();
   //       outputToken = swapToken0Path[1];
   //     }
-
   //     strategyData = abi.encode(uniswapRouter, swapToken0Path, swapToken1Path);
-
   //     if (address(vars.flashSwapPair) == address(pair)) {
   //       emit log("toggling the flashswap pair");
   //       emit log_address(address(pair));
   //       toggleFlashSwapPair(vars);
   //     }
-
   //     //    } else if (compareStrings(strategyContract, "UniswapV2Liquidator")) {
   //     //      address[] memory swapPath = new address[](2);
   //     //      swapPath[0] = inputToken;
@@ -396,7 +347,6 @@ contract AnyLiquidationTest is BaseTest {
   //     int128 outputIndex = -1;
   //     int128 inputIndex = -1;
   //     outputToken = strategyOutputToken;
-
   //     AddressesProvider.CurveSwapPool[] memory curveSwapPools = ap.getCurveSwapPools();
   //     for (uint256 i = 0; i < curveSwapPools.length; i++) {
   //       address poolAddress = curveSwapPools[i].poolAddress;
@@ -413,7 +363,6 @@ contract AnyLiquidationTest is BaseTest {
   //         revert("use the CurveLpTokenLiquidatorNoRegistry for the redemption of LP tokens");
   //       }
   //     }
-
   //     strategyData = abi.encode(inputToken, inputIndex, outputIndex, outputToken, ap.getAddress("wtoken"));
   //   } else if (compareStrings(strategyContract, "CurveLpTokenLiquidatorNoRegistry")) {
   //     address[] memory underlyingTokens = curveOracle.getUnderlyingTokens(inputToken);
@@ -425,20 +374,16 @@ contract AnyLiquidationTest is BaseTest {
   //     emit log_address(address(strategy));
   //     revert("unknown collateral");
   //   }
-
   //   vars.liquidator._whitelistRedemptionStrategy(strategy, true);
   //   redemptionStrategies.push(strategy);
   //   redemptionDatas.push(strategyData);
-
   //   assertEq(outputToken, strategyOutputToken, "!expected output token");
   //   return outputToken;
   // }
-
   // function pickPreferredToken(address[] memory tokens) internal returns (address, uint8) {
   //   address wtoken = ap.getAddress("wtoken");
   //   address stable = ap.getAddress("stableToken");
   //   address wbtc = ap.getAddress("wBTCToken");
-
   //   for (uint8 i = 0; i < tokens.length; i++) {
   //     if (tokens[i] == wtoken) return (wtoken, i);
   //   }
@@ -450,7 +395,6 @@ contract AnyLiquidationTest is BaseTest {
   //   }
   //   return (tokens[0], 0);
   // }
-
   // function addFundingStrategy(
   //   LiquidationData memory vars,
   //   IFundsConversionStrategy strategy,
@@ -462,7 +406,6 @@ contract AnyLiquidationTest is BaseTest {
   //   if (compareStrings(strategyContract, "JarvisLiquidatorFunder")) {
   //     AddressesProvider.JarvisPool[] memory pools = ap.getJarvisPools();
   //     bytes memory strategyData;
-
   //     for (uint256 i = 0; i < pools.length; i++) {
   //       AddressesProvider.JarvisPool memory pool = pools[i];
   //       if (pool.syntheticToken == debtToken) {
@@ -472,10 +415,8 @@ contract AnyLiquidationTest is BaseTest {
   //       }
   //     }
   //     fundingDatas.push(strategyData);
-
   //     vars.liquidator._whitelistRedemptionStrategy(strategy, true);
   //     fundingStrategies.push(strategy);
-
   //     // } else if (compareStrings(strategyContract, "SomeOtherFunder")) {
   //     // bytes memory strategyData = abi.encode(strategySpecificParams);
   //     // (IERC20Upgradeable inputToken, uint256 inputAmount) = IFundsConversionStrategy(addr).estimateInputAmount(10**(debtToken.decimals()), strategyData);
@@ -486,7 +427,6 @@ contract AnyLiquidationTest is BaseTest {
   //     emit log_address(debtToken);
   //     revert("unknown debt token");
   //   }
-
   //   assertEq(strategyInputToken, expectedInputToken, "!expected input token");
   //   return expectedInputToken;
   // }
