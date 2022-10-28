@@ -88,7 +88,6 @@ contract FlywheelPerformanceFeeTest is BaseTest {
       address(this),
       rewardsToken
     );
-    dotDotLpERC4626.reinitialize();
 
     plugin = dotDotLpERC4626;
     marketAddress = address(plugin);

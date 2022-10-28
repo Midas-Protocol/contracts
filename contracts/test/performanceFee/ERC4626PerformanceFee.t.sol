@@ -34,7 +34,6 @@ contract ERC4626PerformanceFeeTest is BaseTest {
     underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
     plugin = new BeefyERC4626();
     plugin.initialize(underlyingToken, beefyVault, 10);
-    plugin.reinitialize();
 
     uint256 currentPerformanceFee = plugin.performanceFee();
     plugin.updateFeeSettings(currentPerformanceFee, newFeeRecipient);

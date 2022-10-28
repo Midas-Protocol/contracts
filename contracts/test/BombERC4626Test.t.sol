@@ -22,7 +22,6 @@ contract BombERC4626Test is BaseTest {
     bombToken = IERC20Upgradeable(address(xbombToken.reward()));
     vault = new BombERC4626();
     vault.initialize(ERC20Upgradeable(address(bombToken)), address(xbombToken));
-    vault.reinitialize();
 
     // get some tokens from a whale
     vm.prank(whale);

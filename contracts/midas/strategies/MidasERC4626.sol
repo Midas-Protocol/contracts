@@ -179,13 +179,13 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
 
         _burn(feeRecipient, oldFees);
         _approve(feeRecipient, owner(), 0);
-
         _mint(newFeeRecipient, oldFees);
-        _approve(newFeeRecipient, owner(), type(uint256).max);
       }
 
-      feeRecipient = newFeeRecipient;
+      _approve(newFeeRecipient, owner(), type(uint256).max);
     }
+
+    feeRecipient = newFeeRecipient;
   }
 
   /* ========== EMERGENCY FUNCTIONS ========== */

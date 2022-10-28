@@ -4,23 +4,10 @@ pragma solidity >=0.8.0;
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 
-import { CToken } from "../compound/CToken.sol";
-import { Comptroller } from "../compound/Comptroller.sol";
-import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
-import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
-
-import { WETH } from "solmate/tokens/WETH.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-import "../FuseSafeLiquidator.sol";
-import "../FusePoolDirectory.sol";
 import "./config/BaseTest.t.sol";
-import "../liquidators/JarvisLiquidatorFunder.sol";
-import "../liquidators/CurveLpTokenLiquidator.sol";
-import "../liquidators/UniswapLpTokenLiquidator.sol";
-import "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
-import "../liquidators/UniswapV2Liquidator.sol";
-import "../liquidators/CurveSwapLiquidator.sol";
+import "../FuseSafeLiquidator.sol";
 
 contract MockRedemptionStrategy is IRedemptionStrategy {
   function redeem(
@@ -87,9 +74,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     // with a larger storage gap to protect the owner variable of OwnableUpgradeable
     // from being overwritten by the FuseSafeLiquidator storage
     for (uint256 i = 40; i < 51; i++) {
-      //      emit log_uint(i);
       address atSloti = address(uint160(uint256(vm.load(address(fsl), bytes32(i)))));
-      //      emit log_address(atSloti);
       assertEq(
         atSloti,
         address(0),
@@ -98,6 +83,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 }
+<<<<<<< HEAD
 
 contract AnyLiquidationTest is BaseTest {
   FuseSafeLiquidator fsl;

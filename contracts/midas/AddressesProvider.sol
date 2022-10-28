@@ -13,19 +13,23 @@ contract AddressesProvider is OwnableUpgradeable {
   mapping(string => address) private _addresses;
   mapping(address => Contract) public flywheelRewards;
   mapping(address => Contract) public plugins;
+
+  /* BEGIN DEPRECATED - keep to not break storage layout */
   mapping(address => Contract) public redemptionStrategies;
   mapping(address => Contract) public fundingStrategies;
-  mapping(address => JarvisPool) public jarvisPools;
+  mapping(address => JarvisPool) private jarvisPools;
+  /* END DEPRECATED */
+
+  JarvisPool[] public jarvisPoolsConfig;
+  CurveSwapPool[] public curveSwapPoolsConfig;
+  mapping(address => RedemptionStrategy) public redemptionStrategiesConfig;
+  mapping(address => FundingStrategy) public fundingStrategiesConfig;
 
   /// @dev Initializer to set the admin that can set and change contracts addresses
   function initialize(address owner) public initializer {
     __Ownable_init();
     _transferOwnership(owner);
   }
-
-  event AddressSet(string id, address indexed newAddress);
-
-  event ContractSet(address indexed key, string contractType, address contractAddress);
 
   /**
    * @dev The contract address and a string that uniquely identifies the contract's interface
@@ -35,11 +39,28 @@ contract AddressesProvider is OwnableUpgradeable {
     string contractInterface;
   }
 
+  struct RedemptionStrategy {
+    address addr;
+    string contractInterface;
+    address outputToken;
+  }
+
+  struct FundingStrategy {
+    address addr;
+    string contractInterface;
+    address inputToken;
+  }
+
   struct JarvisPool {
     address syntheticToken;
     address collateralToken;
     address liquidityPool;
     uint256 expirationTime;
+  }
+
+  struct CurveSwapPool {
+    address poolAddress;
+    address[] coins;
   }
 
   /**
@@ -54,7 +75,6 @@ contract AddressesProvider is OwnableUpgradeable {
     string calldata contractInterface
   ) public onlyOwner {
     flywheelRewards[rewardToken] = Contract(flywheelRewardsModule, contractInterface);
-    emit ContractSet(rewardToken, contractInterface, flywheelRewardsModule);
   }
 
   /**
@@ -69,7 +89,6 @@ contract AddressesProvider is OwnableUpgradeable {
     string calldata contractInterface
   ) public onlyOwner {
     plugins[asset] = Contract(plugin, contractInterface);
-    emit ContractSet(asset, contractInterface, plugin);
   }
 
   /**
@@ -81,10 +100,14 @@ contract AddressesProvider is OwnableUpgradeable {
   function setRedemptionStrategy(
     address asset,
     address strategy,
-    string calldata contractInterface
+    string calldata contractInterface,
+    address outputToken
   ) public onlyOwner {
-    redemptionStrategies[asset] = Contract(strategy, contractInterface);
-    emit ContractSet(asset, contractInterface, strategy);
+    redemptionStrategiesConfig[asset] = RedemptionStrategy(strategy, contractInterface, outputToken);
+  }
+
+  function getRedemptionStrategy(address asset) public view returns (RedemptionStrategy memory) {
+    return redemptionStrategiesConfig[asset];
   }
 
   /**
@@ -96,10 +119,14 @@ contract AddressesProvider is OwnableUpgradeable {
   function setFundingStrategy(
     address asset,
     address strategy,
-    string calldata contractInterface
+    string calldata contractInterface,
+    address inputToken
   ) public onlyOwner {
-    fundingStrategies[asset] = Contract(strategy, contractInterface);
-    emit ContractSet(asset, contractInterface, strategy);
+    fundingStrategiesConfig[asset] = FundingStrategy(strategy, contractInterface, inputToken);
+  }
+
+  function getFundingStrategy(address asset) public view returns (FundingStrategy memory) {
+    return fundingStrategiesConfig[asset];
   }
 
   /**
@@ -115,7 +142,11 @@ contract AddressesProvider is OwnableUpgradeable {
     address liquidityPool,
     uint256 expirationTime
   ) public onlyOwner {
-    jarvisPools[syntheticToken] = JarvisPool(syntheticToken, collateralToken, liquidityPool, expirationTime);
+    jarvisPoolsConfig.push(JarvisPool(syntheticToken, collateralToken, liquidityPool, expirationTime));
+  }
+
+  function setCurveSwapPool(address poolAddress, address[] calldata coins) public onlyOwner {
+    curveSwapPoolsConfig.push(CurveSwapPool(poolAddress, coins));
   }
 
   /**
@@ -125,7 +156,6 @@ contract AddressesProvider is OwnableUpgradeable {
    */
   function setAddress(string calldata id, address newAddress) external onlyOwner {
     _addresses[id] = newAddress;
-    emit AddressSet(id, newAddress);
   }
 
   /**
@@ -134,5 +164,13 @@ contract AddressesProvider is OwnableUpgradeable {
    */
   function getAddress(string calldata id) public view returns (address) {
     return _addresses[id];
+  }
+
+  function getCurveSwapPools() public returns (CurveSwapPool[] memory) {
+    return curveSwapPoolsConfig;
+  }
+
+  function getJarvisPools() public returns (JarvisPool[] memory) {
+    return jarvisPoolsConfig;
   }
 }

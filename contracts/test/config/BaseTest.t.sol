@@ -6,8 +6,12 @@ import "forge-std/Test.sol";
 
 import "../../midas/AddressesProvider.sol";
 
+import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+
 abstract contract BaseTest is Test {
   AddressesProvider public ap;
+  ProxyAdmin public dpa;
 
   function compareNetwork(string memory str1, string memory str2) internal returns (bool) {
     return keccak256(abi.encodePacked(str1)) == keccak256(abi.encodePacked(str2));
@@ -29,7 +33,14 @@ abstract contract BaseTest is Test {
     } else if (compareNetwork(network, "arbitrum")) {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else {
-      ap = new AddressesProvider();
+      dpa = new ProxyAdmin();
+      AddressesProvider logic = new AddressesProvider();
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+        address(logic),
+        address(dpa),
+        abi.encodeWithSelector(ap.initialize.selector, address(this))
+      );
+      ap = AddressesProvider(address(proxy));
     }
     configureAddressesProvider();
   }
