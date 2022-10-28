@@ -13,7 +13,9 @@ contract CurveSwapLiquidatorTest is BaseTest {
   CurveSwapLiquidatorFunder private csl;
 
   function setUp() public {
-    vm.rollFork(22566900);
+    if (block.chainid == BSC_MAINNET) {
+      vm.rollFork(22566900);
+    }
     csl = new CurveSwapLiquidatorFunder();
   }
 
