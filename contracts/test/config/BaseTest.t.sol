@@ -26,8 +26,8 @@ abstract contract BaseTest is Test {
 
   modifier fork(uint128 chainid) {
     vm.selectFork(forkIds[chainid]);
-    setAddressesProvider(chainid);
-    chainSetUp();
+    configureAddressesProvider(chainid);
+    afterForkSetUp();
     _;
   }
 
@@ -41,8 +41,8 @@ abstract contract BaseTest is Test {
   modifier forkAtBlock(uint128 chainid, uint256 blockNumber) {
     if (block.chainid != chainid) {
       vm.selectFork(forkIds[chainid]);
-      setAddressesProvider(chainid);
-      chainSetUp();
+      configureAddressesProvider(chainid);
+      afterForkSetUp();
     }
     _;
   }
@@ -57,7 +57,7 @@ abstract contract BaseTest is Test {
     forkIds[ARBITRUM_ONE] = vm.createFork(vm.rpcUrl("arbitrum"));
   }
 
-  function setAddressesProvider(uint128 chainid) internal {
+  function configureAddressesProvider(uint128 chainid) internal {
     if (block.chainid == BSC_MAINNET) {
       ap = AddressesProvider(0x01c97299b37E66c03419bC4Db24074a89FB36e6d);
     } else if (block.chainid == BSC_CHAPEL) {
@@ -82,26 +82,12 @@ abstract contract BaseTest is Test {
       );
       ap = AddressesProvider(address(proxy));
     }
-    configureAddressesProvider();
-  }
-
-  function chainSetUp() virtual internal {}
-
-  function createSelectFork(string memory network, uint256 forkBlockNumber) internal returns (uint256) {
-    uint256 forkId = vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
-    return forkId;
-  }
-
-  function createFork(string memory network, uint256 forkBlockNumber) internal returns (uint256) {
-    uint256 forkId = vm.createFork(vm.rpcUrl(network), forkBlockNumber);
-    return forkId;
-  }
-
-  function configureAddressesProvider() internal {
     if (ap.owner() == address(0)) {
       ap.initialize(address(this));
     }
   }
+
+  function afterForkSetUp() virtual internal {}
 
   function diff(uint256 a, uint256 b) internal pure returns (uint256) {
     if (a > b) {

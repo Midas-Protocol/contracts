@@ -17,7 +17,7 @@ contract InterestRateModelTest is BaseTest {
   address ANKR_BNB_R = 0xBb1Aa6e59E5163D8722a122cd66EBA614b59df0d;
   uint8 day = 3;
 
-  function chainSetUp() internal override {
+  function afterForkSetUp() internal override {
     if (block.chainid == BSC_MAINNET) {
       ankrBnbInterestRateModel2 = new AnkrBNBInterestRateModel(10512000, 0.5e16, 3e18, 0.85e18, day, ANKR_BNB_R);
       jumpRateModel = new JumpRateModel(10512000, 0.2e17, 0.18e18, 4e18, 0.8e18);

@@ -36,7 +36,7 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     MockAsset usdc;
   }
 
-  function chainSetUp() internal override {
+  function afterForkSetUp() internal override {
     super.setUpWithPool(
       MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
       ERC20Upgradeable(ap.getAddress("wtoken"))

@@ -493,7 +493,7 @@ contract CErc20DelegateTest is BaseTest {
     testPluginImplementations();
   }
 
-  function chainSetUp() internal override {
+  function afterForkSetUp() internal override {
     fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
   }

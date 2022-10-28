@@ -26,7 +26,7 @@ contract ChainlinkOraclesTest is BaseTest {
   ICToken usdcMarketBsc = ICToken(0x8D5bE2768c335e88b71E4e913189AEE7104f01B4);
   ICToken usdtMarketBsc = ICToken(0x1F73754c135d5B9fDE674806f43AeDfA2c7eaDb5);
 
-  function chainSetUp() internal override {
+  function afterForkSetUp() internal override {
     oracle = ChainlinkPriceOracleV2(ap.getAddress("ChainlinkPriceOracleV2"));
   }
 
