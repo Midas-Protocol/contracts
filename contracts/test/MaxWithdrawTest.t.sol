@@ -48,11 +48,6 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     setUpPool("bsc-test", false, 0.1e18, 1.1e18);
   }
 
-  function setNetworkValues(string memory network, uint256 forkBlockNumber) internal {
-    vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
-    setAddressProvider(network);
-  }
-
   function testBsc() public fork(BSC_MAINNET) {
     testMaxWithdraw();
   }

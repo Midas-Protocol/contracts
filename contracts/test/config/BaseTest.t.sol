@@ -59,42 +59,18 @@ abstract contract BaseTest is Test {
 
   function setAddressesProvider(uint128 chainid) internal {
     if (block.chainid == BSC_MAINNET) {
-      setAddressProvider("bsc");
-    } else if (block.chainid == BSC_CHAPEL) {
-      setAddressProvider("bsc_chapel");
-    } else if (block.chainid == MOONBEAM_MAINNET) {
-      setAddressProvider("moonbeam");
-    } else if (block.chainid == EVMOS_TESTNET) {
-      setAddressProvider("evmos_test");
-    } else if (block.chainid == POLYGON_MAINNET) {
-      setAddressProvider("polygon");
-    } else if (block.chainid == NEON_DEVNET) {
-      setAddressProvider("neon_dev");
-    } else if (block.chainid == ARBITRUM_ONE) {
-      setAddressProvider("arbitrum");
-    } else {
-      setAddressProvider("");
-    }
-  }
-
-  function compareNetwork(string memory str1, string memory str2) internal returns (bool) {
-    return keccak256(abi.encodePacked(str1)) == keccak256(abi.encodePacked(str2));
-  }
-
-  function setAddressProvider(string memory network) internal {
-    if (compareNetwork(network, "bsc")) {
       ap = AddressesProvider(0x01c97299b37E66c03419bC4Db24074a89FB36e6d);
-    } else if (compareNetwork(network, "bsc_chapel")) {
+    } else if (block.chainid == BSC_CHAPEL) {
       ap = AddressesProvider(0x38742363597fBaE312B0bdcC351fCc6107E9E27E);
-    } else if (compareNetwork(network, "moonbeam")) {
+    } else if (block.chainid == MOONBEAM_MAINNET) {
       ap = AddressesProvider(0x771ee5a72A57f3540E5b9A6A8C226C2a24A70Fae);
-    } else if (compareNetwork(network, "evmos_test")) {
+    } else if (block.chainid == EVMOS_TESTNET) {
       ap = AddressesProvider(0xB88C6a114F01a80Dc8465b55067C8D046C2F445A);
-    } else if (compareNetwork(network, "polygon")) {
+    } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
-    } else if (compareNetwork(network, "neon_dev")) {
+    } else if (block.chainid == NEON_DEVNET) {
       ap = AddressesProvider(0xd4D0cA503E8befAbE4b75aAC36675Bc1cFA533D1);
-    } else if (compareNetwork(network, "arbitrum")) {
+    } else if (block.chainid == ARBITRUM_ONE) {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else {
       dpa = new ProxyAdmin();
