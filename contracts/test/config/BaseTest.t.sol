@@ -49,7 +49,7 @@ abstract contract BaseTest is Test {
 
   constructor() {
     forkIds[BSC_MAINNET] = vm.createFork(vm.rpcUrl("bsc"));
-    forkIds[BSC_CHAPEL] = vm.createFork(vm.rpcUrl("bsc_chapel"));
+    // forkIds[BSC_CHAPEL] = vm.createFork(vm.rpcUrl("bsc_chapel"));
     forkIds[MOONBEAM_MAINNET] = vm.createFork(vm.rpcUrl("moonbeam"));
     forkIds[EVMOS_TESTNET] = vm.createFork(vm.rpcUrl("evmos_test"));
     forkIds[POLYGON_MAINNET] = vm.createFork(vm.rpcUrl("polygon"));
