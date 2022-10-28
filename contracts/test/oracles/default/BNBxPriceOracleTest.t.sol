@@ -11,22 +11,20 @@ contract BNBxPriceOracleTest is BaseTest {
   MasterPriceOracle mpo;
   address BNBx = 0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275;
 
-  function setUp() public {
+  function setUp() public override {
+    vm.createSelectFork(vm.rpcUrl("bsc"), 22332594);
+    setAddressProvider("bsc");
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-    if (block.chainid == BSC_MAINNET) {
-      setUpOracle();
-    }
+    setUpOracle();
   }
 
   function setUpOracle() public {
-    vm.rollFork(22332594);
-
     oracle = new BNBxPriceOracle();
     vm.prank(mpo.admin());
     oracle.initialize();
   }
 
-  function testBnbXOraclePrice() public shouldRun(forChains(BSC_MAINNET)) {
+  function testBnbXOraclePrice() public {
     uint256 priceBnbX = oracle.price(BNBx);
 
     assertGt(priceBnbX, 1e18);

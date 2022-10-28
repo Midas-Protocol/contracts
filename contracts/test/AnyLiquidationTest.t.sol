@@ -43,15 +43,7 @@ contract AnyLiquidationTest is BaseTest {
     proxy.upgradeTo(address(newImpl));
   }
 
-  function setUp() public {
-    if (block.chainid == BSC_MAINNET) {
-      // TODO run for the latest block number
-      vm.rollFork(22566900);
-    } else if (block.chainid == POLYGON_MAINNET) {
-      // TODO run for the latest block number
-      vm.rollFork(34853000);
-    }
-
+  function setUp() public override {
     upgradeAp();
 
     uniswapRouter = ap.getAddress("IUniswapV2Router02");
@@ -96,7 +88,7 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
-  function testBscAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
+  function testBscAnyLiquidation(uint256 random) public forkAtBlock(BSC_MAINNET, 22566900) {
     // TODO update the setup after the next redeploy
     if (block.number <= 22486200) {
       return;
@@ -106,7 +98,7 @@ contract AnyLiquidationTest is BaseTest {
     doTestAnyLiquidation(random);
   }
 
-  function testPolygonAnyLiquidation(uint256 random) public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testPolygonAnyLiquidation(uint256 random) public forkAtBlock(POLYGON_MAINNET, 34853000) {
     // TODO update the setup after the next redeploy
     if (block.number <= 34788300) {
       return;

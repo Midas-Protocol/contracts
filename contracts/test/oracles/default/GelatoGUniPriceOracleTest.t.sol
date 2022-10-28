@@ -11,14 +11,12 @@ contract GelatoGUniPriceOracleTest is BaseTest {
   GelatoGUniPriceOracle private oracle;
   MasterPriceOracle mpo;
 
-  function setUp() public shouldRun(forChains(POLYGON_MAINNET)) {
-    vm.rollFork(32016397);
-
+  function setUp() public override forkAtBlock(POLYGON_MAINNET, 32016397) {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     oracle = new GelatoGUniPriceOracle(address(0));
   }
 
-  function testPriceGelatoGUni() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testPriceGelatoGUni() public {
     address PAR_USDC_ARRAKIS_VAULT = 0xC1DF4E2fd282e39346422e40C403139CD633Aacd;
     address WBTC_WETH_ARRAKIS_VAULT = 0x590217ef04BcB96FF6Da991AB070958b8F9E77f0;
 

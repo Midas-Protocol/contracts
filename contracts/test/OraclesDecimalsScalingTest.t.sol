@@ -15,25 +15,35 @@ contract OraclesDecimalsScalingTest is BaseTest {
   MasterPriceOracle mpo;
   FusePoolDirectory fusePoolDirectory;
 
-  function setUp() public {
-    // TODO remove rollFork and run it for the latest block
-    if (block.chainid == BSC_MAINNET) {
-      vm.rollFork(21945844);
-    } else if (block.chainid == ARBITRUM_ONE) {
-      vm.rollFork(28654955);
-    } else if (block.chainid == MOONBEAM_MAINNET) {
-      vm.rollFork(2020022);
-    } else if (block.chainid == POLYGON_MAINNET) {
-      vm.rollFork(33996000);
-    } else if (block.chainid == NEON_DEVNET) {
-      vm.rollFork(167826388);
-    }
+  function setUp() public override {}
 
+  function chainSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
   }
 
-  function testOraclesDecimals() public {
+  // TODO just loop through the forks
+  function testBsc() public fork(BSC_MAINNET) {
+    testOraclesDecimals();
+  }
+
+  function testArbitrum() public fork(ARBITRUM_ONE) {
+    testOraclesDecimals();
+  }
+
+  function testMoonbeam() public fork(MOONBEAM_MAINNET) {
+    testOraclesDecimals();
+  }
+
+  function testPolygon() public fork(POLYGON_MAINNET) {
+    testOraclesDecimals();
+  }
+
+  function testNeonDev() public fork(NEON_DEVNET) {
+    testOraclesDecimals();
+  }
+
+  function testOraclesDecimals() internal {
     if (address(fusePoolDirectory) != address(0)) {
       FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 

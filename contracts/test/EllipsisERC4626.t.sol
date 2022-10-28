@@ -41,7 +41,7 @@ contract EllipsisERC4626Test is BaseTest {
   ERC20 marketKey;
   address tester = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
 
-  function setUp() public {
+  function setUp() public override forkAtBlock(BSC_MAINNET, 20238373) {
     testToken = new MockERC20("TestLpToken", "LP-TST", 18);
     epsToken = new MockERC20("epsToken", "EPX", 18);
     mockLpTokenStaker = new MockLpTokenStaker(IERC20Mintable(address(epsToken)), 1000000e18);
@@ -108,7 +108,7 @@ contract EllipsisERC4626Test is BaseTest {
     vm.stopPrank();
   }
 
-  function testTheBugWithdraw(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
+  function testTheBugWithdraw(uint256 amount) public {
     vm.assume(amount > 100 && amount < 1e19);
     testToken.mint(alice, 100e18);
 
@@ -148,7 +148,7 @@ contract EllipsisERC4626Test is BaseTest {
     assertEq(lockedFunds, 0, "should transfer the full balance of the withdrawn LP token, no dust is acceptable");
   }
 
-  function testTheBugRedeem(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
+  function testTheBugRedeem(uint256 amount) public {
     vm.assume(amount > 1e5 && amount < 1e19);
     testToken.mint(alice, 100e18);
 

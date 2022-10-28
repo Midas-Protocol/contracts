@@ -17,9 +17,8 @@ contract UniswapV3PriceOracleTest is BaseTest {
     uint256 twapWindow;
   }
 
-  function setUp() public {
-    // oracle = UniswapV3PriceOracle(ap.getAddress("UniswapV3PriceOracle"));
-    oracle = new UniswapV3PriceOracle(address(this), true);
+  function setUp() public override forkAtBlock(ARBITRUM_ONE, 28739891) {
+    oracle = UniswapV3PriceOracle(ap.getAddress("UniswapV3PriceOracle"));
   }
 
   function testPriceFeed(address[] memory underlyings, UniswapV3PriceOracle.AssetConfig[] memory configs)
@@ -37,7 +36,7 @@ contract UniswapV3PriceOracleTest is BaseTest {
     return price;
   }
 
-  function testArbitrumAssets() public shouldRun(forChains(ARBITRUM_ONE)) {
+  function testArbitrumAssets() public {
     address[] memory underlyings = new address[](3);
     UniswapV3PriceOracle.AssetConfig[] memory configs = new UniswapV3PriceOracle.AssetConfig[](3);
 
@@ -65,11 +64,7 @@ contract UniswapV3PriceOracleTest is BaseTest {
     }
   }
 
-  function testCardinality(UniswapV3PriceOracle.AssetConfig[] memory configs)
-    internal
-    shouldRun(forChains(ARBITRUM_ONE))
-    returns (bool[] memory)
-  {
+  function testCardinality(UniswapV3PriceOracle.AssetConfig[] memory configs) internal returns (bool[] memory) {
     bool[] memory checks = new bool[](configs.length);
     for (uint256 i = 0; i < configs.length; i += 1) {
       (, , , , uint16 observationCardinalityNext, , ) = IUniswapV3Pool(configs[i].poolAddress).slot0();

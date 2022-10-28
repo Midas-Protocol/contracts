@@ -20,7 +20,7 @@ contract PythOraclesTest is BaseTest {
 
   address token = 0x7ff459CE3092e8A866aA06DA88D291E2E31230C1;
 
-  function setUp() public {
+  function setUp() public override forkAtBlock(NEON_DEVNET, 159103730) {
     pythOracle = new MockPyth(0);
 
     PythStructs.PriceFeed memory mockTokenFeed = PythStructs.PriceFeed(
@@ -83,7 +83,7 @@ contract PythOraclesTest is BaseTest {
     price = oracle.price(testedTokenAddress);
   }
 
-  function testTokenPrice() public shouldRun(forChains(NEON_DEVNET)) {
+  function testTokenPrice() public {
     assertEq(testPriceFeed(token, tokenPriceFeed), uint256(uint64((tokenPrice / nativeTokenPrice) * 1e18)));
   }
 }

@@ -481,12 +481,26 @@ contract CErc20DelegateTest is BaseTest {
   address[] implementationsSet;
   address[] pluginsSet;
 
-  function setUp() public {
+  function setUp() public override {}
+
+  function testBscImplementations() public forkAtBlock(BSC_MAINNET, 20238373) {
+    testPoolImplementations();
+    testMarketImplementations();
+    testPluginImplementations();
+  }
+
+  function testPolygonImplementations() public forkAtBlock(POLYGON_MAINNET, 33063212) {
+    testPoolImplementations();
+    testMarketImplementations();
+    testPluginImplementations();
+  }
+
+  function chainSetUp() internal override {
     fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
   }
 
-  function testPoolImplementations() public shouldRun(forChains(POLYGON_MAINNET, BSC_MAINNET)) {
+  function testPoolImplementations() internal {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
@@ -516,7 +530,7 @@ contract CErc20DelegateTest is BaseTest {
     }
   }
 
-  function testMarketImplementations() public shouldRun(forChains(POLYGON_MAINNET, BSC_MAINNET)) {
+  function testMarketImplementations() internal {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
@@ -552,7 +566,7 @@ contract CErc20DelegateTest is BaseTest {
     }
   }
 
-  function testPluginImplementations() public shouldRun(forChains(POLYGON_MAINNET, BSC_MAINNET)) {
+  function testPluginImplementations() internal {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {

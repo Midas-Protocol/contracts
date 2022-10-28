@@ -31,6 +31,8 @@ contract StellaERC4626Test is AbstractERC4626Test {
 
   constructor() WithPool() {}
 
+  function setUp() public override {}
+
   function setUp(string memory _testPreFix, bytes calldata testConfig) public override {
     setUpPool("stella-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));
@@ -96,11 +98,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
     return depositAmount;
   }
 
-  function testInitializedValues(string memory assetName, string memory assetSymbol)
-    public
-    override
-    shouldRun(forChains(BSC_MAINNET))
-  {
+  function testInitializedValues(string memory assetName, string memory assetSymbol) public override {
     assertEq(
       plugin.name(),
       string(abi.encodePacked("Midas ", assetName, " Vault")),

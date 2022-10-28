@@ -32,7 +32,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
   address moraToken = 0x6Ab1F83c0429A1322D7ECDFdDf54CE6D179d911f;
   address wtoken = 0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5;
 
-  constructor() WithPool() {
+  constructor() WithPool() forkAtBlock(NEON_DEVNET, 159103730) {
     super.setUpWithPool(
       MasterPriceOracle(mpo), // MasterPriceOracle
       ERC20Upgradeable(moraToken) // MORA
@@ -58,12 +58,12 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     uint256 price2;
   }
 
-  function setUp() public shouldRun(forChains(NEON_DEVNET)) {
+  function setUp() public override {
     deal(address(underlyingToken), address(this), 10e18);
     setUpPool("neondevnet-test", false, 0.1e18, 1.1e18);
   }
 
-  function testNeonDeployCErc20Delegate() public shouldRun(forChains(NEON_DEVNET)) {
+  function testNeonDeployCErc20Delegate() public {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
@@ -85,7 +85,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     assertEq(underlyingToken.balanceOf(address(this)), 1000);
   }
 
-  function testNeonGetPoolAssetsData() public shouldRun(forChains(NEON_DEVNET)) {
+  function testNeonGetPoolAssetsData() public {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
@@ -104,7 +104,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     assertEq(assets[0].supplyBalance, 10e18);
   }
 
-  function testNeonCErc20Liquidation() public shouldRun(forChains(NEON_DEVNET)) {
+  function testNeonCErc20Liquidation() public {
     LiquidationData memory vars;
     vm.roll(1);
     vars.erc20 = MockERC20(moraToken); // MORA

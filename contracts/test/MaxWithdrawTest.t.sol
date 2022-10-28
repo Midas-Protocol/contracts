@@ -36,14 +36,9 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     MockAsset usdc;
   }
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET, POLYGON_MAINNET)) {
-    // TODO should run for the latest block
-    if (block.chainid == POLYGON_MAINNET) {
-      vm.rollFork(34252820);
-    } else if (block.chainid == BSC_MAINNET) {
-      vm.rollFork(22113750);
-    }
+  function setUp() public override {}
 
+  function chainSetUp() internal override {
     super.setUpWithPool(
       MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
       ERC20Upgradeable(ap.getAddress("wtoken"))
@@ -53,7 +48,20 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     setUpPool("bsc-test", false, 0.1e18, 1.1e18);
   }
 
-  function testMaxWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
+  function setNetworkValues(string memory network, uint256 forkBlockNumber) internal {
+    vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
+    setAddressProvider(network);
+  }
+
+  function testBsc() public fork(BSC_MAINNET) {
+    testMaxWithdraw();
+  }
+
+  function testPolygon() public fork(POLYGON_MAINNET) {
+    testMIIMOMaxWithdraw();
+  }
+
+  function testMaxWithdraw() internal {
     FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
     poolLensSecondary.initialize(fusePoolDirectory);
 
@@ -147,7 +155,7 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     }
   }
 
-  function testMIIMOMaxWithdraw() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testMIIMOMaxWithdraw() internal {
     FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
     poolLensSecondary.initialize(fusePoolDirectory);
 

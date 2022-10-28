@@ -11,10 +11,20 @@ contract TwapOraclesBaseTest is BaseTest {
   UniswapTwapPriceOracleV2Factory twapPriceOracleFactory;
   MasterPriceOracle mpo;
 
-  function setUp() public {
+  function setUp() public override {}
+
+  function chainSetUp() internal override {
     uniswapV2Factory = IUniswapV2Factory(ap.getAddress("IUniswapV2Factory"));
     twapPriceOracleFactory = UniswapTwapPriceOracleV2Factory(ap.getAddress("UniswapTwapPriceOracleV2Factory"));
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+  }
+
+  // BOMB
+  function testBombTwapOraclePrice() public forkAtBlock(BSC_MAINNET, 20238373) {
+    address baseToken = 0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c; // WBTC
+    address testedAssetTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
+
+    assertTrue(getTokenTwapPrice(testedAssetTokenAddress, baseToken) > 0);
   }
 
   function getTokenTwapPrice(address tokenAddress, address baseTokenAddress) internal returns (uint256) {
@@ -48,18 +58,9 @@ contract TwapOraclesBaseTest is BaseTest {
     return mpo.price(tokenAddress);
   }
 
-  // BOMB
-  function testBombTwapOraclePrice() public shouldRun(forChains(BSC_MAINNET)) {
-    address baseToken = 0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c; // WBTC
-    address testedAssetTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
-
-    assertTrue(getTokenTwapPrice(testedAssetTokenAddress, baseToken) > 0);
-  }
-
-  function testChapelEthBusdOraclePrice() public shouldRun(forChains(BSC_CHAPEL)) {
-    address baseToken = 0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684; // USDT
-    address testedAssetTokenAddress = 0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7; // BUSD
-
-    assertTrue(getTokenTwapPrice(testedAssetTokenAddress, baseToken) > 0);
-  }
+  // function testChapelEthBusdOraclePrice() public {
+  //   address baseToken = 0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684; // USDT
+  //   address testedAssetTokenAddress = 0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7; // BUSD
+  //   assertTrue(getTokenTwapPrice(testedAssetTokenAddress, baseToken) > 0);
+  // }
 }

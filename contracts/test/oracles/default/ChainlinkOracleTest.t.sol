@@ -26,8 +26,21 @@ contract ChainlinkOraclesTest is BaseTest {
   ICToken usdcMarketBsc = ICToken(0x8D5bE2768c335e88b71E4e913189AEE7104f01B4);
   ICToken usdtMarketBsc = ICToken(0x1F73754c135d5B9fDE674806f43AeDfA2c7eaDb5);
 
-  function setUp() public {
+  function setUp() public override {}
+
+  function chainSetUp() internal override {
     oracle = ChainlinkPriceOracleV2(ap.getAddress("ChainlinkPriceOracleV2"));
+  }
+
+  function testBsc() public forkAtBlock(BSC_MAINNET, 21118900) {
+    testJBRLPrice();
+    testBSCChainlinkUSDCPrice();
+    testBSCChainlinkUSDTPrice();
+    testUsdcUsdtDeviationBsc();
+  }
+
+  function testPolygon() public forkAtBlock(POLYGON_MAINNET, 33063212) {
+    testUsdcUsdtDeviationPolygon();
   }
 
   function setUpOracleFeed(address testedTokenAddress, address aggregatorAddress) internal {
@@ -40,32 +53,30 @@ contract ChainlinkOraclesTest is BaseTest {
     oracle.setPriceFeeds(underlyings, aggregators, ChainlinkPriceOracleV2.FeedBaseCurrency.USD);
   }
 
-  function testJBRLPrice() public shouldRun(forChains(BSC_MAINNET)) {
+  function testJBRLPrice() internal {
     setUpOracleFeed(jBRLBsc, jBRLFeedBsc);
     assert(oracle.price(jBRLBsc) > 0);
   }
 
-  function testBSCChainlinkUSDCPrice() public shouldRun(forChains(BSC_MAINNET)) {
+  function testBSCChainlinkUSDCPrice() internal {
     vm.rollFork(21118900);
 
-    oracle = new ChainlinkPriceOracleV2(address(this), true, ap.getAddress("wtoken"), usdNativeFeedBsc);
     setUpOracleFeed(usdcBsc, usdcFeedBsc);
     uint256 price = oracle.price(usdcBsc);
     uint256 underlyingPrice = oracle.getUnderlyingPrice(usdcMarketBsc);
     assertEq(price, underlyingPrice);
   }
 
-  function testBSCChainlinkUSDTPrice() public shouldRun(forChains(BSC_MAINNET)) {
+  function testBSCChainlinkUSDTPrice() internal {
     vm.rollFork(21118900);
 
-    oracle = new ChainlinkPriceOracleV2(address(this), true, ap.getAddress("wtoken"), usdNativeFeedBsc);
     setUpOracleFeed(usdtBsc, usdtFeedBsc);
     uint256 price = oracle.price(usdtBsc);
     uint256 underlyingPrice = oracle.getUnderlyingPrice(usdtMarketBsc);
     assertEq(price, underlyingPrice);
   }
 
-  function testUsdcUsdtDeviationBsc() public shouldRun(forChains(BSC_MAINNET)) {
+  function testUsdcUsdtDeviationBsc() internal {
     vm.rollFork(21118900);
 
     setUpOracleFeed(usdtBsc, usdtFeedBsc);
@@ -77,7 +88,7 @@ contract ChainlinkOraclesTest is BaseTest {
     assertApproxEqAbs(usdtPrice, usdcPrice, 1e15, "usd prices differ too much");
   }
 
-  function testUsdcUsdtDeviationPolygon() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testUsdcUsdtDeviationPolygon() internal {
     setUpOracleFeed(usdtPolygon, usdtFeedPolygon);
     setUpOracleFeed(usdcPolygon, usdcFeedPolygon);
 

@@ -11,20 +11,17 @@ import { CurveSwapLiquidatorFunder } from "../liquidators/CurveSwapLiquidatorFun
 
 contract CurveSwapLiquidatorTest is BaseTest {
   CurveSwapLiquidatorFunder private csl;
-
-  function setUp() public {
-    if (block.chainid == BSC_MAINNET) {
-      vm.rollFork(22566900);
-    }
+  //  forkAtBlock(, )
+  function setUp() public override forkAtBlock(BSC_MAINNET, 22566900) {
     csl = new CurveSwapLiquidatorFunder();
   }
 
-  function not_working_TestRedeem() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function not_working_TestRedeem() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
+    // csl = new CurveSwapLiquidatorFunder(); // TODO setUp()
     address pool = 0x0fFc46cD9716a96d8D89E1965774A70Dcb851E50; // xcDOT-stDOT
     address xcDotAddress = 0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080; // 0
     address stDotAddress = 0xFA36Fe1dA08C89eC72Ea1F0143a35bFd5DAea108; // 1
     IERC20Upgradeable xcDot = IERC20Upgradeable(xcDotAddress);
-    //        IERC20Upgradeable stDot = IERC20Upgradeable(stDotAddress);
 
     ICurvePool curvePool = ICurvePool(pool);
 
@@ -41,12 +38,11 @@ contract CurveSwapLiquidatorTest is BaseTest {
     assertEq(xcForSt, stDotOutput, "output amount does not match");
   }
 
-  function testRedeemMAI() public shouldRun(forChains(BSC_MAINNET)) {
+  function testRedeemMAI() public forkAtBlock(BSC_MAINNET, 20238373) {
     address maiAddress = 0x3F56e0c36d275367b8C502090EDF38289b3dEa0d;
     address val3EPSAddress = 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5;
 
     IERC20Upgradeable mai = IERC20Upgradeable(maiAddress);
-    //        IERC20Upgradeable val3EPS = IERC20Upgradeable(val3EPSAddress);
 
     address poolAddress = 0x68354c6E8Bbd020F9dE81EAf57ea5424ba9ef322;
 
@@ -69,7 +65,7 @@ contract CurveSwapLiquidatorTest is BaseTest {
     assertEq(maiForVal3EPS, outputAmount, "output amount does not match");
   }
 
-  function testEstimateInputAmount() public shouldRun(forChains(BSC_MAINNET)) {
+  function testEstimateInputAmount() public forkAtBlock(BSC_MAINNET, 20238373) {
     address maiAddress = 0x3F56e0c36d275367b8C502090EDF38289b3dEa0d;
     address val3EPSAddress = 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5;
     IERC20Upgradeable mai = IERC20Upgradeable(maiAddress);

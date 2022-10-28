@@ -12,7 +12,7 @@ contract InterestRateModelTest is BaseTest {
   InterestRateModelParams params;
   InterestRateModelParams newParams;
 
-  function setUp() public {
+  function setUp() public override {
     params = InterestRateModelParams({
       blocksPerYear: 10512000,
       baseRatePerYear: 0.5e16,

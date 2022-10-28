@@ -23,21 +23,27 @@ contract FuseSafeLiquidatorTest is BaseTest {
   FuseSafeLiquidator fsl;
   address uniswapRouter;
 
-  function setUp() public {
-    if (block.chainid == BSC_MAINNET) {
-      uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
-      fsl = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
-    } else if (block.chainid == POLYGON_MAINNET) {
-      uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
-      fsl = FuseSafeLiquidator(payable(0x37b3890B9b3a5e158EAFDA243d4640c5349aFC15));
-    } else {
-      uniswapRouter = ap.getAddress("IUniswapV2Router02");
-      fsl = new FuseSafeLiquidator();
-      fsl.initialize(address(1), address(2), address(3), address(4), "", 30);
-    }
+  function setUp() public override {}
+
+  function testBsc() public forkAtBlock(BSC_MAINNET, 20238373) {
+    uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
+    fsl = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
+
+    testWhitelistRevert();
+    testWhitelist();
+    testUpgrade();
   }
 
-  function testWhitelistRevert() public {
+  function testPolygon() public forkAtBlock(POLYGON_MAINNET, 33063212) {
+    uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
+    fsl = FuseSafeLiquidator(payable(0x37b3890B9b3a5e158EAFDA243d4640c5349aFC15));
+
+    testWhitelistRevert();
+    testWhitelist();
+    testUpgrade();
+  }
+
+  function testWhitelistRevert() internal {
     IERC20Upgradeable underlyingCollateral = IERC20Upgradeable(address(0));
     uint256 underlyingCollateralSeized = 1;
     IRedemptionStrategy strategy = new MockRedemptionStrategy();
@@ -47,7 +53,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     fsl.redeemCustomCollateral(underlyingCollateral, underlyingCollateralSeized, strategy, strategyData);
   }
 
-  function testWhitelist() public {
+  function testWhitelist() internal {
     IERC20Upgradeable underlyingCollateral = IERC20Upgradeable(address(0));
     uint256 underlyingCollateralSeized = 1;
     IRedemptionStrategy strategy = new MockRedemptionStrategy();
@@ -58,7 +64,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     fsl.redeemCustomCollateral(underlyingCollateral, underlyingCollateralSeized, strategy, strategyData);
   }
 
-  function testUpgrade() public {
+  function testUpgrade() internal {
     // in case these slots start to get used, please redeploy the FSL
     // with a larger storage gap to protect the owner variable of OwnableUpgradeable
     // from being overwritten by the FuseSafeLiquidator storage

@@ -17,7 +17,7 @@ interface IGuniPool {
 
   function totalStake() external view returns (uint256);
 
-  function _users(address) external view returns (uint256, uint256);
+  function userInfo(address) external view returns (uint256, uint256);
 
   function pendingMIMO(address) external view returns (uint256);
 
