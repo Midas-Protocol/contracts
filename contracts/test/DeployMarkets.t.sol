@@ -481,8 +481,6 @@ contract CErc20DelegateTest is BaseTest {
   address[] implementationsSet;
   address[] pluginsSet;
 
-  function setUp() public override {}
-
   function testBscImplementations() public forkAtBlock(BSC_MAINNET, 20238373) {
     testPoolImplementations();
     testMarketImplementations();

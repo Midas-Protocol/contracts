@@ -21,8 +21,6 @@ contract ArrakisAssetTest is AbstractAssetTest {
     testConfigStorage = ITestConfigStorage(address(new ArrakisTestConfigStorage()));
   }
 
-  function setUp() public override {}
-
   function setUpTestContract(bytes calldata testConfig) public override {
     (address asset, address pool) = abi.decode(testConfig, (address, address));
 

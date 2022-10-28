@@ -12,7 +12,7 @@ import { CurveSwapLiquidatorFunder } from "../liquidators/CurveSwapLiquidatorFun
 contract CurveSwapLiquidatorTest is BaseTest {
   CurveSwapLiquidatorFunder private csl;
   //  forkAtBlock(, )
-  function setUp() public override forkAtBlock(BSC_MAINNET, 22566900) {
+  function setUp() public forkAtBlock(BSC_MAINNET, 22566900) {
     csl = new CurveSwapLiquidatorFunder();
   }
 

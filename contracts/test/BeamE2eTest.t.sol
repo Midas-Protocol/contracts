@@ -59,7 +59,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     super.setUpWithPool(MasterPriceOracle(mPriceOracle), ERC20Upgradeable(0x99588867e817023162F4d4829995299054a5fC57));
   }
 
-  function setUp() public override {
+  function setUp() public {
     vm.prank(joey);
     underlyingToken.transfer(address(this), 100e18);
     setUpPool("beam-test", false, 0.1e18, 1.1e18);

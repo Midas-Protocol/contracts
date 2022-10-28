@@ -28,8 +28,6 @@ contract DiaPriceOracleTest is BaseTest {
   DiaPriceOracle private oracle;
   MasterPriceOracle masterPriceOracle;
 
-  function setUp() public override {}
-
   function testMoonbeam() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     testDiaPriceOracleWithNativeFeedMoonbeam();
     testDiaPriceOracleWithMasterPriceOracleMoonbeam();

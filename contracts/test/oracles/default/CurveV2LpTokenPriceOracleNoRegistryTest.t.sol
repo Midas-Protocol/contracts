@@ -16,7 +16,7 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
   ICToken epsJCHFBUSD_c = ICToken(0x1F0452D6a8bb9EAbC53Fa6809Fa0a060Dd531267);
   MasterPriceOracle mpo;
 
-  function setUp() public override forkAtBlock(BSC_MAINNET, 21675481) {
+  function setUp() public forkAtBlock(BSC_MAINNET, 21675481) {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     busd = ap.getAddress("bUSD");
 

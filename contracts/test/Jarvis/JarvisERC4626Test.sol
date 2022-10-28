@@ -39,8 +39,6 @@ contract JarvisERC4626Test is AbstractERC4626Test {
 
   constructor() WithPool() {}
 
-  function setUp() public override {}
-
   function setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("Jarvis-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));

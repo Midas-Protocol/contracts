@@ -58,7 +58,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     uint256 price2;
   }
 
-  function setUp() public override {
+  function setUp() public {
     deal(address(underlyingToken), address(this), 10e18);
     setUpPool("neondevnet-test", false, 0.1e18, 1.1e18);
   }

@@ -22,8 +22,6 @@ contract BeefyBscAssetTest is AbstractAssetTest {
     testConfigStorage = ITestConfigStorage(address(new BeefyBscTestConfigStorage()));
   }
 
-  function setUp() public override {}
-
   function setUpTestContract(bytes calldata testConfig) public override {
     (address beefyVault, uint256 withdrawalFee) = abi.decode(testConfig, (address, uint256));
 

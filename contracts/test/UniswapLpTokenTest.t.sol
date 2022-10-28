@@ -15,8 +15,6 @@ contract UniswapLpTokenBaseTest is BaseTest {
   MasterPriceOracle mpo;
   address wtoken;
 
-  function setUp() public override {}
-
   function chainSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
   }

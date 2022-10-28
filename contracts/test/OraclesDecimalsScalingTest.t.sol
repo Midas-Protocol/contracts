@@ -15,8 +15,6 @@ contract OraclesDecimalsScalingTest is BaseTest {
   MasterPriceOracle mpo;
   FusePoolDirectory fusePoolDirectory;
 
-  function setUp() public override {}
-
   function chainSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));

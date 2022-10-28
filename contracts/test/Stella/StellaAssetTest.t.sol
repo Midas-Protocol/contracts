@@ -20,8 +20,6 @@ contract StellaAssetTest is AbstractAssetTest {
     testConfigStorage = ITestConfigStorage(address(new StellaTestConfigStorage()));
   }
 
-  function setUp() public override {}
-
   function setUpTestContract(bytes calldata testConfig) public override {
     (address asset, uint256 poolId, address[] memory rewardTokens) = abi.decode(
       testConfig,

@@ -17,7 +17,7 @@ contract ContractsUpgradesTest is BaseTest {
   // taken from ERC1967Upgrade
   bytes32 internal constant _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
 
-  function setUp() public override forkAtBlock(BSC_MAINNET, 20238373) {}
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {}
 
   function testUpgradeCurveOracle() public {
     address contractToTest = 0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA; // CurveLpTokenPriceOracleNoRegistry proxy

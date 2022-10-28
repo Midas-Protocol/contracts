@@ -23,8 +23,6 @@ contract FuseSafeLiquidatorTest is BaseTest {
   FuseSafeLiquidator fsl;
   address uniswapRouter;
 
-  function setUp() public override {}
-
   function testBsc() public forkAtBlock(BSC_MAINNET, 20238373) {
     uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
     fsl = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));

@@ -11,7 +11,7 @@ contract BNBxPriceOracleTest is BaseTest {
   MasterPriceOracle mpo;
   address BNBx = 0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275;
 
-  function setUp() public override forkAtBlock(BSC_MAINNET, 22332594) {
+  function setUp() public forkAtBlock(BSC_MAINNET, 22332594) {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     setUpOracle();
   }

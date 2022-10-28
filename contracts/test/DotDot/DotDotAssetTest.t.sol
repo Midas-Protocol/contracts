@@ -21,8 +21,6 @@ contract DotDotAssetTest is AbstractAssetTest {
     testConfigStorage = ITestConfigStorage(address(new DotDotTestConfigStorage()));
   }
 
-  function setUp() public override {}
-
   function setUpTestContract(bytes calldata testConfig) public override {
     (address masterPriceOracle, address asset) = abi.decode(testConfig, (address, address));
 

@@ -23,7 +23,7 @@ contract CurveAssetTest is AbstractAssetTest {
     testConfigStorage = ITestConfigStorage(address(new CurveTestConfigStorage()));
   }
 
-  function setUp() public override {
+  function setUp() public {
     masterPriceOracle = ap.getAddress("MasterPriceOracle");
   }
 

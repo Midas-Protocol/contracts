@@ -23,8 +23,6 @@ contract BeefyERC4626Test is AbstractERC4626Test {
 
   constructor() AbstractERC4626Test() {}
 
-  function setUp() public override {}
-
   function setUp(string memory _testPreFix, bytes calldata data) public override {
     testPreFix = _testPreFix;
 

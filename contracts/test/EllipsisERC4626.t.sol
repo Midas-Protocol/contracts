@@ -41,7 +41,7 @@ contract EllipsisERC4626Test is BaseTest {
   ERC20 marketKey;
   address tester = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
 
-  function setUp() public override forkAtBlock(BSC_MAINNET, 20238373) {
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     testToken = new MockERC20("TestLpToken", "LP-TST", 18);
     epsToken = new MockERC20("epsToken", "EPX", 18);
     mockLpTokenStaker = new MockLpTokenStaker(IERC20Mintable(address(epsToken)), 1000000e18);

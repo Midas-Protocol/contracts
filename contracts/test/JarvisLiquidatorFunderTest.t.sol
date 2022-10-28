@@ -27,7 +27,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
 
   IERC20Upgradeable bUSD;
 
-  function setUp() public override forkAtBlock(BSC_MAINNET, 20238373) {
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     uint64 expirationPeriod = 60 * 40; // 40 mins
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD")); // TODO check if bUSD == stableToken at AP
 

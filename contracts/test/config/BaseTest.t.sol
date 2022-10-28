@@ -85,8 +85,6 @@ abstract contract BaseTest is Test {
     configureAddressesProvider();
   }
 
-  function setUp() virtual public;
-
   function chainSetUp() virtual internal {}
 
   function createSelectFork(string memory network, uint256 forkBlockNumber) internal returns (uint256) {

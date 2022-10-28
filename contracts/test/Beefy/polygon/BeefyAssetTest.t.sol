@@ -28,8 +28,6 @@ contract BeefyPolygonAssetTest is AbstractAssetTest {
     testConfigStorage = ITestConfigStorage(address(new BeefyPolygonTestConfigStorage()));
   }
 
-  function setUp() public override {}
-
   function setUpTestContract(bytes calldata testConfig) public override {
     (address beefyVault, uint256 withdrawalFee) = abi.decode(testConfig, (address, uint256));
 

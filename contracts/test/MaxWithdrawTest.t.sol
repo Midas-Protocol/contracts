@@ -36,8 +36,6 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     MockAsset usdc;
   }
 
-  function setUp() public override {}
-
   function chainSetUp() internal override {
     super.setUpWithPool(
       MasterPriceOracle(ap.getAddress("MasterPriceOracle")),

@@ -43,7 +43,7 @@ contract AnyLiquidationTest is BaseTest {
     proxy.upgradeTo(address(newImpl));
   }
 
-  function setUp() public override {
+  function setUp() public {
     upgradeAp();
 
     uniswapRouter = ap.getAddress("IUniswapV2Router02");

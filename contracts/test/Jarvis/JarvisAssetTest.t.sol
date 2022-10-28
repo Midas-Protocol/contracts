@@ -21,8 +21,6 @@ contract JarvisAssetTest is AbstractAssetTest {
     testConfigStorage = ITestConfigStorage(address(new JarvisTestConfigStorage()));
   }
 
-  function setUp() public override {}
-
   function setUpTestContract(bytes calldata testConfig) public override {
     (address asset, address pool) = abi.decode(testConfig, (address, address));
 

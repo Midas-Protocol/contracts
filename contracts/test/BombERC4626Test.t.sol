@@ -17,7 +17,7 @@ contract BombERC4626Test is BaseTest {
   uint256 depositAmountRoundedDown = depositAmount - 2;
   address whale = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
 
-  function setUp() public override forkAtBlock(BSC_MAINNET, 20238373) {
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     bombToken = IERC20Upgradeable(address(xbombToken.reward()));
     vault = new BombERC4626();
     vault.initialize(ERC20Upgradeable(address(bombToken)), address(xbombToken));

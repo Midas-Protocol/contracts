@@ -17,7 +17,7 @@ import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 contract BNBE2eTest is WithPool, BaseTest {
-  function setUp() public override forkAtBlock(BSC_MAINNET, 20238373) {
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     setUpWithPool(
       MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
       ERC20Upgradeable(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)

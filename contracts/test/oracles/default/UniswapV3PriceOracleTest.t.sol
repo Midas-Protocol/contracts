@@ -17,7 +17,7 @@ contract UniswapV3PriceOracleTest is BaseTest {
     uint256 twapWindow;
   }
 
-  function setUp() public override forkAtBlock(ARBITRUM_ONE, 28739891) {
+  function setUp() public forkAtBlock(ARBITRUM_ONE, 28739891) {
     oracle = UniswapV3PriceOracle(ap.getAddress("UniswapV3PriceOracle"));
   }
 

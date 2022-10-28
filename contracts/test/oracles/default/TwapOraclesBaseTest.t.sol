@@ -11,8 +11,6 @@ contract TwapOraclesBaseTest is BaseTest {
   UniswapTwapPriceOracleV2Factory twapPriceOracleFactory;
   MasterPriceOracle mpo;
 
-  function setUp() public override {}
-
   function chainSetUp() internal override {
     uniswapV2Factory = IUniswapV2Factory(ap.getAddress("IUniswapV2Factory"));
     twapPriceOracleFactory = UniswapTwapPriceOracleV2Factory(ap.getAddress("UniswapTwapPriceOracleV2Factory"));

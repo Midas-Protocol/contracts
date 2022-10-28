@@ -11,7 +11,7 @@ contract StkBNBPriceOracleTest is BaseTest {
   MasterPriceOracle mpo;
   address stkBnb = 0xc2E9d07F66A89c44062459A47a0D2Dc038E4fb16;
 
-  function setUp() public override forkAtBlock(BSC_MAINNET, 21952914) {
+  function setUp() public forkAtBlock(BSC_MAINNET, 21952914) {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     oracle = new StkBNBPriceOracle();
     vm.prank(mpo.admin());

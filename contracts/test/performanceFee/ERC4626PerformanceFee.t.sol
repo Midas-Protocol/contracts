@@ -27,7 +27,7 @@ contract ERC4626PerformanceFeeTest is BaseTest {
   address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
   address newFeeRecipient = address(5);
 
-  function setUp() public override forkAtBlock(BSC_MAINNET, 20238373) {
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
     plugin = new BeefyERC4626();
     plugin.initialize(underlyingToken, beefyVault, 10);

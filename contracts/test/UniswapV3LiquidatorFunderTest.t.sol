@@ -40,7 +40,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
     );
   }
 
-  function setUp() public override {
+  function setUp() public {
     quoter = new Quoter(0x1F98431c8aD98523631AE4a59f267346ea31F984);
 
     setUpPool("gmx-test", false, 0.1e18, 1.1e18);

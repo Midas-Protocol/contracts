@@ -12,8 +12,6 @@ contract SomeOwnable is SafeOwnableUpgradeable {
 }
 
 contract SafeOwnableUpgradeableTest is BaseTest {
-  function setUp() public override {}
-
   function testSafeOwnableUpgradeable() public {
     SomeOwnable someOwnable = new SomeOwnable();
     someOwnable.initialize();

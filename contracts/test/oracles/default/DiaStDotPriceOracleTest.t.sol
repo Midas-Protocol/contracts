@@ -14,7 +14,7 @@ contract DiaStDotPriceOracleTest is BaseTest {
   address wstDot = 0x191cf2602Ca2e534c5Ccae7BCBF4C46a704bb949;
   address multiUsdc = 0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b;
 
-  function setUp() public override forkAtBlock(MOONBEAM_MAINNET, 1959099) {
+  function setUp() public forkAtBlock(MOONBEAM_MAINNET, 1959099) {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     setUpOracle();
   }

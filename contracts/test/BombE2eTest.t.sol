@@ -50,7 +50,7 @@ contract BombE2eTest is WithPool, BaseTest {
     bytes[] data;
   }
 
-  function setUp() public override forkAtBlock(BSC_MAINNET, 20238373) {
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     setUpWithPool(
       MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
       ERC20Upgradeable(0x522348779DCb2911539e76A1042aA922F9C47Ee3)
