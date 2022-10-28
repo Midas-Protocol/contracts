@@ -8,7 +8,6 @@ import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.so
 
 import "./compound/ErrorReporter.sol";
 import "./compound/ComptrollerStorage.sol";
-import "./compound/CEtherDelegator.sol";
 import "./compound/CErc20Delegator.sol";
 import "./compound/CErc20PluginDelegate.sol";
 import "./midas/SafeOwnableUpgradeable.sol";
