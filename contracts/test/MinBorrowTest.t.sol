@@ -19,13 +19,14 @@ contract MinBorrowTest is BaseTest {
   MasterPriceOracle mpo;
 
   function setUp() public {
+    vm.createSelectFork(vm.rpcUrl("bsc"), 20238373);
     ffd = new FuseFeeDistributor();
     mpo = MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA);
     ffd.initialize(0);
     ffd._setPoolLimits(100e18, 0, 0);
   }
 
-  function testMinBorrow() public shouldRun(forChains(BSC_MAINNET)) {
+  function testMinBorrow() public {
     MockERC20 asset = MockERC20(0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c);
 
     CErc20Delegate cToken = CErc20Delegate(0x216714Ecf4FEcc35573CBB2756942274E1B344A2);

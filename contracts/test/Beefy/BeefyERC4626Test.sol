@@ -33,7 +33,6 @@ contract BeefyERC4626Test is AbstractERC4626Test {
     underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
     BeefyERC4626 beefyERC4626 = new BeefyERC4626();
     beefyERC4626.initialize(underlyingToken, beefyVault, _withdrawalFee);
-    beefyERC4626.reinitialize();
     plugin = beefyERC4626;
 
     initialStrategyBalance = beefyVault.balance();
