@@ -17,7 +17,11 @@ contract ContractsUpgradesTest is BaseTest {
   // taken from ERC1967Upgrade
   bytes32 internal constant _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
 
-  function testUpgradeCurveOracle() public shouldRun(forChains(BSC_MAINNET)) {
+  function setUp() public {
+    createSelectFork("bsc", 20238373);
+  }
+
+  function testUpgradeCurveOracle() public {
     address contractToTest = 0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA; // CurveLpTokenPriceOracleNoRegistry proxy
     address twoBrl = 0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9;
     address poolOf2Brl = 0xad51e40D8f255dba1Ad08501D6B1a6ACb7C188f3;
@@ -48,7 +52,7 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(poolAfter, poolOf2Brl, "2brl pool does not match");
   }
 
-  function testFusePoolDirectoryUpgrade() public shouldRun(forChains(BSC_MAINNET)) {
+  function testFusePoolDirectoryUpgrade() public {
     address contractToTest = 0x295d7347606F4bd810C8296bb8d75D657001fcf7; // FusePoolDirectory proxy
 
     // before upgrade
@@ -84,7 +88,7 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
-  function testFuseFeeDistributorUpgrade() public shouldRun(forChains(BSC_MAINNET)) {
+  function testFuseFeeDistributorUpgrade() public {
     address contractToTest = 0xFc1f56C58286E7215701A773b61bFf2e18A177dE; // FFD proxy
     address oldCercDelegate = 0x94C50805bC16737ead84e25Cd5Aa956bCE04BBDF;
 
@@ -134,7 +138,7 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
-  function testCurveLpOracle() public shouldRun(forChains(BSC_MAINNET)) {
+  function testCurveLpOracle() public {
     vm.rollFork(21721830);
 
     address oracleAddress = 0x97A6E1182A85380BaeF265F9BbADd6296515Dccf;

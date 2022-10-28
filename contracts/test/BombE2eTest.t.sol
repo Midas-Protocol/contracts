@@ -32,12 +32,7 @@ contract MockBnb is MockERC20 {
 }
 
 contract BombE2eTest is WithPool, BaseTest {
-  constructor() WithPool() {
-    super.setUpWithPool(
-      MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
-      ERC20Upgradeable(0x522348779DCb2911539e76A1042aA922F9C47Ee3)
-    );
-  }
+  uint256 mainnetForkBlockNumber = 20238373;
 
   struct LiquidationData {
     address[] cTokens;
@@ -57,13 +52,21 @@ contract BombE2eTest is WithPool, BaseTest {
     bytes[] data;
   }
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
+  function setUp() public {
+    createSelectFork("bsc", mainnetForkBlockNumber);
+    setAddressProvider("bsc");
+
+    setUpWithPool(
+      MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
+      ERC20Upgradeable(0x522348779DCb2911539e76A1042aA922F9C47Ee3)
+    );
+
     vm.prank(0xcd6cD62F11F9417FBD44dc0a44F891fd3E869234);
     MockERC20(address(underlyingToken)).mint(address(this), 100e18);
     setUpPool("bsc-test", false, 0.1e18, 1.1e18);
   }
 
-  function testDeployCErc20Delegate() public shouldRun(forChains(BSC_MAINNET)) {
+  function testDeployCErc20Delegate() public {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
@@ -85,7 +88,7 @@ contract BombE2eTest is WithPool, BaseTest {
     assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10e18 + 1000);
   }
 
-  function testGetPoolAssetsData() public shouldRun(forChains(BSC_MAINNET)) {
+  function testGetPoolAssetsData() public {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
@@ -104,7 +107,7 @@ contract BombE2eTest is WithPool, BaseTest {
     assertEq(assets[0].supplyBalance, 10e18);
   }
 
-  function testCErc20Liquidation() public shouldRun(forChains(BSC_MAINNET)) {
+  function testCErc20Liquidation() public {
     LiquidationData memory vars;
     vm.roll(1);
     vars.erc4626 = MockERC4626(0x92C6C8278509A69f5d601Eea1E6273F304311bFe);
@@ -224,7 +227,7 @@ contract BombE2eTest is WithPool, BaseTest {
     vm.stopPrank();
   }
 
-  function testDeployCErc20PluginDelegate() public shouldRun(forChains(BSC_MAINNET)) {
+  function testDeployCErc20PluginDelegate() public {
     MockERC4626 erc4626 = MockERC4626(0x92C6C8278509A69f5d601Eea1E6273F304311bFe);
 
     vm.roll(1);
@@ -258,7 +261,7 @@ contract BombE2eTest is WithPool, BaseTest {
     assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10e18 + 1000);
   }
 
-  function testDeployCErc20PluginRewardsDelegate() public shouldRun(forChains(BSC_MAINNET)) {
+  function testDeployCErc20PluginRewardsDelegate() public {
     MockERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
     FuseFlywheelDynamicRewards rewards;
     FuseFlywheelCore flywheel = new FuseFlywheelCore(

@@ -28,7 +28,22 @@ contract DiaPriceOracleTest is BaseTest {
   DiaPriceOracle private oracle;
   MasterPriceOracle masterPriceOracle;
 
-  function setUpWithNativeFeed() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function testMoonbeam() public {
+    vm.createSelectFork(vm.rpcUrl("moonbeam"), 1824921);
+    setAddressProvider("moonbeam");
+
+    testDiaPriceOracleWithNativeFeedMoonbeam();
+    testDiaPriceOracleWithMasterPriceOracleMoonbeam();
+  }
+
+  function testBsc() public {
+    vm.createSelectFork(vm.rpcUrl("bsc"), 20238373);
+    setAddressProvider("bsc");
+
+    testDiaPriceOracleWithMasterPriceOracleBsc();
+  }
+
+  function setUpWithNativeFeed() internal {
     MockDiaPriceFeed mock = new MockDiaPriceFeed(5 * 10**8); // 5 USD in 8 decimals
     oracle = new DiaPriceOracle(
       address(this),
@@ -41,7 +56,7 @@ contract DiaPriceOracleTest is BaseTest {
     );
   }
 
-  function setUpWithMasterPriceOracle() public shouldRun(forChains(MOONBEAM_MAINNET, BSC_MAINNET)) {
+  function setUpWithMasterPriceOracle() internal {
     SimplePriceOracle spo = new SimplePriceOracle();
     spo.setDirectPrice(address(2), 200000000000000000); // 1e36 / 200000000000000000 = 5e18
     MasterPriceOracle mpo = new MasterPriceOracle();
@@ -53,7 +68,7 @@ contract DiaPriceOracleTest is BaseTest {
     oracle = new DiaPriceOracle(address(this), true, address(0), MockDiaPriceFeed(address(0)), "", mpo, address(2));
   }
 
-  function setUpOraclesMoonbeam() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function setUpOraclesMoonbeam() internal {
     DIAOracleV2 ethPool = DIAOracleV2(0x1f1BAe8D7a2957CeF5ffA0d957cfEDd6828D728f);
     address[] memory underlyings = new address[](1);
     underlyings[0] = address(1);
@@ -64,21 +79,21 @@ contract DiaPriceOracleTest is BaseTest {
     oracle.setPriceFeeds(underlyings, priceFeeds, keys);
   }
 
-  function testDiaPriceOracleWithNativeFeedMoonbeam() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function testDiaPriceOracleWithNativeFeedMoonbeam() internal {
     setUpWithNativeFeed();
     setUpOraclesMoonbeam();
     uint256 price = oracle.price(address(1));
     assertEq(price, 325929279276000000000);
   }
 
-  function testDiaPriceOracleWithMasterPriceOracleMoonbeam() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function testDiaPriceOracleWithMasterPriceOracleMoonbeam() internal {
     setUpWithMasterPriceOracle();
     setUpOraclesMoonbeam();
     uint256 price = oracle.price(address(1));
     assertEq(price, 325929279276000000000);
   }
 
-  function testDiaPriceOracleWithMasterPriceOracleBsc() public shouldRun(forChains(BSC_MAINNET)) {
+  function testDiaPriceOracleWithMasterPriceOracleBsc() internal {
     oracle = DiaPriceOracle(0x944e833dC2Af9fc58D5cfA99B9D8666c843Ad58C);
 
     // miMATIC (MAI)

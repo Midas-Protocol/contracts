@@ -30,9 +30,10 @@ contract MaxWithdrawTestPolygon is WithPool, BaseTest {
     MockAsset dai;
   }
 
-  function setUp() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function setUp() public {
     // TODO should run for the latest block
-    vm.rollFork(34252820);
+    vm.createSelectFork("polygon", 34252820);
+    setAddressProvider("polygon");
 
     super.setUpWithPool(MasterPriceOracle(0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31), ERC20Upgradeable(wmaticAddress));
 
@@ -41,7 +42,7 @@ contract MaxWithdrawTestPolygon is WithPool, BaseTest {
     setUpPool("polygon-test", false, 0.1e18, 1.1e18);
   }
 
-  function testMaxBorrow() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testMaxBorrow() public {
     FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
     poolLensSecondary.initialize(fusePoolDirectory);
 

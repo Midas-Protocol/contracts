@@ -107,11 +107,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     return depositAmount;
   }
 
-  function testInitializedValues(string memory assetName, string memory assetSymbol)
-    public
-    override
-    shouldRun(forChains(POLYGON_MAINNET))
-  {
+  function testInitializedValues(string memory assetName, string memory assetSymbol) public override {
     assertEq(
       plugin.name(),
       string(abi.encodePacked("Midas ", assetName, " Vault")),
@@ -131,7 +127,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     assertEq(JarvisERC4626(address(plugin)).poolId(), poolId, string(abi.encodePacked("!poolId", testPreFix)));
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testAccumulatingRewardsOnDeposit() public {
     deposit(address(this), depositAmount / 2);
     deal(address(jrtMimoSep22Token), address(this), 100e18);
     ERC20(jrtMimoSep22Token).transfer(address(vault), 100e18);
@@ -147,7 +143,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     deposit(address(this), depositAmount);
     deal(address(jrtMimoSep22Token), address(this), 100e18);
     ERC20(jrtMimoSep22Token).transfer(address(vault), 100e18);
@@ -163,7 +159,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testClaimRewards() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testClaimRewards() public {
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);
     CErc20(marketAddress).mint(depositAmount);

@@ -11,8 +11,9 @@ contract UniswapV2LiquidatorFunderTest is BaseTest {
   UniswapV2LiquidatorFunder uv2lf;
   address uniswapV2Router;
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
-    vm.rollFork(22501630);
+  function setUp() public {
+    vm.createSelectFork(vm.rpcUrl("bsc"), 22501630);
+    setAddressProvider("bsc");
 
     uv2lf = new UniswapV2LiquidatorFunder();
     uniswapV2Router = ap.getAddress("IUniswapV2Router02");
@@ -20,7 +21,7 @@ contract UniswapV2LiquidatorFunderTest is BaseTest {
     maiAddress = 0x3F56e0c36d275367b8C502090EDF38289b3dEa0d;
   }
 
-  function testConvertUsdcMai() public shouldRun(forChains(BSC_MAINNET)) {
+  function testConvertUsdcMai() public {
     address[] memory swapPath = new address[](2);
     swapPath[0] = maiAddress;
     swapPath[1] = usdcAddress;

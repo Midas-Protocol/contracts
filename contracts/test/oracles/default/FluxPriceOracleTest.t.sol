@@ -23,7 +23,12 @@ contract MockFluxPriceFeed {
 contract FluxPriceOracleTest is BaseTest {
   FluxPriceOracle private oracle;
 
-  function setUpWithNativeFeed() public shouldRun(forChains(EVMOS_TESTNET)) {
+  function setUp() public {
+    vm.createSelectFork("evmos_test", 2940378);
+    setAddressProvider("evmos");
+  }
+
+  function setUpWithNativeFeed() public {
     MockFluxPriceFeed mock = new MockFluxPriceFeed(5 * 10**8); // 5 USD in 8 decimals
     oracle = new FluxPriceOracle(
       address(this),
@@ -35,7 +40,7 @@ contract FluxPriceOracleTest is BaseTest {
     );
   }
 
-  function setUpWithMasterPriceOracle() public shouldRun(forChains(EVMOS_TESTNET)) {
+  function setUpWithMasterPriceOracle() public {
     SimplePriceOracle spo = new SimplePriceOracle();
     spo.setDirectPrice(address(2), 200000000000000000); // 1e36 / 200000000000000000 = 5e18
     MasterPriceOracle mpo = new MasterPriceOracle();
@@ -47,7 +52,7 @@ contract FluxPriceOracleTest is BaseTest {
     oracle = new FluxPriceOracle(address(this), true, address(0), CLV2V3Interface(address(0)), mpo, address(2));
   }
 
-  function setUpOracles() public shouldRun(forChains(EVMOS_TESTNET)) {
+  function setUpOracles() public {
     CLV2V3Interface ethPool = CLV2V3Interface(0xf8af20b210bCed918f71899E9f4c26dE53e6ccE6);
     address[] memory underlyings = new address[](1);
     underlyings[0] = address(1);
@@ -56,7 +61,7 @@ contract FluxPriceOracleTest is BaseTest {
     oracle.setPriceFeeds(underlyings, priceFeeds);
   }
 
-  function testFluxPriceOracleWithNativeFeed() public shouldRun(forChains(EVMOS_TESTNET)) {
+  function testFluxPriceOracleWithNativeFeed() public {
     setUpWithNativeFeed();
     setUpOracles();
     uint256 price = oracle.price(address(1));
@@ -64,7 +69,7 @@ contract FluxPriceOracleTest is BaseTest {
     assertEq(price, 243373091628000000000);
   }
 
-  function testFluxPriceOracleWithMasterPriceOracle() public shouldRun(forChains(EVMOS_TESTNET)) {
+  function testFluxPriceOracleWithMasterPriceOracle() public {
     setUpWithMasterPriceOracle();
     setUpOracles();
     uint256 price = oracle.price(address(1));

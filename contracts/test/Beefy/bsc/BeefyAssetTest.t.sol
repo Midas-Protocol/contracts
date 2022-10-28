@@ -18,23 +18,24 @@ contract BeefyBscAssetTest is AbstractAssetTest {
   address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
 
   constructor() {
+    vm.createSelectFork("bsc", 20238373);
+    setAddressProvider("bsc");
     test = AbstractERC4626Test(address(new BeefyERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new BeefyBscTestConfigStorage()));
-    shouldRunTest = forChains(BSC_MAINNET);
   }
 
-  function setUp() public override shouldRun(shouldRunTest) {}
+  function setUp() public override {}
 
-  function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
+  function setUpTestContract(bytes calldata testConfig) public override {
     (address beefyVault, uint256 withdrawalFee) = abi.decode(testConfig, (address, uint256));
 
     test.setUp(
       MockERC20(address(IBeefyVault(beefyVault).want())).symbol(),
-      abi.encode(beefyVault, withdrawalFee, lpChef, shouldRunTest)
+      abi.encode(beefyVault, withdrawalFee, lpChef)
     );
   }
 
-  function testInitializedValues() public override shouldRun(shouldRunTest) {
+  function testInitializedValues() public override {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
@@ -48,19 +49,19 @@ contract BeefyBscAssetTest is AbstractAssetTest {
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testDepositWithIncreasedVaultValue() public override {
     this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testDepositWithDecreasedVaultValue() public override {
     this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testWithdrawWithIncreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testWithdrawWithDecreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 }

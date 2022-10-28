@@ -17,18 +17,35 @@ contract InterestRateModelTest is BaseTest {
   address ANKR_BNB_R = 0xBb1Aa6e59E5163D8722a122cd66EBA614b59df0d;
   uint8 day = 3;
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET, POLYGON_MAINNET)) {
+  function testBsc() public {
+    setNetworkValues("bsc", 20238373);
     setUpBsc();
-    setUpPolygon();
+    testJumpRateBorrowRate();
+    testJumpRateSupplyRate();
+    testAnkrBNBBorrowModel2Rate();
+    testAnkrBNBSupplyModel2Rate();
+    testWhitepaperBorrowRate();
+    testWhitepaperSupplyRate();
   }
 
-  function setUpBsc() public shouldRun(forChains(BSC_MAINNET)) {
+  function testPolygon() public {
+    setNetworkValues("polygon", 33063212);
+    setUpPolygon();
+    testJumpRateBorrowRatePolygon();
+  }
+
+  function setNetworkValues(string memory network, uint256 forkBlockNumber) internal {
+    vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
+    setAddressProvider(network);
+  }
+
+  function setUpBsc() internal {
     ankrBnbInterestRateModel2 = new AnkrBNBInterestRateModel(10512000, 0.5e16, 3e18, 0.85e18, day, ANKR_BNB_R);
     jumpRateModel = new JumpRateModel(10512000, 0.2e17, 0.18e18, 4e18, 0.8e18);
     whitepaperInterestRateModel = new WhitePaperInterestRateModel(10512000, 0.2e17, 0.2e18);
   }
 
-  function setUpPolygon() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function setUpPolygon() internal {
     mimoRateModel = new JumpRateModel(13665600, 2e18, 0.4e17, 4e18, 0.8e18);
     jumpRateModel = new JumpRateModel(13665600, 0.2e17, 0.18e18, 2e18, 0.8e18);
   }
@@ -41,7 +58,7 @@ contract InterestRateModelTest is BaseTest {
     return value * 13665600;
   }
 
-  function testJumpRateBorrowRateBsc() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testJumpRateBorrowRatePolygon() internal {
     uint256 borrowRate = mimoRateModel.getBorrowRate(0, 0, 5e18);
     assertGe(_convertToPerYearBsc(borrowRate), 0);
     assertLe(_convertToPerYearBsc(borrowRate), 100e18);
@@ -65,7 +82,7 @@ contract InterestRateModelTest is BaseTest {
     assertLe(_convertToPerYearBsc(borrowRate), 100e18);
   }
 
-  function testJumpRateBorrowRate() public shouldRun(forChains(BSC_MAINNET)) {
+  function testJumpRateBorrowRate() internal {
     uint256 borrowRate = jumpRateModel.getBorrowRate(0, 0, 5e18);
     assertGe(_convertToPerYear(borrowRate), 0);
     assertLe(_convertToPerYear(borrowRate), 100e18);
@@ -89,7 +106,7 @@ contract InterestRateModelTest is BaseTest {
     assertLe(_convertToPerYear(borrowRate), 100e18);
   }
 
-  function testJumpRateSupplyRate() public shouldRun(forChains(BSC_MAINNET)) {
+  function testJumpRateSupplyRate() internal {
     uint256 supplyRate = jumpRateModel.getSupplyRate(0, 10e18, 5e18, 0.2e18);
     assertGe(_convertToPerYear(supplyRate), 0);
     assertLe(_convertToPerYear(supplyRate), 100e18);
@@ -113,7 +130,7 @@ contract InterestRateModelTest is BaseTest {
     assertLe(_convertToPerYear(supplyRate), 100e18);
   }
 
-  function testAnkrBNBBorrowModel2Rate() public shouldRun(forChains(BSC_MAINNET)) {
+  function testAnkrBNBBorrowModel2Rate() internal {
     vm.mockCall(
       address(ANKR_BNB_R),
       abi.encodeWithSelector(IAnkrBNBR.averagePercentageRate.selector, day),
@@ -146,7 +163,7 @@ contract InterestRateModelTest is BaseTest {
     );
   }
 
-  function testAnkrBNBSupplyModel2Rate() public shouldRun(forChains(BSC_MAINNET)) {
+  function testAnkrBNBSupplyModel2Rate() internal {
     vm.mockCall(
       address(ANKR_BNB_R),
       abi.encodeWithSelector(IAnkrBNBR.averagePercentageRate.selector, day),
@@ -179,7 +196,7 @@ contract InterestRateModelTest is BaseTest {
     );
   }
 
-  function testWhitepaperBorrowRate() public shouldRun(forChains(BSC_MAINNET)) {
+  function testWhitepaperBorrowRate() internal {
     uint256 borrowRate = whitepaperInterestRateModel.getBorrowRate(0, 0, 5e18);
     assertGe(_convertToPerYear(borrowRate), 0);
     assertLe(_convertToPerYear(borrowRate), 100e18);
@@ -203,7 +220,7 @@ contract InterestRateModelTest is BaseTest {
     assertLe(_convertToPerYear(borrowRate), 100e18);
   }
 
-  function testWhitepaperSupplyRate() public shouldRun(forChains(BSC_MAINNET)) {
+  function testWhitepaperSupplyRate() internal {
     uint256 supplyRate = whitepaperInterestRateModel.getSupplyRate(0, 10e18, 5e18, 0.2e18);
     assertGe(_convertToPerYear(supplyRate), 0);
     assertLe(_convertToPerYear(supplyRate), 100e18);

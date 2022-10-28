@@ -19,16 +19,17 @@ contract CurveAssetTest is AbstractAssetTest {
   IPriceOracle[] oracles;
 
   constructor() {
+    vm.createSelectFork("polygon", 33063212);
+    setAddressProvider("polygon");
     test = AbstractERC4626Test(address(new CurveERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new CurveTestConfigStorage()));
-    shouldRunTest = forChains(POLYGON_MAINNET);
   }
 
-  function setUp() public override shouldRun(shouldRunTest) {
+  function setUp() public override {
     masterPriceOracle = ap.getAddress("MasterPriceOracle");
   }
 
-  function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
+  function setUpTestContract(bytes calldata testConfig) public override {
     (, address asset, ) = abi.decode(testConfig, (address, address, address[]));
 
     // Set up new oracle
@@ -45,7 +46,7 @@ contract CurveAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override shouldRun(shouldRunTest) {
+  function testInitializedValues() public override {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
@@ -57,35 +58,35 @@ contract CurveAssetTest is AbstractAssetTest {
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override shouldRun(false) {
+  function testDepositWithIncreasedVaultValue() public override {
     // Cant Increase Assets in Vault
     assertTrue(true);
   }
 
-  function testDepositWithDecreasedVaultValue() public override shouldRun(false) {
+  function testDepositWithDecreasedVaultValue() public override {
     // Cant Decrease Assets in Vault
     assertTrue(true);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override shouldRun(false) {
+  function testWithdrawWithIncreasedVaultValue() public override {
     // Cant Increase Assets in Vault
     assertTrue(true);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override shouldRun(false) {
+  function testWithdrawWithDecreasedVaultValue() public override {
     // Cant Decrease Assets in Vault
     assertTrue(true);
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(shouldRunTest) {
+  function testAccumulatingRewardsOnDeposit() public {
     this.runTest(CurveERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(shouldRunTest) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     this.runTest(CurveERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 
-  function testClaimRewards() public shouldRun(shouldRunTest) {
+  function testClaimRewards() public {
     this.runTest(CurveERC4626Test(address(test)).testClaimRewards);
   }
 }

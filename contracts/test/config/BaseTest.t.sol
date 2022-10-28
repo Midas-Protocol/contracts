@@ -10,32 +10,27 @@ import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.so
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 abstract contract BaseTest is Test {
-  uint256 constant BSC_MAINNET = 56;
-  uint256 constant MOONBEAM_MAINNET = 1284;
-  uint256 constant POLYGON_MAINNET = 137;
-  uint256 constant ARBITRUM_ONE = 42161;
-
-  uint256 constant EVMOS_TESTNET = 9000;
-  uint256 constant BSC_CHAPEL = 97;
-  uint256 constant NEON_DEVNET = 245022926;
-
   AddressesProvider public ap;
   ProxyAdmin public dpa;
 
-  constructor() {
-    if (block.chainid == BSC_MAINNET) {
+  function compareNetwork(string memory str1, string memory str2) internal returns (bool) {
+    return keccak256(abi.encodePacked(str1)) == keccak256(abi.encodePacked(str2));
+  }
+
+  function setAddressProvider(string memory network) internal {
+    if (compareNetwork(network, "bsc")) {
       ap = AddressesProvider(0x01c97299b37E66c03419bC4Db24074a89FB36e6d);
-    } else if (block.chainid == BSC_CHAPEL) {
+    } else if (compareNetwork(network, "bsc_chapel")) {
       ap = AddressesProvider(0x38742363597fBaE312B0bdcC351fCc6107E9E27E);
-    } else if (block.chainid == MOONBEAM_MAINNET) {
+    } else if (compareNetwork(network, "moonbeam")) {
       ap = AddressesProvider(0x771ee5a72A57f3540E5b9A6A8C226C2a24A70Fae);
-    } else if (block.chainid == EVMOS_TESTNET) {
+    } else if (compareNetwork(network, "evmos_test")) {
       ap = AddressesProvider(0xB88C6a114F01a80Dc8465b55067C8D046C2F445A);
-    } else if (block.chainid == POLYGON_MAINNET) {
+    } else if (compareNetwork(network, "polygon")) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
-    } else if (block.chainid == NEON_DEVNET) {
+    } else if (compareNetwork(network, "neon_dev")) {
       ap = AddressesProvider(0xd4D0cA503E8befAbE4b75aAC36675Bc1cFA533D1);
-    } else if (block.chainid == ARBITRUM_ONE) {
+    } else if (compareNetwork(network, "arbitrum")) {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else {
       dpa = new ProxyAdmin();
@@ -47,31 +42,23 @@ abstract contract BaseTest is Test {
       );
       ap = AddressesProvider(address(proxy));
     }
+    configureAddressesProvider();
+  }
+
+  function createSelectFork(string memory network, uint256 forkBlockNumber) internal returns (uint256) {
+    uint256 forkId = vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
+    return forkId;
+  }
+
+  function createFork(string memory network, uint256 forkBlockNumber) internal returns (uint256) {
+    uint256 forkId = vm.createFork(vm.rpcUrl(network), forkBlockNumber);
+    return forkId;
+  }
+
+  function configureAddressesProvider() internal {
     if (ap.owner() == address(0)) {
       ap.initialize(address(this));
     }
-    if (address(dpa) == address(0)) {
-      dpa = ProxyAdmin(ap.getAddress("DefaultProxyAdmin"));
-    }
-  }
-
-  modifier shouldRun(bool run) {
-    if (run) {
-      _;
-    }
-  }
-
-  modifier shouldRunTestFail(bool run) {
-    require(run, "test should fail");
-    _;
-  }
-
-  function forChains(uint256 id0) public view returns (bool) {
-    return block.chainid == id0;
-  }
-
-  function forChains(uint256 id0, uint256 id1) public view returns (bool) {
-    return block.chainid == id0 || block.chainid == id1;
   }
 
   function diff(uint256 a, uint256 b) internal pure returns (uint256) {

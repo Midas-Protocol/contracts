@@ -42,6 +42,9 @@ contract AutofarmERC4626Test is BaseTest {
   address charlie = address(30);
 
   function setUp() public {
+    vm.createSelectFork("bsc", 20238373);
+    setAddressProvider("bsc");
+
     testToken = new MockERC20("TestToken", "TST", 18);
     autoToken = new MockERC20("autoToken", "AUTO", 18);
     mockAutofarm = new MockAutofarmV2(address(autoToken));
@@ -113,7 +116,7 @@ contract AutofarmERC4626Test is BaseTest {
     vm.stopPrank();
   }
 
-  function testTheBugWithdraw(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
+  function testTheBugWithdraw(uint256 amount) public {
     vm.assume(amount > 100 && amount < 1e19);
     testToken.mint(alice, 100e18);
 
@@ -161,7 +164,7 @@ contract AutofarmERC4626Test is BaseTest {
     );
   }
 
-  function testTheBugRedeem(uint256 amount) public shouldRun(forChains(BSC_MAINNET)) {
+  function testTheBugRedeem(uint256 amount) public {
     vm.assume(amount > 1e5 && amount < 1e19);
     testToken.mint(alice, 100e18);
 

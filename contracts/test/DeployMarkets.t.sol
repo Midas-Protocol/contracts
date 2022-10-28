@@ -468,6 +468,8 @@ contract DeployMarketsTest is Test {
 }
 
 contract CErc20DelegateTest is BaseTest {
+  uint256 bscForkId;
+  uint256 polygonForkId;
   Comptroller comptroller;
 
   CErc20Delegate cErc20Delegate;
@@ -482,11 +484,32 @@ contract CErc20DelegateTest is BaseTest {
   address[] pluginsSet;
 
   function setUp() public {
+    bscForkId = vm.createFork(vm.rpcUrl("bsc"), 20238373);
+    polygonForkId = vm.createFork(vm.rpcUrl("polygon"), 33063212);
+  }
+
+  function testBscImplementations() public {
+    setUpNetworkValues(bscForkId, "bsc");
+    testPoolImplementations();
+    testMarketImplementations();
+    testPluginImplementations();
+  }
+
+  function testPolygonImplementations() public {
+    setUpNetworkValues(polygonForkId, "polygon");
+    testPoolImplementations();
+    testMarketImplementations();
+    testPluginImplementations();
+  }
+
+  function setUpNetworkValues(uint256 forkId, string memory network) internal {
+    vm.selectFork(forkId);
+    setAddressProvider(network);
     fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
   }
 
-  function testPoolImplementations() public shouldRun(forChains(POLYGON_MAINNET, BSC_MAINNET)) {
+  function testPoolImplementations() internal {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
@@ -516,7 +539,7 @@ contract CErc20DelegateTest is BaseTest {
     }
   }
 
-  function testMarketImplementations() public shouldRun(forChains(POLYGON_MAINNET, BSC_MAINNET)) {
+  function testMarketImplementations() internal {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
@@ -552,7 +575,7 @@ contract CErc20DelegateTest is BaseTest {
     }
   }
 
-  function testPluginImplementations() public shouldRun(forChains(POLYGON_MAINNET, BSC_MAINNET)) {
+  function testPluginImplementations() internal {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {

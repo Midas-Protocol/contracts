@@ -8,7 +8,7 @@ import "../config/BaseTest.t.sol";
 
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { StellaERC4626Test } from "./StellaLpERC4626Test.sol";
-import { StellaTestConfig, StellaTestConfigStorage } from "./StellaTestConfig.sol";
+import { StellaTestConfigStorage } from "./StellaTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
@@ -19,14 +19,15 @@ contract StellaAssetTest is AbstractAssetTest {
   address masterPriceOracle = 0x14C15B9ec83ED79f23BF71D51741f58b69ff1494; // master price oracle
 
   constructor() {
+    vm.createSelectFork("moonbeam", 2176344);
+    setAddressProvider("moonbeam");
     test = AbstractERC4626Test(address(new StellaERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new StellaTestConfigStorage()));
-    shouldRunTest = forChains(MOONBEAM_MAINNET);
   }
 
-  function setUp() public override shouldRun(shouldRunTest) {}
+  function setUp() public override {}
 
-  function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
+  function setUpTestContract(bytes calldata testConfig) public override {
     (address asset, uint256 poolId, address[] memory rewardTokens) = abi.decode(
       testConfig,
       (address, uint256, address[])
@@ -37,7 +38,7 @@ contract StellaAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override shouldRun(shouldRunTest) {
+  function testInitializedValues() public override {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
@@ -49,27 +50,27 @@ contract StellaAssetTest is AbstractAssetTest {
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testDepositWithIncreasedVaultValue() public override {
     this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testDepositWithDecreasedVaultValue() public override {
     this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testWithdrawWithIncreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testWithdrawWithDecreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(shouldRunTest) {
+  function testAccumulatingRewardsOnDeposit() public {
     this.runTest(StellaERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(shouldRunTest) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     this.runTest(StellaERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 }

@@ -34,13 +34,15 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
   Quoter quoter;
 
   constructor() WithPool() {
+    vm.createSelectFork("arbitrum", 28739891);
+    setAddressProvider("arbitrum");
     super.setUpWithPool(
       MasterPriceOracle(0xd4D0cA503E8befAbE4b75aAC36675Bc1cFA533D1),
       ERC20Upgradeable(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1)
     );
   }
 
-  function setUp() public shouldRun(forChains(ARBITRUM_ONE)) {
+  function setUp() public {
     quoter = new Quoter(0x1F98431c8aD98523631AE4a59f267346ea31F984);
 
     setUpPool("gmx-test", false, 0.1e18, 1.1e18);
@@ -62,7 +64,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
     bytes[] data;
   }
 
-  function testGMXLiquidation() public shouldRun(forChains(ARBITRUM_ONE)) {
+  function testGMXLiquidation() public {
     LiquidationData memory vars;
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506);
 

@@ -27,7 +27,10 @@ contract JarvisLiquidatorFunderTest is BaseTest {
 
   IERC20Upgradeable bUSD;
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
+  function setUp() public {
+    vm.createSelectFork(vm.rpcUrl("bsc"), 20238373);
+    setAddressProvider("bsc");
+
     uint64 expirationPeriod = 60 * 40; // 40 mins
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
 
@@ -43,7 +46,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     return synthereumLiquiditiyPool;
   }
 
-  function testRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
+  function testRedeemToken() public {
     vm.prank(minter);
     jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
@@ -56,7 +59,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     assertEq(outputAmount, redeemableAmount);
   }
 
-  function testEmergencyRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
+  function testEmergencyRedeemToken() public {
     ISynthereumLiquidityPool pool = getPool(address(jBRLToken));
     address manager = pool.synthereumFinder().getImplementationAddress("Manager");
     vm.prank(manager);
@@ -84,7 +87,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     bytes[] data;
   }
 
-  function testJbrlLiquidation() public shouldRun(forChains(BSC_MAINNET)) {
+  function testJbrlLiquidation() public {
     LiquidationData memory vars;
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
 
