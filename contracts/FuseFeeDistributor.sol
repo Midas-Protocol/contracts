@@ -8,13 +8,14 @@ import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.so
 
 import "./compound/ErrorReporter.sol";
 import "./compound/ComptrollerStorage.sol";
-import "./external/compound/ICToken.sol";
 import "./external/compound/IComptroller.sol";
+import "./compound/CTokenInterfaces.sol";
 import "./compound/CEtherDelegator.sol";
 import "./compound/CErc20Delegator.sol";
 import "./compound/CErc20PluginDelegate.sol";
 import "./midas/SafeOwnableUpgradeable.sol";
 import "./utils/PatchedStorage.sol";
+import "./oracles/BasePriceOracle.sol";
 
 /**
  * @title FuseFeeDistributor
@@ -106,7 +107,8 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     (, , uint256 borrowBalance, ) = _ctoken.getAccountSnapshot(_msgSender());
     if (borrowBalance == 0) return minBorrowEth;
     IComptroller comptroller = IComptroller(address(_ctoken.comptroller()));
-    uint256 underlyingPriceEth = comptroller.oracle().getUnderlyingPrice(ICToken(address(_ctoken)));
+    BasePriceOracle oracle = BasePriceOracle(address(comptroller.oracle()));
+    uint256 underlyingPriceEth = oracle.price(CErc20Interface(address(_ctoken)).underlying());
     uint256 underlyingDecimals = _ctoken.decimals();
     uint256 borrowBalanceEth = (underlyingPriceEth * borrowBalance) / 10**underlyingDecimals;
     if (borrowBalanceEth > minBorrowEth) {
