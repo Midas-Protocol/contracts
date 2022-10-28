@@ -22,11 +22,7 @@ contract DiaStDotPriceOracleTest is BaseTest {
   function setUpOracle() public {
     oracle = new DiaStDotPriceOracle();
     vm.prank(mpo.admin());
-    oracle.initialize(
-      mpo,
-      DiaStDotOracle(0xFEfe38321199e016c8d5e734A40eCCC0DBeC3711),
-      multiUsdc
-    );
+    oracle.initialize(mpo, DiaStDotOracle(0xFEfe38321199e016c8d5e734A40eCCC0DBeC3711), multiUsdc);
     oracle.reinitialize();
   }
 

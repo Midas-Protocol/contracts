@@ -21,7 +21,7 @@ abstract contract BaseTest is Test {
 
   AddressesProvider public ap;
   ProxyAdmin public dpa;
-  
+
   mapping(uint128 => uint256) internal forkIds;
 
   modifier fork(uint128 chainid) {
@@ -87,7 +87,7 @@ abstract contract BaseTest is Test {
     }
   }
 
-  function afterForkSetUp() virtual internal {}
+  function afterForkSetUp() internal virtual {}
 
   function diff(uint256 a, uint256 b) internal pure returns (uint256) {
     if (a > b) {
