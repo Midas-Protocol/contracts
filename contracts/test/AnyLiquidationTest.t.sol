@@ -96,14 +96,13 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
-  function testBscAnyLiquidation(/*uint256 random*/) public shouldRun(forChains(BSC_MAINNET)) {
+  function testBscAnyLiquidation(uint256 random) public shouldRun(forChains(BSC_MAINNET)) {
     // TODO update the setup after the next redeploy
     if (block.number <= 22486200) {
       return;
     }
 
-    // vm.assume(random > 100 && random < type(uint64).max);
-    uint256 random = 1415;
+    vm.assume(random > 100 && random < type(uint64).max);
     doTestAnyLiquidation(random);
   }
 
