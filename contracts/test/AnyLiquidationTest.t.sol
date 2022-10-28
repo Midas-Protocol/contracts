@@ -404,28 +404,47 @@ contract AnyLiquidationTest is BaseTest {
         }
       }
     } else if (compareStrings(strategyContract, "CurveSwapLiquidator")) {
-      int128 outputIndex = -1;
-      int128 inputIndex = -1;
       outputToken = strategyOutputToken;
 
       AddressesProvider.CurveSwapPool[] memory curveSwapPools = ap.getCurveSwapPools();
       for (uint256 i = 0; i < curveSwapPools.length; i++) {
-        address poolAddress = curveSwapPools[i].poolAddress;
-        ICurvePool curvePool = ICurvePool(poolAddress);
-        try curvePool.coins(i) returns (address coin) {
-          if (coin == outputToken) outputIndex = int128(uint128(i));
-          else if (coin == inputToken) inputIndex = int128(uint128(i));
-        } catch {
-          break;
-        }
-        if (poolAddress == inputToken) {
+        if (curveSwapPools[i].poolAddress == inputToken) {
           emit log_address(inputToken);
           emit log_address(strategyOutputToken);
           revert("use the CurveLpTokenLiquidatorNoRegistry for the redemption of LP tokens");
         }
       }
 
-      strategyData = abi.encode(inputToken, inputIndex, outputIndex, outputToken, ap.getAddress("wtoken"));
+      int128 outputIndex;
+      int128 inputIndex;
+      address poolAddress;
+      for (uint256 i = 0; i < curveSwapPools.length; i++) {
+        outputIndex = -1;
+        inputIndex = -1;
+        poolAddress = curveSwapPools[i].poolAddress;
+        ICurvePool curvePool = ICurvePool(poolAddress);
+        int128 j = 0;
+        while (true) {
+          try curvePool.coins(uint256(int256(j))) returns (address coin) {
+            if (coin == outputToken) outputIndex = j;
+            else if (coin == inputToken) inputIndex = j;
+          } catch {
+            break;
+          }
+          j++;
+        }
+        if (outputIndex >= 0 && inputIndex >= 0) break;
+      }
+
+      if (outputIndex == -1 || inputIndex == -1) {
+        emit log("input token");
+        emit log_address(inputToken);
+        emit log("output token");
+        emit log_address(outputToken);
+        revert("failed to find curve pool");
+      }
+
+      strategyData = abi.encode(poolAddress, inputIndex, outputIndex, outputToken, ap.getAddress("wtoken"));
     } else if (compareStrings(strategyContract, "CurveLpTokenLiquidatorNoRegistry")) {
       address[] memory underlyingTokens = getCurvePoolUnderlyingTokens(curveOracle.poolOf(inputToken));
       (address preferredOutputToken, uint8 outputTokenIndex) = pickPreferredToken(
