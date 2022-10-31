@@ -44,7 +44,9 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   function setUp() public {
-    upgradeAp();
+    if (address(ap) != address(0)) {
+      upgradeAp();
+    }
 
     uniswapRouter = ap.getAddress("IUniswapV2Router02");
 
