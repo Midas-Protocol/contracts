@@ -170,23 +170,14 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
 
     vars.fundingStrategies = new IFundsConversionStrategy[](1);
     vars.data = new bytes[](1);
-    vars.data[0] = abi.encode(
-      token2,
-      token1,
-      poolFee,
-      ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564),
-      quoter
-    );
+    vars.data[0] = abi.encode(token2, token1, poolFee, ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564), quoter);
     vars.fundingStrategies[0] = uniswapv3Liquidator;
 
     // all strategies need to be whitelisted
     vm.prank(vars.liquidator.owner());
     vars.liquidator._whitelistRedemptionStrategy(vars.fundingStrategies[0], true);
 
-    address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(
-      address(token2),
-      ap.getAddress("wtoken")
-    );
+    address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(address(token2), ap.getAddress("wtoken"));
     IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
     uint256 repayAmount = 9e7;
