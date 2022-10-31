@@ -46,12 +46,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Forge RPC cache
-        uses: actions/cache@v3
-        with:
-          path: "$HOME/.foundry/cache"
-          key: rpc-cache-${{ hashFiles('rpc-cache-keyfile') }}
-
       - name: Install Foundry
         uses: onbjerg/foundry-toolchain@v1
         with:
@@ -59,6 +53,12 @@ jobs:
 
       - name: Install Forge dependencies
         run: forge install
+
+      - name: Forge RPC cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.foundry/cache"
+          key: rpc-cache-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests
         run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
