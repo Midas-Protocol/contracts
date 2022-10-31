@@ -22,31 +22,7 @@ abstract contract BaseTest is Test {
   AddressesProvider public ap;
   ProxyAdmin public dpa;
 
-  mapping(uint128 => uint256) internal forkIds;
-
-  modifier fork(uint128 chainid) {
-    vm.selectFork(forkIds[chainid]);
-    configureAddressesProvider(chainid);
-    afterForkSetUp();
-    _;
-  }
-
-  modifier atBlock(uint256 blockNumber) {
-    if (block.number != blockNumber) {
-      vm.rollFork(blockNumber);
-    }
-    _;
-  }
-
-  modifier forkAtBlock(uint128 chainid, uint256 blockNumber) {
-    if (block.chainid != chainid) {
-      vm.selectFork(forkIds[chainid]);
-      vm.rollFork(blockNumber);
-      configureAddressesProvider(chainid);
-      afterForkSetUp();
-    }
-    _;
-  }
+  mapping(uint128 => uint256) private forkIds;
 
   constructor() {
     forkIds[BSC_MAINNET] = vm.createFork(vm.rpcUrl("bsc"));
@@ -57,6 +33,29 @@ abstract contract BaseTest is Test {
     forkIds[NEON_DEVNET] = vm.createFork(vm.rpcUrl("neon_dev"));
     forkIds[ARBITRUM_ONE] = vm.createFork(vm.rpcUrl("arbitrum"));
   }
+
+  modifier fork(uint128 chainid) {
+    _forkAtBlock(chainid, 0);
+    _;
+  }
+
+  modifier forkAtBlock(uint128 chainid, uint256 blockNumber) {
+    _forkAtBlock(chainid, blockNumber);
+    _;
+  }
+
+  function _forkAtBlock(uint128 chainid, uint256 blockNumber) private {
+    if (block.chainid != chainid) {
+      vm.selectFork(forkIds[chainid]);
+      if (blockNumber != 0) {
+        vm.rollFork(blockNumber);
+      }
+      configureAddressesProvider(chainid);
+      afterForkSetUp();
+    }
+  }
+
+  function afterForkSetUp() internal virtual {}
 
   function configureAddressesProvider(uint128 chainid) internal {
     if (block.chainid == BSC_MAINNET) {
@@ -88,8 +87,6 @@ abstract contract BaseTest is Test {
     }
   }
 
-  function afterForkSetUp() internal virtual {}
-
   function diff(uint256 a, uint256 b) internal pure returns (uint256) {
     if (a > b) {
       return a - b;
@@ -98,7 +95,7 @@ abstract contract BaseTest is Test {
     }
   }
 
-  function compareStrings(string memory a, string memory b) public view returns (bool) {
+  function compareStrings(string memory a, string memory b) public pure returns (bool) {
     return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
   }
 

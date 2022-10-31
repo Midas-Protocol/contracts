@@ -43,10 +43,8 @@ contract AnyLiquidationTest is BaseTest {
     proxy.upgradeTo(address(newImpl));
   }
 
-  function setUp() public {
-    if (address(ap) != address(0)) {
-      upgradeAp();
-    }
+  function afterForkSetUp() internal override {
+    upgradeAp();
 
     uniswapRouter = ap.getAddress("IUniswapV2Router02");
 
@@ -90,22 +88,12 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
-  function testBscAnyLiquidation(uint256 random) public forkAtBlock(BSC_MAINNET, 22566900) {
-    // TODO update the setup after the next redeploy
-    if (block.number <= 22486200) {
-      return;
-    }
-
+  function testBscAnyLiquidation(uint256 random) public fork(BSC_MAINNET) {
     vm.assume(random > 100 && random < type(uint64).max);
     doTestAnyLiquidation(random);
   }
 
-  function testPolygonAnyLiquidation(uint256 random) public forkAtBlock(POLYGON_MAINNET, 34853000) {
-    // TODO update the setup after the next redeploy
-    if (block.number <= 34788300) {
-      return;
-    }
-
+  function testPolygonAnyLiquidation(uint256 random) public fork(POLYGON_MAINNET) {
     vm.assume(random > 100 && random < type(uint64).max);
     doTestAnyLiquidation(random);
   }
