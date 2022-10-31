@@ -39,7 +39,7 @@ contract CurveLpTokenLiquidatorNoRegistry is IRedemptionStrategy {
     ICurvePool curvePool = ICurvePool(oracle.poolOf(address(inputToken)));
     curvePool.remove_liquidity_one_coin(inputAmount, int128(int8(curveCoinIndex)), 1);
 
-    if (underlying == address(0)) {
+    if (underlying == address(0) || underlying == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
       WETH(wtoken).deposit{ value: address(this).balance }();
       outputToken = IERC20Upgradeable(wtoken);
     } else {
