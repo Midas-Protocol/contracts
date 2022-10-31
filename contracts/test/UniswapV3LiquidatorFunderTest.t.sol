@@ -32,6 +32,8 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
   address wETH;
   address BTCB;
   uint256 poolFee;
+  uint256 repayAmount;
+  uint256 borrowAmount;
 
   Quoter quoter;
 
@@ -43,7 +45,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
   }
 
   function testPolygon() public forkAtBlock(POLYGON_MAINNET, 35032591) {
-    super.setUpWithPool(
+    setUpWithPool(
       MasterPriceOracle(0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31),
       ERC20Upgradeable(0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270)
     );
@@ -56,7 +58,9 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
     token1 = IMockERC20(0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128);
     token2 = IMockERC20(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174);
     poolFee = 500;
-    testGMXLiquidation();
+    repayAmount = 11e10;
+    borrowAmount = 1e20;
+    testLiquidation();
   }
 
   function testArbitrum() public forkAtBlock(ARBITRUM_ONE, 28739891) {
@@ -69,12 +73,10 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
     token1 = IMockERC20(0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a);
     token2 = IMockERC20(0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8);
     poolFee = 3000;
-    testGMXLiquidation();
+    repayAmount = 9e7;
+    borrowAmount = 1e19;
+    testLiquidation();
   }
-
-  // function getPool(address inputToken) internal view returns (IUniswapV3Pool) {
-  //   return pool;
-  // }
 
   struct LiquidationData {
     address[] cTokens;
@@ -86,7 +88,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
     bytes[] data;
   }
 
-  function testGMXLiquidation() internal {
+  function testLiquidation() internal {
     LiquidationData memory vars;
 
     vars.liquidator = new FuseSafeLiquidator();
@@ -107,7 +109,6 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
     CErc20Delegate cToken1 = CErc20Delegate(address(vars.allMarkets[0]));
     CErc20Delegate cToken2 = CErc20Delegate(address(vars.allMarkets[1]));
 
-    uint256 borrowAmount = 1e19;
     address accountOne = address(10001);
     address accountTwo = address(20002);
 
@@ -180,7 +181,6 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
     address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(address(token2), ap.getAddress("wtoken"));
     IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
-    uint256 repayAmount = 9e7;
     // liquidate
     vm.prank(accountTwo);
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
