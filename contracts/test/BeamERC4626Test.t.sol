@@ -52,9 +52,7 @@ contract BeamERC4626Test is BaseTest {
   uint256 initialBeamBalance = 0;
   uint256 initialBeamSupply = 0;
 
-  function setUp() public {
-    vm.createSelectFork("moonbeam", 1824921);
-    setAddressProvider("moonbeam");
+  function setUp() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     testToken = ERC20Upgradeable(0x99588867e817023162F4d4829995299054a5fC57);
     glintToken = MockERC20(0xcd3B51D98478D53F4515A306bE565c6EebeF1D58);
     mockBeamChef = new MockVault(IBoringERC20(address(testToken)), 0, address(0), 0, address(0));
@@ -458,9 +456,7 @@ contract BeamERC4626UnitTest is BaseTest {
   address charlie = address(30);
   address joy = 0x33Ad49856da25b8E2E2D762c411AEda0D1727918;
 
-  function setUp() public {
-    vm.createSelectFork("moonbeam", 1824921);
-    setAddressProvider("moonbeam");
+  function setUp() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     testToken = ERC20Upgradeable(0x99588867e817023162F4d4829995299054a5fC57);
     glintToken = MockERC20(0xcd3B51D98478D53F4515A306bE565c6EebeF1D58);
     mockBeamChef = new MockVault(IBoringERC20(address(testToken)), 0, address(0), 0, address(0));

@@ -27,12 +27,9 @@ contract JarvisLiquidatorFunderTest is BaseTest {
 
   IERC20Upgradeable bUSD;
 
-  function setUp() public {
-    vm.createSelectFork(vm.rpcUrl("bsc"), 20238373);
-    setAddressProvider("bsc");
-
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     uint64 expirationPeriod = 60 * 40; // 40 mins
-    bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
+    bUSD = IERC20Upgradeable(ap.getAddress("bUSD")); // TODO check if bUSD == stableToken at AP
 
     ISynthereumLiquidityPool[] memory pools = new ISynthereumLiquidityPool[](1);
     pools[0] = synthereumLiquiditiyPool;

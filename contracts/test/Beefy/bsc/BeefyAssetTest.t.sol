@@ -17,14 +17,10 @@ import { ITestConfigStorage } from "../../abstracts/ITestConfigStorage.sol";
 contract BeefyBscAssetTest is AbstractAssetTest {
   address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
 
-  constructor() {
-    vm.createSelectFork("bsc", 20238373);
-    setAddressProvider("bsc");
+  constructor() forkAtBlock(BSC_MAINNET, 20238373) {
     test = AbstractERC4626Test(address(new BeefyERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new BeefyBscTestConfigStorage()));
   }
-
-  function setUp() public override {}
 
   function setUpTestContract(bytes calldata testConfig) public override {
     (address beefyVault, uint256 withdrawalFee) = abi.decode(testConfig, (address, uint256));

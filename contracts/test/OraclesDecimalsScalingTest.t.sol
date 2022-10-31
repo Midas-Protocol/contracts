@@ -15,36 +15,29 @@ contract OraclesDecimalsScalingTest is BaseTest {
   MasterPriceOracle mpo;
   FusePoolDirectory fusePoolDirectory;
 
-  function setNetworkValues(string memory network, uint256 forkBlockNumber) internal {
-    vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
-    setAddressProvider(network);
-
+  function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
   }
 
-  function testBsc() public {
-    setNetworkValues("bsc", 21945844);
+  // TODO just loop through the forks
+  function testBsc() public fork(BSC_MAINNET) {
     testOraclesDecimals();
   }
 
-  function testArbitrum() public {
-    setNetworkValues("arbitrum", 28654955);
+  function testArbitrum() public fork(ARBITRUM_ONE) {
     testOraclesDecimals();
   }
 
-  function testMoonbeam() public {
-    setNetworkValues("moonbeam", 2020022);
+  function testMoonbeam() public fork(MOONBEAM_MAINNET) {
     testOraclesDecimals();
   }
 
-  function testPolygon() public {
-    setNetworkValues("polygon", 33996000);
+  function testPolygon() public fork(POLYGON_MAINNET) {
     testOraclesDecimals();
   }
 
-  function testNeonDev() public {
-    setNetworkValues("neon_dev", 167826388);
+  function testNeonDev() public fork(NEON_DEVNET) {
     testOraclesDecimals();
   }
 

@@ -18,14 +18,12 @@ contract CurveAssetTest is AbstractAssetTest {
   address[] underlyingsForOracle;
   IPriceOracle[] oracles;
 
-  constructor() {
-    vm.createSelectFork("polygon", 33063212);
-    setAddressProvider("polygon");
+  constructor() forkAtBlock(POLYGON_MAINNET, 33063212) {
     test = AbstractERC4626Test(address(new CurveERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new CurveTestConfigStorage()));
   }
 
-  function setUp() public override {
+  function setUp() public {
     masterPriceOracle = ap.getAddress("MasterPriceOracle");
   }
 

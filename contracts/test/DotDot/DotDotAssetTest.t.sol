@@ -16,14 +16,10 @@ import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 // Using 2BRL
 // Tested on block 19052824
 contract DotDotAssetTest is AbstractAssetTest {
-  constructor() {
-    vm.createSelectFork("bsc", 20238373);
-    setAddressProvider("bsc");
+  constructor() forkAtBlock(BSC_MAINNET, 20238373) {
     test = AbstractERC4626Test(address(new DotDotERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new DotDotTestConfigStorage()));
   }
-
-  function setUp() public override {}
 
   function setUpTestContract(bytes calldata testConfig) public override {
     (address masterPriceOracle, address asset) = abi.decode(testConfig, (address, address));

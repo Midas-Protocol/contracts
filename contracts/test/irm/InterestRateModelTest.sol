@@ -17,9 +17,18 @@ contract InterestRateModelTest is BaseTest {
   address ANKR_BNB_R = 0xBb1Aa6e59E5163D8722a122cd66EBA614b59df0d;
   uint8 day = 3;
 
-  function testBsc() public {
-    setNetworkValues("bsc", 20238373);
-    setUpBsc();
+  function afterForkSetUp() internal override {
+    if (block.chainid == BSC_MAINNET) {
+      ankrBnbInterestRateModel2 = new AnkrBNBInterestRateModel(10512000, 0.5e16, 3e18, 0.85e18, day, ANKR_BNB_R);
+      jumpRateModel = new JumpRateModel(10512000, 0.2e17, 0.18e18, 4e18, 0.8e18);
+      whitepaperInterestRateModel = new WhitePaperInterestRateModel(10512000, 0.2e17, 0.2e18);
+    } else if (block.chainid == POLYGON_MAINNET) {
+      mimoRateModel = new JumpRateModel(13665600, 2e18, 0.4e17, 4e18, 0.8e18);
+      jumpRateModel = new JumpRateModel(13665600, 0.2e17, 0.18e18, 2e18, 0.8e18);
+    }
+  }
+
+  function testBsc() public forkAtBlock(BSC_MAINNET, 20238373) {
     testJumpRateBorrowRate();
     testJumpRateSupplyRate();
     testAnkrBNBBorrowModel2Rate();
@@ -28,26 +37,8 @@ contract InterestRateModelTest is BaseTest {
     testWhitepaperSupplyRate();
   }
 
-  function testPolygon() public {
-    setNetworkValues("polygon", 33063212);
-    setUpPolygon();
+  function testPolygon() public forkAtBlock(POLYGON_MAINNET, 33063212) {
     testJumpRateBorrowRatePolygon();
-  }
-
-  function setNetworkValues(string memory network, uint256 forkBlockNumber) internal {
-    vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
-    setAddressProvider(network);
-  }
-
-  function setUpBsc() internal {
-    ankrBnbInterestRateModel2 = new AnkrBNBInterestRateModel(10512000, 0.5e16, 3e18, 0.85e18, day, ANKR_BNB_R);
-    jumpRateModel = new JumpRateModel(10512000, 0.2e17, 0.18e18, 4e18, 0.8e18);
-    whitepaperInterestRateModel = new WhitePaperInterestRateModel(10512000, 0.2e17, 0.2e18);
-  }
-
-  function setUpPolygon() internal {
-    mimoRateModel = new JumpRateModel(13665600, 2e18, 0.4e17, 4e18, 0.8e18);
-    jumpRateModel = new JumpRateModel(13665600, 0.2e17, 0.18e18, 2e18, 0.8e18);
   }
 
   function _convertToPerYear(uint256 value) internal returns (uint256) {

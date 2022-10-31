@@ -15,21 +15,16 @@ contract UniswapLpTokenBaseTest is BaseTest {
   MasterPriceOracle mpo;
   address wtoken;
 
-  function setNetworkValues(string memory network, uint256 forkBlockNumber) internal {
-    vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
-    setAddressProvider(network);
+  function afterForkSetUp() internal override {
+    mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
   }
 
-  function testMoonbeam() public {
-    setNetworkValues("moonbeam", 1824921);
-    mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+  function testMoonbeam() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     testGlmrUsdcLpTokenOraclePrice();
     testGlmrGlintLpTokenOraclePrice();
   }
 
-  function testBsc() public {
-    setNetworkValues("bsc", 20238373);
-    mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+  function testBsc() public forkAtBlock(BSC_MAINNET, 20238373) {
     testBombBtcLpTokenOraclePrice();
   }
 

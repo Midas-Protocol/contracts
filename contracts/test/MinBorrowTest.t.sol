@@ -18,8 +18,7 @@ contract MinBorrowTest is BaseTest {
   FuseFeeDistributor ffd;
   MasterPriceOracle mpo;
 
-  function setUp() public {
-    vm.createSelectFork(vm.rpcUrl("bsc"), 20238373);
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     ffd = new FuseFeeDistributor();
     mpo = MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA);
     ffd.initialize(0);

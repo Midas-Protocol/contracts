@@ -28,18 +28,12 @@ contract DiaPriceOracleTest is BaseTest {
   DiaPriceOracle private oracle;
   MasterPriceOracle masterPriceOracle;
 
-  function testMoonbeam() public {
-    vm.createSelectFork(vm.rpcUrl("moonbeam"), 1824921);
-    setAddressProvider("moonbeam");
-
+  function testMoonbeam() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     testDiaPriceOracleWithNativeFeedMoonbeam();
     testDiaPriceOracleWithMasterPriceOracleMoonbeam();
   }
 
-  function testBsc() public {
-    vm.createSelectFork(vm.rpcUrl("bsc"), 20238373);
-    setAddressProvider("bsc");
-
+  function testBsc() public forkAtBlock(BSC_MAINNET, 20238373) {
     testDiaPriceOracleWithMasterPriceOracleBsc();
   }
 

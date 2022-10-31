@@ -7,10 +7,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20
 import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.sol";
 
 import "./compound/ErrorReporter.sol";
-import "./compound/ComptrollerStorage.sol";
 import "./external/compound/IComptroller.sol";
-import "./compound/CTokenInterfaces.sol";
-import "./compound/CEtherDelegator.sol";
 import "./compound/CErc20Delegator.sol";
 import "./compound/CErc20PluginDelegate.sol";
 import "./midas/SafeOwnableUpgradeable.sol";

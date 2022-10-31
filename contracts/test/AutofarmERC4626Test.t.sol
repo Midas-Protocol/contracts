@@ -41,10 +41,7 @@ contract AutofarmERC4626Test is BaseTest {
   address bob = address(20);
   address charlie = address(30);
 
-  function setUp() public {
-    vm.createSelectFork("bsc", 20238373);
-    setAddressProvider("bsc");
-
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     testToken = new MockERC20("TestToken", "TST", 18);
     autoToken = new MockERC20("autoToken", "AUTO", 18);
     mockAutofarm = new MockAutofarmV2(address(autoToken));

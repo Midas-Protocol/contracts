@@ -14,8 +14,6 @@ contract AbstractAssetTest is BaseTest {
   AbstractERC4626Test public test;
   ITestConfigStorage public testConfigStorage;
 
-  function setUp() public virtual {}
-
   function setUpTestContract(bytes calldata testConfig) public virtual {
     // test.setUp(MockERC20(address(IBeefyVault(testConfig.beefyVault).want())).symbol(), testConfig);
   }
