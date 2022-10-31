@@ -41,6 +41,7 @@ abstract contract BaseTest is Test {
   modifier forkAtBlock(uint128 chainid, uint256 blockNumber) {
     if (block.chainid != chainid) {
       vm.selectFork(forkIds[chainid]);
+      vm.rollFork(blockNumber);
       configureAddressesProvider(chainid);
       afterForkSetUp();
     }
