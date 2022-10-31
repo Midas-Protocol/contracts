@@ -20,9 +20,7 @@ contract PythOraclesTest is BaseTest {
 
   address token = 0x7ff459CE3092e8A866aA06DA88D291E2E31230C1;
 
-  function setUp() public {
-    vm.createSelectFork("neon_dev", 159103730);
-    setAddressProvider("neon_dev");
+  function setUp() public forkAtBlock(NEON_DEVNET, 159103730) {
     pythOracle = new MockPyth(0);
 
     PythStructs.PriceFeed memory mockTokenFeed = PythStructs.PriceFeed(

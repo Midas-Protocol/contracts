@@ -14,18 +14,11 @@ import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 
 // Using 2BRL
-// Tested on block 19052824
 contract StellaAssetTest is AbstractAssetTest {
-  address masterPriceOracle = 0x14C15B9ec83ED79f23BF71D51741f58b69ff1494; // master price oracle
-
-  constructor() {
-    vm.createSelectFork("moonbeam", 2176344);
-    setAddressProvider("moonbeam");
+  constructor() forkAtBlock(MOONBEAM_MAINNET, 2176344) {
     test = AbstractERC4626Test(address(new StellaERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new StellaTestConfigStorage()));
   }
-
-  function setUp() public override {}
 
   function setUpTestContract(bytes calldata testConfig) public override {
     (address asset, uint256 poolId, address[] memory rewardTokens) = abi.decode(
@@ -33,7 +26,7 @@ contract StellaAssetTest is AbstractAssetTest {
       (address, uint256, address[])
     );
 
-    test.setUpWithPool(MasterPriceOracle(masterPriceOracle), ERC20Upgradeable(asset));
+    test.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(asset));
 
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }

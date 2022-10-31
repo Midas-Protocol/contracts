@@ -23,10 +23,7 @@ contract MockFluxPriceFeed {
 contract FluxPriceOracleTest is BaseTest {
   FluxPriceOracle private oracle;
 
-  function setUp() public {
-    vm.createSelectFork("evmos_test", 2940378);
-    setAddressProvider("evmos");
-  }
+  function setUp() public forkAtBlock(EVMOS_TESTNET, 2940378) {}
 
   function setUpWithNativeFeed() public {
     MockFluxPriceFeed mock = new MockFluxPriceFeed(5 * 10**8); // 5 USD in 8 decimals

@@ -22,9 +22,7 @@ contract BalancerLpTokenPriceOracleTest is BaseTest {
   address mimo = 0xADAC33f543267c4D59a8c299cF804c303BC3e4aC;
   address par = 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128;
 
-  function setUp() public {
-    vm.createSelectFork("polygon", 33063212);
-    setAddressProvider("polygon");
+  function setUp() public forkAtBlock(POLYGON_MAINNET, 33672239) {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
   }
 
@@ -36,8 +34,6 @@ contract BalancerLpTokenPriceOracleTest is BaseTest {
   // TODO: add test for mimo / par pair, when we deploy the MIMO DIA price oracle
   // See: https://github.com/Midas-Protocol/monorepo/issues/476
   function testPriceBalancer() public {
-    vm.rollFork(33672239);
-
     oracle = new BalancerLpTokenPriceOracle();
 
     setUpBalancerOracle();

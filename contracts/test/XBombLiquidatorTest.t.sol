@@ -12,9 +12,7 @@ contract XBombLiquidatorTest is BaseTest {
   address bombTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
   XBombLiquidatorFunder liquidator;
 
-  function setUp() public {
-    vm.createSelectFork(vm.rpcUrl("bsc"), 20238373);
-    setAddressProvider("bsc");
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     liquidator = new XBombLiquidatorFunder();
   }
 

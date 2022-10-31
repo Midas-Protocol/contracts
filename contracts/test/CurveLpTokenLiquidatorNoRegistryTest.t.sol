@@ -23,10 +23,7 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
   IERC20Upgradeable bUSD;
   WETH wtoken;
 
-  function setUp() public {
-    vm.createSelectFork("bsc", 20238373);
-    setAddressProvider("bsc");
-
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     wtoken = WETH(payable(ap.getAddress("wtoken")));
     liquidator = new CurveLpTokenLiquidatorNoRegistry();
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));

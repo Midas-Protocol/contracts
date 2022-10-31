@@ -16,31 +16,21 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
   ICToken epsJCHFBUSD_c = ICToken(0x1F0452D6a8bb9EAbC53Fa6809Fa0a060Dd531267);
   MasterPriceOracle mpo;
 
-  function setUp() public {
-    vm.createSelectFork(vm.rpcUrl("bsc"), 20238373);
-    setAddressProvider("bsc");
-
+  function setUp() public forkAtBlock(BSC_MAINNET, 21675481) {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     busd = ap.getAddress("bUSD");
-  }
 
-  function setUpCurveOracle(address lpToken, address pool) internal {
     address[] memory lpTokens = new address[](1);
-    lpTokens[0] = lpToken;
+    lpTokens[0] = epsJCHFBUSD_lp;
     address[] memory pools = new address[](1);
-    pools[0] = pool;
+    pools[0] = epsJCHFBUSD_pool;
 
+    oracle = new CurveV2LpTokenPriceOracleNoRegistry();
     vm.prank(mpo.admin());
     oracle.initialize(lpTokens, pools, busd, mpo);
   }
 
   function testCurveLpTokenPriceOracleNoRegistry() public {
-    vm.rollFork(21675481);
-
-    oracle = new CurveV2LpTokenPriceOracleNoRegistry();
-
-    setUpCurveOracle(epsJCHFBUSD_lp, epsJCHFBUSD_pool);
-
     ICurveV2Pool pool = ICurveV2Pool(epsJCHFBUSD_pool);
     uint256 lp_price = (pool.lp_price() * mpo.price(busd)) / 10**18;
     uint256 price = oracle.price(epsJCHFBUSD_lp);

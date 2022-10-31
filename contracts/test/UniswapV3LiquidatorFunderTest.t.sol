@@ -33,9 +33,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
 
   Quoter quoter;
 
-  constructor() WithPool() {
-    vm.createSelectFork("arbitrum", 28739891);
-    setAddressProvider("arbitrum");
+  constructor() WithPool() forkAtBlock(ARBITRUM_ONE, 28739891) {
     super.setUpWithPool(
       MasterPriceOracle(0xd4D0cA503E8befAbE4b75aAC36675Bc1cFA533D1),
       ERC20Upgradeable(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1)

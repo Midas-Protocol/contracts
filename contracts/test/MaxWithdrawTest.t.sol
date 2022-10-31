@@ -36,10 +36,7 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     MockAsset usdc;
   }
 
-  function setNetworkValues(string memory network, uint256 forkBlockNumber) internal {
-    vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
-    setAddressProvider(network);
-
+  function afterForkSetUp() internal override {
     super.setUpWithPool(
       MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
       ERC20Upgradeable(ap.getAddress("wtoken"))
@@ -49,13 +46,11 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     setUpPool("bsc-test", false, 0.1e18, 1.1e18);
   }
 
-  function testBsc() public {
-    setNetworkValues("bsc", 22113750);
+  function testBsc() public fork(BSC_MAINNET) {
     testMaxWithdraw();
   }
 
-  function testPolygon() public {
-    setNetworkValues("polygon", 34252820);
+  function testPolygon() public fork(POLYGON_MAINNET) {
     testMIIMOMaxWithdraw();
   }
 

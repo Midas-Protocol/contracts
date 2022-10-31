@@ -30,20 +30,32 @@ contract CurveSwapLiquidator is IRedemptionStrategy {
     IERC20Upgradeable inputToken,
     uint256 inputAmount,
     bytes memory strategyData
-  ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+  ) external override returns (IERC20Upgradeable, uint256) {
+    return _convert(inputToken, inputAmount, strategyData);
+  }
+
+  function _convert(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    bytes memory strategyData
+  ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
     // Exchange and store output
     (ICurvePool curvePool, int128 i, int128 j, address jToken, address payable wtoken) = abi.decode(
       strategyData,
       (ICurvePool, int128, int128, address, address)
     );
-    outputToken = IERC20Upgradeable(jToken);
     inputToken.approve(address(curvePool), inputAmount);
-    outputAmount = curvePool.exchange(i, j, inputAmount, 0);
+    curvePool.exchange(i, j, inputAmount, 0);
 
     // Convert to W_NATIVE if ETH
-    if (address(outputToken) == address(0)) {
+    if (jToken == address(0) || jToken == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
       WETH(wtoken).deposit{ value: outputAmount }();
-      return (IERC20Upgradeable(wtoken), outputAmount);
+      outputToken = IERC20Upgradeable(wtoken);
+    } else {
+      outputToken = IERC20Upgradeable(jToken);
     }
+    outputAmount = outputToken.balanceOf(address(this));
+
+    return (outputToken, outputAmount);
   }
 }

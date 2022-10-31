@@ -8,10 +8,7 @@ import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 contract AnkrBNBcPriceOracleTest is BaseTest {
   AnkrBNBcPriceOracle private oracle;
 
-  function setUp() public {
-    vm.createSelectFork(vm.rpcUrl("bsc"), 20238373);
-    setAddressProvider("bsc");
-
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     oracle = new AnkrBNBcPriceOracle(
       AnkrOracle(0xB1aD00B8BB49FB3534120b43f1FEACeAf584AE06),
       MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),

@@ -11,10 +11,7 @@ contract GelatoGUniPriceOracleTest is BaseTest {
   GelatoGUniPriceOracle private oracle;
   MasterPriceOracle mpo;
 
-  function setUp() public {
-    vm.createSelectFork("polygon", 32016397);
-    setAddressProvider("polygon");
-
+  function setUp() public forkAtBlock(POLYGON_MAINNET, 32016397) {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     oracle = new GelatoGUniPriceOracle(address(0));
   }

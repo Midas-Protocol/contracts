@@ -26,24 +26,18 @@ contract ChainlinkOraclesTest is BaseTest {
   ICToken usdcMarketBsc = ICToken(0x8D5bE2768c335e88b71E4e913189AEE7104f01B4);
   ICToken usdtMarketBsc = ICToken(0x1F73754c135d5B9fDE674806f43AeDfA2c7eaDb5);
 
-  function setNetworkValues(string memory network, uint256 forkBlockNumber) internal {
-    vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
-    setAddressProvider(network);
+  function afterForkSetUp() internal override {
     oracle = ChainlinkPriceOracleV2(ap.getAddress("ChainlinkPriceOracleV2"));
   }
 
-  function testBsc() public {
-    setNetworkValues("bsc", 21118900);
-
+  function testBsc() public forkAtBlock(BSC_MAINNET, 21118900) {
     testJBRLPrice();
     testBSCChainlinkUSDCPrice();
     testBSCChainlinkUSDTPrice();
     testUsdcUsdtDeviationBsc();
   }
 
-  function testPolygon() public {
-    setNetworkValues("polygon", 33063212);
-
+  function testPolygon() public forkAtBlock(POLYGON_MAINNET, 33063212) {
     testUsdcUsdtDeviationPolygon();
   }
 

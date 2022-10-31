@@ -57,10 +57,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
 
   ERC20Upgradeable[] rewardsToken;
 
-  function setUp() public {
-    vm.createSelectFork(vm.rpcUrl("bsc"), 20238373);
-    setAddressProvider("bsc");
-
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     dddFlywheel = new MidasFlywheelCore();
     dddFlywheel.initialize(dddToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
     dddRewards = new FuseFlywheelDynamicRewards(FlywheelCore(address(dddFlywheel)), 1);

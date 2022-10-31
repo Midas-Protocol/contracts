@@ -11,18 +11,18 @@ contract TwapOraclesBaseTest is BaseTest {
   UniswapTwapPriceOracleV2Factory twapPriceOracleFactory;
   MasterPriceOracle mpo;
 
-  function setUp() public {}
-
-  function setNetworkValues(string memory network, uint256 forkBlockNumber) internal {
-    vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
-    setAddressProvider(network);
-
+  function afterForkSetUp() internal override {
     uniswapV2Factory = IUniswapV2Factory(ap.getAddress("IUniswapV2Factory"));
     twapPriceOracleFactory = UniswapTwapPriceOracleV2Factory(ap.getAddress("UniswapTwapPriceOracleV2Factory"));
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-    emit log_address(address(uniswapV2Factory));
-    emit log_address(address(twapPriceOracleFactory));
-    emit log_address(address(mpo));
+  }
+
+  // BOMB
+  function testBombTwapOraclePrice() public forkAtBlock(BSC_MAINNET, 20238373) {
+    address baseToken = 0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c; // WBTC
+    address testedAssetTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
+
+    assertTrue(getTokenTwapPrice(testedAssetTokenAddress, baseToken) > 0);
   }
 
   function getTokenTwapPrice(address tokenAddress, address baseTokenAddress) internal returns (uint256) {
@@ -56,22 +56,9 @@ contract TwapOraclesBaseTest is BaseTest {
     return mpo.price(tokenAddress);
   }
 
-  // BOMB
-  function testBombTwapOraclePrice() public {
-    setNetworkValues("bsc", 20238373);
-
-    address baseToken = 0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c; // WBTC
-    address testedAssetTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
-
-    assertTrue(getTokenTwapPrice(testedAssetTokenAddress, baseToken) > 0);
-  }
-
   // function testChapelEthBusdOraclePrice() public {
-  //   setNetworkValues("bsc_chapel", 23826930);
-
   //   address baseToken = 0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684; // USDT
   //   address testedAssetTokenAddress = 0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7; // BUSD
-
   //   assertTrue(getTokenTwapPrice(testedAssetTokenAddress, baseToken) > 0);
   // }
 }

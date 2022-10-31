@@ -55,9 +55,7 @@ contract BeamE2eTest is WithPool, BaseTest {
     MockBeamERC20 asset;
   }
 
-  constructor() WithPool() {
-    vm.createSelectFork("moonbeam", 1824921);
-    setAddressProvider("moonbeam");
+  constructor() WithPool() forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     super.setUpWithPool(MasterPriceOracle(mPriceOracle), ERC20Upgradeable(0x99588867e817023162F4d4829995299054a5fC57));
   }
 

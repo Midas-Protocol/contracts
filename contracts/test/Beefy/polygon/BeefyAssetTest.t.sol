@@ -23,14 +23,10 @@ interface IBeefyStrategy {
 contract BeefyPolygonAssetTest is AbstractAssetTest {
   address lpChef = 0x2FAe83B3916e1467C970C113399ee91B31412bCD;
 
-  constructor() {
-    vm.createSelectFork("polygon", 33063212);
-    setAddressProvider("polygon");
+  constructor() forkAtBlock(POLYGON_MAINNET, 33063212) {
     test = new BeefyERC4626Test();
     testConfigStorage = ITestConfigStorage(address(new BeefyPolygonTestConfigStorage()));
   }
-
-  function setUp() public override {}
 
   function setUpTestContract(bytes calldata testConfig) public override {
     (address beefyVault, uint256 withdrawalFee) = abi.decode(testConfig, (address, uint256));

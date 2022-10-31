@@ -23,13 +23,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
   FuseSafeLiquidator fsl;
   address uniswapRouter;
 
-  function setNetworkValues(string memory network, uint256 forkBlockNumber) internal {
-    vm.createSelectFork(vm.rpcUrl(network), forkBlockNumber);
-    setAddressProvider(network);
-  }
-
-  function testBsc() public {
-    setNetworkValues("bsc", 20238373);
+  function testBsc() public forkAtBlock(BSC_MAINNET, 20238373) {
     uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
     fsl = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
 
@@ -38,8 +32,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     testUpgrade();
   }
 
-  function testPolygon() public {
-    setNetworkValues("polygon", 33063212);
+  function testPolygon() public forkAtBlock(POLYGON_MAINNET, 33063212) {
     uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
     fsl = FuseSafeLiquidator(payable(0x37b3890B9b3a5e158EAFDA243d4640c5349aFC15));
 

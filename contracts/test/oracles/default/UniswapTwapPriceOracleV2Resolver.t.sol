@@ -20,9 +20,7 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
     uint256 price1Cumulative;
   }
 
-  function setUp() public {
-    vm.createSelectFork("moonbeam", 1824921);
-    setAddressProvider("moonbeam");
+  function setUp() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     uniswapV2Factory = IUniswapV2Factory(ap.getAddress("IUniswapV2Factory"));
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
   }

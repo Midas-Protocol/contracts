@@ -16,14 +16,10 @@ import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 contract JarvisAssetTest is AbstractAssetTest {
   address masterPriceOracle = 0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31; // master price oracle
 
-  constructor() {
-    vm.createSelectFork("polygon", 33063212);
-    setAddressProvider("polygon");
+  constructor() forkAtBlock(POLYGON_MAINNET, 33063212) {
     test = AbstractERC4626Test(address(new JarvisERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new JarvisTestConfigStorage()));
   }
-
-  function setUp() public override {}
 
   function setUpTestContract(bytes calldata testConfig) public override {
     (address asset, address pool) = abi.decode(testConfig, (address, address));

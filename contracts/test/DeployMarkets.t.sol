@@ -468,8 +468,6 @@ contract DeployMarketsTest is Test {
 }
 
 contract CErc20DelegateTest is BaseTest {
-  uint256 bscForkId;
-  uint256 polygonForkId;
   Comptroller comptroller;
 
   CErc20Delegate cErc20Delegate;
@@ -483,28 +481,19 @@ contract CErc20DelegateTest is BaseTest {
   address[] implementationsSet;
   address[] pluginsSet;
 
-  function setUp() public {
-    bscForkId = vm.createFork(vm.rpcUrl("bsc"), 20238373);
-    polygonForkId = vm.createFork(vm.rpcUrl("polygon"), 33063212);
-  }
-
-  function testBscImplementations() public {
-    setUpNetworkValues(bscForkId, "bsc");
+  function testBscImplementations() public forkAtBlock(BSC_MAINNET, 20238373) {
     testPoolImplementations();
     testMarketImplementations();
     testPluginImplementations();
   }
 
-  function testPolygonImplementations() public {
-    setUpNetworkValues(polygonForkId, "polygon");
+  function testPolygonImplementations() public forkAtBlock(POLYGON_MAINNET, 33063212) {
     testPoolImplementations();
     testMarketImplementations();
     testPluginImplementations();
   }
 
-  function setUpNetworkValues(uint256 forkId, string memory network) internal {
-    vm.selectFork(forkId);
-    setAddressProvider(network);
+  function afterForkSetUp() internal override {
     fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
   }
