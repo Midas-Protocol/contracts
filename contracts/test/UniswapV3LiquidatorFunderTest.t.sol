@@ -93,7 +93,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
       ap.getAddress("wtoken"),
       ap.getAddress("wBTCToken"),
       "0xe18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303",
-      25
+      30
     );
 
     deployCErc20Delegate(address(token2), "token2", "token2", 0.9e18); // usdc, 6 dec
