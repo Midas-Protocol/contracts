@@ -45,7 +45,6 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
       poolFee = 3000;
       repayAmount = 1e18; // 1.00 GMX
       borrowAmount = 12e18; // 12.00 GMX
-
     } else if (block.chainid == POLYGON_MAINNET) {
       setUpWithPool(
         MasterPriceOracle(0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31),
