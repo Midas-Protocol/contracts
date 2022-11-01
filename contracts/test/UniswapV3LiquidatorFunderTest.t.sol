@@ -53,16 +53,18 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
       quoter = new Quoter(0x1F98431c8aD98523631AE4a59f267346ea31F984);
       setUpPool("polygon-test", false, 0.1e18, 1.1e18);
       uniswapRouter = IUniswapV2Router02(0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506);
-      token1 = IERC20Upgradeable(0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128);
-      token2 = IERC20Upgradeable(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174);
+      token1 = IERC20Upgradeable(0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128); // PAR, 18 decimals
+      token2 = IERC20Upgradeable(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174); // USDC, 6 decimals
       poolFee = 500;
-      repayAmount = 11e10;
-      borrowAmount = 1e20;
+      repayAmount = 1e18; // 1 PAR
+      borrowAmount = 6e20; // 600 PAR
     }
     uniswapv3Liquidator = new UniswapV3LiquidatorFunder();
   }
 
   function testPolygon() public fork(POLYGON_MAINNET) {
+    // collateral value falls from 50 000 USD to 500 USD
+    // PAR price 1 USD => debt value = 600*1 = 600 USD
     testLiquidation();
   }
 
