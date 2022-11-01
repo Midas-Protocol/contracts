@@ -52,7 +52,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   event ActionPaused(string action, bool pauseState);
 
   /// @notice Emitted when an action is paused on a market
-  event ActionPaused(CTokenInterface cToken, string action, bool pauseState);
+  event MarketActionPaused(CTokenInterface cToken, string action, bool pauseState);
 
   /// @notice Emitted when the whitelist enforcement is changed
   event WhitelistEnforcementChanged(bool enforce);
@@ -1363,7 +1363,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     require(hasAdminRights() || state == true, "!admin");
 
     mintGuardianPaused[address(cToken)] = state;
-    emit ActionPaused(cToken, "Mint", state);
+    emit MarketActionPaused(cToken, "Mint", state);
     return state;
   }
 
@@ -1373,7 +1373,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     require(hasAdminRights() || state == true, "!admin");
 
     borrowGuardianPaused[address(cToken)] = state;
-    emit ActionPaused(cToken, "Borrow", state);
+    emit MarketActionPaused(cToken, "Borrow", state);
     return state;
   }
 
