@@ -97,6 +97,10 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
     wtoken = _wtoken;
   }
 
+  function reInitialize(address _wtoken) public {
+    wtoken = _wtoken;
+  }
+
   /**
    * @dev Sets `_oracles` for `underlyings`.
    */
