@@ -6,6 +6,7 @@ import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.s
 import "../external/compound/IPriceOracle.sol";
 import "../external/compound/ICToken.sol";
 import "../external/compound/ICErc20.sol";
+import "../midas/SafeOwnableUpgradeable.sol";
 
 import "./BasePriceOracle.sol";
 
@@ -15,7 +16,7 @@ import "./BasePriceOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
+contract MasterPriceOracle is Initializable, SafeOwnableUpgradeable, IPriceOracle, BasePriceOracle {
   /**
    * @dev Maps underlying token addresses to `PriceOracle` contracts (can be `BasePriceOracle` contracts too).
    */
