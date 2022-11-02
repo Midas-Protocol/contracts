@@ -98,8 +98,9 @@ contract MasterPriceOracle is Initializable, SafeOwnableUpgradeable, IPriceOracl
     wtoken = _wtoken;
   }
 
-  function reinitialize(address _wToken) public reinitializer(2) onlyOwnerOrAdmin {
+  function reinitialize(address _wToken, address _admin) public reinitializer(2) onlyOwnerOrAdmin {
     wtoken = _wToken;
+    admin = _admin;
   }
 
   /**
