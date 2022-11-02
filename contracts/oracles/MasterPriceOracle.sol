@@ -98,15 +98,14 @@ contract MasterPriceOracle is Initializable, SafeOwnableUpgradeable, IPriceOracl
     wtoken = _wtoken;
   }
 
-  function reinitialize(address _wToken, address _admin) public reinitializer(2) onlyOwnerOrAdmin {
+  function reinitialize(address _wToken) public reinitializer(2) onlyOwnerOrAdmin {
     wtoken = _wToken;
-    admin = _admin;
   }
 
   /**
    * @dev Sets `_oracles` for `underlyings`.
    */
-  function add(address[] calldata underlyings, IPriceOracle[] calldata _oracles) external onlyAdmin {
+  function add(address[] calldata underlyings, IPriceOracle[] calldata _oracles) external onlyOwnerOrAdmin {
     // Input validation
     require(
       underlyings.length > 0 && underlyings.length == _oracles.length,
@@ -131,7 +130,7 @@ contract MasterPriceOracle is Initializable, SafeOwnableUpgradeable, IPriceOracl
   /**
    * @dev Changes the default price oracle
    */
-  function setDefaultOracle(IPriceOracle newOracle) external onlyAdmin {
+  function setDefaultOracle(IPriceOracle newOracle) external onlyOwnerOrAdmin {
     IPriceOracle oldOracle = defaultOracle;
     defaultOracle = newOracle;
     emit NewDefaultOracle(address(oldOracle), address(newOracle));
@@ -140,7 +139,7 @@ contract MasterPriceOracle is Initializable, SafeOwnableUpgradeable, IPriceOracl
   /**
    * @dev Changes the admin and emits an event.
    */
-  function changeAdmin(address newAdmin) external onlyAdmin {
+  function changeAdmin(address newAdmin) external onlyOwnerOrAdmin {
     address oldAdmin = admin;
     admin = newAdmin;
     emit NewAdmin(oldAdmin, newAdmin);
