@@ -52,7 +52,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   event ActionPaused(string action, bool pauseState);
 
   /// @notice Emitted when an action is paused on a market
-  event ActionPaused(CTokenInterface cToken, string action, bool pauseState);
+  event MarketActionPaused(CTokenInterface cToken, string action, bool pauseState);
 
   /// @notice Emitted when the whitelist enforcement is changed
   event WhitelistEnforcementChanged(bool enforce);
@@ -904,13 +904,28 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
      *  seizeTokens = seizeAmount / exchangeRate
      *   = actualRepayAmount * (liquidationIncentive * priceBorrowed) / (priceCollateral * exchangeRate)
      */
-    uint256 exchangeRateMantissa = CTokenInterface(cTokenCollateral).exchangeRateStored(); // Note: reverts on error
+    CTokenInterface collateralCToken = CTokenInterface(cTokenCollateral);
+    uint256 exchangeRateMantissa = collateralCToken.exchangeRateStored(); // Note: reverts on error
     uint256 seizeTokens;
     Exp memory numerator;
     Exp memory denominator;
     Exp memory ratio;
 
-    numerator = mul_(Exp({ mantissa: liquidationIncentiveMantissa }), Exp({ mantissa: priceBorrowedMantissa }));
+    uint256 protocolSeizeShareMantissa = collateralCToken.protocolSeizeShareMantissa();
+    uint256 feeSeizeShareMantissa = collateralCToken.feeSeizeShareMantissa();
+
+    /*
+     * The liquidation penalty includes
+     * - the liquidator incentive
+     * - the protocol fees (fuse admin fees)
+     * - the market fee
+     */
+    Exp memory totalPenaltyMantissa = add_(
+      add_(Exp({ mantissa: liquidationIncentiveMantissa }), Exp({ mantissa: protocolSeizeShareMantissa })),
+      Exp({ mantissa: feeSeizeShareMantissa })
+    );
+
+    numerator = mul_(totalPenaltyMantissa, Exp({ mantissa: priceBorrowedMantissa }));
     denominator = mul_(Exp({ mantissa: priceCollateralMantissa }), Exp({ mantissa: exchangeRateMantissa }));
     ratio = div_(numerator, denominator);
 
@@ -1363,7 +1378,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     require(hasAdminRights() || state == true, "!admin");
 
     mintGuardianPaused[address(cToken)] = state;
-    emit ActionPaused(cToken, "Mint", state);
+    emit MarketActionPaused(cToken, "Mint", state);
     return state;
   }
 
@@ -1373,7 +1388,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     require(hasAdminRights() || state == true, "!admin");
 
     borrowGuardianPaused[address(cToken)] = state;
-    emit ActionPaused(cToken, "Borrow", state);
+    emit MarketActionPaused(cToken, "Borrow", state);
     return state;
   }
 

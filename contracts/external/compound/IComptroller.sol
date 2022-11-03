@@ -29,7 +29,12 @@ interface IComptroller {
 
   function checkMembership(address account, ICToken cToken) external view returns (bool);
 
-  function getAccountLiquidity(address account)
+  function getHypotheticalAccountLiquidity(
+    address account,
+    address cTokenModify,
+    uint256 redeemTokens,
+    uint256 borrowAmount
+  )
     external
     view
     returns (
