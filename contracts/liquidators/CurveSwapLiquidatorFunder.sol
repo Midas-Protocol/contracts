@@ -20,7 +20,7 @@ contract CurveSwapLiquidatorFunder is CurveSwapLiquidator, IFundsConversionStrat
     view
     returns (IERC20Upgradeable, uint256)
   {
-    (ICurvePool curvePool, int128 i, int128 j,,) = abi.decode(
+    (ICurvePool curvePool, int128 i, int128 j, , ) = abi.decode(
       strategyData,
       (ICurvePool, int128, int128, address, address)
     );

@@ -21,7 +21,7 @@ import "../liquidators/CurveSwapLiquidatorFunder.sol";
 contract AnyLiquidationTest is BaseTest {
   FuseSafeLiquidator fsl;
   address uniswapRouter;
-  mapping (address => address) assetSpecificRouters;
+  mapping(address => address) assetSpecificRouters;
   CurveLpTokenPriceOracleNoRegistry curveOracle;
 
   IFundsConversionStrategy[] fundingStrategies;
