@@ -159,12 +159,13 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    * @param minOutputAmount The minimum output amount of `to` necessary to complete the exchange without reversion.
    * @param uniswapV2Router The UniswapV2Router02 to use. (Is interchangable with any UniV2 forks)
    */
-  function exchangeAllEthOrTokens(
+  function exchangeAllWethOrTokens(
     address from,
     address to,
     uint256 minOutputAmount,
     IUniswapV2Router02 uniswapV2Router
   ) private {
+    if (to == address(0)) to = W_NATIVE_ADDRESS; // we want W_NATIVE instead of NATIVE
     if (to == from) return;
 
     // From NATIVE, W_NATIVE, or something else?
@@ -181,32 +182,21 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
           block.timestamp
         );
       }
-    } else if (from == W_NATIVE_ADDRESS && to == address(0)) {
-      // Withdraw all W_NATIVE to NATIVE
-      W_NATIVE.withdraw(IERC20Upgradeable(W_NATIVE_ADDRESS).balanceOf(address(this)));
     } else {
       // Approve input tokens
       IERC20Upgradeable fromToken = IERC20Upgradeable(from);
       uint256 inputBalance = fromToken.balanceOf(address(this));
       justApprove(fromToken, address(uniswapV2Router), inputBalance);
 
-      // Exchange from tokens to NATIVE or tokens
-      if (to == address(0))
-        uniswapV2Router.swapExactTokensForETH(
-          inputBalance,
-          minOutputAmount,
-          array(from, W_NATIVE_ADDRESS),
-          address(this),
-          block.timestamp
-        );
-      else
-        uniswapV2Router.swapExactTokensForTokens(
-          inputBalance,
-          minOutputAmount,
-          from == W_NATIVE_ADDRESS || to == W_NATIVE_ADDRESS ? array(from, to) : array(from, W_NATIVE_ADDRESS, to),
-          address(this),
-          block.timestamp
-        ); // Put W_NATIVE in the middle of the path if not already a part of the path
+      // TODO check if redemption strategies make this obsolete
+      // Exchange from tokens to tokens
+      uniswapV2Router.swapExactTokensForTokens(
+        inputBalance,
+        minOutputAmount,
+        from == W_NATIVE_ADDRESS || to == W_NATIVE_ADDRESS ? array(from, to) : array(from, W_NATIVE_ADDRESS, to),
+        address(this),
+        block.timestamp
+      ); // Put W_NATIVE in the middle of the path if not already a part of the path
     }
   }
 
@@ -305,7 +295,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
           }
 
           // Exchange redeemed token collateral if necessary
-          exchangeAllEthOrTokens(address(underlyingCollateral), exchangeSeizedTo, minOutputAmount, uniswapV2Router);
+          exchangeAllWethOrTokens(address(underlyingCollateral), exchangeSeizedTo, minOutputAmount, uniswapV2Router);
         }
       }
     }
@@ -333,22 +323,10 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    * @param minOutputAmount The minimum amount to transfer.
    */
   function transferSeizedFunds(address erc20Contract, uint256 minOutputAmount) internal returns (uint256) {
-    uint256 seizedOutputAmount;
-
-    if (erc20Contract == address(0)) {
-      seizedOutputAmount = address(this).balance;
-      require(seizedOutputAmount >= minOutputAmount, "Minimum NATIVE output amount not satisfied.");
-
-      if (seizedOutputAmount > 0) {
-        (bool success, ) = msg.sender.call{ value: seizedOutputAmount }("");
-        require(success, "Failed to transfer output NATIVE to msg.sender.");
-      }
-    } else {
-      IERC20Upgradeable token = IERC20Upgradeable(erc20Contract);
-      seizedOutputAmount = token.balanceOf(address(this));
-      require(seizedOutputAmount >= minOutputAmount, "Minimum token output amount not satified.");
-      if (seizedOutputAmount > 0) token.safeTransfer(msg.sender, seizedOutputAmount);
-    }
+    IERC20Upgradeable token = IERC20Upgradeable(erc20Contract);
+    uint256 seizedOutputAmount = token.balanceOf(address(this));
+    require(seizedOutputAmount >= minOutputAmount, "Minimum token output amount not satified.");
+    if (seizedOutputAmount > 0) token.safeTransfer(msg.sender, seizedOutputAmount);
 
     return seizedOutputAmount;
   }
@@ -449,38 +427,22 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     uint256 minProfitAmount,
     uint256 ethToCoinbase
   ) private returns (uint256) {
-    if (exchangeProfitTo == address(0)) {
-      // Exchange profit if necessary
-      exchangeAllEthOrTokens(
-        _liquidatorProfitExchangeSource,
-        exchangeProfitTo,
-        minProfitAmount + ethToCoinbase,
-        UNISWAP_V2_ROUTER_02
-      );
+    if (exchangeProfitTo == address(0)) exchangeProfitTo = W_NATIVE_ADDRESS;
 
-      // Transfer NATIVE to block.coinbase if requested
-      if (ethToCoinbase > 0) block.coinbase.call{ value: ethToCoinbase }("");
-
-      // Transfer profit to msg.sender
-      return transferSeizedFunds(exchangeProfitTo, minProfitAmount);
-    } else {
-      // Transfer NATIVE to block.coinbase if requested
-      if (ethToCoinbase > 0) {
-        exchangeToExactEth(_liquidatorProfitExchangeSource, ethToCoinbase, UNISWAP_V2_ROUTER_02);
-        block.coinbase.call{ value: ethToCoinbase }("");
+    // Transfer NATIVE to block.coinbase if requested
+    if (ethToCoinbase > 0) {
+      uint256 currentBalance = address(this).balance;
+      if (ethToCoinbase > currentBalance) {
+        exchangeToExactEth(_liquidatorProfitExchangeSource, ethToCoinbase - currentBalance, UNISWAP_V2_ROUTER_02);
       }
-
-      // Exchange profit if necessary
-      exchangeAllEthOrTokens(
-        _liquidatorProfitExchangeSource,
-        exchangeProfitTo,
-        minProfitAmount + ethToCoinbase,
-        UNISWAP_V2_ROUTER_02
-      );
-
-      // Transfer profit to msg.sender
-      return transferSeizedFunds(exchangeProfitTo, minProfitAmount);
+      block.coinbase.call{ value: ethToCoinbase }("");
     }
+
+    // Exchange profit if necessary
+    exchangeAllWethOrTokens(_liquidatorProfitExchangeSource, exchangeProfitTo, minProfitAmount, UNISWAP_V2_ROUTER_02);
+
+    // Transfer profit to msg.sender
+    return transferSeizedFunds(exchangeProfitTo, minProfitAmount);
   }
 
   /**
