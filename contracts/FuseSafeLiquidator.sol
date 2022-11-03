@@ -623,7 +623,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
 
       // Repay flashloan
       require(
-        collateralRequired <= underlyingCollateral.balanceOf(address(this)),
+        collateralRequired <= underlyingCollateralSeized,
         "Token flashloan return amount greater than seized collateral."
       );
       require(

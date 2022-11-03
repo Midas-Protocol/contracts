@@ -64,32 +64,11 @@ contract AnyLiquidationTest is BaseTest {
       //        25
       //      );
 
-      {
-        // manual config
-        // TODO configure in the AP?
-        address bnbx = 0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275;
-        address apeSwapRouter = 0xcF0feBd3f17CEf5b47b0cD257aCf6025c5BFf3b7;
-        assetSpecificRouters[bnbx] = apeSwapRouter;
+      // TODO configure in the AP?
+      address bnbx = 0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275;
+      address apeSwapRouter = 0xcF0feBd3f17CEf5b47b0cD257aCf6025c5BFf3b7;
+      assetSpecificRouters[bnbx] = apeSwapRouter;
 
-        // BRZ funding strategy
-        address brz = 0x71be881e9C5d4465B3FfF61e89c6f3651E69B5bb;
-        address jbrl = 0x316622977073BBC3dF32E7d2A9B3c77596a0a603;
-        address brzw = 0x5b1a9850f55d9282a7C4Bf23A2a21B050e3Beb2f;
-
-        AddressesProvider.FundingStrategy memory fs = ap.getFundingStrategy(brz);
-        if (fs.addr != address(0)) revert("remove the manual config for brz");
-
-        CurveSwapLiquidatorFunder cslf = new CurveSwapLiquidatorFunder();
-        vm.prank(ap.owner());
-        ap.setFundingStrategy(brz, address(cslf), "CurveSwapLiquidatorFunder", jbrl);
-
-        address[] memory coins = new address[](3);
-        coins[0] = jbrl;
-        coins[1] = brz;
-        coins[2] = brzw;
-        vm.prank(ap.owner());
-        ap.setCurveSwapPool(0x43719DfFf12B04C71F7A589cdc7F54a01da07D7a, coins);
-      }
     } else if (block.chainid == POLYGON_MAINNET) {
       mostLiquidPair1 = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827); // USDC/WMATIC
       mostLiquidPair2 = IUniswapV2Pair(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
@@ -229,10 +208,19 @@ contract AnyLiquidationTest is BaseTest {
         vars.markets = vars.comptroller.getAllMarkets();
         (vars.debtMarket, vars.collateralMarket, vars.borrowAmount) = setUpDebtAndCollateralMarkets(random, vars);
 
+        // TODO implement redemption straegies for these collaterals
+        address bscBnbxMarket = 0xa47A7672EF042Ec2838E9425C083Efd982BFa362;
+        address mimo80par20Market = 0xcb67Bd2aE0597eDb2426802CdF34bb4085d9483A;
         if (address(vars.debtMarket) != address(0) && address(vars.collateralMarket) != address(0)) {
-          emit log("found testable markets at random number");
-          emit log_uint(random);
-          break;
+          if (
+            vars.debtMarket.underlying() != ap.getAddress("wtoken")
+            && address(vars.collateralMarket) != bscBnbxMarket
+            && address(vars.collateralMarket) != mimo80par20Market
+          ) {
+            emit log("found testable markets at random number");
+            emit log_uint(random);
+            break;
+          }
         }
       }
       random++;
@@ -588,6 +576,22 @@ contract AnyLiquidationTest is BaseTest {
       }
 
       strategyData = abi.encode(poolAddress, inputIndex, outputIndex, debtToken, ap.getAddress("wtoken"));
+    } else if (compareStrings(strategyContract, "UniswapV3LiquidatorFunder")) {
+      inputToken = strategyInputToken;
+
+      uint24 fee = 1000;
+      address quoter = ap.getAddress("Quoter");
+      address swapRouter;
+      {
+        // TODO
+        // polygon config // 0x1F98431c8aD98523631AE4a59f267346ea31F984
+        address polygonSwapRouter = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
+
+        swapRouter = polygonSwapRouter;
+        fee = 500;
+      }
+
+      strategyData = abi.encode(inputToken, debtToken, fee, swapRouter, quoter);
     } else {
       emit log(strategyContract);
       emit log_address(debtToken);

@@ -30,17 +30,6 @@ contract FuseSafeLiquidatorTest is BaseTest {
     fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
     if (block.chainid == BSC_MAINNET) {
       uniswapRouter = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
-
-      // TODO comment to test the on-chain FSL
-      fsl = new FuseSafeLiquidator();
-      fsl.initialize(
-        ap.getAddress("wtoken"),
-        uniswapRouter,
-        ap.getAddress("stableToken"),
-        ap.getAddress("wBTCToken"),
-        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
-        25
-      );
     } else if (block.chainid == POLYGON_MAINNET) {
       uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
     }
@@ -93,59 +82,5 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 
-  function test41stkBnbLiquidation() public forkAtBlock(BSC_MAINNET, 22687943) {
-    ICErc20 debtMarket = ICErc20(0x3Af258d24EBdC03127ED6cEb8e58cA90835fbca5);
-    ICErc20 collateralMarket = ICErc20(0xAcfbf93d8fD1A9869bAb2328669dDba33296a421);
-    address borrower = 0x2a2aaFf28425dDB0eD915A505378934b63D99907;
-
-    address comp = debtMarket.comptroller();
-    IComptroller comptroller = IComptroller(comp);
-    MasterPriceOracle mpo = MasterPriceOracle(address(comptroller.oracle()));
-    uint256 initialPrice = mpo.getUnderlyingPrice(collateralMarket);
-    uint256 priceCollateral = initialPrice;
-
-    // decrease the collateral price by 1% until the position becomes liquidatable
-    while (priceCollateral > (initialPrice * 9) / 10) {
-      (uint256 err, uint256 liquidity, uint256 shortfall) = comptroller.getHypotheticalAccountLiquidity(
-        borrower,
-        address(0),
-        0,
-        0
-      );
-
-      emit log("liquidity");
-      emit log_uint(liquidity);
-      emit log("shortfall");
-      emit log_uint(shortfall);
-
-      if (shortfall > 0) {
-        fsl.safeLiquidateToTokensWithFlashLoan(
-          FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
-            borrower,
-            41590343090471371755,
-            debtMarket,
-            collateralMarket,
-            IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16),
-            0,
-            0x0000000000000000000000000000000000000000,
-            IUniswapV2Router02(uniswapRouter),
-            IUniswapV2Router02(uniswapRouter),
-            new IRedemptionStrategy[](0),
-            new bytes[](0),
-            0,
-            new IFundsConversionStrategy[](0),
-            new bytes[](0)
-          )
-        );
-      }
-
-      // decrease the collateral price by 1%
-      priceCollateral = mpo.getUnderlyingPrice(collateralMarket);
-      vm.mockCall(
-        address(mpo),
-        abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, collateralMarket),
-        abi.encode((priceCollateral * 99) / 100)
-      );
-    }
-  }
+  // TODO test with marginal shortfall for liquidation penalty errors
 }
