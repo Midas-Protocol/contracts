@@ -163,17 +163,17 @@ contract AnyLiquidationTest is BaseTest {
       // until there is shortfall for which to be liquidated
       for (uint256 m = 0; m < vars.markets.length; m++) {
         uint256 marketIndexWithOffset = (random - m) % vars.markets.length;
-        if (vars.markets[marketIndexWithOffset].balanceOf(vars.borrower) > 0) {
-          if (address(vars.markets[marketIndexWithOffset]) == address(debt)) continue;
-
-          collateral = CErc20Delegate(address(vars.markets[marketIndexWithOffset]));
+        CTokenInterface randomMarket = vars.markets[marketIndexWithOffset];
+        address randomMarketAddress = address(randomMarket);
+        if (randomMarket.balanceOf(vars.borrower) > 0) {
+          if (randomMarketAddress == address(debt)) continue;
 
           // the collateral prices change
           MasterPriceOracle mpo = MasterPriceOracle(address(vars.comptroller.oracle()));
-          uint256 priceCollateral = mpo.getUnderlyingPrice(ICToken(address(collateral)));
+          uint256 priceCollateral = mpo.getUnderlyingPrice(ICToken(randomMarketAddress));
           vm.mockCall(
             address(mpo),
-            abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, ICToken(address(collateral))),
+            abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, ICToken(randomMarketAddress)),
             abi.encode(priceCollateral / 5)
           );
 
@@ -183,6 +183,7 @@ contract AnyLiquidationTest is BaseTest {
             continue;
           } else {
             emit log("has shortfall");
+            collateral = CErc20Delegate(randomMarketAddress);
             break;
           }
         }
