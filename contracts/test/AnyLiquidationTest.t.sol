@@ -68,7 +68,6 @@ contract AnyLiquidationTest is BaseTest {
       address bnbx = 0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275;
       address apeSwapRouter = 0xcF0feBd3f17CEf5b47b0cD257aCf6025c5BFf3b7;
       assetSpecificRouters[bnbx] = apeSwapRouter;
-
     } else if (block.chainid == POLYGON_MAINNET) {
       mostLiquidPair1 = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827); // USDC/WMATIC
       mostLiquidPair2 = IUniswapV2Pair(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
@@ -214,9 +213,9 @@ contract AnyLiquidationTest is BaseTest {
         address mimo80par20Market = 0xcb67Bd2aE0597eDb2426802CdF34bb4085d9483A;
         if (address(vars.debtMarket) != address(0) && address(vars.collateralMarket) != address(0)) {
           if (
-            vars.debtMarket.underlying() != ap.getAddress("wtoken")
-            && address(vars.collateralMarket) != bscBnbxMarket
-            && address(vars.collateralMarket) != mimo80par20Market
+            vars.debtMarket.underlying() != ap.getAddress("wtoken") &&
+            address(vars.collateralMarket) != bscBnbxMarket &&
+            address(vars.collateralMarket) != mimo80par20Market
           ) {
             emit log("found testable markets at random number");
             emit log_uint(random);
