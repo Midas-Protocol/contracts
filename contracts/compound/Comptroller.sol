@@ -921,10 +921,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
      * - the market fee
      */
     Exp memory totalPenaltyMantissa = add_(
-      add_(
-          Exp({ mantissa: liquidationIncentiveMantissa }),
-          Exp({ mantissa: protocolSeizeShareMantissa })),
-        Exp({ mantissa: feeSeizeShareMantissa })
+      add_(Exp({ mantissa: liquidationIncentiveMantissa }), Exp({ mantissa: protocolSeizeShareMantissa })),
+      Exp({ mantissa: feeSeizeShareMantissa })
     );
 
     numerator = mul_(totalPenaltyMantissa, Exp({ mantissa: priceBorrowedMantissa }));
