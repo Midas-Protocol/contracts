@@ -35,13 +35,13 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 
-  function testBsc() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testBsc() public fork(BSC_MAINNET) {
     testWhitelistRevert();
     testWhitelist();
     testUpgrade();
   }
 
-  function testPolygon() public forkAtBlock(POLYGON_MAINNET, 33063212) {
+  function testPolygon() public fork(POLYGON_MAINNET) {
     testWhitelistRevert();
     testWhitelist();
     testUpgrade();
