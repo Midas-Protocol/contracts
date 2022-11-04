@@ -6,7 +6,7 @@ import "./MidasFlywheelCore.sol";
 abstract contract CErc20 is ERC20 {
   function exchangeRateCurrent() external virtual returns (uint256);
 
-  function underlying() external view returns (address);
+  function underlying() external virtual view returns (address);
 }
 
 interface PriceOracle {
