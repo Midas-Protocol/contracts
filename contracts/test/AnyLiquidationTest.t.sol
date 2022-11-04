@@ -17,6 +17,7 @@ import "./config/BaseTest.t.sol";
 import "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
 import "../liquidators/CurveSwapLiquidator.sol";
 import "../liquidators/CurveSwapLiquidatorFunder.sol";
+import "../liquidators/XBombLiquidatorFunder.sol";
 
 contract AnyLiquidationTest is BaseTest {
   FuseSafeLiquidator fsl;
@@ -455,6 +456,17 @@ contract AnyLiquidationTest is BaseTest {
       }
 
       strategyData = abi.encode(outputTokenIndex, preferredOutputToken, ap.getAddress("wtoken"), address(curveOracle));
+    } else if (compareStrings(strategyContract, "XBombLiquidatorFunder")) {
+      outputToken = strategyOutputToken;
+
+      address xbomb = 0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b;
+      address bomb = 0x522348779DCb2911539e76A1042aA922F9C47Ee3;
+      {
+        // TODO remove after deploy
+        strategy = new XBombLiquidatorFunder();
+      }
+
+      strategyData = abi.encode(inputToken, xbomb, bomb);
     } else {
       emit log(strategyContract);
       emit log_address(address(strategy));
