@@ -458,14 +458,8 @@ contract AnyLiquidationTest is BaseTest {
       strategyData = abi.encode(outputTokenIndex, preferredOutputToken, ap.getAddress("wtoken"), address(curveOracle));
     } else if (compareStrings(strategyContract, "XBombLiquidatorFunder")) {
       outputToken = strategyOutputToken;
-
-      address xbomb = 0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b;
-      address bomb = 0x522348779DCb2911539e76A1042aA922F9C47Ee3;
-      {
-        // TODO remove after deploy
-        strategy = new XBombLiquidatorFunder();
-      }
-
+      address xbomb = inputToken;
+      address bomb = outputToken;
       strategyData = abi.encode(inputToken, xbomb, bomb);
     } else {
       emit log(strategyContract);
