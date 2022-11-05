@@ -174,7 +174,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
       strategyData = abi.encode(
         0,
         0x316622977073BBC3dF32E7d2A9B3c77596a0a603, // jbrl
-        payable (ap.getAddress("wtoken")),
+        ap.getAddress("wtoken"),
         0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA // oracle
       );
       vars.redemptionStrategyData[0] = strategyData;
@@ -226,7 +226,6 @@ contract FuseSafeLiquidatorTest is BaseTest {
   // ctokens seized 10738741294254050199
   // WBNB flash swapped 5551528605298770
   // BUSD seized 1873003268211131735
-
 
   // TODO test with marginal shortfall for liquidation penalty errors
 }
