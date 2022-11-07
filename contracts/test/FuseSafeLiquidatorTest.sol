@@ -192,9 +192,5 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 
-  // ctokens seized 10738741294254050199
-  // WBNB flash swapped 5551528605298770
-  // BUSD seized 1873003268211131735
-
   // TODO test with marginal shortfall for liquidation penalty errors
 }
