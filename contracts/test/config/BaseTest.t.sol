@@ -50,17 +50,17 @@ abstract contract BaseTest is Test {
       if (chainid == BSC_MAINNET) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("bsc")) + 100;
       } else if (chainid == BSC_CHAPEL) {
-        forkIds[chainid] =  vm.createFork(vm.rpcUrl("bsc_chapel")) + 100;
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("bsc_chapel")) + 100;
       } else if (chainid == MOONBEAM_MAINNET) {
-        forkIds[chainid] =  vm.createFork(vm.rpcUrl("moonbeam")) + 100;
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("moonbeam")) + 100;
       } else if (chainid == EVMOS_TESTNET) {
-        forkIds[chainid] =  vm.createFork(vm.rpcUrl("evmos_test")) + 100;
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("evmos_test")) + 100;
       } else if (chainid == POLYGON_MAINNET) {
-        forkIds[chainid] =  vm.createFork(vm.rpcUrl("polygon")) + 100;
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("polygon")) + 100;
       } else if (chainid == NEON_DEVNET) {
-        forkIds[chainid] =  vm.createFork(vm.rpcUrl("neon_dev")) + 100;
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("neon_dev")) + 100;
       } else if (chainid == ARBITRUM_ONE) {
-        forkIds[chainid] =  vm.createFork(vm.rpcUrl("arbitrum")) + 100;
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("arbitrum")) + 100;
       }
     }
     return forkIds[chainid] - 100;
