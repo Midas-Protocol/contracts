@@ -58,7 +58,8 @@ contract ProtocolRevenueTest is BaseTest {
         //        emit log_address(address(market));
         //        emit log_uint(fuseFees);
 
-        uint256 underlyingPrice = mpo.price(CErc20(address(market)).underlying());
+        // uint256 underlyingPrice = mpo.price(CErc20(address(market)).underlying());
+        uint256 underlyingPrice = mpo.getUnderlyingPrice(ICToken(address(market)));
         uint256 nativeFee = (fuseFees * underlyingPrice) / 1e18;
 
         fuseFeesTotal += nativeFee;
@@ -98,8 +99,8 @@ contract ProtocolRevenueTest is BaseTest {
 
           try plugin.performanceFee() returns (uint256 performanceFee) {
             uint256 performanceFeeAssets;
+            ERC20Upgradeable asset = ERC20Upgradeable(plugin.asset());
             {
-              ERC20Upgradeable asset = ERC20Upgradeable(plugin.asset());
               uint256 shareValue = plugin.convertToAssets(10**asset.decimals());
               uint256 supply = plugin.totalSupply();
               uint256 vaultShareHWM = plugin.vaultShareHWM();
@@ -108,8 +109,8 @@ contract ProtocolRevenueTest is BaseTest {
               performanceFeeAssets = plugin.previewRedeem(performanceFeeShares);
             }
 
-            uint256 underlyingPrice = mpo.price(plugin.asset());
-            uint256 nativeFee = (performanceFeeAssets * underlyingPrice) / 1e18;
+            uint256 underlyingPrice = mpo.price(address(asset));
+            uint256 nativeFee = (performanceFeeAssets * underlyingPrice * (10**(18 - asset.decimals()))) / 1e18;
 
             pluginFeesTotal += nativeFee;
           } catch {
@@ -149,8 +150,10 @@ contract ProtocolRevenueTest is BaseTest {
       for (uint8 j = 0; j < flywheels.length; j++) {
         MidasFlywheelCore flywheel = MidasFlywheelCore(flywheels[j]);
         try flywheel.performanceFee() returns (uint256 performanceFeeRewardTokens) {
-          uint256 rewardTokenPrice = mpo.price(address(flywheel.rewardToken()));
-          uint256 nativeFee = (performanceFeeRewardTokens * rewardTokenPrice) / 1e18;
+          ERC20 rewardToken = flywheel.rewardToken();
+          uint256 rewardTokenPrice = mpo.price(address(rewardToken));
+          uint256 nativeFee = (performanceFeeRewardTokens * rewardTokenPrice * (10**(18 - rewardToken.decimals()))) /
+            1e18;
 
           flywheelFeesTotal += nativeFee;
         } catch {
