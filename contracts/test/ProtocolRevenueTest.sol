@@ -96,8 +96,17 @@ contract ProtocolRevenueTest is BaseTest {
           address pluginAddress = address(pluginIERC4626);
           MidasERC4626 plugin = MidasERC4626(address(pluginAddress));
 
-          try plugin.performanceFee() returns (uint256 performanceFeeShares) {
-            uint256 performanceFeeAssets = plugin.previewRedeem(performanceFeeShares);
+          try plugin.performanceFee() returns (uint256 performanceFee) {
+            uint256 performanceFeeAssets;
+            {
+              ERC20Upgradeable asset = ERC20Upgradeable(plugin.asset());
+              uint256 shareValue = plugin.convertToAssets(10**asset.decimals());
+              uint256 supply = plugin.totalSupply();
+              uint256 vaultShareHWM = plugin.vaultShareHWM();
+              uint256 performanceFeeShares = (performanceFee * (shareValue - vaultShareHWM) * supply) / 1e36;
+
+              performanceFeeAssets = plugin.previewRedeem(performanceFeeShares);
+            }
 
             uint256 underlyingPrice = mpo.price(plugin.asset());
             uint256 nativeFee = (performanceFeeAssets * underlyingPrice) / 1e18;
