@@ -11,17 +11,16 @@ import "../midas/strategies/MidasERC4626.sol";
 import "../midas/strategies/flywheel/MidasFlywheelCore.sol";
 
 contract ProtocolRevenueTest is BaseTest {
-  
   MasterPriceOracle internal mpo;
   FusePoolDirectory internal fpd;
   FuseFeeDistributor internal ffd;
-  
+
   function afterForkSetUp() internal override {
     ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
   }
-  
+
   function testFuseAdminFeesBsc() public fork(BSC_MAINNET) {
     _testFuseAdminFees();
   }
@@ -60,7 +59,7 @@ contract ProtocolRevenueTest is BaseTest {
         //        emit log_uint(fuseFees);
 
         uint256 underlyingPrice = mpo.price(CErc20(address(market)).underlying());
-        uint256 nativeFee = fuseFees * underlyingPrice / 1e18;
+        uint256 nativeFee = (fuseFees * underlyingPrice) / 1e18;
 
         fuseFeesTotal += nativeFee;
       }
@@ -101,7 +100,7 @@ contract ProtocolRevenueTest is BaseTest {
             uint256 performanceFeeAssets = plugin.previewRedeem(performanceFeeShares);
 
             uint256 underlyingPrice = mpo.price(plugin.asset());
-            uint256 nativeFee = performanceFeeAssets * underlyingPrice / 1e18;
+            uint256 nativeFee = (performanceFeeAssets * underlyingPrice) / 1e18;
 
             pluginFeesTotal += nativeFee;
           } catch {
@@ -141,9 +140,8 @@ contract ProtocolRevenueTest is BaseTest {
       for (uint8 j = 0; j < flywheels.length; j++) {
         MidasFlywheelCore flywheel = MidasFlywheelCore(flywheels[j]);
         try flywheel.performanceFee() returns (uint256 performanceFeeRewardTokens) {
-
           uint256 rewardTokenPrice = mpo.price(address(flywheel.rewardToken()));
-          uint256 nativeFee = performanceFeeRewardTokens * rewardTokenPrice / 1e18;
+          uint256 nativeFee = (performanceFeeRewardTokens * rewardTokenPrice) / 1e18;
 
           flywheelFeesTotal += nativeFee;
         } catch {
