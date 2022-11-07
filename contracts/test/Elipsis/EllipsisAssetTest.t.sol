@@ -40,16 +40,4 @@ contract EllipsisAssetTest is AbstractAssetTest {
       test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
     }
   }
-
-  // function testAccumulatingRewardsOnDeposit() public {
-  //   this.runTest(EllipsisERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
-  // }
-
-  // function testAccumulatingRewardsOnWithdrawal() public {
-  //   this.runTest(EllipsisERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
-  // }
-
-  // function testClaimRewards() public {
-  //   this.runTest(EllipsisERC4626Test(address(test)).testClaimRewards);
-  // }
 }
