@@ -84,37 +84,6 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 
-  function testNonStrategyLiquidation() public fork(BSC_MAINNET) {
-    ICErc20 debtMarket = ICErc20(0xFEc2B82337dC69C61195bCF43606f46E9cDD2930);
-    ICErc20 collateralMarket = ICErc20(0x1f6B34d12301d6bf0b52Db7938Fc90ab4f12fE95);
-    address borrower = 0x03092C07fa6a4AdBdf219081BEDEdf7006Dd6874;
-
-    address comp = debtMarket.comptroller();
-    IComptroller comptroller = IComptroller(comp);
-    MasterPriceOracle mpo = MasterPriceOracle(address(comptroller.oracle()));
-    uint256 initialPrice = mpo.getUnderlyingPrice(collateralMarket);
-    uint256 priceCollateral = initialPrice;
-
-    fsl.safeLiquidateToTokensWithFlashLoan(
-      FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
-        borrower,
-        5551528605298770,
-        debtMarket,
-        collateralMarket,
-        IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16),
-        0,
-        0x0000000000000000000000000000000000000000,
-        IUniswapV2Router02(uniswapRouter),
-        IUniswapV2Router02(uniswapRouter),
-        new IRedemptionStrategy[](0),
-        new bytes[](0),
-        0,
-        new IFundsConversionStrategy[](0),
-        new bytes[](0)
-      )
-    );
-  }
-
   struct CurveStrategyData {
     ICErc20 debtMarket;
     ICErc20 collateralMarket;
