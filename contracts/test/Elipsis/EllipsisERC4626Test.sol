@@ -26,6 +26,7 @@ struct RewardsCycle {
 
 interface IEllipsisRewardToken {
   function mint(address, uint256) external;
+
   function burnFrom(address, uint256) external;
 }
 
@@ -63,11 +64,7 @@ contract EllipsisERC4626Test is AbstractERC4626Test {
     flywheel.setFlywheelRewards(flywheelRewards);
 
     EllipsisERC4626 EllipsisERC4626 = new EllipsisERC4626();
-    EllipsisERC4626.initialize(
-      ERC20Upgradeable(asset),
-      FlywheelCore(address(flywheel)),
-      lpTokenStaker
-    );
+    EllipsisERC4626.initialize(ERC20Upgradeable(asset), FlywheelCore(address(flywheel)), lpTokenStaker);
 
     initialStrategyBalance = getStrategyBalance();
 

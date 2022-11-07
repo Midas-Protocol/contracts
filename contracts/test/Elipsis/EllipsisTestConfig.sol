@@ -12,9 +12,7 @@ contract EllipsisTestConfigStorage is ITestConfigStorage {
 
   constructor() {
     // BUSD/USDD
-    testConfigs.push(
-      EllipsisTestConfig(0xB343F4cDE5e2049857898E800CD385247e21836D)
-    );
+    testConfigs.push(EllipsisTestConfig(0xB343F4cDE5e2049857898E800CD385247e21836D));
   }
 
   function getTestConfig(uint256 i) public view returns (bytes memory) {
