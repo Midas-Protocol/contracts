@@ -157,12 +157,12 @@ contract ContractsUpgradesTest is BaseTest {
       address[] memory flywheels = pool.getRewardsDistributors();
       for (uint8 j = 0; j < flywheels.length; j++) {
 
-        address expBscFlywheel = 0x89293CeaE1822CE4d5510d3Dd8248F6552FB60F4;
-        address dddBscFlywheel = 0xD146adB6B07c7a31174FFC8B001dCa7AAF8Ff9E0;
-        address mimoPolygonFlywheel = 0x5fF63E442AC4724EC342f4a3d26924233832EcBB;
-        if (flywheels[j] == dddBscFlywheel || flywheels[j] == expBscFlywheel || flywheels[j] == mimoPolygonFlywheel) {
-          continue;
-        }
+//        address expBscFlywheel = 0x89293CeaE1822CE4d5510d3Dd8248F6552FB60F4;
+//        address dddBscFlywheel = 0xD146adB6B07c7a31174FFC8B001dCa7AAF8Ff9E0;
+//        address mimoPolygonFlywheel = 0x5fF63E442AC4724EC342f4a3d26924233832EcBB;
+//        if (flywheels[j] == dddBscFlywheel || flywheels[j] == expBscFlywheel || flywheels[j] == mimoPolygonFlywheel) {
+//          continue;
+//        }
 
         MidasFlywheelCore flywheel = MidasFlywheelCore(flywheels[j]);
 
