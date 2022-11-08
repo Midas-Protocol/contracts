@@ -9,6 +9,7 @@ import "../compound/CErc20.sol";
 import "../compound/CErc20PluginRewardsDelegate.sol";
 import "../midas/strategies/MidasERC4626.sol";
 import "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import "../midas/strategies/flywheel/MidasFlywheel.sol";
 
 contract ProtocolRevenueTest is BaseTest {
   MasterPriceOracle internal mpo;
@@ -149,11 +150,17 @@ contract ProtocolRevenueTest is BaseTest {
       address[] memory flywheels = pool.getRewardsDistributors();
       for (uint8 j = 0; j < flywheels.length; j++) {
         MidasFlywheelCore flywheel = MidasFlywheelCore(flywheels[j]);
-        try flywheel.performanceFee() returns (uint256 performanceFeeRewardTokens) {
+        try flywheel.performanceFee() returns (uint256 performanceFee) {
+          uint256 performanceFeeRewardTokens = flywheel.rewardsAccrued(flywheel.feeRecipient());
+          emit log("rewards accrued");
+          emit log_uint(performanceFeeRewardTokens);
           ERC20 rewardToken = flywheel.rewardToken();
           uint256 rewardTokenPrice = mpo.price(address(rewardToken));
-          uint256 nativeFee = (performanceFeeRewardTokens * rewardTokenPrice * (10**(18 - rewardToken.decimals()))) /
-            1e18;
+          emit log("decimals");
+          emit log_uint(rewardToken.decimals());
+          uint256 nativeFee = performanceFeeRewardTokens * rewardTokenPrice / 1e18;
+          emit log("native accrued");
+          emit log_uint(nativeFee);
 
           flywheelFeesTotal += nativeFee;
         } catch {
