@@ -60,8 +60,9 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   }
 
   function reinitialize() public onlyOwnerOrAdmin {
-    performanceFee = 10e16; // 10%
-    feeRecipient = 0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E;
+    uint256 _performanceFee = 10e16; // 10%
+    address _feeRecipient = 0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E;
+    _updateFeeSettings(_performanceFee, _feeRecipient);
   }
 
   /*///////////////////////////////////////////////////////////////
@@ -207,6 +208,10 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
    * @dev Claim rewards first from the previous feeRecipient before changing it
    */
   function updateFeeSettings(uint256 _performanceFee, address _feeRecipient) external onlyOwner {
+    _updateFeeSettings(_performanceFee, _feeRecipient);
+  }
+
+  function _updateFeeSettings(uint256 _performanceFee, address _feeRecipient) internal {
     emit UpdatedFeeSettings(performanceFee, _performanceFee, feeRecipient, _feeRecipient);
 
     if (feeRecipient != _feeRecipient) {
