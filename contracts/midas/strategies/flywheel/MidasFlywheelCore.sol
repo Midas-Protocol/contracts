@@ -15,7 +15,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   using SafeCastLib for uint256;
 
   /// @notice How much rewardsToken will be send to treasury
-  uint256 public performanceFee = 5e16; // 5%
+  uint256 public performanceFee;
 
   /// @notice Address that gets rewardsToken accrued by performanceFee
   address public feeRecipient; // TODO whats the default address?
@@ -57,6 +57,10 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     flywheelBooster = _flywheelBooster;
 
     _transferOwnership(_owner);
+  }
+
+  function reinitialize() reinitializer(2) public {
+    performanceFee = 5e16; // 5%
   }
 
   /*///////////////////////////////////////////////////////////////
@@ -205,7 +209,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     emit UpdatedFeeSettings(performanceFee, _performanceFee, feeRecipient, _feeRecipient);
 
     if (feeRecipient != _feeRecipient) {
-      rewardsAccrued[_feeRecipient] = rewardsAccrued[feeRecipient];
+      rewardsAccrued[_feeRecipient] += rewardsAccrued[feeRecipient];
       rewardsAccrued[feeRecipient] = 0;
     }
     performanceFee = _performanceFee;
