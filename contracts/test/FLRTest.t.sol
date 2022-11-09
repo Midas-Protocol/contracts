@@ -44,8 +44,9 @@ contract FLRTest is BaseTest {
   FlywheelStaticRewards fwsr;
 
   function testFuseFlywheelLensRouter() public fork(NEON_DEVNET) {
+    address mkt = 0xfcA37c71230b5F650C068bC0fC43aC92F9cA9bFD;
     fwc = MidasFlywheelCore(0x4059eDB9647f04aAF82CCEdF270922D1AFbD44ad);
-    (uint224 index, uint32 lastUpdatedTimestamp) = fwc.strategyState(ERC20(0xfcA37c71230b5F650C068bC0fC43aC92F9cA9bFD));
+    (uint224 index, uint32 lastUpdatedTimestamp) = fwc.strategyState(ERC20(mkt));
 
     emit log_named_uint("index", index);
     emit log_named_uint("lastUpdatedTimestamp", lastUpdatedTimestamp);
@@ -53,12 +54,10 @@ contract FLRTest is BaseTest {
 
     fwsr = FlywheelStaticRewards(0xb4bd9Ec6838BE038C4f965333787b859b7c3F1a2);
 
-    (uint224 rewardsPerSecond, uint32 rewardsEndTimestamp) = fwsr.rewardsInfo(
-      ERC20(0xfcA37c71230b5F650C068bC0fC43aC92F9cA9bFD)
-    );
+    (uint224 rewardsPerSecond, uint32 rewardsEndTimestamp) = fwsr.rewardsInfo(ERC20(mkt));
 
     vm.prank(address(fwc));
-    uint256 accrued = fwsr.getAccruedRewards(ERC20(0xfcA37c71230b5F650C068bC0fC43aC92F9cA9bFD), lastUpdatedTimestamp);
+    uint256 accrued = fwsr.getAccruedRewards(ERC20(mkt), lastUpdatedTimestamp);
 
     emit log_named_uint("accrued", accrued);
     emit log_named_uint("rewardsPerSecond", rewardsPerSecond);
@@ -69,6 +68,11 @@ contract FLRTest is BaseTest {
 
     ri = fwlr.getMarketRewardsInfo(IComptroller(0x8727FA63B01525931688DbaDd3e50f36f25fFD68));
     for (uint256 i = 0; i < ri.length; i++) {
+      if (address(ri[i].market) != mkt) {
+        emit log("NO REWARDS INFO");
+        continue;
+      }
+
       emit log("");
       emit log_named_address("RUNNING FOR MARKET", address(ri[i].market));
       emit log_named_uint("underlyingPrice", ri[i].underlyingPrice);
@@ -110,6 +114,11 @@ contract FLRTest is BaseTest {
 
     ri = fwlr.getMarketRewardsInfo(IComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117));
     for (uint256 i = 0; i < ri.length; i++) {
+      if (address(ri[i].market) != mkt) {
+        emit log("NO REWARDS INFO");
+        continue;
+      }
+
       emit log("");
       emit log_named_address("RUNNING FOR MARKET", address(ri[i].market));
       emit log_named_uint("underlyingPrice", ri[i].underlyingPrice);
