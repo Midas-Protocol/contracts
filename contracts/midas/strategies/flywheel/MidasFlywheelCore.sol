@@ -15,7 +15,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   using SafeCastLib for uint256;
 
   /// @notice How much rewardsToken will be send to treasury
-  uint256 public performanceFee = 5e16; // 5%
+  uint256 public performanceFee;
 
   /// @notice Address that gets rewardsToken accrued by performanceFee
   address public feeRecipient; // TODO whats the default address?
@@ -57,6 +57,12 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     flywheelBooster = _flywheelBooster;
 
     _transferOwnership(_owner);
+  }
+
+  function reinitialize() public onlyOwnerOrAdmin {
+    uint256 _performanceFee = 10e16; // 10%
+    address _feeRecipient = 0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E;
+    _updateFeeSettings(_performanceFee, _feeRecipient);
   }
 
   /*///////////////////////////////////////////////////////////////
@@ -202,10 +208,14 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
    * @dev Claim rewards first from the previous feeRecipient before changing it
    */
   function updateFeeSettings(uint256 _performanceFee, address _feeRecipient) external onlyOwner {
+    _updateFeeSettings(_performanceFee, _feeRecipient);
+  }
+
+  function _updateFeeSettings(uint256 _performanceFee, address _feeRecipient) internal {
     emit UpdatedFeeSettings(performanceFee, _performanceFee, feeRecipient, _feeRecipient);
 
     if (feeRecipient != _feeRecipient) {
-      rewardsAccrued[_feeRecipient] = rewardsAccrued[feeRecipient];
+      rewardsAccrued[_feeRecipient] += rewardsAccrued[feeRecipient];
       rewardsAccrued[feeRecipient] = 0;
     }
     performanceFee = _performanceFee;

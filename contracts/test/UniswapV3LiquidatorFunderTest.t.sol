@@ -23,6 +23,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
   IERC20Upgradeable token1;
   IERC20Upgradeable token2;
   IUniswapV2Router02 uniswapRouter;
+  address univ3SwapRouter;
 
   uint256 poolFee;
   uint256 repayAmount;
@@ -40,6 +41,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
       setUpPool("arbitrum-test", false, 0.1e18, 1.1e18);
       uniswapv3Liquidator = new UniswapV3LiquidatorFunder();
       uniswapRouter = IUniswapV2Router02(0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506);
+      univ3SwapRouter = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
       token1 = IERC20Upgradeable(0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a); // GMX, 18 decimals
       token2 = IERC20Upgradeable(0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8); // USDC, 6 decimals
       poolFee = 3000;
@@ -53,6 +55,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
       quoter = new Quoter(0x1F98431c8aD98523631AE4a59f267346ea31F984);
       setUpPool("polygon-test", false, 0.1e18, 1.1e18);
       uniswapRouter = IUniswapV2Router02(0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506);
+      univ3SwapRouter = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
       token1 = IERC20Upgradeable(0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128); // PAR, 18 decimals
       token2 = IERC20Upgradeable(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174); // USDC, 6 decimals
       poolFee = 500;
@@ -170,7 +173,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
 
     vars.fundingStrategies = new IFundsConversionStrategy[](1);
     vars.data = new bytes[](1);
-    vars.data[0] = abi.encode(token2, token1, poolFee, ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564), quoter);
+    vars.data[0] = abi.encode(token2, token1, poolFee, ISwapRouter(univ3SwapRouter), quoter);
     vars.fundingStrategies[0] = uniswapv3Liquidator;
 
     // all strategies need to be whitelisted
