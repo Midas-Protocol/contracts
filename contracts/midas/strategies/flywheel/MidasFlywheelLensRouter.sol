@@ -44,6 +44,10 @@ contract MidasFlywheelLensRouter {
     uint256 formattedAPR;
     address flywheel;
     address rewardToken;
+    // uint224 indexAfter;
+    // uint224 indexBefore;
+    uint32 lastUpdatedTimestampAfter;
+    uint32 lastUpdatedTimestampBefore;
   }
 
   function getMarketRewardsInfo(IComptroller comptroller) external returns (MarketRewardsInfo[] memory) {
@@ -68,6 +72,10 @@ contract MidasFlywheelLensRouter {
           rewardTokenPrices[j] = oracle.price(rewardToken);
         }
         uint256 rewardSpeedPerSecondPerToken;
+        // uint224 indexBefore;
+        // uint224 indexAfter;
+        uint32 lastUpdatedTimestampBefore;
+        uint32 lastUpdatedTimestampAfter;
         {
           (uint224 indexBefore, uint32 lastUpdatedTimestampBefore) = flywheel.strategyState(market);
           flywheel.accrue(market, address(0));
@@ -84,7 +92,11 @@ contract MidasFlywheelLensRouter {
           formattedAPR: (((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] * 365.25 days) / price) * 1e18) /
             market.exchangeRateCurrent(),
           flywheel: address(flywheel),
-          rewardToken: rewardTokens[j]
+          rewardToken: rewardTokens[j],
+          // indexAfter: indexAfter,
+          // indexBefore: indexBefore
+          lastUpdatedTimestampAfter: lastUpdatedTimestampAfter,
+          lastUpdatedTimestampBefore: lastUpdatedTimestampBefore
         });
       }
 
