@@ -1432,6 +1432,27 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
   }
 
+  function _initImplementation(address extension, bytes calldata fns) external returns (uint256) {
+    if (!hasAdminRights()) {
+      return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_OWNER_CHECK);
+    }
+
+    (bool success, ) = extension.delegatecall(msg.data);
+
+    assembly {
+      let free_mem_ptr := mload(0x40)
+      returndatacopy(free_mem_ptr, 0, returndatasize())
+
+      switch success
+      case 0 {
+        revert(free_mem_ptr, returndatasize())
+      }
+      default {
+        return(free_mem_ptr, returndatasize())
+      }
+    }
+  }
+
   /*** Helper Functions ***/
 
   /**
