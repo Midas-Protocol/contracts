@@ -93,7 +93,7 @@ contract MidasFlywheelLensRouter {
         rewardsInfo[j] = RewardsInfo({
           rewardSpeedPerSecondPerToken: rewardSpeedPerSecondPerToken,
           rewardTokenPrice: rewardTokenPrices[j],
-          formattedAPR: ((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] * 365.25 days) / price) / market.exchangeRateCurrent(),
+          formattedAPR: ((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] / price) * 365.25 days) / market.exchangeRateCurrent(),
           flywheel: address(flywheel),
           rewardToken: rewardTokens[j],
           // indexAfter: indexAfter,
