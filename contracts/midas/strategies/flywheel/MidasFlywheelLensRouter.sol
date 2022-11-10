@@ -67,9 +67,9 @@ contract MidasFlywheelLensRouter {
       for (uint256 j = 0; j < flywheels.length; j++) {
         MidasFlywheelCore flywheel = flywheels[j];
         if (i == 0) {
-          address rewardToken = address(flywheel.rewardToken());
-          rewardTokens[j] = rewardToken;
-          rewardTokenPrices[j] = oracle.price(rewardToken);
+          ERC20 rewardToken = flywheel.rewardToken();
+          rewardTokens[j] = address(rewardToken);
+          rewardTokenPrices[j] = oracle.price(address(rewardToken)) * (10 ** (18 - rewardToken.decimals())); //  price * 10 ** (18 - rewardToken.decimals)
         }
         uint256 rewardSpeedPerSecondPerToken;
         // uint224 indexBefore;
@@ -81,16 +81,19 @@ contract MidasFlywheelLensRouter {
           flywheel.accrue(market, address(0));
           (uint224 indexAfter, uint32 lastUpdatedTimestampAfter) = flywheel.strategyState(market);
           if (lastUpdatedTimestampAfter > lastUpdatedTimestampBefore) {
+            // scale it by  10 ** rewardToken.decimals
             rewardSpeedPerSecondPerToken =
-              (indexAfter - indexBefore) /
+            (
+              10 ** flywheel.rewardToken().decimals() *
+              (indexAfter - indexBefore)
+            ) /
               (lastUpdatedTimestampAfter - lastUpdatedTimestampBefore);
           }
         }
         rewardsInfo[j] = RewardsInfo({
           rewardSpeedPerSecondPerToken: rewardSpeedPerSecondPerToken,
           rewardTokenPrice: rewardTokenPrices[j],
-          formattedAPR: (((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] * 365.25 days) / price) * 1e18) /
-            market.exchangeRateCurrent(),
+          formattedAPR: ((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] * 365.25 days) / price) / market.exchangeRateCurrent(),
           flywheel: address(flywheel),
           rewardToken: rewardTokens[j],
           // indexAfter: indexAfter,
