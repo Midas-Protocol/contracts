@@ -62,7 +62,7 @@ contract MidasFlywheelLensRouter {
       RewardsInfo[] memory rewardsInfo = new RewardsInfo[](flywheels.length);
 
       CErc20Token market = markets[i];
-      uint256 price = oracle.price(market.underlying());
+      uint256 price = oracle.price(market.underlying()); // scaled by 1e18
 
       for (uint256 j = 0; j < flywheels.length; j++) {
         MidasFlywheelCore flywheel = flywheels[j];
@@ -93,7 +93,7 @@ contract MidasFlywheelLensRouter {
         rewardsInfo[j] = RewardsInfo({
           rewardSpeedPerSecondPerToken: rewardSpeedPerSecondPerToken,
           rewardTokenPrice: rewardTokenPrices[j],
-          formattedAPR: ((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] / price) * 365.25 days) / market.exchangeRateCurrent(),
+          formattedAPR: (((rewardSpeedPerSecondPerToken * rewardTokenPrices[j]) / price) * 365.25 days) / market.exchangeRateCurrent(),
           flywheel: address(flywheel),
           rewardToken: rewardTokens[j],
           // indexAfter: indexAfter,
