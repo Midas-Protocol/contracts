@@ -8,14 +8,14 @@ import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 contract WombatLpTokenPriceOracleTest is BaseTest {
   WombatLpTokenPriceOracle private oracle;
 
-  function setUp() public forkAtBlock(BSC_MAINNET, 22933276) {
-    oracle = new WombatLpTokenPriceOracle(MasterPriceOracle(ap.getAddress("MasterPriceOracle")));
+  function afterForkSetUp() internal override {
+    oracle = new WombatLpTokenPriceOracle();
   }
 
-  function testPrice() public {
+  function testPrice() public forkAtBlock(BSC_MAINNET, 22933276) {
     // price for Wombat Wrapped BNB asset
+    vm.prank(ap.getAddress("MasterPriceOracle"));
     uint256 price = oracle.price(0x74f019A5C4eD2C2950Ce16FaD7Af838549092c5b);
-    emit log_uint(price);
-    assertEq(price, 939502768449285698);
+    assertEq(price, 1e18);
   }
 }

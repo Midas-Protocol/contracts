@@ -13,17 +13,19 @@ import "../BasePriceOracle.sol";
 interface IWombatLpAsset {
   function cash() external view returns (uint256);
 
+  function underlyingTokenBalance() external view returns (uint256);
+
   function totalSupply() external view returns (uint256);
 
   function underlyingToken() external view returns (address);
+
+  function pool() external view returns (address);
+
+  function liability() external view returns (uint256);
 }
 
 contract WombatLpTokenPriceOracle is IPriceOracle, BasePriceOracle {
-  MasterPriceOracle public immutable MASTER_PRICE_ORACLE;
-
-  constructor(MasterPriceOracle _masterPriceOracle) {
-    MASTER_PRICE_ORACLE = _masterPriceOracle;
-  }
+  constructor() {}
 
   function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
     if (cToken.isCEther()) return 1e18;
@@ -41,18 +43,19 @@ contract WombatLpTokenPriceOracle is IPriceOracle, BasePriceOracle {
   }
 
   function _price(address asset) internal view returns (uint256) {
-    address underlying = IWombatLpAsset(asset).underlyingToken();
-
-    // balance of underlying asset that vault contains
-    uint256 underlyingCash = IWombatLpAsset(asset).cash();
     // total supply of vault token
     uint256 assetTotalSupply = IWombatLpAsset(asset).totalSupply();
 
     if (assetTotalSupply == 0) return 0;
 
-    uint256 underlyingPrice = MASTER_PRICE_ORACLE.price(underlying);
+    address underlying = IWombatLpAsset(asset).underlyingToken();
 
-    return (underlyingPrice * underlyingCash) / assetTotalSupply;
+    // balance of underlying asset that vault contains
+    uint256 underlyingLiability = IWombatLpAsset(asset).liability();
+
+    uint256 underlyingPrice = BasePriceOracle(msg.sender).price(underlying);
+
+    return (underlyingPrice * underlyingLiability) / assetTotalSupply;
   }
 
   function price(address asset) external view override returns (uint256) {
