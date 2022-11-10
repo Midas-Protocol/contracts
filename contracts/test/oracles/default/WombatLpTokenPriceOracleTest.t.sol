@@ -13,7 +13,7 @@ contract WombatLpTokenPriceOracleTest is BaseTest {
   }
 
   function testPrice() public {
-    // price for Wombex WBNB asset
+    // price for Wombat Wrapped BNB asset
     uint256 price = oracle.price(0x74f019A5C4eD2C2950Ce16FaD7Af838549092c5b);
     emit log_uint(price);
     assertEq(price, 939502768449285698);
