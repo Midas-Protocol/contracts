@@ -2,14 +2,14 @@
 pragma solidity >=0.8.0;
 
 import "../../config/BaseTest.t.sol";
-import { WombexLpTokenPriceOracle } from "../../../oracles/default/WombexLpTokenPriceOracle.sol";
+import { WombatLpTokenPriceOracle } from "../../../oracles/default/WombatLpTokenPriceOracle.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 
-contract WombexLpTokenPriceOracleTest is BaseTest {
-  WombexLpTokenPriceOracle private oracle;
+contract WombatLpTokenPriceOracleTest is BaseTest {
+  WombatLpTokenPriceOracle private oracle;
 
   function setUp() public forkAtBlock(BSC_MAINNET, 22933276) {
-    oracle = new WombexLpTokenPriceOracle(MasterPriceOracle(ap.getAddress("MasterPriceOracle")));
+    oracle = new WombatLpTokenPriceOracle(MasterPriceOracle(ap.getAddress("MasterPriceOracle")));
   }
 
   function testPrice() public {

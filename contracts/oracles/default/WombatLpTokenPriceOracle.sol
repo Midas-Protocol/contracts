@@ -10,7 +10,7 @@ import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import "../../external/compound/IPriceOracle.sol";
 import "../BasePriceOracle.sol";
 
-interface IWombexLpAsset {
+interface IWombatLpAsset {
   function cash() external view returns (uint256);
 
   function totalSupply() external view returns (uint256);
@@ -18,7 +18,7 @@ interface IWombexLpAsset {
   function underlyingToken() external view returns (address);
 }
 
-contract WombexLpTokenPriceOracle is IPriceOracle, BasePriceOracle {
+contract WombatLpTokenPriceOracle is IPriceOracle, BasePriceOracle {
   MasterPriceOracle public immutable MASTER_PRICE_ORACLE;
 
   constructor(MasterPriceOracle _masterPriceOracle) {
@@ -41,12 +41,12 @@ contract WombexLpTokenPriceOracle is IPriceOracle, BasePriceOracle {
   }
 
   function _price(address asset) internal view returns (uint256) {
-    address underlying = IWombexLpAsset(asset).underlyingToken();
+    address underlying = IWombatLpAsset(asset).underlyingToken();
 
     // balance of underlying asset that vault contains
-    uint256 underlyingCash = IWombexLpAsset(asset).cash();
+    uint256 underlyingCash = IWombatLpAsset(asset).cash();
     // total supply of vault token
-    uint256 assetTotalSupply = IWombexLpAsset(asset).totalSupply();
+    uint256 assetTotalSupply = IWombatLpAsset(asset).totalSupply();
 
     if (assetTotalSupply == 0) return 0;
 
