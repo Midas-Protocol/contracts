@@ -21,9 +21,7 @@ interface IWombexLpAsset {
 contract WombexLpTokenPriceOracle is IPriceOracle, BasePriceOracle {
   MasterPriceOracle public immutable MASTER_PRICE_ORACLE;
 
-  constructor(
-    MasterPriceOracle _masterPriceOracle
-  ) {
+  constructor(MasterPriceOracle _masterPriceOracle) {
     MASTER_PRICE_ORACLE = _masterPriceOracle;
   }
 
@@ -36,9 +34,10 @@ contract WombexLpTokenPriceOracle is IPriceOracle, BasePriceOracle {
 
     uint256 assetDecimals = uint256(ERC20Upgradeable(asset).decimals());
 
-    return assetDecimals <= 18
-      ? uint256(oraclePrice) * (10**(18 - assetDecimals))
-      : uint256(oraclePrice) / (10**(assetDecimals - 18));
+    return
+      assetDecimals <= 18
+        ? uint256(oraclePrice) * (10**(18 - assetDecimals))
+        : uint256(oraclePrice) / (10**(assetDecimals - 18));
   }
 
   function _price(address asset) internal view returns (uint256) {
@@ -53,7 +52,7 @@ contract WombexLpTokenPriceOracle is IPriceOracle, BasePriceOracle {
 
     uint256 underlyingPrice = MASTER_PRICE_ORACLE.price(underlying);
 
-    return underlyingPrice * underlyingCash / assetTotalSupply;
+    return (underlyingPrice * underlyingCash) / assetTotalSupply;
   }
 
   function price(address asset) external view override returns (uint256) {
