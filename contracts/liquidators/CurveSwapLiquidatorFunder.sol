@@ -18,16 +18,16 @@ contract CurveSwapLiquidatorFunder is CurveSwapLiquidator, IFundsConversionStrat
   function estimateInputAmount(uint256 outputAmount, bytes memory strategyData)
     external
     view
-    returns (IERC20Upgradeable, uint256 inputAmount)
+    returns (IERC20Upgradeable, uint256)
   {
-    (ICurvePool curvePool, int128 i, int128 j, address jToken, ) = abi.decode(
+    (ICurvePool curvePool, int128 i, int128 j, , ) = abi.decode(
       strategyData,
       (ICurvePool, int128, int128, address, address)
     );
 
     IERC20MetadataUpgradeable inputMetadataToken = IERC20MetadataUpgradeable(curvePool.coins(uint256(int256(i))));
-    uint256 inputAmountGuesstimate = guesstimateInputAmount(curvePool, i, j, jToken, inputMetadataToken, outputAmount);
-    inputAmount = binSearch(
+    uint256 inputAmountGuesstimate = guesstimateInputAmount(curvePool, i, j, inputMetadataToken, outputAmount);
+    uint256 inputAmount = binSearch(
       curvePool,
       i,
       j,
@@ -43,13 +43,14 @@ contract CurveSwapLiquidatorFunder is CurveSwapLiquidator, IFundsConversionStrat
     ICurvePool curvePool,
     int128 i,
     int128 j,
-    address jToken,
     IERC20MetadataUpgradeable inputMetadataToken,
     uint256 outputAmount
   ) internal view returns (uint256) {
-    uint256 oneUnitAsOutputToken = curvePool.get_dy(i, j, 10**inputMetadataToken.decimals());
-
-    return (outputAmount * (10**IERC20MetadataUpgradeable(jToken).decimals())) / oneUnitAsOutputToken;
+    uint256 oneInputToken = 10**inputMetadataToken.decimals();
+    uint256 outputTokensForOneInputToken = curvePool.get_dy(i, j, oneInputToken);
+    // inputAmount / outputAmount = oneInputToken / outputTokensForOneInputToken
+    uint256 inputAmount = (outputAmount * oneInputToken) / outputTokensForOneInputToken;
+    return inputAmount;
   }
 
   function binSearch(
@@ -64,6 +65,7 @@ contract CurveSwapLiquidatorFunder is CurveSwapLiquidator, IFundsConversionStrat
 
     uint256 mid = (low + high) / 2;
     uint256 outputAmount = curvePool.get_dy(i, j, mid);
+    if (outputAmount == 0) revert("output amount 0");
     // output can be up to 10% in excess
     if (outputAmount >= value && outputAmount <= (11 * value) / 10) return mid;
     else if (outputAmount > value) {

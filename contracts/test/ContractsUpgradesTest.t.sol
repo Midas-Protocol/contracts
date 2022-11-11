@@ -9,6 +9,8 @@ import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTok
 import { CurveV2LpTokenPriceOracleNoRegistry } from "../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
 
 import { BeefyERC4626 } from "../midas/strategies/BeefyERC4626.sol";
+import "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import "../midas/strategies/flywheel/MidasFlywheel.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -17,9 +19,7 @@ contract ContractsUpgradesTest is BaseTest {
   // taken from ERC1967Upgrade
   bytes32 internal constant _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
 
-  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {}
-
-  function testUpgradeCurveOracle() public {
+  function testUpgradeCurveOracle() public fork(BSC_MAINNET) {
     address contractToTest = 0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA; // CurveLpTokenPriceOracleNoRegistry proxy
     address twoBrl = 0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9;
     address poolOf2Brl = 0xad51e40D8f255dba1Ad08501D6B1a6ACb7C188f3;
@@ -50,7 +50,7 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(poolAfter, poolOf2Brl, "2brl pool does not match");
   }
 
-  function testFusePoolDirectoryUpgrade() public {
+  function testFusePoolDirectoryUpgrade() public fork(BSC_MAINNET) {
     address contractToTest = 0x295d7347606F4bd810C8296bb8d75D657001fcf7; // FusePoolDirectory proxy
 
     // before upgrade
@@ -86,7 +86,7 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
-  function testFuseFeeDistributorUpgrade() public {
+  function testFuseFeeDistributorUpgrade() public fork(BSC_MAINNET) {
     address contractToTest = 0xFc1f56C58286E7215701A773b61bFf2e18A177dE; // FFD proxy
     address oldCercDelegate = 0x94C50805bC16737ead84e25Cd5Aa956bCE04BBDF;
 
@@ -136,25 +136,47 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
-  function testCurveLpOracle() public {
-    vm.rollFork(21721830);
+  function testFlywheelReinitializeBsc() public fork(BSC_MAINNET) {
+    _testFlywheelReinitialize();
+  }
 
-    address oracleAddress = 0x97A6E1182A85380BaeF265F9BbADd6296515Dccf;
+  function testFlywheelReinitializePolygon() public fork(POLYGON_MAINNET) {
+    _testFlywheelReinitialize();
+  }
 
-    CurveV2LpTokenPriceOracleNoRegistry oracle = CurveV2LpTokenPriceOracleNoRegistry(oracleAddress);
+  function testFlywheelReinitializeMoonbeam() public fork(MOONBEAM_MAINNET) {
+    _testFlywheelReinitialize();
+  }
 
-    emit log_address(oracle.owner());
+  function _testFlywheelReinitialize() internal {
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
 
-    {
-      CurveV2LpTokenPriceOracleNoRegistry newImpl = new CurveV2LpTokenPriceOracleNoRegistry();
-      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(oracleAddress));
-      bytes32 bytesAtSlot = vm.load(address(oracleAddress), _ADMIN_SLOT);
-      address admin = address(uint160(uint256(bytesAtSlot)));
+    for (uint8 i = 0; i < pools.length; i++) {
+      Comptroller pool = Comptroller(pools[i].comptroller);
+      address[] memory flywheels = pool.getRewardsDistributors();
+      for (uint8 j = 0; j < flywheels.length; j++) {
+        MidasFlywheelCore flywheel = MidasFlywheelCore(flywheels[j]);
 
-      // oracle.reinitialize(address(1), address(2));
-      bytes memory data = abi.encodeWithSelector(newImpl.reinitialize.selector, address(1), address(2));
-      vm.prank(admin);
-      proxy.upgradeToAndCall(address(newImpl), data);
+        // upgrade
+        TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(flywheels[j]));
+        bytes32 bytesAtSlot = vm.load(
+          address(proxy),
+          0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103
+        );
+        address admin = address(uint160(uint256(bytesAtSlot)));
+
+        if (admin != address(0)) {
+          // emit log_address(admin);
+          MidasFlywheelCore newImpl = new MidasFlywheelCore();
+          vm.prank(admin);
+          // proxy.upgradeToAndCall(address(newImpl), flywheel.reinitialize.selector);
+          proxy.upgradeTo(address(newImpl));
+
+          vm.prank(flywheel.owner());
+          flywheel.reinitialize();
+        }
+      }
     }
   }
 }

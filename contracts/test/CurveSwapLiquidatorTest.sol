@@ -6,13 +6,14 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 import "../external/curve/ICurvePool.sol";
 import "../compound/EIP20NonStandardInterface.sol";
 import "../compound/JumpRateModel.sol";
+import "../external/compound/ICErc20.sol";
 
 import { CurveSwapLiquidatorFunder } from "../liquidators/CurveSwapLiquidatorFunder.sol";
 
 contract CurveSwapLiquidatorTest is BaseTest {
   CurveSwapLiquidatorFunder private csl;
 
-  function setUp() public forkAtBlock(BSC_MAINNET, 22566900) {
+  function afterForkSetUp() internal override {
     csl = new CurveSwapLiquidatorFunder();
   }
 
