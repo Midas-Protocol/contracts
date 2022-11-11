@@ -12,7 +12,7 @@ contract XBombLiquidatorTest is BaseTest {
   address bombTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
   XBombLiquidatorFunder liquidator;
 
-  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function setUp() public forkAtBlock(BSC_MAINNET, 22962661) {
     liquidator = new XBombLiquidatorFunder();
   }
 
@@ -26,11 +26,13 @@ contract XBombLiquidatorTest is BaseTest {
 
     // fund the liquidator so it can redeem the tokens
     xbombToken.transfer(address(liquidator), balance);
+
+    bytes memory data = abi.encode(address(xbombToken), address(xbombToken), bombTokenAddress);
     // redeem the underlying reward token
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       IERC20Upgradeable(address(xbombToken)),
       balance,
-      ""
+      data
     );
 
     assertEq(address(outputToken), bombTokenAddress);
