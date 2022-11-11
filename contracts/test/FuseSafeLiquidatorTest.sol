@@ -99,7 +99,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     uint256 borrowAmount;
   }
 
-  function testCurveStrategyLiquidation() public fork(BSC_MAINNET) {
+  function testCurveStrategyLiquidation() public forkAtBlock(BSC_MAINNET, 22788730) {
     CurveStrategyData memory vars;
 
     vars.borrower = 0x25bd0fC0e4597B4C9535d94876A8ca1F531Fa92e; // borrower
