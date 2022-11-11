@@ -45,6 +45,6 @@ contract AnkrCertificateTokenPriceOracleTest is BaseTest {
     uint256 priceAnkrBNBc = oracle.price(aBNBc);
 
     assertGt(priceAnkrBNBc, 1e18);
-    assertEq(priceAnkrBNBc, 1031771264536613055);
+    assertEq(priceAnkrBNBc, 1036531403670513817);
   }
 }
