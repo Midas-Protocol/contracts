@@ -46,7 +46,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
       token2 = IERC20Upgradeable(0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8); // USDC, 6 decimals
       poolFee = 3000;
       repayAmount = 1e18; // 1.00 GMX
-      borrowAmount = 12e18; // 12.00 GMX
+      borrowAmount = 15e18; // 12.00 GMX
     } else if (block.chainid == POLYGON_MAINNET) {
       setUpWithPool(
         MasterPriceOracle(0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31),
@@ -71,9 +71,9 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
     testLiquidation();
   }
 
-  function testArbitrum() public fork(ARBITRUM_ONE) {
+  function testArbitrum() public forkAtBlock(ARBITRUM_ONE, 37201588) {
     // collateral value falls from 50 000 USD to 500 USD
-    // GMX price 42.00 USD => debt value = 12*42 = 504 USD
+    // GMX price 34.00 USD => debt value = 15*34 = 510 USD
     testLiquidation();
   }
 

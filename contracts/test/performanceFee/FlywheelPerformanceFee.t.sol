@@ -31,11 +31,11 @@ struct RewardsCycle {
 contract FlywheelPerformanceFeeTest is BaseTest {
   using FixedPointMathLib for uint256;
 
-  uint256 PERFORMANCE_FEE = 5e16;
+  uint256 PERFORMANCE_FEE = 10e16;
   uint256 DEPOSIT_AMOUNT = 100e18;
   uint256 BPS_DENOMINATOR = 10_000;
 
-  address feeRecipient = address(10);
+  address feeRecipient = 0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E;
   MidasERC4626 plugin;
   ERC20Upgradeable underlyingToken = ERC20Upgradeable(0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9);
 
@@ -60,6 +60,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
   function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     dddFlywheel = new MidasFlywheelCore();
     dddFlywheel.initialize(dddToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
+    dddFlywheel.reinitialize();
     dddRewards = new FuseFlywheelDynamicRewards(FlywheelCore(address(dddFlywheel)), 1);
     dddFlywheel.setFlywheelRewards(dddRewards);
 
@@ -126,7 +127,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
 
   function test__initializedValues() public {
     assertEq(dddFlywheel.performanceFee(), PERFORMANCE_FEE, "!perFee");
-    assertEq(dddFlywheel.feeRecipient(), address(0), "!feeRecipient");
+    assertEq(dddFlywheel.feeRecipient(), feeRecipient, "!feeRecipient");
   }
 
   function test__UpdateFeeSettings() public {
