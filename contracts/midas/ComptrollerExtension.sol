@@ -4,8 +4,8 @@ pragma solidity >=0.8.0;
 import "../compound/ComptrollerStorage.sol";
 import "../compound/Unitroller.sol";
 
-contract ComptrollerExtension is UnitrollerAdminStorage {
-  function _initImplementation(address extension, bytes calldata data) {
+contract ComptrollerExtension is ComptrollerV3Storage {
+  function _initExtension(address extension, bytes calldata data) external {
     require(hasAdminRights(), "!unauthorized");
 
     LibDiamond.init(extension, data);
@@ -42,7 +42,7 @@ library LibDiamond {
     require(extension != address(0), "CannotAddSelectorsToZeroAddress");
     LogicStorage storage ds = diamondStorage();
     uint16 selectorCount = uint16(ds.indexes.length);
-    enforceHasContractCode(extension, "LibDiamondCut: Add extension has no code");
+    enforceHasContractCode(extension, "LibDiamondCut: extension has no code");
     for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {
       bytes4 selector = _functionSelectors[selectorIndex];
       address oldImplementation = ds.functions[selector].implementation;
