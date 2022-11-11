@@ -8,7 +8,6 @@ import "./helpers/WithPool.sol";
 import "./config/BaseTest.t.sol";
 import "../compound/CToken.sol";
 import "../compound/CTokenInterfaces.sol";
-import "../compound/Comptroller.sol";
 import "../FuseFeeDistributor.sol";
 import "../oracles/default/UniswapTwapPriceOracleV2Resolver.sol";
 import "../oracles/default/UniswapTwapPriceOracleV2Root.sol";
@@ -29,7 +28,7 @@ contract MinBorrowTest is BaseTest {
     MockERC20 asset = MockERC20(0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c);
 
     CErc20Delegate cToken = CErc20Delegate(0x216714Ecf4FEcc35573CBB2756942274E1B344A2);
-    Comptroller comptroller = Comptroller(address(cToken.comptroller()));
+    ComptrollerInterface comptroller = cToken.comptroller();
     deal(address(asset), address(this), 1000e18);
 
     asset.approve(address(cToken), 1e36);

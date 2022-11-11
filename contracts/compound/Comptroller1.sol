@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "../midas/ComptrollerExtension.sol";
+import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
 
 contract Comptroller1 is ComptrollerExtension, ComptrollerErrorReporter {
   /// @notice Emitted when supply cap for a cToken is changed

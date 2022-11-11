@@ -10,6 +10,7 @@ import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 import { Unitroller } from "./Unitroller.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 import { IMidasFlywheel } from "../midas/strategies/flywheel/IMidasFlywheel.sol";
+import { LibDiamond } from "../midas/ComptrollerExtension.sol";
 
 /**
  * @title Compound's Comptroller Contract
@@ -1285,7 +1286,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 changeStatus = unitroller._acceptImplementation();
     require(changeStatus == 0, "!unauthorized");
 
-    Comptroller(address(unitroller))._becomeImplementation();
+    Comptroller(payable(address(unitroller)))._becomeImplementation();
   }
 
   function _becomeImplementation() external {
@@ -1312,6 +1313,37 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       }
       default {
         return(free_mem_ptr, returndatasize())
+      }
+    }
+  }
+
+  // Find facet for function that is called and execute the
+  // function if a facet is found and return any value.
+  fallback() external payable {
+    LibDiamond.LogicStorage storage ds;
+    bytes32 position = LibDiamond.DIAMOND_STORAGE_POSITION;
+    // get diamond storage
+    assembly {
+      ds.slot := position
+    }
+    // get facet from function selector
+    address facet = ds.functions[msg.sig].implementation;
+    require(facet != address(0), "Diamond: Function does not exist");
+    // Execute external function from facet using delegatecall and return any value.
+    assembly {
+      // copy function selector and any arguments
+      calldatacopy(0, 0, calldatasize())
+      // execute function call using the facet
+      let result := delegatecall(gas(), facet, 0, calldatasize(), 0, 0)
+      // get any return value
+      returndatacopy(0, 0, returndatasize())
+      // return any return value or error back to the caller
+      switch result
+      case 0 {
+        revert(0, returndatasize())
+      }
+      default {
+        return(0, returndatasize())
       }
     }
   }
@@ -1348,7 +1380,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   /**
    * @notice Returns an array of all accruing and non-accruing flywheels
    */
-  function getRewardsDistributors() external view returns (address[] memory) {
+  function getRewardsDistributors() external view override returns (address[] memory) {
     address[] memory allFlywheels = new address[](rewardsDistributors.length + nonAccruingRewardsDistributors.length);
 
     uint8 i = 0;

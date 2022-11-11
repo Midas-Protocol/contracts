@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0;
 
 import "../compound/CTokenInterfaces.sol";
-import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import "./config/BaseTest.t.sol";
@@ -72,7 +71,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest {
 
     CErc20Delegate usdcCToken = CErc20Delegate(usdcMarketAddress);
     CErc20Delegate parCToken = CErc20Delegate(parMarketAddress);
-    Comptroller comptroller = Comptroller(address(usdcCToken.comptroller()));
+    IComptroller comptroller = IComptroller(address(usdcCToken.comptroller()));
 
     vars.cTokens = new address[](2);
     vars.cTokens[0] = address(parCToken);

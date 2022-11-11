@@ -8,7 +8,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
-import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
+import { FuseFlywheelLensRouter } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
 import "fuse-flywheel/FuseFlywheelCore.sol";
 import "../compound/CTokenInterfaces.sol";
 
@@ -32,13 +32,15 @@ import { MockERC4626 } from "../midas/strategies/MockERC4626.sol";
 import { MockERC4626Dynamic } from "../midas/strategies/MockERC4626Dynamic.sol";
 import { BaseTest } from "./config/BaseTest.t.sol";
 import { IERC4626 } from "../compound/IERC4626.sol";
+import { IComptroller } from "../external/compound/IComptroller.sol";
+import { ICToken } from "../external/compound/ICToken.sol";
 
 contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
   MockERC20 rewardToken;
 
   WhitePaperInterestRateModel interestModel;
-  Comptroller comptroller;
+  IComptroller comptroller;
 
   CErc20Delegate cErc20Delegate;
   CErc20PluginDelegate cErc20PluginDelegate;
@@ -116,7 +118,7 @@ contract DeployMarketsTest is Test {
 
     MockPriceOracle priceOracle = new MockPriceOracle(10);
     emptyAddresses.push(address(0));
-    Comptroller tempComptroller = new Comptroller(payable(fuseAdmin));
+    Comptroller tempComptroller = new Comptroller(payable(address(fuseAdmin)));
     newUnitroller.push(address(tempComptroller));
     trueBoolArray.push(true);
     falseBoolArray.push(false);
@@ -132,7 +134,7 @@ contract DeployMarketsTest is Test {
     );
 
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
-    comptroller = Comptroller(comptrollerAddress);
+    comptroller = IComptroller(comptrollerAddress);
   }
 
   function setUp() public {
@@ -161,7 +163,7 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
+    ICToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
     assertEq(cToken.name(), "cUnderlyingToken");
     underlyingToken.approve(address(cToken), 1e36);
@@ -202,7 +204,7 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
+    ICToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(mockERC4626), "!plugin == erc4626");
@@ -249,7 +251,7 @@ contract DeployMarketsTest is Test {
       false,
       abi.encode(
         address(underlyingToken),
-        ComptrollerInterface(address(comptroller)),
+        comptroller,
         payable(address(fuseAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
@@ -262,7 +264,7 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
+    ICToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(mockERC4626Dynamic), "!plugin == erc4626");
@@ -314,7 +316,7 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
+    ICToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(mockERC4626), "!plugin == erc4626");
@@ -363,7 +365,7 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
+    ICToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(pluginA), "!plugin == erc4626");
@@ -402,7 +404,7 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
+    ICToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(pluginA), "!plugin == erc4626");
@@ -502,7 +504,7 @@ contract CErc20DelegateTest is BaseTest {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(pools[i].comptroller);
+      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
       address implementation = comptroller.comptrollerImplementation();
 
       bool added = false;
@@ -532,7 +534,7 @@ contract CErc20DelegateTest is BaseTest {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(pools[i].comptroller);
+      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
       CTokenInterface[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20Delegate delegate = CErc20Delegate(address(markets[j]));
@@ -568,7 +570,7 @@ contract CErc20DelegateTest is BaseTest {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(pools[i].comptroller);
+      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
       CTokenInterface[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));

@@ -101,14 +101,14 @@ contract AnyLiquidationTest is BaseTest {
     address[] cTokens;
     IRedemptionStrategy[] strategies;
     bytes[] redemptionDatas;
-    CTokenInterface[] markets;
+    ICToken[] markets;
     address[] borrowers;
     FuseSafeLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
     bytes[] fundingDatas;
     CErc20Delegate debtMarket;
     CErc20Delegate collateralMarket;
-    Comptroller comptroller;
+    IComptroller comptroller;
     address borrower;
     uint256 borrowAmount;
     address flashSwapFundingToken;
@@ -118,16 +118,16 @@ contract AnyLiquidationTest is BaseTest {
   function getPoolAndBorrower(uint256 random, LiquidationData memory vars)
     internal
     view
-    returns (Comptroller, address)
+    returns (IComptroller, address)
   {
     if (vars.pools.length == 0) revert("no pools to pick from");
 
     uint256 i = random % vars.pools.length; // random pool
-    Comptroller comptroller = Comptroller(vars.pools[i].comptroller);
+    IComptroller comptroller = IComptroller(vars.pools[i].comptroller);
     address[] memory borrowers = comptroller.getAllBorrowers();
 
     if (borrowers.length == 0) {
-      return (Comptroller(address(0)), address(0));
+      return (IComptroller(address(0)), address(0));
     } else {
       uint256 k = random % borrowers.length; // random borrower
       address borrower = borrowers[k];
@@ -163,17 +163,17 @@ contract AnyLiquidationTest is BaseTest {
       // until there is shortfall for which to be liquidated
       for (uint256 m = 0; m < vars.markets.length; m++) {
         uint256 marketIndexWithOffset = (random - m) % vars.markets.length;
-        CTokenInterface randomMarket = vars.markets[marketIndexWithOffset];
+        ICToken randomMarket = vars.markets[marketIndexWithOffset];
         address randomMarketAddress = address(randomMarket);
         if (randomMarket.balanceOf(vars.borrower) > 0) {
           if (randomMarketAddress == address(debt)) continue;
 
           // the collateral prices change
           MasterPriceOracle mpo = MasterPriceOracle(address(vars.comptroller.oracle()));
-          uint256 priceCollateral = mpo.getUnderlyingPrice(ICToken(randomMarketAddress));
+          uint256 priceCollateral = mpo.getUnderlyingPrice(randomMarket);
           vm.mockCall(
             address(mpo),
-            abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, ICToken(randomMarketAddress)),
+            abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, randomMarket),
             abi.encode(priceCollateral / 5)
           );
 

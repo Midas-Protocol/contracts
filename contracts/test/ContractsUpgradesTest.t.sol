@@ -153,7 +153,7 @@ contract ContractsUpgradesTest is BaseTest {
     FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller pool = Comptroller(pools[i].comptroller);
+      IComptroller pool = IComptroller(pools[i].comptroller);
       address[] memory flywheels = pool.getRewardsDistributors();
       for (uint8 j = 0; j < flywheels.length; j++) {
         MidasFlywheelCore flywheel = MidasFlywheelCore(flywheels[j]);
