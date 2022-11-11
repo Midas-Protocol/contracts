@@ -18,20 +18,20 @@ contract AnkrCertificateTokenPriceOracleTest is BaseTest {
   }
 
   function testBSCAnkrOracle() public forkAtBlock(BSC_MAINNET, 22967648) {
-    setUpOracleFtm();
+    setUpOracleBsc();
     testAnkrBSC();
   }
 
   function setUpOracleFtm() public {
     oracle = new AnkrCertificateTokenPriceOracle();
+    vm.prank(oracle.owner());
     oracle.initialize(aFTMc);
-    vm.rollFork(1);
   }
 
   function setUpOracleBsc() public {
     oracle = new AnkrCertificateTokenPriceOracle();
+    vm.prank(oracle.owner());
     oracle.initialize(aBNBc);
-    vm.rollFork(1);
   }
 
   function testAnkrFTM() public {
