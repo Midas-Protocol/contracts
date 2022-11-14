@@ -152,7 +152,11 @@ contract ContractsUpgradesTest is BaseTest {
   bytes4[] private functionSelectors;
 
 
+  /**
+   * @dev testing if the comptroller can add diamond-pattern extensions
+   */
   function testComptrollerExtension() public fork(BSC_MAINNET) {
+    // create a list of the fns selectors to add with the new extension
     ComptrollerFirstExtension cfe = new ComptrollerFirstExtension();
     {
       functionSelectors.push(cfe.addNonAccruingFlywheel.selector);
@@ -166,28 +170,31 @@ contract ContractsUpgradesTest is BaseTest {
       functionSelectors.push(cfe.getFirstMarketSymbol.selector);
     }
 
-    Comptroller newComptroller = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
+    // change the implementation to the new that can add extensions
+    Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
     address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
     Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
-
+    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
+    // whitelist the upgrade
     FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
-    address comptrollerImplementation = asUnitroller.comptrollerImplementation();
     vm.prank(ffd.owner());
     ffd._editComptrollerImplementationWhitelist(
-      asArray(comptrollerImplementation),
-      asArray(address(newComptroller)),
+      asArray(oldComptrollerImplementation),
+      asArray(address(newComptrollerImplementation)),
       asArray(true)
     );
 
+    // upgrade to the new comptroller and initialize the extension
     vm.startPrank(asUnitroller.admin());
     {
-      asUnitroller._setPendingImplementation(address(newComptroller));
-      newComptroller._become(asUnitroller);
+      asUnitroller._setPendingImplementation(address(newComptrollerImplementation));
+      newComptrollerImplementation._become(asUnitroller);
       Comptroller asComptroller = Comptroller(jFiatPoolAddress);
       asComptroller._initExtension(address(cfe), abi.encode(functionSelectors));
     }
     vm.stopPrank();
 
+    // assert that it worked
     ComptrollerFirstExtension asCfe = ComptrollerFirstExtension(jFiatPoolAddress);
     emit log(asCfe.getFirstMarketSymbol());
 
