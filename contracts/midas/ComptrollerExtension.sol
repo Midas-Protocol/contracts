@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "../compound/ComptrollerStorage.sol";
 import "../compound/Unitroller.sol";
 
-contract ComptrollerExtension is ComptrollerV3Storage {
+abstract contract ComptrollerExtension is ComptrollerV3Storage {
   function _initExtension(address extension, bytes calldata data) external {
     require(hasAdminRights(), "!unauthorized");
 

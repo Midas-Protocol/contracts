@@ -6,52 +6,21 @@ import "./config/BaseTest.t.sol";
 import "../FuseFeeDistributor.sol";
 import "../FusePoolDirectory.sol";
 import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
-import { CurveV2LpTokenPriceOracleNoRegistry } from "../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
 
 import { BeefyERC4626 } from "../midas/strategies/BeefyERC4626.sol";
 import "../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import "../midas/strategies/flywheel/MidasFlywheel.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
 // TODO: exclude test from CI
 contract ContractsUpgradesTest is BaseTest {
   // taken from ERC1967Upgrade
   bytes32 internal constant _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
 
-  function testUpgradeCurveOracle() public fork(BSC_MAINNET) {
-    address contractToTest = 0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA; // CurveLpTokenPriceOracleNoRegistry proxy
-    address twoBrl = 0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9;
-    address poolOf2Brl = 0xad51e40D8f255dba1Ad08501D6B1a6ACb7C188f3;
-
-    // before upgrade
-    CurveLpTokenPriceOracleNoRegistry oldImpl = CurveLpTokenPriceOracleNoRegistry(contractToTest);
-    address poolBefore = oldImpl.poolOf(twoBrl);
-    emit log_address(poolBefore);
-
-    assertEq(poolBefore, poolOf2Brl);
-
-    // upgrade
-    {
-      CurveLpTokenPriceOracleNoRegistry newImpl = new CurveLpTokenPriceOracleNoRegistry();
-      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(contractToTest));
-      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-      address admin = address(uint160(uint256(bytesAtSlot)));
-      //            emit log_address(admin);
-      vm.prank(admin);
-      proxy.upgradeTo(address(newImpl));
-    }
-
-    // after upgrade
-    CurveLpTokenPriceOracleNoRegistry newImpl = CurveLpTokenPriceOracleNoRegistry(contractToTest);
-    address poolAfter = newImpl.poolOf(twoBrl);
-    emit log_address(poolAfter);
-
-    assertEq(poolAfter, poolOf2Brl, "2brl pool does not match");
-  }
-
   function testFusePoolDirectoryUpgrade() public fork(BSC_MAINNET) {
-    address contractToTest = 0x295d7347606F4bd810C8296bb8d75D657001fcf7; // FusePoolDirectory proxy
+    address contractToTest = ap.getAddress("FusePoolDirectory"); // FusePoolDirectory proxy
 
     // before upgrade
     FusePoolDirectory oldImpl = FusePoolDirectory(contractToTest);
@@ -178,5 +147,50 @@ contract ContractsUpgradesTest is BaseTest {
         }
       }
     }
+  }
+
+  bytes4[] private functionSelectors;
+
+
+  function testComptrollerExtension() public fork(BSC_MAINNET) {
+    ComptrollerFirstExtension cfe = new ComptrollerFirstExtension();
+    {
+      functionSelectors.push(cfe.addNonAccruingFlywheel.selector);
+      functionSelectors.push(cfe._setMarketSupplyCaps.selector);
+      functionSelectors.push(cfe._setMarketBorrowCaps.selector);
+      functionSelectors.push(cfe._setBorrowCapGuardian.selector);
+      functionSelectors.push(cfe._setPauseGuardian.selector);
+      functionSelectors.push(cfe._setMintPaused.selector);
+      functionSelectors.push(cfe._setBorrowPaused.selector);
+      functionSelectors.push(cfe._setTransferPaused.selector);
+      functionSelectors.push(cfe.getFirstMarketSymbol.selector);
+    }
+
+    Comptroller newComptroller = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
+    address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
+    Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
+
+    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    address comptrollerImplementation = asUnitroller.comptrollerImplementation();
+    vm.prank(ffd.owner());
+    ffd._editComptrollerImplementationWhitelist(
+      asArray(comptrollerImplementation),
+      asArray(address(newComptroller)),
+      asArray(true)
+    );
+
+    vm.startPrank(asUnitroller.admin());
+    {
+      asUnitroller._setPendingImplementation(address(newComptroller));
+      newComptroller._become(asUnitroller);
+      Comptroller asComptroller = Comptroller(jFiatPoolAddress);
+      asComptroller._initExtension(address(cfe), abi.encode(functionSelectors));
+    }
+    vm.stopPrank();
+
+    ComptrollerFirstExtension asCfe = ComptrollerFirstExtension(jFiatPoolAddress);
+    emit log(asCfe.getFirstMarketSymbol());
+
+    assertEq(asCfe.getFirstMarketSymbol(), "fjBRL-1", "market symbol does not match");
   }
 }

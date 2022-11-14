@@ -476,7 +476,7 @@ contract AnyLiquidationTest is BaseTest {
     return outputToken;
   }
 
-  function getCurvePoolUnderlyingTokens(address lpTokenAddress) internal returns (address[] memory) {
+  function getCurvePoolUnderlyingTokens(address lpTokenAddress) internal view returns (address[] memory) {
     ICurvePool curvePool = ICurvePool(lpTokenAddress);
     uint8 i = 0;
     while (true) {
@@ -493,7 +493,7 @@ contract AnyLiquidationTest is BaseTest {
     return tokens;
   }
 
-  function pickPreferredToken(address[] memory tokens, address strategyOutputToken) internal returns (address, uint8) {
+  function pickPreferredToken(address[] memory tokens, address strategyOutputToken) internal view returns (address, uint8) {
     address wtoken = ap.getAddress("wtoken");
     address stable = ap.getAddress("stableToken");
     address wbtc = ap.getAddress("wBTCToken");

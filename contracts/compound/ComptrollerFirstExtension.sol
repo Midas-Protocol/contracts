@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "../midas/ComptrollerExtension.sol";
 import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
 
-contract Comptroller1 is ComptrollerExtension, ComptrollerErrorReporter {
+contract ComptrollerFirstExtension is ComptrollerExtension, ComptrollerErrorReporter {
   /// @notice Emitted when supply cap for a cToken is changed
   event NewSupplyCap(CTokenInterface indexed cToken, uint256 newSupplyCap);
 
@@ -166,5 +166,10 @@ contract Comptroller1 is ComptrollerExtension, ComptrollerErrorReporter {
     seizeGuardianPaused = state;
     emit ActionPaused("Seize", state);
     return state;
+  }
+
+  // a dummy fn to test if the extension works
+  function getFirstMarketSymbol() public view returns (string memory) {
+    return allMarkets[0].symbol();
   }
 }

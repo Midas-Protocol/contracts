@@ -73,7 +73,7 @@ contract OraclesDecimalsScalingTest is BaseTest {
     }
   }
 
-  function isSkipped(address token) internal returns (bool) {
+  function isSkipped(address token) internal pure returns (bool) {
     return
       token == 0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080 || // xcDOT
       token == 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685 || // xcDOT-stDOT LP token
