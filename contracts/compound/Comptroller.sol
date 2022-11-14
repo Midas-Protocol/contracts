@@ -1299,9 +1299,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   }
 
   /**
-  * One-time call to initialize the diamond storage
-  */
-  function _initExtension(address extension, bytes calldata fns) external {
+   * One-time call to initialize the diamond storage
+   */
+  function _initExtension(address extension) external {
     require(hasAdminRights(), "!unauthorized - no admin rights");
 
     (bool success, ) = extension.delegatecall(msg.data);

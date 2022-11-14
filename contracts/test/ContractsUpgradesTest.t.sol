@@ -149,26 +149,12 @@ contract ContractsUpgradesTest is BaseTest {
     }
   }
 
-  bytes4[] private functionSelectors;
-
-
   /**
    * @dev testing if the comptroller can add diamond-pattern extensions
    */
   function testComptrollerExtension() public fork(BSC_MAINNET) {
     // create a list of the fns selectors to add with the new extension
     ComptrollerFirstExtension cfe = new ComptrollerFirstExtension();
-    {
-      functionSelectors.push(cfe.addNonAccruingFlywheel.selector);
-      functionSelectors.push(cfe._setMarketSupplyCaps.selector);
-      functionSelectors.push(cfe._setMarketBorrowCaps.selector);
-      functionSelectors.push(cfe._setBorrowCapGuardian.selector);
-      functionSelectors.push(cfe._setPauseGuardian.selector);
-      functionSelectors.push(cfe._setMintPaused.selector);
-      functionSelectors.push(cfe._setBorrowPaused.selector);
-      functionSelectors.push(cfe._setTransferPaused.selector);
-      functionSelectors.push(cfe.getFirstMarketSymbol.selector);
-    }
 
     // change the implementation to the new that can add extensions
     Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
@@ -190,7 +176,7 @@ contract ContractsUpgradesTest is BaseTest {
       asUnitroller._setPendingImplementation(address(newComptrollerImplementation));
       newComptrollerImplementation._become(asUnitroller);
       Comptroller asComptroller = Comptroller(jFiatPoolAddress);
-      asComptroller._initExtension(address(cfe), abi.encode(functionSelectors));
+      asComptroller._initExtension(address(cfe));
     }
     vm.stopPrank();
 

@@ -493,7 +493,11 @@ contract AnyLiquidationTest is BaseTest {
     return tokens;
   }
 
-  function pickPreferredToken(address[] memory tokens, address strategyOutputToken) internal view returns (address, uint8) {
+  function pickPreferredToken(address[] memory tokens, address strategyOutputToken)
+    internal
+    view
+    returns (address, uint8)
+  {
     address wtoken = ap.getAddress("wtoken");
     address stable = ap.getAddress("stableToken");
     address wbtc = ap.getAddress("wBTCToken");

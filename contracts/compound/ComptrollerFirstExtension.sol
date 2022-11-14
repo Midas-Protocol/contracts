@@ -172,4 +172,19 @@ contract ComptrollerFirstExtension is ComptrollerExtension, ComptrollerErrorRepo
   function getFirstMarketSymbol() public view returns (string memory) {
     return allMarkets[0].symbol();
   }
+
+  function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
+    uint8 i = 0;
+    bytes4[] memory functionSelectors = new bytes4[](9);
+    functionSelectors[i++] = this.addNonAccruingFlywheel.selector;
+    functionSelectors[i++] = this._setMarketSupplyCaps.selector;
+    functionSelectors[i++] = this._setMarketBorrowCaps.selector;
+    functionSelectors[i++] = this._setBorrowCapGuardian.selector;
+    functionSelectors[i++] = this._setPauseGuardian.selector;
+    functionSelectors[i++] = this._setMintPaused.selector;
+    functionSelectors[i++] = this._setBorrowPaused.selector;
+    functionSelectors[i++] = this._setTransferPaused.selector;
+    functionSelectors[i++] = this.getFirstMarketSymbol.selector;
+    return functionSelectors;
+  }
 }

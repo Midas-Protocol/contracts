@@ -5,11 +5,13 @@ import "../compound/ComptrollerStorage.sol";
 import "../compound/Unitroller.sol";
 
 abstract contract ComptrollerExtension is ComptrollerV3Storage {
-  function _initExtension(address extension, bytes calldata data) external {
+  function _initExtension(ComptrollerExtension extension) external {
     require(hasAdminRights(), "!unauthorized");
 
-    LibDiamond.init(extension, data);
+    LibDiamond.init(extension);
   }
+
+  function _getExtensionFunctions() external view virtual returns (bytes4[] memory);
 }
 
 library LibDiamond {
@@ -33,9 +35,40 @@ library LibDiamond {
     }
   }
 
-  function init(address extension, bytes memory data) internal {
-    bytes4[] memory fnsToAdd = abi.decode(data, (bytes4[]));
-    addFunctions(extension, fnsToAdd);
+  function init(ComptrollerExtension extension) internal {
+    bytes4[] memory fnsToAdd = extension._getExtensionFunctions();
+    addFunctions(address(extension), fnsToAdd);
+  }
+
+  function registerExtension(address extensionToAdd, address extensionToReplace) internal {
+    require(extensionToAdd != address(0), "CannotAddSelectorsToZeroAddress");
+    enforceHasContractCode(extensionToAdd, "LibDiamondCut: extension has no code");
+
+    LogicStorage storage ds = diamondStorage();
+    uint16 totalSelectorsCount = uint16(ds.indexes.length);
+
+    if (extensionToReplace != address(0)) {
+      // first remove all functions of the extension to replace
+      for (uint256 i = 0; i < totalSelectorsCount; i++) {
+        bytes4 selector = ds.indexes[i];
+        address selectorImpl = ds.functions[selector].implementation;
+        if (selectorImpl == extensionToReplace) {
+          removeFunctionAtIndex(i);
+        }
+      }
+    }
+
+    bytes4[] memory fnsToAdd = ComptrollerExtension(extensionToAdd)._getExtensionFunctions();
+    addFunctions(extensionToAdd, fnsToAdd);
+  }
+
+  function removeFunctionAtIndex(uint256 index) internal {
+    // TODO
+    LogicStorage storage ds = diamondStorage();
+    bytes4 selector = ds.indexes[index];
+    delete ds.functions[selector];
+    ds.indexes[index] = ds.indexes[ds.indexes.length - 1];
+    ds.indexes.pop();
   }
 
   function addFunctions(address extension, bytes4[] memory _functionSelectors) internal {
