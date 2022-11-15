@@ -39,7 +39,6 @@ contract MockComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
   }
 }
 
-
 contract ExtensionsTest is BaseTest {
   function testExtensionReplace() public fork(BSC_MAINNET) {
     ComptrollerFirstExtension cfe = new ComptrollerFirstExtension();
