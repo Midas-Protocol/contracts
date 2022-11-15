@@ -57,17 +57,16 @@ contract ContractsUpgradesTest is BaseTest {
   }
 
   function testFuseFeeDistributorUpgrade() public fork(BSC_MAINNET) {
-    address contractToTest = 0xFc1f56C58286E7215701A773b61bFf2e18A177dE; // FFD proxy
     address oldCercDelegate = 0x94C50805bC16737ead84e25Cd5Aa956bCE04BBDF;
 
     // before upgrade
-    FuseFeeDistributor oldImpl = FuseFeeDistributor(payable(contractToTest));
-    uint256 marketsCounterBefore = oldImpl.marketsCounter();
-    address ownerBefore = oldImpl.owner();
+    FuseFeeDistributor ffdProxy = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    uint256 marketsCounterBefore = ffdProxy.marketsCounter();
+    address ownerBefore = ffdProxy.owner();
 
-    (address latestCErc20DelegateBefore, bool allowResign, bytes memory becomeImplementationData) = oldImpl
+    (address latestCErc20DelegateBefore, bool allowResign, bytes memory becomeImplementationData) = ffdProxy
       .latestCErc20Delegate(oldCercDelegate);
-    //    bool whitelistedBefore = oldImpl.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateBefore, false);
+    //    bool whitelistedBefore = ffdProxy.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateBefore, false);
 
     emit log_uint(marketsCounterBefore);
     emit log_address(ownerBefore);
@@ -77,7 +76,7 @@ contract ContractsUpgradesTest is BaseTest {
     // upgrade
     {
       FuseFeeDistributor newImpl = new FuseFeeDistributor();
-      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(contractToTest));
+      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffdProxy)));
       bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
       address admin = address(uint160(uint256(bytesAtSlot)));
       // emit log_address(admin);
@@ -86,7 +85,7 @@ contract ContractsUpgradesTest is BaseTest {
     }
 
     // after upgrade
-    FuseFeeDistributor ffd = FuseFeeDistributor(payable(contractToTest));
+    FuseFeeDistributor ffd = FuseFeeDistributor(payable(address(ffdProxy)));
 
     uint256 marketsCounterAfter = ffd.marketsCounter();
     address ownerAfter = ffd.owner();
@@ -164,6 +163,18 @@ contract ContractsUpgradesTest is BaseTest {
     address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
     // whitelist the upgrade
     FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+
+    // upgrade the FFD to include the _registerComptrollerExtension fn
+    {
+      FuseFeeDistributor newImpl = new FuseFeeDistributor();
+      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
+      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
+      address admin = address(uint160(uint256(bytesAtSlot)));
+      // emit log_address(admin);
+      vm.prank(admin);
+      proxy.upgradeTo(address(newImpl));
+    }
+
     vm.prank(ffd.owner());
     ffd._editComptrollerImplementationWhitelist(
       asArray(oldComptrollerImplementation),
@@ -173,13 +184,11 @@ contract ContractsUpgradesTest is BaseTest {
 
     // upgrade to the new comptroller and initialize the extension
     vm.startPrank(asUnitroller.admin());
-    {
-      asUnitroller._setPendingImplementation(address(newComptrollerImplementation));
-      newComptrollerImplementation._become(asUnitroller);
-      Comptroller asComptroller = Comptroller(jFiatPoolAddress);
-      asComptroller._registerExtension(cfe, DiamondExtension(address(0)));
-    }
+    asUnitroller._setPendingImplementation(address(newComptrollerImplementation));
+    newComptrollerImplementation._become(asUnitroller);
     vm.stopPrank();
+    vm.prank(ffd.owner());
+    ffd._registerComptrollerExtension(jFiatPoolAddress, cfe, DiamondExtension(address(0)));
 
     // assert that it worked
     ComptrollerFirstExtension asCfe = ComptrollerFirstExtension(jFiatPoolAddress);

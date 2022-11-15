@@ -12,6 +12,36 @@ abstract contract DiamondExtension {
   function _getExtensionFunctions() external view virtual returns (bytes4[] memory);
 }
 
+abstract contract DiamondBase {
+  /**
+   * @dev register a logic extension
+   * @param extensionToAdd the extension whose functions are to be added
+   * @param extensionToReplace the extension whose functions are to be removed/replaced
+   */
+  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external virtual;
+
+  fallback() external payable {
+    address extension = LibDiamond.getExtensionForFunction(msg.sig);
+    // Execute external function from extension using delegatecall and return any value.
+    assembly {
+      // copy function selector and any arguments
+      calldatacopy(0, 0, calldatasize())
+      // execute function call using the extension
+      let result := delegatecall(gas(), extension, 0, calldatasize(), 0, 0)
+      // get any return value
+      returndatacopy(0, 0, returndatasize())
+      // return any return value or error back to the caller
+      switch result
+      case 0 {
+        revert(0, returndatasize())
+      }
+      default {
+        return(0, returndatasize())
+      }
+    }
+  }
+}
+
 /**
  * @notice a library to use in a contract, whose logic is extended with diamond extension
  */

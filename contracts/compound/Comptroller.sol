@@ -10,14 +10,14 @@ import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 import { Unitroller } from "./Unitroller.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 import { IMidasFlywheel } from "../midas/strategies/flywheel/IMidasFlywheel.sol";
-import { DiamondExtension, LibDiamond } from "../midas/DiamondExtension.sol";
+import { DiamondExtension, DiamondBase, LibDiamond } from "../midas/DiamondExtension.sol";
 
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
  * @dev This contract should not to be deployed alone; instead, deploy `Unitroller` (proxy contract) on top of this `Comptroller` (logic/implementation contract).
  */
-contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerErrorReporter, Exponential {
+contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerErrorReporter, Exponential, DiamondBase {
   /// @notice Emitted when an admin supports a market
   event MarketListed(CTokenInterface cToken);
 
@@ -1303,31 +1303,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    * @param extensionToAdd the extension whose functions are to be added
    * @param extensionToReplace the extension whose functions are to be removed/replaced
    */
-  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external {
-    require(hasAdminRights(), "!unauthorized - no admin rights");
-
+  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external override {
+    require(msg.sender == address(fuseAdmin) && fuseAdminHasRights, "!unauthorized - no admin rights");
     LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
-  }
-
-  fallback() external payable {
-    address extension = LibDiamond.getExtensionForFunction(msg.sig);
-    // Execute external function from extension using delegatecall and return any value.
-    assembly {
-      // copy function selector and any arguments
-      calldatacopy(0, 0, calldatasize())
-      // execute function call using the extension
-      let result := delegatecall(gas(), extension, 0, calldatasize(), 0, 0)
-      // get any return value
-      returndatacopy(0, 0, returndatasize())
-      // return any return value or error back to the caller
-      switch result
-      case 0 {
-        revert(0, returndatasize())
-      }
-      default {
-        return(0, returndatasize())
-      }
-    }
   }
 
   /*** Helper Functions ***/

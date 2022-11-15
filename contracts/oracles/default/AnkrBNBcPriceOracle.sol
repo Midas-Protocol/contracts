@@ -18,7 +18,6 @@ contract AnkrBNBcPriceOracle is IPriceOracle, BasePriceOracle {
   AnkrOracle private immutable ANKR_ORACLE;
   address public immutable BASE_TOKEN;
   address public immutable USD_TOKEN;
-  uint256 private lastPrice = 0;
 
   constructor(
     AnkrOracle _ankrOracle,
