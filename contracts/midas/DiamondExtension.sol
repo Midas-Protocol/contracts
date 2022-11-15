@@ -56,7 +56,6 @@ library LibDiamond {
   struct LogicStorage {
     mapping(bytes4 => Function) functions;
     bytes4[] selectorAtIndex;
-    // mapping(bytes4 => bool) supportedInterfaces;
   }
 
   function getExtensionForFunction(bytes4 msgSig) internal view returns (address) {
@@ -87,16 +86,14 @@ library LibDiamond {
     LogicStorage storage ds = diamondStorage();
     for (uint16 i = 0; i < fnsToRemove.length; i++) {
       bytes4 selectorToRemove = fnsToRemove[i];
-      //address selectorImpl = ds.functions[selector].implementation;
-      //if (selectorImpl == extension)
-      {
-        // swap with the last element in the selectorAtIndex array and remove the last element
-        uint16 indexToKeep = ds.functions[selectorToRemove].index;
-        ds.selectorAtIndex[indexToKeep] = ds.selectorAtIndex[ds.selectorAtIndex.length - 1];
-        ds.functions[ds.selectorAtIndex[indexToKeep]].index = indexToKeep;
-        ds.selectorAtIndex.pop();
-        delete ds.functions[selectorToRemove];
-      }
+      // must never fail
+      assert(address(extension) == ds.functions[selectorToRemove].implementation);
+      // swap with the last element in the selectorAtIndex array and remove the last element
+      uint16 indexToKeep = ds.functions[selectorToRemove].index;
+      ds.selectorAtIndex[indexToKeep] = ds.selectorAtIndex[ds.selectorAtIndex.length - 1];
+      ds.functions[ds.selectorAtIndex[indexToKeep]].index = indexToKeep;
+      ds.selectorAtIndex.pop();
+      delete ds.functions[selectorToRemove];
     }
   }
 
