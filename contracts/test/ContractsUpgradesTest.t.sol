@@ -153,7 +153,6 @@ contract ContractsUpgradesTest is BaseTest {
    * @dev testing if the comptroller can add diamond-pattern extensions
    */
   function testDiamondExtension() public fork(BSC_MAINNET) {
-    // create a list of the fns selectors to add with the new extension
     ComptrollerFirstExtension cfe = new ComptrollerFirstExtension();
 
     // change the implementation to the new that can add extensions
@@ -161,10 +160,8 @@ contract ContractsUpgradesTest is BaseTest {
     address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
     Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
     address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
-    // whitelist the upgrade
     FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
-
-    // upgrade the FFD to include the _registerComptrollerExtension fn
+    // upgrade the FuseFeeDistributor to include the _registerComptrollerExtension fn
     {
       FuseFeeDistributor newImpl = new FuseFeeDistributor();
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
@@ -174,19 +171,20 @@ contract ContractsUpgradesTest is BaseTest {
       vm.prank(admin);
       proxy.upgradeTo(address(newImpl));
     }
-
+    // whitelist the upgrade
     vm.prank(ffd.owner());
     ffd._editComptrollerImplementationWhitelist(
       asArray(oldComptrollerImplementation),
       asArray(address(newComptrollerImplementation)),
       asArray(true)
     );
-
-    // upgrade to the new comptroller and initialize the extension
+    // upgrade to the new comptroller
     vm.startPrank(asUnitroller.admin());
     asUnitroller._setPendingImplementation(address(newComptrollerImplementation));
     newComptrollerImplementation._become(asUnitroller);
     vm.stopPrank();
+
+    // register the extension
     vm.prank(ffd.owner());
     ffd._registerComptrollerExtension(jFiatPoolAddress, cfe, DiamondExtension(address(0)));
 
