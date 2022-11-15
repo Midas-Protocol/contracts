@@ -1,11 +1,20 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
+/**
+ * @notice a base contract for logic extensions that use the diamond pattern storage
+ * to map the functions when looking up the extension contract to delegate to.
+ */
 abstract contract DiamondExtension {
+  /**
+   * @return a list of all the function selectors that this logic extension exposes
+   */
   function _getExtensionFunctions() external view virtual returns (bytes4[] memory);
 }
 
-
+/**
+ * @notice a library to use in a contract, whose logic is extended with diamond extension
+ */
 library LibDiamond {
   bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
 
@@ -18,6 +27,13 @@ library LibDiamond {
     mapping(bytes4 => Function) functions;
     bytes4[] selectorAtIndex;
     // mapping(bytes4 => bool) supportedInterfaces;
+  }
+
+  function getExtensionForFunction(bytes4 msgSig) internal view returns (address) {
+    LibDiamond.LogicStorage storage ds = diamondStorage();
+    address extension = ds.functions[msgSig].implementation;
+    require(extension != address(0), "Diamond: Function does not exist");
+    return extension;
   }
 
   function diamondStorage() internal pure returns (LogicStorage storage ds) {

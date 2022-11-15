@@ -1309,24 +1309,14 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
   }
 
-  // Find facet for function that is called and execute the
-  // function if a facet is found and return any value.
   fallback() external payable {
-    LibDiamond.LogicStorage storage ds;
-    bytes32 position = LibDiamond.DIAMOND_STORAGE_POSITION;
-    // get diamond storage
-    assembly {
-      ds.slot := position
-    }
-    // get facet from function selector
-    address facet = ds.functions[msg.sig].implementation;
-    require(facet != address(0), "Diamond: Function does not exist");
-    // Execute external function from facet using delegatecall and return any value.
+    address extension = LibDiamond.getExtensionForFunction(msg.sig);
+    // Execute external function from extension using delegatecall and return any value.
     assembly {
       // copy function selector and any arguments
       calldatacopy(0, 0, calldatasize())
-      // execute function call using the facet
-      let result := delegatecall(gas(), facet, 0, calldatasize(), 0, 0)
+      // execute function call using the extension
+      let result := delegatecall(gas(), extension, 0, calldatasize(), 0, 0)
       // get any return value
       returndatacopy(0, 0, returndatasize())
       // return any return value or error back to the caller
