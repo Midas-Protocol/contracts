@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../midas/ComptrollerExtension.sol";
+import { DiamondExtension } from "../midas/DiamondExtension.sol";
 import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
+import { CTokenInterface } from "./CTokenInterfaces.sol";
+import { ComptrollerV3Storage } from "./Comptroller.sol";
 
-contract ComptrollerFirstExtension is ComptrollerExtension, ComptrollerErrorReporter {
+contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, ComptrollerErrorReporter {
   /// @notice Emitted when supply cap for a cToken is changed
   event NewSupplyCap(CTokenInterface indexed cToken, uint256 newSupplyCap);
 
@@ -174,17 +176,19 @@ contract ComptrollerFirstExtension is ComptrollerExtension, ComptrollerErrorRepo
   }
 
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 i = 0;
-    bytes4[] memory functionSelectors = new bytes4[](9);
-    functionSelectors[i++] = this.addNonAccruingFlywheel.selector;
-    functionSelectors[i++] = this._setMarketSupplyCaps.selector;
-    functionSelectors[i++] = this._setMarketBorrowCaps.selector;
-    functionSelectors[i++] = this._setBorrowCapGuardian.selector;
-    functionSelectors[i++] = this._setPauseGuardian.selector;
-    functionSelectors[i++] = this._setMintPaused.selector;
-    functionSelectors[i++] = this._setBorrowPaused.selector;
-    functionSelectors[i++] = this._setTransferPaused.selector;
-    functionSelectors[i++] = this.getFirstMarketSymbol.selector;
+    uint8 fnsCount = 10;
+    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
+    functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
+    functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
+    functionSelectors[--fnsCount] = this._setMarketBorrowCaps.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapGuardian.selector;
+    functionSelectors[--fnsCount] = this._setPauseGuardian.selector;
+    functionSelectors[--fnsCount] = this._setMintPaused.selector;
+    functionSelectors[--fnsCount] = this._setBorrowPaused.selector;
+    functionSelectors[--fnsCount] = this._setTransferPaused.selector;
+    functionSelectors[--fnsCount] = this._setSeizePaused.selector;
+    functionSelectors[--fnsCount] = this.getFirstMarketSymbol.selector;
+    require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
 }

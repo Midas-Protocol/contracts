@@ -10,7 +10,7 @@ import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 import { Unitroller } from "./Unitroller.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 import { IMidasFlywheel } from "../midas/strategies/flywheel/IMidasFlywheel.sol";
-import { LibDiamond } from "../midas/ComptrollerExtension.sol";
+import { DiamondExtension, LibDiamond } from "../midas/DiamondExtension.sol";
 
 /**
  * @title Compound's Comptroller Contract
@@ -1299,25 +1299,14 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   }
 
   /**
-   * One-time call to initialize the diamond storage
+   * @dev register a logic extension
+   * @param extensionToAdd the extension whose functions are to be added
+   * @param extensionToReplace the extension whose functions are to be removed/replaced
    */
-  function _initExtension(address extension) external {
+  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external {
     require(hasAdminRights(), "!unauthorized - no admin rights");
 
-    (bool success, ) = extension.delegatecall(msg.data);
-
-    assembly {
-      let free_mem_ptr := mload(0x40)
-      returndatacopy(free_mem_ptr, 0, returndatasize())
-
-      switch success
-      case 0 {
-        revert(free_mem_ptr, returndatasize())
-      }
-      default {
-        return(free_mem_ptr, returndatasize())
-      }
-    }
+    LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
   }
 
   // Find facet for function that is called and execute the

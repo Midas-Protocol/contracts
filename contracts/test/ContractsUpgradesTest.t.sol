@@ -1,18 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./config/BaseTest.t.sol";
-
-import "../FuseFeeDistributor.sol";
-import "../FusePoolDirectory.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
+import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
+import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
-
+import { ComptrollerFirstExtension, DiamondExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { BeefyERC4626 } from "../midas/strategies/BeefyERC4626.sol";
-import "../midas/strategies/flywheel/MidasFlywheelCore.sol";
-import "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { IComptroller } from "../external/compound/IComptroller.sol";
+import { Comptroller } from "../compound/Comptroller.sol";
+import { Unitroller } from "../compound/Unitroller.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
 // TODO: exclude test from CI
 contract ContractsUpgradesTest is BaseTest {
@@ -152,7 +153,7 @@ contract ContractsUpgradesTest is BaseTest {
   /**
    * @dev testing if the comptroller can add diamond-pattern extensions
    */
-  function testComptrollerExtension() public fork(BSC_MAINNET) {
+  function testDiamondExtension() public fork(BSC_MAINNET) {
     // create a list of the fns selectors to add with the new extension
     ComptrollerFirstExtension cfe = new ComptrollerFirstExtension();
 
@@ -176,7 +177,7 @@ contract ContractsUpgradesTest is BaseTest {
       asUnitroller._setPendingImplementation(address(newComptrollerImplementation));
       newComptrollerImplementation._become(asUnitroller);
       Comptroller asComptroller = Comptroller(jFiatPoolAddress);
-      asComptroller._initExtension(address(cfe));
+      asComptroller._registerExtension(cfe, DiamondExtension(address(0)));
     }
     vm.stopPrank();
 
