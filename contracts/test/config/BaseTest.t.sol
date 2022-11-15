@@ -14,6 +14,7 @@ abstract contract BaseTest is Test {
   uint128 constant MOONBEAM_MAINNET = 1284;
   uint128 constant POLYGON_MAINNET = 137;
   uint128 constant ARBITRUM_ONE = 42161;
+  uint128 constant FANTOM_OPERA = 250;
 
   uint128 constant EVMOS_TESTNET = 9000;
   uint128 constant BSC_CHAPEL = 97;
@@ -61,6 +62,8 @@ abstract contract BaseTest is Test {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("neon_dev")) + 100;
       } else if (chainid == ARBITRUM_ONE) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("arbitrum")) + 100;
+      } else if (chainid == FANTOM_OPERA) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("fantom")) + 100;
       }
     }
     return forkIds[chainid] - 100;

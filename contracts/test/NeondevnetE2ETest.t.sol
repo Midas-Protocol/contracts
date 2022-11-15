@@ -17,6 +17,7 @@ import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
+import { IPriceOracle } from "../external/compound/IPriceOracle.sol";
 import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
 import "../external/uniswap/IUniswapV2Pair.sol";
 import "../external/uniswap/IUniswapV2Factory.sol";
@@ -32,7 +33,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
   address moraToken = 0x6Ab1F83c0429A1322D7ECDFdDf54CE6D179d911f;
   address wtoken = 0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5;
 
-  constructor() WithPool() forkAtBlock(NEON_DEVNET, 159103730) {
+  constructor() WithPool() forkAtBlock(NEON_DEVNET, 173154262) {
     mpo = ap.getAddress("MasterPriceOracle");
     super.setUpWithPool(
       MasterPriceOracle(mpo), // MasterPriceOracle
@@ -172,7 +173,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     vm.mockCall(
       mpo, // MPO
       abi.encodeWithSelector(priceOracle.getUnderlyingPrice.selector, ICToken(address(cWNeonToken))),
-      abi.encode(vars.price2 / 1000)
+      abi.encode(vars.price2 / 10000)
     );
 
     vars.strategies = new IRedemptionStrategy[](0);
@@ -194,7 +195,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
       FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
         accountOne,
-        9e14,
+        8e13,
         ICErc20(address(cToken)),
         ICErc20(address(cWNeonToken)),
         flashSwapPair,
