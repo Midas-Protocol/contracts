@@ -46,7 +46,7 @@ contract CErc20DelegateTest is BaseTest {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(pools[i].comptroller);
+      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
       address implementation = comptroller.comptrollerImplementation();
 
       bool added = false;
@@ -76,7 +76,7 @@ contract CErc20DelegateTest is BaseTest {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(pools[i].comptroller);
+      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
       CTokenInterface[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20Delegate delegate = CErc20Delegate(address(markets[j]));
@@ -112,7 +112,7 @@ contract CErc20DelegateTest is BaseTest {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(pools[i].comptroller);
+      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
       CTokenInterface[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));
