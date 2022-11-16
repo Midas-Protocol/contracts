@@ -67,13 +67,13 @@ contract ERC4626PerformanceFeeTest is BaseTest {
 
   function test__UpdateFeeSettings() public {
     uint256 newPerfFee = 100;
-    address newFeeRecipient = address(10);
+    address anotherFeeRecipient = address(10);
 
-    plugin.updateFeeSettings(newPerfFee, newFeeRecipient);
+    plugin.updateFeeSettings(newPerfFee, anotherFeeRecipient);
 
     assertEq(plugin.performanceFee(), newPerfFee, "!perfFee == newPerfFee");
 
-    assertEq(plugin.feeRecipient(), newFeeRecipient, "!feeRecipient == newFeeRecipient");
+    assertEq(plugin.feeRecipient(), anotherFeeRecipient, "!feeRecipient == anotherFeeRecipient");
   }
 
   function testFail__UpdateFeeSettings() public {

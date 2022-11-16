@@ -2,7 +2,7 @@ pragma solidity >=0.8.0;
 
 import "./CToken.sol";
 import "./ExponentialNoError.sol";
-import "./Comptroller.sol";
+import "../external/compound/IComptroller.sol";
 import "./RewardsDistributorStorage.sol";
 
 interface ICErc20Plugin {
@@ -47,7 +47,7 @@ contract PluginRewardsDistributorDelegate is RewardsDistributorDelegateStorageV1
    */
   function checkCToken(CToken cToken) internal view {
     // Make sure cToken is listed
-    Comptroller comptroller = Comptroller(address(cToken.comptroller()));
+    IComptroller comptroller = IComptroller(address(cToken.comptroller()));
     (bool isListed, ) = comptroller.markets(address(cToken));
     require(isListed == true, "comp market is not listed");
 
