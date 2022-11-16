@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0;
 
 import "../compound/CTokenInterfaces.sol";
-import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import "./config/BaseTest.t.sol";
@@ -17,39 +16,42 @@ import "../external/uniswap/Quoter/Quoter.sol";
 import "../external/uniswap/IUniswapV3Pool.sol";
 import "../external/uniswap/ISwapRouter.sol";
 
-interface IMockERC20 is IERC20Upgradeable {
-  function mint(address _address, uint256 amount) external;
-}
-
-contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
+contract UniswapV3LiquidatorFunderTest is BaseTest {
   UniswapV3LiquidatorFunder private uniswapv3Liquidator;
 
-  IUniswapV3Pool pool = IUniswapV3Pool(0x80A9ae39310abf666A87C743d6ebBD0E8C42158E);
+  IERC20Upgradeable parToken;
+  IERC20Upgradeable usdcToken;
+  address parMarketAddress;
+  address usdcMarketAddress;
+  IUniswapV2Router02 uniswapRouter;
+  address univ3SwapRouter;
 
-  address minter = 0x68863dDE14303BcED249cA8ec6AF85d4694dea6A;
-  IMockERC20 gmxToken = IMockERC20(0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a);
-
-  IMockERC20 usdcToken = IMockERC20(0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8);
+  uint256 poolFee;
+  uint256 repayAmount;
+  uint256 borrowAmount;
 
   Quoter quoter;
 
-  constructor() WithPool() forkAtBlock(ARBITRUM_ONE, 28739891) {
-    super.setUpWithPool(
-      MasterPriceOracle(0xd4D0cA503E8befAbE4b75aAC36675Bc1cFA533D1),
-      ERC20Upgradeable(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1)
-    );
-  }
-
-  function setUp() public {
-    quoter = new Quoter(0x1F98431c8aD98523631AE4a59f267346ea31F984);
-
-    setUpPool("gmx-test", false, 0.1e18, 1.1e18);
-
+  function afterForkSetUp() internal override {
+    if (block.chainid == POLYGON_MAINNET) {
+      quoter = new Quoter(0x1F98431c8aD98523631AE4a59f267346ea31F984);
+      uniswapRouter = IUniswapV2Router02(0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506);
+      univ3SwapRouter = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
+      parToken = IERC20Upgradeable(0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128); // PAR, 18 decimals
+      parMarketAddress = 0x2e84b83883E57727bAEBB4D2A85E7acB0b8e6b54;
+      usdcMarketAddress = 0xF2aa6fd973A07AA7F413054958c9e8ec08F5d7cF;
+      usdcToken = IERC20Upgradeable(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174); // USDC, 6 decimals
+      poolFee = 500;
+      repayAmount = 1e18; // 1 PAR
+      borrowAmount = 6e20; // 600 PAR
+    }
     uniswapv3Liquidator = new UniswapV3LiquidatorFunder();
   }
 
-  function getPool(address inputToken) internal view returns (IUniswapV3Pool) {
-    return pool;
+  function testPolygon() public fork(POLYGON_MAINNET) {
+    // collateral value falls from 50 000 USD to 500 USD
+    // PAR price 1 USD => debt value = 600*1 = 600 USD
+    testLiquidation();
   }
 
   struct LiquidationData {
@@ -62,84 +64,63 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
     bytes[] data;
   }
 
-  function testGMXLiquidation() public {
+  function testLiquidation() internal {
     LiquidationData memory vars;
-    IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506);
 
-    vars.liquidator = new FuseSafeLiquidator();
-    vars.liquidator.initialize(
-      ap.getAddress("wtoken"),
-      address(uniswapRouter),
-      0x82aF49447D8a07e3bd95BD0d56f35241523fBab1, // WETH
-      0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f, // BTCB
-      "0xe18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303",
-      25
-    );
+    vars.liquidator = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
 
-    deployCErc20Delegate(address(usdcToken), "USDC", "usdcToken", 0.9e18);
-    deployCErc20Delegate(address(gmxToken), "GMX", "gmx", 0.9e18);
+    CErc20Delegate usdcCToken = CErc20Delegate(usdcMarketAddress);
+    CErc20Delegate parCToken = CErc20Delegate(parMarketAddress);
+    IComptroller comptroller = IComptroller(address(usdcCToken.comptroller()));
 
-    vars.allMarkets = comptroller.getAllMarkets();
+    vars.cTokens = new address[](2);
+    vars.cTokens[0] = address(parCToken);
+    vars.cTokens[1] = address(usdcCToken);
 
-    CErc20Delegate cTokenUSDC = CErc20Delegate(address(vars.allMarkets[0]));
-    CErc20Delegate cTokenGMX = CErc20Delegate(address(vars.allMarkets[1]));
-
-    uint256 borrowAmount = 1e19;
     address accountOne = address(10001);
     address accountTwo = address(20002);
 
-    // Account One supply GMX
-    dealGMX(accountTwo, 10e21);
-    // Account One supply usdcToken
-    dealUSDC(accountOne, 10e10);
-
-    emit log_uint(usdcToken.balanceOf(accountOne));
+    // Account One supply PAR
+    deal(parCToken.underlying(), accountTwo, 10e21);
+    // Account One supply USDC
+    deal(usdcCToken.underlying(), accountOne, 10e10);
 
     // Account One deposit usdcToken
     vm.startPrank(accountOne);
     {
-      vars.cTokens = new address[](2);
-      vars.cTokens[0] = address(cTokenGMX);
-      vars.cTokens[1] = address(cTokenUSDC);
       comptroller.enterMarkets(vars.cTokens);
+      usdcToken.approve(address(usdcCToken), 1e36);
+      require(usdcCToken.mint(5e10) == 0, "USDC mint failed"); // 50 000 USDC deposited
     }
-    usdcToken.approve(address(cTokenUSDC), 1e36);
-    require(cTokenUSDC.mint(5e10) == 0, "USDC mint failed");
     vm.stopPrank();
 
     vm.startPrank(accountTwo);
     {
-      vars.cTokens = new address[](2);
-      vars.cTokens[0] = address(cTokenGMX);
-      vars.cTokens[1] = address(cTokenUSDC);
       comptroller.enterMarkets(vars.cTokens);
+      parToken.approve(address(parCToken), 1e36);
+      require(parCToken.mint(5e21) == 0, "PAR mint failed"); // 5000 PAR deposited
     }
-    gmxToken.approve(address(cTokenGMX), 1e36);
-    require(cTokenGMX.mint(5e21) == 0, "GMX mint failed");
     vm.stopPrank();
 
-    // set borrow enable
-    vm.startPrank(address(this));
-    comptroller._setBorrowPaused(CTokenInterface(address(cTokenGMX)), false);
-    vm.stopPrank();
-
-    // Account One borrow GMX
+    // Account One borrow PAR
     vm.startPrank(accountOne);
-    require(cTokenGMX.borrow(borrowAmount) == 0, "borrow failed");
+    {
+      require(parCToken.borrow(borrowAmount) == 0, "borrow failed"); // borrow 12 PAR
+    }
     vm.stopPrank();
 
     // some time passes, interest accrues and prices change
     {
       vm.roll(block.number + 100);
-      cTokenUSDC.accrueInterest();
-      cTokenGMX.accrueInterest();
+      usdcCToken.accrueInterest();
+      parCToken.accrueInterest();
 
       MasterPriceOracle mpo = MasterPriceOracle(address(comptroller.oracle()));
-      uint256 priceusdc = mpo.getUnderlyingPrice(ICToken(address(cTokenUSDC)));
+      uint256 priceusdc = mpo.getUnderlyingPrice(ICToken(usdcMarketAddress));
       vm.mockCall(
         address(mpo),
-        abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, ICToken(address(cTokenUSDC))),
-        abi.encode(priceusdc / 1000)
+        abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, ICToken(usdcMarketAddress)),
+        abi.encode(priceusdc / 100)
       );
     }
 
@@ -149,13 +130,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
 
     vars.fundingStrategies = new IFundsConversionStrategy[](1);
     vars.data = new bytes[](1);
-    vars.data[0] = abi.encode(
-      usdcToken,
-      gmxToken,
-      3000,
-      ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564),
-      quoter
-    );
+    vars.data[0] = abi.encode(usdcToken, parToken, poolFee, ISwapRouter(univ3SwapRouter), quoter);
     vars.fundingStrategies[0] = uniswapv3Liquidator;
 
     // all strategies need to be whitelisted
@@ -168,15 +143,14 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
     );
     IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
-    uint256 repayAmount = 9e7;
     // liquidate
     vm.prank(accountTwo);
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
       FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
         accountOne,
-        repayAmount,
-        ICErc20(address(cTokenGMX)),
-        ICErc20(address(cTokenUSDC)),
+        repayAmount, // repay PAR
+        ICErc20(address(parCToken)), // PAR debt
+        ICErc20(address(usdcCToken)), // usdc collateral
         flashSwapPair,
         0,
         address(0),
@@ -189,15 +163,5 @@ contract UniswapV3LiquidatorFunderTest is BaseTest, WithPool {
         vars.data
       )
     );
-  }
-
-  function dealUSDC(address to, uint256 amount) internal {
-    vm.prank(0x489ee077994B6658eAfA855C308275EAd8097C4A); // whale
-    usdcToken.transfer(to, amount);
-  }
-
-  function dealGMX(address to, uint256 amount) internal {
-    vm.prank(minter); // whale
-    gmxToken.mint(to, amount);
   }
 }

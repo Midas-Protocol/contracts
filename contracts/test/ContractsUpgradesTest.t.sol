@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./config/BaseTest.t.sol";
-
-import "../FuseFeeDistributor.sol";
-import "../FusePoolDirectory.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
+import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
+import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
-import { CurveV2LpTokenPriceOracleNoRegistry } from "../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
-
+import { ComptrollerFirstExtension, DiamondExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { BeefyERC4626 } from "../midas/strategies/BeefyERC4626.sol";
+import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { IComptroller } from "../external/compound/IComptroller.sol";
+import { Comptroller } from "../compound/Comptroller.sol";
+import { Unitroller } from "../compound/Unitroller.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -17,41 +20,8 @@ contract ContractsUpgradesTest is BaseTest {
   // taken from ERC1967Upgrade
   bytes32 internal constant _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
 
-  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {}
-
-  function testUpgradeCurveOracle() public {
-    address contractToTest = 0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA; // CurveLpTokenPriceOracleNoRegistry proxy
-    address twoBrl = 0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9;
-    address poolOf2Brl = 0xad51e40D8f255dba1Ad08501D6B1a6ACb7C188f3;
-
-    // before upgrade
-    CurveLpTokenPriceOracleNoRegistry oldImpl = CurveLpTokenPriceOracleNoRegistry(contractToTest);
-    address poolBefore = oldImpl.poolOf(twoBrl);
-    emit log_address(poolBefore);
-
-    assertEq(poolBefore, poolOf2Brl);
-
-    // upgrade
-    {
-      CurveLpTokenPriceOracleNoRegistry newImpl = new CurveLpTokenPriceOracleNoRegistry();
-      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(contractToTest));
-      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-      address admin = address(uint160(uint256(bytesAtSlot)));
-      //            emit log_address(admin);
-      vm.prank(admin);
-      proxy.upgradeTo(address(newImpl));
-    }
-
-    // after upgrade
-    CurveLpTokenPriceOracleNoRegistry newImpl = CurveLpTokenPriceOracleNoRegistry(contractToTest);
-    address poolAfter = newImpl.poolOf(twoBrl);
-    emit log_address(poolAfter);
-
-    assertEq(poolAfter, poolOf2Brl, "2brl pool does not match");
-  }
-
-  function testFusePoolDirectoryUpgrade() public {
-    address contractToTest = 0x295d7347606F4bd810C8296bb8d75D657001fcf7; // FusePoolDirectory proxy
+  function testFusePoolDirectoryUpgrade() public fork(BSC_MAINNET) {
+    address contractToTest = ap.getAddress("FusePoolDirectory"); // FusePoolDirectory proxy
 
     // before upgrade
     FusePoolDirectory oldImpl = FusePoolDirectory(contractToTest);
@@ -86,18 +56,17 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
-  function testFuseFeeDistributorUpgrade() public {
-    address contractToTest = 0xFc1f56C58286E7215701A773b61bFf2e18A177dE; // FFD proxy
+  function testFuseFeeDistributorUpgrade() public fork(BSC_MAINNET) {
     address oldCercDelegate = 0x94C50805bC16737ead84e25Cd5Aa956bCE04BBDF;
 
     // before upgrade
-    FuseFeeDistributor oldImpl = FuseFeeDistributor(payable(contractToTest));
-    uint256 marketsCounterBefore = oldImpl.marketsCounter();
-    address ownerBefore = oldImpl.owner();
+    FuseFeeDistributor ffdProxy = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    uint256 marketsCounterBefore = ffdProxy.marketsCounter();
+    address ownerBefore = ffdProxy.owner();
 
-    (address latestCErc20DelegateBefore, bool allowResign, bytes memory becomeImplementationData) = oldImpl
+    (address latestCErc20DelegateBefore, bool allowResign, bytes memory becomeImplementationData) = ffdProxy
       .latestCErc20Delegate(oldCercDelegate);
-    //    bool whitelistedBefore = oldImpl.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateBefore, false);
+    //    bool whitelistedBefore = ffdProxy.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateBefore, false);
 
     emit log_uint(marketsCounterBefore);
     emit log_address(ownerBefore);
@@ -107,7 +76,7 @@ contract ContractsUpgradesTest is BaseTest {
     // upgrade
     {
       FuseFeeDistributor newImpl = new FuseFeeDistributor();
-      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(contractToTest));
+      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffdProxy)));
       bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
       address admin = address(uint160(uint256(bytesAtSlot)));
       // emit log_address(admin);
@@ -116,7 +85,7 @@ contract ContractsUpgradesTest is BaseTest {
     }
 
     // after upgrade
-    FuseFeeDistributor ffd = FuseFeeDistributor(payable(contractToTest));
+    FuseFeeDistributor ffd = FuseFeeDistributor(payable(address(ffdProxy)));
 
     uint256 marketsCounterAfter = ffd.marketsCounter();
     address ownerAfter = ffd.owner();
@@ -136,25 +105,93 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
-  function testCurveLpOracle() public {
-    vm.rollFork(21721830);
+  function testFlywheelReinitializeBsc() public fork(BSC_MAINNET) {
+    _testFlywheelReinitialize();
+  }
 
-    address oracleAddress = 0x97A6E1182A85380BaeF265F9BbADd6296515Dccf;
+  function testFlywheelReinitializePolygon() public fork(POLYGON_MAINNET) {
+    _testFlywheelReinitialize();
+  }
 
-    CurveV2LpTokenPriceOracleNoRegistry oracle = CurveV2LpTokenPriceOracleNoRegistry(oracleAddress);
+  function testFlywheelReinitializeMoonbeam() public fork(MOONBEAM_MAINNET) {
+    _testFlywheelReinitialize();
+  }
 
-    emit log_address(oracle.owner());
+  function _testFlywheelReinitialize() internal {
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
 
-    {
-      CurveV2LpTokenPriceOracleNoRegistry newImpl = new CurveV2LpTokenPriceOracleNoRegistry();
-      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(oracleAddress));
-      bytes32 bytesAtSlot = vm.load(address(oracleAddress), _ADMIN_SLOT);
-      address admin = address(uint160(uint256(bytesAtSlot)));
+    for (uint8 i = 0; i < pools.length; i++) {
+      IComptroller pool = IComptroller(pools[i].comptroller);
+      address[] memory flywheels = pool.getRewardsDistributors();
+      for (uint8 j = 0; j < flywheels.length; j++) {
+        MidasFlywheelCore flywheel = MidasFlywheelCore(flywheels[j]);
 
-      // oracle.reinitialize(address(1), address(2));
-      bytes memory data = abi.encodeWithSelector(newImpl.reinitialize.selector, address(1), address(2));
-      vm.prank(admin);
-      proxy.upgradeToAndCall(address(newImpl), data);
+        // upgrade
+        TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(flywheels[j]));
+        bytes32 bytesAtSlot = vm.load(
+          address(proxy),
+          0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103
+        );
+        address admin = address(uint160(uint256(bytesAtSlot)));
+
+        if (admin != address(0)) {
+          // emit log_address(admin);
+          MidasFlywheelCore newImpl = new MidasFlywheelCore();
+          vm.prank(admin);
+          // proxy.upgradeToAndCall(address(newImpl), flywheel.reinitialize.selector);
+          proxy.upgradeTo(address(newImpl));
+
+          vm.prank(flywheel.owner());
+          flywheel.reinitialize();
+        }
+      }
     }
+  }
+
+  /**
+   * @dev testing if the comptroller can add diamond-pattern extensions
+   */
+  function testDiamondExtension() public fork(BSC_MAINNET) {
+    ComptrollerFirstExtension cfe = new ComptrollerFirstExtension();
+
+    // change the implementation to the new that can add extensions
+    Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
+    address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
+    Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
+    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
+    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    // upgrade the FuseFeeDistributor to include the _registerComptrollerExtension fn
+    {
+      FuseFeeDistributor newImpl = new FuseFeeDistributor();
+      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
+      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
+      address admin = address(uint160(uint256(bytesAtSlot)));
+      // emit log_address(admin);
+      vm.prank(admin);
+      proxy.upgradeTo(address(newImpl));
+    }
+    // whitelist the upgrade
+    vm.prank(ffd.owner());
+    ffd._editComptrollerImplementationWhitelist(
+      asArray(oldComptrollerImplementation),
+      asArray(address(newComptrollerImplementation)),
+      asArray(true)
+    );
+    // upgrade to the new comptroller
+    vm.startPrank(asUnitroller.admin());
+    asUnitroller._setPendingImplementation(address(newComptrollerImplementation));
+    newComptrollerImplementation._become(asUnitroller);
+    vm.stopPrank();
+
+    // register the extension
+    vm.prank(ffd.owner());
+    ffd._registerComptrollerExtension(jFiatPoolAddress, cfe, DiamondExtension(address(0)));
+
+    // assert that it worked
+    ComptrollerFirstExtension asCfe = ComptrollerFirstExtension(jFiatPoolAddress);
+    emit log(asCfe.getFirstMarketSymbol());
+
+    assertEq(asCfe.getFirstMarketSymbol(), "fjBRL-1", "market symbol does not match");
   }
 }

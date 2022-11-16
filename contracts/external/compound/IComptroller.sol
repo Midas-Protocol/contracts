@@ -29,7 +29,12 @@ interface IComptroller {
 
   function checkMembership(address account, ICToken cToken) external view returns (bool);
 
-  function getAccountLiquidity(address account)
+  function getHypotheticalAccountLiquidity(
+    address account,
+    address cTokenModify,
+    uint256 redeemTokens,
+    uint256 borrowAmount
+  )
     external
     view
     returns (
@@ -50,7 +55,7 @@ interface IComptroller {
 
   function mintGuardianPaused(address cToken) external view returns (bool);
 
-  function getRewardsDistributors() external view returns (IRewardsDistributor[] memory);
+  function getRewardsDistributors() external view returns (address[] memory);
 
   function getAllMarkets() external view returns (ICToken[] memory);
 
@@ -59,6 +64,8 @@ interface IComptroller {
   function suppliers(address account) external view returns (bool);
 
   function enforceWhitelist() external view returns (bool);
+
+  function enterMarkets(address[] memory cTokens) external returns (uint256[] memory);
 
   function isUserOfPool(address user) external view returns (bool);
 

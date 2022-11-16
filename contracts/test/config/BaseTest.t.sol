@@ -14,6 +14,7 @@ abstract contract BaseTest is Test {
   uint128 constant MOONBEAM_MAINNET = 1284;
   uint128 constant POLYGON_MAINNET = 137;
   uint128 constant ARBITRUM_ONE = 42161;
+  uint128 constant FANTOM_OPERA = 250;
 
   uint128 constant EVMOS_TESTNET = 9000;
   uint128 constant BSC_CHAPEL = 97;
@@ -23,16 +24,6 @@ abstract contract BaseTest is Test {
   ProxyAdmin public dpa;
 
   mapping(uint128 => uint256) private forkIds;
-
-  constructor() {
-    forkIds[BSC_MAINNET] = vm.createFork(vm.rpcUrl("bsc"));
-    // forkIds[BSC_CHAPEL] = vm.createFork(vm.rpcUrl("bsc_chapel"));
-    forkIds[MOONBEAM_MAINNET] = vm.createFork(vm.rpcUrl("moonbeam"));
-    forkIds[EVMOS_TESTNET] = vm.createFork(vm.rpcUrl("evmos_test"));
-    forkIds[POLYGON_MAINNET] = vm.createFork(vm.rpcUrl("polygon"));
-    forkIds[NEON_DEVNET] = vm.createFork(vm.rpcUrl("neon_dev"));
-    forkIds[ARBITRUM_ONE] = vm.createFork(vm.rpcUrl("arbitrum"));
-  }
 
   modifier fork(uint128 chainid) {
     _forkAtBlock(chainid, 0);
@@ -46,13 +37,36 @@ abstract contract BaseTest is Test {
 
   function _forkAtBlock(uint128 chainid, uint256 blockNumber) private {
     if (block.chainid != chainid) {
-      vm.selectFork(forkIds[chainid]);
+      vm.selectFork(getForkId(chainid));
       if (blockNumber != 0) {
         vm.rollFork(blockNumber);
       }
       configureAddressesProvider(chainid);
       afterForkSetUp();
     }
+  }
+
+  function getForkId(uint128 chainid) private returns (uint256) {
+    if (forkIds[chainid] == 0) {
+      if (chainid == BSC_MAINNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("bsc")) + 100;
+      } else if (chainid == BSC_CHAPEL) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("bsc_chapel")) + 100;
+      } else if (chainid == MOONBEAM_MAINNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("moonbeam")) + 100;
+      } else if (chainid == EVMOS_TESTNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("evmos_test")) + 100;
+      } else if (chainid == POLYGON_MAINNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("polygon")) + 100;
+      } else if (chainid == NEON_DEVNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("neon_dev")) + 100;
+      } else if (chainid == ARBITRUM_ONE) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("arbitrum")) + 100;
+      } else if (chainid == FANTOM_OPERA) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("fantom")) + 100;
+      }
+    }
+    return forkIds[chainid] - 100;
   }
 
   function afterForkSetUp() internal virtual {}
@@ -102,6 +116,13 @@ abstract contract BaseTest is Test {
   function asArray(address value) public pure returns (address[] memory) {
     address[] memory array = new address[](1);
     array[0] = value;
+    return array;
+  }
+
+  function asArray(address value0, address value1) public pure returns (address[] memory) {
+    address[] memory array = new address[](2);
+    array[0] = value0;
+    array[1] = value1;
     return array;
   }
 
