@@ -130,15 +130,14 @@ contract WithPool {
     uint256 liquidationIncentive
   ) public {
     emptyAddresses.push(address(0));
-    Comptroller tempComtroller = new Comptroller(payable(fuseAdmin));
-    newUnitroller.push(address(tempComtroller));
+    newUnitroller.push(address(new Comptroller(payable(fuseAdmin))));
     trueBoolArray.push(true);
     falseBoolArray.push(false);
     fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
 
     (uint256 index, address comptrollerAddress) = fusePoolDirectory.deployPool(
       name,
-      address(tempComtroller),
+      newUnitroller[0],
       abi.encode(payable(address(fuseAdmin))),
       enforceWhitelist,
       closeFactor,
@@ -146,7 +145,7 @@ contract WithPool {
       address(priceOracle)
     );
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
-    comptroller = Comptroller(comptrollerAddress);
+    comptroller = Comptroller(payable(comptrollerAddress));
   }
 
   function deployCErc20Delegate(

@@ -86,7 +86,7 @@ contract LiquidityMiningTest is DSTest {
     );
 
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
-    comptroller = Comptroller(comptrollerAddress);
+    comptroller = Comptroller(payable(comptrollerAddress));
 
     newImplementation.push(address(cErc20Delegate));
     fuseAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);

@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0;
 
 import { CToken } from "../compound/CToken.sol";
-import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import "./config/BaseTest.t.sol";
@@ -78,7 +77,6 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     address[] cTokens;
     IRedemptionStrategy[] strategies;
     bytes[] abis;
-    CTokenInterface[] allMarkets;
     FuseSafeLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
     bytes[] data;
@@ -100,9 +98,8 @@ contract JarvisLiquidatorFunderTest is BaseTest {
       25
     );
 
-    Comptroller comptroller = Comptroller(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
+    IComptroller comptroller = IComptroller(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
 
-    vars.allMarkets = comptroller.getAllMarkets();
     CErc20Delegate cTokenJBRL = CErc20Delegate(0x82A3103bc306293227B756f7554AfAeE82F8ab7a);
     CErc20Delegate cTokenBUSD = CErc20Delegate(0xa7213deB44f570646Ea955771Cc7f39B58841363);
 
