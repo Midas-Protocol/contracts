@@ -20,10 +20,7 @@ contract BNBE2eTest is WithPool, BaseTest {
   function setUp() public fork(BSC_MAINNET) {
     ERC20Upgradeable wbnb = ERC20Upgradeable(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
     address wbnbWhale = 0xF8aaE8D5dd1d7697a4eC6F561737e68a2ab8539e;
-    setUpWithPool(
-      MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
-      wbnb
-    );
+    setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), wbnb);
     vm.prank(wbnbWhale);
     underlyingToken.transfer(address(this), 10e18);
     setUpPool("bsc-test", false, 0.1e18, 1.1e18);
