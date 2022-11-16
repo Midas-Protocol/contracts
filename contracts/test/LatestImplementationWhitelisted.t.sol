@@ -4,7 +4,6 @@ import { CErc20 } from "../compound/CErc20.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
-import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
@@ -13,12 +12,6 @@ import { IERC4626 } from "../compound/IERC4626.sol";
 import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract CErc20DelegateTest is BaseTest {
-  Comptroller comptroller;
-
-  CErc20Delegate cErc20Delegate;
-  CErc20PluginDelegate cErc20PluginDelegate;
-  CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
-
   FuseFeeDistributor fuseAdmin;
   FusePoolDirectory fusePoolDirectory;
 
@@ -46,7 +39,7 @@ contract CErc20DelegateTest is BaseTest {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(pools[i].comptroller);
+      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
       address implementation = comptroller.comptrollerImplementation();
 
       bool added = false;
@@ -76,7 +69,7 @@ contract CErc20DelegateTest is BaseTest {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(pools[i].comptroller);
+      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
       CTokenInterface[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20Delegate delegate = CErc20Delegate(address(markets[j]));
@@ -112,7 +105,7 @@ contract CErc20DelegateTest is BaseTest {
     FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(pools[i].comptroller);
+      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
       CTokenInterface[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));
