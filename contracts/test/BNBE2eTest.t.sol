@@ -17,14 +17,12 @@ import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 contract BNBE2eTest is WithPool, BaseTest {
-  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
-    setUpWithPool(
-      MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
-      ERC20Upgradeable(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
-    );
-    vm.prank(0xF8aaE8D5dd1d7697a4eC6F561737e68a2ab8539e);
-    underlyingToken.transferFrom(0xF8aaE8D5dd1d7697a4eC6F561737e68a2ab8539e, address(this), 10e18);
-    uint256 balance = underlyingToken.balanceOf(address(this));
+  function setUp() public fork(BSC_MAINNET) {
+    ERC20Upgradeable wbnb = ERC20Upgradeable(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
+    address wbnbWhale = 0xF8aaE8D5dd1d7697a4eC6F561737e68a2ab8539e;
+    setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), wbnb);
+    vm.prank(wbnbWhale);
+    underlyingToken.transfer(address(this), 10e18);
     setUpPool("bsc-test", false, 0.1e18, 1.1e18);
   }
 
@@ -65,14 +63,7 @@ contract BNBE2eTest is WithPool, BaseTest {
 
     cToken.mint(10e18);
 
-    // address comptroller1 = 0x31d76A64Bc8BbEffb601fac5884372DEF910F044;
-    // address comptroller2 = 0x11355CF65a9B76e5Ac4C289362fD7c22eE93E762;
-
     FusePoolLens.FusePoolAsset[] memory assets = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
-
-    // FusePoolLens.FusePoolAsset[] memory assets1 = poolLens
-    //     .getPoolAssetsWithData(IComptroller(comptroller1));
-
     assertEq(assets[0].supplyBalance, 10e18);
   }
 

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-/* solhint-disable */
-pragma solidity >=0.4.23;
+pragma solidity >=0.8.0;
 
 import "forge-std/Test.sol";
 
@@ -8,12 +7,9 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
-import { FuseFlywheelLensRouter } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
-import "fuse-flywheel/FuseFlywheelCore.sol";
+import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
 import "../compound/CTokenInterfaces.sol";
 
-import { CErc20 } from "../compound/CErc20.sol";
-import { CToken } from "../compound/CToken.sol";
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
@@ -31,16 +27,18 @@ import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 import { MockERC4626 } from "../midas/strategies/MockERC4626.sol";
 import { MockERC4626Dynamic } from "../midas/strategies/MockERC4626Dynamic.sol";
 import { BaseTest } from "./config/BaseTest.t.sol";
-import { IERC4626 } from "../compound/IERC4626.sol";
-import { IComptroller } from "../external/compound/IComptroller.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
+
+import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
+import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
+import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 
 contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
   MockERC20 rewardToken;
 
   WhitePaperInterestRateModel interestModel;
-  IComptroller comptroller;
+  Comptroller comptroller;
 
   CErc20Delegate cErc20Delegate;
   CErc20PluginDelegate cErc20PluginDelegate;
@@ -49,18 +47,10 @@ contract DeployMarketsTest is Test {
   MockERC4626 mockERC4626;
   MockERC4626Dynamic mockERC4626Dynamic;
 
-  CErc20 cErc20;
   FuseFeeDistributor fuseAdmin;
   FusePoolDirectory fusePoolDirectory;
 
-  FuseFlywheelCore flywheel;
   FuseFlywheelDynamicRewardsPlugin rewards;
-
-  ERC20 marketKey;
-
-  address user = address(this);
-
-  uint256 depositAmount = 1 ether;
 
   address[] markets;
   address[] emptyAddresses;
@@ -72,7 +62,7 @@ contract DeployMarketsTest is Test {
   bool[] f;
   address[] oldCErC20Implementations;
   address[] newCErc20Implementations;
-  FuseFlywheelCore[] flywheelsToClaim;
+  MidasFlywheelCore[] flywheelsToClaim;
 
   function setUpBaseContracts() public {
     underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
@@ -134,7 +124,7 @@ contract DeployMarketsTest is Test {
     );
 
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
-    comptroller = IComptroller(comptrollerAddress);
+    comptroller = Comptroller(comptrollerAddress);
   }
 
   function setUp() public {
@@ -174,11 +164,6 @@ contract DeployMarketsTest is Test {
     cToken.mint(10e18);
     assertEq(cToken.totalSupply(), 10e18 * 5);
     assertEq(underlyingToken.balanceOf(address(cToken)), 10e18);
-    vm.roll(1);
-
-    cToken.borrow(1000);
-    assertEq(cToken.totalBorrows(), 1000);
-    assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10e18 + 1000);
   }
 
   function testDeployCErc20PluginDelegate() public {
@@ -219,32 +204,18 @@ contract DeployMarketsTest is Test {
     assertEq(cToken.totalSupply(), 10e18 * 5);
     assertEq(mockERC4626.balanceOf(address(cToken)), 10e18);
     assertEq(underlyingToken.balanceOf(address(mockERC4626)), 10e18);
-    vm.roll(1);
-
-    cToken.borrow(1000);
-    assertEq(cToken.totalBorrows(), 1000);
-    assertEq(underlyingToken.balanceOf(address(mockERC4626)), 10e18 - 1000);
-    assertEq(mockERC4626.balanceOf(address(cToken)), 10e18 - 1000);
-    assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10e18 + 1000);
   }
 
   function testDeployCErc20PluginRewardsDelegate() public {
-    flywheel = new FuseFlywheelCore(
-      underlyingToken,
-      IFlywheelRewards(address(0)),
-      IFlywheelBooster(address(0)),
-      address(this),
-      Authority(address(0))
-    );
-    rewards = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
+    MidasFlywheelCore flywheel = new MidasFlywheelCore();
+    flywheel.initialize(underlyingToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
+    FlywheelCore asFlywheelCore = FlywheelCore(address(flywheel));
+    rewards = new FuseFlywheelDynamicRewardsPlugin(asFlywheelCore, 1);
     flywheel.setFlywheelRewards(rewards);
 
-    mockERC4626Dynamic = new MockERC4626Dynamic(ERC20(address(underlyingToken)), FlywheelCore(address(flywheel)));
+    mockERC4626Dynamic = new MockERC4626Dynamic(ERC20(address(underlyingToken)), asFlywheelCore);
 
     whitelistPlugin(address(mockERC4626Dynamic), address(mockERC4626Dynamic));
-
-    marketKey = ERC20(address(mockERC4626Dynamic));
-    flywheel.addStrategyForRewards(marketKey);
 
     vm.roll(1);
     comptroller._deployMarket(
@@ -267,6 +238,8 @@ contract DeployMarketsTest is Test {
     ICToken[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
 
+    flywheel.addStrategyForRewards(ERC20(address(cToken)));
+
     assertEq(address(cToken.plugin()), address(mockERC4626Dynamic), "!plugin == erc4626");
     assertEq(underlyingToken.allowance(address(cToken), address(mockERC4626Dynamic)), type(uint256).max);
     assertEq(underlyingToken.allowance(address(cToken), address(flywheel)), 0);
@@ -284,13 +257,6 @@ contract DeployMarketsTest is Test {
     assertEq(cToken.totalSupply(), 10000000 * 5);
     assertEq(mockERC4626Dynamic.balanceOf(address(cToken)), 10000000);
     assertEq(underlyingToken.balanceOf(address(mockERC4626Dynamic)), 10000000);
-    vm.roll(1);
-
-    cToken.borrow(1000);
-    assertEq(cToken.totalBorrows(), 1000);
-    assertEq(underlyingToken.balanceOf(address(mockERC4626Dynamic)), 10000000 - 1000);
-    assertEq(mockERC4626Dynamic.balanceOf(address(cToken)), 10000000 - 1000);
-    assertEq(underlyingToken.balanceOf(address(this)), 100e18 - 10000000 + 1000);
   }
 
   function testAutImplementationCErc20Delegate() public {
@@ -466,144 +432,5 @@ contract DeployMarketsTest is Test {
       arrayOfFalse,
       arrayOfTrue
     );
-  }
-}
-
-contract CErc20DelegateTest is BaseTest {
-  Comptroller comptroller;
-
-  CErc20Delegate cErc20Delegate;
-  CErc20PluginDelegate cErc20PluginDelegate;
-  CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
-
-  CErc20 cErc20;
-  FuseFeeDistributor fuseAdmin;
-  FusePoolDirectory fusePoolDirectory;
-
-  address[] implementationsSet;
-  address[] pluginsSet;
-
-  function testBscImplementations() public forkAtBlock(BSC_MAINNET, 20238373) {
-    testPoolImplementations();
-    testMarketImplementations();
-    testPluginImplementations();
-  }
-
-  function testPolygonImplementations() public forkAtBlock(POLYGON_MAINNET, 33063212) {
-    testPoolImplementations();
-    testMarketImplementations();
-    testPluginImplementations();
-  }
-
-  function afterForkSetUp() internal override {
-    fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
-  }
-
-  function testPoolImplementations() internal {
-    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
-
-    for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
-      address implementation = comptroller.comptrollerImplementation();
-
-      bool added = false;
-      for (uint8 k = 0; k < implementationsSet.length; k++) {
-        if (implementationsSet[k] == implementation) {
-          added = true;
-        }
-      }
-
-      if (!added) implementationsSet.push(implementation);
-    }
-
-    emit log("listing the set");
-    for (uint8 k = 0; k < implementationsSet.length; k++) {
-      emit log_address(implementationsSet[k]);
-
-      address latestImpl = fuseAdmin.latestComptrollerImplementation(implementationsSet[k]);
-      bool whitelisted = fuseAdmin.comptrollerImplementationWhitelist(implementationsSet[k], latestImpl);
-      assertTrue(
-        whitelisted || implementationsSet[k] == latestImpl,
-        "latest implementation for old implementation not whitelisted"
-      );
-    }
-  }
-
-  function testMarketImplementations() internal {
-    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
-
-    for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
-      CTokenInterface[] memory markets = comptroller.getAllMarkets();
-      for (uint8 j = 0; j < markets.length; j++) {
-        CErc20Delegate delegate = CErc20Delegate(address(markets[j]));
-        address implementation = delegate.implementation();
-
-        bool added = false;
-        for (uint8 k = 0; k < implementationsSet.length; k++) {
-          if (implementationsSet[k] == implementation) {
-            added = true;
-          }
-        }
-
-        if (!added) implementationsSet.push(implementation);
-      }
-    }
-
-    emit log("listing the set");
-    for (uint8 k = 0; k < implementationsSet.length; k++) {
-      emit log_address(implementationsSet[k]);
-      (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = fuseAdmin
-        .latestCErc20Delegate(implementationsSet[k]);
-
-      bool whitelisted = fuseAdmin.cErc20DelegateWhitelist(implementationsSet[k], latestCErc20Delegate, allowResign);
-
-      assertTrue(
-        whitelisted || implementationsSet[k] == latestCErc20Delegate,
-        "no whitelisted implementation for old implementation"
-      );
-    }
-  }
-
-  function testPluginImplementations() internal {
-    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
-
-    for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
-      CTokenInterface[] memory markets = comptroller.getAllMarkets();
-      for (uint8 j = 0; j < markets.length; j++) {
-        CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));
-
-        address plugin;
-        try delegate.plugin() returns (IERC4626 _plugin) {
-          plugin = address(_plugin);
-        } catch {
-          continue;
-        }
-
-        bool added = false;
-        for (uint8 k = 0; k < pluginsSet.length; k++) {
-          if (pluginsSet[k] == plugin) {
-            added = true;
-          }
-        }
-
-        if (!added) pluginsSet.push(plugin);
-      }
-    }
-
-    emit log("listing the set");
-    for (uint8 k = 0; k < pluginsSet.length; k++) {
-      address latestPluginImpl = fuseAdmin.latestPluginImplementation(pluginsSet[k]);
-
-      bool whitelisted = fuseAdmin.pluginImplementationWhitelist(pluginsSet[k], latestPluginImpl);
-      emit log_address(pluginsSet[k]);
-
-      assertTrue(
-        whitelisted || pluginsSet[k] == latestPluginImpl,
-        "no whitelisted implementation for old implementation"
-      );
-    }
   }
 }
