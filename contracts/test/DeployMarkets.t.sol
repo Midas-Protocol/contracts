@@ -7,8 +7,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
-import { FuseFlywheelLensRouter } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
-import "fuse-flywheel/FuseFlywheelCore.sol";
+import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
 import "../compound/CTokenInterfaces.sol";
 
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
@@ -28,16 +27,18 @@ import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 import { MockERC4626 } from "../midas/strategies/MockERC4626.sol";
 import { MockERC4626Dynamic } from "../midas/strategies/MockERC4626Dynamic.sol";
 import { BaseTest } from "./config/BaseTest.t.sol";
-import { IERC4626 } from "../compound/IERC4626.sol";
-import { IComptroller } from "../external/compound/IComptroller.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
+
+import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
+import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
+import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 
 contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
   MockERC20 rewardToken;
 
   WhitePaperInterestRateModel interestModel;
-  IComptroller comptroller;
+  Comptroller comptroller;
 
   CErc20Delegate cErc20Delegate;
   CErc20PluginDelegate cErc20PluginDelegate;
@@ -123,7 +124,7 @@ contract DeployMarketsTest is Test {
     );
 
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
-    comptroller = IComptroller(comptrollerAddress);
+    comptroller = Comptroller(comptrollerAddress);
   }
 
   function setUp() public {
@@ -431,144 +432,5 @@ contract DeployMarketsTest is Test {
       arrayOfFalse,
       arrayOfTrue
     );
-  }
-}
-
-contract CErc20DelegateTest is BaseTest {
-  Comptroller comptroller;
-
-  CErc20Delegate cErc20Delegate;
-  CErc20PluginDelegate cErc20PluginDelegate;
-  CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
-
-  CErc20 cErc20;
-  FuseFeeDistributor fuseAdmin;
-  FusePoolDirectory fusePoolDirectory;
-
-  address[] implementationsSet;
-  address[] pluginsSet;
-
-  function testBscImplementations() public forkAtBlock(BSC_MAINNET, 20238373) {
-    testPoolImplementations();
-    testMarketImplementations();
-    testPluginImplementations();
-  }
-
-  function testPolygonImplementations() public forkAtBlock(POLYGON_MAINNET, 33063212) {
-    testPoolImplementations();
-    testMarketImplementations();
-    testPluginImplementations();
-  }
-
-  function afterForkSetUp() internal override {
-    fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
-  }
-
-  function testPoolImplementations() internal {
-    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
-
-    for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
-      address implementation = comptroller.comptrollerImplementation();
-
-      bool added = false;
-      for (uint8 k = 0; k < implementationsSet.length; k++) {
-        if (implementationsSet[k] == implementation) {
-          added = true;
-        }
-      }
-
-      if (!added) implementationsSet.push(implementation);
-    }
-
-    emit log("listing the set");
-    for (uint8 k = 0; k < implementationsSet.length; k++) {
-      emit log_address(implementationsSet[k]);
-
-      address latestImpl = fuseAdmin.latestComptrollerImplementation(implementationsSet[k]);
-      bool whitelisted = fuseAdmin.comptrollerImplementationWhitelist(implementationsSet[k], latestImpl);
-      assertTrue(
-        whitelisted || implementationsSet[k] == latestImpl,
-        "latest implementation for old implementation not whitelisted"
-      );
-    }
-  }
-
-  function testMarketImplementations() internal {
-    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
-
-    for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
-      CTokenInterface[] memory markets = comptroller.getAllMarkets();
-      for (uint8 j = 0; j < markets.length; j++) {
-        CErc20Delegate delegate = CErc20Delegate(address(markets[j]));
-        address implementation = delegate.implementation();
-
-        bool added = false;
-        for (uint8 k = 0; k < implementationsSet.length; k++) {
-          if (implementationsSet[k] == implementation) {
-            added = true;
-          }
-        }
-
-        if (!added) implementationsSet.push(implementation);
-      }
-    }
-
-    emit log("listing the set");
-    for (uint8 k = 0; k < implementationsSet.length; k++) {
-      emit log_address(implementationsSet[k]);
-      (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = fuseAdmin
-        .latestCErc20Delegate(implementationsSet[k]);
-
-      bool whitelisted = fuseAdmin.cErc20DelegateWhitelist(implementationsSet[k], latestCErc20Delegate, allowResign);
-
-      assertTrue(
-        whitelisted || implementationsSet[k] == latestCErc20Delegate,
-        "no whitelisted implementation for old implementation"
-      );
-    }
-  }
-
-  function testPluginImplementations() internal {
-    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
-
-    for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
-      CTokenInterface[] memory markets = comptroller.getAllMarkets();
-      for (uint8 j = 0; j < markets.length; j++) {
-        CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));
-
-        address plugin;
-        try delegate.plugin() returns (IERC4626 _plugin) {
-          plugin = address(_plugin);
-        } catch {
-          continue;
-        }
-
-        bool added = false;
-        for (uint8 k = 0; k < pluginsSet.length; k++) {
-          if (pluginsSet[k] == plugin) {
-            added = true;
-          }
-        }
-
-        if (!added) pluginsSet.push(plugin);
-      }
-    }
-
-    emit log("listing the set");
-    for (uint8 k = 0; k < pluginsSet.length; k++) {
-      address latestPluginImpl = fuseAdmin.latestPluginImplementation(pluginsSet[k]);
-
-      bool whitelisted = fuseAdmin.pluginImplementationWhitelist(pluginsSet[k], latestPluginImpl);
-      emit log_address(pluginsSet[k]);
-
-      assertTrue(
-        whitelisted || pluginsSet[k] == latestPluginImpl,
-        "no whitelisted implementation for old implementation"
-      );
-    }
   }
 }
