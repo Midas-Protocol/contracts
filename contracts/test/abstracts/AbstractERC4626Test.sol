@@ -28,7 +28,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
 
   function setUp(string memory _testPreFix, bytes calldata data) public virtual;
 
-  function deposit(address _owner, uint256 amount) public {
+  function deposit(address _owner, uint256 amount) public virtual {
     vm.startPrank(_owner);
     underlyingToken.approve(address(plugin), amount);
     plugin.deposit(amount, _owner);

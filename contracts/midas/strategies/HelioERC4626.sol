@@ -13,6 +13,12 @@ interface IJAR {
   function exit(uint256 wad) external;
 
   function balanceOf(address) external view returns (uint256);
+
+  function totalSupply() external view returns (uint256);
+
+  function exitDelay() external view returns (uint);
+
+  function setExitDelay(uint) external;
 }
 
 contract HelioERC4626 is MidasERC4626, RewardsClaimer {
