@@ -7,7 +7,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
-import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
+import { FuseFlywheelLensRouter } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
 import "../compound/CTokenInterfaces.sol";
 
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
@@ -124,7 +124,7 @@ contract DeployMarketsTest is Test {
     );
 
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
-    comptroller = Comptroller(comptrollerAddress);
+    comptroller = Comptroller(payable(comptrollerAddress));
   }
 
   function setUp() public {
@@ -153,7 +153,7 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    ICToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
     assertEq(cToken.name(), "cUnderlyingToken");
     underlyingToken.approve(address(cToken), 1e36);
@@ -189,7 +189,7 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    ICToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(mockERC4626), "!plugin == erc4626");
@@ -235,7 +235,7 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    ICToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
 
     flywheel.addStrategyForRewards(ERC20(address(cToken)));
@@ -282,7 +282,7 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    ICToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(mockERC4626), "!plugin == erc4626");
@@ -331,7 +331,7 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    ICToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(pluginA), "!plugin == erc4626");
@@ -370,7 +370,7 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    ICToken[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(pluginA), "!plugin == erc4626");
