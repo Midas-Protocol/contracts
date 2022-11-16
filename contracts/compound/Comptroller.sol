@@ -840,8 +840,11 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       // Pre-compute a conversion factor from tokens -> ether (normalized price value)
       vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
 
-      // sumCollateral += tokensToDenom * cTokenBalance
-      vars.sumCollateral = mul_ScalarTruncateAddUInt(vars.tokensToDenom, vars.cTokenBalance, vars.sumCollateral);
+      // Exclude the asset-to-be-borrowed from the liquidity
+      if (address(asset) != address(cTokenModify) || borrowAmount == 0) {
+        // sumCollateral += tokensToDenom * cTokenBalance
+        vars.sumCollateral = mul_ScalarTruncateAddUInt(vars.tokensToDenom, vars.cTokenBalance, vars.sumCollateral);
+      }
 
       // sumBorrowPlusEffects += oraclePrice * borrowBalance
       vars.sumBorrowPlusEffects = mul_ScalarTruncateAddUInt(
