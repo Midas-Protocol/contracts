@@ -24,6 +24,8 @@ contract LooplessFlywheelBooster is IFlywheelBooster {
      */
   function boostedBalanceOf(ERC20 strategy, address user) external view returns (uint256) {
     CToken asCToken = CToken(address(strategy));
-    return asCToken.balanceOf(user) - (asCToken.borrowBalanceStored(user) * 1e18) / asCToken.exchangeRateStored();
+    uint256 cTokensBalance = asCToken.balanceOf(user);
+    uint256 cTokensBorrow = (asCToken.borrowBalanceStored(user) * 1e18) / asCToken.exchangeRateStored();
+    return (cTokensBalance > cTokensBorrow) ? cTokensBalance - cTokensBorrow : 0;
   }
 }
