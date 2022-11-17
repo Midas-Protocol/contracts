@@ -46,6 +46,14 @@ contract UniswapTwapPriceOracleV2Resolver is IResolver, Ownable {
     return pairConfigs;
   }
 
+  function pairExists(address _pair) external view returns (bool) {
+    for (uint256 i = 0; i < pairs.length; i++) {
+      if (_pair == pairs[i]) return true;
+    }
+
+    return false;
+  }
+
   function changeRoot(UniswapTwapPriceOracleV2Root _root) external onlyOwner {
     root = _root;
   }

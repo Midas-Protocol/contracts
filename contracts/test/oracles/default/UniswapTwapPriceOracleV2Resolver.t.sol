@@ -72,6 +72,9 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
     });
     resolver.addPair(pairConfig);
 
+    assertEq(resolver.pairExists(STELLA_WGLMR), true);
+    assertEq(resolver.pairExists(address(0)), false);
+
     address[] memory workablePairs = resolver.getWorkablePairs();
     emit log_named_uint("workablePairs: ", workablePairs.length);
     for (uint256 i = 0; i < workablePairs.length; i++) {
