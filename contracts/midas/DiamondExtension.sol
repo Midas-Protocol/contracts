@@ -82,21 +82,31 @@ library LibDiamond {
   }
 
   function registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) internal {
-    LogicStorage storage ds = diamondStorage();
-
     if (address(extensionToReplace) != address(0)) {
-      // remove all functions of the extension to replace
-      removeExtensionFunctions(extensionToReplace);
-      for (uint8 i = 0; i < ds.extensions.length; i++) {
-        if (ds.extensions[i] == address(extensionToReplace)) {
-          ds.extensions[i] = ds.extensions[ds.extensions.length - 1];
-          ds.extensions.pop();
-        }
+      removeExtension(extensionToReplace);
+    }
+    addExtension(extensionToAdd);
+  }
+
+  function removeExtension(DiamondExtension extension) internal {
+    LogicStorage storage ds = diamondStorage();
+    // remove all functions of the extension to replace
+    removeExtensionFunctions(extension);
+    for (uint8 i = 0; i < ds.extensions.length; i++) {
+      if (ds.extensions[i] == address(extension)) {
+        ds.extensions[i] = ds.extensions[ds.extensions.length - 1];
+        ds.extensions.pop();
       }
     }
+  }
 
-    addExtensionFunctions(extensionToAdd);
-    ds.extensions.push(address(extensionToAdd));
+  function addExtension(DiamondExtension extension) internal {
+    LogicStorage storage ds = diamondStorage();
+    for (uint8 i = 0; i < ds.extensions.length; i++) {
+      require (ds.extensions[i] != address(extension), "extension already added");
+    }
+    addExtensionFunctions(extension);
+    ds.extensions.push(address(extension));
   }
 
   function removeExtensionFunctions(DiamondExtension extension) internal {

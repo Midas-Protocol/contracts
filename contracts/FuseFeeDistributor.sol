@@ -467,6 +467,19 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     customInterestFeeRates[comptroller] = rate;
   }
 
+  mapping(address => DiamondExtension[]) public comptrollerExtensions;
+
+  function getComptrollerExtensions(address comptroller) external view returns (DiamondExtension[] memory) {
+    return comptrollerExtensions[comptroller];
+  }
+
+  function _setComptrollerExtensions(
+    address comptroller,
+    DiamondExtension[] calldata extensions
+  ) external onlyOwner {
+    comptrollerExtensions[comptroller] = extensions;
+  }
+
   function _registerComptrollerExtension(
     address payable pool,
     DiamondExtension extensionToAdd,
