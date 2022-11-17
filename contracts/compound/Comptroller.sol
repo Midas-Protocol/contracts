@@ -1287,13 +1287,25 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     );
 
     uint256 changeStatus = unitroller._acceptImplementation();
-    require(changeStatus == 0, "!unauthorized");
+    require(changeStatus == 0, "!unauthorized - not pending impl");
 
     Comptroller(payable(address(unitroller)))._becomeImplementation();
   }
 
   function _becomeImplementation() external {
     require(msg.sender == comptrollerImplementation, "!implementation");
+
+    address[] memory currentExtensions = LibDiamond.listExtensions();
+    for (uint256 i = 0; i < currentExtensions.length; i++) {
+      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
+    }
+
+    address[] memory latestExtensions = IFuseFeeDistributor(fuseAdmin).getComptrollerExtensions(
+      comptrollerImplementation
+    );
+    for (uint256 i = 0; i < latestExtensions.length; i++) {
+      LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
+    }
 
     if (!_notEnteredInitialized) {
       _notEntered = true;

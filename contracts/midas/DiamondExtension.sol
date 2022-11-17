@@ -20,6 +20,10 @@ abstract contract DiamondBase {
    */
   function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external virtual;
 
+  function _listExtensions() public returns (address[] memory) {
+    return LibDiamond.listExtensions();
+  }
+
   fallback() external payable {
     address extension = LibDiamond.getExtensionForFunction(msg.sig);
     // Execute external function from extension using delegatecall and return any value.
@@ -56,6 +60,7 @@ library LibDiamond {
   struct LogicStorage {
     mapping(bytes4 => Function) functions;
     bytes4[] selectorAtIndex;
+    address[] extensions;
   }
 
   function getExtensionForFunction(bytes4 msgSig) internal view returns (address) {
@@ -72,13 +77,36 @@ library LibDiamond {
     }
   }
 
+  function listExtensions() internal returns (address[] memory) {
+    return diamondStorage().extensions;
+  }
+
   function registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) internal {
     if (address(extensionToReplace) != address(0)) {
-      // remove all functions of the extension to replace
-      removeExtensionFunctions(extensionToReplace);
+      removeExtension(extensionToReplace);
     }
+    addExtension(extensionToAdd);
+  }
 
-    addExtensionFunctions(extensionToAdd);
+  function removeExtension(DiamondExtension extension) internal {
+    LogicStorage storage ds = diamondStorage();
+    // remove all functions of the extension to replace
+    removeExtensionFunctions(extension);
+    for (uint8 i = 0; i < ds.extensions.length; i++) {
+      if (ds.extensions[i] == address(extension)) {
+        ds.extensions[i] = ds.extensions[ds.extensions.length - 1];
+        ds.extensions.pop();
+      }
+    }
+  }
+
+  function addExtension(DiamondExtension extension) internal {
+    LogicStorage storage ds = diamondStorage();
+    for (uint8 i = 0; i < ds.extensions.length; i++) {
+      require(ds.extensions[i] != address(extension), "extension already added");
+    }
+    addExtensionFunctions(extension);
+    ds.extensions.push(address(extension));
   }
 
   function removeExtensionFunctions(DiamondExtension extension) internal {
