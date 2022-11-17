@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import "./config/BaseTest.t.sol";
 
-import { DiamondExtension } from "../midas/DiamondExtension.sol";
+import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { Comptroller, ComptrollerV3Storage } from "../compound/Comptroller.sol";
@@ -34,6 +34,34 @@ contract MockComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
     functionSelectors[--fnsCount] = this._setSeizePaused.selector;
     functionSelectors[--fnsCount] = this.getFirstMarketSymbol.selector;
     functionSelectors[--fnsCount] = this.getSecondMarketSymbol.selector;
+    require(fnsCount == 0, "use the correct array length");
+    return functionSelectors;
+  }
+}
+
+contract MockSecondComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
+  function getThirdMarketSymbol() public view returns (string memory) {
+    return allMarkets[2].symbol();
+  }
+
+  function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
+    uint8 fnsCount = 1;
+    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
+    functionSelectors[--fnsCount] = this.getThirdMarketSymbol.selector;
+    require(fnsCount == 0, "use the correct array length");
+    return functionSelectors;
+  }
+}
+
+contract MockThirdComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
+  function getFourthMarketSymbol() public view returns (string memory) {
+    return allMarkets[3].symbol();
+  }
+
+  function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
+    uint8 fnsCount = 1;
+    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
+    functionSelectors[--fnsCount] = this.getFourthMarketSymbol.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
@@ -87,5 +115,21 @@ contract ExtensionsTest is BaseTest {
     MockComptrollerExtension asMockExtension = MockComptrollerExtension(jFiatPoolAddress);
     emit log(asMockExtension.getSecondMarketSymbol());
     assertEq(asMockExtension.getSecondMarketSymbol(), "fETH-1", "market symbol does not match");
+
+    // add another extension
+    MockSecondComptrollerExtension msce = new MockSecondComptrollerExtension();
+    vm.prank(ffd.owner());
+    ffd._registerComptrollerExtension(jFiatPoolAddress, msce, DiamondExtension(address(0)));
+
+    // add again the third, removing the second
+    MockThirdComptrollerExtension mtce = new MockThirdComptrollerExtension();
+    vm.prank(ffd.owner());
+    ffd._registerComptrollerExtension(jFiatPoolAddress, mtce, msce);
+
+    DiamondBase asBase = DiamondBase(jFiatPoolAddress);
+    address[] memory currentExtensions = asBase._listExtensions();
+    assertEq(currentExtensions.length, 2, "extensions count does not match");
+    assertEq(currentExtensions[0], address(mce), "!second");
+    assertEq(currentExtensions[1], address(mtce), "!third");
   }
 }
