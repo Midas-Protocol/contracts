@@ -21,9 +21,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   /// @notice Emitted when an admin supports a market
   event MarketListed(CTokenInterface cToken);
 
-  /// @notice Emitted when an admin unsupports a market
-  event MarketUnlisted(CTokenInterface cToken);
-
   /// @notice Emitted when an account enters a market
   event MarketEntered(CTokenInterface cToken, address account);
 
@@ -1210,51 +1207,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     // Set collateral factor
     return err == uint256(Error.NO_ERROR) ? _setCollateralFactor(cToken, collateralFactorMantissa) : err;
-  }
-
-  /**
-   * @notice Removed a market from the markets mapping and sets it as unlisted
-   * @dev Admin function unset isListed and collateralFactorMantissa and unadd support for the market
-   * @param cToken The address of the market (token) to unlist
-   * @return uint 0=success, otherwise a failure. (See enum Error for details)
-   */
-  function _unsupportMarket(CTokenInterface cToken) external returns (uint256) {
-    // Check admin rights
-    if (!hasAdminRights()) return fail(Error.UNAUTHORIZED, FailureInfo.UNSUPPORT_MARKET_OWNER_CHECK);
-
-    // Check if market is already unlisted
-    if (!markets[address(cToken)].isListed)
-      return fail(Error.MARKET_NOT_LISTED, FailureInfo.UNSUPPORT_MARKET_DOES_NOT_EXIST);
-
-    // Check if market is in use
-    if (cToken.totalSupply() > 0) return fail(Error.NONZERO_TOTAL_SUPPLY, FailureInfo.UNSUPPORT_MARKET_IN_USE);
-
-    // Unlist market
-    delete markets[address(cToken)];
-
-    /* Delete cToken from allMarkets */
-    // load into memory for faster iteration
-    CTokenInterface[] memory _allMarkets = allMarkets;
-    uint256 len = _allMarkets.length;
-    uint256 assetIndex = len;
-    for (uint256 i = 0; i < len; i++) {
-      if (_allMarkets[i] == cToken) {
-        assetIndex = i;
-        break;
-      }
-    }
-
-    // We *must* have found the asset in the list or our redundant data structure is broken
-    assert(assetIndex < len);
-
-    // copy last item in list to location of item to be removed, reduce length by 1
-    allMarkets[assetIndex] = allMarkets[allMarkets.length - 1];
-    allMarkets.pop();
-
-    cTokensByUnderlying[CErc20Interface(address(cToken)).underlying()] = CTokenInterface(address(0));
-    emit MarketUnlisted(cToken);
-
-    return uint256(Error.NO_ERROR);
   }
 
   /**
