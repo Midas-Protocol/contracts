@@ -1300,7 +1300,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
     }
 
-    address[] memory latestExtensions = IFuseFeeDistributor(fuseAdmin).getComptrollerExtensions(comptrollerImplementation);
+    address[] memory latestExtensions = IFuseFeeDistributor(fuseAdmin).getComptrollerExtensions(
+      comptrollerImplementation
+    );
     for (uint256 i = 0; i < latestExtensions.length; i++) {
       LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
     }

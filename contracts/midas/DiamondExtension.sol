@@ -103,7 +103,7 @@ library LibDiamond {
   function addExtension(DiamondExtension extension) internal {
     LogicStorage storage ds = diamondStorage();
     for (uint8 i = 0; i < ds.extensions.length; i++) {
-      require (ds.extensions[i] != address(extension), "extension already added");
+      require(ds.extensions[i] != address(extension), "extension already added");
     }
     addExtensionFunctions(extension);
     ds.extensions.push(address(extension));

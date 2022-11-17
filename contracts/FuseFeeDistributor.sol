@@ -473,10 +473,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     return comptrollerExtensions[comptroller];
   }
 
-  function _setComptrollerExtensions(
-    address comptroller,
-    DiamondExtension[] calldata extensions
-  ) external onlyOwner {
+  function _setComptrollerExtensions(address comptroller, DiamondExtension[] calldata extensions) external onlyOwner {
     comptrollerExtensions[comptroller] = extensions;
   }
 
