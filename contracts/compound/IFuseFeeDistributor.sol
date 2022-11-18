@@ -54,6 +54,8 @@ interface IFuseFeeDistributor {
 
   function latestPluginImplementation(address oldImplementation) external view returns (address);
 
+  function getComptrollerExtensions(address comptroller) external view returns (address[] memory);
+
   function deployCErc20(bytes calldata constructorData) external returns (address);
 
   fallback() external payable;

@@ -533,7 +533,6 @@ contract AnyLiquidationTest is BaseTest {
 
     if (compareStrings(strategyContract, "JarvisLiquidatorFunder")) {
       AddressesProvider.JarvisPool[] memory pools = ap.getJarvisPools();
-
       for (uint256 i = 0; i < pools.length; i++) {
         AddressesProvider.JarvisPool memory pool = pools[i];
         if (pool.syntheticToken == debtToken) {
