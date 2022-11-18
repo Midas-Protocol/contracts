@@ -370,7 +370,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Get account liquidity
     (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
       account,
-      CTokenInterface(address(0)),
+      isBorrow ? CTokenInterface(cToken) : CTokenInterface(address(0)),
       0,
       0
     );
