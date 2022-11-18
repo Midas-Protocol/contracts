@@ -370,7 +370,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Get account liquidity
     (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
       account,
-      isBorrow ? CTokenInterface(cToken) : CTokenInterface(address(0)),
+      isBorrow ? cTokenModify : CTokenInterface(address(0)),
       0,
       0
     );
@@ -380,7 +380,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Get max borrow/redeem
     uint256 maxBorrowOrRedeemAmount;
 
-    if (!isBorrow && !markets[address(cTokenModify)].accountMembership[account]) {
+    if (!isBorrow && !markets[cToken].accountMembership[account]) {
       // Max redeem = balance of underlying if not used as collateral
       maxBorrowOrRedeemAmount = balanceOfUnderlying;
     } else {
