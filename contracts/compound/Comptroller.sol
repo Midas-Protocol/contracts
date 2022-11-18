@@ -821,7 +821,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
 
       // Exclude the asset-to-be-borrowed from the liquidity
-      if (address(asset) != address(cTokenModify) || borrowAmount == 0) {
+      if (address(asset) != address(cTokenModify) || redeemTokens > 0) {
         // sumCollateral += tokensToDenom * cTokenBalance
         vars.sumCollateral = mul_ScalarTruncateAddUInt(vars.tokensToDenom, vars.cTokenBalance, vars.sumCollateral);
       }
