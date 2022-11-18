@@ -380,9 +380,12 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Get max borrow/redeem
     uint256 maxBorrowOrRedeemAmount;
 
-    if (!isBorrow && !markets[cToken].accountMembership[account]) {
+    if (!isBorrow && !markets[address(cTokenModify)].accountMembership[account]) {
       // Max redeem = balance of underlying if not used as collateral
       maxBorrowOrRedeemAmount = balanceOfUnderlying;
+    } else if (isBorrow && markets[address(cTokenModify)].accountMembership[account]) {
+      // cannot borrow your supply/collateral
+      return 0;
     } else {
       // Avoid "stack too deep" error by separating this logic
       maxBorrowOrRedeemAmount = _getMaxRedeemOrBorrow(liquidity, cTokenModify, isBorrow);
