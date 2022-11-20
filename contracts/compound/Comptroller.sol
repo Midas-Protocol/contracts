@@ -370,7 +370,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Get account liquidity
     (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
       account,
-      CTokenInterface(address(0)),
+      isBorrow ? cTokenModify : CTokenInterface(address(0)),
       0,
       0
     );
@@ -380,7 +380,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Get max borrow/redeem
     uint256 maxBorrowOrRedeemAmount;
 
-    if (!isBorrow && !markets[address(cTokenModify)].accountMembership[account]) {
+    if (!isBorrow && !markets[cToken].accountMembership[account]) {
       // Max redeem = balance of underlying if not used as collateral
       maxBorrowOrRedeemAmount = balanceOfUnderlying;
     } else {
@@ -821,7 +821,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
 
       // Exclude the asset-to-be-borrowed from the liquidity
-      if (address(asset) != address(cTokenModify) || borrowAmount == 0) {
+      if (address(asset) != address(cTokenModify) || redeemTokens > 0) {
         // sumCollateral += tokensToDenom * cTokenBalance
         vars.sumCollateral = mul_ScalarTruncateAddUInt(vars.tokensToDenom, vars.cTokenBalance, vars.sumCollateral);
       }
