@@ -29,8 +29,7 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
     // return the price denominated in W_NATIVE
     return mpo.price(tokenAddress);
   }
-
-  function testStellaWglmrPriceUpdate() public fork(MOONBEAM_MAINNET) {
+  function testStellaWglmrPriceUpdate() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     twapPriceOracleRoot = UniswapTwapPriceOracleV2Root(0x7645f0A9F814286857E937cB1b3fa9659B03385b); // TODO: add to ap
 
     address STELLA_WGLMR = 0x7F5Ac0FC127bcf1eAf54E3cd01b00300a0861a62; // STELLA/WGLMR
