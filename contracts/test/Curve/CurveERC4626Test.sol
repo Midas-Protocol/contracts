@@ -169,9 +169,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
     vm.stopPrank();
 
     for (uint8 i; i < flywheels.length; i++) {
-      (, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(
-        ERC20(address(marketAddress))
-      );
+      (, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(ERC20(address(marketAddress)));
 
       // Rewards can be transfered in the next cycle
       assertEq(cycleEnd, 0, string(abi.encodePacked("!cycleEnd-", vm.toString(i), " ", testPreFix)));
@@ -200,9 +198,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
         string(abi.encodePacked("!rewardBal-", vm.toString(i), " ", testPreFix))
       );
 
-      (, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(
-        ERC20(address(marketAddress))
-      );
+      (, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(ERC20(address(marketAddress)));
       // Rewards can be transfered in the next cycle
       assertEq(cycleEnd, 1663093678, string(abi.encodePacked("!2.cycleEnd-", vm.toString(i), " ", testPreFix)));
 

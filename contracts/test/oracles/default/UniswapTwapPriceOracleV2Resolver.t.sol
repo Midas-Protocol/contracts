@@ -41,10 +41,7 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
     {
       (, , uint32 lastTime) = IUniswapV2Pair(STELLA_WGLMR).getReserves();
       emit log_named_uint("STELLA_WGLMR last time: ", lastTime);
-      (uint32 timestamp, uint256 price0Cumulative, ) = twapPriceOracleRoot.observations(
-        STELLA_WGLMR,
-        0
-      );
+      (uint32 timestamp, uint256 price0Cumulative, ) = twapPriceOracleRoot.observations(STELLA_WGLMR, 0);
       emit log_named_uint("STELLA_WGLMR observations timestamp: ", timestamp);
       emit log_named_bytes(
         "STELLA_WGLMR observations timestamp diff: ",

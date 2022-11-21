@@ -34,11 +34,7 @@ contract CurveSwapLiquidatorTest is BaseTest {
 
     {
       // mock some calls
-      vm.mockCall(
-        xcDotAddress,
-        abi.encodeWithSelector(xcDot.approve.selector, pool, 10000000000),
-        abi.encode(true)
-      );
+      vm.mockCall(xcDotAddress, abi.encodeWithSelector(xcDot.approve.selector, pool, 10000000000), abi.encode(true));
       vm.mockCall(
         xcDotAddress,
         abi.encodeWithSelector(xcDot.transferFrom.selector, address(csl), pool, 10000000000),
@@ -67,7 +63,11 @@ contract CurveSwapLiquidatorTest is BaseTest {
     dealMai(address(csl), inputAmount);
 
     bytes memory data = abi.encode(poolAddress, 0, 1, val3EPSAddress, ap.getAddress("wtoken"));
-    (IERC20Upgradeable shouldBeVal3EPS, uint256 outputAmount) = csl.redeem(IERC20Upgradeable(maiAddress), inputAmount, data);
+    (IERC20Upgradeable shouldBeVal3EPS, uint256 outputAmount) = csl.redeem(
+      IERC20Upgradeable(maiAddress),
+      inputAmount,
+      data
+    );
     assertEq(address(shouldBeVal3EPS), val3EPSAddress, "output token does not match");
 
     assertEq(maiForVal3EPS, outputAmount, "output amount does not match");
@@ -92,10 +92,7 @@ contract CurveSwapLiquidatorTest is BaseTest {
     assertTrue(shouldBeAround2e10 >= 20e9 && shouldBeAround2e10 <= 21e9, "rough estimate didn't work");
   }
 
-  function dealMai(
-    address to,
-    uint256 amount
-  ) internal {
+  function dealMai(address to, uint256 amount) internal {
     address whale = 0xc412eCccaa35621cFCbAdA4ce203e3Ef78c4114a; // anyswap
     vm.prank(whale);
     IERC20Upgradeable(maiAddress).transfer(to, amount);
