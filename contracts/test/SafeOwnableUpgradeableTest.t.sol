@@ -21,12 +21,6 @@ contract SafeOwnableUpgradeableTest is BaseTest {
     address initOwner = someOwnable.owner();
     assertEq(initOwner, address(this), "owner init value");
 
-    vm.expectRevert("not used anymore");
-    someOwnable.transferOwnership(joe);
-
-    vm.expectRevert("not used anymore");
-    someOwnable.renounceOwnership();
-
     someOwnable._setPendingOwner(joe);
 
     address currentOwner = someOwnable.owner();
