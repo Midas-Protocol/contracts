@@ -27,7 +27,6 @@ contract BalancerLpTokenPriceOracleTest is BaseTest {
   // TODO: add test for mimo / par pair, when we deploy the MIMO DIA price oracle
   // See: https://github.com/Midas-Protocol/monorepo/issues/476
   function testPriceBalancer() public forkAtBlock(POLYGON_MAINNET, 33672239) {
-
     // uint256 lp_price = (pool.lp_price() * mpo.price(busd)) / 10**18;
     uint256 price = oracle.price(wbtcWeth5050);
 

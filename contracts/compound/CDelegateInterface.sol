@@ -39,5 +39,5 @@ abstract contract CDelegateInterface is CDelegationStorage {
    */
   function _prepare() external payable virtual;
 
-  function contractType() external virtual view returns (string memory);
+  function contractType() external view virtual returns (string memory);
 }

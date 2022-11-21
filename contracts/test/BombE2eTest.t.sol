@@ -52,10 +52,7 @@ contract BombE2eTest is WithPool, BaseTest {
 
   function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
     address bombTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
-    setUpWithPool(
-      MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
-      ERC20Upgradeable(bombTokenAddress)
-    );
+    setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(bombTokenAddress));
 
     vm.prank(bombWhale);
     MockERC20(address(underlyingToken)).mint(address(this), 100e18);

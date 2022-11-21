@@ -97,12 +97,7 @@ contract ERC4626PerformanceFeeTest is BaseTest {
       uint256(10),
       "totalSupply increase didnt match expectedFeeShares"
     );
-    assertApproxEqAbs(
-      plugin.balanceOf(plugin.feeRecipient()),
-      expectedFeeShares,
-      uint256(10),
-      "!feeRecipient shares"
-    );
+    assertApproxEqAbs(plugin.balanceOf(plugin.feeRecipient()), expectedFeeShares, uint256(10), "!feeRecipient shares");
     assertEq(plugin.totalAssets(), oldAssets, "totalAssets should not change");
   }
 
@@ -126,12 +121,7 @@ contract ERC4626PerformanceFeeTest is BaseTest {
       uint256(10),
       "totalSupply increase didnt match expectedFeeShares"
     );
-    assertApproxEqAbs(
-      plugin.balanceOf(plugin.feeRecipient()),
-      expectedFeeShares,
-      uint256(10),
-      "!feeShares minted"
-    );
+    assertApproxEqAbs(plugin.balanceOf(plugin.feeRecipient()), expectedFeeShares, uint256(10), "!feeShares minted");
 
     plugin.withdrawAccruedFees();
 
