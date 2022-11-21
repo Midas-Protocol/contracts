@@ -7,7 +7,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import "../midas/strategies/BombERC4626.sol";
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract BombERC4626Test is BaseTest {
   BombERC4626 vault;

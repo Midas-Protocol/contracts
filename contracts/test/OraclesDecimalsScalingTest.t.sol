@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";

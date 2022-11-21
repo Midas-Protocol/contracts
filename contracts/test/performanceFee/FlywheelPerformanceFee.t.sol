@@ -4,17 +4,13 @@ pragma solidity ^0.8.0;
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "..//helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
-import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { DotDotERC4626Test } from "../DotDot/DotDotLpERC4626Test.sol";
-import { IBeefyVault, BeefyERC4626 } from "../../midas/strategies/BeefyERC4626.sol";
 import { MidasERC4626, DotDotLpERC4626, ILpDepositor } from "../../midas/strategies/DotDotLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
-import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";

@@ -6,7 +6,7 @@ import "forge-std/Vm.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 import "../FuseSafeLiquidator.sol";
 
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";

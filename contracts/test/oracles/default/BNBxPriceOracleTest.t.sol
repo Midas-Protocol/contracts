@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../../config/BaseTest.t.sol";
+import { BaseTest } from "../../config/BaseTest.t.sol";
 import { BNBxPriceOracle } from "../../../oracles/default/BNBxPriceOracle.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { ICToken } from "../../../external/compound/ICToken.sol";

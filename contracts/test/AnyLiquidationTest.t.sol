@@ -13,7 +13,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 
 import "../FuseSafeLiquidator.sol";
 import "../FusePoolDirectory.sol";
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 import "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
 import "../liquidators/CurveSwapLiquidator.sol";
 import "../liquidators/CurveSwapLiquidatorFunder.sol";

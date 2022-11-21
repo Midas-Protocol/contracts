@@ -5,7 +5,7 @@ import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 
 import "./helpers/WithPool.sol";
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 import "../compound/CToken.sol";
 import "../compound/CTokenInterfaces.sol";
 import "../FuseFeeDistributor.sol";

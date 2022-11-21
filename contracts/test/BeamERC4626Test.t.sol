@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.23;
 
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 import "../midas/strategies/BeamERC4626.sol";
 import "./mocks/beam/MockVault.sol";
 import "forge-std/Test.sol";

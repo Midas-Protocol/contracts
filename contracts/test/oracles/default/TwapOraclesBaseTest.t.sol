@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "../../../oracles/MasterPriceOracle.sol";
 import "../../../oracles/default/UniswapTwapPriceOracleV2Factory.sol";
 import "../../../external/uniswap/IUniswapV2Factory.sol";
-import "../../config/BaseTest.t.sol";
+import { BaseTest } from "../../config/BaseTest.t.sol";
 
 contract TwapOraclesBaseTest is BaseTest {
   IUniswapV2Factory uniswapV2Factory;

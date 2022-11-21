@@ -3,7 +3,7 @@ pragma solidity >=0.4.23;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 

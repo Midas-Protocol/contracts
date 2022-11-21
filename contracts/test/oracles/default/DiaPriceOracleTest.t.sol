@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../../config/BaseTest.t.sol";
+import { BaseTest } from "../../config/BaseTest.t.sol";
 import { DiaPriceOracle, DIAOracleV2 } from "../../../oracles/default/DiaPriceOracle.sol";
 import { SimplePriceOracle } from "../../../oracles/default/SimplePriceOracle.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";

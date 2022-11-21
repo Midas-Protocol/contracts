@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import { CToken } from "../compound/CToken.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../FuseSafeLiquidator.sol";
 import "../external/uniswap/IUniswapV2Pair.sol";

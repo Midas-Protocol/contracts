@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./helpers/WithPool.sol";
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 import "forge-std/Test.sol";
 import "../compound/CTokenInterfaces.sol";
 

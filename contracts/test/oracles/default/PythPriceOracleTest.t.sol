@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "../../../oracles/default/PythPriceOracle.sol";
-import "../../config/BaseTest.t.sol";
+import { BaseTest } from "../../config/BaseTest.t.sol";
 import { MockPyth } from "@pythnetwork/pyth-sdk-solidity/MockPyth.sol";
 import { PythStructs } from "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
 import { Pyth } from "pyth-neon/PythOracle.sol";

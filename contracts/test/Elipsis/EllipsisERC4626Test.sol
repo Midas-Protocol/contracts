@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { MidasERC4626, EllipsisERC4626, ILpTokenStaker } from "../../midas/strategies/EllipsisERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";

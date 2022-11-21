@@ -5,7 +5,7 @@ import "../../../oracles/MasterPriceOracle.sol";
 import "../../../oracles/default/UniswapTwapPriceOracleV2Root.sol";
 import "../../../oracles/default/UniswapTwapPriceOracleV2Factory.sol";
 import "../../../external/uniswap/IUniswapV2Factory.sol";
-import "../../config/BaseTest.t.sol";
+import { BaseTest } from "../../config/BaseTest.t.sol";
 import { UniswapTwapPriceOracleV2Resolver } from "../../../oracles/default/UniswapTwapPriceOracleV2Resolver.sol";
 
 contract UniswapTwapOracleV2ResolverTest is BaseTest {

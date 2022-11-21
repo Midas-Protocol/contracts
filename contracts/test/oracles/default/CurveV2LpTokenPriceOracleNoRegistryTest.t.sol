@@ -5,7 +5,7 @@ import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import { ICurveV2Pool } from "../../../external/curve/ICurveV2Pool.sol";
 import "../../../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
-import "../../config/BaseTest.t.sol";
+import { BaseTest } from "../../config/BaseTest.t.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 
 contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
