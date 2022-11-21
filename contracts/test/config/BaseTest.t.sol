@@ -37,13 +37,19 @@ abstract contract BaseTest is Test {
 
   function _forkAtBlock(uint128 chainid, uint256 blockNumber) private {
     if (block.chainid != chainid) {
-      vm.selectFork(getForkId(chainid));
       if (blockNumber != 0) {
+        vm.selectFork(getArchiveForkId(chainid));
         vm.rollFork(blockNumber);
+      } else {
+        vm.selectFork(getForkId(chainid));
       }
       configureAddressesProvider(chainid);
       afterForkSetUp();
     }
+  }
+
+  function getForkId(uint128 chainid, bool archive) private returns (uint256) {
+    return archive ? getForkId(chainid) : getArchiveForkId(chainid);
   }
 
   function getForkId(uint128 chainid) private returns (uint256) {
@@ -67,6 +73,29 @@ abstract contract BaseTest is Test {
       }
     }
     return forkIds[chainid] - 100;
+  }
+
+  function getArchiveForkId(uint128 chainid) private returns (uint256) {
+    if (forkIds[chainid] == 0) {
+      if (chainid == BSC_MAINNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("bsc_archive")) + 200;
+      } else if (chainid == BSC_CHAPEL) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("bsc_chapel_archive")) + 200;
+      } else if (chainid == MOONBEAM_MAINNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("moonbeam_archive")) + 200;
+      } else if (chainid == EVMOS_TESTNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("evmos_test_archive")) + 200;
+      } else if (chainid == POLYGON_MAINNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("polygon_archive")) + 200;
+      } else if (chainid == NEON_DEVNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("neon_dev_archive")) + 200;
+      } else if (chainid == ARBITRUM_ONE) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("arbitrum_archive")) + 200;
+      } else if (chainid == FANTOM_OPERA) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("fantom_archive")) + 200;
+      }
+    }
+    return forkIds[chainid] - 200;
   }
 
   function afterForkSetUp() internal virtual {}
