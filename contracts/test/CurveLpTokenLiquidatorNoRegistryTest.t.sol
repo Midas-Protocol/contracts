@@ -3,14 +3,11 @@ pragma solidity >=0.8.0;
 
 import "ds-test/test.sol";
 
-import { WETH } from "solmate/tokens/WETH.sol";
-
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { CurveLpTokenLiquidatorNoRegistry } from "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
 import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
-import "../utils/IW_NATIVE.sol";
-import "../external/curve/ICurvePool.sol";
-import "./config/BaseTest.t.sol";
+
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
   CurveLpTokenLiquidatorNoRegistry private liquidator;
@@ -21,16 +18,15 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
 
   IERC20Upgradeable bUSD;
-  WETH wtoken;
+  address wtoken;
 
-  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
-    wtoken = WETH(payable(ap.getAddress("wtoken")));
+  function afterForkSetUp() internal override {
+    wtoken = ap.getAddress("wtoken");
     liquidator = new CurveLpTokenLiquidatorNoRegistry();
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
   }
 
-  // tested with bsc block number 16233661
-  function testRedeemToken() public {
+  function testRedeemToken() public fork(BSC_MAINNET) {
     vm.prank(lpTokenWhale);
     lpToken.transfer(address(liquidator), 1234);
 
@@ -45,7 +41,7 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     assertEq(outputToken.balanceOf(address(liquidator)), outputAmount, "!outputAmount");
   }
 
-  function testRedeem2Brl() public {
+  function testRedeem2Brl() public fork(BSC_MAINNET) {
     IERC20Upgradeable twobrl = IERC20Upgradeable(0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9);
     address whale2brl = 0x6219b46d6a5B5BfB4Ec433a9F96DB3BF4076AEE1;
     vm.prank(whale2brl);

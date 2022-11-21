@@ -1,14 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../oracles/MasterPriceOracle.sol";
-import "../external/compound/IPriceOracle.sol";
-import "../oracles/default/UniswapTwapPriceOracleV2.sol";
-import "../oracles/default/UniswapTwapPriceOracleV2Root.sol";
-import "../oracles/default/UniswapLpTokenPriceOracle.sol";
-import "./config/BaseTest.t.sol";
-import "../external/uniswap/IUniswapV2Pair.sol";
-import "../external/uniswap/IUniswapV2Factory.sol";
+import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
+import { IPriceOracle } from "../external/compound/IPriceOracle.sol";
+import { UniswapLpTokenPriceOracle } from "../oracles/default/UniswapLpTokenPriceOracle.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract UniswapLpTokenBaseTest is BaseTest {
   UniswapLpTokenPriceOracle uniswapLpTokenPriceOracle;
@@ -17,15 +13,6 @@ contract UniswapLpTokenBaseTest is BaseTest {
 
   function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-  }
-
-  function testMoonbeam() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
-    testGlmrUsdcLpTokenOraclePrice();
-    testGlmrGlintLpTokenOraclePrice();
-  }
-
-  function testBsc() public forkAtBlock(BSC_MAINNET, 20238373) {
-    testBombBtcLpTokenOraclePrice();
   }
 
   function getLpTokenPrice(address lpToken) internal returns (uint256) {
@@ -47,21 +34,21 @@ contract UniswapLpTokenBaseTest is BaseTest {
     return mpo.price(lpToken);
   }
 
-  function testBombBtcLpTokenOraclePrice() internal {
+  function testBombBtcLpTokenOraclePrice() public fork(BSC_MAINNET) {
     address lpToken = 0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6; // Lp BOMB-BTCB
 
     uint256 price = getLpTokenPrice(lpToken);
     assertTrue(price > 0);
   }
 
-  function testGlmrUsdcLpTokenOraclePrice() internal {
+  function testGlmrUsdcLpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
     address lpToken = 0xb929914B89584b4081C7966AC6287636F7EfD053; // Lp GLMR-USDC
 
     uint256 price = getLpTokenPrice(lpToken);
     assertTrue(price > 0);
   }
 
-  function testGlmrGlintLpTokenOraclePrice() internal {
+  function testGlmrGlintLpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
     address lpToken = 0x99588867e817023162F4d4829995299054a5fC57; // Lp GLMR-GLINT
 
     uint256 price = getLpTokenPrice(lpToken);

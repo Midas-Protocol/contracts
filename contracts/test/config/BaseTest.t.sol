@@ -4,21 +4,21 @@ pragma solidity >=0.8.0;
 import "forge-std/Vm.sol";
 import "forge-std/Test.sol";
 
-import "../../midas/AddressesProvider.sol";
+import { AddressesProvider } from "../../midas/AddressesProvider.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 abstract contract BaseTest is Test {
-  uint128 constant BSC_MAINNET = 56;
-  uint128 constant MOONBEAM_MAINNET = 1284;
-  uint128 constant POLYGON_MAINNET = 137;
-  uint128 constant ARBITRUM_ONE = 42161;
-  uint128 constant FANTOM_OPERA = 250;
+  uint128 public constant BSC_MAINNET = 56;
+  uint128 public constant MOONBEAM_MAINNET = 1284;
+  uint128 public constant POLYGON_MAINNET = 137;
+  uint128 public constant ARBITRUM_ONE = 42161;
+  uint128 public constant FANTOM_OPERA = 250;
 
-  uint128 constant EVMOS_TESTNET = 9000;
-  uint128 constant BSC_CHAPEL = 97;
-  uint128 constant NEON_DEVNET = 245022926;
+  uint128 public constant EVMOS_TESTNET = 9000;
+  uint128 public constant BSC_CHAPEL = 97;
+  uint128 public constant NEON_DEVNET = 245022926;
 
   AddressesProvider public ap;
   ProxyAdmin public dpa;
@@ -71,20 +71,20 @@ abstract contract BaseTest is Test {
 
   function afterForkSetUp() internal virtual {}
 
-  function configureAddressesProvider(uint128 chainid) internal {
-    if (block.chainid == BSC_MAINNET) {
+  function configureAddressesProvider(uint128 chainid) private {
+    if (chainid == BSC_MAINNET) {
       ap = AddressesProvider(0x01c97299b37E66c03419bC4Db24074a89FB36e6d);
-    } else if (block.chainid == BSC_CHAPEL) {
+    } else if (chainid == BSC_CHAPEL) {
       ap = AddressesProvider(0x38742363597fBaE312B0bdcC351fCc6107E9E27E);
-    } else if (block.chainid == MOONBEAM_MAINNET) {
+    } else if (chainid == MOONBEAM_MAINNET) {
       ap = AddressesProvider(0x771ee5a72A57f3540E5b9A6A8C226C2a24A70Fae);
-    } else if (block.chainid == EVMOS_TESTNET) {
+    } else if (chainid == EVMOS_TESTNET) {
       ap = AddressesProvider(0xB88C6a114F01a80Dc8465b55067C8D046C2F445A);
-    } else if (block.chainid == POLYGON_MAINNET) {
+    } else if (chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
-    } else if (block.chainid == NEON_DEVNET) {
+    } else if (chainid == NEON_DEVNET) {
       ap = AddressesProvider(0x3B0B043f5c459F9f5dC39ECb04AA39D1E675565B);
-    } else if (block.chainid == ARBITRUM_ONE) {
+    } else if (chainid == ARBITRUM_ONE) {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else {
       dpa = new ProxyAdmin();

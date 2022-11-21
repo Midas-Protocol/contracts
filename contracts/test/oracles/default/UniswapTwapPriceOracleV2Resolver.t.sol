@@ -20,17 +20,17 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
     uint256 price1Cumulative;
   }
 
-  function setUp() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
+  function afterForkSetUp() internal override { // forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     uniswapV2Factory = IUniswapV2Factory(ap.getAddress("IUniswapV2Factory"));
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
   }
 
-  function getTokenTwapPrice(address tokenAddress) internal returns (uint256) {
+  function getTokenTwapPrice(address tokenAddress) internal view returns (uint256) {
     // return the price denominated in W_NATIVE
     return mpo.price(tokenAddress);
   }
 
-  function testStellaWglmrPriceUpdate() public {
+  function testStellaWglmrPriceUpdate() public fork(MOONBEAM_MAINNET) {
     twapPriceOracleRoot = UniswapTwapPriceOracleV2Root(0x7645f0A9F814286857E937cB1b3fa9659B03385b); // TODO: add to ap
 
     address STELLA_WGLMR = 0x7F5Ac0FC127bcf1eAf54E3cd01b00300a0861a62; // STELLA/WGLMR
@@ -80,8 +80,8 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
     (bool canExec, bytes memory execPayload) = resolver.checker();
     emit log_named_bytes("canExec: ", abi.encode(canExec));
     emit log_named_bytes("execPayload: ", execPayload);
-    assertTrue(canExec);
-    assertEq(abi.encodeWithSelector(resolver.updatePairs.selector, workablePairs), execPayload);
+    assertTrue(canExec, "!can exec");
+    assertEq(abi.encodeWithSelector(resolver.updatePairs.selector, workablePairs), execPayload, "!payload");
 
     resolver.updatePairs(workablePairs);
 
