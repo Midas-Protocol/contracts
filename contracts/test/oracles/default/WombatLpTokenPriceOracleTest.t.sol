@@ -11,7 +11,7 @@ contract WombatLpTokenPriceOracleTest is BaseTest {
     oracle = new WombatLpTokenPriceOracle();
   }
 
-  function testPrice() public forkAtBlock(BSC_MAINNET, 22933276) {
+  function testPrice() public fork(BSC_MAINNET) {
     // price for Wombat Wrapped BNB asset
     vm.prank(ap.getAddress("MasterPriceOracle"));
     uint256 price = oracle.price(0x74f019A5C4eD2C2950Ce16FaD7Af838549092c5b);

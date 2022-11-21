@@ -1,20 +1,26 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../compound/CTokenInterfaces.sol";
+import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
+import { UniswapV3LiquidatorFunder } from "../liquidators/UniswapV3LiquidatorFunder.sol";
+import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
+import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
+import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
+import { IUniswapV3Factory } from "../external/uniswap/IUniswapV3Factory.sol";
+import { Quoter } from "../external/uniswap/Quoter/Quoter.sol";
+import { IUniswapV3Pool } from "../external/uniswap/IUniswapV3Pool.sol";
+import { ISwapRouter } from "../external/uniswap/ISwapRouter.sol";
+import { IComptroller } from "../external/compound/IComptroller.sol";
+import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
+import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
+import { ICToken } from "../external/compound/ICToken.sol";
+import { ICErc20 } from "../external/compound/ICErc20.sol";
+
 import { BaseTest } from "./config/BaseTest.t.sol";
-import "./helpers/WithPool.sol";
-import "../liquidators/UniswapV3LiquidatorFunder.sol";
-import "../FuseSafeLiquidator.sol";
-import "../external/uniswap/IUniswapV2Pair.sol";
-import "../external/uniswap/IUniswapV2Factory.sol";
-import "../external/uniswap/ISwapRouter.sol";
-import "../external/uniswap/IUniswapV3Factory.sol";
-import "../external/uniswap/Quoter/Quoter.sol";
-import "../external/uniswap/IUniswapV3Pool.sol";
-import "../external/uniswap/ISwapRouter.sol";
 
 contract UniswapV3LiquidatorFunderTest is BaseTest {
   UniswapV3LiquidatorFunder private uniswapv3Liquidator;

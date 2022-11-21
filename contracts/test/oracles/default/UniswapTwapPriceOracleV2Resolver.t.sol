@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../../../oracles/MasterPriceOracle.sol";
-import "../../../oracles/default/UniswapTwapPriceOracleV2Root.sol";
-import "../../../oracles/default/UniswapTwapPriceOracleV2Factory.sol";
-import "../../../external/uniswap/IUniswapV2Factory.sol";
+import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
+import { UniswapTwapPriceOracleV2Root } from "../../../oracles/default/UniswapTwapPriceOracleV2Root.sol";
+import { IUniswapV2Factory } from "../../../external/uniswap/IUniswapV2Factory.sol";
 import { BaseTest } from "../../config/BaseTest.t.sol";
 import { UniswapTwapPriceOracleV2Resolver } from "../../../oracles/default/UniswapTwapPriceOracleV2Resolver.sol";
+import { IUniswapV2Pair } from "../../../external/uniswap/IUniswapV2Pair.sol";
 
 contract UniswapTwapOracleV2ResolverTest is BaseTest {
   UniswapTwapPriceOracleV2Root twapPriceOracleRoot;
@@ -41,7 +41,7 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
     {
       (, , uint32 lastTime) = IUniswapV2Pair(STELLA_WGLMR).getReserves();
       emit log_named_uint("STELLA_WGLMR last time: ", lastTime);
-      (uint32 timestamp, uint256 price0Cumulative, uint256 price1Cumulative) = twapPriceOracleRoot.observations(
+      (uint32 timestamp, uint256 price0Cumulative, ) = twapPriceOracleRoot.observations(
         STELLA_WGLMR,
         0
       );

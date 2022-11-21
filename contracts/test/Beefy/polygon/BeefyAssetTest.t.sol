@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../../helpers/WithPool.sol";
 import { BaseTest } from "../../config/BaseTest.t.sol";
 
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
@@ -23,7 +20,7 @@ interface IBeefyStrategy {
 contract BeefyPolygonAssetTest is AbstractAssetTest {
   address lpChef = 0x2FAe83B3916e1467C970C113399ee91B31412bCD;
 
-  constructor() forkAtBlock(POLYGON_MAINNET, 33063212) {
+  constructor() fork(POLYGON_MAINNET) {
     test = new BeefyERC4626Test();
     testConfigStorage = ITestConfigStorage(address(new BeefyPolygonTestConfigStorage()));
   }

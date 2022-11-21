@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
 import { ICurveV2Pool } from "../../../external/curve/ICurveV2Pool.sol";
-import "../../../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
-import { BaseTest } from "../../config/BaseTest.t.sol";
+import { CurveV2LpTokenPriceOracleNoRegistry } from "../../../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
+import { ICToken } from "../../../external/compound/ICToken.sol";
+
+import { BaseTest } from "../../config/BaseTest.t.sol";
 
 contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
   CurveV2LpTokenPriceOracleNoRegistry oracle;
@@ -16,7 +16,7 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
   ICToken epsJCHFBUSD_c = ICToken(0x1F0452D6a8bb9EAbC53Fa6809Fa0a060Dd531267);
   MasterPriceOracle mpo;
 
-  function setUp() public forkAtBlock(BSC_MAINNET, 21675481) {
+  function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     busd = ap.getAddress("bUSD");
 
@@ -26,11 +26,10 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
     pools[0] = epsJCHFBUSD_pool;
 
     oracle = new CurveV2LpTokenPriceOracleNoRegistry();
-    vm.prank(mpo.admin());
     oracle.initialize(lpTokens, pools, busd, mpo);
   }
 
-  function testCurveLpTokenPriceOracleNoRegistry() public {
+  function testCurveLpTokenPriceOracleNoRegistry() public forkAtBlock(BSC_MAINNET, 21675481) {
     ICurveV2Pool pool = ICurveV2Pool(epsJCHFBUSD_pool);
     uint256 lp_price = (pool.lp_price() * mpo.price(busd)) / 10**18;
     uint256 price = oracle.price(epsJCHFBUSD_lp);

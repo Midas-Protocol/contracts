@@ -2,8 +2,6 @@
 pragma solidity >=0.8.0;
 
 import { BaseTest } from "../../config/BaseTest.t.sol";
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { GelatoGUniPriceOracle } from "../../../oracles/default/GelatoGUniPriceOracle.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 
@@ -11,12 +9,12 @@ contract GelatoGUniPriceOracleTest is BaseTest {
   GelatoGUniPriceOracle private oracle;
   MasterPriceOracle mpo;
 
-  function setUp() public forkAtBlock(POLYGON_MAINNET, 32016397) {
+  function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-    oracle = new GelatoGUniPriceOracle(address(0));
+    oracle = new GelatoGUniPriceOracle(ap.getAddress("wtoken"));
   }
 
-  function testPriceGelatoGUni() public {
+  function testPriceGelatoGUni() public forkAtBlock(POLYGON_MAINNET, 32016397) {
     address PAR_USDC_ARRAKIS_VAULT = 0xC1DF4E2fd282e39346422e40C403139CD633Aacd;
     address WBTC_WETH_ARRAKIS_VAULT = 0x590217ef04BcB96FF6Da991AB070958b8F9E77f0;
 

@@ -1,18 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-
-import { BaseTest } from "./config/BaseTest.t.sol";
-import "../FuseSafeLiquidator.sol";
-
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { ICurvePool } from "../external/curve/ICurvePool.sol";
 import { CurveSwapLiquidatorFunder } from "../liquidators/CurveSwapLiquidatorFunder.sol";
-import { Comptroller } from "../compound/Comptroller.sol";
+import { IComptroller } from "../external/compound/IComptroller.sol";
+import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
+import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
+import { ICErc20 } from "../external/compound/ICErc20.sol";
+import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
+import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
+
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract MockRedemptionStrategy is IRedemptionStrategy {
   function redeem(
@@ -99,7 +100,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     uint256 borrowAmount;
   }
 
-  function testCurveStrategyLiquidation() public forkAtBlock(BSC_MAINNET, 22788730) {
+  function testCurveStrategyLiquidation() public fork(BSC_MAINNET) {
     CurveStrategyData memory vars;
 
     vars.borrower = 0x25bd0fC0e4597B4C9535d94876A8ca1F531Fa92e; // borrower

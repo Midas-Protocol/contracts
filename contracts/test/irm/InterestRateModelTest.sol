@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
 import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { AnkrBNBInterestRateModel, IAnkrBNBR } from "../../midas/irms/AnkrBNBInterestRateModel.sol";
@@ -28,7 +26,7 @@ contract InterestRateModelTest is BaseTest {
     }
   }
 
-  function testBsc() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testBsc() public fork(BSC_MAINNET) {
     testJumpRateBorrowRate();
     testJumpRateSupplyRate();
     testAnkrBNBBorrowModel2Rate();
@@ -37,7 +35,7 @@ contract InterestRateModelTest is BaseTest {
     testWhitepaperSupplyRate();
   }
 
-  function testPolygon() public forkAtBlock(POLYGON_MAINNET, 33063212) {
+  function testPolygon() public fork(POLYGON_MAINNET) {
     testJumpRateBorrowRatePolygon();
   }
 

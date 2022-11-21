@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
 import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { MidasERC4626, BeefyERC4626, IBeefyVault } from "../../midas/strategies/BeefyERC4626.sol";

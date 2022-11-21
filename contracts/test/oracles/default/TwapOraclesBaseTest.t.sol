@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../../../oracles/MasterPriceOracle.sol";
-import "../../../oracles/default/UniswapTwapPriceOracleV2Factory.sol";
-import "../../../external/uniswap/IUniswapV2Factory.sol";
+import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
+import { UniswapTwapPriceOracleV2Factory } from "../../../oracles/default/UniswapTwapPriceOracleV2Factory.sol";
+import { UniswapTwapPriceOracleV2Root } from "../../../oracles/default/UniswapTwapPriceOracleV2Root.sol";
+import { UniswapTwapPriceOracleV2 } from "../../../oracles/default/UniswapTwapPriceOracleV2.sol";
+import { IUniswapV2Factory } from "../../../external/uniswap/IUniswapV2Factory.sol";
 import { BaseTest } from "../../config/BaseTest.t.sol";
+import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
+import { IUniswapV2Pair } from "../../../external/uniswap/IUniswapV2Pair.sol";
+import { IUniswapV2Factory } from "../../../external/uniswap/IUniswapV2Factory.sol";
 
 contract TwapOraclesBaseTest is BaseTest {
   IUniswapV2Factory uniswapV2Factory;

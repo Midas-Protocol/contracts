@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
-import "../midas/SafeOwnableUpgradeable.sol";
+import { SafeOwnableUpgradeable } from "../midas/SafeOwnableUpgradeable.sol";
 
 contract SomeOwnable is SafeOwnableUpgradeable {
   function initialize() public initializer {

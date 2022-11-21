@@ -23,8 +23,6 @@ contract MockFluxPriceFeed {
 contract FluxPriceOracleTest is BaseTest {
   FluxPriceOracle private oracle;
 
-  function setUp() public forkAtBlock(EVMOS_TESTNET, 2940378) {}
-
   function setUpWithNativeFeed() public {
     MockFluxPriceFeed mock = new MockFluxPriceFeed(5 * 10**8); // 5 USD in 8 decimals
     oracle = new FluxPriceOracle(
@@ -37,7 +35,24 @@ contract FluxPriceOracleTest is BaseTest {
     );
   }
 
-  function setUpWithMasterPriceOracle() public {
+  function setUpOracles() internal {
+    CLV2V3Interface ethPool = CLV2V3Interface(0xf8af20b210bCed918f71899E9f4c26dE53e6ccE6);
+    address[] memory underlyings = new address[](1);
+    underlyings[0] = address(1);
+    CLV2V3Interface[] memory priceFeeds = new CLV2V3Interface[](1);
+    priceFeeds[0] = ethPool;
+    oracle.setPriceFeeds(underlyings, priceFeeds);
+  }
+
+  function testFluxPriceOracleWithNativeFeed() public forkAtBlock(EVMOS_TESTNET, 2940378) {
+    setUpWithNativeFeed();
+    setUpOracles();
+    uint256 price = oracle.price(address(1));
+    emit log_uint(price);
+    assertEq(price, 243373091628000000000);
+  }
+
+  function setUpWithMasterPriceOracle() internal {
     SimplePriceOracle spo = new SimplePriceOracle();
     spo.setDirectPrice(address(2), 200000000000000000); // 1e36 / 200000000000000000 = 5e18
     MasterPriceOracle mpo = new MasterPriceOracle();
@@ -49,24 +64,7 @@ contract FluxPriceOracleTest is BaseTest {
     oracle = new FluxPriceOracle(address(this), true, address(0), CLV2V3Interface(address(0)), mpo, address(2));
   }
 
-  function setUpOracles() public {
-    CLV2V3Interface ethPool = CLV2V3Interface(0xf8af20b210bCed918f71899E9f4c26dE53e6ccE6);
-    address[] memory underlyings = new address[](1);
-    underlyings[0] = address(1);
-    CLV2V3Interface[] memory priceFeeds = new CLV2V3Interface[](1);
-    priceFeeds[0] = ethPool;
-    oracle.setPriceFeeds(underlyings, priceFeeds);
-  }
-
-  function testFluxPriceOracleWithNativeFeed() public {
-    setUpWithNativeFeed();
-    setUpOracles();
-    uint256 price = oracle.price(address(1));
-    emit log_uint(price);
-    assertEq(price, 243373091628000000000);
-  }
-
-  function testFluxPriceOracleWithMasterPriceOracle() public {
+  function testFluxPriceOracleWithMasterPriceOracle() public forkAtBlock(EVMOS_TESTNET, 2940378) {
     setUpWithMasterPriceOracle();
     setUpOracles();
     uint256 price = oracle.price(address(1));

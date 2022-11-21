@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.4.23;
+pragma solidity >=0.8.0;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
@@ -9,9 +9,10 @@ import { Auth, Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
 import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
-import "fuse-flywheel/FuseFlywheelCore.sol";
-import "../compound/CTokenInterfaces.sol";
+import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
+import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 
+import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 import { CToken } from "../compound/CToken.sol";
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
