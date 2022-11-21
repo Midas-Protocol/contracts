@@ -19,21 +19,22 @@ interface IJAR {
   function exitDelay() external view returns (uint);
 
   function setExitDelay(uint) external;
+
+  function rewards(address) external view returns (uint256);
+
+  function earned(address) external view returns (uint256);
 }
 
-contract HelioERC4626 is MidasERC4626, RewardsClaimer {
+contract HelioERC4626 is MidasERC4626 {
   using FixedPointMathLib for uint256;
 
   IJAR public jar;
 
   function initialize(
     ERC20Upgradeable asset,
-    IJAR _jar,
-    address _rewardsDestination,
-    ERC20Upgradeable[] memory _rewardTokens
+    IJAR _jar
   ) public initializer {
     __MidasER4626_init(asset);
-    __RewardsClaimer_init(_rewardsDestination, _rewardTokens);
     jar = _jar;
 
     asset.approve(address(jar), type(uint256).max);
@@ -55,12 +56,16 @@ contract HelioERC4626 is MidasERC4626, RewardsClaimer {
     jar.join(amount);
   }
 
-  function beforeWithdraw(uint256 amount, uint256) internal override {
+  function beforeWithdraw(uint256 amount, uint256 shares) internal override {
+    uint256 balanceBeforeWithdraw = _asset().balanceOf(address(this));
     jar.exit(amount);
-  }
+    uint256 receivedAmount = _asset().balanceOf(address(this)) - balanceBeforeWithdraw;
 
-  function beforeClaim() internal override {
-    jar.exit(0);
+    if (receivedAmount > amount){
+      uint256 rewards = receivedAmount - amount;
+      uint256 rewardsForSender = rewards * shares / totalSupply();
+      jar.join(rewards - rewardsForSender);
+    }
   }
 
   function emergencyWithdrawAndPause() external override onlyOwner {

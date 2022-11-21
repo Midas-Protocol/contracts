@@ -28,7 +28,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
 
   function setUp(string memory _testPreFix, bytes calldata data) public virtual;
 
-  function deposit(address _owner, uint256 amount) public virtual {
+  function deposit(address _owner, uint256 amount) public {
     vm.startPrank(_owner);
     underlyingToken.approve(address(plugin), amount);
     plugin.deposit(amount, _owner);
@@ -48,6 +48,14 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
   function getStrategyBalance() public view virtual returns (uint256);
 
   function getExpectedDepositShares() public view virtual returns (uint256);
+
+  function getWithdrawalRewards(uint256 withdrawalAmount) public virtual returns (uint256) {
+    return 0;
+  }
+
+  function getRedepositRewards(uint256 withdrawnRewards) public view virtual returns (uint256) {
+    return 0;
+  }
 
   function testInitializedValues(string memory assetName, string memory assetSymbol) public virtual {
     assertEq(
@@ -470,13 +478,15 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       this.getDepositShares(),
       plugin.totalSupply()
     );
-
+    uint256 expectedWithdrawalRewards = getWithdrawalRewards(withdrawalAmount);
+    uint256 expectedRedepositRewards = getRedepositRewards(expectedWithdrawalRewards);
+  
     plugin.withdraw(withdrawalAmount, address(this), address(this));
 
     // Test that the actual transfers worked
     assertApproxEqAbs(
       underlyingToken.balanceOf(address(this)),
-      assetBalBefore + withdrawalAmount,
+      assetBalBefore + withdrawalAmount + expectedWithdrawalRewards,
       uint256(10),
       string(abi.encodePacked("!user asset bal ", testPreFix))
     );
@@ -504,7 +514,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     // Test that the ERC4626 holds the expected amount of dotDot shares
     assertApproxEqAbs(
       this.getDepositShares(),
-      depositShares - ExpectedDepositSharesNeeded,
+      depositShares - ExpectedDepositSharesNeeded + expectedRedepositRewards,
       uint256(10),
       string(abi.encodePacked("!dotDot share balance ", testPreFix))
     );
@@ -523,6 +533,8 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       plugin.totalSupply()
     );
 
+    uint256 expectedWithdrawalRewards = getWithdrawalRewards(withdrawalAmount);
+    uint256 expectedRedepositRewards = getRedepositRewards(expectedWithdrawalRewards);
     plugin.withdraw(withdrawalAmount, address(this), address(this));
 
     // Increase the share price
@@ -534,6 +546,8 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       plugin.totalSupply()
     );
 
+    expectedWithdrawalRewards = getWithdrawalRewards(withdrawalAmount);
+    uint256 expectedRedepositRewards1 = getRedepositRewards(expectedWithdrawalRewards);
     plugin.withdraw(withdrawalAmount, address(this), address(this));
 
     // Test that we minted the correct amount of token
@@ -554,7 +568,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     // Test that the ERC4626 holds the expected amount of dotDot shares
     assertApproxEqAbs(
       this.getDepositShares(),
-      depositShareBal - (oldExpectedDepositSharesNeeded + ExpectedDepositSharesNeeded),
+      depositShareBal - (oldExpectedDepositSharesNeeded + ExpectedDepositSharesNeeded) + expectedRedepositRewards + expectedRedepositRewards1,
       uint256(10),
       string(abi.encodePacked("!depositShare ", testPreFix))
     );
@@ -616,13 +630,14 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
       this.getDepositShares(),
       plugin.totalSupply()
     );
-
+    uint256 expectedWithdrawalRewards = getWithdrawalRewards(withdrawalAmount);
+    uint256 expectedRedepositRewards = getRedepositRewards(expectedWithdrawalRewards);
     plugin.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
     assertApproxEqAbs(
       underlyingToken.balanceOf(address(this)),
-      assetBalBefore + withdrawalAmount,
+      assetBalBefore + withdrawalAmount + expectedWithdrawalRewards,
       uint256(10),
       string(abi.encodePacked("!1.user asset bal", testPreFix))
     );
@@ -649,7 +664,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     // Test that the ERC4626 holds the expected amount of dotDot shares
     assertApproxEqAbs(
       this.getDepositShares(),
-      depositShares - ExpectedDepositSharesNeeded,
+      depositShares - ExpectedDepositSharesNeeded + expectedRedepositRewards,
       uint256(10),
       string(abi.encodePacked("!1.dotDot share balance ", testPreFix))
     );
@@ -667,14 +682,16 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     erc4626BalBefore = plugin.balanceOf(address(1));
     expectedErc4626SharesNeeded = plugin.previewWithdraw(withdrawalAmount);
     ExpectedDepositSharesNeeded = expectedErc4626SharesNeeded.mulDivUp(this.getDepositShares(), plugin.totalSupply());
-
+    vm.warp(block.timestamp + 10);
+    expectedWithdrawalRewards = getWithdrawalRewards(withdrawalAmount);
+    uint256 expectedRedepositRewards1 = getRedepositRewards(expectedWithdrawalRewards);
     vm.prank(address(1));
     plugin.withdraw(10e18, address(1), address(1));
 
     // Test that the actual transfers worked
     assertApproxEqAbs(
       underlyingToken.balanceOf(address(1)),
-      assetBalBefore + withdrawalAmount,
+      assetBalBefore + withdrawalAmount + expectedWithdrawalRewards,
       uint256(10),
       string(abi.encodePacked("!2.user asset bal ", testPreFix))
     );
@@ -701,7 +718,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     // Test that the ERC4626 holds the expected amount of dotDot shares
     assertApproxEqAbs(
       this.getDepositShares(),
-      depositShares - ExpectedDepositSharesNeeded,
+      depositShares - ExpectedDepositSharesNeeded + expectedRedepositRewards + expectedRedepositRewards1,
       uint256(10),
       string(abi.encodePacked("!2.dotDot share balance ", testPreFix))
     );
@@ -725,13 +742,15 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     uint256 assetBalBefore = underlyingToken.balanceOf(address(this));
     uint256 erc4626BalBefore = plugin.balanceOf(address(this));
     uint256 ExpectedDepositSharesNeeded = redeemAmount.mulDivUp(this.getDepositShares(), plugin.totalSupply());
+    uint256 expectedWithdrawalRewards = getWithdrawalRewards(withdrawalAmount);
+    uint256 expectedRedepositRewards = getRedepositRewards(expectedWithdrawalRewards);
 
     plugin.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
     assertApproxEqAbs(
       underlyingToken.balanceOf(address(this)),
-      assetBalBefore + withdrawalAmount,
+      assetBalBefore + withdrawalAmount + expectedWithdrawalRewards,
       uint256(10),
       string(abi.encodePacked("!user asset bal ", testPreFix))
     );
@@ -758,7 +777,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     // Test that the ERC4626 holds the expected amount of dotDot shares
     assertApproxEqAbs(
       this.getDepositShares(),
-      depositShares - ExpectedDepositSharesNeeded,
+      depositShares - ExpectedDepositSharesNeeded + expectedRedepositRewards,
       uint256(10),
       string(abi.encodePacked("!dotDot share balance ", testPreFix))
     );
@@ -778,13 +797,15 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     uint256 assetBalBefore = underlyingToken.balanceOf(address(this));
     uint256 erc4626BalBefore = plugin.balanceOf(address(this));
     uint256 ExpectedDepositSharesNeeded = redeemAmount.mulDivUp(this.getDepositShares(), plugin.totalSupply());
+    uint256 expectedWithdrawalRewards = getWithdrawalRewards(withdrawalAmount);
+    uint256 expectedRedepositRewards = getRedepositRewards(expectedWithdrawalRewards);
 
     plugin.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
     assertApproxEqAbs(
       underlyingToken.balanceOf(address(this)),
-      assetBalBefore + withdrawalAmount,
+      assetBalBefore + withdrawalAmount + expectedWithdrawalRewards,
       uint256(10),
       string(abi.encodePacked("!1.user asset bal ", testPreFix))
     );
@@ -811,7 +832,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     // Test that the ERC4626 holds the expected amount of dotDot shares
     assertApproxEqAbs(
       this.getDepositShares(),
-      depositShares - ExpectedDepositSharesNeeded,
+      depositShares - ExpectedDepositSharesNeeded + expectedRedepositRewards,
       uint256(10),
       string(abi.encodePacked("!1.dotDot share balance ", testPreFix))
     );
@@ -826,13 +847,16 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     assetBalBefore = underlyingToken.balanceOf(address(1));
     erc4626BalBefore = plugin.balanceOf(address(1));
     ExpectedDepositSharesNeeded = redeemAmount.mulDivUp(this.getDepositShares(), plugin.totalSupply());
+    vm.warp(block.timestamp + 10);
+    expectedWithdrawalRewards = getWithdrawalRewards(withdrawalAmount);
+    uint256 expectedRedepositRewards1 = getRedepositRewards(expectedWithdrawalRewards);
     vm.prank(address(1));
     plugin.withdraw(10e18, address(1), address(1));
 
     // Test that the actual transfers worked
     assertApproxEqAbs(
       underlyingToken.balanceOf(address(1)),
-      assetBalBefore + withdrawalAmount,
+      assetBalBefore + withdrawalAmount + expectedWithdrawalRewards,
       uint256(10),
       string(abi.encodePacked("!2.user asset bal ", testPreFix))
     );
@@ -859,7 +883,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     // Test that the ERC4626 holds the expected amount of dotDot shares
     assertApproxEqAbs(
       this.getDepositShares(),
-      depositShares - ExpectedDepositSharesNeeded,
+      depositShares - ExpectedDepositSharesNeeded + expectedRedepositRewards + expectedRedepositRewards1,
       uint256(10),
       string(abi.encodePacked("!2.dotDot share balance ", testPreFix))
     );
@@ -874,6 +898,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
 
     deposit(address(this), depositAmount);
 
+    vm.warp(block.timestamp + 10);
     plugin.emergencyWithdrawAndPause();
 
     underlyingToken.approve(address(plugin), depositAmount);
@@ -921,18 +946,19 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
 
     uint256 expectedBal = plugin.previewRedeem(depositAmount);
     assertEq(underlyingToken.balanceOf(address(plugin)), 0, string(abi.encodePacked("!init 0 ", testPreFix)));
+    uint256 expectedWithdrawalRewards = getWithdrawalRewards(depositAmount);
 
     plugin.emergencyWithdrawAndPause();
 
     assertApproxEqAbs(
       underlyingToken.balanceOf(address(plugin)),
-      expectedBal,
+      expectedBal + expectedWithdrawalRewards,
       uint256(10),
       string(abi.encodePacked("!withdraws underlying ", testPreFix))
     );
     assertApproxEqAbs(
       plugin.totalAssets(),
-      expectedBal,
+      expectedBal + expectedWithdrawalRewards,
       uint256(10),
       string(abi.encodePacked("!totalAssets == expectedBal ", testPreFix))
     );
@@ -943,6 +969,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
 
     deposit(address(this), depositAmount);
 
+    vm.warp(block.timestamp + 10);
     plugin.emergencyWithdrawAndPause();
 
     uint256 expectedSharesNeeded = withdrawAmount.mulDivDown(plugin.totalSupply(), plugin.totalAssets());
