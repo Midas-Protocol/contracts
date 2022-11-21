@@ -3,13 +3,10 @@ pragma solidity ^0.8.0;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
 import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
-import { DotDotERC4626Test } from "../DotDot/DotDotLpERC4626Test.sol";
 import { IBeefyVault, BeefyERC4626 } from "../../midas/strategies/BeefyERC4626.sol";
-import { MidasERC4626 } from "../../midas/strategies/MidasERC4626.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
@@ -27,7 +24,7 @@ contract ERC4626PerformanceFeeTest is BaseTest {
   address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
   address newFeeRecipient = address(5);
 
-  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function setUp() public fork(BSC_MAINNET) {
     underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
     plugin = new BeefyERC4626();
     plugin.initialize(underlyingToken, beefyVault, 10);
@@ -94,8 +91,18 @@ contract ERC4626PerformanceFeeTest is BaseTest {
 
     plugin.takePerformanceFee();
 
-    assertEq(plugin.totalSupply() - oldSupply, expectedFeeShares, "totalSupply increase didnt match expectedFeeShares");
-    assertEq(plugin.balanceOf(plugin.feeRecipient()), expectedFeeShares, "!feeRecipient shares");
+    assertApproxEqAbs(
+      plugin.totalSupply() - oldSupply,
+      expectedFeeShares,
+      uint256(10),
+      "totalSupply increase didnt match expectedFeeShares"
+    );
+    assertApproxEqAbs(
+      plugin.balanceOf(plugin.feeRecipient()),
+      expectedFeeShares,
+      uint256(10),
+      "!feeRecipient shares"
+    );
     assertEq(plugin.totalAssets(), oldAssets, "totalAssets should not change");
   }
 
@@ -113,8 +120,18 @@ contract ERC4626PerformanceFeeTest is BaseTest {
 
     plugin.takePerformanceFee();
 
-    assertEq(plugin.totalSupply() - oldSupply, expectedFeeShares, "totalSupply increase didnt match expectedFeeShares");
-    assertEq(plugin.balanceOf(plugin.feeRecipient()), expectedFeeShares, "!feeShares minted");
+    assertApproxEqAbs(
+      plugin.totalSupply() - oldSupply,
+      expectedFeeShares,
+      uint256(10),
+      "totalSupply increase didnt match expectedFeeShares"
+    );
+    assertApproxEqAbs(
+      plugin.balanceOf(plugin.feeRecipient()),
+      expectedFeeShares,
+      uint256(10),
+      "!feeShares minted"
+    );
 
     plugin.withdrawAccruedFees();
 

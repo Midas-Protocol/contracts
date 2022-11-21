@@ -4,8 +4,8 @@ pragma solidity >=0.8.0;
 import "./helpers/WithPool.sol";
 import { BaseTest } from "./config/BaseTest.t.sol";
 import "forge-std/Test.sol";
-import "../compound/CTokenInterfaces.sol";
 
+import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
@@ -17,9 +17,8 @@ import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
-import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
-import "../external/uniswap/IUniswapV2Pair.sol";
-import "../external/uniswap/IUniswapV2Factory.sol";
+import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
+import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
 
 interface MockXBomb {
   function getExchangeRate() external returns (uint256);
@@ -38,7 +37,6 @@ contract BombE2eTest is WithPool, BaseTest {
     FusePoolLens.FusePoolAsset[] assetsData;
     FusePoolLens.FusePoolAsset[] assetsDataAfter;
     IRedemptionStrategy[] strategies;
-    UniswapLpTokenLiquidator lpLiquidator;
     address[] swapToken0Path;
     address[] swapToken1Path;
     bytes[] abis;
@@ -50,13 +48,16 @@ contract BombE2eTest is WithPool, BaseTest {
     bytes[] data;
   }
 
+  address bombWhale = 0xcd6cD62F11F9417FBD44dc0a44F891fd3E869234;
+
   function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
+    address bombTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
     setUpWithPool(
-      MasterPriceOracle(0xB641c21124546e1c979b4C1EbF13aB00D43Ee8eA),
-      ERC20Upgradeable(0x522348779DCb2911539e76A1042aA922F9C47Ee3)
+      MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
+      ERC20Upgradeable(bombTokenAddress)
     );
 
-    vm.prank(0xcd6cD62F11F9417FBD44dc0a44F891fd3E869234);
+    vm.prank(bombWhale);
     MockERC20(address(underlyingToken)).mint(address(this), 100e18);
     setUpPool("bsc-test", false, 0.1e18, 1.1e18);
   }
@@ -140,7 +141,7 @@ contract BombE2eTest is WithPool, BaseTest {
     FusePoolLensSecondary secondary = new FusePoolLensSecondary();
     secondary.initialize(fusePoolDirectory);
 
-    vm.prank(0xcd6cD62F11F9417FBD44dc0a44F891fd3E869234);
+    vm.prank(bombWhale);
     MockERC20(address(underlyingToken)).mint(accountTwo, 1000000000000e18);
     // Account One Supply
     vm.deal(accountOne, 1000000000000e18);

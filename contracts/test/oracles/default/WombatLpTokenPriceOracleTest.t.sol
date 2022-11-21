@@ -3,7 +3,6 @@ pragma solidity >=0.8.0;
 
 import { BaseTest } from "../../config/BaseTest.t.sol";
 import { WombatLpTokenPriceOracle } from "../../../oracles/default/WombatLpTokenPriceOracle.sol";
-import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 
 contract WombatLpTokenPriceOracleTest is BaseTest {
   WombatLpTokenPriceOracle private oracle;

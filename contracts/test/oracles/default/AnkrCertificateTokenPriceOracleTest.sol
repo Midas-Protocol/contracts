@@ -3,8 +3,6 @@ pragma solidity >=0.8.0;
 
 import { BaseTest } from "../../config/BaseTest.t.sol";
 import { AnkrCertificateTokenPriceOracle } from "../../../oracles/default/AnkrCertificateTokenPriceOracle.sol";
-import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import { ICToken } from "../../../external/compound/ICToken.sol";
 
 contract AnkrCertificateTokenPriceOracleTest is BaseTest {
   AnkrCertificateTokenPriceOracle private oracle;

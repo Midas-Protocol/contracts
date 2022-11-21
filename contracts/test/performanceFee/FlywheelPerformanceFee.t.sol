@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
-import "..//helpers/WithPool.sol";
 import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
@@ -13,7 +12,6 @@ import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheel
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
-import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
@@ -53,7 +51,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
 
   ERC20Upgradeable[] rewardsToken;
 
-  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function setUp() public fork(BSC_MAINNET) {
     dddFlywheel = new MidasFlywheelCore();
     dddFlywheel.initialize(dddToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
     dddFlywheel.reinitialize();

@@ -47,8 +47,8 @@ contract UniswapV3PriceOracleTest is BaseTest {
   }
 
   function getPriceFeed(address[] memory underlyings, UniswapV3PriceOracle.AssetConfig[] memory configs)
-  internal
-  returns (uint256[] memory price)
+    internal
+    returns (uint256[] memory price)
   {
     vm.prank(oracle.admin());
     oracle.setPoolFeeds(underlyings, configs);

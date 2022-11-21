@@ -107,7 +107,7 @@ contract CEtherDelegate is CDelegateInterface, CEther {
     }
   }
 
-  function contractType() external override returns (string memory) {
+  function contractType() external override view returns (string memory) {
     return "CEtherDelegate";
   }
 }

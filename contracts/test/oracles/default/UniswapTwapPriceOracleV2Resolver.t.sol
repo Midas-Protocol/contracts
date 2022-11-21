@@ -20,7 +20,7 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
     uint256 price1Cumulative;
   }
 
-  function afterForkSetUp() internal override { // forkAtBlock(MOONBEAM_MAINNET, 1824921) {
+  function afterForkSetUp() internal override {
     uniswapV2Factory = IUniswapV2Factory(ap.getAddress("IUniswapV2Factory"));
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
   }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.4.23;
+pragma solidity ^0.8.0;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
@@ -7,11 +7,8 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-
 import { AlpacaERC4626, IAlpacaVault } from "../midas/strategies/AlpacaERC4626.sol";
 import { MockVault } from "./mocks/alpaca/MockVault.sol";
-import { IVaultConfig } from "./mocks/alpaca/IVaultConfig.sol";
 import { IW_NATIVE } from "../utils/IW_NATIVE.sol";
 import { FixedPointMathLib } from "../utils/FixedPointMathLib.sol";
 
@@ -58,7 +55,7 @@ contract AlpacaERC4626Test is BaseTest {
     // mockVault.earn();
   }
 
-  function getExpectedVaultShares(uint256 amount) internal returns (uint256) {
+  function getExpectedVaultShares(uint256 amount) internal view returns (uint256) {
     uint256 total = mockVault.totalToken();
     uint256 shares = total == 0 ? amount : (amount * mockVault.totalSupply()) / total;
     return shares;

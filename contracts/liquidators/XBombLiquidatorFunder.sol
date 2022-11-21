@@ -40,7 +40,7 @@ contract XBombLiquidatorFunder is IFundsConversionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    (address inputTokenAddress, address xbomb, IERC20Upgradeable bomb) = abi.decode(
+    (, address xbomb, IERC20Upgradeable bomb) = abi.decode(
       strategyData,
       (address, address, IERC20Upgradeable)
     );

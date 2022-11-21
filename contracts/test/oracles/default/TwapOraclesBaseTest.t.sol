@@ -18,7 +18,7 @@ contract TwapOraclesBaseTest is BaseTest {
   }
 
   // BOMB
-  function testBombTwapOraclePrice() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testBombTwapOraclePrice() public fork(BSC_MAINNET) {
     address baseToken = 0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c; // WBTC
     address testedAssetTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
 

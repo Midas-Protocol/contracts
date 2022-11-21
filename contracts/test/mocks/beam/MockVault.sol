@@ -158,8 +158,6 @@ contract MockVault {
 
     if (_amount > 0) {
       uint256 beforeDeposit = pool.lpToken.balanceOf(address(this));
-      uint256 beforeDeposit1 = pool.lpToken.balanceOf(msg.sender);
-      uint256 allowance = pool.lpToken.allowance(msg.sender, address(this));
       pool.lpToken.transferFrom(msg.sender, address(this), _amount);
       uint256 afterDeposit = pool.lpToken.balanceOf(address(this));
 

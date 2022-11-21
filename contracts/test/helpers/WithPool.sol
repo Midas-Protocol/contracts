@@ -22,7 +22,6 @@ import { ComptrollerInterface } from "../../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../../compound/InterestRateModel.sol";
 import { FuseFeeDistributor } from "../../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
-import { MockPriceOracle } from "../../oracles/1337/MockPriceOracle.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { MockERC4626 } from "../../midas/strategies/MockERC4626.sol";
 import { FuseSafeLiquidator } from "../../FuseSafeLiquidator.sol";
@@ -135,7 +134,7 @@ contract WithPool {
     falseBoolArray.push(false);
     fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
 
-    (uint256 index, address comptrollerAddress) = fusePoolDirectory.deployPool(
+    (, address comptrollerAddress) = fusePoolDirectory.deployPool(
       name,
       newUnitroller[0],
       abi.encode(payable(address(fuseAdmin))),

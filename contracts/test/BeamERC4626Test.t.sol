@@ -5,7 +5,6 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 import "../midas/strategies/BeamERC4626.sol";
 import "./mocks/beam/MockVault.sol";
 import "forge-std/Test.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { Authority } from "solmate/auth/Auth.sol";
@@ -91,7 +90,7 @@ contract BeamERC4626Test is BaseTest {
     vm.stopPrank();
   }
 
-  function getBeamCheckBalance() internal returns (uint256) {
+  function getBeamCheckBalance() internal view returns (uint256) {
     (IBoringERC20 lpToken, , , , , , ) = mockBeamChef.poolInfo(0);
     return lpToken.balanceOf(address(mockBeamChef));
   }
@@ -104,7 +103,6 @@ contract BeamERC4626Test is BaseTest {
   }
 
   function testDeposit() public {
-    uint256 expectedBeamShares = depositAmount;
     uint256 expectedErc4626Shares = beamErc4626.previewDeposit(depositAmount);
 
     deposit(address(this), depositAmount);
@@ -122,7 +120,6 @@ contract BeamERC4626Test is BaseTest {
   }
 
   function testMultipleDeposit() public {
-    uint256 expectedBeamShares = depositAmount;
     uint256 expectedErc4626Shares = beamErc4626.previewDeposit(depositAmount);
 
     deposit(address(this), depositAmount);
@@ -155,7 +152,6 @@ contract BeamERC4626Test is BaseTest {
   }
 
   function testMint() public {
-    uint256 expectedBeamShares = depositAmount;
     uint256 mintAmount = beamErc4626.previewDeposit(depositAmount);
 
     testToken.approve(address(beamErc4626), depositAmount);
@@ -174,7 +170,6 @@ contract BeamERC4626Test is BaseTest {
   }
 
   function testMultipleMint() public {
-    uint256 expectedBeamShares = depositAmount;
     uint256 mintAmount = beamErc4626.previewDeposit(depositAmount);
 
     testToken.approve(address(beamErc4626), depositAmount);
@@ -213,8 +208,6 @@ contract BeamERC4626Test is BaseTest {
   }
 
   function testWithdraw() public {
-    uint256 BeamShares = depositAmount;
-
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);
@@ -240,7 +233,7 @@ contract BeamERC4626Test is BaseTest {
   }
 
   function testMultipleWithdraw() public {
-    uint256 BeamShares = depositAmount * 2;
+    uint256 BeamShares = depositAmount;
 
     uint256 withdrawalAmount = 10e18;
 
@@ -296,7 +289,6 @@ contract BeamERC4626Test is BaseTest {
 
   function testRedeem() public {
     uint256 BeamShares = depositAmount;
-
     uint256 withdrawalAmount = 10e18;
     uint256 redeemAmount = beamErc4626.previewWithdraw(withdrawalAmount);
 
@@ -321,8 +313,7 @@ contract BeamERC4626Test is BaseTest {
   }
 
   function testMultipleRedeem() public {
-    uint256 BeamShares = depositAmount * 2;
-
+    uint256 BeamShares = depositAmount;
     uint256 withdrawalAmount = 10e18;
     uint256 redeemAmount = beamErc4626.previewWithdraw(withdrawalAmount);
 
@@ -642,8 +633,7 @@ contract BeamERC4626UnitTest is BaseTest {
     testToken.approve(joy, depositAmount);
     vm.prank(joy);
     testToken.transferFrom(joy, address(this), depositAmount);
-    uint256 balance = testToken.balanceOf(address(this));
-    testToken.approve(address(beamErc4626), depositAmount);
+    testToken.approve(address(beamErc4626), testToken.balanceOf(address(this)));
     flywheel.accrue(ERC20(address(beamErc4626)), address(this));
     beamErc4626.deposit(depositAmount, address(this));
     flywheel.accrue(ERC20(address(beamErc4626)), address(this));

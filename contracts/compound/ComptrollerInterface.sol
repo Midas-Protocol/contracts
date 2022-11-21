@@ -46,7 +46,7 @@ abstract contract ComptrollerInterface {
     uint256 borrowAmount
   ) external virtual returns (uint256);
 
-  function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external virtual returns (uint256);
+  function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external virtual view returns (uint256);
 
   function repayBorrowAllowed(
     address cToken,

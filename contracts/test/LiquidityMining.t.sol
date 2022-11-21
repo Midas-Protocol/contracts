@@ -75,7 +75,7 @@ contract LiquidityMiningTest is DSTest {
     trueBoolArray.push(true);
     falseBoolArray.push(false);
     fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
-    (uint256 index, address comptrollerAddress) = fusePoolDirectory.deployPool(
+    (, address comptrollerAddress) = fusePoolDirectory.deployPool(
       "TestPool",
       address(tempComptroller),
       abi.encode(payable(address(fuseAdmin))),

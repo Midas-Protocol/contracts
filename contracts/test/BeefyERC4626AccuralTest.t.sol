@@ -104,7 +104,7 @@ contract BeefyERC4626AccuralTest is BaseTest {
 
   /* --------------------- ERC4626 ACCURAL TESTS --------------------- */
 
-  function testAccuralIsEqual() public {
+  function testAccrualIsEqual() public {
     deal(address(underlyingToken), accountOne, DEPOSIT_AMOUNT);
     deal(address(underlyingToken), accountTwo, DEPOSIT_AMOUNT);
 

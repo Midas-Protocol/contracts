@@ -9,15 +9,24 @@ import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 
 import { WETH } from "solmate/tokens/WETH.sol";
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-import "../FuseSafeLiquidator.sol";
-import "../FusePoolDirectory.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+
+import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
+import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { BaseTest } from "./config/BaseTest.t.sol";
-import "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
-import "../liquidators/CurveSwapLiquidator.sol";
-import "../liquidators/CurveSwapLiquidatorFunder.sol";
-import "../liquidators/XBombLiquidatorFunder.sol";
+import { AddressesProvider } from "../midas/AddressesProvider.sol";
+import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
+import { ICurvePool } from "../external/curve/ICurvePool.sol";
+import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
+import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
+import { ICToken } from "../external/compound/ICToken.sol";
+import { IComptroller } from "../external/compound/IComptroller.sol";
+import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
+import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
+import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
+import { ICErc20 } from "../external/compound/ICErc20.sol";
 
 contract AnyLiquidationTest is BaseTest {
   FuseSafeLiquidator fsl;
@@ -334,12 +343,12 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
-  function getUniswapV2Router(address inputToken) internal returns (address) {
+  function getUniswapV2Router(address inputToken) internal view returns (address) {
     address router = assetSpecificRouters[inputToken];
     return router != address(0) ? router : uniswapRouter;
   }
 
-  function toggleFlashSwapPair(LiquidationData memory vars) internal {
+  function toggleFlashSwapPair(LiquidationData memory vars) internal view {
     if (address(vars.flashSwapPair) == address(mostLiquidPair1)) {
       vars.flashSwapPair = mostLiquidPair2;
     } else {
@@ -484,7 +493,7 @@ contract AnyLiquidationTest is BaseTest {
     ICurvePool curvePool = ICurvePool(lpTokenAddress);
     uint8 i = 0;
     while (true) {
-      try curvePool.coins(i) returns (address underlying) {
+      try curvePool.coins(i) {
         i++;
       } catch {
         break;

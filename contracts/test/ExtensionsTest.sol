@@ -10,6 +10,8 @@ import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { Comptroller, ComptrollerV3Storage } from "../compound/Comptroller.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 
+import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+
 contract MockComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
   function getFirstMarketSymbol() public view returns (string memory) {
     return allMarkets[0].symbol();
@@ -160,7 +162,7 @@ contract ExtensionsTest is BaseTest {
 
     // deploy a pool that will not get any extensions automatically
     {
-      (uint256 index, address poolAddress) = fpd.deployPool(
+      (, address poolAddress) = fpd.deployPool(
         "just-a-test",
         latestComptrollerImplementation,
         abi.encode(payable(address(ffd))),
@@ -182,7 +184,7 @@ contract ExtensionsTest is BaseTest {
 
     // deploy a pool that will have an extension registered automatically
     {
-      (uint256 index, address poolAddress) = fpd.deployPool(
+      (, address poolAddress) = fpd.deployPool(
         "just-a-test2",
         latestComptrollerImplementation,
         abi.encode(payable(address(ffd))),
