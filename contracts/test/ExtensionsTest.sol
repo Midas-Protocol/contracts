@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
@@ -9,6 +9,8 @@ import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { Comptroller, ComptrollerV3Storage } from "../compound/Comptroller.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
+
+import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract MockComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
   function getFirstMarketSymbol() public view returns (string memory) {
@@ -160,7 +162,7 @@ contract ExtensionsTest is BaseTest {
 
     // deploy a pool that will not get any extensions automatically
     {
-      (uint256 index, address poolAddress) = fpd.deployPool(
+      (, address poolAddress) = fpd.deployPool(
         "just-a-test",
         latestComptrollerImplementation,
         abi.encode(payable(address(ffd))),
@@ -182,7 +184,7 @@ contract ExtensionsTest is BaseTest {
 
     // deploy a pool that will have an extension registered automatically
     {
-      (uint256 index, address poolAddress) = fpd.deployPool(
+      (, address poolAddress) = fpd.deployPool(
         "just-a-test2",
         latestComptrollerImplementation,
         abi.encode(payable(address(ffd))),

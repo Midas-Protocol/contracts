@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../../config/BaseTest.t.sol";
+import { BaseTest } from "../../config/BaseTest.t.sol";
 import { FluxPriceOracle } from "../../../oracles/default/FluxPriceOracle.sol";
 import { CLV2V3Interface } from "../../../external/flux/CLV2V3Interface.sol";
 import { SimplePriceOracle } from "../../../oracles/default/SimplePriceOracle.sol";

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import "../external/bomb/IXBomb.sol";
 import "../liquidators/XBombLiquidatorFunder.sol";
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract XBombLiquidatorTest is BaseTest {
   // the Pancake BOMB/xBOMB pair
@@ -12,11 +12,11 @@ contract XBombLiquidatorTest is BaseTest {
   address bombTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
   XBombLiquidatorFunder liquidator;
 
-  function setUp() public forkAtBlock(BSC_MAINNET, 22962661) {
+  function afterForkSetUp() internal override {
     liquidator = new XBombLiquidatorFunder();
   }
 
-  function testRedeem() public {
+  function testRedeem() public fork(BSC_MAINNET) {
     // make sure we're testing with at least some tokens
     uint256 balance = xbombToken.balanceOf(holder);
     assertTrue(balance > 0);

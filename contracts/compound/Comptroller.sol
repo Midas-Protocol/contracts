@@ -501,7 +501,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    * @param cToken Asset whose underlying is being borrowed
    * @param accountBorrowsNew The user's new borrow balance of the underlying asset
    */
-  function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external override returns (uint256) {
+  function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external view override returns (uint256) {
     // Check if min borrow exists
     uint256 minBorrowEth = IFuseFeeDistributor(fuseAdmin).minBorrowEth();
 
