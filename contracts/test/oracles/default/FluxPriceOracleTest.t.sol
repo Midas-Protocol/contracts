@@ -24,8 +24,6 @@ contract FluxPriceOracleTest is BaseTest {
   FluxPriceOracle private oracle;
   MasterPriceOracle private mpo;
 
-  function setUp() public forkAtBlock(EVMOS_MAINNET, 2940378) {}
-
   function setUpWithNativeFeed() public {
     MockFluxPriceFeed mock = new MockFluxPriceFeed(5 * 10**8); // 5 USD in 8 decimals
     oracle = new FluxPriceOracle();
@@ -57,7 +55,7 @@ contract FluxPriceOracleTest is BaseTest {
     oracle.setPriceFeeds(underlyings, priceFeeds);
   }
 
-  function testFluxPriceOracleWithNativeFeed() public {
+  function testFluxPriceOracleWithNativeFeed() public forkAtBlock(EVMOS_MAINNET, 7527151) {
     setUpWithNativeFeed();
     setUpOracles();
     uint256 price = oracle.price(address(1));
@@ -65,7 +63,7 @@ contract FluxPriceOracleTest is BaseTest {
     assertEq(price, 243373091628000000000);
   }
 
-  function testFluxPriceOracleWithMasterPriceOracle() public {
+  function testFluxPriceOracleWithMasterPriceOracle() public forkAtBlock(EVMOS_MAINNET, 7527151) {
     setUpWithMasterPriceOracle();
     setUpOracles();
     uint256 price = oracle.price(address(1));
