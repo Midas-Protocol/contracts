@@ -3,7 +3,6 @@ pragma solidity >=0.8.0;
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import { CLV2V3Interface } from "../../external/flux/CLV2V3Interface.sol";
 import { IPriceOracle } from "../../external/compound/IPriceOracle.sol";
 import { ICToken } from "../../external/compound/ICToken.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
@@ -11,30 +10,40 @@ import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 import { BasePriceOracle } from "../BasePriceOracle.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
+import { IPriceOracle as IAdrastiaPriceOracle } from "adrastia/interfaces/IPriceOracle.sol";
 
 /**
- * @title FluxOracle
- * @notice Returns prices from Flux.
+ * @title AdrastiaPriceOracle
+ * @notice Returns prices from Adrastia.
  * @dev Implements `PriceOracle`.
- * @author Rahul Sethuram & Carlo Mazzaferro <rahul@midascapital.xyz> (https://github.com/rhlsthrm)
+ * @author Carlo Mazzaferro <rahul@midascapital.xyz> (https://github.com/carlomazzaferro)
  */
-contract AdrastriaPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceOracle {
+contract AdrastiaPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceOracle {
   /**
-   * @notice Maps ERC20 token addresses to ETH-based Flux price feed contracts.
+   * @notice Maps ERC20 token addresses to NATIVE-based Adrastia price feed contracts.
    */
-  mapping(address => CLV2V3Interface) public priceFeeds;
+  mapping(address => IAdrastiaPriceOracle) public priceFeeds;
 
   /**
-   * @notice Flux NATIVE/USD price feed contracts.
+   * @notice Adrastia NATIVE/USD price feed contract.
    */
-  CLV2V3Interface public NATIVE_TOKEN_USD_PRICE_FEED;
+  IAdrastiaPriceOracle public NATIVE_TOKEN_USD_PRICE_FEED;
 
-  address public USD_TOKEN; // token to use as USD price (i.e. USDC)
+  /**
+   * @notice USD token address to use to price assets
+   */
+  address public USD_TOKEN;
+
+  /**
+   * @notice WEVMOS address
+   */
+
+  address public immutable W_TOKEN = 0xD4949664cD82660AaE99bEdc034a0deA8A0bd517;
 
   /**
    * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
    */
-  function initialize(address usdToken, CLV2V3Interface nativeTokenUsd) public initializer onlyOwnerOrAdmin {
+  function initialize(address usdToken, IAdrastiaPriceOracle nativeTokenUsd) public initializer onlyOwnerOrAdmin {
     __SafeOwnable_init();
     USD_TOKEN = usdToken;
     NATIVE_TOKEN_USD_PRICE_FEED = nativeTokenUsd;
@@ -45,7 +54,7 @@ contract AdrastriaPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePrice
    * @param underlyings Underlying token addresses for which to set price feeds.
    * @param feeds The Oracle price feed contract addresses for each of `underlyings`.
    */
-  function setPriceFeeds(address[] memory underlyings, CLV2V3Interface[] memory feeds) external onlyOwner {
+  function setPriceFeeds(address[] memory underlyings, IAdrastiaPriceOracle[] memory feeds) external onlyOwner {
     // Input validation
     require(
       underlyings.length > 0 && underlyings.length == feeds.length,
@@ -67,20 +76,20 @@ contract AdrastriaPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePrice
    */
   function _price(address underlying) internal view returns (uint256) {
     // Get token/ETH price from feed
-    CLV2V3Interface feed = priceFeeds[underlying];
+    IAdrastiaPriceOracle feed = priceFeeds[underlying];
     require(address(feed) != address(0), "No Flux price feed found for this underlying ERC20 token.");
 
     if (address(NATIVE_TOKEN_USD_PRICE_FEED) == address(0)) {
       // Get price from MasterPriceOracle
       uint256 usdNativeTokenPrice = BasePriceOracle(msg.sender).price(USD_TOKEN);
       uint256 nativeTokenUsdPrice = 1e36 / usdNativeTokenPrice; // 18 decimals
-      int256 tokenUsdPrice = feed.latestAnswer();
-      // Flux price feed is 8 decimals:
-      return tokenUsdPrice >= 0 ? (uint256(tokenUsdPrice) * 1e28) / uint256(nativeTokenUsdPrice) : 0;
+      uint112 tokenUsdPrice = feed.consultPrice(underlying);
+      // Adrastia price feed is 18 decimals:
+      return tokenUsdPrice >= 0 ? (uint256(tokenUsdPrice) * 1e36) / uint256(nativeTokenUsdPrice) : 0;
     } else {
-      int256 nativeTokenUsdPrice = NATIVE_TOKEN_USD_PRICE_FEED.latestAnswer();
+      uint112 nativeTokenUsdPrice = NATIVE_TOKEN_USD_PRICE_FEED.consultPrice(W_TOKEN);
       if (nativeTokenUsdPrice <= 0) return 0;
-      int256 tokenUsdPrice = feed.latestAnswer();
+      uint112 tokenUsdPrice = feed.consultPrice(underlying);
       return tokenUsdPrice >= 0 ? (uint256(tokenUsdPrice) * 1e18) / uint256(nativeTokenUsdPrice) : 0;
     }
   }
