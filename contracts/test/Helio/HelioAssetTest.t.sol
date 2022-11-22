@@ -38,7 +38,6 @@ contract HelioAssetTest is AbstractAssetTest {
 
       (address asset, ) = abi.decode(testConfig, (address, address));
 
-
       test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
     }
   }

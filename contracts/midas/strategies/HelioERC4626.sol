@@ -16,9 +16,9 @@ interface IJAR {
 
   function totalSupply() external view returns (uint256);
 
-  function exitDelay() external view returns (uint);
+  function exitDelay() external view returns (uint256);
 
-  function setExitDelay(uint) external;
+  function setExitDelay(uint256) external;
 
   function rewards(address) external view returns (uint256);
 
@@ -30,10 +30,7 @@ contract HelioERC4626 is MidasERC4626 {
 
   IJAR public jar;
 
-  function initialize(
-    ERC20Upgradeable asset,
-    IJAR _jar
-  ) public initializer {
+  function initialize(ERC20Upgradeable asset, IJAR _jar) public initializer {
     __MidasER4626_init(asset);
     jar = _jar;
 
@@ -61,9 +58,9 @@ contract HelioERC4626 is MidasERC4626 {
     jar.exit(amount);
     uint256 receivedAmount = _asset().balanceOf(address(this)) - balanceBeforeWithdraw;
 
-    if (receivedAmount > amount){
+    if (receivedAmount > amount) {
       uint256 rewards = receivedAmount - amount;
-      uint256 rewardsForSender = rewards * shares / totalSupply();
+      uint256 rewardsForSender = (rewards * shares) / totalSupply();
       jar.join(rewards - rewardsForSender);
     }
   }

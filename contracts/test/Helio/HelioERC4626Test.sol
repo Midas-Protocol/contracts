@@ -79,7 +79,7 @@ contract HelioERC4626Test is AbstractERC4626Test {
 
   function getWithdrawalRewards(uint256 withdrawalAmount) public override returns (uint256) {
     vm.warp(block.timestamp + 10);
-    return jar.earned(address(plugin)) * plugin.convertToShares(withdrawalAmount) / plugin.totalSupply();
+    return (jar.earned(address(plugin)) * plugin.convertToShares(withdrawalAmount)) / plugin.totalSupply();
   }
 
   function testInitializedValues(string memory assetName, string memory assetSymbol) public override {
@@ -94,10 +94,6 @@ contract HelioERC4626Test is AbstractERC4626Test {
       string(abi.encodePacked("!symbol ", testPreFix))
     );
     assertEq(address(plugin.asset()), address(underlyingToken), string(abi.encodePacked("!asset ", testPreFix)));
-    assertEq(
-      address(HelioERC4626(address(plugin)).jar()),
-      address(jar),
-      string(abi.encodePacked("!jar ", testPreFix))
-    );
+    assertEq(address(HelioERC4626(address(plugin)).jar()), address(jar), string(abi.encodePacked("!jar ", testPreFix)));
   }
 }

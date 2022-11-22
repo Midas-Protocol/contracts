@@ -478,7 +478,7 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     );
     uint256 expectedWithdrawalRewards = getWithdrawalRewards(withdrawalAmount);
     uint256 expectedRedepositRewards = getRedepositRewards(expectedWithdrawalRewards);
-  
+
     plugin.withdraw(withdrawalAmount, address(this), address(this));
 
     // Test that the actual transfers worked
@@ -566,7 +566,10 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
     // Test that the ERC4626 holds the expected amount of dotDot shares
     assertApproxEqAbs(
       this.getDepositShares(),
-      depositShareBal - (oldExpectedDepositSharesNeeded + ExpectedDepositSharesNeeded) + expectedRedepositRewards + expectedRedepositRewards1,
+      depositShareBal -
+        (oldExpectedDepositSharesNeeded + ExpectedDepositSharesNeeded) +
+        expectedRedepositRewards +
+        expectedRedepositRewards1,
       uint256(10),
       string(abi.encodePacked("!depositShare ", testPreFix))
     );
