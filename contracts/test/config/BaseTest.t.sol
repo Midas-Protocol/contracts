@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "forge-std/Vm.sol";
 import "forge-std/Test.sol";
 
-import "../../midas/AddressesProvider.sol";
+import { AddressesProvider } from "../../midas/AddressesProvider.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
@@ -15,8 +15,8 @@ abstract contract BaseTest is Test {
   uint128 constant POLYGON_MAINNET = 137;
   uint128 constant ARBITRUM_ONE = 42161;
   uint128 constant FANTOM_OPERA = 250;
+  uint128 constant EVMOS_MAINNET = 9001;
 
-  uint128 constant EVMOS_TESTNET = 9000;
   uint128 constant BSC_CHAPEL = 97;
   uint128 constant NEON_DEVNET = 245022926;
 
@@ -37,13 +37,19 @@ abstract contract BaseTest is Test {
 
   function _forkAtBlock(uint128 chainid, uint256 blockNumber) private {
     if (block.chainid != chainid) {
-      vm.selectFork(getForkId(chainid));
       if (blockNumber != 0) {
+        vm.selectFork(getArchiveForkId(chainid));
         vm.rollFork(blockNumber);
+      } else {
+        vm.selectFork(getForkId(chainid));
       }
       configureAddressesProvider(chainid);
       afterForkSetUp();
     }
+  }
+
+  function getForkId(uint128 chainid, bool archive) private returns (uint256) {
+    return archive ? getForkId(chainid) : getArchiveForkId(chainid);
   }
 
   function getForkId(uint128 chainid) private returns (uint256) {
@@ -54,8 +60,8 @@ abstract contract BaseTest is Test {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("bsc_chapel")) + 100;
       } else if (chainid == MOONBEAM_MAINNET) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("moonbeam")) + 100;
-      } else if (chainid == EVMOS_TESTNET) {
-        forkIds[chainid] = vm.createFork(vm.rpcUrl("evmos_test")) + 100;
+      } else if (chainid == EVMOS_MAINNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("evmos")) + 100;
       } else if (chainid == POLYGON_MAINNET) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("polygon")) + 100;
       } else if (chainid == NEON_DEVNET) {
@@ -69,22 +75,48 @@ abstract contract BaseTest is Test {
     return forkIds[chainid] - 100;
   }
 
+  function getArchiveForkId(uint128 chainid) private returns (uint256) {
+    // store the archive rpc urls in the forkIds mapping at an offset
+    uint128 chainidWithOffset = chainid + type(uint64).max;
+    if (forkIds[chainidWithOffset] == 0) {
+      if (chainid == BSC_MAINNET) {
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("bsc_archive")) + 100;
+      } else if (chainid == BSC_CHAPEL) {
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("bsc_chapel_archive")) + 100;
+      } else if (chainid == MOONBEAM_MAINNET) {
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("moonbeam_archive")) + 100;
+      } else if (chainid == EVMOS_MAINNET) {
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("evmos_archive")) + 100;
+      } else if (chainid == POLYGON_MAINNET) {
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("polygon_archive")) + 100;
+      } else if (chainid == NEON_DEVNET) {
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("neon_dev_archive")) + 100;
+      } else if (chainid == ARBITRUM_ONE) {
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("arbitrum_archive")) + 100;
+      } else if (chainid == FANTOM_OPERA) {
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("fantom_archive")) + 100;
+      }
+    }
+    return forkIds[chainidWithOffset] - 100;
+  }
+
   function afterForkSetUp() internal virtual {}
 
-  function configureAddressesProvider(uint128 chainid) internal {
-    if (block.chainid == BSC_MAINNET) {
+  function configureAddressesProvider(uint128 chainid) private {
+    if (chainid == BSC_MAINNET) {
       ap = AddressesProvider(0x01c97299b37E66c03419bC4Db24074a89FB36e6d);
-    } else if (block.chainid == BSC_CHAPEL) {
+    } else if (chainid == BSC_CHAPEL) {
       ap = AddressesProvider(0x38742363597fBaE312B0bdcC351fCc6107E9E27E);
-    } else if (block.chainid == MOONBEAM_MAINNET) {
+    } else if (chainid == MOONBEAM_MAINNET) {
       ap = AddressesProvider(0x771ee5a72A57f3540E5b9A6A8C226C2a24A70Fae);
-    } else if (block.chainid == EVMOS_TESTNET) {
-      ap = AddressesProvider(0xB88C6a114F01a80Dc8465b55067C8D046C2F445A);
+      // } else if (block.chainid == EVMOS_MAINNET) {
+      //   // TODO: change this on deployment
+      //   ap = AddressesProvider(address(0));
     } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
-    } else if (block.chainid == NEON_DEVNET) {
+    } else if (chainid == NEON_DEVNET) {
       ap = AddressesProvider(0x3B0B043f5c459F9f5dC39ECb04AA39D1E675565B);
-    } else if (block.chainid == ARBITRUM_ONE) {
+    } else if (chainid == ARBITRUM_ONE) {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else {
       dpa = new ProxyAdmin();

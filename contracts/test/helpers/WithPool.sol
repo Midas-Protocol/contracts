@@ -3,10 +3,7 @@ pragma solidity >=0.4.23;
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
-import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import "fuse-flywheel/FuseFlywheelCore.sol";
 
-import { ComptrollerErrorReporter } from "../../compound/ErrorReporter.sol";
 import { CErc20 } from "../../compound/CErc20.sol";
 import { CToken } from "../../compound/CToken.sol";
 import { WhitePaperInterestRateModel } from "../../compound/WhitePaperInterestRateModel.sol";
@@ -16,17 +13,12 @@ import { CErc20PluginDelegate } from "../../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { CErc20Delegate } from "../../compound/CErc20Delegate.sol";
 import { CErc20Delegator } from "../../compound/CErc20Delegator.sol";
-import { RewardsDistributorDelegate } from "../../compound/RewardsDistributorDelegate.sol";
-import { RewardsDistributorDelegator } from "../../compound/RewardsDistributorDelegator.sol";
 import { ComptrollerInterface } from "../../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../../compound/InterestRateModel.sol";
 import { FuseFeeDistributor } from "../../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
-import { MockPriceOracle } from "../../oracles/1337/MockPriceOracle.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
-import { MockERC4626 } from "../../midas/strategies/MockERC4626.sol";
 import { FuseSafeLiquidator } from "../../FuseSafeLiquidator.sol";
-import { MockERC4626Dynamic } from "../../midas/strategies/MockERC4626Dynamic.sol";
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { FusePoolLens } from "../../FusePoolLens.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
@@ -135,7 +127,7 @@ contract WithPool {
     falseBoolArray.push(false);
     fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
 
-    (uint256 index, address comptrollerAddress) = fusePoolDirectory.deployPool(
+    (, address comptrollerAddress) = fusePoolDirectory.deployPool(
       name,
       newUnitroller[0],
       abi.encode(payable(address(fuseAdmin))),
