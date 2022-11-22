@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 
-import "../midas/SafeOwnableUpgradeable.sol";
+import { SafeOwnableUpgradeable } from "../midas/SafeOwnableUpgradeable.sol";
 
 contract SomeOwnable is SafeOwnableUpgradeable {
   function initialize() public initializer {
@@ -20,12 +20,6 @@ contract SafeOwnableUpgradeableTest is BaseTest {
 
     address initOwner = someOwnable.owner();
     assertEq(initOwner, address(this), "owner init value");
-
-    vm.expectRevert("not used anymore");
-    someOwnable.transferOwnership(joe);
-
-    vm.expectRevert("not used anymore");
-    someOwnable.renounceOwnership();
 
     someOwnable._setPendingOwner(joe);
 

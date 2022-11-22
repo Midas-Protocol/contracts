@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./helpers/WithPool.sol";
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 import "forge-std/Test.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -31,7 +31,7 @@ contract MaxWithdrawTestPolygon is WithPool, BaseTest {
   }
 
   function setUp() public fork(POLYGON_MAINNET) {
-    super.setUpWithPool(MasterPriceOracle(0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31), ERC20Upgradeable(wmaticAddress));
+    super.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(wmaticAddress));
 
     vm.prank(0x369582d2010B6eD950B571F4101e3bB9b554876F);
     MockERC20(address(underlyingToken)).transfer(address(this), 100e18);

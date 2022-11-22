@@ -20,7 +20,7 @@ abstract contract DiamondBase {
    */
   function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external virtual;
 
-  function _listExtensions() public returns (address[] memory) {
+  function _listExtensions() public view returns (address[] memory) {
     return LibDiamond.listExtensions();
   }
 
@@ -77,7 +77,7 @@ library LibDiamond {
     }
   }
 
-  function listExtensions() internal returns (address[] memory) {
+  function listExtensions() internal view returns (address[] memory) {
     return diamondStorage().extensions;
   }
 

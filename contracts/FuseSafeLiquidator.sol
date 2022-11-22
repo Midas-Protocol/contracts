@@ -8,7 +8,6 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20
 
 import "./liquidators/IRedemptionStrategy.sol";
 import "./liquidators/IFundsConversionStrategy.sol";
-import "./liquidators/JarvisLiquidatorFunder.sol";
 
 import "./external/compound/ICToken.sol";
 
@@ -22,7 +21,6 @@ import "./external/uniswap/IUniswapV2Callee.sol";
 import "./external/uniswap/IUniswapV2Pair.sol";
 import "./external/uniswap/IUniswapV2Factory.sol";
 import "./external/uniswap/UniswapV2Library.sol";
-import "./external/compound/IComptroller.sol";
 
 /**
  * @title FuseSafeLiquidator
