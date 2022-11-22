@@ -7,7 +7,6 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
-import { FuseFlywheelLensRouter } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
 import "../compound/CTokenInterfaces.sol";
 
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";

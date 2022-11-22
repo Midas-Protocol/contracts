@@ -8,8 +8,9 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
-import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
-import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
+import { MidasFlywheelLensRouter, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 
 import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
@@ -41,9 +42,9 @@ contract LiquidityMiningTest is DSTest {
   FuseFeeDistributor fuseAdmin;
   FusePoolDirectory fusePoolDirectory;
 
-  FuseFlywheelCore flywheel;
+  MidasFlywheelCore flywheel;
   FlywheelStaticRewards rewards;
-  FuseFlywheelLensRouter flywheelClaimer;
+  MidasFlywheelLensRouter flywheelClaimer;
 
   address user = address(this);
 
@@ -55,7 +56,7 @@ contract LiquidityMiningTest is DSTest {
   bool[] falseBoolArray;
   bool[] trueBoolArray;
   address[] newImplementation;
-  FuseFlywheelCore[] flywheelsToClaim;
+  MidasFlywheelCore[] flywheelsToClaim;
 
   function setUpBaseContracts() public {
     underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
@@ -114,17 +115,17 @@ contract LiquidityMiningTest is DSTest {
   }
 
   function setUpFlywheel() public {
-    flywheel = new FuseFlywheelCore(
+    flywheel = new MidasFlywheelCore();
+    flywheel.initialize(
       rewardToken,
       FlywheelStaticRewards(address(0)),
       IFlywheelBooster(address(0)),
-      address(this),
-      Authority(address(0))
+      address(this)
     );
-    rewards = new FlywheelStaticRewards(flywheel, address(this), Authority(address(0)));
+    rewards = new FlywheelStaticRewards(FlywheelCore(address(flywheel)), address(this), Authority(address(0)));
     flywheel.setFlywheelRewards(rewards);
 
-    flywheelClaimer = new FuseFlywheelLensRouter();
+    flywheelClaimer = new MidasFlywheelLensRouter();
 
     flywheel.addStrategyForRewards(ERC20(address(cErc20)));
 
@@ -174,7 +175,7 @@ contract LiquidityMiningTest is DSTest {
     require(index == flywheel.ONE() + rewardsPerToken);
 
     // claim and check user balance
-    flywheelClaimer.getUnclaimedRewardsForMarket(user, ICToken(address(cErc20)), flywheelsToClaim, trueBoolArray);
+    flywheelClaimer.getUnclaimedRewardsForMarket(user, CErc20Token(address(cErc20)), flywheelsToClaim, trueBoolArray);
     require(rewardToken.balanceOf(user) == userRewards);
 
     // mint more tokens by user and rerun test
@@ -187,7 +188,7 @@ contract LiquidityMiningTest is DSTest {
     uint256 userRewards2 = (rewardsPerToken2 * cErc20.balanceOf(user)) / 1 ether;
 
     // accrue all unclaimed rewards and claim them
-    flywheelClaimer.getUnclaimedRewardsForMarket(user, ICToken(address(cErc20)), flywheelsToClaim, trueBoolArray);
+    flywheelClaimer.getUnclaimedRewardsForMarket(user, CErc20Token(address(cErc20)), flywheelsToClaim, trueBoolArray);
 
     // user balance should accumulate from both rewards
     require(rewardToken.balanceOf(user) == userRewards + userRewards2, "balance mismatch");
