@@ -76,27 +76,28 @@ abstract contract BaseTest is Test {
   }
 
   function getArchiveForkId(uint128 chainid) private returns (uint256) {
-    uint64 archiveOffset = type(uint64).max;
-    if (forkIds[chainid + archiveOffset] == 0) {
+    // store the archive rpc urls in the forkIds mapping at an offset
+    uint128 chainidWithOffset = chainid + type(uint64).max;
+    if (forkIds[chainidWithOffset] == 0) {
       if (chainid == BSC_MAINNET) {
-        forkIds[chainid + archiveOffset] = vm.createFork(vm.rpcUrl("bsc_archive")) + 100;
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("bsc_archive")) + 100;
       } else if (chainid == BSC_CHAPEL) {
-        forkIds[chainid + archiveOffset] = vm.createFork(vm.rpcUrl("bsc_chapel_archive")) + 100;
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("bsc_chapel_archive")) + 100;
       } else if (chainid == MOONBEAM_MAINNET) {
-        forkIds[chainid + archiveOffset] = vm.createFork(vm.rpcUrl("moonbeam_archive")) + 100;
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("moonbeam_archive")) + 100;
       } else if (chainid == EVMOS_TESTNET) {
-        forkIds[chainid + archiveOffset] = vm.createFork(vm.rpcUrl("evmos_test_archive")) + 100;
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("evmos_test_archive")) + 100;
       } else if (chainid == POLYGON_MAINNET) {
-        forkIds[chainid + archiveOffset] = vm.createFork(vm.rpcUrl("polygon_archive")) + 100;
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("polygon_archive")) + 100;
       } else if (chainid == NEON_DEVNET) {
-        forkIds[chainid + archiveOffset] = vm.createFork(vm.rpcUrl("neon_dev_archive")) + 100;
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("neon_dev_archive")) + 100;
       } else if (chainid == ARBITRUM_ONE) {
-        forkIds[chainid + archiveOffset] = vm.createFork(vm.rpcUrl("arbitrum_archive")) + 100;
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("arbitrum_archive")) + 100;
       } else if (chainid == FANTOM_OPERA) {
-        forkIds[chainid + archiveOffset] = vm.createFork(vm.rpcUrl("fantom_archive")) + 100;
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("fantom_archive")) + 100;
       }
     }
-    return forkIds[chainid + archiveOffset] - 100;
+    return forkIds[chainidWithOffset] - 100;
   }
 
   function afterForkSetUp() internal virtual {}

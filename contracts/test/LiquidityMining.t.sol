@@ -116,12 +116,7 @@ contract LiquidityMiningTest is DSTest {
 
   function setUpFlywheel() public {
     flywheel = new MidasFlywheelCore();
-    flywheel.initialize(
-      rewardToken,
-      FlywheelStaticRewards(address(0)),
-      IFlywheelBooster(address(0)),
-      address(this)
-    );
+    flywheel.initialize(rewardToken, FlywheelStaticRewards(address(0)), IFlywheelBooster(address(0)), address(this));
     rewards = new FlywheelStaticRewards(FlywheelCore(address(flywheel)), address(this), Authority(address(0)));
     flywheel.setFlywheelRewards(rewards);
 
