@@ -118,6 +118,8 @@ abstract contract BaseTest is Test {
       ap = AddressesProvider(0x3B0B043f5c459F9f5dC39ECb04AA39D1E675565B);
     } else if (chainid == ARBITRUM_ONE) {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
+    } else if (chainid == FANTOM_OPERA) {
+      ap = AddressesProvider(0xC1B6152d3977E994F5a4E0dead9d0a11a0D229Ef);
     } else {
       dpa = new ProxyAdmin();
       AddressesProvider logic = new AddressesProvider();

@@ -84,42 +84,33 @@ contract ExtensionsTest is BaseTest {
   function afterForkSetUp() internal override {
     ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
 
-    // upgrade the FuseFeeDistributor to include the _setComptrollerExtensions/getComptrollerExtensions fn
-    {
-      FuseFeeDistributor newImpl = new FuseFeeDistributor();
-      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
-      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-      address admin = address(uint160(uint256(bytesAtSlot)));
-      // emit log_address(admin);
-      vm.prank(admin);
-      proxy.upgradeTo(address(newImpl));
+    if (block.chainid == BSC_MAINNET) {
+      // change the implementation to the new that can add extensions
+      Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
+      latestComptrollerImplementation = address(newComptrollerImplementation);
+
+      Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
+      address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
+      // whitelist the upgrade
+      vm.prank(ffd.owner());
+      ffd._editComptrollerImplementationWhitelist(
+        asArray(oldComptrollerImplementation),
+        asArray(latestComptrollerImplementation),
+        asArray(true)
+      );
+      // whitelist the new pool creation
+      vm.prank(ffd.owner());
+      ffd._editComptrollerImplementationWhitelist(
+        asArray(address(0)),
+        asArray(latestComptrollerImplementation),
+        asArray(true)
+      );
+      // upgrade to the new comptroller
+      vm.startPrank(asUnitroller.admin());
+      asUnitroller._setPendingImplementation(latestComptrollerImplementation);
+      newComptrollerImplementation._become(asUnitroller);
+      vm.stopPrank();
     }
-
-    // change the implementation to the new that can add extensions
-    Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
-    latestComptrollerImplementation = address(newComptrollerImplementation);
-
-    Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
-    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
-    // whitelist the upgrade
-    vm.prank(ffd.owner());
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(oldComptrollerImplementation),
-      asArray(latestComptrollerImplementation),
-      asArray(true)
-    );
-    // whitelist the new pool creation
-    vm.prank(ffd.owner());
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(address(0)),
-      asArray(latestComptrollerImplementation),
-      asArray(true)
-    );
-    // upgrade to the new comptroller
-    vm.startPrank(asUnitroller.admin());
-    asUnitroller._setPendingImplementation(latestComptrollerImplementation);
-    newComptrollerImplementation._become(asUnitroller);
-    vm.stopPrank();
 
     cfe = new ComptrollerFirstExtension();
     mockExtension = new MockComptrollerExtension();
@@ -197,6 +188,30 @@ contract ExtensionsTest is BaseTest {
       address[] memory initExtensionsAfter = DiamondBase(payable(poolAddress))._listExtensions();
       assertEq(initExtensionsAfter.length, 1, "remove this if the ffd config is set up");
       assertEq(initExtensionsAfter[0], address(cfe), "first extension is not the CFE");
+    }
+  }
+
+  function testChapelComptrollerExtensions() public fork(BSC_CHAPEL) {
+    _testComptrollersExtensions();
+  }
+
+  function testArbitrumComptrollerExtensions() public fork(ARBITRUM_ONE) {
+    _testComptrollersExtensions();
+  }
+
+  function testFantomComptrollerExtensions() public fork(FANTOM_OPERA) {
+    _testComptrollersExtensions();
+  }
+
+  function _testComptrollersExtensions() internal {
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      DiamondBase asBase = DiamondBase(payable(pools[i].comptroller));
+      address[] memory extensions = asBase._listExtensions();
+
+      assertEq(extensions.length, 1, "each pool should have the first extension");
     }
   }
 }
