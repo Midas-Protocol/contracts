@@ -66,7 +66,7 @@ contract MidasFlywheelLensRouter {
         if (i == 0) {
           address rewardToken = address(flywheel.rewardToken());
           rewardTokens[j] = rewardToken;
-          rewardTokenPrices[j] = oracle.price(address(rewardToken)); // scaled to 1e18
+          rewardTokenPrices[j] = oracle.price(rewardToken); // scaled to 1e18
         }
         uint256 rewardSpeedPerSecondPerToken;
         {
@@ -79,11 +79,12 @@ contract MidasFlywheelLensRouter {
               (lastUpdatedTimestampAfter - lastUpdatedTimestampBefore);
           }
         }
+        uint256 aprInRewardsTokenDecimals = (((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] * 365.25 days) /
+          price) * 1e18) / market.exchangeRateCurrent();
         rewardsInfo[j] = RewardsInfo({
           rewardSpeedPerSecondPerToken: rewardSpeedPerSecondPerToken,
           rewardTokenPrice: rewardTokenPrices[j],
-          formattedAPR: (((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] * 365.25 days) / price) * 1e18) /
-            market.exchangeRateCurrent(),
+          formattedAPR: aprInRewardsTokenDecimals * (10**(18 - ERC20(rewardTokens[j]).decimals())),
           flywheel: address(flywheel),
           rewardToken: rewardTokens[j]
         });
