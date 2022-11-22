@@ -234,7 +234,7 @@ contract BeamERC4626Test is BaseTest {
   }
 
   function testMultipleWithdraw() public {
-    uint256 BeamShares = depositAmount;
+    uint256 BeamShares = depositAmount * 2;
 
     uint256 withdrawalAmount = 10e18;
 
@@ -314,7 +314,7 @@ contract BeamERC4626Test is BaseTest {
   }
 
   function testMultipleRedeem() public {
-    uint256 BeamShares = depositAmount;
+    uint256 BeamShares = depositAmount * 2;
     uint256 withdrawalAmount = 10e18;
     uint256 redeemAmount = beamErc4626.previewWithdraw(withdrawalAmount);
 
