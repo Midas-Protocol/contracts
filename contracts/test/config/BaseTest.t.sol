@@ -15,8 +15,8 @@ abstract contract BaseTest is Test {
   uint128 constant POLYGON_MAINNET = 137;
   uint128 constant ARBITRUM_ONE = 42161;
   uint128 constant FANTOM_OPERA = 250;
+  uint128 constant EVMOS_MAINNET = 9001;
 
-  uint128 constant EVMOS_TESTNET = 9000;
   uint128 constant BSC_CHAPEL = 97;
   uint128 constant NEON_DEVNET = 245022926;
 
@@ -54,8 +54,8 @@ abstract contract BaseTest is Test {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("bsc_chapel")) + 100;
       } else if (chainid == MOONBEAM_MAINNET) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("moonbeam")) + 100;
-      } else if (chainid == EVMOS_TESTNET) {
-        forkIds[chainid] = vm.createFork(vm.rpcUrl("evmos_test")) + 100;
+      } else if (chainid == EVMOS_MAINNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("evmos")) + 100;
       } else if (chainid == POLYGON_MAINNET) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("polygon")) + 100;
       } else if (chainid == NEON_DEVNET) {
@@ -78,7 +78,7 @@ abstract contract BaseTest is Test {
       ap = AddressesProvider(0x38742363597fBaE312B0bdcC351fCc6107E9E27E);
     } else if (block.chainid == MOONBEAM_MAINNET) {
       ap = AddressesProvider(0x771ee5a72A57f3540E5b9A6A8C226C2a24A70Fae);
-    } else if (block.chainid == EVMOS_TESTNET) {
+    } else if (block.chainid == EVMOS_MAINNET) {
       ap = AddressesProvider(0xB88C6a114F01a80Dc8465b55067C8D046C2F445A);
     } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
