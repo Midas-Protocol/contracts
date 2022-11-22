@@ -56,6 +56,7 @@ contract BeamERC4626Test is BaseTest {
     testToken = ERC20Upgradeable(0x99588867e817023162F4d4829995299054a5fC57);
     glintToken = MockERC20(0xcd3B51D98478D53F4515A306bE565c6EebeF1D58);
     mockBeamChef = new MockVault(IBoringERC20(address(testToken)), 0, address(0), 0, address(0));
+
     vm.warp(1);
     vm.roll(1);
 
