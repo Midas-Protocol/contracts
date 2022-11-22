@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.10;
 
-import "./MidasFlywheelCore.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
+import { MidasFlywheelCore } from "./MidasFlywheelCore.sol";
 
 abstract contract CErc20Token is ERC20 {
   function exchangeRateCurrent() external virtual returns (uint256);
@@ -44,10 +45,6 @@ contract MidasFlywheelLensRouter {
     uint256 formattedAPR;
     address flywheel;
     address rewardToken;
-    // uint224 indexAfter;
-    // uint224 indexBefore;
-    uint32 lastUpdatedTimestampAfter;
-    uint32 lastUpdatedTimestampBefore;
   }
 
   function getMarketRewardsInfo(IComptroller comptroller) external returns (MarketRewardsInfo[] memory) {
@@ -62,20 +59,16 @@ contract MidasFlywheelLensRouter {
       RewardsInfo[] memory rewardsInfo = new RewardsInfo[](flywheels.length);
 
       CErc20Token market = markets[i];
-      uint256 price = oracle.price(market.underlying());
+      uint256 price = oracle.price(market.underlying()); // scaled to 1e18
 
       for (uint256 j = 0; j < flywheels.length; j++) {
         MidasFlywheelCore flywheel = flywheels[j];
         if (i == 0) {
           address rewardToken = address(flywheel.rewardToken());
           rewardTokens[j] = rewardToken;
-          rewardTokenPrices[j] = oracle.price(rewardToken);
+          rewardTokenPrices[j] = oracle.price(address(rewardToken)) * (10**(18 - ERC20(rewardToken).decimals())); // scaled to 1e18
         }
         uint256 rewardSpeedPerSecondPerToken;
-        // uint224 indexBefore;
-        // uint224 indexAfter;
-        uint32 lastUpdatedTimestampBefore;
-        uint32 lastUpdatedTimestampAfter;
         {
           (uint224 indexBefore, uint32 lastUpdatedTimestampBefore) = flywheel.strategyState(market);
           flywheel.accrue(market, address(0));
@@ -92,11 +85,7 @@ contract MidasFlywheelLensRouter {
           formattedAPR: (((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] * 365.25 days) / price) * 1e18) /
             market.exchangeRateCurrent(),
           flywheel: address(flywheel),
-          rewardToken: rewardTokens[j],
-          // indexAfter: indexAfter,
-          // indexBefore: indexBefore
-          lastUpdatedTimestampAfter: lastUpdatedTimestampAfter,
-          lastUpdatedTimestampBefore: lastUpdatedTimestampBefore
+          rewardToken: rewardTokens[j]
         });
       }
 

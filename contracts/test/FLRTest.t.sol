@@ -81,10 +81,6 @@ contract FLRTest is BaseTest {
         emit log_named_uint("rewardTokenPrice", ri[i].rewardsInfo[j].rewardTokenPrice);
         emit log_named_uint("formattedAPR", ri[i].rewardsInfo[j].formattedAPR);
         emit log_named_address("rewardToken", address(ri[i].rewardsInfo[j].rewardToken));
-        // emit log_named_uint("indexAfter", ri[i].rewardsInfo[j].indexAfter);
-        // emit log_named_uint("indexBefore", ri[i].rewardsInfo[j].indexBefore);
-        emit log_named_uint("lastUpdatedTimestampAfter", ri[i].rewardsInfo[j].lastUpdatedTimestampAfter);
-        emit log_named_uint("lastUpdatedTimestampBefore", ri[i].rewardsInfo[j].lastUpdatedTimestampBefore);
       }
     }
   }
@@ -129,8 +125,6 @@ contract FLRTest is BaseTest {
         emit log_named_address("rewardToken", address(ri[i].rewardsInfo[j].rewardToken));
         // emit log_named_uint("indexAfter", ri[i].rewardsInfo[j].indexAfter);
         // emit log_named_uint("indexBefore", ri[i].rewardsInfo[j].indexBefore);
-        emit log_named_uint("lastUpdatedTimestampAfter", ri[i].rewardsInfo[j].lastUpdatedTimestampAfter);
-        emit log_named_uint("lastUpdatedTimestampBefore", ri[i].rewardsInfo[j].lastUpdatedTimestampBefore);
       }
     }
   }
