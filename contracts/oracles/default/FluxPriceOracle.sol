@@ -34,7 +34,7 @@ contract FluxPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceOracl
   /**
    * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
    */
-  function initialize(address usdToken, CLV2V3Interface nativeTokenUsd) public initializer {
+  function initialize(address usdToken, CLV2V3Interface nativeTokenUsd) public initializer onlyOwnerOrAdmin {
     __SafeOwnable_init();
     USD_TOKEN = usdToken;
     NATIVE_TOKEN_USD_PRICE_FEED = nativeTokenUsd;

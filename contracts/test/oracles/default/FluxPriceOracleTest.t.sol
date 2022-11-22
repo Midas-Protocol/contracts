@@ -27,6 +27,7 @@ contract FluxPriceOracleTest is BaseTest {
   function setUpWithNativeFeed() public {
     MockFluxPriceFeed mock = new MockFluxPriceFeed(5 * 10**8); // 5 USD in 8 decimals
     oracle = new FluxPriceOracle();
+    vm.prank(oracle.owner());
     oracle.initialize(address(0), CLV2V3Interface(address(mock)));
   }
 
@@ -42,6 +43,7 @@ contract FluxPriceOracleTest is BaseTest {
     mpo.initialize(underlyings, oracles, IPriceOracle(address(spo)), address(this), true, address(0));
 
     oracle = new FluxPriceOracle();
+    vm.prank(oracle.owner());
     oracle.initialize(address(2), CLV2V3Interface(address(0)));
   }
 
@@ -52,6 +54,7 @@ contract FluxPriceOracleTest is BaseTest {
     underlyings[0] = address(1);
     CLV2V3Interface[] memory priceFeeds = new CLV2V3Interface[](1);
     priceFeeds[0] = ethPool;
+    vm.prank(oracle.owner());
     oracle.setPriceFeeds(underlyings, priceFeeds);
   }
 
