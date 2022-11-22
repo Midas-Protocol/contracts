@@ -4,12 +4,20 @@ pragma solidity >=0.8.0;
 import { CToken } from "../compound/CToken.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
-import "./config/BaseTest.t.sol";
-import "../liquidators/JarvisLiquidatorFunder.sol";
-import "../FuseSafeLiquidator.sol";
-import "../external/uniswap/IUniswapV2Pair.sol";
-import "../external/uniswap/IUniswapV2Factory.sol";
-import "../compound/CTokenInterfaces.sol";
+import { JarvisLiquidatorFunder } from "../liquidators/JarvisLiquidatorFunder.sol";
+import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
+import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
+import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
+import { IComptroller } from "../external/compound/IComptroller.sol";
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { ISynthereumLiquidityPool } from "../external/jarvis/ISynthereumLiquidityPool.sol";
+import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
+import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
+import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
+import { ICErc20 } from "../external/compound/ICErc20.sol";
+import { ICToken } from "../external/compound/ICToken.sol";
+
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 interface IMockERC20 is IERC20Upgradeable {
   function mint(address _address, uint256 amount) external;
@@ -26,7 +34,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
 
   IERC20Upgradeable bUSD;
 
-  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function setUp() public fork(BSC_MAINNET) {
     uint64 expirationPeriod = 60 * 40; // 40 mins
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD")); // TODO check if bUSD == stableToken at AP
 

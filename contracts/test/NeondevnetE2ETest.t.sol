@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./helpers/WithPool.sol";
-import "./config/BaseTest.t.sol";
-import "forge-std/Test.sol";
-import "../compound/CTokenInterfaces.sol";
+import { WithPool } from "./helpers/WithPool.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
@@ -19,8 +16,15 @@ import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
 import { IPriceOracle } from "../external/compound/IPriceOracle.sol";
 import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
-import "../external/uniswap/IUniswapV2Pair.sol";
-import "../external/uniswap/IUniswapV2Factory.sol";
+import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
+import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
+import { FusePoolLens } from "../FusePoolLens.sol";
+import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
+import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
+import { CErc20 } from "../compound/CErc20.sol";
+import { ICToken } from "../external/compound/ICToken.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
 
 contract MockWNeon is MockERC20 {
   constructor() MockERC20("test", "test", 18) {}
@@ -33,10 +37,10 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
   address moraToken = 0x6Ab1F83c0429A1322D7ECDFdDf54CE6D179d911f;
   address wtoken = 0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5;
 
-  constructor() WithPool() forkAtBlock(NEON_DEVNET, 173154262) {
+  constructor() WithPool() fork(NEON_DEVNET) {
     mpo = ap.getAddress("MasterPriceOracle");
     super.setUpWithPool(
-      MasterPriceOracle(mpo), // MasterPriceOracle
+      MasterPriceOracle(mpo),
       ERC20Upgradeable(moraToken) // MORA
     );
   }
@@ -184,7 +188,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
 
     vars.price2 = priceOracle.getUnderlyingPrice(ICToken(address(cWNeonToken)));
     vm.mockCall(
-      mpo, // MPO
+      mpo,
       abi.encodeWithSelector(priceOracle.getUnderlyingPrice.selector, ICToken(address(cWNeonToken))),
       abi.encode(vars.price2 / 10000)
     );

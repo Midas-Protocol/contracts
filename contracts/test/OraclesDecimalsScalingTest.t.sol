@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
@@ -9,7 +9,7 @@ import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 
-import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { IERC20MetadataUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 
 contract OraclesDecimalsScalingTest is BaseTest {
   MasterPriceOracle mpo;
@@ -62,7 +62,7 @@ contract OraclesDecimalsScalingTest is BaseTest {
           uint256 oraclePrice = mpo.price(underlying);
           uint256 scaledPrice = mpo.getUnderlyingPrice(markets[j]);
 
-          uint8 decimals = ERC20Upgradeable(underlying).decimals();
+          uint8 decimals = IERC20MetadataUpgradeable(underlying).decimals();
           uint256 expectedScaledPrice = decimals <= 18
             ? uint256(oraclePrice) * (10**(18 - decimals))
             : uint256(oraclePrice) / (10**(decimals - 18));

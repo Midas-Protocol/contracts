@@ -1,21 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { StellaERC4626Test } from "./StellaLpERC4626Test.sol";
 import { StellaTestConfigStorage } from "./StellaTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
+import "./StellaLpERC4626Test.sol";
 
 // Using 2BRL
 contract StellaAssetTest is AbstractAssetTest {
-  constructor() forkAtBlock(MOONBEAM_MAINNET, 2176344) {
+  constructor() fork(MOONBEAM_MAINNET) {
     test = AbstractERC4626Test(address(new StellaERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new StellaTestConfigStorage()));
   }

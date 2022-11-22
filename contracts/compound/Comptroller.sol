@@ -21,9 +21,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   /// @notice Emitted when an admin supports a market
   event MarketListed(CTokenInterface cToken);
 
-  /// @notice Emitted when an admin unsupports a market
-  event MarketUnlisted(CTokenInterface cToken);
-
   /// @notice Emitted when an account enters a market
   event MarketEntered(CTokenInterface cToken, address account);
 
@@ -373,7 +370,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Get account liquidity
     (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
       account,
-      CTokenInterface(address(0)),
+      isBorrow ? cTokenModify : CTokenInterface(address(0)),
       0,
       0
     );
@@ -383,7 +380,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Get max borrow/redeem
     uint256 maxBorrowOrRedeemAmount;
 
-    if (!isBorrow && !markets[address(cTokenModify)].accountMembership[account]) {
+    if (!isBorrow && !markets[cToken].accountMembership[account]) {
       // Max redeem = balance of underlying if not used as collateral
       maxBorrowOrRedeemAmount = balanceOfUnderlying;
     } else {
@@ -504,7 +501,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    * @param cToken Asset whose underlying is being borrowed
    * @param accountBorrowsNew The user's new borrow balance of the underlying asset
    */
-  function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external override returns (uint256) {
+  function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external view override returns (uint256) {
     // Check if min borrow exists
     uint256 minBorrowEth = IFuseFeeDistributor(fuseAdmin).minBorrowEth();
 
@@ -823,8 +820,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       // Pre-compute a conversion factor from tokens -> ether (normalized price value)
       vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
 
-      // Exclude the asset-to-be-borrowed from the liquidity
-      if (address(asset) != address(cTokenModify) || borrowAmount == 0) {
+      // Exclude the asset-to-be-borrowed from the liquidity, except for when redeeming
+      if (address(asset) != address(cTokenModify) || redeemTokens > 0) {
         // sumCollateral += tokensToDenom * cTokenBalance
         vars.sumCollateral = mul_ScalarTruncateAddUInt(vars.tokensToDenom, vars.cTokenBalance, vars.sumCollateral);
       }
@@ -1213,51 +1210,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   }
 
   /**
-   * @notice Removed a market from the markets mapping and sets it as unlisted
-   * @dev Admin function unset isListed and collateralFactorMantissa and unadd support for the market
-   * @param cToken The address of the market (token) to unlist
-   * @return uint 0=success, otherwise a failure. (See enum Error for details)
-   */
-  function _unsupportMarket(CTokenInterface cToken) external returns (uint256) {
-    // Check admin rights
-    if (!hasAdminRights()) return fail(Error.UNAUTHORIZED, FailureInfo.UNSUPPORT_MARKET_OWNER_CHECK);
-
-    // Check if market is already unlisted
-    if (!markets[address(cToken)].isListed)
-      return fail(Error.MARKET_NOT_LISTED, FailureInfo.UNSUPPORT_MARKET_DOES_NOT_EXIST);
-
-    // Check if market is in use
-    if (cToken.totalSupply() > 0) return fail(Error.NONZERO_TOTAL_SUPPLY, FailureInfo.UNSUPPORT_MARKET_IN_USE);
-
-    // Unlist market
-    delete markets[address(cToken)];
-
-    /* Delete cToken from allMarkets */
-    // load into memory for faster iteration
-    CTokenInterface[] memory _allMarkets = allMarkets;
-    uint256 len = _allMarkets.length;
-    uint256 assetIndex = len;
-    for (uint256 i = 0; i < len; i++) {
-      if (_allMarkets[i] == cToken) {
-        assetIndex = i;
-        break;
-      }
-    }
-
-    // We *must* have found the asset in the list or our redundant data structure is broken
-    assert(assetIndex < len);
-
-    // copy last item in list to location of item to be removed, reduce length by 1
-    allMarkets[assetIndex] = allMarkets[allMarkets.length - 1];
-    allMarkets.pop();
-
-    cTokensByUnderlying[CErc20Interface(address(cToken)).underlying()] = CTokenInterface(address(0));
-    emit MarketUnlisted(cToken);
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
    * @notice Toggles the auto-implementation feature
    * @param enabled If the feature is to be enabled
    * @return uint 0=success, otherwise a failure. (See enum Error for details)
@@ -1287,13 +1239,25 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     );
 
     uint256 changeStatus = unitroller._acceptImplementation();
-    require(changeStatus == 0, "!unauthorized");
+    require(changeStatus == 0, "!unauthorized - not pending impl");
 
     Comptroller(payable(address(unitroller)))._becomeImplementation();
   }
 
   function _becomeImplementation() external {
     require(msg.sender == comptrollerImplementation, "!implementation");
+
+    address[] memory currentExtensions = LibDiamond.listExtensions();
+    for (uint256 i = 0; i < currentExtensions.length; i++) {
+      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
+    }
+
+    address[] memory latestExtensions = IFuseFeeDistributor(fuseAdmin).getComptrollerExtensions(
+      comptrollerImplementation
+    );
+    for (uint256 i = 0; i < latestExtensions.length; i++) {
+      LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
+    }
 
     if (!_notEnteredInitialized) {
       _notEntered = true;
