@@ -5,30 +5,23 @@ import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 
 import "./config/BaseTest.t.sol";
+
+import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { Auth, Authority } from "solmate/auth/Auth.sol";
+import { Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
+
+import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
 import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
 import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
-import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 
 import "../compound/CTokenInterfaces.sol";
-
 import { CErc20 } from "../compound/CErc20.sol";
+
 import { MidasFlywheelLensRouter, IComptroller } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
-import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
-import { Comptroller } from "../compound/Comptroller.sol";
-import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
-import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
-import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
-import { IERC4626 } from "../compound/IERC4626.sol";
-import { RewardsDistributorDelegate } from "../compound/RewardsDistributorDelegate.sol";
-import { RewardsDistributorDelegator } from "../compound/RewardsDistributorDelegator.sol";
-import { ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
-import { InterestRateModel } from "../compound/InterestRateModel.sol";
-import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 
 interface IPriceOracle {
   function price(address underlying) external view returns (uint256);
@@ -37,15 +30,9 @@ interface IPriceOracle {
 contract FLRTest is BaseTest {
   address rewardToken;
 
-  CErc20Delegate cErc20Delegate;
-  CErc20PluginDelegate cErc20PluginDelegate;
-  CErc20 cErc20;
-
   MidasFlywheel flywheel;
   FlywheelStaticRewards rewards;
   MidasFlywheelLensRouter lensRouter;
-
-  FuseFlywheelCore[] flywheelsToClaim;
 
   address BSC_ADMIN = address(0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E);
 
