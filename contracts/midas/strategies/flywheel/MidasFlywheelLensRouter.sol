@@ -66,7 +66,7 @@ contract MidasFlywheelLensRouter {
         if (i == 0) {
           address rewardToken = address(flywheel.rewardToken());
           rewardTokens[j] = rewardToken;
-          rewardTokenPrices[j] = oracle.price(address(rewardToken)) * (10**(18 - ERC20(rewardToken).decimals())); // scaled to 1e18
+          rewardTokenPrices[j] = oracle.price(address(rewardToken)); // scaled to 1e18
         }
         uint256 rewardSpeedPerSecondPerToken;
         {
