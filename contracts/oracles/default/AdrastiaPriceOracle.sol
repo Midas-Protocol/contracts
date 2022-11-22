@@ -87,7 +87,7 @@ contract AdrastiaPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceO
       // Adrastia price feed is 18 decimals:
       return tokenUsdPrice >= 0 ? (uint256(tokenUsdPrice) * 1e36) / uint256(nativeTokenUsdPrice) : 0;
     } else {
-      uint112 nativeTokenUsdPrice = NATIVE_TOKEN_USD_PRICE_FEED.consultPrice(W_TOKEN);
+      uint112 nativeTokenUsdPrice = NATIVE_TOKEN_USD_PRICE_FEED.consultPrice(address(0));
       if (nativeTokenUsdPrice <= 0) return 0;
       uint112 tokenUsdPrice = feed.consultPrice(underlying);
       return tokenUsdPrice >= 0 ? (uint256(tokenUsdPrice) * 1e18) / uint256(nativeTokenUsdPrice) : 0;
