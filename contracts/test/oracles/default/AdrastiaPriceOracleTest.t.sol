@@ -55,14 +55,12 @@ contract AdrastiaPriceOracleTest is BaseTest {
     oracle.setPriceFeeds(underlyings, priceFeeds);
   }
 
-  function testAdrastiaPriceOracle() public fork(EVMOS_MAINNET) {
+  function testAdrastiaPriceOracle() public forkAtBlock(EVMOS_MAINNET, 7581139) {
     setUpAdrastiaFeeds();
     uint256 priceGUsdc = oracle.price(gUSDC);
-    emit log_uint(priceGUsdc);
-    assertEq(priceGUsdc, 217398180292000000000);
+    assertEq(priceGUsdc, 1069746906351096056);
 
     uint256 priceEth = oracle.price(axlWETH);
-    emit log_uint(priceEth);
-    assertEq(priceEth, 217398180292000000000);
+    assertEq(priceEth, 1257026900818360167013);
   }
 }
