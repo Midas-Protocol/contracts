@@ -7,27 +7,20 @@ import { SimplePriceOracle } from "../../../oracles/default/SimplePriceOracle.so
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
 import { IPriceOracle as IAdrastiaPriceOracle } from "adrastia/interfaces/IPriceOracle.sol";
+import { NativeUSDPriceOracle } from "../../../oracles/evmos/NativeUSDPriceOracle.sol";
 
 contract AdrastiaPriceOracleTest is BaseTest {
   AdrastiaPriceOracle private oracle;
   MasterPriceOracle private mpo;
   IAdrastiaPriceOracle private feed;
+  NativeUSDPriceOracle private nativeUSDOracle;
+
   address gUSDC = 0x5FD55A1B9FC24967C4dB09C513C3BA0DFa7FF687;
   address axlWETH = 0x50dE24B3f0B3136C50FA8A3B8ebc8BD80a269ce5;
+  address ADRASTIA_EVMOS_USD_FEED = 0xd850F64Eda6a62d625209711510f43cD49Ef8798;
+  address ADASTRIA_XXX_EVMOS_FEED = 0x51d3d22965Bb2CB2749f896B82756eBaD7812b6d;
 
-  function setUpWithNativeFeed() public {
-    oracle = new AdrastiaPriceOracle();
-
-    // https://docs.adrastia.io/deployments/evmos
-    feed = IAdrastiaPriceOracle(0xd850F64Eda6a62d625209711510f43cD49Ef8798);
-    emit log_named_address("feed", address(feed));
-    emit log_named_uint("dec", feed.quoteTokenDecimals());
-    emit log_named_address("address", address(feed.quoteTokenAddress()));
-    vm.prank(oracle.owner());
-    oracle.initialize(address(0), IAdrastiaPriceOracle(0xd850F64Eda6a62d625209711510f43cD49Ef8798));
-  }
-
-  function setUpWithMasterPriceOracle() public {
+  function setUpMpo() public {
     SimplePriceOracle spo = new SimplePriceOracle();
     spo.setDirectPrice(address(2), 200000000000000000); // 1e36 / 200000000000000000 = 5e18
 
@@ -39,13 +32,17 @@ contract AdrastiaPriceOracleTest is BaseTest {
     mpo.initialize(underlyings, oracles, IPriceOracle(address(spo)), address(this), true, address(0));
 
     oracle = new AdrastiaPriceOracle();
-    vm.prank(oracle.owner());
-    oracle.initialize(address(2), IAdrastiaPriceOracle(address(0)));
+    nativeUSDOracle = new NativeUSDPriceOracle();
+
+    vm.startPrank(oracle.owner());
+    nativeUSDOracle.initialize(ADRASTIA_EVMOS_USD_FEED);
+    oracle.initialize(nativeUSDOracle);
+    vm.stopPrank();
   }
 
-  function setUpOracles() public {
-    // XXX/WEVMOS on EVMOS mainnet
-    IAdrastiaPriceOracle evmosBasedFeed = IAdrastiaPriceOracle(0x51d3d22965Bb2CB2749f896B82756eBaD7812b6d);
+  function setUpAdrastiaFeeds() public {
+    setUpMpo();
+    IAdrastiaPriceOracle evmosBasedFeed = IAdrastiaPriceOracle(ADASTRIA_XXX_EVMOS_FEED);
     address[] memory underlyings = new address[](2);
     underlyings[0] = gUSDC;
     underlyings[1] = axlWETH;
@@ -58,9 +55,8 @@ contract AdrastiaPriceOracleTest is BaseTest {
     oracle.setPriceFeeds(underlyings, priceFeeds);
   }
 
-  function testAdrastiaPriceOracleWithNativeFeed() public fork(EVMOS_MAINNET) {
-    setUpWithNativeFeed();
-    setUpOracles();
+  function testAdrastiaPriceOracle() public fork(EVMOS_MAINNET) {
+    setUpAdrastiaFeeds();
     uint256 priceGUsdc = oracle.price(gUSDC);
     emit log_uint(priceGUsdc);
     assertEq(priceGUsdc, 217398180292000000000);
@@ -68,13 +64,5 @@ contract AdrastiaPriceOracleTest is BaseTest {
     uint256 priceEth = oracle.price(axlWETH);
     emit log_uint(priceEth);
     assertEq(priceEth, 217398180292000000000);
-  }
-
-  function testAdrastiaPriceOracleWithMasterPriceOracle() public fork(EVMOS_MAINNET) {
-    setUpWithMasterPriceOracle();
-    setUpOracles();
-    vm.prank(address(mpo));
-    uint256 price = oracle.price(address(1));
-    assertEq(price, 217398180292000000000);
   }
 }
