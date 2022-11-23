@@ -16,6 +16,7 @@ contract AdrastiaPriceOracleTest is BaseTest {
   address axlWETH = 0x50dE24B3f0B3136C50FA8A3B8ebc8BD80a269ce5;
   address ADRASTIA_EVMOS_USD_FEED = 0xd850F64Eda6a62d625209711510f43cD49Ef8798;
   address ADASTRIA_XXX_EVMOS_FEED = 0x51d3d22965Bb2CB2749f896B82756eBaD7812b6d;
+  address WEVMOS = 0xD4949664cD82660AaE99bEdc034a0deA8A0bd517;
 
   function setUpMpo() public {
     SimplePriceOracle spo = new SimplePriceOracle();
@@ -32,7 +33,7 @@ contract AdrastiaPriceOracleTest is BaseTest {
     NativeUSDPriceOracle nativeUSDOracle = new NativeUSDPriceOracle();
 
     vm.startPrank(oracle.owner());
-    nativeUSDOracle.initialize(ADRASTIA_EVMOS_USD_FEED);
+    nativeUSDOracle.initialize(ADRASTIA_EVMOS_USD_FEED, WEVMOS);
     oracle.initialize(nativeUSDOracle);
     vm.stopPrank();
   }
