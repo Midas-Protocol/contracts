@@ -44,7 +44,7 @@ contract HelioERC4626 is MidasERC4626 {
       return _asset().balanceOf(address(this));
     }
 
-    return jar.balanceOf(address(this));
+    return jar.balanceOf(address(this)) + jar.earned(address(this));
   }
 
   function balanceOfUnderlying(address account) public view returns (uint256) {
@@ -55,15 +55,13 @@ contract HelioERC4626 is MidasERC4626 {
     jar.join(amount);
   }
 
-  function beforeWithdraw(uint256 amount, uint256 shares) internal override {
+  function beforeWithdraw(uint256 amount, uint256) internal override {
     uint256 balanceBeforeWithdraw = _asset().balanceOf(address(this));
     jar.exit(amount);
     uint256 receivedAmount = _asset().balanceOf(address(this)) - balanceBeforeWithdraw;
 
     if (receivedAmount > amount) {
-      uint256 rewards = receivedAmount - amount;
-      uint256 rewardsForSender = (rewards * shares) / totalSupply();
-      jar.join(rewards - rewardsForSender);
+      jar.join(receivedAmount - amount);
     }
   }
 
