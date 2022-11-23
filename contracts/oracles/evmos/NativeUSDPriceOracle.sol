@@ -25,9 +25,12 @@ contract NativeUSDPriceOracle is SafeOwnableUpgradeable {
 
   address public NATIVE_USD_ORACLE_ADDRESS;
 
-  function initialize(address nativeUsdOracleAddress) public initializer onlyOwnerOrAdmin {
+  address public QUOTE_TOKEN_ADDRESS;
+
+  function initialize(address nativeUsdOracleAddress, address quoteTokenAddress) public initializer onlyOwnerOrAdmin {
     __SafeOwnable_init();
     NATIVE_USD_ORACLE_ADDRESS = nativeUsdOracleAddress;
+    QUOTE_TOKEN_ADDRESS = quoteTokenAddress;
   }
 
   /**
@@ -37,7 +40,7 @@ contract NativeUSDPriceOracle is SafeOwnableUpgradeable {
   function getValue() public view returns (uint256) {
     // 0xd850F64Eda6a62d625209711510f43cD49Ef8798 for EVMOS/USD
     IAdrastiaPriceOracle oracle = IAdrastiaPriceOracle(NATIVE_USD_ORACLE_ADDRESS);
-    uint112 nativeTokenUsdPrice = oracle.consultPrice(address(0));
+    uint112 nativeTokenUsdPrice = oracle.consultPrice(QUOTE_TOKEN_ADDRESS);
     uint8 nativeTokenPriceFeedDecimals = oracle.quoteTokenDecimals();
 
     if (nativeTokenUsdPrice <= 0) return 0;

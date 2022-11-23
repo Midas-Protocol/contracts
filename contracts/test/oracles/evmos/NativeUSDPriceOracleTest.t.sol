@@ -13,11 +13,12 @@ import { BaseTest } from "../../config/BaseTest.t.sol";
 contract NativeUSDPriceOracleTest is BaseTest {
   NativeUSDPriceOracle private oracle;
   address EVMOS_USD_FEED = 0xd850F64Eda6a62d625209711510f43cD49Ef8798;
+  address WEVMOS = 0xD4949664cD82660AaE99bEdc034a0deA8A0bd517;
 
   function afterForkSetUp() internal override {
     oracle = new NativeUSDPriceOracle();
     vm.startPrank(oracle.owner());
-    oracle.initialize(EVMOS_USD_FEED);
+    oracle.initialize(EVMOS_USD_FEED, WEVMOS);
   }
 
   function testNativeUSDPriceOracle() public fork(EVMOS_MAINNET) {
