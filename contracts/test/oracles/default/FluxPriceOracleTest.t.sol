@@ -27,6 +27,7 @@ contract FluxPriceOracleTest is BaseTest {
 
   address FLUX_ETH_USD_FEED = 0x4C8f111a1048fEc7Ea9c9cbAB96a2cB5d1B94560;
   address ADRASTIA_EVMOS_USD_FEED = 0xd850F64Eda6a62d625209711510f43cD49Ef8798;
+  address WEVMOS = 0xD4949664cD82660AaE99bEdc034a0deA8A0bd517;
 
   NativeUSDPriceOracle private nativeUSDOracle;
 
@@ -44,10 +45,10 @@ contract FluxPriceOracleTest is BaseTest {
     oracle = new FluxPriceOracle();
     nativeUSDOracle = new NativeUSDPriceOracle();
 
-    vm.startPrank(mpo.admin());
-    nativeUSDOracle.initialize(ADRASTIA_EVMOS_USD_FEED);
+    vm.prank(nativeUSDOracle.owner());
+    nativeUSDOracle.initialize(ADRASTIA_EVMOS_USD_FEED, WEVMOS);
+    vm.prank(oracle.owner());
     oracle.initialize(nativeUSDOracle);
-    vm.stopPrank();
   }
 
   function setUpFluxFeed() public {
@@ -62,10 +63,10 @@ contract FluxPriceOracleTest is BaseTest {
     oracle.setPriceFeeds(underlyings, priceFeeds);
   }
 
-  function testFluxPriceOracle() public forkAtBlock(EVMOS_MAINNET, 7527151) {
+  function testFluxPriceOracle() public forkAtBlock(EVMOS_MAINNET, 7586451) {
     setUpFluxFeed();
     vm.prank(address(mpo));
     uint256 price = oracle.price(address(1));
-    assertEq(price, 217398180292000000000);
+    assertEq(price, 1251197993930680282130);
   }
 }
