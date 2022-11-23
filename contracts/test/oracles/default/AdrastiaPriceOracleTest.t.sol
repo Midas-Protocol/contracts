@@ -13,7 +13,14 @@ contract AdrastiaPriceOracleTest is BaseTest {
   AdrastiaPriceOracle private oracle;
 
   address gUSDC = 0x5FD55A1B9FC24967C4dB09C513C3BA0DFa7FF687;
+  address gUSDT = 0xecEEEfCEE421D8062EF8d6b4D814efe4dc898265;
+  address gDAI = 0xd567B3d7B8FE3C79a1AD8dA978812cfC4Fa05e75;
+
+  address ceWETH = 0x153A59d48AcEAbedbDCf7a13F67Ae52b434B810B;
   address axlWETH = 0x50dE24B3f0B3136C50FA8A3B8ebc8BD80a269ce5;
+
+  address axlWBTC = 0xF5b24c0093b65408ACE53df7ce86a02448d53b25;
+
   address ADRASTIA_EVMOS_USD_FEED = 0xd850F64Eda6a62d625209711510f43cD49Ef8798;
   address ADASTRIA_XXX_EVMOS_FEED = 0x51d3d22965Bb2CB2749f896B82756eBaD7812b6d;
   address WEVMOS = 0xD4949664cD82660AaE99bEdc034a0deA8A0bd517;
@@ -41,24 +48,59 @@ contract AdrastiaPriceOracleTest is BaseTest {
   function setUpAdrastiaFeeds() public {
     setUpMpo();
     IAdrastiaPriceOracle evmosBasedFeed = IAdrastiaPriceOracle(ADASTRIA_XXX_EVMOS_FEED);
-    address[] memory underlyings = new address[](2);
-    underlyings[0] = gUSDC;
-    underlyings[1] = axlWETH;
 
-    IAdrastiaPriceOracle[] memory priceFeeds = new IAdrastiaPriceOracle[](2);
-    priceFeeds[0] = evmosBasedFeed;
-    priceFeeds[1] = evmosBasedFeed;
-
+    // Stables
+    address[] memory stableUnderlyings = new address[](3);
+    stableUnderlyings[0] = gUSDC;
+    stableUnderlyings[1] = gUSDT;
+    stableUnderlyings[2] = gDAI;
+    IAdrastiaPriceOracle[] memory stableFeeds = new IAdrastiaPriceOracle[](3);
+    stableFeeds[0] = evmosBasedFeed;
+    stableFeeds[1] = evmosBasedFeed;
+    stableFeeds[2] = evmosBasedFeed;
     vm.prank(oracle.owner());
-    oracle.setPriceFeeds(underlyings, priceFeeds);
+    oracle.setPriceFeeds(stableUnderlyings, stableFeeds);
+
+    // Weth
+    address[] memory wethUnderlyings = new address[](2);
+    wethUnderlyings[0] = ceWETH;
+    wethUnderlyings[1] = axlWETH;
+    IAdrastiaPriceOracle[] memory wethFeeds = new IAdrastiaPriceOracle[](2);
+    wethFeeds[0] = evmosBasedFeed;
+    wethFeeds[1] = evmosBasedFeed;
+    vm.prank(oracle.owner());
+    oracle.setPriceFeeds(wethUnderlyings, wethFeeds);
+
+    // Wbtc
+    address[] memory wbtcUnderlyings = new address[](1);
+    wbtcUnderlyings[0] = axlWBTC;
+    IAdrastiaPriceOracle[] memory wbtcFeeds = new IAdrastiaPriceOracle[](1);
+    wbtcFeeds[0] = evmosBasedFeed;
+    vm.prank(oracle.owner());
+    oracle.setPriceFeeds(wbtcUnderlyings, wbtcFeeds);
   }
 
-  function testAdrastiaPriceOracle() public forkAtBlock(EVMOS_MAINNET, 7581139) {
+  function testAdrastiaPriceOracle() public fork(EVMOS_MAINNET) {
     setUpAdrastiaFeeds();
-    uint256 priceGUsdc = oracle.price(gUSDC);
-    assertEq(priceGUsdc, 1069746906351096056);
 
-    uint256 priceEth = oracle.price(axlWETH);
-    assertEq(priceEth, 1257026900818360167013);
+    uint256 priceGUsdc = oracle.price(gUSDC);
+    uint256 priceGUsdt = oracle.price(gUSDT);
+    uint256 priceGDai = oracle.price(gDAI);
+
+    uint256 priceCWeth = oracle.price(ceWETH);
+    uint256 priceAxlWeth = oracle.price(axlWETH);
+
+    uint256 priceAxlWbtc = oracle.price(axlWBTC);
+
+    assertGt(priceGUsdc, 1e17);
+    assertLt(priceGUsdc, 1e19);
+
+    assertApproxEqRel(priceGUsdc, priceGUsdt, 5e16, "usd prices differ too much"); // 1e18 = 100%, 5e16 = 5%
+    assertApproxEqRel(priceGUsdt, priceGDai, 5e16, "usd prices differ too much");
+
+    assertApproxEqRel(priceCWeth, priceAxlWeth, 10e16, "eth prices differ too much");
+
+    assertGt(priceAxlWbtc, priceAxlWeth);
+    assertGt(priceAxlWeth, priceGUsdc);
   }
 }
