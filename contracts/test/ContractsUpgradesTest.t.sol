@@ -10,6 +10,7 @@ import { IComptroller } from "../external/compound/IComptroller.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
@@ -191,5 +192,41 @@ contract ContractsUpgradesTest is BaseTest {
     emit log(asCfe.getFirstMarketSymbol());
 
     assertEq(asCfe.getFirstMarketSymbol(), "fjBRL-1", "market symbol does not match");
+  }
+
+  function testBscComptrollerExtensions() public fork(BSC_MAINNET) {
+    _testComptrollersExtensions();
+  }
+
+  function testPolygonComptrollerExtensions() public fork(POLYGON_MAINNET) {
+    _testComptrollersExtensions();
+  }
+
+  function testMoonbeamComptrollerExtensions() public fork(MOONBEAM_MAINNET) {
+    _testComptrollersExtensions();
+  }
+
+  function testChapelComptrollerExtensions() public fork(BSC_CHAPEL) {
+    _testComptrollersExtensions();
+  }
+
+  function testArbitrumComptrollerExtensions() public fork(ARBITRUM_ONE) {
+    _testComptrollersExtensions();
+  }
+
+  function testFantomComptrollerExtensions() public fork(FANTOM_OPERA) {
+    _testComptrollersExtensions();
+  }
+
+  function _testComptrollersExtensions() internal {
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      address payable asPayable = payable(pools[i].comptroller);
+      DiamondBase asBase = DiamondBase(asPayable);
+      address[] memory extensions = asBase._listExtensions();
+      assertEq(extensions.length, 1, "each pool should have the first extension");
+    }
   }
 }

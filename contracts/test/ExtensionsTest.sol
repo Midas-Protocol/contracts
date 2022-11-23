@@ -190,40 +190,4 @@ contract ExtensionsTest is BaseTest {
       assertEq(initExtensionsAfter[0], address(cfe), "first extension is not the CFE");
     }
   }
-
-  function testBscComptrollerExtensions() public fork(BSC_MAINNET) {
-    _testComptrollersExtensions();
-  }
-
-  function testPolygonComptrollerExtensions() public fork(POLYGON_MAINNET) {
-    _testComptrollersExtensions();
-  }
-
-  function testMoonbeamComptrollerExtensions() public fork(MOONBEAM_MAINNET) {
-    _testComptrollersExtensions();
-  }
-
-  function testChapelComptrollerExtensions() public fork(BSC_CHAPEL) {
-    _testComptrollersExtensions();
-  }
-
-  function testArbitrumComptrollerExtensions() public fork(ARBITRUM_ONE) {
-    _testComptrollersExtensions();
-  }
-
-  function testFantomComptrollerExtensions() public fork(FANTOM_OPERA) {
-    _testComptrollersExtensions();
-  }
-
-  function _testComptrollersExtensions() internal {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
-
-    for (uint8 i = 0; i < pools.length; i++) {
-      DiamondBase asBase = DiamondBase(payable(pools[i].comptroller));
-      address[] memory extensions = asBase._listExtensions();
-
-      assertEq(extensions.length, 1, "each pool should have the first extension");
-    }
-  }
 }
