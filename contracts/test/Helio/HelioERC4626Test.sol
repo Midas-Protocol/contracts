@@ -29,6 +29,7 @@ contract HelioERC4626Test is AbstractERC4626Test {
   using FixedPointMathLib for uint256;
 
   IJAR jar;
+  address jarAdmin = 0x8d388136d578dCD791D081c6042284CED6d9B0c6;
 
   constructor() WithPool() {}
 
@@ -50,9 +51,12 @@ contract HelioERC4626Test is AbstractERC4626Test {
   }
 
   function increaseAssetsInVault() public override {
-    deal(address(underlyingToken), address(1), 1e18);
-    vm.prank(address(1));
-    underlyingToken.transfer(address(jar), 1e18);
+    deal(address(underlyingToken), jarAdmin, 100e18);
+    vm.startPrank(jarAdmin);
+    underlyingToken.approve(address(jar), 100e18);
+    jar.replenish(100e18, true);
+    vm.stopPrank();
+    vm.warp(block.timestamp + 100);
   }
 
   function decreaseAssetsInVault() public override {

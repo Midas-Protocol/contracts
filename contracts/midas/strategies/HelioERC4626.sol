@@ -23,6 +23,8 @@ interface IJAR {
   function rewards(address) external view returns (uint256);
 
   function earned(address) external view returns (uint256);
+
+  function replenish(uint wad, bool newSpread) external;
 }
 
 contract HelioERC4626 is MidasERC4626 {
