@@ -21,30 +21,9 @@ import { IPriceOracle as IAdrastiaPriceOracle } from "adrastia/interfaces/IPrice
  */
 contract AdrastiaPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceOracle {
   /**
-   * @notice Maps ERC20 token addresses to enums indicating the base currency of the feed.
-   */
-  mapping(address => FeedBaseCurrency) public feedBaseCurrencies;
-
-  /**
-   * @notice Enum indicating the base currency of a Chainlink price feed.
-   * @dev ETH is interchangeable with the nativeToken of the current chain.
-   */
-
-  enum FeedBaseCurrency {
-    ETH,
-    USD
-  }
-
-  /**
    * @notice Maps ERC20 token addresses to NATIVE-based Adrastia price feed contracts.
    */
   mapping(address => IAdrastiaPriceOracle) public priceFeeds;
-
-  /**
-   * @notice WEVMOS address
-   */
-
-  address public immutable W_TOKEN = 0xD4949664cD82660AaE99bEdc034a0deA8A0bd517;
 
   /**
    * @notice NATIVE/USD price feed.
@@ -64,11 +43,7 @@ contract AdrastiaPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceO
    * @param underlyings Underlying token addresses for which to set price feeds.
    * @param feeds The Oracle price feed contract addresses for each of `underlyings`.
    */
-  function setPriceFeeds(
-    address[] memory underlyings,
-    IAdrastiaPriceOracle[] memory feeds,
-    FeedBaseCurrency baseCurrency
-  ) external onlyOwner {
+  function setPriceFeeds(address[] memory underlyings, IAdrastiaPriceOracle[] memory feeds) external onlyOwner {
     // Input validation
     require(
       underlyings.length > 0 && underlyings.length == feeds.length,
@@ -80,7 +55,6 @@ contract AdrastiaPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceO
       address underlying = underlyings[i];
       // Set feed and base currency
       priceFeeds[underlying] = feeds[i];
-      feedBaseCurrencies[underlying] = baseCurrency;
     }
   }
 
@@ -92,23 +66,10 @@ contract AdrastiaPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceO
     // Get token/ETH price from feed
     IAdrastiaPriceOracle feed = priceFeeds[underlying];
     require(address(feed) != address(0), "No price feed found for this underlying ERC20 token.");
-    FeedBaseCurrency baseCurrency = feedBaseCurrencies[underlying];
 
-    if (baseCurrency == FeedBaseCurrency.ETH) {
-      uint112 tokenPrice = feed.consultPrice(underlying);
-      uint8 feedDecimals = feed.quoteTokenDecimals();
-      return tokenPrice >= 0 ? (uint256(tokenPrice) * 10**(18 - feedDecimals)) : 0;
-    } else if (baseCurrency == FeedBaseCurrency.USD) {
-      uint256 nativeTokenUsdPrice = NATIVE_TOKEN_USD_PRICE_FEED.getValue();
-      uint112 tokenUsdPrice = feed.consultPrice(underlying);
-      uint8 feedDecimals = feed.quoteTokenDecimals();
-      return
-        tokenUsdPrice >= 0
-          ? ((uint256(tokenUsdPrice) * 1e36) / (10**uint256(feedDecimals))) / uint256(nativeTokenUsdPrice)
-          : 0;
-    } else {
-      revert("unknown base currency");
-    }
+    uint112 tokenPrice = feed.consultPrice(underlying);
+    uint8 feedDecimals = feed.quoteTokenDecimals();
+    return tokenPrice >= 0 ? (uint256(tokenPrice) * 10**(18 - feedDecimals)) : 0;
   }
 
   /**
