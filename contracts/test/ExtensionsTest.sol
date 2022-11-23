@@ -191,6 +191,18 @@ contract ExtensionsTest is BaseTest {
     }
   }
 
+  function testBscComptrollerExtensions() public fork(BSC_MAINNET) {
+    _testComptrollersExtensions();
+  }
+
+  function testPolygonComptrollerExtensions() public fork(POLYGON_MAINNET) {
+    _testComptrollersExtensions();
+  }
+
+  function testMoonbeamComptrollerExtensions() public fork(MOONBEAM_MAINNET) {
+    _testComptrollersExtensions();
+  }
+
   function testChapelComptrollerExtensions() public fork(BSC_CHAPEL) {
     _testComptrollersExtensions();
   }
