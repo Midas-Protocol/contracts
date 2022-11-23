@@ -11,9 +11,6 @@ import { NativeUSDPriceOracle } from "../../../oracles/evmos/NativeUSDPriceOracl
 
 contract AdrastiaPriceOracleTest is BaseTest {
   AdrastiaPriceOracle private oracle;
-  MasterPriceOracle private mpo;
-  IAdrastiaPriceOracle private feed;
-  NativeUSDPriceOracle private nativeUSDOracle;
 
   address gUSDC = 0x5FD55A1B9FC24967C4dB09C513C3BA0DFa7FF687;
   address axlWETH = 0x50dE24B3f0B3136C50FA8A3B8ebc8BD80a269ce5;
@@ -24,7 +21,7 @@ contract AdrastiaPriceOracleTest is BaseTest {
     SimplePriceOracle spo = new SimplePriceOracle();
     spo.setDirectPrice(address(2), 200000000000000000); // 1e36 / 200000000000000000 = 5e18
 
-    mpo = new MasterPriceOracle();
+    MasterPriceOracle mpo = new MasterPriceOracle();
     address[] memory underlyings = new address[](1);
     underlyings[0] = address(2);
     IPriceOracle[] memory oracles = new IPriceOracle[](1);
@@ -32,7 +29,7 @@ contract AdrastiaPriceOracleTest is BaseTest {
     mpo.initialize(underlyings, oracles, IPriceOracle(address(spo)), address(this), true, address(0));
 
     oracle = new AdrastiaPriceOracle();
-    nativeUSDOracle = new NativeUSDPriceOracle();
+    NativeUSDPriceOracle nativeUSDOracle = new NativeUSDPriceOracle();
 
     vm.startPrank(oracle.owner());
     nativeUSDOracle.initialize(ADRASTIA_EVMOS_USD_FEED);
