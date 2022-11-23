@@ -9,7 +9,7 @@ import { ICToken } from "../../external/compound/ICToken.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 import { BasePriceOracle } from "../BasePriceOracle.sol";
-import { MasterPriceOracle } from "../MasterPriceOracle.sol";
+import { NativeUSDPriceOracle } from "../evmos/NativeUSDPriceOracle.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
 
 /**
@@ -27,16 +27,13 @@ contract FluxPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceOracl
   /**
    * @notice Flux NATIVE/USD price feed contracts.
    */
-  CLV2V3Interface public NATIVE_TOKEN_USD_PRICE_FEED;
-
-  address public USD_TOKEN; // token to use as USD price (i.e. USDC)
+  NativeUSDPriceOracle public NATIVE_TOKEN_USD_PRICE_FEED;
 
   /**
    * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
    */
-  function initialize(address usdToken, CLV2V3Interface nativeTokenUsd) public initializer onlyOwnerOrAdmin {
+  function initialize(NativeUSDPriceOracle nativeTokenUsd) public initializer onlyOwnerOrAdmin {
     __SafeOwnable_init();
-    USD_TOKEN = usdToken;
     NATIVE_TOKEN_USD_PRICE_FEED = nativeTokenUsd;
   }
 
@@ -70,19 +67,14 @@ contract FluxPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceOracl
     CLV2V3Interface feed = priceFeeds[underlying];
     require(address(feed) != address(0), "No Flux price feed found for this underlying ERC20 token.");
 
-    if (address(NATIVE_TOKEN_USD_PRICE_FEED) == address(0)) {
-      // Get price from MasterPriceOracle
-      uint256 usdNativeTokenPrice = BasePriceOracle(msg.sender).price(USD_TOKEN);
-      uint256 nativeTokenUsdPrice = 1e36 / usdNativeTokenPrice; // 18 decimals
-      int256 tokenUsdPrice = feed.latestAnswer();
-      // Flux price feed is 8 decimals:
-      return tokenUsdPrice >= 0 ? (uint256(tokenUsdPrice) * 1e28) / uint256(nativeTokenUsdPrice) : 0;
-    } else {
-      int256 nativeTokenUsdPrice = NATIVE_TOKEN_USD_PRICE_FEED.latestAnswer();
-      if (nativeTokenUsdPrice <= 0) return 0;
-      int256 tokenUsdPrice = feed.latestAnswer();
-      return tokenUsdPrice >= 0 ? (uint256(tokenUsdPrice) * 1e18) / uint256(nativeTokenUsdPrice) : 0;
-    }
+    // Get the NATIVE/USD price feed from NativeUSDPriceOracle
+    // 18 decimals are used
+    uint256 nativeTokenUsdPrice = NATIVE_TOKEN_USD_PRICE_FEED.getValue();
+    if (nativeTokenUsdPrice <= 0) return 0;
+    // 8 decimals are used
+    int256 tokenUsdPrice = feed.latestAnswer();
+    // Flux price feed is 8 decimals:
+    return tokenUsdPrice >= 0 ? (uint256(tokenUsdPrice) * 1e28) / uint256(nativeTokenUsdPrice) : 0;
   }
 
   /**
