@@ -25,7 +25,10 @@ contract FluxPriceOracleTest is BaseTest {
   FluxPriceOracle private oracle;
   MasterPriceOracle private mpo;
 
-  address FLUX_ETH_USD_FEED = 0x4C8f111a1048fEc7Ea9c9cbAB96a2cB5d1B94560;
+  CLV2V3Interface FLUX_ETH_USD_FEED = CLV2V3Interface(0x4C8f111a1048fEc7Ea9c9cbAB96a2cB5d1B94560);
+  CLV2V3Interface FLUX_FRAX_USD_FEED = CLV2V3Interface(0x71712f8142550C0f76719Bc958ba0C28c4D78985);
+  CLV2V3Interface FLUX_USDC_USD_FEED = CLV2V3Interface(0x3B2AF9149360e9F954C18f280aD0F4Adf1B613b8);
+
   address ADRASTIA_EVMOS_USD_FEED = 0xd850F64Eda6a62d625209711510f43cD49Ef8798;
   address WEVMOS = 0xD4949664cD82660AaE99bEdc034a0deA8A0bd517;
 
@@ -54,11 +57,15 @@ contract FluxPriceOracleTest is BaseTest {
   function setUpFluxFeed() public {
     setUpMpo();
     // ETH/USD on EVMOS mainnet
-    CLV2V3Interface ethPool = CLV2V3Interface(FLUX_ETH_USD_FEED);
-    address[] memory underlyings = new address[](1);
+    address[] memory underlyings = new address[](3);
     underlyings[0] = address(1);
-    CLV2V3Interface[] memory priceFeeds = new CLV2V3Interface[](1);
-    priceFeeds[0] = ethPool;
+    underlyings[1] = address(2);
+    underlyings[2] = address(3);
+
+    CLV2V3Interface[] memory priceFeeds = new CLV2V3Interface[](3);
+    priceFeeds[0] = FLUX_ETH_USD_FEED;
+    priceFeeds[1] = FLUX_FRAX_USD_FEED;
+    priceFeeds[2] = FLUX_USDC_USD_FEED;
     vm.prank(oracle.owner());
     oracle.setPriceFeeds(underlyings, priceFeeds);
   }
@@ -66,7 +73,13 @@ contract FluxPriceOracleTest is BaseTest {
   function testFluxPriceOracle() public forkAtBlock(EVMOS_MAINNET, 7586451) {
     setUpFluxFeed();
     vm.prank(address(mpo));
-    uint256 price = oracle.price(address(1));
-    assertEq(price, 1251197993930680282130);
+    uint256 ethPrice = oracle.price(address(1));
+    assertEq(ethPrice, 1251197993930680282130);
+
+    uint256 fraxPrice = oracle.price(address(2));
+    assertEq(fraxPrice, 1074196702307610415);
+
+    uint256 usdcPrice = oracle.price(address(3));
+    assertApproxEqRel(fraxPrice, usdcPrice, 1e16, "delta between usdc and frax > 1%");
   }
 }
