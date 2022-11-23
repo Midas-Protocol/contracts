@@ -297,7 +297,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
       : strategy.balanceOf(user);
 
     // accumulate rewards by multiplying user tokens by rewardsPerToken index and adding on unclaimed
-    uint256 supplierDelta = (supplierTokens * deltaIndex) / (10**rewardToken.decimals());
+    uint256 supplierDelta = (deltaIndex * supplierTokens) / (10**strategy.decimals());
     uint256 supplierAccrued = rewardsAccrued[user] + supplierDelta;
 
     rewardsAccrued[user] = supplierAccrued;
