@@ -67,8 +67,7 @@ contract ContractsUpgradesTest is BaseTest {
     uint256 marketsCounterBefore = ffdProxy.marketsCounter();
     address ownerBefore = ffdProxy.owner();
 
-    (address latestCErc20DelegateBefore, ,) = ffdProxy
-      .latestCErc20Delegate(oldCercDelegate);
+    (address latestCErc20DelegateBefore, , ) = ffdProxy.latestCErc20Delegate(oldCercDelegate);
     //    bool whitelistedBefore = ffdProxy.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateBefore, false);
 
     emit log_uint(marketsCounterBefore);
