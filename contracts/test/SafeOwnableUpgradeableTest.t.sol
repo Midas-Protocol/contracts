@@ -4,17 +4,27 @@ pragma solidity >=0.8.0;
 import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { SafeOwnableUpgradeable } from "../midas/SafeOwnableUpgradeable.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract SomeOwnable is SafeOwnableUpgradeable {
-  function initialize() public initializer {
-    __Ownable_init();
+  function initialize() public initializer onlyOwnerOrAdmin {
+    __SafeOwnable_init();
   }
 }
 
 contract SafeOwnableUpgradeableTest is BaseTest {
   function testSafeOwnableUpgradeable() public {
+
     SomeOwnable someOwnable = new SomeOwnable();
-    someOwnable.initialize();
+    // deploy as a proxy/implementation
+    {
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+        address(someOwnable),
+        address(dpa),
+        abi.encodeWithSelector(someOwnable.initialize.selector)
+      );
+      someOwnable = SomeOwnable(address(proxy));
+    }
 
     address joe = address(1234);
 

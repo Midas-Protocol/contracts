@@ -24,7 +24,7 @@ abstract contract SafeOwnableUpgradeable is OwnableUpgradeable {
 
   modifier onlyOwnerOrAdmin() {
     bool isOwner = owner() == _msgSender();
-    if (!isOwner) {
+    if (!isOwner && !_isInitializing()) {
       bytes32 _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
       AddressSlot storage adminSlot;
       assembly {
@@ -83,5 +83,15 @@ abstract contract SafeOwnableUpgradeable is OwnableUpgradeable {
 
     emit NewOwner(oldOwner, pendingOwner);
     emit NewPendingOwner(oldPendingOwner, pendingOwner);
+  }
+
+  function renounceOwnership() public override onlyOwner {
+    // do not remove this overriding fn
+    revert("not used anymore");
+  }
+
+  function transferOwnership(address newOwner) public override onlyOwner {
+    // do not remove this overriding fn
+    revert("not used anymore");
   }
 }

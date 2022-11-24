@@ -25,6 +25,10 @@ abstract contract BaseTest is Test {
 
   mapping(uint128 => uint256) private forkIds;
 
+  constructor() {
+    configureAddressesProvider(0);
+  }
+
   modifier fork(uint128 chainid) {
     _forkAtBlock(chainid, 0);
     _;
@@ -43,9 +47,9 @@ abstract contract BaseTest is Test {
       } else {
         vm.selectFork(getForkId(chainid));
       }
-      configureAddressesProvider(chainid);
-      afterForkSetUp();
     }
+    configureAddressesProvider(chainid);
+    afterForkSetUp();
   }
 
   function getForkId(uint128 chainid, bool archive) private returns (uint256) {
