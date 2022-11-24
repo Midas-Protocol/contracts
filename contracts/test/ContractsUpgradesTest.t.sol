@@ -7,7 +7,11 @@ import { ComptrollerFirstExtension, DiamondExtension } from "../compound/Comptro
 import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
+import { ICToken } from "../external/compound/ICToken.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
+import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
+import { CToken } from "../compound/CToken.sol";
+import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
@@ -63,7 +67,7 @@ contract ContractsUpgradesTest is BaseTest {
     uint256 marketsCounterBefore = ffdProxy.marketsCounter();
     address ownerBefore = ffdProxy.owner();
 
-    (address latestCErc20DelegateBefore, bool allowResign, bytes memory becomeImplementationData) = ffdProxy
+    (address latestCErc20DelegateBefore, ,) = ffdProxy
       .latestCErc20Delegate(oldCercDelegate);
     //    bool whitelistedBefore = ffdProxy.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateBefore, false);
 
@@ -227,6 +231,37 @@ contract ContractsUpgradesTest is BaseTest {
       DiamondBase asBase = DiamondBase(asPayable);
       address[] memory extensions = asBase._listExtensions();
       assertEq(extensions.length, 1, "each pool should have the first extension");
+    }
+  }
+
+  function testMarketsLatestImplementationsBsc() public fork(BSC_MAINNET) {
+    _testMarketsLatestImplementations();
+  }
+
+  function testMarketsLatestImplementationsPolygon() public fork(POLYGON_MAINNET) {
+    _testMarketsLatestImplementations();
+  }
+
+  function testMarketsLatestImplementationsMoonbeam() public fork(MOONBEAM_MAINNET) {
+    _testMarketsLatestImplementations();
+  }
+
+  function _testMarketsLatestImplementations() internal {
+    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      IComptroller pool = IComptroller(pools[i].comptroller);
+      ICToken[] memory markets = pool.getAllMarkets();
+      for (uint8 j = 0; j < markets.length; j++) {
+        CErc20Delegate market = CErc20Delegate(address(markets[j]));
+        address currentImpl = market.implementation();
+        (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
+
+        if (currentImpl != upgradeToImpl) emit log_address(address(market));
+        assertEq(currentImpl, upgradeToImpl, "market needs to be upgraded");
+      }
     }
   }
 }

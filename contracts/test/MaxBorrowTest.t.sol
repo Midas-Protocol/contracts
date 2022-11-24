@@ -30,7 +30,7 @@ contract MaxWithdrawTestPolygon is WithPool, BaseTest {
     MockAsset dai;
   }
 
-  function setUp() public fork(POLYGON_MAINNET) {
+  function afterForkSetUp() internal override {
     super.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(wmaticAddress));
 
     vm.prank(0x369582d2010B6eD950B571F4101e3bB9b554876F);
@@ -38,7 +38,7 @@ contract MaxWithdrawTestPolygon is WithPool, BaseTest {
     setUpPool("polygon-test", false, 0.1e18, 1.1e18);
   }
 
-  function testMaxBorrow() public {
+  function testMaxBorrow() public fork(POLYGON_MAINNET) {
     FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
     poolLensSecondary.initialize(fusePoolDirectory);
 

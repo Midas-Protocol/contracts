@@ -11,13 +11,13 @@ import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 contract MinBorrowTest is BaseTest {
   FuseFeeDistributor ffd;
 
-  function setUp() public fork(BSC_MAINNET) {
+  function afterForkSetUp() internal override {
     ffd = new FuseFeeDistributor();
     ffd.initialize(0);
     ffd._setPoolLimits(100e18, 0, 0);
   }
 
-  function testMinBorrow() public {
+  function testMinBorrow() public fork(BSC_MAINNET) {
     MockERC20 asset = MockERC20(0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c);
 
     CErc20Interface cToken = CErc20Interface(0x216714Ecf4FEcc35573CBB2756942274E1B344A2);
