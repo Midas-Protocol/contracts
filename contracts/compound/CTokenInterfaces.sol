@@ -165,7 +165,49 @@ contract CTokenStorage is CTokenAdminStorage {
   uint256 public constant feeSeizeShareMantissa = 1e17; //10%
 }
 
+abstract contract CTokenErc20Interface is CTokenStorage {
+  /**
+   * @notice EIP20 Transfer event
+   */
+  event Transfer(address indexed from, address indexed to, uint256 amount);
+
+  /**
+   * @notice EIP20 Approval event
+   */
+  event Approval(address indexed owner, address indexed spender, uint256 amount);
+
+  /*** User Interface ***/
+
+  function transfer(address dst, uint256 amount) external virtual returns (bool);
+
+  function transferFrom(
+    address src,
+    address dst,
+    uint256 amount
+  ) external virtual returns (bool);
+
+  function approve(address spender, uint256 amount) external virtual returns (bool);
+
+  function allowance(address owner, address spender) external view virtual returns (uint256);
+
+  function balanceOf(address owner) external view virtual returns (uint256);
+
+  function asCTokenInterface() public view returns (CTokenInterface) {
+    return CTokenInterface(address(this));
+  }
+}
+
 abstract contract CTokenInterface is CTokenStorage {
+
+  function asCTokenErc20Interface() public view returns (CTokenErc20Interface) {
+    return CTokenErc20Interface(address(this));
+  }
+
+  // TODO REMOVE
+  event Transfer(address indexed from, address indexed to, uint256 amount);
+
+  /// TODO REMOVE
+
   /**
    * @notice Indicator that this is a CToken contract (for inspection)
    */
@@ -249,32 +291,6 @@ abstract contract CTokenInterface is CTokenStorage {
    * @notice Event emitted when the Fuse fee is changed
    */
   event NewFuseFee(uint256 oldFuseFeeMantissa, uint256 newFuseFeeMantissa);
-
-  /**
-   * @notice EIP20 Transfer event
-   */
-  event Transfer(address indexed from, address indexed to, uint256 amount);
-
-  /**
-   * @notice EIP20 Approval event
-   */
-  event Approval(address indexed owner, address indexed spender, uint256 amount);
-
-  /*** User Interface ***/
-
-  function transfer(address dst, uint256 amount) external virtual returns (bool);
-
-  function transferFrom(
-    address src,
-    address dst,
-    uint256 amount
-  ) external virtual returns (bool);
-
-  function approve(address spender, uint256 amount) external virtual returns (bool);
-
-  function allowance(address owner, address spender) external view virtual returns (uint256);
-
-  function balanceOf(address owner) external view virtual returns (uint256);
 
   function balanceOfUnderlying(address owner) external virtual returns (uint256);
 

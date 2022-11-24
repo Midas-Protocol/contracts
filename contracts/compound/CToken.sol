@@ -83,149 +83,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
   }
 
   /**
-   * @dev Returns latest pending Fuse fee (to be set with `_setFuseFeeFresh`)
-   */
-  function getPendingFuseFeeFromAdmin() internal view returns (uint256) {
-    return IFuseFeeDistributor(fuseAdmin).interestFeeRate();
-  }
-
-  /**
-   * @notice Transfer `tokens` tokens from `src` to `dst` by `spender`
-   * @dev Called by both `transfer` and `transferFrom` internally
-   * @param spender The address of the account performing the transfer
-   * @param src The address of the source account
-   * @param dst The address of the destination account
-   * @param tokens The number of tokens to transfer
-   * @return Whether or not the transfer succeeded
-   */
-  function transferTokens(
-    address spender,
-    address src,
-    address dst,
-    uint256 tokens
-  ) internal returns (uint256) {
-    /* Fail if transfer not allowed */
-    uint256 allowed = comptroller.transferAllowed(address(this), src, dst, tokens);
-    if (allowed != 0) {
-      return failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.TRANSFER_COMPTROLLER_REJECTION, allowed);
-    }
-
-    /* Do not allow self-transfers */
-    if (src == dst) {
-      return fail(Error.BAD_INPUT, FailureInfo.TRANSFER_NOT_ALLOWED);
-    }
-
-    /* Get the allowance, infinite for the account owner */
-    uint256 startingAllowance = 0;
-    if (spender == src) {
-      startingAllowance = type(uint256).max;
-    } else {
-      startingAllowance = transferAllowances[src][spender];
-    }
-
-    /* Do the calculations, checking for {under,over}flow */
-    MathError mathErr;
-    uint256 allowanceNew;
-    uint256 srcTokensNew;
-    uint256 dstTokensNew;
-
-    (mathErr, allowanceNew) = subUInt(startingAllowance, tokens);
-    if (mathErr != MathError.NO_ERROR) {
-      return fail(Error.MATH_ERROR, FailureInfo.TRANSFER_NOT_ALLOWED);
-    }
-
-    (mathErr, srcTokensNew) = subUInt(accountTokens[src], tokens);
-    if (mathErr != MathError.NO_ERROR) {
-      return fail(Error.MATH_ERROR, FailureInfo.TRANSFER_NOT_ENOUGH);
-    }
-
-    (mathErr, dstTokensNew) = addUInt(accountTokens[dst], tokens);
-    if (mathErr != MathError.NO_ERROR) {
-      return fail(Error.MATH_ERROR, FailureInfo.TRANSFER_TOO_MUCH);
-    }
-
-    /////////////////////////
-    // EFFECTS & INTERACTIONS
-    // (No safe failures beyond this point)
-
-    accountTokens[src] = srcTokensNew;
-    accountTokens[dst] = dstTokensNew;
-
-    /* Eat some of the allowance (if necessary) */
-    if (startingAllowance != type(uint256).max) {
-      transferAllowances[src][spender] = allowanceNew;
-    }
-
-    /* We emit a Transfer event */
-    emit Transfer(src, dst, tokens);
-
-    /* We call the defense hook */
-    // unused function
-    // comptroller.transferVerify(address(this), src, dst, tokens);
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Transfer `amount` tokens from `msg.sender` to `dst`
-   * @param dst The address of the destination account
-   * @param amount The number of tokens to transfer
-   * @return Whether or not the transfer succeeded
-   */
-  function transfer(address dst, uint256 amount) external override nonReentrant(false) returns (bool) {
-    return transferTokens(msg.sender, msg.sender, dst, amount) == uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Transfer `amount` tokens from `src` to `dst`
-   * @param src The address of the source account
-   * @param dst The address of the destination account
-   * @param amount The number of tokens to transfer
-   * @return Whether or not the transfer succeeded
-   */
-  function transferFrom(
-    address src,
-    address dst,
-    uint256 amount
-  ) external override nonReentrant(false) returns (bool) {
-    return transferTokens(msg.sender, src, dst, amount) == uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Approve `spender` to transfer up to `amount` from `src`
-   * @dev This will overwrite the approval amount for `spender`
-   *  and is subject to issues noted [here](https://eips.ethereum.org/EIPS/eip-20#approve)
-   * @param spender The address of the account which may transfer tokens
-   * @param amount The number of tokens that are approved (-1 means infinite)
-   * @return Whether or not the approval succeeded
-   */
-  function approve(address spender, uint256 amount) external override returns (bool) {
-    address src = msg.sender;
-    transferAllowances[src][spender] = amount;
-    emit Approval(src, spender, amount);
-    return true;
-  }
-
-  /**
-   * @notice Get the current allowance from `owner` for `spender`
-   * @param owner The address of the account which owns the tokens to be spent
-   * @param spender The address of the account which may transfer tokens
-   * @return The number of tokens allowed to be spent (-1 means infinite)
-   */
-  function allowance(address owner, address spender) external view override returns (uint256) {
-    return transferAllowances[owner][spender];
-  }
-
-  /**
-   * @notice Get the token balance of the `owner`
-   * @param owner The address of the account to query
-   * @return The number of tokens owned by `owner`
-   */
-  function balanceOf(address owner) external view override returns (uint256) {
-    return accountTokens[owner];
-  }
-
-  /**
    * @notice Get the underlying balance of the `owner`
    * @dev This also accrues interest in a transaction
    * @param owner The address of the account to query
@@ -1152,7 +1009,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     require(amountSeizeError == uint256(Error.NO_ERROR), "LIQUIDATE_COMPTROLLER_CALCULATE_AMOUNT_SEIZE_FAILED");
 
     /* Revert if borrower collateral token balance < seizeTokens */
-    require(cTokenCollateral.balanceOf(borrower) >= seizeTokens, "LIQUIDATE_SEIZE_TOO_MUCH");
+    require(cTokenCollateral.asCTokenErc20Interface().balanceOf(borrower) >= seizeTokens, "LIQUIDATE_SEIZE_TOO_MUCH");
 
     // If this is also the collateral, run seizeInternal to avoid re-entrancy, otherwise make an external call
     uint256 seizeError;
@@ -1324,7 +1181,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     if (newAdminFeeMantissa == type(uint256).max) newAdminFeeMantissa = adminFeeMantissa;
 
     // Get latest Fuse fee
-    uint256 newFuseFeeMantissa = getPendingFuseFeeFromAdmin();
+    uint256 newFuseFeeMantissa = IFuseFeeDistributor(fuseAdmin).interestFeeRate();
 
     // Check reserveFactorMantissa + newAdminFeeMantissa + newFuseFeeMantissa ≤ reserveFactorPlusFeesMaxMantissa
     if (add_(add_(reserveFactorMantissa, newAdminFeeMantissa), newFuseFeeMantissa) > reserveFactorPlusFeesMaxMantissa) {
