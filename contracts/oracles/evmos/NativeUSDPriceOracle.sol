@@ -27,7 +27,7 @@ contract NativeUSDPriceOracle is SafeOwnableUpgradeable {
 
   address public QUOTE_TOKEN_ADDRESS;
 
-  function initialize(address nativeUsdOracleAddress, address quoteTokenAddress) public initializer onlyOwnerOrAdmin {
+  function initialize(address nativeUsdOracleAddress, address quoteTokenAddress) public initializer {
     __SafeOwnable_init();
     NATIVE_USD_ORACLE_ADDRESS = nativeUsdOracleAddress;
     QUOTE_TOKEN_ADDRESS = quoteTokenAddress;
