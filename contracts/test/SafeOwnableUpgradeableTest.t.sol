@@ -7,7 +7,7 @@ import { SafeOwnableUpgradeable } from "../midas/SafeOwnableUpgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract SomeOwnable is SafeOwnableUpgradeable {
-  function initialize() public initializer onlyOwnerOrAdmin {
+  function initialize() public initializer {
     __SafeOwnable_init();
   }
 }

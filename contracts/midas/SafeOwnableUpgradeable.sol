@@ -24,7 +24,7 @@ abstract contract SafeOwnableUpgradeable is OwnableUpgradeable {
 
   modifier onlyOwnerOrAdmin() {
     bool isOwner = owner() == _msgSender();
-    if (!isOwner && !_isInitializing()) {
+    if (!isOwner) {
       bytes32 _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
       AddressSlot storage adminSlot;
       assembly {
