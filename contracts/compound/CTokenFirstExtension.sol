@@ -7,7 +7,6 @@ import "./ErrorReporter.sol";
 import "./Exponential.sol";
 
 contract CTokenFirstExtension is DiamondExtension, CTokenErc20Interface, Exponential, TokenErrorReporter {
-
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
     uint8 fnsCount = 5;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);

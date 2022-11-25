@@ -198,7 +198,6 @@ abstract contract CTokenErc20Interface is CTokenStorage {
 }
 
 abstract contract CTokenInterface is CTokenStorage {
-
   function asCTokenErc20Interface() public view returns (CTokenErc20Interface) {
     return CTokenErc20Interface(address(this));
   }

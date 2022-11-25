@@ -12,35 +12,38 @@ contract MinBorrowTest is BaseTest {
   FuseFeeDistributor ffd;
 
   function afterForkSetUp() internal override {
-    ffd = new FuseFeeDistributor();
-    ffd.initialize(0);
-    ffd._setPoolLimits(100e18, 0, 0);
+    ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
   }
 
   function testMinBorrow() public fork(BSC_MAINNET) {
-    MockERC20 asset = MockERC20(0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c);
+    MockERC20 asset = MockERC20(0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d);
+    MockERC20 asset1 = MockERC20(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
 
-    CErc20Interface cToken = CErc20Interface(0x216714Ecf4FEcc35573CBB2756942274E1B344A2);
+    CErc20Interface cToken = CErc20Interface(0x71661c706deEA398F3Cca3187cFB4b6576bDc0f6);
+    CErc20Interface cToken1 = CErc20Interface(0x2F01b89614b963401879b325f853D553375faB58);
     ComptrollerInterface comptroller = cToken.comptroller();
-    deal(address(asset), address(this), 1000e18);
+    deal(address(asset), address(this), 10000e18);
+    deal(address(asset1), address(1), 10000e18);
 
     asset.approve(address(cToken), 1e36);
-    cToken.mint(100e18);
-    address[] memory cTokens = new address[](1);
+    cToken.mint(1000e18);
+
+    vm.startPrank(address(1));
+    asset1.approve(address(cToken1), 1e36);
+    cToken1.mint(1000e18);
+    vm.stopPrank();
+
+    address[] memory cTokens = new address[](2);
     cTokens[0] = address(cToken);
+    cTokens[1] = address(cToken1);
     comptroller.enterMarkets(cTokens);
 
-    uint256 minBorrowEth = ffd.getMinBorrowEth(cToken);
+    uint256 minBorrowEth = ffd.getMinBorrowEth(cToken1);
 
-    assertEq(minBorrowEth, 100e18, "!minBorrowEth for default min borrow eth");
-    cToken.borrow(1e18);
+    assertEq(minBorrowEth, 1e18, "!minBorrowEth for default min borrow eth");
+    cToken1.borrow(300e18);
 
-    minBorrowEth = ffd.getMinBorrowEth(cToken);
-    assertLt(minBorrowEth, 100e18, "!minBorrowEth after borrowing less amount than min amount");
-
-    cToken.borrow(2e18);
-
-    minBorrowEth = ffd.getMinBorrowEth(cToken);
-    assertEq(minBorrowEth, 0, "!minBorrowEth after borrowing great amount than min amount");
+    minBorrowEth = ffd.getMinBorrowEth(cToken1);
+    assertEq(minBorrowEth, 0, "!minBorrowEth after borrowing less amount than min amount");
   }
 }

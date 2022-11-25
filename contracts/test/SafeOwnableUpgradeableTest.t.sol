@@ -14,7 +14,6 @@ contract SomeOwnable is SafeOwnableUpgradeable {
 
 contract SafeOwnableUpgradeableTest is BaseTest {
   function testSafeOwnableUpgradeable() public {
-
     SomeOwnable someOwnable = new SomeOwnable();
     // deploy as a proxy/implementation
     {
