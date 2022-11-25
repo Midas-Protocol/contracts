@@ -491,7 +491,10 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     return cErc20DelegateExtensions[cErc20Delegate];
   }
 
-  function _setCErc20DelegateExtensions(address cErc20Delegate, DiamondExtension[] calldata extensions) external onlyOwner {
+  function _setCErc20DelegateExtensions(address cErc20Delegate, DiamondExtension[] calldata extensions)
+    external
+    onlyOwner
+  {
     cErc20DelegateExtensions[cErc20Delegate] = extensions;
   }
 }
