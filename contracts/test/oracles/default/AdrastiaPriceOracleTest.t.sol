@@ -133,6 +133,6 @@ contract AdrastiaPriceOracleTest is BaseTest {
     assertGt(priceAxlWeth, priceGUsdc);
 
     assertEq(price28Decimals, 5e18, "28 decimals price scaling is wrong");
-    assertEq(price8Decimals, 5e18, "28 decimals price scaling is wrong");
+    assertEq(price8Decimals, 5e18, "8 decimals price scaling is wrong");
   }
 }
