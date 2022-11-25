@@ -9,6 +9,24 @@ import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
 import { IPriceOracle as IAdrastiaPriceOracle } from "adrastia/interfaces/IPriceOracle.sol";
 import { NativeUSDPriceOracle } from "../../../oracles/evmos/NativeUSDPriceOracle.sol";
 
+contract MockAdrastiaPriceOracle {
+  uint112 public staticPrice;
+  uint8 public staticDecimals;
+
+  constructor(uint112 _staticPrice, uint8 _staticDecimals) {
+    staticPrice = _staticPrice;
+    staticDecimals = _staticDecimals;
+  }
+
+  function quoteTokenDecimals() public view virtual returns (uint8) {
+    return staticDecimals;
+  }
+
+  function consultPrice(address token) public view virtual returns (uint112 price) {
+    return staticPrice;
+  }
+}
+
 contract AdrastiaPriceOracleTest is BaseTest {
   AdrastiaPriceOracle private oracle;
 
@@ -78,6 +96,13 @@ contract AdrastiaPriceOracleTest is BaseTest {
     wbtcFeeds[0] = evmosBasedFeed;
     vm.prank(oracle.owner());
     oracle.setPriceFeeds(wbtcUnderlyings, wbtcFeeds);
+
+    // 28 decimals
+    MockAdrastiaPriceOracle mockAdrastiaPriceOracle = new MockAdrastiaPriceOracle(5e28, 28);
+    IAdrastiaPriceOracle[] memory decimalsFeeds = new IAdrastiaPriceOracle[](1);
+    decimalsFeeds[0] = IAdrastiaPriceOracle(address(mockAdrastiaPriceOracle));
+    vm.prank(oracle.owner());
+    oracle.setPriceFeeds(asArray(address(3)), decimalsFeeds);
   }
 
   function testAdrastiaPriceOracle() public fork(EVMOS_MAINNET) {
@@ -92,6 +117,8 @@ contract AdrastiaPriceOracleTest is BaseTest {
 
     uint256 priceAxlWbtc = oracle.price(axlWBTC);
 
+    uint256 price28Decimals = oracle.price(address(3));
+
     assertGt(priceGUsdc, 1e17);
     assertLt(priceGUsdc, 1e19);
 
@@ -102,5 +129,7 @@ contract AdrastiaPriceOracleTest is BaseTest {
 
     assertGt(priceAxlWbtc, priceAxlWeth);
     assertGt(priceAxlWeth, priceGUsdc);
+
+    assertEq(price28Decimals, 5e18, "28 decimals price scaling is wrong");
   }
 }
