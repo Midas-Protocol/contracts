@@ -97,12 +97,13 @@ contract AdrastiaPriceOracleTest is BaseTest {
     vm.prank(oracle.owner());
     oracle.setPriceFeeds(wbtcUnderlyings, wbtcFeeds);
 
+    IAdrastiaPriceOracle[] memory decimalsFeeds = new IAdrastiaPriceOracle[](2);
     // 28 decimals
-    MockAdrastiaPriceOracle mockAdrastiaPriceOracle = new MockAdrastiaPriceOracle(5e28, 28);
-    IAdrastiaPriceOracle[] memory decimalsFeeds = new IAdrastiaPriceOracle[](1);
-    decimalsFeeds[0] = IAdrastiaPriceOracle(address(mockAdrastiaPriceOracle));
+    decimalsFeeds[0] = IAdrastiaPriceOracle(address(new MockAdrastiaPriceOracle(5e8, 8)));
+    // 8 decimals
+    decimalsFeeds[1] = IAdrastiaPriceOracle(address(new MockAdrastiaPriceOracle(5e28, 28)));
     vm.prank(oracle.owner());
-    oracle.setPriceFeeds(asArray(address(3)), decimalsFeeds);
+    oracle.setPriceFeeds(asArray(address(2), address(3)), decimalsFeeds);
   }
 
   function testAdrastiaPriceOracle() public fork(EVMOS_MAINNET) {
@@ -117,7 +118,8 @@ contract AdrastiaPriceOracleTest is BaseTest {
 
     uint256 priceAxlWbtc = oracle.price(axlWBTC);
 
-    uint256 price28Decimals = oracle.price(address(3));
+    uint256 price28Decimals = oracle.price(address(2));
+    uint256 price8Decimals = oracle.price(address(3));
 
     assertGt(priceGUsdc, 1e17);
     assertLt(priceGUsdc, 1e19);
@@ -131,5 +133,6 @@ contract AdrastiaPriceOracleTest is BaseTest {
     assertGt(priceAxlWeth, priceGUsdc);
 
     assertEq(price28Decimals, 5e18, "28 decimals price scaling is wrong");
+    assertEq(price8Decimals, 5e18, "28 decimals price scaling is wrong");
   }
 }
