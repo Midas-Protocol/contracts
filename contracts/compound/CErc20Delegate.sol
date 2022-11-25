@@ -59,6 +59,17 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     // Store new implementation
     implementation = implementation_;
 
+    // add the extensions of the new implementation
+    address[] memory latestExtensions = IFuseFeeDistributor(fuseAdmin).getCErc20DelegateExtensions(implementation);
+    address[] memory currentExtensions = LibDiamond.listExtensions();
+    for (uint256 i = 0; i < currentExtensions.length; i++) {
+      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
+    }
+
+    for (uint256 i = 0; i < latestExtensions.length; i++) {
+      LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
+    }
+
     if (address(this).code.length == 0) {
       // cannot delegate to self with an external call when constructing
       _becomeImplementation(becomeImplementationData);

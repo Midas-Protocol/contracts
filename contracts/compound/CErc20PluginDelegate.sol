@@ -22,8 +22,6 @@ contract CErc20PluginDelegate is CErc20Delegate {
    */
   IERC4626 public plugin;
 
-  uint256 public constant PRECISION = 1e18;
-
   /**
    * @notice Delegate interface to become the implementation
    * @param data The encoded arguments for becoming

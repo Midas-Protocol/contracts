@@ -5,8 +5,9 @@ import "../midas/DiamondExtension.sol";
 import "./CTokenInterfaces.sol";
 import "./ErrorReporter.sol";
 import "./Exponential.sol";
+import "./CDelegateInterface.sol";
 
-contract CTokenFirstExtension is DiamondExtension, CTokenErc20Interface, Exponential, TokenErrorReporter {
+contract CTokenFirstExtension is CDelegationStorage, CTokenErc20Interface, TokenErrorReporter, Exponential, DiamondExtension {
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
     uint8 fnsCount = 5;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);

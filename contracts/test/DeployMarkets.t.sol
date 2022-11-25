@@ -16,8 +16,6 @@ import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
 import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
-import { RewardsDistributorDelegate } from "../compound/RewardsDistributorDelegate.sol";
-import { RewardsDistributorDelegator } from "../compound/RewardsDistributorDelegator.sol";
 import { ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
@@ -25,12 +23,13 @@ import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 import { MockERC4626 } from "../midas/strategies/MockERC4626.sol";
 import { MockERC4626Dynamic } from "../midas/strategies/MockERC4626Dynamic.sol";
-import { BaseTest } from "./config/BaseTest.t.sol";
-
+import { CTokenFirstExtension, DiamondExtension } from "../compound/CTokenFirstExtension.sol";
 import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
+
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
@@ -74,9 +73,15 @@ contract DeployMarketsTest is Test {
   }
 
   function setUpWhiteList() public {
+    cErc20Delegate = new CErc20Delegate();
     cErc20PluginDelegate = new CErc20PluginDelegate();
     cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
-    cErc20Delegate = new CErc20Delegate();
+
+    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
+    cErc20DelegateExtensions[0] = new CTokenFirstExtension();
+    fuseAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
+    fuseAdmin._setCErc20DelegateExtensions(address(cErc20PluginDelegate), cErc20DelegateExtensions);
+    fuseAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
 
     for (uint256 i = 0; i < 7; i++) {
       t.push(true);

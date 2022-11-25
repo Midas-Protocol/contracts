@@ -8,13 +8,14 @@ import "./Exponential.sol";
 import "./EIP20Interface.sol";
 import "./EIP20NonStandardInterface.sol";
 import "./InterestRateModel.sol";
+import "../midas/DiamondExtension.sol";
 
 /**
  * @title Compound's CToken Contract
  * @notice Abstract base for CTokens
  * @author Compound
  */
-contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
+contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase {
   /**
    * @notice Returns a boolean indicating if the sender has admin rights
    */
@@ -1463,6 +1464,20 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
    *  If caller has checked protocol's balance, and verified it is >= amount, this should not revert in normal conditions.
    */
   function doTransferOut(address to, uint256 amount) internal virtual {}
+
+  /**
+   * @dev register a logic extension
+   * @param extensionToAdd the extension whose functions are to be added
+   * @param extensionToReplace the extension whose functions are to be removed/replaced
+   */
+  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external override {
+    ComptrollerV3Storage comptrollerStorage = ComptrollerV3Storage(address(comptroller));
+    require(
+      msg.sender == address(fuseAdmin) && comptrollerStorage.fuseAdminHasRights(),
+      "!unauthorized - no admin rights"
+    );
+    LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
+  }
 
   /*** Reentrancy Guard ***/
 

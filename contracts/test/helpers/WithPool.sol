@@ -22,6 +22,7 @@ import { FuseSafeLiquidator } from "../../FuseSafeLiquidator.sol";
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { FusePoolLens } from "../../FusePoolLens.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { CTokenFirstExtension, DiamondExtension } from "../../compound/CTokenFirstExtension.sol";
 
 contract WithPool {
   ERC20Upgradeable public underlyingToken;
@@ -65,9 +66,15 @@ contract WithPool {
   }
 
   function setUpWhiteList() public {
+    cErc20Delegate = new CErc20Delegate();
     cErc20PluginDelegate = new CErc20PluginDelegate();
     cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
-    cErc20Delegate = new CErc20Delegate();
+
+    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
+    cErc20DelegateExtensions[0] = new CTokenFirstExtension();
+    fuseAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
+    fuseAdmin._setCErc20DelegateExtensions(address(cErc20PluginDelegate), cErc20DelegateExtensions);
+    fuseAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
 
     for (uint256 i = 0; i < 7; i++) {
       t.push(true);

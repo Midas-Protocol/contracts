@@ -12,6 +12,9 @@ abstract contract DiamondExtension {
   function _getExtensionFunctions() external view virtual returns (bytes4[] memory);
 }
 
+// When no function exists for function called
+error FunctionNotFound(bytes4 _functionSelector);
+
 abstract contract DiamondBase {
   /**
    * @dev register a logic extension
@@ -24,8 +27,9 @@ abstract contract DiamondBase {
     return LibDiamond.listExtensions();
   }
 
-  fallback() external payable {
+  fallback() external {
     address extension = LibDiamond.getExtensionForFunction(msg.sig);
+    if (extension == address(0)) revert FunctionNotFound(msg.sig);
     // Execute external function from extension using delegatecall and return any value.
     assembly {
       // copy function selector and any arguments

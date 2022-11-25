@@ -484,4 +484,14 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   ) external onlyOwner {
     DiamondBase(pool)._registerExtension(extensionToAdd, extensionToReplace);
   }
+
+  mapping(address => DiamondExtension[]) public cErc20DelegateExtensions;
+
+  function getCErc20DelegateExtensions(address cErc20Delegate) external view returns (DiamondExtension[] memory) {
+    return cErc20DelegateExtensions[cErc20Delegate];
+  }
+
+  function _setCErc20DelegateExtensions(address cErc20Delegate, DiamondExtension[] calldata extensions) external onlyOwner {
+    cErc20DelegateExtensions[cErc20Delegate] = extensions;
+  }
 }

@@ -22,13 +22,12 @@ import { Unitroller } from "../compound/Unitroller.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
-import { RewardsDistributorDelegate } from "../compound/RewardsDistributorDelegate.sol";
-import { RewardsDistributorDelegator } from "../compound/RewardsDistributorDelegator.sol";
 import { ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
+import { CTokenFirstExtension, DiamondExtension } from "../compound/CTokenFirstExtension.sol";
 
 contract LiquidityMiningTest is DSTest {
   Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -68,6 +67,9 @@ contract LiquidityMiningTest is DSTest {
     fusePoolDirectory = new FusePoolDirectory();
     fusePoolDirectory.initialize(false, emptyAddresses);
     cErc20Delegate = new CErc20Delegate();
+    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
+    cErc20DelegateExtensions[0] = new CTokenFirstExtension();
+    fuseAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
   }
 
   function setUpPoolAndMarket() public {

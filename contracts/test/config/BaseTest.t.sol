@@ -113,9 +113,8 @@ abstract contract BaseTest is Test {
       ap = AddressesProvider(0x38742363597fBaE312B0bdcC351fCc6107E9E27E);
     } else if (chainid == MOONBEAM_MAINNET) {
       ap = AddressesProvider(0x771ee5a72A57f3540E5b9A6A8C226C2a24A70Fae);
-      // } else if (block.chainid == EVMOS_MAINNET) {
-      //   // TODO: change this on deployment
-      //   ap = AddressesProvider(address(0));
+    } else if (block.chainid == EVMOS_MAINNET) {
+      ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
     } else if (chainid == NEON_DEVNET) {
