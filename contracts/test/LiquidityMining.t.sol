@@ -29,9 +29,9 @@ import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 import { CTokenFirstExtension, DiamondExtension } from "../compound/CTokenFirstExtension.sol";
 
-contract LiquidityMiningTest is DSTest {
-  Vm public constant vm = Vm(HEVM_ADDRESS);
+import { BaseTest } from "./config/BaseTest.t.sol";
 
+contract LiquidityMiningTest is BaseTest {
   MockERC20 underlyingToken;
   MockERC20 rewardToken;
 

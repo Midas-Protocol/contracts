@@ -29,14 +29,44 @@ abstract contract BaseTest is Test {
     configureAddressesProvider(0);
   }
 
+  //  uint8 constant CRITICAL = 100;
+  //  uint8 constant NORMAL = 90;
+  //  uint8 constant LOW = 80;
+  //
+  //  modifier priority(uint8 testPriority) {
+  //    uint256 runPriority = NORMAL;
+  //
+  //    try vm.envUint("TEST_RUN_PRIORITY") returns (uint256 p) {
+  //      runPriority = p;
+  //    } catch { /* ignore */ }
+  //
+  //    if (testPriority >= runPriority) {
+  //      _;
+  //    }
+  //  }
+
   modifier fork(uint128 chainid) {
-    _forkAtBlock(chainid, 0);
-    _;
+    if (shouldRunForChain(chainid)) {
+      _forkAtBlock(chainid, 0);
+      _;
+    }
   }
 
   modifier forkAtBlock(uint128 chainid, uint256 blockNumber) {
-    _forkAtBlock(chainid, blockNumber);
-    _;
+    if (shouldRunForChain(chainid)) {
+      _forkAtBlock(chainid, blockNumber);
+      _;
+    }
+  }
+
+  function shouldRunForChain(uint128 chainid) private returns (bool) {
+    bool run = true;
+    try vm.envUint("TEST_RUN_CHAINID") returns (uint256 envChainId) {
+      run = envChainId == chainid;
+    } catch {
+      emit log("failed to get env param TEST_RUN_CHAINID");
+    }
+    return run;
   }
 
   function _forkAtBlock(uint128 chainid, uint256 blockNumber) private {

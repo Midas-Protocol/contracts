@@ -39,11 +39,11 @@ contract InterestRateModelTest is BaseTest {
     testJumpRateBorrowRatePolygon();
   }
 
-  function _convertToPerYear(uint256 value) internal returns (uint256) {
+  function _convertToPerYear(uint256 value) internal pure returns (uint256) {
     return value * 10512000;
   }
 
-  function _convertToPerYearBsc(uint256 value) internal returns (uint256) {
+  function _convertToPerYearBsc(uint256 value) internal pure returns (uint256) {
     return value * 13665600;
   }
 

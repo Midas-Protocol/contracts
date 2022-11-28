@@ -30,7 +30,7 @@ jobs:
       - name: Lint
         run: npm run lint
 
-  build-and-test:
+  build-and-test-bsc:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
@@ -51,6 +51,8 @@ jobs:
       EVMOS_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.EVMOS_MAINNET_ARCHIVE_RPC_URL }}"
       FANTOM_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.FANTOM_MAINNET_ARCHIVE_RPC_URL }}"
       BSC_CHAPEL_ARCHIVE_RPC_URL: "${{ secrets.BSC_CHAPEL_ARCHIVE_RPC_URL }}"
+
+      TEST_RUN_CHAINID: 56
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

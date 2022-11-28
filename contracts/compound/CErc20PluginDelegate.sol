@@ -11,7 +11,7 @@ import "../external/uniswap/IUniswapV2Pair.sol";
  * @notice CToken which outsources token logic to a plugin
  * @author Joey Santoro
  *
- * CErc20PluginDelegate deposits and withdraws from a plugin conract
+ * CErc20PluginDelegate deposits and withdraws from a plugin contract
  * It is also capable of delegating reward functionality to a PluginRewardsDistributor
  */
 contract CErc20PluginDelegate is CErc20Delegate {
