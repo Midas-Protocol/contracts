@@ -73,7 +73,7 @@ contract AdrastiaPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceO
       tokenPrice >= 0
         ? feedDecimals <= 18
           ? (uint256(tokenPrice) * 10**(18 - feedDecimals))
-          : (uint256(tokenPrice) * 10**(feedDecimals - 18))
+          : (uint256(tokenPrice) / 10**(feedDecimals - 18))
         : 0;
   }
 
