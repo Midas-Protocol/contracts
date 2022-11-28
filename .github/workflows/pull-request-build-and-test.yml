@@ -12,8 +12,6 @@ on:
 
 jobs:
   lint:
-    env:
-      MNEMONIC: "${{ secrets.MNEMONIC }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -35,23 +33,7 @@ jobs:
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
       BSC_MAINNET_RPC_URL: "${{ secrets.BSC_MAINNET_RPC_URL }}"
-      POLYGON_MAINNET_RPC_URL: "${{ secrets.POLYGON_MAINNET_RPC_URL }}"
-      MOONBEAM_MAINNET_RPC_URL: "${{ secrets.MOONBEAM_MAINNET_RPC_URL }}"
-      ARBITRUM_MAINNET_RPC_URL: "${{ secrets.ARBITRUM_MAINNET_RPC_URL }}"
-      NEON_DEVNET_RPC_URL: "${{ secrets.NEON_DEVNET_RPC_URL }}"
-      EVMOS_MAINNET_RPC_URL: "${{ secrets.EVMOS_MAINNET_RPC_URL }}"
-      FANTOM_MAINNET_RPC_URL: "${{ secrets.FANTOM_MAINNET_RPC_URL }}"
-      BSC_CHAPEL_RPC_URL: "${{ secrets.BSC_CHAPEL_RPC_URL }}"
-
       BSC_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.BSC_MAINNET_ARCHIVE_RPC_URL }}"
-      POLYGON_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.POLYGON_MAINNET_ARCHIVE_RPC_URL }}"
-      MOONBEAM_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.MOONBEAM_MAINNET_ARCHIVE_RPC_URL }}"
-      ARBITRUM_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.ARBITRUM_MAINNET_ARCHIVE_RPC_URL }}"
-      NEON_DEVNET_ARCHIVE_RPC_URL: "${{ secrets.NEON_DEVNET_ARCHIVE_RPC_URL }}"
-      EVMOS_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.EVMOS_MAINNET_ARCHIVE_RPC_URL }}"
-      FANTOM_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.FANTOM_MAINNET_ARCHIVE_RPC_URL }}"
-      BSC_CHAPEL_ARCHIVE_RPC_URL: "${{ secrets.BSC_CHAPEL_ARCHIVE_RPC_URL }}"
-
       TEST_RUN_CHAINID: 56
     runs-on: ubuntu-latest
     steps:
@@ -291,4 +273,33 @@ jobs:
           key: rpc-cache-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests for BSC testnet
+        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test'
+
+
+  build-and-test-local:
+    needs: [lint]
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      TEST_RUN_CHAINID: 0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - name: Forge RPC cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.foundry/cache"
+          key: rpc-cache-${{ hashFiles('rpc-cache-keyfile') }}
+
+      - name: Run forge tests locally
         run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test'

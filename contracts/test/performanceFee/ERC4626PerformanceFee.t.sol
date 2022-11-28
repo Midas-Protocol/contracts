@@ -22,7 +22,7 @@ contract ERC4626PerformanceFeeTest is BaseTest {
   address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
   address newFeeRecipient = address(5);
 
-  function setUp() public fork(BSC_MAINNET) {
+  function afterForkSetUp() internal override {
     underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
     plugin = new BeefyERC4626();
     plugin.initialize(underlyingToken, beefyVault, 10);
@@ -55,12 +55,12 @@ contract ERC4626PerformanceFeeTest is BaseTest {
 
   /* --------------------- ERC4626 PERFORMANCE FEE TESTS --------------------- */
 
-  function test__initializedValues() public {
+  function test__initializedValues() public fork(BSC_MAINNET) {
     assertEq(plugin.performanceFee(), PERFORMANCE_FEE, "!perFee");
     assertEq(plugin.feeRecipient(), newFeeRecipient, "!feeRecipient");
   }
 
-  function test__UpdateFeeSettings() public {
+  function test__UpdateFeeSettings() public fork(BSC_MAINNET) {
     uint256 newPerfFee = 100;
     address anotherFeeRecipient = address(10);
 
@@ -71,13 +71,13 @@ contract ERC4626PerformanceFeeTest is BaseTest {
     assertEq(plugin.feeRecipient(), anotherFeeRecipient, "!feeRecipient == anotherFeeRecipient");
   }
 
-  function testFail__UpdateFeeSettings() public {
+  function testFail__UpdateFeeSettings() public fork(BSC_MAINNET) {
     vm.startPrank(address(10));
     vm.expectRevert("Owned: Only Owner");
     plugin.updateFeeSettings(100, address(10));
   }
 
-  function test__TakePerformanceFeeInUnderlyingAsset() public {
+  function test__TakePerformanceFeeInUnderlyingAsset() public fork(BSC_MAINNET) {
     createPerformanceFee();
 
     uint256 oldAssets = plugin.totalAssets();
@@ -99,7 +99,7 @@ contract ERC4626PerformanceFeeTest is BaseTest {
     assertEq(plugin.totalAssets(), oldAssets, "totalAssets should not change");
   }
 
-  function test__WithdrawAccruedFees() public {
+  function test__WithdrawAccruedFees() public fork(BSC_MAINNET) {
     plugin.updateFeeSettings(PERFORMANCE_FEE, address(10));
 
     createPerformanceFee();
@@ -127,7 +127,7 @@ contract ERC4626PerformanceFeeTest is BaseTest {
     assertEq(plugin.totalSupply(), oldSupply, "!totalSupply == oldSupply");
   }
 
-  function testFail__WithdrawAccruedFees() public {
+  function testFail__WithdrawAccruedFees() public fork(BSC_MAINNET) {
     vm.startPrank(address(10));
     vm.expectRevert("Owned");
     plugin.withdrawAccruedFees();

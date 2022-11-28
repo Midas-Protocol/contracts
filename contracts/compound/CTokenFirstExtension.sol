@@ -26,10 +26,7 @@ contract CTokenFirstExtension is
     return functionSelectors;
   }
 
-  /*
-  ERC20 fns
-  */
-
+  /* ERC20 fns */
   /**
    * @notice Transfer `tokens` tokens from `src` to `dst` by `spender`
    * @dev Called by both `transfer` and `transferFrom` internally
