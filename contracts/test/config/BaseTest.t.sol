@@ -59,7 +59,7 @@ abstract contract BaseTest is Test {
     }
   }
 
-  function shouldRunForChain(uint128 chainid) private returns (bool) {
+  function shouldRunForChain(uint256 chainid) internal returns (bool) {
     bool run = true;
     try vm.envUint("TEST_RUN_CHAINID") returns (uint256 envChainId) {
       run = envChainId == chainid;
