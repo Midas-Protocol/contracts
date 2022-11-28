@@ -29,6 +29,20 @@ contract CErc20PluginDelegate is CErc20Delegate {
   function _becomeImplementation(bytes memory data) public virtual override {
     require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
 
+    // TODO move to _setImplementationInternal after the initial extensions upgrade
+    {
+      // add the extensions of the new implementation
+      address[] memory latestExtensions = IFuseFeeDistributor(fuseAdmin).getCErc20DelegateExtensions(implementation);
+      address[] memory currentExtensions = LibDiamond.listExtensions();
+      for (uint256 i = 0; i < currentExtensions.length; i++) {
+        LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
+      }
+
+      for (uint256 i = 0; i < latestExtensions.length; i++) {
+        LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
+      }
+    }
+
     address _plugin = abi.decode(data, (address));
 
     if (_plugin == address(0) && address(plugin) != address(0)) {
