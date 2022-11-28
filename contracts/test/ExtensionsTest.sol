@@ -221,12 +221,7 @@ contract ExtensionsTest is BaseTest {
 
     // whitelist the upgrade
     vm.prank(ffd.owner());
-    ffd._editCErc20DelegateWhitelist(
-      asArray(implBefore),
-      asArray(address(newImpl)),
-      asArray(false),
-      asArray(true)
-    );
+    ffd._editCErc20DelegateWhitelist(asArray(implBefore), asArray(address(newImpl)), asArray(false), asArray(true));
 
     // set the new ctoken delegate as the latest
     vm.prank(ffd.owner());
