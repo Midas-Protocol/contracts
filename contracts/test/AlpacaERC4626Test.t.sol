@@ -60,7 +60,7 @@ contract AlpacaERC4626Test is BaseTest {
     return shares;
   }
 
-  function testDeposit() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testDeposit() public fork(BSC_MAINNET) { // forkAtBlock(BSC_MAINNET, 20238373) {
     uint256 expectedErc4626Shares = alpacaERC4626.previewDeposit(depositAmount);
 
     deposit(address(this), depositAmount);
@@ -78,7 +78,7 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares);
   }
 
-  function testMultipleDeposit() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testMultipleDeposit() public fork(BSC_MAINNET) { // forkAtBlock(BSC_MAINNET, 20238373) {
     uint256 expectedErc4626Shares = alpacaERC4626.previewDeposit(depositAmount);
 
     deposit(address(this), depositAmount);
@@ -112,7 +112,7 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "Beefy erc4626 locked amount checking");
   }
 
-  function testMint() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testMint() public fork(BSC_MAINNET) { // forkAtBlock(BSC_MAINNET, 20238373) {
     uint256 mintAmount = alpacaERC4626.previewDeposit(depositAmount);
 
     underlyingToken.approve(address(alpacaERC4626), depositAmount);
@@ -131,7 +131,7 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares);
   }
 
-  function testMultipleMint() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testMultipleMint() public fork(BSC_MAINNET) { // forkAtBlock(BSC_MAINNET, 20238373) {
     uint256 mintAmount = alpacaERC4626.previewDeposit(depositAmount);
 
     underlyingToken.approve(address(alpacaERC4626), depositAmount);
@@ -168,7 +168,7 @@ contract AlpacaERC4626Test is BaseTest {
     vm.stopPrank();
   }
 
-  function testWithdraw() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testWithdraw() public fork(BSC_MAINNET) { // forkAtBlock(BSC_MAINNET, 20238373) {
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);
@@ -282,7 +282,7 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "Beefy erc4626 locked amount checking");
   }
 
-  function testRedeem() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testRedeem() public fork(BSC_MAINNET) { // forkAtBlock(BSC_MAINNET, 20238373) {
     uint256 withdrawalAmount = 10e18;
     uint256 redeemAmount = alpacaERC4626.previewWithdraw(withdrawalAmount);
 
@@ -391,7 +391,7 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "Beefy erc4626 locked amount checking");
   }
 
-  function testAlpacaPauseContract() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testAlpacaPauseContract() public fork(BSC_MAINNET) { // forkAtBlock(BSC_MAINNET, 20238373) {
     uint256 withdrawAmount = 1e18;
 
     deposit(address(this), depositAmount);
@@ -419,10 +419,15 @@ contract AlpacaERC4626Test is BaseTest {
       depositAmount - withdrawAmount - expectedSharesNeeded,
       "!redeem share bal"
     );
-    assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount + expectedAssets, "!redeem asset bal");
+    assertApproxEqAbs(
+      underlyingToken.balanceOf(address(this)),
+      withdrawAmount + expectedAssets,
+      10,
+      "!redeem asset bal"
+    );
   }
 
-  function testAlpacaEmergencyWithdrawAndPause() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testAlpacaEmergencyWithdrawAndPause() public fork(BSC_MAINNET) { // forkAtBlock(BSC_MAINNET, 20238373) {
     deposit(address(this), depositAmount);
 
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "!init 0");
