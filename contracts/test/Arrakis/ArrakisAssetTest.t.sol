@@ -13,7 +13,9 @@ import "./ArrakisERC4626Test.sol";
 contract ArrakisAssetTest is AbstractAssetTest {
   MasterPriceOracle masterPriceOracle;
 
-  constructor() fork(POLYGON_MAINNET) {
+  constructor() fork(POLYGON_MAINNET) {}
+
+  function afterForkSetUp() internal override {
     masterPriceOracle = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     test = AbstractERC4626Test(address(new ArrakisERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new ArrakisTestConfigStorage()));
@@ -28,14 +30,16 @@ contract ArrakisAssetTest is AbstractAssetTest {
   }
 
   function testInitializedValues() public override {
-    for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
-      bytes memory testConfig = testConfigStorage.getTestConfig(i);
+    if (shouldRunForChain(block.chainid)) {
+      for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
+        bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
-      this.setUpTestContract(testConfig);
+        this.setUpTestContract(testConfig);
 
-      (address asset, ) = abi.decode(testConfig, (address, address));
+        (address asset, ) = abi.decode(testConfig, (address, address));
 
-      test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+        test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+      }
     }
   }
 

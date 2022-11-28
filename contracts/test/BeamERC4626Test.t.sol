@@ -449,7 +449,7 @@ contract BeamERC4626UnitTest is BaseTest {
   address charlie = address(30);
   address joy = 0x33Ad49856da25b8E2E2D762c411AEda0D1727918;
 
-  function setUp() public fork(MOONBEAM_MAINNET) {
+  function afterForkSetUp() internal override {
     testToken = ERC20Upgradeable(0x99588867e817023162F4d4829995299054a5fC57);
     glintToken = MockERC20(0xcd3B51D98478D53F4515A306bE565c6EebeF1D58);
     mockBeamChef = new MockVault(IBoringERC20(address(testToken)), 0, address(0), 0, address(0));
@@ -478,7 +478,7 @@ contract BeamERC4626UnitTest is BaseTest {
     vm.roll(2);
   }
 
-  function testInitializedValues() public {
+  function testInitializedValues() public fork(MOONBEAM_MAINNET) {
     assertEq(
       beamErc4626.name(),
       string(abi.encodePacked("Midas ", testToken.name(), " Vault")),
@@ -523,7 +523,7 @@ contract BeamERC4626UnitTest is BaseTest {
     vm.stopPrank();
   }
 
-  function testTheBugWithdraw(uint256 amount) public {
+  function testTheBugWithdraw(uint256 amount) public fork(MOONBEAM_MAINNET) {
     vm.assume(amount > 100 && amount < 1e19);
     vm.prank(joy);
     testToken.approve(joy, 100e18);
@@ -574,7 +574,7 @@ contract BeamERC4626UnitTest is BaseTest {
     );
   }
 
-  function testTheBugRedeem(uint256 amount) public {
+  function testTheBugRedeem(uint256 amount) public fork(MOONBEAM_MAINNET) {
     vm.assume(amount > 1e5 && amount < 1e19);
     vm.prank(joy);
     testToken.approve(joy, 100e18);
@@ -641,7 +641,7 @@ contract BeamERC4626UnitTest is BaseTest {
     flywheel.accrue(ERC20(address(beamErc4626)), address(this));
   }
 
-  function testDeposit() public {
+  function testDeposit() public fork(MOONBEAM_MAINNET) {
     _deposit();
 
     assertEq(testToken.balanceOf(address(this)), 0);
@@ -655,7 +655,7 @@ contract BeamERC4626UnitTest is BaseTest {
     assertEq(beamErc4626.balanceOf(address(this)), depositAmount);
   }
 
-  function testWithdraw() public {
+  function testWithdraw() public fork(MOONBEAM_MAINNET) {
     _deposit();
     beamErc4626.withdraw(depositAmount, address(this), address(this));
 

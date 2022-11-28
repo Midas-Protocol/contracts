@@ -11,7 +11,7 @@ import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 import "./JarvisERC4626Test.sol";
 
 contract JarvisAssetTest is AbstractAssetTest {
-  constructor() fork(POLYGON_MAINNET) {
+  function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new JarvisERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new JarvisTestConfigStorage()));
   }
@@ -24,7 +24,7 @@ contract JarvisAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override {
+  function testInitializedValues() public override fork(POLYGON_MAINNET) {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
@@ -36,31 +36,31 @@ contract JarvisAssetTest is AbstractAssetTest {
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override {
+  function testDepositWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
     this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public override {
+  function testDepositWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
     this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override {
+  function testWithdrawWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
     this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override {
+  function testWithdrawWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
     this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 
-  function testAccumulatingRewardsOnDeposit() public {
+  function testAccumulatingRewardsOnDeposit() public fork(POLYGON_MAINNET) {
     this.runTest(JarvisERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public {
+  function testAccumulatingRewardsOnWithdrawal() public fork(POLYGON_MAINNET) {
     this.runTest(JarvisERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 
-  function testClaimRewards() public {
+  function testClaimRewards() public fork(POLYGON_MAINNET) {
     this.runTest(JarvisERC4626Test(address(test)).testClaimRewards);
   }
 }
