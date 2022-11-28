@@ -34,6 +34,7 @@ contract MockBoringERC20 is MockERC20 {
   }
 }
 
+// TODO adapt the test to run it on the latest block
 contract BeamERC4626Test is BaseTest {
   using FixedPointMathLib for uint256;
 
@@ -51,8 +52,7 @@ contract BeamERC4626Test is BaseTest {
   uint256 initialBeamBalance = 0;
   uint256 initialBeamSupply = 0;
 
-  // TODO adapt the test to run it on the latest block
-  function setUp() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
+  function afterForkSetUp() internal override {
     testToken = ERC20Upgradeable(0x99588867e817023162F4d4829995299054a5fC57);
     glintToken = MockERC20(0xcd3B51D98478D53F4515A306bE565c6EebeF1D58);
     mockBeamChef = new MockVault(IBoringERC20(address(testToken)), 0, address(0), 0, address(0));
@@ -104,7 +104,7 @@ contract BeamERC4626Test is BaseTest {
     vm.stopPrank();
   }
 
-  function testDeposit() public {
+  function testDeposit() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     uint256 expectedErc4626Shares = beamErc4626.previewDeposit(depositAmount);
 
     deposit(address(this), depositAmount);
@@ -121,7 +121,7 @@ contract BeamERC4626Test is BaseTest {
     assertEq(beamErc4626.totalSupply(), expectedErc4626Shares);
   }
 
-  function testMultipleDeposit() public {
+  function testMultipleDeposit() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     uint256 expectedErc4626Shares = beamErc4626.previewDeposit(depositAmount);
 
     deposit(address(this), depositAmount);
@@ -153,7 +153,7 @@ contract BeamERC4626Test is BaseTest {
     assertEq(testToken.balanceOf(address(beamErc4626)), 0, "Beam erc4626 locked amount checking");
   }
 
-  function testMint() public {
+  function testMint() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     uint256 mintAmount = beamErc4626.previewDeposit(depositAmount);
 
     testToken.approve(address(beamErc4626), depositAmount);
@@ -171,7 +171,7 @@ contract BeamERC4626Test is BaseTest {
     assertEq(beamErc4626.totalSupply(), mintAmount);
   }
 
-  function testMultipleMint() public {
+  function testMultipleMint() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     uint256 mintAmount = beamErc4626.previewDeposit(depositAmount);
 
     testToken.approve(address(beamErc4626), depositAmount);
@@ -209,7 +209,7 @@ contract BeamERC4626Test is BaseTest {
     vm.stopPrank();
   }
 
-  function testWithdraw() public {
+  function testWithdraw() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);
@@ -234,7 +234,7 @@ contract BeamERC4626Test is BaseTest {
     assertEq(testToken.balanceOf(address(beamErc4626)), 0, "Beam erc4626 locked amount checking");
   }
 
-  function testMultipleWithdraw() public {
+  function testMultipleWithdraw() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     uint256 BeamShares = depositAmount * 2;
 
     uint256 withdrawalAmount = 10e18;
@@ -289,7 +289,7 @@ contract BeamERC4626Test is BaseTest {
     assertEq(testToken.balanceOf(address(beamErc4626)), 0, "Beam erc4626 locked amount checking");
   }
 
-  function testRedeem() public {
+  function testRedeem() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     uint256 BeamShares = depositAmount;
     uint256 withdrawalAmount = 10e18;
     uint256 redeemAmount = beamErc4626.previewWithdraw(withdrawalAmount);
@@ -314,7 +314,7 @@ contract BeamERC4626Test is BaseTest {
     assertEq(getBeamCheckBalance(), BeamShares - expectedBeamSharesNeeded, "!Beam share balance");
   }
 
-  function testMultipleRedeem() public {
+  function testMultipleRedeem() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     uint256 BeamShares = depositAmount * 2;
 
     uint256 withdrawalAmount = 10e18;
@@ -365,7 +365,7 @@ contract BeamERC4626Test is BaseTest {
     assertEq(testToken.balanceOf(address(beamErc4626)), 0, "Beam erc4626 locked amount checking");
   }
 
-  function testPauseContract() public {
+  function testPauseContract() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     uint256 withdrawAmount = 1e18;
 
     deposit(address(this), depositAmount);
@@ -396,7 +396,7 @@ contract BeamERC4626Test is BaseTest {
     assertEq(testToken.balanceOf(address(this)), withdrawAmount + expectedAssets, "!redeem asset bal");
   }
 
-  function testEmergencyWithdrawAndPause() public {
+  function testEmergencyWithdrawAndPause() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     deposit(address(this), depositAmount);
 
     uint256 expectedBal = beamErc4626.previewRedeem(depositAmount);
@@ -408,7 +408,7 @@ contract BeamERC4626Test is BaseTest {
     assertEq(beamErc4626.totalAssets(), expectedBal, "!totalAssets == expectedBal");
   }
 
-  function testEmergencyWithdrawAndRedeem() public {
+  function testEmergencyWithdrawAndRedeem() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     uint256 withdrawAmount = 1e18;
 
     deposit(address(this), depositAmount);
