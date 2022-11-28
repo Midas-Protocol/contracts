@@ -9,6 +9,9 @@ import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { Comptroller, ComptrollerV3Storage } from "../compound/Comptroller.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
+import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
+import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
+import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -110,6 +113,17 @@ contract ExtensionsTest is BaseTest {
       asUnitroller._setPendingImplementation(latestComptrollerImplementation);
       newComptrollerImplementation._become(asUnitroller);
       vm.stopPrank();
+
+      // upgrade the FuseFeeDistributor to include the getCErc20DelegateExtensions fn
+      {
+        FuseFeeDistributor newImpl = new FuseFeeDistributor();
+        TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
+        bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
+        address admin = address(uint160(uint256(bytesAtSlot)));
+        // emit log_address(admin);
+        vm.prank(admin);
+        proxy.upgradeTo(address(newImpl));
+      }
     }
 
     cfe = new ComptrollerFirstExtension();
@@ -189,5 +203,53 @@ contract ExtensionsTest is BaseTest {
       assertEq(initExtensionsAfter.length, 1, "remove this if the ffd config is set up");
       assertEq(initExtensionsAfter[0], address(cfe), "first extension is not the CFE");
     }
+  }
+
+  function testExistingCTokenExtensionUpgrade() public fork(BSC_MAINNET) {
+    Comptroller asComptroller = Comptroller(jFiatPoolAddress);
+    CTokenInterface[] memory allMarkets = asComptroller.getAllMarkets();
+
+    CTokenInterface firstMarket = allMarkets[0];
+    CErc20Delegate asDelegate = CErc20Delegate(address(firstMarket));
+    emit log(asDelegate.contractType());
+
+    address implBefore = asDelegate.implementation();
+    emit log("implementation before");
+    emit log_address(implBefore);
+
+    CErc20Delegate newImpl = new CErc20Delegate();
+
+    // whitelist the upgrade
+    vm.prank(ffd.owner());
+    ffd._editCErc20DelegateWhitelist(
+      asArray(implBefore),
+      asArray(address(newImpl)),
+      asArray(false),
+      asArray(true)
+    );
+
+    // set the new ctoken delegate as the latest
+    vm.prank(ffd.owner());
+    ffd._setLatestCErc20Delegate(implBefore, address(newImpl), false, "");
+
+    // add the extension to the auto upgrade config
+    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
+    cErc20DelegateExtensions[0] = new CTokenFirstExtension();
+    vm.prank(ffd.owner());
+    ffd._setCErc20DelegateExtensions(address(newImpl), cErc20DelegateExtensions);
+
+    // turn auto impl on
+    vm.prank(asComptroller.admin());
+    asComptroller._toggleAutoImplementations(true);
+
+    // auto upgrade
+    firstMarket.accrueInterest();
+    emit log("new implementation");
+    emit log_address(asDelegate.implementation());
+
+    // check if the extension was added
+    address[] memory extensions = asDelegate._listExtensions();
+    assertEq(extensions.length, 1, "the first extension should be added");
+    assertEq(extensions[0], address(cErc20DelegateExtensions[0]), "the first extension should be the only extension");
   }
 }
