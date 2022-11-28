@@ -21,6 +21,9 @@ contract WombatLpTokenLiquidatorTest is BaseTest {
   }
 
   function testRedeemWBNB() public fork(BSC_MAINNET) {
+    uint256 nov_30_2022 = 1669814415;
+    if (block.timestamp < nov_30_2022) return;
+
     address wombatWBNB = 0x74f019A5C4eD2C2950Ce16FaD7Af838549092c5b;
     uint256 assetAmount = 100e18;
 
