@@ -15,7 +15,7 @@ contract BombERC4626Test is BaseTest {
   uint256 depositAmountRoundedDown = depositAmount - 2;
   address whale = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
 
-  function setUp() public fork(BSC_MAINNET) {
+  function afterForkSetUp() internal override {
     bombToken = IERC20Upgradeable(address(xbombToken.reward()));
     vault = new BombERC4626();
     vault.initialize(ERC20Upgradeable(address(bombToken)), address(xbombToken));
@@ -25,7 +25,7 @@ contract BombERC4626Test is BaseTest {
     bombToken.transfer(address(this), depositAmount);
   }
 
-  function testInitializedValues() public {
+  function testInitializedValues() public fork(BSC_MAINNET) {
     assertEq(vault.name(), "Midas bomb.money Vault");
     assertEq(vault.symbol(), "mvBOMB");
     assertEq(address(vault.asset()), address(bombToken));
@@ -37,7 +37,7 @@ contract BombERC4626Test is BaseTest {
     vault.deposit(depositAmount, address(this));
   }
 
-  function testDeposit() public {
+  function testDeposit() public fork(BSC_MAINNET) {
     deposit();
 
     //Test that the actual transfers worked
@@ -59,7 +59,7 @@ contract BombERC4626Test is BaseTest {
     vault.withdraw(vaultAssets, address(this), address(this));
   }
 
-  function testWithdraw() public {
+  function testWithdraw() public fork(BSC_MAINNET) {
     withdraw();
 
     // test that all vault assets are extracted and transferred to the depositor
@@ -75,7 +75,7 @@ contract BombERC4626Test is BaseTest {
     vault.redeem(shares, address(this), address(this));
   }
 
-  function testRedeem() public {
+  function testRedeem() public fork(BSC_MAINNET) {
     redeem();
 
     // test that all vault assets are extracted and transferred to the depositor
