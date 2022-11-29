@@ -199,7 +199,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
 
     vm.startPrank(accountOne);
     FusePoolLens.FusePoolAsset[] memory assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
-    uint256 neonBalance = cWNeonToken.asCTokenErc20Interface().balanceOf(accountOne);
+    uint256 neonBalance = cWNeonToken.asCTokenExtensionInterface().balanceOf(accountOne);
 
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x696d73D7262223724d60B2ce9d6e20fc31DfC56B);
     address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(
@@ -231,7 +231,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
       IComptroller(address(comptroller))
     );
 
-    uint256 neonBalanceAfter = cWNeonToken.asCTokenErc20Interface().balanceOf(accountOne);
+    uint256 neonBalanceAfter = cWNeonToken.asCTokenExtensionInterface().balanceOf(accountOne);
 
     assertGt(neonBalance, neonBalanceAfter);
     assertGt(assetsData[1].supplyBalance, assetsDataAfter[1].supplyBalance);

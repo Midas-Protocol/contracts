@@ -2,14 +2,15 @@
 pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../midas/DiamondExtension.sol";
-import { CTokenErc20Interface, ComptrollerV3Storage } from "./CTokenInterfaces.sol";
+import { CTokenExtensionInterface, ComptrollerV3Storage } from "./CTokenInterfaces.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { CDelegationStorage } from "./CDelegateInterface.sol";
+import { InterestRateModel } from "./InterestRateModel.sol";
 
 contract CTokenFirstExtension is
   CDelegationStorage,
-  CTokenErc20Interface,
+  CTokenExtensionInterface,
   TokenErrorReporter,
   Exponential,
   DiamondExtension
@@ -161,6 +162,97 @@ contract CTokenFirstExtension is
    */
   function balanceOf(address owner) external view override returns (uint256) {
     return accountTokens[owner];
+  }
+
+  /**
+   * @notice updates the cToken ERC20 name and symbol
+   * @dev Admin function to update the cToken ERC20 name and symbol
+   * @param _name the new ERC20 token name to use
+   * @param _symbol the new ERC20 token symbol to use
+   */
+  function _setNameAndSymbol(string calldata _name, string calldata _symbol) external {
+    // Check caller is admin
+    require(hasAdminRights(), "!admin");
+
+    // Set ERC20 name and symbol
+    name = _name;
+    symbol = _symbol;
+  }
+
+  /**
+   * @notice accrues interest and sets a new reserve factor for the protocol using _setReserveFactorFresh
+   * @dev Admin function to accrue interest and set a new reserve factor
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function _setReserveFactor(uint256 newReserveFactorMantissa) external override nonReentrant(false) returns (uint256) {
+    uint256 error = asCTokenInterface().accrueInterest();
+    if (error != uint256(Error.NO_ERROR)) {
+      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted reserve factor change failed.
+      return fail(Error(error), FailureInfo.SET_RESERVE_FACTOR_ACCRUE_INTEREST_FAILED);
+    }
+    // _setReserveFactorFresh emits reserve-factor-specific logs on errors, so we don't need to.
+    return asCTokenInterface()._setReserveFactorFresh(newReserveFactorMantissa);
+  }
+
+  /**
+   * @notice accrues interest and sets a new admin fee for the protocol using _setAdminFeeFresh
+   * @dev Admin function to accrue interest and set a new admin fee
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function _setAdminFee(uint256 newAdminFeeMantissa) external override nonReentrant(false) returns (uint256) {
+    uint256 error = asCTokenInterface().accrueInterest();
+    if (error != uint256(Error.NO_ERROR)) {
+      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted admin fee change failed.
+      return fail(Error(error), FailureInfo.SET_ADMIN_FEE_ACCRUE_INTEREST_FAILED);
+    }
+    // _setAdminFeeFresh emits reserve-factor-specific logs on errors, so we don't need to.
+    return asCTokenInterface()._setAdminFeeFresh(newAdminFeeMantissa);
+  }
+
+  /**
+   * @notice Accrues interest and reduces Fuse fees by transferring to Fuse
+   * @param withdrawAmount Amount of fees to withdraw
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function _withdrawFuseFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
+    uint256 error = asCTokenInterface().accrueInterest();
+    if (error != uint256(Error.NO_ERROR)) {
+      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted Fuse fee withdrawal failed.
+      return fail(Error(error), FailureInfo.WITHDRAW_FUSE_FEES_ACCRUE_INTEREST_FAILED);
+    }
+    // _withdrawFuseFeesFresh emits reserve-reduction-specific logs on errors, so we don't need to.
+    return asCTokenInterface()._withdrawFuseFeesFresh(withdrawAmount);
+  }
+
+  /**
+   * @notice Accrues interest and reduces admin fees by transferring to admin
+   * @param withdrawAmount Amount of fees to withdraw
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function _withdrawAdminFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
+    uint256 error = asCTokenInterface().accrueInterest();
+    if (error != uint256(Error.NO_ERROR)) {
+      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted admin fee withdrawal failed.
+      return fail(Error(error), FailureInfo.WITHDRAW_ADMIN_FEES_ACCRUE_INTEREST_FAILED);
+    }
+    // _withdrawAdminFeesFresh emits reserve-reduction-specific logs on errors, so we don't need to.
+    return asCTokenInterface()._withdrawAdminFeesFresh(withdrawAmount);
+  }
+
+  /**
+   * @notice accrues interest and updates the interest rate model using _setInterestRateModelFresh
+   * @dev Admin function to accrue interest and update the interest rate model
+   * @param newInterestRateModel the new interest rate model to use
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function _setInterestRateModel(InterestRateModel newInterestRateModel) public override returns (uint256) {
+    uint256 error = asCTokenInterface().accrueInterest();
+    if (error != uint256(Error.NO_ERROR)) {
+      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted change of interest rate model failed
+      return fail(Error(error), FailureInfo.SET_INTEREST_RATE_MODEL_ACCRUE_INTEREST_FAILED);
+    }
+    // _setInterestRateModelFresh emits interest-rate-model-update-specific logs on errors, so we don't need to.
+    return asCTokenInterface()._setInterestRateModelFresh(newInterestRateModel);
   }
 
   /**

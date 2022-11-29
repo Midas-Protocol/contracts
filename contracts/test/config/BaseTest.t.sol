@@ -29,21 +29,23 @@ abstract contract BaseTest is Test {
     configureAddressesProvider(0);
   }
 
-  //  uint8 constant CRITICAL = 100;
-  //  uint8 constant NORMAL = 90;
-  //  uint8 constant LOW = 80;
-  //
-  //  modifier priority(uint8 testPriority) {
-  //    uint256 runPriority = NORMAL;
-  //
-  //    try vm.envUint("TEST_RUN_PRIORITY") returns (uint256 p) {
-  //      runPriority = p;
-  //    } catch { /* ignore */ }
-  //
-  //    if (testPriority >= runPriority) {
-  //      _;
-  //    }
-  //  }
+  uint256 constant CRITICAL = 100;
+  uint256 constant NORMAL = 90;
+  uint256 constant LOW = 80;
+
+  modifier importance(uint256 testImportance) {
+    uint256 runLevel = NORMAL;
+
+    try vm.envUint("TEST_RUN_LEVEL") returns (uint256 level) {
+      runLevel = level;
+    } catch {
+      emit log("failed to get env param TEST_RUN_LEVEL");
+    }
+
+    if (testImportance >= runLevel) {
+      _;
+    }
+  }
 
   modifier fork(uint128 chainid) {
     if (shouldRunForChain(chainid)) {

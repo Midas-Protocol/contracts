@@ -14,7 +14,7 @@ import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCor
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 
-import { CTokenInterface, CTokenErc20Interface } from "../compound/CTokenInterfaces.sol";
+import { CTokenInterface, CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 import { CToken } from "../compound/CToken.sol";
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
@@ -159,7 +159,7 @@ contract LiquidityMiningTest is BaseTest {
   }
 
   function testIntegration() public {
-    CTokenErc20Interface asCErc20 = cErc20.asCTokenErc20Interface();
+    CTokenExtensionInterface asCErc20 = cErc20.asCTokenExtensionInterface();
 
     // store expected rewards per token (1 token per second over total supply)
     uint256 rewardsPerToken = (1 ether * 1 ether) / asCErc20.totalSupply();

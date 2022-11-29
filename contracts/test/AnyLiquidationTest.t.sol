@@ -92,14 +92,14 @@ contract AnyLiquidationTest is BaseTest {
 
   uint256 nov_11_2022 = 1668185732;
 
-  function testBscAnyLiquidation(uint256 random) public fork(BSC_MAINNET) {
-    if (block.timestamp < nov_11_2022 + 19 days) return;
+  function testBscAnyLiquidation(uint256 random) public fork(BSC_MAINNET) importance(LOW) {
+    // if (block.timestamp < nov_11_2022 + 19 days) return;
     vm.assume(random > 100 && random < type(uint64).max);
     doTestAnyLiquidation(random);
   }
 
   function testPolygonAnyLiquidation(uint256 random) public fork(POLYGON_MAINNET) {
-    if (block.timestamp < nov_11_2022 + 19 days) return;
+    // if (block.timestamp < nov_11_2022 + 19 days) return;
     vm.assume(random > 100 && random < type(uint64).max);
     doTestAnyLiquidation(random);
   }

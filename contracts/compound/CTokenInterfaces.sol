@@ -165,7 +165,7 @@ contract CTokenStorage is CTokenAdminStorage {
   uint256 public constant feeSeizeShareMantissa = 1e17; //10%
 }
 
-abstract contract CTokenErc20Interface is CTokenStorage {
+abstract contract CTokenExtensionInterface is CTokenStorage {
   /**
    * @notice EIP20 Transfer event - duplicated in CTokenInterface
    */
@@ -192,6 +192,16 @@ abstract contract CTokenErc20Interface is CTokenStorage {
 
   function balanceOf(address owner) external view virtual returns (uint256);
 
+  function _setReserveFactor(uint256 newReserveFactorMantissa) external virtual returns (uint256);
+
+  function _setAdminFee(uint256 newAdminFeeMantissa) external virtual returns (uint256);
+
+  function _setInterestRateModel(InterestRateModel newInterestRateModel) external virtual returns (uint256);
+
+  function _withdrawAdminFees(uint256 withdrawAmount) external virtual returns (uint256);
+
+  function _withdrawFuseFees(uint256 withdrawAmount) external virtual returns (uint256);
+
   function asCTokenInterface() public view returns (CTokenInterface) {
     return CTokenInterface(address(this));
   }
@@ -199,12 +209,12 @@ abstract contract CTokenErc20Interface is CTokenStorage {
 
 abstract contract CTokenInterface is CTokenStorage {
   /**
-   * @notice EIP20 Transfer event - duplicated in CTokenErc20Interface
+   * @notice EIP20 Transfer event - duplicated in CTokenExtensionInterface
    */
   event Transfer(address indexed from, address indexed to, uint256 amount);
 
-  function asCTokenErc20Interface() public view returns (CTokenErc20Interface) {
-    return CTokenErc20Interface(address(this));
+  function asCTokenExtensionInterface() public view returns (CTokenExtensionInterface) {
+    return CTokenExtensionInterface(address(this));
   }
 
   /**
@@ -330,9 +340,15 @@ abstract contract CTokenInterface is CTokenStorage {
 
   /*** Admin Functions ***/
 
-  function _setReserveFactor(uint256 newReserveFactorMantissa) external virtual returns (uint256);
+  function _setReserveFactorFresh(uint256 newReserveFactorMantissa) external virtual returns (uint256);
 
-  function _setInterestRateModel(InterestRateModel newInterestRateModel) public virtual returns (uint256);
+  function _setAdminFeeFresh(uint256 newAdminFeeMantissa) external virtual returns (uint256);
+
+  function _setInterestRateModelFresh(InterestRateModel newInterestRateModel) external virtual returns (uint256);
+
+  function _withdrawAdminFeesFresh(uint256 withdrawAmount) external virtual returns (uint256);
+
+  function _withdrawFuseFeesFresh(uint256 withdrawAmount) external virtual returns (uint256);
 }
 
 contract CErc20Storage is CTokenStorage {

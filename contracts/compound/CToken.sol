@@ -1010,7 +1010,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     require(amountSeizeError == uint256(Error.NO_ERROR), "LIQUIDATE_COMPTROLLER_CALCULATE_AMOUNT_SEIZE_FAILED");
 
     /* Revert if borrower collateral token balance < seizeTokens */
-    require(cTokenCollateral.asCTokenErc20Interface().balanceOf(borrower) >= seizeTokens, "LIQUIDATE_SEIZE_TOO_MUCH");
+    require(cTokenCollateral.asCTokenExtensionInterface().balanceOf(borrower) >= seizeTokens, "LIQUIDATE_SEIZE_TOO_MUCH");
 
     // If this is also the collateral, run seizeInternal to avoid re-entrancy, otherwise make an external call
     uint256 seizeError;
@@ -1153,26 +1153,11 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
   /*** Admin Functions ***/
 
   /**
-   * @notice accrues interest and sets a new admin fee for the protocol using _setAdminFeeFresh
-   * @dev Admin function to accrue interest and set a new admin fee
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _setAdminFee(uint256 newAdminFeeMantissa) external nonReentrant(false) returns (uint256) {
-    uint256 error = accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted admin fee change failed.
-      return fail(Error(error), FailureInfo.SET_ADMIN_FEE_ACCRUE_INTEREST_FAILED);
-    }
-    // _setAdminFeeFresh emits reserve-factor-specific logs on errors, so we don't need to.
-    return _setAdminFeeFresh(newAdminFeeMantissa);
-  }
-
-  /**
    * @notice Sets a new admin fee for the protocol (*requires fresh interest accrual)
    * @dev Admin function to set a new admin fee
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function _setAdminFeeFresh(uint256 newAdminFeeMantissa) internal returns (uint256) {
+  function _setAdminFeeFresh(uint256 newAdminFeeMantissa) public override nonReentrant(false) returns (uint256) {
     // Verify market's block number equals current block number
     if (accrualBlockNumber != getBlockNumber()) {
       return fail(Error.MARKET_NOT_FRESH, FailureInfo.SET_ADMIN_FEE_FRESH_CHECK);
@@ -1218,26 +1203,16 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
   }
 
   /**
-   * @notice accrues interest and sets a new reserve factor for the protocol using _setReserveFactorFresh
-   * @dev Admin function to accrue interest and set a new reserve factor
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _setReserveFactor(uint256 newReserveFactorMantissa) external override nonReentrant(false) returns (uint256) {
-    uint256 error = accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted reserve factor change failed.
-      return fail(Error(error), FailureInfo.SET_RESERVE_FACTOR_ACCRUE_INTEREST_FAILED);
-    }
-    // _setReserveFactorFresh emits reserve-factor-specific logs on errors, so we don't need to.
-    return _setReserveFactorFresh(newReserveFactorMantissa);
-  }
-
-  /**
    * @notice Sets a new reserve factor for the protocol (*requires fresh interest accrual)
    * @dev Admin function to set a new reserve factor
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function _setReserveFactorFresh(uint256 newReserveFactorMantissa) internal returns (uint256) {
+  function _setReserveFactorFresh(uint256 newReserveFactorMantissa)
+    public
+    override
+    nonReentrant(false)
+    returns (uint256)
+  {
     // Check caller is admin
     if (!hasAdminRights()) {
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_RESERVE_FACTOR_ADMIN_CHECK);
@@ -1262,27 +1237,12 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
   }
 
   /**
-   * @notice Accrues interest and reduces Fuse fees by transferring to Fuse
-   * @param withdrawAmount Amount of fees to withdraw
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _withdrawFuseFees(uint256 withdrawAmount) external nonReentrant(false) returns (uint256) {
-    uint256 error = accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted Fuse fee withdrawal failed.
-      return fail(Error(error), FailureInfo.WITHDRAW_FUSE_FEES_ACCRUE_INTEREST_FAILED);
-    }
-    // _withdrawFuseFeesFresh emits reserve-reduction-specific logs on errors, so we don't need to.
-    return _withdrawFuseFeesFresh(withdrawAmount);
-  }
-
-  /**
    * @notice Reduces Fuse fees by transferring to Fuse
    * @dev Requires fresh interest accrual
    * @param withdrawAmount Amount of fees to withdraw
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function _withdrawFuseFeesFresh(uint256 withdrawAmount) internal returns (uint256) {
+  function _withdrawFuseFeesFresh(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
     // totalFuseFees - reduceAmount
     uint256 totalFuseFeesNew;
 
@@ -1318,27 +1278,12 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
   }
 
   /**
-   * @notice Accrues interest and reduces admin fees by transferring to admin
-   * @param withdrawAmount Amount of fees to withdraw
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _withdrawAdminFees(uint256 withdrawAmount) external nonReentrant(false) returns (uint256) {
-    uint256 error = accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted admin fee withdrawal failed.
-      return fail(Error(error), FailureInfo.WITHDRAW_ADMIN_FEES_ACCRUE_INTEREST_FAILED);
-    }
-    // _withdrawAdminFeesFresh emits reserve-reduction-specific logs on errors, so we don't need to.
-    return _withdrawAdminFeesFresh(withdrawAmount);
-  }
-
-  /**
    * @notice Reduces admin fees by transferring to admin
    * @dev Requires fresh interest accrual
    * @param withdrawAmount Amount of fees to withdraw
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function _withdrawAdminFeesFresh(uint256 withdrawAmount) internal returns (uint256) {
+  function _withdrawAdminFeesFresh(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
     // totalAdminFees - reduceAmount
     uint256 totalAdminFeesNew;
 
@@ -1374,28 +1319,17 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
   }
 
   /**
-   * @notice accrues interest and updates the interest rate model using _setInterestRateModelFresh
-   * @dev Admin function to accrue interest and update the interest rate model
-   * @param newInterestRateModel the new interest rate model to use
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _setInterestRateModel(InterestRateModel newInterestRateModel) public override returns (uint256) {
-    uint256 error = accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted change of interest rate model failed
-      return fail(Error(error), FailureInfo.SET_INTEREST_RATE_MODEL_ACCRUE_INTEREST_FAILED);
-    }
-    // _setInterestRateModelFresh emits interest-rate-model-update-specific logs on errors, so we don't need to.
-    return _setInterestRateModelFresh(newInterestRateModel);
-  }
-
-  /**
    * @notice updates the interest rate model (*requires fresh interest accrual)
    * @dev Admin function to update the interest rate model
    * @param newInterestRateModel the new interest rate model to use
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function _setInterestRateModelFresh(InterestRateModel newInterestRateModel) internal returns (uint256) {
+  function _setInterestRateModelFresh(InterestRateModel newInterestRateModel)
+    public
+    override
+    nonReentrant(false)
+    returns (uint256)
+  {
     // Used to store old model for use in the event that is emitted on success
     InterestRateModel oldInterestRateModel;
 
@@ -1422,21 +1356,6 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     emit NewMarketInterestRateModel(oldInterestRateModel, newInterestRateModel);
 
     return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice updates the cToken ERC20 name and symbol
-   * @dev Admin function to update the cToken ERC20 name and symbol
-   * @param _name the new ERC20 token name to use
-   * @param _symbol the new ERC20 token symbol to use
-   */
-  function _setNameAndSymbol(string calldata _name, string calldata _symbol) external {
-    // Check caller is admin
-    require(hasAdminRights(), "!admin");
-
-    // Set ERC20 name and symbol
-    name = _name;
-    symbol = _symbol;
   }
 
   /*** Safe Token ***/
