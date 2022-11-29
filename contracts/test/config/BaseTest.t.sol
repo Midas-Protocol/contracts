@@ -44,18 +44,20 @@ abstract contract BaseTest is Test {
 
     try vm.envUint("TEST_RUN_LEVEL") returns (uint256 level) {
       runLevel = level;
+      emit log("level");
+      emit log_uint(level);
     } catch {
       emit log("failed to get env param TEST_RUN_LEVEL");
     }
 
+    emit log("testImportance");
+    emit log_uint(testImportance);
+    emit log("runLevel");
+    emit log_uint(runLevel);
     if (testImportance >= runLevel) {
       _;
     } else {
       emit log("not running the test");
-      emit log("testImportance");
-      emit log_uint(testImportance);
-      emit log("runLevel");
-      emit log_uint(runLevel);
     }
   }
 
