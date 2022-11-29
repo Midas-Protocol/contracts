@@ -10,7 +10,7 @@ abstract contract CErc20Token is ERC20 {
   function underlying() external view virtual returns (address);
 }
 
-interface PriceOracle {
+interface IPriceOracle {
   function getUnderlyingPrice(CErc20Token cToken) external view returns (uint256);
 
   function price(address underlying) external view returns (uint256);
@@ -21,7 +21,7 @@ interface IComptroller {
 
   function getAllMarkets() external view returns (CErc20Token[] memory);
 
-  function oracle() external view returns (PriceOracle);
+  function oracle() external view returns (IPriceOracle);
 
   function admin() external returns (address);
 
@@ -52,7 +52,7 @@ contract MidasFlywheelLensRouter {
     MidasFlywheelCore[] memory flywheels = comptroller.getRewardsDistributors();
     address[] memory rewardTokens = new address[](flywheels.length);
     uint256[] memory rewardTokenPrices = new uint256[](flywheels.length);
-    PriceOracle oracle = comptroller.oracle();
+    IPriceOracle oracle = comptroller.oracle();
 
     MarketRewardsInfo[] memory infoList = new MarketRewardsInfo[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
