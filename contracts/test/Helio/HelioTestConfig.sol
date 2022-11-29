@@ -12,7 +12,7 @@ contract HelioTestConfigStorage is ITestConfigStorage {
   HelioTestConfig[] internal testConfigs;
 
   constructor() {
-    // PAR/jEUR
+    // HAY
     testConfigs.push(
       HelioTestConfig(0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5, 0x0a1Fd12F73432928C190CAF0810b3B767A59717e)
     );
