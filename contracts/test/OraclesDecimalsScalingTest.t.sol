@@ -20,7 +20,6 @@ contract OraclesDecimalsScalingTest is BaseTest {
     fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
   }
 
-  // TODO just loop through the forks
   function testBsc() public fork(BSC_MAINNET) {
     testOraclesDecimals();
   }
