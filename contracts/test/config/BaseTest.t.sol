@@ -36,24 +36,12 @@ abstract contract BaseTest is Test {
   modifier importance(uint256 testImportance) {
     uint256 runLevel = NORMAL;
 
-    try vm.envString("GH_ACTION") returns (string memory ghAction) {
-      emit log(ghAction);
-    } catch {
-      emit log("failed to get env param GH_ACTION");
-    }
-
     try vm.envUint("TEST_RUN_LEVEL") returns (uint256 level) {
       runLevel = level;
-      emit log("level");
-      emit log_uint(level);
     } catch {
       emit log("failed to get env param TEST_RUN_LEVEL");
     }
 
-    emit log("testImportance");
-    emit log_uint(testImportance);
-    emit log("runLevel");
-    emit log_uint(runLevel);
     if (testImportance >= runLevel) {
       _;
     } else {
