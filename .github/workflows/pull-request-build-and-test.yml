@@ -53,7 +53,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: "~/.foundry/cache"
-          key: rpc-cache-${{ hashFiles('rpc-cache-keyfile') }}
+          key: rpc-cache-bsc-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests for BSC mainnet
         run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test'
@@ -84,7 +84,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: "~/.foundry/cache"
-          key: rpc-cache-${{ hashFiles('rpc-cache-keyfile') }}
+          key: rpc-cache-polygon-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests for Polygon
         run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test'
@@ -115,7 +115,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: "~/.foundry/cache"
-          key: rpc-cache-${{ hashFiles('rpc-cache-keyfile') }}
+          key: rpc-cache-moonbeam-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests for Moonbeam
         run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test'
@@ -146,7 +146,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: "~/.foundry/cache"
-          key: rpc-cache-${{ hashFiles('rpc-cache-keyfile') }}
+          key: rpc-cache-arbitrum-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests for Arbitrum One
         run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test'
@@ -177,7 +177,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: "~/.foundry/cache"
-          key: rpc-cache-${{ hashFiles('rpc-cache-keyfile') }}
+          key: rpc-cache-neon-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests for Neon devnet
         run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test'
@@ -208,7 +208,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: "~/.foundry/cache"
-          key: rpc-cache-${{ hashFiles('rpc-cache-keyfile') }}
+          key: rpc-cache-evmos-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests for Evmos mainnet
         run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test'
@@ -239,7 +239,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: "~/.foundry/cache"
-          key: rpc-cache-${{ hashFiles('rpc-cache-keyfile') }}
+          key: rpc-cache-fantom-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests for Fantom Opera
         run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test'
@@ -270,7 +270,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: "~/.foundry/cache"
-          key: rpc-cache-${{ hashFiles('rpc-cache-keyfile') }}
+          key: rpc-cache-chapel-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests for BSC testnet
         run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test'
@@ -299,7 +299,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: "~/.foundry/cache"
-          key: rpc-cache-${{ hashFiles('rpc-cache-keyfile') }}
+          key: rpc-cache-local-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests locally
         run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test'
