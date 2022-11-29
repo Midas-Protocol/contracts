@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../midas/DiamondExtension.sol";
-import "./CTokenInterfaces.sol";
-import "./ErrorReporter.sol";
-import "./Exponential.sol";
-import "./CDelegateInterface.sol";
+import { DiamondExtension } from "../midas/DiamondExtension.sol";
+import { CTokenErc20Interface, ComptrollerV3Storage } from "./CTokenInterfaces.sol";
+import { TokenErrorReporter } from "./ErrorReporter.sol";
+import { Exponential } from "./Exponential.sol";
+import { CDelegationStorage } from "./CDelegateInterface.sol";
 
 contract CTokenFirstExtension is
   CDelegationStorage,
