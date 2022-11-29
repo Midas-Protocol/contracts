@@ -50,6 +50,12 @@ abstract contract BaseTest is Test {
 
     if (testImportance >= runLevel) {
       _;
+    } else {
+      emit log("not running the test");
+      emit log("testImportance");
+      emit log_uint(testImportance);
+      emit log("runLevel");
+      emit log_uint(runLevel);
     }
   }
 
