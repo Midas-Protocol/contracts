@@ -167,7 +167,7 @@ contract CTokenStorage is CTokenAdminStorage {
 
 abstract contract CTokenErc20Interface is CTokenStorage {
   /**
-   * @notice EIP20 Transfer event
+   * @notice EIP20 Transfer event - duplicated in CTokenInterface
    */
   event Transfer(address indexed from, address indexed to, uint256 amount);
 
@@ -198,14 +198,14 @@ abstract contract CTokenErc20Interface is CTokenStorage {
 }
 
 abstract contract CTokenInterface is CTokenStorage {
+  /**
+   * @notice EIP20 Transfer event - duplicated in CTokenErc20Interface
+   */
+  event Transfer(address indexed from, address indexed to, uint256 amount);
+
   function asCTokenErc20Interface() public view returns (CTokenErc20Interface) {
     return CTokenErc20Interface(address(this));
   }
-
-  // TODO REMOVE
-  event Transfer(address indexed from, address indexed to, uint256 amount);
-
-  /// TODO REMOVE
 
   /**
    * @notice Indicator that this is a CToken contract (for inspection)
