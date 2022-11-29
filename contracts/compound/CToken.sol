@@ -1010,7 +1010,10 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     require(amountSeizeError == uint256(Error.NO_ERROR), "LIQUIDATE_COMPTROLLER_CALCULATE_AMOUNT_SEIZE_FAILED");
 
     /* Revert if borrower collateral token balance < seizeTokens */
-    require(cTokenCollateral.asCTokenExtensionInterface().balanceOf(borrower) >= seizeTokens, "LIQUIDATE_SEIZE_TOO_MUCH");
+    require(
+      cTokenCollateral.asCTokenExtensionInterface().balanceOf(borrower) >= seizeTokens,
+      "LIQUIDATE_SEIZE_TOO_MUCH"
+    );
 
     // If this is also the collateral, run seizeInternal to avoid re-entrancy, otherwise make an external call
     uint256 seizeError;
