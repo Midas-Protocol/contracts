@@ -2,11 +2,12 @@
 pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../midas/DiamondExtension.sol";
-import { CTokenExtensionInterface, ComptrollerV3Storage } from "./CTokenInterfaces.sol";
+import { CTokenExtensionInterface, ComptrollerV3Storage, UnitrollerAdminStorage } from "./CTokenInterfaces.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { CDelegationStorage } from "./CDelegateInterface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
+import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 
 contract CTokenFirstExtension is
   CDelegationStorage,
@@ -164,6 +165,8 @@ contract CTokenFirstExtension is
     return accountTokens[owner];
   }
 
+  /*** Admin Functions ***/
+
   /**
    * @notice updates the cToken ERC20 name and symbol
    * @dev Admin function to update the cToken ERC20 name and symbol
@@ -184,14 +187,34 @@ contract CTokenFirstExtension is
    * @dev Admin function to accrue interest and set a new reserve factor
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function _setReserveFactor(uint256 newReserveFactorMantissa) external override returns (uint256) {
+  function _setReserveFactor(uint256 newReserveFactorMantissa) external override nonReentrant(false) returns (uint256) {
     uint256 error = asCTokenInterface().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted reserve factor change failed.
       return fail(Error(error), FailureInfo.SET_RESERVE_FACTOR_ACCRUE_INTEREST_FAILED);
     }
-    // _setReserveFactorFresh emits reserve-factor-specific logs on errors, so we don't need to.
-    return asCTokenInterface()._setReserveFactorFresh(newReserveFactorMantissa);
+
+    // Check caller is admin
+    if (!hasAdminRights()) {
+      return fail(Error.UNAUTHORIZED, FailureInfo.SET_RESERVE_FACTOR_ADMIN_CHECK);
+    }
+
+    // Verify market's block number equals current block number
+    if (accrualBlockNumber != block.number) {
+      return fail(Error.MARKET_NOT_FRESH, FailureInfo.SET_RESERVE_FACTOR_FRESH_CHECK);
+    }
+
+    // Check newReserveFactor ≤ maxReserveFactor
+    if (add_(add_(newReserveFactorMantissa, adminFeeMantissa), fuseFeeMantissa) > reserveFactorPlusFeesMaxMantissa) {
+      return fail(Error.BAD_INPUT, FailureInfo.SET_RESERVE_FACTOR_BOUNDS_CHECK);
+    }
+
+    uint256 oldReserveFactorMantissa = reserveFactorMantissa;
+    reserveFactorMantissa = newReserveFactorMantissa;
+
+    emit NewReserveFactor(oldReserveFactorMantissa, newReserveFactorMantissa);
+
+    return uint256(Error.NO_ERROR);
   }
 
   /**
@@ -199,44 +222,55 @@ contract CTokenFirstExtension is
    * @dev Admin function to accrue interest and set a new admin fee
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function _setAdminFee(uint256 newAdminFeeMantissa) external override returns (uint256) {
+  function _setAdminFee(uint256 newAdminFeeMantissa) external override nonReentrant(false) returns (uint256) {
     uint256 error = asCTokenInterface().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted admin fee change failed.
       return fail(Error(error), FailureInfo.SET_ADMIN_FEE_ACCRUE_INTEREST_FAILED);
     }
-    // _setAdminFeeFresh emits reserve-factor-specific logs on errors, so we don't need to.
-    return asCTokenInterface()._setAdminFeeFresh(newAdminFeeMantissa);
-  }
 
-  /**
-   * @notice Accrues interest and reduces Fuse fees by transferring to Fuse
-   * @param withdrawAmount Amount of fees to withdraw
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _withdrawFuseFees(uint256 withdrawAmount) external override returns (uint256) {
-    uint256 error = asCTokenInterface().accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted Fuse fee withdrawal failed.
-      return fail(Error(error), FailureInfo.WITHDRAW_FUSE_FEES_ACCRUE_INTEREST_FAILED);
+    // Verify market's block number equals current block number
+    if (accrualBlockNumber != block.number) {
+      return fail(Error.MARKET_NOT_FRESH, FailureInfo.SET_ADMIN_FEE_FRESH_CHECK);
     }
-    // _withdrawFuseFeesFresh emits reserve-reduction-specific logs on errors, so we don't need to.
-    return asCTokenInterface()._withdrawFuseFeesFresh(withdrawAmount);
-  }
 
-  /**
-   * @notice Accrues interest and reduces admin fees by transferring to admin
-   * @param withdrawAmount Amount of fees to withdraw
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _withdrawAdminFees(uint256 withdrawAmount) external override returns (uint256) {
-    uint256 error = asCTokenInterface().accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted admin fee withdrawal failed.
-      return fail(Error(error), FailureInfo.WITHDRAW_ADMIN_FEES_ACCRUE_INTEREST_FAILED);
+    // Sanitize newAdminFeeMantissa
+    if (newAdminFeeMantissa == type(uint256).max) newAdminFeeMantissa = adminFeeMantissa;
+
+    // Get latest Fuse fee
+    uint256 newFuseFeeMantissa = IFuseFeeDistributor(fuseAdmin).interestFeeRate();
+
+    // Check reserveFactorMantissa + newAdminFeeMantissa + newFuseFeeMantissa ≤ reserveFactorPlusFeesMaxMantissa
+    if (add_(add_(reserveFactorMantissa, newAdminFeeMantissa), newFuseFeeMantissa) > reserveFactorPlusFeesMaxMantissa) {
+      return fail(Error.BAD_INPUT, FailureInfo.SET_ADMIN_FEE_BOUNDS_CHECK);
     }
-    // _withdrawAdminFeesFresh emits reserve-reduction-specific logs on errors, so we don't need to.
-    return asCTokenInterface()._withdrawAdminFeesFresh(withdrawAmount);
+
+    // If setting admin fee
+    if (adminFeeMantissa != newAdminFeeMantissa) {
+      // Check caller is admin
+      if (!hasAdminRights()) {
+        return fail(Error.UNAUTHORIZED, FailureInfo.SET_ADMIN_FEE_ADMIN_CHECK);
+      }
+
+      // Set admin fee
+      uint256 oldAdminFeeMantissa = adminFeeMantissa;
+      adminFeeMantissa = newAdminFeeMantissa;
+
+      // Emit event
+      emit NewAdminFee(oldAdminFeeMantissa, newAdminFeeMantissa);
+    }
+
+    // If setting Fuse fee
+    if (fuseFeeMantissa != newFuseFeeMantissa) {
+      // Set Fuse fee
+      uint256 oldFuseFeeMantissa = fuseFeeMantissa;
+      fuseFeeMantissa = newFuseFeeMantissa;
+
+      // Emit event
+      emit NewFuseFee(oldFuseFeeMantissa, newFuseFeeMantissa);
+    }
+
+    return uint256(Error.NO_ERROR);
   }
 
   /**
@@ -245,14 +279,32 @@ contract CTokenFirstExtension is
    * @param newInterestRateModel the new interest rate model to use
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function _setInterestRateModel(InterestRateModel newInterestRateModel) public override returns (uint256) {
+  function _setInterestRateModel(InterestRateModel newInterestRateModel)
+    public
+    override
+    nonReentrant(false)
+    returns (uint256)
+  {
     uint256 error = asCTokenInterface().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted change of interest rate model failed
       return fail(Error(error), FailureInfo.SET_INTEREST_RATE_MODEL_ACCRUE_INTEREST_FAILED);
     }
-    // _setInterestRateModelFresh emits interest-rate-model-update-specific logs on errors, so we don't need to.
-    return asCTokenInterface()._setInterestRateModelFresh(newInterestRateModel);
+
+    if (!hasAdminRights()) {
+      return fail(Error.UNAUTHORIZED, FailureInfo.SET_INTEREST_RATE_MODEL_OWNER_CHECK);
+    }
+
+    if (accrualBlockNumber != block.number) {
+      return fail(Error.MARKET_NOT_FRESH, FailureInfo.SET_INTEREST_RATE_MODEL_FRESH_CHECK);
+    }
+
+    require(newInterestRateModel.isInterestRateModel(), "!notIrm");
+
+    InterestRateModel oldInterestRateModel = interestRateModel;
+    interestRateModel = newInterestRateModel;
+    emit NewMarketInterestRateModel(oldInterestRateModel, newInterestRateModel);
+
+    return uint256(Error.NO_ERROR);
   }
 
   /**

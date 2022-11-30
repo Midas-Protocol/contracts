@@ -60,24 +60,40 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     comptroller = comptroller_;
 
     // Initialize block number and borrow index (block number mocks depend on comptroller being set)
-    accrualBlockNumber = getBlockNumber();
+    accrualBlockNumber = block.number;
     borrowIndex = mantissaOne;
 
     // Set the interest rate model (depends on block number / borrow index)
-    uint256 err = _setInterestRateModelFresh(interestRateModel_);
-    require(err == uint256(Error.NO_ERROR), "!irm:set");
+    require(interestRateModel_.isInterestRateModel(), "!notIrm");
+    interestRateModel = interestRateModel_;
+    emit NewMarketInterestRateModel(InterestRateModel(address(0)), interestRateModel_);
 
     name = name_;
     symbol = symbol_;
     decimals = decimals_;
 
     // Set reserve factor
-    err = _setReserveFactorFresh(reserveFactorMantissa_);
-    require(err == uint256(Error.NO_ERROR), "!rf:set");
+    // Check newReserveFactor ≤ maxReserveFactor
+    require(
+      reserveFactorMantissa_ + adminFeeMantissa + fuseFeeMantissa <= reserveFactorPlusFeesMaxMantissa,
+      "!rf:set"
+    );
+    reserveFactorMantissa = reserveFactorMantissa_;
+    emit NewReserveFactor(0, reserveFactorMantissa_);
 
     // Set admin fee
-    err = _setAdminFeeFresh(adminFeeMantissa_);
-    require(err == uint256(Error.NO_ERROR), "!adminFee:set");
+    // Sanitize adminFeeMantissa_
+    if (adminFeeMantissa_ == type(uint256).max) adminFeeMantissa_ = adminFeeMantissa;
+    // Get latest Fuse fee
+    uint256 newFuseFeeMantissa = IFuseFeeDistributor(fuseAdmin).interestFeeRate();
+    require(
+      reserveFactorMantissa + adminFeeMantissa_ + newFuseFeeMantissa <= reserveFactorPlusFeesMaxMantissa,
+      "!adminFee:set"
+    );
+    adminFeeMantissa = adminFeeMantissa_;
+    emit NewAdminFee(0, adminFeeMantissa_);
+    fuseFeeMantissa = newFuseFeeMantissa;
+    emit NewFuseFee(0, newFuseFeeMantissa);
 
     // The counter starts true to prevent changing it from zero to non-zero (i.e. smaller cost/refund)
     _notEntered = true;
@@ -133,14 +149,6 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
   }
 
   /**
-   * @dev Function to simply retrieve block number
-   *  This exists mainly for inheriting test contracts to stub this result.
-   */
-  function getBlockNumber() internal view returns (uint256) {
-    return block.number;
-  }
-
-  /**
    * @notice Returns the current per-block borrow interest rate for this cToken
    * @return The borrow interest rate per block, scaled by 1e18
    */
@@ -149,7 +157,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
       interestRateModel.getBorrowRate(
         getCashPrior(),
         totalBorrows,
-        add_(totalReserves, add_(totalAdminFees, totalFuseFees))
+        totalReserves + totalAdminFees + totalFuseFees
       );
   }
 
@@ -162,7 +170,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
       interestRateModel.getSupplyRate(
         getCashPrior(),
         totalBorrows,
-        add_(totalReserves, add_(totalAdminFees, totalFuseFees)),
+        totalReserves + totalAdminFees + totalFuseFees,
         reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
       );
   }
@@ -280,7 +288,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
       (mathErr, cashPlusBorrowsMinusReserves) = addThenSubUInt(
         totalCash,
         totalBorrows,
-        add_(totalReserves, add_(totalAdminFees, totalFuseFees))
+        totalReserves + totalAdminFees + totalFuseFees
       );
       if (mathErr != MathError.NO_ERROR) {
         return (mathErr, 0);
@@ -310,7 +318,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
    */
   function accrueInterest() public virtual override returns (uint256) {
     /* Remember the initial block number */
-    uint256 currentBlockNumber = getBlockNumber();
+    uint256 currentBlockNumber = block.number;
 
     /* Short-circuit accumulating 0 interest */
     if (accrualBlockNumber == currentBlockNumber) {
@@ -321,11 +329,11 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     uint256 cashPrior = getCashPrior();
 
     /* Calculate the current borrow interest rate */
-    uint256 totalFees = add_(totalAdminFees, totalFuseFees);
+    uint256 totalFees = totalAdminFees + totalFuseFees;
     uint256 borrowRateMantissa = interestRateModel.getBorrowRate(
       cashPrior,
       totalBorrows,
-      add_(totalReserves, totalFees)
+      totalReserves + totalFees
     );
     if (borrowRateMantissa > borrowRateMaxMantissa) {
       if (cashPrior > totalFees) revert("!borrowRate");
@@ -361,7 +369,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
 
     Exp memory simpleInterestFactor = mul_(Exp({ mantissa: borrowRateMantissa }), blockDelta);
     uint256 interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, totalBorrows);
-    uint256 totalBorrowsNew = add_(interestAccumulated, totalBorrows);
+    uint256 totalBorrowsNew = interestAccumulated + totalBorrows;
     uint256 totalReservesNew = mul_ScalarTruncateAddUInt(
       Exp({ mantissa: reserveFactorMantissa }),
       interestAccumulated,
@@ -437,7 +445,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     }
 
     /* Verify market's block number equals current block number */
-    if (accrualBlockNumber != getBlockNumber()) {
+    if (accrualBlockNumber != block.number) {
       return (fail(Error.MARKET_NOT_FRESH, FailureInfo.MINT_FRESHNESS_CHECK), 0);
     }
 
@@ -486,9 +494,9 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
      *  totalSupplyNew = totalSupply + mintTokens
      *  accountTokensNew = accountTokens[minter] + mintTokens
      */
-    vars.totalSupplyNew = add_(totalSupply, vars.mintTokens);
+    vars.totalSupplyNew = totalSupply + vars.mintTokens;
 
-    vars.accountTokensNew = add_(accountTokens[minter], vars.mintTokens);
+    vars.accountTokensNew = accountTokens[minter] + vars.mintTokens;
 
     /* We write previously calculated values into storage */
     totalSupply = vars.totalSupplyNew;
@@ -617,7 +625,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     }
 
     /* Verify market's block number equals current block number */
-    if (accrualBlockNumber != getBlockNumber()) {
+    if (accrualBlockNumber != block.number) {
       return fail(Error.MARKET_NOT_FRESH, FailureInfo.REDEEM_FRESHNESS_CHECK);
     }
 
@@ -704,7 +712,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     }
 
     /* Verify market's block number equals current block number */
-    if (accrualBlockNumber != getBlockNumber()) {
+    if (accrualBlockNumber != block.number) {
       return fail(Error.MARKET_NOT_FRESH, FailureInfo.BORROW_FRESHNESS_CHECK);
     }
 
@@ -842,7 +850,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     }
 
     /* Verify market's block number equals current block number */
-    if (accrualBlockNumber != getBlockNumber()) {
+    if (accrualBlockNumber != block.number) {
       return (fail(Error.MARKET_NOT_FRESH, FailureInfo.REPAY_BORROW_FRESHNESS_CHECK), 0);
     }
 
@@ -967,12 +975,12 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     }
 
     /* Verify market's block number equals current block number */
-    if (accrualBlockNumber != getBlockNumber()) {
+    if (accrualBlockNumber != block.number) {
       return (fail(Error.MARKET_NOT_FRESH, FailureInfo.LIQUIDATE_FRESHNESS_CHECK), 0);
     }
 
     /* Verify cTokenCollateral market's block number equals current block number */
-    if (cTokenCollateral.accrualBlockNumber() != getBlockNumber()) {
+    if (cTokenCollateral.accrualBlockNumber() != block.number) {
       return (fail(Error.MARKET_NOT_FRESH, FailureInfo.LIQUIDATE_COLLATERAL_FRESHNESS_CHECK), 0);
     }
 
@@ -1109,7 +1117,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
 
     vars.protocolSeizeTokens = mul_(seizeTokens, Exp({ mantissa: protocolSeizeShareMantissa }));
     vars.feeSeizeTokens = mul_(seizeTokens, Exp({ mantissa: feeSeizeShareMantissa }));
-    vars.liquidatorSeizeTokens = sub_(sub_(seizeTokens, vars.protocolSeizeTokens), vars.feeSeizeTokens);
+    vars.liquidatorSeizeTokens = seizeTokens - vars.protocolSeizeTokens - vars.feeSeizeTokens;
 
     (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateStoredInternal();
     require(vars.mathErr == MathError.NO_ERROR, "!exchangeRate");
@@ -1120,9 +1128,9 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     );
     vars.feeSeizeAmount = mul_ScalarTruncate(Exp({ mantissa: vars.exchangeRateMantissa }), vars.feeSeizeTokens);
 
-    vars.totalReservesNew = add_(totalReserves, vars.protocolSeizeAmount);
-    vars.totalSupplyNew = sub_(sub_(totalSupply, vars.protocolSeizeTokens), vars.feeSeizeTokens);
-    vars.totalFuseFeeNew = add_(totalFuseFees, vars.feeSeizeAmount);
+    vars.totalReservesNew = totalReserves + vars.protocolSeizeAmount;
+    vars.totalSupplyNew = totalSupply - vars.protocolSeizeTokens - vars.feeSeizeTokens;
+    vars.totalFuseFeeNew = totalFuseFees + vars.feeSeizeAmount;
 
     (vars.mathErr, vars.liquidatorTokensNew) = addUInt(accountTokens[liquidator], vars.liquidatorSeizeTokens);
     if (vars.mathErr != MathError.NO_ERROR) {
@@ -1153,214 +1161,6 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     return uint256(Error.NO_ERROR);
   }
 
-  /*** Admin Functions ***/
-
-  /**
-   * @notice Sets a new admin fee for the protocol (*requires fresh interest accrual)
-   * @dev Admin function to set a new admin fee
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _setAdminFeeFresh(uint256 newAdminFeeMantissa) public override nonReentrant(false) returns (uint256) {
-    // Verify market's block number equals current block number
-    if (accrualBlockNumber != getBlockNumber()) {
-      return fail(Error.MARKET_NOT_FRESH, FailureInfo.SET_ADMIN_FEE_FRESH_CHECK);
-    }
-
-    // Sanitize newAdminFeeMantissa
-    if (newAdminFeeMantissa == type(uint256).max) newAdminFeeMantissa = adminFeeMantissa;
-
-    // Get latest Fuse fee
-    uint256 newFuseFeeMantissa = IFuseFeeDistributor(fuseAdmin).interestFeeRate();
-
-    // Check reserveFactorMantissa + newAdminFeeMantissa + newFuseFeeMantissa ≤ reserveFactorPlusFeesMaxMantissa
-    if (add_(add_(reserveFactorMantissa, newAdminFeeMantissa), newFuseFeeMantissa) > reserveFactorPlusFeesMaxMantissa) {
-      return fail(Error.BAD_INPUT, FailureInfo.SET_ADMIN_FEE_BOUNDS_CHECK);
-    }
-
-    // If setting admin fee
-    if (adminFeeMantissa != newAdminFeeMantissa) {
-      // Check caller is admin
-      if (!hasAdminRights()) {
-        return fail(Error.UNAUTHORIZED, FailureInfo.SET_ADMIN_FEE_ADMIN_CHECK);
-      }
-
-      // Set admin fee
-      uint256 oldAdminFeeMantissa = adminFeeMantissa;
-      adminFeeMantissa = newAdminFeeMantissa;
-
-      // Emit event
-      emit NewAdminFee(oldAdminFeeMantissa, newAdminFeeMantissa);
-    }
-
-    // If setting Fuse fee
-    if (fuseFeeMantissa != newFuseFeeMantissa) {
-      // Set Fuse fee
-      uint256 oldFuseFeeMantissa = fuseFeeMantissa;
-      fuseFeeMantissa = newFuseFeeMantissa;
-
-      // Emit event
-      emit NewFuseFee(oldFuseFeeMantissa, newFuseFeeMantissa);
-    }
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Sets a new reserve factor for the protocol (*requires fresh interest accrual)
-   * @dev Admin function to set a new reserve factor
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _setReserveFactorFresh(uint256 newReserveFactorMantissa)
-    public
-    override
-    nonReentrant(false)
-    returns (uint256)
-  {
-    // Check caller is admin
-    if (!hasAdminRights()) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.SET_RESERVE_FACTOR_ADMIN_CHECK);
-    }
-
-    // Verify market's block number equals current block number
-    if (accrualBlockNumber != getBlockNumber()) {
-      return fail(Error.MARKET_NOT_FRESH, FailureInfo.SET_RESERVE_FACTOR_FRESH_CHECK);
-    }
-
-    // Check newReserveFactor ≤ maxReserveFactor
-    if (add_(add_(newReserveFactorMantissa, adminFeeMantissa), fuseFeeMantissa) > reserveFactorPlusFeesMaxMantissa) {
-      return fail(Error.BAD_INPUT, FailureInfo.SET_RESERVE_FACTOR_BOUNDS_CHECK);
-    }
-
-    uint256 oldReserveFactorMantissa = reserveFactorMantissa;
-    reserveFactorMantissa = newReserveFactorMantissa;
-
-    emit NewReserveFactor(oldReserveFactorMantissa, newReserveFactorMantissa);
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Reduces Fuse fees by transferring to Fuse
-   * @dev Requires fresh interest accrual
-   * @param withdrawAmount Amount of fees to withdraw
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _withdrawFuseFeesFresh(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
-    // totalFuseFees - reduceAmount
-    uint256 totalFuseFeesNew;
-
-    // We fail gracefully unless market's block number equals current block number
-    if (accrualBlockNumber != getBlockNumber()) {
-      return fail(Error.MARKET_NOT_FRESH, FailureInfo.WITHDRAW_FUSE_FEES_FRESH_CHECK);
-    }
-
-    // Fail gracefully if protocol has insufficient underlying cash
-    if (getCashPrior() < withdrawAmount) {
-      return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.WITHDRAW_FUSE_FEES_CASH_NOT_AVAILABLE);
-    }
-
-    // Check withdrawAmount ≤ fuseFees[n] (totalFuseFees)
-    if (withdrawAmount > totalFuseFees) {
-      return fail(Error.BAD_INPUT, FailureInfo.WITHDRAW_FUSE_FEES_VALIDATION);
-    }
-
-    /////////////////////////
-    // EFFECTS & INTERACTIONS
-    // (No safe failures beyond this point)
-
-    // We checked withdrawAmount <= totalFuseFees above, so this should never revert.
-    totalFuseFeesNew = sub_(totalFuseFees, withdrawAmount);
-
-    // Store fuseFees[n+1] = fuseFees[n] - withdrawAmount
-    totalFuseFees = totalFuseFeesNew;
-
-    // doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
-    doTransferOut(address(fuseAdmin), withdrawAmount);
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Reduces admin fees by transferring to admin
-   * @dev Requires fresh interest accrual
-   * @param withdrawAmount Amount of fees to withdraw
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _withdrawAdminFeesFresh(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
-    // totalAdminFees - reduceAmount
-    uint256 totalAdminFeesNew;
-
-    // We fail gracefully unless market's block number equals current block number
-    if (accrualBlockNumber != getBlockNumber()) {
-      return fail(Error.MARKET_NOT_FRESH, FailureInfo.WITHDRAW_ADMIN_FEES_FRESH_CHECK);
-    }
-
-    // Fail gracefully if protocol has insufficient underlying cash
-    if (getCashPrior() < withdrawAmount) {
-      return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.WITHDRAW_ADMIN_FEES_CASH_NOT_AVAILABLE);
-    }
-
-    // Check withdrawAmount ≤ adminFees[n] (totalAdminFees)
-    if (withdrawAmount > totalAdminFees) {
-      return fail(Error.BAD_INPUT, FailureInfo.WITHDRAW_ADMIN_FEES_VALIDATION);
-    }
-
-    /////////////////////////
-    // EFFECTS & INTERACTIONS
-    // (No safe failures beyond this point)
-
-    // We checked withdrawAmount <= totalAdminFees above, so this should never revert.
-    totalAdminFeesNew = sub_(totalAdminFees, withdrawAmount);
-
-    // Store adminFees[n+1] = adminFees[n] - withdrawAmount
-    totalAdminFees = totalAdminFeesNew;
-
-    // doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
-    doTransferOut(address(uint160(UnitrollerAdminStorage(address(comptroller)).admin())), withdrawAmount);
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice updates the interest rate model (*requires fresh interest accrual)
-   * @dev Admin function to update the interest rate model
-   * @param newInterestRateModel the new interest rate model to use
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _setInterestRateModelFresh(InterestRateModel newInterestRateModel)
-    public
-    override
-    nonReentrant(false)
-    returns (uint256)
-  {
-    // Used to store old model for use in the event that is emitted on success
-    InterestRateModel oldInterestRateModel;
-
-    // Check caller is admin
-    if (!hasAdminRights()) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.SET_INTEREST_RATE_MODEL_OWNER_CHECK);
-    }
-
-    // We fail gracefully unless market's block number equals current block number
-    if (accrualBlockNumber != getBlockNumber()) {
-      return fail(Error.MARKET_NOT_FRESH, FailureInfo.SET_INTEREST_RATE_MODEL_FRESH_CHECK);
-    }
-
-    // Track the market's current interest rate model
-    oldInterestRateModel = interestRateModel;
-
-    // Ensure invoke newInterestRateModel.isInterestRateModel() returns true
-    require(newInterestRateModel.isInterestRateModel(), "!notIrm");
-
-    // Set the interest rate model to newInterestRateModel
-    interestRateModel = newInterestRateModel;
-
-    // Emit NewMarketInterestRateModel(oldInterestRateModel, newInterestRateModel)
-    emit NewMarketInterestRateModel(oldInterestRateModel, newInterestRateModel);
-
-    return uint256(Error.NO_ERROR);
-  }
-
   /*** Safe Token ***/
 
   /**
@@ -1386,6 +1186,78 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
    *  If caller has checked protocol's balance, and verified it is >= amount, this should not revert in normal conditions.
    */
   function doTransferOut(address to, uint256 amount) internal virtual {}
+
+  /**
+   * @notice Accrues interest and reduces Fuse fees by transferring to Fuse
+   * @param withdrawAmount Amount of fees to withdraw
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function _withdrawFuseFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
+    uint256 error = accrueInterest();
+    if (error != uint256(Error.NO_ERROR)) {
+      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted Fuse fee withdrawal failed.
+      return fail(Error(error), FailureInfo.WITHDRAW_FUSE_FEES_ACCRUE_INTEREST_FAILED);
+    }
+
+    if (accrualBlockNumber != block.number) {
+      return fail(Error.MARKET_NOT_FRESH, FailureInfo.WITHDRAW_FUSE_FEES_FRESH_CHECK);
+    }
+
+    if (getCashPrior() < withdrawAmount) {
+      return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.WITHDRAW_FUSE_FEES_CASH_NOT_AVAILABLE);
+    }
+
+    if (withdrawAmount > totalFuseFees) {
+      return fail(Error.BAD_INPUT, FailureInfo.WITHDRAW_FUSE_FEES_VALIDATION);
+    }
+
+    /////////////////////////
+    // EFFECTS & INTERACTIONS
+    // (No safe failures beyond this point)
+
+    uint256 totalFuseFeesNew = totalFuseFees - withdrawAmount;
+    totalFuseFees = totalFuseFeesNew;
+
+    // doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
+    doTransferOut(address(fuseAdmin), withdrawAmount);
+
+    return uint256(Error.NO_ERROR);
+  }
+
+  /**
+   * @notice Accrues interest and reduces admin fees by transferring to admin
+   * @param withdrawAmount Amount of fees to withdraw
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function _withdrawAdminFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
+    uint256 error = accrueInterest();
+    if (error != uint256(Error.NO_ERROR)) {
+      return fail(Error(error), FailureInfo.WITHDRAW_ADMIN_FEES_ACCRUE_INTEREST_FAILED);
+    }
+
+    if (accrualBlockNumber != block.number) {
+      return fail(Error.MARKET_NOT_FRESH, FailureInfo.WITHDRAW_ADMIN_FEES_FRESH_CHECK);
+    }
+
+    // Fail gracefully if protocol has insufficient underlying cash
+    if (getCashPrior() < withdrawAmount) {
+      return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.WITHDRAW_ADMIN_FEES_CASH_NOT_AVAILABLE);
+    }
+
+    if (withdrawAmount > totalAdminFees) {
+      return fail(Error.BAD_INPUT, FailureInfo.WITHDRAW_ADMIN_FEES_VALIDATION);
+    }
+
+    /////////////////////////
+    // EFFECTS & INTERACTIONS
+    // (No safe failures beyond this point)
+    totalAdminFees = totalAdminFees - withdrawAmount;
+
+    // doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
+    doTransferOut(UnitrollerAdminStorage(address(comptroller)).admin(), withdrawAmount);
+
+    return uint256(Error.NO_ERROR);
+  }
 
   /**
    * @dev register a logic extension
