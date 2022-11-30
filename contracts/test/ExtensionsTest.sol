@@ -238,7 +238,7 @@ contract ExtensionsTest is BaseTest {
     asComptroller._toggleAutoImplementations(true);
 
     // auto upgrade
-    firstMarket.asCTokenExtensionInterface().accrueInterest();
+    CTokenExtensionInterface(address(firstMarket)).accrueInterest();
     emit log("new implementation");
     emit log_address(asDelegate.implementation());
 

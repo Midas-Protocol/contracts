@@ -301,7 +301,7 @@ contract DeployMarketsTest is Test {
 
     // trigger the auto implementations
     vm.prank(address(7));
-    cToken.asCTokenExtensionInterface().accrueInterest();
+    CTokenExtensionInterface(address(cToken)).accrueInterest();
 
     address implAfter = cToken.implementation();
 
@@ -393,7 +393,7 @@ contract DeployMarketsTest is Test {
 
     // trigger the auto implementations from a non-admin address
     vm.prank(address(7));
-    cToken.asCTokenExtensionInterface().accrueInterest();
+    CTokenExtensionInterface(address(cToken)).accrueInterest();
 
     address pluginImplAfter = address(cToken.plugin());
     address implAfter = cToken.implementation();

@@ -118,8 +118,8 @@ contract UniswapV3LiquidatorFunderTest is BaseTest {
     // some time passes, interest accrues and prices change
     {
       vm.roll(block.number + 100);
-      usdcCToken.asCTokenExtensionInterface().accrueInterest();
-      parCToken.asCTokenExtensionInterface().accrueInterest();
+      CTokenExtensionInterface(address(usdcCToken)).accrueInterest();
+      CTokenExtensionInterface(address(parCToken)).accrueInterest();
 
       MasterPriceOracle mpo = MasterPriceOracle(address(comptroller.oracle()));
       uint256 priceusdc = mpo.getUnderlyingPrice(ICToken(usdcMarketAddress));

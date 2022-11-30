@@ -119,10 +119,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
 
     MathError mErr;
 
-    (mErr, borrowBalance) = borrowBalanceStoredInternal(account);
-    if (mErr != MathError.NO_ERROR) {
-      return (uint256(Error.MATH_ERROR), 0, 0, 0);
-    }
+    borrowBalance = borrowBalanceStored(account);
 
     exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateStored();
 
@@ -145,17 +142,6 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
    * @return The calculated balance
    */
   function borrowBalanceStored(address account) public view override returns (uint256) {
-    (MathError err, uint256 result) = borrowBalanceStoredInternal(account);
-    require(err == MathError.NO_ERROR, "!borrowBalanceStored");
-    return result;
-  }
-
-  /**
-   * @notice Return the borrow balance of account based on stored data
-   * @param account The address whose balance should be calculated
-   * @return (error code, the calculated balance or 0 if error code is non-zero)
-   */
-  function borrowBalanceStoredInternal(address account) internal view returns (MathError, uint256) {
     /* Note: we do not assert that the market is up to date */
     MathError mathErr;
     uint256 principalTimesIndex;
@@ -168,23 +154,19 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
      * Rather than failing the calculation with a division by 0, we immediately return 0 in this case.
      */
     if (borrowSnapshot.principal == 0) {
-      return (MathError.NO_ERROR, 0);
+      return 0;
     }
 
     /* Calculate new borrow balance using the interest index:
      *  recentBorrowBalance = borrower.borrowBalance * market.borrowIndex / borrower.borrowIndex
      */
     (mathErr, principalTimesIndex) = mulUInt(borrowSnapshot.principal, borrowIndex);
-    if (mathErr != MathError.NO_ERROR) {
-      return (mathErr, 0);
-    }
+    require(mathErr == MathError.NO_ERROR, "!mulUInt overflow check failed");
 
     (mathErr, result) = divUInt(principalTimesIndex, borrowSnapshot.interestIndex);
-    if (mathErr != MathError.NO_ERROR) {
-      return (mathErr, 0);
-    }
+    require(mathErr == MathError.NO_ERROR, "!divUInt overflow check failed");
 
-    return (MathError.NO_ERROR, result);
+    return result;
   }
 
   /**
@@ -515,11 +497,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
      *  accountBorrowsNew = accountBorrows + borrowAmount
      *  totalBorrowsNew = totalBorrows + borrowAmount
      */
-    (vars.mathErr, vars.accountBorrows) = borrowBalanceStoredInternal(borrower);
-    if (vars.mathErr != MathError.NO_ERROR) {
-      return
-        failOpaque(Error.MATH_ERROR, FailureInfo.BORROW_ACCUMULATED_BALANCE_CALCULATION_FAILED, uint256(vars.mathErr));
-    }
+    vars.accountBorrows = borrowBalanceStored(borrower);
 
     (vars.mathErr, vars.accountBorrowsNew) = addUInt(vars.accountBorrows, borrowAmount);
     if (vars.mathErr != MathError.NO_ERROR) {
@@ -645,17 +623,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     vars.borrowerIndex = accountBorrows[borrower].interestIndex;
 
     /* We fetch the amount the borrower owes, with accumulated interest */
-    (vars.mathErr, vars.accountBorrows) = borrowBalanceStoredInternal(borrower);
-    if (vars.mathErr != MathError.NO_ERROR) {
-      return (
-        failOpaque(
-          Error.MATH_ERROR,
-          FailureInfo.REPAY_BORROW_ACCUMULATED_BALANCE_CALCULATION_FAILED,
-          uint256(vars.mathErr)
-        ),
-        0
-      );
-    }
+    vars.accountBorrows = borrowBalanceStored(borrower);
 
     /* If repayAmount == -1, repayAmount = accountBorrows */
     if (repayAmount == type(uint256).max) {
