@@ -16,7 +16,7 @@ contract ComptrollerTest is BaseTest {
 
   event Failure(uint256 error, uint256 info, uint256 detail);
 
-  function afterForkSetUp() internal override {
+  function setUp() public {
     comptroller = new Comptroller(payable(address(this)));
     flywheel = new MidasFlywheel();
     flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));

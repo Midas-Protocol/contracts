@@ -17,13 +17,17 @@ contract CTokenFirstExtension is
   DiamondExtension
 {
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 5;
+    uint8 fnsCount = 9;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
     functionSelectors[--fnsCount] = this.allowance.selector;
     functionSelectors[--fnsCount] = this.approve.selector;
     functionSelectors[--fnsCount] = this.balanceOf.selector;
+    functionSelectors[--fnsCount] = this._setAdminFee.selector;
+    functionSelectors[--fnsCount] = this._setInterestRateModel.selector;
+    functionSelectors[--fnsCount] = this._setNameAndSymbol.selector;
+    functionSelectors[--fnsCount] = this._setReserveFactor.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
