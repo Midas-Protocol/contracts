@@ -14,10 +14,7 @@ import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 
 contract HelioAssetTest is AbstractAssetTest {
-  address masterPriceOracle; // master price oracle
-
-  constructor() fork(BSC_MAINNET) {
-    masterPriceOracle = ap.getAddress("MasterPriceOracle");
+  function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new HelioERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new HelioTestConfigStorage()));
   }
@@ -25,12 +22,12 @@ contract HelioAssetTest is AbstractAssetTest {
   function setUpTestContract(bytes calldata testConfig) public override {
     (address asset, address jar) = abi.decode(testConfig, (address, address));
 
-    test.setUpWithPool(MasterPriceOracle(masterPriceOracle), ERC20Upgradeable(asset));
+    test.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(asset));
 
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override {
+  function testInitializedValues() public override fork(BSC_MAINNET) {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 

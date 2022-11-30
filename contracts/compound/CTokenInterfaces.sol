@@ -218,6 +218,8 @@ abstract contract CTokenExtensionInterface is CTokenBaseInterface {
 
   function balanceOf(address owner) external view virtual returns (uint256);
 
+  /*** Admin Functions ***/
+
   function _setReserveFactor(uint256 newReserveFactorMantissa) external virtual returns (uint256);
 
   function _setAdminFee(uint256 newAdminFeeMantissa) external virtual returns (uint256);
@@ -332,6 +334,8 @@ abstract contract CTokenInterface is CTokenBaseInterface {
     address borrower,
     uint256 seizeTokens
   ) external virtual returns (uint256);
+
+  /*** Admin Functions ***/
 
   function _withdrawAdminFees(uint256 withdrawAmount) external virtual returns (uint256);
 

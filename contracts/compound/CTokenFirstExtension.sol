@@ -209,7 +209,7 @@ contract CTokenFirstExtension is
     }
 
     // Check newReserveFactor ≤ maxReserveFactor
-    if (add_(add_(newReserveFactorMantissa, adminFeeMantissa), fuseFeeMantissa) > reserveFactorPlusFeesMaxMantissa) {
+    if (newReserveFactorMantissa + adminFeeMantissa + fuseFeeMantissa > reserveFactorPlusFeesMaxMantissa) {
       return fail(Error.BAD_INPUT, FailureInfo.SET_RESERVE_FACTOR_BOUNDS_CHECK);
     }
 
@@ -245,7 +245,7 @@ contract CTokenFirstExtension is
     uint256 newFuseFeeMantissa = IFuseFeeDistributor(fuseAdmin).interestFeeRate();
 
     // Check reserveFactorMantissa + newAdminFeeMantissa + newFuseFeeMantissa ≤ reserveFactorPlusFeesMaxMantissa
-    if (add_(add_(reserveFactorMantissa, newAdminFeeMantissa), newFuseFeeMantissa) > reserveFactorPlusFeesMaxMantissa) {
+    if (reserveFactorMantissa + newAdminFeeMantissa + newFuseFeeMantissa > reserveFactorPlusFeesMaxMantissa) {
       return fail(Error.BAD_INPUT, FailureInfo.SET_ADMIN_FEE_BOUNDS_CHECK);
     }
 
