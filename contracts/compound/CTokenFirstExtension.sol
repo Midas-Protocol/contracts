@@ -324,7 +324,11 @@ contract CTokenFirstExtension is
    */
   function borrowRatePerBlock() external view override returns (uint256) {
     return
-    interestRateModel.getBorrowRate(asCTokenInterface().getCash(), totalBorrows, totalReserves + totalAdminFees + totalFuseFees);
+      interestRateModel.getBorrowRate(
+        asCTokenInterface().getCash(),
+        totalBorrows,
+        totalReserves + totalAdminFees + totalFuseFees
+      );
   }
 
   /**
@@ -333,12 +337,12 @@ contract CTokenFirstExtension is
    */
   function supplyRatePerBlock() external view override returns (uint256) {
     return
-    interestRateModel.getSupplyRate(
-      asCTokenInterface().getCash(),
-      totalBorrows,
-      totalReserves + totalAdminFees + totalFuseFees,
-      reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
-    );
+      interestRateModel.getSupplyRate(
+        asCTokenInterface().getCash(),
+        totalBorrows,
+        totalReserves + totalAdminFees + totalFuseFees,
+        reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
+      );
   }
 
   /**
