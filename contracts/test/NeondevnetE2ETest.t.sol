@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./helpers/WithPool.sol";
-import "./config/BaseTest.t.sol";
-import "forge-std/Test.sol";
-import "../compound/CTokenInterfaces.sol";
+import { WithPool } from "./helpers/WithPool.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
@@ -17,9 +14,17 @@ import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
+import { IPriceOracle } from "../external/compound/IPriceOracle.sol";
 import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
-import "../external/uniswap/IUniswapV2Pair.sol";
-import "../external/uniswap/IUniswapV2Factory.sol";
+import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
+import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
+import { FusePoolLens } from "../FusePoolLens.sol";
+import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
+import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
+import { CErc20 } from "../compound/CErc20.sol";
+import { ICToken } from "../external/compound/ICToken.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
 
 contract MockWNeon is MockERC20 {
   constructor() MockERC20("test", "test", 18) {}
@@ -32,10 +37,10 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
   address moraToken = 0x6Ab1F83c0429A1322D7ECDFdDf54CE6D179d911f;
   address wtoken = 0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5;
 
-  constructor() WithPool() forkAtBlock(NEON_DEVNET, 159103730) {
+  constructor() WithPool() fork(NEON_DEVNET) {
     mpo = ap.getAddress("MasterPriceOracle");
     super.setUpWithPool(
-      MasterPriceOracle(mpo), // MasterPriceOracle
+      MasterPriceOracle(mpo),
       ERC20Upgradeable(moraToken) // MORA
     );
   }
@@ -61,19 +66,28 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
 
   function setUp() public {
     deal(address(underlyingToken), address(this), 10e18);
+    deal(wtoken, address(this), 10e18);
     setUpPool("neondevnet-test", false, 0.1e18, 1.1e18);
   }
 
   function testNeonDeployCErc20Delegate() public {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
+    deployCErc20Delegate(wtoken, "cWToken", "wtoken", 0.9e18);
 
     CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
-    CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
+    CErc20Delegate cToken = CErc20Delegate(address(allMarkets[0]));
+    CErc20Delegate cWToken = CErc20Delegate(address(allMarkets[1]));
+
     assertEq(cToken.name(), "cUnderlyingToken");
+    assertEq(cWToken.name(), "cWToken");
+
     underlyingToken.approve(address(cToken), 1e36);
-    address[] memory cTokens = new address[](1);
+    ERC20Upgradeable(wtoken).approve(address(cWToken), 1e36);
+
+    address[] memory cTokens = new address[](2);
     cTokens[0] = address(cToken);
+    cTokens[1] = address(cWToken);
     comptroller.enterMarkets(cTokens);
 
     vm.roll(1);
@@ -81,9 +95,13 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     assertEq(cToken.totalSupply(), 10e18 * 5);
     assertEq(underlyingToken.balanceOf(address(cToken)), 10e18);
 
-    cToken.borrow(1000);
-    assertEq(cToken.totalBorrows(), 1000);
-    assertEq(underlyingToken.balanceOf(address(this)), 1000);
+    cWToken.mint(10e18);
+    assertEq(cWToken.totalSupply(), 10e18 * 5);
+    assertEq(ERC20Upgradeable(wtoken).balanceOf(address(cWToken)), 10e18);
+
+    cWToken.borrow(1000);
+    assertEq(cWToken.totalBorrows(), 1000);
+    assertEq(ERC20Upgradeable(wtoken).balanceOf(address(this)), 1000);
   }
 
   function testNeonGetPoolAssetsData() public {
@@ -170,9 +188,9 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
 
     vars.price2 = priceOracle.getUnderlyingPrice(ICToken(address(cWNeonToken)));
     vm.mockCall(
-      mpo, // MPO
+      mpo,
       abi.encodeWithSelector(priceOracle.getUnderlyingPrice.selector, ICToken(address(cWNeonToken))),
-      abi.encode(vars.price2 / 1000)
+      abi.encode(vars.price2 / 10000)
     );
 
     vars.strategies = new IRedemptionStrategy[](0);
@@ -194,7 +212,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
       FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
         accountOne,
-        9e14,
+        8e13,
         ICErc20(address(cToken)),
         ICErc20(address(cWNeonToken)),
         flashSwapPair,

@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../../../oracles/MasterPriceOracle.sol";
-import "../../../oracles/default/UniswapTwapPriceOracleV2Factory.sol";
-import "../../../external/uniswap/IUniswapV2Factory.sol";
-import "../../config/BaseTest.t.sol";
+import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
+import { UniswapTwapPriceOracleV2Factory } from "../../../oracles/default/UniswapTwapPriceOracleV2Factory.sol";
+import { UniswapTwapPriceOracleV2Root } from "../../../oracles/default/UniswapTwapPriceOracleV2Root.sol";
+import { UniswapTwapPriceOracleV2 } from "../../../oracles/default/UniswapTwapPriceOracleV2.sol";
+import { IUniswapV2Factory } from "../../../external/uniswap/IUniswapV2Factory.sol";
+import { BaseTest } from "../../config/BaseTest.t.sol";
+import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
+import { IUniswapV2Pair } from "../../../external/uniswap/IUniswapV2Pair.sol";
+import { IUniswapV2Factory } from "../../../external/uniswap/IUniswapV2Factory.sol";
 
 contract TwapOraclesBaseTest is BaseTest {
   IUniswapV2Factory uniswapV2Factory;
@@ -18,7 +23,7 @@ contract TwapOraclesBaseTest is BaseTest {
   }
 
   // BOMB
-  function testBombTwapOraclePrice() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testBombTwapOraclePrice() public fork(BSC_MAINNET) {
     address baseToken = 0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c; // WBTC
     address testedAssetTokenAddress = 0x522348779DCb2911539e76A1042aA922F9C47Ee3; // BOMB
 

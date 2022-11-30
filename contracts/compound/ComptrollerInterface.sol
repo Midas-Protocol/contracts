@@ -5,6 +5,8 @@ abstract contract ComptrollerInterface {
   /// @notice Indicator that this is a Comptroller contract (for inspection)
   bool public constant isComptroller = true;
 
+  function getRewardsDistributors() external view virtual returns (address[] memory);
+
   function getMaxRedeemOrBorrow(
     address account,
     address cToken,
@@ -44,7 +46,7 @@ abstract contract ComptrollerInterface {
     uint256 borrowAmount
   ) external virtual returns (uint256);
 
-  function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external virtual returns (uint256);
+  function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external view virtual returns (uint256);
 
   function repayBorrowAllowed(
     address cToken,

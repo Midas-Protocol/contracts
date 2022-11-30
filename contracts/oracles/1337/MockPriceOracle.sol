@@ -35,7 +35,7 @@ contract MockPriceOracle is IPriceOracle, BasePriceOracle {
    * @dev Returns a boolean indicating if a price feed exists for the underlying asset.
    */
 
-  function hasPriceFeed(address underlying) external view returns (bool) {
+  function hasPriceFeed(address underlying) external pure returns (bool) {
     return true;
   }
 
@@ -72,21 +72,6 @@ contract MockPriceOracle is IPriceOracle, BasePriceOracle {
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
   function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
-    // Return 1e18 for ETH
-    if (cToken.isCEther()) return 1e18;
-
-    // Get underlying token address
-    address underlying = ICErc20(address(cToken)).underlying();
-
-    // Get price
     return 1e18;
-    // uint256 chainlinkPrice = _price(underlying);
-
-    // // Format and return price
-    // uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
-    // return
-    //   underlyingDecimals <= 18
-    //     ? uint256(chainlinkPrice) * (10**(18 - underlyingDecimals))
-    //     : uint256(chainlinkPrice) / (10**(underlyingDecimals - 18));
   }
 }

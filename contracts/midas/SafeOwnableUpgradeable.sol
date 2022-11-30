@@ -84,12 +84,4 @@ abstract contract SafeOwnableUpgradeable is OwnableUpgradeable {
     emit NewOwner(oldOwner, pendingOwner);
     emit NewPendingOwner(oldPendingOwner, pendingOwner);
   }
-
-  function renounceOwnership() public override onlyOwner {
-    revert("not used anymore");
-  }
-
-  function transferOwnership(address newOwner) public override onlyOwner {
-    revert("not used anymore");
-  }
 }

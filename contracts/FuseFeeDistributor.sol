@@ -13,6 +13,7 @@ import "./compound/CErc20PluginDelegate.sol";
 import "./midas/SafeOwnableUpgradeable.sol";
 import "./utils/PatchedStorage.sol";
 import "./oracles/BasePriceOracle.sol";
+import { DiamondExtension, DiamondBase } from "./midas/DiamondExtension.sol";
 
 /**
  * @title FuseFeeDistributor
@@ -464,5 +465,23 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   function _setCustomInterestFeeRate(address comptroller, int256 rate) external onlyOwner {
     require(rate <= 1e18, "Interest fee rate cannot be more than 100%.");
     customInterestFeeRates[comptroller] = rate;
+  }
+
+  mapping(address => DiamondExtension[]) public comptrollerExtensions;
+
+  function getComptrollerExtensions(address comptroller) external view returns (DiamondExtension[] memory) {
+    return comptrollerExtensions[comptroller];
+  }
+
+  function _setComptrollerExtensions(address comptroller, DiamondExtension[] calldata extensions) external onlyOwner {
+    comptrollerExtensions[comptroller] = extensions;
+  }
+
+  function _registerComptrollerExtension(
+    address payable pool,
+    DiamondExtension extensionToAdd,
+    DiamondExtension extensionToReplace
+  ) external onlyOwner {
+    DiamondBase(pool)._registerExtension(extensionToAdd, extensionToReplace);
   }
 }

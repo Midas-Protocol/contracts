@@ -39,7 +39,16 @@ jobs:
       MOONBEAM_MAINNET_RPC_URL: "${{ secrets.MOONBEAM_MAINNET_RPC_URL }}"
       ARBITRUM_MAINNET_RPC_URL: "${{ secrets.ARBITRUM_MAINNET_RPC_URL }}"
       NEON_DEVNET_RPC_URL: "${{ secrets.NEON_DEVNET_RPC_URL }}"
-      EVMOS_TESTNET_RPC_URL: "${{ secrets.EVMOS_TESTNET_RPC_URL }}"
+      EVMOS_MAINNET_RPC_URL: "${{ secrets.EVMOS_MAINNET_RPC_URL }}"
+      FANTOM_MAINNET_RPC_URL: "${{ secrets.FANTOM_MAINNET_RPC_URL }}"
+
+      BSC_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.BSC_MAINNET_ARCHIVE_RPC_URL }}"
+      POLYGON_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.POLYGON_MAINNET_ARCHIVE_RPC_URL }}"
+      MOONBEAM_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.MOONBEAM_MAINNET_ARCHIVE_RPC_URL }}"
+      ARBITRUM_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.ARBITRUM_MAINNET_ARCHIVE_RPC_URL }}"
+      NEON_DEVNET_ARCHIVE_RPC_URL: "${{ secrets.NEON_DEVNET_ARCHIVE_RPC_URL }}"
+      EVMOS_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.EVMOS_MAINNET_ARCHIVE_RPC_URL }}"
+      FANTOM_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.FANTOM_MAINNET_ARCHIVE_RPC_URL }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -61,4 +70,4 @@ jobs:
           key: rpc-cache-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests
-        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
+        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test'

@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
-import { Comptroller } from "../compound/Comptroller.sol";
 import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
+import { IComptroller } from "../external/compound/IComptroller.sol";
 
-import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { IERC20MetadataUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 
 contract OraclesDecimalsScalingTest is BaseTest {
   MasterPriceOracle mpo;
@@ -46,8 +46,8 @@ contract OraclesDecimalsScalingTest is BaseTest {
       FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
 
       for (uint8 i = 0; i < pools.length; i++) {
-        Comptroller comptroller = Comptroller(pools[i].comptroller);
-        CTokenInterface[] memory markets = comptroller.getAllMarkets();
+        IComptroller comptroller = IComptroller(pools[i].comptroller);
+        ICToken[] memory markets = comptroller.getAllMarkets();
         for (uint8 j = 0; j < markets.length; j++) {
           address marketAddress = address(markets[j]);
           CErc20Delegate market = CErc20Delegate(marketAddress);
@@ -60,9 +60,9 @@ contract OraclesDecimalsScalingTest is BaseTest {
           }
 
           uint256 oraclePrice = mpo.price(underlying);
-          uint256 scaledPrice = mpo.getUnderlyingPrice(ICToken(marketAddress));
+          uint256 scaledPrice = mpo.getUnderlyingPrice(markets[j]);
 
-          uint8 decimals = ERC20Upgradeable(underlying).decimals();
+          uint8 decimals = IERC20MetadataUpgradeable(underlying).decimals();
           uint256 expectedScaledPrice = decimals <= 18
             ? uint256(oraclePrice) * (10**(18 - decimals))
             : uint256(oraclePrice) / (10**(decimals - 18));
@@ -73,7 +73,7 @@ contract OraclesDecimalsScalingTest is BaseTest {
     }
   }
 
-  function isSkipped(address token) internal returns (bool) {
+  function isSkipped(address token) internal pure returns (bool) {
     return
       token == 0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080 || // xcDOT
       token == 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685 || // xcDOT-stDOT LP token
