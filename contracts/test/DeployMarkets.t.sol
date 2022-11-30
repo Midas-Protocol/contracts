@@ -29,8 +29,6 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 
-import { BaseTest } from "./config/BaseTest.t.sol";
-
 contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
   MockERC20 rewardToken;
@@ -303,7 +301,7 @@ contract DeployMarketsTest is Test {
 
     // trigger the auto implementations
     vm.prank(address(7));
-    cToken.accrueInterest();
+    cToken.asCTokenExtensionInterface().accrueInterest();
 
     address implAfter = cToken.implementation();
 
@@ -395,7 +393,7 @@ contract DeployMarketsTest is Test {
 
     // trigger the auto implementations from a non-admin address
     vm.prank(address(7));
-    cToken.accrueInterest();
+    cToken.asCTokenExtensionInterface().accrueInterest();
 
     address pluginImplAfter = address(cToken.plugin());
     address implAfter = cToken.implementation();

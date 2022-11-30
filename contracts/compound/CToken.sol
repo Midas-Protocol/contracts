@@ -97,19 +97,6 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
   }
 
   /**
-   * @notice Get the underlying balance of the `owner`
-   * @dev This also accrues interest in a transaction
-   * @param owner The address of the account to query
-   * @return The amount of underlying owned by `owner`
-   */
-  function balanceOfUnderlying(address owner) public override returns (uint256) {
-    Exp memory exchangeRate = Exp({ mantissa: exchangeRateCurrent() });
-    (MathError mErr, uint256 balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
-    require(mErr == MathError.NO_ERROR, "!balance");
-    return balance;
-  }
-
-  /**
    * @notice Get a snapshot of the account's balances, and the cached exchange rate
    * @dev This is used by comptroller to more efficiently perform liquidity checks.
    * @param account Address of the account to snapshot
@@ -137,44 +124,9 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
       return (uint256(Error.MATH_ERROR), 0, 0, 0);
     }
 
-    (mErr, exchangeRateMantissa) = exchangeRateStoredInternal();
-    if (mErr != MathError.NO_ERROR) {
-      return (uint256(Error.MATH_ERROR), 0, 0, 0);
-    }
+    exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateStored();
 
     return (uint256(Error.NO_ERROR), cTokenBalance, borrowBalance, exchangeRateMantissa);
-  }
-
-  /**
-   * @notice Returns the current per-block borrow interest rate for this cToken
-   * @return The borrow interest rate per block, scaled by 1e18
-   */
-  function borrowRatePerBlock() external view override returns (uint256) {
-    return
-      interestRateModel.getBorrowRate(getCashPrior(), totalBorrows, totalReserves + totalAdminFees + totalFuseFees);
-  }
-
-  /**
-   * @notice Returns the current per-block supply interest rate for this cToken
-   * @return The supply interest rate per block, scaled by 1e18
-   */
-  function supplyRatePerBlock() external view override returns (uint256) {
-    return
-      interestRateModel.getSupplyRate(
-        getCashPrior(),
-        totalBorrows,
-        totalReserves + totalAdminFees + totalFuseFees,
-        reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
-      );
-  }
-
-  /**
-   * @notice Returns the current total borrows plus accrued interest
-   * @return The total borrows with interest
-   */
-  function totalBorrowsCurrent() external override returns (uint256) {
-    require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
-    return totalBorrows;
   }
 
   /**
@@ -183,7 +135,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
    * @return The calculated balance
    */
   function borrowBalanceCurrent(address account) external override nonReentrant(false) returns (uint256) {
-    require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
+    require(asCTokenExtensionInterface().accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
     return borrowBalanceStored(account);
   }
 
@@ -194,7 +146,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
    */
   function borrowBalanceStored(address account) public view override returns (uint256) {
     (MathError err, uint256 result) = borrowBalanceStoredInternal(account);
-    require(err == MathError.NO_ERROR, "!borrowBalanceStoredInternal");
+    require(err == MathError.NO_ERROR, "!borrowBalanceStored");
     return result;
   }
 
@@ -236,161 +188,11 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
   }
 
   /**
-   * @notice Accrue interest then return the up-to-date exchange rate
-   * @return Calculated exchange rate scaled by 1e18
-   */
-  function exchangeRateCurrent() public override returns (uint256) {
-    require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
-    return exchangeRateStored();
-  }
-
-  /**
-   * @notice Calculates the exchange rate from the underlying to the CToken
-   * @dev This function does not accrue interest before calculating the exchange rate
-   * @return Calculated exchange rate scaled by 1e18
-   */
-  function exchangeRateStored() public view override returns (uint256) {
-    (MathError err, uint256 result) = exchangeRateStoredInternal();
-    require(err == MathError.NO_ERROR, "!exchangeRateStoredInternal");
-    return result;
-  }
-
-  /**
-   * @notice Calculates the exchange rate from the underlying to the CToken
-   * @dev This function does not accrue interest before calculating the exchange rate
-   * @return (error code, calculated exchange rate scaled by 1e18)
-   */
-  function exchangeRateStoredInternal() internal view returns (MathError, uint256) {
-    uint256 _totalSupply = totalSupply;
-    if (_totalSupply == 0) {
-      /*
-       * If there are no tokens minted:
-       *  exchangeRate = initialExchangeRate
-       */
-      return (MathError.NO_ERROR, initialExchangeRateMantissa);
-    } else {
-      /*
-       * Otherwise:
-       *  exchangeRate = (totalCash + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees)) / totalSupply
-       */
-      uint256 totalCash = getCashPrior();
-      uint256 cashPlusBorrowsMinusReserves;
-      Exp memory exchangeRate;
-      MathError mathErr;
-
-      (mathErr, cashPlusBorrowsMinusReserves) = addThenSubUInt(
-        totalCash,
-        totalBorrows,
-        totalReserves + totalAdminFees + totalFuseFees
-      );
-      if (mathErr != MathError.NO_ERROR) {
-        return (mathErr, 0);
-      }
-
-      (mathErr, exchangeRate) = getExp(cashPlusBorrowsMinusReserves, _totalSupply);
-      if (mathErr != MathError.NO_ERROR) {
-        return (mathErr, 0);
-      }
-
-      return (MathError.NO_ERROR, exchangeRate.mantissa);
-    }
-  }
-
-  /**
    * @notice Get cash balance of this cToken in the underlying asset
    * @return The quantity of underlying asset owned by this contract
    */
   function getCash() external view override returns (uint256) {
     return getCashPrior();
-  }
-
-  /**
-   * @notice Applies accrued interest to total borrows and reserves
-   * @dev This calculates interest accrued from the last checkpointed block
-   *   up to the current block and writes new checkpoint to storage.
-   */
-  function accrueInterest() public virtual override returns (uint256) {
-    /* Remember the initial block number */
-    uint256 currentBlockNumber = block.number;
-
-    /* Short-circuit accumulating 0 interest */
-    if (accrualBlockNumber == currentBlockNumber) {
-      return uint256(Error.NO_ERROR);
-    }
-
-    /* Read the previous values out of storage */
-    uint256 cashPrior = getCashPrior();
-
-    /* Calculate the current borrow interest rate */
-    uint256 totalFees = totalAdminFees + totalFuseFees;
-    uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, totalBorrows, totalReserves + totalFees);
-    if (borrowRateMantissa > borrowRateMaxMantissa) {
-      if (cashPrior > totalFees) revert("!borrowRate");
-      else borrowRateMantissa = borrowRateMaxMantissa;
-    }
-
-    /* Calculate the number of blocks elapsed since the last accrual */
-    (MathError mathErr, uint256 blockDelta) = subUInt(currentBlockNumber, accrualBlockNumber);
-    require(mathErr == MathError.NO_ERROR, "!blockDelta");
-
-    return finishInterestAccrual(currentBlockNumber, cashPrior, borrowRateMantissa, blockDelta);
-  }
-
-  /**
-   * @dev Split off from `accrueInterest` to avoid "stack too deep" error".
-   */
-  function finishInterestAccrual(
-    uint256 currentBlockNumber,
-    uint256 cashPrior,
-    uint256 borrowRateMantissa,
-    uint256 blockDelta
-  ) private returns (uint256) {
-    /*
-     * Calculate the interest accumulated into borrows and reserves and the new index:
-     *  simpleInterestFactor = borrowRate * blockDelta
-     *  interestAccumulated = simpleInterestFactor * totalBorrows
-     *  totalBorrowsNew = interestAccumulated + totalBorrows
-     *  totalReservesNew = interestAccumulated * reserveFactor + totalReserves
-     *  totalFuseFeesNew = interestAccumulated * fuseFee + totalFuseFees
-     *  totalAdminFeesNew = interestAccumulated * adminFee + totalAdminFees
-     *  borrowIndexNew = simpleInterestFactor * borrowIndex + borrowIndex
-     */
-
-    Exp memory simpleInterestFactor = mul_(Exp({ mantissa: borrowRateMantissa }), blockDelta);
-    uint256 interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, totalBorrows);
-    uint256 totalBorrowsNew = interestAccumulated + totalBorrows;
-    uint256 totalReservesNew = mul_ScalarTruncateAddUInt(
-      Exp({ mantissa: reserveFactorMantissa }),
-      interestAccumulated,
-      totalReserves
-    );
-    uint256 totalFuseFeesNew = mul_ScalarTruncateAddUInt(
-      Exp({ mantissa: fuseFeeMantissa }),
-      interestAccumulated,
-      totalFuseFees
-    );
-    uint256 totalAdminFeesNew = mul_ScalarTruncateAddUInt(
-      Exp({ mantissa: adminFeeMantissa }),
-      interestAccumulated,
-      totalAdminFees
-    );
-    uint256 borrowIndexNew = mul_ScalarTruncateAddUInt(simpleInterestFactor, borrowIndex, borrowIndex);
-
-    /////////////////////////
-    // EFFECTS & INTERACTIONS
-    // (No safe failures beyond this point)
-
-    /* We write the previously calculated values into storage */
-    accrualBlockNumber = currentBlockNumber;
-    borrowIndex = borrowIndexNew;
-    totalBorrows = totalBorrowsNew;
-    totalReserves = totalReservesNew;
-    totalFuseFees = totalFuseFeesNew;
-    totalAdminFees = totalAdminFeesNew;
-
-    /* We emit an AccrueInterest event */
-    emit AccrueInterest(cashPrior, interestAccumulated, borrowIndexNew, totalBorrowsNew);
-    return uint256(Error.NO_ERROR);
   }
 
   /**
@@ -400,7 +202,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
    * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
    */
   function mintInternal(uint256 mintAmount) internal nonReentrant(false) returns (uint256, uint256) {
-    uint256 error = accrueInterest();
+    uint256 error = asCTokenExtensionInterface().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
       return (fail(Error(error), FailureInfo.MINT_ACCRUE_INTEREST_FAILED), 0);
@@ -440,10 +242,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
 
     MintLocalVars memory vars;
 
-    (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateStoredInternal();
-    if (vars.mathErr != MathError.NO_ERROR) {
-      return (failOpaque(Error.MATH_ERROR, FailureInfo.MINT_EXCHANGE_RATE_READ_FAILED, uint256(vars.mathErr)), 0);
-    }
+    vars.exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateStored();
 
     // Check max supply
     // unused function
@@ -509,7 +308,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function redeemInternal(uint256 redeemTokens) internal nonReentrant(false) returns (uint256) {
-    uint256 error = accrueInterest();
+    uint256 error = asCTokenExtensionInterface().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
       return fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
@@ -525,7 +324,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function redeemUnderlyingInternal(uint256 redeemAmount) internal nonReentrant(false) returns (uint256) {
-    uint256 error = accrueInterest();
+    uint256 error = asCTokenExtensionInterface().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
       return fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
@@ -562,10 +361,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     RedeemLocalVars memory vars;
 
     /* exchangeRate = invoke Exchange Rate Stored() */
-    (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateStoredInternal();
-    if (vars.mathErr != MathError.NO_ERROR) {
-      return failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_EXCHANGE_RATE_READ_FAILED, uint256(vars.mathErr));
-    }
+    vars.exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateStored();
 
     if (redeemAmountIn == type(uint256).max) {
       redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, address(this), false);
@@ -672,7 +468,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function borrowInternal(uint256 borrowAmount) internal nonReentrant(false) returns (uint256) {
-    uint256 error = accrueInterest();
+    uint256 error = asCTokenExtensionInterface().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
       return fail(Error(error), FailureInfo.BORROW_ACCRUE_INTEREST_FAILED);
@@ -780,7 +576,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
    * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual repayment amount.
    */
   function repayBorrowInternal(uint256 repayAmount) internal nonReentrant(false) returns (uint256, uint256) {
-    uint256 error = accrueInterest();
+    uint256 error = asCTokenExtensionInterface().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
       return (fail(Error(error), FailureInfo.REPAY_BORROW_ACCRUE_INTEREST_FAILED), 0);
@@ -800,7 +596,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     nonReentrant(false)
     returns (uint256, uint256)
   {
-    uint256 error = accrueInterest();
+    uint256 error = asCTokenExtensionInterface().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
       return (fail(Error(error), FailureInfo.REPAY_BEHALF_ACCRUE_INTEREST_FAILED), 0);
@@ -920,13 +716,13 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     uint256 repayAmount,
     CTokenInterface cTokenCollateral
   ) internal nonReentrant(false) returns (uint256, uint256) {
-    uint256 error = accrueInterest();
+    uint256 error = asCTokenExtensionInterface().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted liquidation failed
       return (fail(Error(error), FailureInfo.LIQUIDATE_ACCRUE_BORROW_INTEREST_FAILED), 0);
     }
 
-    error = cTokenCollateral.accrueInterest();
+    error = cTokenCollateral.asCTokenExtensionInterface().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted liquidation failed
       return (fail(Error(error), FailureInfo.LIQUIDATE_ACCRUE_COLLATERAL_INTEREST_FAILED), 0);
@@ -1108,8 +904,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     vars.feeSeizeTokens = mul_(seizeTokens, Exp({ mantissa: feeSeizeShareMantissa }));
     vars.liquidatorSeizeTokens = seizeTokens - vars.protocolSeizeTokens - vars.feeSeizeTokens;
 
-    (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateStoredInternal();
-    require(vars.mathErr == MathError.NO_ERROR, "!exchangeRate");
+    vars.exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateStored();
 
     vars.protocolSeizeAmount = mul_ScalarTruncate(
       Exp({ mantissa: vars.exchangeRateMantissa }),
@@ -1182,7 +977,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _withdrawFuseFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
-    uint256 error = accrueInterest();
+    uint256 error = asCTokenExtensionInterface().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted Fuse fee withdrawal failed.
       return fail(Error(error), FailureInfo.WITHDRAW_FUSE_FEES_ACCRUE_INTEREST_FAILED);
@@ -1219,7 +1014,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _withdrawAdminFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
-    uint256 error = accrueInterest();
+    uint256 error = asCTokenExtensionInterface().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       return fail(Error(error), FailureInfo.WITHDRAW_ADMIN_FEES_ACCRUE_INTEREST_FAILED);
     }

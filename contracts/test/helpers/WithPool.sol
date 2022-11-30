@@ -18,7 +18,6 @@ import { InterestRateModel } from "../../compound/InterestRateModel.sol";
 import { FuseFeeDistributor } from "../../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
-import { FuseSafeLiquidator } from "../../FuseSafeLiquidator.sol";
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { FusePoolLens } from "../../FusePoolLens.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
@@ -38,7 +37,6 @@ contract WithPool {
 
   FuseFeeDistributor fuseAdmin;
   FusePoolDirectory fusePoolDirectory;
-  FuseSafeLiquidator liquidator;
   MasterPriceOracle priceOracle;
   FusePoolLens poolLens;
 

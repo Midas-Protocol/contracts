@@ -139,8 +139,8 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     // some time passes, interest accrues and prices change
     {
       vm.roll(block.number + 100);
-      cTokenBUSD.accrueInterest();
-      cTokenJBRL.accrueInterest();
+      cTokenBUSD.asCTokenExtensionInterface().accrueInterest();
+      cTokenJBRL.asCTokenExtensionInterface().accrueInterest();
 
       MasterPriceOracle mpo = MasterPriceOracle(address(comptroller.oracle()));
       uint256 priceBUSD = mpo.getUnderlyingPrice(ICToken(address(cTokenBUSD)));

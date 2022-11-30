@@ -202,6 +202,11 @@ abstract contract CTokenExtensionInterface is CTokenBaseInterface {
    */
   event Approval(address indexed owner, address indexed spender, uint256 amount);
 
+  /**
+   * @notice Event emitted when interest is accrued
+   */
+  event AccrueInterest(uint256 cashPrior, uint256 interestAccumulated, uint256 borrowIndex, uint256 totalBorrows);
+
   /*** User Interface ***/
 
   function transfer(address dst, uint256 amount) external virtual returns (bool);
@@ -225,6 +230,20 @@ abstract contract CTokenExtensionInterface is CTokenBaseInterface {
   function _setAdminFee(uint256 newAdminFeeMantissa) external virtual returns (uint256);
 
   function _setInterestRateModel(InterestRateModel newInterestRateModel) external virtual returns (uint256);
+
+  function borrowRatePerBlock() external view virtual returns (uint256);
+
+  function supplyRatePerBlock() external view virtual returns (uint256);
+
+  function exchangeRateCurrent() public virtual returns (uint256);
+
+  function exchangeRateStored() public view virtual returns (uint256);
+
+  function accrueInterest() public virtual returns (uint256);
+
+  function totalBorrowsCurrent() external virtual returns (uint256);
+
+  function balanceOfUnderlying(address owner) external virtual returns (uint256);
 
   function asCTokenInterface() public view returns (CTokenInterface) {
     return CTokenInterface(address(this));
@@ -251,11 +270,6 @@ abstract contract CTokenInterface is CTokenBaseInterface {
   }
 
   /*** Market Events ***/
-
-  /**
-   * @notice Event emitted when interest is accrued
-   */
-  event AccrueInterest(uint256 cashPrior, uint256 interestAccumulated, uint256 borrowIndex, uint256 totalBorrows);
 
   /**
    * @notice Event emitted when tokens are minted
@@ -298,8 +312,6 @@ abstract contract CTokenInterface is CTokenBaseInterface {
    */
   event ReservesReduced(address admin, uint256 reduceAmount, uint256 newTotalReserves);
 
-  function balanceOfUnderlying(address owner) external virtual returns (uint256);
-
   function getAccountSnapshot(address account)
     external
     view
@@ -311,23 +323,11 @@ abstract contract CTokenInterface is CTokenBaseInterface {
       uint256
     );
 
-  function borrowRatePerBlock() external view virtual returns (uint256);
-
-  function supplyRatePerBlock() external view virtual returns (uint256);
-
-  function totalBorrowsCurrent() external virtual returns (uint256);
-
   function borrowBalanceCurrent(address account) external virtual returns (uint256);
 
   function borrowBalanceStored(address account) public view virtual returns (uint256);
 
-  function exchangeRateCurrent() public virtual returns (uint256);
-
-  function exchangeRateStored() public view virtual returns (uint256);
-
   function getCash() external view virtual returns (uint256);
-
-  function accrueInterest() public virtual returns (uint256);
 
   function seize(
     address liquidator,
