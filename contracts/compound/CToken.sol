@@ -74,10 +74,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
 
     // Set reserve factor
     // Check newReserveFactor ≤ maxReserveFactor
-    require(
-      reserveFactorMantissa_ + adminFeeMantissa + fuseFeeMantissa <= reserveFactorPlusFeesMaxMantissa,
-      "!rf:set"
-    );
+    require(reserveFactorMantissa_ + adminFeeMantissa + fuseFeeMantissa <= reserveFactorPlusFeesMaxMantissa, "!rf:set");
     reserveFactorMantissa = reserveFactorMantissa_;
     emit NewReserveFactor(0, reserveFactorMantissa_);
 
@@ -154,11 +151,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
    */
   function borrowRatePerBlock() external view override returns (uint256) {
     return
-      interestRateModel.getBorrowRate(
-        getCashPrior(),
-        totalBorrows,
-        totalReserves + totalAdminFees + totalFuseFees
-      );
+      interestRateModel.getBorrowRate(getCashPrior(), totalBorrows, totalReserves + totalAdminFees + totalFuseFees);
   }
 
   /**
@@ -330,11 +323,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
 
     /* Calculate the current borrow interest rate */
     uint256 totalFees = totalAdminFees + totalFuseFees;
-    uint256 borrowRateMantissa = interestRateModel.getBorrowRate(
-      cashPrior,
-      totalBorrows,
-      totalReserves + totalFees
-    );
+    uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, totalBorrows, totalReserves + totalFees);
     if (borrowRateMantissa > borrowRateMaxMantissa) {
       if (cashPrior > totalFees) revert("!borrowRate");
       else borrowRateMantissa = borrowRateMaxMantissa;
