@@ -24,7 +24,7 @@ import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
+import { CTokenInterface, CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
 
 contract MockWNeon is MockERC20 {
   constructor() MockERC20("test", "test", 18) {}
