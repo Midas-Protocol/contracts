@@ -213,6 +213,9 @@ contract ExtensionsTest is BaseTest {
     CErc20Delegate asDelegate = CErc20Delegate(address(firstMarket));
     emit log(asDelegate.contractType());
 
+    uint256 cashBefore = asDelegate.getCash();
+    assertGt(cashBefore, 0, "cash should be non-zero");
+
     address implBefore = asDelegate.implementation();
     emit log("implementation before");
     emit log_address(implBefore);
@@ -246,5 +249,9 @@ contract ExtensionsTest is BaseTest {
     address[] memory extensions = asDelegate._listExtensions();
     assertEq(extensions.length, 1, "the first extension should be added");
     assertEq(extensions[0], address(cErc20DelegateExtensions[0]), "the first extension should be the only extension");
+
+    uint256 cashAfter = asDelegate.getCash();
+    assertGt(cashAfter, 0, "cash should be non-zero");
+    assertEq(cashAfter, cashBefore, "cash should be the same");
   }
 }
