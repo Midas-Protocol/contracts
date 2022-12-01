@@ -216,31 +216,8 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   /**
    * @dev Whitelisted CEtherDelegate implementation contract addresses and `allowResign` values for each existing implementation.
    */
+  /// keep this in the storage to not break the layout
   mapping(address => mapping(address => mapping(bool => bool))) public cEtherDelegateWhitelist;
-
-  /**
-   * @dev Adds/removes CEtherDelegate implementations to the whitelist.
-   * @param oldImplementations The old `CEtherDelegate` implementation addresses to upgrade from for each `newImplementations` to upgrade to.
-   * @param newImplementations Array of `CEtherDelegate` implementations to be whitelisted/unwhitelisted.
-   * @param allowResign Array of `allowResign` values corresponding to `newImplementations` to be whitelisted/unwhitelisted.
-   * @param statuses Array of whitelist statuses corresponding to `newImplementations`.
-   */
-  function _editCEtherDelegateWhitelist(
-    address[] calldata oldImplementations,
-    address[] calldata newImplementations,
-    bool[] calldata allowResign,
-    bool[] calldata statuses
-  ) external onlyOwner {
-    require(
-      newImplementations.length > 0 &&
-        newImplementations.length == oldImplementations.length &&
-        newImplementations.length == allowResign.length &&
-        newImplementations.length == statuses.length,
-      "No CEtherDelegate implementations supplied or array lengths not equal."
-    );
-    for (uint256 i = 0; i < newImplementations.length; i++)
-      cEtherDelegateWhitelist[oldImplementations[i]][newImplementations[i]][allowResign[i]] = statuses[i];
-  }
 
   /**
    * @dev Latest Comptroller implementation for each existing implementation.
@@ -283,6 +260,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   /**
    * @dev Latest CEtherDelegate implementation for each existing implementation.
    */
+  /// keep this in the storage to not break the layout
   mapping(address => CDelegateUpgradeData) public _latestCEtherDelegate;
 
   /**
@@ -303,46 +281,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
       data.implementation != address(0)
         ? (data.implementation, data.allowResign, data.becomeImplementationData)
         : (oldImplementation, false, emptyBytes);
-  }
-
-  /**
-   * @dev Latest CEtherDelegate implementation for each existing implementation.
-   */
-  function latestCEtherDelegate(address oldImplementation)
-    external
-    view
-    returns (
-      address,
-      bool,
-      bytes memory
-    )
-  {
-    CDelegateUpgradeData memory data = _latestCEtherDelegate[oldImplementation];
-    bytes memory emptyBytes;
-    return
-      data.implementation != address(0)
-        ? (data.implementation, data.allowResign, data.becomeImplementationData)
-        : (oldImplementation, false, emptyBytes);
-  }
-
-  /**
-   * @dev Sets the latest `CEtherDelegate` upgrade implementation address and data.
-   * @param oldImplementation The old `CEtherDelegate` implementation address to upgrade from.
-   * @param newImplementation Latest `CEtherDelegate` implementation address.
-   * @param allowResign Whether or not `resignImplementation` should be called on the old implementation before upgrade.
-   * @param becomeImplementationData Data passed to the new implementation via `becomeImplementation` after upgrade.
-   */
-  function _setLatestCEtherDelegate(
-    address oldImplementation,
-    address newImplementation,
-    bool allowResign,
-    bytes calldata becomeImplementationData
-  ) external onlyOwner {
-    _latestCEtherDelegate[oldImplementation] = CDelegateUpgradeData(
-      newImplementation,
-      allowResign,
-      becomeImplementationData
-    );
   }
 
   /**

@@ -26,12 +26,6 @@ interface IFuseFeeDistributor {
     bool allowResign
   ) external view returns (bool);
 
-  function cEtherDelegateWhitelist(
-    address oldImplementation,
-    address newImplementation,
-    bool allowResign
-  ) external view returns (bool);
-
   function latestComptrollerImplementation(address oldImplementation) external view returns (address);
 
   function latestCErc20Delegate(address oldImplementation)
@@ -39,15 +33,6 @@ interface IFuseFeeDistributor {
     view
     returns (
       address cErc20Delegate,
-      bool allowResign,
-      bytes memory becomeImplementationData
-    );
-
-  function latestCEtherDelegate(address oldImplementation)
-    external
-    view
-    returns (
-      address cEtherDelegate,
       bool allowResign,
       bytes memory becomeImplementationData
     );
