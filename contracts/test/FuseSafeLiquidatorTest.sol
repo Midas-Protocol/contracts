@@ -156,19 +156,6 @@ contract FuseSafeLiquidatorTest is BaseTest {
     );
   }
 
-  struct LiquidationData {
-    ICErc20 debtMarket;
-    ICErc20 collateralMarket;
-    address outputToken;
-    uint256 repayAmount;
-    IRedemptionStrategy[] redemptionStrategies;
-    bytes[] redemptionStrategyData;
-    IFundsConversionStrategy[] debtFundingStrategies;
-    bytes[] debtFundingData;
-    address borrower;
-    uint256 borrowAmount;
-  }
-
   function testMoonbeamLiquidationTwo() public fork(MOONBEAM_MAINNET) {
     address xcDotAddress = 0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080; // 0
     IERC20Upgradeable xcDot = IERC20Upgradeable(xcDotAddress);
@@ -188,7 +175,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
 
     vm.mockCall(
       xcDotAddress,
-      abi.encodeWithSelector(xcDot.transfer.selector, 0x2fCa24E19C67070467927DDB85810fF766423e8e, 4274713836238),
+      abi.encodeWithSelector(xcDot.transfer.selector, 0x2fCa24E19C67070467927DDB85810fF766423e8e, 4003410624827),
       abi.encode(true)
     );
     vm.mockCall(
@@ -198,7 +185,7 @@ contract FuseSafeLiquidatorTest is BaseTest {
     );
     vm.mockCall(
       xcDotAddress,
-      abi.encodeWithSelector(xcDot.approve.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72, 4274713836238),
+      abi.encodeWithSelector(xcDot.approve.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72, 4003410624827),
       abi.encode(true)
     );
     vm.mockCall(
