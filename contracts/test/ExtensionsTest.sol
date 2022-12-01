@@ -11,7 +11,10 @@ import { Comptroller, ComptrollerV3Storage } from "../compound/Comptroller.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { CTokenInterface, CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
+import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
+import { IComptroller } from "../external/compound/IComptroller.sol";
+import { ICToken } from "../external/compound/ICToken.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -206,20 +209,35 @@ contract ExtensionsTest is BaseTest {
   }
 
   function testExistingCTokenExtensionUpgrade() public fork(BSC_MAINNET) {
-    Comptroller asComptroller = Comptroller(jFiatPoolAddress);
-    CTokenInterface[] memory allMarkets = asComptroller.getAllMarkets();
+    uint8 random = uint8(block.timestamp % 256);
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
 
-    CTokenInterface firstMarket = allMarkets[0];
-    CErc20Delegate asDelegate = CErc20Delegate(address(firstMarket));
-    emit log(asDelegate.contractType());
+    Comptroller somePool = Comptroller(pools[random % pools.length].comptroller);
+    CTokenInterface[] memory allMarkets = somePool.getAllMarkets();
 
-    uint256 cashBefore = asDelegate.getCash();
-    assertGt(cashBefore, 0, "cash should be non-zero");
+    CTokenInterface someMarket = allMarkets[random % allMarkets.length];
+    CErc20Delegate asDelegate = CErc20Delegate(address(someMarket));
+
+    emit log("pool");
+    emit log_address(address(somePool));
+    emit log("market");
+    emit log_address(address(someMarket));
+
+    _testExistingCTokenExtensionUpgrade(asDelegate);
+  }
+
+  function _testExistingCTokenExtensionUpgrade(CErc20Delegate asDelegate) internal {
+    Comptroller pool = Comptroller(address(asDelegate.comptroller()));
+
+    uint256 totalSupplyBefore = asDelegate.totalSupply();
+    if (totalSupplyBefore == 0) return; // total supply should be non-zero
 
     address implBefore = asDelegate.implementation();
     emit log("implementation before");
     emit log_address(implBefore);
 
+    // CErc20PluginDelegate newImpl = new CErc20PluginDelegate();
     CErc20Delegate newImpl = new CErc20Delegate();
 
     // whitelist the upgrade
@@ -237,11 +255,11 @@ contract ExtensionsTest is BaseTest {
     ffd._setCErc20DelegateExtensions(address(newImpl), cErc20DelegateExtensions);
 
     // turn auto impl on
-    vm.prank(asComptroller.admin());
-    asComptroller._toggleAutoImplementations(true);
+    vm.prank(pool.admin());
+    pool._toggleAutoImplementations(true);
 
     // auto upgrade
-    CTokenExtensionInterface(address(firstMarket)).accrueInterest();
+    CTokenExtensionInterface(address(asDelegate)).accrueInterest();
     emit log("new implementation");
     emit log_address(asDelegate.implementation());
 
@@ -250,8 +268,35 @@ contract ExtensionsTest is BaseTest {
     assertEq(extensions.length, 1, "the first extension should be added");
     assertEq(extensions[0], address(cErc20DelegateExtensions[0]), "the first extension should be the only extension");
 
-    uint256 cashAfter = asDelegate.getCash();
-    assertGt(cashAfter, 0, "cash should be non-zero");
-    assertEq(cashAfter, cashBefore, "cash should be the same");
+    // check if the storage is read from the same place
+    uint256 totalSupplyAfter = asDelegate.totalSupply();
+    assertGt(totalSupplyAfter, 0, "total supply should be non-zero");
+    assertEq(totalSupplyAfter, totalSupplyBefore, "total supply should be the same");
   }
+
+  //  function testMarketsExtensions() public fork(BSC_CHAPEL) {
+  //    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+  //    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+  //
+  //    for (uint256 i = 0; i < pools.length; i++) {
+  //      IComptroller pool = IComptroller(pools[i].comptroller);
+  //      ICToken[] memory markets = pool.getAllMarkets();
+  //      for (uint8 j = 0; j < markets.length; j++) {
+  //        DiamondBase asBase = DiamondBase(address(markets[j]));
+  //        CErc20Delegate asCErc20Delegate = CErc20Delegate(address(markets[j]));
+  //
+  //        try asBase._listExtensions() returns (address[] memory extensions) {
+  //          assertEq(extensions.length, 1, "market is missing the first extension");
+  //        } catch {
+  //          emit log("market that is not yet upgraded to the extensions upgrade");
+  //          emit log_address(address(asBase));
+  //          emit log("implementation");
+  //          emit log_address(asCErc20Delegate.implementation());
+  //          emit log("pool");
+  //          emit log_address(pools[i].comptroller);
+  //          emit log("");
+  //        }
+  //      }
+  //    }
+  //  }
 }
