@@ -85,5 +85,60 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 
+
+  struct LiquidationData {
+    ICErc20 debtMarket;
+    ICErc20 collateralMarket;
+    address outputToken;
+    uint256 repayAmount;
+    IRedemptionStrategy[] redemptionStrategies;
+    bytes[] redemptionStrategyData;
+    IFundsConversionStrategy[] debtFundingStrategies;
+    bytes[] debtFundingData;
+    address borrower;
+    uint256 borrowAmount;
+  }
+
+  function testMoonbeamLiquidation() public fork(MOONBEAM_MAINNET) {
+    address xcDotAddress = 0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080; // 0
+    IERC20Upgradeable xcDot = IERC20Upgradeable(xcDotAddress);
+
+    LiquidationData memory vars;
+    vars.borrower = 0xd63dA94c6A7E8d15F8eed6D008815fD9e978CC1f;
+    vars.repayAmount = 4274713836238;
+    vars.debtMarket = ICErc20(0xa9736bA05de1213145F688e4619E5A7e0dcf4C72);
+    vars.collateralMarket = ICErc20(0xb3D83F2CAb787adcB99d4c768f1Eb42c8734b563);
+    IUniswapV2Pair pair = IUniswapV2Pair(0xd8FbdeF502770832E90a6352b275f20F38269b74);
+
+    address exchangeTo = 0xAcc15dC74880C9944775448304B263D191c6077F;
+
+    IUniswapV2Router02 router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+
+    vm.mockCall(xcDotAddress, hex"313ce567", abi.encode(10));
+
+    vm.mockCall(xcDotAddress, abi.encodeWithSelector(xcDot.transfer.selector, 0x2fCa24E19C67070467927DDB85810fF766423e8e, 4274713836238), abi.encode(true));
+    vm.mockCall(xcDotAddress, abi.encodeWithSelector(xcDot.balanceOf.selector, 0x2fCa24E19C67070467927DDB85810fF766423e8e), abi.encode(4274713836238));
+    vm.mockCall(xcDotAddress, abi.encodeWithSelector(xcDot.approve.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72, 4274713836238), abi.encode(true));
+    vm.mockCall(xcDotAddress, abi.encodeWithSelector(xcDot.balanceOf.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72), abi.encode(4274713836238));
+
+
+    fsl.safeLiquidateToTokensWithFlashLoan(FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
+        vars.borrower,
+        vars.repayAmount,
+        vars.debtMarket,
+        vars.collateralMarket,
+        pair,
+        0,
+        exchangeTo,
+        router,
+        router,
+        vars.redemptionStrategies,
+        vars.redemptionStrategyData,
+        0,
+        vars.debtFundingStrategies,
+        vars.debtFundingData
+      ));
+  }
+
   // TODO test with marginal shortfall for liquidation penalty errors
 }
