@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../../helpers/WithPool.sol";
-import "../../config/BaseTest.t.sol";
+import { BaseTest } from "../../config/BaseTest.t.sol";
 
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { BeefyERC4626Test } from "../BeefyERC4626Test.sol";
@@ -23,15 +20,12 @@ interface IBeefyStrategy {
 contract BeefyPolygonAssetTest is AbstractAssetTest {
   address lpChef = 0x2FAe83B3916e1467C970C113399ee91B31412bCD;
 
-  constructor() {
+  function afterForkSetUp() internal override {
     test = new BeefyERC4626Test();
     testConfigStorage = ITestConfigStorage(address(new BeefyPolygonTestConfigStorage()));
-    shouldRunTest = forChains(POLYGON_MAINNET);
   }
 
-  function setUp() public override shouldRun(shouldRunTest) {}
-
-  function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
+  function setUpTestContract(bytes calldata testConfig) public override {
     (address beefyVault, uint256 withdrawalFee) = abi.decode(testConfig, (address, uint256));
 
     // Polygon beefy strategy has harvest on deposit option so set it false to make sure the deposit works properly.
@@ -41,11 +35,11 @@ contract BeefyPolygonAssetTest is AbstractAssetTest {
 
     test.setUp(
       MockERC20(address(IBeefyVault(beefyVault).want())).symbol(),
-      abi.encode(beefyVault, withdrawalFee, lpChef, shouldRunTest)
+      abi.encode(beefyVault, withdrawalFee, lpChef)
     );
   }
 
-  function testInitializedValues() public override shouldRun(shouldRunTest) {
+  function testInitializedValues() public override fork(POLYGON_MAINNET) {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
@@ -59,19 +53,19 @@ contract BeefyPolygonAssetTest is AbstractAssetTest {
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testDepositWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
     this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testDepositWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
     this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testWithdrawWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
     this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override shouldRun(shouldRunTest) {
+  function testWithdrawWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
     this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 }

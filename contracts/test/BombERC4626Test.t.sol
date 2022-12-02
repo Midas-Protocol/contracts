@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import "../midas/strategies/BombERC4626.sol";
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract BombERC4626Test is BaseTest {
   BombERC4626 vault;
@@ -17,18 +15,17 @@ contract BombERC4626Test is BaseTest {
   uint256 depositAmountRoundedDown = depositAmount - 2;
   address whale = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
+  function afterForkSetUp() internal override {
     bombToken = IERC20Upgradeable(address(xbombToken.reward()));
     vault = new BombERC4626();
     vault.initialize(ERC20Upgradeable(address(bombToken)), address(xbombToken));
-    vault.reinitialize();
 
     // get some tokens from a whale
     vm.prank(whale);
     bombToken.transfer(address(this), depositAmount);
   }
 
-  function testInitializedValues() public shouldRun(forChains(BSC_MAINNET)) {
+  function testInitializedValues() public fork(BSC_MAINNET) {
     assertEq(vault.name(), "Midas bomb.money Vault");
     assertEq(vault.symbol(), "mvBOMB");
     assertEq(address(vault.asset()), address(bombToken));
@@ -40,7 +37,7 @@ contract BombERC4626Test is BaseTest {
     vault.deposit(depositAmount, address(this));
   }
 
-  function testDeposit() public shouldRun(forChains(BSC_MAINNET)) {
+  function testDeposit() public fork(BSC_MAINNET) {
     deposit();
 
     //Test that the actual transfers worked
@@ -62,7 +59,7 @@ contract BombERC4626Test is BaseTest {
     vault.withdraw(vaultAssets, address(this), address(this));
   }
 
-  function testWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
+  function testWithdraw() public fork(BSC_MAINNET) {
     withdraw();
 
     // test that all vault assets are extracted and transferred to the depositor
@@ -78,7 +75,7 @@ contract BombERC4626Test is BaseTest {
     vault.redeem(shares, address(this), address(this));
   }
 
-  function testRedeem() public shouldRun(forChains(BSC_MAINNET)) {
+  function testRedeem() public fork(BSC_MAINNET) {
     redeem();
 
     // test that all vault assets are extracted and transferred to the depositor

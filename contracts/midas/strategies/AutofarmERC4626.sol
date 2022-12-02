@@ -18,7 +18,32 @@ interface IAutofarmV2 {
   //Returns underlying balance in strategies
   function stakedWantTokens(uint256 _pid, address _user) external view returns (uint256);
 
-  function balanceOf(address) external returns (uint256);
+  function balanceOf(address) external view returns (uint256);
+
+  function userInfo(uint256, address) external view returns (uint256, uint256);
+
+  function want() external view returns (address);
+
+  function poolInfo(uint256)
+    external
+    view
+    returns (
+      address,
+      uint256,
+      uint256,
+      uint256,
+      address
+    );
+}
+
+interface IAutoStrat {
+  function wantLockedTotal() external view returns (uint256);
+
+  function wantLockedInHere() external view returns (uint256);
+
+  function autoFarmAddress() external view returns (address);
+
+  function vTokenAddress() external view returns (address);
 }
 
 /**
@@ -62,10 +87,6 @@ contract AutofarmERC4626 is MidasERC4626 {
     performanceFee = 5e16;
     asset.approve(address(autofarm), type(uint256).max);
     _autoToken.approve(address(flywheel.flywheelRewards()), type(uint256).max);
-  }
-
-  function reinitialize() public reinitializer(2) onlyOwner {
-    performanceFee = 5e16;
   }
 
   /* ========== VIEWS ========== */

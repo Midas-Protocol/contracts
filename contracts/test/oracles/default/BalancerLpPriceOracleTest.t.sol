@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../../config/BaseTest.t.sol";
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { BaseTest } from "../../config/BaseTest.t.sol";
 import { BalancerLpTokenPriceOracle } from "../../../oracles/default/BalancerLpTokenPriceOracle.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import "../../../external/balancer/IBalancerPool.sol";
-import "../../../external/balancer/IBalancerVault.sol";
 
 contract BalancerLpTokenPriceOracleTest is BaseTest {
   BalancerLpTokenPriceOracle oracle;
@@ -22,24 +18,15 @@ contract BalancerLpTokenPriceOracleTest is BaseTest {
   address mimo = 0xADAC33f543267c4D59a8c299cF804c303BC3e4aC;
   address par = 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128;
 
-  function setUp() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-  }
-
-  function setUpBalancerOracle() public {
-    vm.prank(mpo.admin());
+    oracle = new BalancerLpTokenPriceOracle();
     oracle.initialize(mpo);
   }
 
   // TODO: add test for mimo / par pair, when we deploy the MIMO DIA price oracle
   // See: https://github.com/Midas-Protocol/monorepo/issues/476
-  function testPriceBalancer() public shouldRun(forChains(POLYGON_MAINNET)) {
-    vm.rollFork(33672239);
-
-    oracle = new BalancerLpTokenPriceOracle();
-
-    setUpBalancerOracle();
-
+  function testPriceBalancer() public forkAtBlock(POLYGON_MAINNET, 33672239) {
     // uint256 lp_price = (pool.lp_price() * mpo.price(busd)) / 10**18;
     uint256 price = oracle.price(wbtcWeth5050);
 

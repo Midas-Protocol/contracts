@@ -1,16 +1,23 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { CToken } from "../compound/CToken.sol";
-import { Comptroller } from "../compound/Comptroller.sol";
+import { CToken, CTokenExtensionInterface } from "../compound/CToken.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
-import "./config/BaseTest.t.sol";
-import "../liquidators/JarvisLiquidatorFunder.sol";
-import "../FuseSafeLiquidator.sol";
-import "../external/uniswap/IUniswapV2Pair.sol";
-import "../external/uniswap/IUniswapV2Factory.sol";
-import "../compound/CTokenInterfaces.sol";
+import { JarvisLiquidatorFunder } from "../liquidators/JarvisLiquidatorFunder.sol";
+import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
+import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
+import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
+import { IComptroller } from "../external/compound/IComptroller.sol";
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { ISynthereumLiquidityPool } from "../external/jarvis/ISynthereumLiquidityPool.sol";
+import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
+import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
+import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
+import { ICErc20 } from "../external/compound/ICErc20.sol";
+import { ICToken } from "../external/compound/ICToken.sol";
+
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 interface IMockERC20 is IERC20Upgradeable {
   function mint(address _address, uint256 amount) external;
@@ -27,9 +34,9 @@ contract JarvisLiquidatorFunderTest is BaseTest {
 
   IERC20Upgradeable bUSD;
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
+  function afterForkSetUp() internal override {
     uint64 expirationPeriod = 60 * 40; // 40 mins
-    bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
+    bUSD = IERC20Upgradeable(ap.getAddress("bUSD")); // TODO check if bUSD == stableToken at AP
 
     ISynthereumLiquidityPool[] memory pools = new ISynthereumLiquidityPool[](1);
     pools[0] = synthereumLiquiditiyPool;
@@ -43,7 +50,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     return synthereumLiquiditiyPool;
   }
 
-  function testRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
+  function testRedeemToken() public fork(BSC_MAINNET) {
     vm.prank(minter);
     jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
@@ -56,7 +63,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     assertEq(outputAmount, redeemableAmount);
   }
 
-  function testEmergencyRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
+  function testEmergencyRedeemToken() public fork(BSC_MAINNET) {
     ISynthereumLiquidityPool pool = getPool(address(jBRLToken));
     address manager = pool.synthereumFinder().getImplementationAddress("Manager");
     vm.prank(manager);
@@ -78,13 +85,12 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     address[] cTokens;
     IRedemptionStrategy[] strategies;
     bytes[] abis;
-    CTokenInterface[] allMarkets;
     FuseSafeLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
     bytes[] data;
   }
 
-  function testJbrlLiquidation() public shouldRun(forChains(BSC_MAINNET)) {
+  function testJbrlLiquidation() public fork(BSC_MAINNET) {
     LiquidationData memory vars;
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
 
@@ -100,9 +106,8 @@ contract JarvisLiquidatorFunderTest is BaseTest {
       25
     );
 
-    Comptroller comptroller = Comptroller(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
+    IComptroller comptroller = IComptroller(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
 
-    vars.allMarkets = comptroller.getAllMarkets();
     CErc20Delegate cTokenJBRL = CErc20Delegate(0x82A3103bc306293227B756f7554AfAeE82F8ab7a);
     CErc20Delegate cTokenBUSD = CErc20Delegate(0xa7213deB44f570646Ea955771Cc7f39B58841363);
 
@@ -134,8 +139,8 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     // some time passes, interest accrues and prices change
     {
       vm.roll(block.number + 100);
-      cTokenBUSD.accrueInterest();
-      cTokenJBRL.accrueInterest();
+      CTokenExtensionInterface(address(cTokenBUSD)).accrueInterest();
+      CTokenExtensionInterface(address(cTokenJBRL)).accrueInterest();
 
       MasterPriceOracle mpo = MasterPriceOracle(address(comptroller.oracle()));
       uint256 priceBUSD = mpo.getUnderlyingPrice(ICToken(address(cTokenBUSD)));

@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { WithPool } from "../helpers/WithPool.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { MidasERC4626, CurveGaugeERC4626, IChildGauge } from "../../midas/strategies/CurveGaugeERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -15,6 +13,9 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
+import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
+import { CErc20 } from "../../compound/CErc20.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 struct RewardsCycle {
@@ -40,7 +41,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
 
   constructor() WithPool() {}
 
-  function setUp(string memory _testPreFix, bytes calldata data) public override shouldRun(forChains(POLYGON_MAINNET)) {
+  function setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("curve-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));
     (address _gauge, address _asset, address[] memory _rewardsToken) = abi.decode(data, (address, address, address[]));
@@ -100,11 +101,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
     return depositAmount;
   }
 
-  function testInitializedValues(string memory assetName, string memory assetSymbol)
-    public
-    override
-    shouldRun(forChains(POLYGON_MAINNET))
-  {
+  function testInitializedValues(string memory assetName, string memory assetSymbol) public override {
     assertEq(
       plugin.name(),
       string(abi.encodePacked("Midas ", assetName, " Vault")),
@@ -123,7 +120,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testAccumulatingRewardsOnDeposit() public {
     deposit(address(this), depositAmount / 2);
 
     vm.warp(block.timestamp + 150);
@@ -143,7 +140,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
     }
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     deposit(address(this), depositAmount);
 
     vm.warp(block.timestamp + 150);
@@ -164,7 +161,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
     }
   }
 
-  function testClaimRewards() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testClaimRewards() public {
     // Deposit funds, Rewards are 0
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);
@@ -172,9 +169,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
     vm.stopPrank();
 
     for (uint8 i; i < flywheels.length; i++) {
-      (uint32 cycleStart, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(
-        ERC20(address(marketAddress))
-      );
+      (, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(ERC20(address(marketAddress)));
 
       // Rewards can be transfered in the next cycle
       assertEq(cycleEnd, 0, string(abi.encodePacked("!cycleEnd-", vm.toString(i), " ", testPreFix)));
@@ -203,9 +198,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
         string(abi.encodePacked("!rewardBal-", vm.toString(i), " ", testPreFix))
       );
 
-      (uint32 cycleStart, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(
-        ERC20(address(marketAddress))
-      );
+      (, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(ERC20(address(marketAddress)));
       // Rewards can be transfered in the next cycle
       assertEq(cycleEnd, 1663093678, string(abi.encodePacked("!2.cycleEnd-", vm.toString(i), " ", testPreFix)));
 

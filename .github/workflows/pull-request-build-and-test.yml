@@ -12,8 +12,6 @@ on:
 
 jobs:
   lint:
-    env:
-      MNEMONIC: "${{ secrets.MNEMONIC }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -30,10 +28,14 @@ jobs:
       - name: Lint
         run: npm run lint
 
-  build-and-test-local:
+  build-and-test-bsc:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
+      BSC_MAINNET_RPC_URL: "${{ secrets.BSC_MAINNET_RPC_URL }}"
+      BSC_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.BSC_MAINNET_ARCHIVE_RPC_URL }}"
+      TEST_RUN_CHAINID: 56
+      TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -48,41 +50,26 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - name: Run forge tests
-        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
-
-  build-and-test-bsc:
-    needs: [lint]
-    env:
-      MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FORK_URL_BSC: "${{ secrets.FORK_URL_BSC }}"
-      FORK_BLOCK_NUMBER: 20238373
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+      - name: Forge RPC cache
+        uses: actions/cache@v3
         with:
-          submodules: recursive
+          path: "~/.foundry/cache"
+          key: rpc-cache-bsc-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
-
-      - name: Install Forge dependencies
-        run: forge install
-
-      - name: Run forge tests on BSC
-        run: forge test --fork-url ${FORK_URL_BSC} --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
+      - name: Run forge tests for BSC mainnet
+        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test'
 
   build-and-test-polygon:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FORK_URL_POLYGON: https://polygon-mainnet.g.alchemy.com/v2/CBh9wOzGY0JRX8wNYOWtEo_Ac374pn78 #"${{ secrets.FORK_URL_POLYGON }}"
-      FORK_BLOCK_NUMBER: 33063212
+      POLYGON_MAINNET_RPC_URL: "${{ secrets.POLYGON_MAINNET_RPC_URL }}"
+      POLYGON_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.POLYGON_MAINNET_ARCHIVE_RPC_URL }}"
+      TEST_RUN_CHAINID: 137
+      TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
@@ -94,39 +81,26 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - name: Run forge tests on Polygon
-        run: forge test --fork-url ${FORK_URL_POLYGON} --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
-
-  build-and-test-evmostestnet:
-    needs: [lint]
-    env:
-      MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FORK_BLOCK_NUMBER: 2940378
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+      - name: Forge RPC cache
+        uses: actions/cache@v3
         with:
-          submodules: recursive
+          path: "~/.foundry/cache"
+          key: rpc-cache-polygon-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
-
-      - name: Install Forge dependencies
-        run: forge install
-
-      - name: Run forge tests on Evmos Testnet
-        run: forge test --fork-url https://eth.bd.evmos.dev:8545 --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
+      - name: Run forge tests for Polygon
+        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test'
 
   build-and-test-moonbeam:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FORK_BLOCK_NUMBER: 1824921
+      MOONBEAM_MAINNET_RPC_URL: "${{ secrets.MOONBEAM_MAINNET_RPC_URL }}"
+      MOONBEAM_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.MOONBEAM_MAINNET_ARCHIVE_RPC_URL }}"
+      TEST_RUN_CHAINID: 1284
+      TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
@@ -138,39 +112,26 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - name: Run forge tests on Moonbeam
-        run: forge test --fork-url https://moonbeam.api.onfinality.io/public --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
-
-  build-and-test-neondevnet:
-    needs: [lint]
-    env:
-      MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FORK_BLOCK_NUMBER: 159103730
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+      - name: Forge RPC cache
+        uses: actions/cache@v3
         with:
-          submodules: recursive
+          path: "~/.foundry/cache"
+          key: rpc-cache-moonbeam-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
-
-      - name: Install Forge dependencies
-        run: forge install
-
-      - name: Run forge tests on Neon Devnet
-        run: forge test --fork-url https://proxy.devnet.neonlabs.org/solana --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
+      - name: Run forge tests for Moonbeam
+        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test'
 
   build-and-test-arbitrum:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FORK_BLOCK_NUMBER: 28739891
+      ARBITRUM_MAINNET_RPC_URL: "${{ secrets.ARBITRUM_MAINNET_RPC_URL }}"
+      ARBITRUM_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.ARBITRUM_MAINNET_ARCHIVE_RPC_URL }}"
+      TEST_RUN_CHAINID: 42161
+      TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
@@ -182,5 +143,164 @@ jobs:
       - name: Install Forge dependencies
         run: forge install
 
-      - name: Run forge tests on Arbitrum
-        run: forge test --fork-url https://rpc.ankr.com/arbitrum --fork-block-number ${FORK_BLOCK_NUMBER} --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test'
+      - name: Forge RPC cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.foundry/cache"
+          key: rpc-cache-arbitrum-${{ hashFiles('rpc-cache-keyfile') }}
+
+      - name: Run forge tests for Arbitrum One
+        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test'
+
+  build-and-test-neon:
+    needs: [lint]
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      NEON_DEVNET_RPC_URL: "${{ secrets.NEON_DEVNET_RPC_URL }}"
+      NEON_DEVNET_ARCHIVE_RPC_URL: "${{ secrets.NEON_DEVNET_ARCHIVE_RPC_URL }}"
+      TEST_RUN_CHAINID: 245022926
+      TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - name: Forge RPC cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.foundry/cache"
+          key: rpc-cache-neon-${{ hashFiles('rpc-cache-keyfile') }}
+
+      - name: Run forge tests for Neon devnet
+        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test'
+
+  build-and-test-evmos:
+    needs: [lint]
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      EVMOS_MAINNET_RPC_URL: "${{ secrets.EVMOS_MAINNET_RPC_URL }}"
+      EVMOS_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.EVMOS_MAINNET_ARCHIVE_RPC_URL }}"
+      TEST_RUN_CHAINID: 9001
+      TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - name: Forge RPC cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.foundry/cache"
+          key: rpc-cache-evmos-${{ hashFiles('rpc-cache-keyfile') }}
+
+      - name: Run forge tests for Evmos mainnet
+        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test'
+
+  build-and-test-fantom:
+    needs: [lint]
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      FANTOM_MAINNET_RPC_URL: "${{ secrets.FANTOM_MAINNET_RPC_URL }}"
+      FANTOM_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.FANTOM_MAINNET_ARCHIVE_RPC_URL }}"
+      TEST_RUN_CHAINID: 250
+      TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - name: Forge RPC cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.foundry/cache"
+          key: rpc-cache-fantom-${{ hashFiles('rpc-cache-keyfile') }}
+
+      - name: Run forge tests for Fantom Opera
+        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test'
+
+  build-and-test-chapel:
+    needs: [lint]
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      BSC_CHAPEL_RPC_URL: "${{ secrets.BSC_CHAPEL_RPC_URL }}"
+      BSC_CHAPEL_ARCHIVE_RPC_URL: "${{ secrets.BSC_CHAPEL_ARCHIVE_RPC_URL }}"
+      TEST_RUN_CHAINID: 97
+      TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - name: Forge RPC cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.foundry/cache"
+          key: rpc-cache-chapel-${{ hashFiles('rpc-cache-keyfile') }}
+
+      - name: Run forge tests for BSC testnet
+        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test'
+
+  build-and-test-local:
+    needs: [lint]
+    env:
+      MNEMONIC: "${{ secrets.MNEMONIC }}"
+      TEST_RUN_CHAINID: 0
+      TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - name: Forge RPC cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.foundry/cache"
+          key: rpc-cache-local-${{ hashFiles('rpc-cache-keyfile') }}
+
+      - name: Run forge tests locally
+        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test'

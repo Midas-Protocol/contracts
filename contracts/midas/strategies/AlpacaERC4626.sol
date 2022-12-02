@@ -59,10 +59,6 @@ contract AlpacaERC4626 is MidasERC4626 {
     _asset().approve(address(alpacaVault), type(uint256).max);
   }
 
-  function reinitialize() public reinitializer(2) onlyOwner {
-    performanceFee = 5e16;
-  }
-
   /* ========== VIEWS ========== */
 
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
@@ -90,7 +86,7 @@ contract AlpacaERC4626 is MidasERC4626 {
     wtoken.deposit{ value: msg.value }();
   }
 
-  function convertToAlpacaVaultShares(uint256 shares) public returns (uint256) {
+  function convertToAlpacaVaultShares(uint256 shares) public view returns (uint256) {
     uint256 supply = totalSupply();
     return supply == 0 ? shares : shares.mulDivUp(alpacaVault.balanceOf(address(this)), supply);
   }

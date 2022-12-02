@@ -69,11 +69,6 @@ contract BeefyERC4626 is MidasERC4626 {
     asset.approve(address(beefyVault), type(uint256).max);
   }
 
-  function reinitialize() public reinitializer(3) onlyOwnerOrAdmin {
-    BPS_DENOMINATOR = 10_000;
-    performanceFee = 5e16;
-  }
-
   /* ========== VIEWS ========== */
 
   /// @notice Calculates the total amount of underlying tokens the Vault holds.

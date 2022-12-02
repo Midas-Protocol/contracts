@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { WithPool } from "../helpers/WithPool.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
+
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import { MidasERC4626, ArrakisERC4626, IGuniPool } from "../../midas/strategies/ArrakisERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -16,6 +16,9 @@ import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
+import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
+import { CErc20 } from "../../compound/CErc20.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 struct RewardsCycle {
@@ -62,7 +65,6 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
 
     ArrakisERC4626 arrakisERC4626 = new ArrakisERC4626();
     arrakisERC4626.initialize(ERC20Upgradeable(address(underlyingToken)), flywheel, pool, address(this), rewardTokens);
-    arrakisERC4626.reinitialize();
 
     plugin = arrakisERC4626;
     initialStrategyBalance = pool.totalStake();
@@ -104,11 +106,7 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
     return depositAmount;
   }
 
-  function testInitializedValues(string memory assetName, string memory assetSymbol)
-    public
-    override
-    shouldRun(forChains(POLYGON_MAINNET))
-  {
+  function testInitializedValues(string memory assetName, string memory assetSymbol) public override {
     assertEq(
       plugin.name(),
       string(abi.encodePacked("Midas ", assetName, " Vault")),
@@ -127,7 +125,7 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testAccumulatingRewardsOnDeposit() public {
     deposit(address(this), depositAmount / 2);
     deal(address(mimoToken), address(this), 100e18);
     ERC20(mimoToken).transfer(address(pool), 100e18);
@@ -143,7 +141,7 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     deposit(address(this), depositAmount);
     deal(address(mimoToken), address(this), 100e18);
     ERC20(mimoToken).transfer(address(pool), 100e18);
@@ -159,11 +157,14 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testClaimRewards() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testClaimRewards() public {
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);
     CErc20(marketAddress).mint(depositAmount);
     vm.stopPrank();
+
+    deal(address(underlyingToken), address(this), depositAmount);
+    deposit(address(this), depositAmount);
 
     deal(address(mimoToken), address(this), 100e18);
     ERC20(mimoToken).transfer(address(pool), 100e18);
@@ -172,6 +173,8 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
     (uint32 mimoStart, uint32 mimoEnd, uint192 mimoReward) = flywheelRewards.rewardsCycle(
       ERC20(address(marketAddress))
     );
+
+    emit log_named_uint("mimoReward", mimoReward);
 
     // Rewards can be transfered in the next cycle
     assertEq(mimoEnd, 0, string(abi.encodePacked("!mimoEnd ", testPreFix)));
@@ -190,6 +193,8 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
 
     (mimoStart, mimoEnd, mimoReward) = flywheelRewards.rewardsCycle(ERC20(address(marketAddress)));
 
+    emit log_named_uint("mimoReward after", mimoReward);
+
     // Rewards can be transfered in the next cycle
     assertGt(mimoEnd, 1000000000, string(abi.encodePacked("!2.mimoEnd ", testPreFix)));
     assertApproxEqAbs(
@@ -201,6 +206,10 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
 
     vm.warp(block.timestamp + 150);
     vm.roll(20);
+
+    (mimoStart, mimoEnd, mimoReward) = flywheelRewards.rewardsCycle(ERC20(address(marketAddress)));
+
+    emit log_named_uint("mimoReward after 111", mimoReward);
 
     flywheel.accrue(ERC20(marketAddress), address(this));
 

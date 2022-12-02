@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { WithPool } from "../helpers/WithPool.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { MidasERC4626, StellaLpERC4626, IStellaDistributorV2 } from "../../midas/strategies/StellaLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
+import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
+import { CErc20 } from "../../compound/CErc20.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 struct RewardsCycle {
   uint32 start;
@@ -54,7 +55,6 @@ contract StellaERC4626Test is AbstractERC4626Test {
       address(this),
       rewardsToken
     );
-    stellaLpERC4626.reinitialize();
 
     plugin = stellaLpERC4626;
 
@@ -97,11 +97,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
     return depositAmount;
   }
 
-  function testInitializedValues(string memory assetName, string memory assetSymbol)
-    public
-    override
-    shouldRun(forChains(BSC_MAINNET))
-  {
+  function testInitializedValues(string memory assetName, string memory assetSymbol) public override {
     assertEq(
       plugin.name(),
       string(abi.encodePacked("Midas ", assetName, " Vault")),

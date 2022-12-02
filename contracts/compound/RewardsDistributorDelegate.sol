@@ -3,8 +3,8 @@ pragma solidity >=0.8.0;
 
 import "./CToken.sol";
 import "./ExponentialNoError.sol";
-import "./Comptroller.sol";
 import "./RewardsDistributorStorage.sol";
+import "../external/compound/IComptroller.sol";
 
 /**
  * @title RewardsDistributorDelegate (COMP distribution logic extracted from `Comptroller`)
@@ -113,7 +113,7 @@ contract RewardsDistributorDelegate is RewardsDistributorDelegateStorageV1, Expo
    */
   function checkCToken(CToken cToken) internal view {
     // Make sure cToken is listed
-    Comptroller comptroller = Comptroller(address(cToken.comptroller()));
+    IComptroller comptroller = IComptroller(address(cToken.comptroller()));
     (bool isListed, ) = comptroller.markets(address(cToken));
     require(isListed == true, "comp market is not listed");
 
@@ -261,7 +261,7 @@ contract RewardsDistributorDelegate is RewardsDistributorDelegateStorageV1, Expo
     }
 
     Double memory deltaIndex = sub_(supplyIndex, supplierIndex);
-    uint256 supplierTokens = CToken(cToken).balanceOf(supplier);
+    uint256 supplierTokens = EIP20NonStandardInterface(cToken).balanceOf(supplier);
     uint256 supplierDelta = mul_(supplierTokens, deltaIndex);
     uint256 supplierAccrued = add_(compAccrued[supplier], supplierDelta);
     compAccrued[supplier] = supplierAccrued;

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./helpers/WithPool.sol";
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 import "forge-std/Test.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -18,9 +18,9 @@ import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
 import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
-import "../external/uniswap/IUniswapV2Pair.sol";
-import "../external/uniswap/IUniswapV2Factory.sol";
-import "../compound/CTokenInterfaces.sol";
+import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
+import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
+import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
 
 contract MockAsset is MockERC20 {
   constructor() MockERC20("test", "test", 8) {}
@@ -36,14 +36,7 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     MockAsset usdc;
   }
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET, POLYGON_MAINNET)) {
-    // TODO should run for the latest block
-    if (block.chainid == POLYGON_MAINNET) {
-      vm.rollFork(34252820);
-    } else if (block.chainid == BSC_MAINNET) {
-      vm.rollFork(22113750);
-    }
-
+  function afterForkSetUp() internal override {
     super.setUpWithPool(
       MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
       ERC20Upgradeable(ap.getAddress("wtoken"))
@@ -53,7 +46,15 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     setUpPool("bsc-test", false, 0.1e18, 1.1e18);
   }
 
-  function testMaxWithdraw() public shouldRun(forChains(BSC_MAINNET)) {
+  function testBsc() public fork(BSC_MAINNET) {
+    testMaxWithdraw();
+  }
+
+  function testPolygon() public fork(POLYGON_MAINNET) {
+    testMIIMOMaxWithdraw();
+  }
+
+  function testMaxWithdraw() internal {
     FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
     poolLensSecondary.initialize(fusePoolDirectory);
 
@@ -147,7 +148,7 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     }
   }
 
-  function testMIIMOMaxWithdraw() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testMIIMOMaxWithdraw() internal {
     FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
     poolLensSecondary.initialize(fusePoolDirectory);
 
