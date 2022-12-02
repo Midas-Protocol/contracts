@@ -11,8 +11,8 @@ import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards
 import { CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
 import "flywheel/FlywheelCore.sol";
 import "../compound/CTokenInterfaces.sol";
-import "../midas/strategies/flywheel/MidasFlywheel.sol";
-import "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { MidasFlywheel, MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { MidasFlywheelLensRouter, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 
 import { CErc20 } from "../compound/CErc20.sol";
 import { CToken } from "../compound/CToken.sol";
