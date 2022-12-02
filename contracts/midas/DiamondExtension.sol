@@ -139,7 +139,7 @@ library LibDiamond {
     bytes4[] memory fnsToAdd = extension._getExtensionFunctions();
     LogicStorage storage ds = diamondStorage();
     uint16 selectorCount = uint16(ds.selectorAtIndex.length);
-    for (uint256 selectorIndex; selectorIndex < fnsToAdd.length; selectorIndex++) {
+    for (uint256 selectorIndex = 0; selectorIndex < fnsToAdd.length; selectorIndex++) {
       bytes4 selector = fnsToAdd[selectorIndex];
       address oldImplementation = ds.functions[selector].implementation;
       if (oldImplementation != address(0)) revert FunctionAlreadyAdded(selector, oldImplementation);

@@ -85,5 +85,35 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 
+  function useThisToTestLiquidations() public fork(POLYGON_MAINNET) {
+    address borrower = 0xA4F4406D3dc6482dB1397d0ad260fd223C8F37FC;
+    address poolAddr = 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2;
+    address debtMarketAddr = 0x456b363D3dA38d3823Ce2e1955362bBd761B324b;
+    address collateralMarketAddr = 0x28D0d45e593764C4cE88ccD1C033d0E2e8cE9aF3;
+
+    FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars memory vars;
+    vars.borrower = borrower;
+    vars.cErc20 = ICErc20(debtMarketAddr);
+    vars.cTokenCollateral = ICErc20(collateralMarketAddr);
+    vars.repayAmount = 70565471214557927746795;
+    vars.flashSwapPair = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827);
+    vars.minProfitAmount = 0;
+    vars.exchangeProfitTo = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
+    vars.uniswapV2RouterForBorrow = IUniswapV2Router02(0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff);
+    vars.uniswapV2RouterForCollateral = IUniswapV2Router02(0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff);
+    vars.redemptionStrategies = new IRedemptionStrategy[](0);
+    vars.strategyData = new bytes[](0);
+    vars.ethToCoinbase = 0;
+    vars.debtFundingStrategies = new IFundsConversionStrategy[](1);
+    vars.debtFundingStrategiesData = new bytes[](1);
+
+    vars.debtFundingStrategies[0] = IFundsConversionStrategy(0x98110E8482E4e286716AC0671438BDd84C4D838c);
+    vars.debtFundingStrategiesData[0] = hex"0000000000000000000000002791bca1f2de4661ed88a30c99a7a9449aa84174000000000000000000000000aec757bf73cc1f4609a1459205835dd40b4e3f290000000000000000000000000000000000000000000000000000000000000960";
+
+    // fsl.safeLiquidateToTokensWithFlashLoan(vars);
+
+    vars.cErc20.comptroller();
+  }
+
   // TODO test with marginal shortfall for liquidation penalty errors
 }

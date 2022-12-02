@@ -20,23 +20,23 @@ contract OraclesDecimalsScalingTest is BaseTest {
     fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
   }
 
-  function testBsc() public fork(BSC_MAINNET) {
+  function testOracleDecimalsBsc() public fork(BSC_MAINNET) {
     testOraclesDecimals();
   }
 
-  function testArbitrum() public fork(ARBITRUM_ONE) {
+  function testOracleDecimalsArbitrum() public fork(ARBITRUM_ONE) {
     testOraclesDecimals();
   }
 
-  function testMoonbeam() public fork(MOONBEAM_MAINNET) {
+  function testOracleDecimalsMoonbeam() public fork(MOONBEAM_MAINNET) {
     testOraclesDecimals();
   }
 
-  function testPolygon() public fork(POLYGON_MAINNET) {
+  function testOracleDecimalsPolygon() public fork(POLYGON_MAINNET) {
     testOraclesDecimals();
   }
 
-  function testNeonDev() public fork(NEON_DEVNET) {
+  function testOracleDecimalsNeonDev() public fork(NEON_DEVNET) {
     testOraclesDecimals();
   }
 

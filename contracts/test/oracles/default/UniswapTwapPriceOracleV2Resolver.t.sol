@@ -4,9 +4,10 @@ pragma solidity >=0.8.0;
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { UniswapTwapPriceOracleV2Root } from "../../../oracles/default/UniswapTwapPriceOracleV2Root.sol";
 import { IUniswapV2Factory } from "../../../external/uniswap/IUniswapV2Factory.sol";
-import { BaseTest } from "../../config/BaseTest.t.sol";
 import { UniswapTwapPriceOracleV2Resolver } from "../../../oracles/default/UniswapTwapPriceOracleV2Resolver.sol";
 import { IUniswapV2Pair } from "../../../external/uniswap/IUniswapV2Pair.sol";
+
+import { BaseTest } from "../../config/BaseTest.t.sol";
 
 contract UniswapTwapOracleV2ResolverTest is BaseTest {
   UniswapTwapPriceOracleV2Root twapPriceOracleRoot;

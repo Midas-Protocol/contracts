@@ -12,6 +12,8 @@ import { Unitroller } from "../compound/Unitroller.sol";
 import { CTokenInterface, CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
+import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
+
 import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
@@ -237,8 +239,8 @@ contract ExtensionsTest is BaseTest {
     emit log("implementation before");
     emit log_address(implBefore);
 
-    // CErc20PluginDelegate newImpl = new CErc20PluginDelegate();
-    CErc20Delegate newImpl = new CErc20Delegate();
+    CErc20PluginRewardsDelegate newImpl = new CErc20PluginRewardsDelegate();
+    // CErc20Delegate newImpl = new CErc20Delegate();
 
     // whitelist the upgrade
     vm.prank(ffd.owner());
@@ -246,7 +248,7 @@ contract ExtensionsTest is BaseTest {
 
     // set the new ctoken delegate as the latest
     vm.prank(ffd.owner());
-    ffd._setLatestCErc20Delegate(implBefore, address(newImpl), false, "");
+    ffd._setLatestCErc20Delegate(implBefore, address(newImpl), false, abi.encodePacked(address(0)));
 
     // add the extension to the auto upgrade config
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
@@ -274,29 +276,53 @@ contract ExtensionsTest is BaseTest {
     assertEq(totalSupplyAfter, totalSupplyBefore, "total supply should be the same");
   }
 
-  //  function testMarketsExtensions() public fork(BSC_CHAPEL) {
-  //    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-  //    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
-  //
-  //    for (uint256 i = 0; i < pools.length; i++) {
-  //      IComptroller pool = IComptroller(pools[i].comptroller);
-  //      ICToken[] memory markets = pool.getAllMarkets();
-  //      for (uint8 j = 0; j < markets.length; j++) {
-  //        DiamondBase asBase = DiamondBase(address(markets[j]));
-  //        CErc20Delegate asCErc20Delegate = CErc20Delegate(address(markets[j]));
-  //
-  //        try asBase._listExtensions() returns (address[] memory extensions) {
-  //          assertEq(extensions.length, 1, "market is missing the first extension");
-  //        } catch {
-  //          emit log("market that is not yet upgraded to the extensions upgrade");
-  //          emit log_address(address(asBase));
-  //          emit log("implementation");
-  //          emit log_address(asCErc20Delegate.implementation());
-  //          emit log("pool");
-  //          emit log_address(pools[i].comptroller);
-  //          emit log("");
-  //        }
-  //      }
-  //    }
-  //  }
+  function testMarketsExtensionsBsc() public fork(BSC_MAINNET) {
+    _testMarketsExtensions();
+  }
+
+  function testMarketsExtensionsMoonbeam() public fork(MOONBEAM_MAINNET) {
+    _testMarketsExtensions();
+  }
+
+  function testMarketsExtensionsPolygon() public fork(POLYGON_MAINNET) {
+    _testMarketsExtensions();
+  }
+
+  function testMarketsExtensionsArbitrum() public fork(ARBITRUM_ONE) {
+    _testMarketsExtensions();
+  }
+
+  function testMarketsExtensionsFantom() public fork(FANTOM_OPERA) {
+    _testMarketsExtensions();
+  }
+
+  function testMarketsExtensionsEvmos() public fork(EVMOS_MAINNET) {
+    _testMarketsExtensions();
+  }
+
+  function _testMarketsExtensions() internal {
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+
+    for (uint256 i = 0; i < pools.length; i++) {
+      IComptroller pool = IComptroller(pools[i].comptroller);
+      ICToken[] memory markets = pool.getAllMarkets();
+      for (uint8 j = 0; j < markets.length; j++) {
+        DiamondBase asBase = DiamondBase(address(markets[j]));
+        CErc20Delegate asCErc20Delegate = CErc20Delegate(address(markets[j]));
+
+        try asBase._listExtensions() returns (address[] memory extensions) {
+          assertEq(extensions.length, 1, "market is missing the first extension");
+        } catch {
+          emit log("market that is not yet upgraded to the extensions upgrade");
+          emit log_address(address(asBase));
+          emit log("implementation");
+          emit log_address(asCErc20Delegate.implementation());
+          emit log("pool");
+          emit log_address(pools[i].comptroller);
+          emit log("");
+        }
+      }
+    }
+  }
 }
