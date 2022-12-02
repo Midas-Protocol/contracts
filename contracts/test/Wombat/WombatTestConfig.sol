@@ -7,7 +7,7 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 
 struct WombatTestConfig {
   address asset;
-  address vault;
+  uint256 poolId;
   ERC20Upgradeable[] rewardTokens;
 }
 
@@ -20,17 +20,11 @@ contract WombatTestConfigStorage is ITestConfigStorage {
     _rewardTokens[0] = ERC20Upgradeable(0xAD6742A35fB341A9Cc6ad674738Dd8da98b94Fb1); // WOM
     _rewardTokens[1] = ERC20Upgradeable(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // WBNB
 
-    testConfigs.push(
-      WombatTestConfig(
-        0x74f019A5C4eD2C2950Ce16FaD7Af838549092c5b,
-        0x98C8f6f029E3A19D796Eb16f9c24703ad884cC83,
-        _rewardTokens
-      )
-    );
+    testConfigs.push(WombatTestConfig(0x74f019A5C4eD2C2950Ce16FaD7Af838549092c5b, 2, _rewardTokens));
   }
 
   function getTestConfig(uint256 i) public view returns (bytes memory) {
-    return abi.encode(testConfigs[i].asset, testConfigs[i].vault, testConfigs[i].rewardTokens);
+    return abi.encode(testConfigs[i].asset, testConfigs[i].poolId, testConfigs[i].rewardTokens);
   }
 
   function getTestConfigLength() public view returns (uint256) {

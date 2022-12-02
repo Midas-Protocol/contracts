@@ -13,18 +13,17 @@ import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 
-// Using 2BRL
-// Tested on block 19052824
+// Tested on block 23534949
 contract WombatAssetTest is AbstractAssetTest {
-  constructor() fork(BSC_MAINNET) {
+  constructor() forkAtBlock(BSC_MAINNET, 23534949) {
     test = AbstractERC4626Test(address(new WombatERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new WombatTestConfigStorage()));
   }
 
   function setUpTestContract(bytes calldata testConfig) public override {
-    (address asset, address vault, ERC20Upgradeable[] memory rewardTokens) = abi.decode(
+    (address asset, uint256 poolId, ERC20Upgradeable[] memory rewardTokens) = abi.decode(
       testConfig,
-      (address, address, ERC20Upgradeable[])
+      (address, uint256, ERC20Upgradeable[])
     );
 
     test.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(asset));
@@ -38,37 +37,13 @@ contract WombatAssetTest is AbstractAssetTest {
 
       this.setUpTestContract(testConfig);
 
-      (address asset, , ) = abi.decode(testConfig, (address, address, ERC20Upgradeable[]));
+      (address asset, , ) = abi.decode(testConfig, (address, uint256, ERC20Upgradeable[]));
 
       test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
     }
   }
 
-  // function testDepositWithIncreasedVaultValue() public override {
-  //   this.runTest(test.testDepositWithIncreasedVaultValue);
-  // }
-
-  // function testDepositWithDecreasedVaultValue() public override {
-  //   this.runTest(test.testDepositWithDecreasedVaultValue);
-  // }
-
-  // function testWithdrawWithIncreasedVaultValue() public override {
-  //   this.runTest(test.testWithdrawWithIncreasedVaultValue);
-  // }
-
-  // function testWithdrawWithDecreasedVaultValue() public override {
-  //   this.runTest(test.testWithdrawWithDecreasedVaultValue);
-  // }
-
-  // function testAccumulatingRewardsOnDeposit() public {
-  //   this.runTest(WombatERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
-  // }
-
-  // function testAccumulatingRewardsOnWithdrawal() public {
-  //   this.runTest(WombatERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
-  // }
-
-  // function testClaimRewards() public {
-  //   this.runTest(WombatERC4626Test(address(test)).testClaimRewards);
-  // }
+  function testClaimRewards() public {
+    this.runTest(WombatERC4626Test(address(test)).testClaimRewards);
+  }
 }

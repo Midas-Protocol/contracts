@@ -6,7 +6,7 @@ import "forge-std/Vm.sol";
 import "../helpers/WithPool.sol";
 import "../config/BaseTest.t.sol";
 
-import { MidasERC4626, WombatLpERC4626, IWmxVault } from "../../midas/strategies/WombatLpERC4626.sol";
+import { MidasERC4626, WombatLpERC4626, IWmxVault, IVoterProxy, IBaseRewardPool, IBooster } from "../../midas/strategies/WombatLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockLpDepositor } from "../mocks/dotdot/MockLpDepositor.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
@@ -25,50 +25,42 @@ struct RewardsCycle {
   uint192 reward;
 }
 
-// Using 2BRL
-// Tested on block 19052824
 contract WombatERC4626Test is AbstractERC4626Test {
   using FixedPointMathLib for uint256;
 
-  address whale = 0x0BC3a8239B0a63E945Ea1bd6722Ba747b9557e56;
+  address operator = 0x9Ac0a3E8864Ea370Bf1A661444f6610dd041Ba1c;
+  address marketAddress;
 
-  IWmxVault vault;
-  ERC20 depositShare = ERC20(0xEFF5b0E496dC7C26fFaA014cEa0d2Baa83DB11c4);
+  // IWmxVault vault;
+  uint256 poolId;
+  IVoterProxy voterProxy = IVoterProxy(0xE3a7FB9C6790b02Dcfa03B6ED9cda38710413569);
 
-  ERC20 dddToken = ERC20(0x84c97300a190676a19D1E13115629A11f8482Bd1);
   FlywheelCore[] flywheels;
   FuseFlywheelDynamicRewardsPlugin[] rewards;
 
-  ERC20 epxToken = ERC20(0xAf41054C1487b0e5E2B9250C0332eCBCe6CE9d71);
-  FlywheelCore epxFlywheel;
-  FuseFlywheelDynamicRewardsPlugin epxRewards;
+  uint256[] internal rewardAmounts;
+  uint192[] internal cycleRewards;
 
-  uint256 withdrawalFee = 10;
-  uint256 ACCEPTABLE_DIFF = 1000;
-
-  uint192 expectedReward = 1e18;
-  address marketAddress;
   ERC20 marketKey;
-
   ERC20Upgradeable[] rewardsToken;
 
   constructor() WithPool() {}
 
   function setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("wombat-test ", false, 0.1e18, 1.1e18);
+    depositAmount = 100e18;
     sendUnderlyingToken(depositAmount, address(this));
-    depositAmount = 10e18;
 
-    (address _asset, address _vault, ERC20Upgradeable[] memory rewardTokens) = abi.decode(
+    (address _asset, uint256 _poolId, ERC20Upgradeable[] memory rewardTokens) = abi.decode(
       data,
-      (address, address, ERC20Upgradeable[])
+      (address, uint256, ERC20Upgradeable[])
     );
+    poolId = _poolId;
+    rewardsToken = rewardTokens;
 
     testPreFix = _testPreFix;
-    vault = IWmxVault(_vault);
 
     for (uint8 i = 0; i < rewardTokens.length; i++) {
-      emit log_address(address(rewardTokens[i]));
       vm.mockCall(
         address(rewardTokens[i]),
         abi.encodeWithSelector(rewardTokens[i].balanceOf.selector, address(0)),
@@ -88,28 +80,13 @@ contract WombatERC4626Test is AbstractERC4626Test {
       rewards.push(reward);
     }
 
-    // epxFlywheel = new FlywheelCore(
-    //   epxToken,
-    //   IFlywheelRewards(address(0)),
-    //   IFlywheelBooster(address(0)),
-    //   address(this),
-    //   Authority(address(0))
-    // );
-    // epxRewards = new FuseFlywheelDynamicRewardsPlugin(epxFlywheel, 1);
-    // epxFlywheel.setFlywheelRewards(epxRewards);
-
-    // ERC20 flywheelsRewardToken = FlywheelCore(address(flywheels)).rewardToken();
-    // rewardsToken.push(ERC20Upgradeable(address(flywheelsRewardToken)));
-    // ERC20 epxFlywheelRewardToken = FlywheelCore(address(epxFlywheel)).rewardToken();
-    // rewardsToken.push(ERC20Upgradeable(address(epxFlywheelRewardToken)));
-
     WombatLpERC4626 wombatLpERC4626 = new WombatLpERC4626();
     emit log_named_address("underlyingToken", address(underlyingToken));
-    wombatLpERC4626.initialize(underlyingToken, vault, rewardTokens, address(this));
+    wombatLpERC4626.initialize(underlyingToken, voterProxy, poolId, rewardTokens, address(this));
     plugin = wombatLpERC4626;
 
     // Just set it explicitly to 0. Just wanted to make clear that this is not forgotten but expected to be 0
-    initialStrategyBalance = 0;
+    initialStrategyBalance = getStrategyBalance();
     initialStrategySupply = 0;
 
     deployCErc20PluginRewardsDelegate(address(plugin), 0.9e18);
@@ -128,8 +105,14 @@ contract WombatERC4626Test is AbstractERC4626Test {
     WombatLpERC4626(address(plugin)).setRewardDestination(marketAddress);
   }
 
+  function _baseRewardPool() internal view returns (IBaseRewardPool) {
+    address booster = voterProxy.operator();
+    (, , , address crvRewards, ) = IBooster(booster).poolInfo(poolId);
+    return IBaseRewardPool(crvRewards);
+  }
+
   function increaseAssetsInVault() public override {
-    sendUnderlyingToken(1000e18, address(vault));
+    sendUnderlyingToken(100e18, address(_baseRewardPool()));
   }
 
   function decreaseAssetsInVault() public override {
@@ -138,11 +121,11 @@ contract WombatERC4626Test is AbstractERC4626Test {
   }
 
   function getDepositShares() public view override returns (uint256) {
-    return vault.balanceOf(address(plugin));
+    return _baseRewardPool().balanceOf(address(plugin));
   }
 
   function getStrategyBalance() public view override returns (uint256) {
-    return vault.totalAssets();
+    return _baseRewardPool().totalSupply();
   }
 
   function getExpectedDepositShares() public view override returns (uint256) {
@@ -162,91 +145,88 @@ contract WombatERC4626Test is AbstractERC4626Test {
     );
     assertEq(address(plugin.asset()), address(underlyingToken), string(abi.encodePacked("!asset ", testPreFix)));
     assertEq(
-      address(WombatLpERC4626(address(plugin)).vault()),
-      address(vault),
-      string(abi.encodePacked("!vault ", testPreFix))
+      address(WombatLpERC4626(address(plugin)).voterProxy()),
+      address(voterProxy),
+      string(abi.encodePacked("!voterProxy ", testPreFix))
     );
   }
 
-  // function testAccumulatingRewardsOnDeposit() public {
-  //   deposit(address(this), depositAmount / 2);
+  function testClaimRewards() public {
+    // Deposit funds, Rewards are 0
+    vm.startPrank(address(this));
+    underlyingToken.approve(marketAddress, depositAmount);
+    CErc20(marketAddress).mint(depositAmount);
+    vm.stopPrank();
 
-  //   vm.warp(block.timestamp + 150);
-  //   vm.roll(10);
+    for (uint8 i = 0; i < rewardsToken.length; i++) {
+      deal(address(rewardsToken[i]), operator, 1000e18);
+      vm.startPrank(operator);
+      _baseRewardPool().queueNewRewards(address(rewardsToken[i]), 1000e18);
+      vm.stopPrank();
+    }
 
-  //   deposit(address(this), depositAmount / 2);
-  //   assertGt(dddToken.balanceOf(address(plugin)), 0.0006 ether, string(abi.encodePacked("!dddBal ", testPreFix)));
-  //   assertGt(epxToken.balanceOf(address(plugin)), 0.01 ether, string(abi.encodePacked("!epxBal ", testPreFix)));
-  // }
+    for (uint8 i = 0; i < rewardsToken.length; i++) {
+      (uint32 start, uint32 end, uint192 reward) = rewards[i].rewardsCycle(ERC20(address(marketAddress)));
 
-  // function testAccumulatingRewardsOnWithdrawal() public {
-  //   deposit(address(this), depositAmount);
+      // Rewards can be transfered in the next cycle
+      assertEq(end, 0, string(abi.encodePacked("!end-", vm.toString(i), " ", testPreFix)));
 
-  //   vm.warp(block.timestamp + 150);
-  //   vm.roll(10);
+      // Reward amount is still 0
+      assertEq(reward, 0, string(abi.encodePacked("!reward-", vm.toString(i), " ", testPreFix)));
 
-  //   plugin.withdraw(1, address(this), address(this));
+      cycleRewards.push(reward);
+    }
 
-  //   assertGt(dddToken.balanceOf(address(plugin)), 0.001 ether, string(abi.encodePacked("!dddBal ", testPreFix)));
-  //   assertGt(epxToken.balanceOf(address(plugin)), 0.025 ether, string(abi.encodePacked("!epxBal ", testPreFix)));
-  // }
+    vm.warp(block.timestamp + 150);
+    vm.roll(10);
 
-  // function testClaimRewards() public {
-  //   // Deposit funds, Rewards are 0
-  //   vm.startPrank(address(this));
-  //   underlyingToken.approve(marketAddress, depositAmount);
-  //   CErc20(marketAddress).mint(depositAmount);
-  //   vm.stopPrank();
+    for (uint8 i = 0; i < rewardsToken.length; i++) {
+      uint256 rewardBefore = rewardsToken[i].balanceOf(address(rewards[i]));
+      // Call accrue as proxy for withdraw/deposit to claim rewards
+      flywheels[i].accrue(ERC20(marketAddress), address(this));
 
-  //   (uint32 dddStart, uint32 dddEnd, uint192 dddReward) = rewards.rewardsCycle(ERC20(address(marketAddress)));
-  //   (uint32 epxStart, uint32 epxEnd, uint192 epxReward) = rewards.rewardsCycle(ERC20(address(marketAddress)));
+      // Accrue rewards to send rewards to flywheelRewards
+      flywheels[i].accrue(ERC20(marketAddress), address(this));
 
-  //   // Rewards can be transfered in the next cycle
-  //   assertEq(dddEnd, 0, string(abi.encodePacked("!dddEnd ", testPreFix)));
-  //   assertEq(epxEnd, 0, string(abi.encodePacked("!epxEnd ", testPreFix)));
+      assertGt(
+        rewardsToken[i].balanceOf(address(rewards[i])),
+        rewardBefore,
+        string(abi.encodePacked("!rewardBal-", vm.toString(i), " ", testPreFix))
+      );
 
-  //   // Reward amount is still 0
-  //   assertEq(dddReward, 0, string(abi.encodePacked("!dddReward ", testPreFix)));
-  //   assertEq(epxReward, 0, string(abi.encodePacked("!epxReward ", testPreFix)));
+      (uint256 start, uint256 end, uint192 reward) = rewards[i].rewardsCycle(ERC20(marketAddress));
 
-  //   vm.warp(block.timestamp + 150);
-  //   vm.roll(10);
+      // Rewards can be transfered in the next cycle
+      assertGt(end, 1000000000, string(abi.encodePacked("!2.end-", vm.toString(i), " ", testPreFix)));
 
-  //   // Call accrue as proxy for withdraw/deposit to claim rewards
-  //   flywheels.accrue(ERC20(marketAddress), address(this));
-  //   epxFlywheel.accrue(ERC20(marketAddress), address(this));
+      // Reward amount is expected value
+      assertGt(reward, cycleRewards[i], string(abi.encodePacked("!2.reward-", vm.toString(i), " ", testPreFix)));
+      cycleRewards[i] = reward;
+    }
 
-  //   // Accrue rewards to send rewards to flywheelRewards
-  //   flywheels.accrue(ERC20(marketAddress), address(this));
-  //   epxFlywheel.accrue(ERC20(marketAddress), address(this));
-  //   assertGt(dddToken.balanceOf(address(rewards)), 0.001 ether, string(abi.encodePacked("!dddBal ", testPreFix)));
-  //   assertGt(epxToken.balanceOf(address(epxRewards)), 0.025 ether, string(abi.encodePacked("!epxBal ", testPreFix)));
+    vm.warp(block.timestamp + 150);
+    vm.roll(20);
 
-  //   (dddStart, dddEnd, dddReward) = rewards.rewardsCycle(ERC20(marketAddress));
-  //   (epxStart, epxEnd, epxReward) = epxRewards.rewardsCycle(ERC20(marketAddress));
+    for (uint8 i = 0; i < flywheels.length; i++) {
+      // Finally accrue reward from last cycle
+      flywheels[i].accrue(ERC20(marketAddress), address(this));
 
-  //   // Rewards can be transfered in the next cycle
-  //   assertGt(dddEnd, 1000000000, string(abi.encodePacked("!2.dddEnd ", testPreFix)));
-  //   assertGt(epxEnd, 1000000000, string(abi.encodePacked("!2.epxEnd ", testPreFix)));
+      // Claim Rewards for the user
+      flywheels[i].claimRewards(address(this));
 
-  //   // Reward amount is expected value
-  //   assertGt(dddReward, 0.001 ether, string(abi.encodePacked("!2.dddReward ", testPreFix)));
-  //   assertGt(epxReward, 0.025 ether, string(abi.encodePacked("!2.epxReward ", testPreFix)));
+      emit log_uint(cycleRewards[i]);
 
-  //   vm.warp(block.timestamp + 150);
-  //   vm.roll(20);
-
-  //   // Finally accrue reward from last cycle
-  //   flywheels.accrue(ERC20(marketAddress), address(this));
-  //   epxFlywheel.accrue(ERC20(marketAddress), address(this));
-
-  //   // Claim Rewards for the user
-  //   flywheels.claimRewards(address(this));
-  //   epxFlywheel.claimRewards(address(this));
-
-  //   assertGt(dddToken.balanceOf(address(this)), 0.001 ether, string(abi.encodePacked("!dddBal User ", testPreFix)));
-  //   assertEq(dddToken.balanceOf(address(flywheels)), 0, string(abi.encodePacked("!dddBal Flywheel ", testPreFix)));
-  //   assertGt(epxToken.balanceOf(address(this)), 0.025 ether, string(abi.encodePacked("!epxBal User ", testPreFix)));
-  //   assertEq(epxToken.balanceOf(address(flywheels)), 0, string(abi.encodePacked("!epxBal Flywheel ", testPreFix)));
-  // }
+      assertApproxEqAbs(
+        rewardsToken[i].balanceOf(address(this)),
+        cycleRewards[i],
+        uint256(1000),
+        string(abi.encodePacked("!rewardBal User-", vm.toString(i), " ", testPreFix))
+      );
+      assertEq(
+        rewardsToken[i].balanceOf(address(flywheels[i])),
+        0,
+        string(abi.encodePacked("!rewardBal Flywheel-", vm.toString(i), " ", testPreFix))
+      );
+    }
+  }
 }
