@@ -26,12 +26,6 @@ interface IFuseFeeDistributor {
     bool allowResign
   ) external view returns (bool);
 
-  function cEtherDelegateWhitelist(
-    address oldImplementation,
-    address newImplementation,
-    bool allowResign
-  ) external view returns (bool);
-
   function latestComptrollerImplementation(address oldImplementation) external view returns (address);
 
   function latestCErc20Delegate(address oldImplementation)
@@ -43,18 +37,11 @@ interface IFuseFeeDistributor {
       bytes memory becomeImplementationData
     );
 
-  function latestCEtherDelegate(address oldImplementation)
-    external
-    view
-    returns (
-      address cEtherDelegate,
-      bool allowResign,
-      bytes memory becomeImplementationData
-    );
-
   function latestPluginImplementation(address oldImplementation) external view returns (address);
 
   function getComptrollerExtensions(address comptroller) external view returns (address[] memory);
+
+  function getCErc20DelegateExtensions(address cErc20Delegate) external view returns (address[] memory);
 
   function deployCErc20(bytes calldata constructorData) external returns (address);
 

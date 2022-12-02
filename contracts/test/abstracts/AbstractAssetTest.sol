@@ -16,9 +16,11 @@ contract AbstractAssetTest is BaseTest {
   }
 
   function runTest(function() external test) public {
-    for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
-      this.setUpTestContract(testConfigStorage.getTestConfig(i));
-      test();
+    if (shouldRunForChain(block.chainid)) {
+      for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
+        this.setUpTestContract(testConfigStorage.getTestConfig(i));
+        test();
+      }
     }
   }
 
