@@ -193,22 +193,11 @@ contract LiquidityMiningTest is DSTest {
   }
 
   function testIntegrationRewardStandard() public {
-    _initialize(6, 18);
-    _testIntegration();
-  }
-
-  function testIntegrationBaseStandard() public {
-    _initialize(18, 6);
-    _testIntegration();
-  }
-
-  function testIntegrationNoStandard() public {
-    _initialize(6, 8);
-    _testIntegration();
-  }
-
-  function testIntegrationStandard() public {
-    _initialize(18, 18);
-    _testIntegration();
+    for (uint8 i = 1; i <= 18; i ++) {
+      for (uint8 j = 1; j <= 18; j ++) {
+        _initialize(6, 18);
+        _testIntegration();
+      }
+    }
   }
 }

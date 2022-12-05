@@ -36,7 +36,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   mapping(address => uint256) public rewardsAccrued;
 
   /// @notice the fixed point factor of flywheel
-  uint224 public ONE = 1e18;
+  uint224 public ONE;
 
   /// @notice The strategy index and last updated per strategy
   mapping(ERC20 => RewardsState) public strategyState;
