@@ -15,7 +15,7 @@ import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 
 // Tested on block 23534949
 contract WombatAssetTest is AbstractAssetTest {
-  function afterForkSetUp() forkAtBlock(BSC_MAINNET, 23534949) {
+  function afterForkSetUp() intenral override {
     test = AbstractERC4626Test(address(new WombatERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new WombatTestConfigStorage()));
   }
