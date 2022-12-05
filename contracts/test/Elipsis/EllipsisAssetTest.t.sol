@@ -11,8 +11,7 @@ import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 import "./EllipsisERC4626Test.sol";
 
 contract EllipsisAssetTest is AbstractAssetTest {
-  // TODO use the latest block
-  constructor() fork(BSC_MAINNET) {
+  function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new EllipsisERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new EllipsisTestConfigStorage()));
   }
@@ -25,7 +24,7 @@ contract EllipsisAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override {
+  function testInitializedValues() public override fork(BSC_MAINNET) {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 

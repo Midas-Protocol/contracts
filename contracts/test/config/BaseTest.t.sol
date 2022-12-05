@@ -25,14 +25,52 @@ abstract contract BaseTest is Test {
 
   mapping(uint128 => uint256) private forkIds;
 
+  constructor() {
+    configureAddressesProvider(0);
+  }
+
+  uint256 constant CRITICAL = 100;
+  uint256 constant NORMAL = 90;
+  uint256 constant LOW = 80;
+
+  modifier importance(uint256 testImportance) {
+    uint256 runLevel = NORMAL;
+
+    try vm.envUint("TEST_RUN_LEVEL") returns (uint256 level) {
+      runLevel = level;
+    } catch {
+      emit log("failed to get env param TEST_RUN_LEVEL");
+    }
+
+    if (testImportance >= runLevel) {
+      _;
+    } else {
+      emit log("not running the test");
+    }
+  }
+
   modifier fork(uint128 chainid) {
-    _forkAtBlock(chainid, 0);
-    _;
+    if (shouldRunForChain(chainid)) {
+      _forkAtBlock(chainid, 0);
+      _;
+    }
   }
 
   modifier forkAtBlock(uint128 chainid, uint256 blockNumber) {
-    _forkAtBlock(chainid, blockNumber);
-    _;
+    if (shouldRunForChain(chainid)) {
+      _forkAtBlock(chainid, blockNumber);
+      _;
+    }
+  }
+
+  function shouldRunForChain(uint256 chainid) internal returns (bool) {
+    bool run = true;
+    try vm.envUint("TEST_RUN_CHAINID") returns (uint256 envChainId) {
+      run = envChainId == chainid;
+    } catch {
+      emit log("failed to get env param TEST_RUN_CHAINID");
+    }
+    return run;
   }
 
   function _forkAtBlock(uint128 chainid, uint256 blockNumber) private {
@@ -43,9 +81,9 @@ abstract contract BaseTest is Test {
       } else {
         vm.selectFork(getForkId(chainid));
       }
-      configureAddressesProvider(chainid);
-      afterForkSetUp();
     }
+    configureAddressesProvider(chainid);
+    afterForkSetUp();
   }
 
   function getForkId(uint128 chainid, bool archive) private returns (uint256) {
@@ -109,15 +147,16 @@ abstract contract BaseTest is Test {
       ap = AddressesProvider(0x38742363597fBaE312B0bdcC351fCc6107E9E27E);
     } else if (chainid == MOONBEAM_MAINNET) {
       ap = AddressesProvider(0x771ee5a72A57f3540E5b9A6A8C226C2a24A70Fae);
-      // } else if (block.chainid == EVMOS_MAINNET) {
-      //   // TODO: change this on deployment
-      //   ap = AddressesProvider(address(0));
+    } else if (block.chainid == EVMOS_MAINNET) {
+      ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
     } else if (chainid == NEON_DEVNET) {
       ap = AddressesProvider(0x3B0B043f5c459F9f5dC39ECb04AA39D1E675565B);
     } else if (chainid == ARBITRUM_ONE) {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
+    } else if (chainid == FANTOM_OPERA) {
+      ap = AddressesProvider(0xC1B6152d3977E994F5a4E0dead9d0a11a0D229Ef);
     } else {
       dpa = new ProxyAdmin();
       AddressesProvider logic = new AddressesProvider();

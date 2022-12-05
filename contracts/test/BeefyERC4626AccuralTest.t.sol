@@ -25,7 +25,7 @@ contract BeefyERC4626AccuralTest is BaseTest {
   address accountOne = address(1);
   address accountTwo = address(2);
 
-  function setUp() public fork(POLYGON_MAINNET) {
+  function afterForkSetUp() internal override {
     underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
     plugin = new BeefyERC4626();
     plugin.initialize(underlyingToken, beefyVault, 10);
@@ -101,7 +101,7 @@ contract BeefyERC4626AccuralTest is BaseTest {
 
   /* --------------------- ERC4626 ACCURAL TESTS --------------------- */
 
-  function testAccrualIsEqual() public {
+  function testAccrualIsEqual() public fork(POLYGON_MAINNET) {
     deal(address(underlyingToken), accountOne, DEPOSIT_AMOUNT);
     deal(address(underlyingToken), accountTwo, DEPOSIT_AMOUNT);
 

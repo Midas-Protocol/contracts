@@ -16,13 +16,9 @@ contract CurveAssetTest is AbstractAssetTest {
   address[] underlyingsForOracle;
   IPriceOracle[] oracles;
 
-  // TODO adapt test to run for the latest block
-  constructor() forkAtBlock(POLYGON_MAINNET, 33063212) {
+  function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new CurveERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new CurveTestConfigStorage()));
-  }
-
-  function setUp() public {
     masterPriceOracle = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
   }
 
@@ -43,7 +39,7 @@ contract CurveAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override {
+  function testInitializedValues() public override forkAtBlock(POLYGON_MAINNET, 33063212) {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
@@ -75,15 +71,15 @@ contract CurveAssetTest is AbstractAssetTest {
     assertTrue(true);
   }
 
-  function testAccumulatingRewardsOnDeposit() public {
+  function testAccumulatingRewardsOnDeposit() public forkAtBlock(POLYGON_MAINNET, 33063212) {
     this.runTest(CurveERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public {
+  function testAccumulatingRewardsOnWithdrawal() public forkAtBlock(POLYGON_MAINNET, 33063212) {
     this.runTest(CurveERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 
-  function testClaimRewards() public {
+  function testClaimRewards() public forkAtBlock(POLYGON_MAINNET, 33063212) {
     this.runTest(CurveERC4626Test(address(test)).testClaimRewards);
   }
 }

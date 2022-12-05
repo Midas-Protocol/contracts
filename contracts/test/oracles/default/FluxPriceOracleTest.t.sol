@@ -9,18 +9,6 @@ import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
 import { NativeUSDPriceOracle } from "../../../oracles/evmos/NativeUSDPriceOracle.sol";
 
-contract MockFluxPriceFeed {
-  int256 public staticPrice;
-
-  constructor(int256 _staticPrice) {
-    staticPrice = _staticPrice;
-  }
-
-  function latestAnswer() external view returns (int256) {
-    return staticPrice;
-  }
-}
-
 contract FluxPriceOracleTest is BaseTest {
   FluxPriceOracle private oracle;
   MasterPriceOracle private mpo;

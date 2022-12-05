@@ -12,6 +12,15 @@ abstract contract DiamondExtension {
   function _getExtensionFunctions() external view virtual returns (bytes4[] memory);
 }
 
+// When no function exists for function called
+error FunctionNotFound(bytes4 _functionSelector);
+
+// When no extension exists for function called
+error ExtensionNotFound(bytes4 _functionSelector);
+
+// When the function is already added
+error FunctionAlreadyAdded(bytes4 _functionSelector, address _currentImpl);
+
 abstract contract DiamondBase {
   /**
    * @dev register a logic extension
@@ -24,8 +33,9 @@ abstract contract DiamondBase {
     return LibDiamond.listExtensions();
   }
 
-  fallback() external payable {
+  fallback() external {
     address extension = LibDiamond.getExtensionForFunction(msg.sig);
+    if (extension == address(0)) revert FunctionNotFound(msg.sig);
     // Execute external function from extension using delegatecall and return any value.
     assembly {
       // copy function selector and any arguments
@@ -66,7 +76,7 @@ library LibDiamond {
   function getExtensionForFunction(bytes4 msgSig) internal view returns (address) {
     LibDiamond.LogicStorage storage ds = diamondStorage();
     address extension = ds.functions[msgSig].implementation;
-    require(extension != address(0), "Diamond: Function does not exist");
+    if (extension == address(0)) revert ExtensionNotFound(msgSig);
     return extension;
   }
 
@@ -129,10 +139,10 @@ library LibDiamond {
     bytes4[] memory fnsToAdd = extension._getExtensionFunctions();
     LogicStorage storage ds = diamondStorage();
     uint16 selectorCount = uint16(ds.selectorAtIndex.length);
-    for (uint256 selectorIndex; selectorIndex < fnsToAdd.length; selectorIndex++) {
+    for (uint256 selectorIndex = 0; selectorIndex < fnsToAdd.length; selectorIndex++) {
       bytes4 selector = fnsToAdd[selectorIndex];
       address oldImplementation = ds.functions[selector].implementation;
-      require(oldImplementation == address(0), "CannotAddFunctionToDiamondThatAlreadyExists");
+      if (oldImplementation != address(0)) revert FunctionAlreadyAdded(selector, oldImplementation);
       ds.functions[selector] = Function(address(extension), selectorCount);
       ds.selectorAtIndex.push(selector);
       selectorCount++;

@@ -365,7 +365,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   ) external override returns (uint256) {
     CTokenInterface cTokenModify = CTokenInterface(cToken);
     // Accrue interest
-    uint256 balanceOfUnderlying = cTokenModify.balanceOfUnderlying(account);
+    uint256 balanceOfUnderlying = cTokenModify.asCTokenExtensionInterface().balanceOfUnderlying(account);
 
     // Get account liquidity
     (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
@@ -888,7 +888,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
      *   = actualRepayAmount * (liquidationIncentive * priceBorrowed) / (priceCollateral * exchangeRate)
      */
     CTokenInterface collateralCToken = CTokenInterface(cTokenCollateral);
-    uint256 exchangeRateMantissa = collateralCToken.exchangeRateStored(); // Note: reverts on error
+    uint256 exchangeRateMantissa = collateralCToken.asCTokenExtensionInterface().exchangeRateStored(); // Note: reverts on error
     uint256 seizeTokens;
     Exp memory numerator;
     Exp memory denominator;

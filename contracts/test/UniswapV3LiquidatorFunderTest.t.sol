@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
+import { CTokenInterface, CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { UniswapV3LiquidatorFunder } from "../liquidators/UniswapV3LiquidatorFunder.sol";
@@ -118,8 +118,8 @@ contract UniswapV3LiquidatorFunderTest is BaseTest {
     // some time passes, interest accrues and prices change
     {
       vm.roll(block.number + 100);
-      usdcCToken.accrueInterest();
-      parCToken.accrueInterest();
+      CTokenExtensionInterface(address(usdcCToken)).accrueInterest();
+      CTokenExtensionInterface(address(parCToken)).accrueInterest();
 
       MasterPriceOracle mpo = MasterPriceOracle(address(comptroller.oracle()));
       uint256 priceusdc = mpo.getUnderlyingPrice(ICToken(usdcMarketAddress));

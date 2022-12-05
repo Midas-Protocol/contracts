@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { CToken } from "../compound/CToken.sol";
+import { CToken, CTokenExtensionInterface } from "../compound/CToken.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { JarvisLiquidatorFunder } from "../liquidators/JarvisLiquidatorFunder.sol";
@@ -34,7 +34,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
 
   IERC20Upgradeable bUSD;
 
-  function setUp() public fork(BSC_MAINNET) {
+  function afterForkSetUp() internal override {
     uint64 expirationPeriod = 60 * 40; // 40 mins
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD")); // TODO check if bUSD == stableToken at AP
 
@@ -50,7 +50,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     return synthereumLiquiditiyPool;
   }
 
-  function testRedeemToken() public {
+  function testRedeemToken() public fork(BSC_MAINNET) {
     vm.prank(minter);
     jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
@@ -63,7 +63,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     assertEq(outputAmount, redeemableAmount);
   }
 
-  function testEmergencyRedeemToken() public {
+  function testEmergencyRedeemToken() public fork(BSC_MAINNET) {
     ISynthereumLiquidityPool pool = getPool(address(jBRLToken));
     address manager = pool.synthereumFinder().getImplementationAddress("Manager");
     vm.prank(manager);
@@ -90,7 +90,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     bytes[] data;
   }
 
-  function testJbrlLiquidation() public {
+  function testJbrlLiquidation() public fork(BSC_MAINNET) {
     LiquidationData memory vars;
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
 
@@ -139,8 +139,8 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     // some time passes, interest accrues and prices change
     {
       vm.roll(block.number + 100);
-      cTokenBUSD.accrueInterest();
-      cTokenJBRL.accrueInterest();
+      CTokenExtensionInterface(address(cTokenBUSD)).accrueInterest();
+      CTokenExtensionInterface(address(cTokenJBRL)).accrueInterest();
 
       MasterPriceOracle mpo = MasterPriceOracle(address(comptroller.oracle()));
       uint256 priceBUSD = mpo.getUnderlyingPrice(ICToken(address(cTokenBUSD)));

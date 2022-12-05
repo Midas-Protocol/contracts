@@ -96,7 +96,7 @@ contract MidasFlywheelLensRouter {
 
   function getUnclaimedRewardsForMarket(
     address user,
-    CErc20Token market,
+    ERC20 market,
     MidasFlywheelCore[] calldata flywheels,
     bool[] calldata accrue
   ) external returns (uint256[] memory rewards) {
