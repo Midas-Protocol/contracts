@@ -219,17 +219,31 @@ contract ExtensionsTest is BaseTest {
     CTokenInterface[] memory allMarkets = somePool.getAllMarkets();
 
     CTokenInterface someMarket = allMarkets[random % allMarkets.length];
-    CErc20Delegate asDelegate = CErc20Delegate(address(someMarket));
+    CErc20PluginDelegate asDelegate = CErc20PluginDelegate(address(someMarket));
 
     emit log("pool");
     emit log_address(address(somePool));
     emit log("market");
     emit log_address(address(someMarket));
 
-    _testExistingCTokenExtensionUpgrade(asDelegate);
+    try this._testExistingCTokenExtensionUpgrade(asDelegate) {
+    } catch Error(string memory reason) {
+      emit log("at random");
+      emit log_uint(random);
+
+      address plugin = address(asDelegate.plugin());
+      emit log("plugin");
+      emit log_address(plugin);
+
+      address latestPlugin = ffd.latestPluginImplementation(plugin);
+      emit log("latest plugin impl");
+      emit log_address(latestPlugin);
+
+      revert(reason);
+    }
   }
 
-  function _testExistingCTokenExtensionUpgrade(CErc20Delegate asDelegate) internal {
+  function _testExistingCTokenExtensionUpgrade(CErc20Delegate asDelegate) public {
     Comptroller pool = Comptroller(address(asDelegate.comptroller()));
 
     uint256 totalSupplyBefore = asDelegate.totalSupply();
@@ -239,8 +253,12 @@ contract ExtensionsTest is BaseTest {
     emit log("implementation before");
     emit log_address(implBefore);
 
-    CErc20PluginRewardsDelegate newImpl = new CErc20PluginRewardsDelegate();
-    // CErc20Delegate newImpl = new CErc20Delegate();
+    CErc20Delegate newImpl;
+    if (compareStrings("CErc20Delegate", asDelegate.contractType())) {
+      newImpl = new CErc20Delegate();
+    } else {
+      newImpl = new CErc20PluginRewardsDelegate();
+    }
 
     // whitelist the upgrade
     vm.prank(ffd.owner());
