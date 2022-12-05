@@ -48,7 +48,6 @@ contract WombatERC4626Test is AbstractERC4626Test {
 
   function setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("wombat-test ", false, 0.1e18, 1.1e18);
-    depositAmount = 100e18;
     sendUnderlyingToken(depositAmount, address(this));
 
     (address _asset, uint256 _poolId, ERC20Upgradeable[] memory rewardTokens) = abi.decode(
@@ -81,7 +80,6 @@ contract WombatERC4626Test is AbstractERC4626Test {
     }
 
     WombatLpERC4626 wombatLpERC4626 = new WombatLpERC4626();
-    emit log_named_address("underlyingToken", address(underlyingToken));
     wombatLpERC4626.initialize(underlyingToken, voterProxy, poolId, rewardTokens, address(this));
     plugin = wombatLpERC4626;
 
@@ -116,8 +114,8 @@ contract WombatERC4626Test is AbstractERC4626Test {
   }
 
   function decreaseAssetsInVault() public override {
-    vm.prank(0x5B74C99AA2356B4eAa7B85dC486843eDff8Dfdbe); //lpStaker
-    underlyingToken.transfer(address(1), 200e18); // transfer doesnt work
+    vm.prank(address(_baseRewardPool()));
+    underlyingToken.transfer(address(1), 200e18);
   }
 
   function getDepositShares() public view override returns (uint256) {
