@@ -4,7 +4,7 @@ pragma solidity ^0.8.10;
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 
-import { ERC4626 } from "../../utils/ERC4626.sol";
+import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 
@@ -37,7 +37,7 @@ interface IMiniChefV2 {
  * Wraps https://github.com/kinesis-labs/kinesis-contract/blob/main/contracts/rewards/MiniChefV2.sol
  *
  */
-contract MiniChefERC4626 is ERC4626 {
+contract MiniChefERC4626 is MidasERC4626 {
   using SafeTransferLib for ERC20;
   using FixedPointMathLib for uint256;
 
@@ -46,7 +46,7 @@ contract MiniChefERC4626 is ERC4626 {
   IMiniChefV2 public immutable miniChef;
   FlywheelCore public immutable flywheel;
 
-  /* ========== CONSTRUCTOR ========== */
+  /* ========== INITIALIZER ========== */
 
   /**
      @notice Creates a new Vault that accepts a specific underlying token.
@@ -55,18 +55,13 @@ contract MiniChefERC4626 is ERC4626 {
      @param _poolId The poolId in AutofarmV2
      @param _miniChef Kenisis MiniChefV2 contract
     */
-  constructor(
+  function initialize(
     ERC20 _asset,
     FlywheelCore _flywheel,
     uint256 _poolId,
     IMiniChefV2 _miniChef
-  )
-    ERC4626(
-      _asset,
-      string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
-      string(abi.encodePacked("mv", _asset.symbol()))
-    )
-  {
+  ) public initializer {
+    __MidasER4626_init(_asset);
     poolId = _poolId;
     miniChef = _miniChef;
     flywheel = _flywheel;
@@ -80,6 +75,10 @@ contract MiniChefERC4626 is ERC4626 {
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
+    if (paused()) {
+      return _asset().balanceOf(address(this));
+    }
+
     return miniChef.userInfo(poolId, address(this)).amount;
   }
 
@@ -98,5 +97,16 @@ contract MiniChefERC4626 is ERC4626 {
   /// @notice withdraws specified amount of underlying token if possible
   function beforeWithdraw(uint256 amount, uint256) internal override {
     miniChef.withdrawAndHarvest(poolId, amount, address(this));
+  }
+
+  function emergencyWithdrawAndPause() external override onlyOwner {
+    uint256 amount = miniChef.userInfo(poolId, address(this)).amount;
+    miniChef.withdrawAndHarvest(poolId, amount, address(this));
+    _pause();
+  }
+
+  function unpause() external override onlyOwner {
+    _unpause();
+    miniChef.deposit(poolId, _asset().balanceOf(address(this)), address(this));
   }
 }
