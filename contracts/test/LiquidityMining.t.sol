@@ -192,12 +192,13 @@ contract LiquidityMiningTest is DSTest {
     require(rewardToken.balanceOf(user) == userRewards + userRewards2, "balance mismatch");
   }
 
-  function testIntegrationRewardStandard() public {
-    for (uint8 i = 1; i <= 18; i ++) {
-      for (uint8 j = 1; j <= 18; j ++) {
-        _initialize(6, 18);
-        _testIntegration();
-      }
-    }
+  function testIntegrationRewardStandard(uint8 i, uint8 j) public {
+    vm.assume(i > 1);
+    vm.assume(j > 1);
+    vm.assume(i < 19);
+    vm.assume(j < 19);
+
+    _initialize(i, j);
+    _testIntegration();
   }
 }
