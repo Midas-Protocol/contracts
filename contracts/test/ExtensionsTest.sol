@@ -226,8 +226,7 @@ contract ExtensionsTest is BaseTest {
     emit log("market");
     emit log_address(address(someMarket));
 
-    try this._testExistingCTokenExtensionUpgrade(asDelegate) {
-    } catch Error(string memory reason) {
+    try this._testExistingCTokenExtensionUpgrade(asDelegate) {} catch Error(string memory reason) {
       emit log("at random");
       emit log_uint(random);
 
