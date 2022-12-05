@@ -29,7 +29,12 @@ interface IComptroller {
 
   function checkMembership(address account, ICToken cToken) external view returns (bool);
 
-  function getAccountLiquidity(address account)
+  function getHypotheticalAccountLiquidity(
+    address account,
+    address cTokenModify,
+    uint256 redeemTokens,
+    uint256 borrowAmount
+  )
     external
     view
     returns (
@@ -48,7 +53,9 @@ interface IComptroller {
 
   function borrowGuardianPaused(address cToken) external view returns (bool);
 
-  function getRewardsDistributors() external view returns (IRewardsDistributor[] memory);
+  function mintGuardianPaused(address cToken) external view returns (bool);
+
+  function getRewardsDistributors() external view returns (address[] memory);
 
   function getAllMarkets() external view returns (ICToken[] memory);
 
@@ -58,6 +65,10 @@ interface IComptroller {
 
   function enforceWhitelist() external view returns (bool);
 
+  function enterMarkets(address[] memory cTokens) external returns (uint256[] memory);
+
+  function isUserOfPool(address user) external view returns (bool);
+
   function whitelist(address account) external view returns (bool);
 
   function _setWhitelistEnforcement(bool enforce) external returns (uint256);
@@ -65,4 +76,16 @@ interface IComptroller {
   function _setWhitelistStatuses(address[] calldata _suppliers, bool[] calldata statuses) external returns (uint256);
 
   function _toggleAutoImplementations(bool enabled) external returns (uint256);
+
+  function _deployMarket(
+    bool isCEther,
+    bytes memory constructorData,
+    uint256 collateralFactorMantissa
+  ) external returns (uint256);
+
+  function getMaxRedeemOrBorrow(
+    address account,
+    ICToken cTokenModify,
+    bool isBorrow
+  ) external returns (uint256);
 }

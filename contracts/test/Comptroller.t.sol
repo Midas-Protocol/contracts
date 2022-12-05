@@ -1,46 +1,48 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.4.23;
+pragma solidity ^0.8.0;
 
-import "forge-std/Test.sol";
-import { WithPool } from "./helpers/WithPool.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 
-contract ComptrollerTest is Test, WithPool {
-  address alice = address(1337);
-  address bob = address(1338);
-  uint256 amount = 1 ether;
+import { ERC20 } from "solmate/tokens/ERC20.sol";
+import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { Comptroller } from "../compound/Comptroller.sol";
+import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
+import { IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 
-  function testEnterMarkets() public {
-    underlyingToken.mint(alice, amount);
-    startHoax(alice);
-    underlyingToken.approve(address(cErc20), amount);
+contract ComptrollerTest is BaseTest {
+  Comptroller internal comptroller;
+  MidasFlywheel internal flywheel;
+  address internal nonOwner = address(0x2222);
 
-    require(comptroller.enterMarkets(markets)[0] == 0);
-    cErc20.mint(amount);
+  event Failure(uint256 error, uint256 info, uint256 detail);
+
+  function setUp() public {
+    comptroller = new Comptroller(payable(address(this)));
+    flywheel = new MidasFlywheel();
+    flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
   }
 
-  function testExitMarket() public {
-    underlyingToken.mint(alice, amount);
-    underlyingToken.mint(bob, amount);
+  function createNewFlywheel() public returns (address) {
+    MidasFlywheel newFlywheel = new MidasFlywheel();
+    newFlywheel.initialize(
+      ERC20(address(0)),
+      IFlywheelRewards(address(0)),
+      IFlywheelBooster(address(0)),
+      address(this)
+    );
+    return address(newFlywheel);
+  }
 
-    vm.startPrank(alice);
-    underlyingToken.approve(address(cErc20), amount);
-    require(comptroller.enterMarkets(markets)[0] == 0, "Failed to Enter Market");
-    cErc20.mint(amount);
-    vm.stopPrank();
+  function test__setFlywheel() external {
+    comptroller._addRewardsDistributor(address(flywheel));
 
-    vm.startPrank(bob);
-    underlyingToken.approve(address(cErc20), amount);
-    require(comptroller.enterMarkets(markets)[0] == 0, "Failed to Enter Market");
-    cErc20.mint(amount);
-    vm.stopPrank();
+    assertEq(comptroller.rewardsDistributors(0), address(flywheel));
+  }
 
-    // Exit market as contract, should work as I don't have any borrow balances
-    require(comptroller.exitMarket(markets[0]) == 0);
-    hoax(alice);
-    require(comptroller.exitMarket(markets[0]) == 0);
-    // Bob can't exit the market because the Comptroller.allBorrowers array will be empty
-    // and causes an Index Out of Bounds Exception
-    // hoax(bob);
-    // require(comptroller.exitMarket(markets[0]) == 0);
+  function test__setFlywheelRevertsIfNonOwner() external {
+    vm.startPrank(nonOwner);
+    vm.expectEmit(false, false, false, true, address(comptroller));
+    emit Failure(1, 2, 0);
+    comptroller._addRewardsDistributor(address(flywheel));
   }
 }

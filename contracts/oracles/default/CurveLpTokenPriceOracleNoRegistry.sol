@@ -1,16 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
+import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 
-import "../../external/compound/IPriceOracle.sol";
 import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
-import "../../compound/ComptrollerStorage.sol";
-import { ComptrollerErrorReporter } from "../../compound/ErrorReporter.sol";
 import "../../external/curve/ICurvePool.sol";
+import "../../midas/SafeOwnableUpgradeable.sol";
+import "../../utils/PatchedStorage.sol";
 
 import "../BasePriceOracle.sol";
 
@@ -20,13 +17,7 @@ import "../BasePriceOracle.sol";
  * @notice CurveLpTokenPriceOracle is a price oracle for Curve LP tokens (using the sender as a root oracle).
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
-contract CurveLpTokenPriceOracleNoRegistry is
-  IPriceOracle,
-  BasePriceOracle,
-  OwnableUpgradeable,
-  UnitrollerAdminStorage,
-  ComptrollerErrorReporter
-{
+contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedStorage, BasePriceOracle {
   /**
    * @dev Maps Curve LP token addresses to underlying token addresses.
    */
@@ -36,16 +27,6 @@ contract CurveLpTokenPriceOracleNoRegistry is
    * @dev Maps Curve LP token addresses to pool addresses.
    */
   mapping(address => address) public poolOf;
-
-  /**
-   * @notice Emitted when pendingAdmin is changed
-   */
-  event NewPendingAdmin(address oldPendingAdmin, address newPendingAdmin);
-
-  /**
-   * @notice Emitted when pendingAdmin is accepted, which means admin is updated
-   */
-  event NewAdmin(address oldAdmin, address newAdmin);
 
   /**
    * @dev Initializes an array of LP tokens and pools if desired.
@@ -63,7 +44,7 @@ contract CurveLpTokenPriceOracleNoRegistry is
       "No LP tokens supplied or array lengths not equal."
     );
 
-    __Ownable_init();
+    __SafeOwnable_init();
     for (uint256 i = 0; i < _lpTokens.length; i++) {
       poolOf[_lpTokens[i]] = _pools[i];
       underlyingTokens[_lpTokens[i]] = _poolUnderlyings[i];
@@ -88,7 +69,7 @@ contract CurveLpTokenPriceOracleNoRegistry is
     address underlying = ICErc20(address(cToken)).underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-    return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
+    return (_price(underlying) * 1e18) / (10**uint256(EIP20Interface(underlying).decimals()));
   }
 
   /**
@@ -124,60 +105,17 @@ contract CurveLpTokenPriceOracleNoRegistry is
     address _pool,
     address[] memory _underlyings
   ) external onlyOwner {
-    address pool = poolOf[_lpToken];
-    require(pool == address(0), "This LP token is already registered.");
+    // require(pool == address(0), "This LP token is already registered.");
     poolOf[_lpToken] = _pool;
     underlyingTokens[_lpToken] = _underlyings;
   }
 
   /**
-   * @notice Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
-   * @dev Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
-   * @param newPendingAdmin New pending admin.
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   * @dev getter for the underlying tokens
+   * @param lpToken the LP token address.
+   * @return _underlyings Underlying addresses.
    */
-  function _setPendingAdmin(address newPendingAdmin) public returns (uint256) {
-    // Check caller = admin
-    if (!hasAdminRights()) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_ADMIN_OWNER_CHECK);
-    }
-
-    // Save current value, if any, for inclusion in log
-    address oldPendingAdmin = pendingAdmin;
-
-    // Store pendingAdmin with value newPendingAdmin
-    pendingAdmin = newPendingAdmin;
-
-    // Emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin)
-    emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin);
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Accepts transfer of admin rights. msg.sender must be pendingAdmin
-   * @dev Admin function for pending admin to accept role and update admin
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _acceptAdmin() public returns (uint256) {
-    // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
-    if (msg.sender != pendingAdmin) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.ACCEPT_ADMIN_PENDING_ADMIN_CHECK);
-    }
-
-    // Save current values for inclusion in log
-    address oldAdmin = admin;
-    address oldPendingAdmin = pendingAdmin;
-
-    // Store admin with value pendingAdmin
-    admin = pendingAdmin;
-
-    // Clear the pending value
-    pendingAdmin = address(0);
-
-    emit NewAdmin(oldAdmin, admin);
-    emit NewPendingAdmin(oldPendingAdmin, pendingAdmin);
-
-    return uint256(Error.NO_ERROR);
+  function getUnderlyingTokens(address lpToken) public view returns (address[] memory) {
+    return underlyingTokens[lpToken];
   }
 }

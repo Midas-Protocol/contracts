@@ -24,7 +24,7 @@ contract UniswapLpTokenLiquidator is IRedemptionStrategy {
     IERC20Upgradeable token,
     address to,
     uint256 minAmount
-  ) private {
+  ) internal {
     uint256 allowance = token.allowance(address(this), to);
 
     if (allowance < minAmount) {

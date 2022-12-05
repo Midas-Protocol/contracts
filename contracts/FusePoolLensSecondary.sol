@@ -154,59 +154,8 @@ contract FusePoolLensSecondary is Initializable {
     ICToken cTokenModify,
     bool isBorrow
   ) internal returns (uint256) {
-    // Accrue interest
-    uint256 balanceOfUnderlying = cTokenModify.balanceOfUnderlying(account);
-
-    // Get account liquidity
     IComptroller comptroller = IComptroller(cTokenModify.comptroller());
-    (uint256 err, uint256 liquidity, uint256 shortfall) = comptroller.getAccountLiquidity(account);
-    require(err == 0, "Comptroller error when calculating account liquidity.");
-    if (shortfall > 0) return 0; // Shortfall, so no more borrow/redeem
-
-    // Get max borrow/redeem
-    uint256 maxBorrowOrRedeemAmount;
-
-    if (!isBorrow && !comptroller.checkMembership(msg.sender, cTokenModify)) {
-      // Max redeem = balance of underlying if not used as collateral
-      maxBorrowOrRedeemAmount = balanceOfUnderlying;
-    } else {
-      // Avoid "stack too deep" error by separating this logic
-      maxBorrowOrRedeemAmount = _getMaxRedeemOrBorrow(liquidity, cTokenModify, isBorrow);
-
-      // Redeem only: max out at underlying balance
-      if (!isBorrow && balanceOfUnderlying < maxBorrowOrRedeemAmount) maxBorrowOrRedeemAmount = balanceOfUnderlying;
-    }
-
-    // Get max borrow or redeem considering cToken liquidity
-    uint256 cTokenLiquidity = cTokenModify.getCash();
-
-    // Return the minimum of the two maximums
-    return maxBorrowOrRedeemAmount <= cTokenLiquidity ? maxBorrowOrRedeemAmount : cTokenLiquidity;
-  }
-
-  /**
-   * @dev Portion of the logic in `getMaxRedeemOrBorrow` above separated to avoid "stack too deep" errors.
-   */
-  function _getMaxRedeemOrBorrow(
-    uint256 liquidity,
-    ICToken cTokenModify,
-    bool isBorrow
-  ) internal view returns (uint256) {
-    if (liquidity <= 0) return 0; // No available account liquidity, so no more borrow/redeem
-
-    // Get the normalized price of the asset
-    IComptroller comptroller = IComptroller(cTokenModify.comptroller());
-    uint256 conversionFactor = comptroller.oracle().getUnderlyingPrice(cTokenModify);
-    require(conversionFactor > 0, "Oracle price error.");
-
-    // Pre-compute a conversion factor from tokens -> ether (normalized price value)
-    if (!isBorrow) {
-      (, uint256 collateralFactorMantissa) = comptroller.markets(address(cTokenModify));
-      conversionFactor = (collateralFactorMantissa * conversionFactor) / 1e18;
-    }
-
-    // Get max borrow or redeem considering excess account liquidity
-    return (liquidity * 1e18) / conversionFactor;
+    return comptroller.getMaxRedeemOrBorrow(account, cTokenModify, isBorrow);
   }
 
   /**
@@ -218,19 +167,19 @@ contract FusePoolLensSecondary is Initializable {
     view
     returns (
       ICToken[] memory,
-      IRewardsDistributor[] memory,
+      address[] memory,
       address[] memory,
       uint256[][] memory,
       uint256[][] memory
     )
   {
     ICToken[] memory allMarkets = comptroller.getAllMarkets();
-    IRewardsDistributor[] memory distributors;
+    address[] memory distributors;
 
-    try comptroller.getRewardsDistributors() returns (IRewardsDistributor[] memory _distributors) {
+    try comptroller.getRewardsDistributors() returns (address[] memory _distributors) {
       distributors = _distributors;
     } catch {
-      distributors = new IRewardsDistributor[](0);
+      distributors = new address[](0);
     }
 
     address[] memory rewardTokens = new address[](distributors.length);
@@ -238,7 +187,9 @@ contract FusePoolLensSecondary is Initializable {
     uint256[][] memory borrowSpeeds = new uint256[][](allMarkets.length);
 
     // Get reward tokens for each distributor
-    for (uint256 i = 0; i < distributors.length; i++) rewardTokens[i] = distributors[i].rewardToken();
+    for (uint256 i = 0; i < distributors.length; i++) {
+      rewardTokens[i] = IRewardsDistributor(distributors[i]).rewardToken();
+    }
 
     // Get reward speeds for each market for each distributor
     for (uint256 i = 0; i < allMarkets.length; i++) {
@@ -247,7 +198,7 @@ contract FusePoolLensSecondary is Initializable {
       borrowSpeeds[i] = new uint256[](distributors.length);
 
       for (uint256 j = 0; j < distributors.length; j++) {
-        IRewardsDistributor distributor = distributors[j];
+        IRewardsDistributor distributor = IRewardsDistributor(distributors[j]);
         supplySpeeds[i][j] = distributor.compSupplySpeeds(cToken);
         borrowSpeeds[i][j] = distributor.compBorrowSpeeds(cToken);
       }
@@ -265,14 +216,14 @@ contract FusePoolLensSecondary is Initializable {
     view
     returns (
       ICToken[][] memory,
-      IRewardsDistributor[][] memory,
+      address[][] memory,
       address[][] memory,
       uint256[][][] memory,
       uint256[][][] memory
     )
   {
     ICToken[][] memory allMarkets = new ICToken[][](comptrollers.length);
-    IRewardsDistributor[][] memory distributors = new IRewardsDistributor[][](comptrollers.length);
+    address[][] memory distributors = new address[][](comptrollers.length);
     address[][] memory rewardTokens = new address[][](comptrollers.length);
     uint256[][][] memory supplySpeeds = new uint256[][][](comptrollers.length);
     uint256[][][] memory borrowSpeeds = new uint256[][][](comptrollers.length);
@@ -359,7 +310,7 @@ contract FusePoolLensSecondary is Initializable {
     returns (
       uint256[] memory,
       IComptroller[] memory,
-      IRewardsDistributor[][] memory
+      address[][] memory
     )
   {
     // Get array length
@@ -375,7 +326,7 @@ contract FusePoolLensSecondary is Initializable {
     // Build array
     uint256[] memory indexes = new uint256[](arrayLength);
     IComptroller[] memory comptrollers = new IComptroller[](arrayLength);
-    IRewardsDistributor[][] memory distributors = new IRewardsDistributor[][](arrayLength);
+    address[][] memory distributors = new address[][](arrayLength);
     uint256 index = 0;
 
     for (uint256 i = 0; i < pools.length; i++) {
@@ -386,7 +337,7 @@ contract FusePoolLensSecondary is Initializable {
           indexes[index] = i;
           comptrollers[index] = comptroller;
 
-          try comptroller.getRewardsDistributors() returns (IRewardsDistributor[] memory _distributors) {
+          try comptroller.getRewardsDistributors() returns (address[] memory _distributors) {
             distributors[index] = _distributors;
           } catch {}
 

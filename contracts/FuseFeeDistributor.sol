@@ -1,36 +1,28 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.sol";
 
 import "./compound/ErrorReporter.sol";
-import "./compound/ComptrollerStorage.sol";
-import "./compound/CEtherDelegator.sol";
+import "./external/compound/IComptroller.sol";
 import "./compound/CErc20Delegator.sol";
+import "./compound/CErc20PluginDelegate.sol";
+import "./midas/SafeOwnableUpgradeable.sol";
+import "./utils/PatchedStorage.sol";
+import "./oracles/BasePriceOracle.sol";
+import { DiamondExtension, DiamondBase } from "./midas/DiamondExtension.sol";
 
 /**
  * @title FuseFeeDistributor
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FuseFeeDistributor controls and receives protocol fees from Fuse pools and relays admin actions to Fuse pools.
  */
-contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdminStorage, ComptrollerErrorReporter {
+contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   using AddressUpgradeable for address;
   using SafeERC20Upgradeable for IERC20Upgradeable;
-
-  /**
-   * @notice Emitted when pendingAdmin is changed
-   */
-  event NewPendingAdmin(address oldPendingAdmin, address newPendingAdmin);
-
-  /**
-   * @notice Emitted when pendingAdmin is accepted, which means admin is updated
-   */
-  event NewAdmin(address oldAdmin, address newAdmin);
 
   /**
    * @dev Initializer that sets initial values of state variables.
@@ -38,7 +30,7 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
    */
   function initialize(uint256 _defaultInterestFeeRate) public initializer {
     require(_defaultInterestFeeRate <= 1e18, "Interest fee rate cannot be more than 100%.");
-    __Ownable_init();
+    __SafeOwnable_init();
     defaultInterestFeeRate = _defaultInterestFeeRate;
     maxSupplyEth = type(uint256).max;
     maxUtilizationRate = type(uint256).max;
@@ -109,6 +101,20 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
     maxUtilizationRate = _maxUtilizationRate;
   }
 
+  function getMinBorrowEth(CTokenInterface _ctoken) public view returns (uint256) {
+    (, , uint256 borrowBalance, ) = _ctoken.getAccountSnapshot(_msgSender());
+    if (borrowBalance == 0) return minBorrowEth;
+    IComptroller comptroller = IComptroller(address(_ctoken.comptroller()));
+    BasePriceOracle oracle = BasePriceOracle(address(comptroller.oracle()));
+    uint256 underlyingPriceEth = oracle.price(CErc20Interface(address(_ctoken)).underlying());
+    uint256 underlyingDecimals = _ctoken.decimals();
+    uint256 borrowBalanceEth = (underlyingPriceEth * borrowBalance) / 10**underlyingDecimals;
+    if (borrowBalanceEth > minBorrowEth) {
+      return 0;
+    }
+    return minBorrowEth - borrowBalanceEth;
+  }
+
   /**
    * @dev Receives ETH fees.
    */
@@ -135,22 +141,6 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   }
 
   /**
-   * @dev Deploys a CToken for the underlying nativeToken of the current chain
-   * @param constructorData Encoded construction data for `CToken initialize()`
-   */
-  function deployCEther(bytes calldata constructorData) external returns (address) {
-    // Make sure comptroller == msg.sender
-    address comptroller = abi.decode(constructorData[0:32], (address));
-    require(comptroller == msg.sender, "Comptroller is not sender.");
-    // Deploy CEtherDelegator using msg.sender, underlying, and block.number as a salt
-    bytes32 salt = keccak256(abi.encodePacked(msg.sender, address(0), block.number));
-
-    bytes memory cEtherDelegatorCreationCode = abi.encodePacked(type(CEtherDelegator).creationCode, constructorData);
-    address proxy = Create2Upgradeable.deploy(0, salt, cEtherDelegatorCreationCode);
-    return proxy;
-  }
-
-  /**
    * @dev Deploys a CToken for an underlying ERC20
    * @param constructorData Encoded construction data for `CToken initialize()`
    */
@@ -160,7 +150,7 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
     require(comptroller == msg.sender, "Comptroller is not sender.");
 
     // Deploy CErc20Delegator using msg.sender, underlying, and block.number as a salt
-    bytes32 salt = keccak256(abi.encodePacked(msg.sender, underlying, block.number));
+    bytes32 salt = keccak256(abi.encodePacked(msg.sender, underlying, ++marketsCounter));
 
     bytes memory cErc20DelegatorCreationCode = abi.encodePacked(type(CErc20Delegator).creationCode, constructorData);
     address proxy = Create2Upgradeable.deploy(0, salt, cErc20DelegatorCreationCode);
@@ -226,31 +216,8 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   /**
    * @dev Whitelisted CEtherDelegate implementation contract addresses and `allowResign` values for each existing implementation.
    */
+  /// keep this in the storage to not break the layout
   mapping(address => mapping(address => mapping(bool => bool))) public cEtherDelegateWhitelist;
-
-  /**
-   * @dev Adds/removes CEtherDelegate implementations to the whitelist.
-   * @param oldImplementations The old `CEtherDelegate` implementation addresses to upgrade from for each `newImplementations` to upgrade to.
-   * @param newImplementations Array of `CEtherDelegate` implementations to be whitelisted/unwhitelisted.
-   * @param allowResign Array of `allowResign` values corresponding to `newImplementations` to be whitelisted/unwhitelisted.
-   * @param statuses Array of whitelist statuses corresponding to `newImplementations`.
-   */
-  function _editCEtherDelegateWhitelist(
-    address[] calldata oldImplementations,
-    address[] calldata newImplementations,
-    bool[] calldata allowResign,
-    bool[] calldata statuses
-  ) external onlyOwner {
-    require(
-      newImplementations.length > 0 &&
-        newImplementations.length == oldImplementations.length &&
-        newImplementations.length == allowResign.length &&
-        newImplementations.length == statuses.length,
-      "No CEtherDelegate implementations supplied or array lengths not equal."
-    );
-    for (uint256 i = 0; i < newImplementations.length; i++)
-      cEtherDelegateWhitelist[oldImplementations[i]][newImplementations[i]][allowResign[i]] = statuses[i];
-  }
 
   /**
    * @dev Latest Comptroller implementation for each existing implementation.
@@ -293,6 +260,7 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   /**
    * @dev Latest CEtherDelegate implementation for each existing implementation.
    */
+  /// keep this in the storage to not break the layout
   mapping(address => CDelegateUpgradeData) public _latestCEtherDelegate;
 
   /**
@@ -313,46 +281,6 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
       data.implementation != address(0)
         ? (data.implementation, data.allowResign, data.becomeImplementationData)
         : (oldImplementation, false, emptyBytes);
-  }
-
-  /**
-   * @dev Latest CEtherDelegate implementation for each existing implementation.
-   */
-  function latestCEtherDelegate(address oldImplementation)
-    external
-    view
-    returns (
-      address,
-      bool,
-      bytes memory
-    )
-  {
-    CDelegateUpgradeData memory data = _latestCEtherDelegate[oldImplementation];
-    bytes memory emptyBytes;
-    return
-      data.implementation != address(0)
-        ? (data.implementation, data.allowResign, data.becomeImplementationData)
-        : (oldImplementation, false, emptyBytes);
-  }
-
-  /**
-   * @dev Sets the latest `CEtherDelegate` upgrade implementation address and data.
-   * @param oldImplementation The old `CEtherDelegate` implementation address to upgrade from.
-   * @param newImplementation Latest `CEtherDelegate` implementation address.
-   * @param allowResign Whether or not `resignImplementation` should be called on the old implementation before upgrade.
-   * @param becomeImplementationData Data passed to the new implementation via `becomeImplementation` after upgrade.
-   */
-  function _setLatestCEtherDelegate(
-    address oldImplementation,
-    address newImplementation,
-    bool allowResign,
-    bytes calldata becomeImplementationData
-  ) external onlyOwner {
-    _latestCEtherDelegate[oldImplementation] = CDelegateUpgradeData(
-      newImplementation,
-      allowResign,
-      becomeImplementationData
-    );
   }
 
   /**
@@ -382,6 +310,76 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
   mapping(address => int256) public customInterestFeeRates;
 
   /**
+   * @dev used as salt for the creation of new markets
+   */
+  uint256 public marketsCounter;
+
+  /**
+   * @dev Latest Plugin implementation for each existing implementation.
+   */
+  mapping(address => address) public _latestPluginImplementation;
+
+  /**
+   * @dev Whitelisted Plugin implementation contract addresses for each existing implementation.
+   */
+  mapping(address => mapping(address => bool)) public pluginImplementationWhitelist;
+
+  /**
+   * @dev Adds/removes plugin implementations to the whitelist.
+   * @param oldImplementations The old plugin implementation addresses to upgrade from for each `newImplementations` to upgrade to.
+   * @param newImplementations Array of plugin implementations to be whitelisted/unwhitelisted.
+   * @param statuses Array of whitelist statuses corresponding to `implementations`.
+   */
+  function _editPluginImplementationWhitelist(
+    address[] calldata oldImplementations,
+    address[] calldata newImplementations,
+    bool[] calldata statuses
+  ) external onlyOwner {
+    require(
+      newImplementations.length > 0 &&
+        newImplementations.length == oldImplementations.length &&
+        newImplementations.length == statuses.length,
+      "No plugin implementations supplied or array lengths not equal."
+    );
+    for (uint256 i = 0; i < newImplementations.length; i++)
+      pluginImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
+  }
+
+  /**
+   * @dev Latest Plugin implementation for each existing implementation.
+   */
+  function latestPluginImplementation(address oldImplementation) external view returns (address) {
+    return
+      _latestPluginImplementation[oldImplementation] != address(0)
+        ? _latestPluginImplementation[oldImplementation]
+        : oldImplementation;
+  }
+
+  /**
+   * @dev Sets the latest plugin upgrade implementation address.
+   * @param oldImplementation The old plugin implementation address to upgrade from.
+   * @param newImplementation Latest plugin implementation address.
+   */
+  function _setLatestPluginImplementation(address oldImplementation, address newImplementation) external onlyOwner {
+    _latestPluginImplementation[oldImplementation] = newImplementation;
+  }
+
+  /**
+   * @dev Upgrades a plugin of a CErc20PluginDelegate market to the latest implementation
+   * @param cDelegator the proxy address
+   * @return if the plugin was upgraded or not
+   */
+  function _upgradePluginToLatestImplementation(address cDelegator) external onlyOwner returns (bool) {
+    CErc20PluginDelegate market = CErc20PluginDelegate(cDelegator);
+
+    address oldPluginAddress = address(market.plugin());
+    market._updatePlugin(_latestPluginImplementation[oldPluginAddress]);
+    address newPluginAddress = address(market.plugin());
+
+    return newPluginAddress != oldPluginAddress;
+  }
+
+  /**
    * @notice Returns the proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
    */
   function interestFeeRate() external view returns (uint256) {
@@ -407,54 +405,34 @@ contract FuseFeeDistributor is Initializable, OwnableUpgradeable, UnitrollerAdmi
     customInterestFeeRates[comptroller] = rate;
   }
 
-  /**
-   * @notice Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
-   * @dev Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
-   * @param newPendingAdmin New pending admin.
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _setPendingAdmin(address newPendingAdmin) public returns (uint256) {
-    // Check caller = admin
-    if (!hasAdminRights()) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_ADMIN_OWNER_CHECK);
-    }
+  mapping(address => DiamondExtension[]) public comptrollerExtensions;
 
-    // Save current value, if any, for inclusion in log
-    address oldPendingAdmin = pendingAdmin;
-
-    // Store pendingAdmin with value newPendingAdmin
-    pendingAdmin = newPendingAdmin;
-
-    // Emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin)
-    emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin);
-
-    return uint256(Error.NO_ERROR);
+  function getComptrollerExtensions(address comptroller) external view returns (DiamondExtension[] memory) {
+    return comptrollerExtensions[comptroller];
   }
 
-  /**
-   * @notice Accepts transfer of admin rights. msg.sender must be pendingAdmin
-   * @dev Admin function for pending admin to accept role and update admin
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _acceptAdmin() public returns (uint256) {
-    // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
-    if (msg.sender != pendingAdmin) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.ACCEPT_ADMIN_PENDING_ADMIN_CHECK);
-    }
+  function _setComptrollerExtensions(address comptroller, DiamondExtension[] calldata extensions) external onlyOwner {
+    comptrollerExtensions[comptroller] = extensions;
+  }
 
-    // Save current values for inclusion in log
-    address oldAdmin = admin;
-    address oldPendingAdmin = pendingAdmin;
+  function _registerComptrollerExtension(
+    address payable pool,
+    DiamondExtension extensionToAdd,
+    DiamondExtension extensionToReplace
+  ) external onlyOwner {
+    DiamondBase(pool)._registerExtension(extensionToAdd, extensionToReplace);
+  }
 
-    // Store admin with value pendingAdmin
-    admin = pendingAdmin;
+  mapping(address => DiamondExtension[]) public cErc20DelegateExtensions;
 
-    // Clear the pending value
-    pendingAdmin = address(0);
+  function getCErc20DelegateExtensions(address cErc20Delegate) external view returns (DiamondExtension[] memory) {
+    return cErc20DelegateExtensions[cErc20Delegate];
+  }
 
-    emit NewAdmin(oldAdmin, admin);
-    emit NewPendingAdmin(oldPendingAdmin, pendingAdmin);
-
-    return uint256(Error.NO_ERROR);
+  function _setCErc20DelegateExtensions(address cErc20Delegate, DiamondExtension[] calldata extensions)
+    external
+    onlyOwner
+  {
+    cErc20DelegateExtensions[cErc20Delegate] = extensions;
   }
 }

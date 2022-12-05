@@ -106,7 +106,7 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
    */
   function setPriceFeeds(
     address[] memory underlyings,
-    AggregatorV3Interface[] memory feeds,
+    address[] memory feeds,
     FeedBaseCurrency baseCurrency
   ) external onlyAdmin {
     // Input validation
@@ -127,7 +127,7 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
         );
 
       // Set feed and base currency
-      priceFeeds[underlying] = feeds[i];
+      priceFeeds[underlying] = AggregatorV3Interface(feeds[i]);
       feedBaseCurrencies[underlying] = baseCurrency;
     }
   }
@@ -152,10 +152,14 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
       (, int256 nativeTokenUsdPrice, , , ) = NATIVE_TOKEN_USD_PRICE_FEED.latestRoundData();
       if (nativeTokenUsdPrice <= 0) return 0;
       (, int256 tokenUsdPrice, , , ) = feed.latestRoundData();
+
       return
         tokenUsdPrice >= 0
-          ? ((uint256(tokenUsdPrice) * 1e26) / (10**uint256(feed.decimals()))) / uint256(nativeTokenUsdPrice)
+          ? ((uint256(tokenUsdPrice) * 1e18 * (10**uint256(NATIVE_TOKEN_USD_PRICE_FEED.decimals()))) /
+            (10**uint256(feed.decimals()))) / uint256(nativeTokenUsdPrice)
           : 0;
+    } else {
+      revert("unknown base currency");
     }
   }
 
@@ -179,14 +183,12 @@ contract ChainlinkPriceOracleV2 is IPriceOracle, BasePriceOracle {
     // Get underlying token address
     address underlying = ICErc20(address(cToken)).underlying();
 
-    // Get price
-    uint256 chainlinkPrice = _price(underlying);
+    uint256 oraclePrice = _price(underlying);
 
-    // Format and return price
     uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
     return
       underlyingDecimals <= 18
-        ? uint256(chainlinkPrice) * (10**(18 - underlyingDecimals))
-        : uint256(chainlinkPrice) / (10**(underlyingDecimals - 18));
+        ? uint256(oraclePrice) * (10**(18 - underlyingDecimals))
+        : uint256(oraclePrice) / (10**(underlyingDecimals - 18));
   }
 }
