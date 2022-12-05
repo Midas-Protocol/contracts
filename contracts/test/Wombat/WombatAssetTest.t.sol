@@ -15,7 +15,7 @@ import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 
 // Tested on block 23534949
 contract WombatAssetTest is AbstractAssetTest {
-  constructor() forkAtBlock(BSC_MAINNET, 23534949) {
+  function afterForkSetUp() forkAtBlock(BSC_MAINNET, 23534949) {
     test = AbstractERC4626Test(address(new WombatERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new WombatTestConfigStorage()));
   }
@@ -31,7 +31,7 @@ contract WombatAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override {
+  function testInitializedValues() public override forkAtBlock(BSC_MAINNET, 23534949) {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
@@ -43,7 +43,7 @@ contract WombatAssetTest is AbstractAssetTest {
     }
   }
 
-  function testClaimRewards() public {
+  function testClaimRewards() public forkAtBlock(BSC_MAINNET, 23534949) {
     this.runTest(WombatERC4626Test(address(test)).testClaimRewards);
   }
 }
