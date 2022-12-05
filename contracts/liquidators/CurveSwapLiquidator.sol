@@ -18,12 +18,6 @@ import "./IRedemptionStrategy.sol";
 contract CurveSwapLiquidator is IRedemptionStrategy {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
-  WETH public immutable W_NATIVE;
-
-  constructor(address wnative) {
-    W_NATIVE = WETH(payable(wnative));
-  }
-
   /**
    * @notice Redeems custom collateral `token` for an underlying token.
    * @param inputToken The input wrapped token to be redeemed for an underlying token.
@@ -36,20 +30,32 @@ contract CurveSwapLiquidator is IRedemptionStrategy {
     IERC20Upgradeable inputToken,
     uint256 inputAmount,
     bytes memory strategyData
-  ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    // Exchange and store output
-    (ICurvePool curvePool, int128 i, int128 j, address jToken) = abi.decode(
-      strategyData,
-      (ICurvePool, int128, int128, address)
-    );
-    outputToken = IERC20Upgradeable(jToken);
-    inputToken.approve(address(curvePool), inputAmount);
-    outputAmount = curvePool.exchange(i, j, inputAmount, 0);
+  ) external override returns (IERC20Upgradeable, uint256) {
+    return _convert(inputToken, inputAmount, strategyData);
+  }
 
-    // Convert to W_NATIVE if ETH because `FuseSafeLiquidator.repayTokenFlashLoan` only supports tokens (not ETH) as output from redemptions (reverts on line 24 because `underlyingCollateral` is the zero address)
-    if (address(outputToken) == address(0)) {
-      W_NATIVE.deposit{ value: outputAmount }();
-      return (IERC20Upgradeable(address(W_NATIVE)), outputAmount);
+  function _convert(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    bytes memory strategyData
+  ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    // Exchange and store output
+    (ICurvePool curvePool, int128 i, int128 j, address jToken, address payable wtoken) = abi.decode(
+      strategyData,
+      (ICurvePool, int128, int128, address, address)
+    );
+    inputToken.approve(address(curvePool), inputAmount);
+    curvePool.exchange(i, j, inputAmount, 0);
+
+    // Convert to W_NATIVE if ETH
+    if (jToken == address(0) || jToken == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
+      WETH(wtoken).deposit{ value: outputAmount }();
+      outputToken = IERC20Upgradeable(wtoken);
+    } else {
+      outputToken = IERC20Upgradeable(jToken);
     }
+    outputAmount = outputToken.balanceOf(address(this));
+
+    return (outputToken, outputAmount);
   }
 }

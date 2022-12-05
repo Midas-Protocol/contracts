@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
 import { ICurveV2Pool } from "../../../external/curve/ICurveV2Pool.sol";
-import "../../../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
-import "../../config/BaseTest.t.sol";
+import { CurveV2LpTokenPriceOracleNoRegistry } from "../../../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
+import { ICToken } from "../../../external/compound/ICToken.sol";
+
+import { BaseTest } from "../../config/BaseTest.t.sol";
 
 contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
   CurveV2LpTokenPriceOracleNoRegistry oracle;
@@ -16,28 +16,20 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
   ICToken epsJCHFBUSD_c = ICToken(0x1F0452D6a8bb9EAbC53Fa6809Fa0a060Dd531267);
   MasterPriceOracle mpo;
 
-  function setUp() public {
+  function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     busd = ap.getAddress("bUSD");
-  }
 
-  function setUpCurveOracle(address lpToken, address pool) public {
     address[] memory lpTokens = new address[](1);
-    lpTokens[0] = lpToken;
+    lpTokens[0] = epsJCHFBUSD_lp;
     address[] memory pools = new address[](1);
-    pools[0] = pool;
+    pools[0] = epsJCHFBUSD_pool;
 
-    vm.prank(mpo.admin());
+    oracle = new CurveV2LpTokenPriceOracleNoRegistry();
     oracle.initialize(lpTokens, pools, busd, mpo);
   }
 
-  function testCurveLpTokenPriceOracleNoRegistry() public shouldRun(forChains(BSC_MAINNET)) {
-    vm.rollFork(21675481);
-
-    oracle = new CurveV2LpTokenPriceOracleNoRegistry();
-
-    setUpCurveOracle(epsJCHFBUSD_lp, epsJCHFBUSD_pool);
-
+  function testCurveLpTokenPriceOracleNoRegistry() public forkAtBlock(BSC_MAINNET, 21675481) {
     ICurveV2Pool pool = ICurveV2Pool(epsJCHFBUSD_pool);
     uint256 lp_price = (pool.lp_price() * mpo.price(busd)) / 10**18;
     uint256 price = oracle.price(epsJCHFBUSD_lp);

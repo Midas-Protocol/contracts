@@ -10,9 +10,21 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 interface ILpTokenStaker {
   function rewardToken() external view returns (ERC20Upgradeable);
 
-  function userInfo(ERC20Upgradeable _token, address _user) external view returns (uint256, uint256);
+  function userInfo(address _token, address _user) external view returns (uint256, uint256);
+
+  function poolInfo(address)
+    external
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256,
+      uint256
+    );
 
   function balanceOf(address) external returns (uint256);
+
+  function claimableReward(address, address[] memory) external view returns (uint256[] memory);
 
   // Deposit LP tokens into the contract. Also triggers a claim.
   function deposit(
@@ -68,16 +80,16 @@ contract EllipsisERC4626 is MidasERC4626 {
     lpTokenStaker.rewardToken().approve(address(flywheel.flywheelRewards()), type(uint256).max);
   }
 
-  function reinitialize() public reinitializer(2) onlyOwner {
-    performanceFee = 5e16;
-  }
-
   /* ========== VIEWS ========== */
 
   /// @notice Calculates the total amount of underlying tokens the Vault holds.
   /// @return The total amount of underlying tokens the Vault holds.
   function totalAssets() public view override returns (uint256) {
-    (uint256 amount, ) = lpTokenStaker.userInfo(_asset(), address(this));
+    if (paused()) {
+      return _asset().balanceOf(address(this));
+    }
+
+    (uint256 amount, ) = lpTokenStaker.userInfo(address(_asset()), address(this));
     return amount;
   }
 
@@ -102,13 +114,13 @@ contract EllipsisERC4626 is MidasERC4626 {
    * Todo: needs test for verification
    */
 
-  // function emergencyWithdrawAndPause() external override onlyOwner {
-  //   lpTokenStaker.withdraw(_asset(), lpTokenStaker.balanceOf(address(this)), true);
-  //   _pause();
-  // }
+  function emergencyWithdrawAndPause() external override onlyOwner {
+    lpTokenStaker.withdraw(_asset(), totalAssets(), true);
+    _pause();
+  }
 
-  // function unpause() external override onlyOwner {
-  //   _unpause();
-  //   lpTokenStaker.deposit(_asset(), _asset().balanceOf(address(this)), true);
-  // }
+  function unpause() external override onlyOwner {
+    _unpause();
+    lpTokenStaker.deposit(_asset(), _asset().balanceOf(address(this)), true);
+  }
 }

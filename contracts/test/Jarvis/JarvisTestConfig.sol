@@ -14,7 +14,6 @@ contract JarvisTestConfigStorage is ITestConfigStorage {
 
   constructor() {
     // PAR/jEUR
-
     testConfigs.push(
       JarvisTestConfig(0x2BC39d179FAfC32B7796DDA3b936e491C87D245b, 0x0f110c55EfE62c16D553A3d3464B77e1853d0e97, 0)
     );

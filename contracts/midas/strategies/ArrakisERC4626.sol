@@ -17,7 +17,7 @@ interface IGuniPool {
 
   function totalStake() external view returns (uint256);
 
-  function _users(address) external view returns (uint256, uint256);
+  function userInfo(address) external view returns (uint256, uint256);
 
   function pendingMIMO(address) external view returns (uint256);
 
@@ -44,10 +44,6 @@ contract ArrakisERC4626 is MidasERC4626, RewardsClaimer {
     pool = _pool;
     flywheel = _flywheel;
     asset.approve(address(pool), type(uint256).max);
-  }
-
-  function reinitialize() public reinitializer(2) onlyOwner {
-    performanceFee = 5e16;
   }
 
   function totalAssets() public view override returns (uint256) {

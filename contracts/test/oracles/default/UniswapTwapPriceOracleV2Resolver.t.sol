@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../../../oracles/MasterPriceOracle.sol";
-import "../../../oracles/default/UniswapTwapPriceOracleV2Root.sol";
-import "../../../oracles/default/UniswapTwapPriceOracleV2Factory.sol";
-import "../../../external/uniswap/IUniswapV2Factory.sol";
-import "../../config/BaseTest.t.sol";
+import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
+import { UniswapTwapPriceOracleV2Root } from "../../../oracles/default/UniswapTwapPriceOracleV2Root.sol";
+import { IUniswapV2Factory } from "../../../external/uniswap/IUniswapV2Factory.sol";
 import { UniswapTwapPriceOracleV2Resolver } from "../../../oracles/default/UniswapTwapPriceOracleV2Resolver.sol";
+import { IUniswapV2Pair } from "../../../external/uniswap/IUniswapV2Pair.sol";
+
+import { BaseTest } from "../../config/BaseTest.t.sol";
 
 contract UniswapTwapOracleV2ResolverTest is BaseTest {
   UniswapTwapPriceOracleV2Root twapPriceOracleRoot;
@@ -20,17 +21,17 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
     uint256 price1Cumulative;
   }
 
-  function setUp() public {
+  function afterForkSetUp() internal override {
     uniswapV2Factory = IUniswapV2Factory(ap.getAddress("IUniswapV2Factory"));
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
   }
 
-  function getTokenTwapPrice(address tokenAddress) internal returns (uint256) {
+  function getTokenTwapPrice(address tokenAddress) internal view returns (uint256) {
     // return the price denominated in W_NATIVE
     return mpo.price(tokenAddress);
   }
 
-  function testStellaWglmrPriceUpdate() public shouldRun(forChains(MOONBEAM_MAINNET)) {
+  function testStellaWglmrPriceUpdate() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
     twapPriceOracleRoot = UniswapTwapPriceOracleV2Root(0x7645f0A9F814286857E937cB1b3fa9659B03385b); // TODO: add to ap
 
     address STELLA_WGLMR = 0x7F5Ac0FC127bcf1eAf54E3cd01b00300a0861a62; // STELLA/WGLMR
@@ -41,10 +42,7 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
     {
       (, , uint32 lastTime) = IUniswapV2Pair(STELLA_WGLMR).getReserves();
       emit log_named_uint("STELLA_WGLMR last time: ", lastTime);
-      (uint32 timestamp, uint256 price0Cumulative, uint256 price1Cumulative) = twapPriceOracleRoot.observations(
-        STELLA_WGLMR,
-        0
-      );
+      (uint32 timestamp, uint256 price0Cumulative, ) = twapPriceOracleRoot.observations(STELLA_WGLMR, 0);
       emit log_named_uint("STELLA_WGLMR observations timestamp: ", timestamp);
       emit log_named_bytes(
         "STELLA_WGLMR observations timestamp diff: ",
@@ -80,8 +78,8 @@ contract UniswapTwapOracleV2ResolverTest is BaseTest {
     (bool canExec, bytes memory execPayload) = resolver.checker();
     emit log_named_bytes("canExec: ", abi.encode(canExec));
     emit log_named_bytes("execPayload: ", execPayload);
-    assertTrue(canExec);
-    assertEq(abi.encodeWithSelector(resolver.updatePairs.selector, workablePairs), execPayload);
+    assertTrue(canExec, "!can exec");
+    assertEq(abi.encodeWithSelector(resolver.updatePairs.selector, workablePairs), execPayload, "!payload");
 
     resolver.updatePairs(workablePairs);
 

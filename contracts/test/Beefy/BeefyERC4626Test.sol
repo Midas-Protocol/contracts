@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { MidasERC4626, BeefyERC4626, IBeefyVault } from "../../midas/strategies/BeefyERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -20,33 +17,25 @@ contract BeefyERC4626Test is AbstractERC4626Test {
 
   IBeefyVault beefyVault; // ERC4626 => underlyingToken => beefyStrategy
   address lpChef; // beefyStrategy => underlyingToken => .
-  bool shouldRunTest;
 
   constructor() AbstractERC4626Test() {}
 
   function setUp(string memory _testPreFix, bytes calldata data) public override {
     testPreFix = _testPreFix;
 
-    (address _beefyVault, uint256 _withdrawalFee, address _lpChef, bool _shouldRunTest) = abi.decode(
-      data,
-      (address, uint256, address, bool)
-    );
+    (address _beefyVault, uint256 _withdrawalFee, address _lpChef) = abi.decode(data, (address, uint256, address));
 
-    if (_shouldRunTest) {
-      lpChef = _lpChef;
-      shouldRunTest = _shouldRunTest;
-      beefyVault = IBeefyVault(_beefyVault);
-      underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
-      BeefyERC4626 beefyERC4626 = new BeefyERC4626();
-      beefyERC4626.initialize(underlyingToken, beefyVault, _withdrawalFee);
-      beefyERC4626.reinitialize();
-      plugin = beefyERC4626;
+    lpChef = _lpChef;
+    beefyVault = IBeefyVault(_beefyVault);
+    underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
+    BeefyERC4626 beefyERC4626 = new BeefyERC4626();
+    beefyERC4626.initialize(underlyingToken, beefyVault, _withdrawalFee);
+    plugin = beefyERC4626;
 
-      initialStrategyBalance = beefyVault.balance();
-      initialStrategySupply = beefyVault.totalSupply();
+    initialStrategyBalance = beefyVault.balance();
+    initialStrategySupply = beefyVault.totalSupply();
 
-      sendUnderlyingToken(depositAmount, address(this));
-    }
+    sendUnderlyingToken(depositAmount, address(this));
   }
 
   function increaseAssetsInVault() public override {
@@ -71,11 +60,7 @@ contract BeefyERC4626Test is AbstractERC4626Test {
     return (depositAmount * beefyVault.totalSupply()) / beefyVault.balance();
   }
 
-  function testInitializedValues(string memory assetName, string memory assetSymbol)
-    public
-    override
-    shouldRun(shouldRunTest)
-  {
+  function testInitializedValues(string memory assetName, string memory assetSymbol) public override {
     assertEq(
       plugin.name(),
       string(abi.encodePacked("Midas ", assetName, " Vault")),

@@ -1,16 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "ds-test/test.sol";
-
-import { WETH } from "solmate/tokens/WETH.sol";
-
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { CurveLpTokenLiquidatorNoRegistry } from "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
 import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
-import "../utils/IW_NATIVE.sol";
-import "../external/curve/ICurvePool.sol";
-import "./config/BaseTest.t.sol";
+
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
   CurveLpTokenLiquidatorNoRegistry private liquidator;
@@ -21,35 +16,30 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
 
   IERC20Upgradeable bUSD;
-  WETH wtoken;
+  address wtoken;
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
-    wtoken = WETH(payable(ap.getAddress("wtoken")));
-    liquidator = new CurveLpTokenLiquidatorNoRegistry(wtoken, curveLPTokenPriceOracleNoRegistry);
+  function afterForkSetUp() internal override {
+    wtoken = ap.getAddress("wtoken");
+    liquidator = new CurveLpTokenLiquidatorNoRegistry();
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
   }
 
-  function testInitializedValues() public shouldRun(forChains(BSC_MAINNET)) {
-    assertEq(address(liquidator.W_NATIVE()), address(wtoken));
-    assertEq(address(liquidator.oracle()), address(curveLPTokenPriceOracleNoRegistry));
-  }
-
-  // tested with bsc block number 16233661
-  function testRedeemToken() public shouldRun(forChains(BSC_MAINNET)) {
+  function testRedeemToken() public fork(BSC_MAINNET) {
     vm.prank(lpTokenWhale);
     lpToken.transfer(address(liquidator), 1234);
 
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       lpToken,
       1234,
-      abi.encode(uint8(0), bUSD)
+      abi.encode(uint8(0), bUSD, wtoken, curveLPTokenPriceOracleNoRegistry)
     );
-    assertEq(address(outputToken), address(bUSD));
-    assertGt(outputAmount, 0);
-    assertEq(outputToken.balanceOf(address(liquidator)), outputAmount);
+
+    assertEq(address(outputToken), address(bUSD), "!outputToken");
+    assertGt(outputAmount, 0, "!outputAmount>0");
+    assertEq(outputToken.balanceOf(address(liquidator)), outputAmount, "!outputAmount");
   }
 
-  function testRedeem2Brl() public shouldRun(forChains(BSC_MAINNET)) {
+  function testRedeem2Brl() public fork(BSC_MAINNET) {
     IERC20Upgradeable twobrl = IERC20Upgradeable(0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9);
     address whale2brl = 0x6219b46d6a5B5BfB4Ec433a9F96DB3BF4076AEE1;
     vm.prank(whale2brl);
@@ -62,7 +52,7 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       twobrl,
       123456,
-      abi.encode(uint8(0), 0x316622977073BBC3dF32E7d2A9B3c77596a0a603)
+      abi.encode(uint8(0), 0x316622977073BBC3dF32E7d2A9B3c77596a0a603, wtoken, curveLPTokenPriceOracleNoRegistry)
     );
     assertEq(address(outputToken), 0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
     assertGt(outputAmount, 0);

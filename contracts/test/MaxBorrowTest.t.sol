@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./helpers/WithPool.sol";
-import "./config/BaseTest.t.sol";
+import { BaseTest } from "./config/BaseTest.t.sol";
 import "forge-std/Test.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -19,12 +19,9 @@ contract MockAsset is MockERC20 {
 }
 
 contract MaxWithdrawTestPolygon is WithPool, BaseTest {
-  constructor() WithPool() {
-    super.setUpWithPool(
-      MasterPriceOracle(0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31),
-      ERC20Upgradeable(0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270)
-    );
-  }
+  address wmaticAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
+  address usdcWhale = 0xe7804c37c13166fF0b37F5aE0BB07A3aEbb6e245;
+  address daiWhale = 0x06959153B974D0D5fDfd87D561db6d8d4FA0bb0B;
 
   struct LiquidationData {
     address[] cTokens;
@@ -33,13 +30,15 @@ contract MaxWithdrawTestPolygon is WithPool, BaseTest {
     MockAsset dai;
   }
 
-  function setUp() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function afterForkSetUp() internal override {
+    super.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(wmaticAddress));
+
     vm.prank(0x369582d2010B6eD950B571F4101e3bB9b554876F);
     MockERC20(address(underlyingToken)).transfer(address(this), 100e18);
     setUpPool("polygon-test", false, 0.1e18, 1.1e18);
   }
 
-  function testMaxBorrow() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testMaxBorrow() public fork(POLYGON_MAINNET) {
     FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
     poolLensSecondary.initialize(fusePoolDirectory);
 
@@ -61,10 +60,10 @@ contract MaxWithdrawTestPolygon is WithPool, BaseTest {
 
     address accountOne = address(1);
 
-    vm.prank(0xe7804c37c13166fF0b37F5aE0BB07A3aEbb6e245);
+    vm.prank(usdcWhale);
     MockERC20(address(vars.usdc)).transfer(accountOne, 10000e6);
 
-    vm.prank(0x06959153B974D0D5fDfd87D561db6d8d4FA0bb0B);
+    vm.prank(daiWhale);
     MockERC20(address(vars.dai)).transfer(accountOne, 10000e18);
 
     // Account One Supply

@@ -1,15 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
-import { DotDotERC4626Test } from "../DotDot/DotDotLpERC4626Test.sol";
 import { IBeefyVault, BeefyERC4626 } from "../../midas/strategies/BeefyERC4626.sol";
-import { MidasERC4626 } from "../../midas/strategies/MidasERC4626.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
@@ -27,11 +22,10 @@ contract ERC4626PerformanceFeeTest is BaseTest {
   address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
   address newFeeRecipient = address(5);
 
-  function setUp() public shouldRun(forChains(BSC_MAINNET)) {
+  function afterForkSetUp() internal override {
     underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
     plugin = new BeefyERC4626();
     plugin.initialize(underlyingToken, beefyVault, 10);
-    plugin.reinitialize();
 
     uint256 currentPerformanceFee = plugin.performanceFee();
     plugin.updateFeeSettings(currentPerformanceFee, newFeeRecipient);
@@ -61,29 +55,29 @@ contract ERC4626PerformanceFeeTest is BaseTest {
 
   /* --------------------- ERC4626 PERFORMANCE FEE TESTS --------------------- */
 
-  function test__initializedValues() public shouldRun(forChains(BSC_MAINNET)) {
+  function test__initializedValues() public fork(BSC_MAINNET) {
     assertEq(plugin.performanceFee(), PERFORMANCE_FEE, "!perFee");
     assertEq(plugin.feeRecipient(), newFeeRecipient, "!feeRecipient");
   }
 
-  function test__UpdateFeeSettings() public shouldRun(forChains(BSC_MAINNET)) {
+  function test__UpdateFeeSettings() public fork(BSC_MAINNET) {
     uint256 newPerfFee = 100;
-    address newFeeRecipient = address(10);
+    address anotherFeeRecipient = address(10);
 
-    plugin.updateFeeSettings(newPerfFee, newFeeRecipient);
+    plugin.updateFeeSettings(newPerfFee, anotherFeeRecipient);
 
     assertEq(plugin.performanceFee(), newPerfFee, "!perfFee == newPerfFee");
 
-    assertEq(plugin.feeRecipient(), newFeeRecipient, "!feeRecipient == newFeeRecipient");
+    assertEq(plugin.feeRecipient(), anotherFeeRecipient, "!feeRecipient == anotherFeeRecipient");
   }
 
-  function testFail__UpdateFeeSettings() public shouldRunTestFail(forChains(BSC_MAINNET)) {
+  function testRevert__UpdateFeeSettings() public fork(BSC_MAINNET) {
     vm.startPrank(address(10));
-    vm.expectRevert("Owned: Only Owner");
+    vm.expectRevert("Ownable: caller is not the owner");
     plugin.updateFeeSettings(100, address(10));
   }
 
-  function test__TakePerformanceFeeInUnderlyingAsset() public shouldRun(forChains(BSC_MAINNET)) {
+  function test__TakePerformanceFeeInUnderlyingAsset() public fork(BSC_MAINNET) {
     createPerformanceFee();
 
     uint256 oldAssets = plugin.totalAssets();
@@ -95,12 +89,17 @@ contract ERC4626PerformanceFeeTest is BaseTest {
 
     plugin.takePerformanceFee();
 
-    assertEq(plugin.totalSupply() - oldSupply, expectedFeeShares, "totalSupply increase didnt match expectedFeeShares");
-    assertEq(plugin.balanceOf(plugin.feeRecipient()), expectedFeeShares, "!feeRecipient shares");
+    assertApproxEqAbs(
+      plugin.totalSupply() - oldSupply,
+      expectedFeeShares,
+      uint256(10),
+      "totalSupply increase didnt match expectedFeeShares"
+    );
+    assertApproxEqAbs(plugin.balanceOf(plugin.feeRecipient()), expectedFeeShares, uint256(10), "!feeRecipient shares");
     assertEq(plugin.totalAssets(), oldAssets, "totalAssets should not change");
   }
 
-  function test__WithdrawAccruedFees() public shouldRun(forChains(BSC_MAINNET)) {
+  function test__WithdrawAccruedFees() public fork(BSC_MAINNET) {
     plugin.updateFeeSettings(PERFORMANCE_FEE, address(10));
 
     createPerformanceFee();
@@ -114,8 +113,13 @@ contract ERC4626PerformanceFeeTest is BaseTest {
 
     plugin.takePerformanceFee();
 
-    assertEq(plugin.totalSupply() - oldSupply, expectedFeeShares, "totalSupply increase didnt match expectedFeeShares");
-    assertEq(plugin.balanceOf(plugin.feeRecipient()), expectedFeeShares, "!feeShares minted");
+    assertApproxEqAbs(
+      plugin.totalSupply() - oldSupply,
+      expectedFeeShares,
+      uint256(10),
+      "totalSupply increase didnt match expectedFeeShares"
+    );
+    assertApproxEqAbs(plugin.balanceOf(plugin.feeRecipient()), expectedFeeShares, uint256(10), "!feeShares minted");
 
     plugin.withdrawAccruedFees();
 
@@ -123,11 +127,9 @@ contract ERC4626PerformanceFeeTest is BaseTest {
     assertEq(plugin.totalSupply(), oldSupply, "!totalSupply == oldSupply");
   }
 
-  function testFail__WithdrawAccruedFees() public shouldRunTestFail(forChains(BSC_MAINNET)) {
-    if (block.chainid != BSC_MAINNET) return fail();
-
+  function testRevert__WithdrawAccruedFees() public fork(BSC_MAINNET) {
     vm.startPrank(address(10));
-    vm.expectRevert("Owned");
+    vm.expectRevert("Ownable: caller is not the owner");
     plugin.withdrawAccruedFees();
   }
 }

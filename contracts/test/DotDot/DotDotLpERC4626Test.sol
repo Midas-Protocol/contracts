@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { WithPool } from "../helpers/WithPool.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { MidasERC4626, DotDotLpERC4626, ILpDepositor } from "../../midas/strategies/DotDotLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -16,7 +14,9 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
-
+import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
+import { CErc20 } from "../../compound/CErc20.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 struct RewardsCycle {
@@ -54,7 +54,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
 
   constructor() WithPool() {}
 
-  function setUp(string memory _testPreFix, bytes calldata) public override shouldRun(forChains(BSC_MAINNET)) {
+  function setUp(string memory _testPreFix, bytes calldata) public override {
     setUpPool("dotdot-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));
 
@@ -94,7 +94,6 @@ contract DotDotERC4626Test is AbstractERC4626Test {
       address(this),
       rewardsToken
     );
-    dotDotLpERC4626.reinitialize();
     plugin = dotDotLpERC4626;
 
     // Just set it explicitly to 0. Just wanted to make clear that this is not forgotten but expected to be 0
@@ -138,11 +137,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     return depositAmount;
   }
 
-  function testInitializedValues(string memory assetName, string memory assetSymbol)
-    public
-    override
-    shouldRun(forChains(BSC_MAINNET))
-  {
+  function testInitializedValues(string memory assetName, string memory assetSymbol) public override {
     assertEq(
       plugin.name(),
       string(abi.encodePacked("Midas ", assetName, " Vault")),
@@ -161,7 +156,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(forChains(BSC_MAINNET)) {
+  function testAccumulatingRewardsOnDeposit() public {
     deposit(address(this), depositAmount / 2);
 
     vm.warp(block.timestamp + 150);
@@ -172,7 +167,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     assertGt(epxToken.balanceOf(address(plugin)), 0.01 ether, string(abi.encodePacked("!epxBal ", testPreFix)));
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(forChains(BSC_MAINNET)) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     deposit(address(this), depositAmount);
 
     vm.warp(block.timestamp + 150);
@@ -184,7 +179,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     assertGt(epxToken.balanceOf(address(plugin)), 0.025 ether, string(abi.encodePacked("!epxBal ", testPreFix)));
   }
 
-  function testClaimRewards() public shouldRun(forChains(BSC_MAINNET)) {
+  function testClaimRewards() public {
     // Deposit funds, Rewards are 0
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);

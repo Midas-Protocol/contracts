@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { WithPool } from "../helpers/WithPool.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { MidasERC4626, JarvisERC4626, IElysianFields } from "../../midas/strategies/JarvisERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -16,7 +14,9 @@ import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
-
+import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
+import { CErc20 } from "../../compound/CErc20.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 struct RewardsCycle {
@@ -65,7 +65,6 @@ contract JarvisERC4626Test is AbstractERC4626Test {
 
     JarvisERC4626 jarvisERC4626 = new JarvisERC4626();
     jarvisERC4626.initialize(underlyingToken, flywheel, vault, poolId, address(this), rewardTokens);
-    jarvisERC4626.reinitialize();
     plugin = jarvisERC4626;
 
     initialStrategyBalance = getStrategyBalance();
@@ -108,11 +107,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     return depositAmount;
   }
 
-  function testInitializedValues(string memory assetName, string memory assetSymbol)
-    public
-    override
-    shouldRun(forChains(POLYGON_MAINNET))
-  {
+  function testInitializedValues(string memory assetName, string memory assetSymbol) public override {
     assertEq(
       plugin.name(),
       string(abi.encodePacked("Midas ", assetName, " Vault")),
@@ -132,7 +127,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     assertEq(JarvisERC4626(address(plugin)).poolId(), poolId, string(abi.encodePacked("!poolId", testPreFix)));
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testAccumulatingRewardsOnDeposit() public {
     deposit(address(this), depositAmount / 2);
     deal(address(jrtMimoSep22Token), address(this), 100e18);
     ERC20(jrtMimoSep22Token).transfer(address(vault), 100e18);
@@ -148,7 +143,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     deposit(address(this), depositAmount);
     deal(address(jrtMimoSep22Token), address(this), 100e18);
     ERC20(jrtMimoSep22Token).transfer(address(vault), 100e18);
@@ -164,7 +159,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testClaimRewards() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testClaimRewards() public {
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);
     CErc20(marketAddress).mint(depositAmount);
