@@ -90,8 +90,8 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
-  //  function testSpecificRandom() public fork(BSC_MAINNET) {
-  //    testBscAnyLiquidation(525);
+  //  function testSpecificRandom() public {
+  //    testBscAnyLiquidation(283);
   //  }
 
   function testBscAnyLiquidation(uint256 random) public fork(BSC_MAINNET) {
@@ -175,12 +175,13 @@ contract AnyLiquidationTest is BaseTest {
       emit log_address(address(debtMarket));
 
       uint256 shortfall = 0;
-      // reduce the collateral for each market where the borrower has supplied
+      // reduce the price of the collateral for each market where the borrower has supplied
       // until there is shortfall for which to be liquidated
       for (uint256 m = 0; m < vars.markets.length; m++) {
         uint256 marketIndexWithOffset = (random - m) % vars.markets.length;
         ICToken randomMarket = vars.markets[marketIndexWithOffset];
-        if (randomMarket.balanceOf(vars.borrower) > 0) {
+        uint256 borrowerCollateral = randomMarket.balanceOf(vars.borrower);
+        if (borrowerCollateral > 0) {
           if (address(randomMarket) == address(debtMarket)) continue;
 
           // the collateral prices change
@@ -191,6 +192,14 @@ contract AnyLiquidationTest is BaseTest {
             abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, randomMarket),
             abi.encode(priceCollateral / 5)
           );
+
+          uint256 collateralValue = borrowerCollateral * (priceCollateral / 5);
+          uint256 borrowValue = borrowAmount * mpo.getUnderlyingPrice(debtMarket);
+
+          if (collateralValue < borrowValue) {
+            emit log("collateral position too small");
+            continue;
+          }
 
           (, , shortfall) = vars.comptroller.getHypotheticalAccountLiquidity(vars.borrower, address(0), 0, 0);
           if (shortfall == 0) {
@@ -319,7 +328,7 @@ contract AnyLiquidationTest is BaseTest {
       vars.liquidator.safeLiquidateToTokensWithFlashLoan(
         FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
           vars.borrower,
-          vars.borrowAmount / 100, //repayAmount,
+          vars.borrowAmount / 100,
           ICErc20(address(vars.debtMarket)),
           ICErc20(address(vars.collateralMarket)),
           vars.flashSwapPair,
