@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./IFuseFeeDistributor.sol";
-import "./ComptrollerStorage.sol";
-import "./ComptrollerInterface.sol";
-import "./InterestRateModel.sol";
+import { ComptrollerInterface } from "./ComptrollerInterface.sol";
+import { InterestRateModel } from "./InterestRateModel.sol";
 
 contract CTokenAdminStorage {
   /*
