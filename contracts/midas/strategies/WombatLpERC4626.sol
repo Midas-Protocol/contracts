@@ -3,7 +3,6 @@ pragma solidity ^0.8.10;
 
 import { MidasERC4626 } from "./MidasERC4626.sol";
 import { RewardsClaimer } from "../RewardsClaimer.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
@@ -63,8 +62,6 @@ interface IBaseRewardPool {
 }
 
 contract WombatLpERC4626 is MidasERC4626, RewardsClaimer {
-  using FixedPointMathLib for uint256;
-
   IVoterProxy public voterProxy;
   uint256 public poolId;
 

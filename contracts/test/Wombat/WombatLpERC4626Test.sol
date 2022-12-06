@@ -1,21 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { WithPool } from "../helpers/WithPool.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
-import { MidasERC4626, WombatLpERC4626, IWmxVault, IVoterProxy, IBaseRewardPool, IBooster } from "../../midas/strategies/WombatLpERC4626.sol";
+import { MidasERC4626, WombatLpERC4626, IVoterProxy, IBaseRewardPool, IBooster } from "../../midas/strategies/WombatLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { MockLpDepositor } from "../mocks/dotdot/MockLpDepositor.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
-import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
+import { CErc20 } from "../../compound/CErc20.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
@@ -26,12 +23,9 @@ struct RewardsCycle {
 }
 
 contract WombatERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   address operator = 0x9Ac0a3E8864Ea370Bf1A661444f6610dd041Ba1c;
   address marketAddress;
 
-  // IWmxVault vault;
   uint256 poolId;
   IVoterProxy voterProxy = IVoterProxy(0xE3a7FB9C6790b02Dcfa03B6ED9cda38710413569);
 
