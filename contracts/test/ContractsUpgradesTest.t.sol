@@ -13,8 +13,9 @@ import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CToken } from "../compound/CToken.sol";
 import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
-import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
+
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
