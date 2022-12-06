@@ -235,7 +235,9 @@ contract ExtensionsTest is BaseTest {
     bytes memory blockNumberBeforeCall = abi.encodeWithSelector(asDelegate.accrualBlockNumber.selector);
     bytes memory accrueInterestCall = abi.encodeWithSelector(asExtension.accrueInterest.selector);
     bytes memory blockNumberAfterCall = abi.encodeWithSelector(asDelegate.accrualBlockNumber.selector);
-    bytes[] memory results = asDelegate.multicall(asArray(blockNumberBeforeCall, accrueInterestCall, blockNumberAfterCall));
+    bytes[] memory results = asDelegate.multicall(
+      asArray(blockNumberBeforeCall, accrueInterestCall, blockNumberAfterCall)
+    );
     uint256 blockNumberBefore = abi.decode(results[0], (uint256));
     uint256 blockNumberAfter = abi.decode(results[2], (uint256));
 
