@@ -210,15 +210,47 @@ contract ExtensionsTest is BaseTest {
     }
   }
 
+  function testMulticallMarket() public fork(BSC_MAINNET) {
+    uint8 random = uint8(block.timestamp % 256);
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+
+    Comptroller somePool = Comptroller(pools[random % pools.length].comptroller);
+    CTokenInterface[] memory markets = somePool.getAllMarkets();
+
+    CTokenInterface someMarket = markets[random % markets.length];
+    CErc20PluginDelegate asDelegate = CErc20PluginDelegate(address(someMarket));
+    CTokenExtensionInterface asExtension = asDelegate.asCTokenExtensionInterface();
+
+    emit log("pool");
+    emit log_address(address(somePool));
+    emit log("market");
+    emit log_address(address(someMarket));
+
+    // TODO remove, no need to upgrade after the next deploy
+    _upgradeExistingCTokenExtension(asDelegate);
+
+    vm.roll(block.number + 1);
+
+    bytes memory blockNumberBeforeCall = abi.encodeWithSelector(asDelegate.accrualBlockNumber.selector);
+    bytes memory accrueInterestCall = abi.encodeWithSelector(asExtension.accrueInterest.selector);
+    bytes memory blockNumberAfterCall = abi.encodeWithSelector(asDelegate.accrualBlockNumber.selector);
+    bytes[] memory results = asDelegate.multicall(asArray(blockNumberBeforeCall, accrueInterestCall, blockNumberAfterCall));
+    uint256 blockNumberBefore = abi.decode(results[0], (uint256));
+    uint256 blockNumberAfter = abi.decode(results[2], (uint256));
+
+    assertGt(blockNumberAfter, blockNumberBefore, "did not accrue?");
+  }
+
   function testExistingCTokenExtensionUpgrade() public fork(BSC_MAINNET) {
     uint8 random = uint8(block.timestamp % 256);
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
 
     Comptroller somePool = Comptroller(pools[random % pools.length].comptroller);
-    CTokenInterface[] memory allMarkets = somePool.getAllMarkets();
+    CTokenInterface[] memory markets = somePool.getAllMarkets();
 
-    CTokenInterface someMarket = allMarkets[random % allMarkets.length];
+    CTokenInterface someMarket = markets[random % markets.length];
     CErc20PluginDelegate asDelegate = CErc20PluginDelegate(address(someMarket));
 
     emit log("pool");
@@ -242,15 +274,14 @@ contract ExtensionsTest is BaseTest {
     }
   }
 
-  function _testExistingCTokenExtensionUpgrade(CErc20Delegate asDelegate) public {
-    Comptroller pool = Comptroller(address(asDelegate.comptroller()));
+  CTokenFirstExtension newCfe = new CTokenFirstExtension();
 
-    uint256 totalSupplyBefore = asDelegate.totalSupply();
-    if (totalSupplyBefore == 0) return; // total supply should be non-zero
-
+  function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
     address implBefore = asDelegate.implementation();
     emit log("implementation before");
     emit log_address(implBefore);
+
+    Comptroller pool = Comptroller(address(asDelegate.comptroller()));
 
     CErc20Delegate newImpl;
     if (compareStrings("CErc20Delegate", asDelegate.contractType())) {
@@ -265,11 +296,11 @@ contract ExtensionsTest is BaseTest {
 
     // set the new ctoken delegate as the latest
     vm.prank(ffd.owner());
-    ffd._setLatestCErc20Delegate(implBefore, address(newImpl), false, abi.encodePacked(address(0)));
+    ffd._setLatestCErc20Delegate(implBefore, address(newImpl), false, abi.encode(address(0)));
 
     // add the extension to the auto upgrade config
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
-    cErc20DelegateExtensions[0] = new CTokenFirstExtension();
+    cErc20DelegateExtensions[0] = newCfe;
     vm.prank(ffd.owner());
     ffd._setCErc20DelegateExtensions(address(newImpl), cErc20DelegateExtensions);
 
@@ -281,11 +312,18 @@ contract ExtensionsTest is BaseTest {
     CTokenExtensionInterface(address(asDelegate)).accrueInterest();
     emit log("new implementation");
     emit log_address(asDelegate.implementation());
+  }
+
+  function _testExistingCTokenExtensionUpgrade(CErc20Delegate asDelegate) public {
+    uint256 totalSupplyBefore = asDelegate.totalSupply();
+    if (totalSupplyBefore == 0) return; // total supply should be non-zero
+
+    _upgradeExistingCTokenExtension(asDelegate);
 
     // check if the extension was added
     address[] memory extensions = asDelegate._listExtensions();
     assertEq(extensions.length, 1, "the first extension should be added");
-    assertEq(extensions[0], address(cErc20DelegateExtensions[0]), "the first extension should be the only extension");
+    assertEq(extensions[0], address(newCfe), "the first extension should be the only extension");
 
     // check if the storage is read from the same place
     uint256 totalSupplyAfter = asDelegate.totalSupply();

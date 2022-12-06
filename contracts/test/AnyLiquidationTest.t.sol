@@ -58,6 +58,7 @@ contract AnyLiquidationTest is BaseTest {
       mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
       mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
       curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
+      // TODO revert to the ap provided, no need to upgrade after the next deploy
       // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
       fsl = new FuseSafeLiquidator();
       fsl.initialize(
