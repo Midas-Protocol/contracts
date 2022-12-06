@@ -5,140 +5,127 @@ import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 
 import "./config/BaseTest.t.sol";
+
+import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { Auth, Authority } from "solmate/auth/Auth.sol";
+import { Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
+
+import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
 import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
-import "fuse-flywheel/FuseFlywheelCore.sol";
-import "../compound/CTokenInterfaces.sol";
+import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
 
+import "../compound/CTokenInterfaces.sol";
 import { CErc20 } from "../compound/CErc20.sol";
-import { CErc20 } from "../compound/CErc20.sol";
+
 import { MidasFlywheelLensRouter, IComptroller } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
-import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
-import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
-import { Comptroller } from "../compound/Comptroller.sol";
-import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
-import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
-import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
-import { IERC4626 } from "../compound/IERC4626.sol";
-import { RewardsDistributorDelegate } from "../compound/RewardsDistributorDelegate.sol";
-import { RewardsDistributorDelegator } from "../compound/RewardsDistributorDelegator.sol";
-import { ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
-import { InterestRateModel } from "../compound/InterestRateModel.sol";
-import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
+import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+
+interface IPriceOracle {
+  function price(address underlying) external view returns (uint256);
+}
 
 contract FLRTest is BaseTest {
-  MockERC20 underlyingToken;
-  MockERC20 rewardToken;
+  address rewardToken;
 
-  CErc20Delegate cErc20Delegate;
-  CErc20PluginDelegate cErc20PluginDelegate;
-  CErc20 cErc20;
+  MidasFlywheel flywheel;
+  FlywheelStaticRewards rewards;
+  MidasFlywheelLensRouter lensRouter;
 
-  MidasFlywheelCore fwc;
-  MidasFlywheelLensRouter fwlr;
+  address BSC_ADMIN = address(0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E);
 
-  FuseFlywheelCore[] flywheelsToClaim;
-  FlywheelStaticRewards fwsr;
+  function setUpFlywheel(
+    address _rewardToken,
+    address mkt,
+    IComptroller comptroller,
+    address admin
+  ) public {
+    flywheel = new MidasFlywheel();
+    flywheel.initialize(
+      ERC20(_rewardToken),
+      FlywheelStaticRewards(address(0)),
+      IFlywheelBooster(address(0)),
+      address(this)
+    );
 
-  function testFuseFlywheelLensRouter() public fork(NEON_DEVNET) {
-    address mkt = 0xfcA37c71230b5F650C068bC0fC43aC92F9cA9bFD;
-    fwc = MidasFlywheelCore(0x4059eDB9647f04aAF82CCEdF270922D1AFbD44ad);
-    (uint224 index, uint32 lastUpdatedTimestamp) = fwc.strategyState(ERC20(mkt));
+    rewards = new FlywheelStaticRewards(FuseFlywheelCore(address(flywheel)), address(this), Authority(address(0)));
+    flywheel.setFlywheelRewards(rewards);
 
-    emit log_named_uint("index", index);
-    emit log_named_uint("lastUpdatedTimestamp", lastUpdatedTimestamp);
-    emit log_named_uint("block.timestamp", block.timestamp);
+    lensRouter = new MidasFlywheelLensRouter();
 
-    fwsr = FlywheelStaticRewards(0xb4bd9Ec6838BE038C4f965333787b859b7c3F1a2);
+    flywheel.addStrategyForRewards(ERC20(mkt));
 
-    (uint224 rewardsPerSecond, uint32 rewardsEndTimestamp) = fwsr.rewardsInfo(ERC20(mkt));
+    // add flywheel as rewardsDistributor to call flywheelPreBorrowAction / flywheelPreSupplyAction
+    vm.prank(admin);
+    require(comptroller._addRewardsDistributor(address(flywheel)) == 0);
 
-    vm.prank(address(fwc));
-    uint256 accrued = fwsr.getAccruedRewards(ERC20(mkt), lastUpdatedTimestamp);
+    // seed rewards to flywheel
+    deal(_rewardToken, address(rewards), 1_000_000 * (10**ERC20(_rewardToken).decimals()));
 
-    emit log_named_uint("accrued", accrued);
-    emit log_named_uint("rewardsPerSecond", rewardsPerSecond);
-    emit log_named_uint("rewardsEndTimestamp", rewardsEndTimestamp);
-
-    fwlr = new MidasFlywheelLensRouter();
-    MidasFlywheelLensRouter.MarketRewardsInfo[] memory ri;
-
-    ri = fwlr.getMarketRewardsInfo(IComptroller(0x8727FA63B01525931688DbaDd3e50f36f25fFD68));
-    for (uint256 i = 0; i < ri.length; i++) {
-      if (address(ri[i].market) != mkt) {
-        emit log("NO REWARDS INFO");
-        continue;
-      }
-
-      emit log("");
-      emit log_named_address("RUNNING FOR MARKET", address(ri[i].market));
-      emit log_named_uint("underlyingPrice", ri[i].underlyingPrice);
-      for (uint256 j = 0; j < ri[i].rewardsInfo.length; j++) {
-        emit log_named_uint("rewardSpeedPerSecondPerToken", ri[i].rewardsInfo[j].rewardSpeedPerSecondPerToken);
-        emit log_named_uint("rewardTokenPrice", ri[i].rewardsInfo[j].rewardTokenPrice);
-        emit log_named_uint("formattedAPR", ri[i].rewardsInfo[j].formattedAPR);
-        emit log_named_address("rewardToken", address(ri[i].rewardsInfo[j].rewardToken));
-        // emit log_named_uint("indexAfter", ri[i].rewardsInfo[j].indexAfter);
-        // emit log_named_uint("indexBefore", ri[i].rewardsInfo[j].indexBefore);
-        emit log_named_uint("lastUpdatedTimestampAfter", ri[i].rewardsInfo[j].lastUpdatedTimestampAfter);
-        emit log_named_uint("lastUpdatedTimestampBefore", ri[i].rewardsInfo[j].lastUpdatedTimestampBefore);
-      }
-    }
+    // Start reward distribution at 1 token per second
+    rewards.setRewardsInfo(
+      ERC20(mkt),
+      FlywheelStaticRewards.RewardsInfo({
+        rewardsPerSecond: uint224(789 * 10**ERC20(_rewardToken).decimals()),
+        rewardsEndTimestamp: 0
+      })
+    );
   }
 
   function testFuseFlywheelLensRouterBsc() public fork(BSC_MAINNET) {
+    rewardToken = address(0x71be881e9C5d4465B3FfF61e89c6f3651E69B5bb); // BRZ
+    emit log_named_address("rewardToken", address(rewardToken));
     address mkt = 0x159A529c00CD4f91b65C54E77703EDb67B4942e4;
-    fwc = MidasFlywheelCore(0x379cdA8eCaC6FFE1E8b8D71649ced26B3FA597Ec);
-    (uint224 index, uint32 lastUpdatedTimestamp) = fwc.strategyState(ERC20(mkt));
+    setUpFlywheel(rewardToken, mkt, IComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117), BSC_ADMIN);
+    emit log_named_uint("mkt dec", ERC20(mkt).decimals());
+
+    (uint224 index, uint32 lastUpdatedTimestamp) = flywheel.strategyState(ERC20(mkt));
 
     emit log_named_uint("index", index);
     emit log_named_uint("lastUpdatedTimestamp", lastUpdatedTimestamp);
     emit log_named_uint("block.timestamp", block.timestamp);
+    emit log_named_uint(
+      "underlying price",
+      IPriceOracle(address(IComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117).oracle())).price(
+        address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
+      )
+    );
+    emit log_named_uint("exchangeRateCurrent", CErc20(mkt).exchangeRateCurrent());
 
-    fwsr = FlywheelStaticRewards(0x2207AfAD110133BB1B869F66b42D76910328AEBE);
+    vm.warp(block.timestamp + 10);
 
-    (uint224 rewardsPerSecond, uint32 rewardsEndTimestamp) = fwsr.rewardsInfo(ERC20(mkt));
+    (uint224 rewardsPerSecond, uint32 rewardsEndTimestamp) = rewards.rewardsInfo(ERC20(mkt));
 
-    vm.prank(address(fwc));
-    uint256 accrued = fwsr.getAccruedRewards(ERC20(mkt), lastUpdatedTimestamp);
+    vm.prank(address(flywheel));
+    uint256 accrued = rewards.getAccruedRewards(ERC20(mkt), lastUpdatedTimestamp);
 
     emit log_named_uint("accrued", accrued);
     emit log_named_uint("rewardsPerSecond", rewardsPerSecond);
     emit log_named_uint("rewardsEndTimestamp", rewardsEndTimestamp);
+    emit log_named_uint("mkt ts", ERC20(mkt).totalSupply());
 
-    fwlr = new MidasFlywheelLensRouter();
-    MidasFlywheelLensRouter.MarketRewardsInfo[] memory ri;
-
-    ri = fwlr.getMarketRewardsInfo(IComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117));
-    for (uint256 i = 0; i < ri.length; i++) {
-      if (address(ri[i].market) != mkt) {
+    MidasFlywheelLensRouter.MarketRewardsInfo[] memory marketRewardsInfos = lensRouter.getMarketRewardsInfo(
+      IComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117)
+    );
+    for (uint256 i = 0; i < marketRewardsInfos.length; i++) {
+      if (address(marketRewardsInfos[i].market) != mkt) {
         emit log("NO REWARDS INFO");
         continue;
       }
 
       emit log("");
-      emit log_named_address("RUNNING FOR MARKET", address(ri[i].market));
-      emit log_named_uint("underlyingPrice", ri[i].underlyingPrice);
-      for (uint256 j = 0; j < ri[i].rewardsInfo.length; j++) {
-        emit log_named_uint("rewardSpeedPerSecondPerToken", ri[i].rewardsInfo[j].rewardSpeedPerSecondPerToken);
-        emit log_named_uint("rewardTokenPrice", ri[i].rewardsInfo[j].rewardTokenPrice);
-        emit log_named_uint("formattedAPR", ri[i].rewardsInfo[j].formattedAPR);
-        emit log_named_address("rewardToken", address(ri[i].rewardsInfo[j].rewardToken));
-        // emit log_named_uint("indexAfter", ri[i].rewardsInfo[j].indexAfter);
-        // emit log_named_uint("indexBefore", ri[i].rewardsInfo[j].indexBefore);
-        emit log_named_uint("lastUpdatedTimestampAfter", ri[i].rewardsInfo[j].lastUpdatedTimestampAfter);
-        emit log_named_uint("lastUpdatedTimestampBefore", ri[i].rewardsInfo[j].lastUpdatedTimestampBefore);
+      emit log_named_address("RUNNING FOR MARKET", address(marketRewardsInfos[i].market));
+      for (uint256 j = 0; j < marketRewardsInfos[i].rewardsInfo.length; j++) {
+        emit log_named_uint(
+          "rewardSpeedPerSecondPerToken",
+          marketRewardsInfos[i].rewardsInfo[j].rewardSpeedPerSecondPerToken
+        );
+        emit log_named_uint("rewardTokenPrice", marketRewardsInfos[i].rewardsInfo[j].rewardTokenPrice);
+        emit log_named_uint("formattedAPR", marketRewardsInfos[i].rewardsInfo[j].formattedAPR);
+        emit log_named_address("rewardToken", address(marketRewardsInfos[i].rewardsInfo[j].rewardToken));
       }
     }
-  }
-
-  function testFetchPluginAddress() public fork(BSC_MAINNET) {
-    cErc20PluginDelegate = CErc20PluginDelegate(0x383158Db17719d2Cf1Ce10Ccb9a6Dd7cC1f54EF3);
-    IERC4626 plugin = cErc20PluginDelegate.plugin();
-    emit log_named_address("plugin", address(plugin));
-    assertEq(address(plugin), 0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE);
   }
 }
