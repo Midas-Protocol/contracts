@@ -372,28 +372,31 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     // we want to calculate the needed flashSwapAmount on-chain to
     // avoid errors due to changing market conditions
     // between the time of calculating and including the tx in a block
-    uint256 flashSwapAmount = vars.repayAmount;
-    IERC20Upgradeable flashSwapFundingToken = IERC20Upgradeable(ICErc20(address(vars.cErc20)).underlying());
+    uint256 fundingAmount = vars.repayAmount;
+    IERC20Upgradeable fundingToken;
     if (vars.debtFundingStrategies.length > 0) {
       require(
         vars.debtFundingStrategies.length == vars.debtFundingStrategiesData.length,
         "Funding IFundsConversionStrategy contract array and strategy data bytes array must be the same length."
       );
-      // loop backwards to estimate the initial input from the final expected output
-      for (uint256 i = vars.debtFundingStrategies.length; i > 0; i--) {
-        bytes memory strategyData = vars.debtFundingStrategiesData[i - 1];
-        IFundsConversionStrategy fcs = vars.debtFundingStrategies[i - 1];
-        (flashSwapFundingToken, flashSwapAmount) = fcs.estimateInputAmount(flashSwapAmount, strategyData);
+      // estimate the initial (flash-swapped token) input from the expected output (debt token)
+      for (uint256 i = 0; i < vars.debtFundingStrategies.length; i++) {
+        bytes memory strategyData = vars.debtFundingStrategiesData[i];
+        IFundsConversionStrategy fcs = vars.debtFundingStrategies[i];
+        (fundingToken, fundingAmount) = fcs.estimateInputAmount(fundingAmount, strategyData);
       }
+    } else {
+      fundingToken = IERC20Upgradeable(ICErc20(address(vars.cErc20)).underlying());
     }
 
-    _flashSwapAmount = flashSwapAmount;
-    _flashSwapToken = address(flashSwapFundingToken);
+    // the last outputs from estimateInputAmount are the ones to be flash-swapped
+    _flashSwapAmount = fundingAmount;
+    _flashSwapToken = address(fundingToken);
 
-    bool token0IsFlashSwapFundingToken = vars.flashSwapPair.token0() == address(flashSwapFundingToken);
+    bool token0IsFlashSwapFundingToken = vars.flashSwapPair.token0() == address(fundingToken);
     vars.flashSwapPair.swap(
-      token0IsFlashSwapFundingToken ? flashSwapAmount : 0,
-      !token0IsFlashSwapFundingToken ? flashSwapAmount : 0,
+      token0IsFlashSwapFundingToken ? fundingAmount : 0,
+      !token0IsFlashSwapFundingToken ? fundingAmount : 0,
       address(this),
       msg.data
     );
@@ -516,13 +519,15 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     uint256 debtRepaymentAmount = debtRepaymentToken.balanceOf(address(this));
 
     if (vars.debtFundingStrategies.length > 0) {
-      for (uint256 i = 0; i < vars.debtFundingStrategies.length; i++)
+      // loop backwards to convert the initial (flash-swapped token) input to the final expected output (debt token)
+      for (uint256 i = vars.debtFundingStrategies.length; i > 0; i--) {
         (debtRepaymentToken, debtRepaymentAmount) = convertCustomFunds(
           debtRepaymentToken,
           debtRepaymentAmount,
-          vars.debtFundingStrategies[i],
-          vars.debtFundingStrategiesData[i]
+          vars.debtFundingStrategies[i - 1],
+          vars.debtFundingStrategiesData[i - 1]
         );
+      }
     }
 
     // Approve the debt repayment transfer, liquidate and redeem the seized collateral

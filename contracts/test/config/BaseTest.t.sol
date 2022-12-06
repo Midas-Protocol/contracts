@@ -208,4 +208,29 @@ abstract contract BaseTest is Test {
     array[0] = value;
     return array;
   }
+
+  function asArray(bytes memory value) public pure returns (bytes[] memory) {
+    bytes[] memory array = new bytes[](1);
+    array[0] = value;
+    return array;
+  }
+
+  function asArray(bytes memory value0, bytes memory value1) public pure returns (bytes[] memory) {
+    bytes[] memory array = new bytes[](2);
+    array[0] = value0;
+    array[1] = value1;
+    return array;
+  }
+
+  function asArray(
+    bytes memory value0,
+    bytes memory value1,
+    bytes memory value2
+  ) public pure returns (bytes[] memory) {
+    bytes[] memory array = new bytes[](3);
+    array[0] = value0;
+    array[1] = value1;
+    array[2] = value2;
+    return array;
+  }
 }

@@ -3,19 +3,13 @@ pragma solidity >=0.8.0;
 
 import "./CErc20.sol";
 import "./CDelegateInterface.sol";
-import "../utils/Multicall.sol";
 
 /**
  * @title Compound's CErc20Delegate Contract
  * @notice CTokens which wrap an EIP-20 underlying and are delegated to
  * @author Compound
  */
-contract CErc20Delegate is CDelegateInterface, CErc20, Multicall {
-  /**
-   * @notice Construct an empty delegate
-   */
-  constructor() {}
-
+contract CErc20Delegate is CDelegateInterface, CErc20 {
   /**
    * @notice Called by the delegator on a delegate to initialize it for duty
    * @param data The encoded bytes data for any initialization

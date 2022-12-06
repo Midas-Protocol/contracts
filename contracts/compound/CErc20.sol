@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./CToken.sol";
+import { CErc20Interface } from "./CTokenInterfaces.sol";
 
 /**
  * @title Compound's CErc20 Contract

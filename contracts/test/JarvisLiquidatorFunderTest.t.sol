@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { CToken, CTokenExtensionInterface } from "../compound/CToken.sol";
+import { CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
+import { CToken } from "../compound/CToken.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { JarvisLiquidatorFunder } from "../liquidators/JarvisLiquidatorFunder.sol";
