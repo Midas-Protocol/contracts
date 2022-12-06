@@ -308,7 +308,10 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
    */
   function setPoolName(uint256 index, string calldata name) external {
     IComptroller _comptroller = IComptroller(pools[index].comptroller);
-    require((msg.sender == _comptroller.admin() && _comptroller.adminHasRights()) || msg.sender == owner(), "!permission");
+    require(
+      (msg.sender == _comptroller.admin() && _comptroller.adminHasRights()) || msg.sender == owner(),
+      "!permission"
+    );
     pools[index].name = name;
   }
 
