@@ -6,46 +6,47 @@ import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
-import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 contract MinBorrowTest is BaseTest {
   FuseFeeDistributor ffd;
 
-  function setUp() public forkAtBlock(BSC_MAINNET, 23310015) {
-    ffd = FuseFeeDistributor(payable(0xFc1f56C58286E7215701A773b61bFf2e18A177dE));
-    vm.prank(ffd.owner());
-    ffd._setPoolLimits(1e18, 0, 0);
+  function afterForkSetUp() internal override {
+    ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
   }
 
-  function testMinBorrow() public {
-    MockERC20 asset = MockERC20(0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d);
-    MockERC20 asset1 = MockERC20(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
+  function testMinBorrow() public fork(BSC_MAINNET) {
+    IERC20Upgradeable usdc = IERC20Upgradeable(0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d);
+    IERC20Upgradeable busd = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
 
-    CErc20Interface cToken = CErc20Interface(0x71661c706deEA398F3Cca3187cFB4b6576bDc0f6);
-    CErc20Interface cToken1 = CErc20Interface(0x2F01b89614b963401879b325f853D553375faB58);
-    ComptrollerInterface comptroller = cToken.comptroller();
-    deal(address(asset), address(this), 10000e18);
-    deal(address(asset1), address(1), 10000e18);
+    CErc20Interface usdcMarket = CErc20Interface(0x71661c706deEA398F3Cca3187cFB4b6576bDc0f6);
+    CErc20Interface busdMarket = CErc20Interface(0x2F01b89614b963401879b325f853D553375faB58);
+    ComptrollerInterface comptroller = usdcMarket.comptroller();
+    deal(address(usdc), address(this), 10000e18);
+    deal(address(busd), address(1), 10000e18);
 
-    asset.approve(address(cToken), 1e36);
-    cToken.mint(1000e18);
+    usdc.approve(address(usdcMarket), 1e36);
+    usdcMarket.mint(1000e18);
 
     vm.startPrank(address(1));
-    asset1.approve(address(cToken1), 1e36);
-    cToken1.mint(1000e18);
+    busd.approve(address(busdMarket), 1e36);
+    busdMarket.mint(1000e18);
     vm.stopPrank();
 
+    // the 0 liquidity base min borrow amount
+    uint256 baseMinBorrowEth = ffd.minBorrowEth();
+
     address[] memory cTokens = new address[](2);
-    cTokens[0] = address(cToken);
-    cTokens[1] = address(cToken1);
+    cTokens[0] = address(usdcMarket);
+    cTokens[1] = address(busdMarket);
     comptroller.enterMarkets(cTokens);
 
-    uint256 minBorrowEth = ffd.getMinBorrowEth(cToken1);
+    uint256 minBorrowEth = ffd.getMinBorrowEth(busdMarket);
+    assertEq(minBorrowEth, baseMinBorrowEth, "!minBorrowEth for default min borrow eth");
 
-    assertEq(minBorrowEth, 1e18, "!minBorrowEth for default min borrow eth");
-    cToken1.borrow(300e18);
+    busdMarket.borrow(300e18);
 
-    minBorrowEth = ffd.getMinBorrowEth(cToken1);
+    minBorrowEth = ffd.getMinBorrowEth(busdMarket);
     assertEq(minBorrowEth, 0, "!minBorrowEth after borrowing less amount than min amount");
   }
 }

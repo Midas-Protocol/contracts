@@ -261,7 +261,7 @@ contract RewardsDistributorDelegate is RewardsDistributorDelegateStorageV1, Expo
     }
 
     Double memory deltaIndex = sub_(supplyIndex, supplierIndex);
-    uint256 supplierTokens = CToken(cToken).balanceOf(supplier);
+    uint256 supplierTokens = EIP20NonStandardInterface(cToken).balanceOf(supplier);
     uint256 supplierDelta = mul_(supplierTokens, deltaIndex);
     uint256 supplierAccrued = add_(compAccrued[supplier], supplierDelta);
     compAccrued[supplier] = supplierAccrued;
