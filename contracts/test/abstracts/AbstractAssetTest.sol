@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { AbstractERC4626Test } from "./AbstractERC4626Test.sol";
@@ -19,9 +16,11 @@ contract AbstractAssetTest is BaseTest {
   }
 
   function runTest(function() external test) public {
-    for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
-      this.setUpTestContract(testConfigStorage.getTestConfig(i));
-      test();
+    if (shouldRunForChain(block.chainid)) {
+      for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
+        this.setUpTestContract(testConfigStorage.getTestConfig(i));
+        test();
+      }
     }
   }
 

@@ -11,11 +11,6 @@ import "./CDelegateInterface.sol";
  */
 contract CErc20Delegate is CDelegateInterface, CErc20 {
   /**
-   * @notice Construct an empty delegate
-   */
-  constructor() {}
-
-  /**
    * @notice Called by the delegator on a delegate to initialize it for duty
    * @param data The encoded bytes data for any initialization
    */
@@ -53,11 +48,20 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     // Call _resignImplementation internally (this delegate's code)
     if (allowResign) _resignImplementation();
 
-    // Get old implementation
     address oldImplementation = implementation;
-
-    // Store new implementation
     implementation = implementation_;
+
+    // add the extensions of the new implementation
+    address[] memory latestExtensions = IFuseFeeDistributor(fuseAdmin).getCErc20DelegateExtensions(implementation);
+    address[] memory currentExtensions = LibDiamond.listExtensions();
+    // removed the current (old) extensions
+    for (uint256 i = 0; i < currentExtensions.length; i++) {
+      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
+    }
+    // add the new extensions
+    for (uint256 i = 0; i < latestExtensions.length; i++) {
+      LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
+    }
 
     if (address(this).code.length == 0) {
       // cannot delegate to self with an external call when constructing
@@ -71,7 +75,6 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
       );
     }
 
-    // Emit event
     emit NewImplementation(oldImplementation, implementation);
   }
 
@@ -110,7 +113,7 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     }
   }
 
-  function contractType() external virtual override returns (string memory) {
+  function contractType() external pure virtual override returns (string memory) {
     return "CErc20Delegate";
   }
 }

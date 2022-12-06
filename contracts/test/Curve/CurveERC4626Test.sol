@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { WithPool } from "../helpers/WithPool.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { MidasERC4626, CurveGaugeERC4626, IChildGauge } from "../../midas/strategies/CurveGaugeERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -15,6 +13,9 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
+import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
+import { CErc20 } from "../../compound/CErc20.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 struct RewardsCycle {
@@ -168,9 +169,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
     vm.stopPrank();
 
     for (uint8 i; i < flywheels.length; i++) {
-      (uint32 cycleStart, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(
-        ERC20(address(marketAddress))
-      );
+      (, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(ERC20(address(marketAddress)));
 
       // Rewards can be transfered in the next cycle
       assertEq(cycleEnd, 0, string(abi.encodePacked("!cycleEnd-", vm.toString(i), " ", testPreFix)));
@@ -199,9 +198,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
         string(abi.encodePacked("!rewardBal-", vm.toString(i), " ", testPreFix))
       );
 
-      (uint32 cycleStart, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(
-        ERC20(address(marketAddress))
-      );
+      (, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(ERC20(address(marketAddress)));
       // Rewards can be transfered in the next cycle
       assertEq(cycleEnd, 1663093678, string(abi.encodePacked("!2.cycleEnd-", vm.toString(i), " ", testPreFix)));
 

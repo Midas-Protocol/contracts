@@ -1,18 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-
-import "./config/BaseTest.t.sol";
-import "../FuseSafeLiquidator.sol";
-
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { ICurvePool } from "../external/curve/ICurvePool.sol";
 import { CurveSwapLiquidatorFunder } from "../liquidators/CurveSwapLiquidatorFunder.sol";
-import { Comptroller } from "../compound/Comptroller.sol";
+import { IComptroller } from "../external/compound/IComptroller.sol";
+import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
+import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
+import { ICErc20 } from "../external/compound/ICErc20.sol";
+import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
+import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
+
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract MockRedemptionStrategy is IRedemptionStrategy {
   function redeem(
@@ -84,117 +85,37 @@ contract FuseSafeLiquidatorTest is BaseTest {
     }
   }
 
-  struct CurveStrategyData {
-    ICErc20 debtMarket;
-    ICErc20 collateralMarket;
-    address outputToken;
-    uint256 borrowedAmount;
-    IFundsConversionStrategy[] debtFundingStrategies;
-    CurveSwapLiquidatorFunder curveSwapLiquidatorFunder;
-    IRedemptionStrategy[] redemptionStrategies;
-    bytes[] redemptionStrategyData;
-    ICurvePool curvePool;
-    bytes[] debtFundingData;
-    address borrower;
-    uint256 borrowAmount;
+  function useThisToTestLiquidations() public fork(POLYGON_MAINNET) {
+    address borrower = 0xA4F4406D3dc6482dB1397d0ad260fd223C8F37FC;
+    address poolAddr = 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2;
+    address debtMarketAddr = 0x456b363D3dA38d3823Ce2e1955362bBd761B324b;
+    address collateralMarketAddr = 0x28D0d45e593764C4cE88ccD1C033d0E2e8cE9aF3;
+
+    FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars memory vars;
+    vars.borrower = borrower;
+    vars.cErc20 = ICErc20(debtMarketAddr);
+    vars.cTokenCollateral = ICErc20(collateralMarketAddr);
+    vars.repayAmount = 70565471214557927746795;
+    vars.flashSwapPair = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827);
+    vars.minProfitAmount = 0;
+    vars.exchangeProfitTo = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
+    vars.uniswapV2RouterForBorrow = IUniswapV2Router02(0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff);
+    vars.uniswapV2RouterForCollateral = IUniswapV2Router02(0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff);
+    vars.redemptionStrategies = new IRedemptionStrategy[](0);
+    vars.strategyData = new bytes[](0);
+    vars.ethToCoinbase = 0;
+    vars.debtFundingStrategies = new IFundsConversionStrategy[](1);
+    vars.debtFundingStrategiesData = new bytes[](1);
+
+    vars.debtFundingStrategies[0] = IFundsConversionStrategy(0x98110E8482E4e286716AC0671438BDd84C4D838c);
+    vars.debtFundingStrategiesData[
+        0
+      ] = hex"0000000000000000000000002791bca1f2de4661ed88a30c99a7a9449aa84174000000000000000000000000aec757bf73cc1f4609a1459205835dd40b4e3f290000000000000000000000000000000000000000000000000000000000000960";
+
+    // fsl.safeLiquidateToTokensWithFlashLoan(vars);
+
+    vars.cErc20.comptroller();
   }
-
-  function testCurveStrategyLiquidation() public fork(BSC_MAINNET) {
-    CurveStrategyData memory vars;
-
-    vars.borrower = 0x25bd0fC0e4597B4C9535d94876A8ca1F531Fa92e; // borrower
-
-    vars.debtMarket = ICErc20(0x9b575BF2F6ca8bf8967Aa320D3AAe3Df82DD17Cd); // jCHF market
-    vars.collateralMarket = ICErc20(0x383158Db17719d2Cf1Ce10Ccb9a6Dd7cC1f54EF3); // 3brl market
-
-    vars.outputToken = vars.debtMarket.underlying(); // jCHF
-
-    vars.curveSwapLiquidatorFunder = new CurveSwapLiquidatorFunder();
-
-    // whitelist redemption strategy
-    vm.prank(fsl.owner());
-    fsl._whitelistRedemptionStrategy(IRedemptionStrategy(address(vars.curveSwapLiquidatorFunder)), true);
-
-    vars.curvePool = ICurvePool(0xBcA6E25937B0F7E0FD8130076b6B218F595E32e2);
-
-    {
-      // debt funding strategy
-      vars.debtFundingStrategies = new IFundsConversionStrategy[](1);
-      vars.debtFundingStrategies[0] = IFundsConversionStrategy(address(vars.curveSwapLiquidatorFunder));
-
-      // deb funding strategy data
-      vars.debtFundingData = new bytes[](1);
-      bytes memory strategyData = abi.encode(
-        vars.curvePool, // curve pool address
-        0, // curve pool input token (BUSD) index
-        1, // curve pool output token (jCHF) index
-        vars.outputToken, // jCHF
-        ap.getAddress("wtoken")
-      );
-      vars.debtFundingData[0] = strategyData;
-
-      // redemption strategy
-      vars.redemptionStrategies = new IRedemptionStrategy[](2);
-      vars.redemptionStrategies[0] = IRedemptionStrategy(0x8683557815883E9F9c4b79CF7DC034709A805d49);
-      vars.redemptionStrategies[1] = IRedemptionStrategy(0xC01c0B84A3c2d8A181636BF2b892FD186758B721);
-
-      // redemption strategy data
-      vars.redemptionStrategyData = new bytes[](2);
-      strategyData = abi.encode(
-        0,
-        0x316622977073BBC3dF32E7d2A9B3c77596a0a603, // jbrl
-        ap.getAddress("wtoken"),
-        0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA // oracle
-      );
-      vars.redemptionStrategyData[0] = strategyData;
-      strategyData = abi.encode(
-        0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56, // BUSD
-        0x0fD8170Dc284CD558325029f6AEc1538c7d99f49, // jBRL-BUSD liquidity pool,
-        2400 // txExpirationPeriod
-      );
-      vars.redemptionStrategyData[1] = strategyData;
-
-      // price manipulation for liquidate
-      {
-        address comp = vars.debtMarket.comptroller();
-        IComptroller comptroller = IComptroller(comp);
-        MasterPriceOracle mpo = MasterPriceOracle(address(comptroller.oracle()));
-        uint256 initialPrice = mpo.getUnderlyingPrice(vars.collateralMarket);
-        uint256 priceCollateral = initialPrice;
-        vm.mockCall(
-          address(mpo),
-          abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, vars.collateralMarket),
-          abi.encode(initialPrice / 100)
-        );
-      }
-
-      vars.borrowAmount = vars.debtMarket.borrowBalanceStored(vars.borrower);
-
-      // liquidate
-      fsl.safeLiquidateToTokensWithFlashLoan(
-        FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
-          vars.borrower, // borrower
-          vars.borrowAmount / 100,
-          vars.debtMarket,
-          vars.collateralMarket,
-          IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16),
-          0,
-          0x0000000000000000000000000000000000000000,
-          IUniswapV2Router02(uniswapRouter),
-          IUniswapV2Router02(uniswapRouter),
-          vars.redemptionStrategies,
-          vars.redemptionStrategyData,
-          0,
-          vars.debtFundingStrategies,
-          vars.debtFundingData
-        )
-      );
-    }
-  }
-
-  // ctokens seized 10738741294254050199
-  // WBNB flash swapped 5551528605298770
-  // BUSD seized 1873003268211131735
 
   // TODO test with marginal shortfall for liquidation penalty errors
 }

@@ -11,7 +11,7 @@ import "../external/uniswap/IUniswapV2Pair.sol";
  * @notice CToken which outsources token logic to a plugin
  * @author Joey Santoro
  *
- * CErc20PluginDelegate deposits and withdraws from a plugin conract
+ * CErc20PluginDelegate deposits and withdraws from a plugin contract
  * It is also capable of delegating reward functionality to a PluginRewardsDistributor
  */
 contract CErc20PluginDelegate is CErc20Delegate {
@@ -21,8 +21,6 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @notice Plugin address
    */
   IERC4626 public plugin;
-
-  uint256 public constant PRECISION = 1e18;
 
   /**
    * @notice Delegate interface to become the implementation
@@ -112,7 +110,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
     plugin.withdraw(amount, to, address(this));
   }
 
-  function contractType() external virtual override returns (string memory) {
+  function contractType() external pure virtual override returns (string memory) {
     return "CErc20PluginDelegate";
   }
 }

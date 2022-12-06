@@ -166,11 +166,11 @@ contract AddressesProvider is OwnableUpgradeable {
     return _addresses[id];
   }
 
-  function getCurveSwapPools() public returns (CurveSwapPool[] memory) {
+  function getCurveSwapPools() public view returns (CurveSwapPool[] memory) {
     return curveSwapPoolsConfig;
   }
 
-  function getJarvisPools() public returns (JarvisPool[] memory) {
+  function getJarvisPools() public view returns (JarvisPool[] memory) {
     return jarvisPoolsConfig;
   }
 }

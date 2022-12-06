@@ -1,23 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "..//helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
-import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { DotDotERC4626Test } from "../DotDot/DotDotLpERC4626Test.sol";
-import { IBeefyVault, BeefyERC4626 } from "../../midas/strategies/BeefyERC4626.sol";
 import { MidasERC4626, DotDotLpERC4626, ILpDepositor } from "../../midas/strategies/DotDotLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
-import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
-import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
@@ -31,11 +23,11 @@ struct RewardsCycle {
 contract FlywheelPerformanceFeeTest is BaseTest {
   using FixedPointMathLib for uint256;
 
-  uint256 PERFORMANCE_FEE = 5e16;
+  uint256 PERFORMANCE_FEE = 10e16;
   uint256 DEPOSIT_AMOUNT = 100e18;
   uint256 BPS_DENOMINATOR = 10_000;
 
-  address feeRecipient = address(10);
+  address feeRecipient = 0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E;
   MidasERC4626 plugin;
   ERC20Upgradeable underlyingToken = ERC20Upgradeable(0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9);
 
@@ -57,9 +49,10 @@ contract FlywheelPerformanceFeeTest is BaseTest {
 
   ERC20Upgradeable[] rewardsToken;
 
-  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function afterForkSetUp() internal override {
     dddFlywheel = new MidasFlywheelCore();
     dddFlywheel.initialize(dddToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
+    dddFlywheel.reinitialize();
     dddRewards = new FuseFlywheelDynamicRewards(FlywheelCore(address(dddFlywheel)), 1);
     dddFlywheel.setFlywheelRewards(dddRewards);
 
@@ -124,12 +117,12 @@ contract FlywheelPerformanceFeeTest is BaseTest {
 
   /* --------------------- FLYWHEEL PERFORMANCE FEE TESTS --------------------- */
 
-  function test__initializedValues() public {
+  function test__initializedValues() public fork(BSC_MAINNET) {
     assertEq(dddFlywheel.performanceFee(), PERFORMANCE_FEE, "!perFee");
-    assertEq(dddFlywheel.feeRecipient(), address(0), "!feeRecipient");
+    assertEq(dddFlywheel.feeRecipient(), feeRecipient, "!feeRecipient");
   }
 
-  function test__UpdateFeeSettings() public {
+  function test__UpdateFeeSettings() public fork(BSC_MAINNET) {
     uint256 newPerfFee = 100;
     address newFeeRecipient = feeRecipient;
 
@@ -139,14 +132,13 @@ contract FlywheelPerformanceFeeTest is BaseTest {
     assertEq(dddFlywheel.feeRecipient(), newFeeRecipient, "!feeRecipient == newFeeRecipient");
   }
 
-  function testFail__UpdateFeeSettings() public {
+  function testRevert__UpdateFeeSettings() public fork(BSC_MAINNET) {
     vm.startPrank(feeRecipient);
-    vm.expectRevert("Owned: Only Owner");
-
+    vm.expectRevert("Ownable: caller is not the owner");
     dddFlywheel.updateFeeSettings(100, feeRecipient);
   }
 
-  function test__TakePerformanceFeeInUnderlyingAsset() public {
+  function test__TakePerformanceFeeInUnderlyingAsset() public fork(BSC_MAINNET) {
     createPerformanceFee();
 
     uint256 expectedPerformanceFee = (rewardAmount * dddFlywheel.performanceFee()) / 1e18;
@@ -164,7 +156,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
     );
   }
 
-  function test__WithdrawAccruedFees() public {
+  function test__WithdrawAccruedFees() public fork(BSC_MAINNET) {
     dddFlywheel.updateFeeSettings(PERFORMANCE_FEE, feeRecipient);
 
     createPerformanceFee();
