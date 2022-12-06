@@ -48,7 +48,8 @@ contract LiquidityMiningTest is BaseTest {
 
   address user = address(this);
 
-  uint256 depositAmount = 1 ether;
+  uint8 baseDecimal;
+  uint8 rewardDecimal;
 
   address[] markets;
   address[] emptyAddresses;
@@ -58,12 +59,14 @@ contract LiquidityMiningTest is BaseTest {
   address[] newImplementation;
   MidasFlywheelCore[] flywheelsToClaim;
 
-  function setUpBaseContracts() public {
-    underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
-    rewardToken = new MockERC20("RewardToken", "RT", 18);
-    interestModel = new WhitePaperInterestRateModel(2343665, 1e18, 1e18);
+  function setUpBaseContracts(uint8 _baseDecimal, uint8 _rewardDecimal) public {
+    baseDecimal = _baseDecimal;
+    rewardDecimal = _rewardDecimal;
+    underlyingToken = new MockERC20("UnderlyingToken", "UT", baseDecimal);
+    rewardToken = new MockERC20("RewardToken", "RT", rewardDecimal);
+    interestModel = new WhitePaperInterestRateModel(2343665, 1 * 10**baseDecimal, 1 * 10**baseDecimal);
     fuseAdmin = new FuseFeeDistributor();
-    fuseAdmin.initialize(1e16);
+    fuseAdmin.initialize(1 * 10**(baseDecimal - 2));
     fusePoolDirectory = new FusePoolDirectory();
     fusePoolDirectory.initialize(false, emptyAddresses);
     cErc20Delegate = new CErc20Delegate();
@@ -131,23 +134,23 @@ contract LiquidityMiningTest is BaseTest {
     require(comptroller._addRewardsDistributor(address(flywheel)) == 0);
 
     // seed rewards to flywheel
-    rewardToken.mint(address(rewards), 100 ether);
+    rewardToken.mint(address(rewards), 100 * 10**rewardDecimal);
 
     // Start reward distribution at 1 token per second
     rewards.setRewardsInfo(
       ERC20(address(cErc20)),
-      FlywheelStaticRewards.RewardsInfo({ rewardsPerSecond: 1 ether, rewardsEndTimestamp: 0 })
+      FlywheelStaticRewards.RewardsInfo({ rewardsPerSecond: uint224(1 * 10**rewardDecimal), rewardsEndTimestamp: 0 })
     );
 
     // preperation for a later call
-    flywheelsToClaim.push(flywheel);
+    flywheelsToClaim.push(MidasFlywheelCore(address(flywheel)));
   }
 
-  function setUp() public {
-    setUpBaseContracts();
+  function _initialize(uint8 baseDecimal, uint8 rewardDecimal) internal {
+    setUpBaseContracts(baseDecimal, rewardDecimal);
     setUpPoolAndMarket();
     setUpFlywheel();
-    deposit(depositAmount);
+    deposit(1 * 10**baseDecimal);
     vm.warp(block.timestamp + 1);
   }
 
@@ -158,14 +161,14 @@ contract LiquidityMiningTest is BaseTest {
     cErc20.mint(_amount);
   }
 
-  function testIntegration() public {
+  function _testIntegration() internal {
     CTokenExtensionInterface asCErc20 = cErc20.asCTokenExtensionInterface();
 
     // store expected rewards per token (1 token per second over total supply)
-    uint256 rewardsPerToken = (1 ether * 1 ether) / asCErc20.totalSupply();
+    uint256 rewardsPerToken = (1 * 10**rewardDecimal * 1 * 10**baseDecimal) / asCErc20.totalSupply();
 
     // store expected user rewards (user balance times reward per second over 1 token)
-    uint256 userRewards = (rewardsPerToken * asCErc20.balanceOf(user)) / 1 ether;
+    uint256 userRewards = (rewardsPerToken * asCErc20.balanceOf(user)) / (1 * 10**baseDecimal);
 
     ERC20 asErc20 = ERC20(address(asCErc20));
     // accrue rewards and check against expected
@@ -180,18 +183,28 @@ contract LiquidityMiningTest is BaseTest {
     require(rewardToken.balanceOf(user) == userRewards);
 
     // mint more tokens by user and rerun test
-    deposit(1e6 ether);
+    deposit(1e6 * 10**baseDecimal);
 
     // for next test, advance 10 seconds instead of 1 (multiply expectations by 10)
-    uint256 rewardsPerToken2 = (10 ether * 1 ether) / asCErc20.totalSupply();
+    uint256 rewardsPerToken2 = (10 * 10**rewardDecimal * 1 * 10**baseDecimal) / asCErc20.totalSupply();
     vm.warp(block.timestamp + 10);
 
-    uint256 userRewards2 = (rewardsPerToken2 * asCErc20.balanceOf(user)) / 1 ether;
+    uint256 userRewards2 = (rewardsPerToken2 * asCErc20.balanceOf(user)) / (1 * 10**baseDecimal);
 
     // accrue all unclaimed rewards and claim them
     flywheelClaimer.getUnclaimedRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
 
     // user balance should accumulate from both rewards
     require(rewardToken.balanceOf(user) == userRewards + userRewards2, "balance mismatch");
+  }
+
+  function testIntegrationRewardStandard(uint8 i, uint8 j) public {
+    vm.assume(i > 1);
+    vm.assume(j > 1);
+    vm.assume(i < 19);
+    vm.assume(j < 19);
+
+    _initialize(i, j);
+    _testIntegration();
   }
 }

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.10;
 
-import "./MidasFlywheelCore.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
+import { MidasFlywheelCore } from "./MidasFlywheelCore.sol";
 
 abstract contract CErc20Token is ERC20 {
   function exchangeRateCurrent() external virtual returns (uint256);
@@ -9,7 +10,7 @@ abstract contract CErc20Token is ERC20 {
   function underlying() external view virtual returns (address);
 }
 
-interface PriceOracle {
+interface IPriceOracle {
   function getUnderlyingPrice(CErc20Token cToken) external view returns (uint256);
 
   function price(address underlying) external view returns (uint256);
@@ -20,7 +21,7 @@ interface IComptroller {
 
   function getAllMarkets() external view returns (CErc20Token[] memory);
 
-  function oracle() external view returns (PriceOracle);
+  function oracle() external view returns (IPriceOracle);
 
   function admin() external returns (address);
 
@@ -51,21 +52,21 @@ contract MidasFlywheelLensRouter {
     MidasFlywheelCore[] memory flywheels = comptroller.getRewardsDistributors();
     address[] memory rewardTokens = new address[](flywheels.length);
     uint256[] memory rewardTokenPrices = new uint256[](flywheels.length);
-    PriceOracle oracle = comptroller.oracle();
+    IPriceOracle oracle = comptroller.oracle();
 
     MarketRewardsInfo[] memory infoList = new MarketRewardsInfo[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
       RewardsInfo[] memory rewardsInfo = new RewardsInfo[](flywheels.length);
 
       CErc20Token market = markets[i];
-      uint256 price = oracle.price(market.underlying());
+      uint256 price = oracle.price(market.underlying()); // scaled to 1e18
 
       for (uint256 j = 0; j < flywheels.length; j++) {
         MidasFlywheelCore flywheel = flywheels[j];
         if (i == 0) {
           address rewardToken = address(flywheel.rewardToken());
           rewardTokens[j] = rewardToken;
-          rewardTokenPrices[j] = oracle.price(rewardToken);
+          rewardTokenPrices[j] = oracle.price(rewardToken); // scaled to 1e18
         }
         uint256 rewardSpeedPerSecondPerToken;
         {
@@ -78,11 +79,12 @@ contract MidasFlywheelLensRouter {
               (lastUpdatedTimestampAfter - lastUpdatedTimestampBefore);
           }
         }
+        uint256 aprInRewardsTokenDecimals = (((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] * 365.25 days) /
+          price) * 1e18) / market.exchangeRateCurrent();
         rewardsInfo[j] = RewardsInfo({
           rewardSpeedPerSecondPerToken: rewardSpeedPerSecondPerToken,
           rewardTokenPrice: rewardTokenPrices[j],
-          formattedAPR: (((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] * 365.25 days) / price) * 1e18) /
-            market.exchangeRateCurrent(),
+          formattedAPR: aprInRewardsTokenDecimals * (10**(18 - ERC20(rewardTokens[j]).decimals())),
           flywheel: address(flywheel),
           rewardToken: rewardTokens[j]
         });
