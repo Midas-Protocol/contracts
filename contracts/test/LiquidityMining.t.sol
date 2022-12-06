@@ -186,10 +186,10 @@ contract LiquidityMiningTest is BaseTest {
     deposit(1e6 * 10**baseDecimal);
 
     // for next test, advance 10 seconds instead of 1 (multiply expectations by 10)
-    uint256 rewardsPerToken2 = (10 ether * 1 ether) / asCErc20.totalSupply();
+    uint256 rewardsPerToken2 = (10 * 10**rewardDecimal * 1 * 10**baseDecimal) / asCErc20.totalSupply();
     vm.warp(block.timestamp + 10);
 
-    uint256 userRewards2 = (rewardsPerToken2 * cErc20.balanceOf(user)) / (1 * 10**baseDecimal);
+    uint256 userRewards2 = (rewardsPerToken2 * asCErc20.balanceOf(user)) / (1 * 10**baseDecimal);
 
     // accrue all unclaimed rewards and claim them
     flywheelClaimer.getUnclaimedRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);

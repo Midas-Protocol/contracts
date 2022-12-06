@@ -20,7 +20,7 @@ import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
 import "../compound/CTokenInterfaces.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 
-import { MidasFlywheelLensRouter, IComptroller } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { MidasFlywheelLensRouter, IComptroller, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 
 interface IPriceOracle {
@@ -92,7 +92,7 @@ contract FLRTest is BaseTest {
         address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
       )
     );
-    emit log_named_uint("exchangeRateCurrent", CErc20(mkt).exchangeRateCurrent());
+    emit log_named_uint("exchangeRateCurrent", CErc20Token(mkt).exchangeRateCurrent());
 
     vm.warp(block.timestamp + 10);
 
