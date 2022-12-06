@@ -20,7 +20,7 @@ contract HelioAssetTest is AbstractAssetTest {
   }
 
   function setUpTestContract(bytes calldata testConfig) public override {
-    (address asset, address jar) = abi.decode(testConfig, (address, address));
+    (address asset,) = abi.decode(testConfig, (address, address));
 
     test.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(asset));
 
