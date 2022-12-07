@@ -5,6 +5,7 @@ import { WithPool } from "../helpers/WithPool.sol";
 import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { MidasERC4626, WombatLpERC4626, IVoterProxy, IBaseRewardPool, IBooster } from "../../midas/strategies/WombatLpERC4626.sol";
+import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
@@ -54,17 +55,17 @@ contract WombatERC4626Test is AbstractERC4626Test {
     testPreFix = _testPreFix;
 
     for (uint8 i = 0; i < rewardTokens.length; i++) {
-      FlywheelCore flywheel = new FlywheelCore(
+      MidasFlywheelCore flywheel = new MidasFlywheelCore();
+      flywheel.initialize(
         ERC20(address(rewardTokens[i])),
         IFlywheelRewards(address(0)),
         IFlywheelBooster(address(0)),
-        address(this),
-        Authority(address(0))
+        address(this)
       );
-      FuseFlywheelDynamicRewardsPlugin reward = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
+      FuseFlywheelDynamicRewardsPlugin reward = new FuseFlywheelDynamicRewardsPlugin(FlywheelCore(address(flywheel)), 1);
       flywheel.setFlywheelRewards(reward);
 
-      flywheels.push(flywheel);
+      flywheels.push(FlywheelCore(address(flywheel)));
       rewards.push(reward);
     }
 
