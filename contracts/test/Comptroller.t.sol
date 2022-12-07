@@ -29,9 +29,9 @@ contract ComptrollerTest is BaseTest {
       revert("at fw");
     }
 
-    try flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this)) {
-
-    } catch {
+    try
+      flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this))
+    {} catch {
       revert("at init");
     }
     //    comptroller = new Comptroller(payable(address(this)));
