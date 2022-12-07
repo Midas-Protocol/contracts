@@ -104,11 +104,13 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     return pools.length - 1;
   }
 
-  function _deprecatePool(uint256 index) external {
-    require(msg.sender == owner(), "!owner");
+  function _deprecatePool(uint256 index) external onlyOwner {
+    FusePool storage fusePool = pools[index];
+
+    require(fusePool.comptroller != address(0), "pool already deprecated");
 
     // swap with the last pool of the creator and delete
-    uint256[] storage creatorPools = _poolsByAccount[pools[index].creator];
+    uint256[] storage creatorPools = _poolsByAccount[fusePool.creator];
     for (uint256 i = 0; i < creatorPools.length; i++) {
       if (creatorPools[i] == index) {
         creatorPools[i] = creatorPools[creatorPools.length - 1];
@@ -116,8 +118,6 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
         break;
       }
     }
-
-    FusePool storage fusePool = pools[index];
 
     // leave it to true to deny the re-registering of the same pool
     poolExists[fusePool.comptroller] = true;
