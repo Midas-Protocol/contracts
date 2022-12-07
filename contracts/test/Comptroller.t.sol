@@ -17,40 +17,20 @@ contract ComptrollerTest is BaseTest {
 
   event Failure(uint256 error, uint256 info, uint256 detail);
 
-  function _setUp() internal {
-    try new Comptroller(payable(address(this))) returns (Comptroller _comp) {
-      comptroller = _comp;
-    } catch {
-      revert("at comp");
-    }
-
-    try new MidasFlywheel() returns (MidasFlywheel _fw) {
-      flywheel = _fw;
-    } catch {
-      revert("at fw");
-    }
-
-    //    vm.prank(owner);
-    //    try
-    //      flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), owner)
-    //    {} catch {
-    //      revert("at init");
-    //    }
-    //    comptroller = new Comptroller(payable(address(this)));
-    //    flywheel = new MidasFlywheel();
-    //    flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
+  function setUp() internal {
+    comptroller = new Comptroller(payable(address(this)));
+    flywheel = new MidasFlywheel();
+    flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
   }
 
-  function testSetFlywheel() public {
-    _setUp();
-    flywheel.initialize(ERC20(address(255)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), owner);
+  function testSetFlywheel() internal {
+    flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), owner);
     comptroller._addRewardsDistributor(address(flywheel));
 
     assertEq(comptroller.rewardsDistributors(0), address(flywheel));
   }
 
-  function testSetFlywheelRevertsIfNonOwner() public {
-    _setUp();
+  function testSetFlywheelRevertsIfNonOwner() internal {
     flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), owner);
     vm.startPrank(nonOwner);
     vm.expectEmit(false, false, false, true, address(comptroller));
