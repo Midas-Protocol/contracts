@@ -406,31 +406,31 @@ contract DeployMarketsTest is Test {
 
   // TODO refactor DeployMarketsTest to extend WithPool
   function whitelistPlugin(address oldImpl, address newImpl) public {
-    address[] memory oldCErC20Implementations = new address[](1);
-    address[] memory newCErc20Implementations = new address[](1);
+    address[] memory _oldCErC20Implementations = new address[](1);
+    address[] memory _newCErc20Implementations = new address[](1);
     bool[] memory arrayOfTrue = new bool[](1);
 
-    oldCErC20Implementations[0] = address(oldImpl);
-    newCErc20Implementations[0] = address(newImpl);
+    _oldCErC20Implementations[0] = address(oldImpl);
+    _newCErc20Implementations[0] = address(newImpl);
     arrayOfTrue[0] = true;
 
-    fuseAdmin._editPluginImplementationWhitelist(oldCErC20Implementations, newCErc20Implementations, arrayOfTrue);
+    fuseAdmin._editPluginImplementationWhitelist(_oldCErC20Implementations, _newCErc20Implementations, arrayOfTrue);
   }
 
   function whitelistCErc20Delegate(address oldImpl, address newImpl) public {
     bool[] memory arrayOfTrue = new bool[](1);
     bool[] memory arrayOfFalse = new bool[](1);
-    address[] memory oldCErC20Implementations = new address[](1);
-    address[] memory newCErc20Implementations = new address[](1);
+    address[] memory _oldCErC20Implementations = new address[](1);
+    address[] memory _newCErc20Implementations = new address[](1);
 
     arrayOfTrue[0] = true;
     arrayOfFalse[0] = false;
-    oldCErC20Implementations[0] = address(oldImpl);
-    newCErc20Implementations[0] = address(newImpl);
+    _oldCErC20Implementations[0] = address(oldImpl);
+    _newCErc20Implementations[0] = address(newImpl);
 
     fuseAdmin._editCErc20DelegateWhitelist(
-      oldCErC20Implementations,
-      newCErc20Implementations,
+      _oldCErC20Implementations,
+      _newCErc20Implementations,
       arrayOfFalse,
       arrayOfTrue
     );

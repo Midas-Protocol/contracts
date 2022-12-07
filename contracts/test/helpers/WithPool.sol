@@ -212,14 +212,14 @@ contract WithPool {
   }
 
   function whitelistPlugin(address oldImpl, address newImpl) public {
-    address[] memory oldCErC20Implementations = new address[](1);
-    address[] memory newCErc20Implementations = new address[](1);
+    address[] memory _oldCErC20Implementations = new address[](1);
+    address[] memory _newCErc20Implementations = new address[](1);
     bool[] memory arrayOfTrue = new bool[](1);
 
-    oldCErC20Implementations[0] = address(oldImpl);
-    newCErc20Implementations[0] = address(newImpl);
+    _oldCErC20Implementations[0] = address(oldImpl);
+    _newCErc20Implementations[0] = address(newImpl);
     arrayOfTrue[0] = true;
 
-    fuseAdmin._editPluginImplementationWhitelist(oldCErC20Implementations, newCErc20Implementations, arrayOfTrue);
+    fuseAdmin._editPluginImplementationWhitelist(_oldCErC20Implementations, _newCErc20Implementations, arrayOfTrue);
   }
 }
