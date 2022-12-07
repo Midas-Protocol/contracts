@@ -36,7 +36,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   mapping(address => uint256) public rewardsAccrued;
 
   /// @notice the fixed point factor of flywheel
-  uint224 public constant ONE = 1e18;
+  uint224 public ONE;
 
   /// @notice The strategy index and last updated per strategy
   mapping(ERC20 => RewardsState) public strategyState;
@@ -55,6 +55,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     rewardToken = _rewardToken;
     flywheelRewards = _flywheelRewards;
     flywheelBooster = _flywheelBooster;
+    ONE = uint224(10**_rewardToken.decimals());
 
     _transferOwnership(_owner);
   }
@@ -155,7 +156,10 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
 
   function _addStrategyForRewards(ERC20 strategy) internal {
     require(strategyState[strategy].index == 0, "strategy");
-    strategyState[strategy] = RewardsState({ index: ONE, lastUpdatedTimestamp: block.timestamp.safeCastTo32() });
+    strategyState[strategy] = RewardsState({
+      index: (10**rewardToken.decimals()).safeCastTo224(),
+      lastUpdatedTimestamp: block.timestamp.safeCastTo32()
+    });
 
     allStrategies.push(strategy);
     emit AddStrategy(address(strategy));
@@ -173,9 +177,11 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
 
   /// @notice swap out the flywheel rewards contract
   function setFlywheelRewards(IFlywheelRewards newFlywheelRewards) external onlyOwner {
-    uint256 oldRewardBalance = rewardToken.balanceOf(address(flywheelRewards));
-    if (oldRewardBalance > 0) {
-      rewardToken.safeTransferFrom(address(flywheelRewards), address(newFlywheelRewards), oldRewardBalance);
+    if (address(flywheelRewards) != address(0)) {
+      uint256 oldRewardBalance = rewardToken.balanceOf(address(flywheelRewards));
+      if (oldRewardBalance > 0) {
+        rewardToken.safeTransferFrom(address(flywheelRewards), address(newFlywheelRewards), oldRewardBalance);
+      }
     }
 
     flywheelRewards = newFlywheelRewards;
@@ -256,7 +262,8 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
 
       uint224 deltaIndex;
 
-      if (supplyTokens != 0) deltaIndex = ((strategyRewardsAccrued * ONE) / supplyTokens).safeCastTo224();
+      if (supplyTokens != 0)
+        deltaIndex = ((strategyRewardsAccrued * (10**strategy.decimals())) / supplyTokens).safeCastTo224();
 
       // accumulate rewards per token onto the index, multiplied by fixed-point factor
       rewardsState = RewardsState({
@@ -283,7 +290,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     // if user hasn't yet accrued rewards, grant them interest from the strategy beginning if they have a balance
     // zero balances will have no effect other than syncing to global index
     if (supplierIndex == 0) {
-      supplierIndex = ONE;
+      supplierIndex = (10**rewardToken.decimals()).safeCastTo224();
     }
 
     uint224 deltaIndex = strategyIndex - supplierIndex;
@@ -293,7 +300,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
       : strategy.balanceOf(user);
 
     // accumulate rewards by multiplying user tokens by rewardsPerToken index and adding on unclaimed
-    uint256 supplierDelta = (supplierTokens * deltaIndex) / ONE;
+    uint256 supplierDelta = (deltaIndex * supplierTokens) / (10**strategy.decimals());
     uint256 supplierAccrued = rewardsAccrued[user] + supplierDelta;
 
     rewardsAccrued[user] = supplierAccrued;

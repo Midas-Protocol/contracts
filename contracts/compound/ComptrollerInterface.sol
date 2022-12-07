@@ -80,6 +80,16 @@ abstract contract ComptrollerInterface {
 
   /*** Liquidity/Liquidation Calculations ***/
 
+  function getAccountLiquidity(address account)
+    external
+    view
+    virtual
+    returns (
+      uint256,
+      uint256,
+      uint256
+    );
+
   function liquidateCalculateSeizeTokens(
     address cTokenBorrowed,
     address cTokenCollateral,

@@ -2,7 +2,8 @@
 pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../midas/DiamondExtension.sol";
-import { CTokenExtensionInterface, ComptrollerV3Storage, UnitrollerAdminStorage } from "./CTokenInterfaces.sol";
+import { CTokenExtensionInterface } from "./CTokenInterfaces.sol";
+import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { CDelegationStorage } from "./CDelegateInterface.sol";

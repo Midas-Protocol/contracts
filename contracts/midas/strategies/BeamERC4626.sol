@@ -104,8 +104,6 @@ contract BeamERC4626 is MidasERC4626 {
     vault.withdraw(poolId, amount);
   }
 
-  event amount(uint256);
-
   function emergencyWithdrawAndPause() external override onlyOwner {
     (ERC20Upgradeable lpToken, , , , , , ) = vault.poolInfo(poolId);
     vault.withdraw(poolId, lpToken.balanceOf(address(vault)));

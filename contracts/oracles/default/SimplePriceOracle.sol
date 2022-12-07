@@ -35,9 +35,9 @@ contract SimplePriceOracle is PriceOracle {
     prices[asset] = underlyingPriceMantissa;
   }
 
-  function setDirectPrice(address asset, uint256 price) public {
-    emit PricePosted(asset, prices[asset], price, price);
-    prices[asset] = price;
+  function setDirectPrice(address asset, uint256 _price) public {
+    emit PricePosted(asset, prices[asset], _price, _price);
+    prices[asset] = _price;
   }
 
   function price(address underlying) external view returns (uint256) {

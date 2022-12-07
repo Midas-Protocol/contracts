@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { CToken, CTokenExtensionInterface } from "../compound/CToken.sol";
+import { CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
+import { CToken } from "../compound/CToken.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { JarvisLiquidatorFunder } from "../liquidators/JarvisLiquidatorFunder.sol";
@@ -90,7 +91,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     bytes[] data;
   }
 
-  function testJbrlLiquidation() public fork(BSC_MAINNET) {
+  function testJbrlLiquidation() public forkAtBlock(BSC_MAINNET, 21700285) {
     LiquidationData memory vars;
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
 

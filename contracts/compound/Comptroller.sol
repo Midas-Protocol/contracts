@@ -734,6 +734,25 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     Exp tokensToDenom;
   }
 
+  function getAccountLiquidity(address account)
+    public
+    view
+    override
+    returns (
+      uint256,
+      uint256,
+      uint256
+    )
+  {
+    (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
+      account,
+      CTokenInterface(address(0)),
+      0,
+      0
+    );
+    return (uint256(err), liquidity, shortfall);
+  }
+
   /**
      * @notice Determine what the account liquidity would be if the given amounts were redeemed/borrowed
      * @param cTokenModify The market to hypothetically redeem/borrow in
