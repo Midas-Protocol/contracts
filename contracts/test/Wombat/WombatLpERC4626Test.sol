@@ -62,7 +62,10 @@ contract WombatERC4626Test is AbstractERC4626Test {
         IFlywheelBooster(address(0)),
         address(this)
       );
-      FuseFlywheelDynamicRewardsPlugin reward = new FuseFlywheelDynamicRewardsPlugin(FlywheelCore(address(flywheel)), 1);
+      FuseFlywheelDynamicRewardsPlugin reward = new FuseFlywheelDynamicRewardsPlugin(
+        FlywheelCore(address(flywheel)),
+        1
+      );
       flywheel.setFlywheelRewards(reward);
 
       flywheels.push(FlywheelCore(address(flywheel)));
