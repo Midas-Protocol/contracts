@@ -104,7 +104,16 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     return pools.length - 1;
   }
 
-  function _deprecatePool(uint256 index) external onlyOwner {
+  function _deprecatePool(address comptroller) external onlyOwner {
+    for (uint256 i = 0; i < pools.length; i++) {
+      if (pools[i].comptroller == comptroller) {
+        _deprecatePool(i);
+        break;
+      }
+    }
+  }
+
+  function _deprecatePool(uint256 index) public onlyOwner {
     FusePool storage fusePool = pools[index];
 
     require(fusePool.comptroller != address(0), "pool already deprecated");
