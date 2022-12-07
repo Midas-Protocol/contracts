@@ -30,6 +30,7 @@ contract ComptrollerTest is BaseTest {
       revert("at fw");
     }
 
+    vm.prank(owner);
     try
       flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), owner)
     {} catch {
