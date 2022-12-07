@@ -39,7 +39,7 @@ contract HelioERC4626Test is AbstractERC4626Test {
 
     testPreFix = _testPreFix;
 
-    (address _asset, address _jar) = abi.decode(data, (address, address));
+    (, address _jar) = abi.decode(data, (address, address));
 
     jar = IJAR(_jar);
 
@@ -93,8 +93,6 @@ contract HelioERC4626Test is AbstractERC4626Test {
   }
 
   function testWithdraw() public override {
-    uint256 depositShares = this.getExpectedDepositShares();
-
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);
@@ -163,8 +161,6 @@ contract HelioERC4626Test is AbstractERC4626Test {
   }
 
   function testWithdrawWithIncreasedVaultValue() public override {
-    uint256 depositShareBal = this.getExpectedDepositShares();
-
     deposit(address(this), depositAmount);
 
     uint256 withdrawalAmount = 10e18;
@@ -199,8 +195,6 @@ contract HelioERC4626Test is AbstractERC4626Test {
   }
 
   function testMultipleRedeem() public override {
-    uint256 depositShares = this.getExpectedDepositShares() * 2;
-
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);
@@ -294,8 +288,6 @@ contract HelioERC4626Test is AbstractERC4626Test {
   }
 
   function testMultipleWithdraw() public override {
-    uint256 depositShares = this.getExpectedDepositShares() * 2;
-
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);
@@ -336,7 +328,6 @@ contract HelioERC4626Test is AbstractERC4626Test {
       string(abi.encodePacked("1.DotDot erc4626 locked amount checking ", testPreFix))
     );
 
-    uint256 totalSupplyBefore = depositAmount * 2 - expectedErc4626SharesNeeded;
     assetBalBefore = underlyingToken.balanceOf(address(1));
     erc4626BalBefore = plugin.balanceOf(address(1));
 
@@ -370,8 +361,6 @@ contract HelioERC4626Test is AbstractERC4626Test {
   }
 
   function testRedeem() public override {
-    uint256 depositShares = this.getExpectedDepositShares();
-
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);

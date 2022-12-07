@@ -58,16 +58,17 @@ contract AnyLiquidationTest is BaseTest {
       mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
       mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
       curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
-      fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      //      fsl = new FuseSafeLiquidator();
-      //      fsl.initialize(
-      //        ap.getAddress("wtoken"),
-      //        uniswapRouter,
-      //        ap.getAddress("stableToken"),
-      //        ap.getAddress("wBTCToken"),
-      //        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
-      //        25
-      //      );
+      // TODO revert to the ap provided, no need to upgrade after the next deploy
+      // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+      fsl = new FuseSafeLiquidator();
+      fsl.initialize(
+        ap.getAddress("wtoken"),
+        uniswapRouter,
+        ap.getAddress("stableToken"),
+        ap.getAddress("wBTCToken"),
+        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
+        25
+      );
 
       // TODO configure in the AP?
       address bnbx = 0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275;
@@ -90,6 +91,10 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
+  //  function testSpecificRandom() public {
+  //    testBscAnyLiquidation(283);
+  //  }
+
   function testBscAnyLiquidation(uint256 random) public fork(BSC_MAINNET) {
     vm.assume(random > 100 && random < type(uint64).max);
     doTestAnyLiquidation(random);
@@ -110,8 +115,8 @@ contract AnyLiquidationTest is BaseTest {
     FuseSafeLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
     bytes[] fundingDatas;
-    CErc20Delegate debtMarket;
-    CErc20Delegate collateralMarket;
+    ICErc20 debtMarket;
+    ICErc20 collateralMarket;
     IComptroller comptroller;
     address borrower;
     uint256 borrowAmount;
@@ -128,6 +133,13 @@ contract AnyLiquidationTest is BaseTest {
 
     uint256 i = random % vars.pools.length; // random pool
     IComptroller comptroller = IComptroller(vars.pools[i].comptroller);
+
+    address bscBombPool = 0x5373C052Df65b317e48D6CAD8Bb8AC50995e9459;
+    if (address(comptroller) == bscBombPool) {
+      // we don't want to deal with the bomb liquidations
+      return (IComptroller(address(0)), address(0));
+    }
+
     address[] memory borrowers = comptroller.getAllBorrowers();
 
     if (borrowers.length == 0) {
@@ -143,34 +155,35 @@ contract AnyLiquidationTest is BaseTest {
   function setUpDebtAndCollateralMarkets(uint256 random, LiquidationData memory vars)
     internal
     returns (
-      CErc20Delegate debt,
-      CErc20Delegate collateral,
+      ICErc20 debtMarket,
+      ICErc20 collateralMarket,
       uint256 borrowAmount
     )
   {
-    // debt
+    // find a debt market in which the borrower has borrowed
     for (uint256 m = 0; m < vars.markets.length; m++) {
       uint256 marketIndexWithOffset = (random + m) % vars.markets.length;
-      borrowAmount = vars.markets[marketIndexWithOffset].borrowBalanceStored(vars.borrower);
+      ICToken randomMarket = vars.markets[marketIndexWithOffset];
+      borrowAmount = randomMarket.borrowBalanceStored(vars.borrower);
       if (borrowAmount > 0) {
-        debt = CErc20Delegate(address(vars.markets[marketIndexWithOffset]));
+        debtMarket = ICErc20(address(randomMarket));
         break;
       }
     }
 
-    if (address(debt) != address(0)) {
+    if (address(debtMarket) != address(0)) {
       emit log("debt market is");
-      emit log_address(address(debt));
+      emit log_address(address(debtMarket));
 
       uint256 shortfall = 0;
-      // reduce the collateral for each market of the borrower
+      // reduce the price of the collateral for each market where the borrower has supplied
       // until there is shortfall for which to be liquidated
       for (uint256 m = 0; m < vars.markets.length; m++) {
         uint256 marketIndexWithOffset = (random - m) % vars.markets.length;
         ICToken randomMarket = vars.markets[marketIndexWithOffset];
-        address randomMarketAddress = address(randomMarket);
-        if (randomMarket.balanceOf(vars.borrower) > 0) {
-          if (randomMarketAddress == address(debt)) continue;
+        uint256 borrowerCollateral = randomMarket.balanceOf(vars.borrower);
+        if (borrowerCollateral > 0) {
+          if (address(randomMarket) == address(debtMarket)) continue;
 
           // the collateral prices change
           MasterPriceOracle mpo = MasterPriceOracle(address(vars.comptroller.oracle()));
@@ -181,19 +194,27 @@ contract AnyLiquidationTest is BaseTest {
             abi.encode(priceCollateral / 5)
           );
 
+          uint256 collateralValue = borrowerCollateral * (priceCollateral / 5);
+          uint256 borrowValue = borrowAmount * mpo.getUnderlyingPrice(debtMarket);
+
+          if (collateralValue < borrowValue) {
+            emit log("collateral position too small");
+            continue;
+          }
+
           (, , shortfall) = vars.comptroller.getHypotheticalAccountLiquidity(vars.borrower, address(0), 0, 0);
           if (shortfall == 0) {
             emit log("collateral still enough");
             continue;
           } else {
             emit log("has shortfall");
-            collateral = CErc20Delegate(randomMarketAddress);
+            collateralMarket = ICErc20(address(randomMarket));
             break;
           }
         }
       }
       if (shortfall == 0) {
-        return (CErc20Delegate(address(0)), CErc20Delegate(address(0)), 0);
+        return (ICErc20(address(0)), ICErc20(address(0)), 0);
       }
     }
   }
@@ -243,7 +264,7 @@ contract AnyLiquidationTest is BaseTest {
 
       uint256 i = 0;
       while (true) {
-        emit log("debt token");
+        emit log("funding token");
         emit log_address(debtTokenToFund);
         if (i++ > 10) revert("endless loop bad");
 
@@ -308,7 +329,7 @@ contract AnyLiquidationTest is BaseTest {
       vars.liquidator.safeLiquidateToTokensWithFlashLoan(
         FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
           vars.borrower,
-          vars.borrowAmount / 100, //repayAmount,
+          vars.borrowAmount / 100,
           ICErc20(address(vars.debtMarket)),
           ICErc20(address(vars.collateralMarket)),
           vars.flashSwapPair,
@@ -581,9 +602,9 @@ contract AnyLiquidationTest is BaseTest {
       }
 
       if (outputIndex == -1 || inputIndex == -1) {
-        emit log("input token");
+        emit log("curve swap input token");
         emit log_address(inputToken);
-        emit log("debt token");
+        emit log("curve swap debt token");
         emit log_address(debtToken);
         revert("failed to find curve pool");
       }

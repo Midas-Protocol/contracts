@@ -1,21 +1,24 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./ComptrollerInterface.sol";
-import "./CTokenInterfaces.sol";
-import "./ErrorReporter.sol";
-import "./Exponential.sol";
-import "./EIP20Interface.sol";
-import "./EIP20NonStandardInterface.sol";
-import "./InterestRateModel.sol";
-import "../midas/DiamondExtension.sol";
+import { ComptrollerInterface } from "./ComptrollerInterface.sol";
+import { CTokenInterface } from "./CTokenInterfaces.sol";
+import { TokenErrorReporter } from "./ErrorReporter.sol";
+import { Exponential } from "./Exponential.sol";
+import { EIP20Interface } from "./EIP20Interface.sol";
+import { EIP20NonStandardInterface } from "./EIP20NonStandardInterface.sol";
+import { InterestRateModel } from "./InterestRateModel.sol";
+import { DiamondBase, DiamondExtension, LibDiamond } from "../midas/DiamondExtension.sol";
+import { Multicall } from "../utils/Multicall.sol";
+import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
+import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 
 /**
  * @title Compound's CToken Contract
  * @notice Abstract base for CTokens
  * @author Compound
  */
-contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase {
+contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase, Multicall {
   /**
    * @notice Returns a boolean indicating if the sender has admin rights
    */

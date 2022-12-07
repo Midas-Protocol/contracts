@@ -64,12 +64,12 @@ contract EllipsisERC4626Test is AbstractERC4626Test {
     flywheelRewards = new FuseFlywheelDynamicRewards(flywheel, 1);
     flywheel.setFlywheelRewards(flywheelRewards);
 
-    EllipsisERC4626 EllipsisERC4626 = new EllipsisERC4626();
-    EllipsisERC4626.initialize(ERC20Upgradeable(asset), FlywheelCore(address(flywheel)), lpTokenStaker);
+    EllipsisERC4626 ellipsisERC4626 = new EllipsisERC4626();
+    ellipsisERC4626.initialize(ERC20Upgradeable(asset), FlywheelCore(address(flywheel)), lpTokenStaker);
 
     initialStrategyBalance = getStrategyBalance();
 
-    plugin = EllipsisERC4626;
+    plugin = ellipsisERC4626;
 
     marketKey = ERC20(address(plugin));
     flywheel.addStrategyForRewards(marketKey);

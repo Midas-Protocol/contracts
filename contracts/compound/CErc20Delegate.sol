@@ -11,11 +11,6 @@ import "./CDelegateInterface.sol";
  */
 contract CErc20Delegate is CDelegateInterface, CErc20 {
   /**
-   * @notice Construct an empty delegate
-   */
-  constructor() {}
-
-  /**
    * @notice Called by the delegator on a delegate to initialize it for duty
    * @param data The encoded bytes data for any initialization
    */
