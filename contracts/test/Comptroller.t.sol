@@ -41,7 +41,7 @@ contract ComptrollerTest is BaseTest {
     //    flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
   }
 
-  function test__setFlywheel() public {
+  function testSetFlywheel() public {
     _setUp();
     flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), owner);
     comptroller._addRewardsDistributor(address(flywheel));
@@ -49,7 +49,7 @@ contract ComptrollerTest is BaseTest {
     assertEq(comptroller.rewardsDistributors(0), address(flywheel));
   }
 
-  function test__setFlywheelRevertsIfNonOwner() public {
+  function testSetFlywheelRevertsIfNonOwner() public {
     _setUp();
     flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), owner);
     vm.startPrank(nonOwner);
