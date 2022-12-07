@@ -20,9 +20,11 @@ contract ComptrollerTest is BaseTest {
     comptroller = new Comptroller(payable(address(this)));
     flywheel = new MidasFlywheel();
     try
-      flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this))
+      flywheel.initialize(ERC20(address(1)), IFlywheelRewards(address(2)), IFlywheelBooster(address(3)), address(this))
     {} catch Error(string memory err) {
       emit log(err);
+    } catch {
+      emit log("erroring on some unknown .decimals() call");
     }
   }
 
