@@ -41,7 +41,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   /**
    * @dev Array of Fuse interest rate pools.
    */
-  FusePool[] private pools;
+  FusePool[] public pools;
 
   /**
    * @dev Maps Ethereum accounts to arrays of Fuse pool indexes.
