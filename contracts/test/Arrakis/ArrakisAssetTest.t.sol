@@ -13,6 +13,8 @@ import "./ArrakisERC4626Test.sol";
 contract ArrakisAssetTest is AbstractAssetTest {
   MasterPriceOracle masterPriceOracle;
 
+  function setUp() public fork(POLYGON_MAINNET) {}
+
   function afterForkSetUp() internal override {
     masterPriceOracle = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     test = AbstractERC4626Test(address(new ArrakisERC4626Test()));
@@ -27,7 +29,7 @@ contract ArrakisAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override fork(POLYGON_MAINNET) {
+  function testInitializedValues() public override {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
@@ -39,31 +41,31 @@ contract ArrakisAssetTest is AbstractAssetTest {
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testDepositWithIncreasedVaultValue() public override {
     this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testDepositWithDecreasedVaultValue() public override {
     this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testWithdrawWithIncreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testWithdrawWithDecreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 
-  function testAccumulatingRewardsOnDeposit() public fork(POLYGON_MAINNET) {
+  function testAccumulatingRewardsOnDeposit() public {
     this.runTest(ArrakisERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public fork(POLYGON_MAINNET) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     this.runTest(ArrakisERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 
-  function testClaimRewards() public fork(POLYGON_MAINNET) {
+  function testClaimRewards() public {
     this.runTest(ArrakisERC4626Test(address(test)).testClaimRewards);
   }
 }

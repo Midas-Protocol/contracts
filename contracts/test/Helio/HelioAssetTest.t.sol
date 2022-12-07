@@ -14,6 +14,8 @@ import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 
 contract HelioAssetTest is AbstractAssetTest {
+  function setUp() public fork(BSC_MAINNET) {}
+
   function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new HelioERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new HelioTestConfigStorage()));
@@ -27,7 +29,7 @@ contract HelioAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override fork(BSC_MAINNET) {
+  function testInitializedValues() public override {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 

@@ -15,6 +15,8 @@ import { ITestConfigStorage } from "../../abstracts/ITestConfigStorage.sol";
 contract BeefyBscAssetTest is AbstractAssetTest {
   address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
 
+  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {}
+
   function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new BeefyERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new BeefyBscTestConfigStorage()));
@@ -29,7 +31,7 @@ contract BeefyBscAssetTest is AbstractAssetTest {
     );
   }
 
-  function testInitializedValues() public override forkAtBlock(BSC_MAINNET, 20238373) {
+  function testInitializedValues() public override {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
@@ -43,19 +45,19 @@ contract BeefyBscAssetTest is AbstractAssetTest {
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override forkAtBlock(BSC_MAINNET, 20238373) {
+  function testDepositWithIncreasedVaultValue() public override {
     this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public override forkAtBlock(BSC_MAINNET, 20238373) {
+  function testDepositWithDecreasedVaultValue() public override {
     this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override forkAtBlock(BSC_MAINNET, 20238373) {
+  function testWithdrawWithIncreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override forkAtBlock(BSC_MAINNET, 20238373) {
+  function testWithdrawWithDecreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 }

@@ -11,6 +11,8 @@ import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 import "./StellaLpERC4626Test.sol";
 
 contract StellaAssetTest is AbstractAssetTest {
+  function setUp() public fork(MOONBEAM_MAINNET) {}
+
   function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new StellaERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new StellaTestConfigStorage()));
@@ -27,7 +29,7 @@ contract StellaAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override fork(MOONBEAM_MAINNET) {
+  function testInitializedValues() public override {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
@@ -39,27 +41,27 @@ contract StellaAssetTest is AbstractAssetTest {
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override fork(MOONBEAM_MAINNET) {
+  function testDepositWithIncreasedVaultValue() public override {
     this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public override fork(MOONBEAM_MAINNET) {
+  function testDepositWithDecreasedVaultValue() public override {
     this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override fork(MOONBEAM_MAINNET) {
+  function testWithdrawWithIncreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override fork(MOONBEAM_MAINNET) {
+  function testWithdrawWithDecreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 
-  function testAccumulatingRewardsOnDeposit() public fork(MOONBEAM_MAINNET) {
+  function testAccumulatingRewardsOnDeposit() public {
     this.runTest(StellaERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public fork(MOONBEAM_MAINNET) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     this.runTest(StellaERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 }

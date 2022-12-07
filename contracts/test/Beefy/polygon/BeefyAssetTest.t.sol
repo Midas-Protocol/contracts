@@ -20,6 +20,8 @@ interface IBeefyStrategy {
 contract BeefyPolygonAssetTest is AbstractAssetTest {
   address lpChef = 0x2FAe83B3916e1467C970C113399ee91B31412bCD;
 
+  function setUp() public fork(POLYGON_MAINNET) {}
+
   function afterForkSetUp() internal override {
     test = new BeefyERC4626Test();
     testConfigStorage = ITestConfigStorage(address(new BeefyPolygonTestConfigStorage()));
@@ -39,7 +41,7 @@ contract BeefyPolygonAssetTest is AbstractAssetTest {
     );
   }
 
-  function testInitializedValues() public override fork(POLYGON_MAINNET) {
+  function testInitializedValues() public override {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
@@ -53,19 +55,19 @@ contract BeefyPolygonAssetTest is AbstractAssetTest {
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testDepositWithIncreasedVaultValue() public override {
     this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testDepositWithDecreasedVaultValue() public override {
     this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testWithdrawWithIncreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testWithdrawWithDecreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 }
