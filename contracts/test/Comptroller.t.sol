@@ -13,25 +13,26 @@ contract ComptrollerTest is BaseTest {
   Comptroller internal comptroller;
   MidasFlywheel internal flywheel;
   address internal nonOwner = address(0x2222);
-  address internal owner = address(0x7777);
 
   event Failure(uint256 error, uint256 info, uint256 detail);
 
-  function setUp() internal {
+  function setUp() public {
     comptroller = new Comptroller(payable(address(this)));
     flywheel = new MidasFlywheel();
-    flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
+    try
+      flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this))
+    {} catch Error(string memory err) {
+      emit log(err);
+    }
   }
 
-  function testSetFlywheel() internal {
-    flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), owner);
+  function test__setFlywheel() external {
     comptroller._addRewardsDistributor(address(flywheel));
 
     assertEq(comptroller.rewardsDistributors(0), address(flywheel));
   }
 
-  function testSetFlywheelRevertsIfNonOwner() internal {
-    flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), owner);
+  function test__setFlywheelRevertsIfNonOwner() external {
     vm.startPrank(nonOwner);
     vm.expectEmit(false, false, false, true, address(comptroller));
     emit Failure(1, 2, 0);
