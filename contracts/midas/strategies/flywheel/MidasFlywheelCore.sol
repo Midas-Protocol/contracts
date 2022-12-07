@@ -52,18 +52,18 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   ) public initializer {
     __SafeOwnable_init();
 
-    rewardToken = _rewardToken;
-    flywheelRewards = _flywheelRewards;
-    flywheelBooster = _flywheelBooster;
+    //    rewardToken = _rewardToken;
+    //    flywheelRewards = _flywheelRewards;
+    //    flywheelBooster = _flywheelBooster;
 
     //_transferOwnership(_owner);
   }
 
-  function reinitialize() public onlyOwnerOrAdmin {
-    uint256 _performanceFee = 10e16; // 10%
-    address _feeRecipient = 0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E;
-    _updateFeeSettings(_performanceFee, _feeRecipient);
-  }
+//  function reinitialize() public onlyOwnerOrAdmin {
+//    uint256 _performanceFee = 10e16; // 10%
+//    address _feeRecipient = 0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E;
+//    _updateFeeSettings(_performanceFee, _feeRecipient);
+//  }
 
   /*///////////////////////////////////////////////////////////////
                         ACCRUE/CLAIM LOGIC
