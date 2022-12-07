@@ -1,16 +1,22 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.10;
 
-import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 
 import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { RewardsClaimer } from "../RewardsClaimer.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
+
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 struct UserInfo {
   uint256 amount;
   int256 rewardDebt;
+}
+
+interface IRewarder {
+  function pendingTokens(uint256, address, uint256) external view returns (address[] memory, uint256[] memory);
 }
 
 interface IMiniChefV2 {
@@ -27,6 +33,10 @@ interface IMiniChefV2 {
     uint256 amount,
     address to
   ) external;
+
+  function rewarder(uint256) external view returns (IRewarder);
+
+  function lpToken(uint256) external view returns (address);
 }
 
 /**
@@ -37,14 +47,13 @@ interface IMiniChefV2 {
  * Wraps https://github.com/kinesis-labs/kinesis-contract/blob/main/contracts/rewards/MiniChefV2.sol
  *
  */
-contract MiniChefERC4626 is MidasERC4626 {
-  using SafeTransferLib for ERC20;
+contract MiniChefERC4626 is MidasERC4626, RewardsClaimer {
   using FixedPointMathLib for uint256;
 
   /* ========== STATE VARIABLES ========== */
-  uint256 public immutable poolId;
-  IMiniChefV2 public immutable miniChef;
-  FlywheelCore public immutable flywheel;
+  uint256 public poolId;
+  IMiniChefV2 public miniChef;
+  FlywheelCore public flywheel;
 
   /* ========== INITIALIZER ========== */
 
@@ -56,18 +65,21 @@ contract MiniChefERC4626 is MidasERC4626 {
      @param _miniChef Kenisis MiniChefV2 contract
     */
   function initialize(
-    ERC20 _asset,
+    ERC20Upgradeable _asset,
     FlywheelCore _flywheel,
     uint256 _poolId,
-    IMiniChefV2 _miniChef
+    IMiniChefV2 _miniChef,
+    address _rewardsDestination,
+    ERC20Upgradeable[] memory _rewardTokens
   ) public initializer {
     __MidasER4626_init(_asset);
+    __RewardsClaimer_init(_rewardsDestination, _rewardTokens);
+
     poolId = _poolId;
     miniChef = _miniChef;
     flywheel = _flywheel;
 
-    asset.approve(address(miniChef), type(uint256).max);
-    flywheel.rewardToken().approve(address(flywheel.flywheelRewards()), type(uint256).max);
+    _asset.approve(address(miniChef), type(uint256).max);
   }
 
   /* ========== VIEWS ========== */
@@ -85,7 +97,7 @@ contract MiniChefERC4626 is MidasERC4626 {
   /// @notice Calculates the total amount of underlying tokens the user holds.
   /// @return The total amount of underlying tokens the user holds.
   function balanceOfUnderlying(address account) public view returns (uint256) {
-    return convertToAssets(balanceOf[account]);
+    return convertToAssets(balanceOf(account));
   }
 
   /* ========== INTERNAL FUNCTIONS ========== */
