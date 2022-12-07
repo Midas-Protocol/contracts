@@ -13,6 +13,8 @@ import { IUniswapV2Factory } from "../../external/uniswap/IUniswapV2Factory.sol"
 import "./MiniChefERC4626Test.sol";
 
 contract MiniChefAssetTest is AbstractAssetTest {
+  function setUp() public fork(EVMOS_MAINNET) {}
+
   function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new MiniChefERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new MiniChefTestConfigStorage()));
@@ -26,7 +28,7 @@ contract MiniChefAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testGetMiniChefPool0() public fork(EVMOS_MAINNET) {
+  function testGetMiniChefPool0() public {
     IUniswapV2Factory factory = IUniswapV2Factory(0x6aBdDa34Fb225be4610a2d153845e09429523Cd2);
     emit log_uint(factory.allPairsLength());
     address pair = factory.getPair(0xD4949664cD82660AaE99bEdc034a0deA8A0bd517, 0x3f75ceabCDfed1aCa03257Dc6Bdc0408E2b4b026);
@@ -34,7 +36,7 @@ contract MiniChefAssetTest is AbstractAssetTest {
     emit log_address(pair);
   }
 
-  function testInitializedValues() public override fork(EVMOS_MAINNET) {
+  function testInitializedValues() public override {
     for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
       bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
