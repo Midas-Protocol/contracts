@@ -303,4 +303,4 @@ jobs:
           key: rpc-cache-local-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests locally
-        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test'
+        run: forge test -vvvvv --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test'
