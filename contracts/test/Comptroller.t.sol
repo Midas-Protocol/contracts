@@ -16,7 +16,7 @@ contract ComptrollerTest is BaseTest {
 
   event Failure(uint256 error, uint256 info, uint256 detail);
 
-  function setUp() public {
+  function setUp() internal {
     comptroller = new Comptroller(payable(address(this)));
     flywheel = new MidasFlywheel();
     try
@@ -27,12 +27,14 @@ contract ComptrollerTest is BaseTest {
   }
 
   function test__setFlywheel() external {
+    setUp();
     comptroller._addRewardsDistributor(address(flywheel));
 
     assertEq(comptroller.rewardsDistributors(0), address(flywheel));
   }
 
   function test__setFlywheelRevertsIfNonOwner() external {
+    setUp();
     vm.startPrank(nonOwner);
     vm.expectEmit(false, false, false, true, address(comptroller));
     emit Failure(1, 2, 0);
