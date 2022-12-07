@@ -173,9 +173,11 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
 
   /// @notice swap out the flywheel rewards contract
   function setFlywheelRewards(IFlywheelRewards newFlywheelRewards) external onlyOwner {
-    uint256 oldRewardBalance = rewardToken.balanceOf(address(flywheelRewards));
-    if (oldRewardBalance > 0) {
-      rewardToken.safeTransferFrom(address(flywheelRewards), address(newFlywheelRewards), oldRewardBalance);
+    if (address(flywheelRewards) != address(0)) {
+      uint256 oldRewardBalance = rewardToken.balanceOf(address(flywheelRewards));
+      if (oldRewardBalance > 0) {
+        rewardToken.safeTransferFrom(address(flywheelRewards), address(newFlywheelRewards), oldRewardBalance);
+      }
     }
 
     flywheelRewards = newFlywheelRewards;

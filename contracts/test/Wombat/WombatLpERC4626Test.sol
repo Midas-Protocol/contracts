@@ -54,11 +54,6 @@ contract WombatERC4626Test is AbstractERC4626Test {
     testPreFix = _testPreFix;
 
     for (uint8 i = 0; i < rewardTokens.length; i++) {
-      vm.mockCall(
-        address(rewardTokens[i]),
-        abi.encodeWithSelector(rewardTokens[i].balanceOf.selector, address(0)),
-        abi.encode(0)
-      );
       FlywheelCore flywheel = new FlywheelCore(
         ERC20(address(rewardTokens[i])),
         IFlywheelRewards(address(0)),
