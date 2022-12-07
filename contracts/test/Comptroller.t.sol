@@ -13,6 +13,7 @@ contract ComptrollerTest is BaseTest {
   Comptroller internal comptroller;
   MidasFlywheel internal flywheel;
   address internal nonOwner = address(0x2222);
+  address internal owner = address(0x7777);
 
   event Failure(uint256 error, uint256 info, uint256 detail);
 
@@ -30,24 +31,13 @@ contract ComptrollerTest is BaseTest {
     }
 
     try
-      flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this))
+      flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), owner)
     {} catch {
       revert("at init");
     }
     //    comptroller = new Comptroller(payable(address(this)));
     //    flywheel = new MidasFlywheel();
     //    flywheel.initialize(ERC20(address(0)), IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
-  }
-
-  function createNewFlywheel() public returns (address) {
-    MidasFlywheel newFlywheel = new MidasFlywheel();
-    newFlywheel.initialize(
-      ERC20(address(0)),
-      IFlywheelRewards(address(0)),
-      IFlywheelBooster(address(0)),
-      address(this)
-    );
-    return address(newFlywheel);
   }
 
   function test__setFlywheel() external {
