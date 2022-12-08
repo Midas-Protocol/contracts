@@ -34,14 +34,16 @@ contract WombatAssetTest is AbstractAssetTest {
   }
 
   function testInitializedValues() public override {
-    for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
-      bytes memory testConfig = testConfigStorage.getTestConfig(i);
+    if (shouldRunForChain(block.chainid)) {
+      for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
+        bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
-      this.setUpTestContract(testConfig);
+        this.setUpTestContract(testConfig);
 
-      (address asset, , ) = abi.decode(testConfig, (address, uint256, ERC20Upgradeable[]));
+        (address asset, , ) = abi.decode(testConfig, (address, uint256, ERC20Upgradeable[]));
 
-      test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+        test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+      }
     }
   }
 

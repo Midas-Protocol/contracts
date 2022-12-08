@@ -32,16 +32,18 @@ contract BeefyBscAssetTest is AbstractAssetTest {
   }
 
   function testInitializedValues() public override {
-    for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
-      bytes memory testConfig = testConfigStorage.getTestConfig(i);
+    if (shouldRunForChain(block.chainid)) {
+      for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
+        bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
-      this.setUpTestContract(testConfig);
+        this.setUpTestContract(testConfig);
 
-      (address beefyVault, ) = abi.decode(testConfig, (address, uint256));
+        (address beefyVault, ) = abi.decode(testConfig, (address, uint256));
 
-      MockERC20 asset = MockERC20(address(IBeefyVault(beefyVault).want()));
+        MockERC20 asset = MockERC20(address(IBeefyVault(beefyVault).want()));
 
-      test.testInitializedValues(asset.name(), asset.symbol());
+        test.testInitializedValues(asset.name(), asset.symbol());
+      }
     }
   }
 

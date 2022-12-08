@@ -30,6 +30,8 @@ contract BeefyPolygonAssetTest is AbstractAssetTest {
   function setUpTestContract(bytes calldata testConfig) public override {
     (address beefyVault, uint256 withdrawalFee) = abi.decode(testConfig, (address, uint256));
 
+    emit log("inside setuptestcontract");
+
     // Polygon beefy strategy has harvest on deposit option so set it false to make sure the deposit works properly.
     IBeefyStrategy strategy = IBeefyStrategy(IBeefyVault(beefyVault).strategy());
     vm.prank(strategy.owner());
@@ -42,16 +44,18 @@ contract BeefyPolygonAssetTest is AbstractAssetTest {
   }
 
   function testInitializedValues() public override {
-    for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
-      bytes memory testConfig = testConfigStorage.getTestConfig(i);
+    if (shouldRunForChain(block.chainid)) {
+      for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
+        bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
-      this.setUpTestContract(testConfig);
+        this.setUpTestContract(testConfig);
 
-      (address beefyVault, ) = abi.decode(testConfig, (address, uint256));
+        (address beefyVault, ) = abi.decode(testConfig, (address, uint256));
 
-      MockERC20 asset = MockERC20(address(IBeefyVault(beefyVault).want()));
+        MockERC20 asset = MockERC20(address(IBeefyVault(beefyVault).want()));
 
-      test.testInitializedValues(asset.name(), asset.symbol());
+        test.testInitializedValues(asset.name(), asset.symbol());
+      }
     }
   }
 
