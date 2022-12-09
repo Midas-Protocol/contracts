@@ -218,9 +218,13 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     return uint256(Error.NO_ERROR);
   }
 
-  // a dummy fn to test if the extension works
-  function getFirstMarketSymbol() public view returns (string memory) {
-    return allMarkets[0].symbol();
+  function _setTotalBorrowCapForAssetForCollateral(
+    address cTokenBorrow,
+    address cTokenCollateral,
+    uint256 borrowCap
+  ) public {
+    require(hasAdminRights(), "!admin");
+    borrowCapForAssetWithCollateral[cTokenBorrow][cTokenCollateral] = borrowCap;
   }
 
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
@@ -236,7 +240,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     functionSelectors[--fnsCount] = this._setTransferPaused.selector;
     functionSelectors[--fnsCount] = this._setSeizePaused.selector;
     functionSelectors[--fnsCount] = this._unsupportMarket.selector;
-    functionSelectors[--fnsCount] = this.getFirstMarketSymbol.selector;
+    functionSelectors[--fnsCount] = this._setTotalBorrowCapForAssetForCollateral.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }

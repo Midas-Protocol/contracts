@@ -43,6 +43,15 @@ interface IComptroller {
       uint256
     );
 
+  function getAccountLiquidity(address account)
+    external
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256
+    );
+
   function _setPriceOracle(IPriceOracle newOracle) external returns (uint256);
 
   function _setCloseFactor(uint256 newCloseFactorMantissa) external returns (uint256);
