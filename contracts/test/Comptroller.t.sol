@@ -106,11 +106,12 @@ contract ComptrollerTest is BaseTest {
     uint256 borrowAmount = marketToBorrow.borrowBalanceStored(someBorrower);
 
     {
-      (
-        uint256 errBefore,
-        uint256 liquidityBefore,
-        uint256 shortfallBefore
-      ) = pool.getHypotheticalAccountLiquidity(someBorrower, address(marketToBorrow), 0, borrowAmount);
+      (uint256 errBefore, uint256 liquidityBefore, uint256 shortfallBefore) = pool.getHypotheticalAccountLiquidity(
+        someBorrower,
+        address(marketToBorrow),
+        0,
+        borrowAmount
+      );
       emit log("errBefore");
       emit log_uint(errBefore);
       emit log("liquidityBefore");
@@ -123,18 +124,15 @@ contract ComptrollerTest is BaseTest {
 
     ComptrollerFirstExtension asExtension = ComptrollerFirstExtension(poolAddress);
     vm.prank(pool.admin());
-    asExtension._setTotalBorrowCapForAssetForCollateral(
-      address(marketToBorrow),
-      address(cappedCollateralMarket),
-      1
-    );
+    asExtension._setTotalBorrowCapForAssetForCollateral(address(marketToBorrow), address(cappedCollateralMarket), 1);
     emit log("");
 
-    (
-      uint256 errAfter,
-      uint256 liquidityAfter,
-      uint256 shortfallAfter
-    ) = pool.getHypotheticalAccountLiquidity(someBorrower, address(marketToBorrow), 0, borrowAmount);
+    (uint256 errAfter, uint256 liquidityAfter, uint256 shortfallAfter) = pool.getHypotheticalAccountLiquidity(
+      someBorrower,
+      address(marketToBorrow),
+      0,
+      borrowAmount
+    );
     emit log("errAfter");
     emit log_uint(errAfter);
     emit log("liquidityAfter");

@@ -855,7 +855,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         // if the borrowed asset is capped against this collateral
         if (address(cTokenModify) != address(0) && borrowAmount > 0) {
           // check if the new total borrows are over the cap
-          if (vars.totalBorrowCapForCollateral != 0 && vars.totalBorrowsBefore + borrowAmount > vars.totalBorrowCapForCollateral) {
+          if (
+            vars.totalBorrowCapForCollateral != 0 &&
+            vars.totalBorrowsBefore + borrowAmount > vars.totalBorrowCapForCollateral
+          ) {
             // if no underflow
             if (vars.totalBorrowCapForCollateral >= vars.totalBorrowsBefore) {
               uint256 borrowAmountCap = vars.totalBorrowCapForCollateral - vars.totalBorrowsBefore;
