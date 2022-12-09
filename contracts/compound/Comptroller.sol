@@ -732,7 +732,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     Exp exchangeRate;
     Exp oraclePrice;
     Exp tokensToDenom;
-
     uint256 totalBorrowCapForCollateral;
     uint256 totalBorrowsBefore;
     uint256 borrowedAssetPrice;
