@@ -14,6 +14,7 @@ import "./MiniChefERC4626Test.sol";
 
 contract MiniChefAssetTest is AbstractAssetTest {
   function setUp() public fork(EVMOS_MAINNET) {}
+  IMiniChefV2 miniChef = IMiniChefV2(0x067eC87844fBD73eDa4a1059F30039584586e09d);
 
   function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new MiniChefERC4626Test()));
@@ -31,9 +32,15 @@ contract MiniChefAssetTest is AbstractAssetTest {
   function testGetMiniChefPool0() public {
     IUniswapV2Factory factory = IUniswapV2Factory(0x6aBdDa34Fb225be4610a2d153845e09429523Cd2);
     emit log_uint(factory.allPairsLength());
-    address pair = factory.getPair(0xD4949664cD82660AaE99bEdc034a0deA8A0bd517, 0x3f75ceabCDfed1aCa03257Dc6Bdc0408E2b4b026);
 
-    emit log_address(pair);
+    for (uint256 i = 0; i < miniChef.poolLength(); i ++) {
+      if (miniChef.lpToken(i) == 0x4Aa9c250874C2d14D0d686833e7b3C5c1837c36c)
+        emit log_uint(i);
+    }
+
+    // address pair = factory.getPair(0xD4949664cD82660AaE99bEdc034a0deA8A0bd517, 0x3f75ceabCDfed1aCa03257Dc6Bdc0408E2b4b026);
+
+    // emit log_address(pair);
   }
 
   function testInitializedValues() public override {

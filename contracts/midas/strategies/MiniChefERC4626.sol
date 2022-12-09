@@ -37,6 +37,8 @@ interface IMiniChefV2 {
   function rewarder(uint256) external view returns (IRewarder);
 
   function lpToken(uint256) external view returns (address);
+
+  function poolLength() external view returns (uint256);
 }
 
 /**

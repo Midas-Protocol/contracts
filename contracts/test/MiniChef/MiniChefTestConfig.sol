@@ -13,9 +13,9 @@ contract MiniChefTestConfigStorage is ITestConfigStorage {
   MiniChefTestConfig[] internal testConfigs;
 
   constructor() {
-    // WEVMOS/DIFF
+    // WEVMOS/JUNO
     testConfigs.push(
-      MiniChefTestConfig(0x932c2D21fa11A545554301E5E6FB48C3accdFF4D, 0xD4949664cD82660AaE99bEdc034a0deA8A0bd517, 1)
+      MiniChefTestConfig(0x4Aa9c250874C2d14D0d686833e7b3C5c1837c36c, 0xD4949664cD82660AaE99bEdc034a0deA8A0bd517, 20)
     );
   }
 
