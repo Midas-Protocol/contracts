@@ -30,8 +30,6 @@ contract BeefyPolygonAssetTest is AbstractAssetTest {
   function setUpTestContract(bytes calldata testConfig) public override {
     (address beefyVault, uint256 withdrawalFee) = abi.decode(testConfig, (address, uint256));
 
-    emit log("inside setuptestcontract");
-
     // Polygon beefy strategy has harvest on deposit option so set it false to make sure the deposit works properly.
     IBeefyStrategy strategy = IBeefyStrategy(IBeefyVault(beefyVault).strategy());
     vm.prank(strategy.owner());
