@@ -32,7 +32,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
 
   constructor() WithPool() {}
 
-  function setUp(string memory _testPreFix, bytes calldata testConfig) public override {
+  function _setUp(string memory _testPreFix, bytes calldata testConfig) public override {
     setUpPool("stella-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));
     (address asset, uint256 _poolId, address[] memory _rewardTokens) = abi.decode(
@@ -156,5 +156,24 @@ contract StellaERC4626Test is AbstractERC4626Test {
       uint256 actualAmount = ERC20(addresses[i]).balanceOf(address(plugin));
       assertEq(actualAmount, amounts[i], string(abi.encodePacked("!rewardBal ", symbols[i], testPreFix)));
     }
+  }
+
+  function testStellaWGLMRRewards() public fork(MOONBEAM_MAINNET) {
+    CErc20PluginRewardsDelegate market = CErc20PluginRewardsDelegate(0xeB7b975C105f05bFb02757fB9bb3361D77AAe84A);
+    address pluginAddress = address(market.plugin());
+    StellaLpERC4626 plugin = StellaLpERC4626(payable(pluginAddress));
+
+    bool anyIsWNative = false;
+    uint256 i = 0;
+    while(true) {
+      try plugin.rewardTokens(i++) returns (ERC20Upgradeable rewToken) {
+        emit log_address(address(rewToken));
+        if (address(rewToken) == ap.getAddress("wtoken")) anyIsWNative = true;
+      } catch {
+        break;
+      }
+    }
+
+    assertTrue(anyIsWNative, "native needs to be among the reward tokens");
   }
 }
