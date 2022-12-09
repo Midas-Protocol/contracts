@@ -854,13 +854,16 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         if (address(cTokenModify) != address(0)) {
           // the value of the collateral is capped regardless if any amount is to be borrowed
           vars.totalBorrowCapForCollateral = borrowCapForAssetWithCollateral[address(cTokenModify)][address(asset)];
-          // check for underflow
-          if (vars.totalBorrowCapForCollateral >= vars.totalBorrowsBefore) {
-            uint256 borrowAmountCap = vars.totalBorrowCapForCollateral - vars.totalBorrowsBefore;
-            assetAsCollateralValueCap = (borrowAmountCap * vars.borrowedAssetPrice) / 1e18;
-          } else {
-            // should never happen, but better to not revert on this underflow
-            assetAsCollateralValueCap = 0;
+          // check if set to any value
+          if (vars.totalBorrowCapForCollateral != 0) {
+            // check for underflow
+            if (vars.totalBorrowCapForCollateral >= vars.totalBorrowsBefore) {
+              uint256 borrowAmountCap = vars.totalBorrowCapForCollateral - vars.totalBorrowsBefore;
+              assetAsCollateralValueCap = (borrowAmountCap * vars.borrowedAssetPrice) / 1e18;
+            } else {
+              // should never happen, but better to not revert on this underflow
+              assetAsCollateralValueCap = 0;
+            }
           }
         }
 
