@@ -79,17 +79,15 @@ contract MidasFlywheelLensRouter {
               (lastUpdatedTimestampAfter - lastUpdatedTimestampBefore);
           }
         }
-        {
-          uint256 aprInRewardsTokenDecimals = (((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] * 365.25 days) /
-            price) * 1e18) / market.exchangeRateCurrent();
-          rewardsInfo[j] = RewardsInfo({
-            rewardSpeedPerSecondPerToken: rewardSpeedPerSecondPerToken,
-            rewardTokenPrice: rewardTokenPrices[j],
-            formattedAPR: (aprInRewardsTokenDecimals * 1e18) / 10**ERC20(rewardTokens[j]).decimals(),
-            flywheel: address(flywheel),
-            rewardToken: rewardTokens[j]
-          });
-        }
+        uint256 aprInRewardsTokenDecimals = (((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] * 365.25 days) /
+          price) * 1e18) / market.exchangeRateCurrent();
+        rewardsInfo[j] = RewardsInfo({
+          rewardSpeedPerSecondPerToken: rewardSpeedPerSecondPerToken,
+          rewardTokenPrice: rewardTokenPrices[j],
+          formattedAPR: (aprInRewardsTokenDecimals * 1e18) / 10**ERC20(rewardTokens[j]).decimals(),
+          flywheel: address(flywheel),
+          rewardToken: rewardTokens[j]
+        });
       }
 
       infoList[i] = MarketRewardsInfo({ market: market, rewardsInfo: rewardsInfo, underlyingPrice: price });
