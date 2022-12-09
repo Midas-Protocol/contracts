@@ -130,7 +130,7 @@ contract MidasFlywheelLensRouter {
     emit log("assetSpeedPerYearPerCTokenScaled");
     emit log_uint(assetSpeedPerYearPerCTokenScaled);
 
-    uint256 aprInRewardsTokenDecimals = assetSpeedPerYearPerCTokenScaled / exchangeRate;// scaled to 10^(reward.decimals)
+    uint256 aprInRewardsTokenDecimals = assetSpeedPerYearPerCTokenScaled / exchangeRate; // scaled to 10^(reward.decimals)
     emit log("aprInRewardsTokenDecimals");
     emit log_uint(aprInRewardsTokenDecimals);
 
