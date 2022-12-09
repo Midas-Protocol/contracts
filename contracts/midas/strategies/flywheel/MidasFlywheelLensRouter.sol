@@ -80,13 +80,12 @@ contract MidasFlywheelLensRouter {
           }
         }
         {
-          uint256 marketInRewardsTokenDecimals = (((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] * 365.25 days) /
+          uint256 aprInRewardsTokenDecimals = (((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] * 365.25 days) /
             price) * 1e18) / market.exchangeRateCurrent();
-          uint256 aprInRewardsTokenDecimals = marketInRewardsTokenDecimals * 10**ERC20(market.underlying()).decimals() / market.totalSupply();
           rewardsInfo[j] = RewardsInfo({
             rewardSpeedPerSecondPerToken: rewardSpeedPerSecondPerToken,
             rewardTokenPrice: rewardTokenPrices[j],
-            formattedAPR: aprInRewardsTokenDecimals * 1e18 / 10**ERC20(rewardTokens[j]).decimals(),
+            formattedAPR: (aprInRewardsTokenDecimals * 1e18) / 10**ERC20(rewardTokens[j]).decimals(),
             flywheel: address(flywheel),
             rewardToken: rewardTokens[j]
           });
