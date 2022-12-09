@@ -79,8 +79,14 @@ contract MidasFlywheelLensRouter {
               (lastUpdatedTimestampAfter - lastUpdatedTimestampBefore);
           }
         }
-        uint256 aprInRewardsTokenDecimals = (((rewardSpeedPerSecondPerToken * rewardTokenPrices[j] * 365.25 days) /
-          price) * 1e18) / market.exchangeRateCurrent();
+
+        uint256 aprInRewardsTokenDecimals = getAprInRewardsTokenDecimals(
+          rewardSpeedPerSecondPerToken,
+          rewardTokenPrices[j],
+          price,
+          market.exchangeRateCurrent()
+        );
+
         rewardsInfo[j] = RewardsInfo({
           rewardSpeedPerSecondPerToken: rewardSpeedPerSecondPerToken,
           rewardTokenPrice: rewardTokenPrices[j],
@@ -94,6 +100,41 @@ contract MidasFlywheelLensRouter {
     }
 
     return infoList;
+  }
+
+  event log(string);
+  event log_uint(uint256);
+
+  function getAprInRewardsTokenDecimals(
+    uint256 rewardSpeedPerSecondPerToken,
+    uint256 rewardTokenPrice,
+    uint256 underlyingPrice,
+    uint256 exchangeRate
+  ) internal returns (uint256) {
+    emit log("rewardSpeedPerSecondPerToken");
+    emit log_uint(rewardSpeedPerSecondPerToken);
+
+    uint256 nativeSpeedPerSecondPerCToken = rewardSpeedPerSecondPerToken * rewardTokenPrice; // scaled to 10^(reward.decimals + 18)
+    emit log("nativeSpeedPerSecondPerCToken");
+    emit log_uint(nativeSpeedPerSecondPerCToken);
+
+    uint256 nativeSpeedPerYearPerCToken = nativeSpeedPerSecondPerCToken * 365.25 days; // scaled to 10^(reward.decimals + 18)
+    emit log("nativeSpeedPerYearPerCToken");
+    emit log_uint(nativeSpeedPerYearPerCToken);
+
+    uint256 assetSpeedPerYearPerCToken = nativeSpeedPerYearPerCToken / underlyingPrice; // scaled to 10^(reward.decimals)
+    emit log("assetSpeedPerYearPerCToken");
+    emit log_uint(assetSpeedPerYearPerCToken);
+
+    uint256 assetSpeedPerYearPerCTokenScaled = assetSpeedPerYearPerCToken * 1e18; // scaled to 10^(reward.decimals + 18)
+    emit log("assetSpeedPerYearPerCTokenScaled");
+    emit log_uint(assetSpeedPerYearPerCTokenScaled);
+
+    uint256 aprInRewardsTokenDecimals = assetSpeedPerYearPerCTokenScaled / exchangeRate;// scaled to 10^(reward.decimals)
+    emit log("aprInRewardsTokenDecimals");
+    emit log_uint(aprInRewardsTokenDecimals);
+
+    return aprInRewardsTokenDecimals;
   }
 
   function getUnclaimedRewardsForMarket(

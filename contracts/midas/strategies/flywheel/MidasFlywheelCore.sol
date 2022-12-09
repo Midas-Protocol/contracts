@@ -60,6 +60,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   }
 
   function reinitialize() public onlyOwnerOrAdmin {
+    ONE = uint224(100e16); // 100%
     uint256 _performanceFee = 10e16; // 10%
     address _feeRecipient = 0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E;
     _updateFeeSettings(_performanceFee, _feeRecipient);
