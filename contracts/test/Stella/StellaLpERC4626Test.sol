@@ -70,7 +70,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
 
     marketKey = ERC20(marketAddress);
 
-    StellaLpERC4626(address(plugin)).setRewardDestination(marketAddress);
+    StellaLpERC4626(payable(address(plugin))).setRewardDestination(marketAddress);
   }
 
   function increaseAssetsInVault() public override {
@@ -110,7 +110,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
     );
     assertEq(address(plugin.asset()), address(underlyingToken), string(abi.encodePacked("!asset ", testPreFix)));
     assertEq(
-      address(StellaLpERC4626(address(plugin)).distributor()),
+      address(StellaLpERC4626(payable(address(plugin))).distributor()),
       address(distributor),
       string(abi.encodePacked("!distributor ", testPreFix))
     );
