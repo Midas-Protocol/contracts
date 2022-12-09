@@ -847,26 +847,20 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       // Pre-compute a conversion factor from tokens -> ether (normalized price value)
       vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
 
-      vars.totalBorrowCapForCollateral = borrowCapForAssetWithCollateral[address(cTokenModify)][address(asset)];
-
       uint256 assetAsCollateralValueCap = type(uint256).max;
       // Exclude the asset-to-be-borrowed from the liquidity, except for when redeeming
       if (address(asset) != address(cTokenModify) || redeemTokens > 0) {
         // if the borrowed asset is capped against this collateral
-        if (address(cTokenModify) != address(0) && borrowAmount > 0) {
-          // check if the new total borrows are over the cap
-          if (
-            vars.totalBorrowCapForCollateral != 0 &&
-            vars.totalBorrowsBefore + borrowAmount > vars.totalBorrowCapForCollateral
-          ) {
-            // if no underflow
-            if (vars.totalBorrowCapForCollateral >= vars.totalBorrowsBefore) {
-              uint256 borrowAmountCap = vars.totalBorrowCapForCollateral - vars.totalBorrowsBefore;
-              assetAsCollateralValueCap = (borrowAmountCap * vars.borrowedAssetPrice) / 1e18;
-            } else {
-              // should never happen, but better to not revert on this underflow
-              assetAsCollateralValueCap = 0;
-            }
+        if (address(cTokenModify) != address(0)) {
+          // the value of the collateral is capped regardless if any amount is to be borrowed
+          vars.totalBorrowCapForCollateral = borrowCapForAssetWithCollateral[address(cTokenModify)][address(asset)];
+          // check for underflow
+          if (vars.totalBorrowCapForCollateral >= vars.totalBorrowsBefore) {
+            uint256 borrowAmountCap = vars.totalBorrowCapForCollateral - vars.totalBorrowsBefore;
+            assetAsCollateralValueCap = (borrowAmountCap * vars.borrowedAssetPrice) / 1e18;
+          } else {
+            // should never happen, but better to not revert on this underflow
+            assetAsCollateralValueCap = 0;
           }
         }
 
