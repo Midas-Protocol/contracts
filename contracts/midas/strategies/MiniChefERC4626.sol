@@ -16,13 +16,23 @@ struct UserInfo {
 }
 
 interface IRewarder {
-  function pendingTokens(uint256, address, uint256) external view returns (address[] memory, uint256[] memory);
+  function pendingTokens(
+    uint256,
+    address,
+    uint256
+  ) external view returns (address[] memory, uint256[] memory);
 }
 
 interface IMiniChefV2 {
   function userInfo(uint256 pid, address user) external view returns (UserInfo memory);
 
   function deposit(
+    uint256 pid,
+    uint256 amount,
+    address to
+  ) external;
+
+  function withdraw(
     uint256 pid,
     uint256 amount,
     address to
@@ -39,6 +49,10 @@ interface IMiniChefV2 {
   function lpToken(uint256) external view returns (address);
 
   function poolLength() external view returns (uint256);
+
+  function harvest(uint256, address) external;
+
+  function pendingDiffusion(uint256, address) external view returns (uint256);
 }
 
 /**
@@ -55,20 +69,17 @@ contract MiniChefERC4626 is MidasERC4626, RewardsClaimer {
   /* ========== STATE VARIABLES ========== */
   uint256 public poolId;
   IMiniChefV2 public miniChef;
-  FlywheelCore public flywheel;
 
   /* ========== INITIALIZER ========== */
 
   /**
      @notice Creates a new Vault that accepts a specific underlying token.
      @param _asset The ERC20 compliant token the Vault should accept.
-     @param _flywheel Flywheel to pull AUTO rewards
      @param _poolId The poolId in AutofarmV2
      @param _miniChef Kenisis MiniChefV2 contract
     */
   function initialize(
     ERC20Upgradeable _asset,
-    FlywheelCore _flywheel,
     uint256 _poolId,
     IMiniChefV2 _miniChef,
     address _rewardsDestination,
@@ -79,7 +90,6 @@ contract MiniChefERC4626 is MidasERC4626, RewardsClaimer {
 
     poolId = _poolId;
     miniChef = _miniChef;
-    flywheel = _flywheel;
 
     _asset.approve(address(miniChef), type(uint256).max);
   }
@@ -110,7 +120,11 @@ contract MiniChefERC4626 is MidasERC4626, RewardsClaimer {
 
   /// @notice withdraws specified amount of underlying token if possible
   function beforeWithdraw(uint256 amount, uint256) internal override {
-    miniChef.withdrawAndHarvest(poolId, amount, address(this));
+    miniChef.withdraw(poolId, amount, address(this));
+  }
+
+  function beforeClaim() internal override {
+    miniChef.harvest(poolId, address(this));
   }
 
   function emergencyWithdrawAndPause() external override onlyOwner {

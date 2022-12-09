@@ -14,6 +14,7 @@ import "./MiniChefERC4626Test.sol";
 
 contract MiniChefAssetTest is AbstractAssetTest {
   function setUp() public fork(EVMOS_MAINNET) {}
+
   IMiniChefV2 miniChef = IMiniChefV2(0x067eC87844fBD73eDa4a1059F30039584586e09d);
 
   function afterForkSetUp() internal override {
@@ -22,25 +23,14 @@ contract MiniChefAssetTest is AbstractAssetTest {
   }
 
   function setUpTestContract(bytes calldata testConfig) public override {
-    (address asset, address rewardToken, uint256 poolId) = abi.decode(testConfig, (address, address, uint256));
+    (address asset, address[] memory rewardTokens, uint256 poolId) = abi.decode(
+      testConfig,
+      (address, address[], uint256)
+    );
 
     test.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(asset));
 
     test.setUp(MockERC20(asset).symbol(), testConfig);
-  }
-
-  function testGetMiniChefPool0() public {
-    IUniswapV2Factory factory = IUniswapV2Factory(0x6aBdDa34Fb225be4610a2d153845e09429523Cd2);
-    emit log_uint(factory.allPairsLength());
-
-    for (uint256 i = 0; i < miniChef.poolLength(); i ++) {
-      if (miniChef.lpToken(i) == 0x4Aa9c250874C2d14D0d686833e7b3C5c1837c36c)
-        emit log_uint(i);
-    }
-
-    // address pair = factory.getPair(0xD4949664cD82660AaE99bEdc034a0deA8A0bd517, 0x3f75ceabCDfed1aCa03257Dc6Bdc0408E2b4b026);
-
-    // emit log_address(pair);
   }
 
   function testInitializedValues() public override {
@@ -49,37 +39,37 @@ contract MiniChefAssetTest is AbstractAssetTest {
 
       this.setUpTestContract(testConfig);
 
-      (address asset, ,) = abi.decode(testConfig, (address, address, uint256));
+      (address asset, , ) = abi.decode(testConfig, (address, address[], uint256));
 
       test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
     }
   }
 
-  // function testDepositWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
-  //   this.runTest(test.testDepositWithIncreasedVaultValue);
-  // }
+  function testDepositWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
+    this.runTest(test.testDepositWithIncreasedVaultValue);
+  }
 
-  // function testDepositWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
-  //   this.runTest(test.testDepositWithDecreasedVaultValue);
-  // }
+  function testDepositWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
+    this.runTest(test.testDepositWithDecreasedVaultValue);
+  }
 
-  // function testWithdrawWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
-  //   this.runTest(test.testWithdrawWithIncreasedVaultValue);
-  // }
+  function testWithdrawWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
+    this.runTest(test.testWithdrawWithIncreasedVaultValue);
+  }
 
-  // function testWithdrawWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
-  //   this.runTest(test.testWithdrawWithDecreasedVaultValue);
-  // }
+  function testWithdrawWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
+    this.runTest(test.testWithdrawWithDecreasedVaultValue);
+  }
 
-  // function testAccumulatingRewardsOnDeposit() public fork(POLYGON_MAINNET) {
-  //   this.runTest(MiniChefERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
-  // }
+  function testAccumulatingRewardsOnDeposit() public {
+    this.runTest(MiniChefERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
+  }
 
-  // function testAccumulatingRewardsOnWithdrawal() public fork(POLYGON_MAINNET) {
-  //   this.runTest(MiniChefERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
-  // }
+  function testAccumulatingRewardsOnWithdrawal() public fork(POLYGON_MAINNET) {
+    this.runTest(MiniChefERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
+  }
 
-  // function testClaimRewards() public fork(POLYGON_MAINNET) {
-  //   this.runTest(MiniChefERC4626Test(address(test)).testClaimRewards);
-  // }
+  function testClaimRewards() public fork(POLYGON_MAINNET) {
+    this.runTest(MiniChefERC4626Test(address(test)).testClaimRewards);
+  }
 }

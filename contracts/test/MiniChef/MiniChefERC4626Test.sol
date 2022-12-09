@@ -4,9 +4,10 @@ pragma solidity ^0.8.0;
 import { WithPool } from "../helpers/WithPool.sol";
 import { BaseTest } from "../config/BaseTest.t.sol";
 
-import { MidasERC4626, MiniChefERC4626, IMiniChefV2 } from "../../midas/strategies/MiniChefERC4626.sol";
+import { MidasERC4626, MiniChefERC4626, IMiniChefV2, IRewarder } from "../../midas/strategies/MiniChefERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
+import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { Authority } from "solmate/auth/Auth.sol";
@@ -28,14 +29,16 @@ struct RewardsCycle {
 contract MiniChefERC4626Test is AbstractERC4626Test {
   using FixedPointMathLib for uint256;
 
-  FlywheelCore flywheel;
-  FuseFlywheelDynamicRewardsPlugin flywheelRewards;
-  address jrtMimoSep22Token = 0xAFC780bb79E308990c7387AB8338160bA8071B67;
+  FlywheelCore[] flywheels;
+  FuseFlywheelDynamicRewardsPlugin[] rewards;
   IMiniChefV2 miniChef = IMiniChefV2(0x067eC87844fBD73eDa4a1059F30039584586e09d);
   address marketAddress;
   ERC20 marketKey;
   ERC20Upgradeable[] rewardTokens;
   uint256 poolId;
+
+  uint256[] internal rewardAmounts;
+  uint192[] internal cycleRewards;
 
   constructor() WithPool() {}
 
@@ -45,31 +48,31 @@ contract MiniChefERC4626Test is AbstractERC4626Test {
 
     testPreFix = _testPreFix;
 
-    (address _asset, address _rewardToken, uint256 _poolId) = abi.decode(data, (address, address, uint256));
-
-    flywheel = new FlywheelCore(
-      ERC20(_rewardToken),
-      IFlywheelRewards(address(0)),
-      IFlywheelBooster(address(0)),
-      address(this),
-      Authority(address(0))
-    );
-
-    rewardTokens.push(ERC20Upgradeable(_rewardToken));
-    vm.mockCall(
-      address(rewardTokens[0]),
-      abi.encodeWithSelector(rewardTokens[0].balanceOf.selector, address(0)),
-      abi.encode(0)
-    );
-
-    flywheelRewards = new FuseFlywheelDynamicRewardsPlugin(flywheel, 1);
-    flywheel.setFlywheelRewards(flywheelRewards);
+    (address _asset, address[] memory _rewardTokens, uint256 _poolId) = abi.decode(data, (address, address[], uint256));
 
     poolId = _poolId;
+    for (uint8 i = 0; i < _rewardTokens.length; i++) {
+      MidasFlywheelCore flywheel = new MidasFlywheelCore();
+      flywheel.initialize(
+        ERC20(_rewardTokens[i]),
+        IFlywheelRewards(address(0)),
+        IFlywheelBooster(address(0)),
+        address(this)
+      );
 
+      FuseFlywheelDynamicRewardsPlugin reward = new FuseFlywheelDynamicRewardsPlugin(
+        FlywheelCore(address(flywheel)),
+        1
+      );
+      flywheel.setFlywheelRewards(reward);
+
+      rewardTokens.push(ERC20Upgradeable(_rewardTokens[i]));
+      flywheels.push(FlywheelCore(address(flywheel)));
+      rewards.push(reward);
+    }
 
     MiniChefERC4626 miniChefERC4626 = new MiniChefERC4626();
-    miniChefERC4626.initialize(underlyingToken, flywheel, poolId, miniChef, address(this), rewardTokens);
+    miniChefERC4626.initialize(underlyingToken, poolId, miniChef, address(this), rewardTokens);
     plugin = miniChefERC4626;
 
     initialStrategyBalance = getStrategyBalance();
@@ -80,11 +83,13 @@ contract MiniChefERC4626Test is AbstractERC4626Test {
     cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(plugin)));
     assertEq(address(cToken.plugin()), address(plugin));
 
-    cToken.approve(_rewardToken, address(flywheelRewards));
-
     marketKey = ERC20(marketAddress);
 
-    flywheel.addStrategyForRewards(marketKey);
+    for (uint8 i = 0; i < rewardTokens.length; i++) {
+      cToken.approve(_rewardTokens[i], address(rewards[i]));
+      flywheels[i].addStrategyForRewards(marketKey);
+    }
+
     MiniChefERC4626(address(plugin)).setRewardDestination(marketAddress);
   }
 
@@ -131,96 +136,97 @@ contract MiniChefERC4626Test is AbstractERC4626Test {
     assertEq(MiniChefERC4626(address(plugin)).poolId(), poolId, string(abi.encodePacked("!poolId", testPreFix)));
   }
 
-  // function testAccumulatingRewardsOnDeposit() public {
-  //   deposit(address(this), depositAmount / 2);
-  //   deal(address(jrtMimoSep22Token), address(this), 100e18);
-  //   ERC20(jrtMimoSep22Token).transfer(address(miniChef), 100e18);
+  function testAccumulatingRewardsOnDeposit() public {
+    deposit(address(this), depositAmount / 2);
 
-  //   uint256 expectedReward = miniChef.pendingRwd(poolId, address(plugin));
+    IRewarder rewarder = miniChef.rewarder(poolId);
+    (, uint256[] memory amounts) = rewarder.pendingTokens(poolId, address(plugin), 0);
 
-  //   deposit(address(this), depositAmount / 2);
+    deposit(address(this), depositAmount / 2);
 
-  //   assertEq(
-  //     ERC20(jrtMimoSep22Token).balanceOf(address(plugin)),
-  //     expectedReward,
-  //     string(abi.encodePacked("!mimoBal ", testPreFix))
-  //   );
-  // }
+    assertEq(rewardTokens[0].balanceOf(address(plugin)), amounts[0], string(abi.encodePacked("!diffBal ", testPreFix)));
+  }
 
-  // function testAccumulatingRewardsOnWithdrawal() public {
-  //   deposit(address(this), depositAmount);
-  //   deal(address(jrtMimoSep22Token), address(this), 100e18);
-  //   ERC20(jrtMimoSep22Token).transfer(address(miniChef), 100e18);
+  function testAccumulatingRewardsOnWithdrawal() public {
+    deposit(address(this), depositAmount);
 
-  //   uint256 expectedReward = miniChef.pendingRwd(poolId, address(plugin));
+    IRewarder rewarder = miniChef.rewarder(poolId);
+    (, uint256[] memory amounts) = rewarder.pendingTokens(poolId, address(plugin), 0);
 
-  //   plugin.withdraw(1, address(this), address(this));
+    plugin.withdraw(1, address(this), address(this));
 
-  //   assertEq(
-  //     ERC20(jrtMimoSep22Token).balanceOf(address(plugin)),
-  //     expectedReward,
-  //     string(abi.encodePacked("!mimoBal ", testPreFix))
-  //   );
-  // }
+    assertEq(rewardTokens[0].balanceOf(address(plugin)), amounts[0], string(abi.encodePacked("!diffBal ", testPreFix)));
+  }
 
-  // function testClaimRewards() public {
-  //   vm.startPrank(address(this));
-  //   underlyingToken.approve(marketAddress, depositAmount);
-  //   CErc20(marketAddress).mint(depositAmount);
-  //   vm.stopPrank();
+  function testClaimRewards() public {
+    // Deposit funds, Rewards are 0
+    vm.startPrank(address(this));
+    underlyingToken.approve(marketAddress, depositAmount);
+    CErc20(marketAddress).mint(depositAmount);
+    vm.stopPrank();
 
-  //   deal(address(jrtMimoSep22Token), address(this), 100e18);
-  //   ERC20(jrtMimoSep22Token).transfer(address(miniChef), 100e18);
-  //   uint256 expectedReward = miniChef.pendingRwd(poolId, address(plugin));
+    for (uint8 i = 0; i < rewardTokens.length; i++) {
+      (uint32 start, uint32 end, uint192 reward) = rewards[i].rewardsCycle(ERC20(address(marketAddress)));
 
-  //   (uint32 mimoStart, uint32 mimoEnd, uint192 mimoReward) = flywheelRewards.rewardsCycle(
-  //     ERC20(address(marketAddress))
-  //   );
+      // Rewards can be transfered in the next cycle
+      assertEq(end, 0, string(abi.encodePacked("!end-", vm.toString(i), " ", testPreFix)));
 
-  //   // Rewards can be transfered in the next cycle
-  //   assertEq(mimoEnd, 0, string(abi.encodePacked("!mimoEnd ", testPreFix)));
+      // Reward amount is still 0
+      assertEq(reward, 0, string(abi.encodePacked("!reward-", vm.toString(i), " ", testPreFix)));
 
-  //   // Reward amount is still 0
-  //   assertEq(mimoReward, 0, string(abi.encodePacked("!mimoReward ", testPreFix)));
+      cycleRewards.push(reward);
+    }
 
-  //   vm.warp(block.timestamp + 150);
-  //   vm.roll(20);
+    vm.warp(block.timestamp + 150);
+    vm.roll(10);
 
-  //   // Call accrue as proxy for withdraw/deposit to claim rewards
-  //   flywheel.accrue(ERC20(marketAddress), address(this));
+    for (uint8 i = 0; i < rewardTokens.length; i++) {
+      uint256 rewardBefore = rewardTokens[i].balanceOf(address(rewards[i]));
+      // Call accrue as proxy for withdraw/deposit to claim rewards
+      flywheels[i].accrue(ERC20(marketAddress), address(this));
 
-  //   // Accrue rewards to send rewards to flywheelRewards
-  //   flywheel.accrue(ERC20(marketAddress), address(this));
+      // Accrue rewards to send rewards to flywheelRewards
+      flywheels[i].accrue(ERC20(marketAddress), address(this));
 
-  //   (mimoStart, mimoEnd, mimoReward) = flywheelRewards.rewardsCycle(ERC20(address(marketAddress)));
+      assertGt(
+        rewardTokens[i].balanceOf(address(rewards[i])),
+        rewardBefore,
+        string(abi.encodePacked("!rewardBal-", vm.toString(i), " ", testPreFix))
+      );
 
-  //   // Rewards can be transfered in the next cycle
-  //   assertGt(mimoEnd, 1000000000, string(abi.encodePacked("!2.mimoEnd ", testPreFix)));
-  //   assertApproxEqAbs(
-  //     mimoReward,
-  //     expectedReward,
-  //     uint256(1000),
-  //     string(abi.encodePacked("!2.mimoReward ", testPreFix))
-  //   );
+      (uint256 start, uint256 end, uint192 reward) = rewards[i].rewardsCycle(ERC20(marketAddress));
 
-  //   vm.warp(block.timestamp + 150);
-  //   vm.roll(20);
+      // Rewards can be transfered in the next cycle
+      assertGt(end, 1000000000, string(abi.encodePacked("!2.end-", vm.toString(i), " ", testPreFix)));
 
-  //   flywheel.accrue(ERC20(marketAddress), address(this));
+      // Reward amount is expected value
+      assertGt(reward, cycleRewards[i], string(abi.encodePacked("!2.reward-", vm.toString(i), " ", testPreFix)));
+      cycleRewards[i] = reward;
+    }
 
-  //   // Claim Rewards for the user
-  //   flywheel.claimRewards(address(this));
+    vm.warp(block.timestamp + 150);
+    vm.roll(20);
 
-  //   assertApproxEqAbs(
-  //     ERC20(jrtMimoSep22Token).balanceOf(address(this)),
-  //     expectedReward,
-  //     uint256(1000),
-  //     string(abi.encodePacked("!mimoBal User ", testPreFix))
-  //   );
-  //   assertEq(
-  //     ERC20(jrtMimoSep22Token).balanceOf(address(flywheel)),
-  //     0,
-  //     string(abi.encodePacked("!mimoBal Flywheel ", testPreFix))
-  //   );
-  // }
+    for (uint8 i = 0; i < flywheels.length; i++) {
+      // Finally accrue reward from last cycle
+      flywheels[i].accrue(ERC20(marketAddress), address(this));
+
+      // Claim Rewards for the user
+      flywheels[i].claimRewards(address(this));
+
+      emit log_uint(cycleRewards[i]);
+
+      assertApproxEqAbs(
+        rewardTokens[i].balanceOf(address(this)),
+        cycleRewards[i],
+        uint256(1000),
+        string(abi.encodePacked("!rewardBal User-", vm.toString(i), " ", testPreFix))
+      );
+      assertEq(
+        rewardTokens[i].balanceOf(address(flywheels[i])),
+        0,
+        string(abi.encodePacked("!rewardBal Flywheel-", vm.toString(i), " ", testPreFix))
+      );
+    }
+  }
 }
