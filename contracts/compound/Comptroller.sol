@@ -819,7 +819,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 oErr;
 
     vars.totalBorrowsBefore = cTokenModify.totalBorrows();
-    if (address(cTokenModify) != address(0) && borrowAmount > 0) {
+    if (address(cTokenModify) != address(0)) {
       vars.borrowedAssetPrice = oracle.getUnderlyingPrice(cTokenModify);
     }
 
