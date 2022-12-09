@@ -732,6 +732,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     Exp exchangeRate;
     Exp oraclePrice;
     Exp tokensToDenom;
+
+    uint256 totalBorrowCapForCollateral;
+    uint256 totalBorrowsBefore;
+    uint256 borrowedAssetPrice;
   }
 
   function getAccountLiquidity(address account)
@@ -815,6 +819,11 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     AccountLiquidityLocalVars memory vars; // Holds all our calculation results
     uint256 oErr;
 
+    vars.totalBorrowsBefore = cTokenModify.totalBorrows();
+    if (address(cTokenModify) != address(0) && borrowAmount > 0) {
+      vars.borrowedAssetPrice = oracle.getUnderlyingPrice(cTokenModify);
+    }
+
     // For each asset the account is in
     CTokenInterface[] memory assets = accountAssets[account];
     for (uint256 i = 0; i < assets.length; i++) {
@@ -839,10 +848,30 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       // Pre-compute a conversion factor from tokens -> ether (normalized price value)
       vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
 
+      vars.totalBorrowCapForCollateral = borrowCapForAssetWithCollateral[address(cTokenModify)][address(asset)];
+
+      uint256 assetAsCollateralValueCap = type(uint256).max;
       // Exclude the asset-to-be-borrowed from the liquidity, except for when redeeming
       if (address(asset) != address(cTokenModify) || redeemTokens > 0) {
-        // sumCollateral += tokensToDenom * cTokenBalance
-        vars.sumCollateral = mul_ScalarTruncateAddUInt(vars.tokensToDenom, vars.cTokenBalance, vars.sumCollateral);
+        // if the borrowed asset is capped against this collateral
+        if (address(cTokenModify) != address(0) && borrowAmount > 0) {
+          // check if the new total borrows are over the cap
+          if (vars.totalBorrowsBefore + borrowAmount > vars.totalBorrowCapForCollateral) {
+            // if no underflow
+            if (vars.totalBorrowCapForCollateral >= vars.totalBorrowsBefore) {
+              uint256 borrowAmountCap = vars.totalBorrowCapForCollateral - vars.totalBorrowsBefore;
+              assetAsCollateralValueCap = (borrowAmountCap * vars.borrowedAssetPrice) / 1e18;
+            } else {
+              // should never happen, but better to not revert on this underflow
+              assetAsCollateralValueCap = 0;
+            }
+          }
+        }
+
+        // accumulate the collateral value to sumCollateral
+        uint256 assetCollateralValue = mul_ScalarTruncate(vars.tokensToDenom, vars.cTokenBalance);
+        if (assetCollateralValue > assetAsCollateralValueCap) assetCollateralValue = assetAsCollateralValueCap;
+        vars.sumCollateral += assetCollateralValue;
       }
 
       // sumBorrowPlusEffects += oraclePrice * borrowBalance
