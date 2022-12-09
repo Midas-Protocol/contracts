@@ -15,6 +15,8 @@ import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 
 // Tested on block 23534949
 contract WombatAssetTest is AbstractAssetTest {
+  function setUp() public forkAtBlock(BSC_MAINNET, 23534949) {}
+
   function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new WombatERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new WombatTestConfigStorage()));
@@ -31,19 +33,21 @@ contract WombatAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override forkAtBlock(BSC_MAINNET, 23534949) {
-    for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
-      bytes memory testConfig = testConfigStorage.getTestConfig(i);
+  function testInitializedValues() public override {
+    if (shouldRunForChain(block.chainid)) {
+      for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
+        bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
-      this.setUpTestContract(testConfig);
+        this.setUpTestContract(testConfig);
 
-      (address asset, , ) = abi.decode(testConfig, (address, uint256, ERC20Upgradeable[]));
+        (address asset, , ) = abi.decode(testConfig, (address, uint256, ERC20Upgradeable[]));
 
-      test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+        test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+      }
     }
   }
 
-  function testClaimRewards() public forkAtBlock(BSC_MAINNET, 23534949) {
+  function testClaimRewards() public {
     this.runTest(WombatERC4626Test(address(test)).testClaimRewards);
   }
 }

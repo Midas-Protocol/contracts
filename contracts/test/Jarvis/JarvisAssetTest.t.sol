@@ -11,6 +11,8 @@ import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 import "./JarvisERC4626Test.sol";
 
 contract JarvisAssetTest is AbstractAssetTest {
+  function setUp() public fork(POLYGON_MAINNET) {}
+
   function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new JarvisERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new JarvisTestConfigStorage()));
@@ -24,43 +26,45 @@ contract JarvisAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override fork(POLYGON_MAINNET) {
-    for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
-      bytes memory testConfig = testConfigStorage.getTestConfig(i);
+  function testInitializedValues() public override {
+    if (shouldRunForChain(block.chainid)) {
+      for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
+        bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
-      this.setUpTestContract(testConfig);
+        this.setUpTestContract(testConfig);
 
-      (address asset, ) = abi.decode(testConfig, (address, address));
+        (address asset, ) = abi.decode(testConfig, (address, address));
 
-      test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+        test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+      }
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testDepositWithIncreasedVaultValue() public override {
     this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testDepositWithDecreasedVaultValue() public override {
     this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testWithdrawWithIncreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testWithdrawWithDecreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 
-  function testAccumulatingRewardsOnDeposit() public fork(POLYGON_MAINNET) {
+  function testAccumulatingRewardsOnDeposit() public {
     this.runTest(JarvisERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public fork(POLYGON_MAINNET) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     this.runTest(JarvisERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 
-  function testClaimRewards() public fork(POLYGON_MAINNET) {
+  function testClaimRewards() public {
     this.runTest(JarvisERC4626Test(address(test)).testClaimRewards);
   }
 }
