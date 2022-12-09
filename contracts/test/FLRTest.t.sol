@@ -21,10 +21,16 @@ import "../compound/CTokenInterfaces.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 
 import { MidasFlywheelLensRouter, IComptroller, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
-import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { MidasFlywheel, MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 
 interface IPriceOracle {
   function price(address underlying) external view returns (uint256);
+}
+
+interface MockERC201 {
+  function balanceOf(address) external view returns (uint256);
+
+  function decimals() external view returns (uint256);
 }
 
 contract FLRTest is BaseTest {
@@ -125,6 +131,46 @@ contract FLRTest is BaseTest {
         emit log_named_uint("rewardTokenPrice", marketRewardsInfos[i].rewardsInfo[j].rewardTokenPrice);
         emit log_named_uint("formattedAPR", marketRewardsInfos[i].rewardsInfo[j].formattedAPR);
         emit log_named_address("rewardToken", address(marketRewardsInfos[i].rewardsInfo[j].rewardToken));
+      }
+    }
+  }
+
+  function testMoonbeamFlywheelLensRouter() public fork(MOONBEAM_MAINNET) {
+    CErc20Token market = CErc20Token(0xa9736bA05de1213145F688e4619E5A7e0dcf4C72);
+    rewardToken = address(0x931715FEE2d06333043d11F658C8CE934aC61D0c);
+    IComptroller comptroller = IComptroller(0xeB2D3A9D962d89b4A9a34ce2bF6a2650c938e185);
+    setUpFlywheel(rewardToken, address(market), comptroller, BSC_ADMIN);
+    IPriceOracle mpo = IPriceOracle(ap.getAddress("mpo"));
+
+    vm.mockCall(
+      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
+      abi.encodeWithSelector(MockERC201.balanceOf.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72),
+      abi.encode(46968940116682)
+    );
+
+    vm.mockCall(
+      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
+      abi.encodeWithSelector(MockERC201.balanceOf.selector, 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685),
+      abi.encode(11552962011148995)
+    );
+
+    vm.mockCall(
+      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
+      abi.encodeWithSelector(MockERC201.decimals.selector),
+      abi.encode(10)
+    );
+
+    // comptroller.getAllMarkets();
+    MidasFlywheelLensRouter.MarketRewardsInfo[] memory info = lensRouter.getMarketRewardsInfo(comptroller);
+    for (uint8 i = 0; i < info.length; i ++) {
+      for (uint8 j = 0; j < info[i].rewardsInfo.length; j ++) {
+        if (info[i].rewardsInfo[j].formattedAPR != 0) {
+          emit log_named_uint("rewardSpeedPerSecondPerToken", info[i].rewardsInfo[j].rewardSpeedPerSecondPerToken);
+          emit log_named_uint("formattedAPR", info[i].rewardsInfo[j].formattedAPR);
+          emit log_named_uint("rewardTokenPrice", info[i].rewardsInfo[j].rewardTokenPrice);
+          emit log_named_address("rewardToken", info[i].rewardsInfo[j].rewardToken);
+          emit log_named_uint("totalSupply", info[i].market.totalSupply());
+        }
       }
     }
   }

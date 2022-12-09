@@ -176,7 +176,7 @@ contract LiquidityMiningTest is BaseTest {
 
     // check market index
     (uint224 index, ) = flywheel.strategyState(asErc20);
-    require(index == flywheel.ONE() + rewardsPerToken);
+    require(index == 10**rewardDecimal + rewardsPerToken);
 
     // claim and check user balance
     flywheelClaimer.getUnclaimedRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
