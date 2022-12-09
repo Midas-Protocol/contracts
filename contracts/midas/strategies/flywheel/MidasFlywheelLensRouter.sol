@@ -111,6 +111,7 @@ contract MidasFlywheelLensRouter {
     uint256 underlyingPrice,
     uint256 exchangeRate
   ) internal returns (uint256) {
+    emit log("");
     emit log("rewardSpeedPerSecondPerToken");
     emit log_uint(rewardSpeedPerSecondPerToken);
 
