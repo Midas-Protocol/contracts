@@ -72,7 +72,7 @@ contract StellaLpERC4626 is MidasERC4626, RewardsClaimer {
    * @dev Receives ETH fees.
    */
   receive() external payable {
-    wNative.deposit{value : msg.value}();
+    wNative.deposit{ value: msg.value }();
   }
 
   function totalAssets() public view override returns (uint256) {

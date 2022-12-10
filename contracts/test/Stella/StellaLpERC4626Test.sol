@@ -165,7 +165,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
 
     bool anyIsWNative = false;
     uint256 i = 0;
-    while(true) {
+    while (true) {
       try plugin.rewardTokens(i++) returns (ERC20Upgradeable rewToken) {
         emit log_address(address(rewToken));
         if (address(rewToken) == ap.getAddress("wtoken")) anyIsWNative = true;
