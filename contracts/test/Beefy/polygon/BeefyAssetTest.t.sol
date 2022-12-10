@@ -20,6 +20,8 @@ interface IBeefyStrategy {
 contract BeefyPolygonAssetTest is AbstractAssetTest {
   address lpChef = 0x2FAe83B3916e1467C970C113399ee91B31412bCD;
 
+  function setUp() public fork(POLYGON_MAINNET) {}
+
   function afterForkSetUp() internal override {
     test = new BeefyERC4626Test();
     testConfigStorage = ITestConfigStorage(address(new BeefyPolygonTestConfigStorage()));
@@ -39,33 +41,35 @@ contract BeefyPolygonAssetTest is AbstractAssetTest {
     );
   }
 
-  function testInitializedValues() public override fork(POLYGON_MAINNET) {
-    for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
-      bytes memory testConfig = testConfigStorage.getTestConfig(i);
+  function testInitializedValues() public override {
+    if (shouldRunForChain(block.chainid)) {
+      for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
+        bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
-      this.setUpTestContract(testConfig);
+        this.setUpTestContract(testConfig);
 
-      (address beefyVault, ) = abi.decode(testConfig, (address, uint256));
+        (address beefyVault, ) = abi.decode(testConfig, (address, uint256));
 
-      MockERC20 asset = MockERC20(address(IBeefyVault(beefyVault).want()));
+        MockERC20 asset = MockERC20(address(IBeefyVault(beefyVault).want()));
 
-      test.testInitializedValues(asset.name(), asset.symbol());
+        test.testInitializedValues(asset.name(), asset.symbol());
+      }
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testDepositWithIncreasedVaultValue() public override {
     this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testDepositWithDecreasedVaultValue() public override {
     this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testWithdrawWithIncreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testWithdrawWithDecreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 }

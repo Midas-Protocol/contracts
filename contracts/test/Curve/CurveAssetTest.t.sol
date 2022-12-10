@@ -16,6 +16,8 @@ contract CurveAssetTest is AbstractAssetTest {
   address[] underlyingsForOracle;
   IPriceOracle[] oracles;
 
+  function setUp() public forkAtBlock(POLYGON_MAINNET, 33063212) {}
+
   function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new CurveERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new CurveTestConfigStorage()));
@@ -39,15 +41,17 @@ contract CurveAssetTest is AbstractAssetTest {
     test.setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override forkAtBlock(POLYGON_MAINNET, 33063212) {
-    for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
-      bytes memory testConfig = testConfigStorage.getTestConfig(i);
+  function testInitializedValues() public override {
+    if (shouldRunForChain(block.chainid)) {
+      for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
+        bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
-      this.setUpTestContract(testConfig);
+        this.setUpTestContract(testConfig);
 
-      (, address asset) = abi.decode(testConfig, (address, address));
+        (, address asset) = abi.decode(testConfig, (address, address));
 
-      test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+        test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+      }
     }
   }
 
@@ -71,15 +75,15 @@ contract CurveAssetTest is AbstractAssetTest {
     assertTrue(true);
   }
 
-  function testAccumulatingRewardsOnDeposit() public forkAtBlock(POLYGON_MAINNET, 33063212) {
+  function testAccumulatingRewardsOnDeposit() public {
     this.runTest(CurveERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public forkAtBlock(POLYGON_MAINNET, 33063212) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     this.runTest(CurveERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 
-  function testClaimRewards() public forkAtBlock(POLYGON_MAINNET, 33063212) {
+  function testClaimRewards() public {
     this.runTest(CurveERC4626Test(address(test)).testClaimRewards);
   }
 }
