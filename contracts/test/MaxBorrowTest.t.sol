@@ -29,7 +29,10 @@ contract MaxBorrowTest is WithPool {
   }
 
   function afterForkSetUp() internal override {
-    super.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(ap.getAddress("wtoken")));
+    super.setUpWithPool(
+      MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
+      ERC20Upgradeable(ap.getAddress("wtoken"))
+    );
 
     if (block.chainid == POLYGON_MAINNET) {
       vm.prank(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
