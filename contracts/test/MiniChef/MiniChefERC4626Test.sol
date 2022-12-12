@@ -42,7 +42,7 @@ contract MiniChefERC4626Test is AbstractERC4626Test {
 
   constructor() WithPool() {}
 
-  function setUp(string memory _testPreFix, bytes calldata data) public override {
+  function _setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("MiniChef-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));
 
