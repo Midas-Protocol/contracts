@@ -9,7 +9,6 @@ import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import "./DotDotLpERC4626Test.sol";
 
-// TODO adapt the test to run for the latest block
 contract DotDotAssetTest is AbstractAssetTest {
   function setUp() public fork(BSC_MAINNET) {}
 

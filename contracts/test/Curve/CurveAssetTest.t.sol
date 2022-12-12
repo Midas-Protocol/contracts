@@ -10,6 +10,7 @@ import { MockPriceOracle, IPriceOracle } from "../../oracles/1337/MockPriceOracl
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import "./CurveERC4626Test.sol";
 
+// TODO adapt test to run for the latest block
 contract CurveAssetTest is AbstractAssetTest {
   MasterPriceOracle masterPriceOracle;
   address[] underlyingsForOracle;
