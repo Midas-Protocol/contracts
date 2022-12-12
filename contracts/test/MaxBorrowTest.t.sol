@@ -17,8 +17,7 @@ contract MockAsset is MockERC20 {
   function deposit() external payable {}
 }
 
-contract MaxWithdrawTestPolygon is WithPool {
-  address wmaticAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
+contract MaxBorrowTest is WithPool {
   address usdcWhale = 0xe7804c37c13166fF0b37F5aE0BB07A3aEbb6e245;
   address daiWhale = 0x06959153B974D0D5fDfd87D561db6d8d4FA0bb0B;
 
@@ -30,11 +29,16 @@ contract MaxWithdrawTestPolygon is WithPool {
   }
 
   function afterForkSetUp() internal override {
-    super.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(wmaticAddress));
+    super.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(ap.getAddress("wtoken")));
 
-    vm.prank(0x369582d2010B6eD950B571F4101e3bB9b554876F);
-    MockERC20(address(underlyingToken)).transfer(address(this), 100e18);
-    setUpPool("polygon-test", false, 0.1e18, 1.1e18);
+    if (block.chainid == POLYGON_MAINNET) {
+      vm.prank(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
+      MockERC20(address(underlyingToken)).transfer(address(this), 100e18);
+      setUpPool("polygon-test", false, 0.1e18, 1.1e18);
+    } else if (block.chainid == BSC_MAINNET) {
+      deal(address(underlyingToken), address(this), 100e18);
+      setUpPool("bsc-test", false, 0.1e18, 1.1e18);
+    }
   }
 
   function testMaxBorrow() public fork(POLYGON_MAINNET) {

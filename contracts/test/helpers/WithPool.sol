@@ -55,8 +55,6 @@ contract WithPool is BaseTest {
   address[] hardcodedAddresses;
   string[] hardcodedNames;
 
-  event log_address1(address add);
-
   function setUpWithPool(MasterPriceOracle _masterPriceOracle, ERC20Upgradeable _underlyingToken) public {
     priceOracle = _masterPriceOracle;
     underlyingToken = _underlyingToken;
@@ -115,7 +113,7 @@ contract WithPool is BaseTest {
     fusePoolDirectory.initialize(false, emptyAddresses);
 
     poolLens = new FusePoolLens();
-    emit log_address1(address(poolLens));
+    emit log_address(address(poolLens));
     poolLens.initialize(
       fusePoolDirectory,
       "Pool",
