@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
-import { IPriceOracle } from "../external/compound/IPriceOracle.sol";
-import { UniswapLpTokenPriceOracle } from "../oracles/default/UniswapLpTokenPriceOracle.sol";
-import { BaseTest } from "./config/BaseTest.t.sol";
+import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
+import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
+import { UniswapLpTokenPriceOracle } from "../../../oracles/default/UniswapLpTokenPriceOracle.sol";
+import { BaseTest } from "../../config/BaseTest.t.sol";
 
 contract UniswapLpTokenBaseTest is BaseTest {
   UniswapLpTokenPriceOracle uniswapLpTokenPriceOracle;
@@ -50,6 +50,13 @@ contract UniswapLpTokenBaseTest is BaseTest {
 
   function testGlmrGlintLpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
     address lpToken = 0x99588867e817023162F4d4829995299054a5fC57; // Lp GLMR-GLINT
+
+    uint256 price = getLpTokenPrice(lpToken);
+    assertTrue(price > 0);
+  }
+
+  function testWGlmrWethLpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
+    address lpToken = 0x8577273FB3B72306F3A59E26ab77116f5D428DAa; // Lp GLMR-GLINT
 
     uint256 price = getLpTokenPrice(lpToken);
     assertTrue(price > 0);
