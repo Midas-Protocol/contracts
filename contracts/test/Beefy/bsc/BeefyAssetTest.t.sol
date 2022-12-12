@@ -25,7 +25,7 @@ contract BeefyBscAssetTest is AbstractAssetTest {
   function setUpTestContract(bytes calldata testConfig) public override {
     (address beefyVault, uint256 withdrawalFee) = abi.decode(testConfig, (address, uint256));
 
-    test.setUp(
+    test._setUp(
       MockERC20(address(IBeefyVault(beefyVault).want())).symbol(),
       abi.encode(beefyVault, withdrawalFee, lpChef)
     );

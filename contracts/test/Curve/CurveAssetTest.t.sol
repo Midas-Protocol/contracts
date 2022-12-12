@@ -38,7 +38,7 @@ contract CurveAssetTest is AbstractAssetTest {
 
     test.setUpWithPool(masterPriceOracle, ERC20Upgradeable(asset));
 
-    test.setUp(MockERC20(asset).symbol(), testConfig);
+    test._setUp(MockERC20(asset).symbol(), testConfig);
   }
 
   function testInitializedValues() public override {

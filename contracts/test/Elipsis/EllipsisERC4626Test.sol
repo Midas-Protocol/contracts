@@ -47,7 +47,7 @@ contract EllipsisERC4626Test is AbstractERC4626Test {
 
   constructor() WithPool() {}
 
-  function setUp(string memory _testPreFix, bytes calldata data) public override {
+  function _setUp(string memory _testPreFix, bytes calldata data) public override {
     sendUnderlyingToken(depositAmount, address(this));
     asset = abi.decode(data, (address));
 
