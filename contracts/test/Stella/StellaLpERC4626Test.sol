@@ -21,8 +21,6 @@ struct RewardsCycle {
 
 // Tested on block 19052824
 contract StellaERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   IStellaDistributorV2 distributor = IStellaDistributorV2(0xF3a5454496E26ac57da879bf3285Fa85DEBF0388); // what you deposit the LP into
 
   uint256 poolId;

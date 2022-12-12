@@ -12,7 +12,7 @@ import "./DotDotLpERC4626Test.sol";
 
 // TODO adapt the test to run for the latest block
 contract DotDotAssetTest is AbstractAssetTest {
-  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {}
+  function setUp() public fork(BSC_MAINNET) {}
 
   function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new DotDotERC4626Test()));

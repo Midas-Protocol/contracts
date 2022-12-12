@@ -28,8 +28,6 @@ struct RewardsCycle {
 // Using 2BRL
 // Tested on block 19052824
 contract DotDotERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   address whale = 0x0BC3a8239B0a63E945Ea1bd6722Ba747b9557e56;
 
   ILpDepositor lpDepositor = ILpDepositor(0x8189F0afdBf8fE6a9e13c69bA35528ac6abeB1af);

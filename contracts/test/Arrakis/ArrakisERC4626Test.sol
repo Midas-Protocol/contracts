@@ -28,8 +28,6 @@ struct RewardsCycle {
 }
 
 contract ArrakisERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   IGuniPool pool;
   FlywheelCore flywheel;
   FuseFlywheelDynamicRewardsPlugin flywheelRewards;

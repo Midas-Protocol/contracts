@@ -13,12 +13,13 @@ import { ITestConfigStorage } from "../../abstracts/ITestConfigStorage.sol";
 
 // TODO adapt test to run for the latest block
 contract BeefyBscAssetTest is AbstractAssetTest {
-  address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B;
+  address lpChef = 0x1083926054069AaD75d7238E9B809b0eF9d94e5B; // bshare
 
-  function setUp() public forkAtBlock(BSC_MAINNET, 20238373) {}
+  function setUp() public fork(BSC_MAINNET) {}
 
   function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new BeefyERC4626Test()));
+    test.setDepositAmount(1e16);
     testConfigStorage = ITestConfigStorage(address(new BeefyBscTestConfigStorage()));
   }
 

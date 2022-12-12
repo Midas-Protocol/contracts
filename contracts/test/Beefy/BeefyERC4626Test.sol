@@ -11,14 +11,10 @@ import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 contract BeefyERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   uint256 withdrawalFee = 10;
 
   IBeefyVault beefyVault; // ERC4626 => underlyingToken => beefyStrategy
   address lpChef; // beefyStrategy => underlyingToken => .
-
-  constructor() AbstractERC4626Test() {}
 
   function setUp(string memory _testPreFix, bytes calldata data) public override {
     testPreFix = _testPreFix;

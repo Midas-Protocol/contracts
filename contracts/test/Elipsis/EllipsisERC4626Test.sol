@@ -32,8 +32,6 @@ interface IEllipsisRewardToken {
 }
 
 contract EllipsisERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   ILpTokenStaker lpTokenStaker = ILpTokenStaker(0x5B74C99AA2356B4eAa7B85dC486843eDff8Dfdbe);
   FlywheelCore flywheel;
   FuseFlywheelDynamicRewards flywheelRewards;

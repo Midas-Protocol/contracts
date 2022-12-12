@@ -113,7 +113,6 @@ contract WithPool is BaseTest {
     fusePoolDirectory.initialize(false, emptyAddresses);
 
     poolLens = new FusePoolLens();
-    emit log_address(address(poolLens));
     poolLens.initialize(
       fusePoolDirectory,
       "Pool",

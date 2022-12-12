@@ -26,8 +26,6 @@ struct RewardsCycle {
 }
 
 contract JarvisERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   IElysianFields vault;
   FlywheelCore flywheel;
   FuseFlywheelDynamicRewardsPlugin flywheelRewards;
