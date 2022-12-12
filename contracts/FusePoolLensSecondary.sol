@@ -22,7 +22,7 @@ contract FusePoolLensSecondary is Initializable {
    * @notice Constructor to set the `FusePoolDirectory` contract object.
    */
   function initialize(FusePoolDirectory _directory) public initializer {
-    require(address(_directory) != address(0), "FusePoolDirectory instance cannot be the zero address");
+    require(address(_directory) != address(0), "FusePoolDirectory instance cannot be the zero address.");
     directory = _directory;
   }
 

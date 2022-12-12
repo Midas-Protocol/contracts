@@ -1,29 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { WithPool } from "../helpers/WithPool.sol";
-import { BaseTest } from "../config/BaseTest.t.sol";
-
-import { MidasERC4626, EllipsisERC4626, ILpTokenStaker } from "../../midas/strategies/EllipsisERC4626.sol";
+import { EllipsisERC4626, ILpTokenStaker } from "../../midas/strategies/EllipsisERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
-import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { Authority } from "solmate/auth/Auth.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
-import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
-import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
-import { CErc20 } from "../../compound/CErc20.sol";
-import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-
-struct RewardsCycle {
-  uint32 start;
-  uint32 end;
-  uint192 reward;
-}
 
 interface IEllipsisRewardToken {
   function mint(address, uint256) external;
@@ -43,7 +28,7 @@ contract EllipsisERC4626Test is AbstractERC4626Test {
   ERC20 marketKey;
   ERC20Upgradeable[] rewardTokens;
 
-  function setUp(string memory _testPreFix, bytes calldata data) public override {
+  function _setUp(string memory _testPreFix, bytes calldata data) public override {
     sendUnderlyingToken(depositAmount, address(this));
     asset = abi.decode(data, (address));
 

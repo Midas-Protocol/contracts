@@ -8,6 +8,7 @@ import { EllipsisTestConfigStorage } from "./EllipsisTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import "./EllipsisERC4626Test.sol";
 
 contract EllipsisAssetTest is AbstractAssetTest {
@@ -23,7 +24,7 @@ contract EllipsisAssetTest is AbstractAssetTest {
 
     test.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(asset));
 
-    test.setUp(MockERC20(asset).symbol(), testConfig);
+    test._setUp(MockERC20(asset).symbol(), testConfig);
   }
 
   function testInitializedValues() public override {

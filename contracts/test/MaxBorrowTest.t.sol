@@ -105,8 +105,8 @@ contract MaxBorrowTest is WithPool {
       asExtension._setBorrowCapForAssetForCollateral(address(cToken), address(cDaiToken), 0.5e6);
     }
 
-    uint256 maxBorrow = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cToken)));
-    assertApproxEqAbs(maxBorrow, 0.5e6, uint256(1e5), "!max borrow");
+    uint256 maxBorrowAfterBorrowCap = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cToken)));
+    assertApproxEqAbs(maxBorrowAfterBorrowCap, 0.5e6, uint256(1e5), "!max borrow");
   }
 
   function upgradePool(Comptroller pool) internal {

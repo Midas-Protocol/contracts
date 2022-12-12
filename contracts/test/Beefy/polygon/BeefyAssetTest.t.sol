@@ -35,7 +35,7 @@ contract BeefyPolygonAssetTest is AbstractAssetTest {
     vm.prank(strategy.owner());
     strategy.setHarvestOnDeposit(false);
 
-    test.setUp(
+    test._setUp(
       MockERC20(address(IBeefyVault(beefyVault).want())).symbol(),
       abi.encode(beefyVault, withdrawalFee, lpChef)
     );

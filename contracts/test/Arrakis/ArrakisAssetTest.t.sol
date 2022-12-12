@@ -8,6 +8,7 @@ import { ArrakisTestConfig, ArrakisTestConfigStorage } from "./ArrakisTestConfig
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import "./ArrakisERC4626Test.sol";
 
 contract ArrakisAssetTest is AbstractAssetTest {
@@ -26,7 +27,7 @@ contract ArrakisAssetTest is AbstractAssetTest {
 
     test.setUpWithPool(masterPriceOracle, ERC20Upgradeable(asset));
 
-    test.setUp(MockERC20(asset).symbol(), testConfig);
+    test._setUp(MockERC20(asset).symbol(), testConfig);
   }
 
   function testInitializedValues() public override {

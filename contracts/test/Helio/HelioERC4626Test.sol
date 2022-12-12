@@ -19,17 +19,11 @@ import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDy
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-struct RewardsCycle {
-  uint32 start;
-  uint32 end;
-  uint192 reward;
-}
-
 contract HelioERC4626Test is AbstractERC4626Test {
   IJAR jar;
   address jarAdmin = 0x8d388136d578dCD791D081c6042284CED6d9B0c6;
 
-  function setUp(string memory _testPreFix, bytes calldata data) public override {
+  function _setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("Helio-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));
 

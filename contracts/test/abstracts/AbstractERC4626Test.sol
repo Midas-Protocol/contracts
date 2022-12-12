@@ -30,7 +30,7 @@ abstract contract AbstractERC4626Test is WithPool {
     depositAmount = _amount;
   }
 
-  function setUp(string memory _testPreFix, bytes calldata data) public virtual;
+  function _setUp(string memory _testPreFix, bytes calldata data) public virtual;
 
   function deposit(address _owner, uint256 amount) public {
     vm.startPrank(_owner);

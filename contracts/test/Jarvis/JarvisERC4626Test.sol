@@ -19,12 +19,6 @@ import { CErc20 } from "../../compound/CErc20.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-struct RewardsCycle {
-  uint32 start;
-  uint32 end;
-  uint192 reward;
-}
-
 contract JarvisERC4626Test is AbstractERC4626Test {
   IElysianFields vault;
   FlywheelCore flywheel;
@@ -35,7 +29,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
   ERC20Upgradeable[] rewardTokens;
   uint256 poolId;
 
-  function setUp(string memory _testPreFix, bytes calldata data) public override {
+  function _setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("Jarvis-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));
 

@@ -8,6 +8,7 @@ import { DotDotTestConfigStorage } from "./DotDotTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import "./DotDotLpERC4626Test.sol";
 
 // TODO adapt the test to run for the latest block
@@ -24,7 +25,7 @@ contract DotDotAssetTest is AbstractAssetTest {
 
     test.setUpWithPool(MasterPriceOracle(masterPriceOracle), ERC20Upgradeable(asset));
 
-    test.setUp(MockERC20(asset).symbol(), testConfig);
+    test._setUp(MockERC20(asset).symbol(), testConfig);
   }
 
   function testInitializedValues() public override {
