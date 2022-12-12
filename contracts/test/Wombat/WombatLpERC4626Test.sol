@@ -39,8 +39,6 @@ contract WombatERC4626Test is AbstractERC4626Test {
   ERC20 marketKey;
   ERC20Upgradeable[] rewardsToken;
 
-  constructor() WithPool() {}
-
   function setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("wombat-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));

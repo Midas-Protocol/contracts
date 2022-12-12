@@ -22,7 +22,9 @@ abstract contract AbstractERC4626Test is WithPool {
   uint256 initialStrategyBalance;
   uint256 initialStrategySupply;
 
-  constructor() {}
+  constructor() {
+    _forkAtBlock(uint128(block.chainid), block.number);
+  }
 
   function setUp(string memory _testPreFix, bytes calldata data) public virtual;
 

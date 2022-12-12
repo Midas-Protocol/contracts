@@ -39,8 +39,6 @@ contract CurveERC4626Test is AbstractERC4626Test {
   address internal marketAddress;
   ERC20 internal marketKey;
 
-  constructor() WithPool() {}
-
   function setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("curve-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));

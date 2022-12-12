@@ -31,8 +31,6 @@ contract HelioERC4626Test is AbstractERC4626Test {
   IJAR jar;
   address jarAdmin = 0x8d388136d578dCD791D081c6042284CED6d9B0c6;
 
-  constructor() WithPool() {}
-
   function setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("Helio-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));

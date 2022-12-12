@@ -63,11 +63,14 @@ contract WithPool is BaseTest {
     fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
     //    fuseAdmin = new FuseFeeDistributor();
     //    fuseAdmin.initialize(1e16);
-    vm.startPrank(fuseAdmin.owner());
+    {
+      vm.prank(fuseAdmin.owner());
+      fuseAdmin._setPendingOwner(address(this));
+      fuseAdmin._acceptOwner();
+    }
     setUpBaseContracts();
     setUpWhiteList();
     // setUpPoolAndMarket();
-    vm.stopPrank();
   }
 
   function setUpWhiteList() internal {
@@ -136,7 +139,6 @@ contract WithPool is BaseTest {
     newUnitroller.push(address(new Comptroller(payable(fuseAdmin))));
     trueBoolArray.push(true);
     falseBoolArray.push(false);
-    vm.prank(fuseAdmin.owner());
     fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
 
     (, address comptrollerAddress) = fusePoolDirectory.deployPool(
@@ -218,7 +220,7 @@ contract WithPool is BaseTest {
     );
   }
 
-  function whitelistPlugin(address oldImpl, address newImpl) public {
+  function whitelistPlugin(address oldImpl, address newImpl) internal {
     address[] memory _oldCErC20Implementations = new address[](1);
     address[] memory _newCErc20Implementations = new address[](1);
     bool[] memory arrayOfTrue = new bool[](1);

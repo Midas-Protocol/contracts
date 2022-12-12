@@ -45,8 +45,6 @@ contract EllipsisERC4626Test is AbstractERC4626Test {
   ERC20 marketKey;
   ERC20Upgradeable[] rewardTokens;
 
-  constructor() WithPool() {}
-
   function setUp(string memory _testPreFix, bytes calldata data) public override {
     sendUnderlyingToken(depositAmount, address(this));
     asset = abi.decode(data, (address));
