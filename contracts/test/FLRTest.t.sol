@@ -20,7 +20,7 @@ import "../compound/CTokenInterfaces.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 
 import { MidasFlywheelLensRouter, IComptroller, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
-import { MidasFlywheel, MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 
 interface IPriceOracle {
   function price(address underlying) external view returns (uint256);

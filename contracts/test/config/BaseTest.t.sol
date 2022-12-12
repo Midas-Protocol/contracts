@@ -50,9 +50,8 @@ abstract contract BaseTest is Test {
   }
 
   modifier debuggingOnly {
-    bool run = false;
-    try vm.envBool("LOCAL_FORGE_ENV") {
-      _;
+    try vm.envBool("LOCAL_FORGE_ENV") returns (bool run) {
+      if (run) _;
     } catch {
       emit log("skipping this test in the CI/CD - add LOCAL_FORGE_ENV=true to your .env file to run locally");
     }
