@@ -19,7 +19,7 @@ contract AlpacaERC4626Test is BaseTest {
 
   uint256 depositAmount = 100e18;
   address wbnbWhale = 0x0eD7e52944161450477ee417DE9Cd3a859b14fD0;
-  
+
   function afterForkSetUp() internal override {
     underlyingToken = ERC20Upgradeable(ap.getAddress("wtoken"));
     mockVault = MockVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063);

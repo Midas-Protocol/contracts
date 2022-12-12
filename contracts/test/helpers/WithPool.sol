@@ -58,9 +58,9 @@ contract WithPool is BaseTest {
   function setUpWithPool(MasterPriceOracle _masterPriceOracle, ERC20Upgradeable _underlyingToken) public {
     priceOracle = _masterPriceOracle;
     underlyingToken = _underlyingToken;
-    fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
-    //    fuseAdmin = new FuseFeeDistributor();
-    //    fuseAdmin.initialize(1e16);
+    //    fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    fuseAdmin = new FuseFeeDistributor();
+    fuseAdmin.initialize(1e16);
     {
       vm.prank(fuseAdmin.owner());
       fuseAdmin._setPendingOwner(address(this));
