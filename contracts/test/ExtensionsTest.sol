@@ -84,6 +84,7 @@ contract ExtensionsTest is BaseTest {
   address payable internal jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
   FuseFeeDistributor internal ffd;
   ComptrollerFirstExtension internal cfe;
+  CTokenFirstExtension newCTokenExtension;
   MockComptrollerExtension internal mockExtension;
   MockSecondComptrollerExtension internal second;
   MockThirdComptrollerExtension internal third;
@@ -132,6 +133,7 @@ contract ExtensionsTest is BaseTest {
     }
 
     cfe = new ComptrollerFirstExtension();
+    newCTokenExtension = new CTokenFirstExtension();
     mockExtension = new MockComptrollerExtension();
     second = new MockSecondComptrollerExtension();
     third = new MockThirdComptrollerExtension();
@@ -276,8 +278,6 @@ contract ExtensionsTest is BaseTest {
     }
   }
 
-  CTokenFirstExtension newCfe = new CTokenFirstExtension();
-
   function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
     address implBefore = asDelegate.implementation();
     emit log("implementation before");
@@ -302,7 +302,7 @@ contract ExtensionsTest is BaseTest {
 
     // add the extension to the auto upgrade config
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
-    cErc20DelegateExtensions[0] = newCfe;
+    cErc20DelegateExtensions[0] = newCTokenExtension;
     vm.prank(ffd.owner());
     ffd._setCErc20DelegateExtensions(address(newImpl), cErc20DelegateExtensions);
 
@@ -325,7 +325,7 @@ contract ExtensionsTest is BaseTest {
     // check if the extension was added
     address[] memory extensions = asDelegate._listExtensions();
     assertEq(extensions.length, 1, "the first extension should be added");
-    assertEq(extensions[0], address(newCfe), "the first extension should be the only extension");
+    assertEq(extensions[0], address(newCTokenExtension), "the first extension should be the only extension");
 
     // check if the storage is read from the same place
     uint256 totalSupplyAfter = asDelegate.totalSupply();

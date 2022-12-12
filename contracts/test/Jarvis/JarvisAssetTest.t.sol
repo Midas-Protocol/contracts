@@ -23,7 +23,7 @@ contract JarvisAssetTest is AbstractAssetTest {
 
     test.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(asset));
 
-    test.setUp(MockERC20(asset).symbol(), testConfig);
+    test._setUp(MockERC20(asset).symbol(), testConfig);
   }
 
   function testInitializedValues() public override {
