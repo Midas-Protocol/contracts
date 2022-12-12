@@ -49,6 +49,14 @@ abstract contract BaseTest is Test {
     }
   }
 
+  modifier debuggingOnly() {
+    try vm.envBool("LOCAL_FORGE_ENV") returns (bool run) {
+      if (run) _;
+    } catch {
+      emit log("skipping this test in the CI/CD - add LOCAL_FORGE_ENV=true to your .env file to run locally");
+    }
+  }
+
   modifier fork(uint128 chainid) {
     if (shouldRunForChain(chainid)) {
       _forkAtBlock(chainid, 0);
