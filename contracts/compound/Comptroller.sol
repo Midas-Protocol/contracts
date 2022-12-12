@@ -11,6 +11,7 @@ import { Unitroller } from "./Unitroller.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 import { IMidasFlywheel } from "../midas/strategies/flywheel/IMidasFlywheel.sol";
 import { DiamondExtension, DiamondBase, LibDiamond } from "../midas/DiamondExtension.sol";
+import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
 /**
  * @title Compound's Comptroller Contract
@@ -1392,6 +1393,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       markets[address(cToken)].collateralFactorMantissa == 0 &&
       borrowGuardianPaused[address(cToken)] == true &&
       add_(add_(cToken.reserveFactorMantissa(), cToken.adminFeeMantissa()), cToken.fuseFeeMantissa()) == 1e18;
+  }
+
+  function asComptrollerFirstExtension() public view returns (ComptrollerFirstExtension) {
+    return ComptrollerFirstExtension(address(this));
   }
 
   /*** Pool-Wide/Cross-Asset Reentrancy Prevention ***/

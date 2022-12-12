@@ -28,7 +28,7 @@ contract MockAsset is MockERC20 {
   function deposit() external payable {}
 }
 
-contract MaxWithdrawTest is WithPool, BaseTest {
+contract MaxWithdrawTest is WithPool {
   struct LiquidationData {
     address[] cTokens;
     CTokenInterface[] allMarkets;

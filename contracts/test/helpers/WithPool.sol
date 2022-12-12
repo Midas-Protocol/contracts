@@ -23,7 +23,9 @@ import { FusePoolLens } from "../../FusePoolLens.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { CTokenFirstExtension, DiamondExtension } from "../../compound/CTokenFirstExtension.sol";
 
-contract WithPool {
+import { BaseTest } from "../config/BaseTest.t.sol";
+
+contract WithPool is BaseTest {
   ERC20Upgradeable public underlyingToken;
   CErc20 cErc20;
   CToken cToken;
@@ -58,18 +60,24 @@ contract WithPool {
   function setUpWithPool(MasterPriceOracle _masterPriceOracle, ERC20Upgradeable _underlyingToken) public {
     priceOracle = _masterPriceOracle;
     underlyingToken = _underlyingToken;
+    fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    //    fuseAdmin = new FuseFeeDistributor();
+    //    fuseAdmin.initialize(1e16);
+    vm.startPrank(fuseAdmin.owner());
     setUpBaseContracts();
     setUpWhiteList();
     // setUpPoolAndMarket();
+    vm.stopPrank();
   }
 
-  function setUpWhiteList() public {
+  function setUpWhiteList() internal {
     cErc20Delegate = new CErc20Delegate();
     cErc20PluginDelegate = new CErc20PluginDelegate();
     cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
 
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
     cErc20DelegateExtensions[0] = new CTokenFirstExtension();
+
     fuseAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
     fuseAdmin._setCErc20DelegateExtensions(address(cErc20PluginDelegate), cErc20DelegateExtensions);
     fuseAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
@@ -98,10 +106,8 @@ contract WithPool {
     fuseAdmin._editCErc20DelegateWhitelist(oldCErC20Implementations, newCErc20Implementations, f, t);
   }
 
-  function setUpBaseContracts() public {
+  function setUpBaseContracts() internal {
     interestModel = new WhitePaperInterestRateModel(2343665, 1e18, 1e18);
-    fuseAdmin = new FuseFeeDistributor();
-    fuseAdmin.initialize(1e16);
     fusePoolDirectory = new FusePoolDirectory();
     fusePoolDirectory.initialize(false, emptyAddresses);
 
@@ -130,6 +136,7 @@ contract WithPool {
     newUnitroller.push(address(new Comptroller(payable(fuseAdmin))));
     trueBoolArray.push(true);
     falseBoolArray.push(false);
+    vm.prank(fuseAdmin.owner());
     fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
 
     (, address comptrollerAddress) = fusePoolDirectory.deployPool(

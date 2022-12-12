@@ -9,7 +9,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 
-abstract contract AbstractERC4626Test is WithPool, BaseTest {
+abstract contract AbstractERC4626Test is WithPool {
   using FixedPointMathLib for uint256;
 
   MidasERC4626 plugin;
