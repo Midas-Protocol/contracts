@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { BaseTest } from "../config/BaseTest.t.sol";
-
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { MidasERC4626, MiniChefERC4626, IMiniChefV2, IRewarder } from "../../midas/strategies/MiniChefERC4626.sol";
+import { MiniChefERC4626, IMiniChefV2, IRewarder } from "../../midas/strategies/MiniChefERC4626.sol";
 import { MiniChefTestConfigStorage } from "./MiniChefTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
-import { IUniswapV2Factory } from "../../external/uniswap/IUniswapV2Factory.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import "./MiniChefERC4626Test.sol";
 
 contract MiniChefAssetTest is AbstractAssetTest {

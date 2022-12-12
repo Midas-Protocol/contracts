@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { BaseTest } from "../../config/BaseTest.t.sol";
-
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { BeefyERC4626Test } from "../BeefyERC4626Test.sol";
 import { BeefyBscTestConfigStorage } from "./BeefyTestConfig.sol";
-import { MidasERC4626, BeefyERC4626, IBeefyVault } from "../../../midas/strategies/BeefyERC4626.sol";
+import { BeefyERC4626, IBeefyVault } from "../../../midas/strategies/BeefyERC4626.sol";
 import { AbstractAssetTest } from "../../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../../abstracts/ITestConfigStorage.sol";
