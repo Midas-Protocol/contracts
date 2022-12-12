@@ -818,8 +818,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     AccountLiquidityLocalVars memory vars; // Holds all our calculation results
     uint256 oErr;
 
-    vars.totalBorrowsBefore = cTokenModify.totalBorrows();
     if (address(cTokenModify) != address(0)) {
+      vars.totalBorrowsBefore = cTokenModify.totalBorrows();
       vars.borrowedAssetPrice = oracle.getUnderlyingPrice(cTokenModify);
     }
 
@@ -853,7 +853,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         // if the borrowed asset is capped against this collateral
         if (address(cTokenModify) != address(0)) {
           // the value of the collateral is capped regardless if any amount is to be borrowed
-          vars.totalBorrowCapForCollateral = borrowCapForAssetWithCollateral[address(cTokenModify)][address(asset)];
+          vars.totalBorrowCapForCollateral = borrowCapForAssetForCollateral[address(cTokenModify)][address(asset)];
           // check if set to any value
           if (vars.totalBorrowCapForCollateral != 0) {
             // check for underflow

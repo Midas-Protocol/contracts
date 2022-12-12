@@ -72,6 +72,7 @@ contract ComptrollerTest is BaseTest {
 
     address poolAddress = jFiatPoolAddress;
     Comptroller pool = Comptroller(poolAddress);
+    // TODO no need to upgrade after the next deploy
     upgradePool(pool);
 
     address[] memory borrowers = pool.getAllBorrowers();
@@ -124,7 +125,7 @@ contract ComptrollerTest is BaseTest {
 
     ComptrollerFirstExtension asExtension = ComptrollerFirstExtension(poolAddress);
     vm.prank(pool.admin());
-    asExtension._setTotalBorrowCapForAssetForCollateral(address(marketToBorrow), address(cappedCollateralMarket), 1);
+    asExtension._setBorrowCapForAssetForCollateral(address(marketToBorrow), address(cappedCollateralMarket), 1);
     emit log("");
 
     (uint256 errAfter, uint256 liquidityAfter, uint256 shortfallAfter) = pool.getHypotheticalAccountLiquidity(

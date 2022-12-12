@@ -169,5 +169,5 @@ contract ComptrollerV3Storage is ComptrollerV2Storage {
   address[] public nonAccruingRewardsDistributors;
 
   /// @dev caps for the total borrows against specific assets
-  mapping(address => mapping(address => uint256)) borrowCapForAssetWithCollateral;
+  mapping(address => mapping(address => uint256)) borrowCapForAssetForCollateral;
 }

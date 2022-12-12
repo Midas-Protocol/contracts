@@ -46,15 +46,7 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     setUpPool("bsc-test", false, 0.1e18, 1.1e18);
   }
 
-  function testBsc() public fork(BSC_MAINNET) {
-    testMaxWithdraw();
-  }
-
-  function testPolygon() public fork(POLYGON_MAINNET) {
-    testMIIMOMaxWithdraw();
-  }
-
-  function testMaxWithdraw() internal {
+  function testMaxWithdrawBsc() public fork(BSC_MAINNET) {
     FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
     poolLensSecondary.initialize(fusePoolDirectory);
 
@@ -148,7 +140,7 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     }
   }
 
-  function testMIIMOMaxWithdraw() internal {
+  function testMIIMOMaxWithdraw() public fork(POLYGON_MAINNET) {
     FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
     poolLensSecondary.initialize(fusePoolDirectory);
 
