@@ -49,7 +49,7 @@ abstract contract BaseTest is Test {
     }
   }
 
-  modifier debuggingOnly {
+  modifier debuggingOnly() {
     try vm.envBool("LOCAL_FORGE_ENV") returns (bool run) {
       if (run) _;
     } catch {
