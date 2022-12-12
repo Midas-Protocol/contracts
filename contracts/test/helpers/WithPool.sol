@@ -21,6 +21,7 @@ import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { FusePoolLens } from "../../FusePoolLens.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { CTokenFirstExtension, DiamondExtension } from "../../compound/CTokenFirstExtension.sol";
 
 import { BaseTest } from "../config/BaseTest.t.sol";
@@ -58,9 +59,20 @@ contract WithPool is BaseTest {
   function setUpWithPool(MasterPriceOracle _masterPriceOracle, ERC20Upgradeable _underlyingToken) public {
     priceOracle = _masterPriceOracle;
     underlyingToken = _underlyingToken;
-    //    fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
-    fuseAdmin = new FuseFeeDistributor();
-    fuseAdmin.initialize(1e16);
+
+    fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    // upgrade
+    {
+      FuseFeeDistributor newImpl = new FuseFeeDistributor();
+      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(fuseAdmin)));
+      bytes32 bytesAtSlot = vm.load(address(proxy), 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103);
+      address admin = address(uint160(uint256(bytesAtSlot)));
+      vm.prank(admin);
+      proxy.upgradeTo(address(newImpl));
+    }
+
+    //    fuseAdmin = new FuseFeeDistributor();
+    //    fuseAdmin.initialize(1e16);
     {
       vm.prank(fuseAdmin.owner());
       fuseAdmin._setPendingOwner(address(this));
