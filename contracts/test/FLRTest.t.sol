@@ -6,11 +6,10 @@ import "forge-std/Vm.sol";
 
 import "./config/BaseTest.t.sol";
 
-import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
+import { IERC20MetadataUpgradeable, IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
@@ -25,12 +24,6 @@ import { MidasFlywheel, MidasFlywheelCore } from "../midas/strategies/flywheel/M
 
 interface IPriceOracle {
   function price(address underlying) external view returns (uint256);
-}
-
-interface MockERC201 {
-  function balanceOf(address) external view returns (uint256);
-
-  function decimals() external view returns (uint256);
 }
 
 contract FLRTest is BaseTest {
@@ -80,7 +73,7 @@ contract FLRTest is BaseTest {
     );
   }
 
-  function testFuseFlywheelLensRouterBsc() public fork(BSC_MAINNET) {
+  function testFuseFlywheelLensRouterBsc() public debuggingOnly fork(BSC_MAINNET) {
     rewardToken = address(0x71be881e9C5d4465B3FfF61e89c6f3651E69B5bb); // BRZ
     emit log_named_address("rewardToken", address(rewardToken));
     address mkt = 0x159A529c00CD4f91b65C54E77703EDb67B4942e4;
@@ -135,7 +128,7 @@ contract FLRTest is BaseTest {
     }
   }
 
-  function testMoonbeamFlywheelLensRouter() public fork(MOONBEAM_MAINNET) {
+  function testMoonbeamFlywheelLensRouter() public debuggingOnly fork(MOONBEAM_MAINNET) {
     CErc20Token market = CErc20Token(0xa9736bA05de1213145F688e4619E5A7e0dcf4C72);
     rewardToken = address(0x931715FEE2d06333043d11F658C8CE934aC61D0c);
     IComptroller comptroller = IComptroller(0xeB2D3A9D962d89b4A9a34ce2bF6a2650c938e185);
@@ -144,19 +137,19 @@ contract FLRTest is BaseTest {
 
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(MockERC201.balanceOf.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72),
+      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72),
       abi.encode(46968940116682)
     );
 
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(MockERC201.balanceOf.selector, 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685),
+      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685),
       abi.encode(11552962011148995)
     );
 
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(MockERC201.decimals.selector),
+      abi.encodeWithSelector(IERC20MetadataUpgradeable.decimals.selector),
       abi.encode(10)
     );
 
