@@ -189,10 +189,10 @@ contract CurveERC4626Test is AbstractERC4626Test {
       );
 
       (, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(ERC20(address(marketAddress)));
-      // Rewards can be transfered in the next cycle
+      // Rewards can be transferred in the next cycle
       assertEq(cycleEnd, 1663093678, string(abi.encodePacked("!2.cycleEnd-", vm.toString(i), " ", testPreFix)));
 
-      // Rewards can be transfered in the next cycle
+      // Rewards can be transferred in the next cycle
       assertGt(
         cycleReward,
         cycleRewards[i],
