@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
-import { MidasERC4626, BeefyERC4626, IBeefyVault } from "../../midas/strategies/BeefyERC4626.sol";
+import { MidasERC4626, BeefyERC4626, IBeefyVault, IBeefyStrategy } from "../../midas/strategies/BeefyERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
@@ -27,6 +27,10 @@ contract BeefyERC4626Test is AbstractERC4626Test {
 
     lpChef = _lpChef;
     beefyVault = IBeefyVault(_beefyVault);
+
+    IBeefyStrategy strategy = IBeefyStrategy(beefyVault.strategy());
+    vm.prank(strategy.keeper());
+    strategy.setHarvestOnDeposit(false);
     underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
     BeefyERC4626 beefyERC4626 = new BeefyERC4626();
     beefyERC4626.initialize(underlyingToken, beefyVault, _withdrawalFee);
