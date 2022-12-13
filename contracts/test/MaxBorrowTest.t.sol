@@ -107,6 +107,16 @@ contract MaxBorrowTest is WithPool {
 
     uint256 maxBorrowAfterBorrowCap = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cToken)));
     assertApproxEqAbs(maxBorrowAfterBorrowCap, 0.5e6, uint256(1e5), "!max borrow");
+
+    // blacklist
+    {
+      ComptrollerFirstExtension asExtension = comptroller.asComptrollerFirstExtension();
+      vm.prank(comptroller.admin());
+      asExtension._blacklistBorrowingAgainstCollateral(address(cToken), address(cDaiToken), true);
+    }
+
+    uint256 maxBorrowAfterBlacklist = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cToken)));
+    assertEq(maxBorrowAfterBlacklist, 0, "!blacklist");
   }
 
   function upgradePool(Comptroller pool) internal {
