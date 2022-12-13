@@ -15,7 +15,8 @@ contract CErc20WrappingDelegate is CErc20Delegate {
 
     if (_wrappingUnderlying != address(0) && _wrappingUnderlying != address(_wrappingUnderlying)) {
       wrappedUnderlying = ERC20Wrapper(_wrappingUnderlying);
-    }
+      ERC20Wrapper(underlying).approve(_wrappingUnderlying, type(uint256).max);
+    }    
   }
 
   function doTransferIn(address from, uint256 amount) internal virtual override returns (uint256) {
