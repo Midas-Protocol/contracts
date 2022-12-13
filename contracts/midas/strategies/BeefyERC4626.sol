@@ -27,7 +27,6 @@ interface IBeefyVault {
   function getPricePerFullShare() external view returns (uint256);
 
   function strategy() external view returns (address);
-
 }
 
 interface IBeefyStrategy {
