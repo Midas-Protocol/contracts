@@ -18,7 +18,7 @@ contract MockAsset is MockERC20 {
 }
 
 contract MaxBorrowTest is WithPool {
-  address usdcWhale = 0xe7804c37c13166fF0b37F5aE0BB07A3aEbb6e245;
+  address usdcWhale = 0x625E7708f30cA75bfd92586e17077590C60eb4cD;
   address daiWhale = 0x06959153B974D0D5fDfd87D561db6d8d4FA0bb0B;
 
   struct LiquidationData {
