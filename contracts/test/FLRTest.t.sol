@@ -152,7 +152,6 @@ contract FLRTest is BaseTest {
     // comptroller.getAllMarkets();
     MidasFlywheelLensRouter.MarketRewardsInfo[] memory info = lensRouter.getMarketRewardsInfo(comptroller);
     for (uint8 i = 0; i < info.length; i++) {
-
       for (uint8 j = 0; j < info[i].rewardsInfo.length; j++) {
         if (info[i].rewardsInfo[j].formattedAPR != 0) {
           emit log("");
