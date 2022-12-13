@@ -19,12 +19,8 @@ import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
 import "../compound/CTokenInterfaces.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 
-import { MidasFlywheelLensRouter, IComptroller, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { MidasFlywheelLensRouter, IComptroller, CErc20Token, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
-
-interface IPriceOracle {
-  function price(address underlying) external view returns (uint256);
-}
 
 contract FLRTest is BaseTest {
   address rewardToken;
@@ -156,8 +152,11 @@ contract FLRTest is BaseTest {
     // comptroller.getAllMarkets();
     MidasFlywheelLensRouter.MarketRewardsInfo[] memory info = lensRouter.getMarketRewardsInfo(comptroller);
     for (uint8 i = 0; i < info.length; i++) {
+
       for (uint8 j = 0; j < info[i].rewardsInfo.length; j++) {
         if (info[i].rewardsInfo[j].formattedAPR != 0) {
+          emit log("");
+          emit log_named_address("market", address(info[i].market));
           emit log_named_uint("rewardSpeedPerSecondPerToken", info[i].rewardsInfo[j].rewardSpeedPerSecondPerToken);
           emit log_named_uint("formattedAPR", info[i].rewardsInfo[j].formattedAPR);
           emit log_named_uint("rewardTokenPrice", info[i].rewardsInfo[j].rewardTokenPrice);

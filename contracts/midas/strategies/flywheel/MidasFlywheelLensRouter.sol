@@ -19,6 +19,8 @@ interface IPriceOracle {
 interface IComptroller {
   function getRewardsDistributors() external view returns (MidasFlywheelCore[] memory);
 
+  function rewardsDistributors(uint256 index) external view returns (MidasFlywheelCore);
+
   function getAllMarkets() external view returns (CErc20Token[] memory);
 
   function oracle() external view returns (IPriceOracle);
@@ -47,9 +49,26 @@ contract MidasFlywheelLensRouter {
     address rewardToken;
   }
 
+  function getRewardsDistributors(IComptroller comptroller) internal view returns (MidasFlywheelCore[] memory) {
+    uint8 count = 0;
+    while (true) {
+      try comptroller.rewardsDistributors(count) {
+        count++;
+      } catch {
+        break;
+      }
+    }
+    MidasFlywheelCore[] memory accruingFlywheels = new MidasFlywheelCore[](count);
+    for (uint8 i = 0; i < count; i++) {
+      accruingFlywheels[i] = comptroller.rewardsDistributors(i);
+    }
+
+    return accruingFlywheels;
+  }
+
   function getMarketRewardsInfo(IComptroller comptroller) external returns (MarketRewardsInfo[] memory) {
     CErc20Token[] memory markets = comptroller.getAllMarkets();
-    MidasFlywheelCore[] memory flywheels = comptroller.getRewardsDistributors();
+    MidasFlywheelCore[] memory flywheels = getRewardsDistributors(comptroller);
     address[] memory rewardTokens = new address[](flywheels.length);
     uint256[] memory rewardTokenPrices = new uint256[](flywheels.length);
     IPriceOracle oracle = comptroller.oracle();
@@ -61,13 +80,16 @@ contract MidasFlywheelLensRouter {
       CErc20Token market = markets[i];
       uint256 price = oracle.price(market.underlying()); // scaled to 1e18
 
-      for (uint256 j = 0; j < flywheels.length; j++) {
-        MidasFlywheelCore flywheel = flywheels[j];
-        if (i == 0) {
-          address rewardToken = address(flywheel.rewardToken());
+      if (i == 0) {
+        for (uint256 j = 0; j < flywheels.length; j++) {
+          address rewardToken = address(flywheels[j].rewardToken());
           rewardTokens[j] = rewardToken;
           rewardTokenPrices[j] = oracle.price(rewardToken); // scaled to 1e18
         }
+      }
+
+      for (uint256 j = 0; j < flywheels.length; j++) {
+        MidasFlywheelCore flywheel = flywheels[j];
         uint256 rewardSpeedPerSecondPerToken;
         {
           (uint224 indexBefore, uint32 lastUpdatedTimestampBefore) = flywheel.strategyState(market);
@@ -110,31 +132,13 @@ contract MidasFlywheelLensRouter {
     uint256 rewardTokenPrice,
     uint256 underlyingPrice,
     uint256 exchangeRate
-  ) internal returns (uint256) {
-    emit log("");
-    emit log("rewardSpeedPerSecondPerToken");
-    emit log_uint(rewardSpeedPerSecondPerToken);
-
+  ) internal view returns (uint256) {
+    if (rewardSpeedPerSecondPerToken == 0) return 0;
     uint256 nativeSpeedPerSecondPerCToken = rewardSpeedPerSecondPerToken * rewardTokenPrice; // scaled to 10^(reward.decimals + 18)
-    emit log("nativeSpeedPerSecondPerCToken");
-    emit log_uint(nativeSpeedPerSecondPerCToken);
-
     uint256 nativeSpeedPerYearPerCToken = nativeSpeedPerSecondPerCToken * 365.25 days; // scaled to 10^(reward.decimals + 18)
-    emit log("nativeSpeedPerYearPerCToken");
-    emit log_uint(nativeSpeedPerYearPerCToken);
-
     uint256 assetSpeedPerYearPerCToken = nativeSpeedPerYearPerCToken / underlyingPrice; // scaled to 10^(reward.decimals)
-    emit log("assetSpeedPerYearPerCToken");
-    emit log_uint(assetSpeedPerYearPerCToken);
-
     uint256 assetSpeedPerYearPerCTokenScaled = assetSpeedPerYearPerCToken * 1e18; // scaled to 10^(reward.decimals + 18)
-    emit log("assetSpeedPerYearPerCTokenScaled");
-    emit log_uint(assetSpeedPerYearPerCTokenScaled);
-
     uint256 aprInRewardsTokenDecimals = assetSpeedPerYearPerCTokenScaled / exchangeRate; // scaled to 10^(reward.decimals)
-    emit log("aprInRewardsTokenDecimals");
-    emit log_uint(aprInRewardsTokenDecimals);
-
     return aprInRewardsTokenDecimals;
   }
 
