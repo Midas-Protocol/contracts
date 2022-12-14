@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { BeefyERC4626, IBeefyVault } from "../../midas/strategies/BeefyERC4626.sol";
+import { BeefyERC4626, IBeefyVault, IBeefyStrategy } from "../../midas/strategies/BeefyERC4626.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
@@ -18,6 +18,10 @@ contract BeefyERC4626Test is AbstractERC4626Test {
 
     lpChef = _lpChef;
     beefyVault = IBeefyVault(_beefyVault);
+
+    IBeefyStrategy strategy = IBeefyStrategy(beefyVault.strategy());
+    vm.prank(strategy.keeper());
+    strategy.setHarvestOnDeposit(false);
     underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
     BeefyERC4626 beefyERC4626 = new BeefyERC4626();
     beefyERC4626.initialize(underlyingToken, beefyVault, _withdrawalFee);
