@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { BaseTest } from "../config/BaseTest.t.sol";
-
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { MidasERC4626, MiniChefERC4626, IMiniChefV2, IRewarder } from "../../midas/strategies/MiniChefERC4626.sol";
+import { MiniChefERC4626, IMiniChefV2, IRewarder } from "../../midas/strategies/MiniChefERC4626.sol";
 import { MiniChefTestConfigStorage } from "./MiniChefTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
-import { IUniswapV2Factory } from "../../external/uniswap/IUniswapV2Factory.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import "./MiniChefERC4626Test.sol";
 
 contract MiniChefAssetTest is AbstractAssetTest {
@@ -47,19 +45,19 @@ contract MiniChefAssetTest is AbstractAssetTest {
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testDepositWithIncreasedVaultValue() public override {
     this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testDepositWithDecreasedVaultValue() public override {
     this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testWithdrawWithIncreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testWithdrawWithDecreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 
@@ -67,11 +65,11 @@ contract MiniChefAssetTest is AbstractAssetTest {
     this.runTest(MiniChefERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public fork(POLYGON_MAINNET) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     this.runTest(MiniChefERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 
-  function testClaimRewards() public fork(POLYGON_MAINNET) {
+  function testClaimRewards() public {
     this.runTest(MiniChefERC4626Test(address(test)).testClaimRewards);
   }
 }

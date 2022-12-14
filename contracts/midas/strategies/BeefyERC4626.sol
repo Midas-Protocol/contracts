@@ -29,6 +29,14 @@ interface IBeefyVault {
   function strategy() external view returns (address);
 }
 
+interface IBeefyStrategy {
+  function harvestOnDeposit() external view returns (bool);
+
+  function setHarvestOnDeposit(bool) external;
+
+  function keeper() external view returns (address);
+}
+
 /**
  * @title Beefy ERC4626 Contract
  * @notice ERC4626 wrapper for beefy vaults

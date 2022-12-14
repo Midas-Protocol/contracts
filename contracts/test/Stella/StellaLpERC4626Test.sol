@@ -1,36 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { WithPool } from "../helpers/WithPool.sol";
-import { BaseTest } from "../config/BaseTest.t.sol";
-
-import { MidasERC4626, StellaLpERC4626, IStellaDistributorV2 } from "../../midas/strategies/StellaLpERC4626.sol";
+import { StellaLpERC4626, IStellaDistributorV2 } from "../../midas/strategies/StellaLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
-import { CErc20 } from "../../compound/CErc20.sol";
-import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-struct RewardsCycle {
-  uint32 start;
-  uint32 end;
-  uint192 reward;
-}
-
-// Tested on block 19052824
 contract StellaERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   IStellaDistributorV2 distributor = IStellaDistributorV2(0xF3a5454496E26ac57da879bf3285Fa85DEBF0388); // what you deposit the LP into
 
   uint256 poolId;
   address marketAddress;
   ERC20 marketKey;
   ERC20Upgradeable[] rewardsToken;
-
-  constructor() WithPool() {}
 
   function _setUp(string memory _testPreFix, bytes calldata testConfig) public override {
     setUpPool("stella-test ", false, 0.1e18, 1.1e18);

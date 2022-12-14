@@ -1,21 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { WithPool } from "../helpers/WithPool.sol";
-import { BaseTest } from "../config/BaseTest.t.sol";
-
-import { MidasERC4626, CurveGaugeERC4626, IChildGauge } from "../../midas/strategies/CurveGaugeERC4626.sol";
+import { CurveGaugeERC4626, IChildGauge } from "../../midas/strategies/CurveGaugeERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
-import { CErc20 } from "../../compound/CErc20.sol";
-import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 struct RewardsCycle {
@@ -25,8 +19,6 @@ struct RewardsCycle {
 }
 
 contract CurveERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   IChildGauge public gauge;
 
   FlywheelCore[] internal flywheels;
@@ -38,8 +30,6 @@ contract CurveERC4626Test is AbstractERC4626Test {
 
   address internal marketAddress;
   ERC20 internal marketKey;
-
-  constructor() WithPool() {}
 
   function _setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("curve-test ", false, 0.1e18, 1.1e18);
@@ -165,7 +155,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
     // Deposit funds, Rewards are 0
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);
-    CErc20(marketAddress).mint(depositAmount);
+    CErc20PluginRewardsDelegate(marketAddress).mint(depositAmount);
     vm.stopPrank();
 
     for (uint8 i; i < flywheels.length; i++) {
@@ -199,10 +189,10 @@ contract CurveERC4626Test is AbstractERC4626Test {
       );
 
       (, uint32 cycleEnd, uint192 cycleReward) = rewardsPlugins[i].rewardsCycle(ERC20(address(marketAddress)));
-      // Rewards can be transfered in the next cycle
+      // Rewards can be transferred in the next cycle
       assertEq(cycleEnd, 1663093678, string(abi.encodePacked("!2.cycleEnd-", vm.toString(i), " ", testPreFix)));
 
-      // Rewards can be transfered in the next cycle
+      // Rewards can be transferred in the next cycle
       assertGt(
         cycleReward,
         cycleRewards[i],

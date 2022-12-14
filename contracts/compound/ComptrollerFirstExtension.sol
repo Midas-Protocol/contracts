@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import { DiamondExtension } from "../midas/DiamondExtension.sol";
 import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
 import { CTokenInterface, CErc20Interface } from "./CTokenInterfaces.sol";
-import { ComptrollerV3Storage } from "./Comptroller.sol";
+import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 
 contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, ComptrollerErrorReporter {
   /// @notice Emitted when supply cap for a cToken is changed
@@ -218,9 +218,13 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     return uint256(Error.NO_ERROR);
   }
 
-  // a dummy fn to test if the extension works
-  function getFirstMarketSymbol() public view returns (string memory) {
-    return allMarkets[0].symbol();
+  function _setBorrowCapForAssetForCollateral(
+    address cTokenBorrow,
+    address cTokenCollateral,
+    uint256 borrowCap
+  ) public {
+    require(hasAdminRights(), "!admin");
+    borrowCapForAssetForCollateral[cTokenBorrow][cTokenCollateral] = borrowCap;
   }
 
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
@@ -236,7 +240,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     functionSelectors[--fnsCount] = this._setTransferPaused.selector;
     functionSelectors[--fnsCount] = this._setSeizePaused.selector;
     functionSelectors[--fnsCount] = this._unsupportMarket.selector;
-    functionSelectors[--fnsCount] = this.getFirstMarketSymbol.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapForAssetForCollateral.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
