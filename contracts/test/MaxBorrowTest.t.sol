@@ -153,10 +153,11 @@ contract MaxBorrowTest is WithPool {
     // TODO no need to upgrade after the next deploy
     upgradePool(pool);
 
-    address[] memory borrowers = pool.getAllBorrowers();
+    ComptrollerFirstExtension asExtension = ComptrollerFirstExtension(poolAddress);
+    address[] memory borrowers = asExtension.getAllBorrowers();
     address someBorrower = borrowers[1];
 
-    CTokenInterface[] memory markets = pool.getAllMarkets();
+    CTokenInterface[] memory markets = asExtension.getAllMarkets();
     for (uint256 i = 0; i < markets.length; i++) {
       CTokenInterface market = markets[i];
       uint256 borrowed = market.borrowBalanceStored(someBorrower);
@@ -201,7 +202,6 @@ contract MaxBorrowTest is WithPool {
       assertGt(liquidityBefore, 0, "expected positive liquidity");
     }
 
-    ComptrollerFirstExtension asExtension = ComptrollerFirstExtension(poolAddress);
     vm.prank(pool.admin());
     asExtension._setBorrowCapForAssetForCollateral(address(marketToBorrow), address(cappedCollateralMarket), 1);
     emit log("");
