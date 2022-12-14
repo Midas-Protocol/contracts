@@ -9,7 +9,6 @@ import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 import "../compound/CTokenInterfaces.sol";
-import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
 contract MockAsset is MockERC20 {
   constructor() MockERC20("test", "test", 8) {}
@@ -56,6 +55,9 @@ contract MaxBorrowTest is WithPool {
     deployCErc20Delegate(address(vars.usdc), "USDC", "usdc", 0.9e18);
     deployCErc20Delegate(address(vars.dai), "DAI", "dai", 0.9e18);
 
+    // TODO no need to upgrade after the next deploy
+    upgradePool(address(comptroller));
+
     vars.allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
 
     CErc20Delegate cToken = CErc20Delegate(address(vars.allMarkets[0]));
@@ -95,9 +97,6 @@ contract MaxBorrowTest is WithPool {
       assertApproxEqAbs((maxBorrow * 1e18) / 10**cToken.decimals(), maxDaiBorrow, uint256(1e16), "!max borrow");
     }
 
-    // TODO no need to upgrade after the next deploy
-    upgradePool(comptroller);
-
     // borrow cap for collateral test
     {
       ComptrollerFirstExtension asExtension = comptroller.asComptrollerFirstExtension();
@@ -119,39 +118,14 @@ contract MaxBorrowTest is WithPool {
     assertEq(maxBorrowAfterBlacklist, 0, "!blacklist");
   }
 
-  function upgradePool(Comptroller pool) internal {
-    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
-    Comptroller newComptrollerImplementation = new Comptroller(payable(ffd));
-
-    Unitroller asUnitroller = Unitroller(payable(address(pool)));
-    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
-
-    // whitelist the upgrade
-    vm.startPrank(ffd.owner());
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(oldComptrollerImplementation),
-      asArray(address(newComptrollerImplementation)),
-      asArray(true)
-    );
-    DiamondExtension[] memory extensions = new DiamondExtension[](1);
-    extensions[0] = new ComptrollerFirstExtension();
-    ffd._setComptrollerExtensions(address(newComptrollerImplementation), extensions);
-    vm.stopPrank();
-
-    // upgrade to the new comptroller
-    vm.startPrank(asUnitroller.admin());
-    asUnitroller._setPendingImplementation(address(newComptrollerImplementation));
-    newComptrollerImplementation._become(asUnitroller);
-    vm.stopPrank();
-  }
-
   function testTotalBorrowCapPerCollateral() public forkAtBlock(BSC_MAINNET, 23761190) {
     address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
 
     address poolAddress = jFiatPoolAddress;
     Comptroller pool = Comptroller(poolAddress);
+
     // TODO no need to upgrade after the next deploy
-    upgradePool(pool);
+    upgradePool(address(pool));
 
     ComptrollerFirstExtension asExtension = ComptrollerFirstExtension(poolAddress);
     address[] memory borrowers = asExtension.getAllBorrowers();
