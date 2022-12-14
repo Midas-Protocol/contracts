@@ -80,7 +80,6 @@ contract MockThirdComptrollerExtension is DiamondExtension, ComptrollerV3Storage
 
 contract ExtensionsTest is BaseTest {
   // ERC1967Upgrade
-  bytes32 internal constant _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
   address payable internal jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
   FuseFeeDistributor internal ffd;
   ComptrollerFirstExtension internal cfe;
@@ -124,10 +123,7 @@ contract ExtensionsTest is BaseTest {
       {
         FuseFeeDistributor newImpl = new FuseFeeDistributor();
         TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
-        bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-        address admin = address(uint160(uint256(bytesAtSlot)));
-        // emit log_address(admin);
-        vm.prank(admin);
+        vm.prank(proxy.admin());
         proxy.upgradeTo(address(newImpl));
       }
     }
@@ -217,7 +213,7 @@ contract ExtensionsTest is BaseTest {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
 
-    Comptroller somePool = Comptroller(pools[random % pools.length].comptroller);
+    ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
     CTokenInterface[] memory markets = somePool.getAllMarkets();
 
     CTokenInterface someMarket = markets[random % markets.length];
@@ -251,7 +247,7 @@ contract ExtensionsTest is BaseTest {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
 
-    Comptroller somePool = Comptroller(pools[random % pools.length].comptroller);
+    ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
     CTokenInterface[] memory markets = somePool.getAllMarkets();
 
     CTokenInterface someMarket = markets[random % markets.length];

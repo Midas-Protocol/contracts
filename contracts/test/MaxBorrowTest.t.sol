@@ -50,7 +50,7 @@ contract MaxWithdrawTestPolygon is WithPool, BaseTest {
     deployCErc20Delegate(address(vars.usdc), "USDC", "usdc", 0.9e18);
     deployCErc20Delegate(address(vars.dai), "DAI", "dai", 0.9e18);
 
-    vars.allMarkets = comptroller.getAllMarkets();
+    vars.allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
 
     CErc20Delegate cToken = CErc20Delegate(address(vars.allMarkets[0]));
 

@@ -116,7 +116,7 @@ contract LiquidityMiningTest is BaseTest {
       0.9e18
     );
 
-    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
     cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
   }
 

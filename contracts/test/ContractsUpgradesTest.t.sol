@@ -21,9 +21,6 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 
 // TODO: exclude test from CI
 contract ContractsUpgradesTest is BaseTest {
-  // taken from ERC1967Upgrade
-  bytes32 internal constant _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
-
   function testFusePoolDirectoryUpgrade() public fork(BSC_MAINNET) {
     address contractToTest = ap.getAddress("FusePoolDirectory"); // FusePoolDirectory proxy
 
@@ -40,10 +37,7 @@ contract ContractsUpgradesTest is BaseTest {
     {
       FusePoolDirectory newImpl = new FusePoolDirectory();
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(contractToTest));
-      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-      address admin = address(uint160(uint256(bytesAtSlot)));
-      //            emit log_address(admin);
-      vm.prank(admin);
+      vm.prank(proxy.admin());
       proxy.upgradeTo(address(newImpl));
     }
 
@@ -80,10 +74,7 @@ contract ContractsUpgradesTest is BaseTest {
     {
       FuseFeeDistributor newImpl = new FuseFeeDistributor();
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffdProxy)));
-      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-      address admin = address(uint160(uint256(bytesAtSlot)));
-      // emit log_address(admin);
-      vm.prank(admin);
+      vm.prank(proxy.admin());
       proxy.upgradeTo(address(newImpl));
     }
 
@@ -132,11 +123,7 @@ contract ContractsUpgradesTest is BaseTest {
 
         // upgrade
         TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(flywheels[j]));
-        bytes32 bytesAtSlot = vm.load(
-          address(proxy),
-          0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103
-        );
-        address admin = address(uint160(uint256(bytesAtSlot)));
+        address admin = proxy.admin();
 
         if (admin != address(0)) {
           // emit log_address(admin);
@@ -168,10 +155,7 @@ contract ContractsUpgradesTest is BaseTest {
     {
       FuseFeeDistributor newImpl = new FuseFeeDistributor();
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
-      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-      address admin = address(uint160(uint256(bytesAtSlot)));
-      // emit log_address(admin);
-      vm.prank(admin);
+      vm.prank(proxy.admin());
       proxy.upgradeTo(address(newImpl));
     }
     // whitelist the upgrade
@@ -190,12 +174,6 @@ contract ContractsUpgradesTest is BaseTest {
     // register the extension
     vm.prank(ffd.owner());
     ffd._registerComptrollerExtension(jFiatPoolAddress, cfe, DiamondExtension(address(0)));
-
-    // assert that it worked
-    ComptrollerFirstExtension asCfe = ComptrollerFirstExtension(jFiatPoolAddress);
-    emit log(asCfe.getFirstMarketSymbol());
-
-    assertEq(asCfe.getFirstMarketSymbol(), "fjBRL-1", "market symbol does not match");
   }
 
   function testBscComptrollerExtensions() public fork(BSC_MAINNET) {

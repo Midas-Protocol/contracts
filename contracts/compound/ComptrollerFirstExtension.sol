@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import { DiamondExtension } from "../midas/DiamondExtension.sol";
 import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
 import { CTokenInterface, CErc20Interface } from "./CTokenInterfaces.sol";
-import { ComptrollerV3Storage } from "./Comptroller.sol";
+import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 
 contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, ComptrollerErrorReporter {
   /// @notice Emitted when supply cap for a cToken is changed
@@ -218,13 +218,8 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     return uint256(Error.NO_ERROR);
   }
 
-  // a dummy fn to test if the extension works
-  function getFirstMarketSymbol() public view returns (string memory) {
-    return allMarkets[0].symbol();
-  }
-
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 11;
+    uint8 fnsCount = 15;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
     functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
@@ -236,8 +231,71 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     functionSelectors[--fnsCount] = this._setTransferPaused.selector;
     functionSelectors[--fnsCount] = this._setSeizePaused.selector;
     functionSelectors[--fnsCount] = this._unsupportMarket.selector;
-    functionSelectors[--fnsCount] = this.getFirstMarketSymbol.selector;
+    functionSelectors[--fnsCount] = this.getAllMarkets.selector;
+    functionSelectors[--fnsCount] = this.getAllBorrowers.selector;
+    functionSelectors[--fnsCount] = this.getWhitelist.selector;
+    functionSelectors[--fnsCount] = this.getRewardsDistributors.selector;
+    functionSelectors[--fnsCount] = this.isUserOfPool.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
+  }
+
+
+  /**
+   * @notice Return all of the markets
+   * @dev The automatic getter may be used to access an individual market.
+   * @return The list of market addresses
+   */
+  function getAllMarkets() public view returns (CTokenInterface[] memory) {
+    return allMarkets;
+  }
+
+  /**
+   * @notice Return all of the borrowers
+   * @dev The automatic getter may be used to access an individual borrower.
+   * @return The list of borrower account addresses
+   */
+  function getAllBorrowers() public view returns (address[] memory) {
+    return allBorrowers;
+  }
+
+  /**
+   * @notice Return all of the whitelist
+   * @dev The automatic getter may be used to access an individual whitelist status.
+   * @return The list of borrower account addresses
+   */
+  function getWhitelist() external view returns (address[] memory) {
+    return whitelistArray;
+  }
+
+  /**
+   * @notice Returns an array of all accruing and non-accruing flywheels
+   */
+  function getRewardsDistributors() external view returns (address[] memory) {
+    address[] memory allFlywheels = new address[](rewardsDistributors.length + nonAccruingRewardsDistributors.length);
+
+    uint8 i = 0;
+    while (i < rewardsDistributors.length) {
+      allFlywheels[i] = rewardsDistributors[i];
+      i++;
+    }
+    uint8 j = 0;
+    while (j < nonAccruingRewardsDistributors.length) {
+      allFlywheels[i + j] = nonAccruingRewardsDistributors[j];
+      j++;
+    }
+
+    return allFlywheels;
+  }
+
+  function isUserOfPool(address user) external view returns (bool) {
+    for (uint256 i = 0; i < allMarkets.length; i++) {
+      address marketAddress = address(allMarkets[i]);
+      if (markets[marketAddress].accountMembership[user]) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

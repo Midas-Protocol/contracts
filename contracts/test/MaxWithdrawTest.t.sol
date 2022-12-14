@@ -66,7 +66,7 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     deployCErc20Delegate(address(vars.asset), "BNB", "bnb", 0.9e18);
     deployCErc20Delegate(address(vars.usdc), "USDC", "usdc", 0.9e18);
 
-    vars.allMarkets = comptroller.getAllMarkets();
+    vars.allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
     CErc20Delegate cBnbToken = CErc20Delegate(address(vars.allMarkets[0]));
 
     CErc20Delegate cToken = CErc20Delegate(address(vars.allMarkets[1]));
@@ -160,7 +160,7 @@ contract MaxWithdrawTest is WithPool, BaseTest {
     deployCErc20Delegate(address(vars.asset), "MIMO", "mimo", 0.9e18);
     deployCErc20Delegate(address(vars.usdc), "USDC", "usdc", 0.9e18);
 
-    vars.allMarkets = comptroller.getAllMarkets();
+    vars.allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
     CErc20Delegate cMimoToken = CErc20Delegate(address(vars.allMarkets[0]));
 
     CErc20Delegate cToken = CErc20Delegate(address(vars.allMarkets[1]));

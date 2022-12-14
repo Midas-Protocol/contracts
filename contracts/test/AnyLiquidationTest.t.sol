@@ -39,13 +39,10 @@ contract AnyLiquidationTest is BaseTest {
   IUniswapV2Pair mostLiquidPair2;
 
   function upgradeAp() internal {
-    bytes32 _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
     AddressesProvider newImpl = new AddressesProvider();
     newImpl.initialize(address(this));
     TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ap)));
-    bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-    address admin = address(uint160(uint256(bytesAtSlot)));
-    vm.prank(admin);
+    vm.prank(proxy.admin());
     proxy.upgradeTo(address(newImpl));
   }
 
