@@ -18,7 +18,9 @@ contract FusePoolDirectoryTest is BaseTest {
     {
       FusePoolDirectory newImpl = new FusePoolDirectory();
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(fpdAddress));
-      vm.prank(proxy.admin());
+      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
+      address admin = address(uint160(uint256(bytesAtSlot)));
+      vm.prank(admin);
       proxy.upgradeTo(address(newImpl));
     }
   }

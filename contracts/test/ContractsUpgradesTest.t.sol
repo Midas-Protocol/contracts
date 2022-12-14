@@ -21,8 +21,6 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 
 // TODO: exclude test from CI
 contract ContractsUpgradesTest is BaseTest {
-  bytes32 internal constant _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
-
   function testFusePoolDirectoryUpgrade() public fork(BSC_MAINNET) {
     address contractToTest = ap.getAddress("FusePoolDirectory"); // FusePoolDirectory proxy
 

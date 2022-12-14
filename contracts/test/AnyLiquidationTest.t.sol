@@ -42,7 +42,9 @@ contract AnyLiquidationTest is BaseTest {
     AddressesProvider newImpl = new AddressesProvider();
     newImpl.initialize(address(this));
     TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ap)));
-    vm.prank(proxy.admin());
+    bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
+    address admin = address(uint160(uint256(bytesAtSlot)));
+    vm.prank(admin);
     proxy.upgradeTo(address(newImpl));
   }
 
