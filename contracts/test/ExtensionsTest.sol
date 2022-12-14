@@ -92,6 +92,12 @@ contract ExtensionsTest is BaseTest {
   function afterForkSetUp() internal override {
     ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
 
+    cfe = new ComptrollerFirstExtension();
+    newCTokenExtension = new CTokenFirstExtension();
+    mockExtension = new MockComptrollerExtension();
+    second = new MockSecondComptrollerExtension();
+    third = new MockThirdComptrollerExtension();
+
     if (block.chainid == BSC_MAINNET) {
       // change the implementation to the new that can add extensions
       Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
@@ -99,47 +105,34 @@ contract ExtensionsTest is BaseTest {
 
       Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
       address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
+
       // whitelist the upgrade
-      vm.prank(ffd.owner());
+      vm.startPrank(ffd.owner());
       ffd._editComptrollerImplementationWhitelist(
         asArray(oldComptrollerImplementation),
         asArray(latestComptrollerImplementation),
         asArray(true)
       );
       // whitelist the new pool creation
-      vm.prank(ffd.owner());
       ffd._editComptrollerImplementationWhitelist(
         asArray(address(0)),
         asArray(latestComptrollerImplementation),
         asArray(true)
       );
+      DiamondExtension[] memory extensions = new DiamondExtension[](1);
+      extensions[0] = cfe;
+      ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);
+      vm.stopPrank();
+
       // upgrade to the new comptroller
       vm.startPrank(asUnitroller.admin());
       asUnitroller._setPendingImplementation(latestComptrollerImplementation);
       newComptrollerImplementation._become(asUnitroller);
       vm.stopPrank();
-
-      // upgrade the FuseFeeDistributor to include the getCErc20DelegateExtensions fn
-      {
-        FuseFeeDistributor newImpl = new FuseFeeDistributor();
-        TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
-        vm.prank(proxy.admin());
-        proxy.upgradeTo(address(newImpl));
-      }
     }
-
-    cfe = new ComptrollerFirstExtension();
-    newCTokenExtension = new CTokenFirstExtension();
-    mockExtension = new MockComptrollerExtension();
-    second = new MockSecondComptrollerExtension();
-    third = new MockThirdComptrollerExtension();
   }
 
   function testExtensionReplace() public fork(BSC_MAINNET) {
-    // initialize with the first extension
-    vm.prank(ffd.owner());
-    ffd._registerComptrollerExtension(jFiatPoolAddress, cfe, DiamondExtension(address(0)));
-
     // replace the first extension with the mock
     vm.prank(ffd.owner());
     ffd._registerComptrollerExtension(jFiatPoolAddress, mockExtension, cfe);
@@ -169,20 +162,15 @@ contract ExtensionsTest is BaseTest {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
 
     // deploy a pool that will not get any extensions automatically
-    {
-      (, address poolAddress) = fpd.deployPool(
-        "just-a-test",
-        latestComptrollerImplementation,
-        abi.encode(payable(address(ffd))),
-        false,
-        0.1e18,
-        1.1e18,
-        ap.getAddress("MasterPriceOracle")
-      );
-
-      address[] memory initExtensionsBefore = DiamondBase(payable(poolAddress))._listExtensions();
-      assertEq(initExtensionsBefore.length, 0, "remove this if the ffd config is set up");
-    }
+    (, address poolAddress) = fpd.deployPool(
+      "just-a-test",
+      latestComptrollerImplementation,
+      abi.encode(payable(address(ffd))),
+      false,
+      0.1e18,
+      1.1e18,
+      ap.getAddress("MasterPriceOracle")
+    );
 
     // configure the FFD so that the extension is automatically added on the pool creation
     DiamondExtension[] memory comptrollerExtensions = new DiamondExtension[](1);
