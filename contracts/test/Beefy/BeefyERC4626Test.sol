@@ -1,24 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { BaseTest } from "../config/BaseTest.t.sol";
-
-import { MidasERC4626, BeefyERC4626, IBeefyVault, IBeefyStrategy } from "../../midas/strategies/BeefyERC4626.sol";
-import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { Authority } from "solmate/auth/Auth.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { BeefyERC4626, IBeefyVault, IBeefyStrategy } from "../../midas/strategies/BeefyERC4626.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 contract BeefyERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   uint256 withdrawalFee = 10;
 
   IBeefyVault beefyVault; // ERC4626 => underlyingToken => beefyStrategy
   address lpChef; // beefyStrategy => underlyingToken => .
-
-  constructor() AbstractERC4626Test() {}
 
   function _setUp(string memory _testPreFix, bytes calldata data) public override {
     testPreFix = _testPreFix;

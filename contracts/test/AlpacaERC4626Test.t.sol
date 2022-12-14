@@ -10,7 +10,6 @@ import { MockVault } from "./mocks/alpaca/MockVault.sol";
 import { IW_NATIVE } from "../utils/IW_NATIVE.sol";
 import { FixedPointMathLib } from "../utils/FixedPointMathLib.sol";
 
-// TODO adapt test to run for the latest block
 contract AlpacaERC4626Test is BaseTest {
   using FixedPointMathLib for uint256;
   AlpacaERC4626 alpacaERC4626;
@@ -19,21 +18,15 @@ contract AlpacaERC4626Test is BaseTest {
   MockVault mockVault;
 
   uint256 depositAmount = 100e18;
-
-  address joy = 0x0eD7e52944161450477ee417DE9Cd3a859b14fD0;
-
-  uint256 iniitalBeefyBalance = 0;
-  uint256 initialBeefySupply = 0;
+  address wbnbWhale = 0x0eD7e52944161450477ee417DE9Cd3a859b14fD0;
 
   function afterForkSetUp() internal override {
     underlyingToken = ERC20Upgradeable(ap.getAddress("wtoken"));
     mockVault = MockVault(0xd7D069493685A581d27824Fc46EdA46B7EfC0063);
     alpacaERC4626 = new AlpacaERC4626();
     alpacaERC4626.initialize(underlyingToken, IAlpacaVault(address(mockVault)), IW_NATIVE(ap.getAddress("wtoken")));
-    iniitalBeefyBalance = mockVault.totalToken();
-    initialBeefySupply = mockVault.totalSupply();
-    sendUnderlyingToken(100e18, address(this));
-    sendUnderlyingToken(100e18, address(1));
+    dealWNative(100e18, address(this));
+    dealWNative(100e18, address(1));
   }
 
   function deposit(address _owner, uint256 amount) public {
@@ -43,14 +36,13 @@ contract AlpacaERC4626Test is BaseTest {
     vm.stopPrank();
   }
 
-  function sendUnderlyingToken(uint256 amount, address recipient) public {
-    vm.startPrank(joy);
+  function dealWNative(uint256 amount, address recipient) public {
+    vm.prank(wbnbWhale);
     underlyingToken.transfer(recipient, amount);
-    vm.stopPrank();
   }
 
   function increaseAssetsInVault() public {
-    sendUnderlyingToken(1000e18, address(mockVault));
+    dealWNative(1000e18, address(mockVault));
     // mockVault.earn();
   }
 
@@ -60,7 +52,7 @@ contract AlpacaERC4626Test is BaseTest {
     return shares;
   }
 
-  function testDeposit() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testDeposit() public fork(BSC_MAINNET) {
     uint256 expectedErc4626Shares = alpacaERC4626.previewDeposit(depositAmount);
 
     deposit(address(this), depositAmount);
@@ -78,7 +70,7 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares);
   }
 
-  function testMultipleDeposit() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testMultipleDeposit() public fork(BSC_MAINNET) {
     uint256 expectedErc4626Shares = alpacaERC4626.previewDeposit(depositAmount);
 
     deposit(address(this), depositAmount);
@@ -91,11 +83,11 @@ contract AlpacaERC4626Test is BaseTest {
     );
     assertTrue(
       diff(depositAmount, alpacaERC4626.balanceOfUnderlying(address(this))) <= 10,
-      "Underlying token balance should be same as depositied amount"
+      "Underlying token balance should be same as deposited amount"
     );
     assertTrue(
       diff(depositAmount, alpacaERC4626.balanceOfUnderlying(address(1))) <= 10,
-      "Underlying token balance should be same as depositied amount"
+      "Underlying token balance should be same as deposited amount"
     );
 
     // Test that we minted the correct amount of token
@@ -112,7 +104,7 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "Beefy erc4626 locked amount checking");
   }
 
-  function testMint() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testMint() public fork(BSC_MAINNET) {
     uint256 mintAmount = alpacaERC4626.previewDeposit(depositAmount);
 
     underlyingToken.approve(address(alpacaERC4626), depositAmount);
@@ -132,7 +124,6 @@ contract AlpacaERC4626Test is BaseTest {
   }
 
   function testMultipleMint() public fork(BSC_MAINNET) {
-    // forkAtBlock(BSC_MAINNET, 20238373) {
     uint256 mintAmount = alpacaERC4626.previewDeposit(depositAmount);
 
     underlyingToken.approve(address(alpacaERC4626), depositAmount);
@@ -169,7 +160,7 @@ contract AlpacaERC4626Test is BaseTest {
     vm.stopPrank();
   }
 
-  function testWithdraw() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testWithdraw() public fork(BSC_MAINNET) {
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);
@@ -209,7 +200,7 @@ contract AlpacaERC4626Test is BaseTest {
     );
   }
 
-  function testMultipleWithdraw() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testMultipleWithdraw() public fork(BSC_MAINNET) {
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);
@@ -283,7 +274,7 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "Beefy erc4626 locked amount checking");
   }
 
-  function testRedeem() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testRedeem() public fork(BSC_MAINNET) {
     uint256 withdrawalAmount = 10e18;
     uint256 redeemAmount = alpacaERC4626.previewWithdraw(withdrawalAmount);
 
@@ -321,7 +312,7 @@ contract AlpacaERC4626Test is BaseTest {
     );
   }
 
-  function testAlapacaMultipleRedeem() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testAlapacaMultipleRedeem() public fork(BSC_MAINNET) {
     uint256 withdrawalAmount = 10e18;
     uint256 redeemAmount = alpacaERC4626.previewWithdraw(withdrawalAmount);
 
@@ -428,7 +419,7 @@ contract AlpacaERC4626Test is BaseTest {
     );
   }
 
-  function testAlpacaEmergencyWithdrawAndPause() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testAlpacaEmergencyWithdrawAndPause() public fork(BSC_MAINNET) {
     deposit(address(this), depositAmount);
 
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "!init 0");
@@ -440,7 +431,7 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(alpacaERC4626.totalAssets(), expectedBal, "!totalAssets == expectedBal");
   }
 
-  function testAlpacaEmergencyWithdrawAndRedeem() public forkAtBlock(BSC_MAINNET, 20238373) {
+  function testAlpacaEmergencyWithdrawAndRedeem() public fork(BSC_MAINNET) {
     uint256 withdrawAmount = 1e18;
 
     deposit(address(this), depositAmount);

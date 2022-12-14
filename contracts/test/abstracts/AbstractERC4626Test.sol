@@ -9,20 +9,26 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 
-abstract contract AbstractERC4626Test is WithPool, BaseTest {
+abstract contract AbstractERC4626Test is WithPool {
   using FixedPointMathLib for uint256;
 
   MidasERC4626 plugin;
 
   string testPreFix;
 
-  uint256 depositAmount = 100e18;
+  uint256 public depositAmount = 100e18;
   uint256 BPS_DENOMINATOR = 10_000;
 
   uint256 initialStrategyBalance;
   uint256 initialStrategySupply;
 
-  constructor() {}
+  constructor() {
+    _forkAtBlock(uint128(block.chainid), block.number);
+  }
+
+  function setDepositAmount(uint256 _amount) public {
+    depositAmount = _amount;
+  }
 
   function _setUp(string memory _testPreFix, bytes calldata data) public virtual;
 
@@ -231,20 +237,20 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
 
     // Test that the balance view calls work
     assertApproxEqAbs(
-      depositAmount * 2 - plugin.totalAssets(),
-      1,
+      depositAmount * 2,
+      plugin.totalAssets(),
       uint256(10),
       string(abi.encodePacked("Total Assets should be same as sum of deposited amounts ", testPreFix))
     );
     assertApproxEqAbs(
-      depositAmount - plugin.convertToAssets(plugin.balanceOf(address(this))),
-      1,
+      depositAmount,
+      plugin.convertToAssets(plugin.balanceOf(address(this))),
       uint256(10),
       string(abi.encodePacked("Underlying token balance should be same as deposited amount ", testPreFix))
     );
     assertApproxEqAbs(
-      depositAmount - plugin.convertToAssets(plugin.balanceOf(address(1))),
-      1,
+      depositAmount,
+      plugin.convertToAssets(plugin.balanceOf(address(1))),
       uint256(10),
       string(abi.encodePacked("Underlying token balance should be same as deposited amount ", testPreFix))
     );
@@ -407,14 +413,14 @@ abstract contract AbstractERC4626Test is WithPool, BaseTest {
 
     // Test that the balance view calls work
     assertApproxEqAbs(
-      depositAmount + depositAmount - plugin.totalAssets(),
-      1,
+      depositAmount + depositAmount,
+      plugin.totalAssets(),
       uint256(10),
       string(abi.encodePacked("!2.totalAssets ", testPreFix))
     );
     assertApproxEqAbs(
-      depositAmount - plugin.convertToAssets(plugin.balanceOf(address(1))),
-      1,
+      depositAmount,
+      plugin.convertToAssets(plugin.balanceOf(address(1))),
       uint256(1),
       string(abi.encodePacked("!2.balOfUnderlying ", testPreFix))
     );

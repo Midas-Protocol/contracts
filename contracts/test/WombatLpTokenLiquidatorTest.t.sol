@@ -20,7 +20,7 @@ contract WombatLpTokenLiquidatorTest is BaseTest {
     mp = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
   }
 
-  function testRedeemWBNB() public forkAtBlock(BSC_MAINNET, 21547774) {
+  function testRedeemWBNB() public fork(BSC_MAINNET) {
     address wombatWBNB = 0x74f019A5C4eD2C2950Ce16FaD7Af838549092c5b;
     uint256 assetAmount = 100e18;
 

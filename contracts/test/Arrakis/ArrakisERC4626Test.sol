@@ -1,24 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { WithPool } from "../helpers/WithPool.sol";
-import { BaseTest } from "../config/BaseTest.t.sol";
-
-import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-
-import { MidasERC4626, ArrakisERC4626, IGuniPool } from "../../midas/strategies/ArrakisERC4626.sol";
+import { ArrakisERC4626, IGuniPool } from "../../midas/strategies/ArrakisERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { Authority } from "solmate/auth/Auth.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
-import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { CErc20 } from "../../compound/CErc20.sol";
-import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 struct RewardsCycle {
@@ -28,8 +20,6 @@ struct RewardsCycle {
 }
 
 contract ArrakisERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   IGuniPool pool;
   FlywheelCore flywheel;
   FuseFlywheelDynamicRewardsPlugin flywheelRewards;
@@ -37,8 +27,6 @@ contract ArrakisERC4626Test is AbstractERC4626Test {
   address marketAddress;
   ERC20 marketKey;
   ERC20Upgradeable[] rewardTokens;
-
-  constructor() WithPool() {}
 
   function _setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("arrakis-test ", false, 0.1e18, 1.1e18);
