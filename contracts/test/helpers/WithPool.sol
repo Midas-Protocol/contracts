@@ -46,7 +46,7 @@ contract WithPool is BaseTest {
 
   address[] markets;
   address[] emptyAddresses;
-  address[] newUnitroller;
+  address[] newComptrollers;
   bool[] falseBoolArray;
   bool[] trueBoolArray;
   bool[] t;
@@ -146,14 +146,18 @@ contract WithPool is BaseTest {
     uint256 liquidationIncentive
   ) public {
     emptyAddresses.push(address(0));
-    newUnitroller.push(address(new Comptroller(payable(fuseAdmin))));
+    newComptrollers.push(address(new Comptroller(payable(fuseAdmin))));
     trueBoolArray.push(true);
     falseBoolArray.push(false);
-    fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
+    fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newComptrollers, trueBoolArray);
+
+    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    extensions[0] = new ComptrollerFirstExtension();
+    fuseAdmin._setComptrollerExtensions(address(newComptrollers[0]), extensions);
 
     (, address comptrollerAddress) = fusePoolDirectory.deployPool(
       name,
-      newUnitroller[0],
+      newComptrollers[0],
       abi.encode(payable(address(fuseAdmin))),
       enforceWhitelist,
       closeFactor,
