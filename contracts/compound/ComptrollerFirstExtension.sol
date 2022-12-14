@@ -242,7 +242,6 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     return functionSelectors;
   }
 
-
   /**
    * @notice Return all of the markets
    * @dev The automatic getter may be used to access an individual market.
