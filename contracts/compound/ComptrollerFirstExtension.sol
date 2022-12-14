@@ -219,7 +219,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
   }
 
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 15;
+    uint8 fnsCount = 17;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
     functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
@@ -236,6 +236,8 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     functionSelectors[--fnsCount] = this.getWhitelist.selector;
     functionSelectors[--fnsCount] = this.getRewardsDistributors.selector;
     functionSelectors[--fnsCount] = this.isUserOfPool.selector;
+    functionSelectors[--fnsCount] = this.getAccruingFlywheels.selector;
+    functionSelectors[--fnsCount] = this._removeFlywheel.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
@@ -286,6 +288,40 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     }
 
     return allFlywheels;
+  }
+
+  function getAccruingFlywheels() external view returns (address[] memory) {
+    return rewardsDistributors;
+  }
+
+  /**
+   * @dev Removes a flywheel from the accruing or non-accruing array
+   * @param flywheelAddress The address of the flywheel to remove from the accruing or non-accruing array
+   * @return true if the flywheel was found and removed
+   */
+  function _removeFlywheel(address flywheelAddress) external returns (bool) {
+    require(hasAdminRights(), "!admin");
+    require(flywheelAddress != address(0), "!flywheel");
+
+    // remove it from the accruing
+    for (uint256 i = 0; i < rewardsDistributors.length; i++) {
+      if (flywheelAddress == rewardsDistributors[i]) {
+        rewardsDistributors[i] = rewardsDistributors[rewardsDistributors.length - 1];
+        rewardsDistributors.pop();
+        return true;
+      }
+    }
+
+    // or remove it from the non-accruing
+    for (uint256 i = 0; i < nonAccruingRewardsDistributors.length; i++) {
+      if (flywheelAddress == nonAccruingRewardsDistributors[i]) {
+        nonAccruingRewardsDistributors[i] = nonAccruingRewardsDistributors[nonAccruingRewardsDistributors.length - 1];
+        nonAccruingRewardsDistributors.pop();
+        return true;
+      }
+    }
+
+    return false;
   }
 
   function isUserOfPool(address user) external view returns (bool) {

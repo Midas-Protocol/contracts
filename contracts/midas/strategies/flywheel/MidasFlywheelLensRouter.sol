@@ -50,6 +50,7 @@ contract MidasFlywheelLensRouter {
   }
 
   function getRewardsDistributors(IComptroller comptroller) internal view returns (MidasFlywheelCore[] memory) {
+    // TODO replace with comptroller.getAccruingFlywheels()
     uint8 count = 0;
     while (true) {
       try comptroller.rewardsDistributors(count) {
