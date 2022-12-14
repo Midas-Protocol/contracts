@@ -12,6 +12,7 @@ import "../compound/CTokenInterfaces.sol";
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
+import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
@@ -115,6 +116,9 @@ contract DeployMarketsTest is Test {
     trueBoolArray.push(true);
     falseBoolArray.push(false);
     fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
+    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    extensions[0] = new ComptrollerFirstExtension();
+    fuseAdmin._setComptrollerExtensions(address(tempComptroller), extensions);
     (, address comptrollerAddress) = fusePoolDirectory.deployPool(
       "TestPool",
       address(tempComptroller),
