@@ -81,7 +81,7 @@ abstract contract BaseTest is Test {
     return run;
   }
 
-  function _forkAtBlock(uint128 chainid, uint256 blockNumber) private {
+  function _forkAtBlock(uint128 chainid, uint256 blockNumber) internal {
     if (block.chainid != chainid) {
       if (blockNumber != 0) {
         vm.selectFork(getArchiveForkId(chainid));

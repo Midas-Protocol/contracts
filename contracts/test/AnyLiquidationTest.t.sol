@@ -199,7 +199,7 @@ contract AnyLiquidationTest is BaseTest {
             continue;
           }
 
-          (, , shortfall) = vars.comptroller.getHypotheticalAccountLiquidity(vars.borrower, address(0), 0, 0);
+          (, , shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
           if (shortfall == 0) {
             emit log("collateral still enough");
             continue;

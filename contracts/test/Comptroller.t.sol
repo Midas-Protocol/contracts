@@ -5,6 +5,10 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
+import { ComptrollerFirstExtension, DiamondExtension } from "../compound/ComptrollerFirstExtension.sol";
+import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
+import { Unitroller } from "../compound/Unitroller.sol";
+import { CTokenInterface, CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
 
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel-v2/interfaces/IFlywheelRewards.sol";

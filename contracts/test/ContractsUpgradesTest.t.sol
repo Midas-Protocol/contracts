@@ -139,25 +139,16 @@ contract ContractsUpgradesTest is BaseTest {
     }
   }
 
-  /**
-   * @dev testing if the comptroller can add diamond-pattern extensions
-   */
-  function testDiamondExtension() public fork(BSC_MAINNET) {
+  // TODO consider if this test is needed anymore
+  function _testDiamondExtension() public fork(BSC_MAINNET) {
     ComptrollerFirstExtension cfe = new ComptrollerFirstExtension();
+    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
 
     // change the implementation to the new that can add extensions
-    Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
+    Comptroller newComptrollerImplementation = new Comptroller(payable(address(ffd)));
     address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
     Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
     address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
-    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
-    // upgrade the FuseFeeDistributor to include the _registerComptrollerExtension fn
-    {
-      FuseFeeDistributor newImpl = new FuseFeeDistributor();
-      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
-      vm.prank(proxy.admin());
-      proxy.upgradeTo(address(newImpl));
-    }
     // whitelist the upgrade
     vm.prank(ffd.owner());
     ffd._editComptrollerImplementationWhitelist(

@@ -32,12 +32,10 @@ contract MockWNeon is MockERC20 {
   function deposit() external payable {}
 }
 
-contract NeondevnetE2ETest is WithPool, BaseTest {
+contract NeondevnetE2ETest is WithPool {
   address mpo;
   address moraToken = 0x6Ab1F83c0429A1322D7ECDFdDf54CE6D179d911f;
   address wtoken = 0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5;
-
-  constructor() WithPool() {}
 
   struct LiquidationData {
     address[] cTokens;

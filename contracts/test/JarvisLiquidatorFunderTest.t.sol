@@ -27,7 +27,7 @@ interface IMockERC20 is IERC20Upgradeable {
 contract JarvisLiquidatorFunderTest is BaseTest {
   JarvisLiquidatorFunder private jarvisLiquidator;
 
-  ISynthereumLiquidityPool synthereumLiquiditiyPool =
+  ISynthereumLiquidityPool synthereumLiquidityPool =
     ISynthereumLiquidityPool(0x0fD8170Dc284CD558325029f6AEc1538c7d99f49);
 
   address minter = 0x0fD8170Dc284CD558325029f6AEc1538c7d99f49;
@@ -40,7 +40,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD")); // TODO check if bUSD == stableToken at AP
 
     ISynthereumLiquidityPool[] memory pools = new ISynthereumLiquidityPool[](1);
-    pools[0] = synthereumLiquiditiyPool;
+    pools[0] = synthereumLiquidityPool;
     uint256[] memory times = new uint256[](1);
     times[0] = expirationPeriod;
 
@@ -48,14 +48,14 @@ contract JarvisLiquidatorFunderTest is BaseTest {
   }
 
   function getPool(address inputToken) internal view returns (ISynthereumLiquidityPool) {
-    return synthereumLiquiditiyPool;
+    return synthereumLiquidityPool;
   }
 
   function testRedeemToken() public fork(BSC_MAINNET) {
     vm.prank(minter);
     jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
-    bytes memory data = abi.encode(address(jBRLToken), address(synthereumLiquiditiyPool), 60 * 40);
+    bytes memory data = abi.encode(address(jBRLToken), address(synthereumLiquidityPool), 60 * 40);
     (uint256 redeemableAmount, ) = getPool(address(jBRLToken)).getRedeemTradeInfo(10e18);
     (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, data);
 
@@ -73,7 +73,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     vm.prank(minter);
     jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
-    bytes memory data = abi.encode(address(jBRLToken), address(synthereumLiquiditiyPool), 60 * 40);
+    bytes memory data = abi.encode(address(jBRLToken), address(synthereumLiquidityPool), 60 * 40);
     (uint256 redeemableAmount, uint256 fee) = getPool(address(jBRLToken)).getRedeemTradeInfo(10e18);
     (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, data);
 
@@ -158,7 +158,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
 
     vars.fundingStrategies = new IFundsConversionStrategy[](1);
     vars.data = new bytes[](1);
-    vars.data[0] = abi.encode(ap.getAddress("bUSD"), address(synthereumLiquiditiyPool), 60 * 40);
+    vars.data[0] = abi.encode(ap.getAddress("bUSD"), address(synthereumLiquidityPool), 60 * 40);
     vars.fundingStrategies[0] = jarvisLiquidator;
 
     // all strategies need to be whitelisted
