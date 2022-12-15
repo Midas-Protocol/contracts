@@ -80,7 +80,6 @@ contract MockThirdComptrollerExtension is DiamondExtension, ComptrollerV3Storage
 
 contract ExtensionsTest is BaseTest {
   // ERC1967Upgrade
-  bytes32 internal constant _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
   address payable internal jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
   FuseFeeDistributor internal ffd;
   ComptrollerFirstExtension internal cfe;
@@ -93,6 +92,12 @@ contract ExtensionsTest is BaseTest {
   function afterForkSetUp() internal override {
     ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
 
+    cfe = new ComptrollerFirstExtension();
+    newCTokenExtension = new CTokenFirstExtension();
+    mockExtension = new MockComptrollerExtension();
+    second = new MockSecondComptrollerExtension();
+    third = new MockThirdComptrollerExtension();
+
     if (block.chainid == BSC_MAINNET) {
       // change the implementation to the new that can add extensions
       Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
@@ -100,50 +105,34 @@ contract ExtensionsTest is BaseTest {
 
       Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
       address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
+
       // whitelist the upgrade
-      vm.prank(ffd.owner());
+      vm.startPrank(ffd.owner());
       ffd._editComptrollerImplementationWhitelist(
         asArray(oldComptrollerImplementation),
         asArray(latestComptrollerImplementation),
         asArray(true)
       );
       // whitelist the new pool creation
-      vm.prank(ffd.owner());
       ffd._editComptrollerImplementationWhitelist(
         asArray(address(0)),
         asArray(latestComptrollerImplementation),
         asArray(true)
       );
+      DiamondExtension[] memory extensions = new DiamondExtension[](1);
+      extensions[0] = cfe;
+      ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);
+      vm.stopPrank();
+
       // upgrade to the new comptroller
       vm.startPrank(asUnitroller.admin());
       asUnitroller._setPendingImplementation(latestComptrollerImplementation);
       newComptrollerImplementation._become(asUnitroller);
       vm.stopPrank();
-
-      // upgrade the FuseFeeDistributor to include the getCErc20DelegateExtensions fn
-      {
-        FuseFeeDistributor newImpl = new FuseFeeDistributor();
-        TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
-        bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-        address admin = address(uint160(uint256(bytesAtSlot)));
-        // emit log_address(admin);
-        vm.prank(admin);
-        proxy.upgradeTo(address(newImpl));
-      }
     }
-
-    cfe = new ComptrollerFirstExtension();
-    newCTokenExtension = new CTokenFirstExtension();
-    mockExtension = new MockComptrollerExtension();
-    second = new MockSecondComptrollerExtension();
-    third = new MockThirdComptrollerExtension();
   }
 
-  function testExtensionReplace() public fork(BSC_MAINNET) {
-    // initialize with the first extension
-    vm.prank(ffd.owner());
-    ffd._registerComptrollerExtension(jFiatPoolAddress, cfe, DiamondExtension(address(0)));
-
+  function testExtensionReplace() public debuggingOnly fork(BSC_MAINNET) {
     // replace the first extension with the mock
     vm.prank(ffd.owner());
     ffd._registerComptrollerExtension(jFiatPoolAddress, mockExtension, cfe);
@@ -171,22 +160,6 @@ contract ExtensionsTest is BaseTest {
 
   function testNewPoolExtensions() public fork(BSC_MAINNET) {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-
-    // deploy a pool that will not get any extensions automatically
-    {
-      (, address poolAddress) = fpd.deployPool(
-        "just-a-test",
-        latestComptrollerImplementation,
-        abi.encode(payable(address(ffd))),
-        false,
-        0.1e18,
-        1.1e18,
-        ap.getAddress("MasterPriceOracle")
-      );
-
-      address[] memory initExtensionsBefore = DiamondBase(payable(poolAddress))._listExtensions();
-      assertEq(initExtensionsBefore.length, 0, "remove this if the ffd config is set up");
-    }
 
     // configure the FFD so that the extension is automatically added on the pool creation
     DiamondExtension[] memory comptrollerExtensions = new DiamondExtension[](1);
@@ -217,7 +190,7 @@ contract ExtensionsTest is BaseTest {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
 
-    Comptroller somePool = Comptroller(pools[random % pools.length].comptroller);
+    ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
     CTokenInterface[] memory markets = somePool.getAllMarkets();
 
     CTokenInterface someMarket = markets[random % markets.length];
@@ -228,9 +201,6 @@ contract ExtensionsTest is BaseTest {
     emit log_address(address(somePool));
     emit log("market");
     emit log_address(address(someMarket));
-
-    // TODO remove, no need to upgrade after the next deploy
-    _upgradeExistingCTokenExtension(asDelegate);
 
     vm.roll(block.number + 1);
 
@@ -251,7 +221,7 @@ contract ExtensionsTest is BaseTest {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
 
-    Comptroller somePool = Comptroller(pools[random % pools.length].comptroller);
+    ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
     CTokenInterface[] memory markets = somePool.getAllMarkets();
 
     CTokenInterface someMarket = markets[random % markets.length];
@@ -276,6 +246,23 @@ contract ExtensionsTest is BaseTest {
 
       revert(reason);
     }
+  }
+
+  function _testExistingCTokenExtensionUpgrade(CErc20Delegate asDelegate) public {
+    uint256 totalSupplyBefore = asDelegate.totalSupply();
+    if (totalSupplyBefore == 0) return; // total supply should be non-zero
+
+    _upgradeExistingCTokenExtension(asDelegate);
+
+    // check if the extension was added
+    address[] memory extensions = asDelegate._listExtensions();
+    assertEq(extensions.length, 1, "the first extension should be added");
+    assertEq(extensions[0], address(newCTokenExtension), "the first extension should be the only extension");
+
+    // check if the storage is read from the same place
+    uint256 totalSupplyAfter = asDelegate.totalSupply();
+    assertGt(totalSupplyAfter, 0, "total supply should be non-zero");
+    assertEq(totalSupplyAfter, totalSupplyBefore, "total supply should be the same");
   }
 
   function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
@@ -316,70 +303,39 @@ contract ExtensionsTest is BaseTest {
     emit log_address(asDelegate.implementation());
   }
 
-  function _testExistingCTokenExtensionUpgrade(CErc20Delegate asDelegate) public {
-    uint256 totalSupplyBefore = asDelegate.totalSupply();
-    if (totalSupplyBefore == 0) return; // total supply should be non-zero
-
-    _upgradeExistingCTokenExtension(asDelegate);
-
-    // check if the extension was added
-    address[] memory extensions = asDelegate._listExtensions();
-    assertEq(extensions.length, 1, "the first extension should be added");
-    assertEq(extensions[0], address(newCTokenExtension), "the first extension should be the only extension");
-
-    // check if the storage is read from the same place
-    uint256 totalSupplyAfter = asDelegate.totalSupply();
-    assertGt(totalSupplyAfter, 0, "total supply should be non-zero");
-    assertEq(totalSupplyAfter, totalSupplyBefore, "total supply should be the same");
+  function testBscComptrollerExtensions() public debuggingOnly fork(BSC_MAINNET) {
+    _testComptrollersExtensions();
   }
 
-  function testMarketsExtensionsBsc() public fork(BSC_MAINNET) {
-    _testMarketsExtensions();
+  function testPolygonComptrollerExtensions() public debuggingOnly fork(POLYGON_MAINNET) {
+    _testComptrollersExtensions();
   }
 
-  function testMarketsExtensionsMoonbeam() public fork(MOONBEAM_MAINNET) {
-    _testMarketsExtensions();
+  function testMoonbeamComptrollerExtensions() public debuggingOnly fork(MOONBEAM_MAINNET) {
+    _testComptrollersExtensions();
   }
 
-  function testMarketsExtensionsPolygon() public fork(POLYGON_MAINNET) {
-    _testMarketsExtensions();
+  function testChapelComptrollerExtensions() public debuggingOnly fork(BSC_CHAPEL) {
+    _testComptrollersExtensions();
   }
 
-  function testMarketsExtensionsArbitrum() public fork(ARBITRUM_ONE) {
-    _testMarketsExtensions();
+  function testArbitrumComptrollerExtensions() public debuggingOnly fork(ARBITRUM_ONE) {
+    _testComptrollersExtensions();
   }
 
-  function testMarketsExtensionsFantom() public fork(FANTOM_OPERA) {
-    _testMarketsExtensions();
+  function testFantomComptrollerExtensions() public debuggingOnly fork(FANTOM_OPERA) {
+    _testComptrollersExtensions();
   }
 
-  function testMarketsExtensionsEvmos() public fork(EVMOS_MAINNET) {
-    _testMarketsExtensions();
-  }
-
-  function _testMarketsExtensions() internal {
+  function _testComptrollersExtensions() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
 
-    for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller pool = IComptroller(pools[i].comptroller);
-      ICToken[] memory markets = pool.getAllMarkets();
-      for (uint8 j = 0; j < markets.length; j++) {
-        DiamondBase asBase = DiamondBase(address(markets[j]));
-        CErc20Delegate asCErc20Delegate = CErc20Delegate(address(markets[j]));
-
-        try asBase._listExtensions() returns (address[] memory extensions) {
-          assertEq(extensions.length, 1, "market is missing the first extension");
-        } catch {
-          emit log("market that is not yet upgraded to the extensions upgrade");
-          emit log_address(address(asBase));
-          emit log("implementation");
-          emit log_address(asCErc20Delegate.implementation());
-          emit log("pool");
-          emit log_address(pools[i].comptroller);
-          emit log("");
-        }
-      }
+    for (uint8 i = 0; i < pools.length; i++) {
+      address payable asPayable = payable(pools[i].comptroller);
+      DiamondBase asBase = DiamondBase(asPayable);
+      address[] memory extensions = asBase._listExtensions();
+      assertEq(extensions.length, 1, "each pool should have the first extension");
     }
   }
 }

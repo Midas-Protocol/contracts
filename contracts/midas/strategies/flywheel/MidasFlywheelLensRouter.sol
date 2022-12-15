@@ -28,6 +28,8 @@ interface IComptroller {
   function admin() external returns (address);
 
   function _addRewardsDistributor(address distributor) external returns (uint256);
+
+  function getAccruingFlywheels() external view returns (MidasFlywheelCore[] memory);
 }
 
 contract MidasFlywheelLensRouter {
@@ -49,26 +51,9 @@ contract MidasFlywheelLensRouter {
     address rewardToken;
   }
 
-  function getRewardsDistributors(IComptroller comptroller) internal view returns (MidasFlywheelCore[] memory) {
-    uint8 count = 0;
-    while (true) {
-      try comptroller.rewardsDistributors(count) {
-        count++;
-      } catch {
-        break;
-      }
-    }
-    MidasFlywheelCore[] memory accruingFlywheels = new MidasFlywheelCore[](count);
-    for (uint8 i = 0; i < count; i++) {
-      accruingFlywheels[i] = comptroller.rewardsDistributors(i);
-    }
-
-    return accruingFlywheels;
-  }
-
   function getMarketRewardsInfo(IComptroller comptroller) external returns (MarketRewardsInfo[] memory) {
     CErc20Token[] memory markets = comptroller.getAllMarkets();
-    MidasFlywheelCore[] memory flywheels = getRewardsDistributors(comptroller);
+    MidasFlywheelCore[] memory flywheels = comptroller.getAccruingFlywheels();
     address[] memory rewardTokens = new address[](flywheels.length);
     uint256[] memory rewardTokenPrices = new uint256[](flywheels.length);
     IPriceOracle oracle = comptroller.oracle();

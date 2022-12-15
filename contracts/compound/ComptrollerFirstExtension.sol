@@ -238,7 +238,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
   }
 
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 12;
+    uint8 fnsCount = 19;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
     functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
@@ -250,9 +250,108 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     functionSelectors[--fnsCount] = this._setTransferPaused.selector;
     functionSelectors[--fnsCount] = this._setSeizePaused.selector;
     functionSelectors[--fnsCount] = this._unsupportMarket.selector;
+    functionSelectors[--fnsCount] = this.getAllMarkets.selector;
+    functionSelectors[--fnsCount] = this.getAllBorrowers.selector;
+    functionSelectors[--fnsCount] = this.getWhitelist.selector;
+    functionSelectors[--fnsCount] = this.getRewardsDistributors.selector;
+    functionSelectors[--fnsCount] = this.isUserOfPool.selector;
+    functionSelectors[--fnsCount] = this.getAccruingFlywheels.selector;
+    functionSelectors[--fnsCount] = this._removeFlywheel.selector;
     functionSelectors[--fnsCount] = this._setBorrowCapForAssetForCollateral.selector;
     functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateral.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
+  }
+
+  /**
+   * @notice Return all of the markets
+   * @dev The automatic getter may be used to access an individual market.
+   * @return The list of market addresses
+   */
+  function getAllMarkets() public view returns (CTokenInterface[] memory) {
+    return allMarkets;
+  }
+
+  /**
+   * @notice Return all of the borrowers
+   * @dev The automatic getter may be used to access an individual borrower.
+   * @return The list of borrower account addresses
+   */
+  function getAllBorrowers() public view returns (address[] memory) {
+    return allBorrowers;
+  }
+
+  /**
+   * @notice Return all of the whitelist
+   * @dev The automatic getter may be used to access an individual whitelist status.
+   * @return The list of borrower account addresses
+   */
+  function getWhitelist() external view returns (address[] memory) {
+    return whitelistArray;
+  }
+
+  /**
+   * @notice Returns an array of all accruing and non-accruing flywheels
+   */
+  function getRewardsDistributors() external view returns (address[] memory) {
+    address[] memory allFlywheels = new address[](rewardsDistributors.length + nonAccruingRewardsDistributors.length);
+
+    uint8 i = 0;
+    while (i < rewardsDistributors.length) {
+      allFlywheels[i] = rewardsDistributors[i];
+      i++;
+    }
+    uint8 j = 0;
+    while (j < nonAccruingRewardsDistributors.length) {
+      allFlywheels[i + j] = nonAccruingRewardsDistributors[j];
+      j++;
+    }
+
+    return allFlywheels;
+  }
+
+  function getAccruingFlywheels() external view returns (address[] memory) {
+    return rewardsDistributors;
+  }
+
+  /**
+   * @dev Removes a flywheel from the accruing or non-accruing array
+   * @param flywheelAddress The address of the flywheel to remove from the accruing or non-accruing array
+   * @return true if the flywheel was found and removed
+   */
+  function _removeFlywheel(address flywheelAddress) external returns (bool) {
+    require(hasAdminRights(), "!admin");
+    require(flywheelAddress != address(0), "!flywheel");
+
+    // remove it from the accruing
+    for (uint256 i = 0; i < rewardsDistributors.length; i++) {
+      if (flywheelAddress == rewardsDistributors[i]) {
+        rewardsDistributors[i] = rewardsDistributors[rewardsDistributors.length - 1];
+        rewardsDistributors.pop();
+        return true;
+      }
+    }
+
+    // or remove it from the non-accruing
+    for (uint256 i = 0; i < nonAccruingRewardsDistributors.length; i++) {
+      if (flywheelAddress == nonAccruingRewardsDistributors[i]) {
+        nonAccruingRewardsDistributors[i] = nonAccruingRewardsDistributors[nonAccruingRewardsDistributors.length - 1];
+        nonAccruingRewardsDistributors.pop();
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function isUserOfPool(address user) external view returns (bool) {
+    for (uint256 i = 0; i < allMarkets.length; i++) {
+      address marketAddress = address(allMarkets[i]);
+      if (markets[marketAddress].accountMembership[user]) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

@@ -16,7 +16,7 @@ contract XBombLiquidatorTest is BaseTest {
     liquidator = new XBombLiquidatorFunder();
   }
 
-  function testRedeem() public fork(BSC_MAINNET) {
+  function testRedeem() public debuggingOnly fork(BSC_MAINNET) {
     // make sure we're testing with at least some tokens
     uint256 balance = xbombToken.balanceOf(holder);
     assertTrue(balance > 0);
