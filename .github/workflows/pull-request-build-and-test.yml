@@ -32,8 +32,8 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      BSC_MAINNET_RPC_URL: "${{ secrets.BSC_MAINNET_RPC_URL }}"
-      BSC_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.BSC_MAINNET_ARCHIVE_RPC_URL }}"
+      BSC_MAINNET_RPC_URL: https://bsc-dataseed.binance.org
+      BSC_MAINNET_ARCHIVE_RPC_URL: https://rpc.ankr.com/bsc
       TEST_RUN_CHAINID: 56
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
@@ -63,8 +63,8 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      POLYGON_MAINNET_RPC_URL: "${{ secrets.POLYGON_MAINNET_RPC_URL }}"
-      POLYGON_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.POLYGON_MAINNET_ARCHIVE_RPC_URL }}"
+      POLYGON_MAINNET_RPC_URL: https://poly-rpc.gateway.pokt.network
+      POLYGON_MAINNET_ARCHIVE_RPC_URL: https://polygon-rpc.com/
       TEST_RUN_CHAINID: 137
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
@@ -94,8 +94,8 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      MOONBEAM_MAINNET_RPC_URL: "${{ secrets.MOONBEAM_MAINNET_RPC_URL }}"
-      MOONBEAM_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.MOONBEAM_MAINNET_ARCHIVE_RPC_URL }}"
+      MOONBEAM_MAINNET_RPC_URL: https://rpc.ankr.com/moonbeam
+      MOONBEAM_MAINNET_ARCHIVE_RPC_URL: https://rpc.ankr.com/moonbeam
       TEST_RUN_CHAINID: 1284
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
@@ -125,8 +125,8 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      ARBITRUM_MAINNET_RPC_URL: "${{ secrets.ARBITRUM_MAINNET_RPC_URL }}"
-      ARBITRUM_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.ARBITRUM_MAINNET_ARCHIVE_RPC_URL }}"
+      ARBITRUM_MAINNET_RPC_URL: https://1rpc.io/arb
+      ARBITRUM_MAINNET_ARCHIVE_RPC_URL: https://arb1.arbitrum.io/rpc
       TEST_RUN_CHAINID: 42161
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
@@ -156,8 +156,8 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      NEON_DEVNET_RPC_URL: "${{ secrets.NEON_DEVNET_RPC_URL }}"
-      NEON_DEVNET_ARCHIVE_RPC_URL: "${{ secrets.NEON_DEVNET_ARCHIVE_RPC_URL }}"
+      NEON_DEVNET_RPC_URL: https://proxy.devnet.neonlabs.org/solana
+      NEON_DEVNET_ARCHIVE_RPC_URL: https://proxy.devnet.neonlabs.org/solana
       TEST_RUN_CHAINID: 245022926
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
@@ -187,8 +187,8 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      EVMOS_MAINNET_RPC_URL: "${{ secrets.EVMOS_MAINNET_RPC_URL }}"
-      EVMOS_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.EVMOS_MAINNET_ARCHIVE_RPC_URL }}"
+      EVMOS_MAINNET_RPC_URL: https://eth.bd.evmos.org:8545
+      EVMOS_MAINNET_ARCHIVE_RPC_URL: https://eth.bd.evmos.org:8545
       TEST_RUN_CHAINID: 9001
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
@@ -218,8 +218,8 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FANTOM_MAINNET_RPC_URL: "${{ secrets.FANTOM_MAINNET_RPC_URL }}"
-      FANTOM_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.FANTOM_MAINNET_ARCHIVE_RPC_URL }}"
+      FANTOM_MAINNET_RPC_URL: https://rpcapi.fantom.network
+      FANTOM_MAINNET_ARCHIVE_RPC_URL: https://rpcapi.fantom.network
       TEST_RUN_CHAINID: 250
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
@@ -249,8 +249,8 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      BSC_CHAPEL_RPC_URL: "${{ secrets.BSC_CHAPEL_RPC_URL }}"
-      BSC_CHAPEL_ARCHIVE_RPC_URL: "${{ secrets.BSC_CHAPEL_ARCHIVE_RPC_URL }}"
+      BSC_CHAPEL_RPC_URL: https://data-seed-prebsc-1-s3.binance.org:8545
+      BSC_CHAPEL_ARCHIVE_RPC_URL: https://data-seed-prebsc-1-s3.binance.org:8545
       TEST_RUN_CHAINID: 97
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
