@@ -320,10 +320,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
    */
   mapping(address => address) public _latestPluginImplementation;
 
-  /**
-   * @dev Latest erc20Wrapping implementation for each existing implementation.
-   */
-  mapping(address => address) public _latestERC20WrappingImplementation;
 
   /**
    * @dev Whitelisted Plugin implementation contract addresses for each existing implementation.
@@ -334,6 +330,11 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
    * @dev Whitelisted erc20Wrapping implementation contract addresses for each existing implementation.
    */
   mapping(address => mapping(address => bool)) public erc20WrappingImplementationWhitelist;
+
+  /**
+   * @dev Latest erc20Wrapping implementation for each existing implementation.
+   */
+  mapping(address => address) public _latestERC20WrappingImplementation;
 
   /**
    * @dev Adds/removes plugin implementations to the whitelist.
