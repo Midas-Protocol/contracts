@@ -90,8 +90,9 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
-  function testSpecificRandom() public {
-    testBscAnyLiquidation(2349);
+  function testSpecificRandom() debuggingOnly public {
+    //testBscAnyLiquidation(2349);
+    testPolygonAnyLiquidation(101);
   }
 
   function testBscAnyLiquidation(uint256 random) public fork(BSC_MAINNET) {

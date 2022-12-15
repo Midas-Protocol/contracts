@@ -11,7 +11,7 @@ import { IERC4626 } from "../compound/IERC4626.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
-contract CErc20DelegateTest is BaseTest {
+contract LatestImplementationWhitelisted is BaseTest {
   FuseFeeDistributor fuseAdmin;
   FusePoolDirectory fusePoolDirectory;
 
