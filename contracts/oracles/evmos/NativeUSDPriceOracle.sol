@@ -38,7 +38,7 @@ contract NativeUSDPriceOracle is SafeOwnableUpgradeable {
    * https://docs.adrastia.io/deployments/evmos
    */
   function getValue() public view returns (uint256) {
-    // 0xd850F64Eda6a62d625209711510f43cD49Ef8798 for EVMOS/USD
+    // 0xeA07Ede816EcD52F17aEEf82a50a608Ca5369145 for EVMOS/USD
     IAdrastiaPriceOracle oracle = IAdrastiaPriceOracle(NATIVE_USD_ORACLE_ADDRESS);
     uint112 nativeTokenUsdPrice = oracle.consultPrice(QUOTE_TOKEN_ADDRESS);
     uint8 nativeTokenPriceFeedDecimals = oracle.quoteTokenDecimals();
