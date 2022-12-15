@@ -320,7 +320,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
    */
   mapping(address => address) public _latestPluginImplementation;
 
-
   /**
    * @dev Whitelisted Plugin implementation contract addresses for each existing implementation.
    */
