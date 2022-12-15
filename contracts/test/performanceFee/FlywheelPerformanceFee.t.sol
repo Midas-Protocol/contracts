@@ -27,7 +27,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
   uint256 DEPOSIT_AMOUNT = 100e18;
   uint256 BPS_DENOMINATOR = 10_000;
 
-  address feeRecipient = 0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E;
+  address feeRecipient = address(16);
   MidasERC4626 plugin;
   ERC20Upgradeable underlyingToken = ERC20Upgradeable(0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9);
 
@@ -169,7 +169,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
     assertEq(
       dddToken.balanceOf(address(dddRewards)),
       rewardAmount - expectedPerformanceFee,
-      "the rewardsModule didnt properly send the feees"
+      "the rewardsModule didnt properly send the fees"
     );
     assertEq(dddFlywheel.rewardsAccrued(feeRecipient), 0, "feeRecipient rewardsAccrued should be 0");
   }
