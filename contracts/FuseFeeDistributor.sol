@@ -397,7 +397,10 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
         : oldImplementation;
   }
 
-  function _setLatestERC20WrappingImplementation(address oldImplementation, address newImplementation) external onlyOwner {
+  function _setLatestERC20WrappingImplementation(address oldImplementation, address newImplementation)
+    external
+    onlyOwner
+  {
     _latestERC20WrappingImplementation[oldImplementation] = newImplementation;
   }
 

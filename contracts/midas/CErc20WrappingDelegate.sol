@@ -9,7 +9,7 @@ import { ERC20Wrapper } from "openzeppelin-contracts/token/ERC20/extensions/ERC2
 
 contract CErc20WrappingDelegate is CErc20Delegate {
   event NewErc20WrappingImplementation(address oldImpl, address newImpl);
-  
+
   ERC20Wrapper public wrappingUnderlying;
 
   function _becomeImplementation(bytes memory data) public virtual override {
@@ -18,7 +18,9 @@ contract CErc20WrappingDelegate is CErc20Delegate {
     address _wrappingUnderlying = abi.decode(data, (address));
 
     if (_wrappingUnderlying == address(0) && address(wrappingUnderlying) != address(0)) {
-      _wrappingUnderlying = IFuseFeeDistributor(fuseAdmin).latestERC20WrappingImplementation(address(wrappingUnderlying));
+      _wrappingUnderlying = IFuseFeeDistributor(fuseAdmin).latestERC20WrappingImplementation(
+        address(wrappingUnderlying)
+      );
     }
 
     if (_wrappingUnderlying != address(0) && _wrappingUnderlying != address(wrappingUnderlying)) {
@@ -29,7 +31,9 @@ contract CErc20WrappingDelegate is CErc20Delegate {
   function _updateUnderlying(address _wrappingUnderlying) public {
     require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _updateUnderlying");
 
-    address oldImplementation = address(wrappingUnderlying) != address(0) ? address(wrappingUnderlying) : _wrappingUnderlying;
+    address oldImplementation = address(wrappingUnderlying) != address(0)
+      ? address(wrappingUnderlying)
+      : _wrappingUnderlying;
 
     require(
       IFuseFeeDistributor(fuseAdmin).erc20WrappingImplementationWhitelist(oldImplementation, _wrappingUnderlying),
