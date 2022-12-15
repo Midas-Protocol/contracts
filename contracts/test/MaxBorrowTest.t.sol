@@ -2,8 +2,6 @@
 pragma solidity >=0.8.0;
 
 import "./helpers/WithPool.sol";
-import { BaseTest } from "./config/BaseTest.t.sol";
-import "forge-std/Test.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
@@ -11,6 +9,7 @@ import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 import "../compound/CTokenInterfaces.sol";
+import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
 contract MockAsset is MockERC20 {
   constructor() MockERC20("test", "test", 8) {}
@@ -18,9 +17,8 @@ contract MockAsset is MockERC20 {
   function deposit() external payable {}
 }
 
-contract MaxWithdrawTestPolygon is WithPool, BaseTest {
-  address wmaticAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
-  address usdcWhale = 0xe7804c37c13166fF0b37F5aE0BB07A3aEbb6e245;
+contract MaxBorrowTest is WithPool {
+  address usdcWhale = 0x625E7708f30cA75bfd92586e17077590C60eb4cD;
   address daiWhale = 0x06959153B974D0D5fDfd87D561db6d8d4FA0bb0B;
 
   struct LiquidationData {
@@ -31,11 +29,19 @@ contract MaxWithdrawTestPolygon is WithPool, BaseTest {
   }
 
   function afterForkSetUp() internal override {
-    super.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(wmaticAddress));
+    super.setUpWithPool(
+      MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
+      ERC20Upgradeable(ap.getAddress("wtoken"))
+    );
 
-    vm.prank(0x369582d2010B6eD950B571F4101e3bB9b554876F);
-    MockERC20(address(underlyingToken)).transfer(address(this), 100e18);
-    setUpPool("polygon-test", false, 0.1e18, 1.1e18);
+    if (block.chainid == POLYGON_MAINNET) {
+      vm.prank(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
+      MockERC20(address(underlyingToken)).transfer(address(this), 100e18);
+      setUpPool("polygon-test", false, 0.1e18, 1.1e18);
+    } else if (block.chainid == BSC_MAINNET) {
+      deal(address(underlyingToken), address(this), 100e18);
+      setUpPool("bsc-test", false, 0.1e18, 1.1e18);
+    }
   }
 
   function testMaxBorrow() public fork(POLYGON_MAINNET) {
@@ -88,5 +94,131 @@ contract MaxWithdrawTestPolygon is WithPool, BaseTest {
       uint256 maxDaiBorrow = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cDaiToken)));
       assertApproxEqAbs((maxBorrow * 1e18) / 10**cToken.decimals(), maxDaiBorrow, uint256(1e16), "!max borrow");
     }
+
+    // TODO no need to upgrade after the next deploy
+    upgradePool(comptroller);
+
+    // borrow cap for collateral test
+    {
+      ComptrollerFirstExtension asExtension = comptroller.asComptrollerFirstExtension();
+      vm.prank(comptroller.admin());
+      asExtension._setBorrowCapForAssetForCollateral(address(cToken), address(cDaiToken), 0.5e6);
+    }
+
+    uint256 maxBorrowAfterBorrowCap = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cToken)));
+    assertApproxEqAbs(maxBorrowAfterBorrowCap, 0.5e6, uint256(1e5), "!max borrow");
+
+    // blacklist
+    {
+      ComptrollerFirstExtension asExtension = comptroller.asComptrollerFirstExtension();
+      vm.prank(comptroller.admin());
+      asExtension._blacklistBorrowingAgainstCollateral(address(cToken), address(cDaiToken), true);
+    }
+
+    uint256 maxBorrowAfterBlacklist = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cToken)));
+    assertEq(maxBorrowAfterBlacklist, 0, "!blacklist");
+  }
+
+  function upgradePool(Comptroller pool) internal {
+    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    Comptroller newComptrollerImplementation = new Comptroller(payable(ffd));
+
+    Unitroller asUnitroller = Unitroller(payable(address(pool)));
+    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
+
+    // whitelist the upgrade
+    vm.startPrank(ffd.owner());
+    ffd._editComptrollerImplementationWhitelist(
+      asArray(oldComptrollerImplementation),
+      asArray(address(newComptrollerImplementation)),
+      asArray(true)
+    );
+    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    extensions[0] = new ComptrollerFirstExtension();
+    ffd._setComptrollerExtensions(address(newComptrollerImplementation), extensions);
+    vm.stopPrank();
+
+    // upgrade to the new comptroller
+    vm.startPrank(asUnitroller.admin());
+    asUnitroller._setPendingImplementation(address(newComptrollerImplementation));
+    newComptrollerImplementation._become(asUnitroller);
+    vm.stopPrank();
+  }
+
+  function testTotalBorrowCapPerCollateral() public forkAtBlock(BSC_MAINNET, 23761190) {
+    address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
+
+    address poolAddress = jFiatPoolAddress;
+    Comptroller pool = Comptroller(poolAddress);
+    // TODO no need to upgrade after the next deploy
+    upgradePool(pool);
+
+    address[] memory borrowers = pool.getAllBorrowers();
+    address someBorrower = borrowers[1];
+
+    CTokenInterface[] memory markets = pool.getAllMarkets();
+    for (uint256 i = 0; i < markets.length; i++) {
+      CTokenInterface market = markets[i];
+      uint256 borrowed = market.borrowBalanceStored(someBorrower);
+      if (borrowed > 0) {
+        emit log("borrower has borrowed");
+        emit log_uint(borrowed);
+        emit log("from market");
+        emit log_address(address(market));
+        emit log_uint(i);
+        emit log("");
+      }
+
+      uint256 collateral = market.asCTokenExtensionInterface().balanceOf(someBorrower);
+      if (collateral > 0) {
+        emit log("has collateral");
+        emit log_uint(collateral);
+        emit log("in market");
+        emit log_address(address(market));
+        emit log_uint(i);
+        emit log("");
+      }
+    }
+
+    CTokenInterface marketToBorrow = markets[0];
+    CTokenInterface cappedCollateralMarket = markets[6];
+    uint256 borrowAmount = marketToBorrow.borrowBalanceStored(someBorrower);
+
+    {
+      (uint256 errBefore, uint256 liquidityBefore, uint256 shortfallBefore) = pool.getHypotheticalAccountLiquidity(
+        someBorrower,
+        address(marketToBorrow),
+        0,
+        borrowAmount
+      );
+      emit log("errBefore");
+      emit log_uint(errBefore);
+      emit log("liquidityBefore");
+      emit log_uint(liquidityBefore);
+      emit log("shortfallBefore");
+      emit log_uint(shortfallBefore);
+
+      assertGt(liquidityBefore, 0, "expected positive liquidity");
+    }
+
+    ComptrollerFirstExtension asExtension = ComptrollerFirstExtension(poolAddress);
+    vm.prank(pool.admin());
+    asExtension._setBorrowCapForAssetForCollateral(address(marketToBorrow), address(cappedCollateralMarket), 1);
+    emit log("");
+
+    (uint256 errAfter, uint256 liquidityAfter, uint256 shortfallAfter) = pool.getHypotheticalAccountLiquidity(
+      someBorrower,
+      address(marketToBorrow),
+      0,
+      borrowAmount
+    );
+    emit log("errAfter");
+    emit log_uint(errAfter);
+    emit log("liquidityAfter");
+    emit log_uint(liquidityAfter);
+    emit log("shortfallAfter");
+    emit log_uint(shortfallAfter);
+
+    assertGt(shortfallAfter, 0, "expected some shortfall");
   }
 }

@@ -1,27 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { WithPool } from "../helpers/WithPool.sol";
-import { BaseTest } from "../config/BaseTest.t.sol";
-
-import { MidasERC4626, WombatLpERC4626, IVoterProxy, IBaseRewardPool, IBooster } from "../../midas/strategies/WombatLpERC4626.sol";
+import { WombatLpERC4626, IVoterProxy, IBaseRewardPool, IBooster } from "../../midas/strategies/WombatLpERC4626.sol";
 import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
+import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
+
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
-import { Authority } from "solmate/auth/Auth.sol";
-import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
-import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
-import { CErc20 } from "../../compound/CErc20.sol";
-
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-
-struct RewardsCycle {
-  uint32 start;
-  uint32 end;
-  uint192 reward;
-}
 
 contract WombatERC4626Test is AbstractERC4626Test {
   address operator = 0x9Ac0a3E8864Ea370Bf1A661444f6610dd041Ba1c;
@@ -38,8 +27,6 @@ contract WombatERC4626Test is AbstractERC4626Test {
 
   ERC20 marketKey;
   ERC20Upgradeable[] rewardsToken;
-
-  constructor() WithPool() {}
 
   function _setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("wombat-test ", false, 0.1e18, 1.1e18);
@@ -146,7 +133,7 @@ contract WombatERC4626Test is AbstractERC4626Test {
     // Deposit funds, Rewards are 0
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);
-    CErc20(marketAddress).mint(depositAmount);
+    CErc20PluginRewardsDelegate(marketAddress).mint(depositAmount);
     vm.stopPrank();
 
     for (uint8 i = 0; i < rewardsToken.length; i++) {

@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { BaseTest } from "../config/BaseTest.t.sol";
-
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { EllipsisTestConfigStorage } from "./EllipsisTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import "./EllipsisERC4626Test.sol";
 
 contract EllipsisAssetTest is AbstractAssetTest {
