@@ -52,7 +52,6 @@ contract FlywheelPerformanceFeeTest is BaseTest {
   function afterForkSetUp() internal override {
     dddFlywheel = new MidasFlywheelCore();
     dddFlywheel.initialize(dddToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
-    dddFlywheel.reinitialize();
     dddRewards = new FuseFlywheelDynamicRewards(FlywheelCore(address(dddFlywheel)), 1);
     dddFlywheel.setFlywheelRewards(dddRewards);
 

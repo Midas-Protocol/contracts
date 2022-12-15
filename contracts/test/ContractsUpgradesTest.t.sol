@@ -130,14 +130,12 @@ contract ContractsUpgradesTest is BaseTest {
         address admin = address(uint160(uint256(bytesAtSlot)));
 
         if (admin != address(0)) {
-          // emit log_address(admin);
           MidasFlywheelCore newImpl = new MidasFlywheelCore();
           vm.prank(admin);
-          // proxy.upgradeToAndCall(address(newImpl), flywheel.reinitialize.selector);
           proxy.upgradeTo(address(newImpl));
 
           vm.prank(flywheel.owner());
-          flywheel.reinitialize();
+          // flywheel.reinitialize();
         }
       }
     }
