@@ -19,11 +19,7 @@ import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/trans
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
-// TODO: exclude test from CI
 contract ContractsUpgradesTest is BaseTest {
-  // taken from ERC1967Upgrade
-  bytes32 internal constant _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
-
   function testFusePoolDirectoryUpgrade() public fork(BSC_MAINNET) {
     address contractToTest = ap.getAddress("FusePoolDirectory"); // FusePoolDirectory proxy
 
@@ -42,7 +38,6 @@ contract ContractsUpgradesTest is BaseTest {
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(contractToTest));
       bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
       address admin = address(uint160(uint256(bytesAtSlot)));
-      //            emit log_address(admin);
       vm.prank(admin);
       proxy.upgradeTo(address(newImpl));
     }
@@ -82,7 +77,6 @@ contract ContractsUpgradesTest is BaseTest {
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffdProxy)));
       bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
       address admin = address(uint160(uint256(bytesAtSlot)));
-      // emit log_address(admin);
       vm.prank(admin);
       proxy.upgradeTo(address(newImpl));
     }
@@ -108,15 +102,15 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
-  function testFlywheelReinitializeBsc() public fork(BSC_MAINNET) {
+  function testFlywheelReinitializeBsc() public debuggingOnly fork(BSC_MAINNET) {
     _testFlywheelReinitialize();
   }
 
-  function testFlywheelReinitializePolygon() public fork(POLYGON_MAINNET) {
+  function testFlywheelReinitializePolygon() public debuggingOnly fork(POLYGON_MAINNET) {
     _testFlywheelReinitialize();
   }
 
-  function testFlywheelReinitializeMoonbeam() public fork(MOONBEAM_MAINNET) {
+  function testFlywheelReinitializeMoonbeam() public debuggingOnly fork(MOONBEAM_MAINNET) {
     _testFlywheelReinitialize();
   }
 
@@ -132,87 +126,18 @@ contract ContractsUpgradesTest is BaseTest {
 
         // upgrade
         TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(flywheels[j]));
-        bytes32 bytesAtSlot = vm.load(
-          address(proxy),
-          0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103
-        );
+        bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
         address admin = address(uint160(uint256(bytesAtSlot)));
 
         if (admin != address(0)) {
-          // emit log_address(admin);
           MidasFlywheelCore newImpl = new MidasFlywheelCore();
           vm.prank(admin);
-          // proxy.upgradeToAndCall(address(newImpl), flywheel.reinitialize.selector);
           proxy.upgradeTo(address(newImpl));
 
           vm.prank(flywheel.owner());
-          flywheel.reinitialize();
+          // flywheel.reinitialize();
         }
       }
-    }
-  }
-
-  // TODO consider if this test is needed anymore
-  function _testDiamondExtension() public fork(BSC_MAINNET) {
-    ComptrollerFirstExtension cfe = new ComptrollerFirstExtension();
-    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
-
-    // change the implementation to the new that can add extensions
-    Comptroller newComptrollerImplementation = new Comptroller(payable(address(ffd)));
-    address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
-    Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
-    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
-    // whitelist the upgrade
-    vm.prank(ffd.owner());
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(oldComptrollerImplementation),
-      asArray(address(newComptrollerImplementation)),
-      asArray(true)
-    );
-    // upgrade to the new comptroller
-    vm.startPrank(asUnitroller.admin());
-    asUnitroller._setPendingImplementation(address(newComptrollerImplementation));
-    newComptrollerImplementation._become(asUnitroller);
-    vm.stopPrank();
-
-    // register the extension
-    vm.prank(ffd.owner());
-    ffd._registerComptrollerExtension(jFiatPoolAddress, cfe, DiamondExtension(address(0)));
-  }
-
-  function testBscComptrollerExtensions() public fork(BSC_MAINNET) {
-    _testComptrollersExtensions();
-  }
-
-  function testPolygonComptrollerExtensions() public fork(POLYGON_MAINNET) {
-    _testComptrollersExtensions();
-  }
-
-  function testMoonbeamComptrollerExtensions() public fork(MOONBEAM_MAINNET) {
-    _testComptrollersExtensions();
-  }
-
-  function testChapelComptrollerExtensions() public fork(BSC_CHAPEL) {
-    _testComptrollersExtensions();
-  }
-
-  function testArbitrumComptrollerExtensions() public fork(ARBITRUM_ONE) {
-    _testComptrollersExtensions();
-  }
-
-  function testFantomComptrollerExtensions() public fork(FANTOM_OPERA) {
-    _testComptrollersExtensions();
-  }
-
-  function _testComptrollersExtensions() internal {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
-
-    for (uint8 i = 0; i < pools.length; i++) {
-      address payable asPayable = payable(pools[i].comptroller);
-      DiamondBase asBase = DiamondBase(asPayable);
-      address[] memory extensions = asBase._listExtensions();
-      assertEq(extensions.length, 1, "each pool should have the first extension");
     }
   }
 
@@ -238,11 +163,25 @@ contract ContractsUpgradesTest is BaseTest {
       ICToken[] memory markets = pool.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20Delegate market = CErc20Delegate(address(markets[j]));
+
         address currentImpl = market.implementation();
         (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
 
         if (currentImpl != upgradeToImpl) emit log_address(address(market));
         assertEq(currentImpl, upgradeToImpl, "market needs to be upgraded");
+
+        DiamondBase asBase = DiamondBase(address(markets[j]));
+        try asBase._listExtensions() returns (address[] memory extensions) {
+          assertEq(extensions.length, 1, "market is missing the first extension");
+        } catch {
+          emit log("market that is not yet upgraded to the extensions upgrade");
+          emit log_address(address(market));
+          emit log("implementation");
+          emit log_address(currentImpl);
+          emit log("pool");
+          emit log_address(pools[i].comptroller);
+          emit log("");
+        }
       }
     }
   }

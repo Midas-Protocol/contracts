@@ -1331,64 +1331,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   /*** Helper Functions ***/
 
   /**
-   * @notice Return all of the markets
-   * @dev The automatic getter may be used to access an individual market.
-   * @return The list of market addresses
-   */
-  function getAllMarkets() public view returns (CTokenInterface[] memory) {
-    return allMarkets;
-  }
-
-  /**
-   * @notice Return all of the borrowers
-   * @dev The automatic getter may be used to access an individual borrower.
-   * @return The list of borrower account addresses
-   */
-  function getAllBorrowers() public view returns (address[] memory) {
-    return allBorrowers;
-  }
-
-  /**
-   * @notice Return all of the whitelist
-   * @dev The automatic getter may be used to access an individual whitelist status.
-   * @return The list of borrower account addresses
-   */
-  function getWhitelist() external view returns (address[] memory) {
-    return whitelistArray;
-  }
-
-  /**
-   * @notice Returns an array of all accruing and non-accruing flywheels
-   */
-  function getRewardsDistributors() external view override returns (address[] memory) {
-    address[] memory allFlywheels = new address[](rewardsDistributors.length + nonAccruingRewardsDistributors.length);
-
-    uint8 i = 0;
-    while (i < rewardsDistributors.length) {
-      allFlywheels[i] = rewardsDistributors[i];
-      i++;
-    }
-    uint8 j = 0;
-    while (j < nonAccruingRewardsDistributors.length) {
-      allFlywheels[i + j] = nonAccruingRewardsDistributors[j];
-      j++;
-    }
-
-    return allFlywheels;
-  }
-
-  function isUserOfPool(address user) public view returns (bool) {
-    for (uint256 i = 0; i < allMarkets.length; i++) {
-      address marketAddress = address(allMarkets[i]);
-      if (markets[marketAddress].accountMembership[user]) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
    * @notice Returns true if the given cToken market has been deprecated
    * @dev All borrows in a deprecated cToken market can be immediately liquidated
    * @param cToken The market to check if deprecated

@@ -20,6 +20,7 @@ import { CToken } from "../compound/CToken.sol";
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
+import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
 import { ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
@@ -46,7 +47,7 @@ contract LiquidityMiningTest is BaseTest {
   FlywheelStaticRewards rewards;
   MidasFlywheelLensRouter flywheelClaimer;
 
-  address user = address(this);
+  address user = address(1337);
 
   uint8 baseDecimal;
   uint8 rewardDecimal;
@@ -83,6 +84,9 @@ contract LiquidityMiningTest is BaseTest {
     trueBoolArray.push(true);
     falseBoolArray.push(false);
     fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
+    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    extensions[0] = new ComptrollerFirstExtension();
+    fuseAdmin._setComptrollerExtensions(address(tempComptroller), extensions);
     (, address comptrollerAddress) = fusePoolDirectory.deployPool(
       "TestPool",
       address(tempComptroller),
@@ -116,7 +120,7 @@ contract LiquidityMiningTest is BaseTest {
       0.9e18
     );
 
-    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
     cErc20 = CErc20(address(allMarkets[allMarkets.length - 1]));
   }
 
@@ -142,7 +146,7 @@ contract LiquidityMiningTest is BaseTest {
       FlywheelStaticRewards.RewardsInfo({ rewardsPerSecond: uint224(1 * 10**rewardDecimal), rewardsEndTimestamp: 0 })
     );
 
-    // preperation for a later call
+    // preparation for a later call
     flywheelsToClaim.push(MidasFlywheelCore(address(flywheel)));
   }
 
@@ -156,46 +160,58 @@ contract LiquidityMiningTest is BaseTest {
 
   function deposit(uint256 _amount) public {
     underlyingToken.mint(user, _amount);
+    vm.startPrank(user);
     underlyingToken.approve(address(cErc20), _amount);
     comptroller.enterMarkets(markets);
     cErc20.mint(_amount);
+    vm.stopPrank();
   }
 
   function _testIntegration() internal {
-    CTokenExtensionInterface asCErc20 = cErc20.asCTokenExtensionInterface();
+    uint256 percentFee = flywheel.performanceFee();
+    uint224 percent100 = flywheel.ONE();
+
+    CTokenExtensionInterface asExtension = cErc20.asCTokenExtensionInterface();
 
     // store expected rewards per token (1 token per second over total supply)
-    uint256 rewardsPerToken = (1 * 10**rewardDecimal * 1 * 10**baseDecimal) / asCErc20.totalSupply();
+    uint256 rewardsPerTokenPlusFee = (1 * 10**rewardDecimal * 1 * 10**baseDecimal) / asExtension.totalSupply();
+    uint256 rewardsPerTokenForFee = (rewardsPerTokenPlusFee * percentFee) / percent100;
+    uint256 rewardsPerToken = rewardsPerTokenPlusFee - rewardsPerTokenForFee;
 
     // store expected user rewards (user balance times reward per second over 1 token)
-    uint256 userRewards = (rewardsPerToken * asCErc20.balanceOf(user)) / (1 * 10**baseDecimal);
+    uint256 userRewards = (rewardsPerToken * asExtension.balanceOf(user)) / (1 * 10**baseDecimal);
 
-    ERC20 asErc20 = ERC20(address(asCErc20));
+    ERC20 asErc20 = ERC20(address(asExtension));
     // accrue rewards and check against expected
-    require(flywheel.accrue(asErc20, user) == userRewards);
+    assertEq(flywheel.accrue(asErc20, user), userRewards, "!accrue amount");
 
     // check market index
     (uint224 index, ) = flywheel.strategyState(asErc20);
-    require(index == 10**rewardDecimal + rewardsPerToken);
+    assertEq(index, 10**rewardDecimal + rewardsPerToken, "!index");
 
     // claim and check user balance
     flywheelClaimer.getUnclaimedRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
-    require(rewardToken.balanceOf(user) == userRewards);
+    assertEq(rewardToken.balanceOf(user), userRewards, "!user rewards");
 
     // mint more tokens by user and rerun test
     deposit(1e6 * 10**baseDecimal);
 
     // for next test, advance 10 seconds instead of 1 (multiply expectations by 10)
-    uint256 rewardsPerToken2 = (10 * 10**rewardDecimal * 1 * 10**baseDecimal) / asCErc20.totalSupply();
     vm.warp(block.timestamp + 10);
 
-    uint256 userRewards2 = (rewardsPerToken2 * asCErc20.balanceOf(user)) / (1 * 10**baseDecimal);
+    uint256 rewardsPerToken2PlusFee = (10 * 10**rewardDecimal * 1 * 10**baseDecimal) / asExtension.totalSupply();
+    uint256 rewardsPerToken2ForFee = (rewardsPerToken2PlusFee * percentFee) / percent100;
+    uint256 rewardsPerToken2 = rewardsPerToken2PlusFee - rewardsPerToken2ForFee;
+
+    uint256 userRewards2 = (rewardsPerToken2 * asExtension.balanceOf(user)) / (1 * 10**baseDecimal);
 
     // accrue all unclaimed rewards and claim them
     flywheelClaimer.getUnclaimedRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
 
+    emit log_named_uint("userRewards", userRewards);
+    emit log_named_uint("userRewards2", userRewards2);
     // user balance should accumulate from both rewards
-    require(rewardToken.balanceOf(user) == userRewards + userRewards2, "balance mismatch");
+    assertEq(rewardToken.balanceOf(user), userRewards + userRewards2, "balance mismatch");
   }
 
   function testIntegrationRewardStandard(uint8 i, uint8 j) public {

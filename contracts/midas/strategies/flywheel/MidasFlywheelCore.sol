@@ -18,7 +18,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   uint256 public performanceFee;
 
   /// @notice Address that gets rewardsToken accrued by performanceFee
-  address public feeRecipient; // TODO whats the default address?
+  address public feeRecipient;
 
   /// @notice The token to reward
   ERC20 public rewardToken;
@@ -57,13 +57,10 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     flywheelBooster = _flywheelBooster;
 
     _transferOwnership(_owner);
-  }
 
-  function reinitialize() public onlyOwnerOrAdmin {
     ONE = uint224(100e16); // 100%
-    uint256 _performanceFee = 10e16; // 10%
-    address _feeRecipient = 0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E;
-    _updateFeeSettings(_performanceFee, _feeRecipient);
+    performanceFee = 10e16; // 10%
+    feeRecipient = _owner;
   }
 
   /*///////////////////////////////////////////////////////////////

@@ -23,6 +23,7 @@ import { FusePoolLens } from "../../FusePoolLens.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { CTokenFirstExtension, DiamondExtension } from "../../compound/CTokenFirstExtension.sol";
+import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
@@ -45,7 +46,7 @@ contract WithPool is BaseTest {
 
   address[] markets;
   address[] emptyAddresses;
-  address[] newUnitroller;
+  address[] newComptrollers;
   bool[] falseBoolArray;
   bool[] trueBoolArray;
   bool[] t;
@@ -145,14 +146,18 @@ contract WithPool is BaseTest {
     uint256 liquidationIncentive
   ) public {
     emptyAddresses.push(address(0));
-    newUnitroller.push(address(new Comptroller(payable(fuseAdmin))));
+    newComptrollers.push(address(new Comptroller(payable(fuseAdmin))));
     trueBoolArray.push(true);
     falseBoolArray.push(false);
-    fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
+    fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newComptrollers, trueBoolArray);
+
+    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    extensions[0] = new ComptrollerFirstExtension();
+    fuseAdmin._setComptrollerExtensions(address(newComptrollers[0]), extensions);
 
     (, address comptrollerAddress) = fusePoolDirectory.deployPool(
       name,
-      newUnitroller[0],
+      newComptrollers[0],
       abi.encode(payable(address(fuseAdmin))),
       enforceWhitelist,
       closeFactor,
@@ -161,6 +166,32 @@ contract WithPool is BaseTest {
     );
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
     comptroller = Comptroller(payable(comptrollerAddress));
+  }
+
+  function upgradePool(address pool) internal {
+    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    Comptroller newComptrollerImplementation = new Comptroller(payable(ffd));
+
+    Unitroller asUnitroller = Unitroller(payable(pool));
+    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
+
+    // whitelist the upgrade
+    vm.startPrank(ffd.owner());
+    ffd._editComptrollerImplementationWhitelist(
+      asArray(oldComptrollerImplementation),
+      asArray(address(newComptrollerImplementation)),
+      asArray(true)
+    );
+    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    extensions[0] = new ComptrollerFirstExtension();
+    ffd._setComptrollerExtensions(address(newComptrollerImplementation), extensions);
+    vm.stopPrank();
+
+    // upgrade to the new comptroller
+    vm.startPrank(asUnitroller.admin());
+    asUnitroller._setPendingImplementation(address(newComptrollerImplementation));
+    newComptrollerImplementation._become(asUnitroller);
+    vm.stopPrank();
   }
 
   function deployCErc20Delegate(
