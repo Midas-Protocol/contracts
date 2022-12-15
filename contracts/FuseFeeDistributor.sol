@@ -10,6 +10,7 @@ import "./compound/ErrorReporter.sol";
 import "./external/compound/IComptroller.sol";
 import "./compound/CErc20Delegator.sol";
 import "./compound/CErc20PluginDelegate.sol";
+import "./midas/CErc20WrappingDelegate.sol";
 import "./midas/SafeOwnableUpgradeable.sol";
 import "./utils/PatchedStorage.sol";
 import "./oracles/BasePriceOracle.sol";
@@ -320,9 +321,19 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   mapping(address => address) public _latestPluginImplementation;
 
   /**
+   * @dev Latest erc20Wrapping implementation for each existing implementation.
+   */
+  mapping(address => address) public _latestERC20WrappingImplementation;
+
+  /**
    * @dev Whitelisted Plugin implementation contract addresses for each existing implementation.
    */
   mapping(address => mapping(address => bool)) public pluginImplementationWhitelist;
+
+  /**
+   * @dev Whitelisted erc20Wrapping implementation contract addresses for each existing implementation.
+   */
+  mapping(address => mapping(address => bool)) public erc20WrappingImplementationWhitelist;
 
   /**
    * @dev Adds/removes plugin implementations to the whitelist.
@@ -345,6 +356,21 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
       pluginImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
   }
 
+  function _editERC20WrappingImplementationWhitelist(
+    address[] calldata oldImplementations,
+    address[] calldata newImplementations,
+    bool[] calldata statuses
+  ) external onlyOwner {
+    require(
+      newImplementations.length > 0 &&
+        newImplementations.length == oldImplementations.length &&
+        newImplementations.length == statuses.length,
+      "No erc20Wrapping implementations supplied or array lengths not equal."
+    );
+    for (uint256 i = 0; i < newImplementations.length; i++)
+      erc20WrappingImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
+  }
+
   /**
    * @dev Latest Plugin implementation for each existing implementation.
    */
@@ -364,6 +390,17 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     _latestPluginImplementation[oldImplementation] = newImplementation;
   }
 
+  function latestERC20WrappingImplementation(address oldImplementation) external view returns (address) {
+    return
+      _latestERC20WrappingImplementation[oldImplementation] != address(0)
+        ? _latestERC20WrappingImplementation[oldImplementation]
+        : oldImplementation;
+  }
+
+  function _setLatestERC20WrappingImplementation(address oldImplementation, address newImplementation) external onlyOwner {
+    _latestERC20WrappingImplementation[oldImplementation] = newImplementation;
+  }
+
   /**
    * @dev Upgrades a plugin of a CErc20PluginDelegate market to the latest implementation
    * @param cDelegator the proxy address
@@ -377,6 +414,16 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     address newPluginAddress = address(market.plugin());
 
     return newPluginAddress != oldPluginAddress;
+  }
+
+  function _upgradeERC20WrappingToLatestImplementation(address cDelegator) external onlyOwner returns (bool) {
+    CErc20WrappingDelegate market = CErc20WrappingDelegate(cDelegator);
+
+    address oldDelegator = address(market.wrappingUnderlying());
+    market._updateUnderlying(_latestERC20WrappingImplementation[oldDelegator]);
+    address newDelegator = address(market.wrappingUnderlying());
+
+    return newDelegator != oldDelegator;
   }
 
   /**
