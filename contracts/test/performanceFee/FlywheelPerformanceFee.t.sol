@@ -37,6 +37,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
   ERC20 depositShare = ERC20(0xEFF5b0E496dC7C26fFaA014cEa0d2Baa83DB11c4);
 
   ERC20 dddToken = ERC20(0x84c97300a190676a19D1E13115629A11f8482Bd1);
+  address flywheelOwner = address(1338);
   MidasFlywheelCore dddFlywheel;
   FuseFlywheelDynamicRewards dddRewards;
 
@@ -50,8 +51,9 @@ contract FlywheelPerformanceFeeTest is BaseTest {
   ERC20Upgradeable[] rewardsToken;
 
   function afterForkSetUp() internal override {
+    vm.startPrank(flywheelOwner);
     dddFlywheel = new MidasFlywheelCore();
-    dddFlywheel.initialize(dddToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
+    dddFlywheel.initialize(dddToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), flywheelOwner);
     dddRewards = new FuseFlywheelDynamicRewards(FlywheelCore(address(dddFlywheel)), 1);
     dddFlywheel.setFlywheelRewards(dddRewards);
 
@@ -74,7 +76,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
       FlywheelCore(address(dddFlywheel)),
       FlywheelCore(address(epxFlywheel)),
       ILpDepositor(address(lpDepositor)),
-      address(this),
+      address(flywheelOwner),
       rewardsToken
     );
 
@@ -84,6 +86,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
 
     dddFlywheel.addStrategyForRewards(marketKey);
     DotDotLpERC4626(address(plugin)).setRewardDestination(marketAddress);
+    vm.stopPrank();
 
     vm.prank(marketAddress);
     dddToken.approve(address(dddRewards), type(uint256).max);
@@ -118,13 +121,14 @@ contract FlywheelPerformanceFeeTest is BaseTest {
 
   function test__initializedValues() public fork(BSC_MAINNET) {
     assertEq(dddFlywheel.performanceFee(), PERFORMANCE_FEE, "!perFee");
-    assertEq(dddFlywheel.feeRecipient(), feeRecipient, "!feeRecipient");
+    assertEq(dddFlywheel.feeRecipient(), flywheelOwner, "!feeRecipient");
   }
 
   function test__UpdateFeeSettings() public fork(BSC_MAINNET) {
     uint256 newPerfFee = 100;
     address newFeeRecipient = feeRecipient;
 
+    vm.prank(flywheelOwner);
     dddFlywheel.updateFeeSettings(newPerfFee, newFeeRecipient);
 
     assertEq(dddFlywheel.performanceFee(), newPerfFee, "!perfFee == newPerfFee");
@@ -132,7 +136,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
   }
 
   function testRevert__UpdateFeeSettings() public fork(BSC_MAINNET) {
-    vm.startPrank(feeRecipient);
+    vm.prank(feeRecipient);
     vm.expectRevert("Ownable: caller is not the owner");
     dddFlywheel.updateFeeSettings(100, feeRecipient);
   }
@@ -156,6 +160,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
   }
 
   function test__WithdrawAccruedFees() public fork(BSC_MAINNET) {
+    vm.prank(flywheelOwner);
     dddFlywheel.updateFeeSettings(PERFORMANCE_FEE, feeRecipient);
 
     createPerformanceFee();
