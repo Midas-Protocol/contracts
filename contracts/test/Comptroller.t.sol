@@ -24,8 +24,8 @@ contract ComptrollerTest is BaseTest {
 
   function setUp() public {
     ERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
-    flywheel = new MidasFlywheel();
     comptroller = new Comptroller(payable(address(this)));
+    flywheel = new MidasFlywheel();
     flywheel.initialize(rewardToken, IFlywheelRewards(address(2)), IFlywheelBooster(address(3)), address(this));
   }
 

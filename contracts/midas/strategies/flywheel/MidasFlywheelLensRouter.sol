@@ -56,6 +56,7 @@ contract MidasFlywheelLensRouter {
     MidasFlywheelCore[] memory flywheels = comptroller.getAccruingFlywheels();
     address[] memory rewardTokens = new address[](flywheels.length);
     uint256[] memory rewardTokenPrices = new uint256[](flywheels.length);
+    uint256[] memory rewardTokenDecimals = new uint256[](flywheels.length);
     IPriceOracle oracle = comptroller.oracle();
 
     MarketRewardsInfo[] memory infoList = new MarketRewardsInfo[](markets.length);
@@ -67,37 +68,27 @@ contract MidasFlywheelLensRouter {
 
       if (i == 0) {
         for (uint256 j = 0; j < flywheels.length; j++) {
-          address rewardToken = address(flywheels[j].rewardToken());
-          rewardTokens[j] = rewardToken;
-          rewardTokenPrices[j] = oracle.price(rewardToken); // scaled to 1e18
+          ERC20 rewardToken = flywheels[j].rewardToken();
+          rewardTokens[j] = address(rewardToken);
+          rewardTokenPrices[j] = oracle.price(address(rewardToken)); // scaled to 1e18
+          rewardTokenDecimals[j] = uint256(rewardToken.decimals());
         }
       }
 
       for (uint256 j = 0; j < flywheels.length; j++) {
         MidasFlywheelCore flywheel = flywheels[j];
-        uint256 rewardSpeedPerSecondPerToken;
-        {
-          (uint224 indexBefore, uint32 lastUpdatedTimestampBefore) = flywheel.strategyState(market);
-          flywheel.accrue(market, address(0));
-          (uint224 indexAfter, uint32 lastUpdatedTimestampAfter) = flywheel.strategyState(market);
-          if (lastUpdatedTimestampAfter > lastUpdatedTimestampBefore) {
-            rewardSpeedPerSecondPerToken =
-              (indexAfter - indexBefore) /
-              (lastUpdatedTimestampAfter - lastUpdatedTimestampBefore);
-          }
-        }
 
-        uint256 aprInRewardsTokenDecimals = getAprInRewardsTokenDecimals(
-          rewardSpeedPerSecondPerToken,
-          rewardTokenPrices[j],
-          price,
-          market.exchangeRateCurrent()
+        uint256 rewardSpeedPerSecondPerToken = getRewardSpeedPerSecondPerToken(
+          flywheel,
+          market,
+          rewardTokenDecimals[j]
         );
+        uint256 apr = getApr(rewardSpeedPerSecondPerToken, rewardTokenPrices[j], price, market.exchangeRateCurrent());
 
         rewardsInfo[j] = RewardsInfo({
-          rewardSpeedPerSecondPerToken: rewardSpeedPerSecondPerToken,
+          rewardSpeedPerSecondPerToken: rewardSpeedPerSecondPerToken, // scaled in 1e18
           rewardTokenPrice: rewardTokenPrices[j],
-          formattedAPR: (aprInRewardsTokenDecimals * 1e18) / 10**ERC20(rewardTokens[j]).decimals(),
+          formattedAPR: apr, // scaled in 1e18
           flywheel: address(flywheel),
           rewardToken: rewardTokens[j]
         });
@@ -109,22 +100,38 @@ contract MidasFlywheelLensRouter {
     return infoList;
   }
 
-  event log(string);
-  event log_uint(uint256);
+  function scaleIndexDiff(uint256 indexDiff, uint256 decimals) internal view returns (uint256) {
+    return decimals <= 18 ? uint256(indexDiff) * (10**(18 - decimals)) : uint256(indexDiff) / (10**(decimals - 18));
+  }
 
-  function getAprInRewardsTokenDecimals(
+  function getRewardSpeedPerSecondPerToken(
+    MidasFlywheelCore flywheel,
+    CErc20Token market,
+    uint256 decimals
+  ) internal returns (uint256 rewardSpeedPerSecondPerToken) {
+    (uint224 indexBefore, uint32 lastUpdatedTimestampBefore) = flywheel.strategyState(market);
+    flywheel.accrue(market, address(0));
+    (uint224 indexAfter, uint32 lastUpdatedTimestampAfter) = flywheel.strategyState(market);
+    if (lastUpdatedTimestampAfter > lastUpdatedTimestampBefore) {
+      rewardSpeedPerSecondPerToken =
+        scaleIndexDiff((indexAfter - indexBefore), decimals) /
+        (lastUpdatedTimestampAfter - lastUpdatedTimestampBefore);
+    }
+  }
+
+  function getApr(
     uint256 rewardSpeedPerSecondPerToken,
     uint256 rewardTokenPrice,
     uint256 underlyingPrice,
     uint256 exchangeRate
   ) internal view returns (uint256) {
     if (rewardSpeedPerSecondPerToken == 0) return 0;
-    uint256 nativeSpeedPerSecondPerCToken = rewardSpeedPerSecondPerToken * rewardTokenPrice; // scaled to 10^(reward.decimals + 18)
-    uint256 nativeSpeedPerYearPerCToken = nativeSpeedPerSecondPerCToken * 365.25 days; // scaled to 10^(reward.decimals + 18)
-    uint256 assetSpeedPerYearPerCToken = nativeSpeedPerYearPerCToken / underlyingPrice; // scaled to 10^(reward.decimals)
-    uint256 assetSpeedPerYearPerCTokenScaled = assetSpeedPerYearPerCToken * 1e18; // scaled to 10^(reward.decimals + 18)
-    uint256 aprInRewardsTokenDecimals = assetSpeedPerYearPerCTokenScaled / exchangeRate; // scaled to 10^(reward.decimals)
-    return aprInRewardsTokenDecimals;
+    uint256 nativeSpeedPerSecondPerCToken = rewardSpeedPerSecondPerToken * rewardTokenPrice; // scaled to 1e36
+    uint256 nativeSpeedPerYearPerCToken = nativeSpeedPerSecondPerCToken * 365.25 days; // scaled to 1e36
+    uint256 assetSpeedPerYearPerCToken = nativeSpeedPerYearPerCToken / underlyingPrice; // scaled to 1e18
+    uint256 assetSpeedPerYearPerCTokenScaled = assetSpeedPerYearPerCToken * 1e18; // scaled to 1e36
+    uint256 apr = assetSpeedPerYearPerCTokenScaled / exchangeRate; // scaled to 1e18
+    return apr;
   }
 
   function getUnclaimedRewardsForMarket(
