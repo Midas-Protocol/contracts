@@ -29,9 +29,7 @@ contract CErc20WrappingDelegate is CErc20Delegate {
   function _updateWrapper(address _newWrapper) public {
     require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _updateWrapper");
 
-    address oldImplementation = address(underlyingWrapper) != address(0)
-      ? address(underlyingWrapper)
-      : _newWrapper;
+    address oldImplementation = address(underlyingWrapper) != address(0) ? address(underlyingWrapper) : _newWrapper;
 
     require(
       IFuseFeeDistributor(fuseAdmin).erc20WrapperUpgradeWhitelist(oldImplementation, _newWrapper),
