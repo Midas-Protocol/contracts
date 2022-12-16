@@ -325,7 +325,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
    */
   mapping(address => mapping(address => bool)) public pluginImplementationWhitelist;
 
-
   /**
    * @dev Adds/removes plugin implementations to the whitelist.
    * @param oldImplementations The old plugin implementation addresses to upgrade from for each `newImplementations` to upgrade to.

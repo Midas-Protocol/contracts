@@ -18,9 +18,7 @@ contract CErc20WrappingDelegate is CErc20Delegate {
     address _wrappingUnderlying = abi.decode(data, (address));
 
     if (_wrappingUnderlying == address(0) && address(wrappingUnderlying) != address(0)) {
-      _wrappingUnderlying = IFuseFeeDistributor(fuseAdmin).latestERC20WrapperForUnderlying(
-        address(wrappingUnderlying)
-      );
+      _wrappingUnderlying = IFuseFeeDistributor(fuseAdmin).latestERC20WrapperForUnderlying(address(wrappingUnderlying));
     }
 
     if (_wrappingUnderlying != address(0) && _wrappingUnderlying != address(wrappingUnderlying)) {
