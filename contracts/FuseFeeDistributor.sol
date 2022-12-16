@@ -412,9 +412,9 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   function _upgradeERC20WrappingToLatestImplementation(address cDelegator) external onlyOwner returns (bool) {
     CErc20WrappingDelegate market = CErc20WrappingDelegate(cDelegator);
 
-    address oldWrapper = address(market.wrappingUnderlying());
-    market._updateUnderlying(_latestERC20WrapperForUnderlying[oldWrapper]);
-    address newWrapper = address(market.wrappingUnderlying());
+    address oldWrapper = address(market.underlyingWrapper());
+    market._updateWrapper(_latestERC20WrapperForUnderlying[oldWrapper]);
+    address newWrapper = address(market.underlyingWrapper());
 
     return newWrapper != oldWrapper;
   }

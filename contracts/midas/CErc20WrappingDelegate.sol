@@ -10,41 +10,41 @@ import { ERC20Wrapper } from "openzeppelin-contracts/token/ERC20/extensions/ERC2
 contract CErc20WrappingDelegate is CErc20Delegate {
   event NewErc20WrappingImplementation(address oldImpl, address newImpl);
 
-  ERC20Wrapper public wrappingUnderlying;
+  ERC20Wrapper public underlyingWrapper;
 
   function _becomeImplementation(bytes memory data) public virtual override {
     require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
 
-    address _wrappingUnderlying = abi.decode(data, (address));
+    address _underlyingWrapper = abi.decode(data, (address));
 
-    if (_wrappingUnderlying == address(0) && address(wrappingUnderlying) != address(0)) {
-      _wrappingUnderlying = IFuseFeeDistributor(fuseAdmin).latestERC20WrapperForUnderlying(address(wrappingUnderlying));
+    if (_underlyingWrapper == address(0) && address(underlyingWrapper) != address(0)) {
+      _underlyingWrapper = IFuseFeeDistributor(fuseAdmin).latestERC20WrapperForUnderlying(address(underlyingWrapper));
     }
 
-    if (_wrappingUnderlying != address(0) && _wrappingUnderlying != address(wrappingUnderlying)) {
-      _updateUnderlying(_wrappingUnderlying);
+    if (_underlyingWrapper != address(0) && _underlyingWrapper != address(underlyingWrapper)) {
+      _updateWrapper(_underlyingWrapper);
     }
   }
 
-  function _updateUnderlying(address _wrappingUnderlying) public {
-    require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _updateUnderlying");
+  function _updateWrapper(address _underlyingWrapper) public {
+    require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _updateWrapper");
 
-    address oldImplementation = address(wrappingUnderlying) != address(0)
-      ? address(wrappingUnderlying)
-      : _wrappingUnderlying;
+    address oldImplementation = address(underlyingWrapper) != address(0)
+      ? address(underlyingWrapper)
+      : _underlyingWrapper;
 
     require(
-      IFuseFeeDistributor(fuseAdmin).erc20WrapperUpgradeWhitelist(oldImplementation, _wrappingUnderlying),
+      IFuseFeeDistributor(fuseAdmin).erc20WrapperUpgradeWhitelist(oldImplementation, _underlyingWrapper),
       "erc20Wrapping implementation not whitelisted"
     );
 
-    if (address(wrappingUnderlying) != address(0) && wrappingUnderlying.balanceOf(address(this)) != 0) {
-      doTransferOut(address(this), wrappingUnderlying.balanceOf(address(this)));
+    if (address(underlyingWrapper) != address(0) && underlyingWrapper.balanceOf(address(this)) != 0) {
+      doTransferOut(address(this), underlyingWrapper.balanceOf(address(this)));
     }
 
-    wrappingUnderlying = ERC20Wrapper(_wrappingUnderlying);
+    underlyingWrapper = ERC20Wrapper(_underlyingWrapper);
 
-    EIP20Interface(underlying).approve(_wrappingUnderlying, type(uint256).max);
+    EIP20Interface(underlying).approve(_underlyingWrapper, type(uint256).max);
 
     uint256 amount = EIP20Interface(underlying).balanceOf(address(this));
 
@@ -52,18 +52,18 @@ contract CErc20WrappingDelegate is CErc20Delegate {
       doTransferIn(address(this), amount);
     }
 
-    emit NewErc20WrappingImplementation(address(wrappingUnderlying), _wrappingUnderlying);
+    emit NewErc20WrappingImplementation(address(underlyingWrapper), _underlyingWrapper);
   }
 
   function doTransferIn(address from, uint256 amount) internal virtual override returns (uint256) {
     require(EIP20Interface(underlying).transferFrom(from, address(this), amount), "send");
 
-    wrappingUnderlying.depositFor(address(this), amount);
+    underlyingWrapper.depositFor(address(this), amount);
     return amount;
   }
 
   function doTransferOut(address to, uint256 amount) internal virtual override {
-    wrappingUnderlying.withdrawTo(to, amount);
+    underlyingWrapper.withdrawTo(to, amount);
   }
 
   function contractType() external pure virtual override returns (string memory) {
