@@ -31,6 +31,10 @@ contract FLRTest is BaseTest {
 
   address BSC_ADMIN = address(0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E);
 
+  function afterForkSetUp() internal override {
+    lensRouter = new MidasFlywheelLensRouter();
+  }
+
   function setUpFlywheel(
     address _rewardToken,
     address mkt,
@@ -47,8 +51,6 @@ contract FLRTest is BaseTest {
 
     rewards = new FlywheelStaticRewards(FuseFlywheelCore(address(flywheel)), address(this), Authority(address(0)));
     flywheel.setFlywheelRewards(rewards);
-
-    lensRouter = new MidasFlywheelLensRouter();
 
     flywheel.addStrategyForRewards(ERC20(mkt));
 
@@ -128,8 +130,7 @@ contract FLRTest is BaseTest {
     CErc20Token market = CErc20Token(0xa9736bA05de1213145F688e4619E5A7e0dcf4C72);
     rewardToken = address(0x931715FEE2d06333043d11F658C8CE934aC61D0c);
     IComptroller comptroller = IComptroller(0xeB2D3A9D962d89b4A9a34ce2bF6a2650c938e185);
-    setUpFlywheel(rewardToken, address(market), comptroller, BSC_ADMIN);
-    IPriceOracle mpo = IPriceOracle(ap.getAddress("mpo"));
+    // setUpFlywheel(rewardToken, address(market), comptroller, BSC_ADMIN);
 
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
@@ -149,7 +150,6 @@ contract FLRTest is BaseTest {
       abi.encode(10)
     );
 
-    // comptroller.getAllMarkets();
     MidasFlywheelLensRouter.MarketRewardsInfo[] memory info = lensRouter.getMarketRewardsInfo(comptroller);
     for (uint8 i = 0; i < info.length; i++) {
       for (uint8 j = 0; j < info[i].rewardsInfo.length; j++) {
