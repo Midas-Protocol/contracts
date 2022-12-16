@@ -78,7 +78,11 @@ contract MidasFlywheelLensRouter {
       for (uint256 j = 0; j < flywheels.length; j++) {
         MidasFlywheelCore flywheel = flywheels[j];
 
-        uint256 rewardSpeedPerSecondPerToken = getRewardSpeedPerSecondPerToken(flywheel, market, rewardTokenDecimals[j]);
+        uint256 rewardSpeedPerSecondPerToken = getRewardSpeedPerSecondPerToken(
+          flywheel,
+          market,
+          rewardTokenDecimals[j]
+        );
         uint256 apr = getApr(rewardSpeedPerSecondPerToken, rewardTokenPrices[j], price, market.exchangeRateCurrent());
 
         rewardsInfo[j] = RewardsInfo({
@@ -100,10 +104,11 @@ contract MidasFlywheelLensRouter {
     return decimals <= 18 ? uint256(indexDiff) * (10**(18 - decimals)) : uint256(indexDiff) / (10**(decimals - 18));
   }
 
-  function getRewardSpeedPerSecondPerToken(MidasFlywheelCore flywheel, CErc20Token market, uint256 decimals)
-    internal
-    returns (uint256 rewardSpeedPerSecondPerToken)
-  {
+  function getRewardSpeedPerSecondPerToken(
+    MidasFlywheelCore flywheel,
+    CErc20Token market,
+    uint256 decimals
+  ) internal returns (uint256 rewardSpeedPerSecondPerToken) {
     (uint224 indexBefore, uint32 lastUpdatedTimestampBefore) = flywheel.strategyState(market);
     flywheel.accrue(market, address(0));
     (uint224 indexAfter, uint32 lastUpdatedTimestampAfter) = flywheel.strategyState(market);
