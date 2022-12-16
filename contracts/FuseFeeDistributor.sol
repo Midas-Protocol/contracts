@@ -325,15 +325,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
    */
   mapping(address => mapping(address => bool)) public pluginImplementationWhitelist;
 
-  /**
-   * @dev Whitelisted erc20Wrapping implementation contract addresses for each existing implementation.
-   */
-  mapping(address => mapping(address => bool)) public erc20WrappingImplementationWhitelist;
-
-  /**
-   * @dev Latest erc20Wrapping implementation for each existing implementation.
-   */
-  mapping(address => address) public _latestERC20WrappingImplementation;
 
   /**
    * @dev Adds/removes plugin implementations to the whitelist.
@@ -356,7 +347,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
       pluginImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
   }
 
-  function _editERC20WrappingImplementationWhitelist(
+  function _editERC20WrapperUpgradeWhitelist(
     address[] calldata oldImplementations,
     address[] calldata newImplementations,
     bool[] calldata statuses
@@ -368,7 +359,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
       "No erc20Wrapping implementations supplied or array lengths not equal."
     );
     for (uint256 i = 0; i < newImplementations.length; i++)
-      erc20WrappingImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
+      erc20WrapperUpgradeWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
   }
 
   /**
@@ -390,18 +381,18 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     _latestPluginImplementation[oldImplementation] = newImplementation;
   }
 
-  function latestERC20WrappingImplementation(address oldImplementation) external view returns (address) {
+  function latestERC20WrapperForUnderlying(address oldImplementation) external view returns (address) {
     return
-      _latestERC20WrappingImplementation[oldImplementation] != address(0)
-        ? _latestERC20WrappingImplementation[oldImplementation]
+      _latestERC20WrapperForUnderlying[oldImplementation] != address(0)
+        ? _latestERC20WrapperForUnderlying[oldImplementation]
         : oldImplementation;
   }
 
-  function _setLatestERC20WrappingImplementation(address oldImplementation, address newImplementation)
+  function _setLatestERC20WrapperForUnderlying(address oldImplementation, address newImplementation)
     external
     onlyOwner
   {
-    _latestERC20WrappingImplementation[oldImplementation] = newImplementation;
+    _latestERC20WrapperForUnderlying[oldImplementation] = newImplementation;
   }
 
   /**
@@ -422,11 +413,11 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   function _upgradeERC20WrappingToLatestImplementation(address cDelegator) external onlyOwner returns (bool) {
     CErc20WrappingDelegate market = CErc20WrappingDelegate(cDelegator);
 
-    address oldDelegator = address(market.wrappingUnderlying());
-    market._updateUnderlying(_latestERC20WrappingImplementation[oldDelegator]);
-    address newDelegator = address(market.wrappingUnderlying());
+    address oldWrapper = address(market.wrappingUnderlying());
+    market._updateUnderlying(_latestERC20WrapperForUnderlying[oldWrapper]);
+    address newWrapper = address(market.wrappingUnderlying());
 
-    return newDelegator != oldDelegator;
+    return newWrapper != oldWrapper;
   }
 
   /**
@@ -474,6 +465,16 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   mapping(address => DiamondExtension[]) public cErc20DelegateExtensions;
+
+  /**
+   * @dev Whitelisted erc20Wrapping implementation contract addresses for each existing implementation.
+   */
+  mapping(address => mapping(address => bool)) public erc20WrapperUpgradeWhitelist;
+
+  /**
+   * @dev Latest erc20Wrapping implementation for each existing implementation.
+   */
+  mapping(address => address) public _latestERC20WrapperForUnderlying;
 
   function getCErc20DelegateExtensions(address cErc20Delegate) external view returns (DiamondExtension[] memory) {
     return cErc20DelegateExtensions[cErc20Delegate];

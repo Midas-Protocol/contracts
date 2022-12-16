@@ -18,7 +18,7 @@ contract CErc20WrappingDelegate is CErc20Delegate {
     address _wrappingUnderlying = abi.decode(data, (address));
 
     if (_wrappingUnderlying == address(0) && address(wrappingUnderlying) != address(0)) {
-      _wrappingUnderlying = IFuseFeeDistributor(fuseAdmin).latestERC20WrappingImplementation(
+      _wrappingUnderlying = IFuseFeeDistributor(fuseAdmin).latestERC20WrapperForUnderlying(
         address(wrappingUnderlying)
       );
     }
@@ -36,7 +36,7 @@ contract CErc20WrappingDelegate is CErc20Delegate {
       : _wrappingUnderlying;
 
     require(
-      IFuseFeeDistributor(fuseAdmin).erc20WrappingImplementationWhitelist(oldImplementation, _wrappingUnderlying),
+      IFuseFeeDistributor(fuseAdmin).erc20WrapperUpgradeWhitelist(oldImplementation, _wrappingUnderlying),
       "erc20Wrapping implementation not whitelisted"
     );
 
