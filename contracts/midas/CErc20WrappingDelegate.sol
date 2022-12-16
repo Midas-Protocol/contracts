@@ -15,26 +15,26 @@ contract CErc20WrappingDelegate is CErc20Delegate {
   function _becomeImplementation(bytes memory data) public virtual override {
     require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
 
-    address _underlyingWrapper = abi.decode(data, (address));
+    address _newWrapper = abi.decode(data, (address));
 
-    if (_underlyingWrapper == address(0) && address(underlyingWrapper) != address(0)) {
-      _underlyingWrapper = IFuseFeeDistributor(fuseAdmin).latestERC20WrapperForUnderlying(address(underlyingWrapper));
+    if (_newWrapper == address(0) && address(underlyingWrapper) != address(0)) {
+      _newWrapper = IFuseFeeDistributor(fuseAdmin).latestERC20WrapperForUnderlying(address(underlyingWrapper));
     }
 
-    if (_underlyingWrapper != address(0) && _underlyingWrapper != address(underlyingWrapper)) {
-      _updateWrapper(_underlyingWrapper);
+    if (_newWrapper != address(0) && _newWrapper != address(underlyingWrapper)) {
+      _updateWrapper(_newWrapper);
     }
   }
 
-  function _updateWrapper(address _underlyingWrapper) public {
+  function _updateWrapper(address _newWrapper) public {
     require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _updateWrapper");
 
     address oldImplementation = address(underlyingWrapper) != address(0)
       ? address(underlyingWrapper)
-      : _underlyingWrapper;
+      : _newWrapper;
 
     require(
-      IFuseFeeDistributor(fuseAdmin).erc20WrapperUpgradeWhitelist(oldImplementation, _underlyingWrapper),
+      IFuseFeeDistributor(fuseAdmin).erc20WrapperUpgradeWhitelist(oldImplementation, _newWrapper),
       "erc20Wrapping implementation not whitelisted"
     );
 
@@ -42,9 +42,9 @@ contract CErc20WrappingDelegate is CErc20Delegate {
       doTransferOut(address(this), underlyingWrapper.balanceOf(address(this)));
     }
 
-    underlyingWrapper = ERC20Wrapper(_underlyingWrapper);
+    underlyingWrapper = ERC20Wrapper(_newWrapper);
 
-    EIP20Interface(underlying).approve(_underlyingWrapper, type(uint256).max);
+    EIP20Interface(underlying).approve(_newWrapper, type(uint256).max);
 
     uint256 amount = EIP20Interface(underlying).balanceOf(address(this));
 
@@ -52,7 +52,7 @@ contract CErc20WrappingDelegate is CErc20Delegate {
       doTransferIn(address(this), amount);
     }
 
-    emit NewErc20WrappingImplementation(address(underlyingWrapper), _underlyingWrapper);
+    emit NewErc20WrappingImplementation(address(underlyingWrapper), _newWrapper);
   }
 
   function doTransferIn(address from, uint256 amount) internal virtual override returns (uint256) {
