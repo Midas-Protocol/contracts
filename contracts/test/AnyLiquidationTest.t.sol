@@ -58,16 +58,16 @@ contract AnyLiquidationTest is BaseTest {
       mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
       curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
       // TODO revert to the ap provided, no need to upgrade after the next deploy
-      // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      fsl = new FuseSafeLiquidator();
-      fsl.initialize(
-        ap.getAddress("wtoken"),
-        uniswapRouter,
-        ap.getAddress("stableToken"),
-        ap.getAddress("wBTCToken"),
-        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
-        25
-      );
+      fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+      //      fsl = new FuseSafeLiquidator();
+      //      fsl.initialize(
+      //        ap.getAddress("wtoken"),
+      //        uniswapRouter,
+      //        ap.getAddress("stableToken"),
+      //        ap.getAddress("wBTCToken"),
+      //        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
+      //        25
+      //      );
 
       // TODO configure in the AP?
       address bnbx = 0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275;
@@ -640,5 +640,39 @@ contract AnyLiquidationTest is BaseTest {
 
     assertEq(strategyInputToken, inputToken, "!expected input token");
     return inputToken;
+  }
+
+  function _functionCall(
+    address target,
+    bytes memory data,
+    string memory errorMessage
+  ) internal returns (bytes memory) {
+    (bool success, bytes memory returndata) = target.call(data);
+
+    if (!success) {
+      // Look for revert reason and bubble it up if present
+      if (returndata.length > 0) {
+        // The easiest way to bubble the revert reason is using memory via assembly
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+          let returndata_size := mload(returndata)
+          revert(add(32, returndata), returndata_size)
+        }
+      } else {
+        revert(errorMessage);
+      }
+    }
+
+    return returndata;
+  }
+
+  function testRawLiquidation() public debuggingOnly fork(BSC_MAINNET) {
+    vm.prank(0x19F2bfCA57FDc1B7406337391d2F54063CaE8748);
+    _functionCall(
+      address(fsl),
+      hex"f6cd5bbd0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000c13d3e8fcedfc07f0d446526299f5600dd73e7710000000000000000000000000000000000000000000000015b3465b70d90cf6a00000000000000000000000082a3103bc306293227b756f7554afaee82f8ab7a000000000000000000000000d96643ba2bf96e73509c4bb73c0cb259daf34de100000000000000000000000058f876857a02d6762e0101bb5c46a8c1ed44dc160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000bb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c00000000000000000000000010ed43c718714eb63d5aa57b78b54704e256024e00000000000000000000000010ed43c718714eb63d5aa57b78b54704e256024e00000000000000000000000000000000000000000000000000000000000001c000000000000000000000000000000000000000000000000000000000000001e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000240000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000c168eae9f3e900c6b3e0d521ed638b10585a4afc000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000060000000000000000000000000e9e7cea3dedca5984780bafc599bd69add087d560000000000000000000000000fd8170dc284cd558325029f6aec1538c7d99f490000000000000000000000000000000000000000000000000000000000000960",
+      "raw liquidation failed"
+    );
   }
 }
