@@ -91,9 +91,14 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
    * @param _lpToken LP token to find the corresponding pool.
    * @param _pool Pool address.
    */
-  function registerPool(address _lpToken, address _pool) external onlyOwner {
+  function registerPool(
+    address _lpToken,
+    address _pool,
+    address _baseToken
+  ) external onlyOwner {
     address pool = poolOf[_lpToken];
     require(pool == address(0), "This LP token is already registered.");
     poolOf[_lpToken] = _pool;
+    baseTokens[_lpToken] = _baseToken;
   }
 }
