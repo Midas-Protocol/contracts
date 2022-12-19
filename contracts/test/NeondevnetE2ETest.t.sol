@@ -32,12 +32,10 @@ contract MockWNeon is MockERC20 {
   function deposit() external payable {}
 }
 
-contract NeondevnetE2ETest is WithPool, BaseTest {
+contract NeondevnetE2ETest is WithPool {
   address mpo;
   address moraToken = 0x6Ab1F83c0429A1322D7ECDFdDf54CE6D179d911f;
   address wtoken = 0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5;
-
-  constructor() WithPool() {}
 
   struct LiquidationData {
     address[] cTokens;
@@ -74,7 +72,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
     deployCErc20Delegate(wtoken, "cWToken", "wtoken", 0.9e18);
 
-    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
     CErc20Delegate cToken = CErc20Delegate(address(allMarkets[0]));
     CErc20Delegate cWToken = CErc20Delegate(address(allMarkets[1]));
 
@@ -107,7 +105,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
-    CTokenInterface[] memory allMarkets = comptroller.getAllMarkets();
+    CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
     CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
     assertEq(cToken.name(), "cUnderlyingToken");
     underlyingToken.approve(address(cToken), 1e36);
@@ -131,7 +129,7 @@ contract NeondevnetE2ETest is WithPool, BaseTest {
     deployCErc20Delegate(address(vars.erc20), "MORA", "MoraSwap", 0.9e18);
     deployCErc20Delegate(address(vars.asset), "WNEON", "Wrapped Neon", 0.9e18);
 
-    vars.allMarkets = comptroller.getAllMarkets();
+    vars.allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
 
     CErc20Delegate cToken = CErc20Delegate(address(vars.allMarkets[0]));
     CErc20Delegate cWNeonToken = CErc20Delegate(address(vars.allMarkets[1]));

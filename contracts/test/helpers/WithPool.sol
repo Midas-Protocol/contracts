@@ -21,9 +21,13 @@ import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { FusePoolLens } from "../../FusePoolLens.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { CTokenFirstExtension, DiamondExtension } from "../../compound/CTokenFirstExtension.sol";
+import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
 
-contract WithPool {
+import { BaseTest } from "../config/BaseTest.t.sol";
+
+contract WithPool is BaseTest {
   ERC20Upgradeable public underlyingToken;
   CErc20 cErc20;
   CToken cToken;
@@ -42,7 +46,7 @@ contract WithPool {
 
   address[] markets;
   address[] emptyAddresses;
-  address[] newUnitroller;
+  address[] newComptrollers;
   bool[] falseBoolArray;
   bool[] trueBoolArray;
   bool[] t;
@@ -53,23 +57,41 @@ contract WithPool {
   address[] hardcodedAddresses;
   string[] hardcodedNames;
 
-  event log_address1(address add);
-
   function setUpWithPool(MasterPriceOracle _masterPriceOracle, ERC20Upgradeable _underlyingToken) public {
     priceOracle = _masterPriceOracle;
     underlyingToken = _underlyingToken;
+
+    fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    // upgrade
+    {
+      FuseFeeDistributor newImpl = new FuseFeeDistributor();
+      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(fuseAdmin)));
+      bytes32 bytesAtSlot = vm.load(address(proxy), 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103);
+      address admin = address(uint160(uint256(bytesAtSlot)));
+      vm.prank(admin);
+      proxy.upgradeTo(address(newImpl));
+    }
+
+    //    fuseAdmin = new FuseFeeDistributor();
+    //    fuseAdmin.initialize(1e16);
+    {
+      vm.prank(fuseAdmin.owner());
+      fuseAdmin._setPendingOwner(address(this));
+      fuseAdmin._acceptOwner();
+    }
     setUpBaseContracts();
     setUpWhiteList();
     // setUpPoolAndMarket();
   }
 
-  function setUpWhiteList() public {
+  function setUpWhiteList() internal {
     cErc20Delegate = new CErc20Delegate();
     cErc20PluginDelegate = new CErc20PluginDelegate();
     cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
 
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
     cErc20DelegateExtensions[0] = new CTokenFirstExtension();
+
     fuseAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
     fuseAdmin._setCErc20DelegateExtensions(address(cErc20PluginDelegate), cErc20DelegateExtensions);
     fuseAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
@@ -98,15 +120,12 @@ contract WithPool {
     fuseAdmin._editCErc20DelegateWhitelist(oldCErC20Implementations, newCErc20Implementations, f, t);
   }
 
-  function setUpBaseContracts() public {
+  function setUpBaseContracts() internal {
     interestModel = new WhitePaperInterestRateModel(2343665, 1e18, 1e18);
-    fuseAdmin = new FuseFeeDistributor();
-    fuseAdmin.initialize(1e16);
     fusePoolDirectory = new FusePoolDirectory();
     fusePoolDirectory.initialize(false, emptyAddresses);
 
     poolLens = new FusePoolLens();
-    emit log_address1(address(poolLens));
     poolLens.initialize(
       fusePoolDirectory,
       "Pool",
@@ -127,14 +146,18 @@ contract WithPool {
     uint256 liquidationIncentive
   ) public {
     emptyAddresses.push(address(0));
-    newUnitroller.push(address(new Comptroller(payable(fuseAdmin))));
+    newComptrollers.push(address(new Comptroller(payable(fuseAdmin))));
     trueBoolArray.push(true);
     falseBoolArray.push(false);
-    fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
+    fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newComptrollers, trueBoolArray);
+
+    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    extensions[0] = new ComptrollerFirstExtension();
+    fuseAdmin._setComptrollerExtensions(address(newComptrollers[0]), extensions);
 
     (, address comptrollerAddress) = fusePoolDirectory.deployPool(
       name,
-      newUnitroller[0],
+      newComptrollers[0],
       abi.encode(payable(address(fuseAdmin))),
       enforceWhitelist,
       closeFactor,
@@ -143,6 +166,32 @@ contract WithPool {
     );
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
     comptroller = Comptroller(payable(comptrollerAddress));
+  }
+
+  function upgradePool(address pool) internal {
+    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    Comptroller newComptrollerImplementation = new Comptroller(payable(ffd));
+
+    Unitroller asUnitroller = Unitroller(payable(pool));
+    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
+
+    // whitelist the upgrade
+    vm.startPrank(ffd.owner());
+    ffd._editComptrollerImplementationWhitelist(
+      asArray(oldComptrollerImplementation),
+      asArray(address(newComptrollerImplementation)),
+      asArray(true)
+    );
+    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    extensions[0] = new ComptrollerFirstExtension();
+    ffd._setComptrollerExtensions(address(newComptrollerImplementation), extensions);
+    vm.stopPrank();
+
+    // upgrade to the new comptroller
+    vm.startPrank(asUnitroller.admin());
+    asUnitroller._setPendingImplementation(address(newComptrollerImplementation));
+    newComptrollerImplementation._become(asUnitroller);
+    vm.stopPrank();
   }
 
   function deployCErc20Delegate(
@@ -211,7 +260,7 @@ contract WithPool {
     );
   }
 
-  function whitelistPlugin(address oldImpl, address newImpl) public {
+  function whitelistPlugin(address oldImpl, address newImpl) internal {
     address[] memory _oldCErC20Implementations = new address[](1);
     address[] memory _newCErc20Implementations = new address[](1);
     bool[] memory arrayOfTrue = new bool[](1);

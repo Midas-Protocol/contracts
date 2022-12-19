@@ -11,6 +11,7 @@ import { Unitroller } from "./Unitroller.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 import { IMidasFlywheel } from "../midas/strategies/flywheel/IMidasFlywheel.sol";
 import { DiamondExtension, DiamondBase, LibDiamond } from "../midas/DiamondExtension.sol";
+import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
 /**
  * @title Compound's Comptroller Contract
@@ -732,6 +733,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     Exp exchangeRate;
     Exp oraclePrice;
     Exp tokensToDenom;
+    uint256 totalBorrowCapForCollateral;
+    uint256 totalBorrowsBefore;
+    uint256 borrowedAssetPrice;
   }
 
   function getAccountLiquidity(address account)
@@ -815,6 +819,11 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     AccountLiquidityLocalVars memory vars; // Holds all our calculation results
     uint256 oErr;
 
+    if (address(cTokenModify) != address(0)) {
+      vars.totalBorrowsBefore = cTokenModify.totalBorrows();
+      vars.borrowedAssetPrice = oracle.getUnderlyingPrice(cTokenModify);
+    }
+
     // For each asset the account is in
     CTokenInterface[] memory assets = accountAssets[account];
     for (uint256 i = 0; i < assets.length; i++) {
@@ -839,10 +848,35 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       // Pre-compute a conversion factor from tokens -> ether (normalized price value)
       vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
 
+      uint256 assetAsCollateralValueCap = type(uint256).max;
       // Exclude the asset-to-be-borrowed from the liquidity, except for when redeeming
       if (address(asset) != address(cTokenModify) || redeemTokens > 0) {
-        // sumCollateral += tokensToDenom * cTokenBalance
-        vars.sumCollateral = mul_ScalarTruncateAddUInt(vars.tokensToDenom, vars.cTokenBalance, vars.sumCollateral);
+        // if the borrowed asset is capped against this collateral
+        if (address(cTokenModify) != address(0)) {
+          bool blacklisted = borrowingAgainstCollateralBlacklist[address(cTokenModify)][address(asset)];
+          if (blacklisted) {
+            assetAsCollateralValueCap = 0;
+          } else {
+            // the value of the collateral is capped regardless if any amount is to be borrowed
+            vars.totalBorrowCapForCollateral = borrowCapForAssetForCollateral[address(cTokenModify)][address(asset)];
+            // check if set to any value
+            if (vars.totalBorrowCapForCollateral != 0) {
+              // check for underflow
+              if (vars.totalBorrowCapForCollateral >= vars.totalBorrowsBefore) {
+                uint256 borrowAmountCap = vars.totalBorrowCapForCollateral - vars.totalBorrowsBefore;
+                assetAsCollateralValueCap = (borrowAmountCap * vars.borrowedAssetPrice) / 1e18;
+              } else {
+                // should never happen, but better to not revert on this underflow
+                assetAsCollateralValueCap = 0;
+              }
+            }
+          }
+        }
+
+        // accumulate the collateral value to sumCollateral
+        uint256 assetCollateralValue = mul_ScalarTruncate(vars.tokensToDenom, vars.cTokenBalance);
+        if (assetCollateralValue > assetAsCollateralValueCap) assetCollateralValue = assetAsCollateralValueCap;
+        vars.sumCollateral += assetCollateralValue;
       }
 
       // sumBorrowPlusEffects += oraclePrice * borrowBalance
@@ -1297,64 +1331,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   /*** Helper Functions ***/
 
   /**
-   * @notice Return all of the markets
-   * @dev The automatic getter may be used to access an individual market.
-   * @return The list of market addresses
-   */
-  function getAllMarkets() public view returns (CTokenInterface[] memory) {
-    return allMarkets;
-  }
-
-  /**
-   * @notice Return all of the borrowers
-   * @dev The automatic getter may be used to access an individual borrower.
-   * @return The list of borrower account addresses
-   */
-  function getAllBorrowers() public view returns (address[] memory) {
-    return allBorrowers;
-  }
-
-  /**
-   * @notice Return all of the whitelist
-   * @dev The automatic getter may be used to access an individual whitelist status.
-   * @return The list of borrower account addresses
-   */
-  function getWhitelist() external view returns (address[] memory) {
-    return whitelistArray;
-  }
-
-  /**
-   * @notice Returns an array of all accruing and non-accruing flywheels
-   */
-  function getRewardsDistributors() external view override returns (address[] memory) {
-    address[] memory allFlywheels = new address[](rewardsDistributors.length + nonAccruingRewardsDistributors.length);
-
-    uint8 i = 0;
-    while (i < rewardsDistributors.length) {
-      allFlywheels[i] = rewardsDistributors[i];
-      i++;
-    }
-    uint8 j = 0;
-    while (j < nonAccruingRewardsDistributors.length) {
-      allFlywheels[i + j] = nonAccruingRewardsDistributors[j];
-      j++;
-    }
-
-    return allFlywheels;
-  }
-
-  function isUserOfPool(address user) public view returns (bool) {
-    for (uint256 i = 0; i < allMarkets.length; i++) {
-      address marketAddress = address(allMarkets[i]);
-      if (markets[marketAddress].accountMembership[user]) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
    * @notice Returns true if the given cToken market has been deprecated
    * @dev All borrows in a deprecated cToken market can be immediately liquidated
    * @param cToken The market to check if deprecated
@@ -1364,6 +1340,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       markets[address(cToken)].collateralFactorMantissa == 0 &&
       borrowGuardianPaused[address(cToken)] == true &&
       add_(add_(cToken.reserveFactorMantissa(), cToken.adminFeeMantissa()), cToken.fuseFeeMantissa()) == 1e18;
+  }
+
+  function asComptrollerFirstExtension() public view returns (ComptrollerFirstExtension) {
+    return ComptrollerFirstExtension(address(this));
   }
 
   /*** Pool-Wide/Cross-Asset Reentrancy Prevention ***/

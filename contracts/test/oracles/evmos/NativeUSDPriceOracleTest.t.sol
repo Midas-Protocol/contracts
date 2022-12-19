@@ -12,7 +12,7 @@ import { BaseTest } from "../../config/BaseTest.t.sol";
 
 contract NativeUSDPriceOracleTest is BaseTest {
   NativeUSDPriceOracle private oracle;
-  address EVMOS_USD_FEED = 0xd850F64Eda6a62d625209711510f43cD49Ef8798;
+  address EVMOS_USD_FEED = 0xeA07Ede816EcD52F17aEEf82a50a608Ca5369145;
   address WEVMOS = 0xD4949664cD82660AaE99bEdc034a0deA8A0bd517;
 
   function afterForkSetUp() internal override {

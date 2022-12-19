@@ -19,12 +19,8 @@ import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
 import "../compound/CTokenInterfaces.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 
-import { MidasFlywheelLensRouter, IComptroller, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { MidasFlywheelLensRouter, IComptroller, CErc20Token, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
-
-interface IPriceOracle {
-  function price(address underlying) external view returns (uint256);
-}
 
 contract FLRTest is BaseTest {
   address rewardToken;
@@ -34,6 +30,10 @@ contract FLRTest is BaseTest {
   MidasFlywheelLensRouter lensRouter;
 
   address BSC_ADMIN = address(0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E);
+
+  function afterForkSetUp() internal override {
+    lensRouter = new MidasFlywheelLensRouter();
+  }
 
   function setUpFlywheel(
     address _rewardToken,
@@ -51,8 +51,6 @@ contract FLRTest is BaseTest {
 
     rewards = new FlywheelStaticRewards(FuseFlywheelCore(address(flywheel)), address(this), Authority(address(0)));
     flywheel.setFlywheelRewards(rewards);
-
-    lensRouter = new MidasFlywheelLensRouter();
 
     flywheel.addStrategyForRewards(ERC20(mkt));
 
@@ -132,8 +130,7 @@ contract FLRTest is BaseTest {
     CErc20Token market = CErc20Token(0xa9736bA05de1213145F688e4619E5A7e0dcf4C72);
     rewardToken = address(0x931715FEE2d06333043d11F658C8CE934aC61D0c);
     IComptroller comptroller = IComptroller(0xeB2D3A9D962d89b4A9a34ce2bF6a2650c938e185);
-    setUpFlywheel(rewardToken, address(market), comptroller, BSC_ADMIN);
-    IPriceOracle mpo = IPriceOracle(ap.getAddress("mpo"));
+    // setUpFlywheel(rewardToken, address(market), comptroller, BSC_ADMIN);
 
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
@@ -153,11 +150,12 @@ contract FLRTest is BaseTest {
       abi.encode(10)
     );
 
-    // comptroller.getAllMarkets();
     MidasFlywheelLensRouter.MarketRewardsInfo[] memory info = lensRouter.getMarketRewardsInfo(comptroller);
     for (uint8 i = 0; i < info.length; i++) {
       for (uint8 j = 0; j < info[i].rewardsInfo.length; j++) {
         if (info[i].rewardsInfo[j].formattedAPR != 0) {
+          emit log("");
+          emit log_named_address("market", address(info[i].market));
           emit log_named_uint("rewardSpeedPerSecondPerToken", info[i].rewardsInfo[j].rewardSpeedPerSecondPerToken);
           emit log_named_uint("formattedAPR", info[i].rewardsInfo[j].formattedAPR);
           emit log_named_uint("rewardTokenPrice", info[i].rewardsInfo[j].rewardTokenPrice);

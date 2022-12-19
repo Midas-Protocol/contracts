@@ -167,4 +167,10 @@ contract ComptrollerV3Storage is ComptrollerV2Storage {
 
   /// @notice RewardsDistributor to list for claiming, but not to notify of flywheel changes.
   address[] public nonAccruingRewardsDistributors;
+
+  /// @dev caps for the total borrows against specific assets
+  mapping(address => mapping(address => uint256)) borrowCapForAssetForCollateral;
+
+  /// @dev blacklist to disallow the borrowing of an asset against specific collateral
+  mapping(address => mapping(address => bool)) borrowingAgainstCollateralBlacklist;
 }
