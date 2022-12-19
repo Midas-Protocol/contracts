@@ -90,6 +90,7 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
    * @dev Register the pool given LP token address and set the pool info.
    * @param _lpToken LP token to find the corresponding pool.
    * @param _pool Pool address.
+   * @param _baseToken Base token to use to price the LP token.
    */
   function registerPool(
     address _lpToken,
