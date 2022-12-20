@@ -10,6 +10,7 @@ import "./liquidators/IRedemptionStrategy.sol";
 import "./liquidators/IFundsConversionStrategy.sol";
 
 import "./external/compound/ICToken.sol";
+import "./external/compound/IComptroller.sol";
 
 import "./external/compound/ICErc20.sol";
 import "./external/compound/ICEther.sol";
@@ -172,6 +173,17 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
     // Input validation
     require(vars.repayAmount > 0, "Repay amount must be greater than 0.");
 
+    // check if the caller has allowed the additional collateral to be pulled
+    IERC20Upgradeable stableCollateral = IERC20Upgradeable(vars.stableCollateralMarket.underlying());
+    uint256 additionalCollateralAllowance = stableCollateral.allowance(msg.sender, address(this));
+    require(additionalCollateralAllowance > 0, "overcollateralization needed");
+
+    // pull the additional collateral and deposit it
+    stableCollateral.transferFrom(msg.sender, address(this), additionalCollateralAllowance);
+    uint256 additionalCollateral = stableCollateral.balanceOf(address(this));
+    stableCollateral.approve(address(vars.stableCollateralMarket), additionalCollateral);
+    vars.stableCollateralMarket.mint(additionalCollateral);
+
     //    /**
     //      1. flash loan a stable pool asset - possibly in pair with the collateral asset
     //      2. supply the stable asset in the pool
@@ -180,7 +192,7 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
     //      5. take the collateral and repay the flashloan with it (or redeem it to the stable asset)
     //    **/
 
-    _flashSwapToken = vars.stableCollateralMarket.underlying();
+    _flashSwapToken = address(stableCollateral);
     _flashSwapAmount = vars.fundingAmount;
 
     bool token0IsFlashSwapFundingToken = vars.flashSwapPair.token0() == address(_flashSwapToken);
@@ -338,7 +350,11 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
     // supply the stable collateral
     IERC20Upgradeable underlyingStableCollateral = IERC20Upgradeable(vars.stableCollateralMarket.underlying());
     underlyingStableCollateral.approve(address(vars.stableCollateralMarket), vars.fundingAmount);
-    require(vars.stableCollateralMarket.mint(vars.fundingAmount) == 0, "!mint stable asset"); // 1337493206264641750254
+    require(vars.stableCollateralMarket.mint(vars.fundingAmount) == 0, "!mint stable asset");
+
+    IComptroller pool = IComptroller(vars.stableCollateralMarket.comptroller());
+    pool.enterMarkets(array(address(vars.stableCollateralMarket), address(vars.collateralMarket), address(vars.debtMarket)));
+
     // borrow the debt asset
     require(vars.debtMarket.borrow(vars.repayAmount) == 0, "!borrow debt asset");
 
@@ -397,7 +413,7 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
     if (redemptionStrategies.length > 0) {
       require(
         redemptionStrategies.length == strategyData.length,
-        "IRedemptionStrategy contract array and strategy data bytes array mnust the the same length."
+        "!redemptionStrategies strategyData len"
       );
       for (uint256 i = 0; i < redemptionStrategies.length; i++)
         (underlyingCollateral, underlyingCollateralSeized) = redeemCustomCollateral(
@@ -434,7 +450,7 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
       );
       require(
         underlyingCollateral.transfer(msg.sender, collateralRequired),
-        "Failed to repay token flashloan on borrow side."
+        "Failed to repay token flashloan on the non-borrow side."
       );
 
       return address(underlyingCollateral);
@@ -504,6 +520,10 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
       abi.encodeWithSelector(strategy.redeem.selector, underlyingCollateral, underlyingCollateralSeized, strategyData)
     );
     return abi.decode(returndata, (IERC20Upgradeable, uint256));
+  }
+
+  function _whitelistRedemptionStrategy(IRedemptionStrategy strategy, bool whitelisted) external onlyOwner {
+    redemptionStrategiesWhitelist[address(strategy)] = whitelisted;
   }
 
   /**

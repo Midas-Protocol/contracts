@@ -11,6 +11,7 @@ import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
+import { UniswapV2Liquidator } from "../liquidators/UniswapV2Liquidator.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
@@ -51,55 +52,67 @@ contract MidasSafeLiquidatorTest is BaseTest {
   }
 
   function testLiquidateAndTakeDebtPosition() public debuggingOnly fork(POLYGON_MAINNET) {
+    uint256 additionalCollateralRequired = 0;
     MidasSafeLiquidator.LiquidateAndTakeDebtPositionVars memory vars;
 
+    address usdcAddress = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+
     vars.borrower = 0xA4F4406D3dc6482dB1397d0ad260fd223C8F37FC;
-    vars.repayAmount = 70646047191675691672694;
+    vars.repayAmount = 70648061919138038486382;
     vars.debtMarket = ICErc20(0x456b363D3dA38d3823Ce2e1955362bBd761B324b); // jJPY
     vars.collateralMarket = ICErc20(0x28D0d45e593764C4cE88ccD1C033d0E2e8cE9aF3); // MAI
     vars.stableCollateralMarket = ICErc20(0x9b38995CA2CEe8e49144b98d09BE9dC3fFA0BE8E); // WMATIC market
 
-    vars.flashSwapPair = findFlashSwapPair(vars.collateralMarket, vars.stableCollateralMarket);
-    vars.fundingAmount = estimateFundingAmount(vars.debtMarket, vars.repayAmount, vars.stableCollateralMarket);
+    // WMATIC-USDC
+    vars.flashSwapPair = IUniswapV2Pair(uniswapV2Factory.getPair(vars.stableCollateralMarket.underlying(), usdcAddress));
+    (vars.fundingAmount, additionalCollateralRequired) = estimateFundingAmount(vars.debtMarket, vars.repayAmount, vars.stableCollateralMarket);
+
     vars.minProfitAmount = 0;
     vars.exchangeProfitTo = address(0);
 
     vars.uniswapV2RouterForBorrow = IUniswapV2Router02(uniswapRouter);
     vars.uniswapV2RouterForCollateral = IUniswapV2Router02(uniswapRouter);
 
-    vars.redemptionStrategies = new IRedemptionStrategy[](0);
-    vars.redemptionStrategiesData = new bytes[](0);
+
+    // use redemption strategy for MAI -> USDC
+    // USDC is then repaid on the non-borrow side of the flashloan (from the WMATIC-USDC pair)
+    vars.redemptionStrategies = new IRedemptionStrategy[](1);
+    vars.redemptionStrategies[0] = new UniswapV2Liquidator();
+    msl._whitelistRedemptionStrategy(vars.redemptionStrategies[0] , true);
+
+    vars.redemptionStrategiesData = new bytes[](1);
+    address[] memory swapPath = new address[](2);
+    swapPath[0] = vars.collateralMarket.underlying();
+    swapPath[1] = usdcAddress;
+    vars.redemptionStrategiesData[0] = abi.encode(uniswapRouter, swapPath);
 
     vars.ethToCoinbase = 0;
 
     vars.collateralFundingStrategies = new IFundsConversionStrategy[](0);
     vars.collateralFundingStrategiesData = new bytes[](0);
 
-    IComptroller pool = IComptroller(vars.debtMarket.comptroller());
-    address[] memory markets = new address[](3);
-    markets[0] = address(vars.debtMarket);
-    markets[1] = address(vars.collateralMarket);
-    markets[2] = address(vars.stableCollateralMarket);
-    pool.enterMarkets(markets);
+    // first deposit the additional collateral required in order to keep the debt position afloat
+    if (additionalCollateralRequired > 0) {
+      IERC20Upgradeable stableCollateralAsset = IERC20Upgradeable(vars.stableCollateralMarket.underlying());
+      vm.prank(address(stableCollateralAsset)); // whale funding
+      stableCollateralAsset.transfer(address(this), vars.fundingAmount);
+      stableCollateralAsset.approve(address(msl), vars.fundingAmount);
+    }
 
     msl.liquidateAndTakeDebtPosition(vars);
   }
 
-  function estimateFundingAmount(ICErc20 debtMarket, uint256 debtAmount, ICErc20 stableCollateralMarket) internal returns (uint256) {
+  function estimateFundingAmount(ICErc20 debtMarket, uint256 debtAmount, ICErc20 stableCollateralMarket) internal view returns (uint256, uint256) {
     uint256 debtAssetPrice = mpo.getUnderlyingPrice(ICToken(address(debtMarket)));
     uint256 stableCollateralAssetPrice = mpo.getUnderlyingPrice(ICToken(address(stableCollateralMarket)));
 
-    uint256 overcollateralizaionFactor = 3; // provide collateral value for 2x the debt value
+    uint256 overcollateralizaionFactor = 5000; // 50%
+    uint256 percent100 = 10000; // 100.00%
 
     uint256 debtValue = (debtAmount * debtAssetPrice) / 1e18; // decimals are accounted for by getUnderlyingPrice
     uint256 stableCollateralEquivalent = (debtValue * 1e18) / stableCollateralAssetPrice; // 18 + 18 - (36 - stableAsset.decimals)
-    uint256 stableCollateralRequired = stableCollateralEquivalent * overcollateralizaionFactor;
-    return stableCollateralRequired;
-  }
 
-  function findFlashSwapPair(ICErc20 collateralMarket, ICErc20 stableCollateralMarket) internal returns (IUniswapV2Pair) {
-    address userCollateral = collateralMarket.underlying();
-    address liquidatorCollateral = stableCollateralMarket.underlying();
-    return IUniswapV2Pair(uniswapV2Factory.getPair(userCollateral, liquidatorCollateral));
+    uint256 additionalCollateralRequired = (stableCollateralEquivalent * overcollateralizaionFactor) / percent100;
+    return (stableCollateralEquivalent, additionalCollateralRequired);
   }
 }
