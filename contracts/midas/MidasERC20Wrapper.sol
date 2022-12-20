@@ -13,6 +13,6 @@ contract MidasERC20Wrapper is ERC20Wrapper {
   }
 
   function recover() public returns (uint256) {
-    return _recover(msg.sender);
+    return _recover(owner);
   }
 }
