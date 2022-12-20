@@ -353,7 +353,9 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
     require(vars.stableCollateralMarket.mint(vars.fundingAmount) == 0, "!mint stable asset");
 
     IComptroller pool = IComptroller(vars.stableCollateralMarket.comptroller());
-    pool.enterMarkets(array(address(vars.stableCollateralMarket), address(vars.collateralMarket), address(vars.debtMarket)));
+    pool.enterMarkets(
+      array(address(vars.stableCollateralMarket), address(vars.collateralMarket), address(vars.debtMarket))
+    );
 
     // borrow the debt asset
     require(vars.debtMarket.borrow(vars.repayAmount) == 0, "!borrow debt asset");
@@ -411,10 +413,7 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
 
     // Redeem custom collateral if liquidation strategy is set
     if (redemptionStrategies.length > 0) {
-      require(
-        redemptionStrategies.length == strategyData.length,
-        "!redemptionStrategies strategyData len"
-      );
+      require(redemptionStrategies.length == strategyData.length, "!redemptionStrategies strategyData len");
       for (uint256 i = 0; i < redemptionStrategies.length; i++)
         (underlyingCollateral, underlyingCollateralSeized) = redeemCustomCollateral(
           underlyingCollateral,

@@ -64,8 +64,14 @@ contract MidasSafeLiquidatorTest is BaseTest {
     vars.stableCollateralMarket = ICErc20(0x9b38995CA2CEe8e49144b98d09BE9dC3fFA0BE8E); // WMATIC market
 
     // WMATIC-USDC
-    vars.flashSwapPair = IUniswapV2Pair(uniswapV2Factory.getPair(vars.stableCollateralMarket.underlying(), usdcAddress));
-    (vars.fundingAmount, additionalCollateralRequired) = estimateFundingAmount(vars.debtMarket, vars.repayAmount, vars.stableCollateralMarket);
+    vars.flashSwapPair = IUniswapV2Pair(
+      uniswapV2Factory.getPair(vars.stableCollateralMarket.underlying(), usdcAddress)
+    );
+    (vars.fundingAmount, additionalCollateralRequired) = estimateFundingAmount(
+      vars.debtMarket,
+      vars.repayAmount,
+      vars.stableCollateralMarket
+    );
 
     vars.minProfitAmount = 0;
     vars.exchangeProfitTo = address(0);
@@ -73,12 +79,11 @@ contract MidasSafeLiquidatorTest is BaseTest {
     vars.uniswapV2RouterForBorrow = IUniswapV2Router02(uniswapRouter);
     vars.uniswapV2RouterForCollateral = IUniswapV2Router02(uniswapRouter);
 
-
     // use redemption strategy for MAI -> USDC
     // USDC is then repaid on the non-borrow side of the flashloan (from the WMATIC-USDC pair)
     vars.redemptionStrategies = new IRedemptionStrategy[](1);
     vars.redemptionStrategies[0] = new UniswapV2Liquidator();
-    msl._whitelistRedemptionStrategy(vars.redemptionStrategies[0] , true);
+    msl._whitelistRedemptionStrategy(vars.redemptionStrategies[0], true);
 
     vars.redemptionStrategiesData = new bytes[](1);
     address[] memory swapPath = new address[](2);
@@ -102,7 +107,11 @@ contract MidasSafeLiquidatorTest is BaseTest {
     msl.liquidateAndTakeDebtPosition(vars);
   }
 
-  function estimateFundingAmount(ICErc20 debtMarket, uint256 debtAmount, ICErc20 stableCollateralMarket) internal view returns (uint256, uint256) {
+  function estimateFundingAmount(
+    ICErc20 debtMarket,
+    uint256 debtAmount,
+    ICErc20 stableCollateralMarket
+  ) internal view returns (uint256, uint256) {
     uint256 debtAssetPrice = mpo.getUnderlyingPrice(ICToken(address(debtMarket)));
     uint256 stableCollateralAssetPrice = mpo.getUnderlyingPrice(ICToken(address(stableCollateralMarket)));
 
