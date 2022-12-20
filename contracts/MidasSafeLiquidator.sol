@@ -335,7 +335,11 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
   }
 
   function postFlashLoanTokens(LiquidateAndTakeDebtPositionVars memory vars) private returns (address) {
-    require(vars.stableCollateralMarket.mint(vars.fundingAmount) == 0, "!mint stable asset");
+    // supply the stable collateral
+    IERC20Upgradeable underlyingStableCollateral = IERC20Upgradeable(vars.stableCollateralMarket.underlying());
+    underlyingStableCollateral.approve(address(vars.stableCollateralMarket), vars.fundingAmount);
+    require(vars.stableCollateralMarket.mint(vars.fundingAmount) == 0, "!mint stable asset"); // 1337493206264641750254
+    // borrow the debt asset
     require(vars.debtMarket.borrow(vars.repayAmount) == 0, "!borrow debt asset");
 
     address underlyingBorrow = vars.debtMarket.underlying();
