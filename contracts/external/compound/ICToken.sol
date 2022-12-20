@@ -57,6 +57,8 @@ interface ICToken {
 
   function redeemUnderlying(uint256 redeemAmount) external returns (uint256);
 
+  function borrow(uint256 borrowAmount) external returns (uint256);
+
   function protocolSeizeShareMantissa() external view returns (uint256);
 
   function feeSeizeShareMantissa() external view returns (uint256);
