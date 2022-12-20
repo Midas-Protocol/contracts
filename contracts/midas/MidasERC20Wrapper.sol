@@ -5,7 +5,6 @@ import { ERC20Wrapper } from "openzeppelin-contracts/token/ERC20/extensions/ERC2
 import { IERC20 } from "openzeppelin-contracts/token/ERC20/IERC20.sol";
 
 contract MidasERC20Wrapper is ERC20Wrapper {
-
   address private owner;
 
   constructor(IERC20 underlyingToken) ERC20Wrapper(underlyingToken) {
