@@ -4,25 +4,28 @@ pragma solidity >=0.8.0;
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { EIP20Interface } from "../compound/EIP20Interface.sol";
 import { IFuseFeeDistributor } from "../compound/IFuseFeeDistributor.sol";
-
-import { ERC20Wrapper } from "openzeppelin-contracts/token/ERC20/extensions/ERC20Wrapper.sol";
+import { MidasERC20Wrapper, IERC20 } from "./MidasERC20Wrapper.sol";
 
 contract CErc20WrappingDelegate is CErc20Delegate {
   event NewErc20WrappingImplementation(address oldImpl, address newImpl);
 
-  ERC20Wrapper public underlyingWrapper;
+  MidasERC20Wrapper public underlyingWrapper;
 
   function _becomeImplementation(bytes memory data) public virtual override {
     require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
 
     address _newWrapper = abi.decode(data, (address));
 
-    if (_newWrapper == address(0) && address(underlyingWrapper) != address(0)) {
-      _newWrapper = IFuseFeeDistributor(fuseAdmin).latestERC20WrapperForUnderlying(address(underlyingWrapper));
-    }
+    if (address(underlyingWrapper) == address(0)) {
+      underlyingWrapper = new MidasERC20Wrapper(IERC20(underlying));
+    } else {
+      if (_newWrapper == address(0) && address(underlyingWrapper) != address(0)) {
+        _newWrapper = IFuseFeeDistributor(fuseAdmin).latestERC20WrapperForUnderlying(address(underlyingWrapper));
+      }
 
-    if (_newWrapper != address(0) && _newWrapper != address(underlyingWrapper)) {
-      _updateWrapper(_newWrapper);
+      if (_newWrapper != address(0) && _newWrapper != address(underlyingWrapper)) {
+        _updateWrapper(_newWrapper);
+      }
     }
   }
 
@@ -40,7 +43,7 @@ contract CErc20WrappingDelegate is CErc20Delegate {
       doTransferOut(address(this), underlyingWrapper.balanceOf(address(this)));
     }
 
-    underlyingWrapper = ERC20Wrapper(_newWrapper);
+    underlyingWrapper = MidasERC20Wrapper(_newWrapper);
 
     EIP20Interface(underlying).approve(_newWrapper, type(uint256).max);
 
