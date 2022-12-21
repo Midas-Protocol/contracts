@@ -25,7 +25,7 @@ contract ContractsUpgradesTest is BaseTest {
 
     // before upgrade
     FusePoolDirectory oldImpl = FusePoolDirectory(contractToTest);
-    (, FusePoolDirectory.FusePool[] memory poolsBefore) = oldImpl.getActivePools();
+    FusePoolDirectory.FusePool[] memory poolsBefore = oldImpl.getAllPools();
     address ownerBefore = oldImpl.owner();
     emit log_address(ownerBefore);
 
