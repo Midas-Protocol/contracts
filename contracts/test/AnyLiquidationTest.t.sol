@@ -90,9 +90,10 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
-  function testSpecificRandom() public debuggingOnly {
-    //testBscAnyLiquidation(2349);
-    testPolygonAnyLiquidation(101);
+  function testSpecificRandom() public debuggingOnly forkAtBlock(BSC_MAINNET, 24095570) {
+    // TODO fix
+    testBscAnyLiquidation(10298080737073959319);
+    //    testPolygonAnyLiquidation(101);
   }
 
   function testBscAnyLiquidation(uint256 random) public fork(BSC_MAINNET) {
@@ -569,6 +570,7 @@ contract AnyLiquidationTest is BaseTest {
       // fundingStrategies.push(new SomeOtherFunder());
       // return inputToken;
     } else if (compareStrings(strategyContract, "CurveSwapLiquidatorFunder")) {
+      // TODO implement a CurveLpTokenFunderNoRegistry and add both this and CurveSwapLiquidatorFunder to the fundingStrategy.ts in the bot
       int128 inputIndex;
       int128 outputIndex;
       inputToken = strategyInputToken;
