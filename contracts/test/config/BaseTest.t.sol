@@ -5,6 +5,7 @@ import "forge-std/Vm.sol";
 import "forge-std/Test.sol";
 
 import { AddressesProvider } from "../../midas/AddressesProvider.sol";
+import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
@@ -243,5 +244,16 @@ abstract contract BaseTest is Test {
     array[1] = value1;
     array[2] = value2;
     return array;
+  }
+
+  // TODO: should we keep this?
+  function upgradeFpd(address oldImplmentation) public {
+    TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(oldImplmentation));
+    bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
+    address admin = address(uint160(uint256(bytesAtSlot)));
+
+    FusePoolDirectory newImpl = new FusePoolDirectory();
+    vm.prank(admin);
+    proxy.upgradeTo(address(newImpl));
   }
 }

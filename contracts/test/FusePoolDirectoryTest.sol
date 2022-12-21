@@ -30,6 +30,9 @@ contract FusePoolDirectoryTest is BaseTest {
   }
 
   function _testDeprecatePool() internal {
+    // TODO: revert this after next deployment
+    upgradeFpd(address(fpd));
+
     (, FusePoolDirectory.FusePool[] memory allPools) = fpd.getActivePools();
 
     FusePoolDirectory.FusePool memory poolToDeprecate;
