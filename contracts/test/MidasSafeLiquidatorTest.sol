@@ -39,15 +39,16 @@ contract MidasSafeLiquidatorTest is BaseTest {
       );
     } else if (block.chainid == POLYGON_MAINNET) {
       uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
-      msl = new MidasSafeLiquidator();
-      msl.initialize(
-        ap.getAddress("wtoken"),
-        uniswapRouter,
-        ap.getAddress("stableToken"),
-        ap.getAddress("wBTCToken"),
-        "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
-        30
-      );
+      msl = MidasSafeLiquidator(payable(0x401B9E407896d5CAad75b057EF32Fa005c07252d));
+      //      msl = new MidasSafeLiquidator();
+      //      msl.initialize(
+      //        ap.getAddress("wtoken"),
+      //        uniswapRouter,
+      //        ap.getAddress("stableToken"),
+      //        ap.getAddress("wBTCToken"),
+      //        "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
+      //        30
+      //      );
     }
   }
 
@@ -58,14 +59,16 @@ contract MidasSafeLiquidatorTest is BaseTest {
     address usdcAddress = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
 
     vars.borrower = 0xA4F4406D3dc6482dB1397d0ad260fd223C8F37FC;
-    vars.repayAmount = 70648061919138038486382;
+    vars.repayAmount = 52648061919138038486382;
     vars.debtMarket = ICErc20(0x456b363D3dA38d3823Ce2e1955362bBd761B324b); // jJPY
     vars.collateralMarket = ICErc20(0x28D0d45e593764C4cE88ccD1C033d0E2e8cE9aF3); // MAI
     vars.stableCollateralMarket = ICErc20(0x9b38995CA2CEe8e49144b98d09BE9dC3fFA0BE8E); // WMATIC market
 
+    address wmatic = vars.stableCollateralMarket.underlying();
+
     // WMATIC-USDC
     vars.flashSwapPair = IUniswapV2Pair(
-      uniswapV2Factory.getPair(vars.stableCollateralMarket.underlying(), usdcAddress)
+      uniswapV2Factory.getPair(wmatic, usdcAddress)
     );
     (vars.fundingAmount, additionalCollateralRequired) = estimateFundingAmount(
       vars.debtMarket,
@@ -82,8 +85,8 @@ contract MidasSafeLiquidatorTest is BaseTest {
     // use redemption strategy for MAI -> USDC
     // USDC is then repaid on the non-borrow side of the flashloan (from the WMATIC-USDC pair)
     vars.redemptionStrategies = new IRedemptionStrategy[](1);
-    vars.redemptionStrategies[0] = new UniswapV2Liquidator();
-    msl._whitelistRedemptionStrategy(vars.redemptionStrategies[0], true);
+    vars.redemptionStrategies[0] = UniswapV2Liquidator(0xd0CE13FD52b4bE9e375EAEf5B2d4F6dB207c0E90);
+    //msl._whitelistRedemptionStrategy(vars.redemptionStrategies[0], true);
 
     vars.redemptionStrategiesData = new bytes[](1);
     address[] memory swapPath = new address[](2);
@@ -96,15 +99,22 @@ contract MidasSafeLiquidatorTest is BaseTest {
     vars.collateralFundingStrategies = new IFundsConversionStrategy[](0);
     vars.collateralFundingStrategiesData = new bytes[](0);
 
+    vm.startPrank(msl.owner());
     // first deposit the additional collateral required in order to keep the debt position afloat
     if (additionalCollateralRequired > 0) {
-      IERC20Upgradeable stableCollateralAsset = IERC20Upgradeable(vars.stableCollateralMarket.underlying());
-      vm.prank(address(stableCollateralAsset)); // whale funding
-      stableCollateralAsset.transfer(address(this), vars.fundingAmount);
-      stableCollateralAsset.approve(address(msl), vars.fundingAmount);
+      IERC20Upgradeable stableCollateralAsset = IERC20Upgradeable(wmatic);
+      uint256 currentAllowance = stableCollateralAsset.allowance(msl.owner(), address(msl));
+      if (currentAllowance < additionalCollateralRequired) {
+        //        vm.prank(address(stableCollateralAsset)); // whale funding
+        //        stableCollateralAsset.transfer(address(this), vars.fundingAmount);
+        stableCollateralAsset.approve(address(msl), additionalCollateralRequired);
+      } else {
+        emit log("no additional allowance needed");
+      }
     }
 
     msl.liquidateAndTakeDebtPosition(vars);
+    vm.stopPrank();
   }
 
   function estimateFundingAmount(
@@ -115,7 +125,7 @@ contract MidasSafeLiquidatorTest is BaseTest {
     uint256 debtAssetPrice = mpo.getUnderlyingPrice(ICToken(address(debtMarket)));
     uint256 stableCollateralAssetPrice = mpo.getUnderlyingPrice(ICToken(address(stableCollateralMarket)));
 
-    uint256 overcollateralizaionFactor = 5000; // 50%
+    uint256 overcollateralizaionFactor = 2500; // 25%
     uint256 percent100 = 10000; // 100.00%
 
     uint256 debtValue = (debtAmount * debtAssetPrice) / 1e18; // decimals are accounted for by getUnderlyingPrice
