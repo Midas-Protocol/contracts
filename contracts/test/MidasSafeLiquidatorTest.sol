@@ -67,9 +67,7 @@ contract MidasSafeLiquidatorTest is BaseTest {
     address wmatic = vars.stableCollateralMarket.underlying();
 
     // WMATIC-USDC
-    vars.flashSwapPair = IUniswapV2Pair(
-      uniswapV2Factory.getPair(wmatic, usdcAddress)
-    );
+    vars.flashSwapPair = IUniswapV2Pair(uniswapV2Factory.getPair(wmatic, usdcAddress));
     (vars.fundingAmount, additionalCollateralRequired) = estimateFundingAmount(
       vars.debtMarket,
       vars.repayAmount,
