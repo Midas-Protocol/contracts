@@ -188,7 +188,7 @@ contract ExtensionsTest is BaseTest {
   function testMulticallMarket() public fork(BSC_MAINNET) {
     uint8 random = uint8(block.timestamp % 256);
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
     CTokenInterface[] memory markets = somePool.getAllMarkets();
@@ -219,7 +219,7 @@ contract ExtensionsTest is BaseTest {
   function testExistingCTokenExtensionUpgrade() public fork(BSC_MAINNET) {
     uint8 random = uint8(block.timestamp % 256);
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
     CTokenInterface[] memory markets = somePool.getAllMarkets();
@@ -329,7 +329,7 @@ contract ExtensionsTest is BaseTest {
 
   function _testComptrollersExtensions() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       address payable asPayable = payable(pools[i].comptroller);

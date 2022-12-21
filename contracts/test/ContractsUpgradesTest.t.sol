@@ -25,7 +25,7 @@ contract ContractsUpgradesTest is BaseTest {
 
     // before upgrade
     FusePoolDirectory oldImpl = FusePoolDirectory(contractToTest);
-    FusePoolDirectory.FusePool[] memory poolsBefore = oldImpl.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory poolsBefore) = oldImpl.getActivePools();
     address ownerBefore = oldImpl.owner();
     emit log_address(ownerBefore);
 
@@ -47,7 +47,7 @@ contract ContractsUpgradesTest is BaseTest {
     address ownerAfter = newImpl.owner();
     emit log_address(ownerAfter);
 
-    FusePoolDirectory.FusePool[] memory poolsAfter = oldImpl.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory poolsAfter) = oldImpl.getActivePools();
     uint256 lenAfter = poolsAfter.length;
     emit log_uint(poolsAfter.length);
 
@@ -156,7 +156,7 @@ contract ContractsUpgradesTest is BaseTest {
   function _testMarketsLatestImplementations() internal {
     FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);

@@ -30,7 +30,7 @@ contract FusePoolDirectoryTest is BaseTest {
   }
 
   function _testDeprecatePool() internal {
-    FusePoolDirectory.FusePool[] memory allPools = fpd.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory allPools) = fpd.getActivePools();
 
     FusePoolDirectory.FusePool memory poolToDeprecate;
     uint256 index;
@@ -45,7 +45,7 @@ contract FusePoolDirectoryTest is BaseTest {
     vm.prank(fpd.owner());
     fpd._deprecatePool(index);
 
-    FusePoolDirectory.FusePool[] memory allPoolsAfter = fpd.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory allPoolsAfter) = fpd.getActivePools();
 
     bool poolStillThere = false;
     for (uint256 i = 0; i < allPoolsAfter.length; i++) {

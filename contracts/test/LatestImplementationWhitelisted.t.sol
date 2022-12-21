@@ -36,7 +36,7 @@ contract LatestImplementationWhitelisted is BaseTest {
   }
 
   function testPoolImplementations() internal {
-    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = fusePoolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
@@ -66,7 +66,7 @@ contract LatestImplementationWhitelisted is BaseTest {
   }
 
   function testMarketImplementations() internal {
-    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = fusePoolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       ComptrollerFirstExtension comptroller = ComptrollerFirstExtension(payable(pools[i].comptroller));
@@ -102,7 +102,7 @@ contract LatestImplementationWhitelisted is BaseTest {
   }
 
   function testPluginImplementations() internal {
-    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = fusePoolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       ComptrollerFirstExtension comptroller = ComptrollerFirstExtension(payable(pools[i].comptroller));
