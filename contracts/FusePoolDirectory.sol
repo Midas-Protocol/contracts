@@ -204,7 +204,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @notice Returns arrays of all Fuse pools' data.
+   * @notice Returns `ids` and directory information of all non-deprecated Fuse pools.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
   function getActivePools() public view returns (uint256[] memory, FusePool[] memory) {
