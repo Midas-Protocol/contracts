@@ -252,7 +252,6 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     return (indexes, result);
   }
 
-
   /**
    * @notice Returns arrays of all public Fuse pool indexes and data.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
