@@ -42,7 +42,9 @@ contract OraclesDecimalsScalingTest is BaseTest {
 
   function testOraclesDecimals() internal {
     if (address(fusePoolDirectory) != address(0)) {
-      FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
+      // TODO: revert this after next deployment
+      upgradeFpd(address(fusePoolDirectory));
+      (, FusePoolDirectory.FusePool[] memory pools) = fusePoolDirectory.getActivePools();
 
       for (uint8 i = 0; i < pools.length; i++) {
         IComptroller comptroller = IComptroller(pools[i].comptroller);

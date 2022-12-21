@@ -451,7 +451,7 @@ contract FusePoolLens is Initializable {
     view
     returns (uint256[] memory, FusePoolDirectory.FusePool[] memory)
   {
-    FusePoolDirectory.FusePool[] memory pools = directory.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = directory.getActivePools();
     uint256 arrayLength = 0;
 
     for (uint256 i = 0; i < pools.length; i++) {

@@ -37,7 +37,7 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
     baseTokens[1] = address(0);
 
     oracle = new CurveV2LpTokenPriceOracleNoRegistry();
-    oracle.initialize(lpTokens, pools, baseTokens);
+    oracle.initialize(lpTokens, pools);
   }
 
   function testCurveV2LpTokenPriceOracleCHFBUSD() public forkAtBlock(BSC_MAINNET, 21675481) {
@@ -56,14 +56,15 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
   function testCurveV2LpTokenPriceOracleBNBXBNB() public forkAtBlock(BSC_MAINNET, 24036448) {
     ICurveV2Pool pool = ICurveV2Pool(epsBnbxBnb_pool);
     vm.startPrank(address(mpo));
-    uint256 lp_price = (pool.lp_price() * mpo.price(address(0))) / 10**18;
+    // coins(0) is BNBx
+    uint256 lp_price = (pool.lp_price() * mpo.price(0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275)) / 10**18;
     uint256 price = oracle.price(epsBnbxBnb_lp);
 
     // TODO: add these when the oracle is added
     // uint256 ulPrice = oracle.getUnderlyingPrice(epsBnbxBnb_c);
     // assertEq(price, ulPrice);
     assertEq(price, lp_price);
-    assertEq(price, 1967240528096903938);
+    assertEq(price, 2058628564849750905);
     vm.stopPrank();
   }
 }
