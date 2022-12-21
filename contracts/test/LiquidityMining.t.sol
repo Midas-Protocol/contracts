@@ -169,7 +169,7 @@ contract LiquidityMiningTest is BaseTest {
 
   function _testIntegration() internal {
     uint256 percentFee = flywheel.performanceFee();
-    uint224 percent100 = flywheel.ONE();
+    uint224 percent100 = 100e16; //flywheel.ONE();
 
     CTokenExtensionInterface asExtension = cErc20.asCTokenExtensionInterface();
 

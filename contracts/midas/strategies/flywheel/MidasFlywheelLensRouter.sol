@@ -100,7 +100,7 @@ contract MidasFlywheelLensRouter {
     return infoList;
   }
 
-  function scaleIndexDiff(uint256 indexDiff, uint256 decimals) internal view returns (uint256) {
+  function scaleIndexDiff(uint256 indexDiff, uint256 decimals) internal pure returns (uint256) {
     return decimals <= 18 ? uint256(indexDiff) * (10**(18 - decimals)) : uint256(indexDiff) / (10**(decimals - 18));
   }
 
@@ -124,7 +124,7 @@ contract MidasFlywheelLensRouter {
     uint256 rewardTokenPrice,
     uint256 underlyingPrice,
     uint256 exchangeRate
-  ) internal view returns (uint256) {
+  ) internal pure returns (uint256) {
     if (rewardSpeedPerSecondPerToken == 0) return 0;
     uint256 nativeSpeedPerSecondPerCToken = rewardSpeedPerSecondPerToken * rewardTokenPrice; // scaled to 1e36
     uint256 nativeSpeedPerYearPerCToken = nativeSpeedPerSecondPerCToken * 365.25 days; // scaled to 1e36
