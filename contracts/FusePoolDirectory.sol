@@ -204,6 +204,31 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
+   * @notice Returns `ids` and directory information of all non-deprecated Fuse pools.
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getActivePools() public view returns (uint256[] memory, FusePool[] memory) {
+    uint256 count = 0;
+    for (uint256 i = 0; i < pools.length; i++) {
+      if (pools[i].comptroller != address(0)) count++;
+    }
+
+    FusePool[] memory activePools = new FusePool[](count);
+    uint256[] memory poolIds = new uint256[](count);
+
+    uint256 index = 0;
+    for (uint256 i = 0; i < pools.length; i++) {
+      if (pools[i].comptroller != address(0)) {
+        poolIds[index] = i;
+        activePools[index] = pools[i];
+        index++;
+      }
+    }
+
+    return (poolIds, activePools);
+  }
+
+  /**
    * @notice Returns arrays of all Fuse pools' data.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
@@ -232,7 +257,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   function getPublicPools() external view returns (uint256[] memory, FusePool[] memory) {
     uint256 arrayLength = 0;
 
-    FusePool[] memory activePools = getAllPools();
+    (, FusePool[] memory activePools) = getActivePools();
     for (uint256 i = 0; i < activePools.length; i++) {
       try IComptroller(activePools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
         if (enforceWhitelist) continue;
@@ -265,7 +290,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   function getPoolsOfUser(address user) external view returns (uint256[] memory, FusePool[] memory) {
     uint256 arrayLength = 0;
 
-    FusePool[] memory activePools = getAllPools();
+    (, FusePool[] memory activePools) = getActivePools();
     for (uint256 i = 0; i < activePools.length; i++) {
       try IComptroller(activePools[i].comptroller).isUserOfPool(user) returns (bool isUsing) {
         if (!isUsing) continue;
@@ -297,7 +322,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   function getPoolsByAccount(address account) external view returns (uint256[] memory, FusePool[] memory) {
     uint256[] memory indexes = new uint256[](_poolsByAccount[account].length);
     FusePool[] memory accountPools = new FusePool[](_poolsByAccount[account].length);
-    FusePool[] memory activePools = getAllPools();
+    (, FusePool[] memory activePools) = getActivePools();
 
     for (uint256 i = 0; i < _poolsByAccount[account].length; i++) {
       indexes[i] = _poolsByAccount[account][i];
@@ -361,7 +386,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   {
     uint256 arrayLength = 0;
 
-    FusePool[] memory activePools = getAllPools();
+    (, FusePool[] memory activePools) = getActivePools();
     for (uint256 i = 0; i < activePools.length; i++) {
       IComptroller comptroller = IComptroller(activePools[i].comptroller);
 
@@ -402,7 +427,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     returns (uint256[] memory, FusePool[] memory)
   {
     uint256 arrayLength = 0;
-    FusePool[] memory activePools = getAllPools();
+    (, FusePool[] memory activePools) = getActivePools();
     for (uint256 i = 0; i < activePools.length; i++) {
       IComptroller comptroller = IComptroller(activePools[i].comptroller);
 
