@@ -24,31 +24,18 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
    * @dev Maps Curve LP token addresses to pool addresses.
    */
   mapping(address => address) public poolOf;
-  /**
-   * @dev Maps Curve LP token addresses to base token addresses.
-   */
-  mapping(address => address) public baseTokens;
 
   /**
    * @dev Initializes an array of LP tokens and pools if desired.
    * @param _lpTokens Array of LP token addresses.
    * @param _pools Array of pool addresses.
-   * @param _baseTokens Array of base token addresses.
    */
-  function initialize(
-    address[] memory _lpTokens,
-    address[] memory _pools,
-    address[] memory _baseTokens
-  ) public initializer {
-    require(
-      _lpTokens.length == _pools.length && _lpTokens.length == _baseTokens.length,
-      "No LP tokens supplied or array lengths not equal."
-    );
+  function initialize(address[] memory _lpTokens, address[] memory _pools) public initializer {
+    require(_lpTokens.length == _pools.length, "No LP tokens supplied or array lengths not equal.");
     __SafeOwnable_init();
 
     for (uint256 i = 0; i < _pools.length; i++) {
       poolOf[_lpTokens[i]] = _pools[i];
-      baseTokens[_lpTokens[i]] = _baseTokens[i];
     }
   }
 
@@ -79,8 +66,9 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
    */
   function _price(address lpToken) internal view returns (uint256) {
     address pool = poolOf[lpToken];
-    address baseToken = baseTokens[lpToken];
-    require(pool != address(0), "LP token is not registered.");
+    require(address(pool) != address(0), "LP token is not registered.");
+
+    address baseToken = ICurvePool(pool).coins(0);
     uint256 lpPrice = ICurveV2Pool(pool).lp_price();
     uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(baseToken);
     return (lpPrice * baseTokenPrice) / 10**18;
@@ -90,16 +78,10 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
    * @dev Register the pool given LP token address and set the pool info.
    * @param _lpToken LP token to find the corresponding pool.
    * @param _pool Pool address.
-   * @param _baseToken Base token to use to price the LP token.
    */
-  function registerPool(
-    address _lpToken,
-    address _pool,
-    address _baseToken
-  ) external onlyOwner {
+  function registerPool(address _lpToken, address _pool) external onlyOwner {
     address pool = poolOf[_lpToken];
     require(pool == address(0), "This LP token is already registered.");
     poolOf[_lpToken] = _pool;
-    baseTokens[_lpToken] = _baseToken;
   }
 }
