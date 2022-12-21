@@ -58,16 +58,16 @@ contract AnyLiquidationTest is BaseTest {
       mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
       curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
       // TODO revert to the ap provided, no need to upgrade after the next deploy
-      // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      fsl = new FuseSafeLiquidator();
-      fsl.initialize(
-        ap.getAddress("wtoken"),
-        uniswapRouter,
-        ap.getAddress("stableToken"),
-        ap.getAddress("wBTCToken"),
-        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
-        25
-      );
+      fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+      //      fsl = new FuseSafeLiquidator();
+      //      fsl.initialize(
+      //        ap.getAddress("wtoken"),
+      //        uniswapRouter,
+      //        ap.getAddress("stableToken"),
+      //        ap.getAddress("wBTCToken"),
+      //        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
+      //        25
+      //      );
 
       // TODO configure in the AP?
       address bnbx = 0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275;

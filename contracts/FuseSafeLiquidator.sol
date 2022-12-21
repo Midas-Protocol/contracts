@@ -486,7 +486,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     uint256 amount0,
     uint256 amount1,
     bytes calldata data
-  ) external override {
+  ) external {
     uniswapV2Call(sender, amount0, amount1, data);
   }
 
