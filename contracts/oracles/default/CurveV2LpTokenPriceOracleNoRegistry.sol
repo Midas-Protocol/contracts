@@ -30,31 +30,13 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
    * @param _lpTokens Array of LP token addresses.
    * @param _pools Array of pool addresses.
    */
-  function initialize(
-    address[] memory _lpTokens,
-    address[] memory _pools,
-    address _usdToken,
-    MasterPriceOracle _masterPriceOracle
-  ) public initializer {
+  function initialize(address[] memory _lpTokens, address[] memory _pools) public initializer {
     require(_lpTokens.length == _pools.length, "No LP tokens supplied or array lengths not equal.");
     __SafeOwnable_init();
-
-    usdToken = _usdToken;
-    masterPriceOracle = _masterPriceOracle;
 
     for (uint256 i = 0; i < _pools.length; i++) {
       poolOf[_lpTokens[i]] = _pools[i];
     }
-  }
-
-  /**
-   * @dev Re-initializes the pool in case of address changes
-   * @param _usdToken stable toklen address
-   * @param _masterPriceOracle mpo addresses.
-   */
-  function reinitialize(address _usdToken, address _masterPriceOracle) public reinitializer(2) onlyOwnerOrAdmin {
-    usdToken = _usdToken;
-    masterPriceOracle = MasterPriceOracle(_masterPriceOracle);
   }
 
   /**
@@ -84,10 +66,12 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
    */
   function _price(address lpToken) internal view returns (uint256) {
     address pool = poolOf[lpToken];
-    require(pool != address(0), "LP token is not registered.");
-    uint256 usdPrice = ICurveV2Pool(pool).lp_price();
-    uint256 bnbUsdPrice = masterPriceOracle.price(usdToken);
-    return (usdPrice * bnbUsdPrice) / 10**18;
+    require(address(pool) != address(0), "LP token is not registered.");
+
+    address baseToken = ICurvePool(pool).coins(0);
+    uint256 lpPrice = ICurveV2Pool(pool).lp_price();
+    uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(baseToken);
+    return (lpPrice * baseTokenPrice) / 10**18;
   }
 
   /**

@@ -102,45 +102,6 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
-  function testFlywheelReinitializeBsc() public debuggingOnly fork(BSC_MAINNET) {
-    _testFlywheelReinitialize();
-  }
-
-  function testFlywheelReinitializePolygon() public debuggingOnly fork(POLYGON_MAINNET) {
-    _testFlywheelReinitialize();
-  }
-
-  function testFlywheelReinitializeMoonbeam() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testFlywheelReinitialize();
-  }
-
-  function _testFlywheelReinitialize() internal {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
-
-    for (uint8 i = 0; i < pools.length; i++) {
-      IComptroller pool = IComptroller(pools[i].comptroller);
-      address[] memory flywheels = pool.getRewardsDistributors();
-      for (uint8 j = 0; j < flywheels.length; j++) {
-        MidasFlywheelCore flywheel = MidasFlywheelCore(flywheels[j]);
-
-        // upgrade
-        TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(flywheels[j]));
-        bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-        address admin = address(uint160(uint256(bytesAtSlot)));
-
-        if (admin != address(0)) {
-          MidasFlywheelCore newImpl = new MidasFlywheelCore();
-          vm.prank(admin);
-          proxy.upgradeTo(address(newImpl));
-
-          vm.prank(flywheel.owner());
-          // flywheel.reinitialize();
-        }
-      }
-    }
-  }
-
   function testMarketsLatestImplementationsBsc() public fork(BSC_MAINNET) {
     _testMarketsLatestImplementations();
   }
