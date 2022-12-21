@@ -7,13 +7,14 @@ import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { MidasFlywheelStaticRewards } from "../midas/strategies/flywheel/rewards/MidasFlywheelStaticRewards.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
+import { IFlywheelRewards } from "flywheel-v2/interfaces/IFlywheelRewards.sol";
+import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
-
-import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 
 contract FlywheelUpgradesTest is BaseTest {
   FusePoolDirectory internal fpd;
@@ -34,6 +35,10 @@ contract FlywheelUpgradesTest is BaseTest {
     _testFlywheelUpgrade();
   }
 
+  function testFlywheelUpgradeEvmos() public debuggingOnly fork(EVMOS_MAINNET) {
+    _testFlywheelUpgrade();
+  }
+
   function _testFlywheelUpgrade() internal {
     MidasFlywheelCore newImpl = new MidasFlywheelCore();
     FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
@@ -44,7 +49,10 @@ contract FlywheelUpgradesTest is BaseTest {
       ICToken[] memory markets = pool.getAllMarkets();
 
       address[] memory flywheels = pool.getRewardsDistributors();
-      if (flywheels.length > 0) emit log_named_address("pool", address(pool));
+      if (flywheels.length > 0) {
+        emit log("");
+        emit log_named_address("pool", address(pool));
+      }
       for (uint8 j = 0; j < flywheels.length; j++) {
         MidasFlywheelCore flywheel = MidasFlywheelCore(flywheels[j]);
 
@@ -77,7 +85,6 @@ contract FlywheelUpgradesTest is BaseTest {
           emit log_named_address("not upgradable flywheel", address(flywheel));
         }
       }
-      emit log("");
     }
   }
 
