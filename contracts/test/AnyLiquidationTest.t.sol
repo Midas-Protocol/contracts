@@ -222,7 +222,7 @@ contract AnyLiquidationTest is BaseTest {
     LiquidationData memory vars;
     vars.liquidator = fsl;
 
-    vars.pools = FusePoolDirectory(ap.getAddress("FusePoolDirectory")).getAllPools();
+    (, vars.pools) = FusePoolDirectory(ap.getAddress("FusePoolDirectory")).getActivePools();
 
     while (true) {
       // get a random pool and a random borrower from it

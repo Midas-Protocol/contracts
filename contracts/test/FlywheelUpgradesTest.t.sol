@@ -36,7 +36,11 @@ contract FlywheelUpgradesTest is BaseTest {
 
   function _testFlywheelUpgrade() internal {
     MidasFlywheelCore newImpl = new MidasFlywheelCore();
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+
+    // TODO: revert this after next deployment
+    upgradeFpd(address(fpd));
+
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);

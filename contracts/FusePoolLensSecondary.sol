@@ -314,7 +314,7 @@ contract FusePoolLensSecondary is Initializable {
     )
   {
     // Get array length
-    FusePoolDirectory.FusePool[] memory pools = directory.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = directory.getActivePools();
     uint256 arrayLength = 0;
 
     for (uint256 i = 0; i < pools.length; i++) {
