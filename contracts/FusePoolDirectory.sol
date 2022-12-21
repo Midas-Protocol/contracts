@@ -207,22 +207,24 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
    * @notice Returns arrays of all Fuse pools' data.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getAllPools() public view returns (FusePool[] memory) {
+  function getAllPools() public view returns (uint256[] memory, FusePool[] memory) {
     uint256 count = 0;
     for (uint256 i = 0; i < pools.length; i++) {
       if (pools[i].comptroller != address(0)) count++;
     }
 
     FusePool[] memory result = new FusePool[](count);
+    uint256[] memory indexes = new uint256[](count);
 
     uint256 index = 0;
     for (uint256 i = 0; i < pools.length; i++) {
       if (pools[i].comptroller != address(0)) {
         result[index++] = pools[i];
+        indexes[index] = i;
       }
     }
 
-    return result;
+    return (indexes, result);
   }
 
   /**
