@@ -245,15 +245,4 @@ abstract contract BaseTest is Test {
     array[2] = value2;
     return array;
   }
-
-  // TODO: should we keep this?
-  function upgradeFpd(address oldImplmentation) public {
-    TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(oldImplmentation));
-    bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-    address admin = address(uint160(uint256(bytesAtSlot)));
-
-    FusePoolDirectory newImpl = new FusePoolDirectory();
-    vm.prank(admin);
-    proxy.upgradeTo(address(newImpl));
-  }
 }

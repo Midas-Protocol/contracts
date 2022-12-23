@@ -30,9 +30,6 @@ contract FusePoolDirectoryTest is BaseTest {
   }
 
   function _testDeprecatePool() internal {
-    // TODO: revert this after next deployment
-    upgradeFpd(address(fpd));
-
     (, FusePoolDirectory.FusePool[] memory allPools) = fpd.getActivePools();
 
     FusePoolDirectory.FusePool memory poolToDeprecate;
@@ -59,5 +56,15 @@ contract FusePoolDirectoryTest is BaseTest {
     }
 
     assertTrue(!poolStillThere, "deprecated pool is still there");
+  }
+
+  function testQPool() public fork(BSC_MAINNET) {
+    fpd = FusePoolDirectory(0x295d7347606F4bd810C8296bb8d75D657001fcf7);
+    FusePoolDirectory.FusePool[] memory allPools = fpd.getAllPools();
+    (uint256[] memory indexes, FusePoolDirectory.FusePool[] memory allPoolsAfter) = fpd.getActivePools();
+    for (uint256 i = 0; i < allPoolsAfter.length; i++) {
+      emit log_named_address("comp", allPoolsAfter[i].comptroller);
+      emit log_named_uint("idx", indexes[i]);
+    }
   }
 }
