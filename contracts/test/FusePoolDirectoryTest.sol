@@ -30,15 +30,12 @@ contract FusePoolDirectoryTest is BaseTest {
   }
 
   function _testDeprecatePool() internal {
-    (, FusePoolDirectory.FusePool[] memory allPools) = fpd.getActivePools();
+    FusePoolDirectory.FusePool[] memory allPools = fpd.getAllPools();
 
     FusePoolDirectory.FusePool memory poolToDeprecate;
-    uint256 index;
-    if (allPools.length > 3) {
-      index = allPools.length - 1;
-    } else {
-      index = 0;
-    }
+
+    // BOMB pool https://app.midascapital.xyz/56/pool/0
+    uint256 index = 0;
 
     poolToDeprecate = allPools[index];
 
@@ -56,15 +53,5 @@ contract FusePoolDirectoryTest is BaseTest {
     }
 
     assertTrue(!poolStillThere, "deprecated pool is still there");
-  }
-
-  function testQPool() public fork(BSC_MAINNET) {
-    fpd = FusePoolDirectory(0x295d7347606F4bd810C8296bb8d75D657001fcf7);
-    FusePoolDirectory.FusePool[] memory allPools = fpd.getAllPools();
-    (uint256[] memory indexes, FusePoolDirectory.FusePool[] memory allPoolsAfter) = fpd.getActivePools();
-    for (uint256 i = 0; i < allPoolsAfter.length; i++) {
-      emit log_named_address("comp", allPoolsAfter[i].comptroller);
-      emit log_named_uint("idx", indexes[i]);
-    }
   }
 }
