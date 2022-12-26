@@ -140,7 +140,7 @@ contract NeondevnetE2ETest is WithPool {
     vars.liquidator = new FuseSafeLiquidator();
     vars.liquidator.initialize(
       wtoken, // wneon
-      0x696d73D7262223724d60B2ce9d6e20fc31DfC56B, // moraswap router
+      0x491FFC6eE42FEfB4Edab9BA7D5F3e639959E081B, // moraswap router
       0x7ff459CE3092e8A866aA06DA88D291E2E31230C1, // USDC
       0x6fbF8F06Ebce724272813327255937e7D1E72298, // wWBTC
       "0x1f475d88284b09799561ca05d87dc757c1ff4a9f48983cdb84d1dd6e209d3ae2",
@@ -199,7 +199,7 @@ contract NeondevnetE2ETest is WithPool {
     FusePoolLens.FusePoolAsset[] memory assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
     uint256 neonBalance = cWNeonToken.asCTokenExtensionInterface().balanceOf(accountOne);
 
-    IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x696d73D7262223724d60B2ce9d6e20fc31DfC56B);
+    IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x491FFC6eE42FEfB4Edab9BA7D5F3e639959E081B);
     address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(
       address(underlyingToken),
       0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5
