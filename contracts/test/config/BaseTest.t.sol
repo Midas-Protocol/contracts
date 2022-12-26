@@ -164,7 +164,7 @@ abstract contract BaseTest is Test {
     } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
     } else if (chainid == NEON_DEVNET) {
-      ap = AddressesProvider(0x3B0B043f5c459F9f5dC39ECb04AA39D1E675565B);
+      ap = AddressesProvider(0x22A4D1bf93e84E107795c82f0c718a083dD1c215);
     } else if (chainid == ARBITRUM_ONE) {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else if (chainid == FANTOM_OPERA) {
