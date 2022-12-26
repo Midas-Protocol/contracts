@@ -154,12 +154,13 @@ contract LiquidityMiningTest is BaseTest {
     setUpBaseContracts(baseDecimal, rewardDecimal);
     setUpPoolAndMarket();
     setUpFlywheel();
+    underlyingToken.mint(address(this), 1e6 * 10 ** baseDecimal);
     deposit(1 * 10**baseDecimal);
     vm.warp(block.timestamp + 1);
   }
 
   function deposit(uint256 _amount) public {
-    underlyingToken.mint(user, _amount);
+    underlyingToken.transfer(user, _amount);
     vm.startPrank(user);
     underlyingToken.approve(address(cErc20), _amount);
     comptroller.enterMarkets(markets);
@@ -194,16 +195,16 @@ contract LiquidityMiningTest is BaseTest {
     assertEq(rewardToken.balanceOf(user), userRewards, "!user rewards");
 
     // mint more tokens by user and rerun test
-    deposit(1e6 * 10**baseDecimal);
+    deposit(1 * 10**baseDecimal);
 
     // for next test, advance 10 seconds instead of 1 (multiply expectations by 10)
     vm.warp(block.timestamp + 10);
 
-    uint256 rewardsPerToken2PlusFee = (10 * 10**rewardDecimal * 1 * 10**baseDecimal) / asExtension.totalSupply();
+    uint256 rewardsPerToken2PlusFee = (1 * 10**rewardDecimal * 1 * 10**baseDecimal) / asExtension.totalSupply();
     uint256 rewardsPerToken2ForFee = (rewardsPerToken2PlusFee * percentFee) / percent100;
     uint256 rewardsPerToken2 = rewardsPerToken2PlusFee - rewardsPerToken2ForFee;
 
-    uint256 userRewards2 = (rewardsPerToken2 * asExtension.balanceOf(user)) / (1 * 10**baseDecimal);
+    uint256 userRewards2 = 10 * (rewardsPerToken2 * asExtension.balanceOf(user)) / (1 * 10**baseDecimal);
 
     // accrue all unclaimed rewards and claim them
     flywheelClaimer.getUnclaimedRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
@@ -212,6 +213,14 @@ contract LiquidityMiningTest is BaseTest {
     emit log_named_uint("userRewards2", userRewards2);
     // user balance should accumulate from both rewards
     assertEq(rewardToken.balanceOf(user), userRewards + userRewards2, "balance mismatch");
+  }
+
+  function testIntegrationReward6() public {
+    testIntegrationRewardStandard(6, 6);
+  }
+
+  function testIntegrationReward18() public {
+    testIntegrationRewardStandard(18, 18);
   }
 
   function testIntegrationRewardStandard(uint8 i, uint8 j) public {
