@@ -154,13 +154,12 @@ contract LiquidityMiningTest is BaseTest {
     setUpBaseContracts(baseDecimal, rewardDecimal);
     setUpPoolAndMarket();
     setUpFlywheel();
-    underlyingToken.mint(address(this), 1e6 * 10**baseDecimal);
     deposit(1 * 10**baseDecimal);
     vm.warp(block.timestamp + 1);
   }
 
   function deposit(uint256 _amount) public {
-    underlyingToken.transfer(user, _amount);
+    underlyingToken.mint(user, _amount);
     vm.startPrank(user);
     underlyingToken.approve(address(cErc20), _amount);
     comptroller.enterMarkets(markets);
