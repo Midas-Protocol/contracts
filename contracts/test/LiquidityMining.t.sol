@@ -214,14 +214,6 @@ contract LiquidityMiningTest is BaseTest {
     assertEq(rewardToken.balanceOf(user), userRewards + userRewards2, "balance mismatch");
   }
 
-  function testIntegrationReward6() public {
-    testIntegrationRewardStandard(6, 6);
-  }
-
-  function testIntegrationReward18() public {
-    testIntegrationRewardStandard(18, 18);
-  }
-
   function testIntegrationRewardStandard(uint8 i, uint8 j) public {
     vm.assume(i > 1);
     vm.assume(j > 1);
