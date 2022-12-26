@@ -154,7 +154,7 @@ contract LiquidityMiningTest is BaseTest {
     setUpBaseContracts(baseDecimal, rewardDecimal);
     setUpPoolAndMarket();
     setUpFlywheel();
-    underlyingToken.mint(address(this), 1e6 * 10 ** baseDecimal);
+    underlyingToken.mint(address(this), 1e6 * 10**baseDecimal);
     deposit(1 * 10**baseDecimal);
     vm.warp(block.timestamp + 1);
   }
@@ -204,7 +204,7 @@ contract LiquidityMiningTest is BaseTest {
     uint256 rewardsPerToken2ForFee = (rewardsPerToken2PlusFee * percentFee) / percent100;
     uint256 rewardsPerToken2 = rewardsPerToken2PlusFee - rewardsPerToken2ForFee;
 
-    uint256 userRewards2 = 10 * (rewardsPerToken2 * asExtension.balanceOf(user)) / (1 * 10**baseDecimal);
+    uint256 userRewards2 = (10 * (rewardsPerToken2 * asExtension.balanceOf(user))) / (1 * 10**baseDecimal);
 
     // accrue all unclaimed rewards and claim them
     flywheelClaimer.getUnclaimedRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
