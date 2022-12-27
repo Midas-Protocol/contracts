@@ -154,7 +154,7 @@ contract CErc20 is CToken, CErc20Interface {
   function doTransferIn(address from, uint256 amount) internal virtual override returns (uint256) {
     uint256 balanceBefore = EIP20Interface(underlying).balanceOf(address(this));
     _callOptionalReturn(
-      abi.encodeWithSelector(EIP20NonStandardInterface(underlying).transferFrom.selector, from, address(this), amount),
+      abi.encodeWithSelector(EIP20Interface(underlying).transferFrom.selector, from, address(this), amount),
       "TOKEN_TRANSFER_IN_FAILED"
     );
 
@@ -175,7 +175,7 @@ contract CErc20 is CToken, CErc20Interface {
    */
   function doTransferOut(address to, uint256 amount) internal virtual override {
     _callOptionalReturn(
-      abi.encodeWithSelector(EIP20NonStandardInterface(underlying).transfer.selector, to, amount),
+      abi.encodeWithSelector(EIP20Interface(underlying).transfer.selector, to, amount),
       "TOKEN_TRANSFER_OUT_FAILED"
     );
   }
