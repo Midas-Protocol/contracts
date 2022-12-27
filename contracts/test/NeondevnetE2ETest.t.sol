@@ -34,8 +34,11 @@ contract MockWNeon is MockERC20 {
 
 contract NeondevnetE2ETest is WithPool {
   address mpo;
-  address moraToken = 0x6Ab1F83c0429A1322D7ECDFdDf54CE6D179d911f;
+  address moraRouter = 0x491FFC6eE42FEfB4Edab9BA7D5F3e639959E081B;
+  address moraToken = 0x6dcDD1620Ce77B595E6490701416f6Dbf20D2f67; // MORA
   address wtoken = 0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5;
+  address wWbtc = 0x6fbF8F06Ebce724272813327255937e7D1E72298;
+  address moraUsdc = 0x6Ab1F83c0429A1322D7ECDFdDf54CE6D179d911f;
 
   struct LiquidationData {
     address[] cTokens;
@@ -140,9 +143,9 @@ contract NeondevnetE2ETest is WithPool {
     vars.liquidator = new FuseSafeLiquidator();
     vars.liquidator.initialize(
       wtoken, // wneon
-      0x696d73D7262223724d60B2ce9d6e20fc31DfC56B, // moraswap router
-      0x7ff459CE3092e8A866aA06DA88D291E2E31230C1, // USDC
-      0x6fbF8F06Ebce724272813327255937e7D1E72298, // wWBTC
+      moraRouter, // moraswap router
+      moraUsdc, // MoraSwap USDC
+      wWbtc, // wWBTC
       "0x1f475d88284b09799561ca05d87dc757c1ff4a9f48983cdb84d1dd6e209d3ae2",
       30
     );
@@ -199,11 +202,8 @@ contract NeondevnetE2ETest is WithPool {
     FusePoolLens.FusePoolAsset[] memory assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
     uint256 neonBalance = cWNeonToken.asCTokenExtensionInterface().balanceOf(accountOne);
 
-    IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x696d73D7262223724d60B2ce9d6e20fc31DfC56B);
-    address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(
-      address(underlyingToken),
-      0xf1041596da0499c3438e3B1Eb7b95354C6Aed1f5
-    );
+    IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(moraRouter);
+    address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(address(underlyingToken), wtoken);
     IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
