@@ -26,10 +26,6 @@ abstract contract AbstractERC4626Test is WithPool {
     _forkAtBlock(uint128(block.chainid), block.number);
   }
 
-  function setDepositAmount(uint256 _amount) public {
-    depositAmount = _amount;
-  }
-
   function _setUp(string memory _testPreFix, bytes calldata data) public virtual;
 
   function deposit(address _owner, uint256 amount) public {
