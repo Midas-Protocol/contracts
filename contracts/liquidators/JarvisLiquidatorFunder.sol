@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { IERC20MetadataUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
-import { FixedPointMathLib } from "../utils/FixedPointMathLib.sol";
+import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 import { IFundsConversionStrategy } from "./IFundsConversionStrategy.sol";
 import { ISynthereumLiquidityPool } from "../external/jarvis/ISynthereumLiquidityPool.sol";
 

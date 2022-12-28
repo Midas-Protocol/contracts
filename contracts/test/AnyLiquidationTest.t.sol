@@ -91,7 +91,7 @@ contract AnyLiquidationTest is BaseTest {
 
   function testSpecificRandom() public debuggingOnly {
     //testBscAnyLiquidation(2349);
-    testPolygonAnyLiquidation(101);
+    testBscAnyLiquidation(1649);
   }
 
   function testBscAnyLiquidation(uint256 random) public fork(BSC_MAINNET) {
@@ -346,8 +346,21 @@ contract AnyLiquidationTest is BaseTest {
     {
       // noop
     } catch Error(string memory reason) {
+      uint256 dec_28_2022 = 1672218645;
       if (compareStrings(reason, "Number of tokens less than minimum limit")) {
         emit log("jarvis pool failing, that's ok");
+      } else if (compareStrings(reason, "No enough liquidity")) {
+        if (block.timestamp < dec_28_2022 + 20 days) {
+          emit log("jarvis pool getMintTradeInfo failing");
+        } else {
+          revert(reason);
+        }
+      } else if (compareStrings(reason, "No enough liquidity for covering mint operation")) {
+        if (block.timestamp < dec_28_2022 + 20 days) {
+          emit log("jarvis pool getMintTradeInfo failing internally");
+        } else {
+          revert(reason);
+        }
       } else {
         revert(reason);
       }
