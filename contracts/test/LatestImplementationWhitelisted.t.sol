@@ -7,6 +7,7 @@ import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
+import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
 import { IERC4626 } from "../compound/IERC4626.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
@@ -140,5 +141,20 @@ contract LatestImplementationWhitelisted is BaseTest {
         "no whitelisted implementation for old implementation"
       );
     }
+  }
+
+  function testMaiDust() public debuggingOnly forkAtBlock(POLYGON_MAINNET, 35632068) {
+    address user = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc;
+    CErc20Delegate market = CErc20Delegate(0x28D0d45e593764C4cE88ccD1C033d0E2e8cE9aF3);
+    CTokenFirstExtension asExtension = CTokenFirstExtension(address(market));
+
+    vm.rollFork(hex"a49844015360e78d5764689d02b968ffe863e52ccfeea3e2a51f8f4e628ff60c");
+    uint256 balanceBefore = asExtension.balanceOf(user);
+    vm.prank(user);
+    market.redeemUnderlying(type(uint256).max);
+    uint256 balanceAfter = asExtension.balanceOf(user);
+
+    emit log_named_uint("balanceBefore", balanceBefore);
+    emit log_named_uint("balanceAfter", balanceAfter);
   }
 }
