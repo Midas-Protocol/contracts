@@ -90,8 +90,8 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   function testSpecificRandom() public debuggingOnly {
-    //testBscAnyLiquidation(2349);
-    testBscAnyLiquidation(1649);
+    //    testPolygonAnyLiquidation(965);
+    testBscAnyLiquidation(102);
   }
 
   function testBscAnyLiquidation(uint256 random) public fork(BSC_MAINNET) {
@@ -358,6 +358,15 @@ contract AnyLiquidationTest is BaseTest {
       } else if (compareStrings(reason, "No enough liquidity for covering mint operation")) {
         if (block.timestamp < dec_28_2022 + 20 days) {
           emit log("jarvis pool getMintTradeInfo failing internally");
+        } else {
+          revert(reason);
+        }
+      } else if (compareStrings(reason, "failed to find curve pool")) {
+        if (
+          vars.debtMarket.underlying() == 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5 &&
+          block.timestamp < dec_28_2022 + 20 days
+        ) {
+          emit log("implement https://github.com/Midas-Protocol/contracts/pull/519");
         } else {
           revert(reason);
         }
