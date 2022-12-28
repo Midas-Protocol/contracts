@@ -194,16 +194,16 @@ contract LiquidityMiningTest is BaseTest {
     assertEq(rewardToken.balanceOf(user), userRewards, "!user rewards");
 
     // mint more tokens by user and rerun test
-    deposit(1e6 * 10**baseDecimal);
+    deposit(1 * 10**baseDecimal);
 
     // for next test, advance 10 seconds instead of 1 (multiply expectations by 10)
     vm.warp(block.timestamp + 10);
 
-    uint256 rewardsPerToken2PlusFee = (10 * 10**rewardDecimal * 1 * 10**baseDecimal) / asExtension.totalSupply();
+    uint256 rewardsPerToken2PlusFee = (1 * 10**rewardDecimal * 1 * 10**baseDecimal) / asExtension.totalSupply();
     uint256 rewardsPerToken2ForFee = (rewardsPerToken2PlusFee * percentFee) / percent100;
     uint256 rewardsPerToken2 = rewardsPerToken2PlusFee - rewardsPerToken2ForFee;
 
-    uint256 userRewards2 = (rewardsPerToken2 * asExtension.balanceOf(user)) / (1 * 10**baseDecimal);
+    uint256 userRewards2 = (10 * (rewardsPerToken2 * asExtension.balanceOf(user))) / (1 * 10**baseDecimal);
 
     // accrue all unclaimed rewards and claim them
     flywheelClaimer.getUnclaimedRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);

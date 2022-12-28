@@ -6,7 +6,6 @@ import { CTokenInterface } from "./CTokenInterfaces.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { EIP20Interface } from "./EIP20Interface.sol";
-import { EIP20NonStandardInterface } from "./EIP20NonStandardInterface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
 import { DiamondBase, DiamondExtension, LibDiamond } from "../midas/DiamondExtension.sol";
 import { Multicall } from "../utils/Multicall.sol";
