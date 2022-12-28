@@ -260,7 +260,6 @@ contract AnyLiquidationTest is BaseTest {
     // add funding strategies
     address debtTokenToFund = vars.debtMarket.underlying();
     {
-
       uint256 i = 0;
       while (true) {
         emit log("funding token");
@@ -362,10 +361,7 @@ contract AnyLiquidationTest is BaseTest {
           revert(reason);
         }
       } else if (compareStrings(reason, "failed to find curve pool")) {
-        if (
-          debtTokenToFund == 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5 &&
-          block.timestamp < dec_28_2022 + 20 days
-        ) {
+        if (debtTokenToFund == 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5 && block.timestamp < dec_28_2022 + 20 days) {
           emit log("implement https://github.com/Midas-Protocol/contracts/pull/519");
         } else {
           revert(reason);
