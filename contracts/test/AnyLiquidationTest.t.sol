@@ -90,8 +90,8 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   function testSpecificRandom() public debuggingOnly {
-    //    testPolygonAnyLiquidation(965);
-    testBscAnyLiquidation(73237448524);
+    testBscAnyLiquidation(657);
+    //    testPolygonAnyLiquidation(101);
   }
 
   function testBscAnyLiquidation(uint256 random) public fork(BSC_MAINNET) {
@@ -218,6 +218,8 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
+  uint256 dec_28_2022 = 1672218645;
+
   function doTestAnyLiquidation(uint256 random) internal {
     LiquidationData memory vars;
     vars.liquidator = fsl;
@@ -258,8 +260,8 @@ contract AnyLiquidationTest is BaseTest {
     // prepare the liquidation
 
     // add funding strategies
-    address debtTokenToFund = vars.debtMarket.underlying();
     {
+      address debtTokenToFund = vars.debtMarket.underlying();
       uint256 i = 0;
       while (true) {
         emit log("funding token");
@@ -276,6 +278,12 @@ contract AnyLiquidationTest is BaseTest {
           strategy.contractInterface,
           strategy.inputToken
         );
+
+        // TODO remove when fixed
+        if (debtTokenToFund == 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5 && block.timestamp < dec_28_2022 + 20 days) {
+          emit log("implement https://github.com/Midas-Protocol/contracts/pull/519");
+          return;
+        }
       }
 
       vars.flashSwapFundingToken = debtTokenToFund;
@@ -345,7 +353,6 @@ contract AnyLiquidationTest is BaseTest {
     {
       // noop
     } catch Error(string memory reason) {
-      uint256 dec_28_2022 = 1672218645;
       if (compareStrings(reason, "Number of tokens less than minimum limit")) {
         emit log("jarvis pool failing, that's ok");
       } else if (compareStrings(reason, "No enough liquidity")) {
@@ -357,12 +364,6 @@ contract AnyLiquidationTest is BaseTest {
       } else if (compareStrings(reason, "No enough liquidity for covering mint operation")) {
         if (block.timestamp < dec_28_2022 + 20 days) {
           emit log("jarvis pool getMintTradeInfo failing internally");
-        } else {
-          revert(reason);
-        }
-      } else if (compareStrings(reason, "failed to find curve pool")) {
-        if (debtTokenToFund == 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5 && block.timestamp < dec_28_2022 + 20 days) {
-          emit log("implement https://github.com/Midas-Protocol/contracts/pull/519");
         } else {
           revert(reason);
         }
