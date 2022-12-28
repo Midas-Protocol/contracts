@@ -91,7 +91,7 @@ contract AnyLiquidationTest is BaseTest {
 
   function testSpecificRandom() public debuggingOnly {
     //    testPolygonAnyLiquidation(965);
-    testBscAnyLiquidation(381);
+    testBscAnyLiquidation(73237448524);
   }
 
   function testBscAnyLiquidation(uint256 random) public fork(BSC_MAINNET) {
@@ -258,8 +258,8 @@ contract AnyLiquidationTest is BaseTest {
     // prepare the liquidation
 
     // add funding strategies
+    address debtTokenToFund = vars.debtMarket.underlying();
     {
-      address debtTokenToFund = vars.debtMarket.underlying();
 
       uint256 i = 0;
       while (true) {
@@ -363,7 +363,7 @@ contract AnyLiquidationTest is BaseTest {
         }
       } else if (compareStrings(reason, "failed to find curve pool")) {
         if (
-          vars.flashSwapFundingToken == 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5 &&
+          debtTokenToFund == 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5 &&
           block.timestamp < dec_28_2022 + 20 days
         ) {
           emit log("implement https://github.com/Midas-Protocol/contracts/pull/519");
