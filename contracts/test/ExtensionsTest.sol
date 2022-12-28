@@ -189,9 +189,6 @@ contract ExtensionsTest is BaseTest {
     uint8 random = uint8(block.timestamp % 256);
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
 
-    // TODO: revert this after next deployment
-    upgradeFpd(address(fpd));
-
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
@@ -223,9 +220,6 @@ contract ExtensionsTest is BaseTest {
   function testExistingCTokenExtensionUpgrade() public fork(BSC_MAINNET) {
     uint8 random = uint8(block.timestamp % 256);
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-
-    // TODO: revert this after next deployment
-    upgradeFpd(address(fpd));
 
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
@@ -337,9 +331,6 @@ contract ExtensionsTest is BaseTest {
 
   function _testComptrollersExtensions() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-
-    // TODO: revert this after next deployment
-    upgradeFpd(address(fpd));
 
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 

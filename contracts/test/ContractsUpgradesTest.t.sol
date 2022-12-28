@@ -118,9 +118,6 @@ contract ContractsUpgradesTest is BaseTest {
     FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
 
-    // TODO: revert this after next deployment
-    upgradeFpd(address(fpd));
-
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {

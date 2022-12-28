@@ -30,18 +30,12 @@ contract FusePoolDirectoryTest is BaseTest {
   }
 
   function _testDeprecatePool() internal {
-    // TODO: revert this after next deployment
-    upgradeFpd(address(fpd));
-
-    (, FusePoolDirectory.FusePool[] memory allPools) = fpd.getActivePools();
+    FusePoolDirectory.FusePool[] memory allPools = fpd.getAllPools();
 
     FusePoolDirectory.FusePool memory poolToDeprecate;
-    uint256 index;
-    if (allPools.length > 3) {
-      index = allPools.length - 1;
-    } else {
-      index = 0;
-    }
+
+    // BOMB pool https://app.midascapital.xyz/56/pool/0
+    uint256 index = 0;
 
     poolToDeprecate = allPools[index];
 

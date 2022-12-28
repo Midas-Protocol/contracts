@@ -35,6 +35,7 @@ contract AdrastiaPriceOracleTest is BaseTest {
   address gDAI = 0xd567B3d7B8FE3C79a1AD8dA978812cfC4Fa05e75;
 
   address ceWETH = 0x153A59d48AcEAbedbDCf7a13F67Ae52b434B810B;
+  address ceUSDC = 0xe46910336479F254723710D57e7b683F3315b22B;
   address axlWETH = 0x50dE24B3f0B3136C50FA8A3B8ebc8BD80a269ce5;
 
   address axlWBTC = 0xF5b24c0093b65408ACE53df7ce86a02448d53b25;
@@ -68,14 +69,17 @@ contract AdrastiaPriceOracleTest is BaseTest {
     IAdrastiaPriceOracle evmosBasedFeed = IAdrastiaPriceOracle(ADASTRIA_XXX_EVMOS_FEED);
 
     // Stables
-    address[] memory stableUnderlyings = new address[](3);
+    address[] memory stableUnderlyings = new address[](4);
     stableUnderlyings[0] = gUSDC;
     stableUnderlyings[1] = gUSDT;
     stableUnderlyings[2] = gDAI;
-    IAdrastiaPriceOracle[] memory stableFeeds = new IAdrastiaPriceOracle[](3);
+    stableUnderlyings[3] = ceUSDC;
+
+    IAdrastiaPriceOracle[] memory stableFeeds = new IAdrastiaPriceOracle[](4);
     stableFeeds[0] = evmosBasedFeed;
     stableFeeds[1] = evmosBasedFeed;
     stableFeeds[2] = evmosBasedFeed;
+    stableFeeds[3] = evmosBasedFeed;
     vm.prank(oracle.owner());
     oracle.setPriceFeeds(stableUnderlyings, stableFeeds);
 
@@ -110,6 +114,7 @@ contract AdrastiaPriceOracleTest is BaseTest {
     setUpAdrastiaFeeds();
 
     uint256 priceGUsdc = oracle.price(gUSDC);
+    uint256 priceCeUsdc = oracle.price(ceUSDC);
     uint256 priceGUsdt = oracle.price(gUSDT);
     uint256 priceGDai = oracle.price(gDAI);
 
@@ -124,8 +129,12 @@ contract AdrastiaPriceOracleTest is BaseTest {
     assertGt(priceGUsdc, 1e17);
     assertLt(priceGUsdc, 1e19);
 
+    assertGt(priceCeUsdc, 1e17);
+    assertLt(priceCeUsdc, 1e19);
+
     assertApproxEqRel(priceGUsdc, priceGUsdt, 5e16, "usd prices differ too much"); // 1e18 = 100%, 5e16 = 5%
     assertApproxEqRel(priceGUsdt, priceGDai, 5e16, "usd prices differ too much");
+    assertApproxEqRel(priceGUsdc, priceCeUsdc, 5e16, "usd prices differ too much");
 
     assertApproxEqRel(priceCWeth, priceAxlWeth, 10e16, "eth prices differ too much");
 
