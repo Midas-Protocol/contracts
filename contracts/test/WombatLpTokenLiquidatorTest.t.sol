@@ -21,29 +21,23 @@ contract WombatLpTokenLiquidatorTest is BaseTest {
   }
 
   function testRedeemWBNB() public fork(BSC_MAINNET) {
-    uint256 dec_28_2022 = 1672218645;
-    if (block.timestamp < dec_28_2022 + 20 days) {
-      emit log("disabled the test until the pool is unpaused");
-      return;
-    }
-
-    address wombatWBNB = 0x74f019A5C4eD2C2950Ce16FaD7Af838549092c5b;
+    address wombatBUSD = 0xF319947eCe3823b790dd87b0A509396fE325745a;
     uint256 assetAmount = 100e18;
 
-    deal(wombatWBNB, address(wtl), assetAmount);
+    deal(wombatBUSD, address(wtl), assetAmount);
 
     vm.prank(address(mp));
-    uint256 assetPrice = oracle.price(wombatWBNB); // wombatWBNB price
-    uint256 underlyingPrice = mp.price(IWombatLpAsset(wombatWBNB).underlyingToken()); // wbnb price
+    uint256 assetPrice = oracle.price(wombatBUSD); // wombatBUSD price
+    uint256 underlyingPrice = mp.price(IWombatLpAsset(wombatBUSD).underlyingToken()); // wbnb price
 
     // amount convertion = assetAmount * underlyingPrice / assetPrice
     uint256 expectedAmount = (assetAmount * underlyingPrice) / assetPrice;
 
     bytes memory strategyData = abi.encode(
-      IWombatLpAsset(wombatWBNB).pool(),
-      IWombatLpAsset(wombatWBNB).underlyingToken()
+      IWombatLpAsset(wombatBUSD).pool(),
+      IWombatLpAsset(wombatBUSD).underlyingToken()
     );
-    (, uint256 redeemAmount) = wtl.redeem(IERC20Upgradeable(wombatWBNB), assetAmount, strategyData);
+    (, uint256 redeemAmount) = wtl.redeem(IERC20Upgradeable(wombatBUSD), assetAmount, strategyData);
 
     assertApproxEqAbs(
       expectedAmount,
