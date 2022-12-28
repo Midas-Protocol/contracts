@@ -8,13 +8,13 @@ contract AnkrCertificateTokenPriceOracleTest is BaseTest {
   AnkrCertificateTokenPriceOracle private oracle;
 
   address aFTMc = 0xCfC785741Dc0e98ad4c9F6394Bb9d43Cd1eF5179;
-  address aBNBc = 0xE85aFCcDaFBE7F2B096f268e31ccE3da8dA2990A;
+  address ankrBNB = 0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827;
   address aMATICc = 0x0E9b89007eEE9c958c0EDA24eF70723C2C93dD58;
 
   function afterForkSetUp() internal override {
     oracle = new AnkrCertificateTokenPriceOracle();
     if (block.chainid == BSC_MAINNET) {
-      oracle.initialize(aBNBc);
+      oracle.initialize(ankrBNB);
     } else if (block.chainid == FANTOM_OPERA) {
       oracle.initialize(aFTMc);
     } else if (block.chainid == POLYGON_MAINNET) {
@@ -28,10 +28,10 @@ contract AnkrCertificateTokenPriceOracleTest is BaseTest {
     assertEq(priceAnkrFTMc, 1032694573127108753);
   }
 
-  function testAnkrBSCOracle() public forkAtBlock(BSC_MAINNET, 22967648) {
-    uint256 priceAnkrBNBc = oracle.price(aBNBc);
-    assertGt(priceAnkrBNBc, 1e18);
-    assertEq(priceAnkrBNBc, 1036531403670513817);
+  function testAnkrBSCOracle() public forkAtBlock(BSC_MAINNET, 24150586) {
+    uint256 priceAnkrBNB = oracle.price(ankrBNB);
+    assertGt(priceAnkrBNB, 1e18);
+    assertEq(priceAnkrBNB, 1040035572321529337);
   }
 
   function testAnkrPolygonOracle() public forkAtBlock(POLYGON_MAINNET, 36299660) {
