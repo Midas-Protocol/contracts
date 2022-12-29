@@ -86,7 +86,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
       @return the cumulative amount of rewards accrued to user (including prior)
     */
   function accrue(ERC20 strategy, address user) public returns (uint256) {
-    RewardsState memory state = strategyState[strategy];
+    RewardsState memory state = getStrategyState(strategy);
 
     if (state.index == 0) return 0;
 
@@ -107,7 +107,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     address user,
     address secondUser
   ) public returns (uint256, uint256) {
-    RewardsState memory state = strategyState[strategy];
+    RewardsState memory state = getStrategyState(strategy);
 
     if (state.index == 0) return (0, 0);
 
@@ -121,7 +121,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
       @dev this function is public, and all rewards transfer to the user
     */
   function claimRewards(address user) external {
-    uint256 accrued = rewardsAccrued[user];
+    uint256 accrued = getRewardsAccrued(user);
 
     if (accrued != 0) {
       rewardsAccrued[user] = 0;
@@ -148,7 +148,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   }
 
   function _addStrategyForRewards(ERC20 strategy) internal {
-    require(strategyState[strategy].index == 0, "strategy");
+    require(getStrategyState(strategy).index == 0, "strategy");
     strategyState[strategy] = RewardsState({
       index: (10**rewardToken.decimals()).safeCastTo224(),
       lastUpdatedTimestamp: block.timestamp.safeCastTo32()
@@ -214,7 +214,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     emit UpdatedFeeSettings(performanceFee, _performanceFee, feeRecipient, _feeRecipient);
 
     if (feeRecipient != _feeRecipient) {
-      rewardsAccrued[_feeRecipient] += rewardsAccrued[feeRecipient];
+      rewardsAccrued[_feeRecipient] += getRewardsAccrued(feeRecipient);
       rewardsAccrued[feeRecipient] = 0;
     }
     performanceFee = _performanceFee;
@@ -276,7 +276,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   ) private returns (uint256) {
     // load indices
     uint224 strategyIndex = state.index;
-    uint224 supplierIndex = userIndex[strategy][user];
+    uint224 supplierIndex = getUserIndex(strategy, user);
 
     // sync user index to global
     userIndex[strategy][user] = strategyIndex;
@@ -295,12 +295,24 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
 
     // accumulate rewards by multiplying user tokens by rewardsPerToken index and adding on unclaimed
     uint256 supplierDelta = (deltaIndex * supplierTokens) / (10**strategy.decimals());
-    uint256 supplierAccrued = rewardsAccrued[user] + supplierDelta;
+    uint256 supplierAccrued = getRewardsAccrued(user) + supplierDelta;
 
     rewardsAccrued[user] = supplierAccrued;
 
     emit AccrueRewards(strategy, user, supplierDelta, strategyIndex);
 
     return supplierAccrued;
+  }
+
+  function getRewardsAccrued(address user) public virtual returns (uint256) {
+    return rewardsAccrued[user];
+  }
+
+  function getStrategyState(ERC20 strategy) public virtual returns (RewardsState memory) {
+    return strategyState[strategy];
+  }
+
+  function getUserIndex(ERC20 strategy, address user) public virtual returns (uint224) {
+    return userIndex[strategy][user];
   }
 }
