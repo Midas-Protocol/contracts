@@ -41,6 +41,11 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   /// @notice user index per strategy
   mapping(ERC20 => mapping(address => uint224)) public userIndex;
 
+  constructor() {
+    // prevents the misusage of the implementation contract
+    _disableInitializers();
+  }
+
   function initialize(
     ERC20 _rewardToken,
     IFlywheelRewards _flywheelRewards,
