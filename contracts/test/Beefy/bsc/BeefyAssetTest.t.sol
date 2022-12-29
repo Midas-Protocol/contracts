@@ -17,7 +17,6 @@ contract BeefyBscAssetTest is AbstractAssetTest {
 
   function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new BeefyERC4626Test()));
-    test.setDepositAmount(1e16);
     testConfigStorage = ITestConfigStorage(address(new BeefyBscTestConfigStorage()));
   }
 
