@@ -110,40 +110,32 @@ contract FlywheelUpgradesTest is BaseTest {
     uint256[] memory rewards = lensRouter.getUnclaimedRewardsForMarket(user, strategy, flywheels, asArray(true));
 
     emit log_named_uint("rewards for flywheel", rewards[0]);
+  }
 
-    {
-      //    uint256 blockStrategyAdded = 18856525;
-      //    uint256 blocksInterval = (block.number - blockStrategyAdded) / 10;
-      //
-      //    for (uint8 i = 0; i <= 10; i++) {
-      //      vm.rollFork(blockStrategyAdded + i * blocksInterval);
-      //
-      //      emit log("");
-      //      emit log_uint(i);
-      //      emit log_named_uint("at block", block.number);
-      //      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(epxFlywheel)));
-      //      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-      //      address admin = address(uint160(uint256(bytesAtSlot)));
-      //      vm.prank(admin);
-      //      address impl = proxy.implementation();
-      //      emit log_named_address("impl", impl);
-      //      (uint224 twoBrlIndex, ) = epxFlywheel.strategyState(strategy);
-      //      emit log_named_uint("twoBrlIndex", twoBrlIndex);
-      //      uint224 userIndex = epxFlywheel.userIndex(strategy, user);
+  function testBrokenStorageLayout() public debuggingOnly fork(MOONBEAM_MAINNET) {
+    ERC20 strategy = ERC20(0x32Be4b977BaB44e9146Bb414c18911e652C56568); // wglmr-xcdot market
+    address brokenFlywheelAddress = 0x34022232C0233Ee05FDe3383FcEC52248Dd84b91;
+    MidasFlywheelCore brokenFlywheel = MidasFlywheelCore(brokenFlywheelAddress);
+
+    uint256 blockFlywheelDeployed = 1864419;
+    uint256 blocksInterval = (block.number - blockFlywheelDeployed) / 10;
+
+    for (uint8 i = 0; i <= 10; i++) {
+      vm.rollFork(blockFlywheelDeployed + i * blocksInterval);
+
+      emit log("");
+      emit log_uint(i);
+      emit log_named_uint("at block", block.number);
+      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(brokenFlywheel)));
+      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
+      address admin = address(uint160(uint256(bytesAtSlot)));
+      vm.prank(admin);
+      address impl = proxy.implementation();
+      emit log_named_address("impl", impl);
+      (uint224 strategyIndex, ) = brokenFlywheel.strategyState(strategy);
+      emit log_named_uint("strategy index", strategyIndex);
+      //      uint224 userIndex = brokenFlywheel.userIndex(strategy, user);
       //      emit log_named_uint("userIndex", userIndex);
-      ////      ERC20 rewardToken = rewardsContract.rewardToken();
-      ////      uint256 rewards = rewardToken.balanceOf(address(rewardsContract));
-      ////      emit log_named_uint("rewards", rewards);
-      //      if (i != 0) {
-      //        (uint32 start,
-      //        uint32 end,
-      //        uint192 reward) = rewardsContract.rewardsCycle(strategy);
-      //
-      //        emit log_named_uint("start", start);
-      //        emit log_named_uint("end", end);
-      //        emit log_named_uint("reward", reward);
-      //      }
-      //    }
     }
   }
 }

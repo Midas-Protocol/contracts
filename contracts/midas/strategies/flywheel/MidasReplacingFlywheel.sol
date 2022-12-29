@@ -31,7 +31,8 @@ contract MidasReplacingFlywheel is MidasFlywheelCore {
   function getStrategyState(ERC20 strategy) public override returns (RewardsState memory) {
     RewardsState memory newStateStrategyState = strategyState[strategy];
     if (newStateStrategyState.index == 0) {
-      strategyState[strategy] = flywheelToReplace.strategyState(strategy);
+      (uint224 index, uint32 ts) = flywheelToReplace.strategyState(strategy);
+      strategyState[strategy] = RewardsState(index, ts);
     }
     return strategyState[strategy];
   }
