@@ -112,10 +112,13 @@ contract FlywheelUpgradesTest is BaseTest {
     emit log_named_uint("rewards for flywheel", rewards[0]);
   }
 
-  function testBrokenStorageLayout() public debuggingOnly fork(MOONBEAM_MAINNET) {
+  function testBrokenStorageLayout() public {
+    vm.selectFork(vm.createFork("https://moonbeam.public.blastapi.io"));
     ERC20 strategy = ERC20(0x32Be4b977BaB44e9146Bb414c18911e652C56568); // wglmr-xcdot market
     address brokenFlywheelAddress = 0x34022232C0233Ee05FDe3383FcEC52248Dd84b91;
     MidasFlywheelCore brokenFlywheel = MidasFlywheelCore(brokenFlywheelAddress);
+    address user = 0x22f5413C075Ccd56D575A54763831C4c27A37Bdb;
+    address stella = 0x0E358838ce72d5e61E0018a2ffaC4bEC5F4c88d2;
 
     uint256 blockFlywheelDeployed = 1864419;
     uint256 blocksInterval = (block.number - blockFlywheelDeployed) / 10;
@@ -133,9 +136,20 @@ contract FlywheelUpgradesTest is BaseTest {
       address impl = proxy.implementation();
       emit log_named_address("impl", impl);
       (uint224 strategyIndex, ) = brokenFlywheel.strategyState(strategy);
-      emit log_named_uint("strategy index", strategyIndex);
-      //      uint224 userIndex = brokenFlywheel.userIndex(strategy, user);
-      //      emit log_named_uint("userIndex", userIndex);
+      emit log_named_uint("strategy index1", strategyIndex);
+
+      uint224 userIndex = brokenFlywheel.userIndex(strategy, user);
+      emit log_named_uint("userIndex1", userIndex);
+
+      deal(0x0E358838ce72d5e61E0018a2ffaC4bEC5F4c88d2, address(strategy), 100 ether);
+
+      brokenFlywheel.accrue(strategy, address(0));
+
+      (strategyIndex, ) = brokenFlywheel.strategyState(strategy);
+      emit log_named_uint("strategy index2", strategyIndex);
+
+      userIndex = brokenFlywheel.userIndex(strategy, user);
+      emit log_named_uint("userIndex", userIndex);
     }
   }
 }
