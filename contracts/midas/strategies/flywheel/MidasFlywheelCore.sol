@@ -33,7 +33,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   IFlywheelBooster public flywheelBooster;
 
   /// @notice The accrued but not yet transferred rewards for each user
-  mapping(address => uint256) public _rewardsAccrued;
+  mapping(address => uint256) internal _rewardsAccrued;
 
   /// @notice The strategy index and last updated per strategy
   mapping(ERC20 => RewardsState) internal _strategyState;
