@@ -182,7 +182,10 @@ contract StellaERC4626Test is AbstractERC4626Test {
       emit log_named_address("current plugin impl", impl);
       StellaLpERC4626 latestPluginImpl = new StellaLpERC4626();
       vm.prank(admin);
-      proxy.upgradeToAndCall(address(latestPluginImpl), abi.encodeWithSelector(latestPluginImpl.reinitialize.selector, wtoken));
+      proxy.upgradeToAndCall(
+        address(latestPluginImpl),
+        abi.encodeWithSelector(latestPluginImpl.reinitialize.selector, wtoken)
+      );
     }
 
     // log the market/plugin addresses before
