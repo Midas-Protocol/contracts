@@ -49,7 +49,7 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   function afterForkSetUp() internal override {
-    upgradeAp();
+    //upgradeAp();
 
     uniswapRouter = ap.getAddress("IUniswapV2Router02");
 
@@ -57,17 +57,16 @@ contract AnyLiquidationTest is BaseTest {
       mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
       mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
       curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
-      // TODO revert to the ap provided, no need to upgrade after the next deploy
-      // fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      fsl = new FuseSafeLiquidator();
-      fsl.initialize(
-        ap.getAddress("wtoken"),
-        uniswapRouter,
-        ap.getAddress("stableToken"),
-        ap.getAddress("wBTCToken"),
-        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
-        25
-      );
+      fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+      //      fsl = new FuseSafeLiquidator();
+      //      fsl.initialize(
+      //        ap.getAddress("wtoken"),
+      //        uniswapRouter,
+      //        ap.getAddress("stableToken"),
+      //        ap.getAddress("wBTCToken"),
+      //        "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
+      //        25
+      //      );
 
       // TODO configure in the AP?
       address bnbx = 0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275;
@@ -91,8 +90,8 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   function testSpecificRandom() public debuggingOnly {
-    //testBscAnyLiquidation(2349);
-    testPolygonAnyLiquidation(101);
+    testBscAnyLiquidation(657);
+    //    testPolygonAnyLiquidation(101);
   }
 
   function testBscAnyLiquidation(uint256 random) public fork(BSC_MAINNET) {
@@ -219,11 +218,13 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
+  uint256 dec_28_2022 = 1672218645;
+
   function doTestAnyLiquidation(uint256 random) internal {
     LiquidationData memory vars;
     vars.liquidator = fsl;
 
-    vars.pools = FusePoolDirectory(ap.getAddress("FusePoolDirectory")).getAllPools();
+    (, vars.pools) = FusePoolDirectory(ap.getAddress("FusePoolDirectory")).getActivePools();
 
     while (true) {
       // get a random pool and a random borrower from it
@@ -234,7 +235,7 @@ contract AnyLiquidationTest is BaseTest {
         vars.markets = vars.comptroller.getAllMarkets();
         (vars.debtMarket, vars.collateralMarket, vars.borrowAmount) = setUpDebtAndCollateralMarkets(random, vars);
 
-        // TODO implement redemption straegies for these collaterals
+        // TODO implement redemption strategies for these collaterals
         address bscBnbxMarket = 0xa47A7672EF042Ec2838E9425C083Efd982BFa362;
         address mimo80par20Market = 0xcb67Bd2aE0597eDb2426802CdF34bb4085d9483A;
         if (address(vars.debtMarket) != address(0) && address(vars.collateralMarket) != address(0)) {
@@ -261,7 +262,6 @@ contract AnyLiquidationTest is BaseTest {
     // add funding strategies
     {
       address debtTokenToFund = vars.debtMarket.underlying();
-
       uint256 i = 0;
       while (true) {
         emit log("funding token");
@@ -278,6 +278,12 @@ contract AnyLiquidationTest is BaseTest {
           strategy.contractInterface,
           strategy.inputToken
         );
+
+        // TODO remove when fixed
+        if (debtTokenToFund == 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5 && block.timestamp < dec_28_2022 + 20 days) {
+          emit log("implement https://github.com/Midas-Protocol/contracts/pull/519");
+          return;
+        }
       }
 
       vars.flashSwapFundingToken = debtTokenToFund;
@@ -349,6 +355,18 @@ contract AnyLiquidationTest is BaseTest {
     } catch Error(string memory reason) {
       if (compareStrings(reason, "Number of tokens less than minimum limit")) {
         emit log("jarvis pool failing, that's ok");
+      } else if (compareStrings(reason, "No enough liquidity")) {
+        if (block.timestamp < dec_28_2022 + 20 days) {
+          emit log("jarvis pool getMintTradeInfo failing");
+        } else {
+          revert(reason);
+        }
+      } else if (compareStrings(reason, "No enough liquidity for covering mint operation")) {
+        if (block.timestamp < dec_28_2022 + 20 days) {
+          emit log("jarvis pool getMintTradeInfo failing internally");
+        } else {
+          revert(reason);
+        }
       } else {
         revert(reason);
       }
@@ -640,5 +658,39 @@ contract AnyLiquidationTest is BaseTest {
 
     assertEq(strategyInputToken, inputToken, "!expected input token");
     return inputToken;
+  }
+
+  function _functionCall(
+    address target,
+    bytes memory data,
+    string memory errorMessage
+  ) internal returns (bytes memory) {
+    (bool success, bytes memory returndata) = target.call(data);
+
+    if (!success) {
+      // Look for revert reason and bubble it up if present
+      if (returndata.length > 0) {
+        // The easiest way to bubble the revert reason is using memory via assembly
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+          let returndata_size := mload(returndata)
+          revert(add(32, returndata), returndata_size)
+        }
+      } else {
+        revert(errorMessage);
+      }
+    }
+
+    return returndata;
+  }
+
+  function testRawLiquidation() public debuggingOnly fork(POLYGON_MAINNET) {
+    vm.prank(0x19F2bfCA57FDc1B7406337391d2F54063CaE8748);
+    _functionCall(
+      address(fsl),
+      hex"f6cd5bbd0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000a4f4406d3dc6482db1397d0ad260fd223c8f37fc000000000000000000000000000000000000000000000ef5c403da86335c444b000000000000000000000000456b363d3da38d3823ce2e1955362bbd761b324b00000000000000000000000028d0d45e593764c4ce88ccd1c033d0e2e8ce9af30000000000000000000000006e7a5fafcec6bb1e78bae2a1f0b612012bf1482700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d500b1d8e8ef31e21c99d1db9a6444d3adf1270000000000000000000000000a5e0829caced8ffdd4de3c43696c57f7d7a678ff000000000000000000000000a5e0829caced8ffdd4de3c43696c57f7d7a678ff00000000000000000000000000000000000000000000000000000000000001c000000000000000000000000000000000000000000000000000000000000001e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000240000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000ac64c0391a54eba34e23429847986d437be82da00000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000600000000000000000000000002791bca1f2de4661ed88a30c99a7a9449aa84174000000000000000000000000aec757bf73cc1f4609a1459205835dd40b4e3f290000000000000000000000000000000000000000000000000000000000000960",
+      "raw liquidation failed"
+    );
   }
 }

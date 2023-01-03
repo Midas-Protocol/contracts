@@ -35,9 +35,6 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   /// @notice The accrued but not yet transferred rewards for each user
   mapping(address => uint256) public rewardsAccrued;
 
-  /// @notice the fixed point factor of flywheel
-  uint224 public ONE = 1e18;
-
   /// @notice The strategy index and last updated per strategy
   mapping(ERC20 => RewardsState) public strategyState;
 
@@ -58,7 +55,6 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
 
     _transferOwnership(_owner);
 
-    ONE = uint224(100e16); // 100%
     performanceFee = 10e16; // 10%
     feeRecipient = _owner;
   }
@@ -252,7 +248,8 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
         ? flywheelBooster.boostedTotalSupply(strategy)
         : strategy.totalSupply();
 
-      uint256 accruedFees = (strategyRewardsAccrued * performanceFee) / ONE;
+      // 100% = 100e16
+      uint256 accruedFees = (strategyRewardsAccrued * performanceFee) / uint224(100e16);
 
       rewardsAccrued[feeRecipient] += accruedFees;
       strategyRewardsAccrued -= accruedFees;
