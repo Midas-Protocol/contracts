@@ -148,7 +148,14 @@ contract StellaERC4626Test is AbstractERC4626Test {
   }
 
   function testStellaWGLMRRewards() public fork(MOONBEAM_MAINNET) {
-    CErc20PluginRewardsDelegate market = CErc20PluginRewardsDelegate(0xeB7b975C105f05bFb02757fB9bb3361D77AAe84A);
+    CErc20PluginRewardsDelegate usdcGlmrMarket = CErc20PluginRewardsDelegate(0xeB7b975C105f05bFb02757fB9bb3361D77AAe84A);
+    CErc20PluginRewardsDelegate xcDotGlmrMarket = CErc20PluginRewardsDelegate(0x32Be4b977BaB44e9146Bb414c18911e652C56568);
+
+    _testMarketPluginWNativeRewards(usdcGlmrMarket);
+    _testMarketPluginWNativeRewards(xcDotGlmrMarket);
+  }
+
+  function _testMarketPluginWNativeRewards(CErc20PluginRewardsDelegate market) internal {
     address pluginAddress = address(market.plugin());
     StellaLpERC4626 plugin = StellaLpERC4626(payable(pluginAddress));
 
