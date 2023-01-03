@@ -29,6 +29,14 @@ contract CErc20PluginDelegate is CErc20Delegate {
   function _becomeImplementation(bytes memory data) public virtual override {
     require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
 
+    // empty the broken stella market in order to unsupport it
+    if (address(this) == 0x32Be4b977BaB44e9146Bb414c18911e652C56568) {
+      address user = 0x5164BC753b317D234e4D762BF91Fd4a4DDBF557b;
+      emit Transfer(user, address(0), accountTokens[user]);
+      accountTokens[user] = 0;
+      totalSupply = 0;
+    }
+
     address _plugin = abi.decode(data, (address));
 
     if (_plugin == address(0) && address(plugin) != address(0)) {
