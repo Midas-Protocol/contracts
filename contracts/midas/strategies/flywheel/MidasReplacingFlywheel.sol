@@ -15,7 +15,7 @@ contract MidasReplacingFlywheel is MidasFlywheelCore {
     address _owner,
     MidasFlywheelCore _flywheelToReplace
   ) public initializer {
-    initialize(_rewardToken, _flywheelRewards, _flywheelBooster, _owner);
+    _initialize(_rewardToken, _flywheelRewards, _flywheelBooster, _owner);
     flywheelToReplace = _flywheelToReplace;
   }
 
@@ -28,20 +28,20 @@ contract MidasReplacingFlywheel is MidasFlywheelCore {
     return rewardsAccrued[user];
   }
 
-  function getStrategyState(ERC20 strategy) public override returns (RewardsState memory) {
-    RewardsState memory newStateStrategyState = strategyState[strategy];
+  function strategyState(ERC20 strategy) public override returns (uint224, uint32) {
+    RewardsState memory newStateStrategyState = _strategyState[strategy];
     if (newStateStrategyState.index == 0) {
       (uint224 index, uint32 ts) = flywheelToReplace.strategyState(strategy);
-      strategyState[strategy] = RewardsState(index, ts);
+      _strategyState[strategy] = RewardsState(index, ts);
     }
-    return strategyState[strategy];
+    return (_strategyState[strategy].index, _strategyState[strategy].lastUpdatedTimestamp);
   }
 
-  function getUserIndex(ERC20 strategy, address user) public override returns (uint224) {
-    uint224 newStateUserIndex = userIndex[strategy][user];
+  function userIndex(ERC20 strategy, address user) public override returns (uint224) {
+    uint224 newStateUserIndex = _userIndex[strategy][user];
     if (newStateUserIndex == 0) {
-      userIndex[strategy][user] = flywheelToReplace.userIndex(strategy, user);
+      _userIndex[strategy][user] = flywheelToReplace.userIndex(strategy, user);
     }
-    return userIndex[strategy][user];
+    return _userIndex[strategy][user];
   }
 }
