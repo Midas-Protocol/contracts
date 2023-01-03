@@ -55,8 +55,11 @@ contract CErc20PluginDelegate is CErc20Delegate {
       "plugin implementation not whitelisted"
     );
 
-    if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
-      plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
+    // don't recover the assets from the broken StellaLpERC4626 implementation
+    if (address(plugin) != 0x46eC3122C73CA62A18FFCFd434cDc1C341Fe96dB) {
+      if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
+        plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
+      }
     }
 
     plugin = IERC4626(_plugin);
