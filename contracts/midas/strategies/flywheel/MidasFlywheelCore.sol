@@ -33,7 +33,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   IFlywheelBooster public flywheelBooster;
 
   /// @notice The accrued but not yet transferred rewards for each user
-  mapping(address => uint256) public rewardsAccrued;
+  mapping(address => uint256) public _rewardsAccrued;
 
   /// @notice The strategy index and last updated per strategy
   mapping(ERC20 => RewardsState) internal _strategyState;
@@ -137,10 +137,10 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
       @dev this function is public, and all rewards transfer to the user
     */
   function claimRewards(address user) external {
-    uint256 accrued = getRewardsAccrued(user);
+    uint256 accrued = rewardsAccrued(user);
 
     if (accrued != 0) {
-      rewardsAccrued[user] = 0;
+      _rewardsAccrued[user] = 0;
 
       rewardToken.safeTransferFrom(address(flywheelRewards), user, accrued);
 
@@ -231,8 +231,8 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     emit UpdatedFeeSettings(performanceFee, _performanceFee, feeRecipient, _feeRecipient);
 
     if (feeRecipient != _feeRecipient) {
-      rewardsAccrued[_feeRecipient] += getRewardsAccrued(feeRecipient);
-      rewardsAccrued[feeRecipient] = 0;
+      _rewardsAccrued[_feeRecipient] += rewardsAccrued(feeRecipient);
+      _rewardsAccrued[feeRecipient] = 0;
     }
     performanceFee = _performanceFee;
     feeRecipient = _feeRecipient;
@@ -268,7 +268,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
       // 100% = 100e16
       uint256 accruedFees = (strategyRewardsAccrued * performanceFee) / uint224(100e16);
 
-      rewardsAccrued[feeRecipient] += accruedFees;
+      _rewardsAccrued[feeRecipient] += accruedFees;
       strategyRewardsAccrued -= accruedFees;
 
       uint224 deltaIndex;
@@ -312,17 +312,17 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
 
     // accumulate rewards by multiplying user tokens by rewardsPerToken index and adding on unclaimed
     uint256 supplierDelta = (deltaIndex * supplierTokens) / (10**strategy.decimals());
-    uint256 supplierAccrued = getRewardsAccrued(user) + supplierDelta;
+    uint256 supplierAccrued = rewardsAccrued(user) + supplierDelta;
 
-    rewardsAccrued[user] = supplierAccrued;
+    _rewardsAccrued[user] = supplierAccrued;
 
     emit AccrueRewards(strategy, user, supplierDelta, strategyIndex);
 
     return supplierAccrued;
   }
 
-  function getRewardsAccrued(address user) public virtual returns (uint256) {
-    return rewardsAccrued[user];
+  function rewardsAccrued(address user) public virtual returns (uint256) {
+    return _rewardsAccrued[user];
   }
 
   function userIndex(ERC20 strategy, address user) public virtual returns (uint224) {

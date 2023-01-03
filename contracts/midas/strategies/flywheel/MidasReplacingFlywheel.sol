@@ -19,13 +19,13 @@ contract MidasReplacingFlywheel is MidasFlywheelCore {
     flywheelToReplace = _flywheelToReplace;
   }
 
-  function getRewardsAccrued(address user) public override returns (uint256) {
-    uint256 newStateRewardsAccrued = rewardsAccrued[user];
+  function rewardsAccrued(address user) public override returns (uint256) {
+    uint256 newStateRewardsAccrued = _rewardsAccrued[user];
     if (newStateRewardsAccrued == 0 && !rewardsTransferred[user]) {
       rewardsTransferred[user] = true;
-      rewardsAccrued[user] = flywheelToReplace.rewardsAccrued(user);
+      _rewardsAccrued[user] = flywheelToReplace.rewardsAccrued(user);
     }
-    return rewardsAccrued[user];
+    return _rewardsAccrued[user];
   }
 
   function strategyState(ERC20 strategy) public override returns (uint224, uint32) {
