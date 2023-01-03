@@ -21,21 +21,13 @@ contract ReplacingFlywheelDynamicRewards is FlywheelDynamicRewards {
     _rewardToken.safeApprove(address(_replacedFlywheel), type(uint256).max);
   }
 
-  function getNextCycleRewards(ERC20 strategy)
-  internal
-  override
-  returns (uint192)
-  {
+  function getNextCycleRewards(ERC20 strategy) internal override returns (uint192) {
     if (msg.sender == address(replacedFlywheel)) {
       return 0;
     } else {
       uint256 rewardAmount = rewardToken.balanceOf(address(strategy));
       if (rewardAmount != 0) {
-        rewardToken.safeTransferFrom(
-          address(strategy),
-          address(this),
-          rewardAmount
-        );
+        rewardToken.safeTransferFrom(address(strategy), address(this), rewardAmount);
       }
       return uint192(rewardAmount);
     }

@@ -136,17 +136,18 @@ contract FlywheelUpgradesTest is BaseTest {
     ERC20 strategy = ERC20(address(market));
     address user = 0xC3A9b350eBBCDD14B96934B6831f1978431D9B8c;
     address flywheelAddress = 0xC6431455AeE17a08D6409BdFB18c4bc73a4069E4; // non-upgradable
-
     MidasFlywheelCore epxFlywheel = MidasFlywheelCore(flywheelAddress);
+    address formerOwner = epxFlywheel.owner();
     FlywheelDynamicRewards oldRewards = FlywheelDynamicRewards(address(epxFlywheel.flywheelRewards()));
 
-    // TODO deploy as proxy
-    MidasReplacingFlywheel replacingFlywheel = new MidasReplacingFlywheel();
+    MidasReplacingFlywheel impl = new MidasReplacingFlywheel();
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(formerOwner), "");
+    MidasReplacingFlywheel replacingFlywheel = MidasReplacingFlywheel(address(proxy));
     replacingFlywheel.initialize(
       epxFlywheel.rewardToken(),
       IFlywheelRewards(address(0)),
       epxFlywheel.flywheelBooster(),
-      epxFlywheel.owner(),
+      address(this),
       epxFlywheel
     );
     ReplacingFlywheelDynamicRewards replacingRewards = new ReplacingFlywheelDynamicRewards(
@@ -154,7 +155,7 @@ contract FlywheelUpgradesTest is BaseTest {
       FlywheelCore(address(replacingFlywheel)),
       oldRewards.rewardsCycleLength()
     );
-    vm.prank(epxFlywheel.owner());
+    vm.prank(formerOwner);
     epxFlywheel.setFlywheelRewards(replacingRewards);
     vm.prank(replacingFlywheel.owner());
     replacingFlywheel.setFlywheelRewards(replacingRewards);

@@ -41,10 +41,10 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   /// @notice user index per strategy
   mapping(ERC20 => mapping(address => uint224)) internal _userIndex;
 
-  //  constructor() {
-  //    // prevents the misusage of the implementation contract
-  //    _disableInitializers();
-  //  }
+  constructor() {
+    // prevents the misusage of the implementation contract
+    _disableInitializers();
+  }
 
   function initialize(
     ERC20 _rewardToken,
@@ -164,7 +164,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   }
 
   function _addStrategyForRewards(ERC20 strategy) internal {
-    (uint224 index,) = strategyState(strategy);
+    (uint224 index, ) = strategyState(strategy);
     require(index == 0, "strategy");
     _strategyState[strategy] = RewardsState({
       index: (10**rewardToken.decimals()).safeCastTo224(),
