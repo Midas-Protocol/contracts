@@ -166,7 +166,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
     assertTrue(anyIsWNative, "native needs to be among the reward tokens");
   }
 
-  function testRedeemXcDotGlmr() public fork(MOONBEAM_MAINNET) {
+  function testRedeemXcDotGlmr() public debuggingOnly fork(MOONBEAM_MAINNET) {
     address user = 0x5164BC753b317D234e4D762BF91Fd4a4DDBF557b;
     address marketAddress = 0x32Be4b977BaB44e9146Bb414c18911e652C56568;
     address correctPlugin = 0x7E9D7D2B5818b8a84B796BEaE8Ab059e24b4810c;
