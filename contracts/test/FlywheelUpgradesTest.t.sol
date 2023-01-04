@@ -147,9 +147,10 @@ contract FlywheelUpgradesTest is BaseTest {
       epxFlywheel.rewardToken(),
       IFlywheelRewards(address(0)),
       epxFlywheel.flywheelBooster(),
-      address(this),
-      epxFlywheel
+      address(this)
     );
+    replacingFlywheel.reinitialize(epxFlywheel);
+
     ReplacingFlywheelDynamicRewards replacingRewards = new ReplacingFlywheelDynamicRewards(
       FlywheelCore(address(epxFlywheel)),
       FlywheelCore(address(replacingFlywheel)),

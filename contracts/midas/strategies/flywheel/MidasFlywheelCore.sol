@@ -52,15 +52,6 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     IFlywheelBooster _flywheelBooster,
     address _owner
   ) public initializer {
-    _initialize(_rewardToken, _flywheelRewards, _flywheelBooster, _owner);
-  }
-
-  function _initialize(
-    ERC20 _rewardToken,
-    IFlywheelRewards _flywheelRewards,
-    IFlywheelBooster _flywheelBooster,
-    address _owner
-  ) internal {
     __SafeOwnable_init();
 
     rewardToken = _rewardToken;
@@ -73,9 +64,9 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     feeRecipient = _owner;
   }
 
-  /*///////////////////////////////////////////////////////////////
+  /*----------------------------------------------------------------
                         ACCRUE/CLAIM LOGIC
-    //////////////////////////////////////////////////////////////*/
+    ----------------------------------------------------------------*/
 
   /** 
       @notice Emitted when a user's rewards accrue to a given strategy.
@@ -148,9 +139,9 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     }
   }
 
-  /*///////////////////////////////////////////////////////////////
+  /*----------------------------------------------------------------
                           ADMIN LOGIC
-    //////////////////////////////////////////////////////////////*/
+    ----------------------------------------------------------------*/
 
   /** 
       @notice Emitted when a new strategy is added to flywheel by the admin
@@ -238,9 +229,9 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     feeRecipient = _feeRecipient;
   }
 
-  /*///////////////////////////////////////////////////////////////
+  /*----------------------------------------------------------------
                     INTERNAL ACCOUNTING LOGIC
-    //////////////////////////////////////////////////////////////*/
+    ----------------------------------------------------------------*/
 
   struct RewardsState {
     /// @notice The strategy's last updated index

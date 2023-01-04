@@ -10,14 +10,7 @@ contract MidasReplacingFlywheel is MidasFlywheel {
   MidasFlywheelCore public flywheelToReplace;
   mapping(address => bool) private rewardsTransferred;
 
-  function initialize(
-    ERC20 _rewardToken,
-    IFlywheelRewards _flywheelRewards,
-    IFlywheelBooster _flywheelBooster,
-    address _owner,
-    MidasFlywheelCore _flywheelToReplace
-  ) public initializer {
-    _initialize(_rewardToken, _flywheelRewards, _flywheelBooster, _owner);
+  function reinitialize(MidasFlywheelCore _flywheelToReplace) public onlyOwnerOrAdmin {
     flywheelToReplace = _flywheelToReplace;
   }
 
