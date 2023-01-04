@@ -407,7 +407,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     CTokenInterface cTokenModify,
     bool isBorrow
   ) internal view returns (uint256) {
-    if (liquidity <= 0) return 0; // No available account liquidity, so no more borrow/redeem
+    if (liquidity == 0) return 0; // No available account liquidity, so no more borrow/redeem
 
     // Get the normalized price of the asset
     uint256 conversionFactor = oracle.getUnderlyingPrice(cTokenModify);
