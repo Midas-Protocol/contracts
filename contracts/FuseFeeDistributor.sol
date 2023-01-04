@@ -23,7 +23,6 @@ struct CDelegateUpgradeData {
 }
 
 abstract contract FeeDistributorStorage {
-
   /**
    * @notice The proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
    */
@@ -67,7 +66,7 @@ abstract contract FeeDistributorStorage {
    */
   mapping(address => address) internal _latestComptrollerImplementation;
   /**
- * @dev Latest CErc20Delegate implementation for each existing implementation.
+   * @dev Latest CErc20Delegate implementation for each existing implementation.
    */
   mapping(address => CDelegateUpgradeData) public _latestCErc20Delegate;
 
@@ -111,7 +110,6 @@ abstract contract FeeDistributorStorage {
    * @dev Latest erc20Wrapping implementation for each existing implementation.
    */
   mapping(address => address) public _latestERC20WrapperForUnderlying;
-
 }
 
 /**
@@ -369,9 +367,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage, FeeDistri
     bool[] calldata statuses
   ) external onlyOwner {
     require(
-      newWrappers.length > 0 &&
-        newWrappers.length == oldWrappers.length &&
-        newWrappers.length == statuses.length,
+      newWrappers.length > 0 && newWrappers.length == oldWrappers.length && newWrappers.length == statuses.length,
       "empty array or lengths not equal"
     );
     for (uint256 i = 0; i < newWrappers.length; i++)
@@ -404,10 +400,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage, FeeDistri
         : oldWrapper;
   }
 
-  function _setLatestERC20WrapperForUnderlying(address oldWrapper, address newWrapper)
-    external
-    onlyOwner
-  {
+  function _setLatestERC20WrapperForUnderlying(address oldWrapper, address newWrapper) external onlyOwner {
     _latestERC20WrapperForUnderlying[oldWrapper] = newWrapper;
   }
 

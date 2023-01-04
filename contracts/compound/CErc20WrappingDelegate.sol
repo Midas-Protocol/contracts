@@ -18,12 +18,7 @@ contract CErc20WrappingDelegate is CErc20Delegate {
 
     if (address(underlyingWrapper) == address(0)) {
       EIP20Interface asErc20 = EIP20Interface(underlying);
-      underlyingWrapper = new MidasERC20Wrapper(
-        underlying,
-        asErc20.name(),
-        asErc20.symbol(),
-        asErc20.decimals()
-    );
+      underlyingWrapper = new MidasERC20Wrapper(underlying, asErc20.name(), asErc20.symbol(), asErc20.decimals());
     } else {
       if (_newWrapper == address(0) && address(underlyingWrapper) != address(0)) {
         _newWrapper = IFuseFeeDistributor(fuseAdmin).latestERC20WrapperForUnderlying(address(underlyingWrapper));

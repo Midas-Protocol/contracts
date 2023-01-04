@@ -8,10 +8,12 @@ contract MidasERC20Wrapper is ERC20Wrapper {
   address private _owner;
   uint8 private _decimals;
 
-  constructor(address underlyingToken_, string memory name_, string memory symbol_, uint8 decimals_)
-    ERC20(name_, symbol_)
-    ERC20Wrapper(IERC20(underlyingToken_))
-  {
+  constructor(
+    address underlyingToken_,
+    string memory name_,
+    string memory symbol_,
+    uint8 decimals_
+  ) ERC20(name_, symbol_) ERC20Wrapper(IERC20(underlyingToken_)) {
     _owner = msg.sender;
     _decimals = decimals_;
   }
