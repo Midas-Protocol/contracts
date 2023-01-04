@@ -3,6 +3,9 @@ pragma solidity 0.8.10;
 
 import "./MidasFlywheel.sol";
 
+import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
+import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
+
 contract MidasReplacingFlywheel is MidasFlywheel {
   MidasFlywheelCore public flywheelToReplace;
   mapping(address => bool) private rewardsTransferred;
