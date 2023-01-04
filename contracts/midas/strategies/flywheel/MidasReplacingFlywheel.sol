@@ -45,4 +45,17 @@ contract MidasReplacingFlywheel is MidasFlywheel {
     }
     return _userIndex[strategy][user];
   }
+
+  function addInitializedStrategy(ERC20 strategy) public onlyOwner {
+    (uint224 index, ) = strategyState(strategy);
+    if (index > 0) {
+      ERC20[] memory strategies = this.getAllStrategies();
+      for (uint8 i = 0; i < strategies.length; i++) {
+        require(address(strategy) != address(strategies[i]), "!added");
+      }
+
+      allStrategies.push(strategy);
+      emit AddStrategy(address(strategy));
+    }
+  }
 }
