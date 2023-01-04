@@ -34,8 +34,8 @@ contract ReplacingFlywheelDynamicRewards is FlywheelDynamicRewards {
       return 0;
     } else {
       // make it work for both pulled (claimed) and pushed (transferred some other way) rewards
-      try IPlugin(ICERC20(address(strategy)).plugin()) returns (IPlugin plugin) {
-        try plugin.claimRewards() {} catch {}
+      try ICERC20(address(strategy)).plugin() returns (address plugin) {
+        try IPlugin(plugin).claimRewards() {} catch {}
       } catch {}
 
       uint256 rewardAmount = rewardToken.balanceOf(address(strategy));
