@@ -82,10 +82,7 @@ contract DotDotLpERC4626 is MidasERC4626, RewardsClaimer {
     asset.approve(address(lpDepositor), type(uint256).max);
   }
 
-  function reinitialize(
-    FlywheelCore _epxFlywheel,
-    FlywheelCore _dddFlywheel
-  ) public onlyOwnerOrAdmin {
+  function reinitialize(FlywheelCore _epxFlywheel, FlywheelCore _dddFlywheel) public onlyOwnerOrAdmin {
     epxFlywheel = _epxFlywheel;
     dddFlywheel = _dddFlywheel;
   }
