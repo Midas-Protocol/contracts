@@ -43,8 +43,8 @@ contract ContractsUpgradesTest is BaseTest {
     }
 
     // after upgrade
-    FusePoolDirectory newImpl = FusePoolDirectory(contractToTest);
-    address ownerAfter = newImpl.owner();
+    FusePoolDirectory fpd = FusePoolDirectory(contractToTest);
+    address ownerAfter = fpd.owner();
     emit log_address(ownerAfter);
 
     (, FusePoolDirectory.FusePool[] memory poolsAfter) = oldImpl.getActivePools();
@@ -57,6 +57,7 @@ contract ContractsUpgradesTest is BaseTest {
 
   function testFuseFeeDistributorUpgrade() public fork(BSC_MAINNET) {
     address oldCercDelegate = 0x94C50805bC16737ead84e25Cd5Aa956bCE04BBDF;
+    address oldComptrollerImpl = 0xC634898F59391bfd66eDDC9eB4298A8E9643596c;
 
     // before upgrade
     FuseFeeDistributor ffdProxy = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
@@ -70,6 +71,9 @@ contract ContractsUpgradesTest is BaseTest {
     emit log_address(ownerBefore);
     //    if (whitelistedBefore) emit log("whitelisted before");
     //    else emit log("should be whitelisted");
+
+    address comptrollerExtensionBefore = address(ffdProxy.comptrollerExtensions(oldComptrollerImpl, 0));
+    emit log_named_address("comp ext before", comptrollerExtensionBefore);
 
     // upgrade
     {
@@ -94,12 +98,15 @@ contract ContractsUpgradesTest is BaseTest {
     emit log_address(ownerAfter);
     //    if (whitelistedAfter) emit log("whitelisted After");
     //    else emit log("should be whitelisted");
+    address comptrollerExtensionAfter = address(ffdProxy.comptrollerExtensions(oldComptrollerImpl, 0));
+    emit log_named_address("comp ext after", comptrollerExtensionAfter);
 
     assertEq(latestCErc20DelegateBefore, latestCErc20DelegateAfter, "latest delegates do not match");
     assertEq(marketsCounterBefore, marketsCounterAfter, "markets counter does not match");
     //    assertEq(whitelistedBefore, whitelistedAfter, "whitelisted status does not match");
 
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
+    assertEq(comptrollerExtensionBefore, comptrollerExtensionAfter, "comp ext mismatch");
   }
 
   function testMarketsLatestImplementationsBsc() public fork(BSC_MAINNET) {

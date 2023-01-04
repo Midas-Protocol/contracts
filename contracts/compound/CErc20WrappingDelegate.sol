@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
-import { EIP20Interface } from "../compound/EIP20Interface.sol";
+import { CErc20Delegate } from "./CErc20Delegate.sol";
+import { EIP20Interface } from "./EIP20Interface.sol";
 import { IFuseFeeDistributor } from "../compound/IFuseFeeDistributor.sol";
-import { MidasERC20Wrapper, IERC20 } from "./MidasERC20Wrapper.sol";
+import { MidasERC20Wrapper } from "../midas/MidasERC20Wrapper.sol";
 
 contract CErc20WrappingDelegate is CErc20Delegate {
   event NewErc20WrappingImplementation(address oldImpl, address newImpl);
@@ -17,7 +17,13 @@ contract CErc20WrappingDelegate is CErc20Delegate {
     address _newWrapper = abi.decode(data, (address));
 
     if (address(underlyingWrapper) == address(0)) {
-      underlyingWrapper = new MidasERC20Wrapper(IERC20(underlying));
+      EIP20Interface asErc20 = EIP20Interface(underlying);
+      underlyingWrapper = new MidasERC20Wrapper(
+        underlying,
+        asErc20.name(),
+        asErc20.symbol(),
+        asErc20.decimals()
+    );
     } else {
       if (_newWrapper == address(0) && address(underlyingWrapper) != address(0)) {
         _newWrapper = IFuseFeeDistributor(fuseAdmin).latestERC20WrapperForUnderlying(address(underlyingWrapper));
@@ -43,6 +49,8 @@ contract CErc20WrappingDelegate is CErc20Delegate {
       doTransferOut(address(this), underlyingWrapper.balanceOf(address(this)));
     }
 
+    emit NewErc20WrappingImplementation(address(underlyingWrapper), _newWrapper);
+
     underlyingWrapper = MidasERC20Wrapper(_newWrapper);
 
     EIP20Interface(underlying).approve(_newWrapper, type(uint256).max);
@@ -52,8 +60,6 @@ contract CErc20WrappingDelegate is CErc20Delegate {
     if (amount != 0) {
       doTransferIn(address(this), amount);
     }
-
-    emit NewErc20WrappingImplementation(address(underlyingWrapper), _newWrapper);
   }
 
   function doTransferIn(address from, uint256 amount) internal virtual override returns (uint256) {
