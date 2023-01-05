@@ -7,6 +7,11 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
+import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
+import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
+import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+
 import "../compound/CTokenInterfaces.sol";
 
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
@@ -26,9 +31,6 @@ import { MockERC4626 } from "../midas/strategies/MockERC4626.sol";
 import { MockERC4626Dynamic } from "../midas/strategies/MockERC4626Dynamic.sol";
 import { CTokenFirstExtension, DiamondExtension } from "../compound/CTokenFirstExtension.sol";
 import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
-import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
-import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
-import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 
 contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
@@ -214,8 +216,8 @@ contract DeployMarketsTest is Test {
 
   function testDeployCErc20PluginRewardsDelegate() public {
     MidasFlywheelCore impl = new MidasFlywheelCore();
-    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
-    flywheel = MidasFlywheel(address(proxy));
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(this), "");
+    MidasFlywheelCore flywheel = MidasFlywheelCore(address(proxy));
     flywheel.initialize(underlyingToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
     FlywheelCore asFlywheelCore = FlywheelCore(address(flywheel));
     rewards = new FuseFlywheelDynamicRewardsPlugin(asFlywheelCore, 1);
