@@ -25,19 +25,19 @@ contract FlywheelUpgradesTest is BaseTest {
     fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
   }
 
-  function testFlywheelUpgradeBsc() public debuggingOnly fork(BSC_MAINNET) {
+  function testFlywheelUpgradeBsc() public fork(BSC_MAINNET) {
     _testFlywheelUpgrade();
   }
 
-  function testFlywheelUpgradePolygon() public debuggingOnly fork(POLYGON_MAINNET) {
+  function testFlywheelUpgradePolygon() public fork(POLYGON_MAINNET) {
     _testFlywheelUpgrade();
   }
 
-  function testFlywheelUpgradeMoonbeam() public debuggingOnly fork(MOONBEAM_MAINNET) {
+  function testFlywheelUpgradeMoonbeam() public fork(MOONBEAM_MAINNET) {
     _testFlywheelUpgrade();
   }
 
-  function testFlywheelUpgradeEvmos() public debuggingOnly fork(EVMOS_MAINNET) {
+  function testFlywheelUpgradeEvmos() public fork(EVMOS_MAINNET) {
     _testFlywheelUpgrade();
   }
 
@@ -65,9 +65,9 @@ contract FlywheelUpgradesTest is BaseTest {
         address admin = address(uint160(uint256(bytesAtSlot)));
 
         if (admin != address(0)) {
-          vm.prank(admin);
-          proxy.upgradeTo(address(newImpl));
-          emit log_named_address("upgradable flywheel", address(flywheel));
+          //vm.prank(admin);
+          //proxy.upgradeTo(address(newImpl));
+          //emit log_named_address("upgradable flywheel", address(flywheel));
 
           bool anyStrategyHasPositiveIndex = false;
 
@@ -80,12 +80,13 @@ contract FlywheelUpgradesTest is BaseTest {
             }
           }
 
-          if (!anyStrategyHasPositiveIndex)
+          if (!anyStrategyHasPositiveIndex) {
             emit log_named_address("all zero index strategies flywheel", address(flywheel));
-          //assertTrue(anyStrategyHasPositiveIndex, "!flywheel has no strategies added or is broken");
+            //assertTrue(anyStrategyHasPositiveIndex, "!flywheel has no strategies added or is broken");
+          }
         } else {
-          //assertTrue(false, "flywheel proxy admin 0");
           emit log_named_address("not upgradable flywheel", address(flywheel));
+          assertTrue(false, "flywheel proxy admin 0");
         }
       }
     }

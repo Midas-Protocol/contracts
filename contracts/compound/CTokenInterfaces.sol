@@ -192,9 +192,7 @@ abstract contract CTokenBaseInterface is CTokenStorage {
    * @notice Event emitted when the Fuse fee is changed
    */
   event NewFuseFee(uint256 oldFuseFeeMantissa, uint256 newFuseFeeMantissa);
-}
 
-abstract contract CTokenExtensionInterface is CTokenBaseInterface {
   /**
    * @notice EIP20 Approval event
    */
@@ -204,7 +202,9 @@ abstract contract CTokenExtensionInterface is CTokenBaseInterface {
    * @notice Event emitted when interest is accrued
    */
   event AccrueInterest(uint256 cashPrior, uint256 interestAccumulated, uint256 borrowIndex, uint256 totalBorrows);
+}
 
+abstract contract CTokenExtensionInterface is CTokenBaseInterface {
   /*** User Interface ***/
 
   function transfer(address dst, uint256 amount) external virtual returns (bool);
@@ -243,9 +243,7 @@ abstract contract CTokenExtensionInterface is CTokenBaseInterface {
 
   function balanceOfUnderlying(address owner) external virtual returns (uint256);
 
-  function asCTokenInterface() public view returns (CTokenInterface) {
-    return CTokenInterface(address(this));
-  }
+  function multicall(bytes[] calldata data) external payable virtual returns (bytes[] memory results);
 }
 
 abstract contract CTokenInterface is CTokenBaseInterface {
