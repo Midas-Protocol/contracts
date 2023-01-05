@@ -102,5 +102,5 @@ abstract contract ComptrollerInterface {
 
   function _afterNonReentrant() external virtual;
 
-  function asComptrollerFirstExtension() external virtual view returns (ComptrollerFirstExtension);
+  function asComptrollerFirstExtension() external view virtual returns (ComptrollerFirstExtension);
 }

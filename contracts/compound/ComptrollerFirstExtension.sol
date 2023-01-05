@@ -81,7 +81,6 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     suppliers[minter] = true;
   }
 
-
   /**
    * @notice Returns true if the accruing flyhwheel was found and replaced
    * @dev Adds a flywheel to the non-accruing list and if already in the accruing, removes it from that list
