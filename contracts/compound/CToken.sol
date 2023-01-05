@@ -279,8 +279,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     emit Transfer(address(this), minter, vars.mintTokens);
 
     /* We call the defense hook */
-    // unused function
-    // comptroller.mintVerify(address(this), minter, vars.actualMintAmount, vars.mintTokens);
+    comptroller.asComptrollerFirstExtension().mintVerify(address(this), minter, vars.actualMintAmount, vars.mintTokens);
 
     return (uint256(Error.NO_ERROR), vars.actualMintAmount);
   }

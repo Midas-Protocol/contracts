@@ -28,6 +28,60 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
   /// @notice Emitted when an admin unsupports a market
   event MarketUnlisted(CTokenInterface cToken);
 
+  function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
+    uint8 fnsCount = 20;
+    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
+    functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
+    functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
+    functionSelectors[--fnsCount] = this._setMarketBorrowCaps.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapGuardian.selector;
+    functionSelectors[--fnsCount] = this._setPauseGuardian.selector;
+    functionSelectors[--fnsCount] = this._setMintPaused.selector;
+    functionSelectors[--fnsCount] = this._setBorrowPaused.selector;
+    functionSelectors[--fnsCount] = this._setTransferPaused.selector;
+    functionSelectors[--fnsCount] = this._setSeizePaused.selector;
+    functionSelectors[--fnsCount] = this._unsupportMarket.selector;
+    functionSelectors[--fnsCount] = this.getAllMarkets.selector;
+    functionSelectors[--fnsCount] = this.getAllBorrowers.selector;
+    functionSelectors[--fnsCount] = this.getWhitelist.selector;
+    functionSelectors[--fnsCount] = this.getRewardsDistributors.selector;
+    functionSelectors[--fnsCount] = this.isUserOfPool.selector;
+    functionSelectors[--fnsCount] = this.getAccruingFlywheels.selector;
+    functionSelectors[--fnsCount] = this._removeFlywheel.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapForAssetForCollateral.selector;
+    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateral.selector;
+    functionSelectors[--fnsCount] = this.mintVerify.selector;
+
+    require(fnsCount == 0, "use the correct array length");
+    return functionSelectors;
+  }
+
+  /**
+   * @notice Validates mint and reverts on rejection. May emit logs.
+   * @param cToken Asset being minted
+   * @param minter The address minting the tokens
+   * @param actualMintAmount The amount of the underlying asset being minted
+   * @param mintTokens The number of tokens being minted
+   */
+  function mintVerify(
+    address cToken,
+    address minter,
+    uint256 actualMintAmount,
+    uint256 mintTokens
+  ) external {
+    require(markets[msg.sender].isListed, "!not ctoken");
+
+    // Shh - currently unused
+    cToken;
+    minter;
+    actualMintAmount;
+    mintTokens;
+
+    // Add minter to suppliers mapping
+    suppliers[minter] = true;
+  }
+
+
   /**
    * @notice Returns true if the accruing flyhwheel was found and replaced
    * @dev Adds a flywheel to the non-accruing list and if already in the accruing, removes it from that list
@@ -235,32 +289,6 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     require(hasAdminRights(), "!admin");
     borrowingAgainstCollateralBlacklist[cTokenBorrow][cTokenCollateral] = blacklisted;
     borrowCapForAssetForCollateral[cTokenBorrow][cTokenCollateral] = 0;
-  }
-
-  function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 19;
-    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
-    functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
-    functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
-    functionSelectors[--fnsCount] = this._setMarketBorrowCaps.selector;
-    functionSelectors[--fnsCount] = this._setBorrowCapGuardian.selector;
-    functionSelectors[--fnsCount] = this._setPauseGuardian.selector;
-    functionSelectors[--fnsCount] = this._setMintPaused.selector;
-    functionSelectors[--fnsCount] = this._setBorrowPaused.selector;
-    functionSelectors[--fnsCount] = this._setTransferPaused.selector;
-    functionSelectors[--fnsCount] = this._setSeizePaused.selector;
-    functionSelectors[--fnsCount] = this._unsupportMarket.selector;
-    functionSelectors[--fnsCount] = this.getAllMarkets.selector;
-    functionSelectors[--fnsCount] = this.getAllBorrowers.selector;
-    functionSelectors[--fnsCount] = this.getWhitelist.selector;
-    functionSelectors[--fnsCount] = this.getRewardsDistributors.selector;
-    functionSelectors[--fnsCount] = this.isUserOfPool.selector;
-    functionSelectors[--fnsCount] = this.getAccruingFlywheels.selector;
-    functionSelectors[--fnsCount] = this._removeFlywheel.selector;
-    functionSelectors[--fnsCount] = this._setBorrowCapForAssetForCollateral.selector;
-    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateral.selector;
-    require(fnsCount == 0, "use the correct array length");
-    return functionSelectors;
   }
 
   /**

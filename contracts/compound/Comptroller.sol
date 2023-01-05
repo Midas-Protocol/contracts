@@ -1342,7 +1342,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       add_(add_(cToken.reserveFactorMantissa(), cToken.adminFeeMantissa()), cToken.fuseFeeMantissa()) == 1e18;
   }
 
-  function asComptrollerFirstExtension() public view returns (ComptrollerFirstExtension) {
+  function asComptrollerFirstExtension() public view override returns (ComptrollerFirstExtension) {
     return ComptrollerFirstExtension(address(this));
   }
 
