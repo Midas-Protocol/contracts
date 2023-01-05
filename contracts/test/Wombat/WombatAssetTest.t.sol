@@ -13,7 +13,6 @@ import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
 
-// Tested on block 23534949
 contract WombatAssetTest is AbstractAssetTest {
   function setUp() public forkAtBlock(BSC_MAINNET, 23844890) {}
 

@@ -340,7 +340,7 @@ contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase
     uint256 redeemTokensIn,
     uint256 redeemAmountIn
   ) internal returns (uint256) {
-    require(redeemTokensIn == 0 || redeemAmountIn == 0, "!redeemTokensInorOut!=0");
+    require(redeemTokensIn == 0 || redeemAmountIn == 0, "!redeem tokens or amount");
 
     RedeemLocalVars memory vars;
 

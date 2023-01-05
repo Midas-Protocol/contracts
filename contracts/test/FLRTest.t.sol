@@ -135,15 +135,13 @@ contract FLRTest is BaseTest {
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
       abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72),
-      abi.encode(46968940116682)
+      abi.encode(34315417857347)
     );
-
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
       abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685),
-      abi.encode(11552962011148995)
+      abi.encode(15786961530391797)
     );
-
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
       abi.encodeWithSelector(IERC20MetadataUpgradeable.decimals.selector),

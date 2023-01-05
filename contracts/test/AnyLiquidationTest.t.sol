@@ -90,7 +90,7 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   function testSpecificRandom() public debuggingOnly {
-    testBscAnyLiquidation(657);
+    testBscAnyLiquidation(1668);
     //    testPolygonAnyLiquidation(101);
   }
 

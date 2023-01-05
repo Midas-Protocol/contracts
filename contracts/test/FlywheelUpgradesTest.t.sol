@@ -7,7 +7,10 @@ import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { MidasReplacingFlywheel } from "../midas/strategies/flywheel/MidasReplacingFlywheel.sol";
+import { ReplacingFlywheelDynamicRewards } from "../midas/strategies/flywheel/rewards/ReplacingFlywheelDynamicRewards.sol";
 import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -88,62 +91,40 @@ contract FlywheelUpgradesTest is BaseTest {
     }
   }
 
-  function testUserExcessEPXRewards() public debuggingOnly fork(BSC_MAINNET) {
-    //     ├─ [4382] 0x44FE7D9bb9b2880BE71c2484F0070D8C35CacB41::getUnclaimedRewardsForMarket(0xC3A9b350eBBCDD14B96934B6831f1978431D9B8c, 0xf0a2852958aD041a9Fb35c312605482Ca3Ec17ba, [0xC6431455AeE17a08D6409BdFB18c4bc73a4069E4], [true])
+  function test2BrlFlywheelReplacement() public debuggingOnly fork(BSC_MAINNET) {
+    CErc20PluginRewardsDelegate market = CErc20PluginRewardsDelegate(0xf0a2852958aD041a9Fb35c312605482Ca3Ec17ba); // 2brl market
+    ERC20 strategy = ERC20(address(market));
     address user = 0xC3A9b350eBBCDD14B96934B6831f1978431D9B8c;
-    address flywheelAddress = 0xC6431455AeE17a08D6409BdFB18c4bc73a4069E4;
-    ERC20 strategy = ERC20(0xf0a2852958aD041a9Fb35c312605482Ca3Ec17ba); // 2brl market
-
+    address flywheelAddress = 0xC6431455AeE17a08D6409BdFB18c4bc73a4069E4; // non-upgradable
     MidasFlywheelCore epxFlywheel = MidasFlywheelCore(flywheelAddress);
-    FlywheelDynamicRewards rewardsContract = FlywheelDynamicRewards(address(epxFlywheel.flywheelRewards()));
+    address formerOwner = epxFlywheel.owner();
+    FlywheelDynamicRewards oldRewards = FlywheelDynamicRewards(address(epxFlywheel.flywheelRewards()));
 
-    //    (uint224 twoBrlIndex, ) = epxFlywheel.strategyState(strategy);
-    //    emit log_named_uint("twoBrlIndex", twoBrlIndex); // 4992296588989034096
-    //
-    //    uint224 userIndex = epxFlywheel.userIndex(strategy, user);
-    //    emit log_named_uint("userIndex", userIndex); //     3206627362250415593
+    MidasReplacingFlywheel impl = new MidasReplacingFlywheel();
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(formerOwner), "");
+    MidasReplacingFlywheel replacingFlywheel = MidasReplacingFlywheel(address(proxy));
+    replacingFlywheel.initialize(
+      epxFlywheel.rewardToken(),
+      IFlywheelRewards(address(0)),
+      epxFlywheel.flywheelBooster(),
+      address(this)
+    );
+    replacingFlywheel.reinitialize(epxFlywheel);
 
-    MidasFlywheelLensRouter lensRouter = new MidasFlywheelLensRouter();
+    ReplacingFlywheelDynamicRewards replacingRewards = new ReplacingFlywheelDynamicRewards(
+      FlywheelCore(address(epxFlywheel)),
+      FlywheelCore(address(replacingFlywheel)),
+      oldRewards.rewardsCycleLength()
+    );
+    vm.prank(formerOwner);
+    epxFlywheel.setFlywheelRewards(replacingRewards);
+    vm.prank(replacingFlywheel.owner());
+    replacingFlywheel.setFlywheelRewards(replacingRewards);
 
-    MidasFlywheelCore[] memory flywheels = new MidasFlywheelCore[](1);
-    flywheels[0] = epxFlywheel;
-    uint256[] memory rewards = lensRouter.getUnclaimedRewardsForMarket(user, strategy, flywheels, asArray(true));
+    uint256 oldFlywheelUserIndex = epxFlywheel.userIndex(strategy, user);
+    uint256 newFlywheelUserIndex = replacingFlywheel.userIndex(strategy, user);
 
-    emit log_named_uint("rewards for flywheel", rewards[0]);
-
-    {
-      //    uint256 blockStrategyAdded = 18856525;
-      //    uint256 blocksInterval = (block.number - blockStrategyAdded) / 10;
-      //
-      //    for (uint8 i = 0; i <= 10; i++) {
-      //      vm.rollFork(blockStrategyAdded + i * blocksInterval);
-      //
-      //      emit log("");
-      //      emit log_uint(i);
-      //      emit log_named_uint("at block", block.number);
-      //      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(epxFlywheel)));
-      //      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-      //      address admin = address(uint160(uint256(bytesAtSlot)));
-      //      vm.prank(admin);
-      //      address impl = proxy.implementation();
-      //      emit log_named_address("impl", impl);
-      //      (uint224 twoBrlIndex, ) = epxFlywheel.strategyState(strategy);
-      //      emit log_named_uint("twoBrlIndex", twoBrlIndex);
-      //      uint224 userIndex = epxFlywheel.userIndex(strategy, user);
-      //      emit log_named_uint("userIndex", userIndex);
-      ////      ERC20 rewardToken = rewardsContract.rewardToken();
-      ////      uint256 rewards = rewardToken.balanceOf(address(rewardsContract));
-      ////      emit log_named_uint("rewards", rewards);
-      //      if (i != 0) {
-      //        (uint32 start,
-      //        uint32 end,
-      //        uint192 reward) = rewardsContract.rewardsCycle(strategy);
-      //
-      //        emit log_named_uint("start", start);
-      //        emit log_named_uint("end", end);
-      //        emit log_named_uint("reward", reward);
-      //      }
-      //    }
-    }
+    assertGt(oldFlywheelUserIndex, 0, "needs a positive index for the check");
+    assertEq(oldFlywheelUserIndex, newFlywheelUserIndex, "index replicated");
   }
 }
