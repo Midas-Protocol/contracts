@@ -7,7 +7,6 @@ import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
-import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
 import { IERC4626 } from "../compound/IERC4626.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
@@ -140,45 +139,6 @@ contract LatestImplementationWhitelisted is BaseTest {
         whitelisted || pluginsSet[k] == latestPluginImpl,
         "no whitelisted implementation for old implementation"
       );
-    }
-  }
-
-  function testMaiDust() public debuggingOnly forkAtBlock(POLYGON_MAINNET, 35632068) {
-    // TODO also debug this tx https://moonscan.io/tx/0x4040f382eb3545ecb2911ad95e9764e18e1a1b0996e8bb983eee748d8510a706
-    address user = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc;
-    CErc20Delegate market = CErc20Delegate(0x28D0d45e593764C4cE88ccD1C033d0E2e8cE9aF3);
-    CTokenFirstExtension asExtension = CTokenFirstExtension(address(market));
-    Comptroller pool = Comptroller(payable(address(market.comptroller())));
-
-    vm.rollFork(hex"a49844015360e78d5764689d02b968ffe863e52ccfeea3e2a51f8f4e628ff60c");
-
-    asExtension.accrueInterest();
-    (, uint256 liquidity, ) = pool.getHypotheticalAccountLiquidity(user, address(0), 0, 0);
-    (, uint256 collateralFactorMantissa) = pool.markets(address(market));
-    emit log_named_uint("max redeem", pool.getMaxRedeemOrBorrow(user, address(market), false)); // 1005114467481175602
-    emit log_named_uint("balance of underlying", asExtension.balanceOfUnderlying(user)); // 1005114467481175609
-    emit log_named_uint("exchange rate", asExtension.exchangeRateStored());
-    emit log_named_uint("liquidity", liquidity);
-    emit log_named_uint("oracle price", pool.oracle().getUnderlyingPrice(market));
-    emit log_named_uint("collateral factor", collateralFactorMantissa);
-
-    uint256 balanceBefore = asExtension.balanceOf(user);
-    vm.prank(user);
-    market.redeemUnderlying(type(uint256).max);
-    uint256 balanceAfter = asExtension.balanceOf(user);
-
-    emit log_named_uint("balanceBefore", balanceBefore);
-    emit log_named_uint("balanceAfter", balanceAfter);
-
-
-    for (uint256 i = 0; ; i++) {
-      try pool.accountAssets(user, i) returns (CTokenInterface asset) {
-        (, uint256 cTokenBalance, uint256 borrowBalance, ) = asset.getAccountSnapshot(user);
-        //emit log_named_uint("asset balance", cTokenBalance);
-        emit log_named_uint("asset borrows", borrowBalance);
-      } catch {
-        break;
-      }
     }
   }
 }
