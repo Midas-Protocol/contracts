@@ -37,7 +37,7 @@ contract MiniChefERC4626Test is AbstractERC4626Test {
     poolId = _poolId;
     for (uint8 i = 0; i < _rewardTokens.length; i++) {
       MidasFlywheelCore impl = new MidasFlywheelCore();
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
       MidasFlywheelCore flywheel = MidasFlywheelCore(address(proxy));
       flywheel.initialize(
         ERC20(_rewardTokens[i]),
