@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
+import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
+import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import { MiniChefERC4626, IMiniChefV2, IRewarder } from "../../midas/strategies/MiniChefERC4626.sol";
+
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
-import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { Authority } from "solmate/auth/Auth.sol";
-import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
-import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract MiniChefERC4626Test is AbstractERC4626Test {
   FlywheelCore[] flywheels;
@@ -34,7 +36,9 @@ contract MiniChefERC4626Test is AbstractERC4626Test {
 
     poolId = _poolId;
     for (uint8 i = 0; i < _rewardTokens.length; i++) {
-      MidasFlywheelCore flywheel = new MidasFlywheelCore();
+      MidasFlywheelCore impl = new MidasFlywheelCore();
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
+      MidasFlywheelCore flywheel = MidasFlywheelCore(address(proxy));
       flywheel.initialize(
         ERC20(_rewardTokens[i]),
         IFlywheelRewards(address(0)),

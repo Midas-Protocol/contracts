@@ -91,46 +91,6 @@ contract FlywheelUpgradesTest is BaseTest {
     }
   }
 
-  function testBrokenStorageLayout() public fork(MOONBEAM_MAINNET) {
-    ERC20 strategy = ERC20(0x32Be4b977BaB44e9146Bb414c18911e652C56568); // wglmr-xcdot market
-    address brokenFlywheelAddress = 0x34022232C0233Ee05FDe3383FcEC52248Dd84b91;
-    MidasFlywheelCore brokenFlywheel = MidasFlywheelCore(brokenFlywheelAddress);
-    address user = 0x22f5413C075Ccd56D575A54763831C4c27A37Bdb;
-    address stella = 0x0E358838ce72d5e61E0018a2ffaC4bEC5F4c88d2;
-
-    uint256 blockFlywheelDeployed = 1864419;
-    uint256 blocksInterval = (block.number - blockFlywheelDeployed) / 10;
-
-    for (uint8 i = 0; i <= 10; i++) {
-      vm.rollFork(blockFlywheelDeployed + i * blocksInterval);
-
-      emit log("");
-      emit log_uint(i);
-      emit log_named_uint("at block", block.number);
-      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(brokenFlywheel)));
-      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-      address admin = address(uint160(uint256(bytesAtSlot)));
-      vm.prank(admin);
-      address impl = proxy.implementation();
-      emit log_named_address("impl", impl);
-      (uint224 strategyIndex, ) = brokenFlywheel.strategyState(strategy);
-      emit log_named_uint("strategy index1", strategyIndex);
-
-      uint224 userIndex = brokenFlywheel.userIndex(strategy, user);
-      emit log_named_uint("userIndex1", userIndex);
-
-      deal(0x0E358838ce72d5e61E0018a2ffaC4bEC5F4c88d2, address(strategy), 100 ether);
-
-      brokenFlywheel.accrue(strategy, address(0));
-
-      (strategyIndex, ) = brokenFlywheel.strategyState(strategy);
-      emit log_named_uint("strategy index2", strategyIndex);
-
-      userIndex = brokenFlywheel.userIndex(strategy, user);
-      emit log_named_uint("userIndex", userIndex);
-    }
-  }
-
   function test2BrlFlywheelReplacement() public debuggingOnly fork(BSC_MAINNET) {
     CErc20PluginRewardsDelegate market = CErc20PluginRewardsDelegate(0xf0a2852958aD041a9Fb35c312605482Ca3Ec17ba); // 2brl market
     ERC20 strategy = ERC20(address(market));
