@@ -11,6 +11,7 @@ import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract WombatERC4626Test is AbstractERC4626Test {
   address operator = 0x9Ac0a3E8864Ea370Bf1A661444f6610dd041Ba1c;
@@ -42,7 +43,13 @@ contract WombatERC4626Test is AbstractERC4626Test {
     testPreFix = _testPreFix;
 
     for (uint8 i = 0; i < rewardTokens.length; i++) {
-      MidasFlywheelCore flywheel = new MidasFlywheelCore();
+      MidasFlywheelCore impl = new MidasFlywheelCore();
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+        address(impl),
+        address(dpa),
+        ""
+      );
+      MidasFlywheelCore flywheel = MidasFlywheelCore(address(proxy));
       flywheel.initialize(
         ERC20(address(rewardTokens[i])),
         IFlywheelRewards(address(0)),

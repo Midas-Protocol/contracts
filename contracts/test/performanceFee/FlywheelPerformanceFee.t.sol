@@ -13,6 +13,7 @@ import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 struct RewardsCycle {
   uint32 start;
@@ -42,7 +43,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
   FuseFlywheelDynamicRewards dddRewards;
 
   ERC20 epxToken = ERC20(0xAf41054C1487b0e5E2B9250C0332eCBCe6CE9d71);
-  FlywheelCore epxFlywheel;
+  MidasFlywheelCore epxFlywheel;
 
   uint256 rewardAmount = 1000e18;
   ERC20 marketKey;
@@ -52,17 +53,28 @@ contract FlywheelPerformanceFeeTest is BaseTest {
 
   function afterForkSetUp() internal override {
     vm.startPrank(flywheelOwner);
-    dddFlywheel = new MidasFlywheelCore();
+    MidasFlywheelCore impl = new MidasFlywheelCore();
+    TransparentUpgradeableProxy proxyDdd = new TransparentUpgradeableProxy(
+      address(impl),
+      address(dpa),
+      ""
+    );
+    dddFlywheel = MidasFlywheelCore(address(proxyDdd));
     dddFlywheel.initialize(dddToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), flywheelOwner);
     dddRewards = new FuseFlywheelDynamicRewards(FlywheelCore(address(dddFlywheel)), 1);
     dddFlywheel.setFlywheelRewards(dddRewards);
 
-    epxFlywheel = new FlywheelCore(
+    TransparentUpgradeableProxy proxyEpx = new TransparentUpgradeableProxy(
+      address(impl),
+      address(dpa),
+      ""
+    );
+    epxFlywheel = MidasFlywheelCore(address(proxyEpx));
+    epxFlywheel.initialize(
       epxToken,
       IFlywheelRewards(address(0)),
       IFlywheelBooster(address(0)),
-      address(this),
-      Authority(address(0))
+      address(this)
     );
 
     ERC20 dddFlywheelRewardToken = FlywheelCore(address(dddFlywheel)).rewardToken();
