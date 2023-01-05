@@ -213,7 +213,9 @@ contract DeployMarketsTest is Test {
   }
 
   function testDeployCErc20PluginRewardsDelegate() public {
-    MidasFlywheelCore flywheel = new MidasFlywheelCore();
+    MidasFlywheelCore impl = new MidasFlywheelCore();
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
+    flywheel = MidasFlywheel(address(proxy));
     flywheel.initialize(underlyingToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
     FlywheelCore asFlywheelCore = FlywheelCore(address(flywheel));
     rewards = new FuseFlywheelDynamicRewardsPlugin(asFlywheelCore, 1);

@@ -54,28 +54,15 @@ contract FlywheelPerformanceFeeTest is BaseTest {
   function afterForkSetUp() internal override {
     vm.startPrank(flywheelOwner);
     MidasFlywheelCore impl = new MidasFlywheelCore();
-    TransparentUpgradeableProxy proxyDdd = new TransparentUpgradeableProxy(
-      address(impl),
-      address(dpa),
-      ""
-    );
+    TransparentUpgradeableProxy proxyDdd = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
     dddFlywheel = MidasFlywheelCore(address(proxyDdd));
     dddFlywheel.initialize(dddToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), flywheelOwner);
     dddRewards = new FuseFlywheelDynamicRewards(FlywheelCore(address(dddFlywheel)), 1);
     dddFlywheel.setFlywheelRewards(dddRewards);
 
-    TransparentUpgradeableProxy proxyEpx = new TransparentUpgradeableProxy(
-      address(impl),
-      address(dpa),
-      ""
-    );
+    TransparentUpgradeableProxy proxyEpx = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
     epxFlywheel = MidasFlywheelCore(address(proxyEpx));
-    epxFlywheel.initialize(
-      epxToken,
-      IFlywheelRewards(address(0)),
-      IFlywheelBooster(address(0)),
-      address(this)
-    );
+    epxFlywheel.initialize(epxToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
 
     ERC20 dddFlywheelRewardToken = FlywheelCore(address(dddFlywheel)).rewardToken();
     rewardsToken.push(ERC20Upgradeable(address(dddFlywheelRewardToken)));

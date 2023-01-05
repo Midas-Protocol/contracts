@@ -125,7 +125,9 @@ contract LiquidityMiningTest is BaseTest {
   }
 
   function setUpFlywheel() public {
-    flywheel = new MidasFlywheel();
+    MidasFlywheel impl = new MidasFlywheel();
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
+    flywheel = MidasFlywheel(address(proxy));
     flywheel.initialize(rewardToken, FlywheelStaticRewards(address(0)), IFlywheelBooster(address(0)), address(this));
     rewards = new FlywheelStaticRewards(FlywheelCore(address(flywheel)), address(this), Authority(address(0)));
     flywheel.setFlywheelRewards(rewards);

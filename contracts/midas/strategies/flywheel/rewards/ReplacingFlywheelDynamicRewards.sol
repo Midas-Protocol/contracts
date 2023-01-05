@@ -20,14 +20,14 @@ contract ReplacingFlywheelDynamicRewards is FlywheelDynamicRewards {
 
   FlywheelCore public replacedFlywheel;
 
-    constructor(
-      FlywheelCore _replacedFlywheel,
-      FlywheelCore _flywheel,
-      uint32 _cycleLength
-    ) FlywheelDynamicRewards(_flywheel, _cycleLength) {
-      replacedFlywheel = _replacedFlywheel;
-      // rewardToken.safeApprove(address(_replacedFlywheel), type(uint256).max);
-    }
+  constructor(
+    FlywheelCore _replacedFlywheel,
+    FlywheelCore _flywheel,
+    uint32 _cycleLength
+  ) FlywheelDynamicRewards(_flywheel, _cycleLength) {
+    replacedFlywheel = _replacedFlywheel;
+    // rewardToken.safeApprove(address(_replacedFlywheel), type(uint256).max);
+  }
 
   function getNextCycleRewards(ERC20 strategy) internal override returns (uint192) {
     if (msg.sender == address(replacedFlywheel)) {

@@ -44,11 +44,7 @@ contract WombatERC4626Test is AbstractERC4626Test {
 
     for (uint8 i = 0; i < rewardTokens.length; i++) {
       MidasFlywheelCore impl = new MidasFlywheelCore();
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-        address(impl),
-        address(dpa),
-        ""
-      );
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
       MidasFlywheelCore flywheel = MidasFlywheelCore(address(proxy));
       flywheel.initialize(
         ERC20(address(rewardTokens[i])),
