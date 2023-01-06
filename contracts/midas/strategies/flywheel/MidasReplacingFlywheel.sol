@@ -16,10 +16,12 @@ contract MidasReplacingFlywheel is MidasFlywheel {
 
   function rewardsAccrued(address user) public override returns (uint256) {
     if (address(flywheelToReplace) != address(0)) {
-      uint256 newStateRewardsAccrued = _rewardsAccrued[user];
-      if (newStateRewardsAccrued == 0 && !rewardsTransferred[user]) {
-        rewardsTransferred[user] = true;
-        _rewardsAccrued[user] = flywheelToReplace.rewardsAccrued(user);
+      if (_rewardsAccrued[user] == 0 && !rewardsTransferred[user]) {
+        uint256 oldStateRewardsAccrued = flywheelToReplace.rewardsAccrued(user);
+        if (oldStateRewardsAccrued != 0) {
+          rewardsTransferred[user] = true;
+          _rewardsAccrued[user] = oldStateRewardsAccrued;
+        }
       }
     }
     return _rewardsAccrued[user];
@@ -30,7 +32,9 @@ contract MidasReplacingFlywheel is MidasFlywheel {
       RewardsState memory newStateStrategyState = _strategyState[strategy];
       if (newStateStrategyState.index == 0) {
         (uint224 index, uint32 ts) = flywheelToReplace.strategyState(strategy);
-        _strategyState[strategy] = RewardsState(index, ts);
+        if (index != 0) {
+          _strategyState[strategy] = RewardsState(index, ts);
+        }
       }
     }
     return (_strategyState[strategy].index, _strategyState[strategy].lastUpdatedTimestamp);
@@ -38,9 +42,11 @@ contract MidasReplacingFlywheel is MidasFlywheel {
 
   function userIndex(ERC20 strategy, address user) public override returns (uint224) {
     if (address(flywheelToReplace) != address(0)) {
-      uint224 newStateUserIndex = _userIndex[strategy][user];
-      if (newStateUserIndex == 0) {
-        _userIndex[strategy][user] = flywheelToReplace.userIndex(strategy, user);
+      if (_userIndex[strategy][user] == 0) {
+        uint224 oldStateUserIndex = flywheelToReplace.userIndex(strategy, user);
+        if (oldStateUserIndex != 0) {
+          _userIndex[strategy][user] = oldStateUserIndex;
+        }
       }
     }
     return _userIndex[strategy][user];
