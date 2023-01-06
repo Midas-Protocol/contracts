@@ -4,16 +4,16 @@ pragma solidity >=0.8.0;
 import { InterestRateModel } from "../../compound/InterestRateModel.sol";
 import { SafeMath } from "../../compound/SafeMath.sol";
 
-interface IAnkrBNBR {
-  function averagePercentageRate(uint256 day) external view returns (uint256);
+interface IAnkrCertBond {
+  function getRatioHistory(uint256 day) external view returns (uint64);
 }
 
-contract AnkrBNBInterestRateModel is InterestRateModel {
+contract AnkrCertificateInterestRateModel is InterestRateModel {
   using SafeMath for uint256;
 
   event NewInterestParams(uint256 blocksPerYear, uint256 baseRateMultiplier, uint256 kink);
 
-  address public ANKR_BNB_R;
+  address public ANKR_CERT;
 
   /**
    * @notice The approximate number of blocks per year that is assumed by the interest rate model
@@ -43,7 +43,7 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
    * @param _baseRateMultiplier The baseRateMultiplier after hitting a specified utilization point
    * @param kink_ The utilization point at which the jump multiplier is applied
    * @param _day The day period for average apr
-   * @param _abnbr Address for Ankr BNB stacking rate
+   * @param _acert Address for Ankr XXX staking rate
    */
   constructor(
     uint256 _blocksPerYear,
@@ -51,7 +51,7 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
     uint256 _jumpMultiplierPerYear,
     uint256 kink_,
     uint8 _day,
-    address _abnbr
+    address _acert
   ) {
     require(_day > 0 && _day < 8, "_day should be from 1 to 7");
     blocksPerYear = _blocksPerYear;
@@ -59,7 +59,7 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
     jumpMultiplierPerBlock = _jumpMultiplierPerYear.div(blocksPerYear);
     kink = kink_;
     day = _day;
-    ANKR_BNB_R = _abnbr;
+    ANKR_CERT = _acert;
 
     emit NewInterestParams(blocksPerYear, baseRateMultiplier, kink);
   }
@@ -85,7 +85,7 @@ contract AnkrBNBInterestRateModel is InterestRateModel {
   }
 
   function getAnkrRate() public view returns (uint256) {
-    return IAnkrBNBR(ANKR_BNB_R).averagePercentageRate(day).div(100).div(blocksPerYear);
+    return uint256(IAnkrCertBond(ANKR_CERT).getRatioHistory(day)).div(100).div(blocksPerYear);
   }
 
   function getMultiplierPerBlock() public view returns (uint256) {
