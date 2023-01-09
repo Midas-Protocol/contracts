@@ -20,6 +20,8 @@ interface IRewardsDistributor {
   /// @notice The COMP accrued but not yet transferred to each user
   function compAccrued(address) external view returns (uint256);
 
+  function userIndex(address, address) external view returns (uint256);
+
   /**
    * @notice Keeps the flywheel moving pre-mint and pre-redeem
    * @dev Called by the Comptroller

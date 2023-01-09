@@ -370,24 +370,28 @@ contract FusePoolLensSecondary is Initializable {
 
     for (uint256 i = 0; i < pools.length; i++) {
       IComptroller comptroller = IComptroller(pools[i].comptroller);
+      ICToken[] memory markets = comptroller.getAllMarkets();
       try comptroller.getRewardsDistributors() returns (address[] memory _distributors) {
         comptrollers[i] = comptroller;
-        distributors[i] = flywheelsWithRewardsForPoolUser(user, _distributors);
+        distributors[i] = flywheelsWithRewardsForMarketsUser(user, markets, _distributors);
       } catch {}
     }
 
     return (poolIds, comptrollers, distributors);
   }
 
-  function flywheelsWithRewardsForPoolUser(address user, address[] memory _distributors)
+  function flywheelsWithRewardsForMarketsUser(address user, ICToken[] memory _markets, address[] memory _distributors)
     internal
     view
     returns (address[] memory)
   {
     address[] memory distributors = new address[](_distributors.length);
     for (uint256 j = 0; j < _distributors.length; j++) {
-      if (IRewardsDistributor(_distributors[j]).compAccrued(user) > 0) {
-        distributors[j] = _distributors[j];
+      for (uint256 k = 0; k < _markets.length; k++) {
+        if (IRewardsDistributor(_distributors[j]).userIndex(address(_markets[k]), user) > 0) {
+          distributors[j] = _distributors[j];
+          break;
+        }
       }
     }
 
