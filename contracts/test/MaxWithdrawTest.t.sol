@@ -17,7 +17,6 @@ import { IComptroller } from "../external/compound/IComptroller.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
 import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
-import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
 import { CTokenInterface } from "../compound/CTokenInterfaces.sol";

@@ -6,17 +6,21 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
+import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import { MidasReplacingFlywheel } from "../midas/strategies/flywheel/MidasReplacingFlywheel.sol";
 import { ReplacingFlywheelDynamicRewards } from "../midas/strategies/flywheel/rewards/ReplacingFlywheelDynamicRewards.sol";
 import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
+import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { IFlywheelRewards } from "flywheel-v2/interfaces/IFlywheelRewards.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
+import { IERC20MetadataUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 contract FlywheelUpgradesTest is BaseTest {
   FusePoolDirectory internal fpd;
@@ -127,5 +131,69 @@ contract FlywheelUpgradesTest is BaseTest {
 
     assertGt(oldFlywheelUserIndex, 0, "needs a positive index for the check");
     assertEq(oldFlywheelUserIndex, newFlywheelUserIndex, "index replicated");
+  }
+
+  function testMoonbeamRewards() public fork(MOONBEAM_MAINNET) {
+    address deployer = 0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E;
+    address user = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc;
+    user = deployer;
+    uint256[] memory pids;
+    IComptroller[] memory pools;
+    address[][] memory distributrs;
+
+    FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
+    poolLensSecondary.initialize(fpd);
+    (pids, pools, distributrs) = poolLensSecondary.getFlywheelsToClaim(user);
+
+    for (uint256 i = 0; i < pools.length; i++) {
+      emit log_named_address("pools", address(pools[i]));
+      emit log_named_uint("pid", pids[i]);
+    }
+
+    for (uint256 i = 0; i < distributrs.length; i++) {
+      emit log_named_array("distributrs", distributrs[i]);
+    }
+  }
+
+  function testAccruedFlywheels() public fork(MOONBEAM_MAINNET) {
+    address user = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc;
+    address deployer = 0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E;
+    user = deployer;
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    vm.mockCall(
+      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
+      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72),
+      abi.encode(34315417857347)
+    );
+    vm.mockCall(
+      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
+      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685),
+      abi.encode(15786961530391797)
+    );
+    vm.mockCall(
+      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
+      abi.encodeWithSelector(IERC20MetadataUpgradeable.decimals.selector),
+      abi.encode(10)
+    );
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      IComptroller pool = IComptroller(pools[i].comptroller);
+
+      address[] memory fws = pool.getRewardsDistributors();
+      ICToken[] memory markets = pool.getAllMarkets();
+
+      for (uint8 j = 0; j < fws.length; j++) {
+        MidasFlywheel fw = MidasFlywheel(fws[j]);
+        emit log_named_address("fw", fws[j]);
+        emit log_named_uint("rewards accrued", fw.rewardsAccrued(user));
+        for (uint8 k = 0; k < markets.length; k++) {
+          ERC20 strategy = ERC20(address(markets[k]));
+          fw.accrue(strategy, user);
+        }
+        emit log_named_uint("comp accrued", fw.compAccrued(user));
+        emit log("");
+      }
+    }
   }
 }
