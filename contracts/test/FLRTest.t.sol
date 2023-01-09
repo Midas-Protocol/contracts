@@ -30,9 +30,11 @@ contract FLRTest is BaseTest {
   MidasFlywheelLensRouter lensRouter;
 
   address BSC_ADMIN = address(0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E);
+  FusePoolDirectory internal fpd;
 
   function afterForkSetUp() internal override {
     lensRouter = new MidasFlywheelLensRouter();
+    fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
   }
 
   function setUpFlywheel(
@@ -164,13 +166,38 @@ contract FLRTest is BaseTest {
     }
   }
 
-  function testBscLensRouter() public debuggingOnly fork(BSC_MAINNET) {
+  function testBscLensRouter() public fork(BSC_MAINNET) {
     MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0xb4c8353412633B779893Bb728435930b7d3610C8);
-    router.getMarketRewardsInfo(IComptroller(0x31d76A64Bc8BbEffb601fac5884372DEF910F044));
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      router.getMarketRewardsInfo(IComptroller(pools[i].comptroller));
+    }
   }
 
-  function testMoonbeamLensRouter() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0xaFdB8Ced672d58b2789bc85A4d5c71ae17e894fc);
-    router.getMarketRewardsInfo(IComptroller(0xCc248E6106CB7B05293eF027D5c1c05BF3E39F21));
+  function testMoonbeamLensRouter() public fork(MOONBEAM_MAINNET) {
+    vm.mockCall(
+      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
+      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72),
+      abi.encode(34315417857347)
+    );
+    vm.mockCall(
+      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
+      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685),
+      abi.encode(15786961530391797)
+    );
+    vm.mockCall(
+      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
+      abi.encodeWithSelector(IERC20MetadataUpgradeable.decimals.selector),
+      abi.encode(10)
+    );
+
+    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x30a6630101baBE0da765e3Ed8323824d40eD9a42);
+
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      router.getMarketRewardsInfo(IComptroller(pools[i].comptroller));
+    }
   }
 }
