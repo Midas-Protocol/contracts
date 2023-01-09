@@ -6,6 +6,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { WETH } from "solmate/tokens/WETH.sol";
 
 contract StellaERC4626Test is AbstractERC4626Test {
   IStellaDistributorV2 distributor = IStellaDistributorV2(0xF3a5454496E26ac57da879bf3285Fa85DEBF0388); // what you deposit the LP into
@@ -14,6 +15,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
   address marketAddress;
   ERC20 marketKey;
   ERC20Upgradeable[] rewardsToken;
+  WETH wNative;
 
   function _setUp(string memory _testPreFix, bytes calldata testConfig) public override {
     setUpPool("stella-test ", false, 0.1e18, 1.1e18);
@@ -22,7 +24,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
       testConfig,
       (address, uint256, address[])
     );
-
+    wNative = WETH(payable(ap.getAddress("wtoken")));
     testPreFix = _testPreFix;
     poolId = _poolId;
 
@@ -38,6 +40,8 @@ contract StellaERC4626Test is AbstractERC4626Test {
       address(this),
       rewardsToken
     );
+
+    stellaLpERC4626.reinitialize(wNative);
 
     plugin = stellaLpERC4626;
 
