@@ -380,11 +380,11 @@ contract FusePoolLensSecondary is Initializable {
     return (poolIds, comptrollers, distributors);
   }
 
-  function flywheelsWithRewardsForMarketsUser(address user, ICToken[] memory _markets, address[] memory _distributors)
-    internal
-    view
-    returns (address[] memory)
-  {
+  function flywheelsWithRewardsForMarketsUser(
+    address user,
+    ICToken[] memory _markets,
+    address[] memory _distributors
+  ) internal view returns (address[] memory) {
     address[] memory distributors = new address[](_distributors.length);
     for (uint256 j = 0; j < _distributors.length; j++) {
       for (uint256 k = 0; k < _markets.length; k++) {
