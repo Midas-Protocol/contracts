@@ -96,43 +96,6 @@ contract FlywheelUpgradesTest is BaseTest {
     }
   }
 
-  function test2BrlFlywheelReplacement() public debuggingOnly fork(BSC_MAINNET) {
-    CErc20PluginRewardsDelegate market = CErc20PluginRewardsDelegate(0xf0a2852958aD041a9Fb35c312605482Ca3Ec17ba); // 2brl market
-    ERC20 strategy = ERC20(address(market));
-    address user = 0xC3A9b350eBBCDD14B96934B6831f1978431D9B8c;
-    address flywheelAddress = 0xC6431455AeE17a08D6409BdFB18c4bc73a4069E4; // non-upgradable
-    MidasFlywheelCore epxFlywheel = MidasFlywheelCore(flywheelAddress);
-    address formerOwner = epxFlywheel.owner();
-    FlywheelDynamicRewards oldRewards = FlywheelDynamicRewards(address(epxFlywheel.flywheelRewards()));
-
-    MidasReplacingFlywheel impl = new MidasReplacingFlywheel();
-    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(formerOwner), "");
-    MidasReplacingFlywheel replacingFlywheel = MidasReplacingFlywheel(address(proxy));
-    replacingFlywheel.initialize(
-      epxFlywheel.rewardToken(),
-      IFlywheelRewards(address(0)),
-      epxFlywheel.flywheelBooster(),
-      address(this)
-    );
-    replacingFlywheel.reinitialize(epxFlywheel);
-
-    ReplacingFlywheelDynamicRewards replacingRewards = new ReplacingFlywheelDynamicRewards(
-      FlywheelCore(address(epxFlywheel)),
-      FlywheelCore(address(replacingFlywheel)),
-      oldRewards.rewardsCycleLength()
-    );
-    vm.prank(formerOwner);
-    epxFlywheel.setFlywheelRewards(replacingRewards);
-    vm.prank(replacingFlywheel.owner());
-    replacingFlywheel.setFlywheelRewards(replacingRewards);
-
-    uint256 oldFlywheelUserIndex = epxFlywheel.userIndex(strategy, user);
-    uint256 newFlywheelUserIndex = replacingFlywheel.userIndex(strategy, user);
-
-    assertGt(oldFlywheelUserIndex, 0, "needs a positive index for the check");
-    assertEq(oldFlywheelUserIndex, newFlywheelUserIndex, "index replicated");
-  }
-
   function testMoonbeamRewards() public fork(MOONBEAM_MAINNET) {
     address deployer = 0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E;
     address user = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc;
