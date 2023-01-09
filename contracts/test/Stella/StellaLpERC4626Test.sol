@@ -15,7 +15,6 @@ contract StellaERC4626Test is AbstractERC4626Test {
   address marketAddress;
   ERC20 marketKey;
   ERC20Upgradeable[] rewardsToken;
-  WETH wNative;
 
   function _setUp(string memory _testPreFix, bytes calldata testConfig) public override {
     setUpPool("stella-test ", false, 0.1e18, 1.1e18);
@@ -24,7 +23,6 @@ contract StellaERC4626Test is AbstractERC4626Test {
       testConfig,
       (address, uint256, address[])
     );
-    wNative = WETH(payable(ap.getAddress("wtoken")));
     testPreFix = _testPreFix;
     poolId = _poolId;
 
@@ -40,8 +38,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
       address(this),
       rewardsToken
     );
-
-    stellaLpERC4626.reinitialize(wNative);
+    stellaLpERC4626.reinitialize(WETH(payable(ap.getAddress("wtoken"))));
 
     plugin = stellaLpERC4626;
 

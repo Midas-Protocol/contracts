@@ -380,9 +380,9 @@ contract FusePoolLensSecondary is Initializable {
   }
 
   function flywheelsWithRewardsForPoolUser(address user, address[] memory _distributors)
-  internal
-  view
-  returns (address[] memory)
+    internal
+    view
+    returns (address[] memory)
   {
     address[] memory distributors = new address[](_distributors.length);
     for (uint256 j = 0; j < _distributors.length; j++) {
