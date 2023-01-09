@@ -164,8 +164,13 @@ contract FLRTest is BaseTest {
     }
   }
 
-  function testLensRouter() public debuggingOnly fork(BSC_MAINNET) {
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x9CBD5cdC9BA938Be9b92aE1cB5bB2b82C4dd1803);
+  function testBscLensRouter() public debuggingOnly fork(BSC_MAINNET) {
+    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0xb4c8353412633B779893Bb728435930b7d3610C8);
     router.getMarketRewardsInfo(IComptroller(0x31d76A64Bc8BbEffb601fac5884372DEF910F044));
+  }
+
+  function testMoonbeamLensRouter() public debuggingOnly fork(MOONBEAM_MAINNET) {
+    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0xaFdB8Ced672d58b2789bc85A4d5c71ae17e894fc);
+    router.getMarketRewardsInfo(IComptroller(0xCc248E6106CB7B05293eF027D5c1c05BF3E39F21));
   }
 }

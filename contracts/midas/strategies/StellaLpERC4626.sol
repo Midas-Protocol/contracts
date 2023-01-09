@@ -43,7 +43,7 @@ contract StellaLpERC4626 is MidasERC4626, RewardsClaimer {
   IStellaDistributorV2 public distributor;
   uint256 public poolId;
   address[] public assetsAsArray;
-  WETH wNative;
+  WETH public wNative;
 
   function initialize(
     ERC20Upgradeable _asset,
