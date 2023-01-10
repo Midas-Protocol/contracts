@@ -114,6 +114,10 @@ contract ContractsUpgradesTest is BaseTest {
     _testMarketsLatestImplementations();
   }
 
+  function testMarketsLatestImplementationsEvmos() public fork(EVMOS_MAINNET) {
+    _testMarketsLatestImplementations();
+  }
+
   function _testMarketsLatestImplementations() internal {
     FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
