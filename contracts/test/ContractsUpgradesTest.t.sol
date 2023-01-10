@@ -151,4 +151,34 @@ contract ContractsUpgradesTest is BaseTest {
       }
     }
   }
+
+  address newDeployer = 0x27521eae4eE4153214CaDc3eCD703b9B0326C908;
+
+  function testPauseGuardiansBsc() public debuggingOnly fork(BSC_MAINNET) {
+    _testPauseGuardians(newDeployer);
+  }
+
+  function testPauseGuardiansPolygon() public debuggingOnly fork(POLYGON_MAINNET) {
+    _testPauseGuardians(newDeployer);
+  }
+
+  function testPauseGuardiansMoonbeam() public debuggingOnly fork(MOONBEAM_MAINNET) {
+    _testPauseGuardians(newDeployer);
+  }
+
+  function _testPauseGuardians(address deployer) internal {
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      IComptroller pool = IComptroller(pools[i].comptroller);
+      address pauseGuardian = pool.pauseGuardian();
+      if (pauseGuardian != address(0) && pauseGuardian != deployer) {
+        emit log_named_address("pool", address(pool));
+        emit log_named_address("unknown pause guardian", pauseGuardian);
+        emit log("");
+      }
+    }
+  }
 }
