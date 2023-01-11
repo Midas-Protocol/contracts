@@ -17,7 +17,7 @@ contract InterestRateModelTest is BaseTest {
   JumpRateModel mimoRateModel;
   WhitePaperInterestRateModel whitepaperInterestRateModel;
 
-  address ANKR_BNB_RATE_PROVIDER = 0xBb1Aa6e59E5163D8722a122cd66EBA614b59df0d;
+  address ANKR_BNB_RATE_PROVIDER = 0xCb0006B31e6b403fEeEC257A8ABeE0817bEd7eBa;
   address ANKR_BNB_BOND = 0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827;
   address ANKR_FTM_RATE_PROVIDER = 0xB42bF10ab9Df82f9a47B86dd76EEE4bA848d0Fa2;
 
