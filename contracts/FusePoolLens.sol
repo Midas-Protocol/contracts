@@ -374,10 +374,7 @@ contract FusePoolLens is Initializable {
     return (detailedAssets);
   }
 
-  function getBorrowCapsPerCollateral(
-    ICToken borrowedAsset,
-    IComptroller comptroller
-  )
+  function getBorrowCapsPerCollateral(ICToken borrowedAsset, IComptroller comptroller)
     internal
     view
     returns (
@@ -491,10 +488,7 @@ contract FusePoolLens is Initializable {
     )
   {
     IComptroller comptroller = IComptroller(asset.comptroller());
-    (collateral, borrowCapsPerCollateral, collateralBlacklisted) = getBorrowCapsPerCollateral(
-      asset,
-      comptroller
-    );
+    (collateral, borrowCapsPerCollateral, collateralBlacklisted) = getBorrowCapsPerCollateral(asset, comptroller);
     totalBorrowCap = comptroller.borrowCaps(address(asset));
     totalSupplyCap = comptroller.supplyCaps(address(asset));
   }
