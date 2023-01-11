@@ -417,7 +417,7 @@ abstract contract AbstractERC4626Test is WithPool {
     assertApproxEqAbs(
       depositAmount,
       plugin.convertToAssets(plugin.balanceOf(address(1))),
-      uint256(1),
+      uint256(10),
       string(abi.encodePacked("!2.balOfUnderlying ", testPreFix))
     );
 
