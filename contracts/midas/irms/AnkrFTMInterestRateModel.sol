@@ -10,10 +10,6 @@ interface IAnkrRateProvider {
 }
 
 contract AnkrFTMInterestRateModel is AnkrCertificateInterestRateModel {
-  using SafeMath for uint256;
-
-  address public ANKR_RATE_PROVIDER;
-
   /**
    * @notice Construct an interest rate model
    * @param _blocksPerYear The approximate number of blocks per year
@@ -29,19 +25,18 @@ contract AnkrFTMInterestRateModel is AnkrCertificateInterestRateModel {
     uint256 kink_,
     uint8 _day,
     address _rate_provider
-  ) {
-    require(_day > 0 && _day < 8, "_day should be from 1 to 7");
-    blocksPerYear = _blocksPerYear;
-    baseRateMultiplier = _baseRateMultiplier;
-    jumpMultiplierPerBlock = _jumpMultiplierPerYear.div(blocksPerYear);
-    kink = kink_;
-    day = _day;
-    ANKR_RATE_PROVIDER = _rate_provider; // 0xB42bF10ab9Df82f9a47B86dd76EEE4bA848d0Fa2
-
-    emit NewInterestParams(blocksPerYear, baseRateMultiplier, kink);
-  }
+  )
+    AnkrCertificateInterestRateModel(
+      _blocksPerYear,
+      _baseRateMultiplier,
+      _jumpMultiplierPerYear,
+      kink_,
+      _day,
+      _rate_provider
+    )
+  {}
 
   function getAnkrRate() public view override returns (uint256) {
-    return uint256(IAnkrRateProvider(ANKR_RATE_PROVIDER).averagePercentageRate(day)).div(100).div(blocksPerYear);
+    return (uint256(IAnkrRateProvider(ANKR_RATE_PROVIDER).averagePercentageRate(day)) / 100) / (blocksPerYear);
   }
 }

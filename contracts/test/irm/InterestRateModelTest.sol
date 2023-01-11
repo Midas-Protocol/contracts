@@ -160,11 +160,11 @@ contract InterestRateModelTest is BaseTest {
   }
 
   function testAnkrFTMBorrowModelRate() internal {
-    // vm.mockCall(
-    //   address(ANKR_FTM_RATE_PROVIDER),
-    //   abi.encodeWithSelector(IAnkrFTMRateProvider.averagePercentageRate.selector, day),
-    //   abi.encode(5.12e18)
-    // );
+    vm.mockCall(
+      address(ANKR_FTM_RATE_PROVIDER),
+      abi.encodeWithSelector(IAnkrFTMRateProvider.averagePercentageRate.selector, day),
+      abi.encode(5.12e18)
+    );
     uint256 borrowRate = ankrCertificateInterestRateModelFTM.getBorrowRate(800e18, 8e18, 8e18);
     uint256 util = ankrCertificateInterestRateModelFTM.utilizationRate(800e18, 8e18, 8e18);
     assertEq(util, 0.1e17); // utilization 1
@@ -213,26 +213,21 @@ contract InterestRateModelTest is BaseTest {
   }
 
   function testAnkrBNBBorrowModelRate() internal {
-    // vm.mockCall(
-    //   address(ANKR_BNB_R),
-    //   abi.encodeWithSelector(IAnkrBNBR.averagePercentageRate.selector, day),
-    //   abi.encode(5.12e18)
-    // );
+    vm.mockCall(
+      address(ANKR_BNB_RATE_PROVIDER),
+      abi.encodeWithSelector(IAnkrBNBRateProvider.averagePercentageRate.selector, day, ANKR_BNB_BOND),
+      abi.encode(5.12e18)
+    );
     uint256 borrowRate = ankrCertificateInterestRateModelBNB.getBorrowRate(800e18, 8e18, 8e18);
     uint256 util = ankrCertificateInterestRateModelBNB.utilizationRate(800e18, 8e18, 8e18);
     assertEq(util, 0.1e17); // utilization 1
-    assertApproxEqAbs(
-      _convertToPerYearBsc(borrowRate) * 100,
-      0.858e17,
-      uint256(1e14),
-      "!borrow rate for utilization 1"
-    );
+    assertApproxEqAbs(_convertToPerYearBsc(borrowRate) * 100, 0.36e17, uint256(1e14), "!borrow rate for utilization 1");
     borrowRate = ankrCertificateInterestRateModelBNB.getBorrowRate(80e18, 8e18, 8e18);
     util = ankrCertificateInterestRateModelBNB.utilizationRate(80e18, 8e18, 8e18);
     assertEq(util, 0.1e18); // utilization 10
     assertApproxEqAbs(
       _convertToPerYearBsc(borrowRate) * 100,
-      0.628e18,
+      0.26347e18,
       uint256(1e14),
       "!borrow rate for utilization 10"
     );
@@ -241,7 +236,7 @@ contract InterestRateModelTest is BaseTest {
     assertEq(util, 0.2e18); // utilization 20
     assertApproxEqAbs(
       _convertToPerYearBsc(borrowRate) * 100,
-      1.2303e18,
+      0.5161e18,
       uint256(1e14),
       "!borrow rate for utilization 20"
     );
@@ -250,7 +245,7 @@ contract InterestRateModelTest is BaseTest {
     assertEq(util, 0.8e18); // utilization 80
     assertApproxEqAbs(
       _convertToPerYearBsc(borrowRate) * 100,
-      4.8444e18,
+      2.0325e18,
       uint256(1e14),
       "!borrow rate for utilization 80"
     );
@@ -259,18 +254,18 @@ contract InterestRateModelTest is BaseTest {
     assertEq(util, 0.9e18); // utilization 90
     assertApproxEqAbs(
       _convertToPerYearBsc(borrowRate) * 100,
-      20.4468e18,
+      17.2853e18,
       uint256(1e14),
       "!borrow rate for utilization 90"
     );
   }
 
   function testAnkrFTMSupplyModelRate() internal {
-    // vm.mockCall(
-    //   address(ANKR_FTM_RATE_PROVIDER),
-    //   abi.encodeWithSelector(IAnkrFTMRateProvider.getRatioHistory.selector, day),
-    //   abi.encode(5.12e18)
-    // );
+    vm.mockCall(
+      address(ANKR_FTM_RATE_PROVIDER),
+      abi.encodeWithSelector(IAnkrFTMRateProvider.averagePercentageRate.selector, day),
+      abi.encode(5.12e18)
+    );
     uint256 supplyRate = ankrCertificateInterestRateModelFTM.getSupplyRate(3e18, 8e18, 1e18, 0.1e18);
     uint256 util = ankrCertificateInterestRateModelFTM.utilizationRate(3e18, 8e18, 1e18);
     assertEq(util, 0.8e18); // utilization 80
@@ -314,30 +309,30 @@ contract InterestRateModelTest is BaseTest {
   }
 
   function testAnkrBNBSupplyModelRate() internal {
-    // vm.mockCall(
-    //   address(ANKR_BNB_RATE_PROVIDER),
-    //   abi.encodeWithSelector(IAnkrBNBRateProvider.averagePercentageRate.selector, day),
-    //   abi.encode(5.12e18)
-    // );
+    vm.mockCall(
+      address(ANKR_BNB_RATE_PROVIDER),
+      abi.encodeWithSelector(IAnkrBNBRateProvider.averagePercentageRate.selector, day, ANKR_BNB_BOND),
+      abi.encode(5.12e18)
+    );
     uint256 supplyRate = ankrCertificateInterestRateModelBNB.getSupplyRate(3e18, 8e18, 1e18, 0.1e18);
     uint256 util = ankrCertificateInterestRateModelBNB.utilizationRate(3e18, 8e18, 1e18);
     assertEq(util, 0.8e18); // utilization 80
     assertApproxEqAbs(
       _convertToPerYearBsc(supplyRate) * 100,
-      3.488e18,
+      1.4634e18,
       uint256(1e14),
       "!supply rate for utilization 80"
     );
     supplyRate = ankrCertificateInterestRateModelBNB.getSupplyRate(800e18, 8e18, 8e18, 0.1e18);
     util = ankrCertificateInterestRateModelBNB.utilizationRate(800e18, 8e18, 8e18);
     assertEq(util, 0.1e17); // utilization 1
-    assertApproxEqAbs(_convertToPerYearBsc(supplyRate) * 100, 0.8e15, uint256(1e14), "!supply rate for utilization 1");
+    assertApproxEqAbs(_convertToPerYearBsc(supplyRate) * 100, 0.32e15, uint256(1e14), "!supply rate for utilization 1");
     supplyRate = ankrCertificateInterestRateModelBNB.getSupplyRate(80e18, 8e18, 8e18, 0.1e18);
     util = ankrCertificateInterestRateModelBNB.utilizationRate(80e18, 8e18, 8e18);
     assertEq(util, 0.1e18); // utilization 10
     assertApproxEqAbs(
       _convertToPerYearBsc(supplyRate) * 100,
-      0.565e17,
+      0.23712e17,
       uint256(1e14),
       "!supply rate for utilization 10"
     );
@@ -346,7 +341,7 @@ contract InterestRateModelTest is BaseTest {
     assertEq(util, 0.2e18); // utilization 20
     assertApproxEqAbs(
       _convertToPerYearBsc(supplyRate) * 100,
-      0.2215e18,
+      0.92915e17,
       uint256(1e14),
       "!supply rate for utilization 20"
     );
@@ -355,7 +350,7 @@ contract InterestRateModelTest is BaseTest {
     assertEq(util, 0.9e18); // utilization 90
     assertApproxEqAbs(
       _convertToPerYearBsc(supplyRate) * 100,
-      16.5619e18,
+      14.001e18,
       uint256(1e14),
       "!supply rate for utilization 90"
     );

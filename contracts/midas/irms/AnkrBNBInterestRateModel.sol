@@ -10,9 +10,6 @@ interface IAnkrRateProvider {
 }
 
 contract AnkrBNBInterestRateModel is AnkrCertificateInterestRateModel {
-  using SafeMath for uint256;
-
-  address public ANKR_RATE_PROVIDER;
   address public ANKR_BOND;
 
   /**
@@ -30,23 +27,23 @@ contract AnkrBNBInterestRateModel is AnkrCertificateInterestRateModel {
     uint256 _jumpMultiplierPerYear,
     uint256 kink_,
     uint8 _day,
-    address _rate_provider, // 0xCb0006B31e6b403fEeEC257A8ABeE0817bEd7eBa
+    address _rate_provider,
     address _abond // 0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827
-  ) {
-    require(_day > 0 && _day < 8, "_day should be from 1 to 7");
-    blocksPerYear = _blocksPerYear;
-    baseRateMultiplier = _baseRateMultiplier;
-    jumpMultiplierPerBlock = _jumpMultiplierPerYear.div(blocksPerYear);
-    kink = kink_;
-    day = _day;
-    ANKR_RATE_PROVIDER = _rate_provider;
+  )
+    AnkrCertificateInterestRateModel(
+      _blocksPerYear,
+      _baseRateMultiplier,
+      _jumpMultiplierPerYear,
+      kink_,
+      _day,
+      _rate_provider
+    )
+  {
     ANKR_BOND = _abond;
-
-    emit NewInterestParams(blocksPerYear, baseRateMultiplier, kink);
   }
 
   function getAnkrRate() public view override returns (uint256) {
     return
-      uint256(IAnkrRateProvider(ANKR_RATE_PROVIDER).averagePercentageRate(ANKR_BOND, day)).div(100).div(blocksPerYear);
+      (uint256(IAnkrRateProvider(ANKR_RATE_PROVIDER).averagePercentageRate(ANKR_BOND, day)) / 100) / (blocksPerYear);
   }
 }
