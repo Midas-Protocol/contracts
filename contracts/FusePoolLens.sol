@@ -274,8 +274,6 @@ contract FusePoolLens is Initializable {
     uint256 totalBorrow;
     uint256 supplyBalance;
     uint256 borrowBalance;
-    uint256 supplyCap;
-    uint256 borrowCap;
     uint256 liquidity;
     bool membership;
     uint256 exchangeRate; // Price of cTokens in terms of underlying tokens
@@ -352,8 +350,6 @@ contract FusePoolLens is Initializable {
       asset.membership = comptroller.checkMembership(user, cToken);
       asset.exchangeRate = cToken.exchangeRateStored(); // We would use exchangeRateCurrent but we already accrue interest above
       asset.underlyingPrice = oracle.price(asset.underlyingToken);
-      asset.supplyCap = comptroller.supplyCaps(address(cToken));
-      asset.borrowCap = comptroller.borrowCaps(address(cToken));
 
       // Get oracle for this cToken
       asset.oracle = address(oracle);
@@ -376,6 +372,40 @@ contract FusePoolLens is Initializable {
     }
 
     return (detailedAssets);
+  }
+
+  function getBorrowCapsPerCollateral(
+    ICToken borrowedAsset,
+    IComptroller comptroller
+  )
+    internal
+    view
+    returns (
+      address[] memory collateral,
+      uint256[] memory borrowCapsAgainstCollateral,
+      bool[] memory borrowingBlacklistedAgainstCollateral
+    )
+  {
+    ICToken[] memory poolMarkets = comptroller.getAllMarkets();
+
+    collateral = new address[](poolMarkets.length - 1);
+    borrowCapsAgainstCollateral = new uint256[](poolMarkets.length - 1);
+    borrowingBlacklistedAgainstCollateral = new bool[](poolMarkets.length - 1);
+
+    for (uint256 i = 0; i < poolMarkets.length; i++) {
+      address collateralAddress = address(poolMarkets[i]);
+      if (collateralAddress != address(borrowedAsset)) {
+        collateral[i] = collateralAddress;
+        borrowCapsAgainstCollateral[i] = comptroller.borrowCapForAssetForCollateral(
+          address(borrowedAsset),
+          collateralAddress
+        );
+        borrowingBlacklistedAgainstCollateral[i] = comptroller.borrowingAgainstCollateralBlacklist(
+          address(borrowedAsset),
+          collateralAddress
+        );
+      }
+    }
   }
 
   /**
@@ -443,6 +473,30 @@ contract FusePoolLens is Initializable {
   function getPoolAssetsByUser(IComptroller comptroller, address user) public returns (FusePoolAsset[] memory) {
     FusePoolAsset[] memory assets = getPoolAssetsWithData(comptroller, comptroller.getAssetsIn(user), user);
     return assets;
+  }
+
+  /**
+   * @notice returns the total borrow/supply cap for the asset and the per collateral borrowing cap for this asset
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getBorrowAndSupplyCapsForAsset(ICToken asset)
+    public
+    view
+    returns (
+      address[] memory collateral,
+      uint256[] memory borrowCapsPerCollateral,
+      bool[] memory collateralBlacklisted,
+      uint256 totalBorrowCap,
+      uint256 totalSupplyCap
+    )
+  {
+    IComptroller comptroller = IComptroller(asset.comptroller());
+    (collateral, borrowCapsPerCollateral, collateralBlacklisted) = getBorrowCapsPerCollateral(
+      asset,
+      comptroller
+    );
+    totalBorrowCap = comptroller.borrowCaps(address(asset));
+    totalSupplyCap = comptroller.supplyCaps(address(asset));
   }
 
   /**
