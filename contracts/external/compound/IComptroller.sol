@@ -19,6 +19,8 @@ interface IComptroller {
 
   function oracle() external view returns (IPriceOracle);
 
+  function pauseGuardian() external view returns (address);
+
   function closeFactorMantissa() external view returns (uint256);
 
   function liquidationIncentiveMantissa() external view returns (uint256);
