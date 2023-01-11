@@ -77,13 +77,22 @@ contract AlpacaERC4626Test is BaseTest {
     deposit(address(1), depositAmount);
 
     // Test that the balance view calls work
-    assertApproxEqAbs(depositAmount * 2, alpacaERC4626.totalAssets(), 2,
+    assertApproxEqAbs(
+      depositAmount * 2,
+      alpacaERC4626.totalAssets(),
+      2,
       "Beefy total Assets should be same as sum of deposited amounts"
     );
-    assertApproxEqAbs(depositAmount, alpacaERC4626.balanceOfUnderlying(address(this)), 10,
+    assertApproxEqAbs(
+      depositAmount,
+      alpacaERC4626.balanceOfUnderlying(address(this)),
+      10,
       "Underlying token balance should be same as deposited amount"
     );
-    assertApproxEqAbs(depositAmount, alpacaERC4626.balanceOfUnderlying(address(1)), 10,
+    assertApproxEqAbs(
+      depositAmount,
+      alpacaERC4626.balanceOfUnderlying(address(1)),
+      10,
       "Underlying token balance should be same as deposited amount"
     );
 
@@ -174,7 +183,10 @@ contract AlpacaERC4626Test is BaseTest {
     alpacaERC4626.withdraw(withdrawalAmount, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertApproxEqAbs(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount, 1,
+    assertApproxEqAbs(
+      underlyingToken.balanceOf(address(this)),
+      assetBalBefore + withdrawalAmount,
+      1,
       "!user asset bal"
     );
 
@@ -214,7 +226,10 @@ contract AlpacaERC4626Test is BaseTest {
     alpacaERC4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertApproxEqAbs(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount, 1,
+    assertApproxEqAbs(
+      underlyingToken.balanceOf(address(this)),
+      assetBalBefore + withdrawalAmount,
+      1,
       "!user asset bal"
     );
 
@@ -228,7 +243,10 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(alpacaERC4626.balanceOf(address(this)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertApproxEqAbs(mockVault.balanceOf(address(alpacaERC4626)), beefyShares - expectedBeefySharesNeeded, 1,
+    assertApproxEqAbs(
+      mockVault.balanceOf(address(alpacaERC4626)),
+      beefyShares - expectedBeefySharesNeeded,
+      1,
       "!beefy share balance"
     );
 
@@ -260,7 +278,10 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(alpacaERC4626.balanceOf(address(1)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertApproxEqAbs(mockVault.balanceOf(address(alpacaERC4626)), beefyShares - expectedBeefySharesNeeded, 1,
+    assertApproxEqAbs(
+      mockVault.balanceOf(address(alpacaERC4626)),
+      beefyShares - expectedBeefySharesNeeded,
+      1,
       "!beefy share balance"
     );
 
@@ -284,7 +305,10 @@ contract AlpacaERC4626Test is BaseTest {
     alpacaERC4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertApproxEqAbs(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount, 1,
+    assertApproxEqAbs(
+      underlyingToken.balanceOf(address(this)),
+      assetBalBefore + withdrawalAmount,
+      1,
       "!user asset bal"
     );
 
@@ -298,7 +322,10 @@ contract AlpacaERC4626Test is BaseTest {
     assertApproxEqAbs(alpacaERC4626.balanceOf(address(this)), erc4626BalBefore - redeemAmount, 1, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertApproxEqAbs(mockVault.balanceOf(address(alpacaERC4626)), beefyShares - expectedBeefySharesNeeded, 1,
+    assertApproxEqAbs(
+      mockVault.balanceOf(address(alpacaERC4626)),
+      beefyShares - expectedBeefySharesNeeded,
+      1,
       "!beefy share balance"
     );
   }
@@ -321,7 +348,10 @@ contract AlpacaERC4626Test is BaseTest {
     alpacaERC4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertApproxEqAbs(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount, 1,
+    assertApproxEqAbs(
+      underlyingToken.balanceOf(address(this)),
+      assetBalBefore + withdrawalAmount,
+      1,
       "!user asset bal"
     );
 
@@ -335,7 +365,10 @@ contract AlpacaERC4626Test is BaseTest {
     assertApproxEqAbs(alpacaERC4626.balanceOf(address(this)), erc4626BalBefore - redeemAmount, 1, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertApproxEqAbs(mockVault.balanceOf(address(alpacaERC4626)), beefyShares - expectedBeefySharesNeeded, 10,
+    assertApproxEqAbs(
+      mockVault.balanceOf(address(alpacaERC4626)),
+      beefyShares - expectedBeefySharesNeeded,
+      10,
       "!beefy share balance"
     );
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "Beefy erc4626 locked amount checking");
@@ -365,7 +398,10 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(alpacaERC4626.balanceOf(address(1)), erc4626BalBefore - redeemAmount, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertApproxEqAbs(mockVault.balanceOf(address(alpacaERC4626)), beefyShares - expectedBeefySharesNeeded, 10,
+    assertApproxEqAbs(
+      mockVault.balanceOf(address(alpacaERC4626)),
+      beefyShares - expectedBeefySharesNeeded,
+      10,
       "!beefy share balance"
     );
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "Beefy erc4626 locked amount checking");
@@ -429,7 +465,10 @@ contract AlpacaERC4626Test is BaseTest {
     uint256 expectedSharesNeeded = withdrawAmount.mulDivDown(alpacaERC4626.totalSupply(), alpacaERC4626.totalAssets());
     alpacaERC4626.withdraw(withdrawAmount, address(this), address(this));
 
-    assertApproxEqAbs(alpacaERC4626.balanceOf(address(this)), depositAmount - expectedSharesNeeded, 1,
+    assertApproxEqAbs(
+      alpacaERC4626.balanceOf(address(this)),
+      depositAmount - expectedSharesNeeded,
+      1,
       "!withdraw share bal"
     );
     assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount, "!withdraw asset bal");
@@ -437,7 +476,10 @@ contract AlpacaERC4626Test is BaseTest {
     uint256 expectedAssets = withdrawAmount.mulDivUp(alpacaERC4626.totalAssets(), alpacaERC4626.totalSupply());
     alpacaERC4626.redeem(withdrawAmount, address(this), address(this));
 
-    assertApproxEqAbs(alpacaERC4626.balanceOf(address(this)), depositAmount - withdrawAmount - expectedSharesNeeded, 1,
+    assertApproxEqAbs(
+      alpacaERC4626.balanceOf(address(this)),
+      depositAmount - withdrawAmount - expectedSharesNeeded,
+      1,
       "!redeem share bal"
     );
     assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount + expectedAssets, "!redeem asset bal");
