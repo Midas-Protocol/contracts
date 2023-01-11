@@ -274,6 +274,8 @@ contract FusePoolLens is Initializable {
     uint256 totalBorrow;
     uint256 supplyBalance;
     uint256 borrowBalance;
+    uint256 supplyCap;
+    uint256 borrowCap;
     uint256 liquidity;
     bool membership;
     uint256 exchangeRate; // Price of cTokens in terms of underlying tokens
@@ -350,6 +352,8 @@ contract FusePoolLens is Initializable {
       asset.membership = comptroller.checkMembership(user, cToken);
       asset.exchangeRate = cToken.exchangeRateStored(); // We would use exchangeRateCurrent but we already accrue interest above
       asset.underlyingPrice = oracle.price(asset.underlyingToken);
+      asset.supplyCap = comptroller.supplyCaps(address(cToken));
+      asset.borrowCap = comptroller.borrowCaps(address(cToken));
 
       // Get oracle for this cToken
       asset.oracle = address(oracle);
