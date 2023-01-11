@@ -2,18 +2,9 @@
 pragma solidity >=0.8.0;
 
 import { InterestRateModel } from "../../compound/InterestRateModel.sol";
-import { SafeMath } from "../../compound/SafeMath.sol";
 
-interface IAnkrCertBond {
-  function getRatioHistory(uint256 day) external view returns (uint64);
-}
-
-contract AnkrCertificateInterestRateModel is InterestRateModel {
-  using SafeMath for uint256;
-
+abstract contract AnkrCertificateInterestRateModel is InterestRateModel {
   event NewInterestParams(uint256 blocksPerYear, uint256 baseRateMultiplier, uint256 kink);
-
-  address public ANKR_CERT;
 
   /**
    * @notice The approximate number of blocks per year that is assumed by the interest rate model
@@ -37,13 +28,16 @@ contract AnkrCertificateInterestRateModel is InterestRateModel {
 
   uint8 public day;
 
+  address public ANKR_RATE_PROVIDER;
+
   /**
    * @notice Construct an interest rate model
    * @param _blocksPerYear The approximate number of blocks per year
    * @param _baseRateMultiplier The baseRateMultiplier after hitting a specified utilization point
    * @param kink_ The utilization point at which the jump multiplier is applied
    * @param _day The day period for average apr
-   * @param _acert Address for Ankr XXX staking rate
+   * @param _rate_provider Address for Ankr Rate Provider for staking rate
+  
    */
   constructor(
     uint256 _blocksPerYear,
@@ -51,15 +45,15 @@ contract AnkrCertificateInterestRateModel is InterestRateModel {
     uint256 _jumpMultiplierPerYear,
     uint256 kink_,
     uint8 _day,
-    address _acert
+    address _rate_provider
   ) {
     require(_day > 0 && _day < 8, "_day should be from 1 to 7");
     blocksPerYear = _blocksPerYear;
     baseRateMultiplier = _baseRateMultiplier;
-    jumpMultiplierPerBlock = _jumpMultiplierPerYear.div(blocksPerYear);
+    jumpMultiplierPerBlock = _jumpMultiplierPerYear / blocksPerYear;
     kink = kink_;
     day = _day;
-    ANKR_CERT = _acert;
+    ANKR_RATE_PROVIDER = _rate_provider;
 
     emit NewInterestParams(blocksPerYear, baseRateMultiplier, kink);
   }
@@ -81,19 +75,17 @@ contract AnkrCertificateInterestRateModel is InterestRateModel {
       return 0;
     }
 
-    return borrows.mul(1e18).div(cash.add(borrows).sub(reserves));
+    return (borrows * 1e18) / (cash + borrows - reserves);
   }
 
-  function getAnkrRate() public view returns (uint256) {
-    return uint256(IAnkrCertBond(ANKR_CERT).getRatioHistory(day)).div(100).div(blocksPerYear);
-  }
+  function getAnkrRate() public view virtual returns (uint256);
 
   function getMultiplierPerBlock() public view returns (uint256) {
-    return getAnkrRate().mul(1e18).div(kink);
+    return (getAnkrRate() * 1e18) / kink;
   }
 
   function getBaseRatePerBlock() public view returns (uint256) {
-    return getAnkrRate().mul(baseRateMultiplier).div(1e18);
+    return (getAnkrRate() * baseRateMultiplier) / 1e18;
   }
 
   function getBorrowRatePostKink(
@@ -102,8 +94,8 @@ contract AnkrCertificateInterestRateModel is InterestRateModel {
     uint256 reserves
   ) public view returns (uint256) {
     uint256 util = utilizationRate(cash, borrows, reserves);
-    uint256 excessUtil = util.sub(kink);
-    return excessUtil.mul(jumpMultiplierPerBlock).div(1e18);
+    uint256 excessUtil = util - kink;
+    return (excessUtil * jumpMultiplierPerBlock) / 1e18;
   }
 
   function getBorrowRate(
@@ -114,13 +106,13 @@ contract AnkrCertificateInterestRateModel is InterestRateModel {
     uint256 util = utilizationRate(cash, borrows, reserves);
     uint256 baseRatePerBlock = getBaseRatePerBlock();
     uint256 multiplierPerBlock = getMultiplierPerBlock();
-    uint256 normalRate = util.mul(multiplierPerBlock).div(1e18).add(baseRatePerBlock);
+    uint256 normalRate = ((util * multiplierPerBlock) / 1e18) + baseRatePerBlock;
 
     if (util <= kink) {
       return normalRate;
     } else {
       uint256 borrowRatePostKink = getBorrowRatePostKink(cash, borrows, reserves);
-      return borrowRatePostKink.add(normalRate);
+      return borrowRatePostKink + normalRate;
     }
   }
 
@@ -130,9 +122,9 @@ contract AnkrCertificateInterestRateModel is InterestRateModel {
     uint256 reserves,
     uint256 reserveFactorMantissa
   ) public view override returns (uint256) {
-    uint256 oneMinusReserveFactor = uint256(1e18).sub(reserveFactorMantissa);
+    uint256 oneMinusReserveFactor = uint256(1e18) - reserveFactorMantissa;
     uint256 borrowRate = getBorrowRate(cash, borrows, reserves);
-    uint256 rateToPool = borrowRate.mul(oneMinusReserveFactor).div(1e18);
-    return utilizationRate(cash, borrows, reserves).mul(rateToPool).div(1e18);
+    uint256 rateToPool = (borrowRate * oneMinusReserveFactor) / 1e18;
+    return (utilizationRate(cash, borrows, reserves) * rateToPool) / (1e18);
   }
 }
