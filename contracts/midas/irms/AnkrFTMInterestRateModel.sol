@@ -6,12 +6,10 @@ import { AnkrCertificateInterestRateModel } from "./AnkrCertificateInterestRateM
 import { SafeMath } from "../../compound/SafeMath.sol";
 
 interface IAnkrRateProvider {
-  function averagePercentageRate(address addr, uint256 day) external view returns (int256);
+  function averagePercentageRate(uint256 day) external view returns (int256);
 }
 
-contract AnkrBNBInterestRateModel is AnkrCertificateInterestRateModel {
-  address public ANKR_BOND;
-
+contract AnkrFTMInterestRateModel is AnkrCertificateInterestRateModel {
   /**
    * @notice Construct an interest rate model
    * @param _blocksPerYear The approximate number of blocks per year
@@ -19,7 +17,6 @@ contract AnkrBNBInterestRateModel is AnkrCertificateInterestRateModel {
    * @param kink_ The utilization point at which the jump multiplier is applied
    * @param _day The day period for average apr
    * @param _rate_provider Address for Ankr Rate Provider for staking rate
-   * @param _abond Address for Ankr BNB bond address
    */
   constructor(
     uint256 _blocksPerYear,
@@ -27,8 +24,7 @@ contract AnkrBNBInterestRateModel is AnkrCertificateInterestRateModel {
     uint256 _jumpMultiplierPerYear,
     uint256 kink_,
     uint8 _day,
-    address _rate_provider,
-    address _abond // 0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827
+    address _rate_provider
   )
     AnkrCertificateInterestRateModel(
       _blocksPerYear,
@@ -38,12 +34,9 @@ contract AnkrBNBInterestRateModel is AnkrCertificateInterestRateModel {
       _day,
       _rate_provider
     )
-  {
-    ANKR_BOND = _abond;
-  }
+  {}
 
   function getAnkrRate() public view override returns (uint256) {
-    return
-      (uint256(IAnkrRateProvider(ANKR_RATE_PROVIDER).averagePercentageRate(ANKR_BOND, day)) / 100) / (blocksPerYear);
+    return (uint256(IAnkrRateProvider(ANKR_RATE_PROVIDER).averagePercentageRate(day)) / 100) / (blocksPerYear);
   }
 }

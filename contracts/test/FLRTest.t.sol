@@ -29,10 +29,11 @@ contract FLRTest is BaseTest {
   FlywheelStaticRewards rewards;
   MidasFlywheelLensRouter lensRouter;
 
-  address BSC_ADMIN = address(0x82eDcFe00bd0ce1f3aB968aF09d04266Bc092e0E);
+  FusePoolDirectory internal fpd;
 
   function afterForkSetUp() internal override {
     lensRouter = new MidasFlywheelLensRouter();
+    fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
   }
 
   function setUpFlywheel(
@@ -75,7 +76,7 @@ contract FLRTest is BaseTest {
     rewardToken = address(0x71be881e9C5d4465B3FfF61e89c6f3651E69B5bb); // BRZ
     emit log_named_address("rewardToken", address(rewardToken));
     address mkt = 0x159A529c00CD4f91b65C54E77703EDb67B4942e4;
-    setUpFlywheel(rewardToken, mkt, IComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117), BSC_ADMIN);
+    setUpFlywheel(rewardToken, mkt, IComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117), ap.owner());
     emit log_named_uint("mkt dec", ERC20(mkt).decimals());
 
     (uint224 index, uint32 lastUpdatedTimestamp) = flywheel.strategyState(ERC20(mkt));
@@ -130,20 +131,18 @@ contract FLRTest is BaseTest {
     CErc20Token market = CErc20Token(0xa9736bA05de1213145F688e4619E5A7e0dcf4C72);
     rewardToken = address(0x931715FEE2d06333043d11F658C8CE934aC61D0c);
     IComptroller comptroller = IComptroller(0xeB2D3A9D962d89b4A9a34ce2bF6a2650c938e185);
-    // setUpFlywheel(rewardToken, address(market), comptroller, BSC_ADMIN);
+    // setUpFlywheel(rewardToken, address(market), comptroller, ap.owner());
 
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
       abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72),
-      abi.encode(46968940116682)
+      abi.encode(34315417857347)
     );
-
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
       abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685),
-      abi.encode(11552962011148995)
+      abi.encode(15786961530391797)
     );
-
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
       abi.encodeWithSelector(IERC20MetadataUpgradeable.decimals.selector),
@@ -163,6 +162,41 @@ contract FLRTest is BaseTest {
           emit log_named_uint("totalSupply", info[i].market.totalSupply());
         }
       }
+    }
+  }
+
+  function testBscLensRouter() public fork(BSC_MAINNET) {
+    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0xb4c8353412633B779893Bb728435930b7d3610C8);
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      router.getMarketRewardsInfo(IComptroller(pools[i].comptroller));
+    }
+  }
+
+  function testMoonbeamLensRouter() public fork(MOONBEAM_MAINNET) {
+    vm.mockCall(
+      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
+      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72),
+      abi.encode(34315417857347)
+    );
+    vm.mockCall(
+      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
+      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685),
+      abi.encode(15786961530391797)
+    );
+    vm.mockCall(
+      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
+      abi.encodeWithSelector(IERC20MetadataUpgradeable.decimals.selector),
+      abi.encode(10)
+    );
+
+    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x30a6630101baBE0da765e3Ed8323824d40eD9a42);
+
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      router.getMarketRewardsInfo(IComptroller(pools[i].comptroller));
     }
   }
 }

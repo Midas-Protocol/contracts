@@ -14,6 +14,7 @@ import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel-v2/interfaces/IFlywheelRewards.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract ComptrollerTest is BaseTest {
   Comptroller internal comptroller;
@@ -25,7 +26,9 @@ contract ComptrollerTest is BaseTest {
   function setUp() public {
     ERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
     comptroller = new Comptroller(payable(address(this)));
-    flywheel = new MidasFlywheel();
+    MidasFlywheel impl = new MidasFlywheel();
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
+    flywheel = MidasFlywheel(address(proxy));
     flywheel.initialize(rewardToken, IFlywheelRewards(address(2)), IFlywheelBooster(address(3)), address(this));
   }
 

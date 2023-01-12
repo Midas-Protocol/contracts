@@ -349,4 +349,48 @@ contract FusePoolLensSecondary is Initializable {
     // Return distributors
     return (indexes, comptrollers, distributors);
   }
+
+  /**
+   * @notice The returned list of flywheels contains address(0) for flywheels for which the user has no rewards to claim
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getFlywheelsToClaim(address user)
+    external
+    view
+    returns (
+      uint256[] memory,
+      IComptroller[] memory,
+      address[][] memory
+    )
+  {
+    (uint256[] memory poolIds, FusePoolDirectory.FusePool[] memory pools) = directory.getActivePools();
+
+    IComptroller[] memory comptrollers = new IComptroller[](pools.length);
+    address[][] memory distributors = new address[][](pools.length);
+
+    for (uint256 i = 0; i < pools.length; i++) {
+      IComptroller comptroller = IComptroller(pools[i].comptroller);
+      try comptroller.getRewardsDistributors() returns (address[] memory _distributors) {
+        comptrollers[i] = comptroller;
+        distributors[i] = flywheelsWithRewardsForPoolUser(user, _distributors);
+      } catch {}
+    }
+
+    return (poolIds, comptrollers, distributors);
+  }
+
+  function flywheelsWithRewardsForPoolUser(address user, address[] memory _distributors)
+    internal
+    view
+    returns (address[] memory)
+  {
+    address[] memory distributors = new address[](_distributors.length);
+    for (uint256 j = 0; j < _distributors.length; j++) {
+      if (IRewardsDistributor(_distributors[j]).compAccrued(user) > 0) {
+        distributors[j] = _distributors[j];
+      }
+    }
+
+    return distributors;
+  }
 }

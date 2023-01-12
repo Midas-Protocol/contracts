@@ -25,14 +25,15 @@ contract MidasFlywheel is MidasFlywheelCore, IMidasFlywheel {
   }
 
   function compAccrued(address user) external view returns (uint256) {
-    return rewardsAccrued[user];
+    return _rewardsAccrued[user];
   }
 
   function addMarketForRewards(ERC20 strategy) external onlyOwner {
     _addStrategyForRewards(strategy);
   }
 
+  // TODO remove
   function marketState(ERC20 strategy) external view returns (uint224, uint32) {
-    return (strategyState[strategy].index, strategyState[strategy].lastUpdatedTimestamp);
+    return (_strategyState[strategy].index, _strategyState[strategy].lastUpdatedTimestamp);
   }
 }

@@ -86,11 +86,26 @@ contract AnyLiquidationTest is BaseTest {
       //        "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
       //        30
       //      );
+    } else if (block.chainid == MOONBEAM_MAINNET) {
+      // TODO figure out how to mock all xcDOT calls
+      mostLiquidPair1 = IUniswapV2Pair(0xa927E1e1E044CA1D9fe1854585003477331fE2Af); // GLMR/xcDOT
+      mostLiquidPair2 = IUniswapV2Pair(0x8CCBbcAF58f5422F6efD4034d8E8a3c9120ADf79); // GLMR/USDC
+      curveOracle = CurveLpTokenPriceOracleNoRegistry(0x315b23e85E1ad004A466f3C89544794Ef3392179);
+      fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
+      //      fsl = new FuseSafeLiquidator();
+      //      fsl.initialize(
+      //        ap.getAddress("wtoken"),
+      //        uniswapRouter,
+      //        ap.getAddress("stableToken"),
+      //        ap.getAddress("wBTCToken"),
+      //        "0x48a6ca3d52d0d0a6c53a83cc3c8688dd46ea4cb786b169ee959b95ad30f61643",
+      //        25
+      //      );
     }
   }
 
   function testSpecificRandom() public debuggingOnly {
-    testBscAnyLiquidation(657);
+    testBscAnyLiquidation(1668);
     //    testPolygonAnyLiquidation(101);
   }
 
@@ -100,6 +115,11 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   function testPolygonAnyLiquidation(uint256 random) public fork(POLYGON_MAINNET) {
+    vm.assume(random > 100 && random < type(uint64).max);
+    doTestAnyLiquidation(random);
+  }
+
+  function testMoonbeamAnyLiquidation(uint256 random) public debuggingOnly fork(MOONBEAM_MAINNET) {
     vm.assume(random > 100 && random < type(uint64).max);
     doTestAnyLiquidation(random);
   }

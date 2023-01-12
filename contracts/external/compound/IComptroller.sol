@@ -19,6 +19,8 @@ interface IComptroller {
 
   function oracle() external view returns (IPriceOracle);
 
+  function pauseGuardian() external view returns (address);
+
   function closeFactorMantissa() external view returns (uint256);
 
   function liquidationIncentiveMantissa() external view returns (uint256);
@@ -72,6 +74,10 @@ interface IComptroller {
 
   function suppliers(address account) external view returns (bool);
 
+  function supplyCaps(address cToken) external view returns (uint256);
+
+  function borrowCaps(address cToken) external view returns (uint256);
+
   function enforceWhitelist() external view returns (bool);
 
   function enterMarkets(address[] memory cTokens) external returns (uint256[] memory);
@@ -97,4 +103,8 @@ interface IComptroller {
     ICToken cTokenModify,
     bool isBorrow
   ) external returns (uint256);
+
+  function borrowCapForAssetForCollateral(address borrowed, address collateral) external view returns (uint256);
+
+  function borrowingAgainstCollateralBlacklist(address borrowed, address collateral) external view returns (bool);
 }
