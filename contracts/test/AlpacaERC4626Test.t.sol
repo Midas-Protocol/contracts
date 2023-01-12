@@ -62,12 +62,12 @@ contract AlpacaERC4626Test is BaseTest {
     assertApproxEqAbs(alpacaERC4626.balanceOfUnderlying(address(this)), depositAmount, 1, "!balanceOfUnderlying");
 
     // Test that we minted the correct amount of token
-    assertEq(alpacaERC4626.balanceOf(address(this)), expectedErc4626Shares);
-    assertEq(alpacaERC4626.totalSupply(), expectedErc4626Shares);
+    assertEq(alpacaERC4626.balanceOf(address(this)), expectedErc4626Shares, "!balance of this");
+    assertEq(alpacaERC4626.totalSupply(), expectedErc4626Shares, "!totalSupply");
 
     uint256 expectedBeefyShares = getExpectedVaultShares(depositAmount);
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertEq(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares);
+    assertEq(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares, "!balance of erc4626");
   }
 
   function testMultipleDeposit() public fork(BSC_MAINNET) {
@@ -121,12 +121,12 @@ contract AlpacaERC4626Test is BaseTest {
     assertApproxEqAbs(alpacaERC4626.balanceOfUnderlying(address(this)), depositAmount, 1, "!balanceOfUnderlying this");
 
     // Test that we minted the correct amount of token
-    assertEq(alpacaERC4626.balanceOf(address(this)), mintAmount);
-    assertEq(alpacaERC4626.totalSupply(), mintAmount);
+    assertEq(alpacaERC4626.balanceOf(address(this)), mintAmount, "!balance of this");
+    assertEq(alpacaERC4626.totalSupply(), mintAmount, "!totalSupply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     uint256 expectedBeefyShares = getExpectedVaultShares(depositAmount);
-    assertEq(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares);
+    assertEq(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares, "!balanceOf erc4626");
   }
 
   function testMultipleMint() public fork(BSC_MAINNET) {
@@ -140,29 +140,29 @@ contract AlpacaERC4626Test is BaseTest {
     assertApproxEqAbs(alpacaERC4626.balanceOfUnderlying(address(this)), depositAmount, 10, "!balanceOfUnderlying this");
 
     // Test that we minted the correct amount of token
-    assertEq(alpacaERC4626.balanceOf(address(this)), mintAmount);
-    assertEq(alpacaERC4626.totalSupply(), mintAmount);
+    assertEq(alpacaERC4626.balanceOf(address(this)), mintAmount, "!balance of this");
+    assertEq(alpacaERC4626.totalSupply(), mintAmount, "!totalSupply");
 
-    assertTrue(underlyingToken.balanceOf(address(alpacaERC4626)) <= 10, "Beefy erc4626 locked amount checking");
+    assertApproxEqAbs(underlyingToken.balanceOf(address(alpacaERC4626)), 0, 10, "Beefy erc4626 locked amount checking");
 
     vm.startPrank(address(1));
     underlyingToken.approve(address(alpacaERC4626), depositAmount);
     alpacaERC4626.mint(mintAmount, address(1));
 
     // Test that the balance view calls work
-    assertTrue(depositAmount + depositAmount - alpacaERC4626.totalAssets() <= 10);
-    assertTrue(depositAmount - alpacaERC4626.balanceOfUnderlying(address(1)) <= 10);
+    assertApproxEqAbs(depositAmount + depositAmount, alpacaERC4626.totalAssets(), 10, "!totalAssets2");
+    assertApproxEqAbs(depositAmount, alpacaERC4626.balanceOfUnderlying(address(1)), 10, "!balanceOfUnderlying1");
 
     // Test that we minted the correct amount of token
-    assertEq(alpacaERC4626.balanceOf(address(1)), mintAmount);
-    assertEq(alpacaERC4626.totalSupply(), mintAmount + mintAmount);
+    assertApproxEqAbs(alpacaERC4626.balanceOf(address(1)), mintAmount, 10, "!balance of 1");
+    assertApproxEqAbs(alpacaERC4626.totalSupply(), mintAmount + mintAmount, 10, "!totalSupply2");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     uint256 expectedBeefyShares = getExpectedVaultShares(depositAmount * 2);
 
     assertApproxEqAbs(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares, 10, "!balance of erc4626");
 
-    assertTrue(underlyingToken.balanceOf(address(alpacaERC4626)) <= 10, "Beefy erc4626 locked amount checking");
+    assertApproxEqAbs(underlyingToken.balanceOf(address(alpacaERC4626)), 0, 10, "Beefy erc4626 locked amount checking");
     vm.stopPrank();
   }
 
