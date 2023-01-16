@@ -4,6 +4,8 @@ pragma solidity >=0.8.0;
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { CurveLpTokenLiquidatorNoRegistry } from "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
 import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
+import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
+import "../external/curve/ICurvePool.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
@@ -57,5 +59,40 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     assertEq(address(outputToken), 0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
     assertGt(outputAmount, 0);
     assertEq(outputToken.balanceOf(address(liquidator)), outputAmount);
+  }
+
+  function testCurveLPOracle() public fork(POLYGON_MAINNET) {
+    MasterPriceOracle mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+    //CurveLpTokenPriceOracleNoRegistry oracle = CurveLpTokenPriceOracleNoRegistry(0xaCF3E1C6f2D6Ff12B8aEE44413D6834774B3f7A3);
+    address stMaticMaticCurveLPToken = 0xe7CEA2F6d7b120174BF3A9Bc98efaF1fF72C997d;
+    address curvePool = 0xFb6FE7802bA9290ef8b00CA16Af4Bc26eb663a28;
+
+    uint256 priceBefore = mpo.price(0xe7CEA2F6d7b120174BF3A9Bc98efaF1fF72C997d);
+    emit log_named_uint("priceBefore", priceBefore);
+
+    address hacker = address(1337);
+    uint256 flashLoaned = 72e6 * 1e18;
+
+    vm.deal(hacker, flashLoaned + 1e18);
+    //    WETH wmatic = WETH(payable(0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270));
+    //
+    //    wmatic.deposit{value: 270000 * 1e18}();
+
+    ICurvePool pool = ICurvePool(curvePool); // 0 - stMatic, 1 - wmatic
+
+    emit log_named_address("coin0", pool.coins(0));
+    emit log_named_address("coin1", pool.coins(1));
+
+    uint256[2] memory amounts;
+    amounts[0] = 0;
+    amounts[1] = flashLoaned;
+
+    vm.startPrank(hacker);
+
+    pool.add_liquidity(amounts, 1, true);
+    vm.stopPrank();
+
+    uint256 priceAfter = mpo.price(0xe7CEA2F6d7b120174BF3A9Bc98efaF1fF72C997d);
+    emit log_named_uint("priceAfter", priceAfter);
   }
 }

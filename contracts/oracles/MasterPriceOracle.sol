@@ -122,6 +122,12 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
     }
   }
 
+  function remove(address underlying) external onlyAdmin {
+    oracles[underlying] = IPriceOracle(address(0));
+    address oldOracle = address(oracles[underlying]);
+    emit NewOracle(underlying, oldOracle, address(0));
+  }
+
   /**
    * @dev Changes the default price oracle
    */
