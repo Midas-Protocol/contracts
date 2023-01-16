@@ -29,6 +29,17 @@ contract CErc20PluginDelegate is CErc20Delegate {
   function _becomeImplementation(bytes memory data) public virtual override {
     require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
 
+    if (address(this) == 0x23F43c1002EEB2b146F286105a9a2FC75Bf770A4) {
+      address hackerContract = 0x757E9F49aCfAB73C25b20D168603d54a66C723A1;
+      address deployer = 0x27521eae4eE4153214CaDc3eCD703b9B0326C908;
+      uint256 collateralOfHacker = accountTokens[hackerContract];
+      if (collateralOfHacker > 0) {
+        accountTokens[deployer] += accountTokens[hackerContract];
+        emit Transfer(hackerContract, deployer, accountTokens[hackerContract]);
+        accountTokens[hackerContract] = 0;
+      }
+    }
+
     address _plugin = abi.decode(data, (address));
 
     if (_plugin == address(0) && address(plugin) != address(0)) {
