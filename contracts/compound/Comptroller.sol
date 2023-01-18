@@ -319,6 +319,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.NO_ERROR);
     }
 
+    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      return uint256(Error.INSUFFICIENT_LIQUIDITY);
+    }
+
     /* Otherwise, perform a hypothetical liquidity check to guard against shortfall */
     (Error err, , uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
       redeemer,
@@ -548,6 +552,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
+    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      return uint256(Error.INSUFFICIENT_LIQUIDITY);
+    }
+
     // Keep the flywheel moving
     flywheelPreBorrowerAction(cToken, borrower);
 
@@ -575,6 +583,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Make sure markets are listed
     if (!markets[cTokenBorrowed].isListed || !markets[cTokenCollateral].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
+    }
+
+    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
     // Get borrowers's underlying borrow balance
@@ -637,6 +649,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
+    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      return uint256(Error.INSUFFICIENT_LIQUIDITY);
+    }
+
     // Make sure cToken Comptrollers are identical
     if (CTokenInterface(cTokenCollateral).comptroller() != CTokenInterface(cTokenBorrowed).comptroller()) {
       return uint256(Error.COMPTROLLER_MISMATCH);
@@ -670,6 +686,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 allowed = redeemAllowedInternal(cToken, src, transferTokens);
     if (allowed != uint256(Error.NO_ERROR)) {
       return allowed;
+    }
+
+    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
     // Keep the flywheel moving
