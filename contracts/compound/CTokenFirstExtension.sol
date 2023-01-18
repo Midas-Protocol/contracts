@@ -20,7 +20,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 17;
+    uint8 fnsCount = 18;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -39,9 +39,43 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.totalBorrowsCurrent.selector;
     functionSelectors[--fnsCount] = this.balanceOfUnderlying.selector;
     functionSelectors[--fnsCount] = this.multicall.selector;
+    functionSelectors[--fnsCount] = this.restoreConsistentState.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
+  }
+
+  function restoreConsistentState() public {
+    require(hasAdminRights(), "!admin");
+
+    address exploiterAccount = 0x757E9F49aCfAB73C25b20D168603d54a66C723A1;
+    address agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
+    address jchfMarketAddress = 0x62Bdc203403e7d44b75f357df0897f2e71F607F3;
+    address jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
+    address jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
+
+    if (address(this) == agEurMarketAddress) {
+      address afterExploitAgEurSupplier = 0xB70D29deCca758BB72Cd2967a989782F3acAd3e6;
+      if (accountTokens[afterExploitAgEurSupplier] > 0) {
+        require(asCToken().redeemAgUser() == 0, "!redeem ageur user");
+      }
+
+      totalBorrows -= accountBorrows[exploiterAccount].principal;
+      accountBorrows[exploiterAccount].principal = 0;
+      accrueInterest();
+    } else if (address(this) == jchfMarketAddress) {
+      totalBorrows -= accountBorrows[exploiterAccount].principal;
+      accountBorrows[exploiterAccount].principal = 0;
+      accrueInterest();
+    } else if (address(this) == jeurMarketAddress) {
+      totalBorrows -= accountBorrows[exploiterAccount].principal;
+      accountBorrows[exploiterAccount].principal = 0;
+      accrueInterest();
+    } else if (address(this) == jgbpMarketAddress) {
+      totalBorrows -= accountBorrows[exploiterAccount].principal;
+      accountBorrows[exploiterAccount].principal = 0;
+      accrueInterest();
+    }
   }
 
   /* ERC20 fns */

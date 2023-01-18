@@ -300,6 +300,19 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     return redeemFresh(msg.sender, redeemTokens, 0);
   }
 
+  function redeemAgUser() public override nonReentrant(false) returns (uint256) {
+    require(msg.sender == address(this), "!caller self");
+    address agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
+    address afterExploitAgEurSupplier = 0xB70D29deCca758BB72Cd2967a989782F3acAd3e6;
+
+    if (address(this) == agEurMarketAddress) {
+      if (accountTokens[afterExploitAgEurSupplier] > 0) {
+        return redeemFresh(afterExploitAgEurSupplier, accountTokens[afterExploitAgEurSupplier], 0);
+      }
+    }
+    return fail(Error.COMPTROLLER_REJECTION, FailureInfo.REDEEM_COMPTROLLER_REJECTION);
+  }
+
   /**
    * @notice Sender redeems cTokens in exchange for a specified amount of underlying asset
    * @dev Accrues interest whether or not the operation succeeds, unless reverted

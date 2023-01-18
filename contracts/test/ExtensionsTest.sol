@@ -99,37 +99,41 @@ contract ExtensionsTest is BaseTest {
     third = new MockThirdComptrollerExtension();
 
     if (block.chainid == BSC_MAINNET) {
-      // change the implementation to the new that can add extensions
-      Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
-      latestComptrollerImplementation = address(newComptrollerImplementation);
-
       Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
-      address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
-
-      // whitelist the upgrade
-      vm.startPrank(ffd.owner());
-      ffd._editComptrollerImplementationWhitelist(
-        asArray(oldComptrollerImplementation),
-        asArray(latestComptrollerImplementation),
-        asArray(true)
-      );
-      // whitelist the new pool creation
-      ffd._editComptrollerImplementationWhitelist(
-        asArray(address(0)),
-        asArray(latestComptrollerImplementation),
-        asArray(true)
-      );
-      DiamondExtension[] memory extensions = new DiamondExtension[](1);
-      extensions[0] = cfe;
-      ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);
-      vm.stopPrank();
-
-      // upgrade to the new comptroller
-      vm.startPrank(asUnitroller.admin());
-      asUnitroller._setPendingImplementation(latestComptrollerImplementation);
-      newComptrollerImplementation._become(asUnitroller);
-      vm.stopPrank();
+      _upgradeExistingComptroller(asUnitroller);
     }
+  }
+
+  function _upgradeExistingComptroller(Unitroller asUnitroller) internal {
+    // change the implementation to the new that can add extensions
+    Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
+    latestComptrollerImplementation = address(newComptrollerImplementation);
+
+    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
+
+    // whitelist the upgrade
+    vm.startPrank(ffd.owner());
+    ffd._editComptrollerImplementationWhitelist(
+      asArray(oldComptrollerImplementation),
+      asArray(latestComptrollerImplementation),
+      asArray(true)
+    );
+    // whitelist the new pool creation
+    ffd._editComptrollerImplementationWhitelist(
+      asArray(address(0)),
+      asArray(latestComptrollerImplementation),
+      asArray(true)
+    );
+    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    extensions[0] = cfe;
+    ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);
+    vm.stopPrank();
+
+    // upgrade to the new comptroller
+    vm.startPrank(asUnitroller.admin());
+    asUnitroller._setPendingImplementation(latestComptrollerImplementation);
+    newComptrollerImplementation._become(asUnitroller);
+    vm.stopPrank();
   }
 
   function testExtensionReplace() public debuggingOnly fork(BSC_MAINNET) {
@@ -303,6 +307,10 @@ contract ExtensionsTest is BaseTest {
     CTokenExtensionInterface(address(asDelegate)).accrueInterest();
     emit log("new implementation");
     emit log_address(asDelegate.implementation());
+
+    // turn auto impl off
+    vm.prank(pool.admin());
+    pool._toggleAutoImplementations(false);
   }
 
   function testBscComptrollerExtensions() public debuggingOnly fork(BSC_MAINNET) {
@@ -340,5 +348,20 @@ contract ExtensionsTest is BaseTest {
       address[] memory extensions = asBase._listExtensions();
       assertEq(extensions.length, 1, "each pool should have the first extension");
     }
+  }
+
+  function testRestoreConsistentMarketsState() public debuggingOnly fork(POLYGON_MAINNET) {
+    address agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
+    address jchfMarketAddress = 0x62Bdc203403e7d44b75f357df0897f2e71F607F3;
+    address jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
+    address jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
+
+    CErc20Delegate market = CErc20Delegate(agEurMarketAddress);
+    _upgradeExistingCTokenExtension(market);
+    Unitroller asUnitroller = Unitroller(payable(address(market.comptroller())));
+    _upgradeExistingComptroller(asUnitroller);
+
+    vm.startPrank(asUnitroller.admin());
+    CTokenFirstExtension(agEurMarketAddress).restoreConsistentState();
   }
 }
