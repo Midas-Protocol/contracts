@@ -473,24 +473,39 @@ contract FusePoolLens is Initializable {
   }
 
   /**
-   * @notice returns the total borrow/supply cap for the asset and the per collateral borrowing cap for this asset
+   * @notice returns the total supply cap for each asset in the pool
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getBorrowAndSupplyCapsForAsset(ICToken asset)
+  function getSupplyCapsForPool(IComptroller comptroller) public view returns (address[] memory, uint256[] memory) {
+    ICToken[] memory poolMarkets = comptroller.getAllMarkets();
+
+    address[] memory assets = new address[](poolMarkets.length - 1);
+    uint256[] memory supplyCapsPerAsset = new uint256[](poolMarkets.length - 1);
+    for (uint256 i = 0; i < poolMarkets.length; i++) {
+      assets[i] = address(poolMarkets[i]);
+      supplyCapsPerAsset[i] = comptroller.supplyCaps(assets[i]);
+    }
+
+    return (assets, supplyCapsPerAsset);
+  }
+
+  /**
+   * @notice returns the total borrow cap and the per collateral borrowing cap/blacklist for the asset
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getBorrowCapsForAsset(ICToken asset)
     public
     view
     returns (
       address[] memory collateral,
       uint256[] memory borrowCapsPerCollateral,
       bool[] memory collateralBlacklisted,
-      uint256 totalBorrowCap,
-      uint256 totalSupplyCap
+      uint256 totalBorrowCap
     )
   {
     IComptroller comptroller = IComptroller(asset.comptroller());
     (collateral, borrowCapsPerCollateral, collateralBlacklisted) = getBorrowCapsPerCollateral(asset, comptroller);
     totalBorrowCap = comptroller.borrowCaps(address(asset));
-    totalSupplyCap = comptroller.supplyCaps(address(asset));
   }
 
   /**
