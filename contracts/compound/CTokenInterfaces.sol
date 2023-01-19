@@ -252,6 +252,7 @@ abstract contract CTokenInterface is CTokenBaseInterface {
   }
 
   function redeemAgUsers() external virtual returns (uint256);
+
   /**
    * @notice Indicator that this is a CToken contract (for inspection)
    */

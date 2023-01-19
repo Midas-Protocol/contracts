@@ -357,7 +357,7 @@ contract ExtensionsTest is BaseTest {
     address jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
 
     address[] memory markets = asArray(agEurMarketAddress, jchfMarketAddress, jeurMarketAddress, jgbpMarketAddress);
-    for(uint256 i = 0; i < markets.length; i++) {
+    for (uint256 i = 0; i < markets.length; i++) {
       address marketAddress = markets[i];
 
       CErc20Delegate market = CErc20Delegate(marketAddress);
@@ -386,7 +386,7 @@ contract ExtensionsTest is BaseTest {
 
     address jarvisMMM = 0x9fB2fbaeCbC0DB28ac5dDE618D6bA2806F71167B;
 
-    for(uint256 i = 0; i < markets.length; i++) {
+    for (uint256 i = 0; i < markets.length; i++) {
       address marketAddress = markets[i];
       CErc20Delegate market = CErc20Delegate(marketAddress);
       _upgradeExistingCTokenExtension(market);
