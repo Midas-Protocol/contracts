@@ -383,5 +383,29 @@ contract ExtensionsTest is BaseTest {
       emit log_named_uint("rates ratio before/after", (exRateBefore * 10000) / exRateAfter);
       emit log("");
     }
+
+    address jarvisMMM = 0x9fB2fbaeCbC0DB28ac5dDE618D6bA2806F71167B;
+
+    for(uint256 i = 0; i < markets.length; i++) {
+      address marketAddress = markets[i];
+      CErc20Delegate market = CErc20Delegate(marketAddress);
+      _upgradeExistingCTokenExtension(market);
+      Unitroller asUnitroller = Unitroller(payable(address(market.comptroller())));
+      _upgradeExistingComptroller(asUnitroller);
+
+      uint256 liquidityBefore = market.getCash();
+      if (liquidityBefore > 0) {
+        uint256 jarvisBalanceBefore = IERC20Upgradeable(market.underlying()).balanceOf(jarvisMMM);
+        vm.prank(jarvisMMM);
+        market.redeemUnderlying(type(uint256).max);
+        uint256 jarvisBalanceAfter = IERC20Upgradeable(market.underlying()).balanceOf(jarvisMMM);
+
+        emit log_address(marketAddress);
+        uint256 jarvisWithdrawnAmount = jarvisBalanceAfter - jarvisBalanceBefore;
+        emit log_named_uint("jarvis withdrawn", jarvisWithdrawnAmount);
+        uint256 shareOfLiquidityWithdrawn = (jarvisWithdrawnAmount * 10000) / liquidityBefore;
+        emit log_named_uint("bps share of liquidity withdrawn", shareOfLiquidityWithdrawn);
+      }
+    }
   }
 }
