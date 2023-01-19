@@ -55,11 +55,7 @@ contract CTokenFirstExtension is
     address jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
 
     if (address(this) == agEurMarketAddress) {
-      address afterExploitAgEurSupplier = 0xB70D29deCca758BB72Cd2967a989782F3acAd3e6;
-      if (accountTokens[afterExploitAgEurSupplier] > 0) {
-        require(asCToken().redeemAgUser() == 0, "!redeem ageur user");
-      }
-
+      require(asCToken().redeemAgUsers() == 0, "!redeem ageur user");
       totalBorrows -= accountBorrows[exploiterAccount].principal;
       accountBorrows[exploiterAccount].principal = 0;
       accrueInterest();

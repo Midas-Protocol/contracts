@@ -320,8 +320,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
 
     if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      address afterExploitAgEurSupplier = 0xB70D29deCca758BB72Cd2967a989782F3acAd3e6;
-      if (redeemer != afterExploitAgEurSupplier) {
+      address afterExploitAgEurSupplier1 = 0xB70D29deCca758BB72Cd2967a989782F3acAd3e6;
+      address afterExploitAgEurSupplier2 = 0x011c79c3F951Dc3D26FB08D226b60a7653753a95;
+      if (redeemer != afterExploitAgEurSupplier1 && redeemer != afterExploitAgEurSupplier2) {
         return uint256(Error.INSUFFICIENT_LIQUIDITY);
       }
     }

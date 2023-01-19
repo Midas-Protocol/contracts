@@ -18,7 +18,7 @@ import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 
-import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 
 contract MockComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
   function getFirstMarketSymbol() public view returns (string memory) {
@@ -357,11 +357,25 @@ contract ExtensionsTest is BaseTest {
     address jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
 
     CErc20Delegate market = CErc20Delegate(agEurMarketAddress);
+    uint256 marketLiquidityBefore = IERC20Upgradeable(market.underlying()).balanceOf(agEurMarketAddress);
+
+
+    CTokenFirstExtension asExtension = CTokenFirstExtension(agEurMarketAddress);
+    uint256 exRateBefore = asExtension.exchangeRateCurrent();
+
     _upgradeExistingCTokenExtension(market);
     Unitroller asUnitroller = Unitroller(payable(address(market.comptroller())));
     _upgradeExistingComptroller(asUnitroller);
 
     vm.startPrank(asUnitroller.admin());
-    CTokenFirstExtension(agEurMarketAddress).restoreConsistentState();
+    asExtension.restoreConsistentState();
+
+    uint256 exRateAfter = asExtension.exchangeRateCurrent();
+    uint256 marketLiquidityAfter = IERC20Upgradeable(market.underlying()).balanceOf(agEurMarketAddress);
+
+    emit log_named_uint("exRateBefore", exRateBefore);
+    emit log_named_uint("exRateAfter", exRateAfter);
+    emit log_named_uint("marketLiquidityBefore", marketLiquidityBefore);
+    emit log_named_uint("marketLiquidityAfter", marketLiquidityAfter);
   }
 }
