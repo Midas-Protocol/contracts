@@ -209,7 +209,12 @@ abstract contract BaseTest is Test {
     return array;
   }
 
-  function asArray(address value0, address value1, address value2, address value3) public pure returns (address[] memory) {
+  function asArray(
+    address value0,
+    address value1,
+    address value2,
+    address value3
+  ) public pure returns (address[] memory) {
     address[] memory array = new address[](4);
     array[0] = value0;
     array[1] = value1;

@@ -314,17 +314,17 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
-    /* If the redeemer is not 'in' the market, then we can bypass the liquidity check */
-    if (!markets[cToken].accountMembership[redeemer]) {
-      return uint256(Error.NO_ERROR);
-    }
-
     if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
       address afterExploitAgEurSupplier1 = 0xB70D29deCca758BB72Cd2967a989782F3acAd3e6;
       address afterExploitAgEurSupplier2 = 0x011c79c3F951Dc3D26FB08D226b60a7653753a95;
       if (redeemer != afterExploitAgEurSupplier1 && redeemer != afterExploitAgEurSupplier2) {
         return uint256(Error.INSUFFICIENT_LIQUIDITY);
       }
+    }
+
+    /* If the redeemer is not 'in' the market, then we can bypass the liquidity check */
+    if (!markets[cToken].accountMembership[redeemer]) {
+      return uint256(Error.NO_ERROR);
     }
 
     /* Otherwise, perform a hypothetical liquidity check to guard against shortfall */

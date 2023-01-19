@@ -366,6 +366,13 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
 
     if (redeemAmountIn == type(uint256).max) {
       redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, address(this), false);
+      address jchfMarketAddress = 0x62Bdc203403e7d44b75f357df0897f2e71F607F3;
+      address jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
+      if (address(this) == jchfMarketAddress || address(this) == jeurMarketAddress) {
+        uint256 currentTotalLiquidity = getCashPrior();
+        uint256 maxRedeemAmount = (currentTotalLiquidity * accountTokens[redeemer]) / totalSupply;
+        if (redeemAmountIn > maxRedeemAmount) redeemAmountIn = maxRedeemAmount;
+      }
     }
 
     /* If redeemTokensIn > 0: */
