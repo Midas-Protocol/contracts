@@ -402,4 +402,53 @@ contract ExtensionsTest is BaseTest {
     emit log_named_uint("jarvis comp tokens", compensationToken.balanceOf(jarvisMMM));
     emit log_named_uint("midas comp token total supply", compensationToken.totalSupply());
   }
+
+  function testGetAllAffectedAssetsBorrowers() public debuggingOnly fork(POLYGON_MAINNET) {
+    address jchfMarketAddress = 0x62Bdc203403e7d44b75f357df0897f2e71F607F3;
+    address jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
+    address jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
+
+    address exploiter = 0x757E9F49aCfAB73C25b20D168603d54a66C723A1;
+
+    bytes[] memory marketNames = asArray("jCHF", "jEUR", "jGPB");
+    address[] memory markets = asArray(jchfMarketAddress, jeurMarketAddress, jgbpMarketAddress);
+    for (uint256 i = 0; i < markets.length; i++) {
+      emit log_named_string("Borrrowers for market", string(marketNames[i]));
+
+      address marketAddress = markets[i];
+
+      CErc20Delegate market = CErc20Delegate(marketAddress);
+      Comptroller comptroller = Comptroller(payable(address(market.comptroller())));
+      ComptrollerFirstExtension comptrollerExt = comptroller.asComptrollerFirstExtension();
+
+      address[] memory borrowers = comptrollerExt.getAllBorrowers();
+      emit log_named_uint("total borrowers", borrowers.length);
+
+      if (borrowers.length == 0) {
+        emit log("No borrowers");
+        emit log("");
+        continue;
+      }
+
+      uint256 totalMarketBorrow = 0;
+
+      for (uint256 j = 0; j < borrowers.length; j++) {
+        if (address(borrowers[j]) == address(exploiter)) {
+          continue;
+        }
+        uint256 borrowBalance = market.borrowBalanceStored(borrowers[j]);
+        if (borrowBalance == 0) {
+          continue;
+        }
+
+        emit log_named_address("borrower", borrowers[j]);
+        // get each borrower's borrow balance
+        emit log_named_uint("borrow balance", borrowBalance);
+        emit log("");
+        totalMarketBorrow += borrowBalance;
+      }
+      emit log_named_uint("total market borrows", totalMarketBorrow);
+      emit log("");
+    }
+  }
 }
