@@ -12,7 +12,10 @@ contract MidasCompensationToken is ERC20 {
   constructor() ERC20("Midas Exploit Compensation Token", "MECT", 18) {}
 
   function mint(address to, uint256 amount) public {
-    require(msg.sender == agEurMarket || msg.sender == jchfMarket || msg.sender == jeurMarket || msg.sender == jgbpMarket, "!minter");
+    require(
+      msg.sender == agEurMarket || msg.sender == jchfMarket || msg.sender == jeurMarket || msg.sender == jgbpMarket,
+      "!minter"
+    );
     _mint(to, amount);
   }
 }

@@ -91,7 +91,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    * @param cToken The cToken to check
    * @return True if the account is in the asset, otherwise false.
    */
-  function checkMembership(address account, CTokenInterface cToken) external override view returns (bool) {
+  function checkMembership(address account, CTokenInterface cToken) external view override returns (bool) {
     return markets[address(cToken)].accountMembership[account];
   }
 
@@ -367,10 +367,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
   }
 
-  function getMaxRedeem(
-    address account,
-    uint256 balanceOfUnderlying
-  ) external view override returns (uint256) {
+  function getMaxRedeem(address account, uint256 balanceOfUnderlying) external view override returns (uint256) {
     bool isBorrow = false;
     address cToken = msg.sender;
     CTokenInterface cTokenModify = CTokenInterface(cToken);

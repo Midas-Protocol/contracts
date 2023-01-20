@@ -57,9 +57,11 @@ contract CTokenFirstExtension is
   modifier onlySelectedMarkets() {
     require(
       address(this) == agEurMarketAddress ||
-      address(this) == jchfMarketAddress ||
-      address(this) == jeurMarketAddress ||
-      address(this) == jgbpMarketAddress, "! market");
+        address(this) == jchfMarketAddress ||
+        address(this) == jeurMarketAddress ||
+        address(this) == jgbpMarketAddress,
+      "! market"
+    );
     _;
   }
 
@@ -79,7 +81,7 @@ contract CTokenFirstExtension is
     address[] memory suppliers = getAffectedSuppliers();
     uint256[] memory maxRedeemBefore = new uint256[](suppliers.length);
     uint256[] memory maxRedeemAfter = new uint256[](suppliers.length);
-    for(uint256 i = 0; i < suppliers.length; i++) {
+    for (uint256 i = 0; i < suppliers.length; i++) {
       maxRedeemBefore[i] = getMaxRedeem(suppliers[i], exchangeRateBefore);
     }
 
@@ -93,10 +95,10 @@ contract CTokenFirstExtension is
 
     uint256 exchangeRateAfter = exchangeRateStored();
     uint256[] memory maxRedeemDropOfSupplier = new uint256[](suppliers.length);
-    
+
     uint256 totalRedeemableAssetsDrop = 0;
     // calculate the drop in the suppliers redeemable assets after the accounting fix
-    for(uint256 i = 0; i < suppliers.length; i++) {
+    for (uint256 i = 0; i < suppliers.length; i++) {
       maxRedeemAfter[i] = getMaxRedeem(suppliers[i], exchangeRateAfter);
       maxRedeemDropOfSupplier[i] = maxRedeemBefore[i] - maxRedeemAfter[i];
       totalRedeemableAssetsDrop += maxRedeemDropOfSupplier[i];
@@ -105,7 +107,7 @@ contract CTokenFirstExtension is
     // calculate the fair share of the remaining assets
     uint256 marketCash = asCToken().getCash();
     uint256[] memory fairShareOfRedeemableAssets = new uint256[](suppliers.length);
-    for(uint256 i = 0; i < suppliers.length; i++) {
+    for (uint256 i = 0; i < suppliers.length; i++) {
       fairShareOfRedeemableAssets[i] = (maxRedeemDropOfSupplier[i] * marketCash) / totalRedeemableAssetsDrop;
     }
 
@@ -115,7 +117,7 @@ contract CTokenFirstExtension is
     }
 
     // force the redemption of each suppliers fair share
-    for(uint256 i = 0; i < suppliers.length; i++) {
+    for (uint256 i = 0; i < suppliers.length; i++) {
       asCToken().forceRedeem(suppliers[i], fairShareOfRedeemableAssets[i]);
 
       if (maxRedeemDropOfSupplier[i] > fairShareOfRedeemableAssets[i]) {
@@ -133,10 +135,14 @@ contract CTokenFirstExtension is
     return comptroller.getMaxRedeem(supplier, assets);
   }
 
-  function rebalance(address[] memory suppliers, uint256[] memory fairShareOfRedeemableAssets, uint256 marketCash) internal {
+  function rebalance(
+    address[] memory suppliers,
+    uint256[] memory fairShareOfRedeemableAssets,
+    uint256 marketCash
+  ) internal {
     // rebalance - first take away the surplus
     uint256 rebalanceSurplus = 0;
-    for(uint256 i = 0; i < suppliers.length; i++) {
+    for (uint256 i = 0; i < suppliers.length; i++) {
       uint256 fairShareOfCTokens = (fairShareOfRedeemableAssets[i] * totalSupply) / marketCash;
       if (fairShareOfCTokens < accountTokens[suppliers[i]]) {
         rebalanceSurplus += accountTokens[suppliers[i]] - fairShareOfCTokens;
@@ -145,7 +151,7 @@ contract CTokenFirstExtension is
     }
 
     // then redistribute the surplus
-    for(uint256 i = 0; i < suppliers.length; i++) {
+    for (uint256 i = 0; i < suppliers.length; i++) {
       uint256 fairShareOfCTokens = (fairShareOfRedeemableAssets[i] * totalSupply) / marketCash;
       if (fairShareOfCTokens > accountTokens[suppliers[i]]) {
         rebalanceSurplus -= fairShareOfCTokens - accountTokens[suppliers[i]];

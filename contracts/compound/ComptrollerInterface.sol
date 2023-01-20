@@ -7,9 +7,9 @@ abstract contract ComptrollerInterface {
   /// @notice Indicator that this is a Comptroller contract (for inspection)
   bool public constant isComptroller = true;
 
-  function checkMembership(address account, CTokenInterface cToken) external virtual view returns (bool);
+  function checkMembership(address account, CTokenInterface cToken) external view virtual returns (bool);
 
-  function getMaxRedeem(address account, uint256 balanceOfUnderlying) external virtual view returns (uint256);
+  function getMaxRedeem(address account, uint256 balanceOfUnderlying) external view virtual returns (uint256);
 
   function getMaxRedeemOrBorrow(
     address account,
