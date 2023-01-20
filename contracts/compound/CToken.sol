@@ -300,22 +300,9 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     return redeemFresh(msg.sender, redeemTokens, 0);
   }
 
-  function redeemAgUsers() public override nonReentrant(false) returns (uint256) {
+  function forceRedeem(address account, uint256 amount) public override {
     require(msg.sender == address(this), "!caller self");
-    address agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
-    address afterExploitAgEurSupplier1 = 0xB70D29deCca758BB72Cd2967a989782F3acAd3e6;
-    address afterExploitAgEurSupplier2 = 0x011c79c3F951Dc3D26FB08D226b60a7653753a95;
-
-    if (address(this) == agEurMarketAddress) {
-      if (accountTokens[afterExploitAgEurSupplier1] > 0) {
-        require(redeemFresh(afterExploitAgEurSupplier1, 0, 4100000000000000000000) == 0, "!ag user1");
-      }
-      if (accountTokens[afterExploitAgEurSupplier2] > 0) {
-        require(redeemFresh(afterExploitAgEurSupplier2, 0, 2000000000000000000000) == 0, "!ag user2");
-      }
-      return 0;
-    }
-    return fail(Error.COMPTROLLER_REJECTION, FailureInfo.REDEEM_COMPTROLLER_REJECTION);
+    require(redeemFresh(account, 0, amount) == 0, "!forced redeem");
   }
 
   /**
@@ -366,13 +353,6 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
 
     if (redeemAmountIn == type(uint256).max) {
       redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, address(this), false);
-      address jchfMarketAddress = 0x62Bdc203403e7d44b75f357df0897f2e71F607F3;
-      address jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
-      if (address(this) == jchfMarketAddress || address(this) == jeurMarketAddress) {
-        uint256 currentTotalLiquidity = getCashPrior();
-        uint256 maxRedeemAmount = (currentTotalLiquidity * accountTokens[redeemer]) / totalSupply;
-        if (redeemAmountIn > maxRedeemAmount) redeemAmountIn = maxRedeemAmount;
-      }
     }
 
     /* If redeemTokensIn > 0: */
@@ -411,10 +391,13 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
       vars.redeemAmount = redeemAmountIn;
     }
 
-    /* Fail if redeem not allowed */
-    uint256 allowed = comptroller.redeemAllowed(address(this), redeemer, vars.redeemTokens);
-    if (allowed != 0) {
-      return failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.REDEEM_COMPTROLLER_REJECTION, allowed);
+    // skip this check when calling forceRedeem
+    if (msg.sender != address(this)) {
+      /* Fail if redeem not allowed */
+      uint256 allowed = comptroller.redeemAllowed(address(this), redeemer, vars.redeemTokens);
+      if (allowed != 0) {
+        return failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.REDEEM_COMPTROLLER_REJECTION, allowed);
+      }
     }
 
     /* Verify market's block number equals current block number */

@@ -19,6 +19,7 @@ import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
+import { MidasCompensationToken } from "../midas/MidasCompensationToken.sol";
 
 contract MockComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
   function getFirstMarketSymbol() public view returns (string memory) {
@@ -356,6 +357,8 @@ contract ExtensionsTest is BaseTest {
     address jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
     address jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
 
+    MidasCompensationToken compensationToken = new MidasCompensationToken();
+
     address[] memory markets = asArray(agEurMarketAddress, jchfMarketAddress, jeurMarketAddress, jgbpMarketAddress);
     for (uint256 i = 0; i < markets.length; i++) {
       address marketAddress = markets[i];
@@ -371,7 +374,7 @@ contract ExtensionsTest is BaseTest {
       _upgradeExistingComptroller(asUnitroller);
 
       vm.prank(asUnitroller.admin());
-      asExtension.restoreConsistentState();
+      asExtension.restoreConsistentState(compensationToken);
 
       uint256 exRateAfter = asExtension.exchangeRateCurrent();
       uint256 marketLiquidityAfter = IERC20Upgradeable(market.underlying()).balanceOf(marketAddress);
@@ -384,28 +387,6 @@ contract ExtensionsTest is BaseTest {
       emit log("");
     }
 
-    address jarvisMMM = 0x9fB2fbaeCbC0DB28ac5dDE618D6bA2806F71167B;
-
-    for (uint256 i = 0; i < markets.length; i++) {
-      address marketAddress = markets[i];
-      CErc20Delegate market = CErc20Delegate(marketAddress);
-      _upgradeExistingCTokenExtension(market);
-      Unitroller asUnitroller = Unitroller(payable(address(market.comptroller())));
-      _upgradeExistingComptroller(asUnitroller);
-
-      uint256 liquidityBefore = market.getCash();
-      if (liquidityBefore > 0) {
-        uint256 jarvisBalanceBefore = IERC20Upgradeable(market.underlying()).balanceOf(jarvisMMM);
-        vm.prank(jarvisMMM);
-        market.redeemUnderlying(type(uint256).max);
-        uint256 jarvisBalanceAfter = IERC20Upgradeable(market.underlying()).balanceOf(jarvisMMM);
-
-        emit log_address(marketAddress);
-        uint256 jarvisWithdrawnAmount = jarvisBalanceAfter - jarvisBalanceBefore;
-        emit log_named_uint("jarvis withdrawn", jarvisWithdrawnAmount);
-        uint256 shareOfLiquidityWithdrawn = (jarvisWithdrawnAmount * 10000) / liquidityBefore;
-        emit log_named_uint("bps share of liquidity withdrawn", shareOfLiquidityWithdrawn);
-      }
-    }
+    emit log_named_uint("midas comp token total supply", compensationToken.totalSupply());
   }
 }
