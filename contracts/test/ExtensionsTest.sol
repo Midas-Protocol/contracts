@@ -422,14 +422,6 @@ contract ExtensionsTest is BaseTest {
       ComptrollerFirstExtension comptrollerExt = comptroller.asComptrollerFirstExtension();
 
       address[] memory borrowers = comptrollerExt.getAllBorrowers();
-      emit log_named_uint("total borrowers", borrowers.length);
-
-      if (borrowers.length == 0) {
-        emit log("No borrowers");
-        emit log("");
-        continue;
-      }
-
       uint256 totalMarketBorrow = 0;
 
       for (uint256 j = 0; j < borrowers.length; j++) {
@@ -447,7 +439,11 @@ contract ExtensionsTest is BaseTest {
         emit log("");
         totalMarketBorrow += borrowBalance;
       }
-      emit log_named_uint("total market borrows", totalMarketBorrow);
+      if (totalMarketBorrow == 0) {
+        emit log("No borrowers found found for this market");
+      } else {
+        emit log_named_uint("total market borrows", totalMarketBorrow);
+      }
       emit log("");
     }
   }
