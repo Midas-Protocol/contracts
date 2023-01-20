@@ -23,7 +23,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 18;
+    uint8 fnsCount = 19;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -43,6 +43,7 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.balanceOfUnderlying.selector;
     functionSelectors[--fnsCount] = this.multicall.selector;
     functionSelectors[--fnsCount] = this.restoreConsistentState.selector;
+    functionSelectors[--fnsCount] = this.getAffectedSuppliers.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
@@ -124,7 +125,7 @@ contract CTokenFirstExtension is
         // mint a token of amount that equals the non-redeemable value (denominated in MATIC)
         uint256 nonRedeemableAssets = maxRedeemDropOfSupplier[i] - fairShareOfRedeemableAssets[i];
         uint256 price = PriceOracle(0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31).getUnderlyingPrice(asCToken());
-        uint256 nonRedeemableValue = (nonRedeemableAssets * price) / exchangeRateStored();
+        uint256 nonRedeemableValue = (nonRedeemableAssets * price) / 1e18;
         compensationToken.mint(suppliers[i], nonRedeemableValue);
       }
     }
@@ -163,7 +164,7 @@ contract CTokenFirstExtension is
     require(rebalanceSurplus < 1000, "!rebalance");
   }
 
-  function getAffectedSuppliers() internal view returns (address[] memory suppliers) {
+  function getAffectedSuppliers() public view returns (address[] memory suppliers) {
     address jarvisMMM = 0x9fB2fbaeCbC0DB28ac5dDE618D6bA2806F71167B;
     if (address(this) == agEurMarketAddress) {
       address angleGovernorMultisig = 0xdA2D2f638D6fcbE306236583845e5822554c02EA;

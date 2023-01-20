@@ -365,24 +365,35 @@ contract ExtensionsTest is BaseTest {
 
       CErc20Delegate market = CErc20Delegate(marketAddress);
       CTokenFirstExtension asExtension = CTokenFirstExtension(marketAddress);
+      IERC20Upgradeable underlying = IERC20Upgradeable(market.underlying());
 
-      uint256 marketLiquidityBefore = IERC20Upgradeable(market.underlying()).balanceOf(marketAddress);
+      uint256 marketLiquidityBefore = underlying.balanceOf(marketAddress);
       uint256 exRateBefore = asExtension.exchangeRateCurrent();
 
       _upgradeExistingCTokenExtension(market);
       Unitroller asUnitroller = Unitroller(payable(address(market.comptroller())));
       _upgradeExistingComptroller(asUnitroller);
 
+      address[] memory affectedSuppliers = asExtension.getAffectedSuppliers();
+      uint256[] memory balancesBefore = new uint256[](affectedSuppliers.length);
+      for (uint256 j = 0; j < affectedSuppliers.length; j++) {
+        balancesBefore[j] = underlying.balanceOf(affectedSuppliers[j]);
+      }
+
       vm.prank(asUnitroller.admin());
       asExtension.restoreConsistentState(compensationToken);
 
       uint256 exRateAfter = asExtension.exchangeRateCurrent();
-      uint256 marketLiquidityAfter = IERC20Upgradeable(market.underlying()).balanceOf(marketAddress);
+      uint256 marketLiquidityAfter = underlying.balanceOf(marketAddress);
 
-      emit log_named_uint("marketLiquidityBefore", marketLiquidityBefore);
-      emit log_named_uint("marketLiquidityAfter", marketLiquidityAfter);
-      emit log_named_uint("exchangeRateBefore", exRateBefore);
-      emit log_named_uint("exchangeRateAfter", exRateAfter);
+      for (uint256 j = 0; j < affectedSuppliers.length; j++) {
+        uint256 balanceAfter = underlying.balanceOf(affectedSuppliers[j]);
+
+        emit log_named_address("supplier redeeming", affectedSuppliers[j]);
+        emit log_named_uint("withdrawn amount", balanceAfter - balancesBefore[j]);
+        emit log("");
+      }
+
       emit log_named_uint("rates ratio before/after", (exRateBefore * 10000) / exRateAfter);
       emit log("");
     }
