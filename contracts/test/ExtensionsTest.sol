@@ -398,6 +398,8 @@ contract ExtensionsTest is BaseTest {
       emit log("");
     }
 
+    address jarvisMMM = 0x9fB2fbaeCbC0DB28ac5dDE618D6bA2806F71167B;
+    emit log_named_uint("jarvis comp tokens", compensationToken.balanceOf(jarvisMMM));
     emit log_named_uint("midas comp token total supply", compensationToken.totalSupply());
   }
 }
