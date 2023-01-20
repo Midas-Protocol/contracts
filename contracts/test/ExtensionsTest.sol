@@ -17,6 +17,7 @@ import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDele
 import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
+import { PriceOracle } from "../compound/PriceOracle.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import { MidasCompensationToken } from "../midas/MidasCompensationToken.sol";
@@ -401,5 +402,28 @@ contract ExtensionsTest is BaseTest {
     address jarvisMMM = 0x9fB2fbaeCbC0DB28ac5dDE618D6bA2806F71167B;
     emit log_named_uint("jarvis comp tokens", compensationToken.balanceOf(jarvisMMM));
     emit log_named_uint("midas comp token total supply", compensationToken.totalSupply());
+  }
+
+  function testCalculateJarvisLoss() public fork(POLYGON_MAINNET) {
+    address jarvisMMM = 0x9fB2fbaeCbC0DB28ac5dDE618D6bA2806F71167B;
+    address jchfMarketAddress = 0x62Bdc203403e7d44b75f357df0897f2e71F607F3;
+    address jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
+    address jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
+
+    uint256 totalMaticValueLost = 0;
+    address[] memory jMarkets = asArray(jchfMarketAddress, jeurMarketAddress, jgbpMarketAddress);
+    uint256[] memory toBeRedeemed = asArray(21987540799528165135125, 192281037459820285841529, 4750000000000000000000);
+    for (uint256 i = 0; i < jMarkets.length; i++) {
+      CErc20Delegate market = CErc20Delegate(jMarkets[i]);
+      CTokenFirstExtension asExtension = CTokenFirstExtension(jMarkets[i]);
+      uint256 lockedBalance = asExtension.balanceOfUnderlying(jarvisMMM);
+
+      uint256 price = PriceOracle(0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31).getUnderlyingPrice(market);
+      uint256 lostValueInMatic = price * (lockedBalance - toBeRedeemed[i]) / 1e18;
+      totalMaticValueLost += lostValueInMatic;
+      emit log_named_uint("lost matic value", lostValueInMatic);
+    }
+
+    emit log_named_uint("total lost matic value", totalMaticValueLost);
   }
 }

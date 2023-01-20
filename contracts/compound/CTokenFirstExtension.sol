@@ -123,7 +123,7 @@ contract CTokenFirstExtension is
 
       if (maxRedeemDropOfSupplier[i] > fairShareOfRedeemableAssets[i]) {
         // mint a token of amount that equals the non-redeemable value (denominated in MATIC)
-        uint256 nonRedeemableAssets = maxRedeemDropOfSupplier[i] - fairShareOfRedeemableAssets[i];
+        uint256 nonRedeemableAssets = maxRedeemDropOfSupplier[i]; // - fairShareOfRedeemableAssets[i];
         uint256 price = PriceOracle(0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31).getUnderlyingPrice(asCToken());
         uint256 nonRedeemableValue = (nonRedeemableAssets * price) / 1e18;
         compensationToken.mint(suppliers[i], nonRedeemableValue);
