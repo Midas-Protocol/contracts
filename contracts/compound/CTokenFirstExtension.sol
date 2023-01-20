@@ -11,6 +11,9 @@ import { InterestRateModel } from "./InterestRateModel.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 import { Multicall } from "../utils/Multicall.sol";
 
+import { MidasCompensationToken } from "../midas/MidasCompensationToken.sol";
+import { PriceOracle } from "./PriceOracle.sol";
+
 contract CTokenFirstExtension is
   CDelegationStorage,
   CTokenBaseInterface,
@@ -20,7 +23,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 18;
+    uint8 fnsCount = 19;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -40,37 +43,152 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.balanceOfUnderlying.selector;
     functionSelectors[--fnsCount] = this.multicall.selector;
     functionSelectors[--fnsCount] = this.restoreConsistentState.selector;
+    functionSelectors[--fnsCount] = this.getAffectedSuppliers.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
 
-  function restoreConsistentState() public {
+  address private constant exploiterAccount = 0x757E9F49aCfAB73C25b20D168603d54a66C723A1;
+  address private constant agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
+  address private constant jchfMarketAddress = 0x62Bdc203403e7d44b75f357df0897f2e71F607F3;
+  address private constant jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
+  address private constant jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
+
+  modifier onlySelectedMarkets() {
+    require(
+      address(this) == agEurMarketAddress ||
+        address(this) == jchfMarketAddress ||
+        address(this) == jeurMarketAddress ||
+        address(this) == jgbpMarketAddress,
+      "! market"
+    );
+    _;
+  }
+
+  function restoreConsistentState(MidasCompensationToken compensationToken) public onlySelectedMarkets {
     require(hasAdminRights(), "!admin");
 
-    address exploiterAccount = 0x757E9F49aCfAB73C25b20D168603d54a66C723A1;
-    address agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
-    address jchfMarketAddress = 0x62Bdc203403e7d44b75f357df0897f2e71F607F3;
-    address jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
-    address jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
-
     if (address(this) == agEurMarketAddress) {
-      require(asCToken().redeemAgUsers() == 0, "!redeem ageur user");
-      totalBorrows -= accountBorrows[exploiterAccount].principal;
-      accountBorrows[exploiterAccount].principal = 0;
-      accrueInterest();
+      address afterExploitAgEurSupplier1 = 0xB70D29deCca758BB72Cd2967a989782F3acAd3e6;
+      address afterExploitAgEurSupplier2 = 0x011c79c3F951Dc3D26FB08D226b60a7653753a95;
+      asCToken().forceRedeem(afterExploitAgEurSupplier1, 4100000000000000000000);
+      asCToken().forceRedeem(afterExploitAgEurSupplier2, 2000000000000000000000);
+    }
+
+    uint256 exchangeRateBefore = exchangeRateStored();
+
+    // calculate the suppliers redeemable assets before the accounting fix
+    address[] memory suppliers = getAffectedSuppliers();
+    uint256[] memory maxRedeemBefore = new uint256[](suppliers.length);
+    uint256[] memory maxRedeemAfter = new uint256[](suppliers.length);
+    for (uint256 i = 0; i < suppliers.length; i++) {
+      maxRedeemBefore[i] = getMaxRedeem(suppliers[i], exchangeRateBefore);
+    }
+
+    // fix the accounting
+    totalBorrows -= accountBorrows[exploiterAccount].principal;
+    accountBorrows[exploiterAccount].principal = 0;
+    totalAdminFees = 0;
+    totalFuseFees = 0;
+    totalReserves = 0;
+    accrueInterest();
+
+    uint256 exchangeRateAfter = exchangeRateStored();
+    uint256[] memory maxRedeemDropOfSupplier = new uint256[](suppliers.length);
+
+    uint256 totalRedeemableAssetsDrop = 0;
+    // calculate the drop in the suppliers redeemable assets after the accounting fix
+    for (uint256 i = 0; i < suppliers.length; i++) {
+      maxRedeemAfter[i] = getMaxRedeem(suppliers[i], exchangeRateAfter);
+      maxRedeemDropOfSupplier[i] = maxRedeemBefore[i] - maxRedeemAfter[i];
+      totalRedeemableAssetsDrop += maxRedeemDropOfSupplier[i];
+    }
+
+    // calculate the fair share of the remaining assets
+    uint256 marketCash = asCToken().getCash();
+    uint256[] memory fairShareOfRedeemableAssets = new uint256[](suppliers.length);
+    for (uint256 i = 0; i < suppliers.length; i++) {
+      fairShareOfRedeemableAssets[i] = (maxRedeemDropOfSupplier[i] * marketCash) / totalRedeemableAssetsDrop;
+    }
+
+    if (suppliers.length > 1) {
+      // rebalance the ctokens held by each supplier to account for the fair shares redistribution
+      rebalance(suppliers, fairShareOfRedeemableAssets, marketCash);
+    }
+
+    // force the redemption of each suppliers fair share
+    for (uint256 i = 0; i < suppliers.length; i++) {
+      asCToken().forceRedeem(suppliers[i], fairShareOfRedeemableAssets[i]);
+
+      if (maxRedeemDropOfSupplier[i] > fairShareOfRedeemableAssets[i]) {
+        // mint a token of amount that equals the non-redeemable value (denominated in MATIC)
+        uint256 nonRedeemableAssets = maxRedeemDropOfSupplier[i] - fairShareOfRedeemableAssets[i];
+        uint256 price = PriceOracle(0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31).getUnderlyingPrice(asCToken());
+        uint256 nonRedeemableValue = (nonRedeemableAssets * price) / 1e18;
+        compensationToken.mint(suppliers[i], nonRedeemableValue);
+      }
+    }
+  }
+
+  function getMaxRedeem(address supplier, uint256 exchangeRate) internal view returns (uint256) {
+    uint256 assets = (accountTokens[supplier] * exchangeRate) / 1e18;
+    return comptroller.getMaxRedeem(supplier, assets);
+  }
+
+  function rebalance(
+    address[] memory suppliers,
+    uint256[] memory fairShareOfRedeemableAssets,
+    uint256 marketCash
+  ) internal {
+    // rebalance - first take away the surplus
+    uint256 rebalanceSurplus = 0;
+    for (uint256 i = 0; i < suppliers.length; i++) {
+      uint256 fairShareOfCTokens = (fairShareOfRedeemableAssets[i] * totalSupply) / marketCash;
+      if (fairShareOfCTokens < accountTokens[suppliers[i]]) {
+        rebalanceSurplus += accountTokens[suppliers[i]] - fairShareOfCTokens;
+        accountTokens[suppliers[i]] = fairShareOfCTokens;
+      }
+    }
+
+    // then redistribute the surplus
+    for (uint256 i = 0; i < suppliers.length; i++) {
+      uint256 fairShareOfCTokens = (fairShareOfRedeemableAssets[i] * totalSupply) / marketCash;
+      if (fairShareOfCTokens > accountTokens[suppliers[i]]) {
+        rebalanceSurplus -= fairShareOfCTokens - accountTokens[suppliers[i]];
+        accountTokens[suppliers[i]] = fairShareOfCTokens;
+      }
+    }
+
+    // 1000 wei is ok as a margin for rounding errors
+    require(rebalanceSurplus < 1000, "!rebalance");
+  }
+
+  function getAffectedSuppliers() public view returns (address[] memory suppliers) {
+    address jarvisMMM = 0x9fB2fbaeCbC0DB28ac5dDE618D6bA2806F71167B;
+    if (address(this) == agEurMarketAddress) {
+      address angleGovernorMultisig = 0xdA2D2f638D6fcbE306236583845e5822554c02EA;
+      suppliers = new address[](1);
+      suppliers[0] = angleGovernorMultisig;
     } else if (address(this) == jchfMarketAddress) {
-      totalBorrows -= accountBorrows[exploiterAccount].principal;
-      accountBorrows[exploiterAccount].principal = 0;
-      accrueInterest();
+      suppliers = new address[](6);
+      suppliers[0] = jarvisMMM;
+      suppliers[1] = 0xc8f6c800A6fCc7Fa69106c4f5dF3A40dE5dF8e7b;
+      suppliers[2] = 0x2701B5d0e417155E7a2B6D6DDfE7f016Ed94846E;
+      suppliers[3] = 0x5d16A5Ea1Bc25cFbb60f49985B70423D96a27c07;
+      suppliers[4] = 0x3feb9298170A751e4E6c81195912fB6a5784139c;
+      suppliers[5] = 0x9AA0285348Ba10C5ec97Ad5E5f4Dec3f2EF6D97d;
     } else if (address(this) == jeurMarketAddress) {
-      totalBorrows -= accountBorrows[exploiterAccount].principal;
-      accountBorrows[exploiterAccount].principal = 0;
-      accrueInterest();
+      suppliers = new address[](6);
+      suppliers[0] = jarvisMMM;
+      suppliers[1] = 0x8fB20c72139B2A971Ab814503D61111349f8Cc78;
+      suppliers[2] = 0x171A296C4D3A1Bd28c0E19F920D1Ef8cd6a50daF;
+      suppliers[3] = 0x7511433194E3300ea7BE96e81909044Eb46ae417;
+      suppliers[4] = 0xB83Ad7D7EFE3fc000a6344c73B3E4407A734d1A8;
+      suppliers[5] = 0xf13Fd4951485f54462DE0fb534851d9687d1ADea;
     } else if (address(this) == jgbpMarketAddress) {
-      totalBorrows -= accountBorrows[exploiterAccount].principal;
-      accountBorrows[exploiterAccount].principal = 0;
-      accrueInterest();
+      suppliers = new address[](1);
+      suppliers[0] = jarvisMMM;
     }
   }
 

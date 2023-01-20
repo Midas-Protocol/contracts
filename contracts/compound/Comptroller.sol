@@ -91,7 +91,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    * @param cToken The cToken to check
    * @return True if the account is in the asset, otherwise false.
    */
-  function checkMembership(address account, CTokenInterface cToken) external view returns (bool) {
+  function checkMembership(address account, CTokenInterface cToken) external view override returns (bool) {
     return markets[address(cToken)].accountMembership[account];
   }
 
@@ -365,6 +365,35 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     if (redeemTokens == 0 && redeemAmount > 0) {
       revert("!zero");
     }
+  }
+
+  function getMaxRedeem(address account, uint256 balanceOfUnderlying) external view override returns (uint256) {
+    bool isBorrow = false;
+    address cToken = msg.sender;
+    CTokenInterface cTokenModify = CTokenInterface(cToken);
+
+    // Get account liquidity
+    (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
+      account,
+      isBorrow ? cTokenModify : CTokenInterface(address(0)),
+      0,
+      0
+    );
+    require(err == Error.NO_ERROR, "!liquidity");
+    if (shortfall > 0) return 0; // Shortfall, so no more borrow/redeem
+
+    // Get max borrow/redeem
+    uint256 maxBorrowOrRedeemAmount;
+
+    if (!isBorrow && !markets[cToken].accountMembership[account]) {
+      // Max redeem = balance of underlying if not used as collateral
+      maxBorrowOrRedeemAmount = balanceOfUnderlying;
+    } else {
+      // Avoid "stack too deep" error by separating this logic
+      maxBorrowOrRedeemAmount = _getMaxRedeemOrBorrow(liquidity, cTokenModify, isBorrow);
+    }
+
+    return maxBorrowOrRedeemAmount;
   }
 
   function getMaxRedeemOrBorrow(
