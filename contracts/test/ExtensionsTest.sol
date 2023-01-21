@@ -373,4 +373,5 @@ contract ExtensionsTest is BaseTest {
 
     assertEq(user1BalanceAfter - user1BalanceBefore, 4100000000000000000000, "user1 redeem");
     assertEq(user2BalanceAfter - user2BalanceBefore, 2000000000000000000000, "user2 redeem");
-  }}
+  }
+}
