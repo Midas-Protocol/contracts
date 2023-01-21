@@ -314,13 +314,13 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
+    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      return uint256(Error.INSUFFICIENT_LIQUIDITY);
+    }
+
     /* If the redeemer is not 'in' the market, then we can bypass the liquidity check */
     if (!markets[cToken].accountMembership[redeemer]) {
       return uint256(Error.NO_ERROR);
-    }
-
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
     /* Otherwise, perform a hypothetical liquidity check to guard against shortfall */
@@ -550,10 +550,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Make sure market is listed
     if (!markets[cToken].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
-    }
-
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
     // Keep the flywheel moving

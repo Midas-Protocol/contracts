@@ -18,7 +18,7 @@ import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 
-import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 
 contract MockComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
   function getFirstMarketSymbol() public view returns (string memory) {
@@ -99,37 +99,41 @@ contract ExtensionsTest is BaseTest {
     third = new MockThirdComptrollerExtension();
 
     if (block.chainid == BSC_MAINNET) {
-      // change the implementation to the new that can add extensions
-      Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
-      latestComptrollerImplementation = address(newComptrollerImplementation);
-
       Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
-      address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
-
-      // whitelist the upgrade
-      vm.startPrank(ffd.owner());
-      ffd._editComptrollerImplementationWhitelist(
-        asArray(oldComptrollerImplementation),
-        asArray(latestComptrollerImplementation),
-        asArray(true)
-      );
-      // whitelist the new pool creation
-      ffd._editComptrollerImplementationWhitelist(
-        asArray(address(0)),
-        asArray(latestComptrollerImplementation),
-        asArray(true)
-      );
-      DiamondExtension[] memory extensions = new DiamondExtension[](1);
-      extensions[0] = cfe;
-      ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);
-      vm.stopPrank();
-
-      // upgrade to the new comptroller
-      vm.startPrank(asUnitroller.admin());
-      asUnitroller._setPendingImplementation(latestComptrollerImplementation);
-      newComptrollerImplementation._become(asUnitroller);
-      vm.stopPrank();
+      _upgradeExistingComptroller(asUnitroller);
     }
+  }
+
+  function _upgradeExistingComptroller(Unitroller asUnitroller) internal {
+    // change the implementation to the new that can add extensions
+    Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
+    latestComptrollerImplementation = address(newComptrollerImplementation);
+
+    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
+
+    // whitelist the upgrade
+    vm.startPrank(ffd.owner());
+    ffd._editComptrollerImplementationWhitelist(
+      asArray(oldComptrollerImplementation),
+      asArray(latestComptrollerImplementation),
+      asArray(true)
+    );
+    // whitelist the new pool creation
+    ffd._editComptrollerImplementationWhitelist(
+      asArray(address(0)),
+      asArray(latestComptrollerImplementation),
+      asArray(true)
+    );
+    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    extensions[0] = cfe;
+    ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);
+    vm.stopPrank();
+
+    // upgrade to the new comptroller
+    vm.startPrank(asUnitroller.admin());
+    asUnitroller._setPendingImplementation(latestComptrollerImplementation);
+    newComptrollerImplementation._become(asUnitroller);
+    vm.stopPrank();
   }
 
   function testExtensionReplace() public debuggingOnly fork(BSC_MAINNET) {
@@ -303,6 +307,10 @@ contract ExtensionsTest is BaseTest {
     CTokenExtensionInterface(address(asDelegate)).accrueInterest();
     emit log("new implementation");
     emit log_address(asDelegate.implementation());
+
+    // turn auto impl off
+    vm.prank(pool.admin());
+    pool._toggleAutoImplementations(false);
   }
 
   function testBscComptrollerExtensions() public debuggingOnly fork(BSC_MAINNET) {
@@ -341,4 +349,28 @@ contract ExtensionsTest is BaseTest {
       assertEq(extensions.length, 1, "each pool should have the first extension");
     }
   }
-}
+
+  function testForceRedeem() public debuggingOnly fork(POLYGON_MAINNET) {
+    address agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
+    address afterExploitAgEurSupplier1 = 0xB70D29deCca758BB72Cd2967a989782F3acAd3e6;
+    address afterExploitAgEurSupplier2 = 0x011c79c3F951Dc3D26FB08D226b60a7653753a95;
+
+    CErc20Delegate market = CErc20Delegate(agEurMarketAddress);
+    IERC20Upgradeable underlying = IERC20Upgradeable(market.underlying());
+
+    uint256 user1BalanceBefore = underlying.balanceOf(afterExploitAgEurSupplier1);
+    uint256 user2BalanceBefore = underlying.balanceOf(afterExploitAgEurSupplier2);
+
+    _upgradeExistingCTokenExtension(market);
+    Unitroller asUnitroller = Unitroller(payable(address(market.comptroller())));
+    _upgradeExistingComptroller(asUnitroller);
+
+    vm.prank(asUnitroller.admin());
+    market.forceRedeemAgEurUsers();
+
+    uint256 user1BalanceAfter = underlying.balanceOf(afterExploitAgEurSupplier1);
+    uint256 user2BalanceAfter = underlying.balanceOf(afterExploitAgEurSupplier2);
+
+    assertEq(user1BalanceAfter - user1BalanceBefore, 4100000000000000000000, "user1 redeem");
+    assertEq(user2BalanceAfter - user2BalanceBefore, 2000000000000000000000, "user2 redeem");
+  }}
