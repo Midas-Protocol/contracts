@@ -21,7 +21,7 @@ import { MasterPriceOracle } from "../MasterPriceOracle.sol";
  * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
  * @notice BalancerLpTokenPriceOracle is a price oracle for Balancer LP tokens.
  * @dev Implements the `PriceOracle` interface used by Midas pools (and Compound v2).
-        This implmentation generalises the BalancerLpTokenPriceOracle to allow for multiple tokens.
+        This implmentation generalises the BalancerLpTokenPriceOracle to allow for >= 2 tokens.
  */
 contract BalancerLpTokenPriceOracleNTokens is SafeOwnableUpgradeable, BasePriceOracle, BNum {
   /**
