@@ -4,6 +4,7 @@ pragma solidity >=0.8.0;
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { SaddleLpTokenLiquidator } from "../liquidators/SaddleLpTokenLiquidator.sol";
 import { SaddleLpPriceOracle } from "../oracles/default/SaddleLpPriceOracle.sol";
+import { ISwap } from "../external/saddle/ISwap.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
@@ -20,15 +21,22 @@ contract SaddleLpTokenLiquidatorTest is BaseTest {
   function testSaddleLpTokenLiquidator() public fork(ARBITRUM_ONE) {
     IERC20Upgradeable lpToken = IERC20Upgradeable(fraxUsdc_lp);
     address lpTokenWhale = 0xa5bD85ed9fA27ba23BfB702989e7218E44fd4706; // metaswap
-    bytes memory data = abi.encode(0, address(oracle));
+    uint8 outputTokenIndex = 0;
+    bytes memory data = abi.encode(outputTokenIndex, address(oracle));
     uint256 amount = 1e18;
 
-    address pool = oracle.poolOf(address(lpToken));
+    address poolAddr = oracle.poolOf(address(lpToken));
+    ISwap pool = ISwap(poolAddr);
+    address outputTokenAddr = pool.getToken(outputTokenIndex);
+    IERC20Upgradeable outputToken = IERC20Upgradeable(outputTokenAddr);
+
     vm.prank(lpTokenWhale);
     lpToken.transfer(address(liquidator), 1e18);
 
     vm.prank(address(liquidator));
-    lpToken.approve(pool, 1e18);
+    lpToken.approve(poolAddr, 1e18);
     liquidator.redeem(lpToken, amount, data);
+
+    assertGt(outputToken.balanceOf(address(liquidator)), 0, "!redeem output");
   }
 }
