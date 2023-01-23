@@ -72,7 +72,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     fuseAdmin = _fuseAdmin;
   }
 
-  function isMarketExploited(address cToken) returns (bool) {
+  function isMarketExploited(address cToken) internal pure returns (bool) {
     address agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
     address jchfMarketAddress = 0x62Bdc203403e7d44b75f357df0897f2e71F607F3;
     address jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
