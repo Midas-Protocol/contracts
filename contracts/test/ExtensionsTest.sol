@@ -267,7 +267,7 @@ contract ExtensionsTest is BaseTest {
     assertEq(totalSupplyAfter, totalSupplyBefore, "total supply should be the same");
   }
 
-  function _prepareCTokenUpgrade(CErc20Delegate market) internal {
+  function _prepareCTokenUpgrade(CErc20Delegate market) internal returns (address) {
     address implBefore = market.implementation();
     emit log("implementation before");
     emit log_address(implBefore);
@@ -292,6 +292,8 @@ contract ExtensionsTest is BaseTest {
     cErc20DelegateExtensions[0] = newCTokenExtension;
     vm.prank(ffd.owner());
     ffd._setCErc20DelegateExtensions(address(newImpl), cErc20DelegateExtensions);
+
+    return address(newImpl);
   }
 
   function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
@@ -306,6 +308,10 @@ contract ExtensionsTest is BaseTest {
     CTokenExtensionInterface(address(asDelegate)).accrueInterest();
     emit log("new implementation");
     emit log_address(asDelegate.implementation());
+
+    // turn auto impl off
+    vm.prank(pool.admin());
+    pool._toggleAutoImplementations(false);
   }
 
   function testBscComptrollerExtensions() public debuggingOnly fork(BSC_MAINNET) {
@@ -357,9 +363,15 @@ contract ExtensionsTest is BaseTest {
     }
 
     CErc20Delegate market = CErc20Delegate(0x0db51E5255E44751b376738d8979D969AD70bff6);
-    _prepareCTokenUpgrade(market);
+
+    address implBefore = market.implementation();
+
+    address newImplAddress = _prepareCTokenUpgrade(market);
 
     vm.startPrank(ffd.owner());
     ffd.autoUpgradePool(address(market.comptroller()));
+
+    address implAfter = market.implementation();
+    assertEq(implAfter, newImplAddress, "!market upgrade");
   }
 }
