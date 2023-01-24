@@ -300,18 +300,6 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     return redeemFresh(msg.sender, redeemTokens, 0);
   }
 
-  function forceRedeemAgEurUsers() public {
-    address agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
-    require(hasAdminRights(), "!admin");
-
-    if (address(this) == agEurMarketAddress) {
-      address afterExploitAgEurSupplier1 = 0xB70D29deCca758BB72Cd2967a989782F3acAd3e6;
-      address afterExploitAgEurSupplier2 = 0x011c79c3F951Dc3D26FB08D226b60a7653753a95;
-      require(redeemFresh(afterExploitAgEurSupplier1, 0, 4100000000000000000000) == 0, "!forced redeem user1");
-      require(redeemFresh(afterExploitAgEurSupplier2, 0, 2000000000000000000000) == 0, "!forced redeem user2");
-    }
-  }
-
   /**
    * @notice Sender redeems cTokens in exchange for a specified amount of underlying asset
    * @dev Accrues interest whether or not the operation succeeds, unless reverted
@@ -398,14 +386,10 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
       vars.redeemAmount = redeemAmountIn;
     }
 
-    address afterExploitAgEurSupplier1 = 0xB70D29deCca758BB72Cd2967a989782F3acAd3e6;
-    address afterExploitAgEurSupplier2 = 0x011c79c3F951Dc3D26FB08D226b60a7653753a95;
-    if (redeemer != afterExploitAgEurSupplier1 && redeemer != afterExploitAgEurSupplier2) {
-      /* Fail if redeem not allowed */
-      uint256 allowed = comptroller.redeemAllowed(address(this), redeemer, vars.redeemTokens);
-      if (allowed != 0) {
-        return failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.REDEEM_COMPTROLLER_REJECTION, allowed);
-      }
+    /* Fail if redeem not allowed */
+    uint256 allowed = comptroller.redeemAllowed(address(this), redeemer, vars.redeemTokens);
+    if (allowed != 0) {
+      return failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.REDEEM_COMPTROLLER_REJECTION, allowed);
     }
 
     /* Verify market's block number equals current block number */

@@ -349,29 +349,4 @@ contract ExtensionsTest is BaseTest {
       assertEq(extensions.length, 1, "each pool should have the first extension");
     }
   }
-
-  function testForceRedeem() public debuggingOnly fork(POLYGON_MAINNET) {
-    address agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
-    address afterExploitAgEurSupplier1 = 0xB70D29deCca758BB72Cd2967a989782F3acAd3e6;
-    address afterExploitAgEurSupplier2 = 0x011c79c3F951Dc3D26FB08D226b60a7653753a95;
-
-    CErc20Delegate market = CErc20Delegate(agEurMarketAddress);
-    IERC20Upgradeable underlying = IERC20Upgradeable(market.underlying());
-
-    uint256 user1BalanceBefore = underlying.balanceOf(afterExploitAgEurSupplier1);
-    uint256 user2BalanceBefore = underlying.balanceOf(afterExploitAgEurSupplier2);
-
-    _upgradeExistingCTokenExtension(market);
-    Unitroller asUnitroller = Unitroller(payable(address(market.comptroller())));
-    _upgradeExistingComptroller(asUnitroller);
-
-    vm.prank(asUnitroller.admin());
-    market.forceRedeemAgEurUsers();
-
-    uint256 user1BalanceAfter = underlying.balanceOf(afterExploitAgEurSupplier1);
-    uint256 user2BalanceAfter = underlying.balanceOf(afterExploitAgEurSupplier2);
-
-    assertEq(user1BalanceAfter - user1BalanceBefore, 4100000000000000000000, "user1 redeem");
-    assertEq(user2BalanceAfter - user2BalanceBefore, 2000000000000000000000, "user2 redeem");
-  }
 }
