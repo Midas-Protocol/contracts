@@ -47,7 +47,7 @@ contract ContractsUpgradesTest is BaseTest {
     address ownerAfter = newImpl.owner();
     emit log_address(ownerAfter);
 
-    FusePoolDirectory.FusePool[] memory poolsAfter = oldImpl.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory poolsAfter) = oldImpl.getActivePools();
     uint256 lenAfter = poolsAfter.length;
     emit log_uint(poolsAfter.length);
 
@@ -102,45 +102,6 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
-  function testFlywheelReinitializeBsc() public debuggingOnly fork(BSC_MAINNET) {
-    _testFlywheelReinitialize();
-  }
-
-  function testFlywheelReinitializePolygon() public debuggingOnly fork(POLYGON_MAINNET) {
-    _testFlywheelReinitialize();
-  }
-
-  function testFlywheelReinitializeMoonbeam() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testFlywheelReinitialize();
-  }
-
-  function _testFlywheelReinitialize() internal {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
-
-    for (uint8 i = 0; i < pools.length; i++) {
-      IComptroller pool = IComptroller(pools[i].comptroller);
-      address[] memory flywheels = pool.getRewardsDistributors();
-      for (uint8 j = 0; j < flywheels.length; j++) {
-        MidasFlywheelCore flywheel = MidasFlywheelCore(flywheels[j]);
-
-        // upgrade
-        TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(flywheels[j]));
-        bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-        address admin = address(uint160(uint256(bytesAtSlot)));
-
-        if (admin != address(0)) {
-          MidasFlywheelCore newImpl = new MidasFlywheelCore();
-          vm.prank(admin);
-          proxy.upgradeTo(address(newImpl));
-
-          vm.prank(flywheel.owner());
-          // flywheel.reinitialize();
-        }
-      }
-    }
-  }
-
   function testMarketsLatestImplementationsBsc() public fork(BSC_MAINNET) {
     _testMarketsLatestImplementations();
   }
@@ -153,10 +114,15 @@ contract ContractsUpgradesTest is BaseTest {
     _testMarketsLatestImplementations();
   }
 
+  function testMarketsLatestImplementationsEvmos() public fork(EVMOS_MAINNET) {
+    _testMarketsLatestImplementations();
+  }
+
   function _testMarketsLatestImplementations() internal {
     FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);
@@ -182,6 +148,36 @@ contract ContractsUpgradesTest is BaseTest {
           emit log_address(pools[i].comptroller);
           emit log("");
         }
+      }
+    }
+  }
+
+  address newDeployer = 0x27521eae4eE4153214CaDc3eCD703b9B0326C908;
+
+  function testPauseGuardiansBsc() public debuggingOnly fork(BSC_MAINNET) {
+    _testPauseGuardians(newDeployer);
+  }
+
+  function testPauseGuardiansPolygon() public debuggingOnly fork(POLYGON_MAINNET) {
+    _testPauseGuardians(newDeployer);
+  }
+
+  function testPauseGuardiansMoonbeam() public debuggingOnly fork(MOONBEAM_MAINNET) {
+    _testPauseGuardians(newDeployer);
+  }
+
+  function _testPauseGuardians(address deployer) internal {
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      IComptroller pool = IComptroller(pools[i].comptroller);
+      address pauseGuardian = pool.pauseGuardian();
+      if (pauseGuardian != address(0) && pauseGuardian != deployer) {
+        emit log_named_address("pool", address(pool));
+        emit log_named_address("unknown pause guardian", pauseGuardian);
+        emit log("");
       }
     }
   }

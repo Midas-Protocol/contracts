@@ -58,16 +58,17 @@ contract FluxPriceOracleTest is BaseTest {
     oracle.setPriceFeeds(underlyings, priceFeeds);
   }
 
-  function testFluxPriceOracle() public forkAtBlock(EVMOS_MAINNET, 8256599) {
+  function testFluxPriceOracle() public forkAtBlock(EVMOS_MAINNET, 9121474) {
     setUpFluxFeed();
-    vm.prank(address(mpo));
+    vm.startPrank(address(mpo));
     uint256 ethPrice = oracle.price(address(1));
-    assertEq(ethPrice, 2586253748621296444418);
+    assertEq(ethPrice, 3884252688697511129032);
 
     uint256 fraxPrice = oracle.price(address(2));
-    assertEq(fraxPrice, 2104240239620782851);
+    assertEq(fraxPrice, 3198958047306790070);
 
     uint256 usdcPrice = oracle.price(address(3));
     assertApproxEqRel(fraxPrice, usdcPrice, 1e16, "delta between usdc and frax > 1%");
+    vm.stopPrank();
   }
 }

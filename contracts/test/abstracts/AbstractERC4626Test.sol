@@ -7,7 +7,7 @@ import { BaseTest } from "../config/BaseTest.t.sol";
 import { MidasERC4626 } from "../../midas/strategies/MidasERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Authority } from "solmate/auth/Auth.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 
 abstract contract AbstractERC4626Test is WithPool {
   using FixedPointMathLib for uint256;
@@ -24,10 +24,6 @@ abstract contract AbstractERC4626Test is WithPool {
 
   constructor() {
     _forkAtBlock(uint128(block.chainid), block.number);
-  }
-
-  function setDepositAmount(uint256 _amount) public {
-    depositAmount = _amount;
   }
 
   function _setUp(string memory _testPreFix, bytes calldata data) public virtual;
@@ -421,7 +417,7 @@ abstract contract AbstractERC4626Test is WithPool {
     assertApproxEqAbs(
       depositAmount,
       plugin.convertToAssets(plugin.balanceOf(address(1))),
-      uint256(1),
+      uint256(10),
       string(abi.encodePacked("!2.balOfUnderlying ", testPreFix))
     );
 

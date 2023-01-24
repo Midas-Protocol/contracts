@@ -33,19 +33,16 @@ contract FusePoolDirectoryTest is BaseTest {
     FusePoolDirectory.FusePool[] memory allPools = fpd.getAllPools();
 
     FusePoolDirectory.FusePool memory poolToDeprecate;
-    uint256 index;
-    if (allPools.length > 3) {
-      index = allPools.length - 1;
-    } else {
-      index = 0;
-    }
+
+    // BOMB pool https://app.midascapital.xyz/56/pool/0
+    uint256 index = 0;
 
     poolToDeprecate = allPools[index];
 
     vm.prank(fpd.owner());
     fpd._deprecatePool(index);
 
-    FusePoolDirectory.FusePool[] memory allPoolsAfter = fpd.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory allPoolsAfter) = fpd.getActivePools();
 
     bool poolStillThere = false;
     for (uint256 i = 0; i < allPoolsAfter.length; i++) {

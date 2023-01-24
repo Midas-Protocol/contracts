@@ -8,7 +8,7 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 import { AlpacaERC4626, IAlpacaVault } from "../midas/strategies/AlpacaERC4626.sol";
 import { MockVault } from "./mocks/alpaca/MockVault.sol";
 import { IW_NATIVE } from "../utils/IW_NATIVE.sol";
-import { FixedPointMathLib } from "../utils/FixedPointMathLib.sol";
+import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 
 contract AlpacaERC4626Test is BaseTest {
   using FixedPointMathLib for uint256;
@@ -58,16 +58,16 @@ contract AlpacaERC4626Test is BaseTest {
     deposit(address(this), depositAmount);
 
     // Test that the balance view calls work
-    assertTrue(diff(alpacaERC4626.totalAssets(), depositAmount) <= 1);
-    assertTrue(diff(alpacaERC4626.balanceOfUnderlying(address(this)), depositAmount) <= 1);
+    assertApproxEqAbs(alpacaERC4626.totalAssets(), depositAmount, 1, "!totalAssets");
+    assertApproxEqAbs(alpacaERC4626.balanceOfUnderlying(address(this)), depositAmount, 1, "!balanceOfUnderlying");
 
     // Test that we minted the correct amount of token
-    assertEq(alpacaERC4626.balanceOf(address(this)), expectedErc4626Shares);
-    assertEq(alpacaERC4626.totalSupply(), expectedErc4626Shares);
+    assertEq(alpacaERC4626.balanceOf(address(this)), expectedErc4626Shares, "!balance of this");
+    assertEq(alpacaERC4626.totalSupply(), expectedErc4626Shares, "!totalSupply");
 
     uint256 expectedBeefyShares = getExpectedVaultShares(depositAmount);
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertEq(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares);
+    assertEq(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares, "!balance of erc4626");
   }
 
   function testMultipleDeposit() public fork(BSC_MAINNET) {
@@ -77,28 +77,34 @@ contract AlpacaERC4626Test is BaseTest {
     deposit(address(1), depositAmount);
 
     // Test that the balance view calls work
-    assertTrue(
-      diff(depositAmount * 2, alpacaERC4626.totalAssets()) <= 2,
+    assertApproxEqAbs(
+      depositAmount * 2,
+      alpacaERC4626.totalAssets(),
+      2,
       "Beefy total Assets should be same as sum of deposited amounts"
     );
-    assertTrue(
-      diff(depositAmount, alpacaERC4626.balanceOfUnderlying(address(this))) <= 10,
+    assertApproxEqAbs(
+      depositAmount,
+      alpacaERC4626.balanceOfUnderlying(address(this)),
+      10,
       "Underlying token balance should be same as deposited amount"
     );
-    assertTrue(
-      diff(depositAmount, alpacaERC4626.balanceOfUnderlying(address(1))) <= 10,
+    assertApproxEqAbs(
+      depositAmount,
+      alpacaERC4626.balanceOfUnderlying(address(1)),
+      10,
       "Underlying token balance should be same as deposited amount"
     );
 
     // Test that we minted the correct amount of token
-    assertTrue(diff(alpacaERC4626.balanceOf(address(this)), expectedErc4626Shares) <= 1);
-    assertTrue(diff(alpacaERC4626.balanceOf(address(1)), expectedErc4626Shares) <= 1);
-    assertTrue(diff(alpacaERC4626.totalSupply(), expectedErc4626Shares * 2) <= 2);
+    assertApproxEqAbs(alpacaERC4626.balanceOf(address(this)), expectedErc4626Shares, 1, "!balance this");
+    assertApproxEqAbs(alpacaERC4626.balanceOf(address(1)), expectedErc4626Shares, 1, "!balance addr1");
+    assertApproxEqAbs(alpacaERC4626.totalSupply(), expectedErc4626Shares * 2, 2, "!totalSupply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     uint256 expectedBeefyShares = getExpectedVaultShares(depositAmount * 2);
 
-    assertTrue(diff(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares) <= 1);
+    assertApproxEqAbs(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares, 1, "!balanceOf erc4626");
 
     // Beefy ERC4626 should not have underlyingToken after deposit
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "Beefy erc4626 locked amount checking");
@@ -111,16 +117,16 @@ contract AlpacaERC4626Test is BaseTest {
     alpacaERC4626.mint(mintAmount, address(this));
 
     // Test that the balance view calls work
-    assertTrue(diff(alpacaERC4626.totalAssets(), depositAmount) <= 1);
-    assertTrue(diff(alpacaERC4626.balanceOfUnderlying(address(this)), depositAmount) <= 1);
+    assertApproxEqAbs(alpacaERC4626.totalAssets(), depositAmount, 1, "!totalAssets");
+    assertApproxEqAbs(alpacaERC4626.balanceOfUnderlying(address(this)), depositAmount, 1, "!balanceOfUnderlying this");
 
     // Test that we minted the correct amount of token
-    assertEq(alpacaERC4626.balanceOf(address(this)), mintAmount);
-    assertEq(alpacaERC4626.totalSupply(), mintAmount);
+    assertEq(alpacaERC4626.balanceOf(address(this)), mintAmount, "!balance of this");
+    assertEq(alpacaERC4626.totalSupply(), mintAmount, "!totalSupply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     uint256 expectedBeefyShares = getExpectedVaultShares(depositAmount);
-    assertEq(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares);
+    assertEq(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares, "!balanceOf erc4626");
   }
 
   function testMultipleMint() public fork(BSC_MAINNET) {
@@ -130,33 +136,33 @@ contract AlpacaERC4626Test is BaseTest {
     alpacaERC4626.mint(mintAmount, address(this));
 
     // Test that the balance view calls work
-    assertTrue(diff(alpacaERC4626.totalAssets(), depositAmount) <= 10);
-    assertTrue(diff(alpacaERC4626.balanceOfUnderlying(address(this)), depositAmount) <= 10);
+    assertApproxEqAbs(alpacaERC4626.totalAssets(), depositAmount, 10, "!totalAssets");
+    assertApproxEqAbs(alpacaERC4626.balanceOfUnderlying(address(this)), depositAmount, 10, "!balanceOfUnderlying this");
 
     // Test that we minted the correct amount of token
-    assertEq(alpacaERC4626.balanceOf(address(this)), mintAmount);
-    assertEq(alpacaERC4626.totalSupply(), mintAmount);
+    assertEq(alpacaERC4626.balanceOf(address(this)), mintAmount, "!balance of this");
+    assertEq(alpacaERC4626.totalSupply(), mintAmount, "!totalSupply");
 
-    assertTrue(underlyingToken.balanceOf(address(alpacaERC4626)) <= 10, "Beefy erc4626 locked amount checking");
+    assertApproxEqAbs(underlyingToken.balanceOf(address(alpacaERC4626)), 0, 10, "Beefy erc4626 locked amount checking");
 
     vm.startPrank(address(1));
     underlyingToken.approve(address(alpacaERC4626), depositAmount);
     alpacaERC4626.mint(mintAmount, address(1));
 
     // Test that the balance view calls work
-    assertTrue(depositAmount + depositAmount - alpacaERC4626.totalAssets() <= 10);
-    assertTrue(depositAmount - alpacaERC4626.balanceOfUnderlying(address(1)) <= 10);
+    assertApproxEqAbs(depositAmount + depositAmount, alpacaERC4626.totalAssets(), 10, "!totalAssets2");
+    assertApproxEqAbs(depositAmount, alpacaERC4626.balanceOfUnderlying(address(1)), 10, "!balanceOfUnderlying1");
 
     // Test that we minted the correct amount of token
-    assertEq(alpacaERC4626.balanceOf(address(1)), mintAmount);
-    assertEq(alpacaERC4626.totalSupply(), mintAmount + mintAmount);
+    assertApproxEqAbs(alpacaERC4626.balanceOf(address(1)), mintAmount, 10, "!balance of 1");
+    assertApproxEqAbs(alpacaERC4626.totalSupply(), mintAmount + mintAmount, 10, "!totalSupply2");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
     uint256 expectedBeefyShares = getExpectedVaultShares(depositAmount * 2);
 
-    assertTrue(diff(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares) <= 10);
+    assertApproxEqAbs(mockVault.balanceOf(address(alpacaERC4626)), expectedBeefyShares, 10, "!balance of erc4626");
 
-    assertTrue(underlyingToken.balanceOf(address(alpacaERC4626)) <= 10, "Beefy erc4626 locked amount checking");
+    assertApproxEqAbs(underlyingToken.balanceOf(address(alpacaERC4626)), 0, 10, "Beefy erc4626 locked amount checking");
     vm.stopPrank();
   }
 
@@ -177,8 +183,10 @@ contract AlpacaERC4626Test is BaseTest {
     alpacaERC4626.withdraw(withdrawalAmount, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertTrue(
-      diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
+    assertApproxEqAbs(
+      underlyingToken.balanceOf(address(this)),
+      assetBalBefore + withdrawalAmount,
+      1,
       "!user asset bal"
     );
 
@@ -218,8 +226,10 @@ contract AlpacaERC4626Test is BaseTest {
     alpacaERC4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertTrue(
-      diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
+    assertApproxEqAbs(
+      underlyingToken.balanceOf(address(this)),
+      assetBalBefore + withdrawalAmount,
+      1,
       "!user asset bal"
     );
 
@@ -227,14 +237,16 @@ contract AlpacaERC4626Test is BaseTest {
     // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
     // uint256 expectedAssetsAfter = depositAmount - (expectedBeefySharesNeeded + (expectedBeefySharesNeeded / 1000));
     //assertEq(alpacaERC4626.totalAssets(), expectedAssetsAfter, "!erc4626 asset bal");
-    assertTrue(diff(depositAmount * 2 - expectedErc4626SharesNeeded, alpacaERC4626.totalSupply()) <= 1, "!totalSupply");
+    assertApproxEqAbs(depositAmount * 2 - expectedErc4626SharesNeeded, alpacaERC4626.totalSupply(), 1, "!totalSupply");
 
     // Test that we burned the right amount of shares
     assertEq(alpacaERC4626.balanceOf(address(this)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertTrue(
-      diff(mockVault.balanceOf(address(alpacaERC4626)), beefyShares - expectedBeefySharesNeeded) <= 1,
+    assertApproxEqAbs(
+      mockVault.balanceOf(address(alpacaERC4626)),
+      beefyShares - expectedBeefySharesNeeded,
+      1,
       "!beefy share balance"
     );
 
@@ -254,20 +266,22 @@ contract AlpacaERC4626Test is BaseTest {
     alpacaERC4626.withdraw(10e18, address(1), address(1));
 
     // Test that the actual transfers worked
-    assertTrue(diff(underlyingToken.balanceOf(address(1)), assetBalBefore + withdrawalAmount) <= 1, "!user asset bal");
+    assertApproxEqAbs(underlyingToken.balanceOf(address(1)), assetBalBefore + withdrawalAmount, 1, "!user asset bal");
 
     // Test that the balance view calls work
     // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
     // uint256 expectedAssetsAfter = depositAmount - (expectedBeefySharesNeeded + (expectedBeefySharesNeeded / 1000));
     //assertEq(alpacaERC4626.totalAssets(), expectedAssetsAfter, "!erc4626 asset bal");
-    assertTrue(diff(alpacaERC4626.totalSupply(), totalSupplyBefore - expectedErc4626SharesNeeded) <= 1, "!totalSupply");
+    assertApproxEqAbs(alpacaERC4626.totalSupply(), totalSupplyBefore - expectedErc4626SharesNeeded, 1, "!totalSupply");
 
     // Test that we burned the right amount of shares
     assertEq(alpacaERC4626.balanceOf(address(1)), erc4626BalBefore - expectedErc4626SharesNeeded, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertTrue(
-      diff(mockVault.balanceOf(address(alpacaERC4626)), beefyShares - expectedBeefySharesNeeded) <= 1,
+    assertApproxEqAbs(
+      mockVault.balanceOf(address(alpacaERC4626)),
+      beefyShares - expectedBeefySharesNeeded,
+      1,
       "!beefy share balance"
     );
 
@@ -291,8 +305,10 @@ contract AlpacaERC4626Test is BaseTest {
     alpacaERC4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertTrue(
-      diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
+    assertApproxEqAbs(
+      underlyingToken.balanceOf(address(this)),
+      assetBalBefore + withdrawalAmount,
+      1,
       "!user asset bal"
     );
 
@@ -300,14 +316,16 @@ contract AlpacaERC4626Test is BaseTest {
     // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
     // uint256 expectedAssetsAfter = depositAmount - (expectedBeefySharesNeeded + (expectedBeefySharesNeeded / 1000));
     //assertEq(alpacaERC4626.totalAssets(), expectedAssetsAfter, "!erc4626 asset bal");
-    assertTrue(diff(alpacaERC4626.totalSupply(), depositAmount - redeemAmount) <= 1, "!totalSupply");
+    assertApproxEqAbs(alpacaERC4626.totalSupply(), depositAmount - redeemAmount, 1, "!totalSupply");
 
     // Test that we burned the right amount of shares
-    assertTrue(diff(alpacaERC4626.balanceOf(address(this)), erc4626BalBefore - redeemAmount) <= 1, "!erc4626 supply");
+    assertApproxEqAbs(alpacaERC4626.balanceOf(address(this)), erc4626BalBefore - redeemAmount, 1, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertTrue(
-      diff(mockVault.balanceOf(address(alpacaERC4626)), beefyShares - expectedBeefySharesNeeded) <= 1,
+    assertApproxEqAbs(
+      mockVault.balanceOf(address(alpacaERC4626)),
+      beefyShares - expectedBeefySharesNeeded,
+      1,
       "!beefy share balance"
     );
   }
@@ -330,8 +348,10 @@ contract AlpacaERC4626Test is BaseTest {
     alpacaERC4626.withdraw(10e18, address(this), address(this));
 
     // Test that the actual transfers worked
-    assertTrue(
-      diff(underlyingToken.balanceOf(address(this)), assetBalBefore + withdrawalAmount) <= 1,
+    assertApproxEqAbs(
+      underlyingToken.balanceOf(address(this)),
+      assetBalBefore + withdrawalAmount,
+      1,
       "!user asset bal"
     );
 
@@ -342,11 +362,13 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(alpacaERC4626.totalSupply(), depositAmount * 2 - redeemAmount, "!totalSupply");
 
     // Test that we burned the right amount of shares
-    assertTrue(diff(alpacaERC4626.balanceOf(address(this)), erc4626BalBefore - redeemAmount) <= 1, "!erc4626 supply");
+    assertApproxEqAbs(alpacaERC4626.balanceOf(address(this)), erc4626BalBefore - redeemAmount, 1, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertTrue(
-      diff(mockVault.balanceOf(address(alpacaERC4626)), beefyShares - expectedBeefySharesNeeded) <= 10,
+    assertApproxEqAbs(
+      mockVault.balanceOf(address(alpacaERC4626)),
+      beefyShares - expectedBeefySharesNeeded,
+      10,
       "!beefy share balance"
     );
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "Beefy erc4626 locked amount checking");
@@ -364,7 +386,7 @@ contract AlpacaERC4626Test is BaseTest {
     alpacaERC4626.withdraw(10e18, address(1), address(1));
 
     // Test that the actual transfers worked
-    assertTrue(diff(underlyingToken.balanceOf(address(1)), assetBalBefore + withdrawalAmount) <= 1, "!user asset bal");
+    assertApproxEqAbs(underlyingToken.balanceOf(address(1)), assetBalBefore + withdrawalAmount, 1, "!user asset bal");
 
     // Test that the balance view calls work
     // I just couldnt not calculate this properly. i was for some reason always ~ 1 BPS off
@@ -376,8 +398,10 @@ contract AlpacaERC4626Test is BaseTest {
     assertEq(alpacaERC4626.balanceOf(address(1)), erc4626BalBefore - redeemAmount, "!erc4626 supply");
 
     // Test that the ERC4626 holds the expected amount of beefy shares
-    assertTrue(
-      diff(mockVault.balanceOf(address(alpacaERC4626)), beefyShares - expectedBeefySharesNeeded) <= 10,
+    assertApproxEqAbs(
+      mockVault.balanceOf(address(alpacaERC4626)),
+      beefyShares - expectedBeefySharesNeeded,
+      10,
       "!beefy share balance"
     );
     assertEq(underlyingToken.balanceOf(address(alpacaERC4626)), 0, "Beefy erc4626 locked amount checking");
@@ -441,8 +465,10 @@ contract AlpacaERC4626Test is BaseTest {
     uint256 expectedSharesNeeded = withdrawAmount.mulDivDown(alpacaERC4626.totalSupply(), alpacaERC4626.totalAssets());
     alpacaERC4626.withdraw(withdrawAmount, address(this), address(this));
 
-    assertTrue(
-      diff(alpacaERC4626.balanceOf(address(this)), depositAmount - expectedSharesNeeded) <= 1,
+    assertApproxEqAbs(
+      alpacaERC4626.balanceOf(address(this)),
+      depositAmount - expectedSharesNeeded,
+      1,
       "!withdraw share bal"
     );
     assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount, "!withdraw asset bal");
@@ -450,8 +476,10 @@ contract AlpacaERC4626Test is BaseTest {
     uint256 expectedAssets = withdrawAmount.mulDivUp(alpacaERC4626.totalAssets(), alpacaERC4626.totalSupply());
     alpacaERC4626.redeem(withdrawAmount, address(this), address(this));
 
-    assertTrue(
-      diff(alpacaERC4626.balanceOf(address(this)), depositAmount - withdrawAmount - expectedSharesNeeded) <= 1,
+    assertApproxEqAbs(
+      alpacaERC4626.balanceOf(address(this)),
+      depositAmount - withdrawAmount - expectedSharesNeeded,
+      1,
       "!redeem share bal"
     );
     assertEq(underlyingToken.balanceOf(address(this)), withdrawAmount + expectedAssets, "!redeem asset bal");

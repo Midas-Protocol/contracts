@@ -188,7 +188,8 @@ contract ExtensionsTest is BaseTest {
   function testMulticallMarket() public fork(BSC_MAINNET) {
     uint8 random = uint8(block.timestamp % 256);
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
     CTokenInterface[] memory markets = somePool.getAllMarkets();
@@ -207,7 +208,7 @@ contract ExtensionsTest is BaseTest {
     bytes memory blockNumberBeforeCall = abi.encodeWithSelector(asDelegate.accrualBlockNumber.selector);
     bytes memory accrueInterestCall = abi.encodeWithSelector(asExtension.accrueInterest.selector);
     bytes memory blockNumberAfterCall = abi.encodeWithSelector(asDelegate.accrualBlockNumber.selector);
-    bytes[] memory results = asDelegate.multicall(
+    bytes[] memory results = asExtension.multicall(
       asArray(blockNumberBeforeCall, accrueInterestCall, blockNumberAfterCall)
     );
     uint256 blockNumberBefore = abi.decode(results[0], (uint256));
@@ -219,7 +220,8 @@ contract ExtensionsTest is BaseTest {
   function testExistingCTokenExtensionUpgrade() public fork(BSC_MAINNET) {
     uint8 random = uint8(block.timestamp % 256);
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
     CTokenInterface[] memory markets = somePool.getAllMarkets();
@@ -329,7 +331,8 @@ contract ExtensionsTest is BaseTest {
 
   function _testComptrollersExtensions() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       address payable asPayable = payable(pools[i].comptroller);

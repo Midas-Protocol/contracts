@@ -486,14 +486,20 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     uint256 amount0,
     uint256 amount1,
     bytes calldata data
-  ) external override {
+  ) external {
     uniswapV2Call(sender, amount0, amount1, data);
   }
 
-  /**
-   * @dev Callback function for BeamSwap flashloans.
-   */
   function BeamSwapCall(
+    address sender,
+    uint256 amount0,
+    uint256 amount1,
+    bytes calldata data
+  ) external {
+    uniswapV2Call(sender, amount0, amount1, data);
+  }
+
+  function stellaswapV2Call(
     address sender,
     uint256 amount0,
     uint256 amount1,
@@ -516,7 +522,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    */
   function postFlashLoanTokens(LiquidateToTokensWithFlashSwapVars memory vars) private returns (address) {
     IERC20Upgradeable debtRepaymentToken = IERC20Upgradeable(_flashSwapToken);
-    uint256 debtRepaymentAmount = debtRepaymentToken.balanceOf(address(this));
+    uint256 debtRepaymentAmount = _flashSwapAmount;
 
     if (vars.debtFundingStrategies.length > 0) {
       // loop backwards to convert the initial (flash-swapped token) input to the final expected output (debt token)

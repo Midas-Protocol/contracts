@@ -33,16 +33,18 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   IFlywheelBooster public flywheelBooster;
 
   /// @notice The accrued but not yet transferred rewards for each user
-  mapping(address => uint256) public rewardsAccrued;
-
-  /// @notice the fixed point factor of flywheel
-  uint224 public ONE = 1e18;
+  mapping(address => uint256) internal _rewardsAccrued;
 
   /// @notice The strategy index and last updated per strategy
-  mapping(ERC20 => RewardsState) public strategyState;
+  mapping(ERC20 => RewardsState) internal _strategyState;
 
   /// @notice user index per strategy
-  mapping(ERC20 => mapping(address => uint224)) public userIndex;
+  mapping(ERC20 => mapping(address => uint224)) internal _userIndex;
+
+  constructor() {
+    // prevents the misusage of the implementation contract
+    _disableInitializers();
+  }
 
   function initialize(
     ERC20 _rewardToken,
@@ -58,14 +60,13 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
 
     _transferOwnership(_owner);
 
-    ONE = uint224(100e16); // 100%
     performanceFee = 10e16; // 10%
     feeRecipient = _owner;
   }
 
-  /*///////////////////////////////////////////////////////////////
+  /*----------------------------------------------------------------
                         ACCRUE/CLAIM LOGIC
-    //////////////////////////////////////////////////////////////*/
+    ----------------------------------------------------------------*/
 
   /** 
       @notice Emitted when a user's rewards accrue to a given strategy.
@@ -90,7 +91,8 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
       @return the cumulative amount of rewards accrued to user (including prior)
     */
   function accrue(ERC20 strategy, address user) public returns (uint256) {
-    RewardsState memory state = strategyState[strategy];
+    (uint224 index, uint32 ts) = strategyState(strategy);
+    RewardsState memory state = RewardsState(index, ts);
 
     if (state.index == 0) return 0;
 
@@ -111,7 +113,8 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     address user,
     address secondUser
   ) public returns (uint256, uint256) {
-    RewardsState memory state = strategyState[strategy];
+    (uint224 index, uint32 ts) = strategyState(strategy);
+    RewardsState memory state = RewardsState(index, ts);
 
     if (state.index == 0) return (0, 0);
 
@@ -125,10 +128,10 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
       @dev this function is public, and all rewards transfer to the user
     */
   function claimRewards(address user) external {
-    uint256 accrued = rewardsAccrued[user];
+    uint256 accrued = rewardsAccrued(user);
 
     if (accrued != 0) {
-      rewardsAccrued[user] = 0;
+      _rewardsAccrued[user] = 0;
 
       rewardToken.safeTransferFrom(address(flywheelRewards), user, accrued);
 
@@ -136,9 +139,9 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     }
   }
 
-  /*///////////////////////////////////////////////////////////////
+  /*----------------------------------------------------------------
                           ADMIN LOGIC
-    //////////////////////////////////////////////////////////////*/
+    ----------------------------------------------------------------*/
 
   /** 
       @notice Emitted when a new strategy is added to flywheel by the admin
@@ -152,8 +155,9 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   }
 
   function _addStrategyForRewards(ERC20 strategy) internal {
-    require(strategyState[strategy].index == 0, "strategy");
-    strategyState[strategy] = RewardsState({
+    (uint224 index, ) = strategyState(strategy);
+    require(index == 0, "strategy");
+    _strategyState[strategy] = RewardsState({
       index: (10**rewardToken.decimals()).safeCastTo224(),
       lastUpdatedTimestamp: block.timestamp.safeCastTo32()
     });
@@ -218,16 +222,16 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
     emit UpdatedFeeSettings(performanceFee, _performanceFee, feeRecipient, _feeRecipient);
 
     if (feeRecipient != _feeRecipient) {
-      rewardsAccrued[_feeRecipient] += rewardsAccrued[feeRecipient];
-      rewardsAccrued[feeRecipient] = 0;
+      _rewardsAccrued[_feeRecipient] += rewardsAccrued(feeRecipient);
+      _rewardsAccrued[feeRecipient] = 0;
     }
     performanceFee = _performanceFee;
     feeRecipient = _feeRecipient;
   }
 
-  /*///////////////////////////////////////////////////////////////
+  /*----------------------------------------------------------------
                     INTERNAL ACCOUNTING LOGIC
-    //////////////////////////////////////////////////////////////*/
+    ----------------------------------------------------------------*/
 
   struct RewardsState {
     /// @notice The strategy's last updated index
@@ -252,9 +256,10 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
         ? flywheelBooster.boostedTotalSupply(strategy)
         : strategy.totalSupply();
 
-      uint256 accruedFees = (strategyRewardsAccrued * performanceFee) / ONE;
+      // 100% = 100e16
+      uint256 accruedFees = (strategyRewardsAccrued * performanceFee) / uint224(100e16);
 
-      rewardsAccrued[feeRecipient] += accruedFees;
+      _rewardsAccrued[feeRecipient] += accruedFees;
       strategyRewardsAccrued -= accruedFees;
 
       uint224 deltaIndex;
@@ -267,7 +272,7 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
         index: state.index + deltaIndex,
         lastUpdatedTimestamp: block.timestamp.safeCastTo32()
       });
-      strategyState[strategy] = rewardsState;
+      _strategyState[strategy] = rewardsState;
     }
   }
 
@@ -279,10 +284,10 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
   ) private returns (uint256) {
     // load indices
     uint224 strategyIndex = state.index;
-    uint224 supplierIndex = userIndex[strategy][user];
+    uint224 supplierIndex = userIndex(strategy, user);
 
     // sync user index to global
-    userIndex[strategy][user] = strategyIndex;
+    _userIndex[strategy][user] = strategyIndex;
 
     // if user hasn't yet accrued rewards, grant them interest from the strategy beginning if they have a balance
     // zero balances will have no effect other than syncing to global index
@@ -298,12 +303,24 @@ contract MidasFlywheelCore is SafeOwnableUpgradeable {
 
     // accumulate rewards by multiplying user tokens by rewardsPerToken index and adding on unclaimed
     uint256 supplierDelta = (deltaIndex * supplierTokens) / (10**strategy.decimals());
-    uint256 supplierAccrued = rewardsAccrued[user] + supplierDelta;
+    uint256 supplierAccrued = rewardsAccrued(user) + supplierDelta;
 
-    rewardsAccrued[user] = supplierAccrued;
+    _rewardsAccrued[user] = supplierAccrued;
 
     emit AccrueRewards(strategy, user, supplierDelta, strategyIndex);
 
     return supplierAccrued;
+  }
+
+  function rewardsAccrued(address user) public virtual returns (uint256) {
+    return _rewardsAccrued[user];
+  }
+
+  function userIndex(ERC20 strategy, address user) public virtual returns (uint224) {
+    return _userIndex[strategy][user];
+  }
+
+  function strategyState(ERC20 strategy) public virtual returns (uint224 index, uint32 lastUpdatedTimestamp) {
+    return (_strategyState[strategy].index, _strategyState[strategy].lastUpdatedTimestamp);
   }
 }

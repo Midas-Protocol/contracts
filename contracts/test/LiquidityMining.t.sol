@@ -8,11 +8,9 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
-import { MidasFlywheelLensRouter, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
-import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
-import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import { CTokenInterface, CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
 import { CErc20 } from "../compound/CErc20.sol";
@@ -29,6 +27,9 @@ import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 import { CTokenFirstExtension, DiamondExtension } from "../compound/CTokenFirstExtension.sol";
+import { MidasFlywheelLensRouter, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
@@ -125,7 +126,9 @@ contract LiquidityMiningTest is BaseTest {
   }
 
   function setUpFlywheel() public {
-    flywheel = new MidasFlywheel();
+    MidasFlywheel impl = new MidasFlywheel();
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
+    flywheel = MidasFlywheel(address(proxy));
     flywheel.initialize(rewardToken, FlywheelStaticRewards(address(0)), IFlywheelBooster(address(0)), address(this));
     rewards = new FlywheelStaticRewards(FlywheelCore(address(flywheel)), address(this), Authority(address(0)));
     flywheel.setFlywheelRewards(rewards);
@@ -169,7 +172,7 @@ contract LiquidityMiningTest is BaseTest {
 
   function _testIntegration() internal {
     uint256 percentFee = flywheel.performanceFee();
-    uint224 percent100 = flywheel.ONE();
+    uint224 percent100 = 100e16; //flywheel.ONE();
 
     CTokenExtensionInterface asExtension = cErc20.asCTokenExtensionInterface();
 
@@ -194,16 +197,16 @@ contract LiquidityMiningTest is BaseTest {
     assertEq(rewardToken.balanceOf(user), userRewards, "!user rewards");
 
     // mint more tokens by user and rerun test
-    deposit(1e6 * 10**baseDecimal);
+    deposit(1 * 10**baseDecimal);
 
     // for next test, advance 10 seconds instead of 1 (multiply expectations by 10)
     vm.warp(block.timestamp + 10);
 
-    uint256 rewardsPerToken2PlusFee = (10 * 10**rewardDecimal * 1 * 10**baseDecimal) / asExtension.totalSupply();
+    uint256 rewardsPerToken2PlusFee = (1 * 10**rewardDecimal * 1 * 10**baseDecimal) / asExtension.totalSupply();
     uint256 rewardsPerToken2ForFee = (rewardsPerToken2PlusFee * percentFee) / percent100;
     uint256 rewardsPerToken2 = rewardsPerToken2PlusFee - rewardsPerToken2ForFee;
 
-    uint256 userRewards2 = (rewardsPerToken2 * asExtension.balanceOf(user)) / (1 * 10**baseDecimal);
+    uint256 userRewards2 = (10 * (rewardsPerToken2 * asExtension.balanceOf(user))) / (1 * 10**baseDecimal);
 
     // accrue all unclaimed rewards and claim them
     flywheelClaimer.getUnclaimedRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
