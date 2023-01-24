@@ -16,9 +16,10 @@ contract BalancerLpTokenLiquidator is IRedemptionStrategy {
     IBalancerVault vault = pool.getVault();
     bytes32 poolId = pool.getPoolId();
     (IERC20Upgradeable[] memory tokens, , ) = vault.getPoolTokens(poolId);
-    uint256[] memory minAmountsOut = new uint256[](tokens.length);
-
     uint256 outputTokenIndex = abi.decode(strategyData, (uint256));
+    outputToken = tokens[outputTokenIndex];
+
+    uint256[] memory minAmountsOut = new uint256[](tokens.length);
     minAmountsOut[outputTokenIndex] = 1;
 
     bytes memory userData = abi.encode(
@@ -34,5 +35,7 @@ contract BalancerLpTokenLiquidator is IRedemptionStrategy {
       false //toInternalBalance
     );
     vault.exitPool(poolId, address(this), payable(address(this)), request);
+
+    outputAmount = outputToken.balanceOf(address(this));
   }
 }
