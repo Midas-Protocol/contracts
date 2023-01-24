@@ -269,6 +269,8 @@ contract ExtensionsTest is BaseTest {
 
   function _prepareCTokenUpgrade(CErc20Delegate market) internal {
     address implBefore = market.implementation();
+    emit log("implementation before");
+    emit log_address(implBefore);
 
     CErc20Delegate newImpl;
     if (compareStrings("CErc20Delegate", market.contractType())) {
@@ -293,33 +295,9 @@ contract ExtensionsTest is BaseTest {
   }
 
   function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
-    address implBefore = asDelegate.implementation();
-    emit log("implementation before");
-    emit log_address(implBefore);
+    _prepareCTokenUpgrade(asDelegate);
 
     Comptroller pool = Comptroller(address(asDelegate.comptroller()));
-
-    CErc20Delegate newImpl;
-    if (compareStrings("CErc20Delegate", asDelegate.contractType())) {
-      newImpl = new CErc20Delegate();
-    } else {
-      newImpl = new CErc20PluginRewardsDelegate();
-    }
-
-    // whitelist the upgrade
-    vm.prank(ffd.owner());
-    ffd._editCErc20DelegateWhitelist(asArray(implBefore), asArray(address(newImpl)), asArray(false), asArray(true));
-
-    // set the new ctoken delegate as the latest
-    vm.prank(ffd.owner());
-    ffd._setLatestCErc20Delegate(implBefore, address(newImpl), false, abi.encode(address(0)));
-
-    // add the extension to the auto upgrade config
-    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
-    cErc20DelegateExtensions[0] = newCTokenExtension;
-    vm.prank(ffd.owner());
-    ffd._setCErc20DelegateExtensions(address(newImpl), cErc20DelegateExtensions);
-
     // turn auto impl on
     vm.prank(pool.admin());
     pool._toggleAutoImplementations(true);
