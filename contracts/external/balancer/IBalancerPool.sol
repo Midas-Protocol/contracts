@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity >=0.8.0;
 
+import { IBalancerVault } from "./IBalancerVault.sol";
+
 interface IBalancerPool {
   function getFinalTokens() external view returns (address[] memory);
 
@@ -18,7 +20,7 @@ interface IBalancerPool {
 
   function getPoolId() external view returns (bytes32);
 
-  function getVault() external view returns (address);
+  function getVault() external view returns (IBalancerVault);
 
   function joinPool(uint256 poolAmountOut, uint256[] calldata maxAmountsIn) external;
 

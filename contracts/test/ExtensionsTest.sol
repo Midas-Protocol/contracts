@@ -18,7 +18,7 @@ import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 
-import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 
 contract MockComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
   function getFirstMarketSymbol() public view returns (string memory) {
@@ -99,37 +99,41 @@ contract ExtensionsTest is BaseTest {
     third = new MockThirdComptrollerExtension();
 
     if (block.chainid == BSC_MAINNET) {
-      // change the implementation to the new that can add extensions
-      Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
-      latestComptrollerImplementation = address(newComptrollerImplementation);
-
       Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
-      address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
-
-      // whitelist the upgrade
-      vm.startPrank(ffd.owner());
-      ffd._editComptrollerImplementationWhitelist(
-        asArray(oldComptrollerImplementation),
-        asArray(latestComptrollerImplementation),
-        asArray(true)
-      );
-      // whitelist the new pool creation
-      ffd._editComptrollerImplementationWhitelist(
-        asArray(address(0)),
-        asArray(latestComptrollerImplementation),
-        asArray(true)
-      );
-      DiamondExtension[] memory extensions = new DiamondExtension[](1);
-      extensions[0] = cfe;
-      ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);
-      vm.stopPrank();
-
-      // upgrade to the new comptroller
-      vm.startPrank(asUnitroller.admin());
-      asUnitroller._setPendingImplementation(latestComptrollerImplementation);
-      newComptrollerImplementation._become(asUnitroller);
-      vm.stopPrank();
+      _upgradeExistingComptroller(asUnitroller);
     }
+  }
+
+  function _upgradeExistingComptroller(Unitroller asUnitroller) internal {
+    // change the implementation to the new that can add extensions
+    Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
+    latestComptrollerImplementation = address(newComptrollerImplementation);
+
+    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
+
+    // whitelist the upgrade
+    vm.startPrank(ffd.owner());
+    ffd._editComptrollerImplementationWhitelist(
+      asArray(oldComptrollerImplementation),
+      asArray(latestComptrollerImplementation),
+      asArray(true)
+    );
+    // whitelist the new pool creation
+    ffd._editComptrollerImplementationWhitelist(
+      asArray(address(0)),
+      asArray(latestComptrollerImplementation),
+      asArray(true)
+    );
+    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    extensions[0] = cfe;
+    ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);
+    vm.stopPrank();
+
+    // upgrade to the new comptroller
+    vm.startPrank(asUnitroller.admin());
+    asUnitroller._setPendingImplementation(latestComptrollerImplementation);
+    newComptrollerImplementation._become(asUnitroller);
+    vm.stopPrank();
   }
 
   function testExtensionReplace() public debuggingOnly fork(BSC_MAINNET) {

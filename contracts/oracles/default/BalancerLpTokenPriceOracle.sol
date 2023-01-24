@@ -62,8 +62,8 @@ contract BalancerLpTokenPriceOracle is SafeOwnableUpgradeable, BasePriceOracle, 
   function _price(address underlying) internal view virtual returns (uint256) {
     IBalancerPool pool = IBalancerPool(underlying);
     bytes32 poolId = pool.getPoolId();
-    IBalancerVault vault = IBalancerVault(address(pool.getVault()));
-    (IERC20[] memory tokens, uint256[] memory balances, ) = vault.getPoolTokens(poolId);
+    IBalancerVault vault = pool.getVault();
+    (IERC20Upgradeable[] memory tokens, uint256[] memory balances, ) = vault.getPoolTokens(poolId);
 
     require(tokens.length == 2, "Oracle suitable only for Balancer Pools of 2 tokens");
 
