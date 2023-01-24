@@ -21,6 +21,7 @@ import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
+import { CErc20WrappingDelegate } from "../compound/CErc20WrappingDelegate.sol";
 import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
 import { ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
@@ -31,6 +32,7 @@ import { MockERC4626 } from "../midas/strategies/MockERC4626.sol";
 import { MockERC4626Dynamic } from "../midas/strategies/MockERC4626Dynamic.sol";
 import { CTokenFirstExtension, DiamondExtension } from "../compound/CTokenFirstExtension.sol";
 import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { MidasERC20Wrapper } from "../midas/MidasERC20Wrapper.sol";
 
 contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
@@ -42,6 +44,7 @@ contract DeployMarketsTest is Test {
   CErc20Delegate cErc20Delegate;
   CErc20PluginDelegate cErc20PluginDelegate;
   CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
+  CErc20WrappingDelegate cErc20WrappingDelegate;
 
   MockERC4626 mockERC4626;
   MockERC4626Dynamic mockERC4626Dynamic;
@@ -77,18 +80,16 @@ contract DeployMarketsTest is Test {
     cErc20Delegate = new CErc20Delegate();
     cErc20PluginDelegate = new CErc20PluginDelegate();
     cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
+    cErc20WrappingDelegate = new CErc20WrappingDelegate();
 
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
     cErc20DelegateExtensions[0] = new CTokenFirstExtension();
     fuseAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
     fuseAdmin._setCErc20DelegateExtensions(address(cErc20PluginDelegate), cErc20DelegateExtensions);
     fuseAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
+    fuseAdmin._setCErc20DelegateExtensions(address(cErc20WrappingDelegate), cErc20DelegateExtensions);
 
-    for (uint256 i = 0; i < 7; i++) {
-      t.push(true);
-      f.push(false);
-    }
-
+    oldCErC20Implementations.push(address(0));
     oldCErC20Implementations.push(address(0));
     oldCErC20Implementations.push(address(0));
     oldCErC20Implementations.push(address(0));
@@ -100,10 +101,16 @@ contract DeployMarketsTest is Test {
     newCErc20Implementations.push(address(cErc20Delegate));
     newCErc20Implementations.push(address(cErc20PluginDelegate));
     newCErc20Implementations.push(address(cErc20PluginRewardsDelegate));
+    newCErc20Implementations.push(address(cErc20WrappingDelegate));
     newCErc20Implementations.push(address(cErc20PluginDelegate));
     newCErc20Implementations.push(address(cErc20PluginRewardsDelegate));
     newCErc20Implementations.push(address(cErc20PluginDelegate));
     newCErc20Implementations.push(address(cErc20PluginRewardsDelegate));
+
+    for (uint256 i = 0; i < newCErc20Implementations.length; i++) {
+      t.push(true);
+      f.push(false);
+    }
 
     fuseAdmin._editCErc20DelegateWhitelist(oldCErC20Implementations, newCErc20Implementations, f, t);
   }
@@ -267,6 +274,41 @@ contract DeployMarketsTest is Test {
     assertEq(cToken.totalSupply(), 10000000 * 5);
     assertEq(mockERC4626Dynamic.balanceOf(address(cToken)), 10000000);
     assertEq(underlyingToken.balanceOf(address(mockERC4626Dynamic)), 10000000);
+  }
+
+  function testDeployCErc20WrappingDelegate() public {
+    vm.roll(1);
+    comptroller._deployMarket(
+      false,
+      abi.encode(
+        address(underlyingToken),
+        comptroller,
+        payable(address(fuseAdmin)),
+        InterestRateModel(address(interestModel)),
+        "cUnderlyingToken",
+        "CUT",
+        address(cErc20WrappingDelegate),
+        abi.encode(address(0)),
+        uint256(1),
+        uint256(0)
+      ),
+      0.9e18
+    );
+
+    CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
+    CErc20WrappingDelegate cToken = CErc20WrappingDelegate(address(allMarkets[allMarkets.length - 1]));
+
+    underlyingToken.approve(address(cToken), 1e36);
+    address[] memory cTokens = new address[](1);
+    cTokens[0] = address(cToken);
+    comptroller.enterMarkets(cTokens);
+    vm.roll(1);
+
+    cToken.mint(10000000);
+    assertEq(cToken.totalSupply(), 10000000 * 5);
+    MidasERC20Wrapper wrapper = cToken.underlyingWrapper();
+    assertEq(wrapper.balanceOf(address(cToken)), 10000000);
+    assertEq(underlyingToken.balanceOf(address(wrapper)), 10000000);
   }
 
   function testAutImplementationCErc20Delegate() public {

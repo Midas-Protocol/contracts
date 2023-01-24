@@ -7,6 +7,8 @@ import { IERC20 } from "openzeppelin-contracts/token/ERC20/IERC20.sol";
 contract MidasERC20Wrapper is ERC20Wrapper {
   address private _owner;
   uint8 private _decimals;
+  //  string private _nameOverride;
+  //  string private _symbolOverride;
 
   constructor(
     address underlyingToken_,
@@ -30,4 +32,26 @@ contract MidasERC20Wrapper is ERC20Wrapper {
       return IERC20(token).transfer(_owner, balance) ? balance : 0;
     }
   }
+
+  //  function name() public view virtual override returns (string memory) {
+  //    if (bytes(_nameOverride).length == 0) {
+  //      return super.name();
+  //    } else {
+  //      return _nameOverride;
+  //    }
+  //  }
+  //
+  //  function symbol() public view virtual override returns (string memory) {
+  //    if (bytes(_symbolOverride).length == 0) {
+  //      return super.symbol();
+  //    } else {
+  //      return _symbolOverride;
+  //    }
+  //  }
+  //
+  //  function _overrideNameAndSymbol(string memory name_, string memory symbol_) external {
+  //    require(msg.sender == _owner, "!owner");
+  //    _name = name_;
+  //    _symbol = symbol_;
+  //  }
 }

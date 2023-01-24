@@ -58,7 +58,7 @@ contract CErc20WrappingDelegate is CErc20Delegate {
 
   function doTransferIn(address from, uint256 amount) internal virtual override returns (uint256) {
     require(EIP20Interface(underlying).transferFrom(from, address(this), amount), "send");
-
+    require(EIP20Interface(underlying).approve(address(underlyingWrapper), amount), "approve wrapper");
     underlyingWrapper.depositFor(address(this), amount);
     return amount;
   }
