@@ -19,6 +19,7 @@ import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract MockComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
   function getFirstMarketSymbol() public view returns (string memory) {

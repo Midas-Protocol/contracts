@@ -13,6 +13,7 @@ import "./compound/CErc20PluginDelegate.sol";
 import "./midas/SafeOwnableUpgradeable.sol";
 import "./utils/PatchedStorage.sol";
 import "./oracles/BasePriceOracle.sol";
+import { CTokenExtensionInterface } from "./compound/CTokenInterfaces.sol";
 import { DiamondExtension, DiamondBase } from "./midas/DiamondExtension.sol";
 
 /**
@@ -447,7 +448,11 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     ICToken[] memory markets = pool.getAllMarkets();
 
     for (uint8 i = 0; i < markets.length; i++) {
-      markets[i].accrueInterest();
+      address marketAddress = address(markets[i]);
+      address implBefore = CErc20PluginDelegate(marketAddress).implementation();
+      address newImpl = _latestCErc20Delegate[implBefore].implementation;
+
+      if (newImpl != address(0)) CTokenExtensionInterface(marketAddress).accrueInterest();
     }
 
     if(!autoImplOnBefore) pool._toggleAutoImplementations(false);
