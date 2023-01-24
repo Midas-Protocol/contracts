@@ -267,6 +267,31 @@ contract ExtensionsTest is BaseTest {
     assertEq(totalSupplyAfter, totalSupplyBefore, "total supply should be the same");
   }
 
+  function _prepareCTokenUpgrade(CErc20Delegate market) internal {
+    address implBefore = market.implementation();
+
+    CErc20Delegate newImpl;
+    if (compareStrings("CErc20Delegate", market.contractType())) {
+      newImpl = new CErc20Delegate();
+    } else {
+      newImpl = new CErc20PluginRewardsDelegate();
+    }
+
+    // whitelist the upgrade
+    vm.prank(ffd.owner());
+    ffd._editCErc20DelegateWhitelist(asArray(implBefore), asArray(address(newImpl)), asArray(false), asArray(true));
+
+    // set the new ctoken delegate as the latest
+    vm.prank(ffd.owner());
+    ffd._setLatestCErc20Delegate(implBefore, address(newImpl), false, abi.encode(address(0)));
+
+    // add the extension to the auto upgrade config
+    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
+    cErc20DelegateExtensions[0] = newCTokenExtension;
+    vm.prank(ffd.owner());
+    ffd._setCErc20DelegateExtensions(address(newImpl), cErc20DelegateExtensions);
+  }
+
   function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
     address implBefore = asDelegate.implementation();
     emit log("implementation before");
@@ -340,5 +365,23 @@ contract ExtensionsTest is BaseTest {
       address[] memory extensions = asBase._listExtensions();
       assertEq(extensions.length, 1, "each pool should have the first extension");
     }
+  }
+
+  function testBulkAutoUpgrade() public fork(POLYGON_MAINNET) {
+    // upgrade
+    {
+      FuseFeeDistributor newImpl = new FuseFeeDistributor();
+      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
+      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
+      address admin = address(uint160(uint256(bytesAtSlot)));
+      vm.prank(admin);
+      proxy.upgradeTo(address(newImpl));
+    }
+
+    CErc20Delegate market = CErc20Delegate(0x0db51E5255E44751b376738d8979D969AD70bff6);
+    _prepareCTokenUpgrade(market);
+
+    vm.startPrank(ffd.owner());
+    ffd.autoUpgradePool(address(market.comptroller()));
   }
 }

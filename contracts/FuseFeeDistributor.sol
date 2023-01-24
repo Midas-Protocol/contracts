@@ -435,4 +435,19 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   {
     cErc20DelegateExtensions[cErc20Delegate] = extensions;
   }
+
+  function autoUpgradePool(address poolAddress) external onlyOwner {
+    IComptroller pool = IComptroller(poolAddress);
+    pool._toggleAutoImplementations(true);
+
+    pool.enterMarkets(new address[](0));
+
+    ICToken[] memory markets = pool.getAllMarkets();
+
+    for (uint8 i = 0; i < markets.length; i++) {
+      markets[i].accrueInterest();
+    }
+
+    pool._toggleAutoImplementations(false);
+  }
 }
