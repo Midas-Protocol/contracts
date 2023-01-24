@@ -22,7 +22,12 @@ contract MidasERC20Wrapper is ERC20Wrapper {
     return _decimals;
   }
 
-  function recover() public returns (uint256) {
-    return _recover(_owner);
+  function recover(address token) public returns (uint256) {
+    if (token == address(this)) {
+      return _recover(_owner);
+    } else {
+      uint256 balance = IERC20(token).balanceOf(address(this));
+      return IERC20(token).transfer(_owner, balance) ? balance : 0;
+    }
   }
 }
