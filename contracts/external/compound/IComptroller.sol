@@ -82,6 +82,8 @@ interface IComptroller {
 
   function enterMarkets(address[] memory cTokens) external returns (uint256[] memory);
 
+  function autoImplementation() external view returns (bool);
+
   function isUserOfPool(address user) external view returns (bool);
 
   function whitelist(address account) external view returns (bool);

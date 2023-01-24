@@ -438,6 +438,8 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
 
   function autoUpgradePool(address poolAddress) external onlyOwner {
     IComptroller pool = IComptroller(poolAddress);
+    bool autoImplOnBefore = pool.autoImplementation();
+
     pool._toggleAutoImplementations(true);
 
     pool.enterMarkets(new address[](0));
@@ -448,6 +450,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
       markets[i].accrueInterest();
     }
 
-    pool._toggleAutoImplementations(false);
+    if(!autoImplOnBefore) pool._toggleAutoImplementations(false);
   }
 }
