@@ -28,9 +28,7 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     IERC20Upgradeable lpToken = IERC20Upgradeable(lpTokenAddress);
     IBalancerPool asPool = IBalancerPool(lpTokenAddress);
 
-    (IERC20Upgradeable[] memory tokens, ,) = asPool
-      .getVault()
-      .getPoolTokens(asPool.getPoolId());
+    (IERC20Upgradeable[] memory tokens, , ) = asPool.getVault().getPoolTokens(asPool.getPoolId());
 
     IERC20Upgradeable outputToken;
     uint256 outputTokenIndex = type(uint256).max;
