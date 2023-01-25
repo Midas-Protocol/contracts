@@ -295,6 +295,9 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
+    // TODO configure the oracle
+    // then call support market and set collateral factor
+
     CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
     CErc20WrappingDelegate cToken = CErc20WrappingDelegate(address(allMarkets[allMarkets.length - 1]));
 
@@ -309,6 +312,25 @@ contract DeployMarketsTest is Test {
     MidasERC20Wrapper wrapper = cToken.underlyingWrapper();
     assertEq(wrapper.balanceOf(address(cToken)), 10000000);
     assertEq(underlyingToken.balanceOf(address(wrapper)), 10000000);
+
+    // deploy a second of the same underlying
+    vm.roll(1);
+    comptroller._deployMarket(
+      false,
+      abi.encode(
+        address(underlyingToken),
+        comptroller,
+        payable(address(fuseAdmin)),
+        InterestRateModel(address(interestModel)),
+        "cUnderlyingToken",
+        "CUT",
+        address(cErc20WrappingDelegate),
+        abi.encode(address(0)),
+        uint256(1),
+        uint256(0)
+      ),
+      0.9e18
+    );
   }
 
   function testAutImplementationCErc20Delegate() public {
