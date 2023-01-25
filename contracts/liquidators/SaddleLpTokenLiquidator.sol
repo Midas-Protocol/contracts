@@ -12,11 +12,13 @@ contract SaddleLpTokenLiquidator is IRedemptionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    (uint8 index, address oracleAddr) = abi.decode(strategyData, (uint8, address));
+    (address outputTokenAddress, address oracleAddr) = abi.decode(strategyData, (address, address));
     SaddleLpPriceOracle oracle = SaddleLpPriceOracle(oracleAddr);
+
     ISwap pool = ISwap(oracle.poolOf(address(inputToken)));
+    uint8 index = pool.getTokenIndex(outputTokenAddress);
 
     outputAmount = pool.removeLiquidityOneToken(inputAmount, index, 1, block.timestamp);
-    outputToken = IERC20Upgradeable(pool.getToken(index));
+    outputToken = IERC20Upgradeable(outputTokenAddress);
   }
 }
