@@ -53,7 +53,7 @@ contract InterestRateModelTest is BaseTest {
     }
   }
 
-  function testFantom() public fork(FANTOM_OPERA) {
+  function testFantomIrm() public fork(FANTOM_OPERA) {
     testJumpRateBorrowRate();
     testJumpRateSupplyRate();
     testAnkrFTMBorrowModelRate();
@@ -62,7 +62,7 @@ contract InterestRateModelTest is BaseTest {
     testWhitepaperSupplyRate();
   }
 
-  function testBsc() public fork(BSC_MAINNET) {
+  function testBscIrm() public fork(BSC_MAINNET) {
     testJumpRateBorrowRate();
     testJumpRateSupplyRate();
     testAnkrBNBBorrowModelRate();
@@ -71,7 +71,7 @@ contract InterestRateModelTest is BaseTest {
     testWhitepaperSupplyRate();
   }
 
-  function testPolygon() public fork(POLYGON_MAINNET) {
+  function testPolygonIrm() public fork(POLYGON_MAINNET) {
     testJumpRateBorrowRatePolygon();
   }
 
