@@ -35,7 +35,9 @@ contract CurveSwapLiquidatorFunder is CurveSwapLiquidator, IFundsConversionStrat
           (CurveLpTokenPriceOracleNoRegistry, CurveV2LpTokenPriceOracleNoRegistry, address, address, address)
         );
 
-      (curvePool, i, j) = curveV2Oracle.getPoolForSwap(inputTokenAddress, outputTokenAddress);
+      if (address(curveV2Oracle) != address(0)) {
+        (curvePool, i, j) = curveV2Oracle.getPoolForSwap(inputTokenAddress, outputTokenAddress);
+      }
       if (address(curvePool) == address(0)) {
         (curvePool, i, j) = curveV1Oracle.getPoolForSwap(inputTokenAddress, outputTokenAddress);
       }

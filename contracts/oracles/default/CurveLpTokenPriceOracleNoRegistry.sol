@@ -55,7 +55,13 @@ contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedSto
 
   function reinitialize(address[] memory _lpTokens) public reinitializer(2) onlyOwnerOrAdmin {
     for (uint256 i = 0; i < _lpTokens.length; i++) {
-      lpTokens[i] = _lpTokens[i];
+      bool skip = false;
+      for (uint256 j = 0; j < lpTokens.length; j++) {
+        if (lpTokens[j] == _lpTokens[i]) {
+          skip = true; break;
+        }
+      }
+      if (!skip) lpTokens.push(_lpTokens[i]);
     }
   }
 
