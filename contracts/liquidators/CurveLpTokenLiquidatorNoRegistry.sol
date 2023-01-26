@@ -29,9 +29,9 @@ contract CurveLpTokenLiquidatorNoRegistry is IRedemptionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    (address outputTokenAddress, address underlying, address payable wtoken, address _oracle) = abi.decode(
+    (address outputTokenAddress, address payable wtoken, address _oracle) = abi.decode(
       strategyData,
-      (address, address, address, address)
+      (address, address, address)
     );
     // the oracle contains the pool registry
     CurveLpTokenPriceOracleNoRegistry oracle = CurveLpTokenPriceOracleNoRegistry(_oracle);
@@ -54,11 +54,11 @@ contract CurveLpTokenLiquidatorNoRegistry is IRedemptionStrategy {
     curvePool.remove_liquidity_one_coin(inputAmount, int128(int8(outputIndex)), 1);
 
     // better safe than sorry
-    if (underlying == address(0) || underlying == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
+    if (outputTokenAddress == address(0) || outputTokenAddress == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
       WETH(wtoken).deposit{ value: address(this).balance }();
       outputToken = IERC20Upgradeable(wtoken);
     } else {
-      outputToken = IERC20Upgradeable(underlying);
+      outputToken = IERC20Upgradeable(outputTokenAddress);
     }
     outputAmount = outputToken.balanceOf(address(this));
 

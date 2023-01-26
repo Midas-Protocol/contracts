@@ -42,11 +42,12 @@ contract CurveSwapLiquidator is IRedemptionStrategy {
     (
       CurveLpTokenPriceOracleNoRegistry curveV1Oracle,
       CurveV2LpTokenPriceOracleNoRegistry curveV2Oracle,
+      ,
       address outputTokenAddress,
       address payable wtoken
     ) = abi.decode(
         strategyData,
-        (CurveLpTokenPriceOracleNoRegistry, CurveV2LpTokenPriceOracleNoRegistry, address, address)
+        (CurveLpTokenPriceOracleNoRegistry, CurveV2LpTokenPriceOracleNoRegistry, address, address, address)
       );
 
     address inputTokenAddress = address(inputToken);
