@@ -9,7 +9,7 @@ import "../external/compound/IComptroller.sol";
 contract FPLTest is BaseTest {
   FusePoolLens fpl = new FusePoolLens();
 
-  function testFPL() public fork(POLYGON_MAINNET) {
+  function testFPL() public debuggingOnly fork(POLYGON_MAINNET) {
     fpl = FusePoolLens(0xD7225110D8F419b0E8Ad0A536977965E62fB5769);
     fpl.getPoolAssetsWithData(IComptroller(0xB08A309eFBFFa41f36A06b2D0C9a4629749b17a2));
   }

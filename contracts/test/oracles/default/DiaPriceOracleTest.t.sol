@@ -43,6 +43,7 @@ contract DiaPriceOracleTest is BaseTest {
 
   function setUpWithMasterPriceOracle() internal {
     SimplePriceOracle spo = new SimplePriceOracle();
+    spo.initialize();
     vm.prank(spo.owner());
     spo.setDirectPrice(address(2), 200000000000000000); // 1e36 / 200000000000000000 = 5e18
     MasterPriceOracle mpo = new MasterPriceOracle();
