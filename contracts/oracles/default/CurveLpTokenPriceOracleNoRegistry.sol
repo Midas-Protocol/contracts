@@ -12,9 +12,9 @@ import "../../utils/PatchedStorage.sol";
 import "../BasePriceOracle.sol";
 
 /**
- * @title CurveLpTokenPriceOracle
+ * @title CurveLpTokenPriceOracleNoRegistry
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
- * @notice CurveLpTokenPriceOracle is a price oracle for Curve LP tokens (using the sender as a root oracle).
+ * @notice CurveLpTokenPriceOracleNoRegistry is a price oracle for Curve LP tokens (using the sender as a root oracle).
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
 contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedStorage, BasePriceOracle {
@@ -27,6 +27,8 @@ contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedSto
    * @dev Maps Curve LP token addresses to pool addresses.
    */
   mapping(address => address) public poolOf;
+
+  address[] public lpTokens;
 
   /**
    * @dev Initializes an array of LP tokens and pools if desired.
@@ -49,6 +51,40 @@ contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedSto
       poolOf[_lpTokens[i]] = _pools[i];
       underlyingTokens[_lpTokens[i]] = _poolUnderlyings[i];
     }
+  }
+
+  function reinitialize(address[] memory _lpTokens) public reinitializer(2) onlyOwnerOrAdmin {
+    for (uint256 i = 0; i < _lpTokens.length; i++) {
+      lpTokens[i] = _lpTokens[i];
+    }
+  }
+
+  function getAllLPTokens() public view returns (address[] memory) {
+    return lpTokens;
+  }
+
+  function getPoolForSwap(address inputToken, address outputToken) public view returns (ICurvePool, int128, int128) {
+    for (uint256 i = 0; i < lpTokens.length; i++) {
+      ICurvePool pool = ICurvePool(poolOf[lpTokens[i]]);
+      int128 inputIndex = -1;
+      int128 outputIndex = -1;
+      int128 j = 0;
+      while(true) {
+        try pool.coins(uint256(uint128(j))) returns (address coin) {
+          if (coin == inputToken) inputIndex = j;
+          else if (coin == outputToken) outputIndex = j;
+          j++;
+        } catch {
+          break;
+        }
+
+        if (outputIndex > -1 && inputIndex > -1) {
+          return (pool, inputIndex, outputIndex);
+        }
+      }
+    }
+
+    return (ICurvePool(address(0)), 0, 0);
   }
 
   /**

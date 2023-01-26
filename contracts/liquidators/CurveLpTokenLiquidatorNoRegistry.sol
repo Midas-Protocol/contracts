@@ -53,7 +53,7 @@ contract CurveLpTokenLiquidatorNoRegistry is IRedemptionStrategy {
 
     curvePool.remove_liquidity_one_coin(inputAmount, int128(int8(outputIndex)), 1);
 
-    // TODO: check if this is needed
+    // better safe than sorry
     if (underlying == address(0) || underlying == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
       WETH(wtoken).deposit{ value: address(this).balance }();
       outputToken = IERC20Upgradeable(wtoken);

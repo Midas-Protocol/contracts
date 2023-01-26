@@ -25,6 +25,8 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
    */
   mapping(address => address) public poolOf;
 
+  address[] public lpTokens;
+
   /**
    * @dev Initializes an array of LP tokens and pools if desired.
    * @param _lpTokens Array of LP token addresses.
@@ -37,6 +39,40 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
     for (uint256 i = 0; i < _pools.length; i++) {
       poolOf[_lpTokens[i]] = _pools[i];
     }
+  }
+
+  function reinitialize(address[] memory _lpTokens) public reinitializer(2) onlyOwnerOrAdmin {
+    for (uint256 i = 0; i < _lpTokens.length; i++) {
+      lpTokens[i] = _lpTokens[i];
+    }
+  }
+
+  function getAllLPTokens() public view returns (address[] memory) {
+    return lpTokens;
+  }
+
+  function getPoolForSwap(address inputToken, address outputToken) public view returns (ICurvePool, int128, int128) {
+    for (uint256 i = 0; i < lpTokens.length; i++) {
+      ICurvePool pool = ICurvePool(poolOf[lpTokens[i]]);
+      int128 inputIndex = -1;
+      int128 outputIndex = -1;
+      int128 j = 0;
+      while(true) {
+        try pool.coins(uint256(uint128(j))) returns (address coin) {
+          if (coin == inputToken) inputIndex = j;
+          else if (coin == outputToken) outputIndex = j;
+          j++;
+        } catch {
+          break;
+        }
+
+        if (outputIndex > -1 && inputIndex > -1) {
+          return (pool, inputIndex, outputIndex);
+        }
+      }
+    }
+
+    return (ICurvePool(address(0)), int128(0), int128(0));
   }
 
   /**
