@@ -51,13 +51,21 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
     return lpTokens;
   }
 
-  function getPoolForSwap(address inputToken, address outputToken) public view returns (ICurvePool, int128, int128) {
+  function getPoolForSwap(address inputToken, address outputToken)
+    public
+    view
+    returns (
+      ICurvePool,
+      int128,
+      int128
+    )
+  {
     for (uint256 i = 0; i < lpTokens.length; i++) {
       ICurvePool pool = ICurvePool(poolOf[lpTokens[i]]);
       int128 inputIndex = -1;
       int128 outputIndex = -1;
       int128 j = 0;
-      while(true) {
+      while (true) {
         try pool.coins(uint256(uint128(j))) returns (address coin) {
           if (coin == inputToken) inputIndex = j;
           else if (coin == outputToken) outputIndex = j;

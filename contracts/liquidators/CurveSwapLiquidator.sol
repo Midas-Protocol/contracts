@@ -9,7 +9,6 @@ import { WETH } from "solmate/tokens/WETH.sol";
 
 import "./IRedemptionStrategy.sol";
 
-
 import "../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
 import "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 
@@ -40,10 +39,15 @@ contract CurveSwapLiquidator is IRedemptionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    (CurveLpTokenPriceOracleNoRegistry curveV1Oracle, CurveV2LpTokenPriceOracleNoRegistry curveV2Oracle, address outputTokenAddress, address payable wtoken) = abi.decode(
-      strategyData,
-      (CurveLpTokenPriceOracleNoRegistry, CurveV2LpTokenPriceOracleNoRegistry, address, address)
-    );
+    (
+      CurveLpTokenPriceOracleNoRegistry curveV1Oracle,
+      CurveV2LpTokenPriceOracleNoRegistry curveV2Oracle,
+      address outputTokenAddress,
+      address payable wtoken
+    ) = abi.decode(
+        strategyData,
+        (CurveLpTokenPriceOracleNoRegistry, CurveV2LpTokenPriceOracleNoRegistry, address, address)
+      );
 
     address inputTokenAddress = address(inputToken);
 
