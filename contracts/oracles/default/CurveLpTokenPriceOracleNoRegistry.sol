@@ -58,7 +58,8 @@ contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedSto
       bool skip = false;
       for (uint256 j = 0; j < lpTokens.length; j++) {
         if (lpTokens[j] == _lpTokens[i]) {
-          skip = true; break;
+          skip = true;
+          break;
         }
       }
       if (!skip) lpTokens.push(_lpTokens[i]);

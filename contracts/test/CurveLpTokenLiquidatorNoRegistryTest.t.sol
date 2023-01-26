@@ -55,11 +55,7 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     lpToken3Eps.transfer(address(liquidator), 1234);
 
     bytes memory data = abi.encode(bUSD, wtoken, curveV1Oracle);
-    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
-      lpToken3Eps,
-      1234,
-      data
-    );
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(lpToken3Eps, 1234, data);
 
     assertEq(address(outputToken), address(bUSD), "!outputToken");
     assertGt(outputAmount, 0, "!outputAmount>0");
@@ -77,11 +73,7 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     require(poolOf2Brl != address(0), "could not find the pool for 2brl");
 
     bytes memory data = abi.encode(jbrl, wtoken, curveV1Oracle);
-    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
-      twobrl,
-      123456,
-      data
-    );
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(twobrl, 123456, data);
     assertEq(address(outputToken), jbrl);
     assertGt(outputAmount, 0);
     assertEq(outputToken.balanceOf(address(liquidator)), outputAmount);

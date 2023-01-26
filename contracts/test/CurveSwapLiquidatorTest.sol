@@ -21,7 +21,6 @@ contract CurveSwapLiquidatorTest is BaseTest {
   address xcDotAddress = 0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080; // 0
   address stDotAddress = 0xFA36Fe1dA08C89eC72Ea1F0143a35bFd5DAea108; // 1
 
-
   CurveLpTokenPriceOracleNoRegistry curveV1Oracle;
   CurveV2LpTokenPriceOracleNoRegistry curveV2Oracle;
 
@@ -32,30 +31,20 @@ contract CurveSwapLiquidatorTest is BaseTest {
 
     if (address(curveV1Oracle) == address(0)) {
       address[][] memory _poolUnderlyings = new address[][](1);
-      _poolUnderlyings[0] = asArray(
-        maiAddress,
-        val3EPSAddress
-      );
+      _poolUnderlyings[0] = asArray(maiAddress, val3EPSAddress);
       //      _poolUnderlyings[1] = asArray(
       //        xcDotAddress,
       //        stDotAddress
       //      );
       curveV1Oracle = new CurveLpTokenPriceOracleNoRegistry();
-      curveV1Oracle.initialize(
-        asArray(lpTokenMai3EPS),
-        asArray(poolAddress),
-        _poolUnderlyings
-      );
+      curveV1Oracle.initialize(asArray(lpTokenMai3EPS), asArray(poolAddress), _poolUnderlyings);
       curveV1Oracle.reinitialize(asArray(lpTokenMai3EPS));
     }
 
     if (address(curveV2Oracle) == address(0)) {
       address lpTokenXcStDot = xcDotStDotPool;
       curveV2Oracle = new CurveV2LpTokenPriceOracleNoRegistry();
-      curveV2Oracle.initialize(
-        asArray(lpTokenXcStDot),
-        asArray(xcDotStDotPool)
-      );
+      curveV2Oracle.initialize(asArray(lpTokenXcStDot), asArray(xcDotStDotPool));
       curveV2Oracle.reinitialize(asArray(lpTokenXcStDot));
     }
   }
@@ -73,7 +62,11 @@ contract CurveSwapLiquidatorTest is BaseTest {
 
     {
       // mock some calls
-      vm.mockCall(xcDotAddress, abi.encodeWithSelector(xcDot.approve.selector, xcDotStDotPool, 10000000000), abi.encode(true));
+      vm.mockCall(
+        xcDotAddress,
+        abi.encodeWithSelector(xcDot.approve.selector, xcDotStDotPool, 10000000000),
+        abi.encode(true)
+      );
       vm.mockCall(
         xcDotAddress,
         abi.encodeWithSelector(xcDot.transferFrom.selector, address(csl), xcDotStDotPool, 10000000000),

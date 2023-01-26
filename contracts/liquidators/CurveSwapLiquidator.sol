@@ -52,7 +52,9 @@ contract CurveSwapLiquidator is IRedemptionStrategy {
 
     address inputTokenAddress = address(inputToken);
 
-    ICurvePool curvePool; int128 i; int128 j;
+    ICurvePool curvePool;
+    int128 i;
+    int128 j;
     if (address(curveV2Oracle) != address(0)) {
       (curvePool, i, j) = curveV2Oracle.getPoolForSwap(inputTokenAddress, outputTokenAddress);
     }
