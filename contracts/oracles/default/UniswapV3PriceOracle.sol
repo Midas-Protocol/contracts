@@ -1,34 +1,29 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
+import { PriceOracle } from "../../compound/PriceOracle.sol";
+import { BasePriceOracle } from "../BasePriceOracle.sol";
+import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import { CTokenInterface } from "../../compound/CErc20.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../external/uniswap/TickMath.sol";
 import "../../external/uniswap/FullMath.sol";
 import "../../external/uniswap/IUniswapV3Pool.sol";
+import "../../midas/SafeOwnableUpgradeable.sol";
 
-import "../BasePriceOracle.sol";
-
+// import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 /**
  * @title UniswapV3PriceOracle
  * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
  * @notice UniswapV3PriceOracle is a price oracle for Uniswap V3 pairs.
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
-contract UniswapV3PriceOracle is IPriceOracle {
+contract UniswapV3PriceOracle is PriceOracle, SafeOwnableUpgradeable {
   /**
    * @notice Maps ERC20 token addresses to UniswapV3Pool addresses.
    */
   mapping(address => AssetConfig) public poolFeeds;
-
-  /**
-   * @dev The administrator of this `UniswapV3PriceOracle`.
-   */
-  address public admin;
 
   /**
    * @dev Controls if `admin` can overwrite existing assignments of oracles to underlying tokens.
@@ -38,36 +33,26 @@ contract UniswapV3PriceOracle is IPriceOracle {
   struct AssetConfig {
     address poolAddress;
     uint256 twapWindow;
+    FeedBaseCurrency baseCurrency;
   }
 
   /**
-   * @dev Constructor to set admin, canAdminOverwrite and wtoken address
+   * @notice Enum indicating the base currency of a Chainlink price feed.
+   * @dev ETH is interchangeable with the nativeToken of the current chain.
    */
-  constructor(address _admin, bool _canAdminOverwrite) {
-    admin = _admin;
-    canAdminOverwrite = _canAdminOverwrite;
+
+  enum FeedBaseCurrency {
+    ETH,
+    USD
   }
 
-  /**
-   * @dev Changes the admin and emits an event.
-   */
-  function changeAdmin(address newAdmin) external onlyAdmin {
-    address oldAdmin = admin;
-    admin = newAdmin;
-    emit NewAdmin(oldAdmin, newAdmin);
-  }
+  address public wtoken;
+  address public USD_TOKEN;
 
-  /**
-   * @dev Event emitted when `admin` is changed.
-   */
-  event NewAdmin(address oldAdmin, address newAdmin);
-
-  /**
-   * @dev Modifier that checks if `msg.sender == admin`.
-   */
-  modifier onlyAdmin() {
-    require(msg.sender == admin, "Sender is not the admin.");
-    _;
+  function initialize(address _wtoken, address usdToken) public initializer {
+    __SafeOwnable_init();
+    wtoken = _wtoken;
+    USD_TOKEN = usdToken;
   }
 
   /**
@@ -75,7 +60,7 @@ contract UniswapV3PriceOracle is IPriceOracle {
    * @param underlyings Underlying token addresses for which to set price feeds.
    * @param assetConfig The asset configuration which includes pool address and twap window.
    */
-  function setPoolFeeds(address[] memory underlyings, AssetConfig[] memory assetConfig) external onlyAdmin {
+  function setPoolFeeds(address[] memory underlyings, AssetConfig[] memory assetConfig) external onlyOwner {
     // Input validation
     require(
       underlyings.length > 0 && underlyings.length == assetConfig.length,
@@ -84,15 +69,11 @@ contract UniswapV3PriceOracle is IPriceOracle {
 
     // For each token/config
     for (uint256 i = 0; i < underlyings.length; i++) {
+      require(
+        assetConfig[i].baseCurrency == FeedBaseCurrency.ETH || assetConfig[i].baseCurrency == FeedBaseCurrency.USD,
+        "Invalid base currency"
+      );
       address underlying = underlyings[i];
-
-      // Check for existing oracle if !canAdminOverwrite
-      if (!canAdminOverwrite)
-        require(
-          poolFeeds[underlying].poolAddress == address(0),
-          "Admin cannot overwrite existing assignments of price feeds to underlying tokens."
-        );
-
       // Set asset config for underlying
       poolFeeds[underlying] = assetConfig[i];
     }
@@ -112,7 +93,7 @@ contract UniswapV3PriceOracle is IPriceOracle {
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in WTOKEN of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
+  function getUnderlyingPrice(CTokenInterface cToken) public view override returns (uint256) {
     address underlying = ICErc20(address(cToken)).underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
@@ -125,6 +106,7 @@ contract UniswapV3PriceOracle is IPriceOracle {
   function _price(address token) internal view virtual returns (uint256) {
     uint32[] memory secondsAgos = new uint32[](2);
     uint256 twapWindow = poolFeeds[token].twapWindow;
+    FeedBaseCurrency baseCurrency = poolFeeds[token].baseCurrency;
 
     secondsAgos[0] = uint32(twapWindow);
     secondsAgos[1] = 0;
@@ -135,7 +117,27 @@ contract UniswapV3PriceOracle is IPriceOracle {
     int24 tick = int24((tickCumulatives[1] - tickCumulatives[0]) / int56(int256(twapWindow)));
     uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick(tick);
 
-    return getPriceX96FromSqrtPriceX96(pool.token0(), token, sqrtPriceX96);
+    uint256 tokenPrice = getPriceX96FromSqrtPriceX96(pool.token0(), token, sqrtPriceX96);
+
+    if (baseCurrency == FeedBaseCurrency.ETH) {
+      return tokenPrice;
+    } else {
+      uint256 usdNativePrice = BasePriceOracle(msg.sender).price(USD_TOKEN);
+      // scale tokenPrice by 1e18
+      uint256 baseTokenDecimals = uint256(ERC20Upgradeable(USD_TOKEN).decimals());
+      uint256 tokenDecimals = uint256(ERC20Upgradeable(token).decimals());
+      uint256 tokenPriceScaled;
+
+      if (baseTokenDecimals > tokenDecimals) {
+        tokenPriceScaled = tokenPrice / (10**(baseTokenDecimals - tokenDecimals));
+      } else if (baseTokenDecimals < tokenDecimals) {
+        tokenPriceScaled = tokenPrice * (10**(tokenDecimals - baseTokenDecimals));
+      } else {
+        tokenPriceScaled = tokenPrice;
+      }
+
+      return (tokenPriceScaled * usdNativePrice) / 1e18;
+    }
   }
 
   function getPriceX96FromSqrtPriceX96(
