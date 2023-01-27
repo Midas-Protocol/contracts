@@ -22,12 +22,12 @@ contract SaddleLpTokenLiquidatorTest is BaseTest {
     IERC20Upgradeable lpToken = IERC20Upgradeable(fraxUsdc_lp);
     address lpTokenWhale = 0xa5bD85ed9fA27ba23BfB702989e7218E44fd4706; // metaswap
     uint8 outputTokenIndex = 0;
-    bytes memory data = abi.encode(outputTokenIndex, address(oracle));
-    uint256 amount = 1e18;
-
     address poolAddr = oracle.poolOf(address(lpToken));
     ISwap pool = ISwap(poolAddr);
-    address outputTokenAddr = pool.getToken(outputTokenIndex);
+    address outputTokenAddr = pool.getToken(0);
+    bytes memory data = abi.encode(outputTokenAddr, address(oracle), ap.getAddress("wtoken"));
+    uint256 amount = 1e18;
+
     IERC20Upgradeable outputToken = IERC20Upgradeable(outputTokenAddr);
 
     vm.prank(lpTokenWhale);
