@@ -74,7 +74,7 @@ contract UniswapV3PriceOracleTest is BaseTest {
     );
     // WBTC-USDC
     configs[6] = UniswapV3PriceOracle.AssetConfig(
-      0xac70bD92F89e6739B3a08Db9B6081a923912f73D,
+      0xA62aD78825E3a55A77823F00Fe0050F567c1e4EE,
       10 minutes,
       UniswapV3PriceOracle.FeedBaseCurrency.USD
     );
@@ -86,7 +86,7 @@ contract UniswapV3PriceOracleTest is BaseTest {
     expPrices[3] = 616728830044297; // (616728830044297 / 1e18) * 1600 = 0,985 (26/01/2022)
     expPrices[4] = 617962412544658;
     expPrices[5] = 32303551248749710;
-    expPrices[6] = 14286501003340731866; // (14286501003340731866 / 1e18) * 1600 = 22,858,4 (26/01/2022)
+    expPrices[6] = 14272222356770933950; //  (14272222356770933950 / 1e18) * 1600 = 22,835 (26/01/2022)
 
     emit log_named_uint("USDC PRICE", mpo.price(stable));
     uint256[] memory prices = getPriceFeed(underlyings, configs);

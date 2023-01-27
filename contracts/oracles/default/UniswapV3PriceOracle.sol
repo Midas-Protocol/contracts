@@ -12,7 +12,6 @@ import "../../external/uniswap/FullMath.sol";
 import "../../external/uniswap/IUniswapV3Pool.sol";
 import "../../midas/SafeOwnableUpgradeable.sol";
 
-// import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 /**
  * @title UniswapV3PriceOracle
  * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
