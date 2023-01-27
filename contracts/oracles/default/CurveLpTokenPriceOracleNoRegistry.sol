@@ -156,7 +156,16 @@ contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedSto
     address _pool,
     address[] memory _underlyings
   ) external onlyOwner {
-    // require(pool == address(0), "This LP token is already registered.");
+    for (uint256 i = 0; i < _lpTokens.length; i++) {
+      bool skip = false;
+      for (uint256 j = 0; j < lpTokens.length; j++) {
+        if (lpTokens[j] == _lpTokens[i]) {
+          skip = true;
+          break;
+        }
+      }
+      if (!skip) lpTokens.push(_lpTokens[i]);
+    }
     poolOf[_lpToken] = _pool;
     underlyingTokens[_lpToken] = _underlyings;
   }
