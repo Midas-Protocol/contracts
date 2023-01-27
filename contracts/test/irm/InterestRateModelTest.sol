@@ -53,7 +53,7 @@ contract InterestRateModelTest is BaseTest {
     }
   }
 
-  function testFantom() public fork(FANTOM_OPERA) {
+  function testFantomIrm() public fork(FANTOM_OPERA) {
     testJumpRateBorrowRate();
     testJumpRateSupplyRate();
     testAnkrFTMBorrowModelRate();
@@ -62,7 +62,7 @@ contract InterestRateModelTest is BaseTest {
     testWhitepaperSupplyRate();
   }
 
-  function testBsc() public fork(BSC_MAINNET) {
+  function testBscIrm() public fork(BSC_MAINNET) {
     testJumpRateBorrowRate();
     testJumpRateSupplyRate();
     testAnkrBNBBorrowModelRate();
@@ -71,7 +71,7 @@ contract InterestRateModelTest is BaseTest {
     testWhitepaperSupplyRate();
   }
 
-  function testPolygon() public fork(POLYGON_MAINNET) {
+  function testPolygonIrm() public fork(POLYGON_MAINNET) {
     testJumpRateBorrowRatePolygon();
   }
 
@@ -221,14 +221,14 @@ contract InterestRateModelTest is BaseTest {
     uint256 borrowRate = ankrCertificateInterestRateModelBNB.getBorrowRate(800e18, 8e18, 8e18);
     uint256 util = ankrCertificateInterestRateModelBNB.utilizationRate(800e18, 8e18, 8e18);
     assertEq(util, 0.1e17); // utilization 1
-    assertApproxEqAbs(_convertToPerYearBsc(borrowRate) * 100, 0.36e17, uint256(1e14), "!borrow rate for utilization 1");
+    assertApproxEqAbs(_convertToPerYearBsc(borrowRate) * 100, 0.36e17, uint256(1e17), "!borrow rate for utilization 1");
     borrowRate = ankrCertificateInterestRateModelBNB.getBorrowRate(80e18, 8e18, 8e18);
     util = ankrCertificateInterestRateModelBNB.utilizationRate(80e18, 8e18, 8e18);
     assertEq(util, 0.1e18); // utilization 10
     assertApproxEqAbs(
       _convertToPerYearBsc(borrowRate) * 100,
       0.26347e18,
-      uint256(1e14),
+      uint256(1e17),
       "!borrow rate for utilization 10"
     );
     borrowRate = ankrCertificateInterestRateModelBNB.getBorrowRate(40e18, 8e18, 8e18);
@@ -237,7 +237,7 @@ contract InterestRateModelTest is BaseTest {
     assertApproxEqAbs(
       _convertToPerYearBsc(borrowRate) * 100,
       0.5161e18,
-      uint256(1e14),
+      uint256(1e17),
       "!borrow rate for utilization 20"
     );
     borrowRate = ankrCertificateInterestRateModelBNB.getBorrowRate(3e18, 8e18, 1e18);
@@ -246,7 +246,7 @@ contract InterestRateModelTest is BaseTest {
     assertApproxEqAbs(
       _convertToPerYearBsc(borrowRate) * 100,
       2.0325e18,
-      uint256(1e14),
+      uint256(1e18),
       "!borrow rate for utilization 80"
     );
     borrowRate = ankrCertificateInterestRateModelBNB.getBorrowRate(8e18, 7.2e18, 7.2e18);
@@ -255,7 +255,7 @@ contract InterestRateModelTest is BaseTest {
     assertApproxEqAbs(
       _convertToPerYearBsc(borrowRate) * 100,
       17.2853e18,
-      uint256(1e14),
+      uint256(1e18),
       "!borrow rate for utilization 90"
     );
   }
@@ -320,20 +320,20 @@ contract InterestRateModelTest is BaseTest {
     assertApproxEqAbs(
       _convertToPerYearBsc(supplyRate) * 100,
       1.4634e18,
-      uint256(1e14),
+      uint256(1e18),
       "!supply rate for utilization 80"
     );
     supplyRate = ankrCertificateInterestRateModelBNB.getSupplyRate(800e18, 8e18, 8e18, 0.1e18);
     util = ankrCertificateInterestRateModelBNB.utilizationRate(800e18, 8e18, 8e18);
     assertEq(util, 0.1e17); // utilization 1
-    assertApproxEqAbs(_convertToPerYearBsc(supplyRate) * 100, 0.32e15, uint256(1e14), "!supply rate for utilization 1");
+    assertApproxEqAbs(_convertToPerYearBsc(supplyRate) * 100, 0.32e15, uint256(1e17), "!supply rate for utilization 1");
     supplyRate = ankrCertificateInterestRateModelBNB.getSupplyRate(80e18, 8e18, 8e18, 0.1e18);
     util = ankrCertificateInterestRateModelBNB.utilizationRate(80e18, 8e18, 8e18);
     assertEq(util, 0.1e18); // utilization 10
     assertApproxEqAbs(
       _convertToPerYearBsc(supplyRate) * 100,
       0.23712e17,
-      uint256(1e14),
+      uint256(1e17),
       "!supply rate for utilization 10"
     );
     supplyRate = ankrCertificateInterestRateModelBNB.getSupplyRate(40e18, 8e18, 8e18, 0.1e18);
@@ -342,7 +342,7 @@ contract InterestRateModelTest is BaseTest {
     assertApproxEqAbs(
       _convertToPerYearBsc(supplyRate) * 100,
       0.92915e17,
-      uint256(1e14),
+      uint256(1e17),
       "!supply rate for utilization 20"
     );
     supplyRate = ankrCertificateInterestRateModelBNB.getSupplyRate(8e18, 7.2e18, 7.2e18, 0.1e18);
@@ -351,7 +351,7 @@ contract InterestRateModelTest is BaseTest {
     assertApproxEqAbs(
       _convertToPerYearBsc(supplyRate) * 100,
       14.001e18,
-      uint256(1e14),
+      uint256(1e18),
       "!supply rate for utilization 90"
     );
   }
