@@ -46,7 +46,7 @@ contract AdrastiaPriceOracleTest is BaseTest {
 
   function setUpMpo() public {
     SimplePriceOracle spo = new SimplePriceOracle();
-    vm.prank(spo.owner());
+    spo.initialize();
     spo.setDirectPrice(address(2), 200000000000000000); // 1e36 / 200000000000000000 = 5e18
 
     MasterPriceOracle mpo = new MasterPriceOracle();
