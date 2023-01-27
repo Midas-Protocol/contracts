@@ -13,6 +13,7 @@ import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { BaseTest } from "./config/BaseTest.t.sol";
 import { AddressesProvider } from "../midas/AddressesProvider.sol";
 import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
+import { CurveV2LpTokenPriceOracleNoRegistry } from "../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
 import { ICurvePool } from "../external/curve/ICurvePool.sol";
 import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
@@ -27,7 +28,6 @@ contract AnyLiquidationTest is BaseTest {
   FuseSafeLiquidator fsl;
   address uniswapRouter;
   mapping(address => address) assetSpecificRouters;
-  CurveLpTokenPriceOracleNoRegistry curveOracle;
 
   IFundsConversionStrategy[] fundingStrategies;
   bytes[] fundingDatas;
@@ -37,6 +37,9 @@ contract AnyLiquidationTest is BaseTest {
 
   IUniswapV2Pair mostLiquidPair1;
   IUniswapV2Pair mostLiquidPair2;
+
+  CurveLpTokenPriceOracleNoRegistry curveV1Oracle;
+  CurveV2LpTokenPriceOracleNoRegistry curveV2Oracle;
 
   function upgradeAp() internal {
     AddressesProvider newImpl = new AddressesProvider();
@@ -52,11 +55,12 @@ contract AnyLiquidationTest is BaseTest {
     //upgradeAp();
 
     uniswapRouter = ap.getAddress("IUniswapV2Router02");
+    curveV1Oracle = CurveLpTokenPriceOracleNoRegistry(ap.getAddress("CurveLpTokenPriceOracleNoRegistry"));
+    curveV2Oracle = CurveV2LpTokenPriceOracleNoRegistry(ap.getAddress("CurveV2LpTokenPriceOracleNoRegistry"));
 
     if (block.chainid == BSC_MAINNET) {
       mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
       mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
-      curveOracle = CurveLpTokenPriceOracleNoRegistry(0x4544d21EB5B368b3f8F98DcBd03f28aC0Cf6A0CA);
       fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
       //      fsl = new FuseSafeLiquidator();
       //      fsl.initialize(
@@ -75,7 +79,6 @@ contract AnyLiquidationTest is BaseTest {
     } else if (block.chainid == POLYGON_MAINNET) {
       mostLiquidPair1 = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827); // USDC/WMATIC
       mostLiquidPair2 = IUniswapV2Pair(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
-      curveOracle = CurveLpTokenPriceOracleNoRegistry(0xaCF3E1C6f2D6Ff12B8aEE44413D6834774B3f7A3);
       fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
       //      fsl = new FuseSafeLiquidator();
       //      fsl.initialize(
@@ -90,7 +93,6 @@ contract AnyLiquidationTest is BaseTest {
       // TODO figure out how to mock all xcDOT calls
       mostLiquidPair1 = IUniswapV2Pair(0xa927E1e1E044CA1D9fe1854585003477331fE2Af); // GLMR/xcDOT
       mostLiquidPair2 = IUniswapV2Pair(0x8CCBbcAF58f5422F6efD4034d8E8a3c9120ADf79); // GLMR/USDC
-      curveOracle = CurveLpTokenPriceOracleNoRegistry(0x315b23e85E1ad004A466f3C89544794Ef3392179);
       fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
       //      fsl = new FuseSafeLiquidator();
       //      fsl.initialize(
@@ -416,7 +418,36 @@ contract AnyLiquidationTest is BaseTest {
     address outputToken;
     bytes memory strategyData;
 
-    if (compareStrings(strategyContract, "UniswapLpTokenLiquidator")) {
+    if (compareStrings(strategyContract, "CurveLpTokenLiquidatorNoRegistry")) {
+      address[] memory underlyingTokens = curveV1Oracle.getUnderlyingTokens(inputToken);
+      (address preferredOutputToken, uint8 outputTokenIndex) = pickPreferredToken(
+        underlyingTokens,
+        strategyOutputToken
+      );
+      emit log("preferred token");
+      emit log_address(preferredOutputToken);
+      emit log_uint(outputTokenIndex);
+      outputToken = preferredOutputToken;
+      if (outputToken == address(0) || outputToken == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
+        outputToken = ap.getAddress("wtoken");
+      }
+
+      strategyData = abi.encode(preferredOutputToken, ap.getAddress("wtoken"), address(curveV1Oracle));
+    } else if (compareStrings(strategyContract, "SaddleLpTokenLiquidator")) {
+      address[] memory underlyingTokens = curveV1Oracle.getUnderlyingTokens(inputToken);
+      (address preferredOutputToken, uint8 outputTokenIndex) = pickPreferredToken(
+        underlyingTokens,
+        strategyOutputToken
+      );
+      outputToken = preferredOutputToken;
+      if (outputToken == address(0) || outputToken == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
+        outputToken = ap.getAddress("wtoken");
+      }
+      strategyData = abi.encode(preferredOutputToken, curveV1Oracle, ap.getAddress("wtoken"));
+    } else if (
+      compareStrings(strategyContract, "UniswapLpTokenLiquidator") ||
+      compareStrings(strategyContract, "GelatoGUniLiquidator")
+    ) {
       IUniswapV2Pair pair = IUniswapV2Pair(inputToken);
       address[] memory swapToken0Path;
       address[] memory swapToken1Path;
@@ -464,61 +495,10 @@ contract AnyLiquidationTest is BaseTest {
       }
     } else if (compareStrings(strategyContract, "CurveSwapLiquidator")) {
       outputToken = strategyOutputToken;
-
-      AddressesProvider.CurveSwapPool[] memory curveSwapPools = ap.getCurveSwapPools();
-      for (uint256 i = 0; i < curveSwapPools.length; i++) {
-        if (curveSwapPools[i].poolAddress == inputToken) {
-          emit log_address(inputToken);
-          emit log_address(strategyOutputToken);
-          revert("use the CurveLpTokenLiquidatorNoRegistry for the redemption of LP tokens");
-        }
-      }
-
-      int128 outputIndex;
-      int128 inputIndex;
-      address poolAddress;
-      for (uint256 i = 0; i < curveSwapPools.length; i++) {
-        outputIndex = -1;
-        inputIndex = -1;
-        poolAddress = curveSwapPools[i].poolAddress;
-        ICurvePool curvePool = ICurvePool(poolAddress);
-        int128 j = 0;
-        while (true) {
-          try curvePool.coins(uint256(int256(j))) returns (address coin) {
-            if (coin == outputToken) outputIndex = j;
-            else if (coin == inputToken) inputIndex = j;
-          } catch {
-            break;
-          }
-          j++;
-        }
-        if (outputIndex >= 0 && inputIndex >= 0) break;
-      }
-
-      if (outputIndex == -1 || inputIndex == -1) {
-        emit log("input token");
-        emit log_address(inputToken);
-        emit log("output token");
-        emit log_address(outputToken);
-        revert("failed to find curve pool");
-      }
-
-      strategyData = abi.encode(poolAddress, inputIndex, outputIndex, outputToken, ap.getAddress("wtoken"));
-    } else if (compareStrings(strategyContract, "CurveLpTokenLiquidatorNoRegistry")) {
-      address[] memory underlyingTokens = getCurvePoolUnderlyingTokens(curveOracle.poolOf(inputToken));
-      (address preferredOutputToken, uint8 outputTokenIndex) = pickPreferredToken(
-        underlyingTokens,
-        strategyOutputToken
-      );
-      emit log("preferred token");
-      emit log_address(preferredOutputToken);
-      emit log_uint(outputTokenIndex);
-      outputToken = preferredOutputToken;
-      if (outputToken == address(0) || outputToken == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
-        outputToken = ap.getAddress("wtoken");
-      }
-
-      strategyData = abi.encode(outputTokenIndex, preferredOutputToken, ap.getAddress("wtoken"), address(curveOracle));
+      strategyData = abi.encode(curveV1Oracle, curveV2Oracle, inputToken, outputToken, ap.getAddress("wtoken"));
+    } else if (compareStrings(strategyContract, "BalancerLpTokenLiquidator")) {
+      outputToken = strategyOutputToken;
+      strategyData = abi.encode(outputToken);
     } else if (compareStrings(strategyContract, "XBombLiquidatorFunder")) {
       outputToken = strategyOutputToken;
       address xbomb = inputToken;
@@ -539,22 +519,22 @@ contract AnyLiquidationTest is BaseTest {
     return outputToken;
   }
 
-  function getCurvePoolUnderlyingTokens(address lpTokenAddress) internal view returns (address[] memory) {
-    ICurvePool curvePool = ICurvePool(lpTokenAddress);
-    uint8 i = 0;
-    while (true) {
-      try curvePool.coins(i) {
-        i++;
-      } catch {
-        break;
-      }
-    }
-    address[] memory tokens = new address[](i);
-    for (uint8 j = 0; j < i; j++) {
-      tokens[j] = curvePool.coins(j);
-    }
-    return tokens;
-  }
+  //  function getCurvePoolUnderlyingTokens(address lpTokenAddress) internal view returns (address[] memory) {
+  //    ICurvePool curvePool = ICurvePool(lpTokenAddress);
+  //    uint8 i = 0;
+  //    while (true) {
+  //      try curvePool.coins(i) {
+  //        i++;
+  //      } catch {
+  //        break;
+  //      }
+  //    }
+  //    address[] memory tokens = new address[](i);
+  //    for (uint8 j = 0; j < i; j++) {
+  //      tokens[j] = curvePool.coins(j);
+  //    }
+  //    return tokens;
+  //  }
 
   function pickPreferredToken(address[] memory tokens, address strategyOutputToken)
     internal
