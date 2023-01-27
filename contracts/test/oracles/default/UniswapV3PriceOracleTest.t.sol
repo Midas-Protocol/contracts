@@ -40,19 +40,19 @@ contract UniswapV3PriceOracleTest is BaseTest {
     configs[0] = UniswapV3PriceOracle.AssetConfig(
       0x80A9ae39310abf666A87C743d6ebBD0E8C42158E,
       10 minutes,
-      UniswapV3PriceOracle.FeedBaseCurrency.ETH
+      UniswapV3PriceOracle.FeedBaseCurrency.NATIVE
     );
     // DPX-ETH
     configs[1] = UniswapV3PriceOracle.AssetConfig(
       0xb52781C275431bD48d290a4318e338FE0dF89eb9,
       10 minutes,
-      UniswapV3PriceOracle.FeedBaseCurrency.ETH
+      UniswapV3PriceOracle.FeedBaseCurrency.NATIVE
     );
     // MAGIC-ETH
     configs[2] = UniswapV3PriceOracle.AssetConfig(
       0x7e7FB3CCEcA5F2ac952eDF221fd2a9f62E411980,
       10 minutes,
-      UniswapV3PriceOracle.FeedBaseCurrency.ETH
+      UniswapV3PriceOracle.FeedBaseCurrency.NATIVE
     );
     // USDs-USDC
     configs[3] = UniswapV3PriceOracle.AssetConfig(

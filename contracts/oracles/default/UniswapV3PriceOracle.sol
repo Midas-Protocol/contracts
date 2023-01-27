@@ -37,21 +37,20 @@ contract UniswapV3PriceOracle is PriceOracle, SafeOwnableUpgradeable {
 
   /**
    * @notice Enum indicating the base currency of a Chainlink price feed.
-   * @dev ETH is interchangeable with the nativeToken of the current chain.
+   * @dev NATIVE is interchangeable with the nativeToken of the current chain.
    */
-
   enum FeedBaseCurrency {
-    ETH,
+    NATIVE,
     USD
   }
 
-  address public wtoken;
+  address public WTOKEN;
   address public USD_TOKEN;
 
-  function initialize(address _wtoken, address usdToken) public initializer {
+  function initialize(address _wtoken, address _usdToken) public initializer {
     __SafeOwnable_init();
-    wtoken = _wtoken;
-    USD_TOKEN = usdToken;
+    WTOKEN = _wtoken;
+    USD_TOKEN = _usdToken;
   }
 
   /**
@@ -69,7 +68,7 @@ contract UniswapV3PriceOracle is PriceOracle, SafeOwnableUpgradeable {
     // For each token/config
     for (uint256 i = 0; i < underlyings.length; i++) {
       require(
-        assetConfig[i].baseCurrency == FeedBaseCurrency.ETH || assetConfig[i].baseCurrency == FeedBaseCurrency.USD,
+        assetConfig[i].baseCurrency == FeedBaseCurrency.NATIVE || assetConfig[i].baseCurrency == FeedBaseCurrency.USD,
         "Invalid base currency"
       );
       address underlying = underlyings[i];
@@ -81,16 +80,16 @@ contract UniswapV3PriceOracle is PriceOracle, SafeOwnableUpgradeable {
   /**
    * @notice Get the token price price for an underlying token address.
    * @param underlying The underlying token address for which to get the price (set to zero address for WTOKEN)
-   * @return Price denominated in WTOKEN (scaled by 1e18)
+   * @return Price denominated in NATIVE (scaled by 1e18)
    */
   function price(address underlying) external view returns (uint256) {
     return _price(underlying);
   }
 
   /**
-   * @notice Returns the price in WTOKEN of the token underlying `cToken`.
+   * @notice Returns the price in NATIVE of the token underlying `cToken`.
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
-   * @return Price in WTOKEN of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
+   * @return Price in NATIVE of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
   function getUnderlyingPrice(CTokenInterface cToken) public view override returns (uint256) {
     address underlying = ICErc20(address(cToken)).underlying();
@@ -118,7 +117,7 @@ contract UniswapV3PriceOracle is PriceOracle, SafeOwnableUpgradeable {
 
     uint256 tokenPrice = getPriceX96FromSqrtPriceX96(pool.token0(), token, sqrtPriceX96);
 
-    if (baseCurrency == FeedBaseCurrency.ETH) {
+    if (baseCurrency == FeedBaseCurrency.NATIVE) {
       return tokenPrice;
     } else {
       uint256 usdNativePrice = BasePriceOracle(msg.sender).price(USD_TOKEN);
