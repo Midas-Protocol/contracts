@@ -199,6 +199,8 @@ contract ExtensionsTest is BaseTest {
     ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
     CTokenInterface[] memory markets = somePool.getAllMarkets();
 
+    if (markets.length == 0) return;
+
     CTokenInterface someMarket = markets[random % markets.length];
     CErc20PluginDelegate asDelegate = CErc20PluginDelegate(address(someMarket));
     CTokenExtensionInterface asExtension = asDelegate.asCTokenExtensionInterface();
@@ -231,7 +233,9 @@ contract ExtensionsTest is BaseTest {
     ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
     CTokenInterface[] memory markets = somePool.getAllMarkets();
 
-    CTokenInterface someMarket = markets[random % markets.length];
+    if (markets.length == 0) return;
+
+  CTokenInterface someMarket = markets[random % markets.length];
     CErc20PluginDelegate asDelegate = CErc20PluginDelegate(address(someMarket));
 
     emit log("pool");
