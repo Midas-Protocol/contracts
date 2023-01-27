@@ -13,12 +13,12 @@ contract MiniChefTestConfigStorage is ITestConfigStorage {
   MiniChefTestConfig[] internal testConfigs;
 
   constructor() {
-    // WEVMOS/JUNO
+    // WEVMOS/gUSDC
 
     address[] memory rewardTokens = new address[](1);
-    rewardTokens[0] = 0xD4949664cD82660AaE99bEdc034a0deA8A0bd517;
+    rewardTokens[0] = 0x3f75ceabCDfed1aCa03257Dc6Bdc0408E2b4b026;
 
-    testConfigs.push(MiniChefTestConfig(0x4Aa9c250874C2d14D0d686833e7b3C5c1837c36c, rewardTokens, 20));
+    testConfigs.push(MiniChefTestConfig(0xD7bfB11ED8fd924E77487480d13542328601e5a3, rewardTokens, 7));
   }
 
   function getTestConfig(uint256 i) public view returns (bytes memory) {

@@ -73,6 +73,19 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     fuseAdmin = _fuseAdmin;
   }
 
+  function isMarketExploited(address cToken) internal pure returns (bool) {
+    address agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
+    address jchfMarketAddress = 0x62Bdc203403e7d44b75f357df0897f2e71F607F3;
+    address jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
+    address jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
+
+    return
+      cToken == agEurMarketAddress ||
+      cToken == jchfMarketAddress ||
+      cToken == jeurMarketAddress ||
+      cToken == jgbpMarketAddress;
+  }
+
   /*** Assets You Are In ***/
 
   /**
@@ -315,13 +328,13 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
+    if (isMarketExploited(cToken)) {
+      return uint256(Error.INSUFFICIENT_LIQUIDITY);
+    }
+
     /* If the redeemer is not 'in' the market, then we can bypass the liquidity check */
     if (!markets[cToken].accountMembership[redeemer]) {
       return uint256(Error.NO_ERROR);
-    }
-
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
     /* Otherwise, perform a hypothetical liquidity check to guard against shortfall */
@@ -553,10 +566,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      return uint256(Error.INSUFFICIENT_LIQUIDITY);
-    }
-
     // Keep the flywheel moving
     flywheelPreBorrowerAction(cToken, borrower);
 
@@ -586,7 +595,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+    if (isMarketExploited(cTokenBorrowed) || isMarketExploited(cTokenCollateral)) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
@@ -650,7 +659,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+    if (isMarketExploited(cTokenBorrowed) || isMarketExploited(cTokenCollateral)) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
@@ -682,15 +691,15 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!transferGuardianPaused, "!transfer:paused");
 
+    if (isMarketExploited(cToken)) {
+      return uint256(Error.INSUFFICIENT_LIQUIDITY);
+    }
+
     // Currently the only consideration is whether or not
     //  the src is allowed to redeem this many tokens
     uint256 allowed = redeemAllowedInternal(cToken, src, transferTokens);
     if (allowed != uint256(Error.NO_ERROR)) {
       return allowed;
-    }
-
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
     // Keep the flywheel moving
