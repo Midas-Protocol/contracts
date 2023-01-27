@@ -587,47 +587,8 @@ contract AnyLiquidationTest is BaseTest {
       // fundingStrategies.push(new SomeOtherFunder());
       // return inputToken;
     } else if (compareStrings(strategyContract, "CurveSwapLiquidatorFunder")) {
-      int128 inputIndex;
-      int128 outputIndex;
       inputToken = strategyInputToken;
-
-      AddressesProvider.CurveSwapPool[] memory curveSwapPools = ap.getCurveSwapPools();
-
-      address poolAddress;
-      for (uint256 i = 0; i < curveSwapPools.length; i++) {
-        poolAddress = curveSwapPools[i].poolAddress;
-        if (poolAddress == debtToken || poolAddress == inputToken) {
-          emit log_address(debtToken);
-          emit log_address(inputToken);
-          emit log_address(poolAddress);
-          revert("no strategy available for funding with curve LP tokens");
-        }
-
-        inputIndex = -1;
-        outputIndex = -1;
-        ICurvePool curvePool = ICurvePool(poolAddress);
-        int128 j = 0;
-        while (true) {
-          try curvePool.coins(uint256(int256(j))) returns (address coin) {
-            if (coin == debtToken) outputIndex = j;
-            else if (coin == inputToken) inputIndex = j;
-          } catch {
-            break;
-          }
-          j++;
-        }
-        if (outputIndex >= 0 && inputIndex >= 0) break;
-      }
-
-      if (outputIndex == -1 || inputIndex == -1) {
-        emit log("curve swap input token");
-        emit log_address(inputToken);
-        emit log("curve swap debt token");
-        emit log_address(debtToken);
-        revert("failed to find curve pool");
-      }
-
-      strategyData = abi.encode(poolAddress, inputIndex, outputIndex, debtToken, ap.getAddress("wtoken"));
+      strategyData = abi.encode(curveV1Oracle, curveV2Oracle, inputToken, debtToken, ap.getAddress("wtoken"));
     } else if (compareStrings(strategyContract, "UniswapV3LiquidatorFunder")) {
       inputToken = strategyInputToken;
 
