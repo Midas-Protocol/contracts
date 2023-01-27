@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 import "../../external/compound/IPriceOracle.sol";
 import "../../external/compound/ICToken.sol";
@@ -63,7 +64,7 @@ contract BalancerLpTokenPriceOracleNTokens is SafeOwnableUpgradeable, BasePriceO
     IBalancerPool pool = IBalancerPool(underlying);
     bytes32 poolId = pool.getPoolId();
     IBalancerVault vault = IBalancerVault(address(pool.getVault()));
-    (IERC20[] memory tokens, uint256[] memory reserves, ) = vault.getPoolTokens(poolId);
+    (IERC20Upgradeable[] memory tokens, uint256[] memory reserves, ) = vault.getPoolTokens(poolId);
 
     uint256 nTokens = tokens.length;
     uint256[] memory weights = pool.getNormalizedWeights();
