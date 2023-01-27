@@ -235,7 +235,7 @@ contract ExtensionsTest is BaseTest {
 
     if (markets.length == 0) return;
 
-  CTokenInterface someMarket = markets[random % markets.length];
+    CTokenInterface someMarket = markets[random % markets.length];
     CErc20PluginDelegate asDelegate = CErc20PluginDelegate(address(someMarket));
 
     emit log("pool");
