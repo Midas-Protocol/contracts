@@ -106,7 +106,6 @@ contract FlywheelUpgradesTest is BaseTest {
       emit log_named_address("flywheel", flywheelAddress);
       emit log_named_uint("should have positive allowance", allowance);
     }
-
   }
 
   function testPolygonFlywheelAllowance() public debuggingOnly fork(POLYGON_MAINNET) {
@@ -132,7 +131,7 @@ contract FlywheelUpgradesTest is BaseTest {
     CTokenInterface[] memory markets = poolExt.getAllMarkets();
 
     for (uint8 j = 0; j < markets.length; j++) {
-      for(uint8 i = 0; i < fws.length; i++) {
+      for (uint8 i = 0; i < fws.length; i++) {
         ERC20 asStrategy = ERC20(address(markets[j]));
         MidasFlywheelCore flywheel = MidasFlywheelCore(fws[i]);
         (uint224 index, ) = flywheel.strategyState(asStrategy);
@@ -148,6 +147,5 @@ contract FlywheelUpgradesTest is BaseTest {
     }
   }
 
-  function _testFlywheelAllowance(ERC20 asStrategy, MidasFlywheelCore flywheel) internal {
-  }
+  function _testFlywheelAllowance(ERC20 asStrategy, MidasFlywheelCore flywheel) internal {}
 }
