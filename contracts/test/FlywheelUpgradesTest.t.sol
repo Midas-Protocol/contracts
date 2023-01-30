@@ -11,6 +11,9 @@ import { MidasReplacingFlywheel } from "../midas/strategies/flywheel/MidasReplac
 import { ReplacingFlywheelDynamicRewards } from "../midas/strategies/flywheel/rewards/ReplacingFlywheelDynamicRewards.sol";
 import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
+import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
+import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
+import { Comptroller } from "../compound/Comptroller.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -90,5 +93,61 @@ contract FlywheelUpgradesTest is BaseTest {
         }
       }
     }
+  }
+
+  function testUsdcParFlywheelAllowance() public debuggingOnly fork(POLYGON_MAINNET) {
+    address usdcParMarket = 0xa5A14c3814d358230a56e8f011B8fc97A508E890;
+    address flywheelAddress = 0x5fF63E442AC4724EC342f4a3d26924233832EcBB;
+
+    ERC20 strategy = ERC20(usdcParMarket);
+    (uint224 index, ) = MidasFlywheelCore(flywheelAddress).strategyState(strategy);
+    if (index > 0) {
+      uint256 allowance = strategy.allowance(usdcParMarket, flywheelAddress);
+      emit log_named_address("flywheel", flywheelAddress);
+      emit log_named_uint("should have positive allowance", allowance);
+    }
+
+  }
+
+  function testPolygonFlywheelAllowance() public debuggingOnly fork(POLYGON_MAINNET) {
+    _testAllMarketsAllowance();
+  }
+
+  function testBscFlywheelAllowance() public debuggingOnly fork(BSC_MAINNET) {
+    _testAllMarketsAllowance();
+  }
+
+  function _testAllMarketsAllowance() internal {
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      _testMarketsAllowance(pools[i].comptroller);
+    }
+  }
+
+  function _testMarketsAllowance(address poolAddress) internal {
+    ComptrollerFirstExtension poolExt = ComptrollerFirstExtension(poolAddress);
+    address[] memory fws = poolExt.getRewardsDistributors();
+
+    CTokenInterface[] memory markets = poolExt.getAllMarkets();
+
+    for (uint8 j = 0; j < markets.length; j++) {
+      for(uint8 i = 0; i < fws.length; i++) {
+        ERC20 asStrategy = ERC20(address(markets[j]));
+        MidasFlywheelCore flywheel = MidasFlywheelCore(fws[i]);
+        (uint224 index, ) = flywheel.strategyState(asStrategy);
+        if (index > 0) {
+          uint256 allowance = asStrategy.allowance(address(asStrategy), address(flywheel));
+          if (allowance == 0) {
+            assertGt(allowance, 0, "!approved");
+            emit log_named_address("flywheel", address(flywheel));
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  function _testFlywheelAllowance(ERC20 asStrategy, MidasFlywheelCore flywheel) internal {
   }
 }
