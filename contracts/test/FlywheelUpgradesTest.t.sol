@@ -95,28 +95,23 @@ contract FlywheelUpgradesTest is BaseTest {
     }
   }
 
-  function testUsdcParFlywheelAllowance() public debuggingOnly fork(POLYGON_MAINNET) {
-    address usdcParMarket = 0xa5A14c3814d358230a56e8f011B8fc97A508E890;
-    address flywheelAddress = 0x5fF63E442AC4724EC342f4a3d26924233832EcBB;
-
-    ERC20 strategy = ERC20(usdcParMarket);
-    (uint224 index, ) = MidasFlywheelCore(flywheelAddress).strategyState(strategy);
-    if (index > 0) {
-      uint256 allowance = strategy.allowance(usdcParMarket, flywheelAddress);
-      emit log_named_address("flywheel", flywheelAddress);
-      emit log_named_uint("should have positive allowance", allowance);
-    }
+  function testPolygonFlywheelAllowance() public fork(POLYGON_MAINNET) {
+    testAllPoolsMarketsAllowance();
   }
 
-  function testPolygonFlywheelAllowance() public debuggingOnly fork(POLYGON_MAINNET) {
-    _testAllMarketsAllowance();
+  function testBscFlywheelAllowance() public fork(BSC_MAINNET) {
+    testAllPoolsMarketsAllowance();
   }
 
-  function testBscFlywheelAllowance() public debuggingOnly fork(BSC_MAINNET) {
-    _testAllMarketsAllowance();
+  function testMoonbeamFlywheelAllowance() public fork(MOONBEAM_MAINNET) {
+    testAllPoolsMarketsAllowance();
   }
 
-  function _testAllMarketsAllowance() internal {
+  function testEvmosFlywheelAllowance() public fork(EVMOS_MAINNET) {
+    testAllPoolsMarketsAllowance();
+  }
+
+  function testAllPoolsMarketsAllowance() internal {
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
@@ -135,17 +130,18 @@ contract FlywheelUpgradesTest is BaseTest {
         ERC20 asStrategy = ERC20(address(markets[j]));
         MidasFlywheelCore flywheel = MidasFlywheelCore(fws[i]);
         (uint224 index, ) = flywheel.strategyState(asStrategy);
+        ERC20 rewToken = flywheel.rewardToken();
+        address rewardsContractAddress = address(flywheel.flywheelRewards());
         if (index > 0) {
-          uint256 allowance = asStrategy.allowance(address(asStrategy), address(flywheel));
+          uint256 allowance = rewToken.allowance(address(asStrategy), rewardsContractAddress);
           if (allowance == 0) {
             assertGt(allowance, 0, "!approved");
-            emit log_named_address("flywheel", address(flywheel));
+            emit log_named_address("flywheel rewards", rewardsContractAddress);
+            emit log_named_address("strategy", address(asStrategy));
             break;
           }
         }
       }
     }
   }
-
-  function _testFlywheelAllowance(ERC20 asStrategy, MidasFlywheelCore flywheel) internal {}
 }

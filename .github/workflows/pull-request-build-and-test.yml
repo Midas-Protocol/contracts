@@ -57,7 +57,7 @@ jobs:
           key: rpc-cache-bsc-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests for BSC mainnet
-        run: forge test --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|MiniChefERC4626Test'
+        run: forge test -v --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|MiniChefERC4626Test'
 
   build-and-test-polygon:
     needs: [lint]

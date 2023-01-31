@@ -180,7 +180,7 @@ contract DeployMarketsTest is Test {
     whitelistPlugin(address(mockERC4626), address(mockERC4626));
 
     vm.roll(1);
-    uint256 err = comptroller._deployMarket(
+    comptroller._deployMarket(
       false,
       abi.encode(
         address(underlyingToken),
@@ -196,7 +196,6 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
-    require(err == 0, "!deployed");
 
     CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
