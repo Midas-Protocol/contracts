@@ -23,12 +23,13 @@ contract VeMDSToken is ERC20Gauges, ERC20MultiVotes {
     Authority _authority,
     address _stakingController
   )
-  ERC20Gauges(_gaugeCycleLength, _incrementFreezeWindow)
-  Auth(_owner, _authority)
-  ERC20("Voting Escrow MDS", "veMDS", 18)
+    ERC20Gauges(_gaugeCycleLength, _incrementFreezeWindow)
+    Auth(_owner, _authority)
+    ERC20("Voting Escrow MDS", "veMDS", 18)
   {
     stakingController = _stakingController; // TODO typed contract param
   }
+
   // TODO ability for the DAO address to be changed by the DAO
 
   modifier onlyStakingController() {
@@ -47,11 +48,7 @@ contract VeMDSToken is ERC20Gauges, ERC20MultiVotes {
     _burn(from, amount);
   }
 
-  function _burn(address from, uint256 amount)
-  internal
-  virtual
-  override(ERC20Gauges, ERC20MultiVotes)
-  {
+  function _burn(address from, uint256 amount) internal virtual override(ERC20Gauges, ERC20MultiVotes) {
     _decrementWeightUntilFree(from, amount);
     _decrementVotesUntilFree(from, amount);
     ERC20._burn(from, amount);

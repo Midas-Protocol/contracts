@@ -17,22 +17,6 @@ contract UniswapV2Liquidator is IRedemptionStrategy {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
   /**
-   * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
-   */
-  function safeApprove(
-    IERC20Upgradeable token,
-    address to,
-    uint256 minAmount
-  ) private {
-    uint256 allowance = token.allowance(address(this), to);
-
-    if (allowance < minAmount) {
-      if (allowance > 0) token.safeApprove(to, 0);
-      token.safeApprove(to, type(uint256).max);
-    }
-  }
-
-  /**
    * @notice Redeems custom collateral `token` for an underlying token.
    * @param inputToken The input wrapped token to be redeemed for an underlying token.
    * @param inputAmount The amount of the input wrapped token to be redeemed for an underlying token.
@@ -45,6 +29,14 @@ contract UniswapV2Liquidator is IRedemptionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    return _convert(inputToken, inputAmount, strategyData);
+  }
+
+  function _convert(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    bytes memory strategyData
+  ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
     // Get Uniswap router and path
     (IUniswapV2Router02 uniswapV2Router, address[] memory swapPath) = abi.decode(
       strategyData,
@@ -53,7 +45,7 @@ contract UniswapV2Liquidator is IRedemptionStrategy {
     require(swapPath.length >= 2 && swapPath[0] == address(inputToken), "Invalid UniswapLiquidator swap path.");
 
     // Swap underlying tokens
-    safeApprove(inputToken, address(uniswapV2Router), inputAmount);
+    inputToken.approve(address(uniswapV2Router), inputAmount);
     uniswapV2Router.swapExactTokensForTokens(inputAmount, 0, swapPath, address(this), block.timestamp);
 
     // Get new collateral

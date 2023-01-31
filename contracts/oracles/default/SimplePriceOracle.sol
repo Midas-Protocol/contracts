@@ -2,9 +2,11 @@
 pragma solidity >=0.8.0;
 
 import "../../compound/PriceOracle.sol";
-import "../../compound/CErc20.sol";
+import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import "../../midas/SafeOwnableUpgradeable.sol";
 
-contract SimplePriceOracle is PriceOracle {
+contract SimplePriceOracle is PriceOracle, SafeOwnableUpgradeable {
   mapping(address => uint256) prices;
   event PricePosted(
     address asset,
@@ -13,23 +15,34 @@ contract SimplePriceOracle is PriceOracle {
     uint256 newPriceMantissa
   );
 
-  function getUnderlyingPrice(CToken cToken) public view override returns (uint256) {
+  function initialize() public initializer {
+    __SafeOwnable_init();
+  }
+
+  function getUnderlyingPrice(CTokenInterface cToken) public view override returns (uint256) {
     if (compareStrings(cToken.symbol(), "cETH")) {
       return 1e18;
     } else {
-      return prices[address(CErc20(address(cToken)).underlying())];
+      address underlying = ICErc20(address(cToken)).underlying();
+      uint256 oraclePrice = prices[underlying];
+
+      uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
+      return
+        underlyingDecimals <= 18
+          ? uint256(oraclePrice) * (10**(18 - underlyingDecimals))
+          : uint256(oraclePrice) / (10**(underlyingDecimals - 18));
     }
   }
 
-  function setUnderlyingPrice(CToken cToken, uint256 underlyingPriceMantissa) public {
-    address asset = address(CErc20(address(cToken)).underlying());
+  function setUnderlyingPrice(CTokenInterface cToken, uint256 underlyingPriceMantissa) public onlyOwner {
+    address asset = ICErc20(address(cToken)).underlying();
     emit PricePosted(asset, prices[asset], underlyingPriceMantissa, underlyingPriceMantissa);
     prices[asset] = underlyingPriceMantissa;
   }
 
-  function setDirectPrice(address asset, uint256 price) public {
-    emit PricePosted(asset, prices[asset], price, price);
-    prices[asset] = price;
+  function setDirectPrice(address asset, uint256 _price) public onlyOwner {
+    emit PricePosted(asset, prices[asset], _price, _price);
+    prices[asset] = _price;
   }
 
   function price(address underlying) external view returns (uint256) {

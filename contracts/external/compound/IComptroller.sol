@@ -19,6 +19,8 @@ interface IComptroller {
 
   function oracle() external view returns (IPriceOracle);
 
+  function pauseGuardian() external view returns (address);
+
   function closeFactorMantissa() external view returns (uint256);
 
   function liquidationIncentiveMantissa() external view returns (uint256);
@@ -28,6 +30,20 @@ interface IComptroller {
   function getAssetsIn(address account) external view returns (ICToken[] memory);
 
   function checkMembership(address account, ICToken cToken) external view returns (bool);
+
+  function getHypotheticalAccountLiquidity(
+    address account,
+    address cTokenModify,
+    uint256 redeemTokens,
+    uint256 borrowAmount
+  )
+    external
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256
+    );
 
   function getAccountLiquidity(address account)
     external
@@ -48,7 +64,9 @@ interface IComptroller {
 
   function borrowGuardianPaused(address cToken) external view returns (bool);
 
-  function getRewardsDistributors() external view returns (IRewardsDistributor[] memory);
+  function mintGuardianPaused(address cToken) external view returns (bool);
+
+  function getRewardsDistributors() external view returns (address[] memory);
 
   function getAllMarkets() external view returns (ICToken[] memory);
 
@@ -56,7 +74,17 @@ interface IComptroller {
 
   function suppliers(address account) external view returns (bool);
 
+  function supplyCaps(address cToken) external view returns (uint256);
+
+  function borrowCaps(address cToken) external view returns (uint256);
+
   function enforceWhitelist() external view returns (bool);
+
+  function enterMarkets(address[] memory cTokens) external returns (uint256[] memory);
+
+  function autoImplementation() external view returns (bool);
+
+  function isUserOfPool(address user) external view returns (bool);
 
   function whitelist(address account) external view returns (bool);
 
@@ -71,4 +99,14 @@ interface IComptroller {
     bytes memory constructorData,
     uint256 collateralFactorMantissa
   ) external returns (uint256);
+
+  function getMaxRedeemOrBorrow(
+    address account,
+    ICToken cTokenModify,
+    bool isBorrow
+  ) external returns (uint256);
+
+  function borrowCapForAssetForCollateral(address borrowed, address collateral) external view returns (uint256);
+
+  function borrowingAgainstCollateralBlacklist(address borrowed, address collateral) external view returns (bool);
 }

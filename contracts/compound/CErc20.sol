@@ -2,10 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./CToken.sol";
-
-interface CompLike {
-  function delegate(address delegatee) external;
-}
+import { CErc20Interface } from "./CTokenInterfaces.sol";
 
 /**
  * @title Compound's CErc20 Contract
@@ -157,7 +154,7 @@ contract CErc20 is CToken, CErc20Interface {
   function doTransferIn(address from, uint256 amount) internal virtual override returns (uint256) {
     uint256 balanceBefore = EIP20Interface(underlying).balanceOf(address(this));
     _callOptionalReturn(
-      abi.encodeWithSelector(EIP20NonStandardInterface(underlying).transferFrom.selector, from, address(this), amount),
+      abi.encodeWithSelector(EIP20Interface(underlying).transferFrom.selector, from, address(this), amount),
       "TOKEN_TRANSFER_IN_FAILED"
     );
 
@@ -178,7 +175,7 @@ contract CErc20 is CToken, CErc20Interface {
    */
   function doTransferOut(address to, uint256 amount) internal virtual override {
     _callOptionalReturn(
-      abi.encodeWithSelector(EIP20NonStandardInterface(underlying).transfer.selector, to, amount),
+      abi.encodeWithSelector(EIP20Interface(underlying).transfer.selector, to, amount),
       "TOKEN_TRANSFER_OUT_FAILED"
     );
   }
@@ -192,15 +189,5 @@ contract CErc20 is CToken, CErc20Interface {
   function _callOptionalReturn(bytes memory data, string memory errorMessage) internal {
     bytes memory returndata = _functionCall(underlying, data, errorMessage);
     if (returndata.length > 0) require(abi.decode(returndata, (bool)), errorMessage);
-  }
-
-  /**
-   * @notice Admin call to delegate the votes of the COMP-like underlying
-   * @param compLikeDelegatee The address to delegate votes to
-   * @dev CTokens whose underlying are not CompLike should revert here
-   */
-  function _delegateCompLikeTo(address compLikeDelegatee) external {
-    require(hasAdminRights(), "only the admin may set the comp-like delegate");
-    CompLike(underlying).delegate(compLikeDelegatee);
   }
 }

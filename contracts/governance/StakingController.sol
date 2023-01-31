@@ -28,7 +28,7 @@ contract StakingController is Initializable {
   event DeclareUnstake(address indexed account, uint256 amount);
   event Unstake(address indexed account, address caller, uint256 amount);
 
-  function initialize(VeMDSToken _veToken, TOUCHToken _touchToken) initializer public {
+  function initialize(VeMDSToken _veToken, TOUCHToken _touchToken) public initializer {
     veToken = _veToken;
     touchToken = _touchToken;
   }
@@ -100,7 +100,7 @@ contract StakingController is Initializable {
   function unstake(address account) public {
     if (unstakeDeclaredTime[account] == 0) revert UnstakeNotDeclared();
     // not possible because UnstakeNotDeclared thrown earlier
-      // if (unstakeDeclaredAmount[account] == 0) revert UnstakeAmountZero();
+    // if (unstakeDeclaredAmount[account] == 0) revert UnstakeAmountZero();
     if (unstakeDeclaredTime[account] > block.timestamp - 7 days) revert UnstakeTooEarly();
 
     // anyone can execute the unstaking in 10 days after the unstaking is declared
@@ -144,7 +144,8 @@ contract StakingController is Initializable {
     } else {
       uint256 releasingStake = releasingStakes[account];
       uint256 hoursSinceStaked = (block.timestamp - stakingStarted) / 3600;
-      if (hoursSinceStaked < 7143) { // 7142 * 0.014 = 99.988 %
+      if (hoursSinceStaked < 7143) {
+        // 7142 * 0.014 = 99.988 %
         // percentage released = hours since staked * 0.014
         vp = (releasingStake * hoursSinceStaked * 14) / 100_000;
       } else {

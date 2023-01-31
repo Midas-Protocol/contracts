@@ -4,33 +4,56 @@ pragma solidity >=0.8.0;
 import "./CErc20Delegate.sol";
 import "./EIP20Interface.sol";
 import "./IERC4626.sol";
+import "../external/uniswap/IUniswapV2Pair.sol";
 
 /**
  * @title Rari's CErc20Plugin's Contract
  * @notice CToken which outsources token logic to a plugin
  * @author Joey Santoro
  *
- * CErc20PluginDelegate deposits and withdraws from a plugin conract
+ * CErc20PluginDelegate deposits and withdraws from a plugin contract
  * It is also capable of delegating reward functionality to a PluginRewardsDistributor
  */
 contract CErc20PluginDelegate is CErc20Delegate {
+  event NewPluginImplementation(address oldImpl, address newImpl);
+
   /**
    * @notice Plugin address
    */
   IERC4626 public plugin;
 
-  uint256 public constant PRECISION = 1e18;
-
   /**
    * @notice Delegate interface to become the implementation
    * @param data The encoded arguments for becoming
    */
-  function _becomeImplementation(bytes calldata data) external virtual override {
-    require(msg.sender == address(this) || hasAdminRights());
+  function _becomeImplementation(bytes memory data) public virtual override {
+    require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _becomeImplementation");
 
     address _plugin = abi.decode(data, (address));
 
-    require(_plugin != address(0), "0");
+    if (_plugin == address(0) && address(plugin) != address(0)) {
+      // if no new plugin address is given, use the latest implementation
+      _plugin = IFuseFeeDistributor(fuseAdmin).latestPluginImplementation(address(plugin));
+    }
+
+    if (_plugin != address(0) && _plugin != address(plugin)) {
+      _updatePlugin(_plugin);
+    }
+  }
+
+  /**
+   * @notice Update the plugin implementation to a whitelisted implementation
+   * @param _plugin The address of the plugin implementation to use
+   */
+  function _updatePlugin(address _plugin) public {
+    require(msg.sender == address(this) || hasAdminRights(), "only self and admins can call _updatePlugin");
+
+    address oldImplementation = address(plugin) != address(0) ? address(plugin) : _plugin;
+
+    require(
+      IFuseFeeDistributor(fuseAdmin).pluginImplementationWhitelist(oldImplementation, _plugin),
+      "plugin implementation not whitelisted"
+    );
 
     if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
       plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
@@ -44,6 +67,8 @@ contract CErc20PluginDelegate is CErc20Delegate {
     if (amount != 0) {
       deposit(amount);
     }
+
+    emit NewPluginImplementation(address(plugin), _plugin);
   }
 
   /*** CToken Overrides ***/
@@ -83,5 +108,9 @@ contract CErc20PluginDelegate is CErc20Delegate {
    */
   function doTransferOut(address to, uint256 amount) internal override {
     plugin.withdraw(amount, to, address(this));
+  }
+
+  function contractType() external pure virtual override returns (string memory) {
+    return "CErc20PluginDelegate";
   }
 }

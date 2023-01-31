@@ -4,17 +4,17 @@ pragma experimental ABIEncoderV2;
 import { EIP20Interface } from "./EIP20Interface.sol";
 
 interface IERC4626 is EIP20Interface {
-  /*///////////////////////////////////////////////////////////////
+  /*----------------------------------------------------------------
                                 Events
-    //////////////////////////////////////////////////////////////*/
+    ----------------------------------------------------------------*/
 
   event Deposit(address indexed from, address indexed to, uint256 value);
 
   event Withdraw(address indexed from, address indexed to, uint256 value);
 
-  /*///////////////////////////////////////////////////////////////
+  /*----------------------------------------------------------------
                             Mutable Functions
-    //////////////////////////////////////////////////////////////*/
+    ----------------------------------------------------------------*/
 
   /**
       @notice Deposit a specific amount of underlying tokens.
@@ -58,9 +58,9 @@ interface IERC4626 is EIP20Interface {
     address from
   ) external returns (uint256 value);
 
-  /*///////////////////////////////////////////////////////////////
+  /*----------------------------------------------------------------
                             View Functions
-    //////////////////////////////////////////////////////////////*/
+    ----------------------------------------------------------------*/
 
   /** 
       @notice The underlying token the Vault accepts.
@@ -79,7 +79,7 @@ interface IERC4626 is EIP20Interface {
       @notice Calculates the total amount of underlying tokens the Vault manages.
       @return The total amount of underlying tokens the Vault manages.
     */
-  function totalUnderlying() external view returns (uint256);
+  function totalAssets() external view returns (uint256);
 
   /** 
       @notice Returns the value in underlying terms of one vault token. 

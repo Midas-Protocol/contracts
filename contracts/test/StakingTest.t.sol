@@ -55,7 +55,7 @@ contract StakingTest is DSTest {
     // advancing 1 day
     vm.warp(block.timestamp + 1 days);
     stakingController.claimAccumulatedVotingPower();
-    assert(veToken.balanceOf(address(this)) == amountToStake * 1000 / 297625);
+    assert(veToken.balanceOf(address(this)) == (amountToStake * 1000) / 297625);
 
     {
       uint256 totalStakedAfter = stakingController.totalStaked();
@@ -88,7 +88,7 @@ contract StakingTest is DSTest {
     assert(veToken.balanceOf(address(this)) == 0);
 
     stakingController.claimAccumulatedVotingPower();
-    assert(veToken.balanceOf(address(this)) == amountToStake * 1000 / 297625);
+    assert(veToken.balanceOf(address(this)) == (amountToStake * 1000) / 297625);
 
     uint256 stakerBalanceBefore = govToken.balanceOf(address(this));
     uint256 contractBalanceBefore = govToken.balanceOf(address(stakingController));
@@ -97,15 +97,18 @@ contract StakingTest is DSTest {
     uint256 allTheVp = veToken.balanceOf(address(this));
     stakingController.declareUnstake(amountToUnstake);
     vm.warp(block.timestamp + 7 days);
-//    vm.expectEmit(true, true, true, false);
-//    emit Transfer(address(this), address(0), allTheVp);
+    //    vm.expectEmit(true, true, true, false);
+    //    emit Transfer(address(this), address(0), allTheVp);
     stakingController.unstake(address(this));
 
     uint256 stakerBalanceAfter = govToken.balanceOf(address(this));
     uint256 contractBalanceAfter = govToken.balanceOf(address(stakingController));
     uint256 totalStakedAfter = stakingController.totalStaked();
 
-    assertTrue(contractBalanceBefore - contractBalanceAfter == amountToUnstake, "contract balance incorrect after unstaking");
+    assertTrue(
+      contractBalanceBefore - contractBalanceAfter == amountToUnstake,
+      "contract balance incorrect after unstaking"
+    );
     assertTrue(stakerBalanceAfter - stakerBalanceBefore == amountToUnstake, "staker balance incorrect after unstaking");
     assertTrue(totalStakedBefore - totalStakedAfter == amountToUnstake, "total staked incorrect after unstaking");
 
@@ -128,7 +131,7 @@ contract StakingTest is DSTest {
 
     stakingController.claimAccumulatedVotingPower();
     // 297.625 days = 100% of the staking period
-    assert(veToken.balanceOf(address(this)) == amountToStake * 1000 / 297625);
+    assert(veToken.balanceOf(address(this)) == (amountToStake * 1000) / 297625);
 
     uint256 stakerBalanceBefore = govToken.balanceOf(address(this));
     uint256 contractBalanceBefore = govToken.balanceOf(address(stakingController));
@@ -147,15 +150,18 @@ contract StakingTest is DSTest {
 
     // 11 days passed since declaring, should unstake successfully as 0x1
     vm.warp(block.timestamp + 3 days);
-//    vm.expectEmit(true, true, true, false);
-//    emit Transfer(address(this), address(0), allTheVp);
+    //    vm.expectEmit(true, true, true, false);
+    //    emit Transfer(address(this), address(0), allTheVp);
     stakingController.unstake(address(this));
 
     uint256 stakerBalanceAfter = govToken.balanceOf(address(this));
     uint256 contractBalanceAfter = govToken.balanceOf(address(stakingController));
     uint256 totalStakedAfter = stakingController.totalStaked();
 
-    assertTrue(contractBalanceBefore - contractBalanceAfter == amountToUnstake, "contract balance incorrect after unstaking");
+    assertTrue(
+      contractBalanceBefore - contractBalanceAfter == amountToUnstake,
+      "contract balance incorrect after unstaking"
+    );
     assertTrue(stakerBalanceAfter - stakerBalanceBefore == amountToUnstake, "staker balance incorrect after unstaking");
     assertTrue(totalStakedBefore - totalStakedAfter == amountToUnstake, "total staked incorrect after unstaking");
 

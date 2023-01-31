@@ -1,6 +1,26 @@
-[default]
+[profile.default]
 src = 'contracts'
 bytecode_hash = 'none'
 solc_version = "0.8.10"
+libs = ["lib"]
+
+[rpc_endpoints]
+bsc = "${BSC_MAINNET_RPC_URL}"
+bsc_chapel = "${BSC_CHAPEL_RPC_URL}"
+polygon = "${POLYGON_MAINNET_RPC_URL}"
+arbitrum = "${ARBITRUM_MAINNET_RPC_URL}"
+fantom = "${FANTOM_MAINNET_RPC_URL}"
+moonbeam = "${MOONBEAM_MAINNET_RPC_URL}"
+neon_dev = "${NEON_DEVNET_RPC_URL}"
+evmos = "${EVMOS_MAINNET_RPC_URL}"
+
+bsc_archive = "${BSC_MAINNET_ARCHIVE_RPC_URL}"
+bsc_chapel_archive = "${BSC_CHAPEL_ARCHIVE_RPC_URL}"
+polygon_archive = "${POLYGON_MAINNET_ARCHIVE_RPC_URL}"
+arbitrum_archive = "${ARBITRUM_MAINNET_ARCHIVE_RPC_URL}"
+fantom_archive = "${FANTOM_MAINNET_ARCHIVE_RPC_URL}"
+moonbeam_archive = "${MOONBEAM_MAINNET_ARCHIVE_RPC_URL}"
+neon_dev_archive = "${NEON_DEVNET_ARCHIVE_RPC_URL}"
+evmos_archive = "${EVMOS_MAINNET_ARCHIVE_RPC_URL}"
 
 # See more config options https://github.com/gakonst/foundry/tree/master/config

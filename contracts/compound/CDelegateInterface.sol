@@ -31,11 +31,13 @@ abstract contract CDelegateInterface is CDelegationStorage {
    * @dev Should revert if any issues arise which make it unfit for delegation
    * @param data The encoded bytes data for any initialization
    */
-  function _becomeImplementation(bytes calldata data) external virtual;
+  function _becomeImplementation(bytes calldata data) public virtual;
 
   /**
    * @notice Function called before all delegator functions
    * @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary
    */
   function _prepare() external payable virtual;
+
+  function contractType() external pure virtual returns (string memory);
 }

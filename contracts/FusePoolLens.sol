@@ -6,6 +6,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeabl
 
 import "./external/compound/IComptroller.sol";
 import "./external/compound/IPriceOracle.sol";
+import "./oracles/BasePriceOracle.sol";
 import "./external/compound/ICToken.sol";
 import "./external/compound/ICErc20.sol";
 import "./external/compound/IRewardsDistributor.sol";
@@ -165,6 +166,25 @@ contract FusePoolLens is Initializable {
   }
 
   /**
+   * @notice Returns arrays of the indexes of Fuse pools used by `user`, data, total supply balances (in ETH), total borrow balances (in ETH), arrays of underlying token addresses, arrays of underlying asset symbols, and booleans indicating if retrieving each pool's data failed.
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
+   */
+  function getPoolsOfUserWithData(address user)
+    external
+    returns (
+      uint256[] memory,
+      FusePoolDirectory.FusePool[] memory,
+      FusePoolData[] memory,
+      bool[] memory
+    )
+  {
+    (uint256[] memory indexes, FusePoolDirectory.FusePool[] memory userPools) = directory.getPoolsOfUser(user);
+    (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(userPools);
+    return (indexes, userPools, data, errored);
+  }
+
+  /**
    * @notice Internal function returning arrays of requested Fuse pool indexes, data, total supply balances (in ETH), total borrow balances (in ETH), arrays of underlying token addresses, arrays of underlying asset symbols, and booleans indicating if retrieving each pool's data failed.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
@@ -264,6 +284,7 @@ contract FusePoolLens is Initializable {
     uint256 adminFee;
     uint256 fuseFee;
     bool borrowGuardianPaused;
+    bool mintGuardianPaused;
   }
 
   /**
@@ -289,7 +310,7 @@ contract FusePoolLens is Initializable {
 
     FusePoolAsset[] memory detailedAssets = new FusePoolAsset[](arrayLength);
     uint256 index = 0;
-    IPriceOracle oracle = comptroller.oracle();
+    BasePriceOracle oracle = BasePriceOracle(address(comptroller.oracle()));
 
     for (uint256 i = 0; i < cTokens.length; i++) {
       // Check if market is listed and get collateral factor
@@ -328,7 +349,7 @@ contract FusePoolLens is Initializable {
       asset.borrowBalance = cToken.borrowBalanceStored(user); // We would use borrowBalanceCurrent but we already accrue interest above
       asset.membership = comptroller.checkMembership(user, cToken);
       asset.exchangeRate = cToken.exchangeRateStored(); // We would use exchangeRateCurrent but we already accrue interest above
-      asset.underlyingPrice = oracle.getUnderlyingPrice(cToken);
+      asset.underlyingPrice = oracle.price(asset.underlyingToken);
 
       // Get oracle for this cToken
       asset.oracle = address(oracle);
@@ -343,6 +364,7 @@ contract FusePoolLens is Initializable {
       asset.adminFee = cToken.adminFeeMantissa();
       asset.fuseFee = cToken.fuseFeeMantissa();
       asset.borrowGuardianPaused = comptroller.borrowGuardianPaused(address(cToken));
+      asset.mintGuardianPaused = comptroller.mintGuardianPaused(address(cToken));
 
       // Add to assets array and increment index
       detailedAssets[index] = asset;
@@ -350,6 +372,37 @@ contract FusePoolLens is Initializable {
     }
 
     return (detailedAssets);
+  }
+
+  function getBorrowCapsPerCollateral(ICToken borrowedAsset, IComptroller comptroller)
+    internal
+    view
+    returns (
+      address[] memory collateral,
+      uint256[] memory borrowCapsAgainstCollateral,
+      bool[] memory borrowingBlacklistedAgainstCollateral
+    )
+  {
+    ICToken[] memory poolMarkets = comptroller.getAllMarkets();
+
+    collateral = new address[](poolMarkets.length - 1);
+    borrowCapsAgainstCollateral = new uint256[](poolMarkets.length - 1);
+    borrowingBlacklistedAgainstCollateral = new bool[](poolMarkets.length - 1);
+
+    for (uint256 i = 0; i < poolMarkets.length; i++) {
+      address collateralAddress = address(poolMarkets[i]);
+      if (collateralAddress != address(borrowedAsset)) {
+        collateral[i] = collateralAddress;
+        borrowCapsAgainstCollateral[i] = comptroller.borrowCapForAssetForCollateral(
+          address(borrowedAsset),
+          collateralAddress
+        );
+        borrowingBlacklistedAgainstCollateral[i] = comptroller.borrowingAgainstCollateralBlacklist(
+          address(borrowedAsset),
+          collateralAddress
+        );
+      }
+    }
   }
 
   /**
@@ -420,6 +473,42 @@ contract FusePoolLens is Initializable {
   }
 
   /**
+   * @notice returns the total supply cap for each asset in the pool
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getSupplyCapsForPool(IComptroller comptroller) public view returns (address[] memory, uint256[] memory) {
+    ICToken[] memory poolMarkets = comptroller.getAllMarkets();
+
+    address[] memory assets = new address[](poolMarkets.length - 1);
+    uint256[] memory supplyCapsPerAsset = new uint256[](poolMarkets.length - 1);
+    for (uint256 i = 0; i < poolMarkets.length; i++) {
+      assets[i] = address(poolMarkets[i]);
+      supplyCapsPerAsset[i] = comptroller.supplyCaps(assets[i]);
+    }
+
+    return (assets, supplyCapsPerAsset);
+  }
+
+  /**
+   * @notice returns the total borrow cap and the per collateral borrowing cap/blacklist for the asset
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getBorrowCapsForAsset(ICToken asset)
+    public
+    view
+    returns (
+      address[] memory collateral,
+      uint256[] memory borrowCapsPerCollateral,
+      bool[] memory collateralBlacklisted,
+      uint256 totalBorrowCap
+    )
+  {
+    IComptroller comptroller = IComptroller(asset.comptroller());
+    (collateral, borrowCapsPerCollateral, collateralBlacklisted) = getBorrowCapsPerCollateral(asset, comptroller);
+    totalBorrowCap = comptroller.borrowCaps(address(asset));
+  }
+
+  /**
    * @notice Returns arrays of Fuse pool indexes and data with a whitelist containing `account`.
    * Note that the whitelist does not have to be enforced.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
@@ -429,7 +518,7 @@ contract FusePoolLens is Initializable {
     view
     returns (uint256[] memory, FusePoolDirectory.FusePool[] memory)
   {
-    FusePoolDirectory.FusePool[] memory pools = directory.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = directory.getActivePools();
     uint256 arrayLength = 0;
 
     for (uint256 i = 0; i < pools.length; i++) {
