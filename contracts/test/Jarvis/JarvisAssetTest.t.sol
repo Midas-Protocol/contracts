@@ -1,58 +1,69 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
-
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { JarvisERC4626Test } from "./JarvisERC4626Test.sol";
-import { JarvisTestConfig, JarvisTestConfigStorage } from "./JarvisTestConfig.sol";
+import { JarvisTestConfigStorage } from "./JarvisTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
+import "./JarvisERC4626Test.sol";
 
 contract JarvisAssetTest is AbstractAssetTest {
-  address masterPriceOracle = 0xb9e1c2B011f252B9931BBA7fcee418b95b6Bdc31; // master price oracle
+  function setUp() public fork(POLYGON_MAINNET) {}
 
-  constructor() {
+  function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new JarvisERC4626Test()));
     testConfigStorage = ITestConfigStorage(address(new JarvisTestConfigStorage()));
-    shouldRunTest = forChains(POLYGON_MAINNET);
   }
 
-  function setUp() public override shouldRun(shouldRunTest) {}
-
-  function setUpTestContract(bytes calldata testConfig) public override shouldRun(shouldRunTest) {
+  function setUpTestContract(bytes calldata testConfig) public override {
     (address asset, address pool) = abi.decode(testConfig, (address, address));
 
-    test.setUpWithPool(MasterPriceOracle(masterPriceOracle), ERC20Upgradeable(asset));
+    test.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(asset));
 
-    test.setUp(MockERC20(asset).symbol(), testConfig);
+    test._setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override shouldRun(shouldRunTest) {
-    for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
-      bytes memory testConfig = testConfigStorage.getTestConfig(i);
+  function testInitializedValues() public override {
+    if (shouldRunForChain(block.chainid)) {
+      for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
+        bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
-      this.setUpTestContract(testConfig);
+        this.setUpTestContract(testConfig);
 
-      (address asset, ) = abi.decode(testConfig, (address, address));
+        (address asset, ) = abi.decode(testConfig, (address, address));
 
-      test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+        test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+      }
     }
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(shouldRunTest) {
+  function testDepositWithIncreasedVaultValue() public override {
+    this.runTest(test.testDepositWithIncreasedVaultValue);
+  }
+
+  function testDepositWithDecreasedVaultValue() public override {
+    this.runTest(test.testDepositWithDecreasedVaultValue);
+  }
+
+  function testWithdrawWithIncreasedVaultValue() public override {
+    this.runTest(test.testWithdrawWithIncreasedVaultValue);
+  }
+
+  function testWithdrawWithDecreasedVaultValue() public override {
+    this.runTest(test.testWithdrawWithDecreasedVaultValue);
+  }
+
+  function testAccumulatingRewardsOnDeposit() public {
     this.runTest(JarvisERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(shouldRunTest) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     this.runTest(JarvisERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 
-  function testClaimRewards() public shouldRun(shouldRunTest) {
+  function testClaimRewards() public {
     this.runTest(JarvisERC4626Test(address(test)).testClaimRewards);
   }
 }

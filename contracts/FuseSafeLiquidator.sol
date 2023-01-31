@@ -8,7 +8,6 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20
 
 import "./liquidators/IRedemptionStrategy.sol";
 import "./liquidators/IFundsConversionStrategy.sol";
-import "./liquidators/JarvisLiquidatorFunder.sol";
 
 import "./external/compound/ICToken.sol";
 
@@ -22,7 +21,6 @@ import "./external/uniswap/IUniswapV2Callee.sol";
 import "./external/uniswap/IUniswapV2Pair.sol";
 import "./external/uniswap/IUniswapV2Factory.sol";
 import "./external/uniswap/UniswapV2Library.sol";
-import "./external/compound/IComptroller.sol";
 
 /**
  * @title FuseSafeLiquidator
@@ -159,12 +157,13 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    * @param minOutputAmount The minimum output amount of `to` necessary to complete the exchange without reversion.
    * @param uniswapV2Router The UniswapV2Router02 to use. (Is interchangable with any UniV2 forks)
    */
-  function exchangeAllEthOrTokens(
+  function exchangeAllWethOrTokens(
     address from,
     address to,
     uint256 minOutputAmount,
     IUniswapV2Router02 uniswapV2Router
   ) private {
+    if (to == address(0)) to = W_NATIVE_ADDRESS; // we want W_NATIVE instead of NATIVE
     if (to == from) return;
 
     // From NATIVE, W_NATIVE, or something else?
@@ -181,32 +180,21 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
           block.timestamp
         );
       }
-    } else if (from == W_NATIVE_ADDRESS && to == address(0)) {
-      // Withdraw all W_NATIVE to NATIVE
-      W_NATIVE.withdraw(IERC20Upgradeable(W_NATIVE_ADDRESS).balanceOf(address(this)));
     } else {
       // Approve input tokens
       IERC20Upgradeable fromToken = IERC20Upgradeable(from);
       uint256 inputBalance = fromToken.balanceOf(address(this));
       justApprove(fromToken, address(uniswapV2Router), inputBalance);
 
-      // Exchange from tokens to NATIVE or tokens
-      if (to == address(0))
-        uniswapV2Router.swapExactTokensForETH(
-          inputBalance,
-          minOutputAmount,
-          array(from, W_NATIVE_ADDRESS),
-          address(this),
-          block.timestamp
-        );
-      else
-        uniswapV2Router.swapExactTokensForTokens(
-          inputBalance,
-          minOutputAmount,
-          from == W_NATIVE_ADDRESS || to == W_NATIVE_ADDRESS ? array(from, to) : array(from, W_NATIVE_ADDRESS, to),
-          address(this),
-          block.timestamp
-        ); // Put W_NATIVE in the middle of the path if not already a part of the path
+      // TODO check if redemption strategies make this obsolete
+      // Exchange from tokens to tokens
+      uniswapV2Router.swapExactTokensForTokens(
+        inputBalance,
+        minOutputAmount,
+        from == W_NATIVE_ADDRESS || to == W_NATIVE_ADDRESS ? array(from, to) : array(from, W_NATIVE_ADDRESS, to),
+        address(this),
+        block.timestamp
+      ); // Put W_NATIVE in the middle of the path if not already a part of the path
     }
   }
 
@@ -305,7 +293,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
           }
 
           // Exchange redeemed token collateral if necessary
-          exchangeAllEthOrTokens(address(underlyingCollateral), exchangeSeizedTo, minOutputAmount, uniswapV2Router);
+          exchangeAllWethOrTokens(address(underlyingCollateral), exchangeSeizedTo, minOutputAmount, uniswapV2Router);
         }
       }
     }
@@ -333,22 +321,10 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    * @param minOutputAmount The minimum amount to transfer.
    */
   function transferSeizedFunds(address erc20Contract, uint256 minOutputAmount) internal returns (uint256) {
-    uint256 seizedOutputAmount;
-
-    if (erc20Contract == address(0)) {
-      seizedOutputAmount = address(this).balance;
-      require(seizedOutputAmount >= minOutputAmount, "Minimum NATIVE output amount not satisfied.");
-
-      if (seizedOutputAmount > 0) {
-        (bool success, ) = msg.sender.call{ value: seizedOutputAmount }("");
-        require(success, "Failed to transfer output NATIVE to msg.sender.");
-      }
-    } else {
-      IERC20Upgradeable token = IERC20Upgradeable(erc20Contract);
-      seizedOutputAmount = token.balanceOf(address(this));
-      require(seizedOutputAmount >= minOutputAmount, "Minimum token output amount not satified.");
-      if (seizedOutputAmount > 0) token.safeTransfer(msg.sender, seizedOutputAmount);
-    }
+    IERC20Upgradeable token = IERC20Upgradeable(erc20Contract);
+    uint256 seizedOutputAmount = token.balanceOf(address(this));
+    require(seizedOutputAmount >= minOutputAmount, "Minimum token output amount not satified.");
+    if (seizedOutputAmount > 0) token.safeTransfer(msg.sender, seizedOutputAmount);
 
     return seizedOutputAmount;
   }
@@ -396,28 +372,31 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     // we want to calculate the needed flashSwapAmount on-chain to
     // avoid errors due to changing market conditions
     // between the time of calculating and including the tx in a block
-    uint256 flashSwapAmount = vars.repayAmount;
-    IERC20Upgradeable flashSwapFundingToken = IERC20Upgradeable(ICErc20(address(vars.cErc20)).underlying());
+    uint256 fundingAmount = vars.repayAmount;
+    IERC20Upgradeable fundingToken;
     if (vars.debtFundingStrategies.length > 0) {
       require(
         vars.debtFundingStrategies.length == vars.debtFundingStrategiesData.length,
         "Funding IFundsConversionStrategy contract array and strategy data bytes array must be the same length."
       );
-      // loop backwards to estimate the initial input from the final expected output
-      for (uint256 i = vars.debtFundingStrategies.length; i > 0; i--) {
-        bytes memory strategyData = vars.debtFundingStrategiesData[i - 1];
-        IFundsConversionStrategy fcs = vars.debtFundingStrategies[i - 1];
-        (flashSwapFundingToken, flashSwapAmount) = fcs.estimateInputAmount(flashSwapAmount, strategyData);
+      // estimate the initial (flash-swapped token) input from the expected output (debt token)
+      for (uint256 i = 0; i < vars.debtFundingStrategies.length; i++) {
+        bytes memory strategyData = vars.debtFundingStrategiesData[i];
+        IFundsConversionStrategy fcs = vars.debtFundingStrategies[i];
+        (fundingToken, fundingAmount) = fcs.estimateInputAmount(fundingAmount, strategyData);
       }
+    } else {
+      fundingToken = IERC20Upgradeable(ICErc20(address(vars.cErc20)).underlying());
     }
 
-    _flashSwapAmount = flashSwapAmount;
-    _flashSwapToken = address(flashSwapFundingToken);
+    // the last outputs from estimateInputAmount are the ones to be flash-swapped
+    _flashSwapAmount = fundingAmount;
+    _flashSwapToken = address(fundingToken);
 
-    bool token0IsFlashSwapFundingToken = vars.flashSwapPair.token0() == address(flashSwapFundingToken);
+    bool token0IsFlashSwapFundingToken = vars.flashSwapPair.token0() == address(fundingToken);
     vars.flashSwapPair.swap(
-      token0IsFlashSwapFundingToken ? flashSwapAmount : 0,
-      !token0IsFlashSwapFundingToken ? flashSwapAmount : 0,
+      token0IsFlashSwapFundingToken ? fundingAmount : 0,
+      !token0IsFlashSwapFundingToken ? fundingAmount : 0,
       address(this),
       msg.data
     );
@@ -449,38 +428,22 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     uint256 minProfitAmount,
     uint256 ethToCoinbase
   ) private returns (uint256) {
-    if (exchangeProfitTo == address(0)) {
-      // Exchange profit if necessary
-      exchangeAllEthOrTokens(
-        _liquidatorProfitExchangeSource,
-        exchangeProfitTo,
-        minProfitAmount + ethToCoinbase,
-        UNISWAP_V2_ROUTER_02
-      );
+    if (exchangeProfitTo == address(0)) exchangeProfitTo = W_NATIVE_ADDRESS;
 
-      // Transfer NATIVE to block.coinbase if requested
-      if (ethToCoinbase > 0) block.coinbase.call{ value: ethToCoinbase }("");
-
-      // Transfer profit to msg.sender
-      return transferSeizedFunds(exchangeProfitTo, minProfitAmount);
-    } else {
-      // Transfer NATIVE to block.coinbase if requested
-      if (ethToCoinbase > 0) {
-        exchangeToExactEth(_liquidatorProfitExchangeSource, ethToCoinbase, UNISWAP_V2_ROUTER_02);
-        block.coinbase.call{ value: ethToCoinbase }("");
+    // Transfer NATIVE to block.coinbase if requested
+    if (ethToCoinbase > 0) {
+      uint256 currentBalance = address(this).balance;
+      if (ethToCoinbase > currentBalance) {
+        exchangeToExactEth(_liquidatorProfitExchangeSource, ethToCoinbase - currentBalance, UNISWAP_V2_ROUTER_02);
       }
-
-      // Exchange profit if necessary
-      exchangeAllEthOrTokens(
-        _liquidatorProfitExchangeSource,
-        exchangeProfitTo,
-        minProfitAmount + ethToCoinbase,
-        UNISWAP_V2_ROUTER_02
-      );
-
-      // Transfer profit to msg.sender
-      return transferSeizedFunds(exchangeProfitTo, minProfitAmount);
+      block.coinbase.call{ value: ethToCoinbase }("");
     }
+
+    // Exchange profit if necessary
+    exchangeAllWethOrTokens(_liquidatorProfitExchangeSource, exchangeProfitTo, minProfitAmount, UNISWAP_V2_ROUTER_02);
+
+    // Transfer profit to msg.sender
+    return transferSeizedFunds(exchangeProfitTo, minProfitAmount);
   }
 
   /**
@@ -523,14 +486,29 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     uint256 amount0,
     uint256 amount1,
     bytes calldata data
-  ) external override {
+  ) external {
     uniswapV2Call(sender, amount0, amount1, data);
   }
 
-  /**
-   * @dev Callback function for BeamSwap flashloans.
-   */
   function BeamSwapCall(
+    address sender,
+    uint256 amount0,
+    uint256 amount1,
+    bytes calldata data
+  ) external {
+    uniswapV2Call(sender, amount0, amount1, data);
+  }
+
+  function stellaswapV2Call(
+    address sender,
+    uint256 amount0,
+    uint256 amount1,
+    bytes calldata data
+  ) external {
+    uniswapV2Call(sender, amount0, amount1, data);
+  }
+
+  function moraswapCall(
     address sender,
     uint256 amount0,
     uint256 amount1,
@@ -544,16 +522,18 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    */
   function postFlashLoanTokens(LiquidateToTokensWithFlashSwapVars memory vars) private returns (address) {
     IERC20Upgradeable debtRepaymentToken = IERC20Upgradeable(_flashSwapToken);
-    uint256 debtRepaymentAmount = debtRepaymentToken.balanceOf(address(this));
+    uint256 debtRepaymentAmount = _flashSwapAmount;
 
     if (vars.debtFundingStrategies.length > 0) {
-      for (uint256 i = 0; i < vars.debtFundingStrategies.length; i++)
+      // loop backwards to convert the initial (flash-swapped token) input to the final expected output (debt token)
+      for (uint256 i = vars.debtFundingStrategies.length; i > 0; i--) {
         (debtRepaymentToken, debtRepaymentAmount) = convertCustomFunds(
           debtRepaymentToken,
           debtRepaymentAmount,
-          vars.debtFundingStrategies[i],
-          vars.debtFundingStrategiesData[i]
+          vars.debtFundingStrategies[i - 1],
+          vars.debtFundingStrategiesData[i - 1]
         );
+      }
     }
 
     // Approve the debt repayment transfer, liquidate and redeem the seized collateral
@@ -652,7 +632,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
 
       // Repay flashloan
       require(
-        collateralRequired <= underlyingCollateral.balanceOf(address(this)),
+        collateralRequired <= underlyingCollateralSeized,
         "Token flashloan return amount greater than seized collateral."
       );
       require(

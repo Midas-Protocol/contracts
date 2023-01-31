@@ -44,7 +44,7 @@ abstract contract ComptrollerInterface {
     uint256 borrowAmount
   ) external virtual returns (uint256);
 
-  function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external virtual returns (uint256);
+  function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external view virtual returns (uint256);
 
   function repayBorrowAllowed(
     address cToken,
@@ -77,6 +77,16 @@ abstract contract ComptrollerInterface {
   ) external virtual returns (uint256);
 
   /*** Liquidity/Liquidation Calculations ***/
+
+  function getAccountLiquidity(address account)
+    external
+    view
+    virtual
+    returns (
+      uint256,
+      uint256,
+      uint256
+    );
 
   function liquidateCalculateSeizeTokens(
     address cTokenBorrowed,

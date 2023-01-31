@@ -1,35 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
-
-import { MidasERC4626, DotDotLpERC4626, ILpDepositor } from "../../midas/strategies/DotDotLpERC4626.sol";
+import { DotDotLpERC4626, ILpDepositor } from "../../midas/strategies/DotDotLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { MockLpDepositor } from "../mocks/dotdot/MockLpDepositor.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
-import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
-
+import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-struct RewardsCycle {
-  uint32 start;
-  uint32 end;
-  uint192 reward;
-}
-
-// Using 2BRL
-// Tested on block 19052824
 contract DotDotERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   address whale = 0x0BC3a8239B0a63E945Ea1bd6722Ba747b9557e56;
 
   ILpDepositor lpDepositor = ILpDepositor(0x8189F0afdBf8fE6a9e13c69bA35528ac6abeB1af);
@@ -52,9 +34,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
 
   ERC20Upgradeable[] rewardsToken;
 
-  constructor() WithPool() {}
-
-  function setUp(string memory _testPreFix, bytes calldata) public override shouldRun(forChains(BSC_MAINNET)) {
+  function _setUp(string memory _testPreFix, bytes calldata) public override {
     setUpPool("dotdot-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));
 
@@ -137,11 +117,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     return depositAmount;
   }
 
-  function testInitializedValues(string memory assetName, string memory assetSymbol)
-    public
-    override
-    shouldRun(forChains(BSC_MAINNET))
-  {
+  function testInitializedValues(string memory assetName, string memory assetSymbol) public override {
     assertEq(
       plugin.name(),
       string(abi.encodePacked("Midas ", assetName, " Vault")),
@@ -160,7 +136,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(forChains(BSC_MAINNET)) {
+  function testAccumulatingRewardsOnDeposit() public {
     deposit(address(this), depositAmount / 2);
 
     vm.warp(block.timestamp + 150);
@@ -171,7 +147,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     assertGt(epxToken.balanceOf(address(plugin)), 0.01 ether, string(abi.encodePacked("!epxBal ", testPreFix)));
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(forChains(BSC_MAINNET)) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     deposit(address(this), depositAmount);
 
     vm.warp(block.timestamp + 150);
@@ -183,11 +159,11 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     assertGt(epxToken.balanceOf(address(plugin)), 0.025 ether, string(abi.encodePacked("!epxBal ", testPreFix)));
   }
 
-  function testClaimRewards() public shouldRun(forChains(BSC_MAINNET)) {
+  function testClaimRewards() public {
     // Deposit funds, Rewards are 0
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);
-    CErc20(marketAddress).mint(depositAmount);
+    CErc20PluginRewardsDelegate(marketAddress).mint(depositAmount);
     vm.stopPrank();
 
     (uint32 dddStart, uint32 dddEnd, uint192 dddReward) = dddRewards.rewardsCycle(ERC20(address(marketAddress)));

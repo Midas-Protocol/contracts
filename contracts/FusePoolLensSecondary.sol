@@ -167,19 +167,19 @@ contract FusePoolLensSecondary is Initializable {
     view
     returns (
       ICToken[] memory,
-      IRewardsDistributor[] memory,
+      address[] memory,
       address[] memory,
       uint256[][] memory,
       uint256[][] memory
     )
   {
     ICToken[] memory allMarkets = comptroller.getAllMarkets();
-    IRewardsDistributor[] memory distributors;
+    address[] memory distributors;
 
-    try comptroller.getRewardsDistributors() returns (IRewardsDistributor[] memory _distributors) {
+    try comptroller.getRewardsDistributors() returns (address[] memory _distributors) {
       distributors = _distributors;
     } catch {
-      distributors = new IRewardsDistributor[](0);
+      distributors = new address[](0);
     }
 
     address[] memory rewardTokens = new address[](distributors.length);
@@ -187,7 +187,9 @@ contract FusePoolLensSecondary is Initializable {
     uint256[][] memory borrowSpeeds = new uint256[][](allMarkets.length);
 
     // Get reward tokens for each distributor
-    for (uint256 i = 0; i < distributors.length; i++) rewardTokens[i] = distributors[i].rewardToken();
+    for (uint256 i = 0; i < distributors.length; i++) {
+      rewardTokens[i] = IRewardsDistributor(distributors[i]).rewardToken();
+    }
 
     // Get reward speeds for each market for each distributor
     for (uint256 i = 0; i < allMarkets.length; i++) {
@@ -196,7 +198,7 @@ contract FusePoolLensSecondary is Initializable {
       borrowSpeeds[i] = new uint256[](distributors.length);
 
       for (uint256 j = 0; j < distributors.length; j++) {
-        IRewardsDistributor distributor = distributors[j];
+        IRewardsDistributor distributor = IRewardsDistributor(distributors[j]);
         supplySpeeds[i][j] = distributor.compSupplySpeeds(cToken);
         borrowSpeeds[i][j] = distributor.compBorrowSpeeds(cToken);
       }
@@ -214,14 +216,14 @@ contract FusePoolLensSecondary is Initializable {
     view
     returns (
       ICToken[][] memory,
-      IRewardsDistributor[][] memory,
+      address[][] memory,
       address[][] memory,
       uint256[][][] memory,
       uint256[][][] memory
     )
   {
     ICToken[][] memory allMarkets = new ICToken[][](comptrollers.length);
-    IRewardsDistributor[][] memory distributors = new IRewardsDistributor[][](comptrollers.length);
+    address[][] memory distributors = new address[][](comptrollers.length);
     address[][] memory rewardTokens = new address[][](comptrollers.length);
     uint256[][][] memory supplySpeeds = new uint256[][][](comptrollers.length);
     uint256[][][] memory borrowSpeeds = new uint256[][][](comptrollers.length);
@@ -308,11 +310,11 @@ contract FusePoolLensSecondary is Initializable {
     returns (
       uint256[] memory,
       IComptroller[] memory,
-      IRewardsDistributor[][] memory
+      address[][] memory
     )
   {
     // Get array length
-    FusePoolDirectory.FusePool[] memory pools = directory.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = directory.getActivePools();
     uint256 arrayLength = 0;
 
     for (uint256 i = 0; i < pools.length; i++) {
@@ -324,7 +326,7 @@ contract FusePoolLensSecondary is Initializable {
     // Build array
     uint256[] memory indexes = new uint256[](arrayLength);
     IComptroller[] memory comptrollers = new IComptroller[](arrayLength);
-    IRewardsDistributor[][] memory distributors = new IRewardsDistributor[][](arrayLength);
+    address[][] memory distributors = new address[][](arrayLength);
     uint256 index = 0;
 
     for (uint256 i = 0; i < pools.length; i++) {
@@ -335,7 +337,7 @@ contract FusePoolLensSecondary is Initializable {
           indexes[index] = i;
           comptrollers[index] = comptroller;
 
-          try comptroller.getRewardsDistributors() returns (IRewardsDistributor[] memory _distributors) {
+          try comptroller.getRewardsDistributors() returns (address[] memory _distributors) {
             distributors[index] = _distributors;
           } catch {}
 
@@ -346,5 +348,49 @@ contract FusePoolLensSecondary is Initializable {
 
     // Return distributors
     return (indexes, comptrollers, distributors);
+  }
+
+  /**
+   * @notice The returned list of flywheels contains address(0) for flywheels for which the user has no rewards to claim
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getFlywheelsToClaim(address user)
+    external
+    view
+    returns (
+      uint256[] memory,
+      IComptroller[] memory,
+      address[][] memory
+    )
+  {
+    (uint256[] memory poolIds, FusePoolDirectory.FusePool[] memory pools) = directory.getActivePools();
+
+    IComptroller[] memory comptrollers = new IComptroller[](pools.length);
+    address[][] memory distributors = new address[][](pools.length);
+
+    for (uint256 i = 0; i < pools.length; i++) {
+      IComptroller comptroller = IComptroller(pools[i].comptroller);
+      try comptroller.getRewardsDistributors() returns (address[] memory _distributors) {
+        comptrollers[i] = comptroller;
+        distributors[i] = flywheelsWithRewardsForPoolUser(user, _distributors);
+      } catch {}
+    }
+
+    return (poolIds, comptrollers, distributors);
+  }
+
+  function flywheelsWithRewardsForPoolUser(address user, address[] memory _distributors)
+    internal
+    view
+    returns (address[] memory)
+  {
+    address[] memory distributors = new address[](_distributors.length);
+    for (uint256 j = 0; j < _distributors.length; j++) {
+      if (IRewardsDistributor(_distributors[j]).compAccrued(user) > 0) {
+        distributors[j] = _distributors[j];
+      }
+    }
+
+    return distributors;
   }
 }

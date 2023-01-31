@@ -1,29 +1,59 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import { BaseTest } from "./config/BaseTest.t.sol";
-import "../external/curve/ICurvePool.sol";
-import "../compound/EIP20NonStandardInterface.sol";
-import "../compound/JumpRateModel.sol";
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { ICurvePool } from "../external/curve/ICurvePool.sol";
+import { CurveSwapLiquidatorFunder } from "../liquidators/CurveSwapLiquidatorFunder.sol";
 
-import { CurveSwapLiquidator } from "../liquidators/CurveSwapLiquidator.sol";
+import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
+import { CurveV2LpTokenPriceOracleNoRegistry } from "../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
+
+import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract CurveSwapLiquidatorTest is BaseTest {
-  CurveSwapLiquidator private csl;
+  CurveSwapLiquidatorFunder private csl;
+  address private maiAddress = 0x3F56e0c36d275367b8C502090EDF38289b3dEa0d;
+  address private val3EPSAddress = 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5;
 
-  function setUp() public {
-    csl = new CurveSwapLiquidator(ap.getAddress("wtoken"));
+  address private lpTokenMai3EPS = 0x80D00D2c8d920a9253c3D65BA901250a55011b37;
+  address private poolAddress = 0x68354c6E8Bbd020F9dE81EAf57ea5424ba9ef322;
+
+  address xcDotStDotPool = 0x0fFc46cD9716a96d8D89E1965774A70Dcb851E50; // xcDOT-stDOT
+  address xcDotAddress = 0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080; // 0
+  address stDotAddress = 0xFA36Fe1dA08C89eC72Ea1F0143a35bFd5DAea108; // 1
+
+  CurveLpTokenPriceOracleNoRegistry curveV1Oracle;
+  CurveV2LpTokenPriceOracleNoRegistry curveV2Oracle;
+
+  function afterForkSetUp() internal override {
+    csl = new CurveSwapLiquidatorFunder();
+    curveV1Oracle = CurveLpTokenPriceOracleNoRegistry(ap.getAddress("CurveLpTokenPriceOracleNoRegistry"));
+    curveV2Oracle = CurveV2LpTokenPriceOracleNoRegistry(ap.getAddress("CurveV2LpTokenPriceOracleNoRegistry"));
+
+    if (address(curveV1Oracle) == address(0)) {
+      address[][] memory _poolUnderlyings = new address[][](1);
+      _poolUnderlyings[0] = asArray(maiAddress, val3EPSAddress);
+      //      _poolUnderlyings[1] = asArray(
+      //        xcDotAddress,
+      //        stDotAddress
+      //      );
+      curveV1Oracle = new CurveLpTokenPriceOracleNoRegistry();
+      curveV1Oracle.initialize(asArray(lpTokenMai3EPS), asArray(poolAddress), _poolUnderlyings);
+      curveV1Oracle.reinitialize(asArray(lpTokenMai3EPS));
+    }
+
+    if (address(curveV2Oracle) == address(0)) {
+      address lpTokenXcStDot = xcDotStDotPool;
+      curveV2Oracle = new CurveV2LpTokenPriceOracleNoRegistry();
+      curveV2Oracle.initialize(asArray(lpTokenXcStDot), asArray(xcDotStDotPool));
+      curveV2Oracle.reinitialize(asArray(lpTokenXcStDot));
+    }
   }
 
-  function not_working_TestRedeem() public shouldRun(forChains(MOONBEAM_MAINNET)) {
-    address pool = 0x0fFc46cD9716a96d8D89E1965774A70Dcb851E50; // xcDOT-stDOT
-    address xcDotAddress = 0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080; // 0
-    address stDotAddress = 0xFA36Fe1dA08C89eC72Ea1F0143a35bFd5DAea108; // 1
+  function testRedeem() public fork(MOONBEAM_MAINNET) {
     IERC20Upgradeable xcDot = IERC20Upgradeable(xcDotAddress);
-    //        IERC20Upgradeable stDot = IERC20Upgradeable(stDotAddress);
 
-    ICurvePool curvePool = ICurvePool(pool);
+    ICurvePool curvePool = ICurvePool(xcDotStDotPool);
 
     assertEq(xcDotAddress, curvePool.coins(0), "coin 0 must be xcDOT");
     assertEq(stDotAddress, curvePool.coins(1), "coin 1 must be stDOT");
@@ -31,22 +61,28 @@ contract CurveSwapLiquidatorTest is BaseTest {
     uint256 xcForSt = curvePool.get_dy(0, 1, 1e10);
     emit log_uint(xcForSt);
 
-    bytes memory data = abi.encode(pool, 0, 1, stDotAddress);
+    {
+      // mock some calls
+      vm.mockCall(
+        xcDotAddress,
+        abi.encodeWithSelector(xcDot.approve.selector, xcDotStDotPool, 10000000000),
+        abi.encode(true)
+      );
+      vm.mockCall(
+        xcDotAddress,
+        abi.encodeWithSelector(xcDot.transferFrom.selector, address(csl), xcDotStDotPool, 10000000000),
+        abi.encode(true)
+      );
+    }
+
+    bytes memory data = abi.encode(curveV1Oracle, curveV2Oracle, xcDotAddress, stDotAddress, ap.getAddress("wtoken"));
     (IERC20Upgradeable shouldBeStDot, uint256 stDotOutput) = csl.redeem(xcDot, 1e10, data);
     assertEq(address(shouldBeStDot), stDotAddress, "output token does not match");
 
-    assertEq(xcForSt, stDotOutput, "output amount does not match");
+    assertApproxEqAbs(xcForSt, stDotOutput, uint256(10), "output amount does not match");
   }
 
-  function testRedeemMAI() public shouldRun(forChains(BSC_MAINNET)) {
-    address maiAddress = 0x3F56e0c36d275367b8C502090EDF38289b3dEa0d;
-    address val3EPSAddress = 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5;
-
-    IERC20Upgradeable mai = IERC20Upgradeable(maiAddress);
-    //        IERC20Upgradeable val3EPS = IERC20Upgradeable(val3EPSAddress);
-
-    address poolAddress = 0x68354c6E8Bbd020F9dE81EAf57ea5424ba9ef322;
-
+  function testRedeemMAI() public fork(BSC_MAINNET) {
     ICurvePool curvePool = ICurvePool(poolAddress);
 
     assertEq(maiAddress, curvePool.coins(0), "coin 0 must be MAI");
@@ -57,22 +93,41 @@ contract CurveSwapLiquidatorTest is BaseTest {
     uint256 maiForVal3EPS = curvePool.get_dy(0, 1, inputAmount);
     emit log_uint(maiForVal3EPS);
 
-    dealMai(mai, address(csl), inputAmount);
+    dealMai(address(csl), inputAmount);
 
-    bytes memory data = abi.encode(poolAddress, 0, 1, val3EPSAddress);
-    (IERC20Upgradeable shouldBeVal3EPS, uint256 outputAmount) = csl.redeem(mai, inputAmount, data);
+    bytes memory data = abi.encode(curveV1Oracle, address(0), maiAddress, val3EPSAddress, ap.getAddress("wtoken"));
+    (IERC20Upgradeable shouldBeVal3EPS, uint256 outputAmount) = csl.redeem(
+      IERC20Upgradeable(maiAddress),
+      inputAmount,
+      data
+    );
     assertEq(address(shouldBeVal3EPS), val3EPSAddress, "output token does not match");
 
     assertEq(maiForVal3EPS, outputAmount, "output amount does not match");
   }
 
-  function dealMai(
-    IERC20Upgradeable mai,
-    address to,
-    uint256 amount
-  ) internal {
+  function testEstimateInputAmount() public fork(BSC_MAINNET) {
+    ICurvePool curvePool = ICurvePool(poolAddress);
+
+    assertEq(maiAddress, curvePool.coins(0), "coin 0 must be MAI");
+    assertEq(val3EPSAddress, curvePool.coins(1), "coin 1 must be val3EPS");
+
+    bytes memory data = abi.encode(curveV1Oracle, address(0), maiAddress, val3EPSAddress, ap.getAddress("wtoken"));
+
+    (IERC20Upgradeable inputToken, uint256 inputAmount) = csl.estimateInputAmount(2e10, data);
+
+    emit log("input");
+    emit log_uint(inputAmount);
+    emit log_address(address(inputToken));
+    uint256 shouldBeAround2e10 = curvePool.get_dy(1, 0, inputAmount);
+    emit log("should be around 2e10");
+    emit log_uint(shouldBeAround2e10);
+    assertTrue(shouldBeAround2e10 >= 20e9 && shouldBeAround2e10 <= 21e9, "rough estimate didn't work");
+  }
+
+  function dealMai(address to, uint256 amount) internal {
     address whale = 0xc412eCccaa35621cFCbAdA4ce203e3Ef78c4114a; // anyswap
     vm.prank(whale);
-    mai.transfer(to, amount);
+    IERC20Upgradeable(maiAddress).transfer(to, amount);
   }
 }

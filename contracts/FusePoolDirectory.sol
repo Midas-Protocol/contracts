@@ -104,6 +104,41 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     return pools.length - 1;
   }
 
+  function _deprecatePool(address comptroller) external onlyOwner {
+    for (uint256 i = 0; i < pools.length; i++) {
+      if (pools[i].comptroller == comptroller) {
+        _deprecatePool(i);
+        break;
+      }
+    }
+  }
+
+  function _deprecatePool(uint256 index) public onlyOwner {
+    FusePool storage fusePool = pools[index];
+
+    require(fusePool.comptroller != address(0), "pool already deprecated");
+
+    // swap with the last pool of the creator and delete
+    uint256[] storage creatorPools = _poolsByAccount[fusePool.creator];
+    for (uint256 i = 0; i < creatorPools.length; i++) {
+      if (creatorPools[i] == index) {
+        creatorPools[i] = creatorPools[creatorPools.length - 1];
+        creatorPools.pop();
+        break;
+      }
+    }
+
+    // leave it to true to deny the re-registering of the same pool
+    poolExists[fusePool.comptroller] = true;
+
+    // nullify the storage
+    fusePool.comptroller = address(0);
+    fusePool.creator = address(0);
+    fusePool.name = "";
+    fusePool.blockPosted = 0;
+    fusePool.timestampPosted = 0;
+  }
+
   /**
    * @dev Deploys a new Fuse pool and adds to the directory.
    * @param name The name of the pool.
@@ -127,12 +162,6 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     // Input validation
     require(implementation != address(0), "No Comptroller implementation contract address specified.");
     require(priceOracle != address(0), "No PriceOracle contract address specified.");
-
-    // Deploy CEtherDelegator using msg.sender, underlying, and block.number as a salt
-    //        bytes32 salt = keccak256(abi.encodePacked(msg.sender, address(0), block.number));
-    //
-
-    //        address proxy = Create2Upgradeable.deploy(0, salt, cEtherDelegatorCreationCode);
 
     // Deploy Unitroller using msg.sender, name, and block.number as a salt
     bytes memory unitrollerCreationCode = abi.encodePacked(type(Unitroller).creationCode, constructorData);
@@ -175,11 +204,50 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
+   * @notice Returns `ids` and directory information of all non-deprecated Fuse pools.
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getActivePools() public view returns (uint256[] memory, FusePool[] memory) {
+    uint256 count = 0;
+    for (uint256 i = 0; i < pools.length; i++) {
+      if (pools[i].comptroller != address(0)) count++;
+    }
+
+    FusePool[] memory activePools = new FusePool[](count);
+    uint256[] memory poolIds = new uint256[](count);
+
+    uint256 index = 0;
+    for (uint256 i = 0; i < pools.length; i++) {
+      if (pools[i].comptroller != address(0)) {
+        poolIds[index] = i;
+        activePools[index] = pools[i];
+        index++;
+      }
+    }
+
+    return (poolIds, activePools);
+  }
+
+  /**
    * @notice Returns arrays of all Fuse pools' data.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getAllPools() external view returns (FusePool[] memory) {
-    return pools;
+  function getAllPools() public view returns (FusePool[] memory) {
+    uint256 count = 0;
+    for (uint256 i = 0; i < pools.length; i++) {
+      if (pools[i].comptroller != address(0)) count++;
+    }
+
+    FusePool[] memory result = new FusePool[](count);
+
+    uint256 index = 0;
+    for (uint256 i = 0; i < pools.length; i++) {
+      if (pools[i].comptroller != address(0)) {
+        result[index++] = pools[i];
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -189,8 +257,9 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   function getPublicPools() external view returns (uint256[] memory, FusePool[] memory) {
     uint256 arrayLength = 0;
 
-    for (uint256 i = 0; i < pools.length; i++) {
-      try IComptroller(pools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
+    (, FusePool[] memory activePools) = getActivePools();
+    for (uint256 i = 0; i < activePools.length; i++) {
+      try IComptroller(activePools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
         if (enforceWhitelist) continue;
       } catch {}
 
@@ -201,13 +270,13 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     FusePool[] memory publicPools = new FusePool[](arrayLength);
     uint256 index = 0;
 
-    for (uint256 i = 0; i < pools.length; i++) {
-      try IComptroller(pools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
+    for (uint256 i = 0; i < activePools.length; i++) {
+      try IComptroller(activePools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
         if (enforceWhitelist) continue;
       } catch {}
 
       indexes[index] = i;
-      publicPools[index] = pools[i];
+      publicPools[index] = activePools[i];
       index++;
     }
 
@@ -221,8 +290,9 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   function getPoolsOfUser(address user) external view returns (uint256[] memory, FusePool[] memory) {
     uint256 arrayLength = 0;
 
-    for (uint256 i = 0; i < pools.length; i++) {
-      try IComptroller(pools[i].comptroller).isUserOfPool(user) returns (bool isUsing) {
+    (, FusePool[] memory activePools) = getActivePools();
+    for (uint256 i = 0; i < activePools.length; i++) {
+      try IComptroller(activePools[i].comptroller).isUserOfPool(user) returns (bool isUsing) {
         if (!isUsing) continue;
       } catch {}
 
@@ -233,13 +303,13 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     FusePool[] memory poolsOfUser = new FusePool[](arrayLength);
     uint256 index = 0;
 
-    for (uint256 i = 0; i < pools.length; i++) {
-      try IComptroller(pools[i].comptroller).isUserOfPool(user) returns (bool isUsing) {
+    for (uint256 i = 0; i < activePools.length; i++) {
+      try IComptroller(activePools[i].comptroller).isUserOfPool(user) returns (bool isUsing) {
         if (!isUsing) continue;
       } catch {}
 
       indexes[index] = i;
-      poolsOfUser[index] = pools[i];
+      poolsOfUser[index] = activePools[i];
       index++;
     }
 
@@ -252,10 +322,11 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   function getPoolsByAccount(address account) external view returns (uint256[] memory, FusePool[] memory) {
     uint256[] memory indexes = new uint256[](_poolsByAccount[account].length);
     FusePool[] memory accountPools = new FusePool[](_poolsByAccount[account].length);
+    (, FusePool[] memory activePools) = getActivePools();
 
     for (uint256 i = 0; i < _poolsByAccount[account].length; i++) {
       indexes[i] = _poolsByAccount[account][i];
-      accountPools[i] = pools[_poolsByAccount[account][i]];
+      accountPools[i] = activePools[_poolsByAccount[account][i]];
     }
 
     return (indexes, accountPools);
@@ -271,7 +342,10 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
    */
   function setPoolName(uint256 index, string calldata name) external {
     IComptroller _comptroller = IComptroller(pools[index].comptroller);
-    require((msg.sender == _comptroller.admin() && _comptroller.adminHasRights()) || msg.sender == owner());
+    require(
+      (msg.sender == _comptroller.admin() && _comptroller.adminHasRights()) || msg.sender == owner(),
+      "!permission"
+    );
     pools[index].name = name;
   }
 
@@ -312,8 +386,9 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   {
     uint256 arrayLength = 0;
 
-    for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller comptroller = IComptroller(pools[i].comptroller);
+    (, FusePool[] memory activePools) = getActivePools();
+    for (uint256 i = 0; i < activePools.length; i++) {
+      IComptroller comptroller = IComptroller(activePools[i].comptroller);
 
       try comptroller.admin() returns (address admin) {
         if (whitelistedAdmin != adminWhitelist[admin]) continue;
@@ -326,15 +401,15 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     FusePool[] memory publicPools = new FusePool[](arrayLength);
     uint256 index = 0;
 
-    for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller comptroller = IComptroller(pools[i].comptroller);
+    for (uint256 i = 0; i < activePools.length; i++) {
+      IComptroller comptroller = IComptroller(activePools[i].comptroller);
 
       try comptroller.admin() returns (address admin) {
         if (whitelistedAdmin != adminWhitelist[admin]) continue;
       } catch {}
 
       indexes[index] = i;
-      publicPools[index] = pools[i];
+      publicPools[index] = activePools[i];
       index++;
     }
 
@@ -343,7 +418,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
 
   /**
    * @notice Returns arrays of all verified Fuse pool indexes and data for which the account is whitelisted
-   * @param account who is whitelised in the returned verified whitelist-enabled pools.
+   * @param account who is whitelisted in the returned verified whitelist-enabled pools.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
   function getVerifiedPoolsOfWhitelistedAccount(address account)
@@ -352,8 +427,9 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     returns (uint256[] memory, FusePool[] memory)
   {
     uint256 arrayLength = 0;
-    for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller comptroller = IComptroller(pools[i].comptroller);
+    (, FusePool[] memory activePools) = getActivePools();
+    for (uint256 i = 0; i < activePools.length; i++) {
+      IComptroller comptroller = IComptroller(activePools[i].comptroller);
 
       try comptroller.enforceWhitelist() returns (bool enforceWhitelist) {
         if (!enforceWhitelist || !comptroller.whitelist(account)) continue;
@@ -366,14 +442,14 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     FusePool[] memory accountWhitelistedPools = new FusePool[](arrayLength);
     uint256 index = 0;
 
-    for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller comptroller = IComptroller(pools[i].comptroller);
+    for (uint256 i = 0; i < activePools.length; i++) {
+      IComptroller comptroller = IComptroller(activePools[i].comptroller);
       try comptroller.enforceWhitelist() returns (bool enforceWhitelist) {
         if (!enforceWhitelist || !comptroller.whitelist(account)) continue;
       } catch {}
 
       indexes[index] = i;
-      accountWhitelistedPools[index] = pools[i];
+      accountWhitelistedPools[index] = activePools[i];
       index++;
     }
 

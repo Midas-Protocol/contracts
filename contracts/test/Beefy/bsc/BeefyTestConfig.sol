@@ -12,9 +12,6 @@ contract BeefyBscTestConfigStorage is ITestConfigStorage {
   BeefyTestConfig[] internal testConfigs;
 
   constructor() {
-    // BOMB-BTCB LP
-    testConfigs.push(BeefyTestConfig(0x94E85B8E050F3F281CB9597cc0144F1F7AF1fe9B, 10));
-
     // CAKE-BNB LP
     testConfigs.push(BeefyTestConfig(0xb26642B6690E4c4c9A6dAd6115ac149c700C7dfE, 10));
 

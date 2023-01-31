@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import { MidasERC4626 } from "./MidasERC4626.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 import { RewardsClaimer } from "../RewardsClaimer.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
@@ -17,7 +17,7 @@ interface IGuniPool {
 
   function totalStake() external view returns (uint256);
 
-  function _users(address) external view returns (uint256, uint256);
+  function userInfo(address) external view returns (uint256, uint256);
 
   function pendingMIMO(address) external view returns (uint256);
 
@@ -40,6 +40,7 @@ contract ArrakisERC4626 is MidasERC4626, RewardsClaimer {
     __MidasER4626_init(asset);
     __RewardsClaimer_init(_rewardsDestination, _rewardTokens);
 
+    performanceFee = 5e16;
     pool = _pool;
     flywheel = _flywheel;
     asset.approve(address(pool), type(uint256).max);

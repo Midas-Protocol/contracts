@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import { MidasERC4626 } from "./MidasERC4626.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
@@ -29,6 +29,14 @@ interface IBeefyVault {
   function strategy() external view returns (address);
 }
 
+interface IBeefyStrategy {
+  function harvestOnDeposit() external view returns (bool);
+
+  function setHarvestOnDeposit(bool) external;
+
+  function keeper() external view returns (address);
+}
+
 /**
  * @title Beefy ERC4626 Contract
  * @notice ERC4626 wrapper for beefy vaults
@@ -44,7 +52,7 @@ contract BeefyERC4626 is MidasERC4626 {
   IBeefyVault public beefyVault;
   uint256 public withdrawalFee;
 
-  uint256 BPS_DENOMINATOR = 10_000;
+  uint256 BPS_DENOMINATOR;
 
   /* ========== INITIALIZER ========== */
 
@@ -60,6 +68,9 @@ contract BeefyERC4626 is MidasERC4626 {
     uint256 _withdrawalFee
   ) public initializer {
     __MidasER4626_init(asset);
+
+    BPS_DENOMINATOR = 10_000;
+    performanceFee = 5e16;
     beefyVault = _beefyVault;
     withdrawalFee = _withdrawalFee;
 

@@ -1,33 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
+import { JarvisERC4626, IElysianFields } from "../../midas/strategies/JarvisERC4626.sol";
+import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
+import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 
-import { MidasERC4626, JarvisERC4626, IElysianFields } from "../../midas/strategies/JarvisERC4626.sol";
+import { Authority } from "solmate/auth/Auth.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
-import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
-import { Authority } from "solmate/auth/Auth.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
-import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
-import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
-import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
-
+import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-struct RewardsCycle {
-  uint32 start;
-  uint32 end;
-  uint192 reward;
-}
-
 contract JarvisERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   IElysianFields vault;
   FlywheelCore flywheel;
   FuseFlywheelDynamicRewardsPlugin flywheelRewards;
@@ -37,9 +22,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
   ERC20Upgradeable[] rewardTokens;
   uint256 poolId;
 
-  constructor() WithPool() {}
-
-  function setUp(string memory _testPreFix, bytes calldata data) public override {
+  function _setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("Jarvis-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));
 
@@ -107,11 +90,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     return depositAmount;
   }
 
-  function testInitializedValues(string memory assetName, string memory assetSymbol)
-    public
-    override
-    shouldRun(forChains(POLYGON_MAINNET))
-  {
+  function testInitializedValues(string memory assetName, string memory assetSymbol) public override {
     assertEq(
       plugin.name(),
       string(abi.encodePacked("Midas ", assetName, " Vault")),
@@ -131,7 +110,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     assertEq(JarvisERC4626(address(plugin)).poolId(), poolId, string(abi.encodePacked("!poolId", testPreFix)));
   }
 
-  function testAccumulatingRewardsOnDeposit() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testAccumulatingRewardsOnDeposit() public {
     deposit(address(this), depositAmount / 2);
     deal(address(jrtMimoSep22Token), address(this), 100e18);
     ERC20(jrtMimoSep22Token).transfer(address(vault), 100e18);
@@ -147,7 +126,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     deposit(address(this), depositAmount);
     deal(address(jrtMimoSep22Token), address(this), 100e18);
     ERC20(jrtMimoSep22Token).transfer(address(vault), 100e18);
@@ -163,10 +142,10 @@ contract JarvisERC4626Test is AbstractERC4626Test {
     );
   }
 
-  function testClaimRewards() public shouldRun(forChains(POLYGON_MAINNET)) {
+  function testClaimRewards() public {
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);
-    CErc20(marketAddress).mint(depositAmount);
+    CErc20PluginRewardsDelegate(marketAddress).mint(depositAmount);
     vm.stopPrank();
 
     deal(address(jrtMimoSep22Token), address(this), 100e18);

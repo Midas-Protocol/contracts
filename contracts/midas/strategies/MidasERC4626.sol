@@ -17,7 +17,7 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
   /* ========== STATE VARIABLES ========== */
 
   uint256 public vaultShareHWM;
-  uint256 public performanceFee = 5e16; // 5%
+  uint256 public performanceFee;
   address public feeRecipient; // TODO whats the default address?
 
   /* ========== EVENTS ========== */
@@ -142,6 +142,8 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
    *   HWM in a fee period, issue fee shares to the vault equal to the performance fee.
    */
   function takePerformanceFee() external onlyOwner {
+    require(feeRecipient != address(0), "fee recipient not initialized");
+
     uint256 currentAssets = totalAssets();
     uint256 shareValue = convertToAssets(10**_asset().decimals());
 
@@ -177,13 +179,13 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
 
         _burn(feeRecipient, oldFees);
         _approve(feeRecipient, owner(), 0);
-
         _mint(newFeeRecipient, oldFees);
-        _approve(newFeeRecipient, owner(), type(uint256).max);
       }
 
-      feeRecipient = newFeeRecipient;
+      _approve(newFeeRecipient, owner(), type(uint256).max);
     }
+
+    feeRecipient = newFeeRecipient;
   }
 
   /* ========== EMERGENCY FUNCTIONS ========== */
@@ -203,6 +205,13 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
     // _unpause();
 
     // Deposit all assets to underlying strategy
+  }
+
+  function shutdown(address market) external onlyOwner whenPaused returns (uint256) {
+    ERC20Upgradeable theAsset = _asset();
+    uint256 endBalance = theAsset.balanceOf(address(this));
+    theAsset.transfer(market, endBalance);
+    return endBalance;
   }
 
   /* ========== INTERNAL HOOKS LOGIC ========== */

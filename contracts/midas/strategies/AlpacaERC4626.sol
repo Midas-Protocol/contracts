@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import { MidasERC4626 } from "./MidasERC4626.sol";
 
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 import { IW_NATIVE } from "../../utils/IW_NATIVE.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
@@ -53,6 +53,7 @@ contract AlpacaERC4626 is MidasERC4626 {
   ) public initializer {
     __MidasER4626_init(asset);
 
+    performanceFee = 5e16;
     alpacaVault = _alpacaVault;
     wtoken = _wtoken;
     _asset().approve(address(alpacaVault), type(uint256).max);
@@ -85,7 +86,7 @@ contract AlpacaERC4626 is MidasERC4626 {
     wtoken.deposit{ value: msg.value }();
   }
 
-  function convertToAlpacaVaultShares(uint256 shares) public returns (uint256) {
+  function convertToAlpacaVaultShares(uint256 shares) public view returns (uint256) {
     uint256 supply = totalSupply();
     return supply == 0 ? shares : shares.mulDivUp(alpacaVault.balanceOf(address(this)), supply);
   }

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import { MidasERC4626 } from "./MidasERC4626.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
@@ -66,6 +66,7 @@ contract BeamERC4626 is MidasERC4626 {
   ) public initializer {
     __MidasER4626_init(asset);
 
+    performanceFee = 5e16;
     vault = _vault;
     poolId = _poolId;
     flywheelCore = _flyWheel;
@@ -102,8 +103,6 @@ contract BeamERC4626 is MidasERC4626 {
   function beforeWithdraw(uint256 amount, uint256) internal override {
     vault.withdraw(poolId, amount);
   }
-
-  event amount(uint256);
 
   function emergencyWithdrawAndPause() external override onlyOwner {
     (ERC20Upgradeable lpToken, , , , , , ) = vault.poolInfo(poolId);

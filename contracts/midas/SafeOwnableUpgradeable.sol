@@ -18,6 +18,25 @@ abstract contract SafeOwnableUpgradeable is OwnableUpgradeable {
     __Ownable_init();
   }
 
+  struct AddressSlot {
+    address value;
+  }
+
+  modifier onlyOwnerOrAdmin() {
+    bool isOwner = owner() == _msgSender();
+    if (!isOwner) {
+      bytes32 _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
+      AddressSlot storage adminSlot;
+      assembly {
+        adminSlot.slot := _ADMIN_SLOT
+      }
+      address admin = adminSlot.value;
+      bool isAdmin = admin == _msgSender();
+      require(isAdmin, "Ownable: caller is neither the owner nor the admin");
+    }
+    _;
+  }
+
   /**
    * @notice Emitted when pendingOwner is changed
    */
@@ -67,10 +86,12 @@ abstract contract SafeOwnableUpgradeable is OwnableUpgradeable {
   }
 
   function renounceOwnership() public override onlyOwner {
+    // do not remove this overriding fn
     revert("not used anymore");
   }
 
   function transferOwnership(address newOwner) public override onlyOwner {
+    // do not remove this overriding fn
     revert("not used anymore");
   }
 }

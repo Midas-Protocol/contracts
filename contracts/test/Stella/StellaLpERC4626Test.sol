@@ -1,27 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
-
-import { MidasERC4626, StellaLpERC4626, IStellaDistributorV2 } from "../../midas/strategies/StellaLpERC4626.sol";
+import { StellaLpERC4626, IStellaDistributorV2 } from "../../midas/strategies/StellaLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
+import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { WETH } from "solmate/tokens/WETH.sol";
 
-struct RewardsCycle {
-  uint32 start;
-  uint32 end;
-  uint192 reward;
-}
-
-// Tested on block 19052824
 contract StellaERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   IStellaDistributorV2 distributor = IStellaDistributorV2(0xF3a5454496E26ac57da879bf3285Fa85DEBF0388); // what you deposit the LP into
 
   uint256 poolId;
@@ -29,16 +16,13 @@ contract StellaERC4626Test is AbstractERC4626Test {
   ERC20 marketKey;
   ERC20Upgradeable[] rewardsToken;
 
-  constructor() WithPool() {}
-
-  function setUp(string memory _testPreFix, bytes calldata testConfig) public override {
+  function _setUp(string memory _testPreFix, bytes calldata testConfig) public override {
     setUpPool("stella-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));
     (address asset, uint256 _poolId, address[] memory _rewardTokens) = abi.decode(
       testConfig,
       (address, uint256, address[])
     );
-
     testPreFix = _testPreFix;
     poolId = _poolId;
 
@@ -54,6 +38,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
       address(this),
       rewardsToken
     );
+    stellaLpERC4626.reinitialize(WETH(payable(ap.getAddress("wtoken"))));
 
     plugin = stellaLpERC4626;
 
@@ -69,7 +54,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
 
     marketKey = ERC20(marketAddress);
 
-    StellaLpERC4626(address(plugin)).setRewardDestination(marketAddress);
+    StellaLpERC4626(payable(address(plugin))).setRewardDestination(marketAddress);
   }
 
   function increaseAssetsInVault() public override {
@@ -96,11 +81,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
     return depositAmount;
   }
 
-  function testInitializedValues(string memory assetName, string memory assetSymbol)
-    public
-    override
-    shouldRun(forChains(BSC_MAINNET))
-  {
+  function testInitializedValues(string memory assetName, string memory assetSymbol) public override {
     assertEq(
       plugin.name(),
       string(abi.encodePacked("Midas ", assetName, " Vault")),
@@ -113,7 +94,7 @@ contract StellaERC4626Test is AbstractERC4626Test {
     );
     assertEq(address(plugin.asset()), address(underlyingToken), string(abi.encodePacked("!asset ", testPreFix)));
     assertEq(
-      address(StellaLpERC4626(address(plugin)).distributor()),
+      address(StellaLpERC4626(payable(address(plugin))).distributor()),
       address(distributor),
       string(abi.encodePacked("!distributor ", testPreFix))
     );
@@ -159,5 +140,24 @@ contract StellaERC4626Test is AbstractERC4626Test {
       uint256 actualAmount = ERC20(addresses[i]).balanceOf(address(plugin));
       assertEq(actualAmount, amounts[i], string(abi.encodePacked("!rewardBal ", symbols[i], testPreFix)));
     }
+  }
+
+  function testStellaWGLMRRewards() public fork(MOONBEAM_MAINNET) {
+    CErc20PluginRewardsDelegate market = CErc20PluginRewardsDelegate(0xeB7b975C105f05bFb02757fB9bb3361D77AAe84A);
+    address pluginAddress = address(market.plugin());
+    StellaLpERC4626 plugin = StellaLpERC4626(payable(pluginAddress));
+
+    bool anyIsWNative = false;
+    uint256 i = 0;
+    while (true) {
+      try plugin.rewardTokens(i++) returns (ERC20Upgradeable rewToken) {
+        emit log_address(address(rewToken));
+        if (address(rewToken) == ap.getAddress("wtoken")) anyIsWNative = true;
+      } catch {
+        break;
+      }
+    }
+
+    assertTrue(anyIsWNative, "native needs to be among the reward tokens");
   }
 }
