@@ -20,10 +20,29 @@ contract CurveSwapLiquidatorFunder is CurveSwapLiquidator, IFundsConversionStrat
     view
     returns (IERC20Upgradeable, uint256)
   {
-    (ICurvePool curvePool, int128 i, int128 j, , ) = abi.decode(
-      strategyData,
-      (ICurvePool, int128, int128, address, address)
-    );
+    ICurvePool curvePool;
+    int128 i;
+    int128 j;
+    {
+      (
+        CurveLpTokenPriceOracleNoRegistry curveV1Oracle,
+        CurveV2LpTokenPriceOracleNoRegistry curveV2Oracle,
+        address inputTokenAddress,
+        address outputTokenAddress,
+        address payable wtoken
+      ) = abi.decode(
+          strategyData,
+          (CurveLpTokenPriceOracleNoRegistry, CurveV2LpTokenPriceOracleNoRegistry, address, address, address)
+        );
+
+      if (address(curveV2Oracle) != address(0)) {
+        (curvePool, i, j) = curveV2Oracle.getPoolForSwap(inputTokenAddress, outputTokenAddress);
+      }
+      if (address(curvePool) == address(0)) {
+        (curvePool, i, j) = curveV1Oracle.getPoolForSwap(inputTokenAddress, outputTokenAddress);
+      }
+    }
+    require(address(curvePool) != address(0), "!curve pool");
 
     IERC20MetadataUpgradeable inputMetadataToken = IERC20MetadataUpgradeable(curvePool.coins(uint256(int256(i))));
     uint256 inputAmountGuesstimate = guesstimateInputAmount(curvePool, i, j, inputMetadataToken, outputAmount);

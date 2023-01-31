@@ -13,6 +13,7 @@ import "./compound/CErc20PluginDelegate.sol";
 import "./midas/SafeOwnableUpgradeable.sol";
 import "./utils/PatchedStorage.sol";
 import "./oracles/BasePriceOracle.sol";
+import { CTokenExtensionInterface } from "./compound/CTokenInterfaces.sol";
 import { DiamondExtension, DiamondBase } from "./midas/DiamondExtension.sol";
 
 /**
@@ -434,5 +435,26 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     onlyOwner
   {
     cErc20DelegateExtensions[cErc20Delegate] = extensions;
+  }
+
+  function autoUpgradePool(address poolAddress) external onlyOwner {
+    IComptroller pool = IComptroller(poolAddress);
+    bool autoImplOnBefore = pool.autoImplementation();
+
+    pool._toggleAutoImplementations(true);
+
+    pool.enterMarkets(new address[](0));
+
+    ICToken[] memory markets = pool.getAllMarkets();
+
+    for (uint8 i = 0; i < markets.length; i++) {
+      address marketAddress = address(markets[i]);
+      address implBefore = CErc20PluginDelegate(marketAddress).implementation();
+      address newImpl = _latestCErc20Delegate[implBefore].implementation;
+
+      if (newImpl != address(0) && newImpl != implBefore) CTokenExtensionInterface(marketAddress).accrueInterest();
+    }
+
+    if (!autoImplOnBefore) pool._toggleAutoImplementations(false);
   }
 }

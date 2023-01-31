@@ -126,7 +126,7 @@ jobs:
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
       ARBITRUM_MAINNET_RPC_URL: https://1rpc.io/arb
-      ARBITRUM_MAINNET_ARCHIVE_RPC_URL: https://arb1.arbitrum.io/rpc
+      ARBITRUM_MAINNET_ARCHIVE_RPC_URL: https://rpc.ankr.com/arbitrum
       TEST_RUN_CHAINID: 42161
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest

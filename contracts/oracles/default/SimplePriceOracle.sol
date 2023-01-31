@@ -4,8 +4,9 @@ pragma solidity >=0.8.0;
 import "../../compound/PriceOracle.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import "../../midas/SafeOwnableUpgradeable.sol";
 
-contract SimplePriceOracle is PriceOracle {
+contract SimplePriceOracle is PriceOracle, SafeOwnableUpgradeable {
   mapping(address => uint256) prices;
   event PricePosted(
     address asset,
@@ -13,6 +14,10 @@ contract SimplePriceOracle is PriceOracle {
     uint256 requestedPriceMantissa,
     uint256 newPriceMantissa
   );
+
+  function initialize() public initializer {
+    __SafeOwnable_init();
+  }
 
   function getUnderlyingPrice(CTokenInterface cToken) public view override returns (uint256) {
     if (compareStrings(cToken.symbol(), "cETH")) {
@@ -29,13 +34,13 @@ contract SimplePriceOracle is PriceOracle {
     }
   }
 
-  function setUnderlyingPrice(CTokenInterface cToken, uint256 underlyingPriceMantissa) public {
+  function setUnderlyingPrice(CTokenInterface cToken, uint256 underlyingPriceMantissa) public onlyOwner {
     address asset = ICErc20(address(cToken)).underlying();
     emit PricePosted(asset, prices[asset], underlyingPriceMantissa, underlyingPriceMantissa);
     prices[asset] = underlyingPriceMantissa;
   }
 
-  function setDirectPrice(address asset, uint256 _price) public {
+  function setDirectPrice(address asset, uint256 _price) public onlyOwner {
     emit PricePosted(asset, prices[asset], _price, _price);
     prices[asset] = _price;
   }
