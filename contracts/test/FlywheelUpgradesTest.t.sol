@@ -100,9 +100,11 @@ contract FlywheelUpgradesTest is BaseTest {
     address flywheelAddress = 0x5fF63E442AC4724EC342f4a3d26924233832EcBB;
 
     ERC20 strategy = ERC20(usdcParMarket);
+    MidasFlywheelCore flywheel = MidasFlywheelCore(flywheelAddress);
     (uint224 index, ) = MidasFlywheelCore(flywheelAddress).strategyState(strategy);
+    ERC20 rewToken = flywheel.rewardToken();
     if (index > 0) {
-      uint256 allowance = strategy.allowance(usdcParMarket, flywheelAddress);
+      uint256 allowance = rewToken.allowance(usdcParMarket, flywheelAddress);
       emit log_named_address("flywheel", flywheelAddress);
       emit log_named_uint("should have positive allowance", allowance);
     }
@@ -135,17 +137,17 @@ contract FlywheelUpgradesTest is BaseTest {
         ERC20 asStrategy = ERC20(address(markets[j]));
         MidasFlywheelCore flywheel = MidasFlywheelCore(fws[i]);
         (uint224 index, ) = flywheel.strategyState(asStrategy);
+        ERC20 rewToken = flywheel.rewardToken();
         if (index > 0) {
-          uint256 allowance = asStrategy.allowance(address(asStrategy), address(flywheel));
+          uint256 allowance = rewToken.allowance(address(asStrategy), address(flywheel));
           if (allowance == 0) {
             assertGt(allowance, 0, "!approved");
             emit log_named_address("flywheel", address(flywheel));
+            emit log_named_address("strategy", address(asStrategy));
             break;
           }
         }
       }
     }
   }
-
-  function _testFlywheelAllowance(ERC20 asStrategy, MidasFlywheelCore flywheel) internal {}
 }
