@@ -11,6 +11,7 @@ import { MidasReplacingFlywheel } from "../midas/strategies/flywheel/MidasReplac
 import { ReplacingFlywheelDynamicRewards } from "../midas/strategies/flywheel/rewards/ReplacingFlywheelDynamicRewards.sol";
 import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
+import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
@@ -126,6 +127,10 @@ contract FlywheelUpgradesTest is BaseTest {
     CTokenInterface[] memory markets = poolExt.getAllMarkets();
 
     for (uint8 j = 0; j < markets.length; j++) {
+      string memory contractType = CErc20Delegate(address(markets[j])).contractType();
+      if (compareStrings(contractType, "CErc20PluginRewardsDelegate") == false) {
+        continue;
+      }
       for (uint8 i = 0; i < fws.length; i++) {
         ERC20 asStrategy = ERC20(address(markets[j]));
         MidasFlywheelCore flywheel = MidasFlywheelCore(fws[i]);
@@ -138,6 +143,7 @@ contract FlywheelUpgradesTest is BaseTest {
             assertGt(allowance, 0, "!approved");
             emit log_named_address("flywheel rewards", rewardsContractAddress);
             emit log_named_address("strategy", address(asStrategy));
+            emit log_named_address("rwtoken", address(rewToken));
             break;
           }
         }
