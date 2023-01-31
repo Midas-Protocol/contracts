@@ -361,16 +361,6 @@ contract ExtensionsTest is BaseTest {
   }
 
   function testBulkAutoUpgrade() public fork(POLYGON_MAINNET) {
-    // upgrade
-    {
-      FuseFeeDistributor newImpl = new FuseFeeDistributor();
-      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
-      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-      address admin = address(uint160(uint256(bytesAtSlot)));
-      vm.prank(admin);
-      proxy.upgradeTo(address(newImpl));
-    }
-
     CErc20Delegate market = CErc20Delegate(0x0db51E5255E44751b376738d8979D969AD70bff6);
 
     address implBefore = market.implementation();
