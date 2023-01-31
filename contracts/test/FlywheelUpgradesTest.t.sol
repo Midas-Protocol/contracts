@@ -107,7 +107,7 @@ contract FlywheelUpgradesTest is BaseTest {
     testAllPoolsMarketsAllowance();
   }
 
-  function testMoonbeamFlywheelAllowance() public fork(EVMOS_MAINNET) {
+  function testEvmosFlywheelAllowance() public fork(EVMOS_MAINNET) {
     testAllPoolsMarketsAllowance();
   }
 
