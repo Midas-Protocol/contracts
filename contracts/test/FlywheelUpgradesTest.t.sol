@@ -11,6 +11,9 @@ import { MidasReplacingFlywheel } from "../midas/strategies/flywheel/MidasReplac
 import { ReplacingFlywheelDynamicRewards } from "../midas/strategies/flywheel/rewards/ReplacingFlywheelDynamicRewards.sol";
 import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
+import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
+import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
+import { Comptroller } from "../compound/Comptroller.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -87,6 +90,61 @@ contract FlywheelUpgradesTest is BaseTest {
         } else {
           emit log_named_address("not upgradable flywheel", address(flywheel));
           assertTrue(false, "flywheel proxy admin 0");
+        }
+      }
+    }
+  }
+
+  function testPolygonFlywheelAllowance() public fork(POLYGON_MAINNET) {
+    testAllPoolsMarketsAllowance();
+  }
+
+  function testBscFlywheelAllowance() public fork(BSC_MAINNET) {
+    testAllPoolsMarketsAllowance();
+  }
+
+  function testMoonbeamFlywheelAllowance() public fork(MOONBEAM_MAINNET) {
+    testAllPoolsMarketsAllowance();
+  }
+
+  function testEvmosFlywheelAllowance() public fork(EVMOS_MAINNET) {
+    testAllPoolsMarketsAllowance();
+  }
+
+  function testAllPoolsMarketsAllowance() internal {
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      _testMarketsAllowance(pools[i].comptroller);
+    }
+  }
+
+  function _testMarketsAllowance(address poolAddress) internal {
+    ComptrollerFirstExtension poolExt = ComptrollerFirstExtension(poolAddress);
+    address[] memory fws = poolExt.getRewardsDistributors();
+
+    CTokenInterface[] memory markets = poolExt.getAllMarkets();
+
+    for (uint8 j = 0; j < markets.length; j++) {
+      string memory contractType = CErc20PluginRewardsDelegate(address(markets[j])).contractType();
+      // check it only for dynamic rewards flywheels
+      if (compareStrings(contractType, "CErc20PluginRewardsDelegate")) {
+        for (uint8 i = 0; i < fws.length; i++) {
+          ERC20 asStrategy = ERC20(address(markets[j]));
+          MidasFlywheelCore flywheel = MidasFlywheelCore(fws[i]);
+          (uint224 index, ) = flywheel.strategyState(asStrategy);
+          ERC20 rewToken = flywheel.rewardToken();
+          address rewardsContractAddress = address(flywheel.flywheelRewards());
+          if (index > 0) {
+            uint256 allowance = rewToken.allowance(address(asStrategy), rewardsContractAddress);
+            if (allowance == 0) {
+              assertGt(allowance, 0, "!approved");
+              emit log_named_address("flywheel rewards", rewardsContractAddress);
+              emit log_named_address("strategy", address(asStrategy));
+              emit log_named_address("rwtoken", address(rewToken));
+              break;
+            }
+          }
         }
       }
     }
