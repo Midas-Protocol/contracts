@@ -155,8 +155,7 @@ contract AaveV3ERC4626 is MidasERC4626 {
   }
 
   function emergencyWithdrawAndPause() external override onlyOwner {
-    uint256 amount = convertToAssets(totalSupply());
-    pool.withdraw(address(_asset()), amount, address(this));
+    pool.withdraw(address(_asset()), type(uint256).max, address(this));
     _pause();
   }
 
