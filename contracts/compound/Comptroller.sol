@@ -990,6 +990,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       Exp({ mantissa: feeSeizeShareMantissa })
     );
 
+    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      totalPenaltyMantissa = Exp({ mantissa: mantissaOne }); // don't take any penalties
+    }
+
     numerator = mul_(totalPenaltyMantissa, Exp({ mantissa: priceBorrowedMantissa }));
     denominator = mul_(Exp({ mantissa: priceCollateralMantissa }), Exp({ mantissa: exchangeRateMantissa }));
     ratio = div_(numerator, denominator);
@@ -1365,6 +1369,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    * @param cToken The market to check if deprecated
    */
   function isDeprecated(CTokenInterface cToken) public view returns (bool) {
+    // TODO deprecate jarvis markets
     return
       markets[address(cToken)].collateralFactorMantissa == 0 &&
       borrowGuardianPaused[address(cToken)] == true &&

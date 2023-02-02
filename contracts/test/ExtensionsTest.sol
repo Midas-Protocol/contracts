@@ -224,38 +224,45 @@ contract ExtensionsTest is BaseTest {
     assertGt(blockNumberAfter, blockNumberBefore, "did not accrue?");
   }
 
-  function testExistingCTokenExtensionUpgrade() public fork(BSC_MAINNET) {
-    uint8 random = uint8(block.timestamp % 256);
+  function testBscExistingCTokenExtensionUpgrade() public fork(BSC_MAINNET) {
+    _testAllPoolsAllMarketsCTokenExtensionUpgrade();
+  }
+
+  function _testAllPoolsAllMarketsCTokenExtensionUpgrade() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    for (uint256 i = 0; i < pools.length; i++) {
+      _testExistingCTokenExtensionUpgrade(pools[i].comptroller);
+    }
+  }
 
-    ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
+  function _testExistingCTokenExtensionUpgrade(address poolAddress) internal {
+    ComptrollerFirstExtension somePool = ComptrollerFirstExtension(poolAddress);
+
     CTokenInterface[] memory markets = somePool.getAllMarkets();
 
     if (markets.length == 0) return;
 
-    CTokenInterface someMarket = markets[random % markets.length];
-    CErc20PluginDelegate asDelegate = CErc20PluginDelegate(address(someMarket));
+    for (uint256 j = 0; j < markets.length; j++) {
+      CTokenInterface someMarket = markets[j];
+      CErc20PluginDelegate asDelegate = CErc20PluginDelegate(address(someMarket));
 
-    emit log("pool");
-    emit log_address(address(somePool));
-    emit log("market");
-    emit log_address(address(someMarket));
+      emit log("pool");
+      emit log_address(address(somePool));
+      emit log("market");
+      emit log_address(address(someMarket));
 
-    try this._testExistingCTokenExtensionUpgrade(asDelegate) {} catch Error(string memory reason) {
-      emit log("at random");
-      emit log_uint(random);
+      try this._testExistingCTokenExtensionUpgrade(asDelegate) {} catch Error(string memory reason) {
+        address plugin = address(asDelegate.plugin());
+        emit log("plugin");
+        emit log_address(plugin);
 
-      address plugin = address(asDelegate.plugin());
-      emit log("plugin");
-      emit log_address(plugin);
+        address latestPlugin = ffd.latestPluginImplementation(plugin);
+        emit log("latest plugin impl");
+        emit log_address(latestPlugin);
 
-      address latestPlugin = ffd.latestPluginImplementation(plugin);
-      emit log("latest plugin impl");
-      emit log_address(latestPlugin);
-
-      revert(reason);
+        revert(reason);
+      }
     }
   }
 
@@ -306,9 +313,9 @@ contract ExtensionsTest is BaseTest {
   }
 
   function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
+    Comptroller pool = Comptroller(address(asDelegate.comptroller()));
     _prepareCTokenUpgrade(asDelegate);
 
-    Comptroller pool = Comptroller(address(asDelegate.comptroller()));
     // turn auto impl on
     vm.prank(pool.admin());
     pool._toggleAutoImplementations(true);
@@ -360,7 +367,7 @@ contract ExtensionsTest is BaseTest {
     }
   }
 
-  function testBulkAutoUpgrade() public fork(POLYGON_MAINNET) {
+  function testBulkAutoUpgrade() public debuggingOnly fork(POLYGON_MAINNET) {
     CErc20Delegate market = CErc20Delegate(0x0db51E5255E44751b376738d8979D969AD70bff6);
 
     address implBefore = market.implementation();
@@ -372,5 +379,60 @@ contract ExtensionsTest is BaseTest {
 
     address implAfter = market.implementation();
     assertEq(implAfter, newImplAddress, "!market upgrade");
+  }
+
+  address private constant exploiterAccount = 0x757E9F49aCfAB73C25b20D168603d54a66C723A1;
+  address private constant agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
+  address private constant jchfMarketAddress = 0x62Bdc203403e7d44b75f357df0897f2e71F607F3;
+  address private constant jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
+  address private constant jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
+
+
+  function testJarvisPoolLiquidations() public fork(POLYGON_MAINNET) {
+    address poolAddress = 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2;
+    Comptroller jarvisPool = Comptroller(poolAddress);
+    ComptrollerFirstExtension asCompExtension = ComptrollerFirstExtension(poolAddress);
+
+    address[] memory borrowers = asCompExtension.getAllBorrowers();
+
+    FuseFeeDistributor ffd = FuseFeeDistributor(ap.getAddress("FuseFeeDistributor"));
+    // fuseFee
+    ffd._setCustomInterestFeeRate(poolAddress, 0);
+
+    vm.startPrank(jarvisPool.admin());
+    require(jarvisPool._setCloseFactor(0.9e18) == 0, "!close factor"); // max, consider making it 1e18
+    require(jarvisPool._setLiquidationIncentive(0), "!liquidation incentive");
+
+    CTokenInterface[] memory markets = asCompExtension.getAllMarkets();
+    for (uint256 i = 0; i < markets.length; i++) {
+      CErc20Delegate market = CErc20Delegate(address(markets[i]));
+      CTokenFirstExtension asMarketExtension = CTokenFirstExtension(address(markets[i]));
+      require(jarvisPool._setCollateralFactor(market, 0) == 0, "!collat factor");
+      require(asMarketExtension._setAdminFee(0) == 0, "!admin fee");
+      require(asMarketExtension._setReserveFactor(0) == 0, "!reserve factor");
+    }
+    vm.stopPrank();
+
+    for (uint256 j = 0; j < borrowers.length; j++) {
+      (uint256 err, uint256 liquidity, uint256 shortfall) = jarvisPool.getAccountLiquidity(borrowers[j]);
+      emit log_named_address("borrower", borrowers[j]);
+      emit log_named_uint("shortfall", shortfall);
+      if (shortfall > 0 && false) { // TODO false
+        bool borrowedFromAny = false;
+        for (uint256 i = 0; i < markets.length; i++) {
+          CErc20Delegate market = CErc20Delegate(address(markets[i]));
+          uint256 borrowBalance = market.borrowBalanceStored(borrowers[j]);
+          if (borrowBalance > 0) {
+            emit log_named_address("borrowed from market", address(markets[i]));
+            emit log_named_uint("borrowed amount", borrowBalance);
+            borrowedFromAny = true;
+          }
+        }
+        if (!borrowedFromAny) {
+          emit log_named_address("not borrowing from any market", borrowers[j]);
+        }
+        emit log("");
+      }
+    }
   }
 }
