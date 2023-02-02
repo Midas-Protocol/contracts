@@ -9,6 +9,8 @@ contract MidasCompensationToken is ERC20 {
   address private constant jeurMarket = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
   address private constant jgbpMarket = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
 
+  address[] public holders;
+
   constructor() ERC20("Midas Exploit Compensation Token", "MECT", 18) {}
 
   function mint(address to, uint256 amount) public {
@@ -17,5 +19,16 @@ contract MidasCompensationToken is ERC20 {
       "!minter"
     );
     _mint(to, amount);
+
+    // add to the set of holders
+    for(uint256 i = 0; i < holders.length; i++) {
+      if (holders[i] == to) return;
+    }
+
+    holders.push(to);
+  }
+
+  function getAllHolders() public returns (address[] memory) {
+    return holders;
   }
 }

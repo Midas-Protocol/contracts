@@ -352,7 +352,7 @@ contract ExtensionsTest is BaseTest {
     }
   }
 
-  function testRestoreConsistentMarketsState() public debuggingOnly fork(POLYGON_MAINNET) {
+  function testRestoreConsistentMarketsState() public debuggingOnly forkAtBlock(POLYGON_MAINNET, 38119348) { // exploit at block 38118348 + 1000
     address agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
     address jchfMarketAddress = 0x62Bdc203403e7d44b75f357df0897f2e71F607F3;
     address jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
@@ -375,33 +375,42 @@ contract ExtensionsTest is BaseTest {
       Unitroller asUnitroller = Unitroller(payable(address(market.comptroller())));
       _upgradeExistingComptroller(asUnitroller);
 
-      address[] memory affectedSuppliers = asExtension.getAffectedSuppliers();
-      uint256[] memory balancesBefore = new uint256[](affectedSuppliers.length);
-      for (uint256 j = 0; j < affectedSuppliers.length; j++) {
-        balancesBefore[j] = underlying.balanceOf(affectedSuppliers[j]);
-      }
+      {
+        address[] memory affectedSuppliers = asExtension.getAffectedSuppliers();
+        uint256[] memory balancesBefore = new uint256[](affectedSuppliers.length);
+        for (uint256 j = 0; j < affectedSuppliers.length; j++) {
+          balancesBefore[j] = underlying.balanceOf(affectedSuppliers[j]);
+        }
 
-      vm.prank(asUnitroller.admin());
-      asExtension.restoreConsistentState(compensationToken);
+        vm.prank(asUnitroller.admin());
+        asExtension.restoreConsistentState(compensationToken);
 
-      uint256 exRateAfter = asExtension.exchangeRateCurrent();
-      uint256 marketLiquidityAfter = underlying.balanceOf(marketAddress);
+        uint256 exRateAfter = asExtension.exchangeRateCurrent();
+        uint256 marketLiquidityAfter = underlying.balanceOf(marketAddress);
 
-      for (uint256 j = 0; j < affectedSuppliers.length; j++) {
-        uint256 balanceAfter = underlying.balanceOf(affectedSuppliers[j]);
+        for (uint256 j = 0; j < affectedSuppliers.length; j++) {
+          uint256 balanceAfter = underlying.balanceOf(affectedSuppliers[j]);
 
-        emit log_named_address("supplier redeeming", affectedSuppliers[j]);
-        emit log_named_uint("withdrawn amount", balanceAfter - balancesBefore[j]);
+          emit log_named_address("supplier redeeming", affectedSuppliers[j]);
+          emit log_named_uint("withdrawn amount", balanceAfter - balancesBefore[j]);
+          emit log("");
+        }
+
+        emit log_named_uint("rates ratio before/after", (exRateBefore * 10000) / exRateAfter);
         emit log("");
       }
-
-      emit log_named_uint("rates ratio before/after", (exRateBefore * 10000) / exRateAfter);
-      emit log("");
     }
 
     address jarvisMMM = 0x9fB2fbaeCbC0DB28ac5dDE618D6bA2806F71167B;
     emit log_named_uint("jarvis comp tokens", compensationToken.balanceOf(jarvisMMM));
     emit log_named_uint("midas comp token total supply", compensationToken.totalSupply());
+
+    address[] memory holders = compensationToken.getAllHolders();
+    for (uint256 i = 0; i < holders.length; i++) {
+      emit log_address(holders[i]);
+      emit log_named_uint("nbsp", compensationToken.balanceOf(holders[i]));
+    }
+    emit log_named_uint("total", compensationToken.totalSupply());
   }
 
   function testCalculateJarvisLoss() public fork(POLYGON_MAINNET) {
