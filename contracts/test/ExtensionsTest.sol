@@ -90,7 +90,7 @@ contract ExtensionsTest is BaseTest {
   MockThirdComptrollerExtension internal third;
   address internal latestComptrollerImplementation;
 
-  function afterForkSetUp() internal override {
+  function afterForkSetUp() internal virtual override {
     ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
 
     cfe = new ComptrollerFirstExtension();
@@ -387,7 +387,7 @@ contract ExtensionsTest is BaseTest {
   address private constant jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
   address private constant jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
 
-  function testJarvisPoolLiquidations() public debuggingOnly fork(POLYGON_MAINNET) {
+  function testJarvisPoolShortfall() public debuggingOnly fork(POLYGON_MAINNET) {
     address payable jarvisPoolAddress = payable(0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2);
     Comptroller jarvisPool = Comptroller(jarvisPoolAddress);
     ComptrollerFirstExtension asCompExtension = ComptrollerFirstExtension(jarvisPoolAddress);
