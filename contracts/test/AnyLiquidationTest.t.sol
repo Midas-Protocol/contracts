@@ -168,11 +168,11 @@ contract AnyLiquidationTest is ExtensionsTest {
     IUniswapV2Pair flashSwapPair;
   }
 
-  function getPoolAndBorrower(uint256 random, LiquidationData memory vars, FusePoolDirectory.FusePool[] memory pools)
-    internal
-    view
-    returns (IComptroller, address)
-  {
+  function getPoolAndBorrower(
+    uint256 random,
+    LiquidationData memory vars,
+    FusePoolDirectory.FusePool[] memory pools
+  ) internal view returns (IComptroller, address) {
     if (pools.length == 0) revert("no pools to pick from");
 
     uint256 i = random % pools.length; // random pool
@@ -267,7 +267,8 @@ contract AnyLiquidationTest is ExtensionsTest {
     LiquidationData memory vars;
     vars.liquidator = fsl;
 
-    (, FusePoolDirectory.FusePool[] memory pools) = FusePoolDirectory(ap.getAddress("FusePoolDirectory")).getActivePools();
+    (, FusePoolDirectory.FusePool[] memory pools) = FusePoolDirectory(ap.getAddress("FusePoolDirectory"))
+      .getActivePools();
 
     while (true) {
       // get a random pool and a random borrower from it
@@ -300,7 +301,7 @@ contract AnyLiquidationTest is ExtensionsTest {
     vars.borrower = borrowers[random % borrowers.length];
     vars.markets = vars.comptroller.getAllMarkets();
 
-    (,, uint256 shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
+    (, , uint256 shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
     if (shortfall == 0) return;
 
     uint256 repayAmount;
