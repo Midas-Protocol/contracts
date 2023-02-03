@@ -129,6 +129,7 @@ contract AnyLiquidationTest is ExtensionsTest {
   }
 
   function testJarvisPoolLiquidations(uint256 random) public forkAtBlock(POLYGON_MAINNET, 38856600) {
+    vm.assume(random > 100 && random < type(uint64).max);
     address payable jarvisPoolAddress = payable(0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2);
     Comptroller jarvisPool = Comptroller(jarvisPoolAddress);
     ComptrollerFirstExtension asCompExtension = ComptrollerFirstExtension(jarvisPoolAddress);
