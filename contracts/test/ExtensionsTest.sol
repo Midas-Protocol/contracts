@@ -394,13 +394,12 @@ contract ExtensionsTest is BaseTest {
 
     address[] memory borrowers = asCompExtension.getAllBorrowers();
 
-    FuseFeeDistributor ffd = FuseFeeDistributor(ap.getAddress("FuseFeeDistributor"));
     // fuseFee
     ffd._setCustomInterestFeeRate(poolAddress, 0);
 
     vm.startPrank(jarvisPool.admin());
     require(jarvisPool._setCloseFactor(0.9e18) == 0, "!close factor"); // max, consider making it 1e18
-    require(jarvisPool._setLiquidationIncentive(0), "!liquidation incentive");
+    require(jarvisPool._setLiquidationIncentive(0) == 0, "!liquidation incentive");
 
     CTokenInterface[] memory markets = asCompExtension.getAllMarkets();
     for (uint256 i = 0; i < markets.length; i++) {
