@@ -387,7 +387,6 @@ contract ExtensionsTest is BaseTest {
   address private constant jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
   address private constant jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
 
-
   function testJarvisPoolLiquidations() public fork(POLYGON_MAINNET) {
     address poolAddress = 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2;
     Comptroller jarvisPool = Comptroller(poolAddress);
@@ -406,8 +405,9 @@ contract ExtensionsTest is BaseTest {
     CTokenInterface[] memory markets = asCompExtension.getAllMarkets();
     for (uint256 i = 0; i < markets.length; i++) {
       CErc20Delegate market = CErc20Delegate(address(markets[i]));
-      CTokenFirstExtension asMarketExtension = CTokenFirstExtension(address(markets[i]));
       require(jarvisPool._setCollateralFactor(market, 0) == 0, "!collat factor");
+
+      CTokenFirstExtension asMarketExtension = CTokenFirstExtension(address(markets[i]));
       require(asMarketExtension._setAdminFee(0) == 0, "!admin fee");
       require(asMarketExtension._setReserveFactor(0) == 0, "!reserve factor");
     }
@@ -417,7 +417,7 @@ contract ExtensionsTest is BaseTest {
       (uint256 err, uint256 liquidity, uint256 shortfall) = jarvisPool.getAccountLiquidity(borrowers[j]);
       emit log_named_address("borrower", borrowers[j]);
       emit log_named_uint("shortfall", shortfall);
-      if (shortfall > 0 && false) { // TODO false
+      if (shortfall > 0) {
         bool borrowedFromAny = false;
         for (uint256 i = 0; i < markets.length; i++) {
           CErc20Delegate market = CErc20Delegate(address(markets[i]));
