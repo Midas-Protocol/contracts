@@ -321,11 +321,8 @@ contract AnyLiquidationTest is ExtensionsTest {
         if (marketAddress == 0xe150e792e0a18C9984a0630f051a607dEe3c265d) {
           emit log("no funding source for jEUR debt");
           continue;
-        //        } else if (marketAddress == 0x5236F79f1C66744071D67888D14306B34EC381A2) {
-        //          emit log("wbtc borrowing not paused yet");
-        //          continue;
         }
-        if(!vars.comptroller.isDeprecated(randomMarket)) {
+        if (!vars.comptroller.isDeprecated(randomMarket)) {
           (, uint256 collatFactor) = vars.comptroller.markets(marketAddress);
           emit log_named_uint("collat factor", collatFactor);
           bool paused = vars.comptroller.borrowGuardianPaused(marketAddress);
