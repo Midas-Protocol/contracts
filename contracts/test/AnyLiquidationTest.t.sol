@@ -164,7 +164,7 @@ contract AnyLiquidationTest is ExtensionsTest {
     ICErc20 collateralMarket;
     IComptroller comptroller;
     address borrower;
-    uint256 borrowAmount;
+    uint256 repayAmount;
     address flashSwapFundingToken;
     IUniswapV2Pair flashSwapPair;
   }
@@ -278,7 +278,7 @@ contract AnyLiquidationTest is ExtensionsTest {
       if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
         // find a market in which the borrower has debt and reduce his collateral price
         vars.markets = vars.comptroller.getAllMarkets();
-        (vars.debtMarket, vars.collateralMarket, vars.borrowAmount) = setUpDebtAndCollateralMarkets(random, vars);
+        (vars.debtMarket, vars.collateralMarket, vars.repayAmount) = setUpDebtAndCollateralMarkets(random, vars);
 
         if (address(vars.debtMarket) != address(0) && address(vars.collateralMarket) != address(0)) {
           if (vars.debtMarket.underlying() != ap.getAddress("wtoken")) {
@@ -291,6 +291,7 @@ contract AnyLiquidationTest is ExtensionsTest {
       random++;
     }
 
+    vars.repayAmount = vars.repayAmount / 100;
     liquidateSpecificPosition(vars);
   }
 
@@ -333,6 +334,7 @@ contract AnyLiquidationTest is ExtensionsTest {
         uint256 collateralValue = priceCollateral * borrowerCollateral;
         if (collateralValue >= borrowValue) {
           vars.collateralMarket = ICErc20(address(randomMarket));
+          vars.repayAmount = borrowAmount;
           break;
         }
       }
@@ -418,7 +420,7 @@ contract AnyLiquidationTest is ExtensionsTest {
       vars.liquidator.safeLiquidateToTokensWithFlashLoan(
         FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
           vars.borrower,
-          vars.borrowAmount / 100,
+          vars.borrowAmount,
           ICErc20(address(vars.debtMarket)),
           ICErc20(address(vars.collateralMarket)),
           vars.flashSwapPair,
