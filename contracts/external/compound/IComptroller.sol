@@ -111,4 +111,6 @@ interface IComptroller {
   function borrowCapForAssetForCollateral(address borrowed, address collateral) external view returns (uint256);
 
   function borrowingAgainstCollateralBlacklist(address borrowed, address collateral) external view returns (bool);
+
+  function isDeprecated(ICToken cToken) external view returns (bool);
 }

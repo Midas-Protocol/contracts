@@ -128,7 +128,7 @@ contract AnyLiquidationTest is ExtensionsTest {
     doTestAnyLiquidation(random);
   }
 
-  function testJarvisPoolLiquidations(uint256 random) public forkAtBlock(POLYGON_MAINNET, 38856600) {
+  function testJarvisPoolLiquidations(uint256 random) public forkAtBlock(POLYGON_MAINNET, 38867180) {
     vm.assume(random > 100 && random < type(uint64).max);
     address payable jarvisPoolAddress = payable(0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2);
     Comptroller jarvisPool = Comptroller(jarvisPoolAddress);
@@ -317,14 +317,25 @@ contract AnyLiquidationTest is ExtensionsTest {
       for (uint256 m = 0; m < vars.markets.length; m++) {
         uint256 marketIndexWithOffset = (random + m) % vars.markets.length;
         ICToken randomMarket = vars.markets[marketIndexWithOffset];
-        if (address(randomMarket) == 0xe150e792e0a18C9984a0630f051a607dEe3c265d) {
+        address marketAddress = address(randomMarket);
+        if (marketAddress == 0xe150e792e0a18C9984a0630f051a607dEe3c265d) {
           emit log("no funding source for jEUR debt");
           continue;
+        //        } else if (marketAddress == 0x5236F79f1C66744071D67888D14306B34EC381A2) {
+        //          emit log("wbtc borrowing not paused yet");
+        //          continue;
+        }
+        if(!vars.comptroller.isDeprecated(randomMarket)) {
+          (, uint256 collatFactor) = vars.comptroller.markets(marketAddress);
+          emit log_named_uint("collat factor", collatFactor);
+          bool paused = vars.comptroller.borrowGuardianPaused(marketAddress);
+          require(paused, "!paused borrowing");
+          require(false, "!deprecated");
         }
 
         borrowAmount = randomMarket.borrowBalanceStored(vars.borrower);
         if (borrowAmount > 0) {
-          vars.debtMarket = ICErc20(address(randomMarket));
+          vars.debtMarket = ICErc20(marketAddress);
           break;
         }
       }
@@ -332,9 +343,12 @@ contract AnyLiquidationTest is ExtensionsTest {
 
       MasterPriceOracle mpo = MasterPriceOracle(address(vars.comptroller.oracle()));
       uint256 priceBorrowedAsset = mpo.getUnderlyingPrice(vars.debtMarket);
-      uint256 borrowValue = priceBorrowedAsset * borrowAmount;
+      uint256 borrowValue = (priceBorrowedAsset * borrowAmount) / 1e18;
 
-      if (borrowValue < 10e18) continue; // don't bother liquidating less than $12 worth of debt
+      if (borrowValue < 20e18) {
+        emit log_named_uint("borrow value too low", borrowValue);
+        continue; // don't bother liquidating less than $25 worth of debt
+      }
 
       for (uint256 m = 0; m < vars.markets.length; m++) {
         uint256 marketIndexWithOffset = (random - m) % vars.markets.length;
@@ -343,7 +357,7 @@ contract AnyLiquidationTest is ExtensionsTest {
         if (borrowerCollateral > 0) {
           if (address(randomMarket) == address(vars.debtMarket)) continue;
           uint256 priceCollateral = mpo.getUnderlyingPrice(randomMarket);
-          uint256 collateralValue = priceCollateral * borrowerCollateral;
+          uint256 collateralValue = (priceCollateral * borrowerCollateral) / 1e18;
           if (collateralValue >= borrowValue) {
             vars.collateralMarket = ICErc20(address(randomMarket));
             vars.repayAmount = borrowAmount;
@@ -351,6 +365,7 @@ contract AnyLiquidationTest is ExtensionsTest {
           }
         }
       }
+      if (address(vars.collateralMarket) == address(0)) continue;
 
       liquidateSpecificPosition(vars);
       return;

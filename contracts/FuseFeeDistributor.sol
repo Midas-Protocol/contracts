@@ -388,6 +388,9 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
 
     if (success && data.length == 32) {
       address comptroller = abi.decode(data, (address));
+
+      if (comptroller == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) return 0;
+
       int256 customRate = customInterestFeeRates[comptroller];
       if (customRate > 0) return uint256(customRate);
       if (customRate < 0) return 0;
