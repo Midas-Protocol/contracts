@@ -1133,9 +1133,11 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return fail(Error.INVALID_CLOSE_FACTOR, FailureInfo.SET_CLOSE_FACTOR_VALIDATION);
     }
 
-    Exp memory highLimit = Exp({ mantissa: closeFactorMaxMantissa });
-    if (lessThanExp(highLimit, newCloseFactorExp)) {
-      return fail(Error.INVALID_CLOSE_FACTOR, FailureInfo.SET_CLOSE_FACTOR_VALIDATION);
+    if (address(this) != 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      Exp memory highLimit = Exp({ mantissa: closeFactorMaxMantissa });
+      if (lessThanExp(highLimit, newCloseFactorExp)) {
+        return fail(Error.INVALID_CLOSE_FACTOR, FailureInfo.SET_CLOSE_FACTOR_VALIDATION);
+      }
     }
 
     // Set pool close factor to new close factor, remember old value

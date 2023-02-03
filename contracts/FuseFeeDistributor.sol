@@ -468,7 +468,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     // fuseFee
     customInterestFeeRates[jarvisPoolAddress] = 0;
 
-    require(jarvisPool._setCloseFactor(0.9e18) == 0, "!close factor"); // max, consider making it 1e18
+    require(jarvisPool._setCloseFactor(1e18) == 0, "!close factor"); // liquidate up to 100% of the debt
     require(jarvisPool._setLiquidationIncentive(0) == 0, "!liquidation incentive");
 
     ICToken[] memory markets = jarvisPool.getAllMarkets();
