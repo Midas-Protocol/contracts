@@ -300,47 +300,55 @@ contract AnyLiquidationTest is ExtensionsTest {
     vars.liquidator = fsl;
     vars.comptroller = IComptroller(0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2);
     address[] memory borrowers = vars.comptroller.getAllBorrowers();
-    vars.borrower = borrowers[random % borrowers.length];
     vars.markets = vars.comptroller.getAllMarkets();
 
-    (, , uint256 shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
-    if (shortfall == 0) return;
+    while (true) {
+      // TODO
+      random++;
 
-    uint256 repayAmount;
-    uint256 borrowAmount;
+      vars.borrower = borrowers[random % borrowers.length];
+      (, , uint256 shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
+      if (shortfall == 0) continue;
 
-    // find a debt market in which the borrower has borrowed
-    for (uint256 m = 0; m < vars.markets.length; m++) {
-      uint256 marketIndexWithOffset = (random + m) % vars.markets.length;
-      ICToken randomMarket = vars.markets[marketIndexWithOffset];
-      borrowAmount = randomMarket.borrowBalanceStored(vars.borrower);
-      if (borrowAmount > 0) {
-        vars.debtMarket = ICErc20(address(randomMarket));
-        break;
-      }
-    }
+      uint256 repayAmount;
+      uint256 borrowAmount;
 
-    MasterPriceOracle mpo = MasterPriceOracle(address(vars.comptroller.oracle()));
-    uint256 priceBorrowedAsset = mpo.getUnderlyingPrice(vars.debtMarket);
-    uint256 borrowValue = priceBorrowedAsset * borrowAmount;
-
-    for (uint256 m = 0; m < vars.markets.length; m++) {
-      uint256 marketIndexWithOffset = (random - m) % vars.markets.length;
-      ICToken randomMarket = vars.markets[marketIndexWithOffset];
-      uint256 borrowerCollateral = randomMarket.balanceOf(vars.borrower);
-      if (borrowerCollateral > 0) {
-        if (address(randomMarket) == address(vars.debtMarket)) continue;
-        uint256 priceCollateral = mpo.getUnderlyingPrice(randomMarket);
-        uint256 collateralValue = priceCollateral * borrowerCollateral;
-        if (collateralValue >= borrowValue) {
-          vars.collateralMarket = ICErc20(address(randomMarket));
-          vars.repayAmount = borrowAmount;
+      // find a debt market in which the borrower has borrowed
+      for (uint256 m = 0; m < vars.markets.length; m++) {
+        uint256 marketIndexWithOffset = (random + m) % vars.markets.length;
+        ICToken randomMarket = vars.markets[marketIndexWithOffset];
+        borrowAmount = randomMarket.borrowBalanceStored(vars.borrower);
+        if (borrowAmount > 0) {
+          vars.debtMarket = ICErc20(address(randomMarket));
           break;
         }
       }
-    }
 
-    liquidateSpecificPosition(vars);
+      MasterPriceOracle mpo = MasterPriceOracle(address(vars.comptroller.oracle()));
+      uint256 priceBorrowedAsset = mpo.getUnderlyingPrice(vars.debtMarket);
+      uint256 borrowValue = priceBorrowedAsset * borrowAmount;
+
+      if (borrowValue < 10e18) continue; // don't bother liquidating less than $12 worth of debt
+
+      for (uint256 m = 0; m < vars.markets.length; m++) {
+        uint256 marketIndexWithOffset = (random - m) % vars.markets.length;
+        ICToken randomMarket = vars.markets[marketIndexWithOffset];
+        uint256 borrowerCollateral = randomMarket.balanceOf(vars.borrower);
+        if (borrowerCollateral > 0) {
+          if (address(randomMarket) == address(vars.debtMarket)) continue;
+          uint256 priceCollateral = mpo.getUnderlyingPrice(randomMarket);
+          uint256 collateralValue = priceCollateral * borrowerCollateral;
+          if (collateralValue >= borrowValue) {
+            vars.collateralMarket = ICErc20(address(randomMarket));
+            vars.repayAmount = borrowAmount;
+            break;
+          }
+        }
+      }
+
+      liquidateSpecificPosition(vars);
+      return;
+    }
   }
 
   function liquidateSpecificPosition(LiquidationData memory vars) internal {
