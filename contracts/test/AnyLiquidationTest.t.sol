@@ -420,7 +420,7 @@ contract AnyLiquidationTest is ExtensionsTest {
       vars.liquidator.safeLiquidateToTokensWithFlashLoan(
         FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
           vars.borrower,
-          vars.borrowAmount,
+          vars.repayAmount,
           ICErc20(address(vars.debtMarket)),
           ICErc20(address(vars.collateralMarket)),
           vars.flashSwapPair,
