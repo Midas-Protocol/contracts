@@ -64,4 +64,8 @@ interface ICToken {
   function protocolSeizeShareMantissa() external view returns (uint256);
 
   function feeSeizeShareMantissa() external view returns (uint256);
+
+  function _setReserveFactor(uint256 newReserveFactorMantissa) external virtual returns (uint256);
+
+  function _setAdminFee(uint256 newAdminFeeMantissa) external virtual returns (uint256);
 }

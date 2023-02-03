@@ -1201,16 +1201,18 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_LIQUIDATION_INCENTIVE_OWNER_CHECK);
     }
 
-    // Check de-scaled min <= newLiquidationIncentive <= max
-    Exp memory newLiquidationIncentive = Exp({ mantissa: newLiquidationIncentiveMantissa });
-    Exp memory minLiquidationIncentive = Exp({ mantissa: liquidationIncentiveMinMantissa });
-    if (lessThanExp(newLiquidationIncentive, minLiquidationIncentive)) {
-      return fail(Error.INVALID_LIQUIDATION_INCENTIVE, FailureInfo.SET_LIQUIDATION_INCENTIVE_VALIDATION);
-    }
+    if (address(this) != 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      // Check de-scaled min <= newLiquidationIncentive <= max
+      Exp memory newLiquidationIncentive = Exp({ mantissa: newLiquidationIncentiveMantissa });
+      Exp memory minLiquidationIncentive = Exp({ mantissa: liquidationIncentiveMinMantissa });
+      if (lessThanExp(newLiquidationIncentive, minLiquidationIncentive)) {
+        return fail(Error.INVALID_LIQUIDATION_INCENTIVE, FailureInfo.SET_LIQUIDATION_INCENTIVE_VALIDATION);
+      }
 
-    Exp memory maxLiquidationIncentive = Exp({ mantissa: liquidationIncentiveMaxMantissa });
-    if (lessThanExp(maxLiquidationIncentive, newLiquidationIncentive)) {
-      return fail(Error.INVALID_LIQUIDATION_INCENTIVE, FailureInfo.SET_LIQUIDATION_INCENTIVE_VALIDATION);
+      Exp memory maxLiquidationIncentive = Exp({ mantissa: liquidationIncentiveMaxMantissa });
+      if (lessThanExp(maxLiquidationIncentive, newLiquidationIncentive)) {
+        return fail(Error.INVALID_LIQUIDATION_INCENTIVE, FailureInfo.SET_LIQUIDATION_INCENTIVE_VALIDATION);
+      }
     }
 
     // Save current value for use in log

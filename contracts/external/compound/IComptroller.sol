@@ -58,6 +58,8 @@ interface IComptroller {
 
   function _setCloseFactor(uint256 newCloseFactorMantissa) external returns (uint256);
 
+  function _setCollateralFactor(ICToken market, uint256 newCollateralFactorMantissa) external returns (uint256);
+
   function _setLiquidationIncentive(uint256 newLiquidationIncentiveMantissa) external returns (uint256);
 
   function _become(IUnitroller unitroller) external;
