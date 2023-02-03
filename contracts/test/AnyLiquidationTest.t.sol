@@ -302,27 +302,33 @@ contract AnyLiquidationTest is ExtensionsTest {
     address[] memory borrowers = vars.comptroller.getAllBorrowers();
     vars.markets = vars.comptroller.getAllMarkets();
 
-    while (true) {
+    while (address(vars.collateralMarket) == address(0)) {
       // TODO
       random++;
 
       vars.borrower = borrowers[random % borrowers.length];
+      if (vars.borrower == 0x757E9F49aCfAB73C25b20D168603d54a66C723A1) continue;
       (, , uint256 shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
       if (shortfall == 0) continue;
 
-      uint256 repayAmount;
       uint256 borrowAmount;
 
       // find a debt market in which the borrower has borrowed
       for (uint256 m = 0; m < vars.markets.length; m++) {
         uint256 marketIndexWithOffset = (random + m) % vars.markets.length;
         ICToken randomMarket = vars.markets[marketIndexWithOffset];
+        if (address(randomMarket) == 0xe150e792e0a18C9984a0630f051a607dEe3c265d) {
+          emit log("no funding source for jEUR debt");
+          continue;
+        }
+
         borrowAmount = randomMarket.borrowBalanceStored(vars.borrower);
         if (borrowAmount > 0) {
           vars.debtMarket = ICErc20(address(randomMarket));
           break;
         }
       }
+      if (address(vars.debtMarket) == address(0)) continue;
 
       MasterPriceOracle mpo = MasterPriceOracle(address(vars.comptroller.oracle()));
       uint256 priceBorrowedAsset = mpo.getUnderlyingPrice(vars.debtMarket);
