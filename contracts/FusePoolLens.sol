@@ -493,7 +493,7 @@ contract FusePoolLens is Initializable {
    * @notice returns the total borrow cap and the per collateral borrowing cap/blacklist for the asset
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getBorrowCapsForAsset(ICToken asset)
+  function getBorrowCapsForAsset(address asset)
     public
     view
     returns (
@@ -503,9 +503,10 @@ contract FusePoolLens is Initializable {
       uint256 totalBorrowCap
     )
   {
-    IComptroller comptroller = IComptroller(asset.comptroller());
-    (collateral, borrowCapsPerCollateral, collateralBlacklisted) = getBorrowCapsPerCollateral(asset, comptroller);
-    totalBorrowCap = comptroller.borrowCaps(address(asset));
+    ICToken cToken = ICToken(asset);
+    IComptroller comptroller = IComptroller(cToken.comptroller());
+    (collateral, borrowCapsPerCollateral, collateralBlacklisted) = getBorrowCapsPerCollateral(cToken, comptroller);
+    totalBorrowCap = comptroller.borrowCaps(address(cToken));
   }
 
   /**
