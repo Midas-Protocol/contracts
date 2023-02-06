@@ -589,6 +589,13 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Shh - currently unused
     liquidator;
 
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
+      liquidator != 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748
+    ) {
+      return uint256(Error.UNAUTHORIZED);
+    }
+
     // Make sure markets are listed
     if (!markets[cTokenBorrowed].isListed || !markets[cTokenCollateral].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
@@ -598,14 +605,14 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
-    // Get borrowers's underlying borrow balance
+    // Get borrowers' underlying borrow balance
     uint256 borrowBalance = CTokenInterface(cTokenBorrowed).borrowBalanceStored(borrower);
 
     /* allow accounts to be liquidated if the market is deprecated */
     if (isDeprecated(CTokenInterface(cTokenBorrowed))) {
       require(borrowBalance >= repayAmount, "!borrow>repay");
     } else {
-      /* The borrower must have shortfall in order to be liquidatable */
+      /* The borrower must have shortfall in order to be liquidateable */
       (Error err, , uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
         borrower,
         CTokenInterface(address(0)),
@@ -887,6 +894,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
             assetAsCollateralValueCap = 0;
           } else {
             // the value of the collateral is capped regardless if any amount is to be borrowed
+            // denominated in the borrowed asset
             vars.totalBorrowCapForCollateral = borrowCapForAssetForCollateral[address(cTokenModify)][address(asset)];
             // check if set to any value
             if (vars.totalBorrowCapForCollateral != 0) {
