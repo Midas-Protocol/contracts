@@ -852,7 +852,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       uint256
     )
   {
-    if (account == 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748) return (Error.NO_ERROR, 0, 0);
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
+      account == 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748
+    ) return (Error.NO_ERROR, 0, 0);
 
     AccountLiquidityLocalVars memory vars; // Holds all our calculation results
     uint256 oErr;
