@@ -18,6 +18,6 @@ contract WithdrawableFlywheelStaticRewards is FlywheelStaticRewards {
 
   function withdraw(uint256 amount) external {
     require(msg.sender == flywheel.owner());
-    rewardToken.safeTransferFrom(address(this), address(flywheel.owner()), amount);
+    rewardToken.safeTransfer(address(flywheel.owner()), amount);
   }
 }
