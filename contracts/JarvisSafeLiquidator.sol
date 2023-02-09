@@ -67,7 +67,6 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
     ICErc20 debtMarket;
     ICErc20 collateralMarket;
     uint256 fundingAmount;
-    address exchangeProfitTo;
     IRedemptionStrategy[] redemptionStrategies;
     bytes[] redemptionStrategiesData;
   }
@@ -137,9 +136,7 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
     require(jarvisWethMarket.mint(vars.fundingAmount) == 0, "!mint stable asset");
 
     IComptroller pool = IComptroller(jarvisWethMarket.comptroller());
-    pool.enterMarkets(
-      array(jarvisWethMarketAddress, address(vars.collateralMarket), address(vars.debtMarket))
-    );
+    pool.enterMarkets(array(jarvisWethMarketAddress, address(vars.collateralMarket), address(vars.debtMarket)));
 
     // borrow the debt asset
     require(vars.debtMarket.borrow(vars.repayAmount) == 0, "!borrow debt asset");
@@ -162,13 +159,7 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
     require(redeemResult == 0, "Error calling redeeming seized cToken: error code not equal to 0");
 
     // Repay flashloan
-    return
-      repayTokenFlashLoan(
-        vars.collateralMarket,
-        vars.exchangeProfitTo,
-        vars.redemptionStrategies,
-        vars.redemptionStrategiesData
-      );
+    return repayTokenFlashLoan(vars.collateralMarket, vars.redemptionStrategies, vars.redemptionStrategiesData);
   }
 
   /**
@@ -176,7 +167,6 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
    */
   function repayTokenFlashLoan(
     ICToken cTokenCollateral,
-    address exchangeProfitTo,
     IRedemptionStrategy[] memory redemptionStrategies,
     bytes[] memory strategyData
   ) private returns (address) {
@@ -191,7 +181,10 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
     uint256 collateralForFee = (underlyingCollateralSeized * 4) / 100; // 4 % is the incentive
 
     // transfer the main part of the borrower collateral to the liquidator
-    underlyingCollateral.transfer(0x19F2bfCA57FDc1B7406337391d2F54063CaE8748, underlyingCollateralSeized - collateralForFee);
+    underlyingCollateral.transfer(
+      0x19F2bfCA57FDc1B7406337391d2F54063CaE8748,
+      underlyingCollateralSeized - collateralForFee
+    );
 
     // Redeem the remaining 4% to repay the flash loan fee
     if (redemptionStrategies.length > 0) {
@@ -221,10 +214,7 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
     )[0];
 
     // Repay flashloan
-    require(
-      collateralRequired <= collateralForFee,
-      "Token flashloan return amount greater than seized collateral."
-    );
+    require(collateralRequired <= collateralForFee, "Token flashloan return amount greater than seized collateral.");
 
     // repay the flash loaned WETH
     require(

@@ -23,6 +23,7 @@ import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
+import { JarvisSafeLiquidator } from "../JarvisSafeLiquidator.sol";
 
 import "./ExtensionsTest.sol";
 
@@ -730,5 +731,56 @@ contract AnyLiquidationTest is ExtensionsTest {
       hex"f6cd5bbd0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000a4f4406d3dc6482db1397d0ad260fd223c8f37fc000000000000000000000000000000000000000000000ef5c403da86335c444b000000000000000000000000456b363d3da38d3823ce2e1955362bbd761b324b00000000000000000000000028d0d45e593764c4ce88ccd1c033d0e2e8ce9af30000000000000000000000006e7a5fafcec6bb1e78bae2a1f0b612012bf1482700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d500b1d8e8ef31e21c99d1db9a6444d3adf1270000000000000000000000000a5e0829caced8ffdd4de3c43696c57f7d7a678ff000000000000000000000000a5e0829caced8ffdd4de3c43696c57f7d7a678ff00000000000000000000000000000000000000000000000000000000000001c000000000000000000000000000000000000000000000000000000000000001e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000240000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000ac64c0391a54eba34e23429847986d437be82da00000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000600000000000000000000000002791bca1f2de4661ed88a30c99a7a9449aa84174000000000000000000000000aec757bf73cc1f4609a1459205835dd40b4e3f290000000000000000000000000000000000000000000000000000000000000960",
       "raw liquidation failed"
     );
+  }
+
+  function testJarvisLiquidator() public debuggingOnly fork(POLYGON_MAINNET) {
+    JarvisSafeLiquidator jsl = new JarvisSafeLiquidator();
+    jsl.initialize();
+
+    ICErc20 jarvisWethMarketAddress = ICErc20(0xc62D6B6539e7f828caa4798E282903c83948FA79);
+
+    MasterPriceOracle mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+
+    JarvisSafeLiquidator.LiquidateJarvisDebtVars memory vars;
+    vars.borrower = 0x29b38578A5d7D9232901a329FF99B4C28Bc439e5;
+    vars.repayAmount = 13643174439320386319124;
+    vars.debtMarket = ICErc20(0xD8029d67a7CfbD08d21968a4Cf284b9C89EB70C6);
+    vars.collateralMarket = ICErc20(0x28D0d45e593764C4cE88ccD1C033d0E2e8cE9aF3);
+
+    uint256 wethTokenPrice = mpo.getUnderlyingPrice(jarvisWethMarketAddress);
+    uint256 debtTokenPrice = mpo.getUnderlyingPrice(vars.debtMarket);
+    uint256 debtValue = (vars.repayAmount * debtTokenPrice) / 1e18;
+
+    vars.fundingAmount = (debtValue * 1e18) / wethTokenPrice;
+
+    (vars.redemptionStrategies, vars.redemptionStrategiesData) = getRedemptionStrategies(vars);
+
+    vm.prank(0x19F2bfCA57FDc1B7406337391d2F54063CaE8748);
+    jsl.liquidateJarvisDebt(vars);
+  }
+
+  function getRedemptionStrategies(JarvisSafeLiquidator.LiquidateJarvisDebtVars memory jarvisVars)
+    internal
+    returns (IRedemptionStrategy[] memory, bytes[] memory)
+  {
+    LiquidationData memory vars;
+    vars.liquidator = fsl;
+    vars.flashSwapPair = IUniswapV2Pair(0xc4e595acDD7d12feC385E5dA5D43160e8A0bAC0E);
+    address wtoken = ap.getAddress("wtoken");
+
+    address collateralTokenToRedeem = jarvisVars.collateralMarket.underlying();
+    while (collateralTokenToRedeem != wtoken) {
+      AddressesProvider.RedemptionStrategy memory strategy = ap.getRedemptionStrategy(collateralTokenToRedeem);
+      if (strategy.addr == address(0)) break;
+      collateralTokenToRedeem = addRedemptionStrategy(
+        vars,
+        IRedemptionStrategy(strategy.addr),
+        strategy.contractInterface,
+        collateralTokenToRedeem,
+        strategy.outputToken
+      );
+    }
+
+    return (redemptionStrategies, redemptionDatas);
   }
 }
