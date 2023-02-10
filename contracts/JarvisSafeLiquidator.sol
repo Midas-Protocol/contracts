@@ -176,9 +176,11 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
     uint256 feeToRepay = flashSwapReturnAmount - _flashSwapAmount;
 
     // Check underlying collateral seized
+    uint256 underlyingCollateralSeized = ICErc20(address(cTokenCollateral)).balanceOfUnderlying(address(this));
+    require(ICErc20(address(cTokenCollateral)).redeemUnderlying(underlyingCollateralSeized) == 0, "redeem for fee");
     IERC20Upgradeable underlyingCollateral = IERC20Upgradeable(ICErc20(address(cTokenCollateral)).underlying());
-    uint256 underlyingCollateralSeized = underlyingCollateral.balanceOf(address(this));
-    uint256 collateralForFee = (underlyingCollateralSeized * 4) / 100; // 4 % is the incentive
+    uint256 underlyingCollateralForFee = underlyingCollateral.balanceOf(address(this));
+    uint256 collateralForFee = (underlyingCollateralForFee * 4) / 100; // 4 % is the incentive
 
     // transfer the main part of the borrower collateral to the liquidator
     underlyingCollateral.transfer(

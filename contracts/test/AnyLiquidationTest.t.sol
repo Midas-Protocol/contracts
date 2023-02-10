@@ -734,10 +734,12 @@ contract AnyLiquidationTest is ExtensionsTest {
   }
 
   function testJarvisLiquidator() public debuggingOnly fork(POLYGON_MAINNET) {
-    JarvisSafeLiquidator jsl = new JarvisSafeLiquidator();
-    jsl.initialize();
+    JarvisSafeLiquidator jsl = JarvisSafeLiquidator(payable(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a));
 
     ICErc20 jarvisWethMarketAddress = ICErc20(0xc62D6B6539e7f828caa4798E282903c83948FA79);
+    IComptroller jarvisPool = IComptroller(jarvisWethMarketAddress.comptroller());
+    vm.prank(jarvisPool.admin());
+    require(jarvisPool._setCollateralFactor(jarvisWethMarketAddress, 0.9e18) == 0, "!collat factor");
 
     MasterPriceOracle mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
 
@@ -751,7 +753,7 @@ contract AnyLiquidationTest is ExtensionsTest {
     uint256 debtTokenPrice = mpo.getUnderlyingPrice(vars.debtMarket);
     uint256 debtValue = (vars.repayAmount * debtTokenPrice) / 1e18;
 
-    vars.fundingAmount = (debtValue * 1e18) / wethTokenPrice;
+    vars.fundingAmount = (2 * (debtValue * 1e18)) / wethTokenPrice;
 
     (vars.redemptionStrategies, vars.redemptionStrategiesData) = getRedemptionStrategies(vars);
 
