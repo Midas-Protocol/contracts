@@ -1012,8 +1012,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     );
 
     if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      // at least a little penalty is needed in order to pay for the flash loan and funding/redemption conversion slippage
-      totalPenaltyMantissa = Exp({ mantissa: 0.04e18 }); // testing with 4 % , has passed with 6 %
+      totalPenaltyMantissa = Exp({ mantissa: 1e18 });
     }
 
     numerator = mul_(totalPenaltyMantissa, Exp({ mantissa: priceBorrowedMantissa }));
