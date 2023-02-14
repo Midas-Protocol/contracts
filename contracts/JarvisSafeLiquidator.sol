@@ -94,7 +94,7 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
     IERC20Upgradeable underlying = IERC20Upgradeable(underlyingAddress);
     uint256 jslBalance = underlying.balanceOf(address(this));
     JarvisLiquidatorFunder jlf = JarvisLiquidatorFunder(0xaC64c0391a54Eba34E23429847986D437bE82da0);
-    redeemCustomCollateral(underlying, jslBalance, jlf, abi.encode(underlying, getPoolAddress(underlying), 0));
+    redeemCustomCollateral(underlying, jslBalance, jlf, abi.encode(underlying, getPoolAddress(underlyingAddress), 0));
   }
 
   function getPoolAddress(address token) internal returns (address) {
