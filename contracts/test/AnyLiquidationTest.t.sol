@@ -742,7 +742,15 @@ contract AnyLiquidationTest is ExtensionsTest {
     dpa.upgrade(TransparentUpgradeableProxy(jslAddress), address(newImpl));
 
     vm.prank(0x19F2bfCA57FDc1B7406337391d2F54063CaE8748);
-    jsl.redeemAllCollateral();
+    IERC20Upgradeable[] memory outputTokens = jsl.redeemAllCollateral();
+    for (uint i = 0; i < outputTokens.length; i++) {
+      if (address(outputTokens[i]) != address(0)) {
+        uint256 balance = outputTokens[i].balanceOf(jslAddress);
+        emit log_named_address("token", address(outputTokens[i]));
+        emit log_named_uint("balance", balance);
+        emit log("");
+      }
+    }
   }
 
   function testRawJarvisLiquidation() public debuggingOnly fork(POLYGON_MAINNET) {

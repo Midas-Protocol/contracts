@@ -78,17 +78,33 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
     return 0;
   }
 
-  function redeemAllCollateral() public {
+  function redeemAllCollateral() public returns (IERC20Upgradeable[] memory) {
     address jPoolAddress = 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2;
     IComptroller jpool = IComptroller(jPoolAddress);
     ICToken[] memory markets = jpool.getAllMarkets();
+    IERC20Upgradeable[] memory outputTokens = new IERC20Upgradeable[](markets.length);
+
     for(uint i = 0; i < markets.length; i++) {
-      redeemCollateral(ICErc20(address(markets[i])));
+      uint256 cTokensBalance = markets[i].balanceOf(address(this));
+      if (cTokensBalance > 0) {
+        uint256 borrows = markets[i].borrowBalanceStored(address(this));
+        if (borrows == 0) {
+          require(jpool.exitMarket(address(markets[i])) == 0, "exit");
+          outputTokens[i] = redeemCollateral(ICErc20(address(markets[i])));
+        } else {
+          //revert("strange");
+        }
+      }
     }
+
+    return outputTokens;
   }
 
-  function redeemCollateral(ICErc20 collateralMarket) public {
+  function redeemCollateral(ICErc20 collateralMarket) public returns (IERC20Upgradeable) {
     require(msg.sender == 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748, "!liquidator");
+
+
+    require(collateralMarket.redeemUnderlying(type(uint256).max) == 0, "redeem coll");
 
     address underlyingAddress = collateralMarket.underlying();
     IERC20Upgradeable underlying = IERC20Upgradeable(underlyingAddress);
@@ -97,11 +113,14 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
       address jarvisPool = getPoolAddress(underlyingAddress);
       if (jarvisPool != address(0)) {
         JarvisLiquidatorFunder jlf = JarvisLiquidatorFunder(0xaC64c0391a54Eba34E23429847986D437bE82da0);
-        redeemCustomCollateral(underlying, jslBalance, jlf, abi.encode(underlying, jarvisPool, 0));
+        (IERC20Upgradeable outputToken,) = redeemCustomCollateral(underlying, jslBalance, jlf, abi.encode(underlying, jarvisPool, 0));
+        return outputToken;
       } else {
         //emit log("other asset");
       }
     }
+
+    return IERC20Upgradeable(address(0));
   }
 
   function getPoolAddress(address token) internal returns (address) {
