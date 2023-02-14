@@ -10,6 +10,7 @@ import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
+import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CToken } from "../compound/CToken.sol";
 import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
@@ -126,6 +127,7 @@ contract ContractsUpgradesTest is BaseTest {
 
     for (uint8 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);
+      if (pools[i].comptroller != 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) continue;
       ICToken[] memory markets = pool.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20Delegate market = CErc20Delegate(address(markets[j]));
@@ -133,6 +135,7 @@ contract ContractsUpgradesTest is BaseTest {
         address currentImpl = market.implementation();
         (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
 
+        assertEq(upgradeToImpl, 0xe0adB2EE014F121939aCD9e70e53D22494D3a72A, "set latest");
         if (currentImpl != upgradeToImpl) emit log_address(address(market));
         assertEq(currentImpl, upgradeToImpl, "market needs to be upgraded");
 
@@ -147,6 +150,39 @@ contract ContractsUpgradesTest is BaseTest {
           emit log("pool");
           emit log_address(pools[i].comptroller);
           emit log("");
+        }
+      }
+    }
+  }
+
+  function testPluginMarket() public debuggingOnly fork(POLYGON_MAINNET) {
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+
+    vm.prank(ffd.owner());
+    ffd._editCErc20DelegateWhitelist(
+      asArray(0x61e8C3Cf48D644E5457Fa51B37501E56838B6C93),
+      asArray(0x8f937ab7659E844f34cB05375239c4CA7bF79e46),
+      asArray(false),
+      asArray(true)
+    );
+
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      IComptroller pool = IComptroller(pools[i].comptroller);
+      if (pools[i].comptroller != 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) continue;
+      ICToken[] memory markets = pool.getAllMarkets();
+      for (uint8 j = 0; j < markets.length; j++) {
+        CErc20PluginDelegate market = CErc20PluginDelegate(address(markets[j]));
+        address implBefore = market.implementation();
+        vm.prank(pool.admin());
+        market._setImplementationSafe(0x8f937ab7659E844f34cB05375239c4CA7bF79e46, false, abi.encode(address(0)));
+
+        address plugin = address(market.plugin());
+        if (plugin != address(0)) {
+          emit log_named_address("market", address(market));
+          emit log_named_address(" impl before", implBefore);
         }
       }
     }

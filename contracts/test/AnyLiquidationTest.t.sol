@@ -733,29 +733,64 @@ contract AnyLiquidationTest is ExtensionsTest {
     );
   }
 
+  function testJarvisLiquidation() public debuggingOnly fork(POLYGON_MAINNET) {
+    address payable jslAddress = payable(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a);
+    JarvisSafeLiquidator jsl = JarvisSafeLiquidator(jslAddress);
+
+    JarvisSafeLiquidator newImpl = new JarvisSafeLiquidator();
+    vm.prank(dpa.owner());
+    dpa.upgrade(TransparentUpgradeableProxy(jslAddress), address(newImpl));
+
+    vm.prank(0x19F2bfCA57FDc1B7406337391d2F54063CaE8748);
+    jsl.redeemAllCollateral();
+  }
+
+  function testRawJarvisLiquidation() public debuggingOnly fork(POLYGON_MAINNET) {
+    address payable jarvisPoolAddress = payable(0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2);
+    Comptroller jarvisPool = Comptroller(jarvisPoolAddress);
+    ComptrollerFirstExtension asCompExtension = ComptrollerFirstExtension(jarvisPoolAddress);
+
+    CTokenInterface[] memory markets = asCompExtension.getAllMarkets();
+    for(uint i = 0; i < markets.length; i++) {
+      CTokenInterface market = markets[i];
+      uint256 borrows = market.totalBorrows();
+      uint hackerBorrows = market.borrowBalanceStored(0x757E9F49aCfAB73C25b20D168603d54a66C723A1);
+      uint liquidatorBorrows = market.borrowBalanceStored(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a);
+
+      if (borrows - hackerBorrows - liquidatorBorrows > 0) {
+        emit log_named_address("market", address(market));
+        emit log(market.symbol());
+        emit log_named_uint("liquidator borrows", liquidatorBorrows);
+        emit log_named_uint("others borrows", borrows - hackerBorrows - liquidatorBorrows);
+        emit log("");
+      }
+    }
+
+//    address[] memory borrowers = asCompExtension.getAllBorrowers();
+//    for(uint256 i = 0; i < borrowers.length; i++) {
+//      if (borrowers[i] != 0x757E9F49aCfAB73C25b20D168603d54a66C723A1 && borrowers[i] != 0x6da2d84d390f12a6c49afe7b677a6a2b8e0d961a) {
+//        CTokenInterface jeur = CTokenInterface(0xe150e792e0a18C9984a0630f051a607dEe3c265d);
+//        uint256 borrows = jeur.borrowBalanceStored(borrowers[i]);
+//        if (borrows  > 0) {
+//          emit log_named_address("borrower", borrowers[i]);
+//          emit log_named_uint("debt", borrows);
+//        }
+//      }
+//    }
+  }
+
   function testJarvisLiquidator() public debuggingOnly fork(POLYGON_MAINNET) {
     JarvisSafeLiquidator jsl = JarvisSafeLiquidator(payable(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a));
 
-    ICErc20 jarvisWethMarketAddress = ICErc20(0xc62D6B6539e7f828caa4798E282903c83948FA79);
-    IComptroller jarvisPool = IComptroller(jarvisWethMarketAddress.comptroller());
-    vm.prank(jarvisPool.admin());
-    require(jarvisPool._setCollateralFactor(jarvisWethMarketAddress, 0.9e18) == 0, "!collat factor");
-
-    MasterPriceOracle mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-
     JarvisSafeLiquidator.LiquidateJarvisDebtVars memory vars;
     vars.borrower = 0x29b38578A5d7D9232901a329FF99B4C28Bc439e5;
-    vars.repayAmount = 13643174439320386319124;
     vars.debtMarket = ICErc20(0xD8029d67a7CfbD08d21968a4Cf284b9C89EB70C6);
     vars.collateralMarket = ICErc20(0x28D0d45e593764C4cE88ccD1C033d0E2e8cE9aF3);
 
-    uint256 wethTokenPrice = mpo.getUnderlyingPrice(jarvisWethMarketAddress);
-    uint256 debtTokenPrice = mpo.getUnderlyingPrice(vars.debtMarket);
-    uint256 debtValue = (vars.repayAmount * debtTokenPrice) / 1e18;
+    vars.repayAmount = vars.debtMarket.borrowBalanceStored(vars.borrower);
 
-    vars.fundingAmount = (2 * (debtValue * 1e18)) / wethTokenPrice;
-
-    (vars.redemptionStrategies, vars.redemptionStrategiesData) = getRedemptionStrategies(vars);
+    vars.fundingAmount = 0;
+    //(vars.redemptionStrategies, vars.redemptionStrategiesData) = getRedemptionStrategies(vars);
 
     vm.prank(0x19F2bfCA57FDc1B7406337391d2F54063CaE8748);
     jsl.liquidateJarvisDebt(vars);
