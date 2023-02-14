@@ -869,7 +869,6 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
       return failOpaque(Error.MATH_ERROR, FailureInfo.LIQUIDATE_SEIZE_BALANCE_DECREMENT_FAILED, uint256(vars.mathErr));
     }
 
-    // TODO remove if
     if (address(comptroller) != 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
       vars.protocolSeizeTokens = mul_(seizeTokens, Exp({ mantissa: protocolSeizeShareMantissa }));
       vars.feeSeizeTokens = mul_(seizeTokens, Exp({ mantissa: feeSeizeShareMantissa }));
