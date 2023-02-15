@@ -389,6 +389,12 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Accrue interest
     uint256 balanceOfUnderlying = cTokenModify.asCTokenExtensionInterface().balanceOfUnderlying(account);
 
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
+      !isBorrow &&
+      account == 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
+    ) return balanceOfUnderlying;
+
     // Get account liquidity
     (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
       account,

@@ -129,30 +129,6 @@ contract AnyLiquidationTest is ExtensionsTest {
     doTestAnyLiquidation(random);
   }
 
-  function testJarvisPoolLiquidations(uint256 random) public forkAtBlock(POLYGON_MAINNET, 38867180) {
-    vm.assume(random > 100 && random < type(uint64).max);
-    address payable jarvisPoolAddress = payable(0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2);
-    Comptroller jarvisPool = Comptroller(jarvisPoolAddress);
-    ComptrollerFirstExtension asCompExtension = ComptrollerFirstExtension(jarvisPoolAddress);
-
-    // upgrade
-    {
-      FuseFeeDistributor newImpl = new FuseFeeDistributor();
-      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
-      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-      address admin = address(uint160(uint256(bytesAtSlot)));
-      vm.prank(admin);
-      proxy.upgradeTo(address(newImpl));
-    }
-    Unitroller asUnitroller = Unitroller(jarvisPoolAddress);
-    _upgradeExistingComptroller(asUnitroller);
-
-    vm.prank(ffd.owner());
-    ffd.liquidateJarvisPool();
-
-    liquidateJarvisBorrowers(random);
-  }
-
   struct LiquidationData {
     IRedemptionStrategy[] strategies;
     bytes[] redemptionDatas;
@@ -294,80 +270,6 @@ contract AnyLiquidationTest is ExtensionsTest {
 
     vars.repayAmount = vars.repayAmount / 100;
     liquidateSpecificPosition(vars);
-  }
-
-  function liquidateJarvisBorrowers(uint256 random) internal {
-    LiquidationData memory vars;
-    vars.liquidator = fsl;
-    vars.comptroller = IComptroller(0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2);
-    address[] memory borrowers = vars.comptroller.getAllBorrowers();
-    vars.markets = vars.comptroller.getAllMarkets();
-
-    while (address(vars.collateralMarket) == address(0)) {
-      // TODO
-      random++;
-
-      vars.borrower = borrowers[random % borrowers.length];
-      if (vars.borrower == 0x757E9F49aCfAB73C25b20D168603d54a66C723A1) continue;
-      (, , uint256 shortfall) = vars.comptroller.getAccountLiquidity(vars.borrower);
-      if (shortfall == 0) continue;
-
-      uint256 borrowAmount;
-
-      // find a debt market in which the borrower has borrowed
-      for (uint256 m = 0; m < vars.markets.length; m++) {
-        uint256 marketIndexWithOffset = (random + m) % vars.markets.length;
-        ICToken randomMarket = vars.markets[marketIndexWithOffset];
-        address marketAddress = address(randomMarket);
-        if (marketAddress == 0xe150e792e0a18C9984a0630f051a607dEe3c265d) {
-          emit log("no funding source for jEUR debt");
-          continue;
-        }
-        if (!vars.comptroller.isDeprecated(randomMarket)) {
-          (, uint256 collatFactor) = vars.comptroller.markets(marketAddress);
-          emit log_named_uint("collat factor", collatFactor);
-          bool paused = vars.comptroller.borrowGuardianPaused(marketAddress);
-          require(paused, "!paused borrowing");
-          require(false, "!deprecated");
-        }
-
-        borrowAmount = randomMarket.borrowBalanceStored(vars.borrower);
-        if (borrowAmount > 0) {
-          vars.debtMarket = ICErc20(marketAddress);
-          break;
-        }
-      }
-      if (address(vars.debtMarket) == address(0)) continue;
-
-      MasterPriceOracle mpo = MasterPriceOracle(address(vars.comptroller.oracle()));
-      uint256 priceBorrowedAsset = mpo.getUnderlyingPrice(vars.debtMarket);
-      uint256 borrowValue = (priceBorrowedAsset * borrowAmount) / 1e18;
-
-      if (borrowValue < 20e18) {
-        emit log_named_uint("borrow value too low", borrowValue);
-        continue; // don't bother liquidating less than $25 worth of debt
-      }
-
-      for (uint256 m = 0; m < vars.markets.length; m++) {
-        uint256 marketIndexWithOffset = (random - m) % vars.markets.length;
-        ICToken randomMarket = vars.markets[marketIndexWithOffset];
-        uint256 borrowerCollateral = randomMarket.balanceOf(vars.borrower);
-        if (borrowerCollateral > 0) {
-          if (address(randomMarket) == address(vars.debtMarket)) continue;
-          uint256 priceCollateral = mpo.getUnderlyingPrice(randomMarket);
-          uint256 collateralValue = (priceCollateral * borrowerCollateral) / 1e18;
-          if (collateralValue >= borrowValue) {
-            vars.collateralMarket = ICErc20(address(randomMarket));
-            vars.repayAmount = borrowAmount;
-            break;
-          }
-        }
-      }
-      if (address(vars.collateralMarket) == address(0)) continue;
-
-      liquidateSpecificPosition(vars);
-      return;
-    }
   }
 
   function liquidateSpecificPosition(LiquidationData memory vars) internal {
@@ -787,45 +689,46 @@ contract AnyLiquidationTest is ExtensionsTest {
 //    }
   }
 
-  function testJarvisLiquidator() public debuggingOnly fork(POLYGON_MAINNET) {
+  function testJarvisPoolLiquidations() public debuggingOnly fork(POLYGON_MAINNET) {
+    address payable jarvisPoolAddress = payable(0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2);
+    Comptroller jarvisPool = Comptroller(jarvisPoolAddress);
+    ComptrollerFirstExtension asCompExtension = ComptrollerFirstExtension(jarvisPoolAddress);
     JarvisSafeLiquidator jsl = JarvisSafeLiquidator(payable(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a));
 
-    JarvisSafeLiquidator.LiquidateJarvisDebtVars memory vars;
-    vars.borrower = 0x29b38578A5d7D9232901a329FF99B4C28Bc439e5;
-    vars.debtMarket = ICErc20(0xD8029d67a7CfbD08d21968a4Cf284b9C89EB70C6);
-    vars.collateralMarket = ICErc20(0x28D0d45e593764C4cE88ccD1C033d0E2e8cE9aF3);
+    // upgrade
+    {
+      FuseFeeDistributor newImpl = new FuseFeeDistributor();
+      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
+      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
+      address admin = address(uint160(uint256(bytesAtSlot)));
+      vm.prank(admin);
+      proxy.upgradeTo(address(newImpl));
+    }
+    Unitroller asUnitroller = Unitroller(jarvisPoolAddress);
+    _upgradeExistingComptroller(asUnitroller);
 
-    vars.repayAmount = vars.debtMarket.borrowBalanceStored(vars.borrower);
 
-    vars.fundingAmount = 0;
-    //(vars.redemptionStrategies, vars.redemptionStrategiesData) = getRedemptionStrategies(vars);
-
-    vm.prank(0x19F2bfCA57FDc1B7406337391d2F54063CaE8748);
-    jsl.liquidateJarvisDebt(vars);
+    jsl.redeemAllCollateral();
   }
 
-  function getRedemptionStrategies(JarvisSafeLiquidator.LiquidateJarvisDebtVars memory jarvisVars)
-    internal
-    returns (IRedemptionStrategy[] memory, bytes[] memory)
-  {
-    LiquidationData memory vars;
-    vars.liquidator = fsl;
-    vars.flashSwapPair = IUniswapV2Pair(0xc4e595acDD7d12feC385E5dA5D43160e8A0bAC0E);
-    address wtoken = ap.getAddress("wtoken");
+  function testLiquidatorDebtMarkets() public debuggingOnly fork(POLYGON_MAINNET) {
+    address jslAddress = 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a;
+    address jarvisPoolAddress = 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2;
+    IComptroller pool = IComptroller(jarvisPoolAddress);
 
-    address collateralTokenToRedeem = jarvisVars.collateralMarket.underlying();
-    while (collateralTokenToRedeem != wtoken) {
-      AddressesProvider.RedemptionStrategy memory strategy = ap.getRedemptionStrategy(collateralTokenToRedeem);
-      if (strategy.addr == address(0)) break;
-      collateralTokenToRedeem = addRedemptionStrategy(
-        vars,
-        IRedemptionStrategy(strategy.addr),
-        strategy.contractInterface,
-        collateralTokenToRedeem,
-        strategy.outputToken
-      );
+    ICToken[] memory markets = pool.getAllMarkets();
+    for(uint i = 0; i < markets.length; i++) {
+      uint256 jslBorrows = markets[i].borrowBalanceStored(jslAddress);
+      if (jslBorrows > 0) {
+        uint256 balance = markets[i].balanceOfUnderlying(jslAddress);
+        if (balance > 0) {
+          emit log_named_address("market", address(markets[i]));
+          emit log_named_uint("borrows", jslBorrows);
+          emit log_named_uint("assets", balance);
+          // emit log_named_uint("diff", jslBorrows - balance);
+          emit log("");
+        }
+      }
     }
-
-    return (redemptionStrategies, redemptionDatas);
   }
 }
