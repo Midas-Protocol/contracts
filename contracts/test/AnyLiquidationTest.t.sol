@@ -635,28 +635,7 @@ contract AnyLiquidationTest is ExtensionsTest {
     );
   }
 
-  function testJarvisLiquidation() public debuggingOnly fork(POLYGON_MAINNET) {
-    address payable jslAddress = payable(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a);
-    JarvisSafeLiquidator jsl = JarvisSafeLiquidator(jslAddress);
-
-    JarvisSafeLiquidator newImpl = new JarvisSafeLiquidator();
-    vm.prank(dpa.owner());
-    dpa.upgrade(TransparentUpgradeableProxy(jslAddress), address(newImpl));
-
-    vm.prank(0x19F2bfCA57FDc1B7406337391d2F54063CaE8748);
-    IERC20Upgradeable[] memory outputTokens = jsl.redeemAllCollateral();
-    for (uint i = 0; i < outputTokens.length; i++) {
-      if (address(outputTokens[i]) != address(0)) {
-        uint256 balance = outputTokens[i].balanceOf(jslAddress);
-        emit log_named_address("token", address(outputTokens[i]));
-        emit log_named_uint("balance", balance);
-        emit log("");
-      }
-    }
-  }
-
   function testRawJarvisLiquidation() public debuggingOnly fork(POLYGON_MAINNET) {
-    address payable jarvisPoolAddress = payable(0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2);
     Comptroller jarvisPool = Comptroller(jarvisPoolAddress);
     ComptrollerFirstExtension asCompExtension = ComptrollerFirstExtension(jarvisPoolAddress);
 
@@ -665,7 +644,7 @@ contract AnyLiquidationTest is ExtensionsTest {
       CTokenInterface market = markets[i];
       uint256 borrows = market.totalBorrows();
       uint hackerBorrows = market.borrowBalanceStored(0x757E9F49aCfAB73C25b20D168603d54a66C723A1);
-      uint liquidatorBorrows = market.borrowBalanceStored(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a);
+      uint liquidatorBorrows = market.borrowBalanceStored(jslAddress);
 
       if (borrows - hackerBorrows - liquidatorBorrows > 0) {
         emit log_named_address("market", address(market));
@@ -689,46 +668,76 @@ contract AnyLiquidationTest is ExtensionsTest {
 //    }
   }
 
+  function testEvaluateCollateral() public debuggingOnly fork(POLYGON_MAINNET) {
+    Comptroller jarvisPool = Comptroller(jarvisPoolAddress);
+    IComptroller pool = IComptroller(jarvisPoolAddress);
+    MasterPriceOracle mpo = MasterPriceOracle(address(pool.oracle()));
+    uint256 priceUsdc = mpo.price(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174);
+
+    uint256 totalUsdcValue = 0;
+
+    ICToken[] memory markets = pool.getAllMarkets();
+    for(uint i = 0; i < markets.length; i++) {
+      ICToken market = markets[i];
+      uint256 balanceOfUnderlying = market.balanceOfUnderlying(jslAddress);
+      uint256 price = mpo.getUnderlyingPrice(market);
+      uint256 collateralValue = (price * balanceOfUnderlying) / 1e18;
+      uint256 collateralUsdcValue = (collateralValue * priceUsdc) / 1e18;
+
+      totalUsdcValue += collateralUsdcValue;
+    }
+
+    emit log_named_uint("value", totalUsdcValue);
+  }
+
+  address liquidator = 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748;
+  address payable jslAddress = payable(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a);
+  address payable jarvisPoolAddress = payable(0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2);
+
   function testJarvisPoolLiquidations() public debuggingOnly fork(POLYGON_MAINNET) {
-    address payable jarvisPoolAddress = payable(0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2);
     Comptroller jarvisPool = Comptroller(jarvisPoolAddress);
     ComptrollerFirstExtension asCompExtension = ComptrollerFirstExtension(jarvisPoolAddress);
-    JarvisSafeLiquidator jsl = JarvisSafeLiquidator(payable(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a));
+    JarvisSafeLiquidator jsl = JarvisSafeLiquidator(jslAddress);
 
     // upgrade
     {
-      FuseFeeDistributor newImpl = new FuseFeeDistributor();
-      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
-      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-      address admin = address(uint160(uint256(bytesAtSlot)));
-      vm.prank(admin);
-      proxy.upgradeTo(address(newImpl));
+      JarvisSafeLiquidator newImpl = new JarvisSafeLiquidator();
+      vm.prank(dpa.owner());
+      dpa.upgrade(TransparentUpgradeableProxy(jslAddress), address(newImpl));
     }
     Unitroller asUnitroller = Unitroller(jarvisPoolAddress);
     _upgradeExistingComptroller(asUnitroller);
 
-
-    jsl.redeemAllCollateral();
-  }
-
-  function testLiquidatorDebtMarkets() public debuggingOnly fork(POLYGON_MAINNET) {
-    address jslAddress = 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a;
-    address jarvisPoolAddress = 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2;
-    IComptroller pool = IComptroller(jarvisPoolAddress);
-
-    ICToken[] memory markets = pool.getAllMarkets();
-    for(uint i = 0; i < markets.length; i++) {
-      uint256 jslBorrows = markets[i].borrowBalanceStored(jslAddress);
-      if (jslBorrows > 0) {
-        uint256 balance = markets[i].balanceOfUnderlying(jslAddress);
-        if (balance > 0) {
-          emit log_named_address("market", address(markets[i]));
-          emit log_named_uint("borrows", jslBorrows);
-          emit log_named_uint("assets", balance);
-          // emit log_named_uint("diff", jslBorrows - balance);
-          emit log("");
-        }
+    vm.prank(liquidator);
+    IERC20Upgradeable[] memory outputTokens = jsl.redeemAllCollateral();
+    for (uint i = 0; i < outputTokens.length; i++) {
+      if (address(outputTokens[i]) != address(0)) {
+        uint256 balance = outputTokens[i].balanceOf(jslAddress);
+        emit log_named_address("token", address(outputTokens[i]));
+        emit log_named_uint("balance", balance);
+        emit log("");
       }
     }
+
+    // 36189585990998793921668
+    // 36259788690336592145075
+
+//    IComptroller pool = IComptroller(jarvisPoolAddress);
+//    MasterPriceOracle mpo = MasterPriceOracle(address(pool.oracle()));
+//
+//    uint256 totalBorrowsValue = 0;
+//    ICToken[] memory markets = pool.getAllMarkets();
+//    for(uint i = 0; i < markets.length; i++) {
+//      uint256 jslBorrows = markets[i].borrowBalanceStored(jslAddress);
+//      if (jslBorrows > 0) {
+//        emit log_named_address("market", address(markets[i]));
+//        emit log_named_uint("borrows", jslBorrows);
+//        totalBorrowsValue += (mpo.getUnderlyingPrice(markets[i]) * jslBorrows) / 1e18;
+//        emit log("");
+//      }
+//    }
+//
+//    uint256 priceUsdc = mpo.price(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174);
+//    emit log_named_uint("total borrows value", (totalBorrowsValue * 1e18) / priceUsdc);
   }
 }

