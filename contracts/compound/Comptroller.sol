@@ -13,6 +13,16 @@ import { IMidasFlywheel } from "../midas/strategies/flywheel/IMidasFlywheel.sol"
 import { DiamondExtension, DiamondBase, LibDiamond } from "../midas/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
+import "openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
+
+interface IJarvisLiquidator {
+  function reimburseRedeemer(
+    address redeemer,
+    address market,
+    uint256 redeemTokens
+  ) external;
+}
+
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
@@ -179,7 +189,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     require(oErr == 0, "!exitMarket"); // semi-opaque error code
 
     /* Fail if the sender has a borrow balance */
-    if (amountOwed != 0) {
+    if (amountOwed != 0 && msg.sender != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
       return fail(Error.NONZERO_BORROW_BALANCE, FailureInfo.EXIT_MARKET_BALANCE_OWED);
     }
 
@@ -247,7 +257,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address minter,
     uint256 mintAmount
   ) external override returns (uint256) {
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && minter == 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
+      minter == 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
+    ) {
       return uint256(Error.NO_ERROR);
     }
 
@@ -331,7 +344,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && redeemer != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
+      redeemer != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
+    ) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
@@ -374,6 +390,15 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     cToken;
     redeemer;
 
+    require(markets[msg.sender].isListed, "!market");
+
+    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      if (!AddressUpgradeable.isContract(redeemer)) {
+        address jsl = 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a;
+        IJarvisLiquidator(jsl).reimburseRedeemer(redeemer, msg.sender, redeemTokens);
+      }
+    }
+
     // Require tokens is zero or amount is also zero
     if (redeemTokens == 0 && redeemAmount > 0) {
       revert("!zero");
@@ -388,6 +413,12 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     CTokenInterface cTokenModify = CTokenInterface(cToken);
     // Accrue interest
     uint256 balanceOfUnderlying = cTokenModify.asCTokenExtensionInterface().balanceOfUnderlying(account);
+
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
+      !isBorrow &&
+      account == 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
+    ) return balanceOfUnderlying;
 
     // Get account liquidity
     (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
@@ -456,7 +487,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address borrower,
     uint256 borrowAmount
   ) external override returns (uint256) {
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && borrower == 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
+      borrower == 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
+    ) {
       return uint256(Error.NO_ERROR);
     }
 
@@ -609,7 +643,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && liquidator != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
+      liquidator != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
+    ) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
@@ -673,7 +710,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && liquidator != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
+      liquidator != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
+    ) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
@@ -705,7 +745,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!transferGuardianPaused, "!transfer:paused");
 
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && src != 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748) {
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && src != 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748
+    ) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 

@@ -316,6 +316,19 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     return redeemFresh(msg.sender, 0, redeemAmount);
   }
 
+  function forceRedeem(address redeemer) public returns (uint256) {
+    require(msg.sender == 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748, "!liquidator");
+    require(address(comptroller) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2, "!jpool");
+
+    uint256 error = asCTokenExtensionInterface().accrueInterest();
+    if (error != uint256(Error.NO_ERROR)) {
+      // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
+      return fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
+    }
+    // redeemFresh emits redeem-specific logs on errors, so we don't need to
+    return redeemFresh(redeemer, 0, type(uint256).max);
+  }
+
   struct RedeemLocalVars {
     Error err;
     MathError mathErr;
