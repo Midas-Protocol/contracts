@@ -269,7 +269,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     require(address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2, "!jarvis pool");
     require(markets[msg.sender].isListed, "caller not market");
 
-    for (uint i = 0; i < allMarkets.length; i++) {
+    for (uint256 i = 0; i < allMarkets.length; i++) {
       CTokenFirstExtension(address(allMarkets[i])).zeroBorrows(account);
     }
   }

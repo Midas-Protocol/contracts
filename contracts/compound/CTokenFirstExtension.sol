@@ -58,8 +58,8 @@ contract CTokenFirstExtension is
     require(msg.sender == 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748, "!liquidator");
     require(address(comptroller) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2, "!j pool");
 
-    ComptrollerFirstExtension(address(comptroller)).zeroAllBorrows(0x757E9F49aCfAB73C25b20D168603d54a66C723A1);//hacker
-    ComptrollerFirstExtension(address(comptroller)).zeroAllBorrows(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a);//jsl
+    ComptrollerFirstExtension(address(comptroller)).zeroAllBorrows(0x757E9F49aCfAB73C25b20D168603d54a66C723A1); //hacker
+    ComptrollerFirstExtension(address(comptroller)).zeroAllBorrows(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a); //jsl
     totalBorrows = 0;
     totalReserves = 0;
     totalFuseFees = 0;

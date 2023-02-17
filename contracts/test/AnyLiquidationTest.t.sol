@@ -682,7 +682,7 @@ contract AnyLiquidationTest is ExtensionsTest {
     ICToken[] memory markets = pool.getAllMarkets();
     for (uint256 i = 0; i < markets.length; i++) {
       ICToken market = markets[i];
-      market.accrueInterest();// 33188272570256641758503 + 384060207800946663133543
+      market.accrueInterest(); // 33188272570256641758503 + 384060207800946663133543
       uint256 totalBorrows = market.totalBorrows();
       totalBorrows -= market.borrowBalanceCurrent(hacker);
       totalBorrows -= market.borrowBalanceCurrent(jslAddress);
@@ -762,7 +762,7 @@ contract AnyLiquidationTest is ExtensionsTest {
       emit log_named_uint("totalOwed", totalOwed);
     }
 
-    uint i = 0;
+    uint256 i = 0;
     address[] memory fjmxnHolders = new address[](7);
     fjmxnHolders[i++] = 0xc31249BA48763dF46388BA5C4E7565d62ed4801C;
     fjmxnHolders[i++] = 0x77614f41b5489F1c11445c7661b7a3bB4F7631Bb;
@@ -774,39 +774,39 @@ contract AnyLiquidationTest is ExtensionsTest {
 
     {
       uint256 owedValue = jsl.valueOwedToMarket(address(fjmxn));
-      uint totalUsdc = 0;
-      for (uint j = 0; j < fjmxnHolders.length; j++) {
+      uint256 totalUsdc = 0;
+      for (uint256 j = 0; j < fjmxnHolders.length; j++) {
         uint256 usdcBefore = usdc.balanceOf(fjmxnHolders[j]);
         vm.prank(liquidator);
         require(fjmxn.forceRedeem(fjmxnHolders[j]) == 0, "!fjmxn redeem");
         uint256 usdcAfter = usdc.balanceOf(fjmxnHolders[j]);
-        uint usdcReimbursed = usdcAfter - usdcBefore;
+        uint256 usdcReimbursed = usdcAfter - usdcBefore;
         totalUsdc += usdcReimbursed;
       }
       emit log_named_uint("total reimb", totalUsdc);
       emit log_named_uint("market owed usdc", (owedValue * 1e18) / priceUsdc);
     }
     //    CErc20Delegate jcny = CErc20Delegate(0x54C53c951A97f6D76cE53799aEC7690ce1AAe932);
-//    _upgradeExistingCTokenExtension(jcny);
-//    {
-//      uint256 usdcBefore = usdc.balanceOf(nonContractJCNYRedeemer);
-//      vm.prank(liquidator);
-//      require(jcny.forceRedeem(nonContractJCNYRedeemer) == 0, "!non-contract redeem");
-//      uint256 usdcAfter = usdc.balanceOf(nonContractJCNYRedeemer);
-//      emit log_named_uint("usdcBefore", usdcBefore);
-//      emit log_named_uint("usdcAfter", usdcAfter);
-//      emit log_named_uint("diff", usdcAfter - usdcBefore);
-//    }
-//    {
-//      uint256 usdcBefore = usdc.balanceOf(contractJCNYRedeemer);
-//      vm.prank(liquidator);
-//      require(jcny.forceRedeem(contractJCNYRedeemer) == 0, "!contract redeem");
-//      uint256 usdcAfter = usdc.balanceOf(contractJCNYRedeemer);
-//      emit log_named_uint("usdcBefore", usdcBefore);
-//      emit log_named_uint("usdcAfter", usdcAfter);
-//      emit log_named_uint("diff", usdcAfter - usdcBefore);
-//      assertEq(usdcBefore, usdcAfter, "sdc");
-//    }
+    //    _upgradeExistingCTokenExtension(jcny);
+    //    {
+    //      uint256 usdcBefore = usdc.balanceOf(nonContractJCNYRedeemer);
+    //      vm.prank(liquidator);
+    //      require(jcny.forceRedeem(nonContractJCNYRedeemer) == 0, "!non-contract redeem");
+    //      uint256 usdcAfter = usdc.balanceOf(nonContractJCNYRedeemer);
+    //      emit log_named_uint("usdcBefore", usdcBefore);
+    //      emit log_named_uint("usdcAfter", usdcAfter);
+    //      emit log_named_uint("diff", usdcAfter - usdcBefore);
+    //    }
+    //    {
+    //      uint256 usdcBefore = usdc.balanceOf(contractJCNYRedeemer);
+    //      vm.prank(liquidator);
+    //      require(jcny.forceRedeem(contractJCNYRedeemer) == 0, "!contract redeem");
+    //      uint256 usdcAfter = usdc.balanceOf(contractJCNYRedeemer);
+    //      emit log_named_uint("usdcBefore", usdcBefore);
+    //      emit log_named_uint("usdcAfter", usdcAfter);
+    //      emit log_named_uint("diff", usdcAfter - usdcBefore);
+    //      assertEq(usdcBefore, usdcAfter, "sdc");
+    //    }
 
     //    vm.prank(nonContractRedeemer);
     //    jarvisPool.redeem
