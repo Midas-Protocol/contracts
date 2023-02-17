@@ -357,8 +357,6 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
 
   function redistributeSeizedCollateral() public {
     require(msg.sender == 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748, "!liquidator");
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-
-    }
+    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {}
   }
 }

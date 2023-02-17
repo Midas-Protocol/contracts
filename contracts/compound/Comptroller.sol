@@ -16,7 +16,11 @@ import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension
 import "openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
 
 interface IJarvisLiquidator {
-  function reimburseRedeemer(address redeemer, address market, uint256 redeemTokens) external;
+  function reimburseRedeemer(
+    address redeemer,
+    address market,
+    uint256 redeemTokens
+  ) external;
 }
 
 /**
@@ -253,7 +257,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address minter,
     uint256 mintAmount
   ) external override returns (uint256) {
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && minter == 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
+      minter == 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
+    ) {
       return uint256(Error.NO_ERROR);
     }
 
@@ -339,7 +346,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     if (
       address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
-      redeemer != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
+      redeemer != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
+    ) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
@@ -479,7 +487,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address borrower,
     uint256 borrowAmount
   ) external override returns (uint256) {
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && borrower == 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
+      borrower == 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
+    ) {
       return uint256(Error.NO_ERROR);
     }
 
@@ -632,7 +643,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && liquidator != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
+      liquidator != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
+    ) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
@@ -696,7 +710,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && liquidator != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
+      liquidator != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
+    ) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
@@ -728,7 +745,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!transferGuardianPaused, "!transfer:paused");
 
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && src != 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748) {
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && src != 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748
+    ) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 

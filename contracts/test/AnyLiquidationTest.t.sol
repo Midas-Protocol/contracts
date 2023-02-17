@@ -640,11 +640,11 @@ contract AnyLiquidationTest is ExtensionsTest {
     ComptrollerFirstExtension asCompExtension = ComptrollerFirstExtension(jarvisPoolAddress);
 
     CTokenInterface[] memory markets = asCompExtension.getAllMarkets();
-    for(uint i = 0; i < markets.length; i++) {
+    for (uint256 i = 0; i < markets.length; i++) {
       CTokenInterface market = markets[i];
       uint256 borrows = market.totalBorrows();
-      uint hackerBorrows = market.borrowBalanceStored(0x757E9F49aCfAB73C25b20D168603d54a66C723A1);
-      uint liquidatorBorrows = market.borrowBalanceStored(jslAddress);
+      uint256 hackerBorrows = market.borrowBalanceStored(0x757E9F49aCfAB73C25b20D168603d54a66C723A1);
+      uint256 liquidatorBorrows = market.borrowBalanceStored(jslAddress);
 
       if (borrows - hackerBorrows - liquidatorBorrows > 0) {
         emit log_named_address("market", address(market));
@@ -655,21 +655,20 @@ contract AnyLiquidationTest is ExtensionsTest {
       }
     }
 
-//    address[] memory borrowers = asCompExtension.getAllBorrowers();
-//    for(uint256 i = 0; i < borrowers.length; i++) {
-//      if (borrowers[i] != 0x757E9F49aCfAB73C25b20D168603d54a66C723A1 && borrowers[i] != 0x6da2d84d390f12a6c49afe7b677a6a2b8e0d961a) {
-//        CTokenInterface jeur = CTokenInterface(0xe150e792e0a18C9984a0630f051a607dEe3c265d);
-//        uint256 borrows = jeur.borrowBalanceStored(borrowers[i]);
-//        if (borrows  > 0) {
-//          emit log_named_address("borrower", borrowers[i]);
-//          emit log_named_uint("debt", borrows);
-//        }
-//      }
-//    }
+    //    address[] memory borrowers = asCompExtension.getAllBorrowers();
+    //    for(uint256 i = 0; i < borrowers.length; i++) {
+    //      if (borrowers[i] != 0x757E9F49aCfAB73C25b20D168603d54a66C723A1 && borrowers[i] != 0x6da2d84d390f12a6c49afe7b677a6a2b8e0d961a) {
+    //        CTokenInterface jeur = CTokenInterface(0xe150e792e0a18C9984a0630f051a607dEe3c265d);
+    //        uint256 borrows = jeur.borrowBalanceStored(borrowers[i]);
+    //        if (borrows  > 0) {
+    //          emit log_named_address("borrower", borrowers[i]);
+    //          emit log_named_uint("debt", borrows);
+    //        }
+    //      }
+    //    }
   }
 
   address usdcAddress = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
-
 
   function testEvaluateCollateral() public debuggingOnly fork(POLYGON_MAINNET) {
     Comptroller jarvisPool = Comptroller(jarvisPoolAddress);
@@ -680,7 +679,7 @@ contract AnyLiquidationTest is ExtensionsTest {
     uint256 totalUsdcValue = 0;
 
     ICToken[] memory markets = pool.getAllMarkets();
-    for(uint i = 0; i < markets.length; i++) {
+    for (uint256 i = 0; i < markets.length; i++) {
       ICToken market = markets[i];
       uint256 balanceOfUnderlying = market.balanceOfUnderlying(jslAddress);
       uint256 price = mpo.getUnderlyingPrice(market);
@@ -718,7 +717,7 @@ contract AnyLiquidationTest is ExtensionsTest {
 
     vm.prank(liquidator);
     IERC20Upgradeable[] memory outputTokens = jsl.redistributeCollateral();
-    for (uint i = 0; i < outputTokens.length; i++) {
+    for (uint256 i = 0; i < outputTokens.length; i++) {
       if (address(outputTokens[i]) != address(0)) {
         uint256 balance = outputTokens[i].balanceOf(jslAddress);
         emit log_named_address("token", address(outputTokens[i]));
@@ -736,35 +735,33 @@ contract AnyLiquidationTest is ExtensionsTest {
     emit log_named_uint("owedm to market", owed);
     emit log_named_uint("totalOwed", totalOwed);
 
-//    _upgradeExistingCTokenExtension(jcny);
-//
-//    uint256 usdcBefore = usdc.balanceOf(nonContractJCNYRedeemer);
-//    vm.prank(liquidator);
-//    require(jcny.forceRedeem(nonContractJCNYRedeemer) == 0, "!non-contract redeem");
-//    uint256 usdcAfter = usdc.balanceOf(nonContractJCNYRedeemer);
-//
-//    require(usdcAfter > usdcBefore, "redeem reimburse");
+    //    _upgradeExistingCTokenExtension(jcny);
+    //
+    //    uint256 usdcBefore = usdc.balanceOf(nonContractJCNYRedeemer);
+    //    vm.prank(liquidator);
+    //    require(jcny.forceRedeem(nonContractJCNYRedeemer) == 0, "!non-contract redeem");
+    //    uint256 usdcAfter = usdc.balanceOf(nonContractJCNYRedeemer);
+    //
+    //    require(usdcAfter > usdcBefore, "redeem reimburse");
 
+    //    vm.prank(nonContractRedeemer);
+    //    jarvisPool.redeem
 
-//    vm.prank(nonContractRedeemer);
-//    jarvisPool.redeem
-
-
-//    IComptroller pool = IComptroller(jarvisPoolAddress);
-//    MasterPriceOracle mpo = MasterPriceOracle(address(pool.oracle()));
-//    uint256 totalBorrowsValue = 0;
-//    ICToken[] memory markets = pool.getAllMarkets();
-//    for(uint i = 0; i < markets.length; i++) {
-//      uint256 jslBorrows = markets[i].borrowBalanceStored(jslAddress);
-//      if (jslBorrows > 0) {
-//        emit log_named_address("market", address(markets[i]));
-//        emit log_named_uint("borrows", jslBorrows);
-//        totalBorrowsValue += (mpo.getUnderlyingPrice(markets[i]) * jslBorrows) / 1e18;
-//        emit log("");
-//      }
-//    }
-//
-//    uint256 priceUsdc = mpo.price(usdcAddress);
-//    emit log_named_uint("total borrows value", (totalBorrowsValue * 1e18) / priceUsdc);
+    //    IComptroller pool = IComptroller(jarvisPoolAddress);
+    //    MasterPriceOracle mpo = MasterPriceOracle(address(pool.oracle()));
+    //    uint256 totalBorrowsValue = 0;
+    //    ICToken[] memory markets = pool.getAllMarkets();
+    //    for(uint i = 0; i < markets.length; i++) {
+    //      uint256 jslBorrows = markets[i].borrowBalanceStored(jslAddress);
+    //      if (jslBorrows > 0) {
+    //        emit log_named_address("market", address(markets[i]));
+    //        emit log_named_uint("borrows", jslBorrows);
+    //        totalBorrowsValue += (mpo.getUnderlyingPrice(markets[i]) * jslBorrows) / 1e18;
+    //        emit log("");
+    //      }
+    //    }
+    //
+    //    uint256 priceUsdc = mpo.price(usdcAddress);
+    //    emit log_named_uint("total borrows value", (totalBorrowsValue * 1e18) / priceUsdc);
   }
 }
