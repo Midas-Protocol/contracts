@@ -626,12 +626,6 @@ contract AnyLiquidationTest is ExtensionsTest {
     return returndata;
   }
 
-  function testJarvisLiquidation() public debuggingOnly fork(POLYGON_MAINNET) {
-    JarvisSafeLiquidator jsl = JarvisSafeLiquidator(payable(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a));
-    vm.prank(0x19F2bfCA57FDc1B7406337391d2F54063CaE8748);
-    jsl.redeemAllCollateral();
-  }
-
   function testRawLiquidation() public debuggingOnly fork(POLYGON_MAINNET) {
     vm.prank(0x19F2bfCA57FDc1B7406337391d2F54063CaE8748);
     _functionCall(
