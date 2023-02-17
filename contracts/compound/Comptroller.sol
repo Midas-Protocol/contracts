@@ -82,19 +82,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     fuseAdmin = _fuseAdmin;
   }
 
-  function isMarketExploited(address cToken) internal pure returns (bool) {
-    address agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
-    address jchfMarketAddress = 0x62Bdc203403e7d44b75f357df0897f2e71F607F3;
-    address jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
-    address jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
-
-    return
-      cToken == agEurMarketAddress ||
-      cToken == jchfMarketAddress ||
-      cToken == jeurMarketAddress ||
-      cToken == jgbpMarketAddress;
-  }
-
   /*** Assets You Are In ***/
 
   /**
@@ -352,6 +339,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     if (err != Error.NO_ERROR) {
       return uint256(err);
     }
+
     if (shortfall > 0) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
@@ -379,10 +367,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     require(markets[msg.sender].isListed, "!market");
 
     if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      if (!AddressUpgradeable.isContract(redeemer)) {
-        address jsl = 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a;
-        IJarvisLiquidator(jsl).reimburseRedeemer(redeemer, msg.sender, redeemTokens);
-      }
+      require(!AddressUpgradeable.isContract(redeemer), "force redeem contract");
+      IJarvisLiquidator(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a).reimburseRedeemer(redeemer, msg.sender, redeemTokens);
     }
 
     // Require tokens is zero or amount is also zero
@@ -675,10 +661,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
-    if (
-      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
-      liquidator != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
-    ) {
+    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 

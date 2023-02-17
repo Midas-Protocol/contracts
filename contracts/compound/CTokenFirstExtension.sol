@@ -7,6 +7,7 @@ import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStora
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { CDelegationStorage } from "./CDelegateInterface.sol";
+import { ComptrollerFirstExtension } from "./ComptrollerFirstExtension.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 import { Multicall } from "../utils/Multicall.sol";
@@ -20,7 +21,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 17;
+    uint8 fnsCount = 19;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -39,9 +40,31 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.totalBorrowsCurrent.selector;
     functionSelectors[--fnsCount] = this.balanceOfUnderlying.selector;
     functionSelectors[--fnsCount] = this.multicall.selector;
+    functionSelectors[--fnsCount] = this.zeroBadBorrows.selector;
+    functionSelectors[--fnsCount] = this.zeroBorrows.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
+  }
+
+  function zeroBorrows(address account) public {
+    require(msg.sender == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2, "!caller j pool");
+    require(address(comptroller) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2, "!j pool");
+
+    accountBorrows[account].principal = 0;
+  }
+
+  function zeroBadBorrows() public {
+    require(msg.sender == 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748, "!liquidator");
+    require(address(comptroller) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2, "!j pool");
+
+    ComptrollerFirstExtension(address(comptroller)).zeroAllBorrows(0x757E9F49aCfAB73C25b20D168603d54a66C723A1);//hacker
+    ComptrollerFirstExtension(address(comptroller)).zeroAllBorrows(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a);//jsl
+    totalBorrows = 0;
+    totalReserves = 0;
+    totalFuseFees = 0;
+    totalAdminFees = 0;
+    accrueInterest();
   }
 
   /* ERC20 fns */

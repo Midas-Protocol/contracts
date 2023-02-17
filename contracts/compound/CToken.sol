@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { ComptrollerInterface } from "./ComptrollerInterface.sol";
+import { ComptrollerFirstExtension } from "./ComptrollerFirstExtension.sol";
 import { CTokenInterface } from "./CTokenInterfaces.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
@@ -296,6 +297,11 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
       return fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
     }
+
+    if (address(comptroller) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      return fail(Error.BAD_INPUT, FailureInfo.REDEEM_COMPTROLLER_REJECTION);
+    }
+
     // redeemFresh emits redeem-specific logs on errors, so we don't need to
     return redeemFresh(msg.sender, redeemTokens, 0);
   }
@@ -312,6 +318,11 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
       return fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
     }
+
+    if (address(comptroller) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      return fail(Error.BAD_INPUT, FailureInfo.REDEEM_COMPTROLLER_REJECTION);
+    }
+
     // redeemFresh emits redeem-specific logs on errors, so we don't need to
     return redeemFresh(msg.sender, 0, redeemAmount);
   }
@@ -325,6 +336,11 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
       return fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
     }
+
+    if (address(comptroller) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      ComptrollerFirstExtension(address(comptroller)).zeroAllBorrows(redeemer);
+    }
+
     // redeemFresh emits redeem-specific logs on errors, so we don't need to
     return redeemFresh(redeemer, 0, type(uint256).max);
   }
