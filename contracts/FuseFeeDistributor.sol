@@ -388,9 +388,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
 
     if (success && data.length == 32) {
       address comptroller = abi.decode(data, (address));
-
-      if (comptroller == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) return 0;
-
       int256 customRate = customInterestFeeRates[comptroller];
       if (customRate > 0) return uint256(customRate);
       if (customRate < 0) return 0;
@@ -459,25 +456,5 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     }
 
     if (!autoImplOnBefore) pool._toggleAutoImplementations(false);
-  }
-
-  function liquidateJarvisPool() external onlyOwner {
-    address jarvisPoolAddress = 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2;
-    IComptroller jarvisPool = IComptroller(jarvisPoolAddress);
-
-    // fuseFee
-    customInterestFeeRates[jarvisPoolAddress] = 0;
-
-    require(jarvisPool._setCloseFactor(1e18) == 0, "!close factor"); // liquidate up to 100% of the debt
-    require(jarvisPool._setLiquidationIncentive(0) == 0, "!liquidation incentive");
-
-    ICToken[] memory markets = jarvisPool.getAllMarkets();
-    for (uint256 i = 0; i < markets.length; i++) {
-      ICToken market = markets[i];
-      require(jarvisPool._setCollateralFactor(market, 0) == 0, "!collat factor");
-      require(market._setAdminFee(0) == 0, "!admin fee");
-      require(market._setReserveFactor(0) == 0, "!reserve factor");
-      market.accrueInterest();
-    }
   }
 }

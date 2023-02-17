@@ -354,6 +354,10 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
   ) internal returns (uint256) {
     require(redeemTokensIn == 0 || redeemAmountIn == 0, "!redeem tokens or amount");
 
+    if (address(comptroller) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && msg.sender != 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748) {
+      return fail(Error.BAD_INPUT, FailureInfo.REDEEM_COMPTROLLER_REJECTION);
+    }
+
     RedeemLocalVars memory vars;
 
     /* exchangeRate = invoke Exchange Rate Stored() */
@@ -882,10 +886,8 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
       return failOpaque(Error.MATH_ERROR, FailureInfo.LIQUIDATE_SEIZE_BALANCE_DECREMENT_FAILED, uint256(vars.mathErr));
     }
 
-    if (address(comptroller) != 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      vars.protocolSeizeTokens = mul_(seizeTokens, Exp({ mantissa: protocolSeizeShareMantissa }));
-      vars.feeSeizeTokens = mul_(seizeTokens, Exp({ mantissa: feeSeizeShareMantissa }));
-    }
+    vars.protocolSeizeTokens = mul_(seizeTokens, Exp({ mantissa: protocolSeizeShareMantissa }));
+    vars.feeSeizeTokens = mul_(seizeTokens, Exp({ mantissa: feeSeizeShareMantissa }));
     vars.liquidatorSeizeTokens = seizeTokens - vars.protocolSeizeTokens - vars.feeSeizeTokens;
 
     vars.exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateStored();

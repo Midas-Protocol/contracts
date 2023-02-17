@@ -189,7 +189,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     require(oErr == 0, "!exitMarket"); // semi-opaque error code
 
     /* Fail if the sender has a borrow balance */
-    if (amountOwed != 0 && msg.sender != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
+    if (amountOwed != 0) {
       return fail(Error.NONZERO_BORROW_BALANCE, FailureInfo.EXIT_MARKET_BALANCE_OWED);
     }
 
@@ -257,13 +257,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address minter,
     uint256 mintAmount
   ) external override returns (uint256) {
-    if (
-      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
-      minter == 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
-    ) {
-      return uint256(Error.NO_ERROR);
-    }
-
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!mintGuardianPaused[cToken], "!mint:paused");
 
@@ -344,13 +337,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
-    if (
-      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
-      redeemer != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
-    ) {
-      return uint256(Error.INSUFFICIENT_LIQUIDITY);
-    }
-
     /* If the redeemer is not 'in' the market, then we can bypass the liquidity check */
     if (!markets[cToken].accountMembership[redeemer]) {
       return uint256(Error.NO_ERROR);
@@ -416,9 +402,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     if (
       address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
-      !isBorrow &&
-      account == 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
-    ) return balanceOfUnderlying;
+      !isBorrow) return balanceOfUnderlying;
 
     // Get account liquidity
     (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
@@ -487,13 +471,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address borrower,
     uint256 borrowAmount
   ) external override returns (uint256) {
-    if (
-      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
-      borrower == 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
-    ) {
-      return uint256(Error.NO_ERROR);
-    }
-
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!borrowGuardianPaused[cToken], "!borrow:paused");
 
@@ -631,23 +608,13 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Shh - currently unused
     liquidator;
 
-    if (
-      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
-      liquidator != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
-    ) {
-      return uint256(Error.UNAUTHORIZED);
+    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
     // Make sure markets are listed
     if (!markets[cTokenBorrowed].isListed || !markets[cTokenCollateral].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
-    }
-
-    if (
-      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
-      liquidator != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
-    ) {
-      return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
     // Get borrowers' underlying borrow balance
@@ -745,9 +712,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!transferGuardianPaused, "!transfer:paused");
 
-    if (
-      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && src != 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748
-    ) {
+    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
@@ -902,11 +867,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       uint256
     )
   {
-    if (
-      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
-      account == 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a
-    ) return (Error.NO_ERROR, 0, 0);
-
     AccountLiquidityLocalVars memory vars; // Holds all our calculation results
     uint256 oErr;
 
@@ -1053,10 +1013,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       Exp({ mantissa: feeSeizeShareMantissa })
     );
 
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      totalPenaltyMantissa = Exp({ mantissa: 1e18 });
-    }
-
     numerator = mul_(totalPenaltyMantissa, Exp({ mantissa: priceBorrowedMantissa }));
     denominator = mul_(Exp({ mantissa: priceCollateralMantissa }), Exp({ mantissa: exchangeRateMantissa }));
     ratio = div_(numerator, denominator);
@@ -1195,11 +1151,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return fail(Error.INVALID_CLOSE_FACTOR, FailureInfo.SET_CLOSE_FACTOR_VALIDATION);
     }
 
-    if (address(this) != 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      Exp memory highLimit = Exp({ mantissa: closeFactorMaxMantissa });
-      if (lessThanExp(highLimit, newCloseFactorExp)) {
-        return fail(Error.INVALID_CLOSE_FACTOR, FailureInfo.SET_CLOSE_FACTOR_VALIDATION);
-      }
+    Exp memory highLimit = Exp({ mantissa: closeFactorMaxMantissa });
+    if (lessThanExp(highLimit, newCloseFactorExp)) {
+      return fail(Error.INVALID_CLOSE_FACTOR, FailureInfo.SET_CLOSE_FACTOR_VALIDATION);
     }
 
     // Set pool close factor to new close factor, remember old value
@@ -1266,18 +1220,16 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_LIQUIDATION_INCENTIVE_OWNER_CHECK);
     }
 
-    if (address(this) != 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      // Check de-scaled min <= newLiquidationIncentive <= max
-      Exp memory newLiquidationIncentive = Exp({ mantissa: newLiquidationIncentiveMantissa });
-      Exp memory minLiquidationIncentive = Exp({ mantissa: liquidationIncentiveMinMantissa });
-      if (lessThanExp(newLiquidationIncentive, minLiquidationIncentive)) {
-        return fail(Error.INVALID_LIQUIDATION_INCENTIVE, FailureInfo.SET_LIQUIDATION_INCENTIVE_VALIDATION);
-      }
+    // Check de-scaled min <= newLiquidationIncentive <= max
+    Exp memory newLiquidationIncentive = Exp({ mantissa: newLiquidationIncentiveMantissa });
+    Exp memory minLiquidationIncentive = Exp({ mantissa: liquidationIncentiveMinMantissa });
+    if (lessThanExp(newLiquidationIncentive, minLiquidationIncentive)) {
+      return fail(Error.INVALID_LIQUIDATION_INCENTIVE, FailureInfo.SET_LIQUIDATION_INCENTIVE_VALIDATION);
+    }
 
-      Exp memory maxLiquidationIncentive = Exp({ mantissa: liquidationIncentiveMaxMantissa });
-      if (lessThanExp(maxLiquidationIncentive, newLiquidationIncentive)) {
-        return fail(Error.INVALID_LIQUIDATION_INCENTIVE, FailureInfo.SET_LIQUIDATION_INCENTIVE_VALIDATION);
-      }
+    Exp memory maxLiquidationIncentive = Exp({ mantissa: liquidationIncentiveMaxMantissa });
+    if (lessThanExp(maxLiquidationIncentive, newLiquidationIncentive)) {
+      return fail(Error.INVALID_LIQUIDATION_INCENTIVE, FailureInfo.SET_LIQUIDATION_INCENTIVE_VALIDATION);
     }
 
     // Save current value for use in log
@@ -1436,12 +1388,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    * @param cToken The market to check if deprecated
    */
   function isDeprecated(CTokenInterface cToken) public view returns (bool) {
-    uint256 feesSum = add_(add_(cToken.reserveFactorMantissa(), cToken.adminFeeMantissa()), cToken.fuseFeeMantissa());
-    // TODO deprecate jarvis markets
     return
       markets[address(cToken)].collateralFactorMantissa == 0 &&
       borrowGuardianPaused[address(cToken)] == true &&
-      (feesSum == 0 || feesSum == 1e18);
+      add_(add_(cToken.reserveFactorMantissa(), cToken.adminFeeMantissa()), cToken.fuseFeeMantissa()) == 1e18;
   }
 
   function asComptrollerFirstExtension() public view returns (ComptrollerFirstExtension) {

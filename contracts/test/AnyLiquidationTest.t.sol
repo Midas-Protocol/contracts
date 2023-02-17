@@ -713,21 +713,9 @@ contract AnyLiquidationTest is ExtensionsTest {
     Unitroller asUnitroller = Unitroller(jarvisPoolAddress);
     _upgradeExistingComptroller(asUnitroller);
 
-    require(usdc.balanceOf(jslAddress) == 0, "usdc before");
-
-    vm.prank(liquidator);
-    IERC20Upgradeable[] memory outputTokens = jsl.redistributeCollateral();
-    for (uint256 i = 0; i < outputTokens.length; i++) {
-      if (address(outputTokens[i]) != address(0)) {
-        uint256 balance = outputTokens[i].balanceOf(jslAddress);
-        emit log_named_address("token", address(outputTokens[i]));
-        emit log_named_uint("balance", balance);
-        emit log("");
-      }
-    }
-    require(usdc.balanceOf(jslAddress) > 0, "usdc after");
 
     CErc20Delegate jcny = CErc20Delegate(0x54C53c951A97f6D76cE53799aEC7690ce1AAe932);
+    _upgradeExistingCTokenExtension(jcny);
 
     uint256 owed = jsl.valueOwedToMarket(address(jcny));
     uint256 totalOwed = jsl.totalValueOwedToMarkets();
@@ -735,14 +723,14 @@ contract AnyLiquidationTest is ExtensionsTest {
     emit log_named_uint("owedm to market", owed);
     emit log_named_uint("totalOwed", totalOwed);
 
-    //    _upgradeExistingCTokenExtension(jcny);
-    //
-    //    uint256 usdcBefore = usdc.balanceOf(nonContractJCNYRedeemer);
-    //    vm.prank(liquidator);
-    //    require(jcny.forceRedeem(nonContractJCNYRedeemer) == 0, "!non-contract redeem");
-    //    uint256 usdcAfter = usdc.balanceOf(nonContractJCNYRedeemer);
-    //
-    //    require(usdcAfter > usdcBefore, "redeem reimburse");
+
+    uint256 usdcBefore = usdc.balanceOf(nonContractJCNYRedeemer);
+    vm.prank(liquidator);
+    require(jcny.forceRedeem(nonContractJCNYRedeemer) == 0, "!non-contract redeem");
+    uint256 usdcAfter = usdc.balanceOf(nonContractJCNYRedeemer);
+    emit log_named_uint("usdcBefore", usdcBefore);
+    emit log_named_uint("usdcAfter", usdcAfter);
+    emit log_named_uint("diff", usdcAfter - usdcBefore);
 
     //    vm.prank(nonContractRedeemer);
     //    jarvisPool.redeem
