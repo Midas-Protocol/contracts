@@ -316,7 +316,6 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
     }
   }
 
-
   function array(address a, address b) private pure returns (address[] memory) {
     address[] memory arr = new address[](2);
     arr[0] = a;

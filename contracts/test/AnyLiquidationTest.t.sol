@@ -713,7 +713,6 @@ contract AnyLiquidationTest is ExtensionsTest {
     Unitroller asUnitroller = Unitroller(jarvisPoolAddress);
     _upgradeExistingComptroller(asUnitroller);
 
-
     CErc20Delegate jcny = CErc20Delegate(0x54C53c951A97f6D76cE53799aEC7690ce1AAe932);
     _upgradeExistingCTokenExtension(jcny);
 
@@ -722,7 +721,6 @@ contract AnyLiquidationTest is ExtensionsTest {
 
     emit log_named_uint("owedm to market", owed);
     emit log_named_uint("totalOwed", totalOwed);
-
 
     uint256 usdcBefore = usdc.balanceOf(nonContractJCNYRedeemer);
     vm.prank(liquidator);
