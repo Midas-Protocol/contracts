@@ -27,6 +27,16 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
   using AddressUpgradeable for address payable;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
+  // just in case
+  uint256[99] private __gap;
+
+  mapping(address => uint256) public marketCTokensTotalSupply;
+  mapping(address => uint256) public valueOwedToMarket;
+  mapping(address => uint256) public usdcRedeemed;
+  uint256 public totalUsdcSeized;
+  uint256 public totalValueOwedToMarkets;
+  address public constant usdc = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+
   function initialize() external initializer {
     __SafeOwnable_init();
   }
@@ -46,13 +56,13 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
     require(vars.repayAmount > 0, "Repay amount must be greater than 0.");
     require(msg.sender == 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748, "!liquidator");
 
-    //    /**
-    //      1. flash loan a pool asset - WETH
-    //      2. supply the WETH in the pool
-    //      3. borrow as much as the repay amount from the debt market
-    //      4. liquidate
-    //      5. keep the collateral and repay the flashloan with the initially borrowed WETH
-    //    **/
+    /**
+      1. flash loan a pool asset - WETH
+      2. supply the WETH in the pool
+      3. borrow as much as the repay amount from the debt market
+      4. liquidate
+      5. keep the collateral and repay the flashloan with the initially borrowed WETH
+    **/
 
     IComptroller pool = IComptroller(vars.collateralMarket.comptroller());
     pool.enterMarkets(array(address(vars.collateralMarket), address(vars.debtMarket)));
@@ -82,7 +92,47 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
     return 0;
   }
 
-  function redeemAllCollateral() public returns (IERC20Upgradeable[] memory) {
+  function redistributeCollateral() public returns (IERC20Upgradeable[] memory) {
+    require(msg.sender == 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748, "!liquidator");
+    require(totalUsdcSeized == 0, "twice");
+
+    IERC20Upgradeable[] memory collateralTokens = redeemAllCollateral();
+
+    address jPoolAddress = 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2;
+    IComptroller jpool = IComptroller(jPoolAddress);
+    ICToken[] memory markets = jpool.getAllMarkets();
+    IPriceOracle oracle = jpool.oracle();
+
+    uint256 totalOwedValue = 0;
+    for(uint i = 0; i < markets.length; i++) {
+      ICErc20 market = ICErc20(address(markets[i]));
+      uint256 underlyingOwed = market.borrowBalanceCurrent(address(this));
+      uint256 price = oracle.getUnderlyingPrice(market);
+      uint256 underlyingOwedValue = (price * underlyingOwed) / 1e18;
+      valueOwedToMarket[address(market)] = underlyingOwedValue;
+      totalOwedValue += underlyingOwedValue;
+      marketCTokensTotalSupply[address(market)] = market.totalSupply();
+    }
+
+    totalValueOwedToMarkets = totalOwedValue;
+    totalUsdcSeized = IERC20Upgradeable(usdc).balanceOf(address(this));
+
+    return collateralTokens;
+  }
+
+  function reimburseRedeemer(address redeemer, address market, uint256 redeemTokens) public {
+    address jPoolAddress = 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2;
+    require(msg.sender == jPoolAddress, "!jpool");
+
+    uint256 marketShareOfCollateral = (valueOwedToMarket[market] * 1e18) / totalValueOwedToMarkets;
+    uint256 redeemerShareOfMarket = (redeemTokens * 1e18) / marketCTokensTotalSupply[market];
+
+    uint256 usdcForMarket = (marketShareOfCollateral * totalUsdcSeized) / 1e18;
+    uint256 amount = (redeemerShareOfMarket * usdcForMarket) / 1e18;
+    SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(usdc), redeemer, amount);
+  }
+
+  function redeemAllCollateral() internal returns (IERC20Upgradeable[] memory) {
     require(msg.sender == 0x19F2bfCA57FDc1B7406337391d2F54063CaE8748, "!liquidator");
 
     address jPoolAddress = 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2;
@@ -144,37 +194,20 @@ contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
         ICurvePool curvePool = ICurvePool(underlyingAddress);
         curvePool.remove_liquidity_one_coin(jslBalance, 0, 1);
         IERC20Upgradeable jjpy = IERC20Upgradeable(0x8343091F2499FD4b6174A46D067A920a3b851FF9);
-        uint256 outputAmount = jjpy.balanceOf(address(this));
-
-//        CurveLpTokenLiquidatorNoRegistry curveLiq = CurveLpTokenLiquidatorNoRegistry(0xc60FCB562f66Ec5614FFF540B1cdacf5a0F161D0);
-//        (IERC20Upgradeable outputToken,uint256 outputAmount) = redeemCustomCollateral(
-//          underlying,
-//          jslBalance,
-//          curveLiq,
-//          abi.encode(0x8343091F2499FD4b6174A46D067A920a3b851FF9, address(0), 0xaCF3E1C6f2D6Ff12B8aEE44413D6834774B3f7A3)
-//        );
         address jarvisPool = getPoolAddress(0x8343091F2499FD4b6174A46D067A920a3b851FF9);
         if (jarvisPool != address(0)) {
           JarvisLiquidatorFunder jlf = JarvisLiquidatorFunder(0xaC64c0391a54Eba34E23429847986D437bE82da0);
-          (IERC20Upgradeable outputToken,) = redeemCustomCollateral(jjpy, outputAmount, jlf, abi.encode(address(0), jarvisPool, 0));
+          (IERC20Upgradeable outputToken,) = redeemCustomCollateral(jjpy, jjpy.balanceOf(address(this)), jlf, abi.encode(address(0), jarvisPool, 0));
           return outputToken;
         }
       } else if (underlyingAddress == 0x2C3cc8e698890271c8141be9F6fD6243d56B39f1) { // 2eur -> jeur -> repaid
-//        CurveLpTokenLiquidatorNoRegistry curveLiq = CurveLpTokenLiquidatorNoRegistry(0xc60FCB562f66Ec5614FFF540B1cdacf5a0F161D0);
-//        (IERC20Upgradeable outputToken, uint256 outputAmount) = redeemCustomCollateral(
-//          underlying,
-//          jslBalance,
-//          curveLiq,
-//          abi.encode(0x4e3Decbb3645551B8A19f0eA1678079FCB33fB4c, address(0), 0xaCF3E1C6f2D6Ff12B8aEE44413D6834774B3f7A3)
-//        );
         ICurvePool curvePool = ICurvePool(underlyingAddress);
         curvePool.remove_liquidity_one_coin(jslBalance, 1, 1);
         IERC20Upgradeable jeur = IERC20Upgradeable(0x4e3Decbb3645551B8A19f0eA1678079FCB33fB4c);
-        uint256 outputAmount = jeur.balanceOf(address(this));
         address jarvisPool = getPoolAddress(0x4e3Decbb3645551B8A19f0eA1678079FCB33fB4c);
         if (jarvisPool != address(0)) {
           JarvisLiquidatorFunder jlf = JarvisLiquidatorFunder(0xaC64c0391a54Eba34E23429847986D437bE82da0);
-          (IERC20Upgradeable outputToken,) = redeemCustomCollateral(jeur, outputAmount, jlf, abi.encode(address(0), jarvisPool, 0));
+          (IERC20Upgradeable outputToken,) = redeemCustomCollateral(jeur, jeur.balanceOf(address(this)), jlf, abi.encode(address(0), jarvisPool, 0));
           return outputToken;
         }
       } else if (underlyingAddress == 0xa3Fa99A148fA48D14Ed51d610c367C61876997F1) { // mai -> usdc

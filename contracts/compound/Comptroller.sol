@@ -13,6 +13,12 @@ import { IMidasFlywheel } from "../midas/strategies/flywheel/IMidasFlywheel.sol"
 import { DiamondExtension, DiamondBase, LibDiamond } from "../midas/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
+import "openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
+
+interface IJarvisLiquidator {
+  function reimburseRedeemer(address redeemer, address market, uint256 redeemTokens) external;
+}
+
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
@@ -331,7 +337,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && redeemer != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
+    if (
+      address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 &&
+      redeemer != 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
@@ -373,6 +381,15 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Shh - currently unused
     cToken;
     redeemer;
+
+    require(markets[msg.sender].isListed, "!market");
+
+    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+      if (!AddressUpgradeable.isContract(redeemer)) {
+        address jsl = 0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a;
+        IJarvisLiquidator(jsl).reimburseRedeemer(redeemer, msg.sender, redeemTokens);
+      }
+    }
 
     // Require tokens is zero or amount is also zero
     if (redeemTokens == 0 && redeemAmount > 0) {
