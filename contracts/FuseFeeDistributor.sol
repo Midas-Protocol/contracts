@@ -441,11 +441,10 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     IComptroller pool = IComptroller(poolAddress);
     bool autoImplOnBefore = pool.autoImplementation();
 
+    ICToken[] memory markets = pool.getAllMarkets();
     pool._toggleAutoImplementations(true);
 
     pool.enterMarkets(new address[](0));
-
-    ICToken[] memory markets = pool.getAllMarkets();
 
     for (uint8 i = 0; i < markets.length; i++) {
       address marketAddress = address(markets[i]);

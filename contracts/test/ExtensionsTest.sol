@@ -368,7 +368,7 @@ contract ExtensionsTest is BaseTest {
   }
 
   function testBulkAutoUpgrade() public debuggingOnly fork(POLYGON_MAINNET) {
-    CErc20Delegate market = CErc20Delegate(0x0db51E5255E44751b376738d8979D969AD70bff6);
+    CErc20Delegate market = CErc20Delegate(0x17A6922ADE40e8aE783b0f6b8931Faeca4a5A264);
 
     address implBefore = market.implementation();
 
