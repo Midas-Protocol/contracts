@@ -8,7 +8,7 @@ import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
 
 import { IBalancerStablePool } from "../../external/balancer/IBalancerStablePool.sol";
-import { IBalancerVault } from "../../external/balancer/IBalancerVault.sol";
+import { IBalancerVault, UserBalanceOp } from "../../external/balancer/IBalancerVault.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
 
 import { BasePriceOracle } from "../BasePriceOracle.sol";
@@ -62,6 +62,11 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
   }
 
+  function ensureNotInVaultContext(IBalancerVault vault) internal {
+    UserBalanceOp[] memory noop = new UserBalanceOp[](0);
+    vault.manageUserBalance(noop);
+  }
+
   /**
    * @dev Fetches the fair LP token/ETH price from Balancer, with 18 decimals of precision.
    * Source: https://github.com/AlphaFinanceLab/homora-v2/blob/master/contracts/oracle/BalancerPairOracle.sol
@@ -69,6 +74,14 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
   function _price(address underlying) internal view virtual returns (uint256) {
     IBalancerStablePool pool = IBalancerStablePool(underlying);
 
+    // read-only re-entracy protection
+    (bool callSuccess, ) = address(this).staticcall(
+      abi.encodeWithSignature("ensureNotInVaultContext(IBalancerVault)", pool.getVault())
+    );
+
+    if (!callSuccess) {
+      return 0;
+    }
     // Returns the BLP Token / Base Token rate
     uint256 rate = pool.getRate();
     uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(baseTokens[underlying]);

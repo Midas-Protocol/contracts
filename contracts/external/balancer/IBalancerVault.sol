@@ -3,7 +3,26 @@ pragma solidity >=0.8.0;
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
+interface IAsset {}
+
+enum UserBalanceOpKind {
+  DEPOSIT_INTERNAL,
+  WITHDRAW_INTERNAL,
+  TRANSFER_INTERNAL,
+  TRANSFER_EXTERNAL
+}
+
+struct UserBalanceOp {
+  UserBalanceOpKind kind;
+  IAsset asset;
+  uint256 amount;
+  address sender;
+  address payable recipient;
+}
+
 interface IBalancerVault {
+  function manageUserBalance(UserBalanceOp[] memory ops) external payable;
+
   function getPoolTokens(bytes32 poolId)
     external
     view
