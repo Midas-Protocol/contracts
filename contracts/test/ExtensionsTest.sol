@@ -103,6 +103,16 @@ contract ExtensionsTest is BaseTest {
       Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
       _upgradeExistingComptroller(asUnitroller);
     }
+
+    // upgrade
+    {
+      FuseFeeDistributor newImpl = new FuseFeeDistributor();
+      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
+      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
+      address admin = address(uint160(uint256(bytesAtSlot)));
+      vm.prank(admin);
+      proxy.upgradeTo(address(newImpl));
+    }
   }
 
   function _upgradeExistingComptroller(Unitroller asUnitroller) internal {
@@ -306,9 +316,9 @@ contract ExtensionsTest is BaseTest {
   }
 
   function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
+    Comptroller pool = Comptroller(address(asDelegate.comptroller()));
     _prepareCTokenUpgrade(asDelegate);
 
-    Comptroller pool = Comptroller(address(asDelegate.comptroller()));
     // turn auto impl on
     vm.prank(pool.admin());
     pool._toggleAutoImplementations(true);
