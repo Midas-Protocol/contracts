@@ -21,6 +21,7 @@ import { MasterPriceOracle } from "../MasterPriceOracle.sol";
  * @notice BalancerLpStablePoolPriceOracle is a price oracle for Balancer LP tokens.
  * @dev Implements the `PriceOracle` interface used by Midas pools (and Compound v2).
  */
+
 contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
   mapping(address => address) public baseTokens;
 
@@ -62,9 +63,9 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
   }
 
-  function ensureNotInVaultContext(address vault) internal {
+  function ensureNotInVaultContext(IBalancerVault vault) external {
     UserBalanceOp[] memory noop = new UserBalanceOp[](0);
-    IBalancerVault(vault).manageUserBalance(noop);
+    vault.manageUserBalance(noop);
   }
 
   /**
@@ -76,7 +77,7 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
 
     // read-only re-entracy protection
     (bool callSuccess, ) = address(this).staticcall(
-      abi.encodeWithSignature("ensureNotInVaultContext(address)", address(pool.getVault()))
+      abi.encodeWithSelector(this.ensureNotInVaultContext.selector, pool.getVault())
     );
 
     if (!callSuccess) {
