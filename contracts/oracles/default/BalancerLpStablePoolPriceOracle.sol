@@ -62,9 +62,9 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
   }
 
-  function ensureNotInVaultContext(IBalancerVault vault) internal {
+  function ensureNotInVaultContext(address vault) internal {
     UserBalanceOp[] memory noop = new UserBalanceOp[](0);
-    vault.manageUserBalance(noop);
+    IBalancerVault(vault).manageUserBalance(noop);
   }
 
   /**
@@ -76,7 +76,7 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
 
     // read-only re-entracy protection
     (bool callSuccess, ) = address(this).staticcall(
-      abi.encodeWithSignature("ensureNotInVaultContext(IBalancerVault)", pool.getVault())
+      abi.encodeWithSignature("ensureNotInVaultContext(address)", address(pool.getVault()))
     );
 
     if (!callSuccess) {
