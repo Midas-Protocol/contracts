@@ -383,4 +383,37 @@ contract ExtensionsTest is BaseTest {
     address implAfter = market.implementation();
     assertEq(implAfter, newImplAddress, "!market upgrade");
   }
+
+  function testMoonbeamBorrowCapsStorage() public fork(MOONBEAM_MAINNET) {
+    _testBorrowCapsStorage();
+  }
+
+  function testPolygonBorrowCapsStorage() public fork(POLYGON_MAINNET) {
+    _testBorrowCapsStorage();
+  }
+
+  function testBscBorrowCapsStorage() public fork(BSC_MAINNET) {
+    _testBorrowCapsStorage();
+  }
+
+  function _testBorrowCapsStorage() internal {
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      address payable asPayable = payable(pools[i].comptroller);
+      Unitroller asUnitroller = Unitroller(asPayable);
+      _upgradeExistingComptroller(asUnitroller);
+
+      ComptrollerFirstExtension poolExt = ComptrollerFirstExtension(pools[i].comptroller);
+      CTokenInterface[] memory markets = poolExt.getAllMarkets();
+
+      for (uint8 j = 0; j < markets.length; j++) {
+        uint256 cap = poolExt.borrowCapForCollateral(address(markets[j]));
+        emit log_named_address("market", address(markets[j]));
+        assertEq(cap, 0, "non zero cap");
+      }
+    }
+  }
 }
