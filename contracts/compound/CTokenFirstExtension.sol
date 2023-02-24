@@ -395,6 +395,126 @@ contract CTokenFirstExtension is
     }
   }
 
+  function accrueInterestHypothetical() public view returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256) {
+    uint256 currentBlockNumber = block.number;
+    uint256 cashPrior = asCToken().getCash();
+    uint256 totalFees = totalAdminFees + totalFuseFees;
+    uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, totalBorrows, totalReserves + totalFees);
+    if (borrowRateMantissa > borrowRateMaxMantissa) {
+      if (cashPrior > totalFees) revert("!borrowRate");
+      else borrowRateMantissa = borrowRateMaxMantissa;
+    }
+    (MathError mathErr, uint256 blockDelta) = subUInt(currentBlockNumber, accrualBlockNumber);
+    require(mathErr == MathError.NO_ERROR, "!blockDelta");
+
+    return _finishInterestAccrual(currentBlockNumber, cashPrior, borrowRateMantissa, blockDelta);
+  }
+
+  function _finishInterestAccrual(
+    uint256 currentBlockNumber,
+    uint256 cashPrior,
+    uint256 borrowRateMantissa,
+    uint256 blockDelta
+  ) public view returns (
+    uint256,
+    uint256 totalSupply,
+    uint256 borrowIndexNew,
+    uint256 totalBorrowsNew,
+    uint256 totalReservesNew,
+    uint256 totalFuseFeesNew,
+    uint256 totalAdminFeesNew
+  ) {
+    Exp memory simpleInterestFactor = mul_(Exp({ mantissa: borrowRateMantissa }), blockDelta);
+    uint256 interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, totalBorrows);
+    totalBorrowsNew = interestAccumulated + totalBorrows;
+    totalReservesNew = mul_ScalarTruncateAddUInt(
+      Exp({ mantissa: reserveFactorMantissa }),
+      interestAccumulated,
+      totalReserves
+    );
+    totalFuseFeesNew = mul_ScalarTruncateAddUInt(
+      Exp({ mantissa: fuseFeeMantissa }),
+      interestAccumulated,
+      totalFuseFees
+    );
+    totalAdminFeesNew = mul_ScalarTruncateAddUInt(
+      Exp({ mantissa: adminFeeMantissa }),
+      interestAccumulated,
+      totalAdminFees
+    );
+    borrowIndexNew = mul_ScalarTruncateAddUInt(simpleInterestFactor, borrowIndex, borrowIndex);
+
+    return (
+      currentBlockNumber,
+      totalSupply,
+      borrowIndexNew,
+      totalBorrowsNew,
+      totalReservesNew,
+      totalFuseFeesNew,
+      totalAdminFeesNew
+    );
+  }
+
+  function exchangeRateHypothetical() public view returns (uint256) {
+    (
+      uint256 _accrualBlockNumber,
+      uint256 _totalSupply,
+      uint256 _totalCash,
+      uint256 _totalBorrows,
+      uint256 _totalReserves,
+      uint256 _totalFuseFees,
+      uint256 _totalAdminFee
+    ) = accrueInterestHypothetical();
+
+    return _exchangeRateHypothetical(
+      _totalSupply,
+      initialExchangeRateMantissa,
+      _totalCash,
+      _totalBorrows,
+      _totalReserves,
+      _totalAdminFee,
+      _totalFuseFees
+    );
+  }
+
+  function _exchangeRateHypothetical(
+    uint256 _totalSupply,
+    uint256 _initialExchangeRateMantissa,
+    uint256 _totalCash,
+    uint256 _totalBorrows,
+    uint256 _totalReserves,
+    uint256 _totalAdminFees,
+    uint256 _totalFuseFees
+  ) internal pure returns (uint256) {
+    if (_totalSupply == 0) {
+      /*
+       * If there are no tokens minted:
+       *  exchangeRate = initialExchangeRate
+       */
+      return _initialExchangeRateMantissa;
+    } else {
+      /*
+       * Otherwise:
+       *  exchangeRate = (totalCash + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees)) / totalSupply
+       */
+      uint256 cashPlusBorrowsMinusReserves;
+      Exp memory exchangeRate;
+      MathError mathErr;
+
+      (mathErr, cashPlusBorrowsMinusReserves) = addThenSubUInt(
+        _totalCash,
+        _totalBorrows,
+        _totalReserves + _totalAdminFees + _totalFuseFees
+      );
+      require(mathErr == MathError.NO_ERROR, "!addThenSubUInt overflow check failed");
+
+      (mathErr, exchangeRate) = getExp(cashPlusBorrowsMinusReserves, _totalSupply);
+      require(mathErr == MathError.NO_ERROR, "!getExp overflow check failed");
+
+      return exchangeRate.mantissa;
+    }
+  }
+
   /**
    * @notice Applies accrued interest to total borrows and reserves
    * @dev This calculates interest accrued from the last checkpointed block
