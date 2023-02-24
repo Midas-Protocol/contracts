@@ -106,7 +106,7 @@ interface IComptroller {
     bool isBorrow
   ) external returns (uint256);
 
-  function borrowCapForAssetForCollateral(address borrowed, address collateral) external view returns (uint256);
+  function borrowCapForCollateral(address collateral) external view returns (uint256);
 
   function borrowingAgainstCollateralBlacklist(address borrowed, address collateral) external view returns (bool);
 }
