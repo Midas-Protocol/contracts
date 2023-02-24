@@ -2,10 +2,10 @@
 pragma solidity >=0.8.0;
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import { CurveLpTokenLiquidatorNoRegistry } from "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
-import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
+import { CurveLpTokenLiquidatorNoRegistry } from "../../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
+import { CurveLpTokenPriceOracleNoRegistry } from "../../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 
-import { BaseTest } from "./config/BaseTest.t.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
   CurveLpTokenLiquidatorNoRegistry private liquidator;

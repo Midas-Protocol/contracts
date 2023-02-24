@@ -2,11 +2,11 @@
 pragma solidity >=0.8.0;
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import { SaddleLpTokenLiquidator } from "../liquidators/SaddleLpTokenLiquidator.sol";
-import { SaddleLpPriceOracle } from "../oracles/default/SaddleLpPriceOracle.sol";
-import { ISwap } from "../external/saddle/ISwap.sol";
+import { SaddleLpTokenLiquidator } from "../../liquidators/SaddleLpTokenLiquidator.sol";
+import { SaddleLpPriceOracle } from "../../oracles/default/SaddleLpPriceOracle.sol";
+import { ISwap } from "../../external/saddle/ISwap.sol";
 
-import { BaseTest } from "./config/BaseTest.t.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 contract SaddleLpTokenLiquidatorTest is BaseTest {
   SaddleLpTokenLiquidator private liquidator;

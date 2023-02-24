@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../external/bomb/IXBomb.sol";
-import "../liquidators/XBombLiquidatorFunder.sol";
-import { BaseTest } from "./config/BaseTest.t.sol";
+import "../../external/bomb/IXBomb.sol";
+import "../../liquidators/XBombLiquidatorFunder.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 contract XBombLiquidatorTest is BaseTest {
   // the Pancake BOMB/xBOMB pair
