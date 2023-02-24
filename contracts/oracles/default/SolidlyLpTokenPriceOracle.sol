@@ -7,25 +7,25 @@ import "../../external/compound/IPriceOracle.sol";
 import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
 
-import "../../external/uniswap/IUniswapV2Pair.sol";
+import "../../external/solidly/IPair.sol";
 
 import "../BasePriceOracle.sol";
 import { UniswapLikeLpTokenPriceOracle } from "./UniswapLikeLpTokenPriceOracle.sol";
 
 /**
- * @title UniswapLpTokenPriceOracle
- * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
- * @notice UniswapLpTokenPriceOracle is a price oracle for Uniswap (and SushiSwap) LP tokens.
+ * @title SolidlyLpTokenPriceOracle
+ * @author Carlo Mazzaferro, David Lucid <david@rari.capital> (https://github.com/davidlucid)
+ * @notice SolidlyLpTokenPriceOracle is a price oracle for Solidly LP tokens.
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
-contract UniswapLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
+contract SolidlyLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
   /**
    * @dev Fetches the fair LP token/ETH price from Uniswap, with 18 decimals of precision.
    */
   constructor(address _wtoken) UniswapLikeLpTokenPriceOracle(_wtoken) {}
 
   function _price(address token) internal view virtual override returns (uint256) {
-    IUniswapV2Pair pair = IUniswapV2Pair(token);
+    IPair pair = IPair(token);
     uint256 totalSupply = pair.totalSupply();
     if (totalSupply == 0) return 0;
     (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
