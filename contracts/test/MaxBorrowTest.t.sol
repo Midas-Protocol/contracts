@@ -97,15 +97,15 @@ contract MaxBorrowTest is WithPool {
       assertApproxEqAbs((maxBorrow * 1e18) / 10**cToken.decimals(), maxDaiBorrow, uint256(1e16), "!max borrow");
     }
 
-//    // borrow cap for collateral test
-//    {
-//      ComptrollerFirstExtension asExtension = comptroller.asComptrollerFirstExtension();
-//      vm.prank(comptroller.admin());
-//      asExtension._setBorrowCapForCollateral(address(cToken), address(cDaiToken), 0.5e6);
-//    }
-//
-//    uint256 maxBorrowAfterBorrowCap = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cToken)));
-//    assertApproxEqAbs(maxBorrowAfterBorrowCap, 0.5e6, uint256(1e5), "!max borrow");
+    //    // borrow cap for collateral test
+    //    {
+    //      ComptrollerFirstExtension asExtension = comptroller.asComptrollerFirstExtension();
+    //      vm.prank(comptroller.admin());
+    //      asExtension._setBorrowCapForCollateral(address(cToken), address(cDaiToken), 0.5e6);
+    //    }
+    //
+    //    uint256 maxBorrowAfterBorrowCap = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cToken)));
+    //    assertApproxEqAbs(maxBorrowAfterBorrowCap, 0.5e6, uint256(1e5), "!max borrow");
 
     // blacklist
     {
@@ -118,81 +118,81 @@ contract MaxBorrowTest is WithPool {
     assertEq(maxBorrowAfterBlacklist, 0, "!blacklist");
   }
 
-//  function testTotalBorrowCapPerCollateral() public forkAtBlock(BSC_MAINNET, 23761190) {
-//    address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
-//
-//    address poolAddress = jFiatPoolAddress;
-//    Comptroller pool = Comptroller(poolAddress);
-//
-//    // TODO no need to upgrade after the next deploy
-//    upgradePool(address(pool));
-//
-//    ComptrollerFirstExtension asExtension = ComptrollerFirstExtension(poolAddress);
-//    address[] memory borrowers = asExtension.getAllBorrowers();
-//    address someBorrower = borrowers[1];
-//
-//    CTokenInterface[] memory markets = asExtension.getAllMarkets();
-//    for (uint256 i = 0; i < markets.length; i++) {
-//      CTokenInterface market = markets[i];
-//      uint256 borrowed = market.borrowBalanceStored(someBorrower);
-//      if (borrowed > 0) {
-//        emit log("borrower has borrowed");
-//        emit log_uint(borrowed);
-//        emit log("from market");
-//        emit log_address(address(market));
-//        emit log_uint(i);
-//        emit log("");
-//      }
-//
-//      uint256 collateral = market.asCTokenExtensionInterface().balanceOf(someBorrower);
-//      if (collateral > 0) {
-//        emit log("has collateral");
-//        emit log_uint(collateral);
-//        emit log("in market");
-//        emit log_address(address(market));
-//        emit log_uint(i);
-//        emit log("");
-//      }
-//    }
-//
-//    CTokenInterface marketToBorrow = markets[0];
-//    CTokenInterface cappedCollateralMarket = markets[6];
-//    uint256 borrowAmount = marketToBorrow.borrowBalanceStored(someBorrower);
-//
-//    {
-//      (uint256 errBefore, uint256 liquidityBefore, uint256 shortfallBefore) = pool.getHypotheticalAccountLiquidity(
-//        someBorrower,
-//        address(marketToBorrow),
-//        0,
-//        borrowAmount
-//      );
-//      emit log("errBefore");
-//      emit log_uint(errBefore);
-//      emit log("liquidityBefore");
-//      emit log_uint(liquidityBefore);
-//      emit log("shortfallBefore");
-//      emit log_uint(shortfallBefore);
-//
-//      assertGt(liquidityBefore, 0, "expected positive liquidity");
-//    }
-//
-//    vm.prank(pool.admin());
-//    asExtension._setBorrowCapForCollateral(address(marketToBorrow), address(cappedCollateralMarket), 1);
-//    emit log("");
-//
-//    (uint256 errAfter, uint256 liquidityAfter, uint256 shortfallAfter) = pool.getHypotheticalAccountLiquidity(
-//      someBorrower,
-//      address(marketToBorrow),
-//      0,
-//      borrowAmount
-//    );
-//    emit log("errAfter");
-//    emit log_uint(errAfter);
-//    emit log("liquidityAfter");
-//    emit log_uint(liquidityAfter);
-//    emit log("shortfallAfter");
-//    emit log_uint(shortfallAfter);
-//
-//    assertGt(shortfallAfter, 0, "expected some shortfall");
-//  }
+  //  function testTotalBorrowCapPerCollateral() public forkAtBlock(BSC_MAINNET, 23761190) {
+  //    address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
+  //
+  //    address poolAddress = jFiatPoolAddress;
+  //    Comptroller pool = Comptroller(poolAddress);
+  //
+  //    // TODO no need to upgrade after the next deploy
+  //    upgradePool(address(pool));
+  //
+  //    ComptrollerFirstExtension asExtension = ComptrollerFirstExtension(poolAddress);
+  //    address[] memory borrowers = asExtension.getAllBorrowers();
+  //    address someBorrower = borrowers[1];
+  //
+  //    CTokenInterface[] memory markets = asExtension.getAllMarkets();
+  //    for (uint256 i = 0; i < markets.length; i++) {
+  //      CTokenInterface market = markets[i];
+  //      uint256 borrowed = market.borrowBalanceStored(someBorrower);
+  //      if (borrowed > 0) {
+  //        emit log("borrower has borrowed");
+  //        emit log_uint(borrowed);
+  //        emit log("from market");
+  //        emit log_address(address(market));
+  //        emit log_uint(i);
+  //        emit log("");
+  //      }
+  //
+  //      uint256 collateral = market.asCTokenExtensionInterface().balanceOf(someBorrower);
+  //      if (collateral > 0) {
+  //        emit log("has collateral");
+  //        emit log_uint(collateral);
+  //        emit log("in market");
+  //        emit log_address(address(market));
+  //        emit log_uint(i);
+  //        emit log("");
+  //      }
+  //    }
+  //
+  //    CTokenInterface marketToBorrow = markets[0];
+  //    CTokenInterface cappedCollateralMarket = markets[6];
+  //    uint256 borrowAmount = marketToBorrow.borrowBalanceStored(someBorrower);
+  //
+  //    {
+  //      (uint256 errBefore, uint256 liquidityBefore, uint256 shortfallBefore) = pool.getHypotheticalAccountLiquidity(
+  //        someBorrower,
+  //        address(marketToBorrow),
+  //        0,
+  //        borrowAmount
+  //      );
+  //      emit log("errBefore");
+  //      emit log_uint(errBefore);
+  //      emit log("liquidityBefore");
+  //      emit log_uint(liquidityBefore);
+  //      emit log("shortfallBefore");
+  //      emit log_uint(shortfallBefore);
+  //
+  //      assertGt(liquidityBefore, 0, "expected positive liquidity");
+  //    }
+  //
+  //    vm.prank(pool.admin());
+  //    asExtension._setBorrowCapForCollateral(address(marketToBorrow), address(cappedCollateralMarket), 1);
+  //    emit log("");
+  //
+  //    (uint256 errAfter, uint256 liquidityAfter, uint256 shortfallAfter) = pool.getHypotheticalAccountLiquidity(
+  //      someBorrower,
+  //      address(marketToBorrow),
+  //      0,
+  //      borrowAmount
+  //    );
+  //    emit log("errAfter");
+  //    emit log_uint(errAfter);
+  //    emit log("liquidityAfter");
+  //    emit log_uint(liquidityAfter);
+  //    emit log("shortfallAfter");
+  //    emit log_uint(shortfallAfter);
+  //
+  //    assertGt(shortfallAfter, 0, "expected some shortfall");
+  //  }
 }

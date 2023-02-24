@@ -393,9 +393,7 @@ contract FusePoolLens is Initializable {
       address collateralAddress = address(poolMarkets[i]);
       if (collateralAddress != address(borrowedAsset)) {
         collateral[i] = collateralAddress;
-        borrowCapsAgainstCollateral[i] = comptroller.borrowCapForCollateral(
-          collateralAddress
-        );
+        borrowCapsAgainstCollateral[i] = comptroller.borrowCapForCollateral(collateralAddress);
         borrowingBlacklistedAgainstCollateral[i] = comptroller.borrowingAgainstCollateralBlacklist(
           address(borrowedAsset),
           collateralAddress
