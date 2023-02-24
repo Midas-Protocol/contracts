@@ -218,9 +218,13 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     return uint256(Error.NO_ERROR);
   }
 
-  function _setBorrowCapForCollateral(address cTokenCollateral, uint256 borrowCap) public {
+  function _setBorrowCapForCollateral(
+    address cTokenBorrow,
+    address cTokenCollateral,
+    uint256 borrowCap
+  ) public {
     require(hasAdminRights(), "!admin");
-    borrowCapForCollateral[cTokenCollateral] = borrowCap;
+    borrowCapForCollateral[cTokenBorrow][cTokenCollateral] = borrowCap;
   }
 
   function _blacklistBorrowingAgainstCollateral(

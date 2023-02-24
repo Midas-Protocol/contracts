@@ -884,8 +884,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
           if (blacklisted) {
             assetAsCollateralValueCap = 0;
           } else {
-            // the value of the collateral is capped regardless if any amount is to be borrowed
-            vars.borrowCapForCollateral = borrowCapForCollateral[address(asset)];
+            // for each user the value of this kind of collateral is capped regardless of the amount borrowed
+            vars.borrowCapForCollateral = borrowCapForCollateral[address(cTokenModify)][address(asset)];
             // check if set to any value
             if (vars.borrowCapForCollateral != 0) {
               // this asset usage as collateral is capped at the native value of the borrow cap

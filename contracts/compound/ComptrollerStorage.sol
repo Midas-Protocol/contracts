@@ -169,7 +169,7 @@ contract ComptrollerV3Storage is ComptrollerV2Storage {
   address[] public nonAccruingRewardsDistributors;
 
   /// @dev cap for each user's borrows against specific assets
-  mapping(address => uint256) public borrowCapForCollateral; // TODO can we reuse this storage slot?
+  mapping(address => mapping(address => uint256)) public borrowCapForCollateral;
 
   /// @dev blacklist to disallow the borrowing of an asset against specific collateral
   mapping(address => mapping(address => bool)) public borrowingAgainstCollateralBlacklist;
