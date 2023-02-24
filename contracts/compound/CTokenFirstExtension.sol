@@ -395,7 +395,19 @@ contract CTokenFirstExtension is
     }
   }
 
-  function accrueInterestHypothetical() public view returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256) {
+  function accrueInterestHypothetical()
+    public
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256,
+      uint256,
+      uint256,
+      uint256,
+      uint256
+    )
+  {
     uint256 currentBlockNumber = block.number;
     uint256 cashPrior = asCToken().getCash();
     uint256 totalFees = totalAdminFees + totalFuseFees;
@@ -415,15 +427,19 @@ contract CTokenFirstExtension is
     uint256 cashPrior,
     uint256 borrowRateMantissa,
     uint256 blockDelta
-  ) public view returns (
-    uint256,
-    uint256 totalSupply,
-    uint256 borrowIndexNew,
-    uint256 totalBorrowsNew,
-    uint256 totalReservesNew,
-    uint256 totalFuseFeesNew,
-    uint256 totalAdminFeesNew
-  ) {
+  )
+    public
+    view
+    returns (
+      uint256,
+      uint256 totalSupply,
+      uint256 borrowIndexNew,
+      uint256 totalBorrowsNew,
+      uint256 totalReservesNew,
+      uint256 totalFuseFeesNew,
+      uint256 totalAdminFeesNew
+    )
+  {
     Exp memory simpleInterestFactor = mul_(Exp({ mantissa: borrowRateMantissa }), blockDelta);
     uint256 interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, totalBorrows);
     totalBorrowsNew = interestAccumulated + totalBorrows;
@@ -466,15 +482,16 @@ contract CTokenFirstExtension is
       uint256 _totalAdminFee
     ) = accrueInterestHypothetical();
 
-    return _exchangeRateHypothetical(
-      _totalSupply,
-      initialExchangeRateMantissa,
-      _totalCash,
-      _totalBorrows,
-      _totalReserves,
-      _totalAdminFee,
-      _totalFuseFees
-    );
+    return
+      _exchangeRateHypothetical(
+        _totalSupply,
+        initialExchangeRateMantissa,
+        _totalCash,
+        _totalBorrows,
+        _totalReserves,
+        _totalAdminFee,
+        _totalFuseFees
+      );
   }
 
   function _exchangeRateHypothetical(
