@@ -439,11 +439,12 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
 
   function autoUpgradePool(address poolAddress) external onlyOwner {
     IComptroller pool = IComptroller(poolAddress);
-    bool autoImplOnBefore = pool.autoImplementation();
 
     ICToken[] memory markets = pool.getAllMarkets();
+    bool autoImplOnBefore = pool.autoImplementation();
     pool._toggleAutoImplementations(true);
 
+    // auto upgrade the pool
     pool.enterMarkets(new address[](0));
 
     for (uint8 i = 0; i < markets.length; i++) {
@@ -451,6 +452,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
       address implBefore = CErc20PluginDelegate(marketAddress).implementation();
       address newImpl = _latestCErc20Delegate[implBefore].implementation;
 
+      // auto upgrade the market
       if (newImpl != address(0) && newImpl != implBefore) CTokenExtensionInterface(marketAddress).accrueInterest();
     }
 
