@@ -505,9 +505,9 @@ contract CTokenFirstExtension is
   }
 
   function accrueInterestHypothetical(uint256 blockNumber, uint256 cashPrior)
-  internal
-  view
-  returns (InterestAccrual memory)
+    internal
+    view
+    returns (InterestAccrual memory)
   {
     uint256 totalFees = totalAdminFees + totalFuseFees;
     uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, totalBorrows, totalReserves + totalFees);
