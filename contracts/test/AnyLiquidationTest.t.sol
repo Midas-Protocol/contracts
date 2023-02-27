@@ -23,7 +23,6 @@ import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
-import { JarvisSafeLiquidator } from "../JarvisSafeLiquidator.sol";
 
 contract AnyLiquidationTest is BaseTest {
   FuseSafeLiquidator fsl;

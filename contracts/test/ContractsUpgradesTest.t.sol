@@ -10,7 +10,6 @@ import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
-import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CToken } from "../compound/CToken.sol";
 import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
