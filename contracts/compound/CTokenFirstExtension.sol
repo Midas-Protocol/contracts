@@ -364,75 +364,18 @@ contract CTokenFirstExtension is
    * @return Calculated exchange rate scaled by 1e18
    */
   function exchangeRateStored() public view returns (uint256) {
-    uint256 _totalSupply = totalSupply;
-    if (_totalSupply == 0) {
-      /*
-       * If there are no tokens minted:
-       *  exchangeRate = initialExchangeRate
-       */
-      return initialExchangeRateMantissa;
-    } else {
-      /*
-       * Otherwise:
-       *  exchangeRate = (totalCash + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees)) / totalSupply
-       */
-      uint256 totalCash = asCToken().getCash();
-      uint256 cashPlusBorrowsMinusReserves;
-      Exp memory exchangeRate;
-      MathError mathErr;
+    uint256 totalCash = asCToken().getCash();
 
-      (mathErr, cashPlusBorrowsMinusReserves) = addThenSubUInt(
+    return
+      _exchangeRateHypothetical(
+        totalSupply,
+        initialExchangeRateMantissa,
         totalCash,
         totalBorrows,
-        totalReserves + totalAdminFees + totalFuseFees
+        totalReserves,
+        totalAdminFees,
+        totalFuseFees
       );
-      require(mathErr == MathError.NO_ERROR, "!addThenSubUInt overflow check failed");
-
-      (mathErr, exchangeRate) = getExp(cashPlusBorrowsMinusReserves, _totalSupply);
-      require(mathErr == MathError.NO_ERROR, "!getExp overflow check failed");
-
-      return exchangeRate.mantissa;
-    }
-  }
-
-  function _finishInterestAccrual(
-    uint256 blockNumber,
-    uint256 cashPrior,
-    uint256 borrowRateMantissa,
-    uint256 blockDelta
-  ) public view returns (InterestAccrual memory accrual) {
-    /*
-     * Calculate the interest accumulated into borrows and reserves and the new index:
-     *  simpleInterestFactor = borrowRate * blockDelta
-     *  interestAccumulated = simpleInterestFactor * totalBorrows
-     *  totalBorrowsNew = interestAccumulated + totalBorrows
-     *  totalReservesNew = interestAccumulated * reserveFactor + totalReserves
-     *  totalFuseFeesNew = interestAccumulated * fuseFee + totalFuseFees
-     *  totalAdminFeesNew = interestAccumulated * adminFee + totalAdminFees
-     *  borrowIndexNew = simpleInterestFactor * borrowIndex + borrowIndex
-     */
-
-    accrual.accrualBlockNumber = blockNumber;
-    accrual.totalSupply = totalSupply;
-    Exp memory simpleInterestFactor = mul_(Exp({ mantissa: borrowRateMantissa }), blockDelta);
-    accrual.interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, totalBorrows);
-    accrual.totalBorrows = interestAccumulated + totalBorrows;
-    accrual.totalReserves = mul_ScalarTruncateAddUInt(
-      Exp({ mantissa: reserveFactorMantissa }),
-      interestAccumulated,
-      totalReserves
-    );
-    accrual.totalFuseFees = mul_ScalarTruncateAddUInt(
-      Exp({ mantissa: fuseFeeMantissa }),
-      interestAccumulated,
-      totalFuseFees
-    );
-    accrual.totalAdminFees = mul_ScalarTruncateAddUInt(
-      Exp({ mantissa: adminFeeMantissa }),
-      interestAccumulated,
-      totalAdminFees
-    );
-    accrual.borrowIndex = mul_ScalarTruncateAddUInt(simpleInterestFactor, borrowIndex, borrowIndex);
   }
 
   function exchangeRateHypothetical() public view returns (uint256) {
@@ -504,7 +447,7 @@ contract CTokenFirstExtension is
   function accrueInterestHypothetical(uint256 blockNumber, uint256 cashPrior)
     internal
     view
-    returns (InterestAccrual memory)
+    returns (InterestAccrual memory accrual)
   {
     uint256 totalFees = totalAdminFees + totalFuseFees;
     uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, totalBorrows, totalReserves + totalFees);
@@ -515,7 +458,38 @@ contract CTokenFirstExtension is
     (MathError mathErr, uint256 blockDelta) = subUInt(blockNumber, accrualBlockNumber);
     require(mathErr == MathError.NO_ERROR, "!blockDelta");
 
-    return _finishInterestAccrual(blockNumber, cashPrior, borrowRateMantissa, blockDelta);
+    /*
+     * Calculate the interest accumulated into borrows and reserves and the new index:
+     *  simpleInterestFactor = borrowRate * blockDelta
+     *  interestAccumulated = simpleInterestFactor * totalBorrows
+     *  totalBorrowsNew = interestAccumulated + totalBorrows
+     *  totalReservesNew = interestAccumulated * reserveFactor + totalReserves
+     *  totalFuseFeesNew = interestAccumulated * fuseFee + totalFuseFees
+     *  totalAdminFeesNew = interestAccumulated * adminFee + totalAdminFees
+     *  borrowIndexNew = simpleInterestFactor * borrowIndex + borrowIndex
+     */
+
+    accrual.accrualBlockNumber = blockNumber;
+    accrual.totalSupply = totalSupply;
+    Exp memory simpleInterestFactor = mul_(Exp({ mantissa: borrowRateMantissa }), blockDelta);
+    accrual.interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, totalBorrows);
+    accrual.totalBorrows = interestAccumulated + totalBorrows;
+    accrual.totalReserves = mul_ScalarTruncateAddUInt(
+      Exp({ mantissa: reserveFactorMantissa }),
+      interestAccumulated,
+      totalReserves
+    );
+    accrual.totalFuseFees = mul_ScalarTruncateAddUInt(
+      Exp({ mantissa: fuseFeeMantissa }),
+      interestAccumulated,
+      totalFuseFees
+    );
+    accrual.totalAdminFees = mul_ScalarTruncateAddUInt(
+      Exp({ mantissa: adminFeeMantissa }),
+      interestAccumulated,
+      totalAdminFees
+    );
+    accrual.borrowIndex = mul_ScalarTruncateAddUInt(simpleInterestFactor, borrowIndex, borrowIndex);
   }
 
   /**
