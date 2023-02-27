@@ -390,4 +390,42 @@ contract ExtensionsTest is BaseTest {
     address implAfter = market.implementation();
     assertEq(implAfter, newImplAddress, "!market upgrade");
   }
+
+  function testMoonbeamBorrowCapsStorage() public debuggingOnly fork(MOONBEAM_MAINNET) {
+    _testBorrowCapsStorage();
+  }
+
+  function testPolygonBorrowCapsStorage() public debuggingOnly fork(POLYGON_MAINNET) {
+    _testBorrowCapsStorage();
+  }
+
+  function testBscBorrowCapsStorage() public debuggingOnly fork(BSC_MAINNET) {
+    _testBorrowCapsStorage();
+  }
+
+  function _testBorrowCapsStorage() internal {
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      address payable asPayable = payable(pools[i].comptroller);
+      Unitroller asUnitroller = Unitroller(asPayable);
+      _upgradeExistingComptroller(asUnitroller);
+
+      ComptrollerFirstExtension poolExt = ComptrollerFirstExtension(pools[i].comptroller);
+      CTokenInterface[] memory markets = poolExt.getAllMarkets();
+
+      for (uint8 k = 0; k < markets.length; k++) {
+        for (uint8 j = 0; j < markets.length; j++) {
+          uint256 cap = poolExt.borrowCapForCollateral(address(markets[k]), address(markets[j]));
+          if (cap != 0) {
+            emit log_named_address("borrowed", address(markets[k]));
+            emit log_named_address("collateral", address(markets[j]));
+          }
+          assertEq(cap, 0, "non zero cap");
+        }
+      }
+    }
+  }
 }

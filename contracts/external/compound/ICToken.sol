@@ -55,7 +55,7 @@ interface ICToken {
 
   function exchangeRateStored() external view returns (uint256);
 
-  function accrueInterest() external virtual returns (uint256);
+  function accrueInterest() external returns (uint256);
 
   function getCash() external view returns (uint256);
 
