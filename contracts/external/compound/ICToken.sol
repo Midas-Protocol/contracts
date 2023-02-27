@@ -43,7 +43,13 @@ interface ICToken {
 
   function totalBorrowsCurrent() external returns (uint256);
 
+  function totalBorrows() external view returns (uint256);
+
+  function totalSupply() external view returns (uint256);
+
   function borrowBalanceStored(address account) external view returns (uint256);
+
+  function borrowBalanceCurrent(address account) external returns (uint256);
 
   function exchangeRateCurrent() external returns (uint256);
 
@@ -61,7 +67,13 @@ interface ICToken {
 
   function borrow(uint256 borrowAmount) external returns (uint256);
 
+  function repayBorrow(uint256 repayAmount) external returns (uint256);
+
   function protocolSeizeShareMantissa() external view returns (uint256);
 
   function feeSeizeShareMantissa() external view returns (uint256);
+
+  function _setReserveFactor(uint256 newReserveFactorMantissa) external virtual returns (uint256);
+
+  function _setAdminFee(uint256 newAdminFeeMantissa) external virtual returns (uint256);
 }

@@ -90,7 +90,7 @@ contract ExtensionsTest is BaseTest {
   MockThirdComptrollerExtension internal third;
   address internal latestComptrollerImplementation;
 
-  function afterForkSetUp() internal override {
+  function afterForkSetUp() internal virtual override {
     ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
 
     cfe = new ComptrollerFirstExtension();
@@ -234,38 +234,45 @@ contract ExtensionsTest is BaseTest {
     assertGt(blockNumberAfter, blockNumberBefore, "did not accrue?");
   }
 
-  function testExistingCTokenExtensionUpgrade() public fork(BSC_MAINNET) {
-    uint8 random = uint8(block.timestamp % 256);
+  function testBscExistingCTokenExtensionUpgrade() public fork(BSC_MAINNET) {
+    _testAllPoolsAllMarketsCTokenExtensionUpgrade();
+  }
+
+  function _testAllPoolsAllMarketsCTokenExtensionUpgrade() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    for (uint256 i = 0; i < pools.length; i++) {
+      _testExistingCTokenExtensionUpgrade(pools[i].comptroller);
+    }
+  }
 
-    ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
+  function _testExistingCTokenExtensionUpgrade(address poolAddress) internal {
+    ComptrollerFirstExtension somePool = ComptrollerFirstExtension(poolAddress);
+
     CTokenInterface[] memory markets = somePool.getAllMarkets();
 
     if (markets.length == 0) return;
 
-    CTokenInterface someMarket = markets[random % markets.length];
-    CErc20PluginDelegate asDelegate = CErc20PluginDelegate(address(someMarket));
+    for (uint256 j = 0; j < markets.length; j++) {
+      CTokenInterface someMarket = markets[j];
+      CErc20PluginDelegate asDelegate = CErc20PluginDelegate(address(someMarket));
 
-    emit log("pool");
-    emit log_address(address(somePool));
-    emit log("market");
-    emit log_address(address(someMarket));
+      emit log("pool");
+      emit log_address(address(somePool));
+      emit log("market");
+      emit log_address(address(someMarket));
 
-    try this._testExistingCTokenExtensionUpgrade(asDelegate) {} catch Error(string memory reason) {
-      emit log("at random");
-      emit log_uint(random);
+      try this._testExistingCTokenExtensionUpgrade(asDelegate) {} catch Error(string memory reason) {
+        address plugin = address(asDelegate.plugin());
+        emit log("plugin");
+        emit log_address(plugin);
 
-      address plugin = address(asDelegate.plugin());
-      emit log("plugin");
-      emit log_address(plugin);
+        address latestPlugin = ffd.latestPluginImplementation(plugin);
+        emit log("latest plugin impl");
+        emit log_address(latestPlugin);
 
-      address latestPlugin = ffd.latestPluginImplementation(plugin);
-      emit log("latest plugin impl");
-      emit log_address(latestPlugin);
-
-      revert(reason);
+        revert(reason);
+      }
     }
   }
 
@@ -370,8 +377,8 @@ contract ExtensionsTest is BaseTest {
     }
   }
 
-  function testBulkAutoUpgrade() public fork(POLYGON_MAINNET) {
-    CErc20Delegate market = CErc20Delegate(0x0db51E5255E44751b376738d8979D969AD70bff6);
+  function testBulkAutoUpgrade() public debuggingOnly fork(POLYGON_MAINNET) {
+    CErc20Delegate market = CErc20Delegate(0x17A6922ADE40e8aE783b0f6b8931Faeca4a5A264);
 
     address implBefore = market.implementation();
 
