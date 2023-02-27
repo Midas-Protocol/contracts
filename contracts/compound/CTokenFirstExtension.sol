@@ -400,42 +400,39 @@ contract CTokenFirstExtension is
     uint256 cashPrior,
     uint256 borrowRateMantissa,
     uint256 blockDelta
-  ) public view returns (InterestAccrual memory result) {
-    uint256 totalSupply;
-    uint256 borrowIndexNew;
-    uint256 totalBorrowsNew;
-    uint256 totalReservesNew;
-    uint256 totalFuseFeesNew;
-    uint256 totalAdminFeesNew;
+  ) public view returns (InterestAccrual memory accrual) {
+    /*
+     * Calculate the interest accumulated into borrows and reserves and the new index:
+     *  simpleInterestFactor = borrowRate * blockDelta
+     *  interestAccumulated = simpleInterestFactor * totalBorrows
+     *  totalBorrowsNew = interestAccumulated + totalBorrows
+     *  totalReservesNew = interestAccumulated * reserveFactor + totalReserves
+     *  totalFuseFeesNew = interestAccumulated * fuseFee + totalFuseFees
+     *  totalAdminFeesNew = interestAccumulated * adminFee + totalAdminFees
+     *  borrowIndexNew = simpleInterestFactor * borrowIndex + borrowIndex
+     */
 
+    accrual.accrualBlockNumber = blockNumber;
+    accrual.totalSupply = totalSupply;
     Exp memory simpleInterestFactor = mul_(Exp({ mantissa: borrowRateMantissa }), blockDelta);
-    uint256 interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, totalBorrows);
-    totalBorrowsNew = interestAccumulated + totalBorrows;
-    totalReservesNew = mul_ScalarTruncateAddUInt(
+    accrual.interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, totalBorrows);
+    accrual.totalBorrows = interestAccumulated + totalBorrows;
+    accrual.totalReserves = mul_ScalarTruncateAddUInt(
       Exp({ mantissa: reserveFactorMantissa }),
       interestAccumulated,
       totalReserves
     );
-    totalFuseFeesNew = mul_ScalarTruncateAddUInt(
+    accrual.totalFuseFees = mul_ScalarTruncateAddUInt(
       Exp({ mantissa: fuseFeeMantissa }),
       interestAccumulated,
       totalFuseFees
     );
-    totalAdminFeesNew = mul_ScalarTruncateAddUInt(
+    accrual.totalAdminFees = mul_ScalarTruncateAddUInt(
       Exp({ mantissa: adminFeeMantissa }),
       interestAccumulated,
       totalAdminFees
     );
-    borrowIndexNew = mul_ScalarTruncateAddUInt(simpleInterestFactor, borrowIndex, borrowIndex);
-
-    result.accrualBlockNumber = blockNumber;
-    result.totalSupply = totalSupply;
-    result.borrowIndex = borrowIndexNew;
-    result.totalBorrows = totalBorrowsNew;
-    result.totalReserves = totalReservesNew;
-    result.totalFuseFees = totalFuseFeesNew;
-    result.totalAdminFees = totalAdminFeesNew;
-    result.interestAccumulated = interestAccumulated;
+    accrual.borrowIndex = mul_ScalarTruncateAddUInt(simpleInterestFactor, borrowIndex, borrowIndex);
   }
 
   function exchangeRateHypothetical() public view returns (uint256) {
@@ -540,6 +537,7 @@ contract CTokenFirstExtension is
     /////////////////////////
     // EFFECTS & INTERACTIONS
     // (No safe failures beyond this point)
+    accrualBlockNumber = currentBlockNumber;
     borrowIndex = accrual.borrowIndex;
     totalBorrows = accrual.totalBorrows;
     totalReserves = accrual.totalReserves;
