@@ -762,8 +762,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     Exp exchangeRate;
     Exp oraclePrice;
     Exp tokensToDenom;
-    uint256 totalBorrowCapForCollateral;
-    uint256 totalBorrowsBefore;
+    uint256 borrowCapForCollateral;
     uint256 borrowedAssetPrice;
   }
 
@@ -849,7 +848,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 oErr;
 
     if (address(cTokenModify) != address(0)) {
-      vars.totalBorrowsBefore = cTokenModify.totalBorrows();
       vars.borrowedAssetPrice = oracle.getUnderlyingPrice(cTokenModify);
     }
 
@@ -886,18 +884,12 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
           if (blacklisted) {
             assetAsCollateralValueCap = 0;
           } else {
-            // the value of the collateral is capped regardless if any amount is to be borrowed
-            vars.totalBorrowCapForCollateral = borrowCapForAssetForCollateral[address(cTokenModify)][address(asset)];
+            // for each user the value of this kind of collateral is capped regardless of the amount borrowed
+            vars.borrowCapForCollateral = borrowCapForCollateral[address(cTokenModify)][address(asset)];
             // check if set to any value
-            if (vars.totalBorrowCapForCollateral != 0) {
-              // check for underflow
-              if (vars.totalBorrowCapForCollateral >= vars.totalBorrowsBefore) {
-                uint256 borrowAmountCap = vars.totalBorrowCapForCollateral - vars.totalBorrowsBefore;
-                assetAsCollateralValueCap = (borrowAmountCap * vars.borrowedAssetPrice) / 1e18;
-              } else {
-                // should never happen, but better to not revert on this underflow
-                assetAsCollateralValueCap = 0;
-              }
+            if (vars.borrowCapForCollateral != 0) {
+              // this asset usage as collateral is capped at the native value of the borrow cap
+              assetAsCollateralValueCap = (vars.borrowCapForCollateral * vars.borrowedAssetPrice) / 1e18;
             }
           }
         }
