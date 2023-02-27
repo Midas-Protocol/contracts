@@ -80,8 +80,6 @@ contract MockThirdComptrollerExtension is DiamondExtension, ComptrollerV3Storage
 }
 
 contract ExtensionsTest is BaseTest {
-  // ERC1967Upgrade
-  address payable internal jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
   FuseFeeDistributor internal ffd;
   ComptrollerFirstExtension internal cfe;
   CTokenFirstExtension newCTokenExtension;
@@ -98,21 +96,6 @@ contract ExtensionsTest is BaseTest {
     mockExtension = new MockComptrollerExtension();
     second = new MockSecondComptrollerExtension();
     third = new MockThirdComptrollerExtension();
-
-    if (block.chainid == BSC_MAINNET) {
-      Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
-      _upgradeExistingComptroller(asUnitroller);
-    }
-
-    // upgrade
-    {
-      FuseFeeDistributor newImpl = new FuseFeeDistributor();
-      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
-      bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
-      address admin = address(uint160(uint256(bytesAtSlot)));
-      vm.prank(admin);
-      proxy.upgradeTo(address(newImpl));
-    }
   }
 
   function _upgradeExistingComptroller(Unitroller asUnitroller) internal {
@@ -148,6 +131,10 @@ contract ExtensionsTest is BaseTest {
   }
 
   function testExtensionReplace() public debuggingOnly fork(BSC_MAINNET) {
+    address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
+    Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
+    _upgradeExistingComptroller(asUnitroller);
+
     // replace the first extension with the mock
     vm.prank(ffd.owner());
     ffd._registerComptrollerExtension(jFiatPoolAddress, mockExtension, cfe);
