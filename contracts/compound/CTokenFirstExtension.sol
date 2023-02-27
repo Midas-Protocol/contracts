@@ -20,7 +20,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 17;
+    uint8 fnsCount = 18;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -39,6 +39,7 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.totalBorrowsCurrent.selector;
     functionSelectors[--fnsCount] = this.balanceOfUnderlying.selector;
     functionSelectors[--fnsCount] = this.multicall.selector;
+    functionSelectors[--fnsCount] = this.exchangeRateHypothetical.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
@@ -508,6 +509,7 @@ contract CTokenFirstExtension is
 
     uint256 cashPrior = asCToken().getCash();
     InterestAccrual memory accrual = accrueInterestHypothetical(currentBlockNumber, cashPrior);
+
     /////////////////////////
     // EFFECTS & INTERACTIONS
     // (No safe failures beyond this point)

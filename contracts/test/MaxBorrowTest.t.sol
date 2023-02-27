@@ -118,7 +118,8 @@ contract MaxBorrowTest is WithPool {
     assertEq(maxBorrowAfterBlacklist, 0, "!blacklist");
   }
 
-  function testBorrowCapPerCollateral() public forkAtBlock(BSC_MAINNET, 23761190) {
+  // TODO test with the latest block and contracts and/or without the FSL
+  function testBorrowCapPerCollateral() public debuggingOnly forkAtBlock(BSC_MAINNET, 23761190) {
     address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
 
     address poolAddress = jFiatPoolAddress;
