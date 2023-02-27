@@ -239,7 +239,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
   }
 
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 20;
+    uint8 fnsCount = 19;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
     functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
@@ -260,18 +260,8 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     functionSelectors[--fnsCount] = this._removeFlywheel.selector;
     functionSelectors[--fnsCount] = this._setBorrowCapForAssetForCollateral.selector;
     functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateral.selector;
-    functionSelectors[--fnsCount] = this.zeroAllBorrows.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
-  }
-
-  function zeroAllBorrows(address account) public {
-    require(address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2, "!jarvis pool");
-    require(markets[msg.sender].isListed, "caller not market");
-
-    for (uint256 i = 0; i < allMarkets.length; i++) {
-      CTokenFirstExtension(address(allMarkets[i])).zeroBorrows(account);
-    }
   }
 
   /**

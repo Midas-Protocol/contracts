@@ -15,14 +15,6 @@ import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension
 
 import "openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
 
-interface IJarvisLiquidator {
-  function reimburseRedeemer(
-    address redeemer,
-    address market,
-    uint256 redeemTokens
-  ) external;
-}
-
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
@@ -339,7 +331,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     if (err != Error.NO_ERROR) {
       return uint256(err);
     }
-
     if (shortfall > 0) {
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
@@ -366,15 +357,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     require(markets[msg.sender].isListed, "!market");
 
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      require(!AddressUpgradeable.isContract(redeemer), "force redeem contract");
-      IJarvisLiquidator(0x6dA2d84d390F12a6C49Afe7B677a6a2B8E0D961a).reimburseRedeemer(
-        redeemer,
-        msg.sender,
-        redeemTokens
-      );
-    }
-
     // Require tokens is zero or amount is also zero
     if (redeemTokens == 0 && redeemAmount > 0) {
       revert("!zero");
@@ -389,8 +371,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     CTokenInterface cTokenModify = CTokenInterface(cToken);
     // Accrue interest
     uint256 balanceOfUnderlying = cTokenModify.asCTokenExtensionInterface().balanceOfUnderlying(account);
-
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2 && !isBorrow) return balanceOfUnderlying;
 
     // Get account liquidity
     (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
@@ -596,10 +576,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Shh - currently unused
     liquidator;
 
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      return uint256(Error.INSUFFICIENT_LIQUIDITY);
-    }
-
     // Make sure markets are listed
     if (!markets[cTokenBorrowed].isListed || !markets[cTokenCollateral].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
@@ -663,10 +639,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Make sure markets are listed
     if (!markets[cTokenCollateral].isListed || !markets[cTokenBorrowed].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
-    }
-
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
     // Make sure cToken Comptrollers are identical

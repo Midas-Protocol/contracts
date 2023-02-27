@@ -25,9 +25,7 @@ import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
 import { JarvisSafeLiquidator } from "../JarvisSafeLiquidator.sol";
 
-import "./ExtensionsTest.sol";
-
-contract AnyLiquidationTest is ExtensionsTest {
+contract AnyLiquidationTest is BaseTest {
   FuseSafeLiquidator fsl;
   address uniswapRouter;
   mapping(address => address) assetSpecificRouters;
