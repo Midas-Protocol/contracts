@@ -473,20 +473,20 @@ contract CTokenFirstExtension is
     accrual.totalSupply = totalSupply;
     Exp memory simpleInterestFactor = mul_(Exp({ mantissa: borrowRateMantissa }), blockDelta);
     accrual.interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, totalBorrows);
-    accrual.totalBorrows = interestAccumulated + totalBorrows;
+    accrual.totalBorrows = accrual.interestAccumulated + totalBorrows;
     accrual.totalReserves = mul_ScalarTruncateAddUInt(
       Exp({ mantissa: reserveFactorMantissa }),
-      interestAccumulated,
+      accrual.interestAccumulated,
       totalReserves
     );
     accrual.totalFuseFees = mul_ScalarTruncateAddUInt(
       Exp({ mantissa: fuseFeeMantissa }),
-      interestAccumulated,
+      accrual.interestAccumulated,
       totalFuseFees
     );
     accrual.totalAdminFees = mul_ScalarTruncateAddUInt(
       Exp({ mantissa: adminFeeMantissa }),
-      interestAccumulated,
+      accrual.interestAccumulated,
       totalAdminFees
     );
     accrual.borrowIndex = mul_ScalarTruncateAddUInt(simpleInterestFactor, borrowIndex, borrowIndex);
