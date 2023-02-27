@@ -395,35 +395,6 @@ contract CTokenFirstExtension is
     }
   }
 
-  struct InterestAccrual {
-    uint256 accrualBlockNumber;
-    uint256 borrowIndex;
-    uint256 totalSupply;
-    uint256 totalCash;
-    uint256 totalBorrows;
-    uint256 totalReserves;
-    uint256 totalFuseFees;
-    uint256 totalAdminFees;
-    uint256 interestAccumulated;
-  }
-
-  function accrueInterestHypothetical(uint256 blockNumber, uint256 cashPrior)
-    internal
-    view
-    returns (InterestAccrual memory)
-  {
-    uint256 totalFees = totalAdminFees + totalFuseFees;
-    uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, totalBorrows, totalReserves + totalFees);
-    if (borrowRateMantissa > borrowRateMaxMantissa) {
-      if (cashPrior > totalFees) revert("!borrowRate");
-      else borrowRateMantissa = borrowRateMaxMantissa;
-    }
-    (MathError mathErr, uint256 blockDelta) = subUInt(blockNumber, accrualBlockNumber);
-    require(mathErr == MathError.NO_ERROR, "!blockDelta");
-
-    return _finishInterestAccrual(blockNumber, cashPrior, borrowRateMantissa, blockDelta);
-  }
-
   function _finishInterestAccrual(
     uint256 blockNumber,
     uint256 cashPrior,
@@ -521,6 +492,35 @@ contract CTokenFirstExtension is
     }
   }
 
+  struct InterestAccrual {
+    uint256 accrualBlockNumber;
+    uint256 borrowIndex;
+    uint256 totalSupply;
+    uint256 totalCash;
+    uint256 totalBorrows;
+    uint256 totalReserves;
+    uint256 totalFuseFees;
+    uint256 totalAdminFees;
+    uint256 interestAccumulated;
+  }
+
+  function accrueInterestHypothetical(uint256 blockNumber, uint256 cashPrior)
+  internal
+  view
+  returns (InterestAccrual memory)
+  {
+    uint256 totalFees = totalAdminFees + totalFuseFees;
+    uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, totalBorrows, totalReserves + totalFees);
+    if (borrowRateMantissa > borrowRateMaxMantissa) {
+      if (cashPrior > totalFees) revert("!borrowRate");
+      else borrowRateMantissa = borrowRateMaxMantissa;
+    }
+    (MathError mathErr, uint256 blockDelta) = subUInt(blockNumber, accrualBlockNumber);
+    require(mathErr == MathError.NO_ERROR, "!blockDelta");
+
+    return _finishInterestAccrual(blockNumber, cashPrior, borrowRateMantissa, blockDelta);
+  }
+
   /**
    * @notice Applies accrued interest to total borrows and reserves
    * @dev This calculates interest accrued from the last checkpointed block
@@ -546,63 +546,6 @@ contract CTokenFirstExtension is
     totalFuseFees = accrual.totalFuseFees;
     totalAdminFees = accrual.totalAdminFees;
     emit AccrueInterest(cashPrior, accrual.interestAccumulated, borrowIndex, totalBorrows);
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @dev Split off from `accrueInterest` to avoid "stack too deep" error".
-   */
-  function finishInterestAccrual(
-    uint256 currentBlockNumber,
-    uint256 cashPrior,
-    uint256 borrowRateMantissa,
-    uint256 blockDelta
-  ) private returns (uint256) {
-    /*
-     * Calculate the interest accumulated into borrows and reserves and the new index:
-     *  simpleInterestFactor = borrowRate * blockDelta
-     *  interestAccumulated = simpleInterestFactor * totalBorrows
-     *  totalBorrowsNew = interestAccumulated + totalBorrows
-     *  totalReservesNew = interestAccumulated * reserveFactor + totalReserves
-     *  totalFuseFeesNew = interestAccumulated * fuseFee + totalFuseFees
-     *  totalAdminFeesNew = interestAccumulated * adminFee + totalAdminFees
-     *  borrowIndexNew = simpleInterestFactor * borrowIndex + borrowIndex
-     */
-
-    Exp memory simpleInterestFactor = mul_(Exp({ mantissa: borrowRateMantissa }), blockDelta);
-    uint256 interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, totalBorrows);
-    uint256 totalBorrowsNew = interestAccumulated + totalBorrows;
-    uint256 totalReservesNew = mul_ScalarTruncateAddUInt(
-      Exp({ mantissa: reserveFactorMantissa }),
-      interestAccumulated,
-      totalReserves
-    );
-    uint256 totalFuseFeesNew = mul_ScalarTruncateAddUInt(
-      Exp({ mantissa: fuseFeeMantissa }),
-      interestAccumulated,
-      totalFuseFees
-    );
-    uint256 totalAdminFeesNew = mul_ScalarTruncateAddUInt(
-      Exp({ mantissa: adminFeeMantissa }),
-      interestAccumulated,
-      totalAdminFees
-    );
-    uint256 borrowIndexNew = mul_ScalarTruncateAddUInt(simpleInterestFactor, borrowIndex, borrowIndex);
-
-    /////////////////////////
-    // EFFECTS & INTERACTIONS
-    // (No safe failures beyond this point)
-
-    /* We write the previously calculated values into storage */
-    accrualBlockNumber = currentBlockNumber;
-    borrowIndex = borrowIndexNew;
-    totalBorrows = totalBorrowsNew;
-    totalReserves = totalReservesNew;
-    totalFuseFees = totalFuseFeesNew;
-    totalAdminFees = totalAdminFeesNew;
-
-    /* We emit an AccrueInterest event */
-    emit AccrueInterest(cashPrior, interestAccumulated, borrowIndexNew, totalBorrowsNew);
     return uint256(Error.NO_ERROR);
   }
 
