@@ -395,51 +395,45 @@ contract CTokenFirstExtension is
     }
   }
 
-  function accrueInterestHypothetical()
-    public
-    view
-    returns (
-      uint256,
-      uint256,
-      uint256,
-      uint256,
-      uint256,
-      uint256,
-      uint256
-    )
-  {
-    uint256 currentBlockNumber = block.number;
-    uint256 cashPrior = asCToken().getCash();
+  struct InterestAccrual {
+    uint256 accrualBlockNumber;
+    uint256 borrowIndex;
+    uint256 totalSupply;
+    uint256 totalCash;
+    uint256 totalBorrows;
+    uint256 totalReserves;
+    uint256 totalFuseFees;
+    uint256 totalAdminFees;
+    uint256 interestAccumulated;
+  }
+
+  function accrueInterestHypothetical(uint256 blockNumber, uint256 cashPrior) internal view returns (InterestAccrual memory) {
     uint256 totalFees = totalAdminFees + totalFuseFees;
     uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, totalBorrows, totalReserves + totalFees);
     if (borrowRateMantissa > borrowRateMaxMantissa) {
       if (cashPrior > totalFees) revert("!borrowRate");
       else borrowRateMantissa = borrowRateMaxMantissa;
     }
-    (MathError mathErr, uint256 blockDelta) = subUInt(currentBlockNumber, accrualBlockNumber);
+    (MathError mathErr, uint256 blockDelta) = subUInt(blockNumber, accrualBlockNumber);
     require(mathErr == MathError.NO_ERROR, "!blockDelta");
 
-    return _finishInterestAccrual(currentBlockNumber, cashPrior, borrowRateMantissa, blockDelta);
+    return _finishInterestAccrual(blockNumber, cashPrior, borrowRateMantissa, blockDelta);
   }
 
   function _finishInterestAccrual(
-    uint256 currentBlockNumber,
+    uint256 blockNumber,
     uint256 cashPrior,
     uint256 borrowRateMantissa,
     uint256 blockDelta
-  )
-    public
-    view
-    returns (
-      uint256,
-      uint256 totalSupply,
-      uint256 borrowIndexNew,
-      uint256 totalBorrowsNew,
-      uint256 totalReservesNew,
-      uint256 totalFuseFeesNew,
-      uint256 totalAdminFeesNew
-    )
+  ) public view returns (InterestAccrual memory result)
   {
+    uint256 totalSupply;
+    uint256 borrowIndexNew;
+    uint256 totalBorrowsNew;
+    uint256 totalReservesNew;
+    uint256 totalFuseFeesNew;
+    uint256 totalAdminFeesNew;
+
     Exp memory simpleInterestFactor = mul_(Exp({ mantissa: borrowRateMantissa }), blockDelta);
     uint256 interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, totalBorrows);
     totalBorrowsNew = interestAccumulated + totalBorrows;
@@ -460,37 +454,29 @@ contract CTokenFirstExtension is
     );
     borrowIndexNew = mul_ScalarTruncateAddUInt(simpleInterestFactor, borrowIndex, borrowIndex);
 
-    return (
-      currentBlockNumber,
-      totalSupply,
-      borrowIndexNew,
-      totalBorrowsNew,
-      totalReservesNew,
-      totalFuseFeesNew,
-      totalAdminFeesNew
-    );
+    result.accrualBlockNumber = blockNumber;
+    result.totalSupply = totalSupply;
+    result.borrowIndex = borrowIndexNew;
+    result.totalBorrows = totalBorrowsNew;
+    result.totalReserves = totalReservesNew;
+    result.totalFuseFees = totalFuseFeesNew;
+    result.totalAdminFees = totalAdminFeesNew;
+    result.interestAccumulated = interestAccumulated;
   }
 
   function exchangeRateHypothetical() public view returns (uint256) {
-    (
-      uint256 _accrualBlockNumber,
-      uint256 _totalSupply,
-      uint256 _totalCash,
-      uint256 _totalBorrows,
-      uint256 _totalReserves,
-      uint256 _totalFuseFees,
-      uint256 _totalAdminFee
-    ) = accrueInterestHypothetical();
+    uint256 cashPrior = asCToken().getCash();
+    InterestAccrual memory accrual = accrueInterestHypothetical(block.number, cashPrior);
 
     return
       _exchangeRateHypothetical(
-        _totalSupply,
+        accrual.totalSupply,
         initialExchangeRateMantissa,
-        _totalCash,
-        _totalBorrows,
-        _totalReserves,
-        _totalAdminFee,
-        _totalFuseFees
+        accrual.totalCash,
+        accrual.totalBorrows,
+        accrual.totalReserves,
+        accrual.totalAdminFees,
+        accrual.totalFuseFees
       );
   }
 
@@ -546,22 +532,18 @@ contract CTokenFirstExtension is
       return uint256(Error.NO_ERROR);
     }
 
-    /* Read the previous values out of storage */
     uint256 cashPrior = asCToken().getCash();
-
-    /* Calculate the current borrow interest rate */
-    uint256 totalFees = totalAdminFees + totalFuseFees;
-    uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, totalBorrows, totalReserves + totalFees);
-    if (borrowRateMantissa > borrowRateMaxMantissa) {
-      if (cashPrior > totalFees) revert("!borrowRate");
-      else borrowRateMantissa = borrowRateMaxMantissa;
-    }
-
-    /* Calculate the number of blocks elapsed since the last accrual */
-    (MathError mathErr, uint256 blockDelta) = subUInt(currentBlockNumber, accrualBlockNumber);
-    require(mathErr == MathError.NO_ERROR, "!blockDelta");
-
-    return finishInterestAccrual(currentBlockNumber, cashPrior, borrowRateMantissa, blockDelta);
+    InterestAccrual memory accrual = accrueInterestHypothetical(currentBlockNumber, cashPrior);
+    /////////////////////////
+    // EFFECTS & INTERACTIONS
+    // (No safe failures beyond this point)
+    borrowIndex = accrual.borrowIndex;
+    totalBorrows = accrual.totalBorrows;
+    totalReserves = accrual.totalReserves;
+    totalFuseFees = accrual.totalFuseFees;
+    totalAdminFees = accrual.totalAdminFees;
+    emit AccrueInterest(cashPrior, accrual.interestAccumulated, borrowIndex, totalBorrows);
+    return uint256(Error.NO_ERROR);
   }
 
   /**
