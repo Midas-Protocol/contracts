@@ -26,17 +26,16 @@ contract AccrueInterestTest is UpgradesBaseTest {
     CErc20Delegate market = CErc20Delegate(marketAddress);
     CTokenFirstExtension marketAsExt = CTokenFirstExtension(marketAddress);
 
-    // accrue at the latest block in order to have an equal/comparable accrual period
-    marketAsExt.accrueInterest();
-
     uint256 adminFeeMantissa = market.adminFeeMantissa();
     uint256 fuseFeeMantissa = market.fuseFeeMantissa();
     uint256 reserveFactorMantissa = market.reserveFactorMantissa();
 
-    AccrualDiff memory diffBefore;
-
     // test with the logic before the refactoring
-    {
+
+    AccrualDiff memory diffBefore;
+    // accrue at the latest block in order to have an equal/comparable accrual period
+    marketAsExt.accrueInterest();
+  {
       CTokenFirstExtension.InterestAccrual memory accrualDataBefore;
       CTokenFirstExtension.InterestAccrual memory accrualDataAfter;
 
@@ -90,7 +89,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
     assertGt(hypoRate, 0, "!hypo rate");
 
     AccrualDiff memory diffAfter;
-
+    // accrue at the latest block in order to have an equal/comparable accrual period
     marketAsExt.accrueInterest();
     {
       CTokenFirstExtension.InterestAccrual memory accrualDataBefore;
