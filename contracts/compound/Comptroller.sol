@@ -13,8 +13,6 @@ import { IMidasFlywheel } from "../midas/strategies/flywheel/IMidasFlywheel.sol"
 import { DiamondExtension, DiamondBase, LibDiamond } from "../midas/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
-import "openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
-
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
@@ -668,10 +666,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   ) external override returns (uint256) {
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!transferGuardianPaused, "!transfer:paused");
-
-    if (address(this) == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
-      return uint256(Error.INSUFFICIENT_LIQUIDITY);
-    }
 
     // Currently the only consideration is whether or not
     //  the src is allowed to redeem this many tokens

@@ -5,7 +5,6 @@ import { DiamondExtension } from "../midas/DiamondExtension.sol";
 import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
 import { CTokenInterface, CErc20Interface } from "./CTokenInterfaces.sol";
 import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
-import { CTokenFirstExtension } from "./CTokenFirstExtension.sol";
 
 contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, ComptrollerErrorReporter {
   /// @notice Emitted when supply cap for a cToken is changed

@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0;
 
 import { ComptrollerInterface } from "./ComptrollerInterface.sol";
-import { ComptrollerFirstExtension } from "./ComptrollerFirstExtension.sol";
 import { CTokenInterface } from "./CTokenInterfaces.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
@@ -297,7 +296,6 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
       return fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
     }
-
     // redeemFresh emits redeem-specific logs on errors, so we don't need to
     return redeemFresh(msg.sender, redeemTokens, 0);
   }
@@ -314,7 +312,6 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
       return fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
     }
-
     // redeemFresh emits redeem-specific logs on errors, so we don't need to
     return redeemFresh(msg.sender, 0, redeemAmount);
   }
