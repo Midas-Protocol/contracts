@@ -407,7 +407,11 @@ contract CTokenFirstExtension is
     uint256 interestAccumulated;
   }
 
-  function accrueInterestHypothetical(uint256 blockNumber, uint256 cashPrior) internal view returns (InterestAccrual memory) {
+  function accrueInterestHypothetical(uint256 blockNumber, uint256 cashPrior)
+    internal
+    view
+    returns (InterestAccrual memory)
+  {
     uint256 totalFees = totalAdminFees + totalFuseFees;
     uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, totalBorrows, totalReserves + totalFees);
     if (borrowRateMantissa > borrowRateMaxMantissa) {
@@ -425,8 +429,7 @@ contract CTokenFirstExtension is
     uint256 cashPrior,
     uint256 borrowRateMantissa,
     uint256 blockDelta
-  ) public view returns (InterestAccrual memory result)
-  {
+  ) public view returns (InterestAccrual memory result) {
     uint256 totalSupply;
     uint256 borrowIndexNew;
     uint256 totalBorrowsNew;
