@@ -88,7 +88,6 @@ contract ExtensionsTest is BaseTest {
   MockThirdComptrollerExtension internal third;
   address internal latestComptrollerImplementation;
 
-
   function afterForkSetUp() internal virtual override {
     ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
 

@@ -35,7 +35,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
     AccrualDiff memory diffBefore;
     // accrue at the latest block in order to have an equal/comparable accrual period
     marketAsExt.accrueInterest();
-  {
+    {
       CTokenFirstExtension.InterestAccrual memory accrualDataBefore;
       CTokenFirstExtension.InterestAccrual memory accrualDataAfter;
 
@@ -58,7 +58,11 @@ contract AccrueInterestTest is UpgradesBaseTest {
       accrualDataAfter.totalAdminFees = marketAsExt.totalAdminFees();
       accrualDataAfter.totalSupply = marketAsExt.totalSupply();
 
-      assertEq(accrualDataBefore.accrualBlockNumber, accrualDataAfter.accrualBlockNumber - 1e6, "!total supply old impl");
+      assertEq(
+        accrualDataBefore.accrualBlockNumber,
+        accrualDataAfter.accrualBlockNumber - 1e6,
+        "!total supply old impl"
+      );
       assertLt(accrualDataBefore.borrowIndex, accrualDataAfter.borrowIndex, "!borrow index old impl");
       assertLt(accrualDataBefore.totalBorrows, accrualDataAfter.totalBorrows, "!total borrows old impl");
       if (reserveFactorMantissa > 0) {
@@ -114,19 +118,23 @@ contract AccrueInterestTest is UpgradesBaseTest {
       accrualDataAfter.totalAdminFees = marketAsExt.totalAdminFees();
       accrualDataAfter.totalSupply = marketAsExt.totalSupply();
 
-      assertEq(accrualDataBefore.accrualBlockNumber, accrualDataAfter.accrualBlockNumber - 1e6, "!total supply old impl");
-      assertLt(accrualDataBefore.borrowIndex, accrualDataAfter.borrowIndex, "!borrow index old impl");
-      assertLt(accrualDataBefore.totalBorrows, accrualDataAfter.totalBorrows, "!total borrows old impl");
+      assertEq(
+        accrualDataBefore.accrualBlockNumber,
+        accrualDataAfter.accrualBlockNumber - 1e6,
+        "!total supply old impl"
+      );
+      assertLt(accrualDataBefore.borrowIndex, accrualDataAfter.borrowIndex, "!borrow index new impl");
+      assertLt(accrualDataBefore.totalBorrows, accrualDataAfter.totalBorrows, "!total borrows new impl");
       if (reserveFactorMantissa > 0) {
-        assertLt(accrualDataBefore.totalReserves, accrualDataAfter.totalReserves, "!total reserves old impl");
+        assertLt(accrualDataBefore.totalReserves, accrualDataAfter.totalReserves, "!total reserves new impl");
       }
       if (fuseFeeMantissa > 0) {
-        assertLt(accrualDataBefore.totalFuseFees, accrualDataAfter.totalFuseFees, "!total fuse fees old impl");
+        assertLt(accrualDataBefore.totalFuseFees, accrualDataAfter.totalFuseFees, "!total fuse fees new impl");
       }
       if (adminFeeMantissa > 0) {
-        assertLt(accrualDataBefore.totalAdminFees, accrualDataAfter.totalAdminFees, "!total admin fees old impl");
+        assertLt(accrualDataBefore.totalAdminFees, accrualDataAfter.totalAdminFees, "!total admin fees new impl");
       }
-      assertEq(accrualDataBefore.totalSupply, accrualDataAfter.totalSupply, "!total supply old impl");
+      assertEq(accrualDataBefore.totalSupply, accrualDataAfter.totalSupply, "!total supply new impl");
 
       diffAfter.borrowIndex = accrualDataAfter.borrowIndex - accrualDataBefore.borrowIndex;
       diffAfter.totalBorrows = accrualDataAfter.totalBorrows - accrualDataBefore.totalBorrows;
