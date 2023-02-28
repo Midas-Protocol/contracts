@@ -52,7 +52,7 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   function afterForkSetUp() internal override {
-    //upgradeAp();
+    super.afterForkSetUp();
 
     uniswapRouter = ap.getAddress("IUniswapV2Router02");
     curveV1Oracle = CurveLpTokenPriceOracleNoRegistry(ap.getAddress("CurveLpTokenPriceOracleNoRegistry"));
@@ -127,8 +127,6 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   struct LiquidationData {
-    FusePoolDirectory.FusePool[] pools;
-    address[] cTokens;
     IRedemptionStrategy[] strategies;
     bytes[] redemptionDatas;
     ICToken[] markets;
@@ -140,20 +138,20 @@ contract AnyLiquidationTest is BaseTest {
     ICErc20 collateralMarket;
     IComptroller comptroller;
     address borrower;
-    uint256 borrowAmount;
+    uint256 repayAmount;
     address flashSwapFundingToken;
     IUniswapV2Pair flashSwapPair;
   }
 
-  function getPoolAndBorrower(uint256 random, LiquidationData memory vars)
-    internal
-    view
-    returns (IComptroller, address)
-  {
-    if (vars.pools.length == 0) revert("no pools to pick from");
+  function getPoolAndBorrower(
+    uint256 random,
+    LiquidationData memory vars,
+    FusePoolDirectory.FusePool[] memory pools
+  ) internal view returns (IComptroller, address) {
+    if (pools.length == 0) revert("no pools to pick from");
 
-    uint256 i = random % vars.pools.length; // random pool
-    IComptroller comptroller = IComptroller(vars.pools[i].comptroller);
+    uint256 i = random % pools.length; // random pool
+    IComptroller comptroller = IComptroller(pools[i].comptroller);
 
     address bscBombPool = 0x5373C052Df65b317e48D6CAD8Bb8AC50995e9459;
     if (address(comptroller) == bscBombPool) {
@@ -240,32 +238,24 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
-  uint256 dec_28_2022 = 1672218645;
-
   function doTestAnyLiquidation(uint256 random) internal {
     LiquidationData memory vars;
     vars.liquidator = fsl;
 
-    (, vars.pools) = FusePoolDirectory(ap.getAddress("FusePoolDirectory")).getActivePools();
+    (, FusePoolDirectory.FusePool[] memory pools) = FusePoolDirectory(ap.getAddress("FusePoolDirectory"))
+      .getActivePools();
 
     while (true) {
       // get a random pool and a random borrower from it
-      (vars.comptroller, vars.borrower) = getPoolAndBorrower(random, vars);
+      (vars.comptroller, vars.borrower) = getPoolAndBorrower(random, vars, pools);
 
       if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
         // find a market in which the borrower has debt and reduce his collateral price
         vars.markets = vars.comptroller.getAllMarkets();
-        (vars.debtMarket, vars.collateralMarket, vars.borrowAmount) = setUpDebtAndCollateralMarkets(random, vars);
+        (vars.debtMarket, vars.collateralMarket, vars.repayAmount) = setUpDebtAndCollateralMarkets(random, vars);
 
-        // TODO implement redemption strategies for these collaterals
-        address bscBnbxMarket = 0xa47A7672EF042Ec2838E9425C083Efd982BFa362;
-        address mimo80par20Market = 0xcb67Bd2aE0597eDb2426802CdF34bb4085d9483A;
         if (address(vars.debtMarket) != address(0) && address(vars.collateralMarket) != address(0)) {
-          if (
-            vars.debtMarket.underlying() != ap.getAddress("wtoken") &&
-            address(vars.collateralMarket) != bscBnbxMarket &&
-            address(vars.collateralMarket) != mimo80par20Market
-          ) {
+          if (vars.debtMarket.underlying() != ap.getAddress("wtoken")) {
             emit log("found testable markets at random number");
             emit log_uint(random);
             break;
@@ -275,6 +265,11 @@ contract AnyLiquidationTest is BaseTest {
       random++;
     }
 
+    vars.repayAmount = vars.repayAmount / 100;
+    liquidateSpecificPosition(vars);
+  }
+
+  function liquidateSpecificPosition(LiquidationData memory vars) internal {
     emit log("debt and collateral markets");
     emit log_address(address(vars.debtMarket));
     emit log_address(address(vars.collateralMarket));
@@ -300,12 +295,6 @@ contract AnyLiquidationTest is BaseTest {
           strategy.contractInterface,
           strategy.inputToken
         );
-
-        // TODO remove when fixed
-        if (debtTokenToFund == 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5 && block.timestamp < dec_28_2022 + 20 days) {
-          emit log("implement https://github.com/Midas-Protocol/contracts/pull/519");
-          return;
-        }
       }
 
       vars.flashSwapFundingToken = debtTokenToFund;
@@ -357,7 +346,7 @@ contract AnyLiquidationTest is BaseTest {
       vars.liquidator.safeLiquidateToTokensWithFlashLoan(
         FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
           vars.borrower,
-          vars.borrowAmount / 100,
+          vars.repayAmount,
           ICErc20(address(vars.debtMarket)),
           ICErc20(address(vars.collateralMarket)),
           vars.flashSwapPair,
@@ -377,18 +366,6 @@ contract AnyLiquidationTest is BaseTest {
     } catch Error(string memory reason) {
       if (compareStrings(reason, "Number of tokens less than minimum limit")) {
         emit log("jarvis pool failing, that's ok");
-      } else if (compareStrings(reason, "No enough liquidity")) {
-        if (block.timestamp < dec_28_2022 + 20 days) {
-          emit log("jarvis pool getMintTradeInfo failing");
-        } else {
-          revert(reason);
-        }
-      } else if (compareStrings(reason, "No enough liquidity for covering mint operation")) {
-        if (block.timestamp < dec_28_2022 + 20 days) {
-          emit log("jarvis pool getMintTradeInfo failing internally");
-        } else {
-          revert(reason);
-        }
       } else {
         revert(reason);
       }

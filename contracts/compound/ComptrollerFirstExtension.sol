@@ -218,13 +218,13 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     return uint256(Error.NO_ERROR);
   }
 
-  function _setBorrowCapForAssetForCollateral(
+  function _setBorrowCapForCollateral(
     address cTokenBorrow,
     address cTokenCollateral,
     uint256 borrowCap
   ) public {
     require(hasAdminRights(), "!admin");
-    borrowCapForAssetForCollateral[cTokenBorrow][cTokenCollateral] = borrowCap;
+    borrowCapForCollateral[cTokenBorrow][cTokenCollateral] = borrowCap;
   }
 
   function _blacklistBorrowingAgainstCollateral(
@@ -234,7 +234,6 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
   ) public {
     require(hasAdminRights(), "!admin");
     borrowingAgainstCollateralBlacklist[cTokenBorrow][cTokenCollateral] = blacklisted;
-    borrowCapForAssetForCollateral[cTokenBorrow][cTokenCollateral] = 0;
   }
 
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
@@ -257,7 +256,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     functionSelectors[--fnsCount] = this.isUserOfPool.selector;
     functionSelectors[--fnsCount] = this.getAccruingFlywheels.selector;
     functionSelectors[--fnsCount] = this._removeFlywheel.selector;
-    functionSelectors[--fnsCount] = this._setBorrowCapForAssetForCollateral.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapForCollateral.selector;
     functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateral.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
