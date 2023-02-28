@@ -72,6 +72,10 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
   function _updateExtensions() internal {
     address[] memory latestExtensions = IFuseFeeDistributor(fuseAdmin).getCErc20DelegateExtensions(implementation);
     address[] memory currentExtensions = LibDiamond.listExtensions();
+
+    // don't update if they are the same
+    if (latestExtensions.length == 1 && currentExtensions.length == 1 && latestExtensions[0] == currentExtensions[0]) return;
+
     // removed the current (old) extensions
     for (uint256 i = 0; i < currentExtensions.length; i++) {
       LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
