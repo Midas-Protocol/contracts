@@ -86,7 +86,7 @@ contract ExtensionsTest is BaseTest {
   MockComptrollerExtension internal mockExtension;
   MockSecondComptrollerExtension internal second;
   MockThirdComptrollerExtension internal third;
-  address internal latestComptrollerImplementation;
+  address payable internal latestComptrollerImplementation;
 
   function afterForkSetUp() internal virtual override {
     ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
@@ -96,19 +96,15 @@ contract ExtensionsTest is BaseTest {
     mockExtension = new MockComptrollerExtension();
     second = new MockSecondComptrollerExtension();
     third = new MockThirdComptrollerExtension();
+    Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
+    latestComptrollerImplementation = payable(address(newComptrollerImplementation));
   }
 
-  function _upgradeExistingComptroller(Unitroller asUnitroller) internal {
-    // change the implementation to the new that can add extensions
-    Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
-    latestComptrollerImplementation = address(newComptrollerImplementation);
-
-    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
-
+  function _prepareComptrollerUpgrade(address oldCompImpl) internal {
     // whitelist the upgrade
     vm.startPrank(ffd.owner());
     ffd._editComptrollerImplementationWhitelist(
-      asArray(oldComptrollerImplementation),
+      asArray(oldCompImpl),
       asArray(latestComptrollerImplementation),
       asArray(true)
     );
@@ -122,11 +118,18 @@ contract ExtensionsTest is BaseTest {
     extensions[0] = cfe;
     ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);
     vm.stopPrank();
+  }
+
+  function _upgradeExistingComptroller(Unitroller asUnitroller) internal {
+    // change the implementation to the new that can add extensions
+    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
+
+    _prepareComptrollerUpgrade(oldComptrollerImplementation);
 
     // upgrade to the new comptroller
     vm.startPrank(asUnitroller.admin());
     asUnitroller._setPendingImplementation(latestComptrollerImplementation);
-    newComptrollerImplementation._become(asUnitroller);
+    Comptroller(latestComptrollerImplementation)._become(asUnitroller);
     vm.stopPrank();
   }
 
@@ -163,11 +166,7 @@ contract ExtensionsTest is BaseTest {
   function testNewPoolExtensions() public fork(BSC_MAINNET) {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
 
-    // configure the FFD so that the extension is automatically added on the pool creation
-    DiamondExtension[] memory comptrollerExtensions = new DiamondExtension[](1);
-    comptrollerExtensions[0] = cfe;
-    vm.prank(ffd.owner());
-    ffd._setComptrollerExtensions(latestComptrollerImplementation, comptrollerExtensions);
+    _prepareComptrollerUpgrade(address(0));
 
     // deploy a pool that will have an extension registered automatically
     {
@@ -229,11 +228,11 @@ contract ExtensionsTest is BaseTest {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
     for (uint256 i = 0; i < pools.length; i++) {
-      _testExistingCTokenExtensionUpgrade(pools[i].comptroller);
+      _testPoolAllMarketsExtensionUpgrade(pools[i].comptroller);
     }
   }
 
-  function _testExistingCTokenExtensionUpgrade(address poolAddress) internal {
+  function _testPoolAllMarketsExtensionUpgrade(address poolAddress) internal {
     ComptrollerFirstExtension somePool = ComptrollerFirstExtension(poolAddress);
 
     CTokenInterface[] memory markets = somePool.getAllMarkets();
@@ -248,6 +247,12 @@ contract ExtensionsTest is BaseTest {
       emit log_address(address(somePool));
       emit log("market");
       emit log_address(address(someMarket));
+
+      Comptroller pool = Comptroller(payable(poolAddress));
+
+      // turn auto impl off
+      vm.prank(pool.admin());
+      pool._toggleAutoImplementations(false);
 
       try this._testExistingCTokenExtensionUpgrade(asDelegate) {} catch Error(string memory reason) {
         address plugin = address(asDelegate.plugin());
@@ -310,21 +315,14 @@ contract ExtensionsTest is BaseTest {
   }
 
   function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
-    Comptroller pool = Comptroller(address(asDelegate.comptroller()));
-    _prepareCTokenUpgrade(asDelegate);
+    address newDelegate = _prepareCTokenUpgrade(asDelegate);
 
-    // turn auto impl on
-    vm.prank(pool.admin());
-    pool._toggleAutoImplementations(true);
+    asDelegate._setImplementationSafe(newDelegate, false, "");
 
     // auto upgrade
     CTokenExtensionInterface(address(asDelegate)).accrueInterest();
     emit log("new implementation");
     emit log_address(asDelegate.implementation());
-
-    // turn auto impl off
-    vm.prank(pool.admin());
-    pool._toggleAutoImplementations(false);
   }
 
   function testBscComptrollerExtensions() public debuggingOnly fork(BSC_MAINNET) {
