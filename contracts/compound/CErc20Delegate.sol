@@ -52,16 +52,7 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     implementation = implementation_;
 
     // add the extensions of the new implementation
-    address[] memory latestExtensions = IFuseFeeDistributor(fuseAdmin).getCErc20DelegateExtensions(implementation);
-    address[] memory currentExtensions = LibDiamond.listExtensions();
-    // removed the current (old) extensions
-    for (uint256 i = 0; i < currentExtensions.length; i++) {
-      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
-    }
-    // add the new extensions
-    for (uint256 i = 0; i < latestExtensions.length; i++) {
-      LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
-    }
+    _updateExtensions();
 
     if (address(this).code.length == 0) {
       // cannot delegate to self with an external call when constructing
@@ -76,6 +67,24 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     }
 
     emit NewImplementation(oldImplementation, implementation);
+  }
+
+  function _updateExtensions() internal {
+    address[] memory latestExtensions = IFuseFeeDistributor(fuseAdmin).getCErc20DelegateExtensions(implementation);
+    address[] memory currentExtensions = LibDiamond.listExtensions();
+
+    // don't update if they are the same
+    if (latestExtensions.length == 1 && currentExtensions.length == 1 && latestExtensions[0] == currentExtensions[0])
+      return;
+
+    // removed the current (old) extensions
+    for (uint256 i = 0; i < currentExtensions.length; i++) {
+      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
+    }
+    // add the new extensions
+    for (uint256 i = 0; i < latestExtensions.length; i++) {
+      LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
+    }
   }
 
   /**
@@ -93,9 +102,7 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     require(hasAdminRights(), "!admin");
 
     // Set implementation
-    if (implementation != implementation_) {
-      _setImplementationInternal(implementation_, allowResign, becomeImplementationData);
-    }
+    _setImplementationInternal(implementation_, allowResign, becomeImplementationData);
   }
 
   /**
@@ -109,6 +116,8 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
       ).latestCErc20Delegate(implementation);
       if (implementation != latestCErc20Delegate) {
         _setImplementationInternal(latestCErc20Delegate, allowResign, becomeImplementationData);
+      } else {
+        _updateExtensions();
       }
     }
   }
