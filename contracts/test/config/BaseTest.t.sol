@@ -163,6 +163,7 @@ abstract contract BaseTest is Test {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
+      dpa = ProxyAdmin(0x9b30a238A94c5a456a02ceC01e41f1c91d54e915);
     } else if (chainid == NEON_DEVNET) {
       ap = AddressesProvider(0x2F475CbCdeDbCcb010aF1a7A2E49DC7AadE5c423);
     } else if (chainid == ARBITRUM_ONE) {

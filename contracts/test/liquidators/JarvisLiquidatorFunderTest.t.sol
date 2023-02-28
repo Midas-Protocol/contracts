@@ -91,7 +91,8 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     bytes[] data;
   }
 
-  function testJbrlLiquidation() public forkAtBlock(BSC_MAINNET, 21700285) {
+  // TODO test with the latest block and contracts and/or without the FSL
+  function testJbrlLiquidation() public debuggingOnly forkAtBlock(BSC_MAINNET, 21700285) {
     LiquidationData memory vars;
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
 
