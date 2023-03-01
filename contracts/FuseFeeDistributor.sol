@@ -457,7 +457,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     if (!autoImplOnBefore) pool._toggleAutoImplementations(false);
   }
 
-  function toggleAutoimplementations(IComptroller pool) external onlyOwner {
-    pool._toggleAutoImplementations(false);
+  function toggleAutoimplementations(IComptroller pool, bool enabled) external onlyOwner {
+    pool._toggleAutoImplementations(enabled);
   }
 }
