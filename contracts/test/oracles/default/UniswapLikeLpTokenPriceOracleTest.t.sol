@@ -3,6 +3,8 @@ pragma solidity >=0.8.0;
 
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
+import { IPair } from "../../../external/solidly/IPair.sol";
+import { IUniswapV2Pair } from "../../../external/uniswap/IUniswapV2Pair.sol";
 import { UniswapLpTokenPriceOracle } from "../../../oracles/default/UniswapLpTokenPriceOracle.sol";
 import { SolidlyLpTokenPriceOracle } from "../../../oracles/default/SolidlyLpTokenPriceOracle.sol";
 import { UniswapLikeLpTokenPriceOracle } from "../../../oracles/default/UniswapLikeLpTokenPriceOracle.sol";
@@ -42,33 +44,46 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     return mpo.price(lpToken);
   }
 
-  function testBombBtcLpTokenOraclePrice() public fork(BSC_MAINNET) {
-    address lpToken = 0x84392649eb0bC1c1532F2180E58Bae4E1dAbd8D6; // Lp BOMB-BTCB
+  function verifyLpPrice(
+    address lpToken,
+    uint256 price,
+    uint256 tolerance
+  ) internal {
+    uint256 priceToken0 = mpo.price(IPair(lpToken).token0());
+    uint256 priceToken1 = mpo.price(IPair(lpToken).token1());
+    assertApproxEqAbs(2 * sqrt(priceToken0) * sqrt(priceToken1), price, tolerance);
+  }
+
+  function testBusdWbnbUniswap() public fork(BSC_MAINNET) {
+    address lpToken = 0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16; // Lp WBNB-BUSD
 
     uint256 price = getLpPrice(lpToken, getUniswapLpTokenPriceOracle());
     assertTrue(price > 0);
+    verifyLpPrice(lpToken, price, 1e17);
   }
 
   function testBnbXBnbSolidly() public fork(BSC_MAINNET) {
     address lpToken = 0x6c83E45fE3Be4A9c12BB28cB5BA4cD210455fb55; // Lp BNBx/WBNB (volatile AMM)
 
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    uint256 priceBnbX = mpo.price(0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275);
-    uint256 priceWbnb = mpo.price(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
-
     assertTrue(price > 0);
-    assertApproxEqAbs(priceBnbX + priceWbnb, price, 1e16);
+    verifyLpPrice(lpToken, price, 1e14);
   }
 
-  function testBusdUsdtSolidly() public fork(BSC_MAINNET) {
+  function testUsdtUsdcSolidly() public fork(BSC_MAINNET) {
     address lpToken = 0x618f9Eb0E1a698409621f4F487B563529f003643; // Lp USDT/USDC (stable AMM)
 
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    uint256 priceUsdc = mpo.price(0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d);
-    uint256 priceUsdt = mpo.price(0x55d398326f99059fF775485246999027B3197955);
-
     assertTrue(price > 0);
-    assertApproxEqAbs(priceUsdc + priceUsdt, price, 1e17);
+    verifyLpPrice(lpToken, price, 1e14);
+  }
+
+  function testBusdWbnbSolidly() public fork(BSC_MAINNET) {
+    address lpToken = 0x483653bcF3a10d9a1c334CE16a19471a614F4385; // Lp USDT/USDC (stable AMM)
+
+    uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
+    assertTrue(price > 0);
+    verifyLpPrice(lpToken, price, 1e14);
   }
 
   function testGlmrUsdcLpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
@@ -76,6 +91,7 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
 
     uint256 price = getLpPrice(lpToken, getUniswapLpTokenPriceOracle());
     assertTrue(price > 0);
+    verifyLpPrice(lpToken, price, 1e16);
   }
 
   function testGlmrGlintLpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
@@ -83,6 +99,7 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
 
     uint256 price = getLpPrice(lpToken, getUniswapLpTokenPriceOracle());
     assertTrue(price > 0);
+    verifyLpPrice(lpToken, price, 1e16);
   }
 
   function testWGlmrWethLpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
@@ -90,5 +107,6 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
 
     uint256 price = getLpPrice(lpToken, getUniswapLpTokenPriceOracle());
     assertTrue(price > 0);
+    verifyLpPrice(lpToken, price, 1e16);
   }
 }
