@@ -6,6 +6,7 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { ComptrollerFirstExtension, DiamondExtension } from "../compound/ComptrollerFirstExtension.sol";
+import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { CTokenInterface, CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
@@ -43,5 +44,35 @@ contract ComptrollerTest is BaseTest {
     vm.expectEmit(false, false, false, true, address(comptroller));
     emit Failure(1, 2, 0);
     comptroller._addRewardsDistributor(address(flywheel));
+  }
+
+  function testBscRefactoredBorrowCaps() debuggingOnly public fork(BSC_MAINNET) {
+    _testRefactoredBorrowCaps();
+  }
+
+  function testPolygonRefactoredBorrowCaps() debuggingOnly public fork(POLYGON_MAINNET) {
+    _testRefactoredBorrowCaps();
+  }
+
+  function testMoonbeamRefactoredBorrowCaps() debuggingOnly public fork(MOONBEAM_MAINNET) {
+    _testRefactoredBorrowCaps();
+  }
+
+  function testEvmosRefactoredBorrowCaps() debuggingOnly public fork(EVMOS_MAINNET) {
+    _testRefactoredBorrowCaps();
+  }
+
+  function testFantomRefactoredBorrowCaps() debuggingOnly public fork(FANTOM_OPERA) {
+    _testRefactoredBorrowCaps();
+  }
+
+  function _testRefactoredBorrowCaps() internal {
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+    for(uint256 i = 0; i < pools.length; i++) {
+      Comptroller pool = Comptroller(pools[i].comptroller);
+      uint256 borrowCap = pool.borrowCapForCollateral(address(1), address(2));
+      assertEq(borrowCap, 0, "dummy borrow cap non-zero");
+    }
   }
 }
