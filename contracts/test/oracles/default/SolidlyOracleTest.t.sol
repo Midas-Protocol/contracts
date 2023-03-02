@@ -115,4 +115,28 @@ contract SolidlyPriceOracleTest is BaseTest {
     }
     return price;
   }
+
+  function testSetUnsupportedBaseToken() public fork(ARBITRUM_ONE) {
+    address dai = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
+    address usdt = 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9;
+
+    address[] memory underlyings = new address[](1);
+    SolidlyPriceOracle.AssetConfig[] memory configs = new SolidlyPriceOracle.AssetConfig[](1);
+
+    underlyings[0] = dai;
+
+    // DAI/USDT
+    configs[0] = SolidlyPriceOracle.AssetConfig(0x15b9D20bcaa4f65d9004D2BEBAc4058445FD5285, usdt);
+
+    vm.startPrank(oracle.owner());
+    vm.expectRevert(bytes("Underlying token must be supported"));
+    oracle.setPoolFeeds(underlyings, configs);
+    oracle._setSupportedUsdTokens(asArray(usdt, stable));
+    oracle.setPoolFeeds(underlyings, configs);
+    vm.stopPrank();
+
+    // check prices
+    uint256 price = oracle.price(dai);
+    assertApproxEqRel(price, mpo.price(dai), 1e17, "!Price Error");
+  }
 }
