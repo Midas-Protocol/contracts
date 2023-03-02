@@ -637,10 +637,6 @@ contract AnyLiquidationTest is BaseTest {
     address ffd = ap.getAddress("FuseFeeDistributor");
 
     vm.prank(0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
-    _functionCall(
-      ffd,
-      hex"fa7cc72d000000000000000000000000db984f8cbc1cf893a18c2da50282a1492234602c",
-      "call failed"
-    );
+    _functionCall(ffd, hex"fa7cc72d000000000000000000000000db984f8cbc1cf893a18c2da50282a1492234602c", "call failed");
   }
 }

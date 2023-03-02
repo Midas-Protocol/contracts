@@ -387,15 +387,15 @@ contract CTokenFirstExtension is
       InterestAccrual memory accrual = accrueInterestHypothetical(block.number, cashPrior);
 
       return
-      _exchangeRateHypothetical(
-        accrual.totalSupply,
-        initialExchangeRateMantissa,
-        accrual.totalCash,
-        accrual.totalBorrows,
-        accrual.totalReserves,
-        accrual.totalAdminFees,
-        accrual.totalFuseFees
-      );
+        _exchangeRateHypothetical(
+          accrual.totalSupply,
+          initialExchangeRateMantissa,
+          accrual.totalCash,
+          accrual.totalBorrows,
+          accrual.totalReserves,
+          accrual.totalAdminFees,
+          accrual.totalFuseFees
+        );
     }
   }
 

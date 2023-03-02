@@ -46,30 +46,30 @@ contract ComptrollerTest is BaseTest {
     comptroller._addRewardsDistributor(address(flywheel));
   }
 
-  function testBscRefactoredBorrowCaps() debuggingOnly public fork(BSC_MAINNET) {
+  function testBscRefactoredBorrowCaps() public debuggingOnly fork(BSC_MAINNET) {
     _testRefactoredBorrowCaps();
   }
 
-  function testPolygonRefactoredBorrowCaps() debuggingOnly public fork(POLYGON_MAINNET) {
+  function testPolygonRefactoredBorrowCaps() public debuggingOnly fork(POLYGON_MAINNET) {
     _testRefactoredBorrowCaps();
   }
 
-  function testMoonbeamRefactoredBorrowCaps() debuggingOnly public fork(MOONBEAM_MAINNET) {
+  function testMoonbeamRefactoredBorrowCaps() public debuggingOnly fork(MOONBEAM_MAINNET) {
     _testRefactoredBorrowCaps();
   }
 
-  function testEvmosRefactoredBorrowCaps() debuggingOnly public fork(EVMOS_MAINNET) {
+  function testEvmosRefactoredBorrowCaps() public debuggingOnly fork(EVMOS_MAINNET) {
     _testRefactoredBorrowCaps();
   }
 
-  function testFantomRefactoredBorrowCaps() debuggingOnly public fork(FANTOM_OPERA) {
+  function testFantomRefactoredBorrowCaps() public debuggingOnly fork(FANTOM_OPERA) {
     _testRefactoredBorrowCaps();
   }
 
   function _testRefactoredBorrowCaps() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
-    for(uint256 i = 0; i < pools.length; i++) {
+    for (uint256 i = 0; i < pools.length; i++) {
       Comptroller pool = Comptroller(pools[i].comptroller);
       uint256 borrowCap = pool.borrowCapForCollateral(address(1), address(2));
       assertEq(borrowCap, 0, "dummy borrow cap non-zero");
