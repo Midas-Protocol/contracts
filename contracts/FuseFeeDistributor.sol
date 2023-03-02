@@ -437,9 +437,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     cErc20DelegateExtensions[cErc20Delegate] = extensions;
   }
 
-  function autoUpgradePool(address poolAddress) external onlyOwner {
-    IComptroller pool = IComptroller(poolAddress);
-
+  function autoUpgradePool(IComptroller pool) external onlyOwner {
     ICToken[] memory markets = pool.getAllMarkets();
     bool autoImplOnBefore = pool.autoImplementation();
     pool._toggleAutoImplementations(true);
@@ -457,5 +455,9 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     }
 
     if (!autoImplOnBefore) pool._toggleAutoImplementations(false);
+  }
+
+  function toggleAutoimplementations(IComptroller pool, bool enabled) external onlyOwner {
+    pool._toggleAutoImplementations(enabled);
   }
 }

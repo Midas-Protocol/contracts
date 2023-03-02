@@ -371,7 +371,7 @@ contract ExtensionsTest is BaseTest {
     address newImplAddress = _prepareCTokenUpgrade(market);
 
     vm.startPrank(ffd.owner());
-    ffd.autoUpgradePool(address(market.comptroller()));
+    ffd.autoUpgradePool(IComptroller(address(market.comptroller())));
 
     address implAfter = market.implementation();
     assertEq(implAfter, newImplAddress, "!market upgrade");
