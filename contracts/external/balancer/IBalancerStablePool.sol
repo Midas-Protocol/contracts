@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import { IBalancerVault } from "./IBalancerVault.sol";
 import { IRateProvider } from "./IRateProvider.sol";
 
-interface  IBalancerStablePool {
+interface IBalancerStablePool {
   function getActualSupply() external view returns (uint256);
 
   function getBptIndex() external view returns (uint256);
