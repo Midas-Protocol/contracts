@@ -395,7 +395,6 @@ contract ExtensionsTest is BaseTest {
     Comptroller pool = Comptroller(poolAddress);
     CTokenInterface[] memory markets = poolAsExt.getAllMarkets();
     for (uint8 k = 0; k < markets.length; k++) {
-      _upgradeExistingCTokenExtension(CErc20Delegate(address(markets[k])));
       CTokenFirstExtension marketAsExt = CTokenFirstExtension(address(markets[k]));
       uint256 exchRateBefore = marketAsExt.exchangeRateStored();
       emit log_named_uint("rate before", exchRateBefore);
@@ -426,9 +425,6 @@ contract ExtensionsTest is BaseTest {
 
       CTokenInterface[] memory markets = poolExt.getAllMarkets();
       for (uint8 k = 0; k < markets.length; k++) {
-        //        CErc20Delegate market = CErc20Delegate(address(markets[k]));
-        //        emit log(market.contractType());
-        //        emit log_named_address("impl", market.implementation());
         CTokenFirstExtension marketAsExt = CTokenFirstExtension(address(markets[k]));
         uint256 exchRateBefore = marketAsExt.exchangeRateStored();
         emit log_named_uint("rate before", exchRateBefore);
