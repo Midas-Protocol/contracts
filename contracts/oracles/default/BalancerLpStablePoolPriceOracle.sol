@@ -84,4 +84,8 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(baseTokens[underlying]);
     return (rate * baseTokenPrice) / 1e18;
   }
+
+  function getAllLpTokens() public view returns (address[] memory) {
+    return lpTokens;
+  }
 }

@@ -6,6 +6,7 @@ import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
 import { BalancerLpStablePoolPriceOracle } from "../../../oracles/default/BalancerLpStablePoolPriceOracle.sol";
 import { BaseTest } from "../../config/BaseTest.t.sol";
 import { IBalancerStablePool } from "../../../external/balancer/IBalancerStablePool.sol";
+import { IBalancerVault, UserBalanceOp } from "../../../external/balancer/IBalancerVault.sol";
 
 contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   BalancerLpStablePoolPriceOracle oracle;
@@ -73,5 +74,19 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     uint256 price = getLpTokenPrice(boostedAavePool);
     assertTrue(price > 0);
     assertApproxEqAbs(price, mpo.price(usdt), 1e16);
+  }
+
+  function testReentrancyErrorMessage() public fork(POLYGON_MAINNET) {
+    // TODO configure it in the addresses provider after deployed (or just hardcode it here for polygon)
+    oracle = BalancerLpStablePoolPriceOracle(ap.getAddress("BalancerLpStablePoolPriceOracle"));
+    address[] memory lpTokens = oracle.getAllLpTokens();
+    //address[] memory lpTokens = asArray(stMATIC_WMATIC_pool);
+    for (uint256 i = 0; i < lpTokens.length; i++) {
+      IBalancerVault vault = IBalancerStablePool(lpTokens[i]).getVault();
+      // raise the reentrancy flag for that vault
+      vm.store(address(vault), bytes32(uint256(0)), bytes32(uint256(2)));
+      vm.expectRevert(bytes("BAL#400"));
+      vault.manageUserBalance(new UserBalanceOp[](0));
+    }
   }
 }
