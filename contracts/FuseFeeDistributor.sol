@@ -447,11 +447,8 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
 
     for (uint8 i = 0; i < markets.length; i++) {
       address marketAddress = address(markets[i]);
-      address implBefore = CErc20PluginDelegate(marketAddress).implementation();
-      address newImpl = _latestCErc20Delegate[implBefore].implementation;
-
       // auto upgrade the market
-      if (newImpl != address(0) && newImpl != implBefore) CTokenExtensionInterface(marketAddress).accrueInterest();
+      CTokenExtensionInterface(marketAddress).accrueInterest();
     }
 
     if (!autoImplOnBefore) pool._toggleAutoImplementations(false);
