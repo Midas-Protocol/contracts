@@ -75,12 +75,13 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
   function _price(address underlying) internal view virtual returns (uint256) {
     IBalancerStablePool pool = IBalancerStablePool(underlying);
 
-    // read-only re-entracy protection
-    (bool callSuccess, ) = address(this).staticcall(
+    // read-only re-entracy protection - this call is always unsuccessful
+    (, bytes memory result) = address(this).staticcall(
       abi.encodeWithSelector(this.ensureNotInVaultContext.selector, pool.getVault())
     );
 
-    if (!callSuccess) {
+    bytes32 reentrancyErrorHash = keccak256(hex"08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000742414c2334303000000000000000000000000000000000000000000000000000");
+    if (reentrancyErrorHash == keccak256(result)) {
       return 0;
     }
     // Returns the BLP Token / Base Token rate

@@ -5,6 +5,8 @@ import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
 import { BalancerLpStablePoolPriceOracle } from "../../../oracles/default/BalancerLpStablePoolPriceOracle.sol";
 import { BaseTest } from "../../config/BaseTest.t.sol";
+import { IBalancerStablePool } from "../../../external/balancer/IBalancerStablePool.sol";
+import { IBalancerVault, UserBalanceOp } from "../../../external/balancer/IBalancerVault.sol";
 
 contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   BalancerLpStablePoolPriceOracle oracle;
@@ -36,6 +38,16 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     mpo.add(asArray(lpToken), oracles);
     emit log("added the oracle");
     return mpo.price(lpToken);
+  }
+
+  function testReentrancyWmaticStmaticLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
+    IBalancerVault ibVault = IBalancerStablePool(stMATIC_WMATIC_pool).getVault();
+    address vault = address(ibVault);
+    // raise the reentrancy flag for that vault
+    vm.store(vault, bytes32(uint256(0)), bytes32(uint256(2)));
+
+    uint256 price = getLpTokenPrice(stMATIC_WMATIC_pool);
+    assertEq(price, 0, "should return 0 when a reentrancy is detected");
   }
 
   function testWmaticStmaticLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
