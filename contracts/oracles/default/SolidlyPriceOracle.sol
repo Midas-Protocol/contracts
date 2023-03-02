@@ -16,7 +16,7 @@ import "../../midas/SafeOwnableUpgradeable.sol";
  * @notice SolidlyOracle is a price oracle for Solidly-style pairs.
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
-contract SolidlyOracle is PriceOracle, SafeOwnableUpgradeable {
+contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
   /**
    * @notice Maps ERC20 token addresses to UniswapV3Pool addresses.
    */
@@ -100,9 +100,9 @@ contract SolidlyOracle is PriceOracle, SafeOwnableUpgradeable {
 
     baseToken == token0 ? quoteToken = token1 : quoteToken = token0;
 
-    // get pricePerPaseToken for 1 baseToken
-    uint256 pricePerPaseToken = pair.current(baseToken, 10**uint256(ERC20Upgradeable(baseToken).decimals()));
-
+    // get how many baseTokens (WBNB or BUSD) are needed to get us 1 quote token
+    // i.e: the ration X/WBNB or X/BUSD
+    uint256 pricePerPaseToken = pair.current(quoteToken, 10**uint256(ERC20Upgradeable(quoteToken).decimals()));
     if (baseToken == WTOKEN) {
       return pricePerPaseToken;
     } else {
