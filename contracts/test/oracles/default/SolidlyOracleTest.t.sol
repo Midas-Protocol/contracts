@@ -40,10 +40,10 @@ contract SolidlyPriceOracleTest is BaseTest {
     address[] memory underlyings = new address[](4);
     SolidlyPriceOracle.AssetConfig[] memory configs = new SolidlyPriceOracle.AssetConfig[](4);
 
-    underlyings[0] = hay; // HAY
-    underlyings[1] = bnbx; // BNBx
-    underlyings[2] = eth; // ETH
-    underlyings[3] = usdt; // USDT
+    underlyings[0] = hay;
+    underlyings[1] = bnbx;
+    underlyings[2] = eth;
+    underlyings[3] = usdt;
 
     // HAY/BUSD
     configs[0] = SolidlyPriceOracle.AssetConfig(0x93B32a8dfE10e9196403dd111974E325219aec24, busd);
@@ -68,6 +68,38 @@ contract SolidlyPriceOracleTest is BaseTest {
     }
   }
 
+  function testArbitrumAssets() public fork(ARBITRUM_ONE) {
+    address wbtc = 0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f;
+    address dai = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
+    address usdt = 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9;
+
+    address[] memory underlyings = new address[](3);
+    SolidlyPriceOracle.AssetConfig[] memory configs = new SolidlyPriceOracle.AssetConfig[](3);
+
+    underlyings[0] = wbtc;
+    underlyings[1] = dai;
+    underlyings[2] = usdt;
+
+    // WBTC/WETH (8/18 decimals)
+    configs[0] = SolidlyPriceOracle.AssetConfig(0xd9D611c6943585bc0e18E51034AF8fa28778F7Da, wtoken);
+    // DAI/USDC (18/6)
+    configs[1] = SolidlyPriceOracle.AssetConfig(0x07d7F291e731A41D3F0EA4F1AE5b6d920ffb3Fe0, stable);
+    // USDT/USDC (6/6)
+    configs[2] = SolidlyPriceOracle.AssetConfig(0xC9dF93497B1852552F2200701cE58C236cC0378C, stable);
+
+    PriceExpected[] memory expPrices = new PriceExpected[](3);
+
+    expPrices[0] = PriceExpected({ price: mpo.price(wbtc), percentErrorAllowed: 1e18 }); // 1%
+    expPrices[1] = PriceExpected({ price: mpo.price(dai), percentErrorAllowed: 1e18 }); // 1%
+    expPrices[2] = PriceExpected({ price: mpo.price(usdt), percentErrorAllowed: 1e17 }); // 0.1%
+
+    emit log_named_uint("USDC PRICE", mpo.price(stable));
+    uint256[] memory prices = getPriceFeed(underlyings, configs);
+    for (uint256 i = 0; i < prices.length; i++) {
+      assertApproxEqRel(prices[i], expPrices[i].price, expPrices[i].percentErrorAllowed, "!Price Error");
+    }
+  }
+
   function getPriceFeed(address[] memory underlyings, SolidlyPriceOracle.AssetConfig[] memory configs)
     internal
     returns (uint256[] memory price)
@@ -78,8 +110,6 @@ contract SolidlyPriceOracleTest is BaseTest {
 
     price = new uint256[](underlyings.length);
     for (uint256 i = 0; i < underlyings.length; i++) {
-      emit log_named_address("UL", underlyings[i]);
-
       vm.prank(address(mpo));
       price[i] = oracle.price(underlyings[i]);
     }
