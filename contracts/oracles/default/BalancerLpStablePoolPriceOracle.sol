@@ -80,9 +80,10 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
       abi.encodeWithSelector(this.ensureNotInVaultContext.selector, pool.getVault())
     );
 
-    bytes32 reentrancyErrorHash = keccak256(
-      hex"08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000742414c2334303000000000000000000000000000000000000000000000000000"
-    );
+    string memory balancerReentrancyErrorMsg = "BAL#400";
+    // hex"08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000742414c2334303000000000000000000000000000000000000000000000000000"
+    bytes memory encodedError = abi.encodeWithSignature("Error(string)", balancerReentrancyErrorMsg);
+    bytes32 reentrancyErrorHash = keccak256(encodedError);
     if (reentrancyErrorHash == keccak256(result)) {
       return 0;
     }

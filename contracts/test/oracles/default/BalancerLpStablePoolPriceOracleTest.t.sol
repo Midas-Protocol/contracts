@@ -40,6 +40,12 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     return mpo.price(lpToken);
   }
 
+  function testErrorReentrancy() public debuggingOnly {
+    string memory balancerReentrancyErrorMsg = "BAL#400";
+    bytes memory encodedError = abi.encodeWithSignature("Error(string)", balancerReentrancyErrorMsg);
+    emit log_named_bytes("encoded error", encodedError);
+  }
+
   function testReentrancyWmaticStmaticLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
     IBalancerVault ibVault = IBalancerStablePool(stMATIC_WMATIC_pool).getVault();
     address vault = address(ibVault);
