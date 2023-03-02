@@ -43,6 +43,8 @@ interface IPair {
 
   function lastObservation() external view returns (Observation memory);
 
+  function current(address tokenIn, uint256 amountIn) external view returns (uint256 amountOut);
+
   function transferFrom(
     address src,
     address dst,
