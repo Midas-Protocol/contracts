@@ -317,6 +317,7 @@ contract ExtensionsTest is BaseTest {
   function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
     address newDelegate = _prepareCTokenUpgrade(asDelegate);
 
+    vm.prank(asDelegate.fuseAdmin());
     asDelegate._setImplementationSafe(newDelegate, false, "");
 
     // auto upgrade
@@ -376,40 +377,67 @@ contract ExtensionsTest is BaseTest {
     assertEq(implAfter, newImplAddress, "!market upgrade");
   }
 
-  function testMoonbeamBorrowCapsStorage() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testBorrowCapsStorage();
+  function testMoonbeamExchangeRateHypo() public debuggingOnly fork(MOONBEAM_MAINNET) {
+    _testExchangeRateHypo();
   }
 
-  function testPolygonBorrowCapsStorage() public debuggingOnly fork(POLYGON_MAINNET) {
-    _testBorrowCapsStorage();
+  function testPolygonExchangeRateHypo() public debuggingOnly fork(POLYGON_MAINNET) {
+    _testExchangeRateHypo();
   }
 
-  function testBscBorrowCapsStorage() public debuggingOnly fork(BSC_MAINNET) {
-    _testBorrowCapsStorage();
+  function testBscExchangeRateHypo() public debuggingOnly fork(BSC_MAINNET) {
+    _testExchangeRateHypo();
   }
 
-  function _testBorrowCapsStorage() internal {
+  function testBscBombExchangeRateHypo() public debuggingOnly fork(BSC_MAINNET) {
+    address poolAddress = 0x5373C052Df65b317e48D6CAD8Bb8AC50995e9459;
+    ComptrollerFirstExtension poolAsExt = ComptrollerFirstExtension(poolAddress);
+    Comptroller pool = Comptroller(poolAddress);
+    CTokenInterface[] memory markets = poolAsExt.getAllMarkets();
+    for (uint8 k = 0; k < markets.length; k++) {
+      _upgradeExistingCTokenExtension(CErc20Delegate(address(markets[k])));
+      CTokenFirstExtension marketAsExt = CTokenFirstExtension(address(markets[k]));
+      uint256 exchRateBefore = marketAsExt.exchangeRateStored();
+      emit log_named_uint("rate before", exchRateBefore);
+      marketAsExt.accrueInterest();
+      uint256 exchRateAfter = marketAsExt.exchangeRateStored();
+      emit log_named_uint("rate after", exchRateAfter);
+      uint256 exchangeRateHypothetical = marketAsExt.exchangeRateHypothetical();
+      emit log_named_uint("rate hypo", exchangeRateHypothetical);
+    }
+  }
+
+  function testEvmosExchangeRateHypo() public debuggingOnly fork(EVMOS_MAINNET) {
+    _testExchangeRateHypo();
+  }
+
+  function testFantomExchangeRateHypo() public debuggingOnly fork(FANTOM_OPERA) {
+    _testExchangeRateHypo();
+  }
+
+  function _testExchangeRateHypo() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
 
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      address payable asPayable = payable(pools[i].comptroller);
-      Unitroller asUnitroller = Unitroller(asPayable);
-      _upgradeExistingComptroller(asUnitroller);
-
+      if (pools[i].comptroller == 0x5373C052Df65b317e48D6CAD8Bb8AC50995e9459) continue;
       ComptrollerFirstExtension poolExt = ComptrollerFirstExtension(pools[i].comptroller);
-      CTokenInterface[] memory markets = poolExt.getAllMarkets();
 
+      CTokenInterface[] memory markets = poolExt.getAllMarkets();
       for (uint8 k = 0; k < markets.length; k++) {
-        for (uint8 j = 0; j < markets.length; j++) {
-          uint256 cap = poolExt.borrowCapForCollateral(address(markets[k]), address(markets[j]));
-          if (cap != 0) {
-            emit log_named_address("borrowed", address(markets[k]));
-            emit log_named_address("collateral", address(markets[j]));
-          }
-          assertEq(cap, 0, "non zero cap");
-        }
+        //        CErc20Delegate market = CErc20Delegate(address(markets[k]));
+        //        emit log(market.contractType());
+        //        emit log_named_address("impl", market.implementation());
+        CTokenFirstExtension marketAsExt = CTokenFirstExtension(address(markets[k]));
+        uint256 exchRateBefore = marketAsExt.exchangeRateStored();
+        emit log_named_uint("rate before", exchRateBefore);
+        marketAsExt.accrueInterest();
+        marketAsExt.accrueInterest();
+        uint256 exchRateAfter = marketAsExt.exchangeRateStored();
+        emit log_named_uint("rate after", exchRateAfter);
+        uint256 rate = marketAsExt.exchangeRateHypothetical();
+        assertGt(rate, 0, "hypo rate zero");
       }
     }
   }
