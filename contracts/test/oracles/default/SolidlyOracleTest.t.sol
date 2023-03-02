@@ -136,6 +136,7 @@ contract SolidlyPriceOracleTest is BaseTest {
     vm.stopPrank();
 
     // check prices
+    vm.prank(address(mpo));
     uint256 price = oracle.price(dai);
     assertApproxEqRel(price, mpo.price(dai), 1e17, "!Price Error");
   }
