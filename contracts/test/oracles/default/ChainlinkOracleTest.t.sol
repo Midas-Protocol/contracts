@@ -5,8 +5,9 @@ import { ChainlinkPriceOracleV2 } from "../../../oracles/default/ChainlinkPriceO
 import { ICToken } from "../../../external/compound/ICToken.sol";
 
 import { BaseTest } from "../../config/BaseTest.t.sol";
+import { CoingeckoAPICaller } from "./CoingeckoAPICaller.sol";
 
-contract ChainlinkOraclesTest is BaseTest {
+contract ChainlinkOraclesTest is BaseTest, CoingeckoAPICaller {
   ChainlinkPriceOracleV2 oracle;
 
   address usdcPolygon = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
@@ -74,5 +75,12 @@ contract ChainlinkOraclesTest is BaseTest {
     uint256 usdcPrice = oracle.price(usdcPolygon);
 
     assertApproxEqAbs(usdtPrice, usdcPrice, 1e16, "usd prices differ too much");
+  }
+
+  function testPriceAgainstCoingecko() public debuggingOnly {
+    string memory base = "usd";
+    string memory asset = "ethereum-classic";
+    uint256 price = getCoinGeckoPrice(asset, base); // scaled to 1e18
+    emit log_named_uint("ethereum-classic price in usd", price);
   }
 }
