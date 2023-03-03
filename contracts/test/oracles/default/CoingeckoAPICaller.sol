@@ -21,13 +21,13 @@ contract CoingeckoAPICaller is Test {
     return floatPointToUint(floatPointPrice);
   }
 
-  function concat4(string memory str0, string memory str1, string memory str2, string memory str3) internal returns (string memory) {
-    return string(
-      bytes.concat(
-        bytes.concat(bytes(str0), bytes(str1)),
-        bytes.concat(bytes(str2), bytes(str3))
-      )
-    );
+  function concat4(
+    string memory str0,
+    string memory str1,
+    string memory str2,
+    string memory str3
+  ) internal returns (string memory) {
+    return string(bytes.concat(bytes.concat(bytes(str0), bytes(str1)), bytes.concat(bytes(str2), bytes(str3))));
   }
 
   function floatPointToUint(string memory str) internal returns (uint256) {
@@ -35,13 +35,13 @@ contract CoingeckoAPICaller is Test {
     uint256 k;
 
     for (uint256 i = 0; i < asBytes.length; i++) {
-      if (asBytes[i] != '.') k++;
+      if (asBytes[i] != ".") k++;
     }
 
     bytes memory noPointBytes = new bytes(k);
     k = 0;
     for (uint256 i = 0; i < asBytes.length; i++) {
-      if (asBytes[i] != '.') noPointBytes[k++] = asBytes[i];
+      if (asBytes[i] != ".") noPointBytes[k++] = asBytes[i];
     }
 
     return vm.parseUint(string(noPointBytes));
