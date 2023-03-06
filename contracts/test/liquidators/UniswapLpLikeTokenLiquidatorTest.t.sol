@@ -77,22 +77,33 @@ contract UniswapLpTokenLiquidatorTest is BaseTest {
       swapToken1Path = asArray(token1, wtoken);
     }
 
-    uint256 amount = 1e18;
+    uint256 redeemAmount = 1e18;
 
     bytes memory data = abi.encode(uniswapV2Router, swapToken0Path, swapToken1Path);
 
+    uint256 outputBalanceBefore = outputToken.balanceOf(address(liquidator));
     vm.prank(whale);
-    lpTokenContract.transfer(address(liquidator), 1e18);
+    lpTokenContract.transfer(address(liquidator), redeemAmount);
 
     vm.prank(address(liquidator));
-    lpTokenContract.approve(WBNB_BUSD_Uniswap, 1e18);
-    liquidator.redeem(lpTokenContract, amount, data);
+    lpTokenContract.approve(WBNB_BUSD_Uniswap, redeemAmount);
+    liquidator.redeem(lpTokenContract, redeemAmount, data);
 
-    assertGt(outputToken.balanceOf(address(liquidator)), 0, "!redeem output");
+    uint256 outputBalanceAfter = outputToken.balanceOf(address(liquidator));
+    uint256 outputBalanceDiff = outputBalanceAfter - outputBalanceBefore;
+    assertGt(outputBalanceDiff, 0, "!redeem output");
+
+    // compare the value of the input LP tokens and the value of the output tokens
+    uint256 price = mpo.price(address(outputToken));
+    uint256 outputValue = (price * outputBalanceDiff) / 1e18;
+    uint256 inputTokenPrice = mpo.price(WBNB_BUSD_Uniswap);
+    uint256 inputValue = (redeemAmount * inputTokenPrice) / 1e18;
+
+    assertApproxEqAbs(inputValue, outputValue, 1e15, "value of output does not match the value of the output");
   }
 
   function testUniswapLpRedeem() public fork(BSC_MAINNET) {
-    address lpTokenWhale = 0xa5f8C5Dbd5F286960b9d90548680aE5ebFf07652; // pcs main statking contract
+    address lpTokenWhale = 0xa5f8C5Dbd5F286960b9d90548680aE5ebFf07652; // pcs main staking contract
     testRedeem(lpTokenWhale, WBNB_BUSD_Uniswap, oracleUniswap);
   }
 

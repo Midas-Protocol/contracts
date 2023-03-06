@@ -106,8 +106,8 @@ contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
     if (baseToken == WTOKEN) {
       // No need to scale either, because WNATIVE is always 1e18
       return pricePerPaseToken;
-      // base token is USD
     } else {
+      // base token is USD
       uint256 usdNativePrice = BasePriceOracle(msg.sender).price(baseToken);
       // scale tokenPrice by 1e18
       uint256 baseTokenDecimals = uint256(ERC20Upgradeable(baseToken).decimals());
@@ -116,11 +116,8 @@ contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
 
       if (baseTokenDecimals > quoteTokenDecimals) {
         tokenPriceScaled = pricePerPaseToken / (10**(baseTokenDecimals - quoteTokenDecimals));
-      } else if (baseTokenDecimals < quoteTokenDecimals) {
+      } else if (baseTokenDecimals <= quoteTokenDecimals) {
         tokenPriceScaled = pricePerPaseToken * (10**(quoteTokenDecimals - baseTokenDecimals));
-      } else {
-        // same decimals -- not necessarily 18 however, so need to scale to 18 - decimals
-        tokenPriceScaled = pricePerPaseToken * (10**(18 - quoteTokenDecimals));
       }
 
       return (tokenPriceScaled * usdNativePrice) / 1e18;

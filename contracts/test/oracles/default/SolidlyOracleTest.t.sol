@@ -128,9 +128,12 @@ contract SolidlyPriceOracleTest is BaseTest {
     // DAI/USDT
     configs[0] = SolidlyPriceOracle.AssetConfig(0x15b9D20bcaa4f65d9004D2BEBAc4058445FD5285, usdt);
 
+    // revert if underlying is not supported
     vm.startPrank(oracle.owner());
     vm.expectRevert(bytes("Underlying token must be supported"));
     oracle.setPoolFeeds(underlyings, configs);
+
+    // add it successfully when suported
     oracle._setSupportedUsdTokens(asArray(usdt, stable));
     oracle.setPoolFeeds(underlyings, configs);
     vm.stopPrank();
