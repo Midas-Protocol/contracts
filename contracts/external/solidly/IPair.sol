@@ -39,6 +39,8 @@ interface IPair {
 
   function tokens() external returns (address, address);
 
+  function stable() external view returns (bool);
+
   function observationLength() external view returns (uint256);
 
   function lastObservation() external view returns (Observation memory);

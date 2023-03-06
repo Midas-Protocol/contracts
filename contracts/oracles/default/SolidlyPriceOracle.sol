@@ -102,10 +102,10 @@ contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
 
     // get how many baseTokens (WNATIVE or STABLE) are needed to get us 1 quote token
     // i.e: the ration X/WNATIVE or X/STABLE
-    uint256 pricePerBaseToken = pair.current(quoteToken, 10**uint256(ERC20Upgradeable(quoteToken).decimals()));
+    uint256 baseTokensPerQuoteToken = pair.current(quoteToken, 10**uint256(ERC20Upgradeable(quoteToken).decimals()));
     if (baseToken == WTOKEN) {
       // No need to scale either, because WNATIVE is always 1e18
-      return pricePerBaseToken;
+      return baseTokensPerQuoteToken;
     } else {
       // base token is USD
       uint256 usdNativePrice = BasePriceOracle(msg.sender).price(baseToken);
@@ -114,9 +114,9 @@ contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
       uint256 tokenPriceScaled;
 
       if (baseTokenDecimals > 18) {
-        tokenPriceScaled = pricePerBaseToken / (10**(baseTokenDecimals - 18));
+        tokenPriceScaled = baseTokensPerQuoteToken / (10**(baseTokenDecimals - 18));
       } else {
-        tokenPriceScaled = pricePerBaseToken * (10**(18 - baseTokenDecimals));
+        tokenPriceScaled = baseTokensPerQuoteToken * (10**(18 - baseTokenDecimals));
       }
 
       return (tokenPriceScaled * usdNativePrice) / 1e18;
