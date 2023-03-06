@@ -113,7 +113,11 @@ contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
       uint256 baseTokenDecimals = uint256(ERC20Upgradeable(baseToken).decimals());
       uint256 tokenPriceScaled;
 
-      tokenPriceScaled = pricePerBaseToken * (10**(18 - baseTokenDecimals));
+      if (baseTokenDecimals > 18) {
+        tokenPriceScaled = pricePerBaseToken / (10**(baseTokenDecimals - 18));
+      } else {
+        tokenPriceScaled = pricePerBaseToken * (10**(18 - baseTokenDecimals));
+      }
 
       return (tokenPriceScaled * usdNativePrice) / 1e18;
     }
