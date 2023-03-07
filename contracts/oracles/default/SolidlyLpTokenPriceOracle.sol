@@ -28,7 +28,6 @@ contract SolidlyLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
     IPair pair = IPair(token);
     uint256 totalSupply = pair.totalSupply();
     if (totalSupply == 0) return 0;
-    // Get fair reserves
     address token0 = pair.token0();
     address token1 = pair.token1();
 
@@ -41,19 +40,20 @@ contract SolidlyLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
 
     uint256 timeElapsed = block.timestamp - _observation.timestamp;
 
+    // Get fair reserves
     uint256 _reserve0 = (reserve0Cumulative - _observation.reserve0Cumulative) / timeElapsed;
     uint256 _reserve1 = (reserve1Cumulative - _observation.reserve1Cumulative) / timeElapsed;
 
-    // Get fair price of non-WETH token (underlying the pair) in terms of ETH
-    uint256 token0FairPrice = token0 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token0);
-    uint256 token1FairPrice = token1 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token1);
+    // Get the native price of the underlying, scaled by 1e18
+    uint256 token0Price = token0 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token0);
+    uint256 token1Price = token1 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token1);
 
     return
       (_reserve0 *
         (10**(18 - uint256(ERC20Upgradeable(token0).decimals()))) *
-        token0FairPrice +
+        token0Price +
         _reserve1 *
         (10**(18 - uint256(ERC20Upgradeable(token1).decimals()))) *
-        token1FairPrice) / totalSupply;
+        token1Price) / totalSupply;
   }
 }
