@@ -83,6 +83,8 @@ contract ExtensionsTest is BaseTest {
   FuseFeeDistributor internal ffd;
   ComptrollerFirstExtension internal cfe;
   CTokenFirstExtension newCTokenExtension;
+  CErc20Delegate cErc20Delegate;
+  CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
   MockComptrollerExtension internal mockExtension;
   MockSecondComptrollerExtension internal second;
   MockThirdComptrollerExtension internal third;
@@ -96,6 +98,8 @@ contract ExtensionsTest is BaseTest {
     mockExtension = new MockComptrollerExtension();
     second = new MockSecondComptrollerExtension();
     third = new MockThirdComptrollerExtension();
+    cErc20Delegate = new CErc20Delegate();
+    cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
     Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
     latestComptrollerImplementation = payable(address(newComptrollerImplementation));
   }
@@ -292,9 +296,9 @@ contract ExtensionsTest is BaseTest {
 
     CErc20Delegate newImpl;
     if (compareStrings("CErc20Delegate", market.contractType())) {
-      newImpl = new CErc20Delegate();
+      newImpl = cErc20Delegate;
     } else {
-      newImpl = new CErc20PluginRewardsDelegate();
+      newImpl = cErc20PluginRewardsDelegate;
     }
 
     // whitelist the upgrade
@@ -317,8 +321,9 @@ contract ExtensionsTest is BaseTest {
   function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
     address newDelegate = _prepareCTokenUpgrade(asDelegate);
 
+    bytes memory becomeImplData = (address(newDelegate) == address(cErc20Delegate)) ? bytes("") : abi.encode(address(0));
     vm.prank(asDelegate.fuseAdmin());
-    asDelegate._setImplementationSafe(newDelegate, false, "");
+    asDelegate._setImplementationSafe(newDelegate, false, becomeImplData);
 
     // auto upgrade
     //CTokenExtensionInterface(address(asDelegate)).accrueInterest();
