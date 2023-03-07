@@ -183,7 +183,6 @@ contract SolidlyPriceOracleTest is BaseTest {
     ERC20Upgradeable daiToken = ERC20Upgradeable(pair.token0());
     ERC20Upgradeable usdtToken = ERC20Upgradeable(pair.token1());
 
-
     // manipulate
     {
       address hacker = address(666);
@@ -207,7 +206,7 @@ contract SolidlyPriceOracleTest is BaseTest {
       vm.stopPrank();
     }
 
-    for (uint i = 0; i < 60; i++) {
+    for (uint256 i = 0; i < 60; i++) {
       vm.warp(block.timestamp + 15);
       pair.sync();
 
