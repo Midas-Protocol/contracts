@@ -48,6 +48,6 @@ contract SolidlyLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
     uint256 token0FairPrice = token0 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token0);
     uint256 token1FairPrice = token1 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token1);
 
-    return (2 * sqrt(_reserve0 * _reserve1) * sqrt(token0FairPrice * token1FairPrice)) / totalSupply;
+    return (_reserve0 * token0FairPrice + _reserve1 * token1FairPrice) / totalSupply;
   }
 }
