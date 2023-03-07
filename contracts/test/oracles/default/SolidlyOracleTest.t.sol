@@ -191,8 +191,6 @@ contract SolidlyPriceOracleTest is BaseTest {
       usdtToken.transfer(hacker, usdtToken.balanceOf(usdtWhale));
       vm.stopPrank();
 
-      
-
       vm.startPrank(hacker);
       //usdtToken.transfer(pairAddress, usdtToken.balanceOf(hacker));
 

@@ -409,7 +409,7 @@ contract ExtensionsTest is BaseTest {
 
       CTokenInterface[] memory markets = poolExt.getAllMarkets();
       for (uint8 k = 0; k < markets.length; k++) {
-                CErc20Delegate market = CErc20Delegate(address(markets[k]));
+        CErc20Delegate market = CErc20Delegate(address(markets[k]));
         //        emit log(market.contractType());
         //        emit log_named_address("impl", market.implementation());
         CTokenFirstExtension marketAsExt = CTokenFirstExtension(address(markets[k]));
