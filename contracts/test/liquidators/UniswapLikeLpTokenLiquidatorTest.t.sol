@@ -16,7 +16,7 @@ import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
-contract UniswapLpTokenLiquidatorTest is BaseTest {
+contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
   UniswapLpTokenLiquidator private liquidator;
   SolidlyLpTokenPriceOracle private oracleSolidly;
   UniswapLpTokenPriceOracle private oracleUniswap;
