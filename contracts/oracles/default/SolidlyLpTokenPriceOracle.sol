@@ -49,6 +49,12 @@ contract SolidlyLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
     uint256 token0FairPrice = token0 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token0);
     uint256 token1FairPrice = token1 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token1);
 
-    return (_reserve0 * token0FairPrice + _reserve1 * token1FairPrice) / totalSupply;
+    return
+      (_reserve0 *
+        (10**(18 - uint256(ERC20Upgradeable(token0).decimals()))) *
+        token0FairPrice +
+        _reserve1 *
+        (10**(18 - uint256(ERC20Upgradeable(token1).decimals()))) *
+        token1FairPrice) / totalSupply;
   }
 }
