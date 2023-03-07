@@ -321,7 +321,9 @@ contract ExtensionsTest is BaseTest {
   function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
     address newDelegate = _prepareCTokenUpgrade(asDelegate);
 
-    bytes memory becomeImplData = (address(newDelegate) == address(cErc20Delegate)) ? bytes("") : abi.encode(address(0));
+    bytes memory becomeImplData = (address(newDelegate) == address(cErc20Delegate))
+      ? bytes("")
+      : abi.encode(address(0));
     vm.prank(asDelegate.fuseAdmin());
     asDelegate._setImplementationSafe(newDelegate, false, becomeImplData);
 
