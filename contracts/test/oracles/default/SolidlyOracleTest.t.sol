@@ -156,29 +156,33 @@ contract SolidlyPriceOracleTest is BaseTest {
     address daiWhale = 0x969f7699fbB9C79d8B61315630CDeED95977Cfb8;
     address usdtWhale = 0xf89d7b9c864f589bbF53a82105107622B35EaA40;
 
-    address[] memory underlyings = new address[](1);
-    SolidlyPriceOracle.AssetConfig[] memory configs = new SolidlyPriceOracle.AssetConfig[](1);
+    // set up the oracle
+    {
+      address[] memory underlyings = new address[](1);
+      SolidlyPriceOracle.AssetConfig[] memory configs = new SolidlyPriceOracle.AssetConfig[](1);
 
-    underlyings[0] = dai;
+      underlyings[0] = dai;
 
-    // DAI/USDT
-    configs[0] = SolidlyPriceOracle.AssetConfig(pairAddress, usdt);
+      // DAI/USDT
+      configs[0] = SolidlyPriceOracle.AssetConfig(pairAddress, usdt);
 
-    // add it successfully when suported
-    vm.startPrank(oracle.owner());
-    oracle._setSupportedUsdTokens(asArray(usdt, stable));
-    oracle.setPoolFeeds(underlyings, configs);
-    vm.stopPrank();
-    // DAI/USDT
+      // add it successfully when suported
+      vm.startPrank(oracle.owner());
+      oracle._setSupportedUsdTokens(asArray(usdt, stable));
+      oracle.setPoolFeeds(underlyings, configs);
+      vm.stopPrank();
+    }
+
     SolidlyLpTokenPriceOracle lpOracle = new SolidlyLpTokenPriceOracle(ap.getAddress("wtoken"));
 
     vm.prank(address(mpo));
     uint256 priceBefore = lpOracle.price(pairAddress);
-    emit log_named_uint("price before", priceBefore); // 1269280650826049098610 - 1.269e22
+    emit log_named_uint("price before", priceBefore);
 
     IPair pair = IPair(pairAddress);
     ERC20Upgradeable daiToken = ERC20Upgradeable(pair.token0());
     ERC20Upgradeable usdtToken = ERC20Upgradeable(pair.token1());
+
 
     // manipulate
     {
@@ -192,16 +196,24 @@ contract SolidlyPriceOracleTest is BaseTest {
       vm.stopPrank();
 
       vm.startPrank(hacker);
-      //usdtToken.transfer(pairAddress, usdtToken.balanceOf(hacker));
+      ERC20Upgradeable tokenToSwap = daiToken;
 
-      uint256 amountOut = pair.getAmountOut(daiToken.balanceOf(hacker), dai);
-      daiToken.transfer(pairAddress, daiToken.balanceOf(hacker));
+      // advance > 30 mins so an observations is recorded
+      //vm.warp(block.timestamp + 60 * 22);
+
+      uint256 amountOut = pair.getAmountOut(tokenToSwap.balanceOf(hacker), address(tokenToSwap));
+      tokenToSwap.transfer(pairAddress, tokenToSwap.balanceOf(hacker));
       pair.swap(amountOut, 0, hacker, "");
       vm.stopPrank();
     }
 
-    vm.prank(address(mpo));
-    uint256 priceAfter = lpOracle.price(pairAddress);
-    emit log_named_uint("price after", priceAfter); //
+    for (uint i = 0; i < 60; i++) {
+      vm.warp(block.timestamp + 15);
+      pair.sync();
+
+      emit log_named_uint("i", i);
+      vm.prank(address(mpo));
+      emit log_named_uint("price after", lpOracle.price(pairAddress));
+    }
   }
 }

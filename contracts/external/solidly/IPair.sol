@@ -85,6 +85,8 @@ interface IPair {
 
   function mint(address to) external returns (uint256 liquidity);
 
+  function sync() external;
+
   function transfer(address dst, uint256 amount) external returns (bool);
 
   function getReserves()
