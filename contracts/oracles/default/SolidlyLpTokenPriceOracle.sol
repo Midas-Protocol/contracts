@@ -45,15 +45,9 @@ contract SolidlyLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
     uint256 _reserve1 = (reserve1Cumulative - _observation.reserve1Cumulative) / timeElapsed;
 
     // Get fair price of non-WETH token (underlying the pair) in terms of ETH
-    uint256 token0FairPrice = token0 == wtoken
-      ? 1e18
-      : (BasePriceOracle(msg.sender).price(token0) * 1e18) / (10**uint256(ERC20Upgradeable(token0).decimals()));
-    uint256 token1FairPrice = token1 == wtoken
-      ? 1e18
-      : (BasePriceOracle(msg.sender).price(token1) * 1e18) / (10**uint256(ERC20Upgradeable(token1).decimals()));
+    uint256 token0FairPrice = token0 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token0);
+    uint256 token1FairPrice = token1 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token1);
 
-    // Implementation from https://github.com/AlphaFinanceLab/homora-v2/blob/e643392d582c81f6695136971cff4b685dcd2859/contracts/oracle/UniswapV2Oracle.sol#L18
-    uint256 sqrtK = (sqrt(_reserve0 * _reserve1) * (2**112)) / totalSupply;
-    return (((sqrtK * 2 * sqrt(token0FairPrice)) / (2**56)) * sqrt(token1FairPrice)) / (2**56);
+    return (2 * sqrt(_reserve0 * _reserve1) * sqrt(token0FairPrice * token1FairPrice)) / totalSupply;
   }
 }

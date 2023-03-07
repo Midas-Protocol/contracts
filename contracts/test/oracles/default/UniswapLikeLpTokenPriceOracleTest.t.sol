@@ -86,6 +86,30 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     verifyLpPrice(lpToken, price, 1e17);
   }
 
+  function testWbtcWethArbiSolidly() public fork(ARBITRUM_ONE) {
+    address lpToken = 0xd9D611c6943585bc0e18E51034AF8fa28778F7Da; // Lp WBTC/WETH (volatile AMM)
+
+    uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
+    assertTrue(price > 0);
+    verifyLpPrice(lpToken, price, 1e17); // 1% tolerance
+  }
+
+  function testDaitUsdcArbiSolidly() public fork(ARBITRUM_ONE) {
+    address lpToken = 0x07d7F291e731A41D3F0EA4F1AE5b6d920ffb3Fe0; // Lp DAI/USDC (stable AMM)
+
+    uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
+    assertTrue(price > 0);
+    verifyLpPrice(lpToken, price, 1e17);
+  }
+
+  function testUsdtUsdcArbiSolidly() public fork(ARBITRUM_ONE) {
+    address lpToken = 0xC9dF93497B1852552F2200701cE58C236cC0378C; // Lp USDT/USDC (stable AMM)
+
+    uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
+    assertTrue(price > 0);
+    verifyLpPrice(lpToken, price, 1e17);
+  }
+
   function testGlmrUsdcLpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
     address lpToken = 0x8CCBbcAF58f5422F6efD4034d8E8a3c9120ADf79; // Lp GLMR-USDC
 
