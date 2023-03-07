@@ -96,8 +96,8 @@ contract UniswapLpTokenLiquidatorTest is BaseTest {
     uint256 outputBalanceDiff = outputBalanceAfter - outputBalanceBefore;
     assertGt(outputBalanceDiff, 0, "!redeem output");
 
-    checkInputOutputValue(redeemAmount, lpToken, outputBalanceDiff, address(outputToken));
     // compare the value of the input LP tokens and the value of the output tokens
+    checkInputOutputValue(redeemAmount, lpToken, outputBalanceDiff, address(outputToken));
   }
 
   function checkInputOutputValue(

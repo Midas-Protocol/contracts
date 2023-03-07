@@ -2,9 +2,12 @@
 pragma solidity >=0.8.0;
 
 import { SolidlyPriceOracle } from "../../../oracles/default/SolidlyPriceOracle.sol";
+import { SolidlyLpTokenPriceOracle } from "../../../oracles/default/SolidlyLpTokenPriceOracle.sol";
 import { IPair } from "../../../external/solidly/IPair.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { BaseTest } from "../../config/BaseTest.t.sol";
+
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 struct PriceExpected {
   uint256 price;
@@ -142,5 +145,65 @@ contract SolidlyPriceOracleTest is BaseTest {
     vm.prank(address(mpo));
     uint256 price = oracle.price(dai);
     assertApproxEqRel(price, mpo.price(dai), 1e17, "!Price Error");
+  }
+
+  function testSolidlyLPTokenPriceManipulation() public debuggingOnly fork(ARBITRUM_ONE) {
+    address pairAddress = 0x15b9D20bcaa4f65d9004D2BEBAc4058445FD5285;
+
+    address dai = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
+    address usdt = 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9;
+
+    address daiWhale = 0x969f7699fbB9C79d8B61315630CDeED95977Cfb8;
+    address usdtWhale = 0xf89d7b9c864f589bbF53a82105107622B35EaA40;
+
+    address[] memory underlyings = new address[](1);
+    SolidlyPriceOracle.AssetConfig[] memory configs = new SolidlyPriceOracle.AssetConfig[](1);
+
+    underlyings[0] = dai;
+
+    // DAI/USDT
+    configs[0] = SolidlyPriceOracle.AssetConfig(pairAddress, usdt);
+
+    // add it successfully when suported
+    vm.startPrank(oracle.owner());
+    oracle._setSupportedUsdTokens(asArray(usdt, stable));
+    oracle.setPoolFeeds(underlyings, configs);
+    vm.stopPrank();
+    // DAI/USDT
+    SolidlyLpTokenPriceOracle lpOracle = new SolidlyLpTokenPriceOracle(ap.getAddress("wtoken"));
+
+    vm.prank(address(mpo));
+    uint256 priceBefore = lpOracle.price(pairAddress);
+    emit log_named_uint("price before", priceBefore); // 1269280650826049098610 - 1.269e22
+
+    IPair pair = IPair(pairAddress);
+    ERC20Upgradeable daiToken = ERC20Upgradeable(pair.token0());
+    ERC20Upgradeable usdtToken = ERC20Upgradeable(pair.token1());
+
+    // manipulate
+    {
+      address hacker = address(666);
+      vm.startPrank(daiWhale);
+      daiToken.transfer(hacker, daiToken.balanceOf(daiWhale));
+      vm.stopPrank();
+
+      vm.startPrank(usdtWhale);
+      usdtToken.transfer(hacker, usdtToken.balanceOf(usdtWhale));
+      vm.stopPrank();
+
+      
+
+      vm.startPrank(hacker);
+      //usdtToken.transfer(pairAddress, usdtToken.balanceOf(hacker));
+
+      uint256 amountOut = pair.getAmountOut(daiToken.balanceOf(hacker), dai);
+      daiToken.transfer(pairAddress, daiToken.balanceOf(hacker));
+      pair.swap(amountOut, 0, hacker, "");
+      vm.stopPrank();
+    }
+
+    vm.prank(address(mpo));
+    uint256 priceAfter = lpOracle.price(pairAddress);
+    emit log_named_uint("price after", priceAfter); //
   }
 }
