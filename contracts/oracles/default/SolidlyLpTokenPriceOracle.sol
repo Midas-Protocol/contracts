@@ -41,6 +41,7 @@ contract SolidlyLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
     }
 
     uint256 timeElapsed = block.timestamp - _observation.timestamp;
+
     uint256 _reserve0 = (reserve0Cumulative - _observation.reserve0Cumulative) / timeElapsed;
     uint256 _reserve1 = (reserve1Cumulative - _observation.reserve1Cumulative) / timeElapsed;
 

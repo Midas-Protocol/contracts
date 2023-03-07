@@ -110,6 +110,14 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     verifyLpPrice(lpToken, price, 1e17);
   }
 
+  function testWethGmxArbiSolidly() public fork(ARBITRUM_ONE) {
+    address lpToken = 0x06A4c4389d5C6cD1Ec63dDFFb7e9b3214254A720; // Lp WETH/GMX (volatile AMM)
+
+    uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
+    assertTrue(price > 0);
+    verifyLpPrice(lpToken, price, 1e17);
+  }
+
   function testGlmrUsdcLpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
     address lpToken = 0x8CCBbcAF58f5422F6efD4034d8E8a3c9120ADf79; // Lp GLMR-USDC
 
