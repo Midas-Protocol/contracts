@@ -142,4 +142,46 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     assertTrue(price > 0);
     verifyLpPrice(lpToken, price, 1e17);
   }
+
+  // Fixed block number tests
+
+  // https://arbiscan.io/tx/0x8e5366d84d278c7dc5fa285c9cb3cf63697763066a77c228b7ae2a2cea9115e7
+  // 0.000000011455333328 LP tokens removed from the pool
+  // - 11,264.0276 USDT
+  // - 11,646.6401 USDC
+  // =~ $22,910  = ~14.68 ETH (ETH price: $1560)
+  // Therefor, LP price is 14.68/0.000000011455333328 = 1,2815e9
+  function testForkedUsdtUsdcArbiSolidly() public forkAtBlock(ARBITRUM_ONE, 67509709) {
+    address lpToken = 0xC9dF93497B1852552F2200701cE58C236cC0378C; // Lp USDT/USDC (stable AMM)
+
+    uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
+    emit log_named_uint("lpprice", price);
+  }
+
+  // https://arbiscan.io/tx/0xcd98ae753ca7cbe93bfb653c3090fa0973ad10ab6b096fe7005216eae3f96a0f
+  // 5.111039 LP tokens added from the pool
+  // - 1.11740494 WETH
+  // - 24.5277511 GMX
+  // =~ $3490,5  = ~2,237 ETH (ETH price: $1560)
+  // Therefor, LP price is 2,237/5,111 = 0,4377
+  function testForkeWethGmxArbiSolidly() public forkAtBlock(ARBITRUM_ONE, 67509709) {
+    address lpToken = 0x06A4c4389d5C6cD1Ec63dDFFb7e9b3214254A720; // Lp USDT/USDC (stable AMM)
+
+    uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
+    assertEq(price, 439393617368171439); // 439393617368171439/1e18 = 0.439393617368171439
+  }
+
+  // https://bscscan.com/tx/0x4f08c603fddf6d4fcc4cfd7e8fa325d5a2ed6d61f097c86204a5ef915acf4948
+  // 12,593.45 LP tokens added from the pool
+  // - 12,282.086 USDT
+  // - 12,904.8221 USDC
+  // =~ $25,211  = ~88,46 BNB (ETH price: $285,77)
+  // Therefor, LP price is 88,46/12,593.45 = 0,007024286
+
+  function testForkeUsdtUsdcBscSolidly() public forkAtBlock(BSC_MAINNET, 26257339) {
+    address lpToken = 0x618f9Eb0E1a698409621f4F487B563529f003643; // Lp USDT/USDC (stable AMM)
+
+    uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
+    assertEq(price, 6993216032507730); // 6993216032507730/1e18 = 0.006993216032507730
+  }
 }
