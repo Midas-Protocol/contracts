@@ -365,13 +365,11 @@ contract CTokenFirstExtension is
    * @return Calculated exchange rate scaled by 1e18
    */
   function exchangeRateStored() public view returns (uint256) {
-    uint256 totalCash = asCToken().getCash();
-
     return
       _exchangeRateHypothetical(
         totalSupply,
         initialExchangeRateMantissa,
-        totalCash,
+        asCToken().getCash(),
         totalBorrows,
         totalReserves,
         totalAdminFees,
@@ -390,7 +388,7 @@ contract CTokenFirstExtension is
         _exchangeRateHypothetical(
           accrual.totalSupply,
           initialExchangeRateMantissa,
-          accrual.totalCash,
+          cashPrior,
           accrual.totalBorrows,
           accrual.totalReserves,
           accrual.totalAdminFees,
@@ -441,7 +439,6 @@ contract CTokenFirstExtension is
     uint256 accrualBlockNumber;
     uint256 borrowIndex;
     uint256 totalSupply;
-    uint256 totalCash;
     uint256 totalBorrows;
     uint256 totalReserves;
     uint256 totalFuseFees;

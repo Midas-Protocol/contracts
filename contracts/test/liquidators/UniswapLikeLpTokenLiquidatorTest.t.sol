@@ -16,7 +16,7 @@ import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
-contract UniswapLpTokenLiquidatorTest is BaseTest {
+contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
   UniswapLpTokenLiquidator private liquidator;
   SolidlyLpTokenPriceOracle private oracleSolidly;
   UniswapLpTokenPriceOracle private oracleUniswap;
@@ -77,22 +77,45 @@ contract UniswapLpTokenLiquidatorTest is BaseTest {
       swapToken1Path = asArray(token1, wtoken);
     }
 
-    uint256 amount = 1e18;
+    uint256 outputBalanceBefore = outputToken.balanceOf(address(liquidator));
 
-    bytes memory data = abi.encode(uniswapV2Router, swapToken0Path, swapToken1Path);
+    uint256 redeemAmount = 1e18;
+    // redeem
+    {
+      bytes memory data = abi.encode(uniswapV2Router, swapToken0Path, swapToken1Path);
 
-    vm.prank(whale);
-    lpTokenContract.transfer(address(liquidator), 1e18);
+      vm.prank(whale);
+      lpTokenContract.transfer(address(liquidator), redeemAmount);
 
-    vm.prank(address(liquidator));
-    lpTokenContract.approve(WBNB_BUSD_Uniswap, 1e18);
-    liquidator.redeem(lpTokenContract, amount, data);
+      vm.prank(address(liquidator));
+      lpTokenContract.approve(WBNB_BUSD_Uniswap, redeemAmount);
+      liquidator.redeem(lpTokenContract, redeemAmount, data);
+    }
 
-    assertGt(outputToken.balanceOf(address(liquidator)), 0, "!redeem output");
+    uint256 outputBalanceAfter = outputToken.balanceOf(address(liquidator));
+    uint256 outputBalanceDiff = outputBalanceAfter - outputBalanceBefore;
+    assertGt(outputBalanceDiff, 0, "!redeem output");
+
+    // compare the value of the input LP tokens and the value of the output tokens
+    checkInputOutputValue(redeemAmount, lpToken, outputBalanceDiff, address(outputToken));
+  }
+
+  function checkInputOutputValue(
+    uint256 inputAmount,
+    address inputToken,
+    uint256 outputAmount,
+    address outputToken
+  ) internal {
+    uint256 outputTokenPrice = mpo.price(address(outputToken));
+    uint256 outputValue = (outputTokenPrice * outputAmount) / 1e18;
+    uint256 inputTokenPrice = mpo.price(inputToken);
+    uint256 inputValue = (inputAmount * inputTokenPrice) / 1e18;
+
+    assertApproxEqAbs(inputValue, outputValue, 1e15, "value of output does not match the value of the output");
   }
 
   function testUniswapLpRedeem() public fork(BSC_MAINNET) {
-    address lpTokenWhale = 0xa5f8C5Dbd5F286960b9d90548680aE5ebFf07652; // pcs main statking contract
+    address lpTokenWhale = 0xa5f8C5Dbd5F286960b9d90548680aE5ebFf07652; // pcs main staking contract
     testRedeem(lpTokenWhale, WBNB_BUSD_Uniswap, oracleUniswap);
   }
 

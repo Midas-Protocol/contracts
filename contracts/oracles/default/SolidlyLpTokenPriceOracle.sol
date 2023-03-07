@@ -28,20 +28,32 @@ contract SolidlyLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
     IPair pair = IPair(token);
     uint256 totalSupply = pair.totalSupply();
     if (totalSupply == 0) return 0;
-    (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
     address token0 = pair.token0();
     address token1 = pair.token1();
 
-    // Get fair price of non-WETH token (underlying the pair) in terms of ETH
-    uint256 token0FairPrice = token0 == wtoken
-      ? 1e18
-      : (BasePriceOracle(msg.sender).price(token0) * 1e18) / (10**uint256(ERC20Upgradeable(token0).decimals()));
-    uint256 token1FairPrice = token1 == wtoken
-      ? 1e18
-      : (BasePriceOracle(msg.sender).price(token1) * 1e18) / (10**uint256(ERC20Upgradeable(token1).decimals()));
+    Observation memory _observation = pair.lastObservation();
 
-    // Implementation from https://github.com/AlphaFinanceLab/homora-v2/blob/e643392d582c81f6695136971cff4b685dcd2859/contracts/oracle/UniswapV2Oracle.sol#L18
-    uint256 sqrtK = (sqrt(reserve0 * reserve1) * (2**112)) / totalSupply;
-    return (((sqrtK * 2 * sqrt(token0FairPrice)) / (2**56)) * sqrt(token1FairPrice)) / (2**56);
+    (uint256 reserve0Cumulative, uint256 reserve1Cumulative, ) = pair.currentCumulativePrices();
+    if (block.timestamp == _observation.timestamp) {
+      _observation = pair.observations(pair.observationLength() - 2);
+    }
+
+    uint256 timeElapsed = block.timestamp - _observation.timestamp;
+
+    // Get fair reserves
+    uint256 _reserve0 = (reserve0Cumulative - _observation.reserve0Cumulative) / timeElapsed;
+    uint256 _reserve1 = (reserve1Cumulative - _observation.reserve1Cumulative) / timeElapsed;
+
+    // Get the native price of the underlying, scaled by 1e18
+    uint256 token0Price = token0 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token0);
+    uint256 token1Price = token1 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token1);
+
+    return
+      (_reserve0 *
+        (10**(18 - uint256(ERC20Upgradeable(token0).decimals()))) *
+        token0Price +
+        _reserve1 *
+        (10**(18 - uint256(ERC20Upgradeable(token1).decimals()))) *
+        token1Price) / totalSupply;
   }
 }
