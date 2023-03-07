@@ -163,7 +163,7 @@ contract NeondevnetE2ETest is WithPool {
     // Account One Supply
     vm.startPrank(accountOne);
     vars.asset.approve(address(cWNeonToken), 1e36);
-    cWNeonToken.mint(1e17);
+    require(cWNeonToken.mint(1e17) == 0, "failed to mint cWNeonToken");
     vars.cTokens[0] = address(cWNeonToken);
     comptroller.enterMarkets(vars.cTokens);
     vm.stopPrank();
@@ -171,20 +171,20 @@ contract NeondevnetE2ETest is WithPool {
     // Account Two Supply
     vm.startPrank(accountTwo);
     underlyingToken.approve(address(cToken), 1e36);
-    cToken.mint(10e18);
+    require(cToken.mint(10e18) == 0, "failed to mint cToken");
     vars.cTokens[0] = address(cToken);
     comptroller.enterMarkets(vars.cTokens);
     vm.stopPrank();
 
-    assertEq(cToken.totalSupply(), 10e18 * 5);
-    assertEq(cWNeonToken.totalSupply(), 1e17 * 5);
+    assertEq(cToken.totalSupply(), 10e18 * 5, "!ctoken total supply");
+    assertEq(cWNeonToken.totalSupply(), 1e17 * 5, "!cWNeonToken total supply");
 
     // Account One Borrow
     vm.startPrank(accountOne);
     underlyingToken.approve(address(cToken), 1e36);
-    cToken.borrow(1e16);
+    require(cToken.borrow(1e16) == 0, "failed to borrow");
     vm.stopPrank();
-    assertEq(cToken.totalBorrows(), 1e16);
+    assertEq(cToken.totalBorrows(), 1e16, "!ctoken total borrows");
 
     vars.price2 = priceOracle.getUnderlyingPrice(ICToken(address(cWNeonToken)));
     vm.mockCall(
@@ -231,8 +231,8 @@ contract NeondevnetE2ETest is WithPool {
 
     uint256 neonBalanceAfter = cWNeonToken.asCTokenExtensionInterface().balanceOf(accountOne);
 
-    assertGt(neonBalance, neonBalanceAfter);
-    assertGt(assetsData[1].supplyBalance, assetsDataAfter[1].supplyBalance);
+    assertGt(neonBalance, neonBalanceAfter, "!balance after > before");
+    assertGt(assetsData[1].supplyBalance, assetsDataAfter[1].supplyBalance, "!supply balance after > before");
 
     vm.stopPrank();
   }

@@ -218,4 +218,56 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
     assertEq(price, 6993216032507730); // 6993216032507730/1e18 = 0.006993216032507730
   }
+
+  function testSolidlyLPTokenPriceManipulation() public debuggingOnly fork(ARBITRUM_ONE) {
+    address pairAddress = 0x15b9D20bcaa4f65d9004D2BEBAc4058445FD5285;
+
+    address dai = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
+    address usdt = 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9;
+
+    address daiWhale = 0x969f7699fbB9C79d8B61315630CDeED95977Cfb8;
+    address usdtWhale = 0xf89d7b9c864f589bbF53a82105107622B35EaA40;
+
+    SolidlyLpTokenPriceOracle lpOracle = new SolidlyLpTokenPriceOracle(ap.getAddress("wtoken"));
+
+    vm.prank(address(mpo));
+    uint256 priceBefore = lpOracle.price(pairAddress);
+    emit log_named_uint("price before", priceBefore);
+
+    IPair pair = IPair(pairAddress);
+    ERC20Upgradeable daiToken = ERC20Upgradeable(pair.token0());
+    ERC20Upgradeable usdtToken = ERC20Upgradeable(pair.token1());
+
+    // manipulate
+    {
+      address hacker = address(666);
+      vm.startPrank(daiWhale);
+      daiToken.transfer(hacker, daiToken.balanceOf(daiWhale));
+      vm.stopPrank();
+
+      vm.startPrank(usdtWhale);
+      usdtToken.transfer(hacker, usdtToken.balanceOf(usdtWhale));
+      vm.stopPrank();
+
+      vm.startPrank(hacker);
+      ERC20Upgradeable tokenToSwap = daiToken;
+
+      // advance > 30 mins so an observations is recorded
+      //vm.warp(block.timestamp + 60 * 22);
+
+      uint256 amountOut = pair.getAmountOut(tokenToSwap.balanceOf(hacker), address(tokenToSwap));
+      tokenToSwap.transfer(pairAddress, tokenToSwap.balanceOf(hacker));
+      pair.swap(amountOut, 0, hacker, "");
+      vm.stopPrank();
+    }
+
+    for (uint256 i = 0; i < 60; i++) {
+      vm.warp(block.timestamp + 15);
+      pair.sync();
+
+      emit log_named_uint("i", i);
+      vm.prank(address(mpo));
+      emit log_named_uint("price after", lpOracle.price(pairAddress));
+    }
+  }
 }
