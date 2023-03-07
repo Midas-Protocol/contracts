@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { BalancerLpTokenLiquidator } from "../liquidators/BalancerLpTokenLiquidator.sol";
-import { ICErc20 } from "../external/compound/ICErc20.sol";
-import "../external/balancer/IBalancerPool.sol";
-import "../external/balancer/IBalancerVault.sol";
+import { BalancerLpTokenLiquidator } from "../../liquidators/BalancerLpTokenLiquidator.sol";
+import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import "../../external/balancer/IBalancerPool.sol";
+import "../../external/balancer/IBalancerVault.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-import { BaseTest } from "./config/BaseTest.t.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 contract BalancerLpTokenLiquidatorTest is BaseTest {
   BalancerLpTokenLiquidator private liquidator;

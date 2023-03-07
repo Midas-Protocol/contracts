@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { MidasSafeLiquidator } from "../MidasSafeLiquidator.sol";
-import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
-import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
-import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
-import { ICErc20 } from "../external/compound/ICErc20.sol";
-import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
-import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
-import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
-import { IComptroller } from "../external/compound/IComptroller.sol";
-import { UniswapV2Liquidator } from "../liquidators/UniswapV2Liquidator.sol";
+import { MidasSafeLiquidator } from "../../MidasSafeLiquidator.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
+import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
+import { IFundsConversionStrategy } from "../../liquidators/IFundsConversionStrategy.sol";
+import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import { IUniswapV2Router02 } from "../../external/uniswap/IUniswapV2Router02.sol";
+import { IUniswapV2Pair } from "../../external/uniswap/IUniswapV2Pair.sol";
+import { IUniswapV2Factory } from "../../external/uniswap/IUniswapV2Factory.sol";
+import { ICToken } from "../../external/compound/ICToken.sol";
+import { IComptroller } from "../../external/compound/IComptroller.sol";
+import { UniswapV2Liquidator } from "../../liquidators/UniswapV2Liquidator.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-import { BaseTest } from "./config/BaseTest.t.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
 contract MidasSafeLiquidatorTest is BaseTest {
   MidasSafeLiquidator msl;

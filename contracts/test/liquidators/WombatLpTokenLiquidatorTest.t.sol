@@ -2,12 +2,12 @@
 pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import { BaseTest } from "./config/BaseTest.t.sol";
+import { BaseTest } from "../config/BaseTest.t.sol";
 
-import { WombatLpTokenLiquidator } from "../liquidators/WombatLpTokenLiquidator.sol";
-import { IWombatLpAsset } from "../oracles/default/WombatLpTokenPriceOracle.sol";
-import { WombatLpTokenPriceOracle } from "../oracles/default/WombatLpTokenPriceOracle.sol";
-import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
+import { WombatLpTokenLiquidator } from "../../liquidators/WombatLpTokenLiquidator.sol";
+import { IWombatLpAsset } from "../../oracles/default/WombatLpTokenPriceOracle.sol";
+import { WombatLpTokenPriceOracle } from "../../oracles/default/WombatLpTokenPriceOracle.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 
 contract WombatLpTokenLiquidatorTest is BaseTest {
   WombatLpTokenLiquidator private wtl;

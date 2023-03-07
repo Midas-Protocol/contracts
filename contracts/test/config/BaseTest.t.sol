@@ -258,4 +258,13 @@ abstract contract BaseTest is Test {
     array[2] = value2;
     return array;
   }
+
+  function sqrt(uint256 x) public pure returns (uint256 y) {
+    uint256 z = (x + 1) / 2;
+    y = x;
+    while (z < y) {
+      y = z;
+      z = (x / z + z) / 2;
+    }
+  }
 }

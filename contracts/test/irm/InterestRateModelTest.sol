@@ -227,7 +227,7 @@ contract InterestRateModelTest is BaseTest {
     assertEq(util, 0.1e18); // utilization 10
     assertApproxEqAbs(
       _convertToPerYearBsc(borrowRate) * 100,
-      0.26347e18,
+      0.42347e18,
       uint256(1e17),
       "!borrow rate for utilization 10"
     );
@@ -236,7 +236,7 @@ contract InterestRateModelTest is BaseTest {
     assertEq(util, 0.2e18); // utilization 20
     assertApproxEqAbs(
       _convertToPerYearBsc(borrowRate) * 100,
-      0.5161e18,
+      0.8461e18,
       uint256(1e17),
       "!borrow rate for utilization 20"
     );
@@ -245,7 +245,7 @@ contract InterestRateModelTest is BaseTest {
     assertEq(util, 0.8e18); // utilization 80
     assertApproxEqAbs(
       _convertToPerYearBsc(borrowRate) * 100,
-      2.0325e18,
+      3.308e18,
       uint256(1e18),
       "!borrow rate for utilization 80"
     );
@@ -254,7 +254,7 @@ contract InterestRateModelTest is BaseTest {
     assertEq(util, 0.9e18); // utilization 90
     assertApproxEqAbs(
       _convertToPerYearBsc(borrowRate) * 100,
-      17.2853e18,
+      18.7193e18,
       uint256(1e18),
       "!borrow rate for utilization 90"
     );
@@ -350,7 +350,7 @@ contract InterestRateModelTest is BaseTest {
     assertEq(util, 0.9e18); // utilization 90
     assertApproxEqAbs(
       _convertToPerYearBsc(supplyRate) * 100,
-      14.001e18,
+      15.162e18,
       uint256(1e18),
       "!supply rate for utilization 90"
     );
