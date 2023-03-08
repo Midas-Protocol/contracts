@@ -15,8 +15,10 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   address stMATIC_WMATIC_pool = 0x8159462d255C1D24915CB51ec361F700174cD994;
   address jBRL_BRZ_pool = 0xE22483774bd8611bE2Ad2F4194078DaC9159F4bA;
   address boostedAavePool = 0x48e6B98ef6329f8f0A30eBB8c7C960330d648085;
+  address MATICx_WMATIC_pool = 0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0;
 
   address stMATIC = 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4;
+  address MATICx = 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6;
   address jBRL = 0xf2f77FE7b8e66571E0fca7104c4d670BF1C8d722;
   address usdt = 0xc2132D05D31c914a87C6611C10748AEb04B58e8F;
 
@@ -88,5 +90,17 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
       vm.expectRevert(bytes("BAL#400"));
       vault.manageUserBalance(new UserBalanceOp[](0));
     }
+  }
+
+  function testRegisterNewLpToken() public fork(POLYGON_MAINNET) {
+    vm.prank(oracle.owner());
+
+    uint256 lenghtBefore = oracle.getAllLpTokens().length;
+    oracle.registerLpToken(MATICx_WMATIC_pool, MATICx);
+    assertTrue(oracle.getAllLpTokens().length == lenghtBefore + 1);
+
+    uint256 price = getLpTokenPrice(MATICx_WMATIC_pool);
+    assertTrue(price > 0);
+    assertApproxEqAbs(price, mpo.price(MATICx), 1e17);
   }
 }
