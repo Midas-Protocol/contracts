@@ -5,7 +5,6 @@ import "forge-std/Vm.sol";
 import "forge-std/Test.sol";
 
 import { AddressesProvider } from "../../midas/AddressesProvider.sol";
-import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
