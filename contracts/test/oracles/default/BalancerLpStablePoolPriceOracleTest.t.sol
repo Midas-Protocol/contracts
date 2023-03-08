@@ -5,6 +5,8 @@ import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
 import { BalancerLpStablePoolPriceOracle } from "../../../oracles/default/BalancerLpStablePoolPriceOracle.sol";
 import { BaseTest } from "../../config/BaseTest.t.sol";
+import { IBalancerStablePool } from "../../../external/balancer/IBalancerStablePool.sol";
+import { IBalancerVault, UserBalanceOp } from "../../../external/balancer/IBalancerVault.sol";
 
 contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   BalancerLpStablePoolPriceOracle oracle;
@@ -38,6 +40,24 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     return mpo.price(lpToken);
   }
 
+  function testReentrancyWmaticStmaticLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
+    // add the oracle to the mpo for that LP token
+    {
+      IPriceOracle[] memory oracles = new IPriceOracle[](1);
+      oracles[0] = IPriceOracle(oracle);
+
+      vm.prank(mpo.admin());
+      mpo.add(asArray(stMATIC_WMATIC_pool), oracles);
+    }
+
+    address vault = address(IBalancerStablePool(stMATIC_WMATIC_pool).getVault());
+    // raise the reentrancy flag for that vault
+    vm.store(vault, bytes32(uint256(0)), bytes32(uint256(2)));
+    // should revert with the specific message
+    vm.expectRevert(bytes("Balancer vault view reentrancy"));
+    mpo.price(stMATIC_WMATIC_pool);
+  }
+
   function testWmaticStmaticLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
     uint256 price = getLpTokenPrice(stMATIC_WMATIC_pool);
     assertTrue(price > 0);
@@ -54,5 +74,19 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     uint256 price = getLpTokenPrice(boostedAavePool);
     assertTrue(price > 0);
     assertApproxEqAbs(price, mpo.price(usdt), 1e16);
+  }
+
+  function testReentrancyErrorMessage() public fork(POLYGON_MAINNET) {
+    // TODO configure it in the addresses provider after deployed (or just hardcode it here for polygon)
+    oracle = BalancerLpStablePoolPriceOracle(ap.getAddress("BalancerLpStablePoolPriceOracle"));
+    address[] memory lpTokens = oracle.getAllLpTokens();
+    //address[] memory lpTokens = asArray(stMATIC_WMATIC_pool);
+    for (uint256 i = 0; i < lpTokens.length; i++) {
+      IBalancerVault vault = IBalancerStablePool(lpTokens[i]).getVault();
+      // raise the reentrancy flag for that vault
+      vm.store(address(vault), bytes32(uint256(0)), bytes32(uint256(2)));
+      vm.expectRevert(bytes("BAL#400"));
+      vault.manageUserBalance(new UserBalanceOp[](0));
+    }
   }
 }

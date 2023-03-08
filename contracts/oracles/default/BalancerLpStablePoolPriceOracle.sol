@@ -8,7 +8,7 @@ import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
 
 import { IBalancerStablePool } from "../../external/balancer/IBalancerStablePool.sol";
-import { IBalancerVault, UserBalanceOp } from "../../external/balancer/IBalancerVault.sol";
+import { IBalancerVault } from "../../external/balancer/IBalancerVault.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
 
 import { BasePriceOracle } from "../BasePriceOracle.sol";
@@ -26,6 +26,8 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
   mapping(address => address) public baseTokens;
 
   address[] public lpTokens;
+
+  bytes32 internal constant REENTRANCY_ERROR_HASH = keccak256(abi.encodeWithSignature("Error(string)", "BAL#400"));
 
   /**
    * @dev Initializes an array of LP tokens and pools if desired.
@@ -63,29 +65,27 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
   }
 
-  function ensureNotInVaultContext(IBalancerVault vault) external {
-    UserBalanceOp[] memory noop = new UserBalanceOp[](0);
-    vault.manageUserBalance(noop);
-  }
-
   /**
    * @dev Fetches the fair LP token/ETH price from Balancer, with 18 decimals of precision.
    * Source: https://github.com/AlphaFinanceLab/homora-v2/blob/master/contracts/oracle/BalancerPairOracle.sol
    */
   function _price(address underlying) internal view virtual returns (uint256) {
     IBalancerStablePool pool = IBalancerStablePool(underlying);
+    IBalancerVault vault = pool.getVault();
 
-    // read-only re-entracy protection
-    (bool callSuccess, ) = address(this).staticcall(
-      abi.encodeWithSelector(this.ensureNotInVaultContext.selector, pool.getVault())
+    // read-only re-entracy protection - this call is always unsuccessful
+    (, bytes memory revertData) = address(vault).staticcall(
+      abi.encodeWithSelector(vault.manageUserBalance.selector, new address[](0))
     );
+    require(keccak256(revertData) != REENTRANCY_ERROR_HASH, "Balancer vault view reentrancy");
 
-    if (!callSuccess) {
-      return 0;
-    }
     // Returns the BLP Token / Base Token rate
     uint256 rate = pool.getRate();
     uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(baseTokens[underlying]);
     return (rate * baseTokenPrice) / 1e18;
+  }
+
+  function getAllLpTokens() public view returns (address[] memory) {
+    return lpTokens;
   }
 }

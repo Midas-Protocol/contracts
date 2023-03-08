@@ -631,4 +631,12 @@ contract AnyLiquidationTest is BaseTest {
       "raw liquidation failed"
     );
   }
+
+  function testPolygonComptrollerUpgradeRaw() public debuggingOnly fork(POLYGON_MAINNET) {
+    address poolAddress = 0xB08A309eFBFFa41f36A06b2D0C9a4629749b17a2;
+    address ffd = ap.getAddress("FuseFeeDistributor");
+
+    vm.prank(0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
+    _functionCall(ffd, hex"fa7cc72d000000000000000000000000db984f8cbc1cf893a18c2da50282a1492234602c", "call failed");
+  }
 }
