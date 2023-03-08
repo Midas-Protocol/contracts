@@ -89,4 +89,14 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
       vault.manageUserBalance(new UserBalanceOp[](0));
     }
   }
+
+  function testRegisterNewLpToken() public fork(POLYGON_MAINNET) {
+    address newLpToken = 0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0; // B-MaticX-Stable
+    address baseToken = 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6; // MaticX
+
+    oracle.registerLpToken(newLpToken, baseToken);
+
+    uint256 price = getLpTokenPrice(newLpToken);
+    assertTrue(price > 0);
+  }
 }

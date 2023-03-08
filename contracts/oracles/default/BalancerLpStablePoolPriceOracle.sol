@@ -88,4 +88,25 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
   function getAllLpTokens() public view returns (address[] memory) {
     return lpTokens;
   }
+
+  /**
+   * @dev Register the pool given LP token address and set the baseToken info.
+   * @param _lpToken LP token.
+   * @param _baseToken Base token for the LP Token address.
+   */
+  function registerLpToken(address _lpToken, address _baseToken) external onlyOwner {
+    bool skip = false;
+    for (uint256 j = 0; j < lpTokens.length; j++) {
+      if (lpTokens[j] == _lpToken) {
+        skip = true;
+        break;
+      }
+    }
+    if (skip) {
+      return;
+    } else {
+      lpTokens.push(_lpToken);
+      baseTokens[_lpToken] = _baseToken;
+    }
+  }
 }
