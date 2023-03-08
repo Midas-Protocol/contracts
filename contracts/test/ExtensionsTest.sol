@@ -228,6 +228,10 @@ contract ExtensionsTest is BaseTest {
     _testAllPoolsAllMarketsCTokenExtensionUpgrade();
   }
 
+  function testMoonbeamExistingCTokenExtensionUpgrade() public fork(MOONBEAM_MAINNET) {
+    _testAllPoolsAllMarketsCTokenExtensionUpgrade();
+  }
+
   function _testAllPoolsAllMarketsCTokenExtensionUpgrade() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();

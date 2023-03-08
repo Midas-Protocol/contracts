@@ -102,11 +102,9 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
         break;
       }
     }
-    if (skip) {
-      return;
-    } else {
+    if (!skip) {
       lpTokens.push(_lpToken);
-      baseTokens[_lpToken] = _baseToken;
     }
+    baseTokens[_lpToken] = _baseToken;
   }
 }
