@@ -8,6 +8,8 @@ struct Observation {
 }
 
 interface IPair {
+  function observations(uint256 index) external pure returns (Observation memory);
+
   function name() external pure returns (string memory);
 
   function symbol() external pure returns (string memory);
@@ -39,9 +41,22 @@ interface IPair {
 
   function tokens() external returns (address, address);
 
+  function stable() external view returns (bool);
+
   function observationLength() external view returns (uint256);
 
   function lastObservation() external view returns (Observation memory);
+
+  function current(address tokenIn, uint256 amountIn) external view returns (uint256 amountOut);
+
+  function currentCumulativePrices()
+    external
+    view
+    returns (
+      uint256 reserve0Cumulative,
+      uint256 reserve1Cumulative,
+      uint256 blockTimestamp
+    );
 
   function transferFrom(
     address src,
@@ -69,6 +84,10 @@ interface IPair {
   function burn(address to) external returns (uint256 amount0, uint256 amount1);
 
   function mint(address to) external returns (uint256 liquidity);
+
+  function sync() external;
+
+  function transfer(address dst, uint256 amount) external returns (bool);
 
   function getReserves()
     external
