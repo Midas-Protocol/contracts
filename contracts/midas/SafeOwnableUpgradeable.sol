@@ -90,7 +90,7 @@ abstract contract SafeOwnableUpgradeable is OwnableUpgradeable {
     revert("not used anymore");
   }
 
-  function transferOwnership(address newOwner) public override onlyOwner {
+  function transferOwnership(address) public override onlyOwner {
     // do not remove this overriding fn
     revert("not used anymore");
   }

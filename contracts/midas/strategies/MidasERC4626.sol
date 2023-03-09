@@ -31,17 +31,17 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
 
   /* ========== INITIALIZER ========== */
 
-  function __MidasER4626_init(ERC20Upgradeable _asset) internal onlyInitializing {
+  function __MidasER4626_init(ERC20Upgradeable asset_) internal onlyInitializing {
     __SafeOwnable_init();
     __Pausable_init();
     __Context_init();
     __ERC20_init(
-      string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
-      string(abi.encodePacked("mv", _asset.symbol()))
+      string(abi.encodePacked("Midas ", asset_.name(), " Vault")),
+      string(abi.encodePacked("mv", asset_.symbol()))
     );
-    __ERC4626_init(_asset);
+    __ERC4626_init(asset_);
 
-    vaultShareHWM = 10**_asset.decimals();
+    vaultShareHWM = 10**asset_.decimals();
   }
 
   function _asset() internal view returns (ERC20Upgradeable) {
