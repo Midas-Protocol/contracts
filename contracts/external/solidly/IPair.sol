@@ -45,6 +45,10 @@ interface IPair {
 
   function observationLength() external view returns (uint256);
 
+  function reserve0CumulativeLast() external view returns (uint256);
+
+  function reserve1CumulativeLast() external view returns (uint256);
+
   function lastObservation() external view returns (Observation memory);
 
   function current(address tokenIn, uint256 amountIn) external view returns (uint256 amountOut);
@@ -86,6 +90,8 @@ interface IPair {
   function mint(address to) external returns (uint256 liquidity);
 
   function sync() external;
+
+  function balanceOf(address) external view returns (uint256);
 
   function transfer(address dst, uint256 amount) external returns (bool);
 

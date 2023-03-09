@@ -6,6 +6,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeabl
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
 import { IPair, Observation } from "../../../external/solidly/IPair.sol";
+import { IRouter } from "../../../external/solidly/IRouter.sol";
 import { IUniswapV2Pair } from "../../../external/uniswap/IUniswapV2Pair.sol";
 import { UniswapLpTokenPriceOracle } from "../../../oracles/default/UniswapLpTokenPriceOracle.sol";
 import { SolidlyLpTokenPriceOracle } from "../../../oracles/default/SolidlyLpTokenPriceOracle.sol";
@@ -16,9 +17,11 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
   UniswapLikeLpTokenPriceOracle uniswapLpTokenPriceOracle;
   MasterPriceOracle mpo;
   address wtoken;
+  SolidlyLpTokenPriceOracle lpOracle;
 
   function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+    lpOracle = new SolidlyLpTokenPriceOracle(ap.getAddress("wtoken"));
   }
 
   function getSolidlyLpTokenPriceOracle() internal returns (UniswapLikeLpTokenPriceOracle) {
@@ -220,15 +223,8 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
   }
 
   function testSolidlyLPTokenPriceManipulation() public debuggingOnly fork(ARBITRUM_ONE) {
-    address pairAddress = 0x15b9D20bcaa4f65d9004D2BEBAc4058445FD5285;
-
-    address dai = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
-    address usdt = 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9;
-
     address daiWhale = 0x969f7699fbB9C79d8B61315630CDeED95977Cfb8;
     address usdtWhale = 0xf89d7b9c864f589bbF53a82105107622B35EaA40;
-
-    SolidlyLpTokenPriceOracle lpOracle = new SolidlyLpTokenPriceOracle(ap.getAddress("wtoken"));
 
     vm.prank(address(mpo));
     uint256 priceBefore = lpOracle.price(pairAddress);
@@ -269,5 +265,91 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
       vm.prank(address(mpo));
       emit log_named_uint("price after", lpOracle.price(pairAddress));
     }
+  }
+
+  ERC20Upgradeable dai = ERC20Upgradeable(0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1);
+  ERC20Upgradeable usdt = ERC20Upgradeable(0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9);
+  address pairAddress = 0x15b9D20bcaa4f65d9004D2BEBAc4058445FD5285;
+  IRouter router = IRouter(0xF26515D5482e2C2FD237149bF6A653dA4794b3D0);
+  address pairWhale = 0x637DCef6f06A120e0cca5BCa079F6cF6Da9264e8;
+
+  function testBurnReceivedAssets() public debuggingOnly fork(ARBITRUM_ONE) {
+    //IPair pair = IPair(pairAddress); // dai/usdt
+
+    uint256 daiPrice = mpo.price(address(dai));
+    uint256 usdtPrice = mpo.price(address(usdt));
+
+    {
+      uint256 whaleLPTokens = ERC20Upgradeable(pairAddress).balanceOf(pairWhale);
+      emit log_named_uint("starting LP tokens", whaleLPTokens);
+
+      for (uint256 i = 0; i < 60; i++) {
+        vm.warp(block.timestamp + 15);
+
+        //(uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
+        //emit log_named_uint("k", k(dai, usdt, reserve0, reserve1));
+
+        uint256 daiBalanceBefore = dai.balanceOf(pairWhale);
+        uint256 usdtBalanceBefore = usdt.balanceOf(pairWhale);
+
+        {
+          uint256 amountToBeBurnt = whaleLPTokens / 60;
+          {
+            vm.prank(address(mpo));
+            uint256 priceLpToken = lpOracle.price(pairAddress);
+            emit log_named_uint("solidly oracle LP token price:", priceLpToken);
+
+            emit log_named_uint("hypothetical value to be burnt", (amountToBeBurnt * priceLpToken) / 1e18);
+          }
+
+          vm.startPrank(pairWhale);
+          ERC20Upgradeable(pairAddress).approve(address(router), amountToBeBurnt);
+          (uint256 amountA, uint256 amountB) = router.removeLiquidity(
+            address(dai),
+            address(usdt),
+            true,
+            amountToBeBurnt,
+            0,
+            0,
+            pairWhale,
+            block.timestamp + 1
+          );
+          vm.stopPrank();
+        }
+        //        pair.transfer(pairAddress, amountToBeBurnt);
+        //        pair.burn(pairWhale);
+
+        uint256 daiBalanceAfter = dai.balanceOf(pairWhale);
+        uint256 usdtBalanceAfter = usdt.balanceOf(pairWhale);
+
+        emit log_named_uint(
+          "actual received value:::::::::",
+          ((daiBalanceAfter - daiBalanceBefore) * daiPrice + (usdtBalanceAfter - usdtBalanceBefore) * usdtPrice) / 1e18
+        );
+        emit log("");
+      }
+    }
+  }
+
+  function k(
+    ERC20Upgradeable token0,
+    ERC20Upgradeable token1,
+    uint256 x,
+    uint256 y
+  ) internal view returns (uint256) {
+    bool stable = true;
+    if (stable) {
+      uint256 _x = (x * 1e18) / decimals(token0);
+      uint256 _y = (y * 1e18) / decimals(token1);
+      uint256 _a = (_x * _y) / 1e18;
+      uint256 _b = ((_x * _x) / 1e18 + (_y * _y) / 1e18);
+      return (_a * _b) / 1e18; // x3y+y3x >= k
+    } else {
+      return x * y; // xy >= k
+    }
+  }
+
+  function decimals(ERC20Upgradeable token) internal view returns (uint256) {
+    return 10**token.decimals();
   }
 }
