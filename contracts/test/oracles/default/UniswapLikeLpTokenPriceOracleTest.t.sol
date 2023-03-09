@@ -316,7 +316,7 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
   address pairWhale = 0x637DCef6f06A120e0cca5BCa079F6cF6Da9264e8;
 
   function testBurnReceivedAssets() public debuggingOnly fork(ARBITRUM_ONE) {
-    //IPair pair = IPair(pairAddress); // dai/usdt
+    IPair pair = IPair(pairAddress); // dai/usdt
 
     uint256 daiPrice = mpo.price(address(dai));
     uint256 usdtPrice = mpo.price(address(usdt));
@@ -328,8 +328,8 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
       for (uint256 i = 0; i < 60; i++) {
         vm.warp(block.timestamp + 15);
 
-        //(uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
-        //emit log_named_uint("k", k(dai, usdt, reserve0, reserve1));
+        (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
+        emit log_named_uint("k", k(dai, usdt, reserve0, reserve1));
 
         uint256 daiBalanceBefore = dai.balanceOf(pairWhale);
         uint256 usdtBalanceBefore = usdt.balanceOf(pairWhale);
