@@ -20,13 +20,19 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   address stMATIC = 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4;
   address MATICx = 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6;
   address jBRL = 0xf2f77FE7b8e66571E0fca7104c4d670BF1C8d722;
+  address BRZ = 0x491a4eB4f1FC3BfF8E1d2FC856a6A46663aD556f;
   address usdt = 0xc2132D05D31c914a87C6611C10748AEb04B58e8F;
+  address usdc = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+  address dai = 0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063;
 
   function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     address[] memory lpTokens = asArray(stMATIC_WMATIC_pool, jBRL_BRZ_pool, boostedAavePool);
 
-    address[] memory baseTokens = asArray(stMATIC, jBRL, usdt);
+    address[][] memory baseTokens = new address[][](3);
+    baseTokens[0] = asArray(stMATIC);
+    baseTokens[1] = asArray(jBRL, BRZ);
+    baseTokens[2] = asArray(usdt, usdc, dai);
 
     oracle = new BalancerLpStablePoolPriceOracle();
     oracle.initialize(lpTokens, baseTokens);
@@ -96,7 +102,7 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     vm.prank(oracle.owner());
 
     uint256 lenghtBefore = oracle.getAllLpTokens().length;
-    oracle.registerLpToken(MATICx_WMATIC_pool, MATICx);
+    oracle.registerLpToken(MATICx_WMATIC_pool, asArray(MATICx));
     assertTrue(oracle.getAllLpTokens().length == lenghtBefore + 1);
 
     uint256 price = getLpTokenPrice(MATICx_WMATIC_pool);

@@ -23,7 +23,7 @@ import { MasterPriceOracle } from "../MasterPriceOracle.sol";
  */
 
 contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
-  mapping(address => address) public baseTokens;
+  mapping(address => address[]) public baseTokens;
 
   address[] public lpTokens;
 
@@ -34,7 +34,7 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
    * @param _lpTokens Array of LP token addresses.
    * @param _baseTokens Array of base token addresses.
    */
-  function initialize(address[] memory _lpTokens, address[] memory _baseTokens) public initializer {
+  function initialize(address[] memory _lpTokens, address[][] memory _baseTokens) public initializer {
     require(_lpTokens.length == _baseTokens.length, "No LP tokens supplied or array lengths not equal.");
     __SafeOwnable_init();
 
@@ -81,7 +81,13 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
 
     // Returns the BLP Token / Base Token rate
     uint256 rate = pool.getRate();
-    uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(baseTokens[underlying]);
+    uint256 baseTokenPrice;
+    address[] memory baseTokenArray = baseTokens[underlying];
+    for (uint256 i = 0; i < baseTokenArray.length; i++) {
+      baseTokenPrice += BasePriceOracle(msg.sender).price(baseTokenArray[i]);
+    }
+    baseTokenPrice = baseTokenPrice / baseTokenArray.length;
+
     return (rate * baseTokenPrice) / 1e18;
   }
 
@@ -92,9 +98,9 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
   /**
    * @dev Register the pool given LP token address and set the baseToken info.
    * @param _lpToken LP token.
-   * @param _baseToken Base token for the LP Token address.
+   * @param _baseTokens Base tokens for the LP Token address.
    */
-  function registerLpToken(address _lpToken, address _baseToken) external onlyOwner {
+  function registerLpToken(address _lpToken, address[] memory _baseTokens) external onlyOwner {
     bool skip = false;
     for (uint256 j = 0; j < lpTokens.length; j++) {
       if (lpTokens[j] == _lpToken) {
@@ -105,6 +111,6 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     if (!skip) {
       lpTokens.push(_lpToken);
     }
-    baseTokens[_lpToken] = _baseToken;
+    baseTokens[_lpToken] = _baseTokens;
   }
 }
