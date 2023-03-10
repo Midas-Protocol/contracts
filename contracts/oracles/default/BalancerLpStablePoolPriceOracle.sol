@@ -70,7 +70,7 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     uint256 poolActualSupply = pool.getActualSupply();
     (IERC20Upgradeable[] memory tokens, uint256[] memory balances, ) = vault.getPoolTokens(pool.getPoolId());
 
-    uint256 weightedBaseTokenPrice = 0;
+    uint256 weightedBaseTokenValue = 0;
 
     for (uint256 i = 0; i < tokens.length; i++) {
       // exclude the LP token itself
@@ -83,13 +83,13 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
       // get the share of the base token in the pool
       uint256 baseTokenShare = (balancesScaled * 1e18) / poolActualSupply;
 
-      // Get the price of the base token
+      // Get the price of the base token in ETH
       uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(address(tokens[i]));
 
-      // Weight the base token price by the share of the base token in the pool
-      weightedBaseTokenPrice += (baseTokenShare * baseTokenPrice) / 1e18;
+      // Get the value of each of the base tokens' share in ETH
+      weightedBaseTokenValue += (baseTokenShare * baseTokenPrice) / 1e18;
     }
-    // Multiply the weights of each base token by the rate of the pool
-    return (rate * weightedBaseTokenPrice) / 1e18;
+    // Multiply the value of each of the base tokens' share in ETH by the rate of the pool
+    return (rate * weightedBaseTokenValue) / 1e18;
   }
 }

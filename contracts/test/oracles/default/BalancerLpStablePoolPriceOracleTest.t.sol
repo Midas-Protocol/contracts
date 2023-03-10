@@ -21,6 +21,7 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
 
   address stMATIC_WMATIC_pool = 0x8159462d255C1D24915CB51ec361F700174cD994;
   address jBRL_BRZ_pool = 0xE22483774bd8611bE2Ad2F4194078DaC9159F4bA;
+  address jEUR_agEUR_pool = 0xa48D164F6eB0EDC68bd03B56fa59E12F24499aD1;
   address boostedAavePool = 0x48e6B98ef6329f8f0A30eBB8c7C960330d648085;
 
   address linearAaveUsdtPool = 0xFf4ce5AAAb5a627bf82f4A571AB1cE94Aa365eA6;
@@ -39,12 +40,6 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
 
   function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-    // address[] memory lpTokens = asArray(stMATIC_WMATIC_pool, jBRL_BRZ_pool, boostedAavePool);
-
-    // address[][] memory baseTokens = new address[][](3);
-    // baseTokens[0] = asArray(stMATIC);
-    // baseTokens[1] = asArray(jBRL, BRZ);
-    // baseTokens[2] = asArray(usdt, usdc, dai);
 
     stableLpOracle = new BalancerLpStablePoolPriceOracle();
     stableLpOracle.initialize();
@@ -111,6 +106,30 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
 
     assertTrue(price > 0);
     assertApproxEqAbs(price, mpo.price(usdt), 1e16);
+  }
+
+  // Tests @ block number
+
+  // tx: https://polygonscan.com/tx/0x098bc391015d6517850ffe54b268d65bf7886ca4ed4207d79a54ba11debcf445
+  // - 2,995.9 for ~ 3,200 USD
+  // 1 LP token = 1,068 USD
+
+  function testjEurAgEurLpTokenOraclePrice() public forkAtBlock(POLYGON_MAINNET, 40141540) {
+    uint256 price = getLpTokenPrice(jEUR_agEUR_pool, stableLpOracle);
+
+    assertTrue(price > 0);
+    assertEq(price, 1017737040677024019); // 1,017e18 WMATIC * 1,05 USD/WMATIC =~ 1,068 USD
+  }
+
+  // https://polygonscan.com/tx/0xa061b632a95f2e0c81bacdb5a6d39991fb4e8436c52234373f9f736e2ad05e52
+  // - 2,122 LP Tokens ~ 407.49 USD
+  // 1 LP token = 0,1920 USD
+
+  function testjBrlBrzLpTokenOraclePrice() public forkAtBlock(POLYGON_MAINNET, 40120755) {
+    uint256 price = getLpTokenPrice(jBRL_BRZ_pool, stableLpOracle);
+
+    assertTrue(price > 0);
+    assertEq(price, 179844959613292499); // 0,1798e18 WMATIC * 1,05 USD/WMATIC =~ 1,888 USD
   }
 
   // function testReentrancyErrorMessage() public fork(POLYGON_MAINNET) {
