@@ -4,7 +4,8 @@ pragma solidity >=0.8.0;
 import "./MidasERC4626.sol";
 import "../vault/MultiAssetOptimizer.sol";
 
-contract OptimizedVaultERC4626 is MidasERC4626 {
+// TODO reentrancy guard?
+contract OptimizedERC4626 is MidasERC4626 {
   constructor() {
     _disableInitializers();
   }
@@ -19,7 +20,6 @@ contract OptimizedVaultERC4626 is MidasERC4626 {
     _asset.approve(address(vault), type(uint256).max);
   }
 
-
   function totalAssets() public view override returns (uint256) {
     return _asset().balanceOf(address(this));
   }
@@ -29,6 +29,7 @@ contract OptimizedVaultERC4626 is MidasERC4626 {
   }
 
   function afterDeposit(uint256 amount, uint256) internal override {
+    // TODO rebalance on deposit to offload the gas costs to the user
     vault.deposit(amount);
   }
 
