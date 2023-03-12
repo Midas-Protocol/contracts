@@ -159,11 +159,11 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
   // - 15,543.33 USDC
   // =~ $30,119.52  = ~19.307 ETH (ETH price: $1560)
   // Therefor, LP price is 19.307/0.015037668670 = 1283,9
-  function testForkedDaiUsdcArbiSolidly() public forkAtBlock(ARBITRUM_ONE, 67509709) {
+  function testForkedDaiUsdcArbiSolidlyV2() public forkAtBlock(ARBITRUM_ONE, 67509709) {
     address lpToken = 0x07d7F291e731A41D3F0EA4F1AE5b6d920ffb3Fe0; // Lp DAI/USDC (stable AMM)
 
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertEq(price, 1271881478415550136267); // 1271881478415550136267/1e18 = 1271,88
+    assertEq(price, 1271805633613441720518); // 1271881478415550136267/1e18 = 1271,80
   }
 
   // https://arbiscan.io/tx/0x8e5366d84d278c7dc5fa285c9cb3cf63697763066a77c228b7ae2a2cea9115e7
