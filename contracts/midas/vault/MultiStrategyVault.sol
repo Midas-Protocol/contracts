@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
-// Docgen-SOLC: 0.8.15
+pragma solidity ^0.8.10;
 
-pragma solidity ^0.8.15;
-
-import { ERC4626Upgradeable, IERC20MetadataUpgradeable as IERC20Metadata, ERC20Upgradeable as ERC20 } from "openzeppelin-contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol";
-import { SafeERC20Upgradeable as SafeERC20 } from "openzeppelin-contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import { ReentrancyGuardUpgradeable } from "openzeppelin-contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import { PausableUpgradeable } from "openzeppelin-contracts-upgradeable/security/PausableUpgradeable.sol";
-import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/utils/math/MathUpgradeable.sol";
-import { OwnedUpgradeable } from "../utils/OwnedUpgradeable.sol";
-import { VaultFees, IERC4626, IERC20 } from "../interfaces/vault/IVault.sol";
+import { ERC4626Upgradeable, IERC20MetadataUpgradeable as IERC20Metadata, ERC20Upgradeable as ERC20 } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
+import { SafeERC20Upgradeable as SafeERC20 } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import { ReentrancyGuardUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol";
+import { PausableUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/security/PausableUpgradeable.sol";
+import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
+import { VaultFees, IERC4626, IERC20 } from "./IVault.sol";
+import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
 
 struct AdapterConfig {
   IERC4626 adapter;
@@ -26,7 +24,12 @@ struct AdapterConfig {
  * It allows for multiple type of fees which are taken by issuing new vault shares.
  * Adapter and fees can be changed by the owner after a ragequit time.
  */
-contract MultiStrategyVault is ERC4626Upgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable, OwnedUpgradeable {
+contract MultiStrategyVault is
+  SafeOwnableUpgradeable,
+  ERC4626Upgradeable,
+  ReentrancyGuardUpgradeable,
+  PausableUpgradeable
+{
   using SafeERC20 for IERC20;
   using Math for uint256;
 
@@ -71,7 +74,7 @@ contract MultiStrategyVault is ERC4626Upgradeable, ReentrancyGuardUpgradeable, P
     address owner
   ) external initializer {
     __ERC4626_init(IERC20Metadata(address(asset_)));
-    __Owned_init(owner);
+    __SafeOwnable_init();
 
     if (address(asset_) == address(0)) revert InvalidAsset();
     _verifyAdapterConfig(adapters_, adapterCount_);
@@ -95,7 +98,7 @@ contract MultiStrategyVault is ERC4626Upgradeable, ReentrancyGuardUpgradeable, P
     if (feeRecipient_ == address(0)) revert InvalidFeeRecipient();
     feeRecipient = feeRecipient_;
 
-    contractName = keccak256(abi.encodePacked("Popcorn", name(), block.timestamp, "Vault"));
+    contractName = keccak256(abi.encodePacked("Midas", name(), block.timestamp, "Vault"));
 
     feesUpdatedAt = block.timestamp;
     highWaterMark = 1e9;
@@ -104,19 +107,43 @@ contract MultiStrategyVault is ERC4626Upgradeable, ReentrancyGuardUpgradeable, P
 
     emit VaultInitialized(contractName, address(asset_));
 
-    _name = string.concat("Popcorn ", IERC20Metadata(address(asset_)).name(), " Vault");
-    _symbol = string.concat("pop-", IERC20Metadata(address(asset_)).symbol());
+    _name = string(bytes.concat("Midas Optimized", bytes(IERC20Metadata(address(asset_)).name()), " Vault"));
+    _symbol = string(bytes.concat("mo-", bytes(IERC20Metadata(address(asset_)).symbol())));
   }
 
-  function name() public view override(IERC20Metadata, ERC20) returns (string memory) {
+  function name()
+    public
+    view
+    override
+    returns (
+      /*(IERC20Metadata, ERC20)*/
+      string memory
+    )
+  {
     return _name;
   }
 
-  function symbol() public view override(IERC20Metadata, ERC20) returns (string memory) {
+  function symbol()
+    public
+    view
+    override
+    returns (
+      /*(IERC20Metadata, ERC20)*/
+      string memory
+    )
+  {
     return _symbol;
   }
 
-  function decimals() public view override(IERC20Metadata, ERC20) returns (uint8) {
+  function decimals()
+    public
+    view
+    override
+    returns (
+      /*(IERC20Metadata, ERC20)*/
+      uint8
+    )
+  {
     return _decimals;
   }
 

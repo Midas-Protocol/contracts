@@ -350,6 +350,16 @@ contract CTokenFirstExtension is
       );
   }
 
+  function supplyRatePerBlockAfterDeposit(uint256 mintAmount) external view returns (uint256) {
+    return
+      interestRateModel.getSupplyRate(
+        asCToken().getCash() + mintAmount,
+        totalBorrows,
+        totalReserves + totalAdminFees + totalFuseFees,
+        reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
+      );
+  }
+
   /**
    * @notice Accrue interest then return the up-to-date exchange rate
    * @return Calculated exchange rate scaled by 1e18
