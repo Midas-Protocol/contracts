@@ -63,14 +63,6 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     );
   }
 
-  function testBusdWbnbUniswap() public fork(BSC_MAINNET) {
-    address lpToken = 0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16; // Lp WBNB-BUSD
-
-    uint256 price = getLpPrice(lpToken, getUniswapLpTokenPriceOracle());
-    assertTrue(price > 0);
-    verifyLpPrice(lpToken, price, 3e17); // 3% tolerance
-  }
-
   function testBnbXBnbSolidly() public fork(BSC_MAINNET) {
     address lpToken = 0x6c83E45fE3Be4A9c12BB28cB5BA4cD210455fb55; // Lp BNBx/WBNB (volatile AMM)
 
@@ -153,17 +145,44 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
   }
 
   // Fixed block number tests
+
+  // https://bscscan.com/tx/0xad3d5e2ddcd246bf6b76e381b8231ef32e3d82b539baf2e1d6a677b9a61967a4
+  // 2,932.668 LP tokens removed from the pool
+  // - 48,841.999 BUSD
+  // - 176,1972 WBNB
+  // =~ $97,945.00  = ~352,32 BNB (BNB price: $278)
+  // Therefor, LP price is 352,32/2,932.668 = 0,1201
+  // FAILING
+  function testForkedBusdWbnbSolidly() public forkAtBlock(BSC_MAINNET, 26399998) {
+    address lpToken = 0x483653bcF3a10d9a1c334CE16a19471a614F4385; // Lp WBNB-BUSD
+    uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
+    assertEq(price, 120054770949519465); // 120054770949519465/1e18 = 0,1200
+  }
+
+  // https://bscscan.com/tx/0xbc26ea6b98235d62b3d6bd48171f999e5016a39f739a35fa36c18de4462baf4b
+  // 39,3053 LP tokens removed from the pool
+  // - 896,4976 BUSD
+  // - 3,233 WBNB
+  // =~ $1,797.86  = ~6,467 BNB (BNB price: $278)
+  // Therefor, LP price is 6,467/39,3053 = 0,1645
+  function testForkedBusdWbnbUniswap() public forkAtBlock(BSC_MAINNET, 26399706) {
+    address lpToken = 0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16; // Lp WBNB-BUSD
+
+    uint256 price = getLpPrice(lpToken, getUniswapLpTokenPriceOracle());
+    assertEq(price, 164507819383257850); // 164507819383257850/1e18 = 0,1645
+  }
+
   // https://arbiscan.io/tx/0xff32f8f997d487a3e6f602552f2da9edc1e31f1e023e0e9dcacc77bd177791b1
   // 0.015037668670 LP tokens removed from the pool
   // - 14,546.17 DAI
   // - 15,543.33 USDC
   // =~ $30,119.52  = ~19.307 ETH (ETH price: $1560)
   // Therefor, LP price is 19.307/0.015037668670 = 1283,9
-  function testForkedDaiUsdcArbiSolidlyV2() public forkAtBlock(ARBITRUM_ONE, 67509709) {
+  function testForkedDaiUsdcArbiSolidly() public forkAtBlock(ARBITRUM_ONE, 67509709) {
     address lpToken = 0x07d7F291e731A41D3F0EA4F1AE5b6d920ffb3Fe0; // Lp DAI/USDC (stable AMM)
 
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertEq(price, 1271805633613441720518); // 1271881478415550136267/1e18 = 1271,80
+    assertEq(price, 1271806681784089041909); // 1271881478415550136267/1e18 = 1271,80
   }
 
   // https://arbiscan.io/tx/0x8e5366d84d278c7dc5fa285c9cb3cf63697763066a77c228b7ae2a2cea9115e7
@@ -176,7 +195,7 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     address lpToken = 0xC9dF93497B1852552F2200701cE58C236cC0378C; // Lp USDT/USDC (stable AMM)
 
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertEq(price, 1275460020881969657832030547); // 1275460020881969657832030547/1e18 = 1,275e9
+    assertEq(price, 1271259093277226037776836844); // 1275460020881969657832030547/1e18 = 1,275e9
   }
 
   // https://arbiscan.io/tx/0xcd98ae753ca7cbe93bfb653c3090fa0973ad10ab6b096fe7005216eae3f96a0f
@@ -189,7 +208,7 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     address lpToken = 0x06A4c4389d5C6cD1Ec63dDFFb7e9b3214254A720; // Lp WETH/GMX (volatile AMM)
 
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertEq(price, 439393617368171439); // 439393617368171439/1e18 = 0.439393617368171439
+    assertEq(price, 439388395594901356); // 439388395594901356/1e18 = 0.43939
   }
 
   // https://arbiscan.io/tx/0xb33c8fd30b124070c08eff4c7dd8fbf98c1a8ac8b61e7e9afb5da3c77176c4ff
@@ -202,21 +221,20 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     address lpToken = 0xd9D611c6943585bc0e18E51034AF8fa28778F7Da; // Lp WETH/WBTC (volatile AMM)
 
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertEq(price, 755603649957725481578826); // 755603649957725481578826/1e18 = 755,603.6499
+    assertEq(price, 755603082914754302563322); // 755603649957725481578826/1e18 = 755,603.6499
   }
 
   // https://bscscan.com/tx/0x4f08c603fddf6d4fcc4cfd7e8fa325d5a2ed6d61f097c86204a5ef915acf4948
   // 12,593.45 LP tokens added from the pool
   // - 12,282.086 USDT
   // - 12,904.8221 USDC
-  // =~ $25,211  = ~88,46 BNB (ETH price: $285,77)
-  // Therefor, LP price is 88,46/12,593.45 = 0,007024286
+  // =~ $25,211  = ~86,99 BNB (ETH price: $289,77)
+  // Therefor, LP price is 86,99/12,593.45 = 0,0069
 
   function testForkeUsdtUsdcBscSolidly() public forkAtBlock(BSC_MAINNET, 26257339) {
     address lpToken = 0x618f9Eb0E1a698409621f4F487B563529f003643; // Lp USDT/USDC (stable AMM)
-
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertEq(price, 6993216032507730); // 6993216032507730/1e18 = 0.006993216032507730
+    assertEq(price, 6999543840666965); // 6999543840666965/1e18 = 0.006999543840666965
   }
 
   function testSolidlyLPTokenPriceManipulation() public debuggingOnly fork(ARBITRUM_ONE) {

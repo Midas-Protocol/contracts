@@ -32,7 +32,7 @@ contract SolidlyLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
     (uint256 r0, uint256 r1, ) = pair.getReserves();
 
     r0 = r0 * 10**(18 - uint256(ERC20Upgradeable(pair.token0()).decimals()));
-    r0 = r1 * 10**(18 - uint256(ERC20Upgradeable(pair.token1()).decimals()));
+    r1 = r1 * 10**(18 - uint256(ERC20Upgradeable(pair.token1()).decimals()));
 
     address x = pair.token0();
     address y = pair.token1();
@@ -70,7 +70,7 @@ contract SolidlyLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
     uint256 firstTerm = (P_x * sqrt(sqrt((10**16 * P_x**3) / denomFirstTerm))) / 10**4;
     uint256 secondTerm = (P_y * sqrt(sqrt((10**16 * P_y**3) / denomSecondTerm))) / 10**4;
 
-    return (sqrt4K * (firstTerm + secondTerm));
+    return (sqrt4K * (firstTerm + secondTerm)) / 1e18;
   }
 
   function _sqrt4k(
@@ -79,10 +79,10 @@ contract SolidlyLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
     uint256 t_s
   ) public pure returns (uint256) {
     // sqrt4K = sqrt(sqrt((r0**3) * r1 + (r0**3) * r1)) / t_s;
-    uint256 r03r1 = ((((r0**2 / 10**9) * r0) / 10**18) * r1) / 1e27;
-    uint256 r13r0 = ((((r1**2 / 10**9) * r1) / 10**18) * r0) / 1e27;
-    uint256 sqrtK = 10**27 * sqrt(r03r1 + r13r0);
-    return sqrt(sqrtK) / t_s;
+    uint256 r03r1 = ((((r0**2 / 10**18) * r0) / 10**18) * r1) / 1e36;
+    uint256 r13r0 = ((((r1**2 / 10**18) * r1) / 10**18) * r0) / 1e36;
+    uint256 sqrtK = 10**36 * sqrt(r03r1 + r13r0);
+    return (sqrt(sqrtK) * 1e18) / t_s;
   }
 
   function _price(address token) internal view virtual override returns (uint256) {

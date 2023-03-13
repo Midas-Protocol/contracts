@@ -31,7 +31,7 @@ contract UniswapLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
     (uint256 r0, uint256 r1, ) = pair.getReserves();
 
     r0 = r0 * 10**(18 - uint256(ERC20Upgradeable(pair.token0()).decimals()));
-    r0 = r1 * 10**(18 - uint256(ERC20Upgradeable(pair.token1()).decimals()));
+    r1 = r1 * 10**(18 - uint256(ERC20Upgradeable(pair.token1()).decimals()));
 
     address token0 = pair.token0();
     address token1 = pair.token1();
