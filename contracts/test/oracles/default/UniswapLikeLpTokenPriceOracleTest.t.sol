@@ -6,6 +6,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeabl
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
 import { IPair, Observation } from "../../../external/solidly/IPair.sol";
+import { IRouter } from "../../../external/solidly/IRouter.sol";
 import { IUniswapV2Pair } from "../../../external/uniswap/IUniswapV2Pair.sol";
 import { UniswapLpTokenPriceOracle } from "../../../oracles/default/UniswapLpTokenPriceOracle.sol";
 import { SolidlyLpTokenPriceOracle } from "../../../oracles/default/SolidlyLpTokenPriceOracle.sol";
@@ -237,7 +238,45 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     assertEq(price, 6999543840666965); // 6999543840666965/1e18 = 0.006999543840666965
   }
 
-  function testSolidlyLPTokenPriceManipulation() public debuggingOnly fork(ARBITRUM_ONE) {
+  function testSolidlyLPTokenPriceManipulationWithMintAndBurn() public fork(ARBITRUM_ONE) {
+    address pairAddress = 0x15b9D20bcaa4f65d9004D2BEBAc4058445FD5285;
+    address pairWhale = 0x637DCef6f06A120e0cca5BCa079F6cF6Da9264e8;
+    IRouter router = IRouter(0xF26515D5482e2C2FD237149bF6A653dA4794b3D0);
+
+    SolidlyLpTokenPriceOracle lpOracle = new SolidlyLpTokenPriceOracle(ap.getAddress("wtoken"));
+
+    vm.prank(address(mpo));
+    uint256 priceBefore = lpOracle.price(pairAddress);
+
+    uint256 initialPairBalance = ERC20Upgradeable(pairAddress).balanceOf(pairWhale);
+    emit log_named_uint("initialPairBalance", initialPairBalance);
+
+    // manipulate
+    {
+      uint256 burnAmount = (initialPairBalance * 8) / 10;
+      vm.startPrank(pairWhale);
+      ERC20Upgradeable(pairAddress).approve(address(router), burnAmount);
+      (uint256 amountA, uint256 amountB) = router.removeLiquidity(
+        0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1, // dai
+        0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9, // usdt
+        true,
+        burnAmount,
+        0,
+        0,
+        pairWhale,
+        block.timestamp + 1
+      );
+      emit log_named_uint("amountA", amountA);
+      emit log_named_uint("amountB", amountB);
+      vm.stopPrank();
+    }
+    vm.prank(address(mpo));
+    uint256 priceAfter = lpOracle.price(pairAddress);
+    emit log_named_uint("price before", priceBefore);
+    emit log_named_uint("price after", priceAfter);
+  }
+
+  function testSolidlyLPTokenPriceManipulationWithSwaps() public debuggingOnly fork(ARBITRUM_ONE) {
     address pairAddress = 0x15b9D20bcaa4f65d9004D2BEBAc4058445FD5285;
 
     address dai = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
@@ -273,13 +312,17 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
       // advance > 30 mins so an observations is recorded
       //vm.warp(block.timestamp + 60 * 22);
 
-      uint256 amountOut = pair.getAmountOut(tokenToSwap.balanceOf(hacker), address(tokenToSwap));
-      tokenToSwap.transfer(pairAddress, tokenToSwap.balanceOf(hacker));
+      uint256 amountOut = pair.getAmountOut(tokenToSwap.balanceOf(hacker) / 10, address(tokenToSwap));
+      emit log_named_uint("amountOut", amountOut);
+
+      tokenToSwap.transfer(pairAddress, tokenToSwap.balanceOf(hacker) / 10);
       pair.swap(amountOut, 0, hacker, "");
       vm.stopPrank();
+      vm.prank(address(mpo));
+      emit log_named_uint("price after at the same block", lpOracle.price(pairAddress));
     }
 
-    for (uint256 i = 0; i < 60; i++) {
+    for (uint256 i = 0; i < 10; i++) {
       vm.warp(block.timestamp + 15);
       pair.sync();
 
