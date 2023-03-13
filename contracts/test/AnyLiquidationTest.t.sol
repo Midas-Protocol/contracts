@@ -631,25 +631,43 @@ contract AnyLiquidationTest is BaseTest {
 
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20Upgradeable.transfer.selector, 0xb4A9ebf1A0dcf58e0EF936cF1ca49067Ba49228B, 1372091245495),
+      abi.encodeWithSelector(
+        IERC20Upgradeable.transfer.selector,
+        0xb4A9ebf1A0dcf58e0EF936cF1ca49067Ba49228B,
+        1372091245495
+      ),
       abi.encode(true)
     );
 
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20Upgradeable.transferFrom.selector, 0xb4A9ebf1A0dcf58e0EF936cF1ca49067Ba49228B, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72, 1372091245495),
+      abi.encodeWithSelector(
+        IERC20Upgradeable.transferFrom.selector,
+        0xb4A9ebf1A0dcf58e0EF936cF1ca49067Ba49228B,
+        0xa9736bA05de1213145F688e4619E5A7e0dcf4C72,
+        1372091245495
+      ),
       abi.encode(true)
     );
 
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20Upgradeable.transferFrom.selector, 0x27521eae4eE4153214CaDc3eCD703b9B0326C908, 0xb4A9ebf1A0dcf58e0EF936cF1ca49067Ba49228B, 1372091245495),
+      abi.encodeWithSelector(
+        IERC20Upgradeable.transferFrom.selector,
+        0x27521eae4eE4153214CaDc3eCD703b9B0326C908,
+        0xb4A9ebf1A0dcf58e0EF936cF1ca49067Ba49228B,
+        1372091245495
+      ),
       abi.encode(true)
     );
 
-  vm.mockCall(
+    vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20Upgradeable.approve.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72, 1372091245495),
+      abi.encodeWithSelector(
+        IERC20Upgradeable.approve.selector,
+        0xa9736bA05de1213145F688e4619E5A7e0dcf4C72,
+        1372091245495
+      ),
       abi.encode(true)
     );
 
@@ -669,7 +687,6 @@ contract AnyLiquidationTest is BaseTest {
       abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xb4A9ebf1A0dcf58e0EF936cF1ca49067Ba49228B),
       abi.encode(10)
     );
-
 
     _functionCall(
       address(fsl),

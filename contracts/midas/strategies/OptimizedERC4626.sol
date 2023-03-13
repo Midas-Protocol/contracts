@@ -5,7 +5,7 @@ import "./MidasERC4626.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
 
-  struct AdapterConfig {
+struct AdapterConfig {
   IERC4626Upgradeable adapter;
   uint64 allocation;
 }
@@ -79,15 +79,15 @@ contract OptimizedERC4626 is MidasERC4626 {
   }
 
   function changeFees() external {
-//    if (proposedFeeTime == 0 || block.timestamp < proposedFeeTime + quitPeriod) revert NotPassedQuitPeriod(quitPeriod);
-//
-//    emit ChangedFees(fees, proposedFees);
-//
-//    fees = proposedFees;
-//    feesUpdatedAt = block.timestamp;
-//
-//    delete proposedFees;
-//    delete proposedFeeTime;
+    //    if (proposedFeeTime == 0 || block.timestamp < proposedFeeTime + quitPeriod) revert NotPassedQuitPeriod(quitPeriod);
+    //
+    //    emit ChangedFees(fees, proposedFees);
+    //
+    //    fees = proposedFees;
+    //    feesUpdatedAt = block.timestamp;
+    //
+    //    delete proposedFees;
+    //    delete proposedFeeTime;
   }
 
   function proposeAdapters(AdapterConfig[10] calldata newAdapters, uint8 newAdapterCount) external onlyOwner {
@@ -165,12 +165,12 @@ contract OptimizedERC4626 is MidasERC4626 {
    * @param _quitPeriod Time to rage quit after proposal.
    */
   function setQuitPeriod(uint256 _quitPeriod) external onlyOwner {
-//    if (block.timestamp < proposedAdapterTime + quitPeriod || block.timestamp < proposedFeeTime + quitPeriod)
-//      revert NotPassedQuitPeriod(quitPeriod);
-//    if (_quitPeriod < 1 days || _quitPeriod > 7 days) revert InvalidQuitPeriod();
-//
-//    quitPeriod = _quitPeriod;
-//
-//    emit QuitPeriodSet(quitPeriod);
+    //    if (block.timestamp < proposedAdapterTime + quitPeriod || block.timestamp < proposedFeeTime + quitPeriod)
+    //      revert NotPassedQuitPeriod(quitPeriod);
+    //    if (_quitPeriod < 1 days || _quitPeriod > 7 days) revert InvalidQuitPeriod();
+    //
+    //    quitPeriod = _quitPeriod;
+    //
+    //    emit QuitPeriodSet(quitPeriod);
   }
 }
