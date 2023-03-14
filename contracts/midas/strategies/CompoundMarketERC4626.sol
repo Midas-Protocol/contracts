@@ -107,7 +107,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
 
   /// @notice Withdraws as much as possible from the lending platform
   /// @return Whether everything was withdrawn or not
-  function withdrawAll() public override returns(bool) {
+  function withdrawAll() public override returns (bool) {
     return withdraw(maxWithdraw(msg.sender), msg.sender, msg.sender) > 0;
   }
 
