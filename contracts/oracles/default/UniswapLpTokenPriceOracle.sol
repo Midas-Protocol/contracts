@@ -28,20 +28,20 @@ contract UniswapLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
     IUniswapV2Pair pair = IUniswapV2Pair(token);
     uint256 totalSupply = pair.totalSupply();
     if (totalSupply == 0) return 0;
-    (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
+    (uint256 r0, uint256 r1, ) = pair.getReserves();
+
+    r0 = r0 * 10**(18 - uint256(ERC20Upgradeable(pair.token0()).decimals()));
+    r1 = r1 * 10**(18 - uint256(ERC20Upgradeable(pair.token1()).decimals()));
+
     address token0 = pair.token0();
     address token1 = pair.token1();
 
     // Get fair price of non-WETH token (underlying the pair) in terms of ETH
-    uint256 token0FairPrice = token0 == wtoken
-      ? 1e18
-      : (BasePriceOracle(msg.sender).price(token0) * 1e18) / (10**uint256(ERC20Upgradeable(token0).decimals()));
-    uint256 token1FairPrice = token1 == wtoken
-      ? 1e18
-      : (BasePriceOracle(msg.sender).price(token1) * 1e18) / (10**uint256(ERC20Upgradeable(token1).decimals()));
+    uint256 token0FairPrice = token0 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token0);
+    uint256 token1FairPrice = token1 == wtoken ? 1e18 : BasePriceOracle(msg.sender).price(token1);
 
     // Implementation from https://github.com/AlphaFinanceLab/homora-v2/blob/e643392d582c81f6695136971cff4b685dcd2859/contracts/oracle/UniswapV2Oracle.sol#L18
-    uint256 sqrtK = (sqrt(reserve0 * reserve1) * (2**112)) / totalSupply;
+    uint256 sqrtK = (sqrt(r0 * r1) * (2**112)) / totalSupply;
     return (((sqrtK * 2 * sqrt(token0FairPrice)) / (2**56)) * sqrt(token1FairPrice)) / (2**56);
   }
 }
