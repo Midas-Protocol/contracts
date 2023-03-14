@@ -80,14 +80,17 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
 
       // scale by the decimals of the base token
       uint256 balancesScaled = balances[i] * 10**(18 - uint256(ERC20Upgradeable(address(tokens[i])).decimals()));
-      // get the share of the base token in the pool
-      uint256 baseTokenShare = (balancesScaled * 1e18) / poolActualSupply;
+
+      // get the share of the base token in the pool (inverse to prevent underflow)
+      // e18 + e18 - e18
+      uint256 baseTokenShare = (poolActualSupply * 1e18) / balancesScaled;
 
       // Get the price of the base token in ETH
       uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(address(tokens[i]));
 
       // Get the value of each of the base tokens' share in ETH
-      weightedBaseTokenValue += (baseTokenShare * baseTokenPrice) / 1e18;
+      // e18 + e18 - e18
+      weightedBaseTokenValue += ((baseTokenPrice * 1e18) / baseTokenShare);
     }
     // Multiply the value of each of the base tokens' share in ETH by the rate of the pool
     return (rate * weightedBaseTokenValue) / 1e18;

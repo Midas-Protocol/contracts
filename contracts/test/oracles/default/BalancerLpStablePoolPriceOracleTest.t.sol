@@ -108,28 +108,38 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     assertApproxEqAbs(price, mpo.price(usdt), 1e16);
   }
 
-  // Tests @ block number
+  // Tests @block number
 
   // tx: https://polygonscan.com/tx/0x098bc391015d6517850ffe54b268d65bf7886ca4ed4207d79a54ba11debcf445
   // - 2,995.9 for ~ 3,200 USD
   // 1 LP token = 1,068 USD
-
-  function testjEurAgEurLpTokenOraclePrice() public forkAtBlock(POLYGON_MAINNET, 40141540) {
+  function testForkedJeurAgEurLpTokenOraclePrice() public forkAtBlock(POLYGON_MAINNET, 40141540) {
     uint256 price = getLpTokenPrice(jEUR_agEUR_pool, stableLpOracle);
 
     assertTrue(price > 0);
-    assertEq(price, 1017737040677024019); // 1,017e18 WMATIC * 1,05 USD/WMATIC =~ 1,068 USD
+    assertEq(price, 1017737040677024022); // 1,017e18 WMATIC * 1,05 USD/WMATIC =~ 1,068 USD
   }
 
   // https://polygonscan.com/tx/0xa061b632a95f2e0c81bacdb5a6d39991fb4e8436c52234373f9f736e2ad05e52
   // - 2,122 LP Tokens ~ 407.49 USD
   // 1 LP token = 0,1920 USD
 
-  function testjBrlBrzLpTokenOraclePrice() public forkAtBlock(POLYGON_MAINNET, 40120755) {
+  function testForkedJbrlBrzLpTokenOraclePrice() public forkAtBlock(POLYGON_MAINNET, 40120755) {
     uint256 price = getLpTokenPrice(jBRL_BRZ_pool, stableLpOracle);
 
     assertTrue(price > 0);
-    assertEq(price, 179844959613292499); // 0,1798e18 WMATIC * 1,05 USD/WMATIC =~ 1,888 USD
+    assertEq(price, 179844959613292499); // 0,1798e18 WMATIC * 1,05 USD/WMATIC =~ 0,1888 USD
+  }
+
+  // https://polygonscan.com/tx/0x904e0a81c09b7340fab580b6f6210416e2aca9539c43d2a69fb72712b82a8a00
+  // - 197.820 LP Tokens ~ $235.15 USD
+  // 1 LP token = 1,188 USD
+
+  function testForkedWmaticStMaticTokenOraclePrice() public forkAtBlock(POLYGON_MAINNET, 40304920) {
+    uint256 price = getLpTokenPrice(stMATIC_WMATIC_pool, stableLpOracle);
+
+    assertTrue(price > 0);
+    assertEq(price, 1019375858752541150); // 1,0193 WMATIC * 1,18 USD/WMATIC =~ 1,202 USD
   }
 
   // function testReentrancyErrorMessage() public fork(POLYGON_MAINNET) {
