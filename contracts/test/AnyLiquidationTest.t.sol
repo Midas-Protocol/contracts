@@ -6,7 +6,6 @@ import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import { IERC20MetadataUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
@@ -146,7 +145,6 @@ contract AnyLiquidationTest is BaseTest {
 
   function getPoolAndBorrower(
     uint256 random,
-    LiquidationData memory vars,
     FusePoolDirectory.FusePool[] memory pools
   ) internal view returns (IComptroller, address) {
     if (pools.length == 0) revert("no pools to pick from");
@@ -248,7 +246,7 @@ contract AnyLiquidationTest is BaseTest {
 
     while (true) {
       // get a random pool and a random borrower from it
-      (vars.comptroller, vars.borrower) = getPoolAndBorrower(random, vars, pools);
+      (vars.comptroller, vars.borrower) = getPoolAndBorrower(random, pools);
 
       if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
         if (address(vars.comptroller) != 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
@@ -415,7 +413,7 @@ contract AnyLiquidationTest is BaseTest {
       strategyData = abi.encode(preferredOutputToken, ap.getAddress("wtoken"), address(curveV1Oracle));
     } else if (compareStrings(strategyContract, "SaddleLpTokenLiquidator")) {
       address[] memory underlyingTokens = curveV1Oracle.getUnderlyingTokens(inputToken);
-      (address preferredOutputToken, uint8 outputTokenIndex) = pickPreferredToken(
+      (address preferredOutputToken,) = pickPreferredToken(
         underlyingTokens,
         strategyOutputToken
       );
@@ -626,80 +624,12 @@ contract AnyLiquidationTest is BaseTest {
     return returndata;
   }
 
-  function testRawLiquidation() public debuggingOnly fork(MOONBEAM_MAINNET) {
+  function testRawLiquidation() public debuggingOnly fork(POLYGON_MAINNET) {
     vm.prank(0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
-
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(
-        IERC20Upgradeable.transfer.selector,
-        0xb4A9ebf1A0dcf58e0EF936cF1ca49067Ba49228B,
-        1372091245495
-      ),
-      abi.encode(true)
-    );
-
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(
-        IERC20Upgradeable.transferFrom.selector,
-        0xb4A9ebf1A0dcf58e0EF936cF1ca49067Ba49228B,
-        0xa9736bA05de1213145F688e4619E5A7e0dcf4C72,
-        1372091245495
-      ),
-      abi.encode(true)
-    );
-
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(
-        IERC20Upgradeable.transferFrom.selector,
-        0x27521eae4eE4153214CaDc3eCD703b9B0326C908,
-        0xb4A9ebf1A0dcf58e0EF936cF1ca49067Ba49228B,
-        1372091245495
-      ),
-      abi.encode(true)
-    );
-
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(
-        IERC20Upgradeable.approve.selector,
-        0xa9736bA05de1213145F688e4619E5A7e0dcf4C72,
-        1372091245495
-      ),
-      abi.encode(true)
-    );
-
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72),
-      abi.encode(64373093320182)
-    );
-
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20MetadataUpgradeable.decimals.selector),
-      abi.encode(10)
-    );
-    vm.mockCall(
-      0xb3D83F2CAb787adcB99d4c768f1Eb42c8734b563,
-      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xb4A9ebf1A0dcf58e0EF936cF1ca49067Ba49228B),
-      abi.encode(10)
-    );
-
     _functionCall(
       address(fsl),
       hex"a68ee119000000000000000000000000f93a5f0a4925eec32cd585641c88a498523f383c0000000000000000000000000000000000000000000000000000013f7702e3b7000000000000000000000000a9736ba05de1213145f688e4619e5a7e0dcf4c72000000000000000000000000b3d83f2cab787adcb99d4c768f1eb42c8734b5630000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070085a09d30d6f8c4ecf6ee10120d1847383bb570000000000000000000000000000000000000000000000000000000000000120000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
       "raw liquidation failed"
     );
-  }
-
-  function testPolygonComptrollerUpgradeRaw() public debuggingOnly fork(POLYGON_MAINNET) {
-    address poolAddress = 0xB08A309eFBFFa41f36A06b2D0C9a4629749b17a2;
-    address ffd = ap.getAddress("FuseFeeDistributor");
-
-    vm.prank(0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
-    _functionCall(ffd, hex"fa7cc72d000000000000000000000000db984f8cbc1cf893a18c2da50282a1492234602c", "call failed");
   }
 }

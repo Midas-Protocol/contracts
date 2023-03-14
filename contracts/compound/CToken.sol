@@ -118,8 +118,6 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     uint256 borrowBalance;
     uint256 exchangeRateMantissa;
 
-    MathError mErr;
-
     borrowBalance = borrowBalanceStored(account);
 
     exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateStored();
