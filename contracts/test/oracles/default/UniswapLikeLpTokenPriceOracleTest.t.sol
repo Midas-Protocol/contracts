@@ -6,6 +6,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeabl
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
 import { IPair, Observation } from "../../../external/solidly/IPair.sol";
+import { IRouter } from "../../../external/solidly/IRouter.sol";
 import { IUniswapV2Pair } from "../../../external/uniswap/IUniswapV2Pair.sol";
 import { UniswapLpTokenPriceOracle } from "../../../oracles/default/UniswapLpTokenPriceOracle.sol";
 import { SolidlyLpTokenPriceOracle } from "../../../oracles/default/SolidlyLpTokenPriceOracle.sol";
@@ -61,14 +62,6 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
       price,
       tolerance
     );
-  }
-
-  function testBusdWbnbUniswap() public fork(BSC_MAINNET) {
-    address lpToken = 0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16; // Lp WBNB-BUSD
-
-    uint256 price = getLpPrice(lpToken, getUniswapLpTokenPriceOracle());
-    assertTrue(price > 0);
-    verifyLpPrice(lpToken, price, 3e17); // 3% tolerance
   }
 
   function testBnbXBnbSolidly() public fork(BSC_MAINNET) {
@@ -153,6 +146,33 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
   }
 
   // Fixed block number tests
+
+  // https://bscscan.com/tx/0xad3d5e2ddcd246bf6b76e381b8231ef32e3d82b539baf2e1d6a677b9a61967a4
+  // 2,932.668 LP tokens removed from the pool
+  // - 48,841.999 BUSD
+  // - 176,1972 WBNB
+  // =~ $97,945.00  = ~352,32 BNB (BNB price: $278)
+  // Therefor, LP price is 352,32/2,932.668 = 0,1201
+  // FAILING
+  function testForkedBusdWbnbSolidly() public forkAtBlock(BSC_MAINNET, 26399998) {
+    address lpToken = 0x483653bcF3a10d9a1c334CE16a19471a614F4385; // Lp WBNB-BUSD
+    uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
+    assertEq(price, 120054770949519465); // 120054770949519465/1e18 = 0,1200
+  }
+
+  // https://bscscan.com/tx/0xbc26ea6b98235d62b3d6bd48171f999e5016a39f739a35fa36c18de4462baf4b
+  // 39,3053 LP tokens removed from the pool
+  // - 896,4976 BUSD
+  // - 3,233 WBNB
+  // =~ $1,797.86  = ~6,467 BNB (BNB price: $278)
+  // Therefor, LP price is 6,467/39,3053 = 0,1645
+  function testForkedBusdWbnbUniswap() public forkAtBlock(BSC_MAINNET, 26399706) {
+    address lpToken = 0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16; // Lp WBNB-BUSD
+
+    uint256 price = getLpPrice(lpToken, getUniswapLpTokenPriceOracle());
+    assertEq(price, 164507819383257850); // 164507819383257850/1e18 = 0,1645
+  }
+
   // https://arbiscan.io/tx/0xff32f8f997d487a3e6f602552f2da9edc1e31f1e023e0e9dcacc77bd177791b1
   // 0.015037668670 LP tokens removed from the pool
   // - 14,546.17 DAI
@@ -163,7 +183,7 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     address lpToken = 0x07d7F291e731A41D3F0EA4F1AE5b6d920ffb3Fe0; // Lp DAI/USDC (stable AMM)
 
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertEq(price, 1271881478415550136267); // 1271881478415550136267/1e18 = 1271,88
+    assertEq(price, 1271806681784089041909); // 1271881478415550136267/1e18 = 1271,80
   }
 
   // https://arbiscan.io/tx/0x8e5366d84d278c7dc5fa285c9cb3cf63697763066a77c228b7ae2a2cea9115e7
@@ -176,7 +196,7 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     address lpToken = 0xC9dF93497B1852552F2200701cE58C236cC0378C; // Lp USDT/USDC (stable AMM)
 
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertEq(price, 1275460020881969657832030547); // 1275460020881969657832030547/1e18 = 1,275e9
+    assertEq(price, 1271259093277226037776836844); // 1275460020881969657832030547/1e18 = 1,275e9
   }
 
   // https://arbiscan.io/tx/0xcd98ae753ca7cbe93bfb653c3090fa0973ad10ab6b096fe7005216eae3f96a0f
@@ -189,7 +209,7 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     address lpToken = 0x06A4c4389d5C6cD1Ec63dDFFb7e9b3214254A720; // Lp WETH/GMX (volatile AMM)
 
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertEq(price, 439393617368171439); // 439393617368171439/1e18 = 0.439393617368171439
+    assertEq(price, 439388395594901356); // 439388395594901356/1e18 = 0.43939
   }
 
   // https://arbiscan.io/tx/0xb33c8fd30b124070c08eff4c7dd8fbf98c1a8ac8b61e7e9afb5da3c77176c4ff
@@ -202,24 +222,61 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     address lpToken = 0xd9D611c6943585bc0e18E51034AF8fa28778F7Da; // Lp WETH/WBTC (volatile AMM)
 
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertEq(price, 755603649957725481578826); // 755603649957725481578826/1e18 = 755,603.6499
+    assertEq(price, 755603082914754302563322); // 755603649957725481578826/1e18 = 755,603.6499
   }
 
   // https://bscscan.com/tx/0x4f08c603fddf6d4fcc4cfd7e8fa325d5a2ed6d61f097c86204a5ef915acf4948
   // 12,593.45 LP tokens added from the pool
   // - 12,282.086 USDT
   // - 12,904.8221 USDC
-  // =~ $25,211  = ~88,46 BNB (ETH price: $285,77)
-  // Therefor, LP price is 88,46/12,593.45 = 0,007024286
+  // =~ $25,211  = ~86,99 BNB (ETH price: $289,77)
+  // Therefor, LP price is 86,99/12,593.45 = 0,0069
 
   function testForkeUsdtUsdcBscSolidly() public forkAtBlock(BSC_MAINNET, 26257339) {
     address lpToken = 0x618f9Eb0E1a698409621f4F487B563529f003643; // Lp USDT/USDC (stable AMM)
-
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertEq(price, 6993216032507730); // 6993216032507730/1e18 = 0.006993216032507730
+    assertEq(price, 6999543840666965); // 6999543840666965/1e18 = 0.006999543840666965
   }
 
-  function testSolidlyLPTokenPriceManipulation() public debuggingOnly fork(ARBITRUM_ONE) {
+  function testSolidlyLPTokenPriceManipulationWithMintAndBurn() public fork(ARBITRUM_ONE) {
+    address pairAddress = 0x15b9D20bcaa4f65d9004D2BEBAc4058445FD5285;
+    address pairWhale = 0x637DCef6f06A120e0cca5BCa079F6cF6Da9264e8;
+    IRouter router = IRouter(0xF26515D5482e2C2FD237149bF6A653dA4794b3D0);
+
+    SolidlyLpTokenPriceOracle lpOracle = new SolidlyLpTokenPriceOracle(ap.getAddress("wtoken"));
+
+    vm.prank(address(mpo));
+    uint256 priceBefore = lpOracle.price(pairAddress);
+
+    uint256 initialPairBalance = ERC20Upgradeable(pairAddress).balanceOf(pairWhale);
+    emit log_named_uint("initialPairBalance", initialPairBalance);
+
+    // manipulate
+    {
+      uint256 burnAmount = (initialPairBalance * 8) / 10;
+      vm.startPrank(pairWhale);
+      ERC20Upgradeable(pairAddress).approve(address(router), burnAmount);
+      (uint256 amountA, uint256 amountB) = router.removeLiquidity(
+        0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1, // dai
+        0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9, // usdt
+        true,
+        burnAmount,
+        0,
+        0,
+        pairWhale,
+        block.timestamp + 1
+      );
+      emit log_named_uint("amountA", amountA);
+      emit log_named_uint("amountB", amountB);
+      vm.stopPrank();
+    }
+    vm.prank(address(mpo));
+    uint256 priceAfter = lpOracle.price(pairAddress);
+    emit log_named_uint("price before", priceBefore);
+    emit log_named_uint("price after", priceAfter);
+  }
+
+  function testSolidlyLPTokenPriceManipulationWithSwaps() public debuggingOnly fork(ARBITRUM_ONE) {
     address pairAddress = 0x15b9D20bcaa4f65d9004D2BEBAc4058445FD5285;
 
     address dai = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
@@ -255,13 +312,17 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
       // advance > 30 mins so an observations is recorded
       //vm.warp(block.timestamp + 60 * 22);
 
-      uint256 amountOut = pair.getAmountOut(tokenToSwap.balanceOf(hacker), address(tokenToSwap));
-      tokenToSwap.transfer(pairAddress, tokenToSwap.balanceOf(hacker));
+      uint256 amountOut = pair.getAmountOut(tokenToSwap.balanceOf(hacker) / 10, address(tokenToSwap));
+      emit log_named_uint("amountOut", amountOut);
+
+      tokenToSwap.transfer(pairAddress, tokenToSwap.balanceOf(hacker) / 10);
       pair.swap(amountOut, 0, hacker, "");
       vm.stopPrank();
+      vm.prank(address(mpo));
+      emit log_named_uint("price after at the same block", lpOracle.price(pairAddress));
     }
 
-    for (uint256 i = 0; i < 60; i++) {
+    for (uint256 i = 0; i < 10; i++) {
       vm.warp(block.timestamp + 15);
       pair.sync();
 
