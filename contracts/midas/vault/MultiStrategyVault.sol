@@ -60,7 +60,6 @@ contract MultiStrategyVault is
    * @param fees_ Desired fees in 1e18. (1e18 = 100%, 1e14 = 1 BPS)
    * @param feeRecipient_ Recipient of all vault fees. (Must not be zero address)
    * @param depositLimit_ Maximum amount of assets which can be deposited.
-   * @param owner Owner of the contract. Controls management functions.
    * @dev This function is called by the factory contract when deploying a new vault.
    * @dev Usually the adapter should already be pre configured. Otherwise a new one can only be added after a ragequit time.
    */
@@ -70,8 +69,7 @@ contract MultiStrategyVault is
     uint8 adapterCount_,
     VaultFees calldata fees_,
     address feeRecipient_,
-    uint256 depositLimit_,
-    address owner
+    uint256 depositLimit_
   ) external initializer {
     __ERC4626_init(IERC20Metadata(address(asset_)));
     __SafeOwnable_init();
@@ -232,7 +230,7 @@ contract MultiStrategyVault is
     uint256 assets,
     address receiver,
     address owner
-  ) public override returns (uint256 shares) {
+  ) public override returns (uint256) {
     if (receiver == address(0)) revert InvalidReceiver();
     if (assets > maxWithdraw(owner)) revert MaxError(assets);
 
@@ -657,7 +655,7 @@ contract MultiStrategyVault is
     emit NewAdaptersProposed(newAdapters, proposedAdapterCount, block.timestamp);
   }
 
-  function _verifyAdapterConfig(AdapterConfig[10] calldata newAdapters, uint8 adapterCount_) internal {
+  function _verifyAdapterConfig(AdapterConfig[10] calldata newAdapters, uint8 adapterCount_) internal view {
     if (adapterCount_ == 0 || adapterCount_ > 10) revert InvalidConfig();
 
     uint256 totalAllocation;
