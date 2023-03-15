@@ -41,6 +41,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     return convertToAssets(balanceOf(account));
   }
 
+  // TODO claim rewards from a flywheel
   function afterDeposit(uint256 amount, uint256) internal override {
     require(market.mint(amount) == 0, "deposit to market failed");
   }
@@ -53,7 +54,8 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     return market.supplyRatePerBlockAfterDeposit(amount) * blocksPerYear;
   }
 
-  function emergencyWithdrawAndPause() external override onlyOwner {
+  function emergencyWithdrawAndPause() external override(IGenericLender, MidasERC4626) {
+    require(msg.sender == owner() || msg.sender == address(vault), "not owner or vault");
     require(market.redeem(market.balanceOf(address(this))) == 0, "redeem all failed");
     _pause();
   }
@@ -69,6 +71,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
 
   /// @notice Helper function to get the current total of assets managed by the lender.
   function nav() public view returns (uint256) {
+    // TODO market.balanceOf(address(this)) instead of market.totalSupply()
     return (market.totalSupply() * market.exchangeRateHypothetical()) / 1e18;
   }
 
@@ -99,8 +102,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   }
 
   /// @notice Deposits the current balance of the contract to the lending platform
-  function deposit() public override {
-    // TODO onlyOwner?
+  function deposit() public override onlyOwner {
     // TODO what do we need this fn for?
     deposit(IERC20Upgradeable(asset()).balanceOf(address(this)), address(this));
   }

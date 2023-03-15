@@ -66,4 +66,6 @@ interface IGenericLender {
 
   /// @notice Returns the current balance invested on the lender and related staking contracts
   function underlyingBalanceStored() external view returns (uint256 balance);
+
+  function emergencyWithdrawAndPause() external;
 }
