@@ -42,6 +42,8 @@ contract CrossMinter is IXReceiver {
     uint32 _origin,
     bytes memory _callData
   ) external returns (bytes memory) {
+    require(msg.sender == address(connext), "!connext");
+
     // Because this call is *not* authenticated, the _originSender will be the Zero Address
     // Decode call data and get CToken address, Minter Address
     (address _cToken, address _minter) = abi.decode(_callData, (address, address));
@@ -72,7 +74,7 @@ contract CrossMinter is IXReceiver {
     require(cToken.mint(_amount) == 0, "mint falied!");
 
     // Transfer CToken to minter
-    IERC20Upgradeable(_cToken).transfer(_minter, cToken.balanceOf(address(this)));
+    CTokenInterface(_cToken).asCTokenExtensionInterface().transfer(_minter, cToken.balanceOf(address(this)));
   }
 
   /**
