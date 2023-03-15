@@ -47,17 +47,17 @@ contract CrossMinter is ProposedOwnable, IXReceiver {
   ) external returns (bytes memory) {
     require(msg.sender == address(connext), "!connext");
 
-    // Because this call is *not* authenticated, the _originSender will be the Zero Address
-    // Decode call data and get CToken address, Minter Address
+    // Because this call is *not* authenticated, the _originSender will be the Zero Address.
+    // Decode call data and get CToken address, Minter Address.
     (address _cToken, address _minter) = abi.decode(_callData, (address, address));
 
     require(_minter != address(0), "Zero Minter!");
     require(_amount > 0, "Zero Mint amount!");
 
-    // Check underlying asset
+    // Check underlying asset.
     ICToken cToken = ICToken(_cToken);
 
-    // Check If this contract enterred market
+    // Check if this contract entered market
     if (!comptroller.checkMembership(address(this), cToken)) {
       address[] memory cTokens = new address[](1);
       cTokens[0] = address(_cToken);
@@ -66,17 +66,17 @@ contract CrossMinter is ProposedOwnable, IXReceiver {
       comptroller.enterMarkets(cTokens);
     }
 
-    // Approve underlying
+    // Approve underlying.
     if (!cToken.isCEther()) {
       safeApprove(IERC20Upgradeable(_asset), _cToken, _amount);
     } else {
       require(_asset == ICErc20(_cToken).underlying(), "!Underlying");
     }
 
-    // Mint to this contract
-    require(cToken.mint(_amount) == 0, "mint falied!");
+    // Mint to this contract.
+    require(cToken.mint(_amount) == 0, "mint failed");
 
-    // Transfer CToken to minter
+    // Transfer CToken to minter.
     CTokenInterface(_cToken).asCTokenExtensionInterface().transfer(_minter, cToken.balanceOf(address(this)));
   }
 
