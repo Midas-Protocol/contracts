@@ -183,7 +183,7 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     address lpToken = 0x07d7F291e731A41D3F0EA4F1AE5b6d920ffb3Fe0; // Lp DAI/USDC (stable AMM)
 
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertEq(price, 1271806681784089041909); // 1271881478415550136267/1e18 = 1271,80
+    assertEq(price, 1271806681784147372847); // 1271806681784147372847/1e18 = 1271,80
   }
 
   // https://arbiscan.io/tx/0x8e5366d84d278c7dc5fa285c9cb3cf63697763066a77c228b7ae2a2cea9115e7
@@ -196,7 +196,7 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     address lpToken = 0xC9dF93497B1852552F2200701cE58C236cC0378C; // Lp USDT/USDC (stable AMM)
 
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertEq(price, 1271259093277226037776836844); // 1275460020881969657832030547/1e18 = 1,275e9
+    assertEq(price, 1271259093277228095541923239); // 1271259093277228095541923239/1e18 = 1,275e9
   }
 
   // https://arbiscan.io/tx/0xcd98ae753ca7cbe93bfb653c3090fa0973ad10ab6b096fe7005216eae3f96a0f
@@ -235,7 +235,7 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
   function testForkeUsdtUsdcBscSolidly() public forkAtBlock(BSC_MAINNET, 26257339) {
     address lpToken = 0x618f9Eb0E1a698409621f4F487B563529f003643; // Lp USDT/USDC (stable AMM)
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertEq(price, 6999543840666965); // 6999543840666965/1e18 = 0.006999543840666965
+    assertEq(price, 6999543840666976); // 6999543840666976/1e18 = 0.006999543840666965
   }
 
   function testSolidlyLPTokenPriceManipulationWithMintAndBurn() public debuggingOnly fork(ARBITRUM_ONE) {

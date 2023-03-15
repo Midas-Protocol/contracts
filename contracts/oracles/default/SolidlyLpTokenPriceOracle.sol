@@ -79,9 +79,9 @@ contract SolidlyLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
     uint256 t_s
   ) public pure returns (uint256) {
     // sqrt4K = sqrt(sqrt((r0**3) * r1 + (r0**3) * r1)) / t_s;
-    uint256 r03r1 = ((((r0**2 / 10**18) * r0) / 10**18) * r1) / 1e36;
-    uint256 r13r0 = ((((r1**2 / 10**18) * r1) / 10**18) * r0) / 1e36;
-    uint256 sqrtK = 10**36 * sqrt(r03r1 + r13r0);
+    uint256 r03r1 = ((((r0**2 / 10**18) * r0) / 10**18) * r1);
+    uint256 r13r0 = ((((r1**2 / 10**18) * r1) / 10**18) * r0);
+    uint256 sqrtK = 10**18 * sqrt(r03r1 + r13r0);
     return (sqrt(sqrtK) * 1e18) / t_s;
   }
 
