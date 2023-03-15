@@ -143,10 +143,11 @@ contract AnyLiquidationTest is BaseTest {
     IUniswapV2Pair flashSwapPair;
   }
 
-  function getPoolAndBorrower(
-    uint256 random,
-    FusePoolDirectory.FusePool[] memory pools
-  ) internal view returns (IComptroller, address) {
+  function getPoolAndBorrower(uint256 random, FusePoolDirectory.FusePool[] memory pools)
+    internal
+    view
+    returns (IComptroller, address)
+  {
     if (pools.length == 0) revert("no pools to pick from");
 
     uint256 i = random % pools.length; // random pool
@@ -413,10 +414,7 @@ contract AnyLiquidationTest is BaseTest {
       strategyData = abi.encode(preferredOutputToken, ap.getAddress("wtoken"), address(curveV1Oracle));
     } else if (compareStrings(strategyContract, "SaddleLpTokenLiquidator")) {
       address[] memory underlyingTokens = curveV1Oracle.getUnderlyingTokens(inputToken);
-      (address preferredOutputToken,) = pickPreferredToken(
-        underlyingTokens,
-        strategyOutputToken
-      );
+      (address preferredOutputToken, ) = pickPreferredToken(underlyingTokens, strategyOutputToken);
       outputToken = preferredOutputToken;
       if (outputToken == address(0) || outputToken == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
         outputToken = ap.getAddress("wtoken");

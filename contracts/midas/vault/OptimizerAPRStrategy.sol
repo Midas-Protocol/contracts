@@ -5,12 +5,12 @@ import "../../external/angle/IGenericLender.sol";
 import { Initializable } from "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 
-  struct LendStatus {
-    string name;
-    uint256 assets;
-    uint256 rate;
-    address add;
-  }
+struct LendStatus {
+  string name;
+  uint256 assets;
+  uint256 rate;
+  address add;
+}
 
 contract OptimizerAPRStrategy is Initializable {
   IGenericLender[] public lenders;
@@ -76,6 +76,4 @@ contract OptimizerAPRStrategy is Initializable {
 
     return weightedAPR / bal;
   }
-
-
 }
