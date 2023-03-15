@@ -16,6 +16,13 @@ contract CrossMinter is IXReceiver {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
   /**
+   * @notice Admin that can sweep the contracts of stuck funds in the event of a failed
+   * user path.
+   * TODO: Make transfer-able
+   */
+  address public admin;
+
+  /**
    * @notice The Connext contract on this domain
    */
   IConnext public immutable connext;
@@ -25,9 +32,10 @@ contract CrossMinter is IXReceiver {
    */
   IComptroller public comptroller;
 
-  constructor(address _connext, address _comptroller) {
+  constructor(address _connext, address _comptroller, address _admin) {
     connext = IConnext(_connext);
     comptroller = IComptroller(_comptroller);
+    admin = _admin;
   }
 
   /**
@@ -87,6 +95,14 @@ contract CrossMinter is IXReceiver {
       if (allowance > 0) token.safeApprove(to, 0);
       token.safeApprove(to, type(uint256).max);
     }
+  }
+
+  /**
+   * @notice This sweep is used to rescue any funds that might get trapped in the contract due
+   * to a failure in the `xReceive` user path.
+   */
+  function sweepToken(IERC20Upgradeable token, uint256 amount) public {
+    token.transfer(admin, amount);
   }
 
   /**
