@@ -30,7 +30,13 @@ contract CrossMinter is ProposedOwnable, IXReceiver {
   constructor(address _connext, address _comptroller, address _king) {
     connext = IConnext(_connext);
     comptroller = IComptroller(_comptroller);
-    _setOwner(_king);
+
+    // Default owner should be the deployer address.
+    if (_king == address(0)) {
+      _setOwner(msg.sender);
+    } else {
+      _setOwner(_king);
+    }
   }
 
   /**
