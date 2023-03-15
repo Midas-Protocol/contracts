@@ -7,7 +7,6 @@ import "../../external/compound/ICToken.sol";
 import "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
 import "../../external/angle/IGenericLender.sol";
 import "../vault/MultiStrategyVault.sol";
-import "../../external/compound/IPriceOracle.sol";
 
 // TODO reentrancy guard?
 contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
@@ -15,7 +14,6 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   MultiStrategyVault public vault;
   uint256 public blocksPerYear;
   string public lenderName;
-  IPriceOracle public oracle;
 
   constructor() {
     _disableInitializers();
@@ -25,14 +23,12 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     ERC20Upgradeable _asset,
     ICToken _market,
     MultiStrategyVault _vault,
-    IPriceOracle _oracle,
     uint256 _blocksPerYear
   ) public initializer {
     __MidasER4626_init(_asset);
     lenderName = string(bytes.concat("Midas Optimized ", bytes(_asset.name())));
     market = _market;
     vault = _vault;
-    oracle = _oracle;
     blocksPerYear = _blocksPerYear;
   }
 
@@ -49,12 +45,22 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     require(market.mint(amount) == 0, "deposit to market failed");
   }
 
-  function beforeWithdraw(uint256, uint256 shares) internal override {
-    require(market.redeem(shares) == 0, "redeem from market failed");
+  function beforeWithdraw(uint256 amount, uint256) internal override {
+    require(market.redeemUnderlying(amount) == 0, "redeem from market failed");
   }
 
   function aprAfterDeposit(uint256 amount) public view returns (uint256) {
     return market.supplyRatePerBlockAfterDeposit(amount) * blocksPerYear;
+  }
+
+  function emergencyWithdrawAndPause() external override onlyOwner {
+    require(market.redeem(market.balanceOf(address(this))) == 0, "redeem all failed");
+    _pause();
+  }
+
+  function unpause() external override onlyOwner {
+    deposit();
+    _unpause();
   }
 
   /*------------------------------------------------------------
@@ -62,8 +68,8 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     ------------------------------------------------------------*/
 
   /// @notice Helper function to get the current total of assets managed by the lender.
-  function nav() external view returns (uint256) {
-    return (market.getCash() * oracle.getUnderlyingPrice(market)) / 1e18;
+  function nav() public view returns (uint256) {
+    return (market.totalSupply() * market.exchangeRateHypothetical()) / 1e18;
   }
 
   /// @notice Reference to the `Strategy` contract the lender interacts with
@@ -81,7 +87,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   /// @notice Returns an estimation of the current Annual Percentage Rate weighted by the assets under
   /// management of the lender
   function weightedApr() external view returns (uint256) {
-    return aprAfterDeposit(1e36 / oracle.getUnderlyingPrice(market));
+    return (apr() * nav()) / 1e18;
   }
 
   /// @notice Withdraws a given amount from lender
@@ -92,15 +98,9 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     return amount;
   }
 
-  /// @notice Withdraws as much as possible in case of emergency and sends it to the `PoolManager`
-  /// @param amount Amount to withdraw
-  /// @dev Does not check if any error occurs or if the amount withdrawn is correct
-  function emergencyWithdraw(uint256 amount) external {
-    // TODO
-  }
-
   /// @notice Deposits the current balance of the contract to the lending platform
   function deposit() public override {
+    // TODO onlyOwner?
     // TODO what do we need this fn for?
     deposit(IERC20Upgradeable(asset()).balanceOf(address(this)), address(this));
   }

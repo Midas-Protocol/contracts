@@ -27,11 +27,6 @@ interface IGenericLender {
   /// @return Amount actually withdrawn
   function withdraw(uint256 amount) external returns (uint256);
 
-  /// @notice Withdraws as much as possible in case of emergency and sends it to the `PoolManager`
-  /// @param amount Amount to withdraw
-  /// @dev Does not check if any error occurs or if the amount withdrawn is correct
-  function emergencyWithdraw(uint256 amount) external;
-
   /// @notice Deposits the current balance of the contract to the lending platform
   function deposit() external;
 
