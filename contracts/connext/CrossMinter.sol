@@ -95,6 +95,8 @@ contract CrossMinter is ProposedOwnable, IXReceiver {
   /**
    * @notice This sweep is used to rescue any funds that might get trapped in the contract due
    * to a failure in the `xReceive` user path.
+   * @param token - ERC20 token to sweep.
+   * @param amount - Amount of the token to withdraw.
    */
   function sweepToken(IERC20Upgradeable token, uint256 amount) public onlyOwner {
     token.transfer(_owner, amount);
