@@ -6,7 +6,7 @@ import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/
 import "../SafeOwnableUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
-  struct LendStatus {
+struct LendStatus {
   string name;
   uint256 assets;
   uint256 rate;
