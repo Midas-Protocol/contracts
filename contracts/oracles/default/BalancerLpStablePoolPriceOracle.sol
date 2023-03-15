@@ -24,10 +24,12 @@ import { MasterPriceOracle } from "../MasterPriceOracle.sol";
  */
 
 contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
+  address[] public underlyings;
   bytes32 internal constant REENTRANCY_ERROR_HASH = keccak256(abi.encodeWithSignature("Error(string)", "BAL#400"));
 
-  function initialize() public initializer {
+  function initialize(address[] memory _underlyings) public initializer {
     __SafeOwnable_init();
+    underlyings = _underlyings;
   }
 
   /**
@@ -94,5 +96,26 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     }
     // Multiply the value of each of the base tokens' share in ETH by the rate of the pool
     return (rate * weightedBaseTokenValue) / 1e18;
+  }
+
+  /**
+   * @dev Register the an underlying.
+   * @param _underlying Underlying token for which to add an oracle.
+   */
+  function registerToken(address _underlying) external onlyOwner {
+    bool skip = false;
+    for (uint256 j = 0; j < underlyings.length; j++) {
+      if (underlyings[j] == _underlying) {
+        skip = true;
+        break;
+      }
+    }
+    if (!skip) {
+      underlyings.push(_underlying);
+    }
+  }
+
+  function getAllUnderlyings() external view returns (address[] memory) {
+    return underlyings;
   }
 }

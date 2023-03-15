@@ -41,11 +41,14 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
 
+    address[] memory stableLps = asArray(stMATIC_WMATIC_pool, jBRL_BRZ_pool, jEUR_agEUR_pool);
+    address[] memory linearLps = asArray(linearAaveUsdtPool, linearAaveUsdcPool, linearAaveDaiPool);
+
     stableLpOracle = new BalancerLpStablePoolPriceOracle();
-    stableLpOracle.initialize();
+    stableLpOracle.initialize(stableLps);
 
     linearLpOracle = new BalancerLpLinearPoolPriceOracle();
-    linearLpOracle.initialize();
+    linearLpOracle.initialize(linearLps);
   }
 
   function getLpTokenPrice(address lpToken, IPriceOracle oracle) internal returns (uint256) {
@@ -95,6 +98,10 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     uint256 priceLAUsdc = getLpTokenPrice(linearAaveUsdcPool, linearLpOracle);
     uint256 priceLADai = getLpTokenPrice(linearAaveDaiPool, linearLpOracle);
 
+    // register the oracle
+    vm.prank(stableLpOracle.owner());
+    stableLpOracle.registerToken(boostedAavePool);
+
     uint256 price = getLpTokenPrice(boostedAavePool, stableLpOracle);
     assertTrue(price > 0);
     assertApproxEqAbs(price, mpo.price(usdt), 1e16);
@@ -142,17 +149,25 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     assertEq(price, 1019375858752541150); // 1,0193 WMATIC * 1,18 USD/WMATIC =~ 1,202 USD
   }
 
+  function _reEntrancyTest(address[] memory lpTokens) internal {
+    for (uint256 i = 0; i < lpTokens.length; i++) {
+      IBalancerVault vault = IBalancerStablePool(lpTokens[i]).getVault();
+      // raise the reentrancy flag for that vault
+      vm.store(address(vault), bytes32(uint256(0)), bytes32(uint256(2)));
+      vm.expectRevert(bytes("BAL#400"));
+      vault.manageUserBalance(new UserBalanceOp[](0));
+    }
+  }
+
   // function testReentrancyErrorMessage() public fork(POLYGON_MAINNET) {
   //   // TODO configure it in the addresses provider after deployed (or just hardcode it here for polygon)
-  //   oracle = BalancerLpStablePoolPriceOracle(ap.getAddress("BalancerLpStablePoolPriceOracle"));
-  //   address[] memory lpTokens = oracle.getAllLpTokens();
-  //   //address[] memory lpTokens = asArray(stMATIC_WMATIC_pool);
-  //   for (uint256 i = 0; i < lpTokens.length; i++) {
-  //     IBalancerVault vault = IBalancerStablePool(lpTokens[i]).getVault();
-  //     // raise the reentrancy flag for that vault
-  //     vm.store(address(vault), bytes32(uint256(0)), bytes32(uint256(2)));
-  //     vm.expectRevert(bytes("BAL#400"));
-  //     vault.manageUserBalance(new UserBalanceOp[](0));
-  //   }
+  //   stableLpOracle = BalancerLpStablePoolPriceOracle(ap.getAddress("BalancerLpStablePoolPriceOracle"));
+  //   linearLpOracle = BalancerLpStablePoolPriceOracle(ap.getAddress("BalancerLpLinearPoolPriceOracle"));
+
+  //   address[] memory stableLpTokens = stableLpOracle.getAllUnderlyings();
+  //   address[] memory linearLpTokens = linearLpOracle.getAllUnderlyings();
+
+  //   _reEntrancyTest(stableLpTokens);
+  //   _reEntrancyTest(linearLpTokens);
   // }
 }
