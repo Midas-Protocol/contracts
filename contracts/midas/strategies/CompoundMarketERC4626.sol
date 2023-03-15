@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./MidasERC4626.sol";
-import "../../external/compound/ICToken.sol";
+import { ICErc20 } from "../../external/compound/ICErc20.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
 import "../../external/angle/IGenericLender.sol";
@@ -10,7 +10,7 @@ import "../vault/MultiStrategyVault.sol";
 
 // TODO reentrancy guard?
 contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
-  ICToken public market;
+  ICErc20 public market;
   MultiStrategyVault public vault;
   uint256 public blocksPerYear;
   string public lenderName;
@@ -20,14 +20,14 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   }
 
   function initialize(
-    ERC20Upgradeable _asset,
-    ICToken _market,
+    ICErc20 _market,
     MultiStrategyVault _vault,
     uint256 _blocksPerYear
   ) public initializer {
+    market = _market;
+    ERC20Upgradeable _asset = ERC20Upgradeable(market.underlying());
     __MidasER4626_init(_asset);
     lenderName = string(bytes.concat("Midas Optimized ", bytes(_asset.name())));
-    market = _market;
     vault = _vault;
     blocksPerYear = _blocksPerYear;
   }
