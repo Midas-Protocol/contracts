@@ -8,19 +8,14 @@ import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
 import { ICToken, ICErc20 } from "../external/compound/ICErc20.sol";
 import { IComptroller } from "../external/compound/IComptroller.sol";
 
+import { ProposedOwnable } from "./ProposedOwnable.sol";
+
 /**
  * @title CrossMinter
  * @notice Mint CToken from the connext cross-chain transaction
  */
-contract CrossMinter is IXReceiver {
+contract CrossMinter is ProposedOwnable, IXReceiver {
   using SafeERC20Upgradeable for IERC20Upgradeable;
-
-  /**
-   * @notice Admin that can sweep the contracts of stuck funds in the event of a failed
-   * user path.
-   * TODO: Make transfer-able
-   */
-  address public admin;
 
   /**
    * @notice The Connext contract on this domain
@@ -32,10 +27,10 @@ contract CrossMinter is IXReceiver {
    */
   IComptroller public comptroller;
 
-  constructor(address _connext, address _comptroller, address _admin) {
+  constructor(address _connext, address _comptroller, address _king) {
     connext = IConnext(_connext);
     comptroller = IComptroller(_comptroller);
-    admin = _admin;
+    _setOwner(_king);
   }
 
   /**
@@ -101,8 +96,8 @@ contract CrossMinter is IXReceiver {
    * @notice This sweep is used to rescue any funds that might get trapped in the contract due
    * to a failure in the `xReceive` user path.
    */
-  function sweepToken(IERC20Upgradeable token, uint256 amount) public {
-    token.transfer(admin, amount);
+  function sweepToken(IERC20Upgradeable token, uint256 amount) public onlyOwner {
+    token.transfer(_owner, amount);
   }
 
   /**
