@@ -1,14 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
-
 pragma solidity ^0.8.10;
-
-import "./IAccessControlAngle.sol";
 
 /// @title IGenericLender
 /// @author Yearn with slight modifications from Angle Core Team
 /// @dev Interface for the `GenericLender` contract, the base interface for contracts interacting
 /// with lending and yield farming platforms
-/*is IAccessControlAngle*/
 interface IGenericLender {
   /// @notice Name of the lender on which funds are invested
   function lenderName() external view returns (string memory);
