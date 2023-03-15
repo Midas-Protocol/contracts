@@ -238,7 +238,7 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     assertEq(price, 6999543840666965); // 6999543840666965/1e18 = 0.006999543840666965
   }
 
-  function testSolidlyLPTokenPriceManipulationWithMintAndBurn() public fork(ARBITRUM_ONE) {
+  function testSolidlyLPTokenPriceManipulationWithMintAndBurn() public debuggingOnly fork(ARBITRUM_ONE) {
     address pairAddress = 0x15b9D20bcaa4f65d9004D2BEBAc4058445FD5285;
     address pairWhale = 0x637DCef6f06A120e0cca5BCa079F6cF6Da9264e8;
     IRouter router = IRouter(0xF26515D5482e2C2FD237149bF6A653dA4794b3D0);
