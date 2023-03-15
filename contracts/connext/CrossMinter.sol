@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
-import { IConnext } from "@connext/interfaces/core/IConnext.sol";
-import { IXReceiver } from "@connext/interfaces/core/IXReceiver.sol";
+import { IConnext } from "@connext-interfaces/core/IConnext.sol";
+import { IXReceiver } from "@connext-interfaces/core/IXReceiver.sol";
+import { SafeERC20Upgradeable, IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
-import { ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
-import { CTokenInterface, CErc20Interface } from "../compound/CTokenInterfaces.sol";
+import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
+import { ICToken, ICErc20 } from "../external/compound/ICErc20.sol";
+import { IComptroller } from "../external/compound/IComptroller.sol";
 
 /**
  * @title CrossMinter
  * @notice Mint CToken from the connext cross-chain transaction
  */
 contract CrossMinter is IXReceiver {
+  using SafeERC20Upgradeable for IERC20Upgradeable;
+
   /**
    * @notice The Connext contract on this domain
    */
@@ -19,11 +23,11 @@ contract CrossMinter is IXReceiver {
   /**
    * @notice Contract which oversees inter-cToken operations
    */
-  ComptrollerInterface public comptroller;
+  IComptroller public comptroller;
 
   constructor(address _connext, address _comptroller) {
     connext = IConnext(_connext);
-    comptroller = ComptrollerInterface(_comptroller);
+    comptroller = IComptroller(_comptroller);
   }
 
   /**
@@ -46,8 +50,7 @@ contract CrossMinter is IXReceiver {
     require(_amount > 0, "Zero Mint amount!");
 
     // Check underlying asset
-    CTokenInterface cToken = CTokenInterface(_cToken);
-    require(_asset == cToken.underlying(), "!Underlying");
+    ICToken cToken = ICToken(_cToken);
 
     // Check If this contract enterred market
     if (!comptroller.checkMembership(address(this), cToken)) {
@@ -60,14 +63,16 @@ contract CrossMinter is IXReceiver {
 
     // Approve underlying
     if (!cToken.isCEther()) {
-      safeApprove(_asset, _cToken, _amount);
+      safeApprove(IERC20Upgradeable(_asset), _cToken, _amount);
+    } else {
+      require(_asset == ICErc20(_cToken).underlying(), "!Underlying");
     }
 
     // Mint to this contract
     require(cToken.mint(_amount) == 0, "mint falied!");
 
     // Transfer CToken to minter
-    cToken.transfer(_minter, cToken.balanceOf(address(this)));
+    IERC20Upgradeable(_cToken).transfer(_minter, cToken.balanceOf(address(this)));
   }
 
   /**
