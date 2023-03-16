@@ -41,9 +41,11 @@ interface IGenericLender {
   /// of `amount`
   /// @param amount Amount to add to the lending platform, and that we want to take into account
   /// in the apr computation
-  function aprAfterDeposit(int256 amount) external view returns (uint256);
+  function aprAfterDeposit(uint256 amount) external view returns (uint256);
 
-  /// @notice
+  function aprAfterWithdraw(uint256 amount) external view returns (uint256);
+
+    /// @notice
   /// Removes tokens from this Strategy that are not the type of tokens
   /// managed by this Strategy. This may be used in case of accidentally
   /// sending the wrong kind of token to this Strategy.

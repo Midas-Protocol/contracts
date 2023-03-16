@@ -17,7 +17,7 @@ struct LendStatus {
 contract OptimizerAPRStrategy is MultiStrategyVault {
   using SafeERC20Upgradeable for IERC20;
 
-  uint64 internal constant _BPS = 10000;
+  uint64 internal constant _BPS = 1e18;
 
   /// @notice See note on `setEmergencyExit()`
   bool public emergencyExit;
@@ -90,44 +90,50 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
       weightedAPR += adapters[i].adapter.weightedApr();
     }
 
-    return weightedAPR / bal;
+    uint8 decimals = IERC20Metadata(asset()).decimals();
+    return (weightedAPR * (10 ** decimals)) / bal;
   }
 
   /// @notice Returns the weighted apr in an hypothetical world where the strategy splits its nav
   /// in respect to shares
   /// @param shares List of shares (in bps of the nav) that should be allocated to each lender
-  function estimatedAPR(uint64[] memory shares)
+  function estimatedAPR(uint64[] calldata shares)
     public
     view
-    returns (uint256 weightedAPR, int256[] memory lenderAdjustedAmounts)
+    returns (uint256, int256[] memory)
   {
-    lenderAdjustedAmounts = new int256[](adapterCount);
+    uint256 weightedAPRScaled = 0;
+    int256[] memory lenderAdjustedAmounts = new int256[](adapterCount);
     if (adapterCount != shares.length) revert IncorrectListLength();
 
     uint256 bal = estimatedTotalAssets();
-    if (bal == 0) return (weightedAPR, lenderAdjustedAmounts);
+    if (bal == 0) return (weightedAPRScaled, lenderAdjustedAmounts);
 
     uint256 share;
     for (uint256 i; i < adapterCount; ++i) {
       share += shares[i];
       uint256 futureDeposit = (bal * shares[i]) / _BPS;
-      // It won't overflow for `decimals <= 18`, as it would mean gigantic amounts
-      int256 adjustedAmount = int256(futureDeposit) - int256(adapters[i].adapter.nav());
-      lenderAdjustedAmounts[i] = adjustedAmount;
-      weightedAPR += futureDeposit * adapters[i].adapter.aprAfterDeposit(adjustedAmount);
-    }
-    if (share != 10000) revert InvalidShares();
 
-    weightedAPR /= bal;
+      int256 adjustedAmount = int256(futureDeposit) - int256(adapters[i].adapter.nav());
+      if (adjustedAmount > 0) {
+        weightedAPRScaled += futureDeposit * adapters[i].adapter.aprAfterDeposit(uint256(adjustedAmount));
+      } else {
+        weightedAPRScaled += futureDeposit * adapters[i].adapter.aprAfterWithdraw(uint256(-adjustedAmount));
+      }
+      lenderAdjustedAmounts[i] = adjustedAmount;
+    }
+    if (share != _BPS) revert InvalidShares();
+
+    return (weightedAPRScaled / bal, lenderAdjustedAmounts);
   }
 
   // =============================== CORE FUNCTIONS ==============================
 
   /// @notice Harvests the Strategy, recognizing any profits or losses and adjusting
   /// the Strategy's position.
-  function harvest(bytes memory data) external {
+  function harvest(uint64[] calldata shares) external {
     _report();
-    _adjustPosition(data);
+    _adjustPosition(shares);
   }
 
   function _report() internal {
@@ -142,14 +148,12 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
     }
   }
 
-  function _adjustPosition(bytes memory data) internal {
+  function _adjustPosition(uint64[] calldata lenderSharesHint) internal {
     // Emergency exit is dealt with at beginning of harvest
     if (emergencyExit) return;
 
     // We just keep all money in `asset` if we dont have any lenders
     if (adapterCount == 0) return;
-
-    uint64[] memory lenderSharesHint = abi.decode(data, (uint64[]));
 
     uint256 estimatedAprHint;
     int256[] memory lenderAdjustedAmounts;
@@ -167,19 +171,23 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
             adapters[i].adapter.withdraw(uint256(-lenderAdjustedAmounts[i]));
         }
       }
+      // TODO deltaWithdraw is always 0 for compound markets deposits
 
       // If the strategy didn't succeed to withdraw the intended funds -> revert and force the greedy path
       if (deltaWithdraw > withdrawalThreshold) revert IncorrectDistribution();
 
       for (uint256 i; i < adapterCount; ++i) {
-        // As `deltaWithdraw` is inferior to `withdrawalThreshold` (a dust)
+        // As `deltaWithdraw` is less than `withdrawalThreshold` (a dust)
         // It is not critical to compensate on an arbitrary lender as it will only slightly impact global APR
         if (lenderAdjustedAmounts[i] > int256(deltaWithdraw)) {
           lenderAdjustedAmounts[i] -= int256(deltaWithdraw);
           deltaWithdraw = 0;
-          IERC20(asset()).safeTransfer(address(adapters[i].adapter), uint256(lenderAdjustedAmounts[i]));
-          adapters[i].adapter.deposit();
-        } else if (lenderAdjustedAmounts[i] > 0) deltaWithdraw -= uint256(lenderAdjustedAmounts[i]);
+          IERC20(asset()).approve(address(adapters[i].adapter), uint256(lenderAdjustedAmounts[i]));
+          adapters[i].adapter.deposit(uint256(lenderAdjustedAmounts[i]), address(this));
+        } else if (lenderAdjustedAmounts[i] > 0) {
+          deltaWithdraw -= uint256(lenderAdjustedAmounts[i]);
+        }
+        adapters[i].allocation = lenderSharesHint[i];
       }
     }
   }

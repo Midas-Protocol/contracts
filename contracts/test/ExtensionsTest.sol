@@ -26,11 +26,11 @@ contract MockComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
     return allMarkets[0].symbol();
   }
 
-  function _setTransferPaused(bool state) public returns (bool) {
+  function _setTransferPaused(bool) public returns (bool) {
     return false;
   }
 
-  function _setSeizePaused(bool state) public returns (bool) {
+  function _setSeizePaused(bool) public returns (bool) {
     return false;
   }
 
@@ -295,8 +295,8 @@ contract ExtensionsTest is BaseTest {
 
   function _prepareCTokenUpgrade(CErc20Delegate market) internal returns (address) {
     address implBefore = market.implementation();
-    emit log("implementation before");
-    emit log_address(implBefore);
+    //emit log("implementation before");
+    //emit log_address(implBefore);
 
     CErc20Delegate newImpl;
     if (compareStrings("CErc20Delegate", market.contractType())) {
@@ -333,8 +333,8 @@ contract ExtensionsTest is BaseTest {
 
     // auto upgrade
     //CTokenExtensionInterface(address(asDelegate)).accrueInterest();
-    emit log("new implementation");
-    emit log_address(asDelegate.implementation());
+    //emit log("new implementation");
+    //emit log_address(asDelegate.implementation());
   }
 
   function testBscComptrollerExtensions() public debuggingOnly fork(BSC_MAINNET) {
@@ -376,8 +376,6 @@ contract ExtensionsTest is BaseTest {
 
   function testBulkAutoUpgrade() public debuggingOnly fork(POLYGON_MAINNET) {
     CErc20Delegate market = CErc20Delegate(0x4DED2939A2A8912E9Cc9eaEFAbECC43CC9864723);
-
-    address implBefore = market.implementation();
 
     address newImplAddress = _prepareCTokenUpgrade(market);
 

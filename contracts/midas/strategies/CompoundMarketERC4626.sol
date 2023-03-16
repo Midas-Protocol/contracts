@@ -42,6 +42,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
 
   // TODO claim rewards from a flywheel
   function afterDeposit(uint256 amount, uint256) internal override {
+    ERC20Upgradeable(asset()).approve(address(market), amount);
     require(market.mint(amount) == 0, "deposit to market failed");
   }
 
@@ -51,6 +52,10 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
 
   function aprAfterDeposit(uint256 amount) public view returns (uint256) {
     return market.supplyRatePerBlockAfterDeposit(amount) * blocksPerYear;
+  }
+
+  function aprAfterWithdraw(uint256 amount) public view override returns (uint256) {
+    return market.supplyRatePerBlockAfterWithdraw(amount) * blocksPerYear;
   }
 
   function emergencyWithdrawAndPause() external override(IGenericLender, MidasERC4626) {
@@ -70,7 +75,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
 
   /// @notice Helper function to get the current total of assets managed by the lender.
   function nav() public view returns (uint256) {
-    return (market.balanceOf(msg.sender) * market.exchangeRateHypothetical()) / 1e18;
+    return (market.balanceOf(address(this)) * market.exchangeRateHypothetical()) / 1e18;
   }
 
   /// @notice Returns an estimation of the current Annual Percentage Rate on the lender
@@ -92,10 +97,15 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     return amount;
   }
 
+  // TODO remove this fn?
   /// @notice Deposits the current balance of the contract to the lending platform
   function deposit() public override onlyOwner {
     // TODO what do we need this fn for?
     deposit(IERC20Upgradeable(asset()).balanceOf(address(this)), address(this));
+  }
+
+  function deposit(uint256 amount) public {
+    deposit(amount, address(this));
   }
 
   /// @notice Withdraws as much as possible from the lending platform
@@ -110,14 +120,6 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   /// and we cannot withdraw everything
   function hasAssets() public view returns (bool) {
     return market.balanceOf(address(this)) > 10;
-  }
-
-  /// @notice Returns an estimation of the current Annual Percentage Rate after a new deposit
-  /// of `amount`
-  /// @param amount Amount to add to the lending platform, and that we want to take into account
-  /// in the apr computation
-  function aprAfterDeposit(int256 amount) public view override returns (uint256) {
-    return aprAfterDeposit(uint256(amount));
   }
 
   /// @notice
