@@ -3,7 +3,6 @@ pragma solidity >=0.8.0;
 
 import "../helpers/WithPool.sol";
 import { BaseTest } from "../config/BaseTest.t.sol";
-import "forge-std/Test.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
@@ -15,6 +14,8 @@ import { FusePoolLensSecondary } from "../../FusePoolLensSecondary.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import { CTokenInterface } from "../../compound/CTokenInterfaces.sol";
 import { CrossMinter } from "../../connext/CrossMinter.sol";
+
+import "forge-std/Test.sol";
 
 contract MockAsset is MockERC20 {
   constructor() MockERC20("test", "test", 8) {}
