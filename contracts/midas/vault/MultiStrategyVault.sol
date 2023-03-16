@@ -48,6 +48,7 @@ contract MultiStrategyVault is
 
   error InvalidAsset();
   error InvalidAdapter();
+  error InvalidAllocations();
 
   constructor() {
     _disableInitializers();

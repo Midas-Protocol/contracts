@@ -28,7 +28,6 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
 
   error IncorrectListLength();
   error IncorrectDistribution();
-  error InvalidShares();
 
   function initialize(
     IERC20 asset_,
@@ -95,20 +94,20 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
   }
 
   /// @notice Returns the weighted apr in an hypothetical world where the strategy splits its nav
-  /// in respect to shares
-  /// @param shares List of shares (in bps of the nav) that should be allocated to each lender
-  function estimatedAPR(uint64[] calldata shares) public view returns (uint256, int256[] memory) {
+  /// in respect to allocations
+  /// @param allocations List of allocations (in bps of the nav) that should be allocated to each lender
+  function estimatedAPR(uint64[] calldata allocations) public view returns (uint256, int256[] memory) {
     uint256 weightedAPRScaled = 0;
     int256[] memory lenderAdjustedAmounts = new int256[](adapterCount);
-    if (adapterCount != shares.length) revert IncorrectListLength();
+    if (adapterCount != allocations.length) revert IncorrectListLength();
 
     uint256 bal = estimatedTotalAssets();
     if (bal == 0) return (weightedAPRScaled, lenderAdjustedAmounts);
 
-    uint256 share;
+    uint256 allocation;
     for (uint256 i; i < adapterCount; ++i) {
-      share += shares[i];
-      uint256 futureDeposit = (bal * shares[i]) / _BPS;
+      allocation += allocations[i];
+      uint256 futureDeposit = (bal * allocations[i]) / _BPS;
 
       int256 adjustedAmount = int256(futureDeposit) - int256(adapters[i].adapter.nav());
       if (adjustedAmount > 0) {
@@ -118,7 +117,7 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
       }
       lenderAdjustedAmounts[i] = adjustedAmount;
     }
-    if (share != _BPS) revert InvalidShares();
+    if (allocation != _BPS) revert InvalidAllocations();
 
     return (weightedAPRScaled / bal, lenderAdjustedAmounts);
   }
@@ -127,9 +126,9 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
 
   /// @notice Harvests the Strategy, recognizing any profits or losses and adjusting
   /// the Strategy's position.
-  function harvest(uint64[] calldata shares) external {
+  function harvest(uint64[] calldata allocations) external {
     _report();
-    _adjustPosition(shares);
+    _adjustPosition(allocations);
   }
 
   function _report() internal {
@@ -144,7 +143,7 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
     }
   }
 
-  function _adjustPosition(uint64[] calldata lenderSharesHint) internal {
+  function _adjustPosition(uint64[] calldata lenderAllocationsHint) internal {
     // Emergency exit is dealt with at beginning of harvest
     if (emergencyExit) return;
 
@@ -153,7 +152,8 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
 
     uint256 estimatedAprHint;
     int256[] memory lenderAdjustedAmounts;
-    if (lenderSharesHint.length != 0) (estimatedAprHint, lenderAdjustedAmounts) = estimatedAPR(lenderSharesHint);
+    if (lenderAllocationsHint.length != 0)
+      (estimatedAprHint, lenderAdjustedAmounts) = estimatedAPR(lenderAllocationsHint);
 
     // estimated APR might be
     uint256 currentAPR = estimatedAPR();
@@ -183,7 +183,7 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
         } else if (lenderAdjustedAmounts[i] > 0) {
           deltaWithdraw -= uint256(lenderAdjustedAmounts[i]);
         }
-        adapters[i].allocation = lenderSharesHint[i];
+        adapters[i].allocation = lenderAllocationsHint[i];
       }
     }
   }
