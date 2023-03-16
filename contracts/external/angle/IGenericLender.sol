@@ -12,9 +12,6 @@ interface IGenericLender {
   /// @notice Helper function to get the current total of assets managed by the lender.
   function nav() external view returns (uint256);
 
-  /// @notice Reference to the `Strategy` contract the lender interacts with
-  function strategy() external view returns (address);
-
   /// @notice Returns an estimation of the current Annual Percentage Rate on the lender
   function apr() external view returns (uint256);
 

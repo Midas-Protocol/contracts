@@ -6,12 +6,11 @@ import { ICErc20 } from "../../external/compound/ICErc20.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
 import "../../external/angle/IGenericLender.sol";
-import "../vault/MultiStrategyVault.sol";
 
 // TODO reentrancy guard?
 contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   ICErc20 public market;
-  MultiStrategyVault public vault;
+  address public vault;
   uint256 public blocksPerYear;
   string public lenderName;
 
@@ -21,7 +20,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
 
   function initialize(
     ICErc20 _market,
-    MultiStrategyVault _vault,
+    address _vault,
     uint256 _blocksPerYear
   ) public initializer {
     market = _market;
@@ -55,7 +54,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   }
 
   function emergencyWithdrawAndPause() external override(IGenericLender, MidasERC4626) {
-    require(msg.sender == owner() || msg.sender == address(vault), "not owner or vault");
+    require(msg.sender == owner() || msg.sender == vault, "not owner or vault");
     require(market.redeem(market.balanceOf(address(this))) == 0, "redeem all failed");
     _pause();
   }
@@ -71,15 +70,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
 
   /// @notice Helper function to get the current total of assets managed by the lender.
   function nav() public view returns (uint256) {
-    // TODO market.balanceOf(address(this)) instead of market.totalSupply()
-    return (market.totalSupply() * market.exchangeRateHypothetical()) / 1e18;
-  }
-
-  /// @notice Reference to the `Strategy` contract the lender interacts with
-  function strategy() public view returns (address) {
-    // TODO remove if we don't want to have a 1:1 relationship
-    // between the vault and the market erc4626s?
-    return address(vault);
+    return (market.balanceOf(msg.sender) * market.exchangeRateHypothetical()) / 1e18;
   }
 
   /// @notice Returns an estimation of the current Annual Percentage Rate on the lender

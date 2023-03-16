@@ -2,30 +2,27 @@
 pragma solidity ^0.8.10;
 
 import "../../external/angle/IGenericLender.sol";
-import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
+import { IERC20Upgradeable as IERC20 } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "../SafeOwnableUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "./MultiStrategyVault.sol";
 
-struct LendStatus {
+  struct LendStatus {
   string name;
   uint256 assets;
   uint256 rate;
   address add;
 }
 
-contract OptimizerAPRStrategy is SafeOwnableUpgradeable {
-  using SafeERC20Upgradeable for IERC20Upgradeable;
+contract OptimizerAPRStrategy is MultiStrategyVault {
+  using SafeERC20Upgradeable for IERC20;
 
   uint64 internal constant _BPS = 10000;
 
   /// @notice See note on `setEmergencyExit()`
   bool public emergencyExit;
 
-  IGenericLender[] public lenders;
   uint256 public withdrawalThreshold;
-
-  /// @notice Reference to the ERC20 farmed by this strategy
-  IERC20Upgradeable public want;
 
   event EmergencyExitActivated();
 
@@ -33,8 +30,22 @@ contract OptimizerAPRStrategy is SafeOwnableUpgradeable {
   error IncorrectDistribution();
   error InvalidShares();
 
-  function initialize(IERC20Upgradeable _want) public initializer {
-    want = _want;
+  function initialize(
+    IERC20 asset_,
+    AdapterConfig[10] calldata adapters_,
+    uint8 adapterCount_,
+    VaultFees calldata fees_,
+    address feeRecipient_,
+    uint256 depositLimit_
+  ) public override initializer {
+    __MultiStrategyVault_init(
+      asset_,
+      adapters_,
+      adapterCount_,
+      fees_,
+      feeRecipient_,
+      depositLimit_
+    );
   }
 
   // =============================== VIEW FUNCTIONS ==============================
@@ -42,14 +53,13 @@ contract OptimizerAPRStrategy is SafeOwnableUpgradeable {
   /// @notice View function to check the current state of the strategy
   /// @return Returns the status of all lenders attached the strategy
   function lendStatuses() external view returns (LendStatus[] memory) {
-    uint256 lendersLength = lenders.length;
-    LendStatus[] memory statuses = new LendStatus[](lendersLength);
-    for (uint256 i; i < lendersLength; ++i) {
+    LendStatus[] memory statuses = new LendStatus[](adapterCount);
+    for (uint256 i; i < adapterCount; ++i) {
       LendStatus memory s;
-      s.name = lenders[i].lenderName();
-      s.add = address(lenders[i]);
-      s.assets = lenders[i].nav();
-      s.rate = lenders[i].apr();
+      s.name = adapters[i].adapter.lenderName();
+      s.add = address(adapters[i].adapter);
+      s.assets = adapters[i].adapter.nav();
+      s.rate = adapters[i].adapter.apr();
       statuses[i] = s;
     }
     return statuses;
@@ -58,21 +68,20 @@ contract OptimizerAPRStrategy is SafeOwnableUpgradeable {
   /// @notice View function to check the total assets lent
   function lentTotalAssets() public view returns (uint256) {
     uint256 nav;
-    uint256 lendersLength = lenders.length;
-    for (uint256 i; i < lendersLength; ++i) {
-      nav += lenders[i].nav();
+    for (uint256 i; i < adapterCount; ++i) {
+      nav += adapters[i].adapter.nav();
     }
     return nav;
   }
 
   /// @notice View function to check the total assets managed by the strategy
   function estimatedTotalAssets() public view returns (uint256 nav) {
-    nav = lentTotalAssets() + want.balanceOf(address(this));
+    nav = lentTotalAssets() + IERC20(asset()).balanceOf(address(this));
   }
 
   /// @notice View function to check the number of lending platforms
   function numLenders() external view returns (uint256) {
-    return lenders.length;
+    return adapterCount;
   }
 
   /// @notice Returns the weighted apr of all lenders
@@ -84,9 +93,8 @@ contract OptimizerAPRStrategy is SafeOwnableUpgradeable {
     }
 
     uint256 weightedAPR;
-    uint256 lendersLength = lenders.length;
-    for (uint256 i; i < lendersLength; ++i) {
-      weightedAPR += lenders[i].weightedApr();
+    for (uint256 i; i < adapterCount; ++i) {
+      weightedAPR += adapters[i].adapter.weightedApr();
     }
 
     return weightedAPR / bal;
@@ -100,21 +108,20 @@ contract OptimizerAPRStrategy is SafeOwnableUpgradeable {
     view
     returns (uint256 weightedAPR, int256[] memory lenderAdjustedAmounts)
   {
-    uint256 lenderLength = lenders.length;
-    lenderAdjustedAmounts = new int256[](lenderLength);
-    if (lenderLength != shares.length) revert IncorrectListLength();
+    lenderAdjustedAmounts = new int256[](adapterCount);
+    if (adapterCount != shares.length) revert IncorrectListLength();
 
     uint256 bal = estimatedTotalAssets();
     if (bal == 0) return (weightedAPR, lenderAdjustedAmounts);
 
     uint256 share;
-    for (uint256 i; i < lenderLength; ++i) {
+    for (uint256 i; i < adapterCount; ++i) {
       share += shares[i];
       uint256 futureDeposit = (bal * shares[i]) / _BPS;
       // It won't overflow for `decimals <= 18`, as it would mean gigantic amounts
-      int256 adjustedAmount = int256(futureDeposit) - int256(lenders[i].nav());
+      int256 adjustedAmount = int256(futureDeposit) - int256(adapters[i].adapter.nav());
       lenderAdjustedAmounts[i] = adjustedAmount;
-      weightedAPR += futureDeposit * lenders[i].aprAfterDeposit(adjustedAmount);
+      weightedAPR += futureDeposit * adapters[i].adapter.aprAfterDeposit(adjustedAmount);
     }
     if (share != 10000) revert InvalidShares();
 
@@ -132,10 +139,8 @@ contract OptimizerAPRStrategy is SafeOwnableUpgradeable {
 
   function _report() internal {
     if (emergencyExit) {
-      IGenericLender[] memory lendersList = lenders;
-      uint256 lendersListLength = lendersList.length;
-      for (uint256 i; i < lendersListLength; ++i) {
-        lendersList[i].emergencyWithdrawAndPause();
+      for (uint256 i; i < adapterCount; ++i) {
+        adapters[i].adapter.emergencyWithdrawAndPause();
       }
     } else {
       // TODO emit event about the harvested returns and currently deposited assets
@@ -148,11 +153,8 @@ contract OptimizerAPRStrategy is SafeOwnableUpgradeable {
     // Emergency exit is dealt with at beginning of harvest
     if (emergencyExit) return;
 
-    // Storing the `lenders` array in a cache variable
-    IGenericLender[] memory lendersList = lenders;
-    uint256 lendersListLength = lendersList.length;
-    // We just keep all money in `want` if we dont have any lenders
-    if (lendersListLength == 0) return;
+    // We just keep all money in `asset` if we dont have any lenders
+    if (adapterCount == 0) return;
 
     uint64[] memory lenderSharesHint = abi.decode(data, (uint64[]));
 
@@ -165,25 +167,25 @@ contract OptimizerAPRStrategy is SafeOwnableUpgradeable {
     // The hint was successful --> we find a better allocation than the current one
     if (currentAPR < estimatedAprHint) {
       uint256 deltaWithdraw;
-      for (uint256 i; i < lendersListLength; ++i) {
+      for (uint256 i; i < adapterCount; ++i) {
         if (lenderAdjustedAmounts[i] < 0) {
           deltaWithdraw +=
             uint256(-lenderAdjustedAmounts[i]) -
-            lendersList[i].withdraw(uint256(-lenderAdjustedAmounts[i]));
+            adapters[i].adapter.withdraw(uint256(-lenderAdjustedAmounts[i]));
         }
       }
 
       // If the strategy didn't succeed to withdraw the intended funds -> revert and force the greedy path
       if (deltaWithdraw > withdrawalThreshold) revert IncorrectDistribution();
 
-      for (uint256 i; i < lendersListLength; ++i) {
+      for (uint256 i; i < adapterCount; ++i) {
         // As `deltaWithdraw` is inferior to `withdrawalThreshold` (a dust)
         // It is not critical to compensate on an arbitrary lender as it will only slightly impact global APR
         if (lenderAdjustedAmounts[i] > int256(deltaWithdraw)) {
           lenderAdjustedAmounts[i] -= int256(deltaWithdraw);
           deltaWithdraw = 0;
-          want.safeTransfer(address(lendersList[i]), uint256(lenderAdjustedAmounts[i]));
-          lendersList[i].deposit();
+          IERC20(asset()).safeTransfer(address(adapters[i].adapter), uint256(lenderAdjustedAmounts[i]));
+          adapters[i].adapter.deposit();
         } else if (lenderAdjustedAmounts[i] > 0) deltaWithdraw -= uint256(lenderAdjustedAmounts[i]);
       }
     }

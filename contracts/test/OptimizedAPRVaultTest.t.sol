@@ -8,8 +8,10 @@ import { ICErc20 } from "../external/compound/ICErc20.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { IERC4626Upgradeable as IERC4626, IERC20Upgradeable as IERC20 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
+import "../midas/vault/OptimizerAPRStrategy.sol";
+import "./ExtensionsTest.sol";
 
-contract OptimizedAPRVaultTest is BaseTest {
+contract OptimizedAPRVaultTest is ExtensionsTest {
   function testVaultOptimization() public debuggingOnly fork(BSC_MAINNET) {
     address wnativeAddress = ap.getAddress("wtoken");
     address ankrWbnbMarketAddress = 0x57a64a77f8E4cFbFDcd22D5551F52D675cc5A956;
@@ -17,14 +19,17 @@ contract OptimizedAPRVaultTest is BaseTest {
     ICErc20 ankrWbnbMarket = ICErc20(ankrWbnbMarketAddress);
     ICErc20 ahWbnbMarket = ICErc20(ahWbnbMarketAddress);
 
-    MultiStrategyVault vault = new MultiStrategyVault();
+    _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
+    _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
+
+    OptimizerAPRStrategy vault = new OptimizerAPRStrategy();
     {
       TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
         address(vault),
         address(dpa),
         ""
       );
-      vault = MultiStrategyVault(address(proxy));
+      vault = OptimizerAPRStrategy(address(proxy));
     }
 
     CompoundMarketERC4626 ankrMarketAdapter = new CompoundMarketERC4626();
@@ -38,7 +43,7 @@ contract OptimizedAPRVaultTest is BaseTest {
     }
     ankrMarketAdapter.initialize(
       ankrWbnbMarket,
-      vault,
+      address(vault),
       20 * 24 * 365 * 60 //blocks per year
     );
     CompoundMarketERC4626 ahMarketAdapter = new CompoundMarketERC4626();
@@ -52,7 +57,7 @@ contract OptimizedAPRVaultTest is BaseTest {
     }
     ahMarketAdapter.initialize(
       ahWbnbMarket,
-      vault,
+      address(vault),
       20 * 24 * 365 * 60 //blocks per year
     );
 
@@ -71,6 +76,10 @@ contract OptimizedAPRVaultTest is BaseTest {
       type(uint256).max
     );
 
-
+    uint64[] memory shares = new uint64[](2);
+    shares[0] = 4000;
+    shares[1] = 6000;
+    bytes memory harvestData = abi.encode(shares);
+    vault.harvest(harvestData);
   }
 }

@@ -8,9 +8,10 @@ import { PausableUpgradeable } from "openzeppelin-contracts-upgradeable/contract
 import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
 import { VaultFees, IERC4626, IERC20 } from "./IVault.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
+import "../strategies/CompoundMarketERC4626.sol";
 
 struct AdapterConfig {
-  IERC4626 adapter;
+  CompoundMarketERC4626 adapter;
   uint64 allocation;
 }
 
@@ -70,7 +71,26 @@ contract MultiStrategyVault is
     VaultFees calldata fees_,
     address feeRecipient_,
     uint256 depositLimit_
-  ) external initializer {
+  ) public virtual initializer {
+    __MultiStrategyVault_init(
+      asset_,
+      adapters_,
+      adapterCount_,
+      fees_,
+      feeRecipient_,
+      depositLimit_
+    );
+  }
+
+  function __MultiStrategyVault_init(
+    IERC20 asset_,
+    AdapterConfig[10] calldata adapters_,
+    uint8 adapterCount_,
+    VaultFees calldata fees_,
+    address feeRecipient_,
+    uint256 depositLimit_
+  ) internal {
+
     __ERC4626_init(IERC20Metadata(address(asset_)));
     __SafeOwnable_init();
 
