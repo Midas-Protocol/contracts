@@ -91,17 +91,13 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
     }
 
     uint8 decimals = IERC20Metadata(asset()).decimals();
-    return (weightedAPR * (10 ** decimals)) / bal;
+    return (weightedAPR * (10**decimals)) / bal;
   }
 
   /// @notice Returns the weighted apr in an hypothetical world where the strategy splits its nav
   /// in respect to shares
   /// @param shares List of shares (in bps of the nav) that should be allocated to each lender
-  function estimatedAPR(uint64[] calldata shares)
-    public
-    view
-    returns (uint256, int256[] memory)
-  {
+  function estimatedAPR(uint64[] calldata shares) public view returns (uint256, int256[] memory) {
     uint256 weightedAPRScaled = 0;
     int256[] memory lenderAdjustedAmounts = new int256[](adapterCount);
     if (adapterCount != shares.length) revert IncorrectListLength();

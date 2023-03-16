@@ -82,4 +82,4 @@ interface ICToken {
   function supplyRatePerBlockAfterDeposit(uint256 mintAmount) external view returns (uint256);
 
   function supplyRatePerBlockAfterWithdraw(uint256 withdrawAmount) external view returns (uint256);
-  }
+}

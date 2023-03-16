@@ -45,7 +45,7 @@ interface IGenericLender {
 
   function aprAfterWithdraw(uint256 amount) external view returns (uint256);
 
-    /// @notice
+  /// @notice
   /// Removes tokens from this Strategy that are not the type of tokens
   /// managed by this Strategy. This may be used in case of accidentally
   /// sending the wrong kind of token to this Strategy.

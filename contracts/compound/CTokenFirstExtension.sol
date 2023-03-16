@@ -354,22 +354,22 @@ contract CTokenFirstExtension is
 
   function supplyRatePerBlockAfterDeposit(uint256 mintAmount) external view returns (uint256) {
     return
-    interestRateModel.getSupplyRate(
-      asCToken().getCash() + mintAmount,
-      totalBorrows,
-      totalReserves + totalAdminFees + totalFuseFees,
-      reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
-    );
+      interestRateModel.getSupplyRate(
+        asCToken().getCash() + mintAmount,
+        totalBorrows,
+        totalReserves + totalAdminFees + totalFuseFees,
+        reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
+      );
   }
 
   function supplyRatePerBlockAfterWithdraw(uint256 withdrawAmount) external view returns (uint256) {
     return
-    interestRateModel.getSupplyRate(
-      asCToken().getCash() - withdrawAmount,
-      totalBorrows,
-      totalReserves + totalAdminFees + totalFuseFees,
-      reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
-    );
+      interestRateModel.getSupplyRate(
+        asCToken().getCash() - withdrawAmount,
+        totalBorrows,
+        totalReserves + totalAdminFees + totalFuseFees,
+        reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
+      );
   }
 
   /**
