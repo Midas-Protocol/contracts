@@ -105,7 +105,7 @@ contract CrossMinter is ProposedOwnable, IXReceiver {
    * @param amount - Amount of the token to withdraw.
    */
   function sweepToken(IERC20Upgradeable token, uint256 amount) public onlyOwner {
-    token.transfer(_owner, amount);
+    token.transfer(msg.sender, amount);
   }
 
   /**

@@ -60,7 +60,7 @@ contract CrossMinterTest is WithPool {
     upgradePool(address(comptroller));
 
     // create cross minter contract
-    crossMinter = new CrossMinter(connext, address(comptroller));
+    crossMinter = new CrossMinter(connext, address(comptroller), address(0));
 
     vars.allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
     CErc20Delegate cBnbToken = CErc20Delegate(address(vars.allMarkets[0]));
