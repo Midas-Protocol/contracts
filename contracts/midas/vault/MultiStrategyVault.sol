@@ -72,14 +72,7 @@ contract MultiStrategyVault is
     address feeRecipient_,
     uint256 depositLimit_
   ) public virtual initializer {
-    __MultiStrategyVault_init(
-      asset_,
-      adapters_,
-      adapterCount_,
-      fees_,
-      feeRecipient_,
-      depositLimit_
-    );
+    __MultiStrategyVault_init(asset_, adapters_, adapterCount_, fees_, feeRecipient_, depositLimit_);
   }
 
   function __MultiStrategyVault_init(
@@ -90,7 +83,6 @@ contract MultiStrategyVault is
     address feeRecipient_,
     uint256 depositLimit_
   ) internal {
-
     __ERC4626_init(IERC20Metadata(address(asset_)));
     __SafeOwnable_init();
 

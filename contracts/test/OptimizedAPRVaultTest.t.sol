@@ -24,21 +24,13 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
 
     OptimizerAPRStrategy vault = new OptimizerAPRStrategy();
     {
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-        address(vault),
-        address(dpa),
-        ""
-      );
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(vault), address(dpa), "");
       vault = OptimizerAPRStrategy(address(proxy));
     }
 
     CompoundMarketERC4626 ankrMarketAdapter = new CompoundMarketERC4626();
     {
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-        address(ankrMarketAdapter),
-        address(dpa),
-        ""
-      );
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(ankrMarketAdapter), address(dpa), "");
       ankrMarketAdapter = CompoundMarketERC4626(address(proxy));
     }
     ankrMarketAdapter.initialize(
@@ -48,11 +40,7 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     );
     CompoundMarketERC4626 ahMarketAdapter = new CompoundMarketERC4626();
     {
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-        address(ahMarketAdapter),
-        address(dpa),
-        ""
-      );
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(ahMarketAdapter), address(dpa), "");
       ahMarketAdapter = CompoundMarketERC4626(address(proxy));
     }
     ahMarketAdapter.initialize(

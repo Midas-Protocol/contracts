@@ -7,7 +7,7 @@ import "../SafeOwnableUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "./MultiStrategyVault.sol";
 
-  struct LendStatus {
+struct LendStatus {
   string name;
   uint256 assets;
   uint256 rate;
@@ -38,14 +38,7 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
     address feeRecipient_,
     uint256 depositLimit_
   ) public override initializer {
-    __MultiStrategyVault_init(
-      asset_,
-      adapters_,
-      adapterCount_,
-      fees_,
-      feeRecipient_,
-      depositLimit_
-    );
+    __MultiStrategyVault_init(asset_, adapters_, adapterCount_, fees_, feeRecipient_, depositLimit_);
   }
 
   // =============================== VIEW FUNCTIONS ==============================
