@@ -32,7 +32,7 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
   /* ========== INITIALIZER ========== */
 
   function __MidasER4626_init(ERC20Upgradeable asset_) internal onlyInitializing {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     __Pausable_init();
     __Context_init();
     __ERC20_init(

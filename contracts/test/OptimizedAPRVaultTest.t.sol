@@ -66,7 +66,8 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
       2, // adapters count
       VaultFees(0, 0, 0, 0),
       address(this),
-      type(uint256).max
+      type(uint256).max,
+      address(this)
     );
 
     address wbnbWhale = 0x0eD7e52944161450477ee417DE9Cd3a859b14fD0;

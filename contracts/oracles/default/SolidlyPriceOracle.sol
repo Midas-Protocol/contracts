@@ -36,7 +36,7 @@ contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
   address[] public SUPPORTED_USD_TOKENS;
 
   function initialize(address _wtoken, address[] memory _supportedUsdTokens) public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     WTOKEN = _wtoken;
     SUPPORTED_USD_TOKENS = _supportedUsdTokens;
   }

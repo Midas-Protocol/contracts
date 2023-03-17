@@ -60,7 +60,7 @@ contract PythPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
     MasterPriceOracle masterPriceOracle,
     address usdToken
   ) public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     CAN_ADMIN_OVERWRITE = canAdminOverwrite;
     WTOKEN = wtoken;
     NATIVE_TOKEN_USD_FEED = nativeTokenUsdFeed;

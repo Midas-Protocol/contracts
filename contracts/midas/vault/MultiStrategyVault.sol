@@ -71,9 +71,10 @@ contract MultiStrategyVault is
     uint8 adapterCount_,
     VaultFees calldata fees_,
     address feeRecipient_,
-    uint256 depositLimit_
+    uint256 depositLimit_,
+    address owner_
   ) public virtual initializer {
-    __MultiStrategyVault_init(asset_, adapters_, adapterCount_, fees_, feeRecipient_, depositLimit_);
+    __MultiStrategyVault_init(asset_, adapters_, adapterCount_, fees_, feeRecipient_, depositLimit_, owner_);
   }
 
   function __MultiStrategyVault_init(
@@ -82,10 +83,11 @@ contract MultiStrategyVault is
     uint8 adapterCount_,
     VaultFees calldata fees_,
     address feeRecipient_,
-    uint256 depositLimit_
+    uint256 depositLimit_,
+    address owner_
   ) internal {
     __ERC4626_init(IERC20Metadata(address(asset_)));
-    __SafeOwnable_init();
+    __SafeOwnable_init(owner_);
 
     if (address(asset_) == address(0)) revert InvalidAsset();
     _verifyAdapterConfig(adapters_, adapterCount_);

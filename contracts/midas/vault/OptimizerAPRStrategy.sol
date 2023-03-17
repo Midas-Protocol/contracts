@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
-import "../../external/angle/IGenericLender.sol";
-import { IERC20Upgradeable as IERC20 } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
-import "../SafeOwnableUpgradeable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "./MultiStrategyVault.sol";
+import { IGenericLender } from "../../external/angle/IGenericLender.sol";
+import { IERC20Upgradeable as IERC20, IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
+import { SafeOwnableUpgradeable } from "../SafeOwnableUpgradeable.sol";
+import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import { MultiStrategyVault, AdapterConfig, VaultFees } from "./MultiStrategyVault.sol";
 
 struct LendStatus {
   string name;
@@ -19,7 +19,6 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
 
   uint64 internal constant _BPS = 1e18;
 
-  /// @notice See note on `setEmergencyExit()`
   bool public emergencyExit;
 
   uint256 public withdrawalThreshold;
@@ -35,12 +34,11 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
     uint8 adapterCount_,
     VaultFees calldata fees_,
     address feeRecipient_,
-    uint256 depositLimit_
+    uint256 depositLimit_,
+    address owner_
   ) public override initializer {
-    __MultiStrategyVault_init(asset_, adapters_, adapterCount_, fees_, feeRecipient_, depositLimit_);
+    __MultiStrategyVault_init(asset_, adapters_, adapterCount_, fees_, feeRecipient_, depositLimit_, owner_);
   }
-
-  // =============================== VIEW FUNCTIONS ==============================
 
   /// @notice View function to check the current state of the strategy
   /// @return Returns the status of all lenders attached the strategy
@@ -126,25 +124,15 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
 
   /// @notice Harvests the Strategy, recognizing any profits or losses and adjusting
   /// the Strategy's position.
-  function harvest(uint64[] calldata allocations) external {
-    _report();
-    _adjustPosition(allocations);
-  }
-
-  function _report() internal {
-    if (emergencyExit) {
-      for (uint256 i; i < adapterCount; ++i) {
-        adapters[i].adapter.emergencyWithdrawAndPause();
-      }
-    } else {
-      // TODO emit event about the harvested returns and currently deposited assets
-      //_prepareReturn();
-      //emit Harvested(profit, loss, debtPayment, debtOutstanding);
-    }
+  function harvest(uint64[] calldata lenderAllocationsHint) external {
+    // TODO emit event about the harvested returns and currently deposited assets
+    //_prepareReturn();
+    //emit Harvested(profit, loss, debtPayment, debtOutstanding);
+    _adjustPosition(lenderAllocationsHint);
   }
 
   function _adjustPosition(uint64[] calldata lenderAllocationsHint) internal {
-    // Emergency exit is dealt with at beginning of harvest
+    // do not redeposit if emergencyExit is activated
     if (emergencyExit) return;
 
     // We just keep all money in `asset` if we dont have any lenders
@@ -155,10 +143,12 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
     if (lenderAllocationsHint.length != 0)
       (estimatedAprHint, lenderAdjustedAmounts) = estimatedAPR(lenderAllocationsHint);
 
-    // estimated APR might be
     uint256 currentAPR = estimatedAPR();
-    // The hint was successful --> we find a better allocation than the current one
     if (currentAPR < estimatedAprHint) {
+      // The hint was successful --> we find a better allocation than the current one
+
+      // calculate the "delta" - the difference between
+      // the requested amount to withdraw and the actually withdrawn amount
       uint256 deltaWithdraw;
       for (uint256 i; i < adapterCount; ++i) {
         if (lenderAdjustedAmounts[i] < 0) {
@@ -174,31 +164,30 @@ contract OptimizerAPRStrategy is MultiStrategyVault {
 
       for (uint256 i; i < adapterCount; ++i) {
         // As `deltaWithdraw` is less than `withdrawalThreshold` (a dust)
-        // It is not critical to compensate on an arbitrary lender as it will only slightly impact global APR
+        // It is not a problem to compensate on an arbitrary lender as it will only slightly impact global APR
         if (lenderAdjustedAmounts[i] > int256(deltaWithdraw)) {
           lenderAdjustedAmounts[i] -= int256(deltaWithdraw);
           deltaWithdraw = 0;
-          IERC20(asset()).approve(address(adapters[i].adapter), uint256(lenderAdjustedAmounts[i]));
-          adapters[i].adapter.deposit(uint256(lenderAdjustedAmounts[i]), address(this));
         } else if (lenderAdjustedAmounts[i] > 0) {
           deltaWithdraw -= uint256(lenderAdjustedAmounts[i]);
         }
+
+        // redeposit through the lenders adapters
+        IERC20(asset()).approve(address(adapters[i].adapter), uint256(lenderAdjustedAmounts[i]));
+        adapters[i].adapter.deposit(uint256(lenderAdjustedAmounts[i]), address(this));
+        // record the accepted allocations in storage
         adapters[i].allocation = lenderAllocationsHint[i];
       }
     }
   }
 
-  // ================================= GOVERNANCE ================================
-
-  /// @notice Activates emergency exit. Once activated, the Strategy will exit its
-  /// position upon the next harvest, depositing all funds into the Manager as
-  /// quickly as is reasonable given on-chain conditions.
-  /// @dev This may only be called by the `PoolManager`, because when calling this the `PoolManager` should at the same
-  /// time update the debt ratio
-  /// @dev This function can only be called once by the `PoolManager` contract
-  /// @dev See `poolManager.setEmergencyExit()` and `harvest()` for further details.
   function setEmergencyExit() external onlyOwner {
     emergencyExit = true;
+
+    for (uint256 i; i < adapterCount; ++i) {
+      try adapters[i].adapter.emergencyWithdrawAndPause() {} catch {}
+    }
+
     emit EmergencyExitActivated();
   }
 }

@@ -31,7 +31,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
    */
   function initialize(uint256 _defaultInterestFeeRate) public initializer {
     require(_defaultInterestFeeRate <= 1e18, "Interest fee rate cannot be more than 100%.");
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     defaultInterestFeeRate = _defaultInterestFeeRate;
     maxSupplyEth = type(uint256).max;
     maxUtilizationRate = type(uint256).max;

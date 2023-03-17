@@ -48,7 +48,7 @@ contract UniswapV3PriceOracle is PriceOracle, SafeOwnableUpgradeable {
   address public USD_TOKEN;
 
   function initialize(address _wtoken, address _usdToken) public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     WTOKEN = _wtoken;
     USD_TOKEN = _usdToken;
   }

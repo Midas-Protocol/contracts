@@ -36,7 +36,7 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
    */
   function initialize(address[] memory _lpTokens, address[] memory _baseTokens) public initializer {
     require(_lpTokens.length == _baseTokens.length, "No LP tokens supplied or array lengths not equal.");
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
 
     for (uint256 i = 0; i < _baseTokens.length; i++) {
       baseTokens[_lpTokens[i]] = _baseTokens[i];
