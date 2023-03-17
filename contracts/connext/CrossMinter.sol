@@ -27,7 +27,11 @@ contract CrossMinter is ProposedOwnable, IXReceiver {
    */
   IComptroller public comptroller;
 
-  constructor(address _connext, address _comptroller, address _king) {
+  constructor(
+    address _connext,
+    address _comptroller,
+    address _king
+  ) {
     connext = IConnext(_connext);
     comptroller = IComptroller(_comptroller);
 
@@ -89,7 +93,11 @@ contract CrossMinter is ProposedOwnable, IXReceiver {
   /**
    * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
    */
-  function safeApprove(IERC20Upgradeable token, address to, uint256 minAmount) private {
+  function safeApprove(
+    IERC20Upgradeable token,
+    address to,
+    uint256 minAmount
+  ) private {
     uint256 allowance = token.allowance(address(this), to);
 
     if (allowance < minAmount) {
