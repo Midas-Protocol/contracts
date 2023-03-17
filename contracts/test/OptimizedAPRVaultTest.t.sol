@@ -35,7 +35,6 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     }
     ankrMarketAdapter.initialize(
       ankrWbnbMarket,
-      address(vault),
       20 * 24 * 365 * 60 //blocks per year
     );
     uint256 ankrMarketApr = ankrMarketAdapter.apr();
@@ -48,7 +47,6 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     }
     ahMarketAdapter.initialize(
       ahWbnbMarket,
-      address(vault),
       20 * 24 * 365 * 60 //blocks per year
     );
     uint256 ahMarketApr = ahMarketAdapter.apr();
