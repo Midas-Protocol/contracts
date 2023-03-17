@@ -10,25 +10,23 @@ import "../../external/angle/IGenericLender.sol";
 // TODO reentrancy guard?
 contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   ICErc20 public market;
-  address public vault;
   uint256 public blocksPerYear;
-  string public lenderName;
 
   constructor() {
     _disableInitializers();
   }
 
   function initialize(
-    ICErc20 _market,
-    address _vault,
-    uint256 _blocksPerYear
+    ICErc20 market_,
+    uint256 blocksPerYear_
   ) public initializer {
-    market = _market;
-    ERC20Upgradeable _asset = ERC20Upgradeable(market.underlying());
-    __MidasER4626_init(_asset);
-    lenderName = string(bytes.concat("Midas Optimized ", bytes(_asset.name())));
-    vault = _vault;
-    blocksPerYear = _blocksPerYear;
+    __MidasER4626_init(ERC20Upgradeable(market_.underlying()));
+    market = market_;
+    blocksPerYear = blocksPerYear_;
+  }
+
+  function lenderName() public view returns (string memory) {
+    return string(bytes.concat("Midas Optimized ", bytes(name())));
   }
 
   function totalAssets() public view override returns (uint256) {
@@ -59,7 +57,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   }
 
   function emergencyWithdrawAndPause() external override(IGenericLender, MidasERC4626) {
-    require(msg.sender == owner() || msg.sender == vault, "not owner or vault");
+    require(msg.sender == owner() /*|| msg.sender == vault*/, "not owner or vault");
     require(market.redeem(market.balanceOf(address(this))) == 0, "redeem all failed");
     _pause();
   }
