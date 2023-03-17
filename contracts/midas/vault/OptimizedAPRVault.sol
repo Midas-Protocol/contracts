@@ -14,7 +14,7 @@ struct LendStatus {
   address add;
 }
 
-contract OptimizerAPRStrategy is MultiStrategyVault {
+contract OptimizedAPRVault is MultiStrategyVault {
   using SafeERC20Upgradeable for IERC20;
 
   uint64 internal constant _BPS = 1e18;

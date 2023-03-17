@@ -8,7 +8,7 @@ import { ICErc20 } from "../external/compound/ICErc20.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { IERC4626Upgradeable as IERC4626, IERC20Upgradeable as IERC20 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
-import "../midas/vault/OptimizerAPRStrategy.sol";
+import "../midas/vault/OptimizedAPRVault.sol";
 import "./ExtensionsTest.sol";
 
 contract OptimizedAPRVaultTest is ExtensionsTest {
@@ -22,10 +22,10 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
     _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
 
-    OptimizerAPRStrategy vault = new OptimizerAPRStrategy();
+    OptimizedAPRVault vault = new OptimizedAPRVault();
     {
       TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(vault), address(dpa), "");
-      vault = OptimizerAPRStrategy(address(proxy));
+      vault = OptimizedAPRVault(address(proxy));
     }
 
     CompoundMarketERC4626 ankrMarketAdapter = new CompoundMarketERC4626();
