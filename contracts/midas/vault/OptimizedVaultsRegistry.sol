@@ -6,7 +6,7 @@ import "./MultiStrategyVault.sol";
 contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
   MultiStrategyVault[] public vaults;
 
-  function initialize() public initializer onlyOwnerOrAdmin {
+  function initialize() public initializer {
     __SafeOwnable_init(msg.sender);
   }
 

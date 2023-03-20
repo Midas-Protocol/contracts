@@ -9,24 +9,31 @@ import { ICErc20 } from "../external/compound/ICErc20.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { IERC4626Upgradeable as IERC4626, IERC20Upgradeable as IERC20 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
 import "../midas/vault/OptimizedAPRVault.sol";
+import "../midas/vault/OptimizedVaultsRegistry.sol";
+
 import "./ExtensionsTest.sol";
 
 contract OptimizedAPRVaultTest is ExtensionsTest {
+  address ankrWbnbMarketAddress = 0x57a64a77f8E4cFbFDcd22D5551F52D675cc5A956;
+  address ahWbnbMarketAddress = 0x059c595f19d6FA9f8203F3731DF54455cD248c44;
+  address wbnbWhale = 0x0eD7e52944161450477ee417DE9Cd3a859b14fD0;
+
+  function testVaultRegistry() public {
+    OptimizedVaultsRegistry registry = new OptimizedVaultsRegistry();
+    {
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(registry), address(dpa), "");
+      registry = OptimizedVaultsRegistry(address(proxy));
+    }
+    registry.initialize();
+  }
+
   function testVaultOptimization() public debuggingOnly fork(BSC_MAINNET) {
     address wnativeAddress = ap.getAddress("wtoken");
-    address ankrWbnbMarketAddress = 0x57a64a77f8E4cFbFDcd22D5551F52D675cc5A956;
-    address ahWbnbMarketAddress = 0x059c595f19d6FA9f8203F3731DF54455cD248c44;
     ICErc20 ankrWbnbMarket = ICErc20(ankrWbnbMarketAddress);
     ICErc20 ahWbnbMarket = ICErc20(ahWbnbMarketAddress);
 
     _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
     _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
-
-    OptimizedAPRVault vault = new OptimizedAPRVault();
-    {
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(vault), address(dpa), "");
-      vault = OptimizedAPRVault(address(proxy));
-    }
 
     CompoundMarketERC4626 ankrMarketAdapter = new CompoundMarketERC4626();
     {
@@ -58,6 +65,12 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     adapters[1].adapter = ahMarketAdapter;
     adapters[1].allocation = 1e17;
 
+    OptimizedAPRVault vault = new OptimizedAPRVault();
+    {
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(vault), address(dpa), "");
+      vault = OptimizedAPRVault(address(proxy));
+    }
+
     vault.initialize(
       IERC20(wnativeAddress),
       adapters,
@@ -67,8 +80,6 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
       type(uint256).max,
       address(this)
     );
-
-    address wbnbWhale = 0x0eD7e52944161450477ee417DE9Cd3a859b14fD0;
 
     vm.startPrank(wbnbWhale);
     IERC20(wnativeAddress).approve(address(vault), type(uint256).max);
