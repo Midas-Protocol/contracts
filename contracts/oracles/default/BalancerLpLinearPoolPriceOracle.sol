@@ -8,20 +8,22 @@ import "../../external/compound/IPriceOracle.sol";
 import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
 
-import { IBalancerStablePool } from "../../external/balancer/IBalancerStablePool.sol";
+import { IBalancerLinearPool } from "../../external/balancer/IBalancerLinearPool.sol";
 import { IBalancerVault } from "../../external/balancer/IBalancerVault.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
+
 import { BasePriceOracle } from "../BasePriceOracle.sol";
+
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 
 /**
- * @title BalancerLpStablePoolPriceOracle
+ * @title BalancerLpLinearPoolPriceOracle
  * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
- * @notice BalancerLpStablePoolPriceOracle is a price oracle for Balancer LP tokens.
+ * @notice BalancerLpLinearPoolPriceOracle is a price oracle for Balancer LP tokens.
  * @dev Implements the `PriceOracle` interface used by Midas pools (and Compound v2).
  */
 
-contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
+contract BalancerLpLinearPoolPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
   address[] public underlyings;
   bytes32 internal constant REENTRANCY_ERROR_HASH = keccak256(abi.encodeWithSignature("Error(string)", "BAL#400"));
 
@@ -57,9 +59,9 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
    * Source: https://github.com/AlphaFinanceLab/homora-v2/blob/master/contracts/oracle/BalancerPairOracle.sol
    */
   function _price(address underlying) internal view virtual returns (uint256) {
-    IBalancerStablePool pool = IBalancerStablePool(underlying);
+    IBalancerLinearPool pool = IBalancerLinearPool(underlying);
     IBalancerVault vault = pool.getVault();
-    uint256 rate = pool.getRate();
+    address mainToken = pool.getMainToken();
 
     // read-only re-entracy protection - this call is always unsuccessful
     (, bytes memory revertData) = address(vault).staticcall(
@@ -67,33 +69,12 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     );
     require(keccak256(revertData) != REENTRANCY_ERROR_HASH, "Balancer vault view reentrancy");
 
-    uint256 poolActualSupply = pool.getActualSupply();
-    (IERC20Upgradeable[] memory tokens, uint256[] memory balances, ) = vault.getPoolTokens(pool.getPoolId());
+    // Returns the BLP Token / Main Token rate (1e18)
+    uint256 rate = pool.getRate();
 
-    uint256 weightedBaseTokenValue = 0;
-
-    for (uint256 i = 0; i < tokens.length; i++) {
-      // exclude the LP token itself
-      if (tokens[i] == IERC20Upgradeable(underlying)) {
-        continue;
-      }
-
-      // scale by the decimals of the base token
-      uint256 balancesScaled = balances[i] * 10**(18 - uint256(ERC20Upgradeable(address(tokens[i])).decimals()));
-
-      // get the share of the base token in the pool (inverse to prevent underflow)
-      // e18 + e18 - e18
-      uint256 baseTokenShare = (poolActualSupply * 1e18) / balancesScaled;
-
-      // Get the price of the base token in ETH
-      uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(address(tokens[i]));
-
-      // Get the value of each of the base tokens' share in ETH
-      // e18 + e18 - e18
-      weightedBaseTokenValue += ((baseTokenPrice * 1e18) / baseTokenShare);
-    }
-    // Multiply the value of each of the base tokens' share in ETH by the rate of the pool
-    return (rate * weightedBaseTokenValue) / 1e18;
+    // get main token's price (1e18)
+    uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(mainToken);
+    return (rate * baseTokenPrice) / 1e18;
   }
 
   /**
