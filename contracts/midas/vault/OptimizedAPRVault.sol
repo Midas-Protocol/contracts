@@ -48,7 +48,7 @@ contract OptimizedAPRVault is MultiStrategyVault {
       LendStatus memory s;
       s.name = adapters[i].adapter.lenderName();
       s.add = address(adapters[i].adapter);
-      s.assets = adapters[i].adapter.nav();
+      s.assets = adapters[i].adapter.balanceOfUnderlying(address(this));
       s.rate = adapters[i].adapter.apr();
       statuses[i] = s;
     }
@@ -59,7 +59,7 @@ contract OptimizedAPRVault is MultiStrategyVault {
   function lentTotalAssets() public view returns (uint256) {
     uint256 nav;
     for (uint256 i; i < adapterCount; ++i) {
-      nav += adapters[i].adapter.nav();
+      nav += adapters[i].adapter.balanceOfUnderlying(address(this));
     }
     return nav;
   }
@@ -107,7 +107,7 @@ contract OptimizedAPRVault is MultiStrategyVault {
       allocation += allocations[i];
       uint256 futureDeposit = (bal * allocations[i]) / _BPS;
 
-      int256 adjustedAmount = int256(futureDeposit) - int256(adapters[i].adapter.nav());
+      int256 adjustedAmount = int256(futureDeposit) - int256(adapters[i].adapter.balanceOfUnderlying(address(this)));
       if (adjustedAmount > 0) {
         weightedAPRScaled += futureDeposit * adapters[i].adapter.aprAfterDeposit(uint256(adjustedAmount));
       } else {
