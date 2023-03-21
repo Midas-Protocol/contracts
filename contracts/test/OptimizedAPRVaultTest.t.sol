@@ -8,6 +8,8 @@ import { ICErc20 } from "../external/compound/ICErc20.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { IERC4626Upgradeable as IERC4626, IERC20Upgradeable as IERC20 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
+import { WETH } from "solmate/tokens/WETH.sol";
+
 import "../midas/vault/OptimizedAPRVault.sol";
 import "../midas/vault/OptimizedVaultsRegistry.sol";
 
@@ -17,6 +19,8 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
   address ankrWbnbMarketAddress = 0x57a64a77f8E4cFbFDcd22D5551F52D675cc5A956;
   address ahWbnbMarketAddress = 0x059c595f19d6FA9f8203F3731DF54455cD248c44;
   address wbnbWhale = 0x0eD7e52944161450477ee417DE9Cd3a859b14fD0;
+  uint256 depositAmount = 1e18;
+  uint256 blocksPerYear = 20 * 24 * 365 * 60; //blocks per year
 
   function testVaultRegistry() public {
     OptimizedVaultsRegistry registry = new OptimizedVaultsRegistry();
@@ -28,42 +32,55 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
   }
 
   function testVaultOptimization() public debuggingOnly fork(BSC_MAINNET) {
-    address wnativeAddress = ap.getAddress("wtoken");
+    address payable wnativeAddress = payable(ap.getAddress("wtoken"));
     ICErc20 ankrWbnbMarket = ICErc20(ankrWbnbMarketAddress);
     ICErc20 ahWbnbMarket = ICErc20(ahWbnbMarketAddress);
-
-    _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
-    _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
-
-    CompoundMarketERC4626 ankrMarketAdapter = new CompoundMarketERC4626();
-    {
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(ankrMarketAdapter), address(dpa), "");
-      ankrMarketAdapter = CompoundMarketERC4626(address(proxy));
-    }
-    ankrMarketAdapter.initialize(
-      ankrWbnbMarket,
-      20 * 24 * 365 * 60 //blocks per year
-    );
-    uint256 ankrMarketApr = ankrMarketAdapter.apr();
-    emit log_named_uint("ankrMarketApr", ankrMarketApr);
-
-    CompoundMarketERC4626 ahMarketAdapter = new CompoundMarketERC4626();
-    {
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(ahMarketAdapter), address(dpa), "");
-      ahMarketAdapter = CompoundMarketERC4626(address(proxy));
-    }
-    ahMarketAdapter.initialize(
-      ahWbnbMarket,
-      20 * 24 * 365 * 60 //blocks per year
-    );
-    uint256 ahMarketApr = ahMarketAdapter.apr();
-    emit log_named_uint("ahMarketApr", ahMarketApr);
-
+    WETH wbnb = WETH(wnativeAddress);
     AdapterConfig[10] memory adapters;
-    adapters[0].adapter = ankrMarketAdapter;
-    adapters[0].allocation = 9e17;
-    adapters[1].adapter = ahMarketAdapter;
-    adapters[1].allocation = 1e17;
+
+    {
+      // make sure there is enough liquidity
+      vm.startPrank(wbnbWhale);
+      wbnb.approve(ankrWbnbMarketAddress, depositAmount * 10);
+      ankrWbnbMarket.mint(depositAmount * 10);
+      wbnb.approve(ahWbnbMarketAddress, depositAmount * 10);
+      ahWbnbMarket.mint(depositAmount * 10);
+      vm.stopPrank();
+    }
+    {
+      _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
+      _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
+
+      CompoundMarketERC4626 ankrMarketAdapter = new CompoundMarketERC4626();
+      {
+        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+          address(ankrMarketAdapter),
+          address(dpa),
+          ""
+        );
+        ankrMarketAdapter = CompoundMarketERC4626(address(proxy));
+      }
+      ankrMarketAdapter.initialize(
+        ankrWbnbMarket,
+        20 * 24 * 365 * 60 //blocks per year
+      );
+      uint256 ankrMarketApr = ankrMarketAdapter.apr();
+      emit log_named_uint("ankrMarketApr", ankrMarketApr);
+
+      CompoundMarketERC4626 ahMarketAdapter = new CompoundMarketERC4626();
+      {
+        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(ahMarketAdapter), address(dpa), "");
+        ahMarketAdapter = CompoundMarketERC4626(address(proxy));
+      }
+      ahMarketAdapter.initialize(ahWbnbMarket, blocksPerYear);
+      uint256 ahMarketApr = ahMarketAdapter.apr();
+      emit log_named_uint("ahMarketApr", ahMarketApr);
+
+      adapters[0].adapter = ankrMarketAdapter;
+      adapters[0].allocation = 9e17;
+      adapters[1].adapter = ahMarketAdapter;
+      adapters[1].allocation = 1e17;
+    }
 
     OptimizedAPRVault vault = new OptimizedAPRVault();
     {
@@ -82,8 +99,8 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     );
 
     vm.startPrank(wbnbWhale);
-    IERC20(wnativeAddress).approve(address(vault), type(uint256).max);
-    vault.deposit(1e18);
+    wbnb.approve(address(vault), type(uint256).max);
+    vault.deposit(depositAmount);
     vm.stopPrank();
 
     uint64[] memory lenderSharesHint = new uint64[](2);
@@ -116,6 +133,22 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     uint256 aprAfter = vault.estimatedAPR();
     emit log_named_uint("aprAfter", aprAfter);
 
-    assertGt(aprAfter, currentAPR, "!harvest didn't optimize the allocations");
+    if (estimatedAprHint > currentAPR) {
+      assertGt(aprAfter, currentAPR, "!harvest didn't optimize the allocations");
+    }
+
+    uint256 wbnbBalanceBefore = wbnb.balanceOf(wbnbWhale);
+
+    vm.warp(block.timestamp + 365.25 days);
+    vm.roll(block.number + blocksPerYear);
+
+    vm.startPrank(wbnbWhale);
+    uint256 maxRedeem = vault.maxRedeem(wbnbWhale);
+    vault.redeem(maxRedeem);
+    vm.stopPrank();
+
+    uint256 wbnbBalanceAfter = wbnb.balanceOf(wbnbWhale);
+
+    assertGt(wbnbBalanceAfter - wbnbBalanceBefore, depositAmount, "!depositor did not accrue");
   }
 }

@@ -159,23 +159,25 @@ contract OptimizedAPRVault is MultiStrategyVault {
       }
       // TODO deltaWithdraw is always 0 for compound markets deposits
 
-      // If the strategy didn't succeed to withdraw the intended funds -> revert and force the greedy path
+      // If the strategy didn't succeed to withdraw the intended funds
       if (deltaWithdraw > withdrawalThreshold) revert IncorrectDistribution();
 
       for (uint256 i; i < adapterCount; ++i) {
-        // As `deltaWithdraw` is less than `withdrawalThreshold` (a dust)
-        // It is not a problem to compensate on an arbitrary lender as it will only slightly impact global APR
-        if (lenderAdjustedAmounts[i] > int256(deltaWithdraw)) {
-          lenderAdjustedAmounts[i] -= int256(deltaWithdraw);
-          deltaWithdraw = 0;
-        } else if (lenderAdjustedAmounts[i] > 0) {
-          deltaWithdraw -= uint256(lenderAdjustedAmounts[i]);
-        }
+        if (lenderAdjustedAmounts[i] > 0) {
+          // As `deltaWithdraw` is less than `withdrawalThreshold` (a dust)
+          // It is not a problem to compensate on an arbitrary lender as it will only slightly impact global APR
+          if (lenderAdjustedAmounts[i] > int256(deltaWithdraw)) {
+            lenderAdjustedAmounts[i] -= int256(deltaWithdraw);
+            deltaWithdraw = 0;
+          } else {
+            deltaWithdraw -= uint256(lenderAdjustedAmounts[i]);
+          }
 
-        // redeposit through the lenders adapters
-        IERC20(asset()).approve(address(adapters[i].adapter), uint256(lenderAdjustedAmounts[i]));
-        adapters[i].adapter.deposit(uint256(lenderAdjustedAmounts[i]), address(this));
-        // record the accepted allocations in storage
+          // redeposit through the lenders adapters
+          IERC20(asset()).approve(address(adapters[i].adapter), uint256(lenderAdjustedAmounts[i]));
+          adapters[i].adapter.deposit(uint256(lenderAdjustedAmounts[i]), address(this));
+        }
+        // record the applied allocation in storage
         adapters[i].allocation = lenderAllocationsHint[i];
       }
     }
