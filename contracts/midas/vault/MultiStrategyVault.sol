@@ -308,13 +308,16 @@ contract MultiStrategyVault is
 
     _burn(owner, shares);
 
+    uint256 actuallyWithdrawn = 0;
     for (uint8 i; i < adapterCount; i++) {
       uint256 allocation = assets.mulDiv(uint256(adapters[i].allocation), 1e18, Math.Rounding.Down);
 
       if (assets % 2 == 1 && i == 0 && IERC20(asset()).balanceOf(address(this)) == 0) allocation += 1;
 
       adapters[i].adapter.withdraw(allocation, address(this), address(this));
+      actuallyWithdrawn += allocation;
     }
+    assets = actuallyWithdrawn;
 
     IERC20(asset()).safeTransfer(receiver, assets);
 
@@ -450,18 +453,25 @@ contract MultiStrategyVault is
   }
 
   /// @return Maximum amount of underlying `asset` token that can be withdrawn by `caller` address. Delegates to adapters.
-  function maxWithdraw(address) public view override returns (uint256) {
+  function maxWithdraw(address caller) public view override returns (uint256) {
+    uint256 callerShares = balanceOf(caller);
+    uint256 callerAssets = _convertToAssets(callerShares, Math.Rounding.Down);
+    uint256 maxWithdraw_ = maxWithdrawVault();
+    return Math.min(maxWithdraw_, callerAssets);
+  }
+
+  function maxWithdrawVault() internal view returns (uint256) {
     uint256 maxWithdraw_ = type(uint256).max;
     uint256 leftover = IERC20(asset()).balanceOf(address(this));
 
     for (uint8 i; i < adapterCount; i++) {
       uint256 adapterMax = adapters[i].adapter.maxWithdraw(address(this));
-      uint256 scalar = 1e18 / uint256(adapters[i].allocation);
+      uint256 scalar = 1e36 / uint256(adapters[i].allocation);
 
       if (adapterMax > type(uint256).max / scalar) {
         adapterMax = type(uint256).max;
       } else {
-        adapterMax *= scalar;
+        adapterMax = (adapterMax * scalar) / 1e18;
       }
 
       maxWithdraw_ = Math.min(maxWithdraw_, adapterMax + leftover);
@@ -471,26 +481,11 @@ contract MultiStrategyVault is
   }
 
   /// @return Maximum amount of shares that may be redeemed by `caller` address. Delegates to adapters.
-  function maxRedeem(address) public view override returns (uint256) {
-    uint256 maxRedeem_ = type(uint256).max;
-    uint256 leftover = IERC20(asset()).balanceOf(address(this)) > 0
-      ? _convertToShares(IERC20(asset()).balanceOf(address(this)), Math.Rounding.Down)
-      : 0;
-
-    for (uint8 i; i < adapterCount; i++) {
-      uint256 adapterMax = adapters[i].adapter.maxRedeem(address(this));
-      uint256 scalar = 1e18 / uint256(adapters[i].allocation);
-
-      if (adapterMax > type(uint256).max / scalar) {
-        adapterMax = type(uint256).max;
-      } else {
-        adapterMax *= scalar;
-      }
-
-      maxRedeem_ = Math.min(maxRedeem_, adapterMax + leftover);
-    }
-
-    return maxRedeem_;
+  function maxRedeem(address caller) public view override returns (uint256) {
+    uint256 callerShares = balanceOf(caller);
+    uint256 maxWithdraw_ = maxWithdrawVault();
+    uint256 maxRedeem_ = _convertToShares(maxWithdraw_, Math.Rounding.Down);
+    return Math.min(maxRedeem_, callerShares);
   }
 
   /*------------------------------------------------------------

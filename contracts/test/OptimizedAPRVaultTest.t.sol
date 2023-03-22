@@ -59,6 +59,7 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
           ""
         );
         ankrMarketAdapter = CompoundMarketERC4626(address(proxy));
+        vm.label(address(ankrMarketAdapter), "ankrMarketAdapter");
       }
       ankrMarketAdapter.initialize(
         ankrWbnbMarket,
@@ -71,6 +72,7 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
       {
         TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(ahMarketAdapter), address(dpa), "");
         ahMarketAdapter = CompoundMarketERC4626(address(proxy));
+        vm.label(address(ahMarketAdapter), "ahMarketAdapter");
       }
       ahMarketAdapter.initialize(ahWbnbMarket, blocksPerYear);
       uint256 ahMarketApr = ahMarketAdapter.apr();
@@ -86,17 +88,18 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     {
       TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(vault), address(dpa), "");
       vault = OptimizedAPRVault(address(proxy));
-    }
+      vm.label(address(vault), "vault");
 
-    vault.initialize(
-      IERC20(wnativeAddress),
-      adapters,
-      2, // adapters count
-      VaultFees(0, 0, 0, 0),
-      address(this),
-      type(uint256).max,
-      address(this)
-    );
+      vault.initialize(
+        IERC20(wnativeAddress),
+        adapters,
+        2, // adapters count
+        VaultFees(0, 0, 0, 0),
+        address(this),
+        type(uint256).max,
+        address(this)
+      );
+    }
 
     vm.startPrank(wbnbWhale);
     wbnb.approve(address(vault), type(uint256).max);
@@ -107,28 +110,30 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     lenderSharesHint[0] = 4e17;
     lenderSharesHint[1] = 6e17;
 
-    uint256 lentTotalAssets = vault.lentTotalAssets();
-    uint256 estimatedTotalAssets = vault.estimatedTotalAssets();
     uint256 currentAPR = vault.estimatedAPR();
-    emit log_named_uint("lentTotalAssets", lentTotalAssets);
-    emit log_named_uint("estimatedTotalAssets", estimatedTotalAssets);
     emit log_named_uint("currentAPR", currentAPR);
 
     uint256 estimatedAprHint;
-    int256[] memory lenderAdjustedAmounts;
-    if (lenderSharesHint.length != 0) (estimatedAprHint, lenderAdjustedAmounts) = vault.estimatedAPR(lenderSharesHint);
+    {
+      int256[] memory lenderAdjustedAmounts;
+      if (lenderSharesHint.length != 0) (estimatedAprHint, lenderAdjustedAmounts) = vault.estimatedAPR(lenderSharesHint);
 
-    emit log_named_int("lenderAdjustedAmounts0", lenderAdjustedAmounts[0]);
-    emit log_named_int("lenderAdjustedAmounts1", lenderAdjustedAmounts[1]);
-    emit log_named_uint("hint", estimatedAprHint);
+      emit log_named_int("lenderAdjustedAmounts0", lenderAdjustedAmounts[0]);
+      emit log_named_int("lenderAdjustedAmounts1", lenderAdjustedAmounts[1]);
+      emit log_named_uint("hint", estimatedAprHint);
 
-    if (estimatedAprHint > currentAPR) {
-      emit log("harvest will rebalance");
-    } else {
-      emit log("harvest will NOT rebalance");
+      if (estimatedAprHint > currentAPR) {
+        emit log("harvest will rebalance");
+      } else {
+        emit log("harvest will NOT rebalance");
+      }
     }
 
+    uint256 maxRedeemBefore = vault.maxRedeem(wbnbWhale);
     vault.harvest(lenderSharesHint);
+    uint256 maxRedeemAfter = vault.maxRedeem(wbnbWhale);
+    emit log_named_uint("maxRedeemBefore", maxRedeemBefore);
+    emit log_named_uint("maxRedeemAfter", maxRedeemAfter);
 
     uint256 aprAfter = vault.estimatedAPR();
     emit log_named_uint("aprAfter", aprAfter);
@@ -139,16 +144,20 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
 
     uint256 wbnbBalanceBefore = wbnb.balanceOf(wbnbWhale);
 
+    // advance time with a year
     vm.warp(block.timestamp + 365.25 days);
     vm.roll(block.number + blocksPerYear);
 
-    vm.startPrank(wbnbWhale);
-    uint256 maxRedeem = vault.maxRedeem(wbnbWhale);
-    vault.redeem(maxRedeem);
-    vm.stopPrank();
+    uint256 maxRedeemWhale = vault.maxRedeem(wbnbWhale);
+    {
+      vm.startPrank(wbnbWhale);
+      uint256 previewRed = vault.previewRedeem(maxRedeemWhale);
+      emit log_named_uint("previewRed", previewRed);
+      vault.redeem(maxRedeemWhale);
+      vm.stopPrank();
+    }
 
     uint256 wbnbBalanceAfter = wbnb.balanceOf(wbnbWhale);
-
     assertGt(wbnbBalanceAfter - wbnbBalanceBefore, depositAmount, "!depositor did not accrue");
   }
 }
