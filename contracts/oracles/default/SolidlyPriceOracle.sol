@@ -33,12 +33,12 @@ contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
   }
 
   address public WTOKEN;
-  address[] public SUPPORTED_USD_TOKENS;
+  address[] public SUPPORTED_BASE_TOKENS;
 
-  function initialize(address _wtoken, address[] memory _supportedUsdTokens) public initializer {
+  function initialize(address _wtoken, address[] memory _supportedBaseTokens) public initializer {
     __SafeOwnable_init();
     WTOKEN = _wtoken;
-    SUPPORTED_USD_TOKENS = _supportedUsdTokens;
+    SUPPORTED_BASE_TOKENS = _supportedBaseTokens;
   }
 
   /**
@@ -107,8 +107,8 @@ contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
       // No need to scale either, because WNATIVE is always 1e18
       return baseTokensPerQuoteToken;
     } else {
-      // base token is USD
-      uint256 usdNativePrice = BasePriceOracle(msg.sender).price(baseToken);
+      // base token is USD or another token
+      uint256 baseTokenNativePrice = BasePriceOracle(msg.sender).price(baseToken);
       // scale tokenPrice by 1e18
       uint256 baseTokenDecimals = uint256(ERC20Upgradeable(baseToken).decimals());
       uint256 tokenPriceScaled;
@@ -119,20 +119,20 @@ contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
         tokenPriceScaled = baseTokensPerQuoteToken * (10**(18 - baseTokenDecimals));
       }
 
-      return (tokenPriceScaled * usdNativePrice) / 1e18;
+      return (tokenPriceScaled * baseTokenNativePrice) / 1e18;
     }
   }
 
   function _isBaseTokenSupported(address token) internal view returns (bool) {
-    for (uint256 i = 0; i < SUPPORTED_USD_TOKENS.length; i++) {
-      if (SUPPORTED_USD_TOKENS[i] == token) {
+    for (uint256 i = 0; i < SUPPORTED_BASE_TOKENS.length; i++) {
+      if (SUPPORTED_BASE_TOKENS[i] == token) {
         return true;
       }
     }
     return false;
   }
 
-  function _setSupportedUsdTokens(address[] memory _supportedUsdTokens) external onlyOwner {
-    SUPPORTED_USD_TOKENS = _supportedUsdTokens;
+  function _setSupportedBaseTokens(address[] memory _supportedBaseTokens) external onlyOwner {
+    SUPPORTED_BASE_TOKENS = _supportedBaseTokens;
   }
 }

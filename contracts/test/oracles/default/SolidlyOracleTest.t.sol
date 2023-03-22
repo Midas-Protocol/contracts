@@ -33,6 +33,27 @@ contract SolidlyPriceOracleTest is BaseTest {
     oracle.initialize(wtoken, asArray(stable));
   }
 
+  // Ankr Price: $0.034632 (fetched from block explorer)
+  // BNB Price at block 26678077: $337.67 (fetched from block explorer)
+  function testBscCustomAsset() public forkAtBlock(BSC_MAINNET, 26678077) {
+    address ankr = 0xf307910A4c7bbc79691fD374889b36d8531B08e3;
+    address ankrBNB = 0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827;
+
+    address[] memory underlyings = new address[](1);
+    SolidlyPriceOracle.AssetConfig[] memory configs = new SolidlyPriceOracle.AssetConfig[](1);
+
+    underlyings[0] = ankr;
+    // ANKR/ankrBNB
+    configs[0] = SolidlyPriceOracle.AssetConfig(0x7ef540f672Cd643B79D2488344944499F7518b1f, ankrBNB);
+
+    vm.prank(oracle.owner());
+    oracle._setSupportedBaseTokens(asArray(stable, ankrBNB));
+
+    uint256[] memory prices = getPriceFeed(underlyings, configs);
+    // Assert price in $ is equal
+    assertApproxEqRel((prices[0] * 33667) / 100, 0.03463e18, 1e17); // 0.1 % error
+  }
+
   function testBscAssets() public fork(BSC_MAINNET) {
     address busd = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
     address usdt = 0x55d398326f99059fF775485246999027B3197955;
@@ -137,7 +158,7 @@ contract SolidlyPriceOracleTest is BaseTest {
     oracle.setPoolFeeds(underlyings, configs);
 
     // add it successfully when suported
-    oracle._setSupportedUsdTokens(asArray(usdt, stable));
+    oracle._setSupportedBaseTokens(asArray(usdt, stable));
     oracle.setPoolFeeds(underlyings, configs);
     vm.stopPrank();
 
