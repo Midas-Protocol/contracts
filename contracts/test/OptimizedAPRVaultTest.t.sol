@@ -116,7 +116,8 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     uint256 estimatedAprHint;
     {
       int256[] memory lenderAdjustedAmounts;
-      if (lenderSharesHint.length != 0) (estimatedAprHint, lenderAdjustedAmounts) = vault.estimatedAPR(lenderSharesHint);
+      if (lenderSharesHint.length != 0)
+        (estimatedAprHint, lenderAdjustedAmounts) = vault.estimatedAPR(lenderSharesHint);
 
       emit log_named_int("lenderAdjustedAmounts0", lenderAdjustedAmounts[0]);
       emit log_named_int("lenderAdjustedAmounts1", lenderAdjustedAmounts[1]);
