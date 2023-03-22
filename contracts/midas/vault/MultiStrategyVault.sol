@@ -465,16 +465,18 @@ contract MultiStrategyVault is
     uint256 leftover = IERC20(asset()).balanceOf(address(this));
 
     for (uint8 i; i < adapterCount; i++) {
-      uint256 adapterMax = adapters[i].adapter.maxWithdraw(address(this));
-      uint256 scalar = 1e36 / uint256(adapters[i].allocation);
+      if (adapters[i].allocation > 0) {
+        uint256 adapterMax = adapters[i].adapter.maxWithdraw(address(this));
+        uint256 scalar = 1e36 / uint256(adapters[i].allocation);
 
-      if (adapterMax > type(uint256).max / scalar) {
-        adapterMax = type(uint256).max;
-      } else {
-        adapterMax = (adapterMax * scalar) / 1e18;
+        if (adapterMax > type(uint256).max / scalar) {
+          adapterMax = type(uint256).max;
+        } else {
+          adapterMax = (adapterMax * scalar) / 1e18;
+        }
+
+        maxWithdraw_ = Math.min(maxWithdraw_, adapterMax + leftover);
       }
-
-      maxWithdraw_ = Math.min(maxWithdraw_, adapterMax + leftover);
     }
 
     return maxWithdraw_;
