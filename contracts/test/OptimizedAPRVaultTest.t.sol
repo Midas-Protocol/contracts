@@ -21,6 +21,22 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
   address wbnbWhale = 0x0eD7e52944161450477ee417DE9Cd3a859b14fD0;
   uint256 depositAmount = 1e18;
   uint256 blocksPerYear = 20 * 24 * 365 * 60; //blocks per year
+  WETH wbnb;
+  AdapterConfig[10] adapters;
+  ICErc20 ankrWbnbMarket;
+  ICErc20 ahWbnbMarket;
+  address payable wnativeAddress;
+  OptimizedAPRVault vault;
+
+  function afterForkSetUp() internal override {
+    wnativeAddress = payable(ap.getAddress("wtoken"));
+    wbnb = WETH(wnativeAddress);
+    ankrWbnbMarket = ICErc20(ankrWbnbMarketAddress);
+    ahWbnbMarket = ICErc20(ahWbnbMarketAddress);
+
+    _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
+    _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
+  }
 
   function testVaultRegistry() public {
     OptimizedVaultsRegistry registry = new OptimizedVaultsRegistry();
@@ -31,59 +47,46 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     registry.initialize();
   }
 
-  function testVaultOptimization() public debuggingOnly fork(BSC_MAINNET) {
-    address payable wnativeAddress = payable(ap.getAddress("wtoken"));
-    ICErc20 ankrWbnbMarket = ICErc20(ankrWbnbMarketAddress);
-    ICErc20 ahWbnbMarket = ICErc20(ahWbnbMarketAddress);
-    WETH wbnb = WETH(wnativeAddress);
-    AdapterConfig[10] memory adapters;
+  function addLiquidity() internal {
+    vm.startPrank(wbnbWhale);
+    wbnb.approve(ankrWbnbMarketAddress, depositAmount * 10);
+    ankrWbnbMarket.mint(depositAmount * 10);
+    wbnb.approve(ahWbnbMarketAddress, depositAmount * 10);
+    ahWbnbMarket.mint(depositAmount * 10);
+    vm.stopPrank();
+  }
 
+  function deployAdapters() internal {
+    CompoundMarketERC4626 ankrMarketAdapter = new CompoundMarketERC4626();
     {
-      // make sure there is enough liquidity
-      vm.startPrank(wbnbWhale);
-      wbnb.approve(ankrWbnbMarketAddress, depositAmount * 10);
-      ankrWbnbMarket.mint(depositAmount * 10);
-      wbnb.approve(ahWbnbMarketAddress, depositAmount * 10);
-      ahWbnbMarket.mint(depositAmount * 10);
-      vm.stopPrank();
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(ankrMarketAdapter), address(dpa), "");
+      ankrMarketAdapter = CompoundMarketERC4626(address(proxy));
+      vm.label(address(ankrMarketAdapter), "ankrMarketAdapter");
     }
+    ankrMarketAdapter.initialize(
+      ankrWbnbMarket,
+      20 * 24 * 365 * 60 //blocks per year
+    );
+    uint256 ankrMarketApr = ankrMarketAdapter.apr();
+    emit log_named_uint("ankrMarketApr", ankrMarketApr);
+
+    CompoundMarketERC4626 ahMarketAdapter = new CompoundMarketERC4626();
     {
-      _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
-      _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
-
-      CompoundMarketERC4626 ankrMarketAdapter = new CompoundMarketERC4626();
-      {
-        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-          address(ankrMarketAdapter),
-          address(dpa),
-          ""
-        );
-        ankrMarketAdapter = CompoundMarketERC4626(address(proxy));
-        vm.label(address(ankrMarketAdapter), "ankrMarketAdapter");
-      }
-      ankrMarketAdapter.initialize(
-        ankrWbnbMarket,
-        20 * 24 * 365 * 60 //blocks per year
-      );
-      uint256 ankrMarketApr = ankrMarketAdapter.apr();
-      emit log_named_uint("ankrMarketApr", ankrMarketApr);
-
-      CompoundMarketERC4626 ahMarketAdapter = new CompoundMarketERC4626();
-      {
-        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(ahMarketAdapter), address(dpa), "");
-        ahMarketAdapter = CompoundMarketERC4626(address(proxy));
-        vm.label(address(ahMarketAdapter), "ahMarketAdapter");
-      }
-      ahMarketAdapter.initialize(ahWbnbMarket, blocksPerYear);
-      uint256 ahMarketApr = ahMarketAdapter.apr();
-      emit log_named_uint("ahMarketApr", ahMarketApr);
-
-      adapters[0].adapter = ankrMarketAdapter;
-      adapters[0].allocation = 9e17;
-      adapters[1].adapter = ahMarketAdapter;
-      adapters[1].allocation = 1e17;
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(ahMarketAdapter), address(dpa), "");
+      ahMarketAdapter = CompoundMarketERC4626(address(proxy));
+      vm.label(address(ahMarketAdapter), "ahMarketAdapter");
     }
+    ahMarketAdapter.initialize(ahWbnbMarket, blocksPerYear);
+    uint256 ahMarketApr = ahMarketAdapter.apr();
+    emit log_named_uint("ahMarketApr", ahMarketApr);
 
+    adapters[0].adapter = ankrMarketAdapter;
+    adapters[0].allocation = 9e17;
+    adapters[1].adapter = ahMarketAdapter;
+    adapters[1].allocation = 1e17;
+  }
+
+  function deployVault() internal {
     OptimizedAPRVault vault = new OptimizedAPRVault();
     {
       TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(vault), address(dpa), "");
@@ -100,11 +103,24 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
         address(this)
       );
     }
+  }
 
+  function depositAssets() internal {
     vm.startPrank(wbnbWhale);
     wbnb.approve(address(vault), type(uint256).max);
     vault.deposit(depositAmount);
     vm.stopPrank();
+  }
+
+  function testVaultOptimization() public debuggingOnly fork(BSC_MAINNET) {
+    // make sure there is enough liquidity in the testing markets
+    addLiquidity();
+
+    deployAdapters();
+
+    deployVault();
+
+    depositAssets();
 
     uint64[] memory lenderSharesHint = new uint64[](2);
     lenderSharesHint[0] = 4e17;
@@ -130,35 +146,47 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
       }
     }
 
-    uint256 maxRedeemBefore = vault.maxRedeem(wbnbWhale);
-    vault.harvest(lenderSharesHint);
-    uint256 maxRedeemAfter = vault.maxRedeem(wbnbWhale);
-    emit log_named_uint("maxRedeemBefore", maxRedeemBefore);
-    emit log_named_uint("maxRedeemAfter", maxRedeemAfter);
-
-    uint256 aprAfter = vault.estimatedAPR();
-    emit log_named_uint("aprAfter", aprAfter);
-
-    if (estimatedAprHint > currentAPR) {
-      assertGt(aprAfter, currentAPR, "!harvest didn't optimize the allocations");
-    }
-
-    uint256 wbnbBalanceBefore = wbnb.balanceOf(wbnbWhale);
-
-    // advance time with a year
-    vm.warp(block.timestamp + 365.25 days);
-    vm.roll(block.number + blocksPerYear);
-
-    uint256 maxRedeemWhale = vault.maxRedeem(wbnbWhale);
+    // harvest
     {
-      vm.startPrank(wbnbWhale);
-      uint256 previewRed = vault.previewRedeem(maxRedeemWhale);
-      emit log_named_uint("previewRed", previewRed);
-      vault.redeem(maxRedeemWhale);
-      vm.stopPrank();
+      uint256 maxRedeemBefore = vault.maxRedeem(wbnbWhale);
+      vault.harvest(lenderSharesHint);
+      uint256 maxRedeemAfter = vault.maxRedeem(wbnbWhale);
+      emit log_named_uint("maxRedeemBefore", maxRedeemBefore);
+      emit log_named_uint("maxRedeemAfter", maxRedeemAfter);
     }
 
-    uint256 wbnbBalanceAfter = wbnb.balanceOf(wbnbWhale);
-    assertGt(wbnbBalanceAfter - wbnbBalanceBefore, depositAmount, "!depositor did not accrue");
+    // test if the APR improved as a result of the hinted better allocations
+    {
+      uint256 aprAfter = vault.estimatedAPR();
+      emit log_named_uint("aprAfter", aprAfter);
+
+      if (estimatedAprHint > currentAPR) {
+        assertGt(aprAfter, currentAPR, "!harvest didn't optimize the allocations");
+      }
+    }
+
+    // test the balance before and after calling redeem
+    {
+      uint256 wbnbBalanceBefore = wbnb.balanceOf(wbnbWhale);
+
+      // advance time with a year
+      vm.warp(block.timestamp + 365.25 days);
+      vm.roll(block.number + blocksPerYear);
+
+      uint256 maxRedeemWhale = vault.maxRedeem(wbnbWhale);
+      uint256 assetsFromRedeem = vault.previewRedeem(maxRedeemWhale);
+      emit log_named_uint("assetsFromRedeem", assetsFromRedeem);
+
+      // call redeem
+      vm.prank(wbnbWhale);
+      vault.redeem(maxRedeemWhale);
+
+      uint256 wbnbBalanceAfter = wbnb.balanceOf(wbnbWhale);
+      assertGt(
+        wbnbBalanceAfter - wbnbBalanceBefore,
+        depositAmount,
+        "!depositor did not receive more than the initial deposited amount"
+      );
+    }
   }
 }

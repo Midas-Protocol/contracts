@@ -81,13 +81,13 @@ contract OptimizedAPRVault is MultiStrategyVault {
       return 0;
     }
 
-    uint256 apy;
+    uint256 weightedAPR;
     for (uint256 i; i < adapterCount; ++i) {
-      apy += adapters[i].adapter.weightedAprAfterDeposit(amount);
+      weightedAPR += adapters[i].adapter.weightedAprAfterDeposit(amount);
     }
 
     uint8 decimals = IERC20Metadata(asset()).decimals();
-    return (apy * (10**decimals)) / (bal + amount);
+    return (weightedAPR * (10**decimals)) / (bal + amount);
   }
 
   /// @notice Returns the weighted apr of all lenders
