@@ -87,6 +87,10 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     return (apr() * nav()) / 1e18;
   }
 
+  function weightedAprAfterDeposit(uint256 amount) public view returns (uint256) {
+    return (aprAfterDeposit(amount) * (nav() + amount)) / 1e18;
+  }
+
   /// @notice Withdraws a given amount from lender
   /// @param amount The amount the caller wants to withdraw
   /// @return Amount actually withdrawn

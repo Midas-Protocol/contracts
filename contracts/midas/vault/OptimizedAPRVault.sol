@@ -74,6 +74,22 @@ contract OptimizedAPRVault is MultiStrategyVault {
     return adapterCount;
   }
 
+  /// @notice view function to check the hypothetical APY after the deposit of some amount
+  function supplyAPY(uint256 amount) public view returns (uint256) {
+    uint256 bal = estimatedTotalAssets();
+    if (bal == 0 && amount == 0) {
+      return 0;
+    }
+
+    uint256 apy;
+    for (uint256 i; i < adapterCount; ++i) {
+      apy += adapters[i].adapter.weightedAprAfterDeposit(amount);
+    }
+
+    uint8 decimals = IERC20Metadata(asset()).decimals();
+    return (apy * (10**decimals)) / (bal + amount);
+  }
+
   /// @notice Returns the weighted apr of all lenders
   /// @dev It's computed by doing: `sum(nav * apr) / totalNav`
   function estimatedAPR() public view returns (uint256) {
