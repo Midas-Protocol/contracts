@@ -584,7 +584,7 @@ contract MultiStrategyVault is
 
   error InvalidVaultFees();
   error InvalidFeeRecipient();
-  error NotPassedQuitPeriod(uint256 quitPeriod);
+  error NotPassedQuitPeriod();
 
   /**
    * @notice Propose new fees for this vault. Caller must be owner.
@@ -604,7 +604,7 @@ contract MultiStrategyVault is
 
   /// @notice Change fees to the previously proposed fees after the quit period has passed.
   function changeFees() external {
-    if (proposedFeeTime == 0 || block.timestamp < proposedFeeTime + quitPeriod) revert NotPassedQuitPeriod(quitPeriod);
+    if (proposedFeeTime == 0 || block.timestamp < proposedFeeTime + quitPeriod) revert NotPassedQuitPeriod();
 
     emit ChangedFees(fees, proposedFees);
 
@@ -693,7 +693,7 @@ contract MultiStrategyVault is
    */
   function changeAdapters() external takeFees {
     if (proposedAdapterTime == 0 || block.timestamp < proposedAdapterTime + quitPeriod)
-      revert NotPassedQuitPeriod(quitPeriod);
+      revert NotPassedQuitPeriod();
 
     for (uint8 i; i < adapterCount; i++) {
       adapters[i].adapter.redeem(adapters[i].adapter.balanceOf(address(this)), address(this), address(this));
@@ -738,7 +738,7 @@ contract MultiStrategyVault is
    */
   function setQuitPeriod(uint256 _quitPeriod) external onlyOwner {
     if (block.timestamp < proposedAdapterTime + quitPeriod || block.timestamp < proposedFeeTime + quitPeriod)
-      revert NotPassedQuitPeriod(quitPeriod);
+      revert NotPassedQuitPeriod();
     if (_quitPeriod < 1 days || _quitPeriod > 7 days) revert InvalidQuitPeriod();
 
     quitPeriod = _quitPeriod;

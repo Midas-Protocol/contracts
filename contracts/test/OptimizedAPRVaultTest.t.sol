@@ -283,4 +283,28 @@ contract OptimizedAPRVaultTest is MarketsTest {
     vm.expectRevert("!caller not a vault");
     adapters[0].adapter.deposit(10);
   }
+
+  error NotPassedQuitPeriod();
+
+  function testChangeAdapters() public fork(BSC_MAINNET) {
+    CompoundMarketERC4626 ahMarketAdapter = new CompoundMarketERC4626();
+    {
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(ahMarketAdapter), address(dpa), "");
+      ahMarketAdapter = CompoundMarketERC4626(address(proxy));
+      vm.label(address(ahMarketAdapter), "ahMarketAdapter");
+    }
+    ahMarketAdapter.initialize(ahWbnbMarket, blocksPerYear, address(registry));
+    adapters[2].adapter = ahMarketAdapter;
+
+    adapters[0].allocation = 8e17;
+    adapters[1].allocation = 1e17;
+    adapters[2].allocation = 1e17;
+
+    vault.proposeAdapters(adapters, 3);
+    vm.expectRevert(NotPassedQuitPeriod.selector);
+    vault.changeAdapters();
+
+    vm.warp(block.timestamp + 3.01 days);
+    vault.changeAdapters();
+  }
 }
