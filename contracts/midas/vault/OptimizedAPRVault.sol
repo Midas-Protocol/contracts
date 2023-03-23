@@ -30,7 +30,7 @@ contract OptimizedAPRVault is MultiStrategyVault {
   error IncorrectListLength();
   error IncorrectDistribution();
 
-  function initialize(
+  function initializeWithRegistry(
     IERC20 asset_,
     AdapterConfig[10] calldata adapters_,
     uint8 adapterCount_,
