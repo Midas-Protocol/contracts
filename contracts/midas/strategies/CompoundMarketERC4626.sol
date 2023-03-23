@@ -14,7 +14,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   uint256 public blocksPerYear;
   OptimizedVaultsRegistry public registry;
 
-  modifier onlyRegisteredVaults {
+  modifier onlyRegisteredVaults() {
     OptimizedAPRVault[] memory vaults = registry.getAllVaults();
     bool isMsgSender = false;
     for (uint256 i = 0; i < vaults.length; i++) {
@@ -60,12 +60,12 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   }
 
   // TODO claim rewards from a flywheel
-  function afterDeposit(uint256 amount, uint256) internal onlyRegisteredVaults override {
+  function afterDeposit(uint256 amount, uint256) internal override onlyRegisteredVaults {
     ERC20Upgradeable(asset()).approve(address(market), amount);
     require(market.mint(amount) == 0, "deposit to market failed");
   }
 
-  function beforeWithdraw(uint256 amount, uint256) internal onlyRegisteredVaults override {
+  function beforeWithdraw(uint256 amount, uint256) internal override onlyRegisteredVaults {
     require(market.redeemUnderlying(amount) == 0, "redeem from market failed");
   }
 

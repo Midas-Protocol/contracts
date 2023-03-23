@@ -54,8 +54,8 @@ contract MarketsTest is BaseTest {
     address newDelegate = _prepareCTokenUpgrade(asDelegate);
 
     bytes memory becomeImplData = (address(newDelegate) == address(cErc20Delegate))
-    ? bytes("")
-    : abi.encode(address(0));
+      ? bytes("")
+      : abi.encode(address(0));
     vm.prank(asDelegate.fuseAdmin());
     asDelegate._setImplementationSafe(newDelegate, false, becomeImplData);
   }
