@@ -24,9 +24,6 @@ interface IGenericLender {
   /// @return Amount actually withdrawn
   function withdraw(uint256 amount) external returns (uint256);
 
-  /// @notice Deposits the current balance of the contract to the lending platform
-  function deposit() external;
-
   /// @notice Withdraws as much as possible from the lending platform
   /// @return Whether everything was withdrawn or not
   function withdrawAll() external returns (bool);
@@ -65,6 +62,4 @@ interface IGenericLender {
 
   /// @notice Returns the current balance invested on the lender and related staking contracts
   function underlyingBalanceStored() external view returns (uint256 balance);
-
-  function emergencyWithdrawAndPause() external;
 }

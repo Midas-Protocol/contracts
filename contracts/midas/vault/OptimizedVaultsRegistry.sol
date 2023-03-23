@@ -1,16 +1,17 @@
 pragma solidity ^0.8.0;
 
 import "../SafeOwnableUpgradeable.sol";
-import "./MultiStrategyVault.sol";
+import "./OptimizedAPRVault.sol";
+import "../strategies/CompoundMarketERC4626.sol";
 
 contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
-  MultiStrategyVault[] public vaults;
+  OptimizedAPRVault[] public vaults;
 
   function initialize() public initializer {
     __SafeOwnable_init(msg.sender);
   }
 
-  function getAllVaults() public view returns (MultiStrategyVault[] memory) {
+  function getAllVaults() public view returns (OptimizedAPRVault[] memory) {
     return vaults;
   }
 
@@ -20,7 +21,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
         return false;
       }
     }
-    vaults.push(MultiStrategyVault(vault));
+    vaults.push(OptimizedAPRVault(vault));
     return true;
   }
 
@@ -33,5 +34,16 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
       }
     }
     return false;
+  }
+
+  function setEmergencyExit() external onlyOwner {
+    for (uint256 i; i < vaults.length; ++i) {
+      uint8 adapterCount = vaults[i].adapterCount();
+      for (uint256 j; j < adapterCount; ++j) {
+        (CompoundMarketERC4626 adapter, ) = vaults[i].adapters(j);
+        try adapter.emergencyWithdrawAndPause() {} catch {}
+      }
+      vaults[i].setEmergencyExit();
+    }
   }
 }

@@ -27,6 +27,7 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
   ICErc20 ahWbnbMarket;
   address payable wnativeAddress;
   OptimizedAPRVault vault;
+  OptimizedVaultsRegistry registry;
   uint64[] lenderSharesHint = new uint64[](2);
 
   function afterForkSetUp() internal override {
@@ -42,8 +43,8 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
   }
 
-  function testVaultRegistry() public {
-    OptimizedVaultsRegistry registry = new OptimizedVaultsRegistry();
+  function deployVaultRegistry() internal {
+    registry = new OptimizedVaultsRegistry();
     {
       TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(registry), address(dpa), "");
       registry = OptimizedVaultsRegistry(address(proxy));
@@ -69,7 +70,8 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     }
     ankrMarketAdapter.initialize(
       ankrWbnbMarket,
-      20 * 24 * 365 * 60 //blocks per year
+      20 * 24 * 365 * 60, //blocks per year
+      address(registry)
     );
     uint256 ankrMarketApr = ankrMarketAdapter.apr();
     emit log_named_uint("ankrMarketApr", ankrMarketApr);
@@ -80,7 +82,7 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
       ahMarketAdapter = CompoundMarketERC4626(address(proxy));
       vm.label(address(ahMarketAdapter), "ahMarketAdapter");
     }
-    ahMarketAdapter.initialize(ahWbnbMarket, blocksPerYear);
+    ahMarketAdapter.initialize(ahWbnbMarket, blocksPerYear, address(registry));
     uint256 ahMarketApr = ahMarketAdapter.apr();
     emit log_named_uint("ahMarketApr", ahMarketApr);
 
@@ -92,21 +94,22 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
 
   function deployVault() internal {
     vault = new OptimizedAPRVault();
-    {
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(vault), address(dpa), "");
-      vault = OptimizedAPRVault(address(proxy));
-      vm.label(address(vault), "vault");
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(vault), address(dpa), "");
+    vault = OptimizedAPRVault(address(proxy));
+    vm.label(address(vault), "vault");
 
-      vault.initialize(
-        IERC20(wnativeAddress),
-        adapters,
-        2, // adapters count
-        VaultFees(0, 0, 0, 0),
-        address(this),
-        type(uint256).max,
-        address(this)
-      );
-    }
+    vault.initialize(
+      IERC20(wnativeAddress),
+      adapters,
+      2, // adapters count
+      VaultFees(0, 0, 0, 0),
+      address(this),
+      type(uint256).max,
+      address(this),
+      address(registry)
+    );
+
+    registry.addVault(address(vault));
   }
 
   function depositAssets() internal {
@@ -116,15 +119,33 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     vm.stopPrank();
   }
 
-  function testVaultOptimization() public fork(BSC_MAINNET) {
+  function setUpVault() internal {
     // make sure there is enough liquidity in the testing markets
     addLiquidity();
+
+    deployVaultRegistry();
 
     deployAdapters();
 
     deployVault();
 
     depositAssets();
+  }
+
+  function testVaultEmergencyShutdown() public fork(BSC_MAINNET) {
+    setUpVault();
+
+    registry.setEmergencyExit();
+
+    assertTrue(vault.emergencyExit(), "!emergency set");
+    assertEq(vault.lentTotalAssets(), 0, "!still lending");
+    assertGt(vault.estimatedTotalAssets(), 0, "!emergency withdrawn");
+
+    vault.harvest(lenderSharesHint);
+  }
+
+  function testVaultOptimization() public fork(BSC_MAINNET) {
+    setUpVault();
 
     uint256 estimatedAprHint;
     {
@@ -172,7 +193,9 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
   }
 
   function testOptVaultRedeem() public fork(BSC_MAINNET) {
-    testVaultOptimization();
+    setUpVault();
+    vault.harvest(lenderSharesHint);
+
     // test the balance before and after calling redeem
     {
       uint256 wbnbBalanceBefore = wbnb.balanceOf(wbnbWhale);
@@ -199,7 +222,9 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
   }
 
   function testOptVaultMint() public fork(BSC_MAINNET) {
-    testVaultOptimization();
+    setUpVault();
+    vault.harvest(lenderSharesHint);
+
     // test the shares before and after calling mint
     {
       uint256 vaultSharesBefore = vault.balanceOf(wbnbWhale);
@@ -229,7 +254,9 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
   }
 
   function testOptVaultDeposit() public fork(BSC_MAINNET) {
-    testVaultOptimization();
+    setUpVault();
+    vault.harvest(lenderSharesHint);
+
     // test the shares before and after calling deposit
     {
       uint256 vaultSharesBefore = vault.balanceOf(wbnbWhale);

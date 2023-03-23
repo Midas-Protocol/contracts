@@ -11,15 +11,21 @@ import "../../external/angle/IGenericLender.sol";
 contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   ICErc20 public market;
   uint256 public blocksPerYear;
+  address public registry;
 
   constructor() {
     _disableInitializers();
   }
 
-  function initialize(ICErc20 market_, uint256 blocksPerYear_) public initializer {
+  function initialize(ICErc20 market_, uint256 blocksPerYear_, address registry_) public initializer {
     __MidasER4626_init(ERC20Upgradeable(market_.underlying()));
     market = market_;
     blocksPerYear = blocksPerYear_;
+    registry = registry_;
+  }
+
+  function reinitialize(address registry_) public reinitializer(2) {
+    registry = registry_;
   }
 
   function lenderName() public view returns (string memory) {
@@ -53,17 +59,17 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     return market.supplyRatePerBlockAfterWithdraw(amount) * blocksPerYear;
   }
 
-  function emergencyWithdrawAndPause() external override(IGenericLender, MidasERC4626) {
+  function emergencyWithdrawAndPause() external override {
     require(
-      msg.sender == owner(), /*|| msg.sender == vault*/
-      "not owner or vault"
+      msg.sender == owner() || msg.sender == registry,
+      "not owner or vaults registry"
     );
-    require(market.redeem(market.balanceOf(address(this))) == 0, "redeem all failed");
+    require(market.redeemUnderlying(type(uint256).max) == 0, "redeem all failed");
     _pause();
   }
 
   function unpause() external override onlyOwner {
-    deposit();
+    deposit(ERC20Upgradeable(asset()).balanceOf(address(this)), address(this));
     _unpause();
   }
 
@@ -97,13 +103,6 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   function withdraw(uint256 amount) public override returns (uint256) {
     withdraw(amount, msg.sender, msg.sender);
     return amount;
-  }
-
-  // TODO remove this fn?
-  /// @notice Deposits the current balance of the contract to the lending platform
-  function deposit() public override onlyOwner {
-    // TODO what do we need this fn for?
-    deposit(IERC20Upgradeable(asset()).balanceOf(address(this)), address(this));
   }
 
   function deposit(uint256 amount) public {

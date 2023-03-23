@@ -23,6 +23,8 @@ contract OptimizedAPRVault is MultiStrategyVault {
 
   uint256 public withdrawalThreshold;
 
+  address public registry;
+
   event EmergencyExitActivated();
 
   error IncorrectListLength();
@@ -35,9 +37,15 @@ contract OptimizedAPRVault is MultiStrategyVault {
     VaultFees calldata fees_,
     address feeRecipient_,
     uint256 depositLimit_,
-    address owner_
-  ) public override initializer {
+    address owner_,
+    address registry_
+  ) public initializer {
     __MultiStrategyVault_init(asset_, adapters_, adapterCount_, fees_, feeRecipient_, depositLimit_, owner_);
+    registry = registry_;
+  }
+
+  function reinitialize(address registry_) public reinitializer(2) {
+    registry = registry_;
   }
 
   /// @notice View function to check the current state of the strategy
@@ -199,11 +207,12 @@ contract OptimizedAPRVault is MultiStrategyVault {
     }
   }
 
-  function setEmergencyExit() external onlyOwner {
+  function setEmergencyExit() external {
+    require(msg.sender == owner() || msg.sender == registry, "not registry or owner");
     emergencyExit = true;
 
     for (uint256 i; i < adapterCount; ++i) {
-      try adapters[i].adapter.emergencyWithdrawAndPause() {} catch {}
+      adapters[i].adapter.withdrawAll();
     }
 
     emit EmergencyExitActivated();
