@@ -86,8 +86,7 @@ contract ExtensionsTest is MarketsTest {
   address payable internal latestComptrollerImplementation;
 
   function afterForkSetUp() internal virtual override {
-    ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
-
+    super.afterForkSetUp();
     cfe = new ComptrollerFirstExtension();
     mockExtension = new MockComptrollerExtension();
     second = new MockSecondComptrollerExtension();
