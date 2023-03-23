@@ -692,8 +692,7 @@ contract MultiStrategyVault is
    * @dev Last we update HWM and assetsCheckpoint for fees to make sure they adjust to the new adapter
    */
   function changeAdapters() external takeFees {
-    if (proposedAdapterTime == 0 || block.timestamp < proposedAdapterTime + quitPeriod)
-      revert NotPassedQuitPeriod();
+    if (proposedAdapterTime == 0 || block.timestamp < proposedAdapterTime + quitPeriod) revert NotPassedQuitPeriod();
 
     for (uint8 i; i < adapterCount; i++) {
       adapters[i].adapter.redeem(adapters[i].adapter.balanceOf(address(this)), address(this), address(this));
