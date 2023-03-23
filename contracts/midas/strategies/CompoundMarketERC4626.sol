@@ -17,7 +17,11 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     _disableInitializers();
   }
 
-  function initialize(ICErc20 market_, uint256 blocksPerYear_, address registry_) public initializer {
+  function initialize(
+    ICErc20 market_,
+    uint256 blocksPerYear_,
+    address registry_
+  ) public initializer {
     __MidasER4626_init(ERC20Upgradeable(market_.underlying()));
     market = market_;
     blocksPerYear = blocksPerYear_;
@@ -60,10 +64,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   }
 
   function emergencyWithdrawAndPause() external override {
-    require(
-      msg.sender == owner() || msg.sender == registry,
-      "not owner or vaults registry"
-    );
+    require(msg.sender == owner() || msg.sender == registry, "not owner or vaults registry");
     require(market.redeemUnderlying(type(uint256).max) == 0, "redeem all failed");
     _pause();
   }
