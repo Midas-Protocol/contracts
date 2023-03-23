@@ -28,12 +28,6 @@ interface IGenericLender {
   /// @return Whether everything was withdrawn or not
   function withdrawAll() external returns (bool);
 
-  /// @notice Check if assets are currently managed by the lender
-  /// @dev We're considering that the strategy has no assets if it has less than 10 of the
-  /// underlying asset in total to avoid the case where there is dust remaining on the lending market
-  /// and we cannot withdraw everything
-  function hasAssets() external view returns (bool);
-
   /// @notice Returns an estimation of the current Annual Percentage Rate after a new deposit
   /// of `amount`
   /// @param amount Amount to add to the lending platform, and that we want to take into account
@@ -59,7 +53,4 @@ interface IGenericLender {
   /// Implement `_protectedTokens()` to specify any additional tokens that
   /// should be protected from sweeping in addition to `want`.
   function sweep(address _token, address to) external;
-
-  /// @notice Returns the current balance invested on the lender and related staking contracts
-  function underlyingBalanceStored() external view returns (uint256 balance);
 }

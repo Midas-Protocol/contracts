@@ -8,7 +8,6 @@ import "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradea
 import "../../external/angle/IGenericLender.sol";
 import "../vault/OptimizedVaultsRegistry.sol";
 
-// TODO reentrancy guard?
 contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   ICErc20 public market;
   uint256 public blocksPerYear;
@@ -130,14 +129,6 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     return withdraw(maxWithdraw(msg.sender), msg.sender, msg.sender) > 0;
   }
 
-  /// @notice Check if assets are currently managed by the lender
-  /// @dev We're considering that the strategy has no assets if it has less than 10 of the
-  /// underlying asset in total to avoid the case where there is dust remaining on the lending market
-  /// and we cannot withdraw everything
-  function hasAssets() public view returns (bool) {
-    return market.balanceOf(address(this)) > 10;
-  }
-
   /// @notice
   /// Removes tokens from this Strategy that are not the type of tokens
   /// managed by this Strategy. This may be used in case of accidentally
@@ -153,10 +144,5 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
 
     IERC20Upgradeable token = IERC20Upgradeable(_token);
     token.transfer(to, token.balanceOf(address(this)));
-  }
-
-  /// @notice Returns the current balance invested on the lender and related staking contracts
-  function underlyingBalanceStored() external view returns (uint256) {
-    return totalAssets();
   }
 }
