@@ -71,7 +71,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     ankrMarketAdapter.initialize(
       ankrWbnbMarket,
       20 * 24 * 365 * 60, //blocks per year
-      address(registry)
+      registry
     );
     uint256 ankrMarketApr = ankrMarketAdapter.apr();
     emit log_named_uint("ankrMarketApr", ankrMarketApr);
@@ -82,7 +82,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
       ahMarketAdapter = CompoundMarketERC4626(address(proxy));
       vm.label(address(ahMarketAdapter), "ahMarketAdapter");
     }
-    ahMarketAdapter.initialize(ahWbnbMarket, blocksPerYear, address(registry));
+    ahMarketAdapter.initialize(ahWbnbMarket, blocksPerYear, registry);
     uint256 ahMarketApr = ahMarketAdapter.apr();
     emit log_named_uint("ahMarketApr", ahMarketApr);
 
@@ -293,7 +293,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
       ahMarketAdapter = CompoundMarketERC4626(address(proxy));
       vm.label(address(ahMarketAdapter), "ahMarketAdapter");
     }
-    ahMarketAdapter.initialize(ahWbnbMarket, blocksPerYear, address(registry));
+    ahMarketAdapter.initialize(ahWbnbMarket, blocksPerYear, registry);
     adapters[2].adapter = ahMarketAdapter;
 
     adapters[0].allocation = 8e17;

@@ -36,21 +36,11 @@ interface IGenericLender {
 
   function aprAfterWithdraw(uint256 amount) external view returns (uint256);
 
-  /// @notice
-  /// Removes tokens from this Strategy that are not the type of tokens
+  /// @notice Removes tokens from this Strategy that are not the type of tokens
   /// managed by this Strategy. This may be used in case of accidentally
   /// sending the wrong kind of token to this Strategy.
   ///
-  /// Tokens will be sent to `governance()`.
-  ///
-  /// This will fail if an attempt is made to sweep `want`, or any tokens
-  /// that are protected by this Strategy.
-  ///
-  /// This may only be called by governance.
   /// @param _token The token to transfer out of this poolManager.
   /// @param to Address to send the tokens to.
-  /// @dev
-  /// Implement `_protectedTokens()` to specify any additional tokens that
-  /// should be protected from sweeping in addition to `want`.
   function sweep(address _token, address to) external;
 }

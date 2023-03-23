@@ -33,12 +33,12 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   function initialize(
     ICErc20 market_,
     uint256 blocksPerYear_,
-    address registry_
+    OptimizedVaultsRegistry registry_
   ) public initializer {
     __MidasER4626_init(ERC20Upgradeable(market_.underlying()));
     market = market_;
     blocksPerYear = blocksPerYear_;
-    registry = OptimizedVaultsRegistry(registry_);
+    registry = registry_;
   }
 
   function reinitialize(address registry_) public reinitializer(2) {
@@ -129,13 +129,9 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     return withdraw(maxWithdraw(msg.sender), msg.sender, msg.sender) > 0;
   }
 
-  /// @notice
-  /// Removes tokens from this Strategy that are not the type of tokens
+  /// @notice Removes tokens from this Strategy that are not the type of tokens
   /// managed by this Strategy. This may be used in case of accidentally
   /// sending the wrong kind of token to this Strategy.
-  ///
-  /// This will fail if an attempt is made to sweep `want`, or any tokens
-  /// that are protected by this Strategy.
   ///
   /// @param _token The token to transfer out of this poolManager.
   /// @param to Address to send the tokens to.
