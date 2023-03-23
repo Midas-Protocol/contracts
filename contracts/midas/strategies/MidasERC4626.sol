@@ -191,21 +191,9 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
   /* ========== EMERGENCY FUNCTIONS ========== */
 
   // Should withdraw all funds from the strategy and pause the contract
-  function emergencyWithdrawAndPause() external virtual onlyOwner {
-    revert("!implementation");
+  function emergencyWithdrawAndPause() external virtual;
 
-    // Withdraw all assets from underlying strategy
-
-    // _pause();
-  }
-
-  function unpause() external virtual onlyOwner {
-    revert("!implementation");
-
-    // _unpause();
-
-    // Deposit all assets to underlying strategy
-  }
+  function unpause() external virtual;
 
   function shutdown(address market) external onlyOwner whenPaused returns (uint256) {
     ERC20Upgradeable theAsset = _asset();
@@ -216,7 +204,7 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
 
   /* ========== INTERNAL HOOKS LOGIC ========== */
 
-  function beforeWithdraw(uint256 assets, uint256 shares) internal virtual {}
+  function beforeWithdraw(uint256 assets, uint256 shares) internal virtual;
 
-  function afterDeposit(uint256 assets, uint256 shares) internal virtual {}
+  function afterDeposit(uint256 assets, uint256 shares) internal virtual;
 }

@@ -83,7 +83,6 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   }
 
   function unpause() external override onlyOwner {
-    deposit(ERC20Upgradeable(asset()).balanceOf(address(this)), address(this));
     _unpause();
   }
 

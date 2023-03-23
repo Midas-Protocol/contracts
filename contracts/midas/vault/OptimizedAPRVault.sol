@@ -214,7 +214,7 @@ contract OptimizedAPRVault is MultiStrategyVault {
     }
 
     emergencyExit = true;
-    pause();
+    _pause();
 
     emit EmergencyExitActivated();
   }
