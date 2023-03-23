@@ -188,6 +188,33 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
   }
 
+  function testOptVaultWithdraw() public fork(BSC_MAINNET) {
+    vault.harvest(lenderSharesHint);
+
+    // test the balance before and after calling redeem
+    {
+      uint256 wbnbBalanceBefore = wbnb.balanceOf(wbnbWhale);
+
+      // advance time with a year
+      vm.warp(block.timestamp + 365.25 days);
+      vm.roll(block.number + blocksPerYear);
+
+      uint256 maxWithdrawWhale = vault.maxWithdraw(wbnbWhale);
+      emit log_named_uint("maxWithdrawWhale", maxWithdrawWhale);
+
+      // call redeem
+      vm.prank(wbnbWhale);
+      vault.withdraw(maxWithdrawWhale);
+
+      uint256 wbnbBalanceAfter = wbnb.balanceOf(wbnbWhale);
+      assertGt(
+        wbnbBalanceAfter - wbnbBalanceBefore,
+        depositAmount,
+        "!depositor did not receive more than the initial deposited amount"
+      );
+    }
+  }
+
   function testOptVaultRedeem() public fork(BSC_MAINNET) {
     vault.harvest(lenderSharesHint);
 
@@ -281,7 +308,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     vm.startPrank(wbnbWhale);
     wbnb.approve(address(adapters[0].adapter), 10);
     vm.expectRevert("!caller not a vault");
-    adapters[0].adapter.deposit(10);
+    adapters[0].adapter.deposit(10, wbnbWhale);
   }
 
   error NotPassedQuitPeriod();

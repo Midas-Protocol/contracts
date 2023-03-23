@@ -9,9 +9,6 @@ interface IGenericLender {
   /// @notice Name of the lender on which funds are invested
   function lenderName() external view returns (string memory);
 
-  /// @notice Helper function to get the current total of assets managed by the lender.
-  function nav() external view returns (uint256);
-
   /// @notice Returns an estimation of the current Annual Percentage Rate on the lender
   function apr() external view returns (uint256);
 

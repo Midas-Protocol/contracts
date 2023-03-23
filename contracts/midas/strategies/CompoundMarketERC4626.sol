@@ -91,11 +91,6 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
                         IGenericLender FNs
     ------------------------------------------------------------*/
 
-  /// @notice Helper function to get the current total of assets managed by the lender.
-  function nav() public view returns (uint256) {
-    return (market.balanceOf(address(this)) * market.exchangeRateHypothetical()) / 1e18;
-  }
-
   /// @notice Returns an estimation of the current Annual Percentage Rate on the lender
   function apr() public view override returns (uint256) {
     return market.supplyRatePerBlock() * blocksPerYear;
@@ -104,11 +99,13 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   /// @notice Returns an estimation of the current Annual Percentage Rate weighted by the assets under
   /// management of the lender
   function weightedApr() external view returns (uint256) {
-    return (apr() * nav()) / 1e18;
+    return (apr() * totalAssets()) / 1e18;
   }
 
+  /// @notice Returns an estimation of the hypothetical Annual Percentage Rate weighted by the assets under
+  /// management of the lender plus the amount, if deposited
   function weightedAprAfterDeposit(uint256 amount) public view returns (uint256) {
-    return (aprAfterDeposit(amount) * (nav() + amount)) / 1e18;
+    return (aprAfterDeposit(amount) * (totalAssets() + amount)) / 1e18;
   }
 
   /// @notice Withdraws a given amount from lender
@@ -117,10 +114,6 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   function withdraw(uint256 amount) public override returns (uint256) {
     withdraw(amount, msg.sender, msg.sender);
     return amount;
-  }
-
-  function deposit(uint256 amount) public {
-    deposit(amount, address(this));
   }
 
   /// @notice Withdraws as much as possible from the lending platform
