@@ -208,11 +208,13 @@ contract OptimizedAPRVault is MultiStrategyVault {
 
   function setEmergencyExit() external {
     require(msg.sender == owner() || msg.sender == registry, "not registry or owner");
-    emergencyExit = true;
 
     for (uint256 i; i < adapterCount; ++i) {
       adapters[i].adapter.withdrawAll();
     }
+
+    emergencyExit = true;
+    pause();
 
     emit EmergencyExitActivated();
   }
