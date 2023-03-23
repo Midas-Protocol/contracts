@@ -223,7 +223,9 @@ contract MultiStrategyVault is
     IERC20(asset()).safeTransferFrom(caller, address(this), assets);
 
     for (uint8 i; i < adapterCount; i++) {
-      adapters[i].adapter.deposit(assets.mulDiv(adapters[i].allocation, 1e18, Math.Rounding.Down), address(this));
+      uint256 adapterDeposit = assets.mulDiv(adapters[i].allocation, 1e18, Math.Rounding.Down);
+      IERC20(asset()).approve(address(adapters[i].adapter), adapterDeposit);
+      adapters[i].adapter.deposit(adapterDeposit, address(this));
     }
 
     _mint(receiver, shares);

@@ -27,12 +27,16 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
   ICErc20 ahWbnbMarket;
   address payable wnativeAddress;
   OptimizedAPRVault vault;
+  uint64[] lenderSharesHint = new uint64[](2);
 
   function afterForkSetUp() internal override {
+    super.afterForkSetUp();
     wnativeAddress = payable(ap.getAddress("wtoken"));
     wbnb = WETH(wnativeAddress);
     ankrWbnbMarket = ICErc20(ankrWbnbMarketAddress);
     ahWbnbMarket = ICErc20(ahWbnbMarketAddress);
+    lenderSharesHint[0] = 4e17;
+    lenderSharesHint[1] = 6e17;
 
     _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
     _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
@@ -81,13 +85,13 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     emit log_named_uint("ahMarketApr", ahMarketApr);
 
     adapters[0].adapter = ankrMarketAdapter;
-    adapters[0].allocation = 9e17;
+    adapters[0].allocation = 1e17;
     adapters[1].adapter = ahMarketAdapter;
-    adapters[1].allocation = 1e17;
+    adapters[1].allocation = 9e17;
   }
 
   function deployVault() internal {
-    OptimizedAPRVault vault = new OptimizedAPRVault();
+    vault = new OptimizedAPRVault();
     {
       TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(vault), address(dpa), "");
       vault = OptimizedAPRVault(address(proxy));
@@ -112,7 +116,7 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     vm.stopPrank();
   }
 
-  function testVaultOptimization() public debuggingOnly fork(BSC_MAINNET) {
+  function testVaultOptimization() public fork(BSC_MAINNET) {
     // make sure there is enough liquidity in the testing markets
     addLiquidity();
 
@@ -121,13 +125,6 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     deployVault();
 
     depositAssets();
-
-    uint64[] memory lenderSharesHint = new uint64[](2);
-    lenderSharesHint[0] = 4e17;
-    lenderSharesHint[1] = 6e17;
-
-    uint256 currentAPR = vault.estimatedAPR();
-    emit log_named_uint("currentAPR", currentAPR);
 
     uint256 estimatedAprHint;
     {
@@ -138,8 +135,14 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
       emit log_named_int("lenderAdjustedAmounts0", lenderAdjustedAmounts[0]);
       emit log_named_int("lenderAdjustedAmounts1", lenderAdjustedAmounts[1]);
       emit log_named_uint("hint", estimatedAprHint);
+    }
 
-      if (estimatedAprHint > currentAPR) {
+    // log before
+    uint256 aprBefore = vault.estimatedAPR();
+    {
+      emit log_named_uint("aprBefore", aprBefore);
+
+      if (estimatedAprHint > aprBefore) {
         emit log("harvest will rebalance");
       } else {
         emit log("harvest will NOT rebalance");
@@ -149,9 +152,11 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
     // harvest
     {
       uint256 maxRedeemBefore = vault.maxRedeem(wbnbWhale);
-      vault.harvest(lenderSharesHint);
-      uint256 maxRedeemAfter = vault.maxRedeem(wbnbWhale);
       emit log_named_uint("maxRedeemBefore", maxRedeemBefore);
+
+      vault.harvest(lenderSharesHint);
+
+      uint256 maxRedeemAfter = vault.maxRedeem(wbnbWhale);
       emit log_named_uint("maxRedeemAfter", maxRedeemAfter);
     }
 
@@ -160,11 +165,14 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
       uint256 aprAfter = vault.estimatedAPR();
       emit log_named_uint("aprAfter", aprAfter);
 
-      if (estimatedAprHint > currentAPR) {
-        assertGt(aprAfter, currentAPR, "!harvest didn't optimize the allocations");
+      if (estimatedAprHint > aprBefore) {
+        assertGt(aprAfter, aprBefore, "!harvest didn't optimize the allocations");
       }
     }
+  }
 
+  function testOptVaultRedeem() public fork(BSC_MAINNET) {
+    testVaultOptimization();
     // test the balance before and after calling redeem
     {
       uint256 wbnbBalanceBefore = wbnb.balanceOf(wbnbWhale);
@@ -184,6 +192,65 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
       uint256 wbnbBalanceAfter = wbnb.balanceOf(wbnbWhale);
       assertGt(
         wbnbBalanceAfter - wbnbBalanceBefore,
+        depositAmount,
+        "!depositor did not receive more than the initial deposited amount"
+      );
+    }
+  }
+
+  function testOptVaultMint() public fork(BSC_MAINNET) {
+    testVaultOptimization();
+    // test the shares before and after calling mint
+    {
+      uint256 vaultSharesBefore = vault.balanceOf(wbnbWhale);
+
+      // advance time with a year
+      vm.warp(block.timestamp + 365.25 days);
+      vm.roll(block.number + blocksPerYear);
+
+      uint256 maxMintWhale = vault.maxMint(wbnbWhale);
+      maxMintWhale = Math.min(maxMintWhale, wbnb.balanceOf(wbnbWhale));
+      maxMintWhale = vault.convertToShares(maxMintWhale);
+      emit log_named_uint("maxMintWhale", maxMintWhale);
+
+      // call mint
+      vm.startPrank(wbnbWhale);
+      wbnb.approve(address(vault), maxMintWhale);
+      vault.mint(maxMintWhale);
+      vm.stopPrank();
+
+      uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
+      assertGt(
+        vaultSharesAfter - vaultSharesBefore,
+        depositAmount,
+        "!depositor did not receive more than the initial deposited amount"
+      );
+    }
+  }
+
+  function testOptVaultDeposit() public fork(BSC_MAINNET) {
+    testVaultOptimization();
+    // test the shares before and after calling deposit
+    {
+      uint256 vaultSharesBefore = vault.balanceOf(wbnbWhale);
+
+      // advance time with a year
+      vm.warp(block.timestamp + 365.25 days);
+      vm.roll(block.number + blocksPerYear);
+
+      uint256 maxDepositWhale = vault.maxDeposit(wbnbWhale);
+      maxDepositWhale = Math.min(maxDepositWhale, wbnb.balanceOf(wbnbWhale));
+      emit log_named_uint("maxDepositWhale", maxDepositWhale);
+
+      // call deposit
+      vm.startPrank(wbnbWhale);
+      wbnb.approve(address(vault), maxDepositWhale);
+      vault.deposit(maxDepositWhale);
+      vm.stopPrank();
+
+      uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
+      assertGt(
+        vaultSharesAfter - vaultSharesBefore,
         depositAmount,
         "!depositor did not receive more than the initial deposited amount"
       );
