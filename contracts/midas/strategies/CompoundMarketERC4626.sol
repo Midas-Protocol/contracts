@@ -6,12 +6,26 @@ import { ICErc20 } from "../../external/compound/ICErc20.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
 import "../../external/angle/IGenericLender.sol";
+import "../vault/OptimizedVaultsRegistry.sol";
 
 // TODO reentrancy guard?
 contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   ICErc20 public market;
   uint256 public blocksPerYear;
-  address public registry;
+  OptimizedVaultsRegistry public registry;
+
+  modifier onlyRegisteredVaults {
+    OptimizedAPRVault[] memory vaults = registry.getAllVaults();
+    bool isMsgSender = false;
+    for (uint256 i = 0; i < vaults.length; i++) {
+      if (msg.sender == address(vaults[i])) {
+        isMsgSender = true;
+        break;
+      }
+    }
+    require(isMsgSender, "!caller not a vault");
+    _;
+  }
 
   constructor() {
     _disableInitializers();
@@ -25,11 +39,11 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     __MidasER4626_init(ERC20Upgradeable(market_.underlying()));
     market = market_;
     blocksPerYear = blocksPerYear_;
-    registry = registry_;
+    registry = OptimizedVaultsRegistry(registry_);
   }
 
   function reinitialize(address registry_) public reinitializer(2) {
-    registry = registry_;
+    registry = OptimizedVaultsRegistry(registry_);
   }
 
   function lenderName() public view returns (string memory) {
@@ -46,12 +60,12 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   }
 
   // TODO claim rewards from a flywheel
-  function afterDeposit(uint256 amount, uint256) internal override {
+  function afterDeposit(uint256 amount, uint256) internal onlyRegisteredVaults override {
     ERC20Upgradeable(asset()).approve(address(market), amount);
     require(market.mint(amount) == 0, "deposit to market failed");
   }
 
-  function beforeWithdraw(uint256 amount, uint256) internal override {
+  function beforeWithdraw(uint256 amount, uint256) internal onlyRegisteredVaults override {
     require(market.redeemUnderlying(amount) == 0, "redeem from market failed");
   }
 
@@ -64,7 +78,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   }
 
   function emergencyWithdrawAndPause() external override {
-    require(msg.sender == owner() || msg.sender == registry, "not owner or vaults registry");
+    require(msg.sender == owner() || msg.sender == address(registry), "not owner or vaults registry");
     require(market.redeemUnderlying(type(uint256).max) == 0, "redeem all failed");
     _pause();
   }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { BaseTest } from "./config/BaseTest.t.sol";
+import "./config/MarketsTest.t.sol";
 import "../midas/vault/MultiStrategyVault.sol";
 import "../midas/strategies/CompoundMarketERC4626.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
@@ -13,9 +13,7 @@ import { WETH } from "solmate/tokens/WETH.sol";
 import "../midas/vault/OptimizedAPRVault.sol";
 import "../midas/vault/OptimizedVaultsRegistry.sol";
 
-import "./ExtensionsTest.sol";
-
-contract OptimizedAPRVaultTest is ExtensionsTest {
+contract OptimizedAPRVaultTest is MarketsTest {
   address ankrWbnbMarketAddress = 0x57a64a77f8E4cFbFDcd22D5551F52D675cc5A956;
   address ahWbnbMarketAddress = 0x059c595f19d6FA9f8203F3731DF54455cD248c44;
   address wbnbWhale = 0x0eD7e52944161450477ee417DE9Cd3a859b14fD0;
@@ -41,6 +39,8 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
 
     _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
     _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
+
+    setUpVault();
   }
 
   function deployVaultRegistry() internal {
@@ -133,8 +133,6 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
   }
 
   function testVaultEmergencyShutdown() public fork(BSC_MAINNET) {
-    setUpVault();
-
     registry.setEmergencyExit();
 
     assertTrue(vault.emergencyExit(), "!emergency set");
@@ -145,8 +143,6 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
   }
 
   function testVaultOptimization() public fork(BSC_MAINNET) {
-    setUpVault();
-
     uint256 estimatedAprHint;
     {
       int256[] memory lenderAdjustedAmounts;
@@ -193,7 +189,6 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
   }
 
   function testOptVaultRedeem() public fork(BSC_MAINNET) {
-    setUpVault();
     vault.harvest(lenderSharesHint);
 
     // test the balance before and after calling redeem
@@ -222,7 +217,6 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
   }
 
   function testOptVaultMint() public fork(BSC_MAINNET) {
-    setUpVault();
     vault.harvest(lenderSharesHint);
 
     // test the shares before and after calling mint
@@ -254,7 +248,6 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
   }
 
   function testOptVaultDeposit() public fork(BSC_MAINNET) {
-    setUpVault();
     vault.harvest(lenderSharesHint);
 
     // test the shares before and after calling deposit
@@ -282,5 +275,12 @@ contract OptimizedAPRVaultTest is ExtensionsTest {
         "!depositor did not receive more than the initial deposited amount"
       );
     }
+  }
+
+  function testDirectAdaptersDeposit() public fork(BSC_MAINNET) {
+    vm.startPrank(wbnbWhale);
+    wbnb.approve(address(adapters[0].adapter), 10);
+    vm.expectRevert("!caller not a vault");
+    adapters[0].adapter.deposit(10);
   }
 }
