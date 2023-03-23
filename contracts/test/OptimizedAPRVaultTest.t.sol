@@ -98,7 +98,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     vault = OptimizedAPRVault(address(proxy));
     vm.label(address(vault), "vault");
 
-    vault.initialize(
+    vault.initializeWithRegistry(
       IERC20(wnativeAddress),
       adapters,
       2, // adapters count
