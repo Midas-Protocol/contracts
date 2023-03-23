@@ -35,10 +35,9 @@ contract MultiStrategyVault is
   using Math for uint256;
 
   uint256 internal constant SECONDS_PER_YEAR = 365.25 days;
+  uint8 public constant DECIMAL_OFFSET = 9;
 
   uint8 internal _decimals;
-  uint8 public constant decimalOffset = 9;
-
   string internal _name;
   string internal _symbol;
 
@@ -100,7 +99,7 @@ contract MultiStrategyVault is
       asset_.approve(address(adapters_[i].adapter), type(uint256).max);
     }
 
-    _decimals = IERC20Metadata(address(asset_)).decimals() + decimalOffset; // Asset decimals + decimal offset to combat inflation attacks
+    _decimals = IERC20Metadata(address(asset_)).decimals() + DECIMAL_OFFSET; // Asset decimals + decimal offset to combat inflation attacks
 
     INITIAL_CHAIN_ID = block.chainid;
     INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
@@ -394,11 +393,11 @@ contract MultiStrategyVault is
     override
     returns (uint256 shares)
   {
-    return assets.mulDiv(totalSupply() + 10**decimalOffset, totalAssets() + 1, rounding);
+    return assets.mulDiv(totalSupply() + 10**DECIMAL_OFFSET, totalAssets() + 1, rounding);
   }
 
   function _convertToAssets(uint256 shares, Math.Rounding rounding) internal view virtual override returns (uint256) {
-    return shares.mulDiv(totalAssets() + 1, totalSupply() + 10**decimalOffset, rounding);
+    return shares.mulDiv(totalAssets() + 1, totalSupply() + 10**DECIMAL_OFFSET, rounding);
   }
 
   /*------------------------------------------------------------
@@ -434,7 +433,7 @@ contract MultiStrategyVault is
     uint256 depositLimit_ = depositLimit;
     if (paused() || assets >= depositLimit_) return 0;
 
-    uint256 maxMint_ = depositLimit > type(uint256).max / (totalSupply() + 10**decimalOffset)
+    uint256 maxMint_ = depositLimit > type(uint256).max / (totalSupply() + 10**DECIMAL_OFFSET)
       ? type(uint256).max
       : _convertToShares(depositLimit_, Math.Rounding.Up);
 
