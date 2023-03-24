@@ -60,6 +60,7 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
   function _price(address underlying) internal view virtual returns (uint256) {
     IBalancerStablePool pool = IBalancerStablePool(underlying);
     IBalancerVault vault = pool.getVault();
+
     // read-only re-entracy protection - this call is always unsuccessful
     (, bytes memory revertData) = address(vault).staticcall(
       abi.encodeWithSelector(vault.manageUserBalance.selector, new address[](0))
@@ -75,11 +76,15 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
       if (tokens[i] == IERC20Upgradeable(underlying)) {
         continue;
       }
-
+      // Get the price of each of the base tokens in ETH
+      // This also includes the price of the nested LP tokens, if they are e.g. LinearPools
+      // The only requirement is that the nested LP tokens have a price oracle registered
+      // See BalancerLpLinearPoolPriceOracle.sol for an example, as well as the relevant tests
       uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(address(tokens[i]));
       if (baseTokenPrice < minPrice) minPrice = baseTokenPrice;
     }
     // Multiply the value of each of the base tokens' share in ETH by the rate of the pool
+    // pool.getRate() is the rate of the pool, scaled by 1e18
     return (minPrice * pool.getRate()) / 1e18;
   }
 
