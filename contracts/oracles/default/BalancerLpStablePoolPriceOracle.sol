@@ -56,23 +56,19 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
 
   /**
    * @dev Fetches the fair LP token/ETH price from Balancer, with 18 decimals of precision.
-   * Source: https://github.com/AlphaFinanceLab/homora-v2/blob/master/contracts/oracle/BalancerPairOracle.sol
    */
   function _price(address underlying) internal view virtual returns (uint256) {
     IBalancerStablePool pool = IBalancerStablePool(underlying);
     IBalancerVault vault = pool.getVault();
-    uint256 rate = pool.getRate();
-
     // read-only re-entracy protection - this call is always unsuccessful
     (, bytes memory revertData) = address(vault).staticcall(
       abi.encodeWithSelector(vault.manageUserBalance.selector, new address[](0))
     );
     require(keccak256(revertData) != REENTRANCY_ERROR_HASH, "Balancer vault view reentrancy");
 
-    uint256 poolActualSupply = pool.getActualSupply();
-    (IERC20Upgradeable[] memory tokens, uint256[] memory balances, ) = vault.getPoolTokens(pool.getPoolId());
+    (IERC20Upgradeable[] memory tokens, , ) = vault.getPoolTokens(pool.getPoolId());
 
-    uint256 weightedBaseTokenValue = 0;
+    uint256 minPrice = type(uint256).max;
 
     for (uint256 i = 0; i < tokens.length; i++) {
       // exclude the LP token itself
@@ -80,22 +76,11 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
         continue;
       }
 
-      // scale by the decimals of the base token
-      uint256 balancesScaled = balances[i] * 10**(18 - uint256(ERC20Upgradeable(address(tokens[i])).decimals()));
-
-      // get the share of the base token in the pool (inverse to prevent underflow)
-      // e18 + e18 - e18
-      uint256 baseTokenShare = (poolActualSupply * 1e18) / balancesScaled;
-
-      // Get the price of the base token in ETH
       uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(address(tokens[i]));
-
-      // Get the value of each of the base tokens' share in ETH
-      // e18 + e18 - e18
-      weightedBaseTokenValue += ((baseTokenPrice * 1e18) / baseTokenShare);
+      if (baseTokenPrice < minPrice) minPrice = baseTokenPrice;
     }
     // Multiply the value of each of the base tokens' share in ETH by the rate of the pool
-    return (rate * weightedBaseTokenValue) / 1e18;
+    return (minPrice * pool.getRate()) / 1e18;
   }
 
   /**

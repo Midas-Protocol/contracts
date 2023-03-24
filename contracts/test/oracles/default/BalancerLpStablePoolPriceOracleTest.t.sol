@@ -124,7 +124,7 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     uint256 price = getLpTokenPrice(jEUR_agEUR_pool, stableLpOracle);
 
     assertTrue(price > 0);
-    assertEq(price, 1017737040677024022); // 1,017e18 WMATIC * 1,05 USD/WMATIC =~ 1,068 USD
+    assertEq(price, 1015155060583030014); // 1,015e18 WMATIC * 1,05 USD/WMATIC =~ 1,066 USD
   }
 
   // https://polygonscan.com/tx/0xa061b632a95f2e0c81bacdb5a6d39991fb4e8436c52234373f9f736e2ad05e52
@@ -135,7 +135,7 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     uint256 price = getLpTokenPrice(jBRL_BRZ_pool, stableLpOracle);
 
     assertTrue(price > 0);
-    assertEq(price, 179844959613292499); // 0,1798e18 WMATIC * 1,05 USD/WMATIC =~ 0,1888 USD
+    assertEq(price, 179658854285035798); // 0,1796e18 WMATIC * 1,05 USD/WMATIC =~ 0,1888 USD
   }
 
   // https://polygonscan.com/tx/0x904e0a81c09b7340fab580b6f6210416e2aca9539c43d2a69fb72712b82a8a00
@@ -146,7 +146,7 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     uint256 price = getLpTokenPrice(stMATIC_WMATIC_pool, stableLpOracle);
 
     assertTrue(price > 0);
-    assertEq(price, 1019375858752541150); // 1,0193 WMATIC * 1,18 USD/WMATIC =~ 1,202 USD
+    assertEq(price, 1009290665332190911); // 1,0093 WMATIC * 1,18 USD/WMATIC =~ 1,1909 USD
   }
 
   function _reEntrancyTest(address[] memory lpTokens) internal {
