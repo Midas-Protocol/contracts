@@ -76,7 +76,7 @@ contract AlgebraPriceOracleTest is BaseTest {
     return price;
   }
 
-  function testSetUnsupportedBaseToken() public forkAtBlock(POLYGON_MAINNET, 0, 5244 / 1, 098) {
+  function testSetUnsupportedBaseToken() public forkAtBlock(POLYGON_MAINNET, 40783999) {
     address usdt = 0xc2132D05D31c914a87C6611C10748AEb04B58e8F;
     address ixt = 0xE06Bd4F5aAc8D0aA337D13eC88dB6defC6eAEefE;
 

@@ -15,7 +15,9 @@ contract UniswapV3PriceOracleTest is BaseTest {
 
   function afterForkSetUp() internal override {
     // Not using the address provider yet -- config just added
-    stable = ap.getAddress("stableToken");
+
+    // TODO: use ap when deployment is done
+    stable = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8; // USDC
     wtoken = ap.getAddress("wtoken"); // WETH
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     oracle = new UniswapV3PriceOracle();
