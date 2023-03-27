@@ -41,15 +41,18 @@ contract OptimizedAPRVaultTest is MarketsTest {
     super.afterForkSetUp();
     wnativeAddress = payable(ap.getAddress("wtoken"));
     wbnb = WETH(wnativeAddress);
-    ankrWbnbMarket = ICErc20(ankrWbnbMarketAddress);
-    ahWbnbMarket = ICErc20(ahWbnbMarketAddress);
-    lenderSharesHint[0] = 4e17;
-    lenderSharesHint[1] = 6e17;
 
-    _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
-    _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
+    if (block.chainid == BSC_MAINNET) {
+      ankrWbnbMarket = ICErc20(ankrWbnbMarketAddress);
+      ahWbnbMarket = ICErc20(ahWbnbMarketAddress);
+      lenderSharesHint[0] = 4e17;
+      lenderSharesHint[1] = 6e17;
 
-    setUpVault();
+      _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
+      _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
+
+      setUpVault();
+    }
   }
 
   function deployVaultRegistry() internal {
