@@ -354,35 +354,41 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
   function testVaultAccrueRewards() public fork(BSC_MAINNET) {
     ERC20Upgradeable twoBrl = ERC20Upgradeable(twoBrlAddress);
-    ERC20Upgradeable[] memory rewardTokens = new ERC20Upgradeable[](2);
-    rewardTokens[0] = ERC20Upgradeable(dddAddress);
-    rewardTokens[1] = ERC20Upgradeable(epxAddress);
+    ERC20Upgradeable ddd = ERC20Upgradeable(dddAddress);
+    ERC20Upgradeable epx = ERC20Upgradeable(epxAddress);
 
-    _upgradeExistingCTokenExtension(CErc20Delegate(twoBrlMarketAddress));
-
-    deployVaultRegistry();
-
-    CompoundMarketERC4626 twoBrlMarketAdapter = new CompoundMarketERC4626();
+    // set up the registry, the vault and the adapter
     {
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-        address(twoBrlMarketAdapter),
-        address(dpa),
-        ""
-      );
-      twoBrlMarketAdapter = CompoundMarketERC4626(address(proxy));
-      vm.label(address(twoBrlMarketAdapter), "twoBrlMarketAdapter");
-    }
-    twoBrlMarketAdapter.initialize(ICErc20(twoBrlMarketAddress), blocksPerYear, registry);
+      // upgrade to enable the aprAfterDeposit fn for the vault
+      _upgradeExistingCTokenExtension(CErc20Delegate(twoBrlMarketAddress));
 
-    AdapterConfig[10] memory _adapters;
-    _adapters[0].adapter = twoBrlMarketAdapter;
-    _adapters[0].allocation = 1e18;
+      deployVaultRegistry();
 
-    {
-      vault = new OptimizedAPRVault();
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(vault), address(dpa), "");
+      // deploy the adapter
+      CompoundMarketERC4626 twoBrlMarketAdapter = new CompoundMarketERC4626();
+      {
+        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+          address(twoBrlMarketAdapter),
+          address(dpa),
+          ""
+        );
+        twoBrlMarketAdapter = CompoundMarketERC4626(address(proxy));
+        vm.label(address(twoBrlMarketAdapter), "twoBrlMarketAdapter");
+      }
+      twoBrlMarketAdapter.initialize(ICErc20(twoBrlMarketAddress), blocksPerYear, registry);
+
+      // deploy the vault
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(new OptimizedAPRVault()), address(dpa), "");
       vault = OptimizedAPRVault(address(proxy));
       vm.label(address(vault), "vault");
+
+      ERC20Upgradeable[] memory rewardTokens = new ERC20Upgradeable[](2);
+      rewardTokens[0] = ddd;
+      rewardTokens[1] = epx;
+
+      AdapterConfig[10] memory _adapters;
+      _adapters[0].adapter = twoBrlMarketAdapter;
+      _adapters[0].allocation = 1e18;
 
       vault.initializeWithRegistry(
         twoBrl,
@@ -398,11 +404,11 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
       registry.addVault(address(vault));
     }
-    MidasFlywheel flywheelDDD = vault.flywheels(rewardTokens[0]);
-    vm.label(address(flywheelDDD), "DDDfw");
-    MidasFlywheel flywheelEPX = vault.flywheels(rewardTokens[1]);
-    vm.label(address(flywheelEPX), "EPXfw");
 
+    MidasFlywheel flywheelDDD = vault.flywheels(ddd);
+    MidasFlywheel flywheelEPX = vault.flywheels(epx);
+
+    // deposit some funds
     vm.startPrank(twoBrlWhale);
     twoBrl.approve(address(vault), type(uint256).max);
     // accruing for the first time internally with _afterTokenTransfer
@@ -410,52 +416,38 @@ contract OptimizedAPRVaultTest is MarketsTest {
     vm.stopPrank();
 
     {
-      FuseFlywheelDynamicRewards rew = FuseFlywheelDynamicRewards(address(flywheelDDD.flywheelRewards()));
-      (uint32 start, uint32 end, uint192 reward) = rew.rewardsCycle(ERC20(address(vault)));
-      emit log_named_uint("start", start);
-      emit log_named_uint("end", end);
-      emit log_named_uint("reward", reward);
-
-      // advance time to move to the next cycle
-      vm.warp(block.timestamp + 18 hours);
+      // advance time to move away from the first cycle,
+      // because the first cycle is initialized with 0 rewards
+      vm.warp(block.timestamp + 25 hours);
       vm.roll(block.number + 1000);
     }
+
+    // pull from the adapters the rewards for the new cycle
+    vault.claimRewards();
+
     {
+      // TODO figure out why these accrue calls are necessary
       flywheelDDD.accrue(ERC20(address(vault)), twoBrlWhale);
       flywheelEPX.accrue(ERC20(address(vault)), twoBrlWhale);
 
-      // advance time to move to the next cycle
-      vm.warp(block.timestamp + 18 hours);
+      // advance time in the same cycle in order to accrue some rewards for it
+      vm.warp(block.timestamp + 10 hours);
       vm.roll(block.number + 1000);
     }
-    //    // advance time with a year
-    //    vm.warp(block.timestamp + 365.25 days);
-    //    vm.roll(block.number + blocksPerYear);
 
     // harvest does nothing when the APR remains the same
     //uint64[] memory array = new uint64[](1);
     //array[0] = 1e18;
     //vault.harvest(array);
 
-    vault.claimRewards();
-
-    {
-      FuseFlywheelDynamicRewards rew = FuseFlywheelDynamicRewards(address(flywheelDDD.flywheelRewards()));
-
-      (uint32 start, uint32 end, uint192 reward) = rew.rewardsCycle(ERC20(address(vault)));
-      emit log_named_uint("start", start);
-      emit log_named_uint("end", end);
-      emit log_named_uint("reward", reward);
-    }
-
-    vm.startPrank(twoBrlWhale);
+    // accrue and claim
     flywheelDDD.accrue(ERC20(address(vault)), twoBrlWhale);
     flywheelDDD.claimRewards(twoBrlWhale);
     flywheelEPX.accrue(ERC20(address(vault)), twoBrlWhale);
     flywheelEPX.claimRewards(twoBrlWhale);
-    vm.stopPrank();
 
-    assertGt(rewardTokens[0].balanceOf(twoBrlWhale), 0, "!received DDD");
-    assertGt(rewardTokens[1].balanceOf(twoBrlWhale), 0, "!received EPX");
+    // check if any rewards were claimed
+    assertGt(ddd.balanceOf(twoBrlWhale), 0, "!received DDD");
+    assertGt(epx.balanceOf(twoBrlWhale), 0, "!received EPX");
   }
 }

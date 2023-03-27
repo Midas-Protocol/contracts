@@ -57,7 +57,7 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
     __RewardsClaimer_init(address(this), rewardTokens_);
     registry = registry_;
     for (uint256 i; i < rewardTokens_.length; ++i) {
-      _addRewardToken(rewardTokens_[i]);
+      _deployFlywheelForRewardToken(rewardTokens_[i]);
     }
   }
 
@@ -66,22 +66,21 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
   }
 
   function addRewardToken(IERC20 token_) public onlyOwner {
-    _addRewardToken(token_);
+    _deployFlywheelForRewardToken(token_);
+    rewardTokens.push(token_);
   }
 
-  function _addRewardToken(IERC20 token_) internal {
+  function _deployFlywheelForRewardToken(IERC20 token_) internal {
     require(address(flywheels[token_]) == address(0), "already added");
-    rewardTokens.push(token_);
 
     MidasFlywheel newFlywheelImpl = new MidasFlywheel();
-
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(newFlywheelImpl), registry, "");
     MidasFlywheel newFlywheel = MidasFlywheel(address(proxy));
 
     newFlywheel.initialize(
       ERC20(address(token_)),
       IFlywheelRewards(address(this)),
-      IFlywheelBooster(address(0)), // booster
+      IFlywheelBooster(address(0)),
       address(this)
     );
     FuseFlywheelDynamicRewards rewardsContract = new FuseFlywheelDynamicRewards(
@@ -94,7 +93,7 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
     // TODO accept owner
     newFlywheel._setPendingOwner(owner());
 
-    // let the vault shareholders accrue
+    // lets the vault shareholders accrue
     newFlywheel.addStrategyForRewards(ERC20(address(this)));
     flywheels[token_] = newFlywheel;
   }
