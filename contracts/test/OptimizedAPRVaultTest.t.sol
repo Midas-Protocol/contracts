@@ -111,7 +111,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     vault.initializeWithRegistry(
       ERC20Upgradeable(wnativeAddress),
       adapters,
-      2,
+      2, // adapters count
       VaultFees(0, 0, 0, 0),
       address(this),
       type(uint256).max,
