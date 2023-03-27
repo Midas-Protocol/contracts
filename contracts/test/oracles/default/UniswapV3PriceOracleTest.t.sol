@@ -17,13 +17,41 @@ contract UniswapV3PriceOracleTest is BaseTest {
     // Not using the address provider yet -- config just added
 
     // TODO: use ap when deployment is done
-    stable = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8; // USDC
+    stable = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8; // USDC or arbitrum
     wtoken = ap.getAddress("wtoken"); // WETH
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     oracle = new UniswapV3PriceOracle();
 
     vm.prank(mpo.admin());
     oracle.initialize(wtoken, asArray(stable));
+  }
+
+  function testPolygonAssets() public forkAtBlock(POLYGON_MAINNET, 40828111) {
+    address[] memory underlyings = new address[](1);
+    ConcentratedLiquidityBasePriceOracle.AssetConfig[]
+      memory configs = new ConcentratedLiquidityBasePriceOracle.AssetConfig[](1);
+
+    underlyings[0] = 0xE5417Af564e4bFDA1c483642db72007871397896; // GNS (18 decimals)
+
+    // GNS-MATIC
+    configs[0] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
+      0xEFa98Fdf168f372E5e9e9b910FcDfd65856f3986,
+      10 minutes,
+      wtoken
+    );
+
+    uint256[] memory expPrices = new uint256[](1);
+    expPrices[0] = 6496778484267765489; // (6496778484267765489 / 1e18) * 1.067 = $6.93 (27/03/2023)
+
+    uint256[] memory prices = getPriceFeed(underlyings, configs);
+    for (uint256 i = 0; i < prices.length; i++) {
+      assertEq(prices[i], expPrices[i], "!Price Error");
+    }
+
+    bool[] memory cardinalityChecks = getCardinality(configs);
+    for (uint256 i = 0; i < cardinalityChecks.length; i++) {
+      assertEq(cardinalityChecks[i], true, "!Cardinality Error");
+    }
   }
 
   function testArbitrumAssets() public forkAtBlock(ARBITRUM_ONE, 55624326) {
