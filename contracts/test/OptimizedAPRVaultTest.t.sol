@@ -2,16 +2,25 @@
 pragma solidity >=0.8.0;
 
 import "./config/MarketsTest.t.sol";
-import "../midas/vault/MultiStrategyVault.sol";
-import "../midas/strategies/CompoundMarketERC4626.sol";
+import { MultiStrategyVault, AdapterConfig, VaultFees } from "../midas/vault/MultiStrategyVault.sol";
+import { CompoundMarketERC4626 } from "../midas/strategies/CompoundMarketERC4626.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
 
+import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import { IERC4626Upgradeable as IERC4626, IERC20Upgradeable as IERC20 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
+import { IERC4626Upgradeable as IERC4626 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { WETH } from "solmate/tokens/WETH.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
 
-import "../midas/vault/OptimizedAPRVault.sol";
-import "../midas/vault/OptimizedVaultsRegistry.sol";
+import { OptimizedAPRVault } from "../midas/vault/OptimizedAPRVault.sol";
+import { OptimizedVaultsRegistry } from "../midas/vault/OptimizedVaultsRegistry.sol";
+
+import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
+import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
+import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 
 contract OptimizedAPRVaultTest is MarketsTest {
   address ankrWbnbMarketAddress = 0x57a64a77f8E4cFbFDcd22D5551F52D675cc5A956;
@@ -31,16 +40,21 @@ contract OptimizedAPRVaultTest is MarketsTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
     wnativeAddress = payable(ap.getAddress("wtoken"));
-    wbnb = WETH(wnativeAddress);
-    ankrWbnbMarket = ICErc20(ankrWbnbMarketAddress);
-    ahWbnbMarket = ICErc20(ahWbnbMarketAddress);
-    lenderSharesHint[0] = 4e17;
-    lenderSharesHint[1] = 6e17;
 
-    _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
-    _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
+    if (block.chainid == BSC_MAINNET) {
+      wbnb = WETH(wnativeAddress);
+      ankrWbnbMarket = ICErc20(ankrWbnbMarketAddress);
+      ahWbnbMarket = ICErc20(ahWbnbMarketAddress);
+      lenderSharesHint[0] = 4e17;
+      lenderSharesHint[1] = 6e17;
 
-    setUpVault();
+      _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
+      _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
+
+      setUpVault();
+    } else {
+
+    }
   }
 
   function deployVaultRegistry() internal {
@@ -98,15 +112,17 @@ contract OptimizedAPRVaultTest is MarketsTest {
     vault = OptimizedAPRVault(address(proxy));
     vm.label(address(vault), "vault");
 
+    ERC20Upgradeable[] memory rewardTokens = new ERC20Upgradeable[](0);
     vault.initializeWithRegistry(
-      IERC20(wnativeAddress),
+      ERC20Upgradeable(wnativeAddress),
       adapters,
-      2, // adapters count
+      2,
       VaultFees(0, 0, 0, 0),
       address(this),
       type(uint256).max,
       address(this),
-      address(registry)
+      address(registry),
+      rewardTokens
     );
 
     registry.addVault(address(vault));
@@ -333,5 +349,114 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
     vm.warp(block.timestamp + 3.01 days);
     vault.changeAdapters();
+  }
+
+  address twoBrlAddress = 0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9;
+  address twoBrlMarketAddress = 0xf0a2852958aD041a9Fb35c312605482Ca3Ec17ba; // DDD and EPX rewards
+  address twoBrlWhale = 0x2484AE439894521f57fdC227E16999a636Fb2Fd4;
+  address dddAddress = 0x84c97300a190676a19D1E13115629A11f8482Bd1;
+  address epxAddress = 0xAf41054C1487b0e5E2B9250C0332eCBCe6CE9d71;
+
+  function testVaultAccrueRewards() public fork(BSC_MAINNET) {
+    ERC20Upgradeable twoBrl = ERC20Upgradeable(twoBrlAddress);
+    ERC20Upgradeable[] memory rewardTokens = new ERC20Upgradeable[](2);
+    rewardTokens[0] = ERC20Upgradeable(dddAddress);
+    rewardTokens[1] = ERC20Upgradeable(epxAddress);
+
+    _upgradeExistingCTokenExtension(CErc20Delegate(twoBrlMarketAddress));
+
+    deployVaultRegistry();
+
+    CompoundMarketERC4626 twoBrlMarketAdapter = new CompoundMarketERC4626();
+    {
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(twoBrlMarketAdapter), address(dpa), "");
+      twoBrlMarketAdapter = CompoundMarketERC4626(address(proxy));
+      vm.label(address(twoBrlMarketAdapter), "twoBrlMarketAdapter");
+    }
+    twoBrlMarketAdapter.initialize(ICErc20(twoBrlMarketAddress), blocksPerYear, registry);
+
+    AdapterConfig[10] memory _adapters;
+    _adapters[0].adapter = twoBrlMarketAdapter;
+    _adapters[0].allocation = 1e18;
+
+    {
+      vault = new OptimizedAPRVault();
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(vault), address(dpa), "");
+      vault = OptimizedAPRVault(address(proxy));
+      vm.label(address(vault), "vault");
+
+      vault.initializeWithRegistry(
+        twoBrl,
+        _adapters,
+        1,
+        VaultFees(0, 0, 0, 0),
+        address(this),
+        type(uint256).max,
+        address(this),
+        address(registry),
+        rewardTokens
+      );
+
+      registry.addVault(address(vault));
+    }
+    MidasFlywheel flywheelDDD = vault.flywheels(rewardTokens[0]);
+    vm.label(address(flywheelDDD), "DDDfw");
+    MidasFlywheel flywheelEPX = vault.flywheels(rewardTokens[1]);
+    vm.label(address(flywheelEPX), "EPXfw");
+
+    vm.startPrank(twoBrlWhale);
+    twoBrl.approve(address(vault), type(uint256).max);
+    // accruing for the first time internally with _afterTokenTransfer
+    vault.deposit(depositAmount);
+    vm.stopPrank();
+
+    {
+      FuseFlywheelDynamicRewards rew = FuseFlywheelDynamicRewards(address(flywheelDDD.flywheelRewards()));
+      (uint32 start, uint32 end, uint192 reward) = rew.rewardsCycle(ERC20(address(vault)));
+      emit log_named_uint("start", start);
+      emit log_named_uint("end", end);
+      emit log_named_uint("reward", reward);
+
+      // advance time to move to the next cycle
+      vm.warp(block.timestamp + 18 hours);
+      vm.roll(block.number + 1000);
+    }
+    {
+      flywheelDDD.accrue(ERC20(address(vault)), twoBrlWhale);
+      flywheelEPX.accrue(ERC20(address(vault)), twoBrlWhale);
+
+      // advance time to move to the next cycle
+      vm.warp(block.timestamp + 18 hours);
+      vm.roll(block.number + 1000);
+    }
+    //    // advance time with a year
+    //    vm.warp(block.timestamp + 365.25 days);
+    //    vm.roll(block.number + blocksPerYear);
+
+    // harvest does nothing when the APR remains the same
+    //uint64[] memory array = new uint64[](1);
+    //array[0] = 1e18;
+    //vault.harvest(array);
+
+    vault.claimRewards();
+
+    {
+      FuseFlywheelDynamicRewards rew = FuseFlywheelDynamicRewards(address(flywheelDDD.flywheelRewards()));
+
+      (uint32 start, uint32 end, uint192 reward) = rew.rewardsCycle(ERC20(address(vault)));
+      emit log_named_uint("start", start);
+      emit log_named_uint("end", end);
+      emit log_named_uint("reward", reward);
+    }
+
+    vm.startPrank(twoBrlWhale);
+    flywheelDDD.accrue(ERC20(address(vault)), twoBrlWhale);
+    flywheelDDD.claimRewards(twoBrlWhale);
+    flywheelEPX.accrue(ERC20(address(vault)), twoBrlWhale);
+    flywheelEPX.claimRewards(twoBrlWhale);
+    vm.stopPrank();
+
+    assertGt(rewardTokens[0].balanceOf(twoBrlWhale), 0, "!received DDD");
+    assertGt(rewardTokens[1].balanceOf(twoBrlWhale), 0, "!received EPX");
   }
 }

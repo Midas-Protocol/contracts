@@ -2,10 +2,20 @@
 pragma solidity ^0.8.10;
 
 import { IGenericLender } from "../../external/angle/IGenericLender.sol";
-import { IERC20Upgradeable as IERC20, IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import { SafeOwnableUpgradeable } from "../SafeOwnableUpgradeable.sol";
-import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import { MultiStrategyVault, AdapterConfig, VaultFees } from "./MultiStrategyVault.sol";
+import { RewardsClaimer } from "../RewardsClaimer.sol";
+import "../strategies/flywheel/MidasFlywheel.sol";
+
+import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
+import { ERC20Upgradeable as IERC20 } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+
+import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
+import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
+import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
+import { FlywheelCore } from "flywheel/FlywheelCore.sol";
 
 struct LendStatus {
   string name;
@@ -14,7 +24,7 @@ struct LendStatus {
   address add;
 }
 
-contract OptimizedAPRVault is MultiStrategyVault {
+contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
   using SafeERC20Upgradeable for IERC20;
 
   uint64 internal constant _BPS = 1e18;
@@ -24,6 +34,8 @@ contract OptimizedAPRVault is MultiStrategyVault {
   uint256 public withdrawalThreshold;
 
   address public registry;
+
+  mapping(IERC20 => MidasFlywheel) public flywheels;
 
   event EmergencyExitActivated();
 
@@ -38,14 +50,50 @@ contract OptimizedAPRVault is MultiStrategyVault {
     address feeRecipient_,
     uint256 depositLimit_,
     address owner_,
-    address registry_
+    address registry_,
+    IERC20[] memory rewardTokens_
   ) public initializer {
     __MultiStrategyVault_init(asset_, adapters_, adapterCount_, fees_, feeRecipient_, depositLimit_, owner_);
+    __RewardsClaimer_init(address(this), rewardTokens_);
     registry = registry_;
+    for (uint256 i; i < rewardTokens_.length; ++i) {
+      _addRewardToken(rewardTokens_[i]);
+    }
   }
 
   function reinitialize(address registry_) public reinitializer(2) {
     registry = registry_;
+  }
+
+  function addRewardToken(IERC20 token_) public onlyOwner {
+    _addRewardToken(token_);
+  }
+
+  function _addRewardToken(IERC20 token_) internal {
+    require(address(flywheels[token_]) == address(0), "already added");
+    rewardTokens.push(token_);
+
+    MidasFlywheel newFlywheelImpl = new MidasFlywheel();
+
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(newFlywheelImpl), registry, "");
+    MidasFlywheel newFlywheel = MidasFlywheel(address(proxy));
+
+    newFlywheel.initialize(
+      ERC20(address(token_)),
+      IFlywheelRewards(address(this)),
+      IFlywheelBooster(address(0)), // booster
+      address(this)
+    );
+    FuseFlywheelDynamicRewards rewardsContract = new FuseFlywheelDynamicRewards(FlywheelCore(address(newFlywheel)), 1 days);
+    newFlywheel.setFlywheelRewards(rewardsContract);
+    token_.approve(address(rewardsContract), type(uint256).max);
+    newFlywheel.updateFeeSettings(0, address(this));
+    // TODO accept owner
+    newFlywheel._setPendingOwner(owner());
+
+    // let the vault shareholders accrue
+    newFlywheel.addStrategyForRewards(ERC20(address(this)));
+    flywheels[token_] = newFlywheel;
   }
 
   /// @notice View function to check the current state of the strategy
@@ -197,7 +245,6 @@ contract OptimizedAPRVault is MultiStrategyVault {
             deltaWithdraw -= uint256(lenderAdjustedAmounts[i]);
           }
           // redeposit through the lenders adapters
-          IERC20(asset()).approve(address(adapters[i].adapter), uint256(lenderAdjustedAmounts[i]));
           adapters[i].adapter.deposit(uint256(lenderAdjustedAmounts[i]), address(this));
         }
         // record the applied allocation in storage
@@ -217,5 +264,23 @@ contract OptimizedAPRVault is MultiStrategyVault {
     _pause();
 
     emit EmergencyExitActivated();
+  }
+
+  function beforeClaim() internal override {
+    for (uint256 i; i < adapterCount; ++i) {
+      adapters[i].adapter.claimRewards();
+    }
+  }
+
+  function _afterTokenTransfer(
+    address from,
+    address to,
+    uint256 amount
+  ) internal override {
+    // TODO accrue called twice for each fw - because??
+    super._afterTokenTransfer(from, to, amount);
+    for (uint256 i; i < rewardTokens.length; ++i) {
+      flywheels[rewardTokens[i]].accrue(ERC20(address(this)), from, to);
+    }
   }
 }

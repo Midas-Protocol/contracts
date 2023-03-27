@@ -223,7 +223,6 @@ contract MultiStrategyVault is
 
     for (uint8 i; i < adapterCount; i++) {
       uint256 adapterDeposit = assets.mulDiv(adapters[i].allocation, 1e18, Math.Rounding.Down);
-      IERC20(asset()).approve(address(adapters[i].adapter), adapterDeposit);
       adapters[i].adapter.deposit(adapterDeposit, address(this));
     }
 
