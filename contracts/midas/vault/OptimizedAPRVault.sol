@@ -84,7 +84,10 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
       IFlywheelBooster(address(0)), // booster
       address(this)
     );
-    FuseFlywheelDynamicRewards rewardsContract = new FuseFlywheelDynamicRewards(FlywheelCore(address(newFlywheel)), 1 days);
+    FuseFlywheelDynamicRewards rewardsContract = new FuseFlywheelDynamicRewards(
+      FlywheelCore(address(newFlywheel)),
+      1 days
+    );
     newFlywheel.setFlywheelRewards(rewardsContract);
     token_.approve(address(rewardsContract), type(uint256).max);
     newFlywheel.updateFeeSettings(0, address(this));

@@ -40,21 +40,16 @@ contract OptimizedAPRVaultTest is MarketsTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
     wnativeAddress = payable(ap.getAddress("wtoken"));
+    wbnb = WETH(wnativeAddress);
+    ankrWbnbMarket = ICErc20(ankrWbnbMarketAddress);
+    ahWbnbMarket = ICErc20(ahWbnbMarketAddress);
+    lenderSharesHint[0] = 4e17;
+    lenderSharesHint[1] = 6e17;
 
-    if (block.chainid == BSC_MAINNET) {
-      wbnb = WETH(wnativeAddress);
-      ankrWbnbMarket = ICErc20(ankrWbnbMarketAddress);
-      ahWbnbMarket = ICErc20(ahWbnbMarketAddress);
-      lenderSharesHint[0] = 4e17;
-      lenderSharesHint[1] = 6e17;
+    _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
+    _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
 
-      _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
-      _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
-
-      setUpVault();
-    } else {
-
-    }
+    setUpVault();
   }
 
   function deployVaultRegistry() internal {
@@ -369,7 +364,11 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
     CompoundMarketERC4626 twoBrlMarketAdapter = new CompoundMarketERC4626();
     {
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(twoBrlMarketAdapter), address(dpa), "");
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+        address(twoBrlMarketAdapter),
+        address(dpa),
+        ""
+      );
       twoBrlMarketAdapter = CompoundMarketERC4626(address(proxy));
       vm.label(address(twoBrlMarketAdapter), "twoBrlMarketAdapter");
     }
