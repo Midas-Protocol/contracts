@@ -378,7 +378,11 @@ contract OptimizedAPRVaultTest is MarketsTest {
       twoBrlMarketAdapter.initialize(ICErc20(twoBrlMarketAddress), blocksPerYear, registry);
 
       // deploy the vault
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(new OptimizedAPRVault()), address(dpa), "");
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+        address(new OptimizedAPRVault()),
+        address(dpa),
+        ""
+      );
       vault = OptimizedAPRVault(address(proxy));
       vm.label(address(vault), "vault");
 
