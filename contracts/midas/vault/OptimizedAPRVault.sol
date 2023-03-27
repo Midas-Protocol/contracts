@@ -197,7 +197,6 @@ contract OptimizedAPRVault is MultiStrategyVault {
             deltaWithdraw -= uint256(lenderAdjustedAmounts[i]);
           }
           // redeposit through the lenders adapters
-          IERC20(asset()).approve(address(adapters[i].adapter), uint256(lenderAdjustedAmounts[i]));
           adapters[i].adapter.deposit(uint256(lenderAdjustedAmounts[i]), address(this));
         }
         // record the applied allocation in storage
