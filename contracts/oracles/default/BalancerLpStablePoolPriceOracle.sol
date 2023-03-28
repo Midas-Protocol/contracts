@@ -24,12 +24,25 @@ import { MasterPriceOracle } from "../MasterPriceOracle.sol";
  */
 
 contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
+  /**
+   * @dev Maps Balancer LP Stabble token addresses to underlying token addresses.
+   */
+  mapping(address => address[]) public underlyingTokens;
+
+  /**
+   * @dev Supported underlying assets
+   */
   address[] public underlyings;
+
   bytes32 internal constant REENTRANCY_ERROR_HASH = keccak256(abi.encodeWithSignature("Error(string)", "BAL#400"));
 
-  function initialize(address[] memory _underlyings) public initializer {
+  function initialize(address[] memory _underlyings, address[][] memory _poolUnderlyings) public initializer {
+    require(_underlyings.length == _poolUnderlyings.length, "No LP tokens supplied or array lengths not equal.");
+
     __SafeOwnable_init();
-    underlyings = _underlyings;
+    for (uint256 i = 0; i < _underlyings.length; i++) {
+      underlyingTokens[_underlyings[i]] = _poolUnderlyings[i];
+    }
   }
 
   /**
@@ -67,15 +80,11 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     );
     require(keccak256(revertData) != REENTRANCY_ERROR_HASH, "Balancer vault view reentrancy");
 
-    (IERC20Upgradeable[] memory tokens, , ) = vault.getPoolTokens(pool.getPoolId());
+    address[] memory tokens = underlyingTokens[underlying];
 
     uint256 minPrice = type(uint256).max;
 
     for (uint256 i = 0; i < tokens.length; i++) {
-      // exclude the LP token itself
-      if (tokens[i] == IERC20Upgradeable(underlying)) {
-        continue;
-      }
       // Get the price of each of the base tokens in ETH
       // This also includes the price of the nested LP tokens, if they are e.g. LinearPools
       // The only requirement is that the nested LP tokens have a price oracle registered
@@ -92,7 +101,7 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
    * @dev Register the an underlying.
    * @param _underlying Underlying token for which to add an oracle.
    */
-  function registerToken(address _underlying) external onlyOwner {
+  function registerToken(address _underlying, address[] memory _underlyingTokens) external onlyOwner {
     bool skip = false;
     for (uint256 j = 0; j < underlyings.length; j++) {
       if (underlyings[j] == _underlying) {
@@ -102,6 +111,7 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     }
     if (!skip) {
       underlyings.push(_underlying);
+      underlyingTokens[_underlying] = _underlyingTokens;
     }
   }
 
