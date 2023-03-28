@@ -310,8 +310,16 @@ contract MultiStrategyVault is
 
     for (uint8 i; i < adapterCount; i++) {
       uint256 vaultAdapterShares = adapters[i].adapter.balanceOf(address(this));
-      uint256 shareOfAdapterShares = shares.mulDiv(vaultAdapterShares, totalSupply() + 10**DECIMAL_OFFSET, Math.Rounding.Up);
-      adapters[i].adapter.withdraw(adapters[i].adapter.previewRedeem(shareOfAdapterShares), address(this), address(this));
+      uint256 shareOfAdapterShares = shares.mulDiv(
+        vaultAdapterShares,
+        totalSupply() + 10**DECIMAL_OFFSET,
+        Math.Rounding.Up
+      );
+      adapters[i].adapter.withdraw(
+        adapters[i].adapter.previewRedeem(shareOfAdapterShares),
+        address(this),
+        address(this)
+      );
     }
 
     // the fresh minted feeShares are backed by the assets left after this transfer
