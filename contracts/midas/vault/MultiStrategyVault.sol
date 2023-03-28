@@ -308,17 +308,13 @@ contract MultiStrategyVault is
 
     _burn(owner, shares);
 
-    uint256 actuallyWithdrawn = 0;
     for (uint8 i; i < adapterCount; i++) {
-      uint256 allocation = assets.mulDiv(uint256(adapters[i].allocation), 1e18, Math.Rounding.Down);
-
-      if (assets % 2 == 1 && i == 0 && IERC20(asset()).balanceOf(address(this)) == 0) allocation += 1;
-
-      adapters[i].adapter.withdraw(allocation, address(this), address(this));
-      actuallyWithdrawn += allocation;
+      uint256 vaultAdapterShares = adapters[i].adapter.balanceOf(address(this));
+      uint256 shareOfAdapterShares = shares.mulDiv(vaultAdapterShares, totalSupply() + 10**DECIMAL_OFFSET, Math.Rounding.Up);
+      adapters[i].adapter.withdraw(adapters[i].adapter.previewRedeem(shareOfAdapterShares), address(this), address(this));
     }
-    assets = actuallyWithdrawn;
 
+    // the fresh minted feeShares are backed by the assets left after this transfer
     IERC20(asset()).safeTransfer(receiver, assets);
 
     emit Withdraw(caller, receiver, owner, assets, shares);
@@ -333,7 +329,8 @@ contract MultiStrategyVault is
     assets = IERC20(asset()).balanceOf(address(this));
 
     for (uint8 i; i < adapterCount; i++) {
-      assets += adapters[i].adapter.convertToAssets(adapters[i].adapter.balanceOf(address(this)));
+      uint256 vaultAdapterShares = adapters[i].adapter.balanceOf(address(this));
+      assets += adapters[i].adapter.previewRedeem(vaultAdapterShares);
     }
   }
 
@@ -396,7 +393,15 @@ contract MultiStrategyVault is
   }
 
   function _convertToAssets(uint256 shares, Math.Rounding rounding) internal view virtual override returns (uint256) {
-    return shares.mulDiv(totalAssets() + 1, totalSupply() + 10**DECIMAL_OFFSET, rounding);
+    uint256 assets = IERC20(asset()).balanceOf(address(this));
+
+    for (uint8 i; i < adapterCount; i++) {
+      uint256 vaultAdapterShares = adapters[i].adapter.balanceOf(address(this));
+      uint256 shareOfAdapterShares = shares.mulDiv(vaultAdapterShares, totalSupply() + 10**DECIMAL_OFFSET, rounding);
+      assets += adapters[i].adapter.previewRedeem(shareOfAdapterShares);
+    }
+
+    return assets;
   }
 
   /*------------------------------------------------------------

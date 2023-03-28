@@ -26,6 +26,7 @@ contract OptimizedAPRVault is MultiStrategyVault {
   address public registry;
 
   event EmergencyExitActivated();
+  event Harvested(uint256 totalAssets, uint256 aprBefore, uint256 aprAfter);
 
   error IncorrectListLength();
   error IncorrectDistribution();
@@ -150,8 +151,6 @@ contract OptimizedAPRVault is MultiStrategyVault {
   /// the Strategy's position.
   function harvest(uint64[] calldata lenderAllocationsHint) external {
     // TODO emit event about the harvested returns and currently deposited assets
-    //_prepareReturn();
-    //emit Harvested(profit, loss, debtPayment, debtOutstanding);
     _adjustPosition(lenderAllocationsHint);
   }
 
@@ -203,6 +202,8 @@ contract OptimizedAPRVault is MultiStrategyVault {
         adapters[i].allocation = lenderAllocationsHint[i];
       }
     }
+
+    emit Harvested(totalAssets(), currentAPR, estimatedAprHint);
   }
 
   function setEmergencyExit() external {
