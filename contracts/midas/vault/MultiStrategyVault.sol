@@ -306,13 +306,14 @@ contract MultiStrategyVault is
       _spendAllowance(owner, caller, shares);
     }
 
+    uint256 totalSupplyBefore = totalSupply();
     _burn(owner, shares);
 
     for (uint8 i; i < adapterCount; i++) {
       uint256 vaultAdapterShares = adapters[i].adapter.balanceOf(address(this));
-      uint256 shareOfAdapterShares = shares.mulDiv(
-        vaultAdapterShares,
-        totalSupply() + 10**DECIMAL_OFFSET,
+      uint256 shareOfAdapterShares = vaultAdapterShares.mulDiv(
+        shares,
+        totalSupplyBefore + 10**DECIMAL_OFFSET,
         Math.Rounding.Up
       );
       adapters[i].adapter.withdraw(
@@ -401,11 +402,12 @@ contract MultiStrategyVault is
   }
 
   function _convertToAssets(uint256 shares, Math.Rounding rounding) internal view virtual override returns (uint256) {
-    uint256 assets = IERC20(asset()).balanceOf(address(this));
-
+    uint256 cashAssets_ = IERC20(asset()).balanceOf(address(this));
+    uint256 assets = cashAssets_.mulDiv(shares, totalSupply() + 10**DECIMAL_OFFSET, rounding);
+    // calculate the share of the assets held in the adapters
     for (uint8 i; i < adapterCount; i++) {
       uint256 vaultAdapterShares = adapters[i].adapter.balanceOf(address(this));
-      uint256 shareOfAdapterShares = shares.mulDiv(vaultAdapterShares, totalSupply() + 10**DECIMAL_OFFSET, rounding);
+      uint256 shareOfAdapterShares = vaultAdapterShares.mulDiv(shares, totalSupply() + 10**DECIMAL_OFFSET, rounding);
       assets += adapters[i].adapter.previewRedeem(shareOfAdapterShares);
     }
 
@@ -716,13 +718,13 @@ contract MultiStrategyVault is
     adapters = proposedAdapters;
     adapterCount = proposedAdapterCount;
 
-    uint256 totalAssets_ = IERC20(asset()).balanceOf(address(this));
+    uint256 cashAssets_ = IERC20(asset()).balanceOf(address(this));
 
     for (uint8 i; i < adapterCount; i++) {
       IERC20(asset()).approve(address(adapters[i].adapter), type(uint256).max);
 
       adapters[i].adapter.deposit(
-        totalAssets_.mulDiv(uint256(adapters[i].allocation), 1e18, Math.Rounding.Down),
+        cashAssets_.mulDiv(uint256(adapters[i].allocation), 1e18, Math.Rounding.Down),
         address(this)
       );
     }
