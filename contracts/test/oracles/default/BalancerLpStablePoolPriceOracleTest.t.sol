@@ -32,6 +32,8 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
 
   address stMATIC = 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4;
   address MATICx = 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6;
+  address agEUR = 0xE0B52e49357Fd4DAf2c15e02058DCE6BC0057db4;
+  address jEUR = 0x4e3Decbb3645551B8A19f0eA1678079FCB33fB4c;
   address jBRL = 0xf2f77FE7b8e66571E0fca7104c4d670BF1C8d722;
   address BRZ = 0x491a4eB4f1FC3BfF8E1d2FC856a6A46663aD556f;
   address usdt = 0xc2132D05D31c914a87C6611C10748AEb04B58e8F;
@@ -40,12 +42,18 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
 
   function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+    address wtoken = ap.getAddress("wtoken");
+
+    address[][] memory stablePoolUnderlyings = new address[][](3);
+    stablePoolUnderlyings[0] = asArray(stMATIC, wtoken);
+    stablePoolUnderlyings[1] = asArray(jBRL, BRZ);
+    stablePoolUnderlyings[2] = asArray(jEUR, agEUR);
 
     address[] memory stableLps = asArray(stMATIC_WMATIC_pool, jBRL_BRZ_pool, jEUR_agEUR_pool);
     address[] memory linearLps = asArray(linearAaveUsdtPool, linearAaveUsdcPool, linearAaveDaiPool);
 
     stableLpOracle = new BalancerLpStablePoolPriceOracle();
-    stableLpOracle.initialize(stableLps);
+    stableLpOracle.initialize(stableLps, stablePoolUnderlyings);
 
     linearLpOracle = new BalancerLpLinearPoolPriceOracle();
     linearLpOracle.initialize(linearLps);
@@ -93,14 +101,9 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   }
 
   function testBoostedAaveLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
-    // These 3 assets need an oracle as well
-    uint256 priceLAUsdt = getLpTokenPrice(linearAaveUsdtPool, linearLpOracle);
-    uint256 priceLAUsdc = getLpTokenPrice(linearAaveUsdcPool, linearLpOracle);
-    uint256 priceLADai = getLpTokenPrice(linearAaveDaiPool, linearLpOracle);
-
     // register the oracle
     vm.prank(stableLpOracle.owner());
-    stableLpOracle.registerToken(boostedAavePool);
+    stableLpOracle.registerToken(boostedAavePool, asArray(usdt, usdc, dai));
 
     uint256 price = getLpTokenPrice(boostedAavePool, stableLpOracle);
     assertTrue(price > 0);
