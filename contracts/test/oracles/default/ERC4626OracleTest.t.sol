@@ -35,7 +35,7 @@ contract ERC4626OracleTest is BaseTest {
     chainlinkOracle.setPriceFeeds(
       asArray(USDC),
       asArray(usdcUsdPriceFeed),
-      ChainlinkPriceOracleV2.FeedBaseCurrency.USD
+      ChainlinkPriceOracleV2.FeedBaseCurrency.ETH
     );
     oracles[0] = IPriceOracle(address(chainlinkOracle));
 
@@ -50,7 +50,13 @@ contract ERC4626OracleTest is BaseTest {
 
   function testErc4626aPriceOracle() public fork(ETHEREUM_MAINNET) {
     setUpOtherOracles();
-    uint256 priceRy = mpo.price(realYieldUSDVault);
-    emit log_named_uint("priceRy", priceRy);
+    uint256 priceRealYieldUsdc = mpo.price(realYieldUSDVault);
+    uint256 priceUsdc = mpo.price(USDC);
+
+    emit log_named_uint("priceRy", priceRealYieldUsdc);
+    emit log_named_uint("priceUSdc", priceUsdc);
+
+    // Approximate only -- these should not match.
+    assertApproxEqRel(priceRealYieldUsdc, priceUsdc, 1e17, "!diff > 10%");
   }
 }

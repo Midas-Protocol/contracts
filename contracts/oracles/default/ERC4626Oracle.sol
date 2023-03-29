@@ -33,7 +33,6 @@ contract ERC4626Oracle is SafeOwnableUpgradeable, BasePriceOracle {
 
   /**
    * @dev Fetches the fair LP token/ETH price from Balancer, with 18 decimals of precision.
-   * Source: https://github.com/AlphaFinanceLab/homora-v2/blob/master/contracts/oracle/BalancerPairOracle.sol
    */
   function _price(address underlying) internal view virtual returns (uint256) {
     IERC4626 vault = IERC4626(underlying);
