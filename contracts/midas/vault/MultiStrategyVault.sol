@@ -202,7 +202,7 @@ contract MultiStrategyVault is
 
     uint256 feeShares = shares.mulDiv(depositFee, 1e18 - depositFee, Math.Rounding.Down);
 
-    assets = _convertToAssets(shares + feeShares, Math.Rounding.Up);
+    assets = _convertToAssets(shares + feeShares, Math.Rounding.Down);
 
     if (feeShares > 0) _mint(feeRecipient, feeShares);
 
@@ -363,7 +363,7 @@ contract MultiStrategyVault is
   function previewMint(uint256 shares) public view override returns (uint256 assets) {
     uint256 depositFee = uint256(fees.deposit);
     shares += shares.mulDiv(depositFee, 1e18 - depositFee, Math.Rounding.Up);
-    assets = _convertToAssets(shares, Math.Rounding.Up);
+    assets = _convertToAssets(shares, Math.Rounding.Down);
   }
 
   /**
@@ -398,7 +398,12 @@ contract MultiStrategyVault is
     override
     returns (uint256 shares)
   {
-    return assets.mulDiv(totalSupply() + 10**DECIMAL_OFFSET, totalAssets() + 1, rounding);
+    uint256 totalSupply_ = totalSupply();
+    if (totalSupply_ == 0) {
+      return assets * 10**DECIMAL_OFFSET;
+    } else {
+      return assets.mulDiv(totalSupply(), totalAssets(), rounding);
+    }
   }
 
   function _convertToAssets(uint256 shares, Math.Rounding rounding) internal view virtual override returns (uint256) {

@@ -255,9 +255,9 @@ contract OptimizedAPRVaultTest is MarketsTest {
       vm.roll(block.number + blocksPerYear);
 
       uint256 maxMintWhale = vault.maxMint(wbnbWhale);
-      maxMintWhale = Math.min(maxMintWhale, wbnb.balanceOf(wbnbWhale));
-      maxMintWhale = vault.convertToShares(maxMintWhale);
-      emit log_named_uint("maxMintWhale", maxMintWhale);
+      uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
+      uint256 asShares = vault.previewDeposit(whaleAssets);
+      maxMintWhale = Math.min(maxMintWhale, asShares);
 
       // call mint
       vm.startPrank(wbnbWhale);
