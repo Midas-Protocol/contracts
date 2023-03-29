@@ -313,11 +313,11 @@ contract MultiStrategyVault is
       uint256 vaultAdapterShares = adapters[i].adapter.balanceOf(address(this));
       uint256 shareOfAdapterShares = vaultAdapterShares.mulDiv(
         shares,
-        totalSupplyBefore + 10**DECIMAL_OFFSET,
+        totalSupplyBefore,
         Math.Rounding.Up
       );
-      adapters[i].adapter.withdraw(
-        adapters[i].adapter.previewRedeem(shareOfAdapterShares),
+      adapters[i].adapter.redeem(
+        shareOfAdapterShares,
         address(this),
         address(this)
       );
@@ -407,7 +407,7 @@ contract MultiStrategyVault is
     // calculate the share of the assets held in the adapters
     for (uint8 i; i < adapterCount; i++) {
       uint256 vaultAdapterShares = adapters[i].adapter.balanceOf(address(this));
-      uint256 shareOfAdapterShares = vaultAdapterShares.mulDiv(shares, totalSupply() + 10**DECIMAL_OFFSET, rounding);
+      uint256 shareOfAdapterShares = vaultAdapterShares.mulDiv(shares, totalSupply(), rounding);
       assets += adapters[i].adapter.previewRedeem(shareOfAdapterShares);
     }
 
