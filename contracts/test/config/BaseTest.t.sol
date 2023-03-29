@@ -11,6 +11,7 @@ import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.so
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 abstract contract BaseTest is Test {
+  uint128 constant ETHEREUM_MAINNET = 1;
   uint128 constant BSC_MAINNET = 56;
   uint128 constant MOONBEAM_MAINNET = 1284;
   uint128 constant POLYGON_MAINNET = 137;
@@ -120,6 +121,8 @@ abstract contract BaseTest is Test {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("arbitrum")) + 100;
       } else if (chainid == FANTOM_OPERA) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("fantom")) + 100;
+      } else if (chainid == ETHEREUM_MAINNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("ethereum")) + 100;
       }
     }
     return forkIds[chainid] - 100;
