@@ -27,7 +27,7 @@ contract ERC4626OracleTest is BaseTest {
     mpo.initialize(assets, oracles, IPriceOracle(address(0)), address(this), true, WETH);
   }
 
-  function setUpOtherOracles() public {
+  function setUpAssetOracles() public {
     setUpMpo();
     IPriceOracle[] memory oracles = new IPriceOracle[](2);
     chainlinkOracle = new ChainlinkPriceOracleV2(mpo.admin(), true, WETH, nativeUsdPriceFeed);
@@ -50,6 +50,18 @@ contract ERC4626OracleTest is BaseTest {
 
   function testErc4626aPriceOracle() public fork(ETHEREUM_MAINNET) {
     setUpOtherOracles();
+    uint256 priceRealYieldUsdc = mpo.price(realYieldUSDVault);
+    uint256 priceUsdc = mpo.price(USDC);
+
+    emit log_named_uint("priceRy", priceRealYieldUsdc);
+    emit log_named_uint("priceUSdc", priceUsdc);
+
+    // Approximate only -- these should not match.
+    assertApproxEqRel(priceRealYieldUsdc, priceUsdc, 1e17, "!diff > 10%");
+  }
+
+  function testErc4626RedemptionStrategy() public fork(ETHEREUM_MAINNET) {
+    setUpAssetOracles();
     uint256 priceRealYieldUsdc = mpo.price(realYieldUSDVault);
     uint256 priceUsdc = mpo.price(USDC);
 
