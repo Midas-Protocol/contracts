@@ -302,7 +302,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
   }
 
   function testOptVaultDeposit(uint256 depositAmount_) public fork(BSC_MAINNET) {
-    vm.assume(depositAmount_ >= 1e9 && depositAmount_ < type(uint128).max);
+    vm.assume(depositAmount_ >= 10 * vault.adapterCount() && depositAmount_ < type(uint128).max);
 
     vault.harvest(lenderSharesHint);
 
@@ -320,6 +320,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
       wbnb.approve(address(vault), whaleAssets);
       bool shouldRevert = depositAmount_ >= whaleAssets;
       if (shouldRevert) vm.expectRevert("!insufficient balance");
+      if (expectedVaultSharesMinted == 0) vm.expectRevert("too little assets");
       vault.deposit(depositAmount_);
       vm.stopPrank();
 

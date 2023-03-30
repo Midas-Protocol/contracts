@@ -178,10 +178,11 @@ contract MultiStrategyVault is
 
     uint256 feeShares = _convertToShares(
       assets.mulDiv(uint256(fees.deposit), 1e18, Math.Rounding.Down),
-      Math.Rounding.Up
+      Math.Rounding.Down
     );
 
     shares = _convertToShares(assets, Math.Rounding.Down) - feeShares;
+    require(shares > 0, "too little assets");
 
     if (feeShares > 0) _mint(feeRecipient, feeShares);
 
@@ -203,6 +204,8 @@ contract MultiStrategyVault is
     uint256 feeShares = shares.mulDiv(depositFee, 1e18 - depositFee, Math.Rounding.Down);
 
     assets = _convertToAssets(shares + feeShares, Math.Rounding.Down);
+    // don't let it mint shares for 0 assets
+    require(assets == 0, "too little shares");
 
     if (feeShares > 0) _mint(feeRecipient, feeShares);
 
@@ -254,10 +257,8 @@ contract MultiStrategyVault is
     if (receiver == address(0)) revert InvalidReceiver();
 
     uint256 shares = _convertToShares(assets, Math.Rounding.Down);
-
     uint256 withdrawalFee = uint256(fees.withdrawal);
     uint256 feeShares = shares.mulDiv(withdrawalFee, 1e18 - withdrawalFee, Math.Rounding.Down);
-
     shares += feeShares;
 
     if (feeShares > 0) _mint(feeRecipient, feeShares);
@@ -347,7 +348,7 @@ contract MultiStrategyVault is
   function previewDeposit(uint256 assets) public view override returns (uint256 shares) {
     uint256 feeShares = _convertToShares(
       assets.mulDiv(uint256(fees.deposit), 1e18, Math.Rounding.Down),
-      Math.Rounding.Up
+      Math.Rounding.Down
     );
     shares = _convertToShares(assets, Math.Rounding.Down) - feeShares;
   }
@@ -372,9 +373,9 @@ contract MultiStrategyVault is
    */
   function previewWithdraw(uint256 assets) public view override returns (uint256 shares) {
     shares = _convertToShares(assets, Math.Rounding.Down);
-
     uint256 withdrawalFee = uint256(fees.withdrawal);
-    shares += shares.mulDiv(withdrawalFee, 1e18 - withdrawalFee, Math.Rounding.Up);
+    uint256 feeShares = shares.mulDiv(withdrawalFee, 1e18 - withdrawalFee, Math.Rounding.Down);
+    shares += feeShares;
   }
 
   /**
@@ -390,6 +391,7 @@ contract MultiStrategyVault is
     assets = _convertToAssets(shares - feeShares, Math.Rounding.Up);
   }
 
+  // @notice returns the max amount of shares that match this assets amount
   function _convertToShares(uint256 assets, Math.Rounding rounding)
     internal
     view
@@ -401,7 +403,6 @@ contract MultiStrategyVault is
     if (totalSupply_ == 0) {
       return assets * 10**DECIMAL_OFFSET;
     } else {
-      // returns the max amount of shares that match this assets amount
       return (assets + 1).mulDiv(totalSupply_, totalAssets(), rounding);
     }
   }
@@ -416,8 +417,6 @@ contract MultiStrategyVault is
   {
     uint256 totalSupply_ = totalSupply();
     if (totalSupply_ == 0) {
-      // don't let it mint shares for 0 assets
-      require(shares >= 10**DECIMAL_OFFSET, "too little shares");
       assets = shares / 10**DECIMAL_OFFSET;
     } else {
       assets += totalAssets().mulDiv(shares, totalSupply_, rounding);
@@ -519,7 +518,7 @@ contract MultiStrategyVault is
       return 0;
     } else {
       uint256 maxWithdraw_ = maxWithdrawVault();
-      uint256 maxRedeem_ = _convertToShares(maxWithdraw_, Math.Rounding.Up);
+      uint256 maxRedeem_ = previewWithdraw(maxWithdraw_);
       return Math.min(maxRedeem_, callerShares);
     }
   }
