@@ -285,33 +285,36 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
   }
 
-  function testOptVaultDeposit() public fork(BSC_MAINNET) {
+  function testOptVaultDeposit(uint256 depositAmount_) public fork(BSC_MAINNET) {
+    vm.assume(depositAmount_ >= 1e9 && depositAmount_ < type(uint128).max);
+
     vault.harvest(lenderSharesHint);
+
+    // advance time with a year
+    vm.warp(block.timestamp + 365.25 days);
+    vm.roll(block.number + blocksPerYear);
 
     // test the shares before and after calling deposit
     {
       uint256 vaultSharesBefore = vault.balanceOf(wbnbWhale);
-
-      // advance time with a year
-      vm.warp(block.timestamp + 365.25 days);
-      vm.roll(block.number + blocksPerYear);
-
-      uint256 maxDepositWhale = vault.maxDeposit(wbnbWhale);
-      maxDepositWhale = Math.min(maxDepositWhale, wbnb.balanceOf(wbnbWhale));
-      emit log_named_uint("maxDepositWhale", maxDepositWhale);
-
+      uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
+      uint256 expectedVaultSharesMinted = vault.previewDeposit(depositAmount_);
       // call deposit
       vm.startPrank(wbnbWhale);
-      wbnb.approve(address(vault), maxDepositWhale);
-      vault.deposit(maxDepositWhale);
+      wbnb.approve(address(vault), whaleAssets);
+      bool shouldRevert = depositAmount_ >= whaleAssets;
+      if (shouldRevert) vm.expectRevert("!insufficient balance");
+      vault.deposit(depositAmount_);
       vm.stopPrank();
 
-      uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
-      assertGt(
-        vaultSharesAfter - vaultSharesBefore,
-        depositAmount,
-        "!depositor did not receive more than the initial deposited amount"
-      );
+      if (!shouldRevert) {
+        uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
+        assertEq(
+          vaultSharesAfter - vaultSharesBefore,
+          expectedVaultSharesMinted,
+          "!depositor did not receive the expected minted shares"
+        );
+      }
     }
   }
 

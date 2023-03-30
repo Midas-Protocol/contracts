@@ -347,8 +347,11 @@ contract MultiStrategyVault is
    * @dev This method accounts for issuance of accrued fee shares.
    */
   function previewDeposit(uint256 assets) public view override returns (uint256 shares) {
-    assets -= assets.mulDiv(uint256(fees.deposit), 1e18, Math.Rounding.Down);
-    shares = _convertToShares(assets, Math.Rounding.Down);
+    uint256 feeShares = _convertToShares(
+      assets.mulDiv(uint256(fees.deposit), 1e18, Math.Rounding.Down),
+      Math.Rounding.Up
+    );
+    shares = _convertToShares(assets, Math.Rounding.Down) - feeShares;
   }
 
   /**
