@@ -209,8 +209,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
     if (assets > 100) assertEq(sameAssets, assets, "!same");
   }
 
-  function testOptVaultMint(uint256 mintAmount) public fork(BSC_MAINNET) {
-    vm.assume(mintAmount >= 1e18);
+  function testOptVaultMint(uint256 mintAmount_) public fork(BSC_MAINNET) {
+    vm.assume(mintAmount_ >= 20);
 
     vault.harvest(lenderSharesHint);
 
@@ -230,17 +230,17 @@ contract OptimizedAPRVaultTest is MarketsTest {
       vm.startPrank(wbnbWhale);
       {
         wbnb.approve(address(vault), whaleAssets);
-        if (vault.previewMint(mintAmount) == 0) vm.expectRevert("too little assets");
-        else if (mintAmount > maxShares) vm.expectRevert("!insufficient balance");
+        if (vault.previewMint(mintAmount_) == 0) vm.expectRevert("too little shares");
+        else if (mintAmount_ > maxShares) vm.expectRevert("!insufficient balance");
         else shouldRevert = false;
 
-        vault.mint(mintAmount);
+        vault.mint(mintAmount_);
       }
       vm.stopPrank();
 
       if (!shouldRevert) {
         uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
-        assertEq(vaultSharesAfter - vaultSharesBefore, mintAmount, "!depositor did not mint the correct shares");
+        assertEq(vaultSharesAfter - vaultSharesBefore, mintAmount_, "!depositor did not mint the correct shares");
       }
     }
   }

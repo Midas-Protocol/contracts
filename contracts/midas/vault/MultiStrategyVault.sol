@@ -174,12 +174,12 @@ contract MultiStrategyVault is
 
   function deposit(uint256 assets, address receiver) public override returns (uint256 shares) {
     if (receiver == address(0)) revert InvalidReceiver();
+    require(assets > 0, "too little assets");
     if (assets > maxDeposit(receiver)) revert MaxError(assets);
 
     uint256 feeShares = _convertToShares(assets.mulDiv(uint256(fees.deposit), 1e18, Math.Rounding.Down));
 
     shares = _convertToShares(assets) - feeShares;
-    require(shares > 0, "too little assets");
 
     if (feeShares > 0) _mint(feeRecipient, feeShares);
 
@@ -251,8 +251,10 @@ contract MultiStrategyVault is
     address owner
   ) public override returns (uint256) {
     if (receiver == address(0)) revert InvalidReceiver();
+    require(assets > 0, "too little assets");
 
     uint256 shares = _convertToShares(assets);
+
     uint256 withdrawalFee = uint256(fees.withdrawal);
     uint256 feeShares = shares.mulDiv(withdrawalFee, 1e18 - withdrawalFee, Math.Rounding.Down);
     shares += feeShares;
