@@ -173,15 +173,18 @@ contract ERC4626OracleAndLiquidatorTest is BaseTest {
     // get the redeemed value of the output token
     uint256 redeemOutputTokenValue = (mpo.price(address(_outputToken)) * liquidatorBalance) /
       10**ERC20Upgradeable(address(_outputToken)).decimals();
-
-    emit log_named_uint("liquidatorBalance", liquidatorBalance);
-    emit log_named_uint("otoken price", mpo.price(address(_outputToken)));
-    emit log_named_uint("otoken dec", ERC20Upgradeable(address(_outputToken)).decimals());
-
     // ensure they are approximately equal
     assertApproxEqRel(redeemValue, redeemOutputTokenValue, 3e16, "!diff > 3%");
-    // log the difference
 
-    emit log_named_uint("diff", diffRel(redeemValue, redeemOutputTokenValue));
+    uint256 maxVal = redeemValue > redeemOutputTokenValue ? redeemValue : redeemOutputTokenValue;
+    uint256 minVal = redeemValue < redeemOutputTokenValue ? redeemValue : redeemOutputTokenValue;
+
+    uint256 absoluteDifference = maxVal - minVal;
+    uint256 percentageDifference = (absoluteDifference * 10000) / maxVal; // Multiplied by 10000 for 2 decimal places of precision
+
+    // log the differences
+    emit log_named_uint("redeemOutputTokenValue", redeemOutputTokenValue);
+    emit log_named_uint("redeemValue", redeemValue);
+    emit log_named_uint("base 1000 diff", percentageDifference);
   }
 }
