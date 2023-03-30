@@ -260,11 +260,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
       if (!shouldRevert) {
         uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
-        assertEq(
-          vaultSharesBefore - vaultSharesAfter,
-          redeemAmount_,
-          "!depositor did not redeem the requested shares"
-        );
+        assertEq(vaultSharesBefore - vaultSharesAfter, redeemAmount_, "!depositor did not redeem the requested shares");
       }
     }
   }
@@ -300,11 +296,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
       if (!shouldRevert) {
         uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
-        assertEq(
-          vaultSharesAfter - vaultSharesBefore,
-          mintAmount,
-          "!depositor did not mint the correct shares"
-        );
+        assertEq(vaultSharesAfter - vaultSharesBefore, mintAmount, "!depositor did not mint the correct shares");
       }
     }
   }

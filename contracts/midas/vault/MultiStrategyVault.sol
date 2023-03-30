@@ -407,7 +407,13 @@ contract MultiStrategyVault is
   }
 
   // @notice returns the min amount of assets that match this shares amount
-  function _convertToAssets(uint256 shares, Math.Rounding rounding) internal view virtual override returns (uint256 assets) {
+  function _convertToAssets(uint256 shares, Math.Rounding rounding)
+    internal
+    view
+    virtual
+    override
+    returns (uint256 assets)
+  {
     uint256 totalSupply_ = totalSupply();
     if (totalSupply_ == 0) {
       // don't let it mint shares for 0 assets
