@@ -191,7 +191,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
       emit log_named_uint("maxRedeemAfter", maxRedeemAfter);
     }
 
-    // test if the APR improved as a result of the hinted better allocations
+    // check if the APR improved as a result of the hinted better allocations
     {
       uint256 aprAfter = vault.estimatedAPR();
       emit log_named_uint("aprAfter", aprAfter);
@@ -202,119 +202,187 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
   }
 
-  function testOptVaultWithdraw() public fork(BSC_MAINNET) {
-    vault.harvest(lenderSharesHint);
-
-    // test the balance before and after calling redeem
-    {
-      uint256 wbnbBalanceBefore = wbnb.balanceOf(wbnbWhale);
-
-      // advance time with a year
-      vm.warp(block.timestamp + 365.25 days);
-      vm.roll(block.number + blocksPerYear);
-
-      uint256 maxWithdrawWhale = vault.maxWithdraw(wbnbWhale);
-      emit log_named_uint("maxWithdrawWhale", maxWithdrawWhale);
-
-      // call redeem
-      vm.prank(wbnbWhale);
-      vault.withdraw(maxWithdrawWhale);
-
-      uint256 wbnbBalanceAfter = wbnb.balanceOf(wbnbWhale);
-      assertGt(
-        wbnbBalanceAfter - wbnbBalanceBefore,
-        depositAmount,
-        "!depositor did not receive more than the initial deposited amount"
-      );
-    }
+  function testVaultPreviewMint(uint256 assets) public fork(BSC_MAINNET) {
+    vm.assume(assets >= 10 * vault.adapterCount() && assets < type(uint128).max);
+    // previewDeposit should return the maximum shares that are minted for the assets input
+    uint256 maxShares = vault.previewDeposit(assets);
+    // previewMint should return the minimum assets required for the shares input
+    uint256 shouldBeMoreThanAvailableAssets = vault.previewMint(maxShares + 1);
+    // minting a share more should require more assets than the available
+    assertGt(shouldBeMoreThanAvailableAssets, assets, "!not gt than available assets");
   }
 
-  function testOptVaultRedeem() public fork(BSC_MAINNET) {
-    vault.harvest(lenderSharesHint);
+  function testVaultPreviewRedeem(uint256 assets) public fork(BSC_MAINNET) {
+    vm.assume(assets < type(uint128).max);
+    // previewWithdraw should return the maximum shares that are burned for the assets input
+    uint256 maxShares = vault.previewWithdraw(assets);
+    uint256 sameAssets = vault.previewRedeem(maxShares);
+    uint256 shouldBeMoreThanRequestedAssets = vault.previewRedeem(maxShares + 1);
+    assertGt(shouldBeMoreThanRequestedAssets, assets, "!not gt than requested assets");
 
-    // test the balance before and after calling redeem
-    {
-      uint256 wbnbBalanceBefore = wbnb.balanceOf(wbnbWhale);
-
-      // advance time with a year
-      vm.warp(block.timestamp + 365.25 days);
-      vm.roll(block.number + blocksPerYear);
-
-      uint256 maxRedeemWhale = vault.maxRedeem(wbnbWhale);
-      uint256 assetsFromRedeem = vault.previewRedeem(maxRedeemWhale);
-      emit log_named_uint("assetsFromRedeem", assetsFromRedeem);
-
-      // call redeem
-      vm.prank(wbnbWhale);
-      vault.redeem(maxRedeemWhale);
-
-      uint256 wbnbBalanceAfter = wbnb.balanceOf(wbnbWhale);
-      assertGt(
-        wbnbBalanceAfter - wbnbBalanceBefore,
-        depositAmount,
-        "!depositor did not receive more than the initial deposited amount"
-      );
-    }
+    if (assets > 100) assertEq(sameAssets, assets, "!same");
   }
 
-  function testOptVaultMint() public fork(BSC_MAINNET) {
+  function testOptVaultMint(uint256 mintAmount_) public fork(BSC_MAINNET) {
+    vm.assume(mintAmount_ > 1e8);
+
     vault.harvest(lenderSharesHint);
+
+    // advance time with a year
+    vm.warp(block.timestamp + 365.25 days);
+    vm.roll(block.number + blocksPerYear);
 
     // test the shares before and after calling mint
     {
       uint256 vaultSharesBefore = vault.balanceOf(wbnbWhale);
-
-      // advance time with a year
-      vm.warp(block.timestamp + 365.25 days);
-      vm.roll(block.number + blocksPerYear);
-
-      uint256 maxMintWhale = vault.maxMint(wbnbWhale);
-      maxMintWhale = Math.min(maxMintWhale, wbnb.balanceOf(wbnbWhale));
-      maxMintWhale = vault.convertToShares(maxMintWhale);
-      emit log_named_uint("maxMintWhale", maxMintWhale);
+      uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
+      // preview deposit should return the max shares possible for the supplied amount of assets
+      uint256 maxShares = vault.previewDeposit(whaleAssets);
 
       // call mint
+      bool shouldRevert = true;
       vm.startPrank(wbnbWhale);
-      wbnb.approve(address(vault), maxMintWhale);
-      vault.mint(maxMintWhale);
+      {
+        wbnb.approve(address(vault), whaleAssets);
+        if (vault.previewMint(mintAmount_) == 0) vm.expectRevert("too little shares");
+        else if (mintAmount_ > maxShares) vm.expectRevert("!insufficient balance");
+        else shouldRevert = false;
+
+        vault.mint(mintAmount_);
+      }
       vm.stopPrank();
 
-      uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
-      assertGt(
-        vaultSharesAfter - vaultSharesBefore,
-        depositAmount,
-        "!depositor did not receive more than the initial deposited amount"
-      );
+      if (!shouldRevert) {
+        uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
+        assertEq(vaultSharesAfter - vaultSharesBefore, mintAmount_, "!depositor did not mint the correct shares");
+      }
     }
   }
 
-  function testOptVaultDeposit() public fork(BSC_MAINNET) {
+  function testOptVaultDeposit(uint256 depositAmount_) public fork(BSC_MAINNET) {
+    vm.assume(depositAmount_ >= 10 * vault.adapterCount() && depositAmount_ < type(uint128).max);
+
     vault.harvest(lenderSharesHint);
+
+    // advance time with a year
+    vm.warp(block.timestamp + 365.25 days);
+    vm.roll(block.number + blocksPerYear);
 
     // test the shares before and after calling deposit
     {
       uint256 vaultSharesBefore = vault.balanceOf(wbnbWhale);
-
-      // advance time with a year
-      vm.warp(block.timestamp + 365.25 days);
-      vm.roll(block.number + blocksPerYear);
-
-      uint256 maxDepositWhale = vault.maxDeposit(wbnbWhale);
-      maxDepositWhale = Math.min(maxDepositWhale, wbnb.balanceOf(wbnbWhale));
-      emit log_named_uint("maxDepositWhale", maxDepositWhale);
+      uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
+      uint256 expectedVaultSharesMinted = vault.previewDeposit(depositAmount_);
 
       // call deposit
+      bool shouldRevert = true;
       vm.startPrank(wbnbWhale);
-      wbnb.approve(address(vault), maxDepositWhale);
-      vault.deposit(maxDepositWhale);
+      {
+        wbnb.approve(address(vault), whaleAssets);
+        if (depositAmount_ > whaleAssets) vm.expectRevert("!insufficient balance");
+        else if (expectedVaultSharesMinted == 0) vm.expectRevert("too little assets");
+        else shouldRevert = false;
+
+        vault.deposit(depositAmount_);
+      }
       vm.stopPrank();
 
-      uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
-      assertGt(
-        vaultSharesAfter - vaultSharesBefore,
-        depositAmount,
-        "!depositor did not receive more than the initial deposited amount"
-      );
+      if (!shouldRevert) {
+        uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
+        assertEq(
+          vaultSharesAfter - vaultSharesBefore,
+          expectedVaultSharesMinted,
+          "!depositor did not receive the expected minted shares"
+        );
+      }
+    }
+  }
+
+  function testOptVaultWithdraw(uint256 withdrawAmount_) public fork(BSC_MAINNET) {
+    vm.assume(withdrawAmount_ < type(uint128).max);
+
+    vault.harvest(lenderSharesHint);
+
+    // deposit some assets to test a wider range of withdrawable amounts
+    vm.startPrank(wbnbWhale);
+    uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
+    wbnb.approve(address(vault), whaleAssets);
+    vault.deposit(whaleAssets / 2);
+    vm.stopPrank();
+
+    // advance time with a year
+    vm.warp(block.timestamp + 365.25 days);
+    vm.roll(block.number + blocksPerYear);
+
+    // test the balance before and after calling withdraw
+    {
+      uint256 wbnbBalanceBefore = wbnb.balanceOf(wbnbWhale);
+
+      uint256 maxWithdrawWhale = vault.maxWithdraw(wbnbWhale);
+
+      // call withdraw
+      bool shouldRevert = true;
+      vm.startPrank(wbnbWhale);
+      {
+        if (withdrawAmount_ > maxWithdrawWhale) vm.expectRevert("ERC20: burn amount exceeds balance");
+        else if (withdrawAmount_ == 0) vm.expectRevert("too little assets");
+        else shouldRevert = false;
+
+        vault.withdraw(withdrawAmount_);
+      }
+      vm.stopPrank();
+
+      if (!shouldRevert) {
+        uint256 wbnbBalanceAfter = wbnb.balanceOf(wbnbWhale);
+        assertEq(
+          wbnbBalanceAfter - wbnbBalanceBefore,
+          withdrawAmount_,
+          "!depositor did not receive the requested withdraw amount"
+        );
+      }
+    }
+  }
+
+  function testOptVaultRedeem(uint256 redeemAmount_) public fork(BSC_MAINNET) {
+    vm.assume(redeemAmount_ < type(uint128).max);
+
+    vault.harvest(lenderSharesHint);
+
+    // deposit some assets to test a wider range of redeemable amounts
+    vm.startPrank(wbnbWhale);
+    uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
+    wbnb.approve(address(vault), whaleAssets);
+    vault.deposit(whaleAssets / 2);
+    vm.stopPrank();
+
+    // advance time with a year
+    vm.warp(block.timestamp + 365.25 days);
+    vm.roll(block.number + blocksPerYear);
+
+    // test the balance before and after calling redeem
+    {
+      uint256 vaultSharesBefore = vault.balanceOf(wbnbWhale);
+
+      uint256 maxRedeemWhale = vault.maxRedeem(wbnbWhale);
+
+      uint256 assetsToReceive = vault.previewRedeem(redeemAmount_);
+
+      // call redeem
+      bool shouldRevert = true;
+      vm.startPrank(wbnbWhale);
+      {
+        if (assetsToReceive == 0) vm.expectRevert("too little shares");
+        else if (redeemAmount_ > maxRedeemWhale) vm.expectRevert("ERC20: burn amount exceeds balance");
+        else shouldRevert = false;
+
+        vault.redeem(redeemAmount_);
+      }
+      vm.stopPrank();
+
+      if (!shouldRevert) {
+        uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
+        assertEq(vaultSharesBefore - vaultSharesAfter, redeemAmount_, "!depositor did not redeem the requested shares");
+      }
     }
   }
 

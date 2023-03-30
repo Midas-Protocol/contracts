@@ -59,7 +59,6 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     return convertToAssets(balanceOf(account));
   }
 
-  // TODO claim rewards from a flywheel
   function afterDeposit(uint256 amount, uint256) internal override onlyRegisteredVaults {
     ERC20Upgradeable(asset()).approve(address(market), amount);
     require(market.mint(amount) == 0, "deposit to market failed");

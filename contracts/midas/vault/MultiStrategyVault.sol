@@ -124,39 +124,15 @@ contract MultiStrategyVault is
     _symbol = string(bytes.concat("mo-", bytes(IERC20Metadata(address(asset_)).symbol())));
   }
 
-  function name()
-    public
-    view
-    override
-    returns (
-      /*(IERC20Metadata, ERC20)*/
-      string memory
-    )
-  {
+  function name() public view override returns (string memory) {
     return _name;
   }
 
-  function symbol()
-    public
-    view
-    override
-    returns (
-      /*(IERC20Metadata, ERC20)*/
-      string memory
-    )
-  {
+  function symbol() public view override returns (string memory) {
     return _symbol;
   }
 
-  function decimals()
-    public
-    view
-    override
-    returns (
-      /*(IERC20Metadata, ERC20)*/
-      uint8
-    )
-  {
+  function decimals() public view override returns (uint8) {
     return _decimals;
   }
 
@@ -164,7 +140,6 @@ contract MultiStrategyVault is
                       DEPOSIT/WITHDRAWAL LOGIC
     ------------------------------------------------------------*/
 
-  error ZeroAmount();
   error InvalidReceiver();
   error MaxError(uint256 amount);
 
@@ -174,14 +149,13 @@ contract MultiStrategyVault is
 
   function deposit(uint256 assets, address receiver) public override returns (uint256 shares) {
     if (receiver == address(0)) revert InvalidReceiver();
+    require(assets > 0, "too little assets");
     if (assets > maxDeposit(receiver)) revert MaxError(assets);
 
-    uint256 feeShares = _convertToShares(
-      assets.mulDiv(uint256(fees.deposit), 1e18, Math.Rounding.Down),
-      Math.Rounding.Down
-    );
-
-    shares = _convertToShares(assets, Math.Rounding.Down) - feeShares;
+    uint256 shares = _convertToShares(assets);
+    uint256 depositFee = uint256(fees.deposit);
+    uint256 feeShares = shares.mulDiv(depositFee, 1e18 - depositFee, Math.Rounding.Down);
+    shares = shares - feeShares;
 
     if (feeShares > 0) _mint(feeRecipient, feeShares);
 
@@ -199,10 +173,10 @@ contract MultiStrategyVault is
     if (shares > maxMint(receiver)) revert MaxError(shares);
 
     uint256 depositFee = uint256(fees.deposit);
-
     uint256 feeShares = shares.mulDiv(depositFee, 1e18 - depositFee, Math.Rounding.Down);
-
-    assets = _convertToAssets(shares + feeShares, Math.Rounding.Up);
+    assets = _convertToAssets(shares + feeShares);
+    // don't let it mint shares for 0 assets
+    require(assets > 0, "too little shares");
 
     if (feeShares > 0) _mint(feeRecipient, feeShares);
 
@@ -219,10 +193,15 @@ contract MultiStrategyVault is
   ) internal override nonReentrant whenNotPaused {
     if (receiver == address(0)) revert InvalidReceiver();
 
-    IERC20(asset()).safeTransferFrom(caller, address(this), assets);
+    IERC20 asset_ = IERC20(asset());
+    require(asset_.balanceOf(caller) >= assets, "!insufficient balance");
+    require(asset_.allowance(caller, address(this)) >= assets, "!insufficient allowance");
+    asset_.safeTransferFrom(caller, address(this), assets);
 
+    // allocate all available assets = caller assets + cash
+    uint256 assetsToAllocate = asset_.balanceOf(address(this));
     for (uint8 i; i < adapterCount; i++) {
-      uint256 adapterDeposit = assets.mulDiv(adapters[i].allocation, 1e18, Math.Rounding.Down);
+      uint256 adapterDeposit = assetsToAllocate.mulDiv(adapters[i].allocation, 1e18, Math.Rounding.Down);
       adapters[i].adapter.deposit(adapterDeposit, address(this));
     }
 
@@ -248,14 +227,12 @@ contract MultiStrategyVault is
     address owner
   ) public override returns (uint256) {
     if (receiver == address(0)) revert InvalidReceiver();
-    if (assets > maxWithdraw(owner)) revert MaxError(assets);
+    require(assets > 0, "too little assets");
 
-    uint256 shares = _convertToShares(assets, Math.Rounding.Up);
+    uint256 shares = _convertToShares(assets);
 
     uint256 withdrawalFee = uint256(fees.withdrawal);
-
     uint256 feeShares = shares.mulDiv(withdrawalFee, 1e18 - withdrawalFee, Math.Rounding.Down);
-
     shares += feeShares;
 
     if (feeShares > 0) _mint(feeRecipient, feeShares);
@@ -282,11 +259,12 @@ contract MultiStrategyVault is
     address owner
   ) public override returns (uint256 assets) {
     if (receiver == address(0)) revert InvalidReceiver();
-    if (shares > maxRedeem(owner)) revert MaxError(shares);
 
-    uint256 feeShares = shares.mulDiv(uint256(fees.withdrawal), 1e18, Math.Rounding.Down);
+    uint256 withdrawalFee = uint256(fees.withdrawal);
+    uint256 feeShares = shares.mulDiv(withdrawalFee, 1e18 - withdrawalFee, Math.Rounding.Down);
 
-    assets = _convertToAssets(shares - feeShares, Math.Rounding.Up);
+    assets = _convertToAssets(shares - feeShares);
+    require(assets > 0, "too little shares");
 
     if (feeShares > 0) _mint(feeRecipient, feeShares);
 
@@ -306,19 +284,17 @@ contract MultiStrategyVault is
       _spendAllowance(owner, caller, shares);
     }
 
+    uint256 totalSupplyBefore = totalSupply();
     _burn(owner, shares);
 
-    uint256 actuallyWithdrawn = 0;
     for (uint8 i; i < adapterCount; i++) {
-      uint256 allocation = assets.mulDiv(uint256(adapters[i].allocation), 1e18, Math.Rounding.Down);
-
-      if (assets % 2 == 1 && i == 0 && IERC20(asset()).balanceOf(address(this)) == 0) allocation += 1;
-
-      adapters[i].adapter.withdraw(allocation, address(this), address(this));
-      actuallyWithdrawn += allocation;
+      uint256 vaultAdapterShares = adapters[i].adapter.balanceOf(address(this));
+      // round up the shares to make sure enough is withdrawn for the transfer
+      uint256 shareOfAdapterShares = vaultAdapterShares.mulDiv(shares, totalSupplyBefore, Math.Rounding.Up);
+      adapters[i].adapter.redeem(shareOfAdapterShares, address(this), address(this));
     }
-    assets = actuallyWithdrawn;
 
+    // the fresh minted feeShares are backed by the assets left after this transfer
     IERC20(asset()).safeTransfer(receiver, assets);
 
     emit Withdraw(caller, receiver, owner, assets, shares);
@@ -332,32 +308,36 @@ contract MultiStrategyVault is
   function totalAssets() public view override returns (uint256 assets) {
     assets = IERC20(asset()).balanceOf(address(this));
 
+    // add the assets held in the adapters
     for (uint8 i; i < adapterCount; i++) {
-      assets += adapters[i].adapter.convertToAssets(adapters[i].adapter.balanceOf(address(this)));
+      uint256 vaultAdapterShares = adapters[i].adapter.balanceOf(address(this));
+      assets += adapters[i].adapter.previewRedeem(vaultAdapterShares);
     }
   }
 
   /**
    * @notice Simulate the effects of a deposit at the current block, given current on-chain conditions.
    * @param assets Exact amount of underlying `asset` token to deposit
-   * @return shares of the vault issued in exchange to the user for `assets`
+   * @return of the vault issued in exchange to the user for `assets`
    * @dev This method accounts for issuance of accrued fee shares.
    */
-  function previewDeposit(uint256 assets) public view override returns (uint256 shares) {
-    assets -= assets.mulDiv(uint256(fees.deposit), 1e18, Math.Rounding.Down);
-    shares = _convertToShares(assets, Math.Rounding.Down);
+  function previewDeposit(uint256 assets) public view override returns (uint256) {
+    uint256 shares = _convertToShares(assets);
+    uint256 depositFee = uint256(fees.deposit);
+    uint256 feeShares = shares.mulDiv(depositFee, 1e18 - depositFee, Math.Rounding.Down);
+    return shares - feeShares;
   }
 
   /**
    * @notice Simulate the effects of a mint at the current block, given current on-chain conditions.
    * @param shares Exact amount of vault shares to mint.
-   * @return assets quantity of underlying needed in exchange to mint `shares`.
+   * @return quantity of underlying needed in exchange to mint `shares`.
    * @dev This method accounts for issuance of accrued fee shares.
    */
-  function previewMint(uint256 shares) public view override returns (uint256 assets) {
+  function previewMint(uint256 shares) public view override returns (uint256) {
     uint256 depositFee = uint256(fees.deposit);
-    shares += shares.mulDiv(depositFee, 1e18 - depositFee, Math.Rounding.Up);
-    assets = _convertToAssets(shares, Math.Rounding.Up);
+    uint256 feeShares = shares.mulDiv(depositFee, 1e18 - depositFee, Math.Rounding.Down);
+    return _convertToAssets(shares + feeShares);
   }
 
   /**
@@ -367,36 +347,51 @@ contract MultiStrategyVault is
    * @dev This method accounts for both issuance of fee shares and withdrawal fee.
    */
   function previewWithdraw(uint256 assets) public view override returns (uint256 shares) {
-    shares = _convertToShares(assets, Math.Rounding.Up);
-
+    shares = _convertToShares(assets);
     uint256 withdrawalFee = uint256(fees.withdrawal);
-    shares += shares.mulDiv(withdrawalFee, 1e18 - withdrawalFee, Math.Rounding.Up);
+    uint256 feeShares = shares.mulDiv(withdrawalFee, 1e18 - withdrawalFee, Math.Rounding.Down);
+    shares += feeShares;
   }
 
   /**
    * @notice Simulate the effects of a redemption at the current block, given current on-chain conditions.
    * @param shares Exact amount of `shares` to redeem
-   * @return assets quantity of underlying returned in exchange for `shares`.
+   * @return quantity of underlying returned in exchange for `shares`.
    * @dev This method accounts for both issuance of fee shares and withdrawal fee.
    */
-  function previewRedeem(uint256 shares) public view override returns (uint256 assets) {
-    uint256 feeShares = shares.mulDiv(uint256(fees.withdrawal), 1e18, Math.Rounding.Down);
-
-    assets = _convertToAssets(shares - feeShares, Math.Rounding.Up);
+  function previewRedeem(uint256 shares) public view override returns (uint256) {
+    if (totalSupply() == 0) return 0;
+    uint256 withdrawalFee = uint256(fees.withdrawal);
+    uint256 feeShares = shares.mulDiv(withdrawalFee, 1e18 - withdrawalFee, Math.Rounding.Down);
+    return _convertToAssets(shares - feeShares);
   }
 
-  function _convertToShares(uint256 assets, Math.Rounding rounding)
-    internal
-    view
-    virtual
-    override
-    returns (uint256 shares)
-  {
-    return assets.mulDiv(totalSupply() + 10**DECIMAL_OFFSET, totalAssets() + 1, rounding);
+  // @notice returns the max amount of shares that match this assets amount
+  function _convertToShares(uint256 assets) internal view returns (uint256) {
+    return _convertToShares(assets, Math.Rounding.Down);
+  }
+
+  function _convertToShares(uint256 assets, Math.Rounding rounding) internal view virtual override returns (uint256) {
+    uint256 totalSupply_ = totalSupply();
+    if (totalSupply_ == 0) {
+      return assets * 10**DECIMAL_OFFSET;
+    } else {
+      return (assets + 1).mulDiv(totalSupply_, totalAssets(), rounding);
+    }
+  }
+
+  // @notice returns the min amount of assets that match this shares amount
+  function _convertToAssets(uint256 shares) internal view returns (uint256) {
+    return _convertToAssets(shares, Math.Rounding.Down);
   }
 
   function _convertToAssets(uint256 shares, Math.Rounding rounding) internal view virtual override returns (uint256) {
-    return shares.mulDiv(totalAssets() + 1, totalSupply() + 10**DECIMAL_OFFSET, rounding);
+    uint256 totalSupply_ = totalSupply();
+    if (totalSupply_ == 0) {
+      return shares / 10**DECIMAL_OFFSET;
+    } else {
+      return totalAssets().mulDiv(shares, totalSupply_, rounding);
+    }
   }
 
   /*------------------------------------------------------------
@@ -434,7 +429,7 @@ contract MultiStrategyVault is
 
     uint256 maxMint_ = depositLimit > type(uint256).max / (totalSupply() + 10**DECIMAL_OFFSET)
       ? type(uint256).max
-      : _convertToShares(depositLimit_, Math.Rounding.Up);
+      : _convertToShares(depositLimit_);
 
     for (uint8 i; i < adapterCount; i++) {
       uint256 adapterMax = adapters[i].adapter.maxMint(address(this));
@@ -455,39 +450,25 @@ contract MultiStrategyVault is
   /// @return Maximum amount of underlying `asset` token that can be withdrawn by `caller` address. Delegates to adapters.
   function maxWithdraw(address caller) public view override returns (uint256) {
     uint256 callerShares = balanceOf(caller);
-    uint256 callerAssets = _convertToAssets(callerShares, Math.Rounding.Down);
-    uint256 maxWithdraw_ = maxWithdrawVault();
-    return Math.min(maxWithdraw_, callerAssets);
-  }
-
-  function maxWithdrawVault() internal view returns (uint256) {
-    uint256 maxWithdraw_ = type(uint256).max;
-    uint256 leftover = IERC20(asset()).balanceOf(address(this));
-
-    for (uint8 i; i < adapterCount; i++) {
-      if (adapters[i].allocation > 0) {
-        uint256 adapterMax = adapters[i].adapter.maxWithdraw(address(this));
-        uint256 scalar = 1e36 / uint256(adapters[i].allocation);
-
-        if (adapterMax > type(uint256).max / scalar) {
-          adapterMax = type(uint256).max;
-        } else {
-          adapterMax = (adapterMax * scalar) / 1e18;
-        }
-
-        maxWithdraw_ = Math.min(maxWithdraw_, adapterMax + leftover);
-      }
+    if (callerShares == 0) {
+      return 0;
+    } else {
+      uint256 callerAssets = previewRedeem(callerShares);
+      uint256 maxWithdraw_ = totalAssets();
+      return Math.min(maxWithdraw_, callerAssets);
     }
-
-    return maxWithdraw_;
   }
 
   /// @return Maximum amount of shares that may be redeemed by `caller` address. Delegates to adapters.
   function maxRedeem(address caller) public view override returns (uint256) {
     uint256 callerShares = balanceOf(caller);
-    uint256 maxWithdraw_ = maxWithdrawVault();
-    uint256 maxRedeem_ = _convertToShares(maxWithdraw_, Math.Rounding.Down);
-    return Math.min(maxRedeem_, callerShares);
+    if (callerShares == 0) {
+      return 0;
+    } else {
+      uint256 maxWithdraw_ = totalAssets();
+      uint256 maxRedeem_ = previewWithdraw(maxWithdraw_);
+      return Math.min(maxRedeem_, callerShares);
+    }
   }
 
   /*------------------------------------------------------------
@@ -703,13 +684,13 @@ contract MultiStrategyVault is
     adapters = proposedAdapters;
     adapterCount = proposedAdapterCount;
 
-    uint256 totalAssets_ = IERC20(asset()).balanceOf(address(this));
+    uint256 cashAssets_ = IERC20(asset()).balanceOf(address(this));
 
     for (uint8 i; i < adapterCount; i++) {
       IERC20(asset()).approve(address(adapters[i].adapter), type(uint256).max);
 
       adapters[i].adapter.deposit(
-        totalAssets_.mulDiv(uint256(adapters[i].allocation), 1e18, Math.Rounding.Down),
+        cashAssets_.mulDiv(uint256(adapters[i].allocation), 1e18, Math.Rounding.Down),
         address(this)
       );
     }
@@ -845,8 +826,4 @@ contract MultiStrategyVault is
         )
       );
   }
-
-  /*------------------------------------------------------------
-                    FLYWHEEL PER REWARD TOKEN
-    ------------------------------------------------------------*/
 }
