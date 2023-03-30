@@ -124,36 +124,15 @@ contract MultiStrategyVault is
     _symbol = string(bytes.concat("mo-", bytes(IERC20Metadata(address(asset_)).symbol())));
   }
 
-  function name()
-    public
-    view
-    override
-    returns (
-      string memory
-    )
-  {
+  function name() public view override returns (string memory) {
     return _name;
   }
 
-  function symbol()
-    public
-    view
-    override
-    returns (
-      string memory
-    )
-  {
+  function symbol() public view override returns (string memory) {
     return _symbol;
   }
 
-  function decimals()
-    public
-    view
-    override
-    returns (
-      uint8
-    )
-  {
+  function decimals() public view override returns (uint8) {
     return _decimals;
   }
 
