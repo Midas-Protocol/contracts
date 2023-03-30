@@ -49,7 +49,7 @@ contract ERC4626OracleTest is BaseTest {
   }
 
   function testErc4626aPriceOracle() public fork(ETHEREUM_MAINNET) {
-    setUpOtherOracles();
+    setUpAssetOracles();
     uint256 priceRealYieldUsdc = mpo.price(realYieldUSDVault);
     uint256 priceUsdc = mpo.price(USDC);
 

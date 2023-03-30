@@ -63,6 +63,9 @@ contract ERC4626Liquidator is IRedemptionStrategy {
         if (underlyingTokens[i] == address(_outputToken)) {
           continue;
         }
+        if (IERC20Upgradeable(underlyingTokens[i]).balanceOf(address(this)) == 0) {
+          continue;
+        }
         _swap(
           underlyingTokens[i],
           IERC20Upgradeable(underlyingTokens[i]).balanceOf(address(this)),
@@ -72,7 +75,7 @@ contract ERC4626Liquidator is IRedemptionStrategy {
         );
       }
       outputAmount = _outputToken.balanceOf(address(this));
-      return (outputToken, outputAmount);
+      return (_outputToken, outputAmount);
     }
   }
 
