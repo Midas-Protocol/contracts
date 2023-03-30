@@ -190,7 +190,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
   // TODO min amounts fuzz testing
   function testOptVaultWithdraw(uint256 withdrawAmount_) public fork(BSC_MAINNET) {
-    vm.assume(withdrawAmount_ >= 1e9 && withdrawAmount_ < type(uint128).max);
+    vm.assume(withdrawAmount_ < type(uint128).max);
 
     vault.harvest(lenderSharesHint);
 
