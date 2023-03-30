@@ -177,9 +177,10 @@ contract MultiStrategyVault is
     require(assets > 0, "too little assets");
     if (assets > maxDeposit(receiver)) revert MaxError(assets);
 
-    uint256 feeShares = _convertToShares(assets.mulDiv(uint256(fees.deposit), 1e18, Math.Rounding.Down));
-
-    shares = _convertToShares(assets) - feeShares;
+    uint256 shares = _convertToShares(assets);
+    uint256 depositFee = uint256(fees.deposit);
+    uint256 feeShares = shares.mulDiv(depositFee, 1e18 - depositFee, Math.Rounding.Down);
+    shares = shares - feeShares;
 
     if (feeShares > 0) _mint(feeRecipient, feeShares);
 
@@ -342,24 +343,26 @@ contract MultiStrategyVault is
   /**
    * @notice Simulate the effects of a deposit at the current block, given current on-chain conditions.
    * @param assets Exact amount of underlying `asset` token to deposit
-   * @return shares of the vault issued in exchange to the user for `assets`
+   * @return of the vault issued in exchange to the user for `assets`
    * @dev This method accounts for issuance of accrued fee shares.
    */
-  function previewDeposit(uint256 assets) public view override returns (uint256 shares) {
-    uint256 feeShares = _convertToShares(assets.mulDiv(uint256(fees.deposit), 1e18, Math.Rounding.Down));
-    shares = _convertToShares(assets) - feeShares;
+  function previewDeposit(uint256 assets) public view override returns (uint256) {
+    uint256 shares = _convertToShares(assets);
+    uint256 depositFee = uint256(fees.deposit);
+    uint256 feeShares = shares.mulDiv(depositFee, 1e18 - depositFee, Math.Rounding.Down);
+    return shares - feeShares;
   }
 
   /**
    * @notice Simulate the effects of a mint at the current block, given current on-chain conditions.
    * @param shares Exact amount of vault shares to mint.
-   * @return assets quantity of underlying needed in exchange to mint `shares`.
+   * @return quantity of underlying needed in exchange to mint `shares`.
    * @dev This method accounts for issuance of accrued fee shares.
    */
-  function previewMint(uint256 shares) public view override returns (uint256 assets) {
+  function previewMint(uint256 shares) public view override returns (uint256) {
     uint256 depositFee = uint256(fees.deposit);
     uint256 feeShares = shares.mulDiv(depositFee, 1e18 - depositFee, Math.Rounding.Down);
-    assets = _convertToAssets(shares + feeShares);
+    return _convertToAssets(shares + feeShares);
   }
 
   /**
@@ -378,14 +381,14 @@ contract MultiStrategyVault is
   /**
    * @notice Simulate the effects of a redemption at the current block, given current on-chain conditions.
    * @param shares Exact amount of `shares` to redeem
-   * @return assets quantity of underlying returned in exchange for `shares`.
+   * @return quantity of underlying returned in exchange for `shares`.
    * @dev This method accounts for both issuance of fee shares and withdrawal fee.
    */
-  function previewRedeem(uint256 shares) public view override returns (uint256 assets) {
+  function previewRedeem(uint256 shares) public view override returns (uint256) {
     if (totalSupply() == 0) return 0;
     uint256 withdrawalFee = uint256(fees.withdrawal);
     uint256 feeShares = shares.mulDiv(withdrawalFee, 1e18 - withdrawalFee, Math.Rounding.Down);
-    assets = _convertToAssets(shares - feeShares);
+    return _convertToAssets(shares - feeShares);
   }
 
   // @notice returns the max amount of shares that match this assets amount
