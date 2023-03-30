@@ -188,7 +188,6 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
   }
 
-  // TODO min amounts fuzz testing
   function testOptVaultWithdraw(uint256 withdrawAmount_) public fork(BSC_MAINNET) {
     vm.assume(withdrawAmount_ < type(uint128).max);
 
@@ -280,16 +279,11 @@ contract OptimizedAPRVaultTest is MarketsTest {
       uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
       // preview deposit should return the max shares possible for the supplied amount of assets
       uint256 maxShares = vault.previewDeposit(whaleAssets);
-      uint256 maxSharesPlusOne = maxShares + 1;
-      // previewMint should return the minimum assets required for the shares input
-      uint256 shouldBeMoreThanWhaleAssets = vault.previewMint(maxSharesPlusOne);
-      // minting a share more should require more assets than the available
-      assertGt(shouldBeMoreThanWhaleAssets, whaleAssets, "!not gt than whale assets");
 
       // call mint
       vm.startPrank(wbnbWhale);
       wbnb.approve(address(vault), whaleAssets);
-      bool shouldRevert = mintAmount >= maxSharesPlusOne;
+      bool shouldRevert = mintAmount > maxShares;
       if (shouldRevert) vm.expectRevert("!insufficient balance");
       vault.mint(mintAmount);
       vm.stopPrank();
@@ -318,7 +312,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
       // call deposit
       vm.startPrank(wbnbWhale);
       wbnb.approve(address(vault), whaleAssets);
-      bool shouldRevert = depositAmount_ >= whaleAssets;
+      bool shouldRevert = depositAmount_ > whaleAssets;
       if (shouldRevert) vm.expectRevert("!insufficient balance");
       if (expectedVaultSharesMinted == 0) vm.expectRevert("too little assets");
       vault.deposit(depositAmount_);
@@ -333,6 +327,16 @@ contract OptimizedAPRVaultTest is MarketsTest {
         );
       }
     }
+  }
+
+  function testVaultPreviewMint(uint256 assets) public fork(BSC_MAINNET) {
+    vm.assume(assets >= 10 * vault.adapterCount() && assets < type(uint128).max);
+    // previewDeposit should return the maximum shares that are minted for the assets input
+    uint256 maxShares = vault.previewDeposit(assets);
+    // previewMint should return the minimum assets required for the shares input
+    uint256 shouldBeMoreThanAvailableAssets = vault.previewMint(maxShares + 1);
+    // minting a share more should require more assets than the available
+    assertGt(shouldBeMoreThanAvailableAssets, assets, "!not gt than available assets");
   }
 
   function testDirectAdaptersDeposit() public fork(BSC_MAINNET) {
