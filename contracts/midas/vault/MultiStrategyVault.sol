@@ -385,22 +385,30 @@ contract MultiStrategyVault is
   }
 
   // @notice returns the max amount of shares that match this assets amount
-  function _convertToShares(uint256 assets) internal view virtual override returns (uint256 shares) {
+  function _convertToShares(uint256 assets) internal view returns (uint256 shares) {
+    return _convertToShares(assets, Math.Rounding.Down);
+  }
+
+  function _convertToShares(uint256 assets, Math.Rounding rounding) internal view virtual override returns (uint256 shares) {
     uint256 totalSupply_ = totalSupply();
     if (totalSupply_ == 0) {
       return assets * 10**DECIMAL_OFFSET;
     } else {
-      return (assets + 1).mulDiv(totalSupply_, totalAssets(), Math.Rounding.Down);
+      return (assets + 1).mulDiv(totalSupply_, totalAssets(), rounding);
     }
   }
 
   // @notice returns the min amount of assets that match this shares amount
-  function _convertToAssets(uint256 shares) internal view virtual override returns (uint256 assets) {
+  function _convertToAssets(uint256 shares) internal view returns (uint256 assets) {
+    return _convertToAssets(shares, Math.Rounding.Up);
+  }
+
+  function _convertToAssets(uint256 shares, Math.Rounding rounding) internal view virtual override returns (uint256 assets) {
     uint256 totalSupply_ = totalSupply();
     if (totalSupply_ == 0) {
       assets = shares / 10**DECIMAL_OFFSET;
     } else {
-      assets += totalAssets().mulDiv(shares, totalSupply_, Math.Rounding.Up);
+      assets += totalAssets().mulDiv(shares, totalSupply_, rounding);
     }
   }
 
