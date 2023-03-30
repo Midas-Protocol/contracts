@@ -476,33 +476,9 @@ contract MultiStrategyVault is
       return 0;
     } else {
       uint256 callerAssets = previewRedeem(callerShares);
-      uint256 maxWithdraw_ = maxWithdrawVault();
+      uint256 maxWithdraw_ = totalAssets();
       return Math.min(maxWithdraw_, callerAssets);
     }
-  }
-
-  // TODO reconsider if this fn is needed anymore
-  /// @notice calculates the max amount of assets that can be withdrawn while keeping the allocations proportions
-  function maxWithdrawVault() internal view returns (uint256) {
-    uint256 maxWithdraw_ = type(uint256).max;
-    uint256 leftover = IERC20(asset()).balanceOf(address(this));
-
-    for (uint8 i; i < adapterCount; i++) {
-      if (adapters[i].allocation > 0) {
-        uint256 adapterMax = adapters[i].adapter.maxWithdraw(address(this));
-        uint256 scalar = 1e36 / uint256(adapters[i].allocation);
-
-        if (adapterMax > type(uint256).max / scalar) {
-          adapterMax = type(uint256).max;
-        } else {
-          adapterMax = (adapterMax * scalar) / 1e18;
-        }
-
-        maxWithdraw_ = Math.min(maxWithdraw_, adapterMax + leftover);
-      }
-    }
-
-    return maxWithdraw_;
   }
 
   /// @return Maximum amount of shares that may be redeemed by `caller` address. Delegates to adapters.
@@ -511,7 +487,7 @@ contract MultiStrategyVault is
     if (callerShares == 0) {
       return 0;
     } else {
-      uint256 maxWithdraw_ = maxWithdrawVault();
+      uint256 maxWithdraw_ = totalAssets();
       uint256 maxRedeem_ = previewWithdraw(maxWithdraw_);
       return Math.min(maxRedeem_, callerShares);
     }
@@ -872,8 +848,4 @@ contract MultiStrategyVault is
         )
       );
   }
-
-  /*------------------------------------------------------------
-                    FLYWHEEL PER REWARD TOKEN
-    ------------------------------------------------------------*/
 }
