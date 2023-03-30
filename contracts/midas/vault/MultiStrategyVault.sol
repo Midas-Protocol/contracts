@@ -252,12 +252,10 @@ contract MultiStrategyVault is
     address owner
   ) public override returns (uint256) {
     if (receiver == address(0)) revert InvalidReceiver();
-    if (assets > maxWithdraw(owner)) revert MaxError(assets);
 
     uint256 shares = _convertToShares(assets, Math.Rounding.Down);
 
     uint256 withdrawalFee = uint256(fees.withdrawal);
-
     uint256 feeShares = shares.mulDiv(withdrawalFee, 1e18 - withdrawalFee, Math.Rounding.Down);
 
     shares += feeShares;
@@ -387,8 +385,8 @@ contract MultiStrategyVault is
    */
   function previewRedeem(uint256 shares) public view override returns (uint256 assets) {
     if (totalSupply() == 0) return 0;
-    uint256 feeShares = shares.mulDiv(uint256(fees.withdrawal), 1e18, Math.Rounding.Down);
-
+    uint256 withdrawalFee = uint256(fees.withdrawal);
+    uint256 feeShares = shares.mulDiv(withdrawalFee, 1e18 - withdrawalFee, Math.Rounding.Down);
     assets = _convertToAssets(shares - feeShares, Math.Rounding.Up);
   }
 

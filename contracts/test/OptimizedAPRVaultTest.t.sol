@@ -177,7 +177,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
       emit log_named_uint("maxRedeemAfter", maxRedeemAfter);
     }
 
-    // test if the APR improved as a result of the hinted better allocations
+    // check if the APR improved as a result of the hinted better allocations
     {
       uint256 aprAfter = vault.estimatedAPR();
       emit log_named_uint("aprAfter", aprAfter);
@@ -188,31 +188,44 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
   }
 
-  // TODO fuzz testing
-  function testOptVaultWithdraw() public fork(BSC_MAINNET) {
+  // TODO min amounts fuzz testing
+  function testOptVaultWithdraw(uint256 withdrawAmount_) public fork(BSC_MAINNET) {
+    vm.assume(withdrawAmount_ >= 1e9 && withdrawAmount_ < type(uint128).max);
+
     vault.harvest(lenderSharesHint);
 
-    // test the balance before and after calling redeem
+    // deposit some assets to test a wider range of withdrawable amounts
+    vm.startPrank(wbnbWhale);
+    uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
+    wbnb.approve(address(vault), whaleAssets);
+    vault.deposit(whaleAssets / 2);
+    vm.stopPrank();
+
+    // advance time with a year
+    vm.warp(block.timestamp + 365.25 days);
+    vm.roll(block.number + blocksPerYear);
+
+    // test the balance before and after calling withdraw
     {
       uint256 wbnbBalanceBefore = wbnb.balanceOf(wbnbWhale);
 
-      // advance time with a year
-      vm.warp(block.timestamp + 365.25 days);
-      vm.roll(block.number + blocksPerYear);
-
       uint256 maxWithdrawWhale = vault.maxWithdraw(wbnbWhale);
-      emit log_named_uint("maxWithdrawWhale", maxWithdrawWhale);
 
-      // call redeem
-      vm.prank(wbnbWhale);
-      vault.withdraw(maxWithdrawWhale);
+      // call withdraw as the whale
+      vm.startPrank(wbnbWhale);
+      bool shouldRevert = withdrawAmount_ > maxWithdrawWhale;
+      if (shouldRevert) vm.expectRevert("ERC20: burn amount exceeds balance");
+      vault.withdraw(withdrawAmount_);
+      vm.stopPrank();
 
-      uint256 wbnbBalanceAfter = wbnb.balanceOf(wbnbWhale);
-      assertGt(
-        wbnbBalanceAfter - wbnbBalanceBefore,
-        maxWithdrawWhale,
-        "!depositor did not receive more than the initial deposited amount"
-      );
+      if (!shouldRevert) {
+        uint256 wbnbBalanceAfter = wbnb.balanceOf(wbnbWhale);
+        assertEq(
+          wbnbBalanceAfter - wbnbBalanceBefore,
+          withdrawAmount_,
+          "!depositor did not receive the requested withdraw amount"
+        );
+      }
     }
   }
 
@@ -249,14 +262,13 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
     vault.harvest(lenderSharesHint);
 
+    // advance time with a year
+    vm.warp(block.timestamp + 365.25 days);
+    vm.roll(block.number + blocksPerYear);
+
     // test the shares before and after calling mint
     {
       uint256 vaultSharesBefore = vault.balanceOf(wbnbWhale);
-
-      // advance time with a year
-      vm.warp(block.timestamp + 365.25 days);
-      vm.roll(block.number + blocksPerYear);
-
       uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
       // preview deposit should return the max shares possible for the supplied amount of assets
       uint256 maxShares = vault.previewDeposit(whaleAssets);
