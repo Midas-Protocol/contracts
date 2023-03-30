@@ -188,6 +188,14 @@ abstract contract BaseTest is Test {
     }
   }
 
+  function diffRel(uint256 a, uint256 b) internal pure returns (uint256) {
+    if (a > b) {
+      return (100 * (a - b)) / a;
+    } else {
+      return (100 * (b - a)) / b;
+    }
+  }
+
   function diff(uint256 a, uint256 b) internal pure returns (uint256) {
     if (a > b) {
       return a - b;
