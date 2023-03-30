@@ -233,7 +233,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
         if (vault.previewMint(mintAmount) == 0) vm.expectRevert("too little assets");
         else if (mintAmount > maxShares) vm.expectRevert("!insufficient balance");
         else shouldRevert = false;
-        
+
         vault.mint(mintAmount);
       }
       vm.stopPrank();
@@ -358,7 +358,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
       vm.startPrank(wbnbWhale);
       {
         if (assetsToReceive == 0) vm.expectRevert("too little shares");
-        else if(redeemAmount_ > maxRedeemWhale) vm.expectRevert("ERC20: burn amount exceeds balance");
+        else if (redeemAmount_ > maxRedeemWhale) vm.expectRevert("ERC20: burn amount exceeds balance");
         else shouldRevert = false;
 
         vault.redeem(redeemAmount_);
