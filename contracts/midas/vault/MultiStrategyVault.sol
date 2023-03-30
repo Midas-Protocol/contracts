@@ -222,9 +222,10 @@ contract MultiStrategyVault is
     require(asset_.allowance(caller, address(this)) >= assets, "!insufficient allowance");
     asset_.safeTransferFrom(caller, address(this), assets);
 
-    // TODO deposit user assets + cash
+    // allocate all available assets = caller assets + cash
+    uint256 assetsToAllocate = asset_.balanceOf(address(this));
     for (uint8 i; i < adapterCount; i++) {
-      uint256 adapterDeposit = assets.mulDiv(adapters[i].allocation, 1e18, Math.Rounding.Down);
+      uint256 adapterDeposit = assetsToAllocate.mulDiv(adapters[i].allocation, 1e18, Math.Rounding.Down);
       adapters[i].adapter.deposit(adapterDeposit, address(this));
     }
 
