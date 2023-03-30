@@ -129,7 +129,6 @@ contract MultiStrategyVault is
     view
     override
     returns (
-      /*(IERC20Metadata, ERC20)*/
       string memory
     )
   {
@@ -141,7 +140,6 @@ contract MultiStrategyVault is
     view
     override
     returns (
-      /*(IERC20Metadata, ERC20)*/
       string memory
     )
   {
@@ -153,7 +151,6 @@ contract MultiStrategyVault is
     view
     override
     returns (
-      /*(IERC20Metadata, ERC20)*/
       uint8
     )
   {
@@ -164,7 +161,6 @@ contract MultiStrategyVault is
                       DEPOSIT/WITHDRAWAL LOGIC
     ------------------------------------------------------------*/
 
-  error ZeroAmount();
   error InvalidReceiver();
   error MaxError(uint256 amount);
 
