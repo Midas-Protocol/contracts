@@ -389,7 +389,13 @@ contract MultiStrategyVault is
     return _convertToShares(assets, Math.Rounding.Down);
   }
 
-  function _convertToShares(uint256 assets, Math.Rounding rounding) internal view virtual override returns (uint256 shares) {
+  function _convertToShares(uint256 assets, Math.Rounding rounding)
+    internal
+    view
+    virtual
+    override
+    returns (uint256 shares)
+  {
     uint256 totalSupply_ = totalSupply();
     if (totalSupply_ == 0) {
       return assets * 10**DECIMAL_OFFSET;
@@ -403,7 +409,13 @@ contract MultiStrategyVault is
     return _convertToAssets(shares, Math.Rounding.Up);
   }
 
-  function _convertToAssets(uint256 shares, Math.Rounding rounding) internal view virtual override returns (uint256 assets) {
+  function _convertToAssets(uint256 shares, Math.Rounding rounding)
+    internal
+    view
+    virtual
+    override
+    returns (uint256 assets)
+  {
     uint256 totalSupply_ = totalSupply();
     if (totalSupply_ == 0) {
       assets = shares / 10**DECIMAL_OFFSET;
