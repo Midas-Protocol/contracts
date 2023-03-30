@@ -198,6 +198,17 @@ contract OptimizedAPRVaultTest is MarketsTest {
     assertGt(shouldBeMoreThanAvailableAssets, assets, "!not gt than available assets");
   }
 
+  function testVaultPreviewRedeem(uint256 assets) public fork(BSC_MAINNET) {
+    vm.assume(assets < type(uint128).max);
+    // previewWithdraw should return the maximum shares that are burned for the assets input
+    uint256 maxShares = vault.previewWithdraw(assets);
+    uint256 sameAssets = vault.previewRedeem(maxShares);
+    uint256 shouldBeMoreThanRequestedAssets = vault.previewRedeem(maxShares + 1);
+    assertGt(shouldBeMoreThanRequestedAssets, assets, "!not gt than requested assets");
+
+    if (assets > 100) assertEq(sameAssets, assets, "!same");
+  }
+
   function testOptVaultMint(uint256 mintAmount) public fork(BSC_MAINNET) {
     vm.assume(mintAmount >= 1e18);
 
@@ -215,12 +226,16 @@ contract OptimizedAPRVaultTest is MarketsTest {
       uint256 maxShares = vault.previewDeposit(whaleAssets);
 
       // call mint
+      bool shouldRevert = true;
       vm.startPrank(wbnbWhale);
-      wbnb.approve(address(vault), whaleAssets);
-      bool shouldRevert = mintAmount > maxShares;
-      if (vault.previewMint(mintAmount) == 0) vm.expectRevert("too little assets");
-      if (shouldRevert) vm.expectRevert("!insufficient balance");
-      vault.mint(mintAmount);
+      {
+        wbnb.approve(address(vault), whaleAssets);
+        if (vault.previewMint(mintAmount) == 0) vm.expectRevert("too little assets");
+        else if (mintAmount > maxShares) vm.expectRevert("!insufficient balance");
+        else shouldRevert = false;
+        
+        vault.mint(mintAmount);
+      }
       vm.stopPrank();
 
       if (!shouldRevert) {
@@ -244,13 +259,18 @@ contract OptimizedAPRVaultTest is MarketsTest {
       uint256 vaultSharesBefore = vault.balanceOf(wbnbWhale);
       uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
       uint256 expectedVaultSharesMinted = vault.previewDeposit(depositAmount_);
+
       // call deposit
+      bool shouldRevert = true;
       vm.startPrank(wbnbWhale);
-      wbnb.approve(address(vault), whaleAssets);
-      bool shouldRevert = depositAmount_ > whaleAssets;
-      if (shouldRevert) vm.expectRevert("!insufficient balance");
-      if (expectedVaultSharesMinted == 0) vm.expectRevert("too little assets");
-      vault.deposit(depositAmount_);
+      {
+        wbnb.approve(address(vault), whaleAssets);
+        if (depositAmount_ > whaleAssets) vm.expectRevert("!insufficient balance");
+        else if (expectedVaultSharesMinted == 0) vm.expectRevert("too little assets");
+        else shouldRevert = false;
+
+        vault.deposit(depositAmount_);
+      }
       vm.stopPrank();
 
       if (!shouldRevert) {
@@ -286,11 +306,16 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
       uint256 maxWithdrawWhale = vault.maxWithdraw(wbnbWhale);
 
-      // call withdraw as the whale
+      // call withdraw
+      bool shouldRevert = true;
       vm.startPrank(wbnbWhale);
-      bool shouldRevert = withdrawAmount_ > maxWithdrawWhale;
-      if (shouldRevert) vm.expectRevert("ERC20: burn amount exceeds balance");
-      vault.withdraw(withdrawAmount_);
+      {
+        if (withdrawAmount_ > maxWithdrawWhale) vm.expectRevert("ERC20: burn amount exceeds balance");
+        else if (withdrawAmount_ == 0) vm.expectRevert("too little assets");
+        else shouldRevert = false;
+
+        vault.withdraw(withdrawAmount_);
+      }
       vm.stopPrank();
 
       if (!shouldRevert) {
@@ -305,7 +330,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
   }
 
   function testOptVaultRedeem(uint256 redeemAmount_) public fork(BSC_MAINNET) {
-    vm.assume(redeemAmount_ >= 1e18);
+    vm.assume(redeemAmount_ < type(uint128).max);
 
     vault.harvest(lenderSharesHint);
 
@@ -326,11 +351,18 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
       uint256 maxRedeemWhale = vault.maxRedeem(wbnbWhale);
 
+      uint256 assetsToReceive = vault.previewRedeem(redeemAmount_);
+
       // call redeem
+      bool shouldRevert = true;
       vm.startPrank(wbnbWhale);
-      bool shouldRevert = redeemAmount_ > maxRedeemWhale;
-      if (shouldRevert) vm.expectRevert("ERC20: burn amount exceeds balance");
-      vault.redeem(redeemAmount_);
+      {
+        if (assetsToReceive == 0) vm.expectRevert("too little shares");
+        else if(redeemAmount_ > maxRedeemWhale) vm.expectRevert("ERC20: burn amount exceeds balance");
+        else shouldRevert = false;
+
+        vault.redeem(redeemAmount_);
+      }
       vm.stopPrank();
 
       if (!shouldRevert) {

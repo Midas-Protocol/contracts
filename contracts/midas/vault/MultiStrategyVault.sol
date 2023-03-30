@@ -200,7 +200,7 @@ contract MultiStrategyVault is
     uint256 feeShares = shares.mulDiv(depositFee, 1e18 - depositFee, Math.Rounding.Down);
     assets = _convertToAssets(shares + feeShares);
     // don't let it mint shares for 0 assets
-    require(assets == 0, "too little shares");
+    require(assets > 0, "too little shares");
 
     if (feeShares > 0) _mint(feeRecipient, feeShares);
 
@@ -286,6 +286,7 @@ contract MultiStrategyVault is
     uint256 feeShares = shares.mulDiv(withdrawalFee, 1e18 - withdrawalFee, Math.Rounding.Down);
 
     assets = _convertToAssets(shares - feeShares);
+    require(assets > 0, "too little shares");
 
     if (feeShares > 0) _mint(feeRecipient, feeShares);
 
@@ -310,6 +311,7 @@ contract MultiStrategyVault is
 
     for (uint8 i; i < adapterCount; i++) {
       uint256 vaultAdapterShares = adapters[i].adapter.balanceOf(address(this));
+      // round up the shares to make sure enough is withdrawn for the transfer
       uint256 shareOfAdapterShares = vaultAdapterShares.mulDiv(shares, totalSupplyBefore, Math.Rounding.Up);
       adapters[i].adapter.redeem(shareOfAdapterShares, address(this), address(this));
     }
@@ -406,7 +408,7 @@ contract MultiStrategyVault is
 
   // @notice returns the min amount of assets that match this shares amount
   function _convertToAssets(uint256 shares) internal view returns (uint256 assets) {
-    return _convertToAssets(shares, Math.Rounding.Up);
+    return _convertToAssets(shares, Math.Rounding.Down);
   }
 
   function _convertToAssets(uint256 shares, Math.Rounding rounding)
@@ -489,6 +491,7 @@ contract MultiStrategyVault is
     }
   }
 
+  // TODO reconsider if this fn is needed anymore
   /// @notice calculates the max amount of assets that can be withdrawn while keeping the allocations proportions
   function maxWithdrawVault() internal view returns (uint256) {
     uint256 maxWithdraw_ = type(uint256).max;
