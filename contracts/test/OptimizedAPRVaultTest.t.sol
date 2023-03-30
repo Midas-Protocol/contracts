@@ -229,31 +229,43 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
   }
 
-  function testOptVaultRedeem() public fork(BSC_MAINNET) {
+  function testOptVaultRedeem(uint256 redeemAmount_) public fork(BSC_MAINNET) {
+    vm.assume(redeemAmount_ >= 1e18);
+
     vault.harvest(lenderSharesHint);
+
+    // deposit some assets to test a wider range of redeemable amounts
+    vm.startPrank(wbnbWhale);
+    uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
+    wbnb.approve(address(vault), whaleAssets);
+    vault.deposit(whaleAssets / 2);
+    vm.stopPrank();
+
+    // advance time with a year
+    vm.warp(block.timestamp + 365.25 days);
+    vm.roll(block.number + blocksPerYear);
 
     // test the balance before and after calling redeem
     {
-      uint256 wbnbBalanceBefore = wbnb.balanceOf(wbnbWhale);
-
-      // advance time with a year
-      vm.warp(block.timestamp + 365.25 days);
-      vm.roll(block.number + blocksPerYear);
+      uint256 vaultSharesBefore = vault.balanceOf(wbnbWhale);
 
       uint256 maxRedeemWhale = vault.maxRedeem(wbnbWhale);
-      uint256 assetsFromRedeem = vault.previewRedeem(maxRedeemWhale);
-      emit log_named_uint("assetsFromRedeem", assetsFromRedeem);
 
       // call redeem
-      vm.prank(wbnbWhale);
-      vault.redeem(maxRedeemWhale);
+      vm.startPrank(wbnbWhale);
+      bool shouldRevert = redeemAmount_ > maxRedeemWhale;
+      if (shouldRevert) vm.expectRevert("ERC20: burn amount exceeds balance");
+      vault.redeem(redeemAmount_);
+      vm.stopPrank();
 
-      uint256 wbnbBalanceAfter = wbnb.balanceOf(wbnbWhale);
-      assertGt(
-        wbnbBalanceAfter - wbnbBalanceBefore,
-        depositAmount,
-        "!depositor did not receive more than the initial deposited amount"
-      );
+      if (!shouldRevert) {
+        uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
+        assertEq(
+          vaultSharesBefore - vaultSharesAfter,
+          redeemAmount_,
+          "!depositor did not redeem the requested shares"
+        );
+      }
     }
   }
 

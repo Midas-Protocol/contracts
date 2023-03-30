@@ -284,9 +284,9 @@ contract MultiStrategyVault is
     address owner
   ) public override returns (uint256 assets) {
     if (receiver == address(0)) revert InvalidReceiver();
-    if (shares > maxRedeem(owner)) revert MaxError(shares);
 
-    uint256 feeShares = shares.mulDiv(uint256(fees.withdrawal), 1e18, Math.Rounding.Down);
+    uint256 withdrawalFee = uint256(fees.withdrawal);
+    uint256 feeShares = shares.mulDiv(withdrawalFee, 1e18 - withdrawalFee, Math.Rounding.Down);
 
     assets = _convertToAssets(shares - feeShares, Math.Rounding.Up);
 
