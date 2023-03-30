@@ -188,6 +188,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
   }
 
+  // TODO fuzz testing
   function testOptVaultWithdraw() public fork(BSC_MAINNET) {
     vault.harvest(lenderSharesHint);
 
@@ -209,7 +210,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
       uint256 wbnbBalanceAfter = wbnb.balanceOf(wbnbWhale);
       assertGt(
         wbnbBalanceAfter - wbnbBalanceBefore,
-        depositAmount,
+        maxWithdrawWhale,
         "!depositor did not receive more than the initial deposited amount"
       );
     }
@@ -243,7 +244,9 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
   }
 
-  function testOptVaultMint() public fork(BSC_MAINNET) {
+  function testOptVaultMint(uint256 mintAmount) public fork(BSC_MAINNET) {
+    vm.assume(mintAmount >= 1e18);
+
     vault.harvest(lenderSharesHint);
 
     // test the shares before and after calling mint
@@ -254,23 +257,31 @@ contract OptimizedAPRVaultTest is MarketsTest {
       vm.warp(block.timestamp + 365.25 days);
       vm.roll(block.number + blocksPerYear);
 
-      uint256 maxMintWhale = vault.maxMint(wbnbWhale);
       uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
-      uint256 asShares = vault.previewDeposit(whaleAssets);
-      maxMintWhale = Math.min(maxMintWhale, asShares);
+      // preview deposit should return the max shares possible for the supplied amount of assets
+      uint256 maxShares = vault.previewDeposit(whaleAssets);
+      uint256 maxSharesPlusOne = maxShares + 1;
+      // previewMint should return the minimum assets required for the shares input
+      uint256 shouldBeMoreThanWhaleAssets = vault.previewMint(maxSharesPlusOne);
+      // minting a share more should require more assets than the available
+      assertGt(shouldBeMoreThanWhaleAssets, whaleAssets, "!not gt than whale assets");
 
       // call mint
       vm.startPrank(wbnbWhale);
-      wbnb.approve(address(vault), maxMintWhale);
-      vault.mint(maxMintWhale);
+      wbnb.approve(address(vault), whaleAssets);
+      bool shouldRevert = mintAmount >= maxSharesPlusOne;
+      if (shouldRevert) vm.expectRevert("!insufficient balance");
+      vault.mint(mintAmount);
       vm.stopPrank();
 
-      uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
-      assertGt(
-        vaultSharesAfter - vaultSharesBefore,
-        depositAmount,
-        "!depositor did not receive more than the initial deposited amount"
-      );
+      if (!shouldRevert) {
+        uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
+        assertEq(
+          vaultSharesAfter - vaultSharesBefore,
+          mintAmount,
+          "!depositor did not mint the correct shares"
+        );
+      }
     }
   }
 
