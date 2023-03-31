@@ -42,10 +42,6 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     registry = registry_;
   }
 
-  function reinitialize(address registry_) public reinitializer(2) {
-    registry = OptimizedVaultsRegistry(registry_);
-  }
-
   function lenderName() public view returns (string memory) {
     return string(bytes.concat("Midas Optimized ", bytes(name())));
   }
@@ -142,16 +138,26 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
       MidasFlywheel flywheel = MidasFlywheel(poolFlywheels[j]);
       ERC20 rewardToken = flywheel.rewardToken();
 
-      // TODO what happens when different vaults are using the same adapter?
       // accrue and claim the rewards
-      uint256 rewardsBalanceBefore = rewardToken.balanceOf(address(this));
       flywheel.accrue(ERC20(address(market)), address(this));
       flywheel.claimRewards(address(this));
-      uint256 rewardsBalanceAfter = rewardToken.balanceOf(address(this));
 
-      // transfer the claimed reward tokens to the vault, if different than the asset
-      if (address(rewardToken) != address(asset())) {
-        rewardToken.transfer(msg.sender, rewardsBalanceAfter - rewardsBalanceBefore);
+      uint256 totalRewards = rewardToken.balanceOf(address(this));
+      // avoid rounding errors for too little amounts
+      if (totalRewards > 1000) {
+        // the rewards that are in the underlying asset are autocompounded
+        if (address(rewardToken) == address(asset())) {
+          afterDeposit(totalRewards, 0);
+        } else {
+          // redistribute the claimed rewards among the vaults
+          OptimizedAPRVault[] memory vaults = registry.getAllVaults();
+          for (uint256 i = 0; i < vaults.length; i++) {
+            address vaultAddress = address(vaults[i]);
+            uint256 vaultSharesInAdapter = balanceOf(vaultAddress);
+            uint256 vaultShareOfRewards = (vaultSharesInAdapter * totalRewards) / totalSupply();
+            rewardToken.transfer(vaultAddress, vaultShareOfRewards);
+          }
+        }
       }
     }
   }
