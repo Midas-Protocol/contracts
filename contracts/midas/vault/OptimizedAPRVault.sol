@@ -21,7 +21,7 @@ struct LendStatus {
   string name;
   uint256 assets;
   uint256 rate;
-  address add;
+  address addr;
 }
 
 contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
@@ -60,10 +60,6 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
     for (uint256 i; i < rewardTokens_.length; ++i) {
       _deployFlywheelForRewardToken(rewardTokens_[i]);
     }
-  }
-
-  function reinitialize(address registry_) public reinitializer(2) {
-    registry = registry_;
   }
 
   function addRewardToken(IERC20 token_) public onlyOwner {
@@ -106,7 +102,7 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
     for (uint256 i; i < adapterCount; ++i) {
       LendStatus memory s;
       s.name = adapters[i].adapter.lenderName();
-      s.add = address(adapters[i].adapter);
+      s.addr = address(adapters[i].adapter);
       s.assets = adapters[i].adapter.balanceOfUnderlying(address(this));
       s.rate = adapters[i].adapter.apr();
       statuses[i] = s;
@@ -144,7 +140,7 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
     return (weightedAPR * (10**decimals)) / (bal + amount);
   }
 
-  /// @notice Returns the weighted apr of all lenders
+  /// @notice Returns the weighted apr of all adapters
   /// @dev It's computed by doing: `sum(nav * apr) / totalNav`
   function estimatedAPR() public view returns (uint256) {
     uint256 bal = estimatedTotalAssets();
@@ -163,14 +159,14 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
 
   /// @notice Returns the weighted apr in an hypothetical world where the strategy splits its nav
   /// in respect to allocations
-  /// @param allocations List of allocations (in bps of the nav) that should be allocated to each lender
+  /// @param allocations List of allocations (in bps of the nav) that should be allocated to each adapter
   function estimatedAPR(uint64[] calldata allocations) public view returns (uint256, int256[] memory) {
     uint256 weightedAPRScaled = 0;
-    int256[] memory lenderAdjustedAmounts = new int256[](adapterCount);
+    int256[] memory adapterAdjustedAmounts = new int256[](adapterCount);
     if (adapterCount != allocations.length) revert IncorrectListLength();
 
     uint256 bal = estimatedTotalAssets();
-    if (bal == 0) return (weightedAPRScaled, lenderAdjustedAmounts);
+    if (bal == 0) return (weightedAPRScaled, adapterAdjustedAmounts);
 
     uint256 allocation;
     for (uint256 i; i < adapterCount; ++i) {
@@ -183,33 +179,33 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
       } else {
         weightedAPRScaled += futureDeposit * adapters[i].adapter.aprAfterWithdraw(uint256(-adjustedAmount));
       }
-      lenderAdjustedAmounts[i] = adjustedAmount;
+      adapterAdjustedAmounts[i] = adjustedAmount;
     }
     if (allocation != _BPS) revert InvalidAllocations();
 
-    return (weightedAPRScaled / bal, lenderAdjustedAmounts);
+    return (weightedAPRScaled / bal, adapterAdjustedAmounts);
   }
 
   // =============================== CORE FUNCTIONS ==============================
 
   /// @notice Harvests the Strategy, recognizing any profits or losses and adjusting
   /// the Strategy's position.
-  function harvest(uint64[] calldata lenderAllocationsHint) external {
+  function harvest(uint64[] calldata adapterAllocationsHint) external {
     // TODO emit event about the harvested returns and currently deposited assets
-    _adjustPosition(lenderAllocationsHint);
+    _adjustPosition(adapterAllocationsHint);
   }
 
-  function _adjustPosition(uint64[] calldata lenderAllocationsHint) internal {
+  function _adjustPosition(uint64[] calldata adapterAllocationsHint) internal {
     // do not redeposit if emergencyExit is activated
     if (emergencyExit) return;
 
-    // We just keep all money in `asset` if we dont have any lenders
+    // We just keep all money in `asset` if we dont have any adapters
     if (adapterCount == 0) return;
 
     uint256 estimatedAprHint;
-    int256[] memory lenderAdjustedAmounts;
-    if (lenderAllocationsHint.length != 0)
-      (estimatedAprHint, lenderAdjustedAmounts) = estimatedAPR(lenderAllocationsHint);
+    int256[] memory adapterAdjustedAmounts;
+    if (adapterAllocationsHint.length != 0)
+      (estimatedAprHint, adapterAdjustedAmounts) = estimatedAPR(adapterAllocationsHint);
 
     uint256 currentAPR = estimatedAPR();
     if (currentAPR < estimatedAprHint) {
@@ -219,10 +215,10 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
       // the requested amount to withdraw and the actually withdrawn amount
       uint256 deltaWithdraw;
       for (uint256 i; i < adapterCount; ++i) {
-        if (lenderAdjustedAmounts[i] < 0) {
+        if (adapterAdjustedAmounts[i] < 0) {
           deltaWithdraw +=
-            uint256(-lenderAdjustedAmounts[i]) -
-            adapters[i].adapter.withdraw(uint256(-lenderAdjustedAmounts[i]));
+            uint256(-adapterAdjustedAmounts[i]) -
+            adapters[i].adapter.withdraw(uint256(-adapterAdjustedAmounts[i]));
         }
       }
       // TODO deltaWithdraw is always 0 for compound markets deposits
@@ -231,20 +227,20 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
       if (deltaWithdraw > withdrawalThreshold) revert IncorrectDistribution();
 
       for (uint256 i; i < adapterCount; ++i) {
-        if (lenderAdjustedAmounts[i] > 0) {
+        if (adapterAdjustedAmounts[i] > 0) {
           // As `deltaWithdraw` is less than `withdrawalThreshold` (a dust)
-          // It is not a problem to compensate on an arbitrary lender as it will only slightly impact global APR
-          if (lenderAdjustedAmounts[i] > int256(deltaWithdraw)) {
-            lenderAdjustedAmounts[i] -= int256(deltaWithdraw);
+          // It is not a problem to compensate on an arbitrary adapter as it will only slightly impact global APR
+          if (adapterAdjustedAmounts[i] > int256(deltaWithdraw)) {
+            adapterAdjustedAmounts[i] -= int256(deltaWithdraw);
             deltaWithdraw = 0;
           } else {
-            deltaWithdraw -= uint256(lenderAdjustedAmounts[i]);
+            deltaWithdraw -= uint256(adapterAdjustedAmounts[i]);
           }
-          // redeposit through the lenders adapters
-          adapters[i].adapter.deposit(uint256(lenderAdjustedAmounts[i]), address(this));
+          // redeposit through the adapters
+          adapters[i].adapter.deposit(uint256(adapterAdjustedAmounts[i]), address(this));
         }
         // record the applied allocation in storage
-        adapters[i].allocation = lenderAllocationsHint[i];
+        adapters[i].allocation = adapterAllocationsHint[i];
       }
     }
 
