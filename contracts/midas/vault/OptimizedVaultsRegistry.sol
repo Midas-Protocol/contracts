@@ -46,6 +46,4 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
       vaults[i].setEmergencyExit();
     }
   }
-
-  // TODO lens function to list all flywheels for which a user can accrue and claim rewards
 }

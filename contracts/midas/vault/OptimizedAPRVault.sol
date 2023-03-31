@@ -78,11 +78,6 @@ contract OptimizedAPRVault is MultiStrategyVault {
     nav = lentTotalAssets() + IERC20(asset()).balanceOf(address(this));
   }
 
-  /// @notice View function to check the number of lending platforms
-  function numLenders() external view returns (uint256) {
-    return adapterCount;
-  }
-
   /// @notice view function to check the hypothetical APY after the deposit of some amount
   function supplyAPY(uint256 amount) public view returns (uint256) {
     uint256 bal = estimatedTotalAssets();
