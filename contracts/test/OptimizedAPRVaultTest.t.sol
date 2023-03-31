@@ -203,7 +203,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
   }
 
   function testVaultPreviewMint(uint256 assets) public fork(BSC_MAINNET) {
-    vm.assume(assets >= 10 * vault.adapterCount() && assets < type(uint128).max);
+    vm.assume(assets >= 10 * vault.adaptersCount() && assets < type(uint128).max);
     // previewDeposit should return the maximum shares that are minted for the assets input
     uint256 maxShares = vault.previewDeposit(assets);
     // previewMint should return the minimum assets required for the shares input
@@ -260,7 +260,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
   }
 
   function testOptVaultDeposit(uint256 depositAmount_) public fork(BSC_MAINNET) {
-    vm.assume(depositAmount_ >= 10 * vault.adapterCount() && depositAmount_ < type(uint128).max);
+    vm.assume(depositAmount_ >= 10 * vault.adaptersCount() && depositAmount_ < type(uint128).max);
 
     vault.harvest(lenderSharesHint);
 
@@ -525,4 +525,6 @@ contract OptimizedAPRVaultTest is MarketsTest {
     assertGt(ddd.balanceOf(twoBrlWhale), 0, "!received DDD");
     assertGt(epx.balanceOf(twoBrlWhale), 0, "!received EPX");
   }
+
+  // TODO test claiming the rewards for multiple vaults
 }
