@@ -202,7 +202,8 @@ contract MultiStrategyVault is
     uint256 assetsToAllocate = asset_.balanceOf(address(this));
     for (uint8 i; i < adapterCount; i++) {
       uint256 adapterDeposit = assetsToAllocate.mulDiv(adapters[i].allocation, 1e18, Math.Rounding.Down);
-      if (adapterDeposit > 0) {
+      // don't do too small deposits, so that zero shares minting is avoided
+      if (adapterDeposit > 100) {
         adapters[i].adapter.deposit(adapterDeposit, address(this));
       }
     }

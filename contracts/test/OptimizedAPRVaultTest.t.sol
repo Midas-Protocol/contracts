@@ -224,8 +224,6 @@ contract OptimizedAPRVaultTest is MarketsTest {
   }
 
   function testOptVaultMint(uint256 mintAmount_) public fork(BSC_MAINNET) {
-    vm.assume(mintAmount_ > 1e8);
-
     vault.harvest(lenderSharesHint);
 
     // advance time with a year
