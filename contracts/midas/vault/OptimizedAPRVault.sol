@@ -285,4 +285,11 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
       flywheels[rewardTokens[i]].accrue(ERC20(address(this)), from, to);
     }
   }
+
+  function getAllFlywheels() external view returns (MidasFlywheel[] memory allFlywheels) {
+    allFlywheels = new MidasFlywheel[](rewardTokens.length);
+    for (uint256 i = 0; i < rewardTokens.length; i++) {
+      allFlywheels[i] = flywheels[rewardTokens[i]];
+    }
+  }
 }
