@@ -29,7 +29,7 @@ contract DiaStDotPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
     DiaStDotOracle _diaStDotOracle,
     address _usdToken
   ) public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     masterPriceOracle = _masterPriceOracle;
     diaStDotOracle = _diaStDotOracle;
     usdToken = _usdToken;

@@ -13,7 +13,7 @@ contract StkBNBPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
   address public stkBnb;
 
   function initialize() public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     stakingPool = IStakePool(0xC228CefDF841dEfDbD5B3a18dFD414cC0dbfa0D8);
     stkBnb = 0xc2E9d07F66A89c44062459A47a0D2Dc038E4fb16;
   }
