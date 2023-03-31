@@ -42,7 +42,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     registry = registry_;
   }
 
-  function reinitialize(address registry_) public onlyOwner {
+  function reinitialize(address registry_) public onlyOwnerOrAdmin {
     registry = OptimizedVaultsRegistry(registry_);
   }
 
