@@ -35,7 +35,7 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
 
   address public registry;
 
-  mapping(IERC20 => MidasFlywheel) public flywheels;
+  mapping(IERC20 => MidasFlywheel) public flywheelForRewardToken;
 
   event EmergencyExitActivated();
   event Harvested(uint256 totalAssets, uint256 aprBefore, uint256 aprAfter);
@@ -68,7 +68,7 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
   }
 
   function _deployFlywheelForRewardToken(IERC20 token_) internal {
-    require(address(flywheels[token_]) == address(0), "already added");
+    require(address(flywheelForRewardToken[token_]) == address(0), "already added");
 
     MidasFlywheel newFlywheelImpl = new MidasFlywheel();
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(newFlywheelImpl), registry, "");
@@ -92,7 +92,7 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
 
     // lets the vault shareholders accrue
     newFlywheel.addStrategyForRewards(ERC20(address(this)));
-    flywheels[token_] = newFlywheel;
+    flywheelForRewardToken[token_] = newFlywheel;
   }
 
   function adaptersCount() public view returns (uint8) {
@@ -277,14 +277,14 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
   ) internal override {
     super._afterTokenTransfer(from, to, amount);
     for (uint256 i; i < rewardTokens.length; ++i) {
-      flywheels[rewardTokens[i]].accrue(ERC20(address(this)), from, to);
+      flywheelForRewardToken[rewardTokens[i]].accrue(ERC20(address(this)), from, to);
     }
   }
 
   function getAllFlywheels() external view returns (MidasFlywheel[] memory allFlywheels) {
     allFlywheels = new MidasFlywheel[](rewardTokens.length);
     for (uint256 i = 0; i < rewardTokens.length; i++) {
-      allFlywheels[i] = flywheels[rewardTokens[i]];
+      allFlywheels[i] = flywheelForRewardToken[rewardTokens[i]];
     }
   }
 }

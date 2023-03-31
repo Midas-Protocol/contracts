@@ -478,8 +478,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
       registry.addVault(address(vault));
     }
 
-    MidasFlywheel flywheelDDD = vault.flywheels(ddd);
-    MidasFlywheel flywheelEPX = vault.flywheels(epx);
+    MidasFlywheel flywheelDDD = vault.flywheelForRewardToken(ddd);
+    MidasFlywheel flywheelEPX = vault.flywheelForRewardToken(epx);
 
     // deposit some funds
     vm.startPrank(twoBrlWhale);
