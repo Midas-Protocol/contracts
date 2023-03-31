@@ -42,6 +42,10 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     registry = registry_;
   }
 
+  function reinitialize(address registry_) public onlyOwner {
+    registry = OptimizedVaultsRegistry(registry_);
+  }
+
   function lenderName() public view returns (string memory) {
     return string(bytes.concat("Midas Optimized ", bytes(name())));
   }
