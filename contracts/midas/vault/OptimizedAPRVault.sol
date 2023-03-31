@@ -95,6 +95,10 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
     flywheels[token_] = newFlywheel;
   }
 
+  function adaptersCount() public view returns (uint8) {
+    return adapterCount;
+  }
+
   /// @notice View function to check the current state of the strategy
   /// @return Returns the status of all lenders attached the strategy
   function lendStatuses() external view returns (LendStatus[] memory) {
