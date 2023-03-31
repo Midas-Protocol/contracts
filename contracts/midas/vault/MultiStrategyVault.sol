@@ -152,10 +152,10 @@ contract MultiStrategyVault is
     require(assets > 0, "too little assets");
     if (assets > maxDeposit(receiver)) revert MaxError(assets);
 
-    uint256 shares = _convertToShares(assets);
+    shares = _convertToShares(assets);
     uint256 depositFee = uint256(fees.deposit);
     uint256 feeShares = shares.mulDiv(depositFee, 1e18 - depositFee, Math.Rounding.Down);
-    shares = shares - feeShares;
+    shares -= feeShares;
 
     if (feeShares > 0) _mint(feeRecipient, feeShares);
 
