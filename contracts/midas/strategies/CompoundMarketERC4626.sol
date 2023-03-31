@@ -3,6 +3,7 @@ pragma solidity >=0.8.0;
 
 import "./MidasERC4626.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import { IComptroller } from "../../external/compound/IComptroller.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
 import "../../external/angle/IGenericLender.sol";
@@ -131,5 +132,27 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
 
     IERC20Upgradeable token = IERC20Upgradeable(_token);
     token.transfer(to, token.balanceOf(address(this)));
+  }
+
+  function claimRewards() public onlyRegisteredVaults {
+    IComptroller pool = IComptroller(market.comptroller());
+    address[] memory poolFlywheels = pool.getRewardsDistributors();
+
+    for (uint256 j = 0; j < poolFlywheels.length; j++) {
+      MidasFlywheel flywheel = MidasFlywheel(poolFlywheels[j]);
+      ERC20 rewardToken = flywheel.rewardToken();
+
+      // TODO what happens when different vaults are using the same adapter?
+      // accrue and claim the rewards
+      uint256 rewardsBalanceBefore = rewardToken.balanceOf(address(this));
+      flywheel.accrue(ERC20(address(market)), address(this));
+      flywheel.claimRewards(address(this));
+      uint256 rewardsBalanceAfter = rewardToken.balanceOf(address(this));
+
+      // transfer the claimed reward tokens to the vault, if different than the asset
+      if (address(rewardToken) != address(asset())) {
+        rewardToken.transfer(msg.sender, rewardsBalanceAfter - rewardsBalanceBefore);
+      }
+    }
   }
 }
