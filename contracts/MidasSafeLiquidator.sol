@@ -96,7 +96,7 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
     bytes memory _uniswapPairInitHashCode,
     uint8 _flashSwapFee
   ) external initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
 
     require(_uniswapV2router != address(0), "UniswapV2Factory not defined.");
     W_NATIVE_ADDRESS = _wtoken;

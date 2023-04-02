@@ -5,7 +5,6 @@ import "forge-std/Vm.sol";
 import "forge-std/Test.sol";
 
 import { AddressesProvider } from "../../midas/AddressesProvider.sol";
-import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
@@ -225,6 +224,13 @@ abstract contract BaseTest is Test {
   function asArray(bool value) public pure returns (bool[] memory) {
     bool[] memory array = new bool[](1);
     array[0] = value;
+    return array;
+  }
+
+  function asArray(uint256 value0, uint256 value1) public pure returns (uint256[] memory) {
+    uint256[] memory array = new uint256[](2);
+    array[0] = value0;
+    array[1] = value1;
     return array;
   }
 

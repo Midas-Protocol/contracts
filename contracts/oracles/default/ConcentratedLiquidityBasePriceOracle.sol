@@ -35,7 +35,7 @@ abstract contract ConcentratedLiquidityBasePriceOracle is PriceOracle, SafeOwnab
   address[] public SUPPORTED_BASE_TOKENS;
 
   function initialize(address _wtoken, address[] memory _supportedBaseTokens) public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     WTOKEN = _wtoken;
     SUPPORTED_BASE_TOKENS = _supportedBaseTokens;
   }

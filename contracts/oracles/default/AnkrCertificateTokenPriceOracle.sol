@@ -24,7 +24,7 @@ contract AnkrCertificateTokenPriceOracle is SafeOwnableUpgradeable, BasePriceOra
   IAnkrCertificate public aTokenCertificate;
 
   function initialize(address ankrCertificateToken) public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     aTokenCertificate = IAnkrCertificate(ankrCertificateToken);
   }
 
