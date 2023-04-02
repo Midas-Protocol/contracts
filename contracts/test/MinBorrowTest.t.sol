@@ -19,8 +19,8 @@ contract MinBorrowTest is BaseTest {
     IERC20Upgradeable usdc = IERC20Upgradeable(0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d);
     IERC20Upgradeable busd = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
 
-    CErc20Interface usdcMarket = CErc20Interface(0x71661c706deEA398F3Cca3187cFB4b6576bDc0f6);
-    CErc20Interface busdMarket = CErc20Interface(0x2F01b89614b963401879b325f853D553375faB58);
+    CErc20Interface usdcMarket = CErc20Interface(0x16B8da195CdC7F380B333bf6cF2f0f33c1061755);
+    CErc20Interface busdMarket = CErc20Interface(0x3BCb7dbBe729B24bE6c660B3e8ADD1Cb352e371D);
     ComptrollerInterface comptroller = usdcMarket.comptroller();
     deal(address(usdc), address(this), 10000e18);
     deal(address(busd), address(1), 10000e18);
