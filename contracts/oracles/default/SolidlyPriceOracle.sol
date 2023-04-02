@@ -135,4 +135,8 @@ contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
   function _setSupportedBaseTokens(address[] memory _supportedBaseTokens) external onlyOwner {
     SUPPORTED_BASE_TOKENS = _supportedBaseTokens;
   }
+
+  function getSupportedBaseTokens() external view returns (address[] memory) {
+    return SUPPORTED_BASE_TOKENS;
+  }
 }
