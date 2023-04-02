@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
+import { EIP20Interface } from "../../compound/EIP20Interface.sol";
+
 import { PriceOracle } from "../../compound/PriceOracle.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import { CTokenInterface } from "../../compound/CErc20.sol";
@@ -82,6 +84,7 @@ abstract contract ConcentratedLiquidityBasePriceOracle is PriceOracle, SafeOwnab
     address underlying = ICErc20(address(cToken)).underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
+    return (_price(underlying) * 1e18) / (10**uint256(EIP20Interface(underlying).decimals()));
   }
 
   /**
