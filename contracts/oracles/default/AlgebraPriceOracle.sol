@@ -37,7 +37,6 @@ contract AlgebraPriceOracle is ConcentratedLiquidityBasePriceOracle {
       tickAvg += (tickCumulatives[i] - tickCumulatives[i - 1]) / int56(int256(twapWindow / periods));
     }
 
-
     int24 tick = int24(tickAvg / int24(uint24(periods)));
     uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick(tick);
 
