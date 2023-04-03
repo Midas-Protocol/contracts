@@ -59,10 +59,10 @@ contract UniswapV3PriceOracleTest is BaseTest {
     ConcentratedLiquidityBasePriceOracle.AssetConfig[]
       memory configs = new ConcentratedLiquidityBasePriceOracle.AssetConfig[](1);
 
-    underlyings[0] = 0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6; // WBTC (18 decimals)
+    underlyings[0] = 0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f; // WBTC (18 decimals)
     // WBTC-USDC
     configs[0] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
-      0x847b64f9d3A95e977D157866447a5C0A5dFa0Ee5,
+      0xA62aD78825E3a55A77823F00Fe0050F567c1e4EE,
       10 minutes,
       stable
     );
@@ -74,7 +74,7 @@ contract UniswapV3PriceOracleTest is BaseTest {
     assertApproxEqRel(oraclePrice, mpoPrice, 1e15, "Oracle price != MPO price");
   }
 
-  function testForkedArbitrumAssets() public forkAtBlock(ARBITRUM_ONE, 76210006) {
+  function testForkedArbitrumAssets() public forkAtBlock(ARBITRUM_ONE, 76531543) {
     address[] memory underlyings = new address[](7);
     ConcentratedLiquidityBasePriceOracle.AssetConfig[]
       memory configs = new ConcentratedLiquidityBasePriceOracle.AssetConfig[](7);
