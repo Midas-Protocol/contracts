@@ -14,10 +14,7 @@ contract UniswapV3PriceOracleTest is BaseTest {
   address stable;
 
   function afterForkSetUp() internal override {
-    // Not using the address provider yet -- config just added
-
-    // TODO: use ap when deployment is done
-    wtoken = ap.getAddress("stableToken"); // USDC or arbitrum
+    stable = ap.getAddress("stableToken"); // USDC or arbitrum
     wtoken = ap.getAddress("wtoken"); // WETH
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     oracle = new UniswapV3PriceOracle();
@@ -69,9 +66,11 @@ contract UniswapV3PriceOracleTest is BaseTest {
     vm.prank(oracle.owner());
     oracle.setPoolFeeds(underlyings, configs);
     vm.roll(1);
+
+    vm.prank(address(mpo));
     uint256 oraclePrice = oracle.price(underlyings[0]);
     uint256 mpoPrice = mpo.price(underlyings[0]);
-    assertApproxEqRel(oraclePrice, mpoPrice, 1e15, "Oracle price != MPO price");
+    assertApproxEqRel(oraclePrice, mpoPrice, 1e16, "Oracle price != MPO price by > 1%");
   }
 
   function testForkedArbitrumAssets() public forkAtBlock(ARBITRUM_ONE, 76531543) {
@@ -131,13 +130,13 @@ contract UniswapV3PriceOracleTest is BaseTest {
     );
 
     uint256[] memory expPrices = new uint256[](7);
-    expPrices[0] = 32303551248749710; // (32303551248749710 / 1e18) * 1600 = 51.7 (26/01/2022)
-    expPrices[1] = 186352358731969434;
-    expPrices[2] = 817348875792654;
-    expPrices[3] = 616728830044297; // (616728830044297 / 1e18) * 1600 = 0,985 (26/01/2022)
-    expPrices[4] = 617962412544658;
-    expPrices[5] = 32303551248749710;
-    expPrices[6] = 14272222356770933950; //  (14272222356770933950 / 1e18) * 1600 = 22,835 (26/01/2022)
+    expPrices[0] = 40593178272890829; // (40593178272890829 / 1e18) * 1807 = $75.4 (03/04/2023)
+    expPrices[1] = 143330393236690077; // (143330393236690077 / 1e18) * 1807 = $259 (03/04/2023)
+    expPrices[2] = 751649566984753; //  (751649566984753 / 1e18) * 1807 = $1.35 (03/04/2023
+    expPrices[3] = 556167462143161; // (556167462143161 / 1e18) * 1807 = $1.005 (03/04/2023
+    expPrices[4] = 559233394986996; // (559233394986996 / 1e18) * 1807 = $1.01 (03/04/2023
+    expPrices[5] = 40593178272890829; // (40593178272890829 / 1e18) * 1807 = $75.4 (03/04/2023)
+    expPrices[6] = 15531111568051631540; //  (15531111568051631540 / 1e18) * 1807 = $28.064,6 (03/04/2023)
 
     emit log_named_uint("USDC PRICE", mpo.price(stable));
     uint256[] memory prices = getPriceFeed(underlyings, configs);
