@@ -17,7 +17,7 @@ contract UniswapV3PriceOracleTest is BaseTest {
     // Not using the address provider yet -- config just added
 
     // TODO: use ap when deployment is done
-    stable = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8; // USDC or arbitrum
+    wtoken = ap.getAddress("stableToken"); // USDC or arbitrum
     wtoken = ap.getAddress("wtoken"); // WETH
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     oracle = new UniswapV3PriceOracle();
@@ -26,7 +26,7 @@ contract UniswapV3PriceOracleTest is BaseTest {
     oracle.initialize(wtoken, asArray(stable));
   }
 
-  function testPolygonAssets() public forkAtBlock(POLYGON_MAINNET, 40828111) {
+  function testForkedPolygonAssets() public forkAtBlock(POLYGON_MAINNET, 40828111) {
     address[] memory underlyings = new address[](1);
     ConcentratedLiquidityBasePriceOracle.AssetConfig[]
       memory configs = new ConcentratedLiquidityBasePriceOracle.AssetConfig[](1);
@@ -54,7 +54,27 @@ contract UniswapV3PriceOracleTest is BaseTest {
     }
   }
 
-  function testArbitrumAssets() public forkAtBlock(ARBITRUM_ONE, 55624326) {
+  function testArbitrumAssets() public fork(ARBITRUM_ONE) {
+    address[] memory underlyings = new address[](1);
+    ConcentratedLiquidityBasePriceOracle.AssetConfig[]
+      memory configs = new ConcentratedLiquidityBasePriceOracle.AssetConfig[](1);
+
+    underlyings[0] = 0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6; // WBTC (18 decimals)
+    // WBTC-USDC
+    configs[0] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
+      0x847b64f9d3A95e977D157866447a5C0A5dFa0Ee5,
+      10 minutes,
+      stable
+    );
+    vm.prank(oracle.owner());
+    oracle.setPoolFeeds(underlyings, configs);
+    vm.roll(1);
+    uint256 oraclePrice = oracle.price(underlyings[0]);
+    uint256 mpoPrice = mpo.price(underlyings[0]);
+    assertApproxEqRel(oraclePrice, mpoPrice, 1e15, "Oracle price != MPO price");
+  }
+
+  function testForkedArbitrumAssets() public forkAtBlock(ARBITRUM_ONE, 76210006) {
     address[] memory underlyings = new address[](7);
     ConcentratedLiquidityBasePriceOracle.AssetConfig[]
       memory configs = new ConcentratedLiquidityBasePriceOracle.AssetConfig[](7);
