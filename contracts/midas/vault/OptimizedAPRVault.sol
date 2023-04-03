@@ -5,17 +5,17 @@ import { IGenericLender } from "../../external/angle/IGenericLender.sol";
 import { SafeOwnableUpgradeable } from "../SafeOwnableUpgradeable.sol";
 import { MultiStrategyVault, AdapterConfig, VaultFees } from "./MultiStrategyVault.sol";
 import { RewardsClaimer } from "../RewardsClaimer.sol";
-import "../strategies/flywheel/MidasFlywheel.sol";
+import { MidasFlywheel } from "../strategies/flywheel/MidasFlywheel.sol";
 
 import { SafeERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import { ERC20Upgradeable as IERC20 } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { FlywheelCore } from "flywheel/FlywheelCore.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
 
 struct LendStatus {
   string name;
@@ -37,6 +37,8 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
 
   mapping(IERC20 => MidasFlywheel) public flywheelForRewardToken;
 
+  address public flywheelLogic;
+
   event EmergencyExitActivated();
   event Harvested(uint256 totalAssets, uint256 aprBefore, uint256 aprAfter);
 
@@ -52,11 +54,13 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
     uint256 depositLimit_,
     address owner_,
     address registry_,
-    IERC20[] memory rewardTokens_
+    IERC20[] memory rewardTokens_,
+    address flywheelLogic_
   ) public initializer {
     __MultiStrategyVault_init(asset_, adapters_, adapterCount_, fees_, feeRecipient_, depositLimit_, owner_);
     __RewardsClaimer_init(address(this), rewardTokens_);
     registry = registry_;
+    flywheelLogic = flywheelLogic_;
     for (uint256 i; i < rewardTokens_.length; ++i) {
       _deployFlywheelForRewardToken(rewardTokens_[i]);
     }
@@ -70,8 +74,7 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
   function _deployFlywheelForRewardToken(IERC20 token_) internal {
     require(address(flywheelForRewardToken[token_]) == address(0), "already added");
 
-    MidasFlywheel newFlywheelImpl = new MidasFlywheel();
-    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(newFlywheelImpl), registry, "");
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(flywheelLogic, registry, "");
     MidasFlywheel newFlywheel = MidasFlywheel(address(proxy));
 
     newFlywheel.initialize(

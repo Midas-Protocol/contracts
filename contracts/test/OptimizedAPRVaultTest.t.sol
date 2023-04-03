@@ -17,7 +17,6 @@ import { OptimizedAPRVault } from "../midas/vault/OptimizedAPRVault.sol";
 import { OptimizedVaultsRegistry } from "../midas/vault/OptimizedVaultsRegistry.sol";
 
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
-import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
@@ -110,6 +109,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
     vault = OptimizedAPRVault(address(proxy));
     vm.label(address(vault), "vault");
 
+    MidasFlywheel flywheelLogic = new MidasFlywheel();
+
     ERC20Upgradeable[] memory rewardTokens = new ERC20Upgradeable[](0);
     vault.initializeWithRegistry(
       ERC20Upgradeable(wnativeAddress),
@@ -120,7 +121,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
       type(uint256).max,
       address(this),
       address(registry),
-      rewardTokens
+      rewardTokens,
+      address(flywheelLogic)
     );
 
     registry.addVault(address(vault));
@@ -463,6 +465,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
       _adapters[0].adapter = twoBrlMarketAdapter;
       _adapters[0].allocation = 1e18;
 
+      MidasFlywheel flywheelLogic = new MidasFlywheel();
       vault.initializeWithRegistry(
         twoBrl,
         _adapters,
@@ -472,7 +475,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
         type(uint256).max,
         address(this),
         address(registry),
-        rewardTokens
+        rewardTokens,
+        address(flywheelLogic)
       );
 
       registry.addVault(address(vault));
