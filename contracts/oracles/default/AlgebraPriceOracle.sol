@@ -20,17 +20,25 @@ contract AlgebraPriceOracle is ConcentratedLiquidityBasePriceOracle {
    * @dev Fetches the price for a token from Algebra pools
    */
   function _price(address token) internal view override returns (uint256) {
-    uint32[] memory secondsAgos = new uint32[](2);
+    uint8 periods = 4;
+    uint32[] memory secondsAgos = new uint32[](periods + 1);
     uint256 twapWindow = poolFeeds[token].twapWindow;
-    address baseToken = poolFeeds[token].baseToken;
 
-    secondsAgos[0] = uint32(twapWindow);
-    secondsAgos[1] = 0;
+    for (uint256 i = 0; i <= periods; i++) {
+      secondsAgos[i] = uint32(((periods - i) * twapWindow) / periods);
+    }
+    address baseToken = poolFeeds[token].baseToken;
 
     IAlgebraPool pool = IAlgebraPool(poolFeeds[token].poolAddress);
     (int56[] memory tickCumulatives, , , ) = pool.getTimepoints(secondsAgos);
 
-    int24 tick = int24((tickCumulatives[1] - tickCumulatives[0]) / int56(int256(twapWindow)));
+    int56 tickAvg;
+    for (uint256 i = 1; i < tickCumulatives.length; i++) {
+      tickAvg += (tickCumulatives[i] - tickCumulatives[i - 1]) / int56(int256(twapWindow / periods));
+    }
+
+
+    int24 tick = int24(tickAvg / int24(uint24(periods)));
     uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick(tick);
 
     uint256 tokenPrice = getPriceX96FromSqrtPriceX96(pool.token0(), token, sqrtPriceX96);

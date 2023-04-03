@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { AlgebraPriceOracle } from "../../../oracles/default/AlgebraPriceOracle.sol";
 import { ConcentratedLiquidityBasePriceOracle } from "../../../oracles/default/ConcentratedLiquidityBasePriceOracle.sol";
-import { IAlgebraPool } from "../../../external/algebra/IAlgebraPool.sol";
+import "../../../external/algebra/IAlgebraPool.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { BaseTest } from "../../config/BaseTest.t.sol";
 
@@ -106,5 +106,34 @@ contract AlgebraPriceOracleTest is BaseTest {
     vm.prank(address(mpo));
     uint256 price = oracle.price(ixt);
     assertEq(price, 480815305168365489, "!Price Error"); // 0.5244 USDT / 1.098$ = 0.477 MATIC (26/03/2023)
+  }
+
+  function testCardinalityAlgebra() public debuggingOnly fork(POLYGON_MAINNET) {
+    address pairAddress = 0xD6e486c197606559946384AE2624367d750A160f; //IXT-USDT
+
+    IAlgebraPool pair = IAlgebraPool(pairAddress);
+    uint16 latestTp = getLatestTimepointIndex(pair);
+    emit log_named_uint("latest tp", latestTp);
+
+    IDataStorageOperator dso = pair.dataStorageOperator();
+    Timepoint memory tp = dso.timepoints(latestTp);
+
+    if (tp.initialized) {
+      emit log("latest tp is initialized");
+    } else {
+      emit log("no");
+    }
+
+    Timepoint memory nextTp = dso.timepoints(latestTp + 1);
+    if (nextTp.initialized) {
+      emit log("next is init");
+    } else {
+      emit log("next not");
+    }
+  }
+
+  function getLatestTimepointIndex(IAlgebraPool pool) internal view returns (uint16) {
+    GlobalState memory gs = pool.globalState();
+    return gs.timepointIndex;
   }
 }
