@@ -130,28 +130,27 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   }
 
   function testBoostedAaveLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
+    IBalancerStablePool stablePool = IBalancerStablePool(boostedAavePool);
+
+    // Updates cache of getTokenRate
+    stablePool.updateTokenRateCache(linearAaveUsdtPool);
+    stablePool.updateTokenRateCache(linearAaveUsdcPool);
+    stablePool.updateTokenRateCache(linearAaveDaiPool);
+
     uint256 price = _getLpTokenPrice(boostedAavePool, stableLpOracle);
 
     // Find min price among the three underlying linear pools
     uint256[] memory linearPoolTokenPrices = new uint256[](3);
-    linearPoolTokenPrices[0] = mpo.price(linearAaveUsdtPool);
-    linearPoolTokenPrices[1] = mpo.price(linearAaveUsdcPool);
-    linearPoolTokenPrices[2] = mpo.price(linearAaveDaiPool);
-    uint256 minLinearPoolTokenPrice = _getMinValue(linearPoolTokenPrices);
-
-    // Find the price of the main token of the linear pool with the lowest price
-    uint256 minTokenPrice = mpo.price(dai);
-    if (minLinearPoolTokenPrice == mpo.price(linearAaveUsdtPool)) {
-      minTokenPrice = mpo.price(usdt);
-    } else if (minLinearPoolTokenPrice == mpo.price(linearAaveUsdcPool)) {
-      minTokenPrice = mpo.price(usdc);
-    }
+    linearPoolTokenPrices[0] = mpo.price(linearAaveUsdtPool) * 1e18 / IBalancerLinearPool(linearAaveUsdtPool).getRate();
+    linearPoolTokenPrices[1] = mpo.price(linearAaveUsdcPool) * 1e18 / IBalancerLinearPool(linearAaveUsdcPool).getRate();
+    linearPoolTokenPrices[2] = mpo.price(linearAaveDaiPool) * 1e18 / IBalancerLinearPool(linearAaveDaiPool).getRate();
+    uint256 mainTokenPrice = _getMinValue(linearPoolTokenPrices);
 
     uint256 stablePoolRate = IBalancerStablePool(boostedAavePool).getRate();
-    uint256 expectedRate = minTokenPrice*stablePoolRate/1e18;
+    uint256 expectedRate = (mainTokenPrice * stablePoolRate) / 1e18;
 
     assertTrue(price > 0);
-    assertApproxEqAbs(price, expectedRate, 1e13);
+    assertEq(price, expectedRate);
   }
 
   // Tests for LinearPools

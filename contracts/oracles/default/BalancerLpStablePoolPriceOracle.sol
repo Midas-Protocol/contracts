@@ -58,8 +58,9 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     IBalancerStablePool pool = IBalancerStablePool(underlying);
     IBalancerVault vault = pool.getVault();
 
-    // read-only re-entrancy protection - this call is always unsuccessful
-    (bool success, bytes memory revertData) = address(vault).staticcall(
+    // read-only re-entrancy protection - this call is always unsuccessful but we need to make sure
+    // it didn't fail due to a re-entrancy attack
+    (, bytes memory revertData) = address(vault).staticcall(
       abi.encodeWithSelector(vault.manageUserBalance.selector, new address[](0))
     );
     require(keccak256(revertData) != REENTRANCY_ERROR_HASH, "Balancer vault view reentrancy");
@@ -79,14 +80,8 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
       // The only requirement is that the nested LP tokens have a price oracle registered
       // See BalancerLpLinearPoolPriceOracle.sol for an example, as well as the relevant tests
       uint256 marketTokenPrice = BasePriceOracle(msg.sender).price(address(tokens[i]));
-      uint256 depositTokenPrice = 1e18;
-      // Using getTokenRateCache to save some gas
-      try pool.getTokenRateCache(address(tokens[i])) returns (uint256 depositPrice, uint256, uint256, uint256) {
-        depositTokenPrice = depositPrice;
-      } catch (bytes memory revertData) {
-
-      }
-      uint256 finalPrice = marketTokenPrice*1e18/depositTokenPrice;
+      uint256 depositTokenPrice = pool.getTokenRate(address(tokens[i]));
+      uint256 finalPrice = marketTokenPrice * 1e18 / depositTokenPrice;
       if (finalPrice < minPrice) {
         minPrice = finalPrice;
       }
