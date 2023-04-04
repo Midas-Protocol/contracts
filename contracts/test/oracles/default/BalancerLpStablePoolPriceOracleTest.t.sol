@@ -172,7 +172,7 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     uint256 price = _getLpTokenPrice(jEUR_agEUR_pool, stableLpOracle);
 
     assertTrue(price > 0);
-    assertEq(price, 1015155060583030014);
+    assertEq(price, 1015155060583030014); // 1,015e18 WMATIC * 1,05 USD/WMATIC =~ 1,066 USD
   }
 
   // https://polygonscan.com/tx/0xa061b632a95f2e0c81bacdb5a6d39991fb4e8436c52234373f9f736e2ad05e52
