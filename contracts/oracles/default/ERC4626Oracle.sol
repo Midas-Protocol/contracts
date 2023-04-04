@@ -12,7 +12,7 @@ import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
 
 contract ERC4626Oracle is SafeOwnableUpgradeable, BasePriceOracle {
   function initialize() public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
   }
 
   function price(address underlying) external view override returns (uint256) {

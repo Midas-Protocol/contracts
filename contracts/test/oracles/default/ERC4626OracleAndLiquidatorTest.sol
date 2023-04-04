@@ -99,7 +99,7 @@ contract ERC4626OracleAndLiquidatorTest is BaseTest {
     if (block.chainid == ETHEREUM_MAINNET) {
       underlyingTokens = asArray(address(usdcToken), address(daiToken), address(usdtToken)); // USDC, 6 decimals
       poolFee = 10;
-      erc4626Vault = IERC4626(0x97e6E0a40a3D02F12d1cEC30ebfbAE04e37C119E);
+      erc4626Vault = IERC4626(0x97e6E0a40a3D02F12d1cEC30ebfbAE04e37C119E); // USDC-DAI-USDT Real Yield
       quoter = new Quoter(0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6);
       univ3SwapRouter = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
       holder = 0x3541Fda19b09769A938EB2A5f5154b01aE5b0869;
@@ -128,7 +128,7 @@ contract ERC4626OracleAndLiquidatorTest is BaseTest {
     uint256 priceUsdc = mpo.price(address(usdcToken));
 
     // Approximate only -- these should not match.
-    assertApproxEqRel(priceRealYieldUsdc, priceUsdc, 1e17, "!diff > 10%");
+    assertApproxEqRel(priceRealYieldUsdc, priceUsdc, 3e16, "!diff > 3%");
   }
 
   function testRealYieldUsdErc4626RedemptionStrategy() public fork(ETHEREUM_MAINNET) {

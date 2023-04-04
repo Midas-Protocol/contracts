@@ -147,6 +147,8 @@ abstract contract BaseTest is Test {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("arbitrum_archive")) + 100;
       } else if (chainid == FANTOM_OPERA) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("fantom_archive")) + 100;
+      } else if (chainid == ETHEREUM_MAINNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("ethereum_archive")) + 100;
       }
     }
     return forkIds[chainidWithOffset] - 100;
@@ -184,14 +186,6 @@ abstract contract BaseTest is Test {
     }
     if (ap.owner() == address(0)) {
       ap.initialize(address(this));
-    }
-  }
-
-  function diffRel(uint256 a, uint256 b) internal pure returns (uint256) {
-    if (a > b) {
-      return (100 * (a - b)) / a;
-    } else {
-      return (100 * (b - a)) / b;
     }
   }
 
