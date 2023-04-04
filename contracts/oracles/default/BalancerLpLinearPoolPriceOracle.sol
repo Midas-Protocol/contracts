@@ -28,7 +28,7 @@ contract BalancerLpLinearPoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
   bytes32 internal constant REENTRANCY_ERROR_HASH = keccak256(abi.encodeWithSignature("Error(string)", "BAL#400"));
 
   function initialize(address[] memory _underlyings) public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     underlyings = _underlyings;
   }
 

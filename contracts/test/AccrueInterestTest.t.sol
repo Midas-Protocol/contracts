@@ -15,7 +15,7 @@ struct AccrualDiff {
 
 contract AccrueInterestTest is UpgradesBaseTest {
   // fork before the accrue interest refactoring
-  function testAccrueInterest() public forkAtBlock(BSC_MAINNET, 26032460) {
+  function testAccrueInterest() public debuggingOnly forkAtBlock(BSC_MAINNET, 26032460) {
     address busdMarketAddress = 0xa7213deB44f570646Ea955771Cc7f39B58841363;
     address wbnbMarketAddress = 0x57a64a77f8E4cFbFDcd22D5551F52D675cc5A956;
 

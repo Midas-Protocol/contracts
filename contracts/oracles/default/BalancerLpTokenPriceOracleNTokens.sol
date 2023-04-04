@@ -31,7 +31,7 @@ contract BalancerLpTokenPriceOracleNTokens is SafeOwnableUpgradeable, BasePriceO
   MasterPriceOracle public masterPriceOracle;
 
   function initialize(MasterPriceOracle _masterPriceOracle) public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     masterPriceOracle = _masterPriceOracle;
   }
 
