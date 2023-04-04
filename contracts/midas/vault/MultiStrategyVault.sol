@@ -8,12 +8,7 @@ import { PausableUpgradeable } from "openzeppelin-contracts-upgradeable/contract
 import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
 import { VaultFees, IERC4626, IERC20 } from "./IVault.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
-import "../strategies/CompoundMarketERC4626.sol";
-
-struct AdapterConfig {
-  CompoundMarketERC4626 adapter;
-  uint64 allocation;
-}
+import "./MultiStrategyVaultStorage.sol";
 
 /**
  * @title   Vault
@@ -26,6 +21,7 @@ struct AdapterConfig {
  * Adapter and fees can be changed by the owner after a ragequit time.
  */
 contract MultiStrategyVault is
+  MultiStrategyVaultStorage,
   SafeOwnableUpgradeable,
   ERC4626Upgradeable,
   ReentrancyGuardUpgradeable,
@@ -37,11 +33,11 @@ contract MultiStrategyVault is
   uint256 internal constant SECONDS_PER_YEAR = 365.25 days;
   uint8 public constant DECIMAL_OFFSET = 9;
 
-  uint8 internal _decimals;
-  string internal _name;
-  string internal _symbol;
-
-  bytes32 public contractName;
+//  uint8 internal _decimals;
+//  string internal _name;
+//  string internal _symbol;
+//
+//  bytes32 public contractName;
 
   event VaultInitialized(bytes32 contractName, address indexed asset);
 
@@ -518,9 +514,9 @@ contract MultiStrategyVault is
                             FEE LOGIC
     ------------------------------------------------------------*/
 
-  uint256 public highWaterMark;
-  uint256 public assetsCheckpoint;
-  uint256 public feesUpdatedAt;
+//  uint256 public highWaterMark;
+//  uint256 public assetsCheckpoint;
+//  uint256 public feesUpdatedAt;
 
   error InsufficientWithdrawalAmount(uint256 amount);
 
@@ -553,12 +549,12 @@ contract MultiStrategyVault is
                         FEE MANAGEMENT LOGIC
     ------------------------------------------------------------*/
 
-  VaultFees public fees;
-
-  VaultFees public proposedFees;
-  uint256 public proposedFeeTime;
-
-  address public feeRecipient;
+//  VaultFees public fees;
+//
+//  VaultFees public proposedFees;
+//  uint256 public proposedFeeTime;
+//
+//  address public feeRecipient;
 
   event NewFeesProposed(VaultFees newFees, uint256 timestamp);
   event ChangedFees(VaultFees oldFees, VaultFees newFees);
@@ -614,13 +610,13 @@ contract MultiStrategyVault is
                             ADAPTER LOGIC
     ------------------------------------------------------------*/
 
-  AdapterConfig[10] public adapters;
-  AdapterConfig[10] public proposedAdapters;
-
-  uint8 public adapterCount;
-  uint8 public proposedAdapterCount;
-
-  uint256 public proposedAdapterTime;
+//  AdapterConfig[10] public adapters;
+//  AdapterConfig[10] public proposedAdapters;
+//
+//  uint8 public adapterCount;
+//  uint8 public proposedAdapterCount;
+//
+//  uint256 public proposedAdapterTime;
 
   event NewAdaptersProposed(AdapterConfig[10] newAdapter, uint8 adapterCount, uint256 timestamp);
   event ChangedAdapters(
@@ -707,7 +703,7 @@ contract MultiStrategyVault is
                             RAGE QUIT LOGIC
     ------------------------------------------------------------*/
 
-  uint256 public quitPeriod;
+  //uint256 public quitPeriod;
 
   event QuitPeriodSet(uint256 quitPeriod);
 
@@ -731,7 +727,7 @@ contract MultiStrategyVault is
                         DEPOSIT LIMIT LOGIC
     ------------------------------------------------------------*/
 
-  uint256 public depositLimit;
+  //uint256 public depositLimit;
 
   event DepositLimitSet(uint256 depositLimit);
 
@@ -764,9 +760,9 @@ contract MultiStrategyVault is
     ------------------------------------------------------------*/
 
   //  EIP-2612 STORAGE
-  uint256 internal INITIAL_CHAIN_ID;
-  bytes32 internal INITIAL_DOMAIN_SEPARATOR;
-  mapping(address => uint256) public nonces;
+//  uint256 internal INITIAL_CHAIN_ID;
+//  bytes32 internal INITIAL_DOMAIN_SEPARATOR;
+//  mapping(address => uint256) public nonces;
 
   error PermitDeadlineExpired(uint256 deadline);
   error InvalidSigner(address signer);

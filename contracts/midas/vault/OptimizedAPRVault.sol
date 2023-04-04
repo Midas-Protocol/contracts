@@ -3,7 +3,8 @@ pragma solidity ^0.8.10;
 
 import { IGenericLender } from "../../external/angle/IGenericLender.sol";
 import { SafeOwnableUpgradeable } from "../SafeOwnableUpgradeable.sol";
-import { MultiStrategyVault, AdapterConfig, VaultFees } from "./MultiStrategyVault.sol";
+import { AdapterConfig, VaultFees } from "./MultiStrategyVault.sol";
+import { MultiStrategyVaultStorage } from "./MultiStrategyVaultStorage.sol";
 import { RewardsClaimer } from "../RewardsClaimer.sol";
 import { MidasFlywheel } from "../strategies/flywheel/MidasFlywheel.sol";
 
@@ -24,20 +25,20 @@ struct LendStatus {
   address addr;
 }
 
-contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
+contract OptimizedAPRVault is MultiStrategyVaultStorage, RewardsClaimer {
   using SafeERC20Upgradeable for IERC20;
 
   uint64 internal constant _BPS = 1e18;
 
-  bool public emergencyExit;
-
-  uint256 public withdrawalThreshold;
-
-  address public registry;
-
-  mapping(IERC20 => MidasFlywheel) public flywheelForRewardToken;
-
-  address public flywheelLogic;
+//  bool public emergencyExit;
+//
+//  uint256 public withdrawalThreshold;
+//
+//  address public registry;
+//
+//  mapping(IERC20 => MidasFlywheel) public flywheelForRewardToken;
+//
+//  address public flywheelLogic;
 
   event EmergencyExitActivated();
   event Harvested(uint256 totalAssets, uint256 aprBefore, uint256 aprAfter);
@@ -66,7 +67,8 @@ contract OptimizedAPRVault is MultiStrategyVault, RewardsClaimer {
     }
   }
 
-  function addRewardToken(IERC20 token_) public onlyOwner {
+  function addRewardToken(IERC20 token_) public {
+    require(msg.sender == owner(), "!owner");
     _deployFlywheelForRewardToken(token_);
     rewardTokens.push(token_);
   }
