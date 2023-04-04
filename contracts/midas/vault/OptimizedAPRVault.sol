@@ -18,8 +18,7 @@ struct LendStatus {
   address addr;
 }
 
-contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage
-{
+contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
   using SafeERC20 for IERC20;
   using Math for uint256;
 
@@ -716,8 +715,8 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage
       for (uint256 i; i < adapterCount; ++i) {
         if (adapterAdjustedAmounts[i] < 0) {
           deltaWithdraw +=
-          uint256(-adapterAdjustedAmounts[i]) -
-          adapters[i].adapter.withdraw(uint256(-adapterAdjustedAmounts[i]));
+            uint256(-adapterAdjustedAmounts[i]) -
+            adapters[i].adapter.withdraw(uint256(-adapterAdjustedAmounts[i]));
         }
       }
       // TODO deltaWithdraw is always 0 for compound markets deposits
@@ -761,6 +760,7 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage
     }
     if (totalAllocation != 1e18) revert InvalidConfig();
   }
+
   error AssetInvalid();
   error InvalidConfig();
   error InvalidVaultFees();

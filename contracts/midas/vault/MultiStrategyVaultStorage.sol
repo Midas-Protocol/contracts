@@ -23,7 +23,6 @@ abstract contract MultiStrategyVaultStorage is
   ReentrancyGuardUpgradeable,
   PausableUpgradeable
 {
-
   uint256 internal constant SECONDS_PER_YEAR = 365.25 days;
 
   uint8 internal _decimals;

@@ -57,13 +57,13 @@ contract OptimizedAPRVaultExtension is MultiStrategyVaultStorage, DiamondExtensi
   function accruedManagementFee() public view returns (uint256) {
     uint256 managementFee = fees.management;
     return
-    managementFee > 0
-    ? managementFee.mulDiv(
-      totalAssets() * (block.timestamp - feesUpdatedAt),
-      SECONDS_PER_YEAR,
-      Math.Rounding.Down
-    ) / 1e18
-    : 0;
+      managementFee > 0
+        ? managementFee.mulDiv(
+          totalAssets() * (block.timestamp - feesUpdatedAt),
+          SECONDS_PER_YEAR,
+          Math.Rounding.Down
+        ) / 1e18
+        : 0;
   }
 
   /**
@@ -78,9 +78,9 @@ contract OptimizedAPRVaultExtension is MultiStrategyVaultStorage, DiamondExtensi
     uint256 performanceFee = fees.performance;
 
     return
-    performanceFee > 0 && shareValue > highWaterMark_
-    ? performanceFee.mulDiv((shareValue - highWaterMark_) * totalSupply(), 1e36, Math.Rounding.Down)
-    : 0;
+      performanceFee > 0 && shareValue > highWaterMark_
+        ? performanceFee.mulDiv((shareValue - highWaterMark_) * totalSupply(), 1e36, Math.Rounding.Down)
+        : 0;
   }
 
   /*------------------------------------------------------------
@@ -90,7 +90,11 @@ contract OptimizedAPRVaultExtension is MultiStrategyVaultStorage, DiamondExtensi
   error InsufficientWithdrawalAmount(uint256 amount);
 
   /// @notice Minimal function to call `takeFees` modifier.
-  function takeManagementAndPerformanceFees() external /*nonReentrant*/ takeFees {}
+  function takeManagementAndPerformanceFees()
+    external
+    /*nonReentrant*/
+    takeFees
+  {}
 
   /// @notice Collect management and performance fees and update vault share high water mark.
   modifier takeFees() {
@@ -104,8 +108,8 @@ contract OptimizedAPRVaultExtension is MultiStrategyVaultStorage, DiamondExtensi
     if (totalFee > 0 && currentAssets > 0) {
       uint256 supply = totalSupply();
       uint256 feeInShare = supply == 0
-      ? totalFee
-      : totalFee.mulDiv(supply, currentAssets - totalFee, Math.Rounding.Down);
+        ? totalFee
+        : totalFee.mulDiv(supply, currentAssets - totalFee, Math.Rounding.Down);
       _mint(feeRecipient, feeInShare);
     }
 
