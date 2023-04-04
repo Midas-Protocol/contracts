@@ -20,4 +20,6 @@ interface IBalancerStablePool {
   function getScalingFactros() external view returns (uint256[] memory);
 
   function getTokenRate(address token) external view returns (uint256);
+
+  function getTokenRateCache(address token) external view returns (uint256, uint256, uint256, uint256);
 }

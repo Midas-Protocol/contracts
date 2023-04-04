@@ -11,8 +11,10 @@ import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
 import { BalancerLpStablePoolPriceOracle } from "../../../oracles/default/BalancerLpStablePoolPriceOracle.sol";
 import { BalancerLpLinearPoolPriceOracle } from "../../../oracles/default/BalancerLpLinearPoolPriceOracle.sol";
 import { BaseTest } from "../../config/BaseTest.t.sol";
+import { IBalancerLinearPool } from "../../../external/balancer/IBalancerLinearPool.sol";
 import { IBalancerStablePool } from "../../../external/balancer/IBalancerStablePool.sol";
 import { IBalancerVault, UserBalanceOp } from "../../../external/balancer/IBalancerVault.sol";
+import {BalancerReentrancyAttacker} from "../../../utils/BalancerReentrancyAttacker.sol";
 
 contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   BalancerLpStablePoolPriceOracle stableLpOracle;
@@ -42,80 +44,124 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
 
   function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-    address wtoken = ap.getAddress("wtoken");
 
-    address[][] memory stablePoolUnderlyings = new address[][](3);
-    stablePoolUnderlyings[0] = asArray(stMATIC, wtoken);
-    stablePoolUnderlyings[1] = asArray(jBRL, BRZ);
-    stablePoolUnderlyings[2] = asArray(jEUR, agEUR);
-
-    address[] memory stableLps = asArray(stMATIC_WMATIC_pool, jBRL_BRZ_pool, jEUR_agEUR_pool);
     address[] memory linearLps = asArray(linearAaveUsdtPool, linearAaveUsdcPool, linearAaveDaiPool);
 
     stableLpOracle = new BalancerLpStablePoolPriceOracle();
-    stableLpOracle.initialize(stableLps, stablePoolUnderlyings);
+    stableLpOracle.initialize();
 
     linearLpOracle = new BalancerLpLinearPoolPriceOracle();
     linearLpOracle.initialize(linearLps);
-  }
 
-  function getLpTokenPrice(address lpToken, IPriceOracle oracle) internal returns (uint256) {
-    IPriceOracle[] memory oracles = new IPriceOracle[](1);
-    oracles[0] = oracle;
-
+    IPriceOracle[] memory lpOracles = new IPriceOracle[](linearLps.length);
+    for (uint256 i = 0; i < linearLps.length; i++) {
+      lpOracles[i] = linearLpOracle;
+    }
     vm.prank(mpo.admin());
-    mpo.add(asArray(lpToken), oracles);
-    emit log("added the oracle");
-    return mpo.price(lpToken);
+    mpo.add(linearLps, lpOracles);
   }
 
   function testReentrancyWmaticStmaticLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
-    // add the oracle to the mpo for that LP token
-    {
-      IPriceOracle[] memory oracles = new IPriceOracle[](1);
-      oracles[0] = IPriceOracle(stableLpOracle);
-
-      vm.prank(mpo.admin());
-      mpo.add(asArray(stMATIC_WMATIC_pool), oracles);
-    }
-
     address vault = address(IBalancerStablePool(stMATIC_WMATIC_pool).getVault());
-    // raise the reentrancy flag for that vault
-    vm.store(vault, bytes32(uint256(0)), bytes32(uint256(2)));
+    BalancerReentrancyAttacker reentrancyAttacker = new BalancerReentrancyAttacker(
+      IBalancerVault(vault),
+      mpo,
+      stMATIC_WMATIC_pool
+    );
+
+    // add the oracle to the mpo for that LP token
+    IPriceOracle[] memory oracles = new IPriceOracle[](1);
+    oracles[0] = IPriceOracle(stableLpOracle);
+    vm.prank(mpo.admin());
+    mpo.add(asArray(stMATIC_WMATIC_pool), oracles);
+
+    // gives ETH to attacker
+    vm.deal(address(reentrancyAttacker), 5 ether);
+
+    // makes sure the address calling the attack is from attacker
+    vm.prank(address(reentrancyAttacker));
+
     // should revert with the specific message
-    vm.expectRevert(bytes("Balancer vault view reentrancy"));
-    mpo.price(stMATIC_WMATIC_pool);
+    vm.expectRevert(bytes("BAL#420"));
+    reentrancyAttacker.startAttack();
   }
 
   // Tests for ComposableStablePools
-  function testWmaticStmaticLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
-    uint256 price = getLpTokenPrice(stMATIC_WMATIC_pool, stableLpOracle);
+  function testJeurAgEurLpTokenOraclePrice() public fork(POLYGON_MAINNET)  {
+    uint256 price = _getLpTokenPrice(jEUR_agEUR_pool, stableLpOracle);
+
+    uint256[] memory baseTokenPrices = new uint256[](2);
+    baseTokenPrices[0] = mpo.price(jEUR);
+    baseTokenPrices[1] = mpo.price(agEUR);
+    uint256 minTokenPrice = _getMinValue(baseTokenPrices);
+    uint256 poolRate = IBalancerStablePool(jEUR_agEUR_pool).getRate();
+    uint256 expectedRate = minTokenPrice*poolRate/1e18;
+
     assertTrue(price > 0);
-    assertApproxEqAbs(price, mpo.price(stMATIC), 1e17);
+    assertEq(price, expectedRate);
   }
 
   function testJbrlBrzLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
-    uint256 price = getLpTokenPrice(jBRL_BRZ_pool, stableLpOracle);
+    uint256 price = _getLpTokenPrice(jBRL_BRZ_pool, stableLpOracle);
+
+    uint256[] memory baseTokenPrices = new uint256[](2);
+    baseTokenPrices[0] = mpo.price(jBRL);
+    baseTokenPrices[1] = mpo.price(BRZ);
+    uint256 minTokenPrice = _getMinValue(baseTokenPrices);
+    uint256 poolRate = IBalancerStablePool(jBRL_BRZ_pool).getRate();
+    uint256 expectedRate = minTokenPrice*poolRate/1e18;
+
     assertTrue(price > 0);
-    assertApproxEqAbs(price, mpo.price(jBRL), 1e16);
+    assertEq(price, expectedRate);
+  }
+
+  function testWmaticStmaticLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
+    uint256 price = _getLpTokenPrice(stMATIC_WMATIC_pool, stableLpOracle);
+
+    uint256[] memory baseTokenPrices = new uint256[](2);
+    baseTokenPrices[0] = mpo.price(stMATIC);
+    baseTokenPrices[1] = mpo.price(ap.getAddress("wtoken"));
+    uint256 minTokenPrice = _getMinValue(baseTokenPrices);
+    uint256 poolRate = IBalancerStablePool(stMATIC_WMATIC_pool).getRate();
+    uint256 expectedRate = minTokenPrice*poolRate/1e18;
+
+    assertTrue(price > 0);
+    assertEq(price, expectedRate);
   }
 
   function testBoostedAaveLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
-    // register the oracle
-    vm.prank(stableLpOracle.owner());
-    stableLpOracle.registerToken(boostedAavePool, asArray(usdt, usdc, dai));
+    uint256 price = _getLpTokenPrice(boostedAavePool, stableLpOracle);
 
-    uint256 price = getLpTokenPrice(boostedAavePool, stableLpOracle);
+    // Find min price among the three underlying linear pools
+    uint256[] memory linearPoolTokenPrices = new uint256[](3);
+    linearPoolTokenPrices[0] = mpo.price(linearAaveUsdtPool);
+    linearPoolTokenPrices[1] = mpo.price(linearAaveUsdcPool);
+    linearPoolTokenPrices[2] = mpo.price(linearAaveDaiPool);
+    uint256 minLinearPoolTokenPrice = _getMinValue(linearPoolTokenPrices);
+
+    // Find the price of the main token of the linear pool with the lowest price
+    uint256 minTokenPrice = mpo.price(dai);
+    if (minLinearPoolTokenPrice == mpo.price(linearAaveUsdtPool)) {
+      minTokenPrice = mpo.price(usdt);
+    } else if (minLinearPoolTokenPrice == mpo.price(linearAaveUsdcPool)) {
+      minTokenPrice = mpo.price(usdc);
+    }
+
+    uint256 stablePoolRate = IBalancerStablePool(boostedAavePool).getRate();
+    uint256 expectedRate = minTokenPrice*stablePoolRate/1e18;
+
     assertTrue(price > 0);
-    assertApproxEqAbs(price, mpo.price(usdt), 1e16);
+    assertApproxEqAbs(price, expectedRate, 1e13);
   }
 
   // Tests for LinearPools
   function testLinearAaveUsdtLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
-    uint256 price = getLpTokenPrice(linearAaveUsdtPool, linearLpOracle);
+    uint256 price = _getLpTokenPrice(linearAaveUsdtPool, linearLpOracle);
 
     assertTrue(price > 0);
-    assertApproxEqAbs(price, mpo.price(usdt), 1e16);
+    uint256 poolRate = IBalancerLinearPool(linearAaveUsdtPool).getRate();
+    uint256 expectedRate = mpo.price(usdt)*poolRate/1e18;
+    assertEq(price, expectedRate);
   }
 
   // Tests @block number
@@ -124,10 +170,10 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   // - 2,995.9 for ~ 3,200 USD
   // 1 LP token = 1,068 USD
   function testForkedJeurAgEurLpTokenOraclePrice() public forkAtBlock(POLYGON_MAINNET, 40141540) {
-    uint256 price = getLpTokenPrice(jEUR_agEUR_pool, stableLpOracle);
+    uint256 price = _getLpTokenPrice(jEUR_agEUR_pool, stableLpOracle);
 
     assertTrue(price > 0);
-    assertEq(price, 1015155060583030014); // 1,015e18 WMATIC * 1,05 USD/WMATIC =~ 1,066 USD
+    assertEq(price, 1015155060583030014);
   }
 
   // https://polygonscan.com/tx/0xa061b632a95f2e0c81bacdb5a6d39991fb4e8436c52234373f9f736e2ad05e52
@@ -135,7 +181,7 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   // 1 LP token = 0,1920 USD
 
   function testForkedJbrlBrzLpTokenOraclePrice() public forkAtBlock(POLYGON_MAINNET, 40120755) {
-    uint256 price = getLpTokenPrice(jBRL_BRZ_pool, stableLpOracle);
+    uint256 price = _getLpTokenPrice(jBRL_BRZ_pool, stableLpOracle);
 
     assertTrue(price > 0);
     assertEq(price, 179658854285035798); // 0,1796e18 WMATIC * 1,05 USD/WMATIC =~ 0,1888 USD
@@ -146,31 +192,28 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   // 1 LP token = 1,188 USD
 
   function testForkedWmaticStMaticTokenOraclePrice() public forkAtBlock(POLYGON_MAINNET, 40304920) {
-    uint256 price = getLpTokenPrice(stMATIC_WMATIC_pool, stableLpOracle);
+    uint256 price = _getLpTokenPrice(stMATIC_WMATIC_pool, stableLpOracle);
 
     assertTrue(price > 0);
     assertEq(price, 1009290665332190911); // 1,0093 WMATIC * 1,18 USD/WMATIC =~ 1,1909 USD
   }
 
-  function _reEntrancyTest(address[] memory lpTokens) internal {
-    for (uint256 i = 0; i < lpTokens.length; i++) {
-      IBalancerVault vault = IBalancerStablePool(lpTokens[i]).getVault();
-      // raise the reentrancy flag for that vault
-      vm.store(address(vault), bytes32(uint256(0)), bytes32(uint256(2)));
-      vm.expectRevert(bytes("BAL#400"));
-      vault.manageUserBalance(new UserBalanceOp[](0));
-    }
+  function _getLpTokenPrice(address lpToken, IPriceOracle oracle) internal returns (uint256) {
+    IPriceOracle[] memory oracles = new IPriceOracle[](1);
+    oracles[0] = oracle;
+
+    vm.prank(mpo.admin());
+    mpo.add(asArray(lpToken), oracles);
+    emit log("added the oracle");
+    return mpo.price(lpToken);
   }
 
-  // function testReentrancyErrorMessage() public fork(POLYGON_MAINNET) {
-  //   // TODO configure it in the addresses provider after deployed (or just hardcode it here for polygon)
-  //   stableLpOracle = BalancerLpStablePoolPriceOracle(ap.getAddress("BalancerLpStablePoolPriceOracle"));
-  //   linearLpOracle = BalancerLpStablePoolPriceOracle(ap.getAddress("BalancerLpLinearPoolPriceOracle"));
-
-  //   address[] memory stableLpTokens = stableLpOracle.getAllUnderlyings();
-  //   address[] memory linearLpTokens = linearLpOracle.getAllUnderlyings();
-
-  //   _reEntrancyTest(stableLpTokens);
-  //   _reEntrancyTest(linearLpTokens);
-  // }
+  function _getMinValue(uint256[] memory prices) internal returns (uint256 minPrice){
+    minPrice = type(uint256).max;
+    for (uint256 i = 0; i < prices.length; i++) {
+      if (prices[i] < minPrice) {
+        minPrice = prices[i];
+      }
+    }
+  }
 }
