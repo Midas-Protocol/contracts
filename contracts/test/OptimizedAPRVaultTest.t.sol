@@ -2,29 +2,41 @@
 pragma solidity >=0.8.0;
 
 import "./config/MarketsTest.t.sol";
-import { MultiStrategyVault, AdapterConfig, VaultFees } from "../midas/vault/MultiStrategyVault.sol";
 import { CompoundMarketERC4626 } from "../midas/strategies/CompoundMarketERC4626.sol";
 import { ICErc20 } from "../external/compound/ICErc20.sol";
 
 import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import { IERC4626Upgradeable as IERC4626 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
-import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { IERC4626Upgradeable as IERC4626, IERC20Upgradeable as IERC20 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
 import { WETH } from "solmate/tokens/WETH.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 
-import { OptimizedAPRVault } from "../midas/vault/OptimizedAPRVault.sol";
+import { OptimizedAPRVault, AdapterConfig, VaultFees } from "../midas/vault/OptimizedAPRVault.sol";
 import { OptimizedVaultsRegistry } from "../midas/vault/OptimizedVaultsRegistry.sol";
+import { OptimizedAPRVaultExtension } from "../midas/vault/OptimizedAPRVaultExtension.sol";
 
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 
+interface TwoBRL is IERC20 {
+  function minter() external view returns (address);
+
+  function mint(address to, uint256 amount) external;
+}
+
 contract OptimizedAPRVaultTest is MarketsTest {
   address ankrWbnbMarketAddress = 0x57a64a77f8E4cFbFDcd22D5551F52D675cc5A956;
   address ahWbnbMarketAddress = 0x059c595f19d6FA9f8203F3731DF54455cD248c44;
   address wbnbWhale = 0x0eD7e52944161450477ee417DE9Cd3a859b14fD0;
+
+  address twoBrlAddress = 0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9;
+  address twoBrlMarketAddress = 0xf0a2852958aD041a9Fb35c312605482Ca3Ec17ba; // DDD and EPX rewards
+  address twoBrlWhale = address(255);
+  address dddAddress = 0x84c97300a190676a19D1E13115629A11f8482Bd1;
+  address epxAddress = 0xAf41054C1487b0e5E2B9250C0332eCBCe6CE9d71;
+
   uint256 depositAmount = 1e18;
   uint256 blocksPerYear = 20 * 24 * 365 * 60; //blocks per year
   WETH wbnb;
@@ -35,6 +47,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
   OptimizedAPRVault vault;
   OptimizedVaultsRegistry registry;
   uint64[] lenderSharesHint = new uint64[](2);
+  TwoBRL twoBrl;
 
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
@@ -49,6 +62,10 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
       _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
       _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
+
+      twoBrl = TwoBRL(twoBrlAddress);
+      vm.prank(twoBrl.minter());
+      twoBrl.mint(twoBrlWhale, 1e19);
 
       setUpVault();
     }
@@ -111,9 +128,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
     MidasFlywheel flywheelLogic = new MidasFlywheel();
 
-    ERC20Upgradeable[] memory rewardTokens = new ERC20Upgradeable[](0);
     vault.initializeWithRegistry(
-      ERC20Upgradeable(wnativeAddress),
+      IERC20(wnativeAddress),
       adapters,
       2, // adapters count
       VaultFees(0, 0, 0, 0),
@@ -121,9 +137,10 @@ contract OptimizedAPRVaultTest is MarketsTest {
       type(uint256).max,
       address(this),
       address(registry),
-      rewardTokens,
       address(flywheelLogic)
     );
+    OptimizedAPRVaultExtension ext = new OptimizedAPRVaultExtension();
+    vault._registerExtension(ext, DiamondExtension(address(0)));
 
     registry.addVault(address(vault));
   }
@@ -409,24 +426,18 @@ contract OptimizedAPRVaultTest is MarketsTest {
     adapters[1].allocation = 1e17;
     adapters[2].allocation = 1e17;
 
-    vault.proposeAdapters(adapters, 3);
+    OptimizedAPRVaultExtension ext = vault.asExtension();
+    ext.proposeAdapters(adapters, 3);
     vm.expectRevert(NotPassedQuitPeriod.selector);
-    vault.changeAdapters();
+    ext.changeAdapters();
 
     vm.warp(block.timestamp + 3.01 days);
-    vault.changeAdapters();
+    ext.changeAdapters();
   }
 
-  address twoBrlAddress = 0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9;
-  address twoBrlMarketAddress = 0xf0a2852958aD041a9Fb35c312605482Ca3Ec17ba; // DDD and EPX rewards
-  address twoBrlWhale = 0x2484AE439894521f57fdC227E16999a636Fb2Fd4;
-  address dddAddress = 0x84c97300a190676a19D1E13115629A11f8482Bd1;
-  address epxAddress = 0xAf41054C1487b0e5E2B9250C0332eCBCe6CE9d71;
-
   function testVaultAccrueRewards() public fork(BSC_MAINNET) {
-    ERC20Upgradeable twoBrl = ERC20Upgradeable(twoBrlAddress);
-    ERC20Upgradeable ddd = ERC20Upgradeable(dddAddress);
-    ERC20Upgradeable epx = ERC20Upgradeable(epxAddress);
+    IERC20 ddd = IERC20(dddAddress);
+    IERC20 epx = IERC20(epxAddress);
 
     // set up the registry, the vault and the adapter
     {
@@ -457,10 +468,6 @@ contract OptimizedAPRVaultTest is MarketsTest {
       vault = OptimizedAPRVault(address(proxy));
       vm.label(address(vault), "vault");
 
-      ERC20Upgradeable[] memory rewardTokens = new ERC20Upgradeable[](2);
-      rewardTokens[0] = ddd;
-      rewardTokens[1] = epx;
-
       AdapterConfig[10] memory _adapters;
       _adapters[0].adapter = twoBrlMarketAdapter;
       _adapters[0].allocation = 1e18;
@@ -475,9 +482,13 @@ contract OptimizedAPRVaultTest is MarketsTest {
         type(uint256).max,
         address(this),
         address(registry),
-        rewardTokens,
         address(flywheelLogic)
       );
+      OptimizedAPRVaultExtension ext = new OptimizedAPRVaultExtension();
+      vault._registerExtension(ext, DiamondExtension(address(0)));
+
+      vault.asExtension().addRewardToken(ddd);
+      vault.asExtension().addRewardToken(epx);
 
       registry.addVault(address(vault));
     }
@@ -500,7 +511,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
 
     // pull from the adapters the rewards for the new cycle
-    vault.claimRewards();
+    vault.asExtension().claimRewards();
 
     {
       // TODO figure out why these accrue calls are necessary

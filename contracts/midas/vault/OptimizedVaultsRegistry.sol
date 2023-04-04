@@ -45,7 +45,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
         (CompoundMarketERC4626 adapter, ) = vaults[i].adapters(j);
         try adapter.emergencyWithdrawAndPause() {} catch {}
       }
-      vaults[i].setEmergencyExit();
+      vaults[i].asExtension().setEmergencyExit();
     }
   }
 
@@ -56,7 +56,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
   {
     uint256 totalFlywheels = 0;
     for (uint256 i = 0; i < vaults.length; i++) {
-      MidasFlywheel[] memory flywheels = vaults[i].getAllFlywheels();
+      MidasFlywheel[] memory flywheels = vaults[i].asExtension().getAllFlywheels();
       totalFlywheels += flywheels.length;
     }
 
@@ -65,7 +65,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
 
     for (uint256 i = 0; i < vaults.length; i++) {
       OptimizedAPRVault vault = vaults[i];
-      MidasFlywheel[] memory flywheels = vault.getAllFlywheels();
+      MidasFlywheel[] memory flywheels = vault.asExtension().getAllFlywheels();
       uint256 flywheelsLen = flywheels.length;
 
       for (uint256 j = 0; j < flywheelsLen; j++) {

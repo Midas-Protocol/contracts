@@ -5,13 +5,27 @@ import { VaultFees, IERC20 } from "./IVault.sol";
 import "../strategies/CompoundMarketERC4626.sol";
 import "../DiamondExtension.sol";
 import { MidasFlywheel } from "../strategies/flywheel/MidasFlywheel.sol";
+import { SafeOwnableUpgradeable, OwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
+
+import { ERC4626Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
+import { ReentrancyGuardUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol";
+import { PausableUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/security/PausableUpgradeable.sol";
+import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
 
 struct AdapterConfig {
   CompoundMarketERC4626 adapter;
   uint64 allocation;
 }
 
-abstract contract MultiStrategyVaultStorage is DiamondBase {
+abstract contract MultiStrategyVaultStorage is
+  SafeOwnableUpgradeable,
+  ERC4626Upgradeable,
+  ReentrancyGuardUpgradeable,
+  PausableUpgradeable
+{
+
+  uint256 internal constant SECONDS_PER_YEAR = 365.25 days;
+
   uint8 internal _decimals;
   string internal _name;
   string internal _symbol;
@@ -36,11 +50,12 @@ abstract contract MultiStrategyVaultStorage is DiamondBase {
   uint256 public quitPeriod;
   uint256 public depositLimit;
 
+  //  EIP-2612 STORAGE
   uint256 internal INITIAL_CHAIN_ID;
   bytes32 internal INITIAL_DOMAIN_SEPARATOR;
   mapping(address => uint256) public nonces;
 
-
+  // OptimizedAPRVault storage
 
   bool public emergencyExit;
   uint256 public withdrawalThreshold;
@@ -48,16 +63,9 @@ abstract contract MultiStrategyVaultStorage is DiamondBase {
   mapping(IERC20 => MidasFlywheel) public flywheelForRewardToken;
   address public flywheelLogic;
 
-  function owner() public view virtual returns (address);
+  /// @notice the address to send rewards
+  address public rewardDestination;
 
-  /**
-   * @dev register a logic extension
-   * @param extensionToAdd the extension whose functions are to be added
-   * @param extensionToReplace the extension whose functions are to be removed/replaced
-   */
-  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external override {
-    require(msg.sender == owner(), "!unauthorized - no admin rights");
-    LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
-  }
-
+  /// @notice the array of reward tokens to send to
+  IERC20[] public rewardTokens;
 }
