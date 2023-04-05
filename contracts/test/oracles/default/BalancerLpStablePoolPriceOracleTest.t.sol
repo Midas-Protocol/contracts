@@ -86,6 +86,23 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     reentrancyAttacker.startAttack();
   }
 
+  function testReentrancyErrorMessageWmaticStmaticLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
+    // add the oracle to the mpo for that LP token
+    {
+      IPriceOracle[] memory oracles = new IPriceOracle[](1);
+      oracles[0] = IPriceOracle(stableLpOracle);
+      vm.prank(mpo.admin());
+      mpo.add(asArray(stMATIC_WMATIC_pool), oracles);
+    }
+
+    address vault = address(IBalancerStablePool(stMATIC_WMATIC_pool).getVault());
+    // raise the reentrancy flag for that vault
+    vm.store(vault, bytes32(uint256(0)), bytes32(uint256(2)));
+    // should revert with the specific message
+    vm.expectRevert(bytes("Balancer vault view reentrancy"));
+    mpo.price(stMATIC_WMATIC_pool);
+  }
+
   // Tests for ComposableStablePools
   function testJeurAgEurLpTokenOraclePrice() public fork(POLYGON_MAINNET)  {
     uint256 price = _getLpTokenPrice(jEUR_agEUR_pool, stableLpOracle);
