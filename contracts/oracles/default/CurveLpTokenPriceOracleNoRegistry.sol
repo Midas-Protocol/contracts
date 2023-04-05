@@ -46,14 +46,14 @@ contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedSto
       "No LP tokens supplied or array lengths not equal."
     );
 
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     for (uint256 i = 0; i < _lpTokens.length; i++) {
       poolOf[_lpTokens[i]] = _pools[i];
       underlyingTokens[_lpTokens[i]] = _poolUnderlyings[i];
     }
   }
 
-  function reinitialize(address[] memory _lpTokens) public reinitializer(2) onlyOwnerOrAdmin {
+  function reinitialize(address[] memory _lpTokens) public reinitializer(4) onlyOwnerOrAdmin {
     for (uint256 i = 0; i < _lpTokens.length; i++) {
       bool skip = false;
       for (uint256 j = 0; j < lpTokens.length; j++) {

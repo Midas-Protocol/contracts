@@ -118,13 +118,13 @@ contract AutofarmERC4626 is MidasERC4626 {
    * Todo: needs test for verification
    */
 
-  // function emergencyWithdrawAndPause() external override onlyOwner {
-  //   autofarm.withdraw(poolId, autofarm.balanceOf(address(this)));
-  //   _pause();
-  // }
+  function emergencyWithdrawAndPause() external override onlyOwner {
+    autofarm.withdraw(poolId, autofarm.balanceOf(address(this)));
+    _pause();
+  }
 
-  // function unpause() external override onlyOwner {
-  //   _unpause();
-  //   autofarm.deposit(poolId, asset.balanceOf(address(this)));
-  // }
+  function unpause() external override onlyOwner {
+    _unpause();
+    autofarm.deposit(poolId, _asset().balanceOf(address(this)));
+  }
 }

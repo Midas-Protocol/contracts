@@ -8,7 +8,7 @@ import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/trans
 
 contract SomeOwnable is SafeOwnableUpgradeable {
   function initialize() public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
   }
 }
 

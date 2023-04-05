@@ -35,7 +35,7 @@ contract BalancerRateProviderOracle is SafeOwnableUpgradeable, BasePriceOracle {
     address[] memory _baseTokens,
     address[] memory _underlyings
   ) public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     require(
       _rateProviders.length == _baseTokens.length && _baseTokens.length == _underlyings.length,
       "Array lengths not equal."

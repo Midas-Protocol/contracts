@@ -4,22 +4,21 @@ pragma solidity >=0.8.0;
 import { BasePriceOracle } from "../BasePriceOracle.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { ConcentratedLiquidityBasePriceOracle } from "./ConcentratedLiquidityBasePriceOracle.sol";
+import { IAlgebraPool } from "../../external/algebra/IAlgebraPool.sol";
 
 import "../../external/uniswap/TickMath.sol";
 import "../../external/uniswap/FullMath.sol";
-import "../../external/uniswap/IUniswapV3Pool.sol";
 
 /**
  * @title UniswapV3PriceOracle
  * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
- * @notice UniswapV3PriceOracle is a price oracle for Uniswap V3 pairs.
+ * @notice AlgebraPriceOracle is a price oracle for Algebra pairs.
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
-contract UniswapV3PriceOracle is ConcentratedLiquidityBasePriceOracle {
+contract AlgebraPriceOracle is ConcentratedLiquidityBasePriceOracle {
   /**
-   * @dev Fetches the price for a token from Algebra pools.
+   * @dev Fetches the price for a token from Algebra pools
    */
-
   function _price(address token) internal view override returns (uint256) {
     uint32[] memory secondsAgos = new uint32[](2);
     uint256 twapWindow = poolFeeds[token].twapWindow;
@@ -28,8 +27,8 @@ contract UniswapV3PriceOracle is ConcentratedLiquidityBasePriceOracle {
     secondsAgos[0] = uint32(twapWindow);
     secondsAgos[1] = 0;
 
-    IUniswapV3Pool pool = IUniswapV3Pool(poolFeeds[token].poolAddress);
-    (int56[] memory tickCumulatives, ) = pool.observe(secondsAgos);
+    IAlgebraPool pool = IAlgebraPool(poolFeeds[token].poolAddress);
+    (int56[] memory tickCumulatives, , , ) = pool.getTimepoints(secondsAgos);
 
     int24 tick = int24((tickCumulatives[1] - tickCumulatives[0]) / int56(int256(twapWindow)));
     uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick(tick);
