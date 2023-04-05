@@ -22,12 +22,10 @@ import { MasterPriceOracle } from "../MasterPriceOracle.sol";
  */
 
 contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
-  address[] public underlyings;
   bytes32 internal constant REENTRANCY_ERROR_HASH = keccak256(abi.encodeWithSignature("Error(string)", "BAL#400"));
 
-  function initialize(address[] memory _underlyings) public initializer {
+  function initialize() public initializer {
     __SafeOwnable_init(msg.sender);
-    underlyings = _underlyings;
   }
 
   /**
@@ -54,66 +52,41 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
 
   /**
    * @dev Fetches the fair LP token/ETH price from Balancer, with 18 decimals of precision.
-   * Source: https://github.com/AlphaFinanceLab/homora-v2/blob/master/contracts/oracle/BalancerPairOracle.sol
    */
   function _price(address underlying) internal view virtual returns (uint256) {
     IBalancerStablePool pool = IBalancerStablePool(underlying);
     IBalancerVault vault = pool.getVault();
-    uint256 rate = pool.getRate();
 
-    // read-only re-entracy protection - this call is always unsuccessful
+    // read-only re-entrancy protection - this call is always unsuccessful but we need to make sure
+    // it didn't fail due to a re-entrancy attack
     (, bytes memory revertData) = address(vault).staticcall(
       abi.encodeWithSelector(vault.manageUserBalance.selector, new address[](0))
     );
     require(keccak256(revertData) != REENTRANCY_ERROR_HASH, "Balancer vault view reentrancy");
 
-    uint256 poolActualSupply = pool.getActualSupply();
-    (IERC20Upgradeable[] memory tokens, uint256[] memory balances, ) = vault.getPoolTokens(pool.getPoolId());
+    bytes32 poolId = pool.getPoolId();
+    (IERC20Upgradeable[] memory tokens, , ) = vault.getPoolTokens(poolId);
+    uint256 bptIndex = pool.getBptIndex();
 
-    uint256 weightedBaseTokenValue = 0;
+    uint256 minPrice = type(uint256).max;
 
     for (uint256 i = 0; i < tokens.length; i++) {
-      // exclude the LP token itself
-      if (tokens[i] == IERC20Upgradeable(underlying)) {
+      if (i == bptIndex) {
         continue;
       }
-
-      // scale by the decimals of the base token
-      uint256 balancesScaled = balances[i] * 10**(18 - uint256(ERC20Upgradeable(address(tokens[i])).decimals()));
-
-      // get the share of the base token in the pool (inverse to prevent underflow)
-      // e18 + e18 - e18
-      uint256 baseTokenShare = (poolActualSupply * 1e18) / balancesScaled;
-
-      // Get the price of the base token in ETH
-      uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(address(tokens[i]));
-
-      // Get the value of each of the base tokens' share in ETH
-      // e18 + e18 - e18
-      weightedBaseTokenValue += ((baseTokenPrice * 1e18) / baseTokenShare);
-    }
-    // Multiply the value of each of the base tokens' share in ETH by the rate of the pool
-    return (rate * weightedBaseTokenValue) / 1e18;
-  }
-
-  /**
-   * @dev Register the an underlying.
-   * @param _underlying Underlying token for which to add an oracle.
-   */
-  function registerToken(address _underlying) external onlyOwner {
-    bool skip = false;
-    for (uint256 j = 0; j < underlyings.length; j++) {
-      if (underlyings[j] == _underlying) {
-        skip = true;
-        break;
+      // Get the price of each of the base tokens in ETH
+      // This also includes the price of the nested LP tokens, if they are e.g. LinearPools
+      // The only requirement is that the nested LP tokens have a price oracle registered
+      // See BalancerLpLinearPoolPriceOracle.sol for an example, as well as the relevant tests
+      uint256 marketTokenPrice = BasePriceOracle(msg.sender).price(address(tokens[i]));
+      uint256 depositTokenPrice = pool.getTokenRate(address(tokens[i]));
+      uint256 finalPrice = (marketTokenPrice * 1e18) / depositTokenPrice;
+      if (finalPrice < minPrice) {
+        minPrice = finalPrice;
       }
     }
-    if (!skip) {
-      underlyings.push(_underlying);
-    }
-  }
-
-  function getAllUnderlyings() external view returns (address[] memory) {
-    return underlyings;
+    // Multiply the value of each of the base tokens' share in ETH by the rate of the pool
+    // pool.getRate() is the rate of the pool, scaled by 1e18
+    return (minPrice * pool.getRate()) / 1e18;
   }
 }
