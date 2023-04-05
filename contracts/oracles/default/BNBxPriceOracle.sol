@@ -21,7 +21,7 @@ contract BNBxPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
   address public BNBx;
 
   function initialize() public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     stakeManager = IStakeManager(0x7276241a669489E4BBB76f63d2A43Bfe63080F2F);
     (, address _bnbX, , ) = stakeManager.getContracts();
     BNBx = _bnbX;

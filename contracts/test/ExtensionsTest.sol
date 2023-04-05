@@ -1,20 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { BaseTest } from "./config/BaseTest.t.sol";
+import { MarketsTest } from "./config/MarketsTest.t.sol";
 
 import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
-import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { Comptroller, ComptrollerV3Storage } from "../compound/Comptroller.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { CTokenInterface, CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
-import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
-
+import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
+
 import { IComptroller } from "../external/compound/IComptroller.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
 
@@ -26,11 +25,11 @@ contract MockComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
     return allMarkets[0].symbol();
   }
 
-  function _setTransferPaused(bool state) public returns (bool) {
+  function _setTransferPaused(bool) public returns (bool) {
     return false;
   }
 
-  function _setSeizePaused(bool state) public returns (bool) {
+  function _setSeizePaused(bool) public returns (bool) {
     return false;
   }
 
@@ -79,27 +78,19 @@ contract MockThirdComptrollerExtension is DiamondExtension, ComptrollerV3Storage
   }
 }
 
-contract ExtensionsTest is BaseTest {
-  FuseFeeDistributor internal ffd;
+contract ExtensionsTest is MarketsTest {
   ComptrollerFirstExtension internal cfe;
-  CTokenFirstExtension newCTokenExtension;
-  CErc20Delegate cErc20Delegate;
-  CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
   MockComptrollerExtension internal mockExtension;
   MockSecondComptrollerExtension internal second;
   MockThirdComptrollerExtension internal third;
   address payable internal latestComptrollerImplementation;
 
   function afterForkSetUp() internal virtual override {
-    ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
-
+    super.afterForkSetUp();
     cfe = new ComptrollerFirstExtension();
-    newCTokenExtension = new CTokenFirstExtension();
     mockExtension = new MockComptrollerExtension();
     second = new MockSecondComptrollerExtension();
     third = new MockThirdComptrollerExtension();
-    cErc20Delegate = new CErc20Delegate();
-    cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
     Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
     latestComptrollerImplementation = payable(address(newComptrollerImplementation));
   }
@@ -293,50 +284,6 @@ contract ExtensionsTest is BaseTest {
     assertEq(totalSupplyAfter, totalSupplyBefore, "total supply should be the same");
   }
 
-  function _prepareCTokenUpgrade(CErc20Delegate market) internal returns (address) {
-    address implBefore = market.implementation();
-    emit log("implementation before");
-    emit log_address(implBefore);
-
-    CErc20Delegate newImpl;
-    if (compareStrings("CErc20Delegate", market.contractType())) {
-      newImpl = cErc20Delegate;
-    } else {
-      newImpl = cErc20PluginRewardsDelegate;
-    }
-
-    // whitelist the upgrade
-    vm.prank(ffd.owner());
-    ffd._editCErc20DelegateWhitelist(asArray(implBefore), asArray(address(newImpl)), asArray(false), asArray(true));
-
-    // set the new ctoken delegate as the latest
-    vm.prank(ffd.owner());
-    ffd._setLatestCErc20Delegate(implBefore, address(newImpl), false, abi.encode(address(0)));
-
-    // add the extension to the auto upgrade config
-    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
-    cErc20DelegateExtensions[0] = newCTokenExtension;
-    vm.prank(ffd.owner());
-    ffd._setCErc20DelegateExtensions(address(newImpl), cErc20DelegateExtensions);
-
-    return address(newImpl);
-  }
-
-  function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
-    address newDelegate = _prepareCTokenUpgrade(asDelegate);
-
-    bytes memory becomeImplData = (address(newDelegate) == address(cErc20Delegate))
-      ? bytes("")
-      : abi.encode(address(0));
-    vm.prank(asDelegate.fuseAdmin());
-    asDelegate._setImplementationSafe(newDelegate, false, becomeImplData);
-
-    // auto upgrade
-    //CTokenExtensionInterface(address(asDelegate)).accrueInterest();
-    emit log("new implementation");
-    emit log_address(asDelegate.implementation());
-  }
-
   function testBscComptrollerExtensions() public debuggingOnly fork(BSC_MAINNET) {
     _testComptrollersExtensions();
   }
@@ -376,8 +323,6 @@ contract ExtensionsTest is BaseTest {
 
   function testBulkAutoUpgrade() public debuggingOnly fork(POLYGON_MAINNET) {
     CErc20Delegate market = CErc20Delegate(0x4DED2939A2A8912E9Cc9eaEFAbECC43CC9864723);
-
-    address implBefore = market.implementation();
 
     address newImplAddress = _prepareCTokenUpgrade(market);
 

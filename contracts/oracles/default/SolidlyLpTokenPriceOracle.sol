@@ -3,13 +3,8 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import { IPair } from "../../external/solidly/IPair.sol";
-
-import "../BasePriceOracle.sol";
+import { BasePriceOracle } from "../BasePriceOracle.sol";
 import { UniswapLikeLpTokenPriceOracle } from "./UniswapLikeLpTokenPriceOracle.sol";
 
 /**

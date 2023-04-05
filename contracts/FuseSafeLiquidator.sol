@@ -303,14 +303,14 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   }
 
   function safeLiquidate(
-    address borrower,
-    ICEther cEther,
-    ICErc20 cErc20Collateral,
-    uint256 minOutputAmount,
-    address exchangeSeizedTo,
-    IUniswapV2Router02 uniswapV2Router,
-    IRedemptionStrategy[] memory redemptionStrategies,
-    bytes[] memory strategyData
+    address,
+    ICEther,
+    ICErc20,
+    uint256,
+    address,
+    IUniswapV2Router02,
+    IRedemptionStrategy[] memory,
+    bytes[] memory
   ) external payable returns (uint256) {
     revert("not used anymore");
   }
@@ -406,16 +406,16 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   }
 
   function safeLiquidateToEthWithFlashLoan(
-    address borrower,
-    uint256 repayAmount,
-    ICEther cEther,
-    ICErc20 cErc20Collateral,
-    uint256 minProfitAmount,
-    address exchangeProfitTo,
-    IUniswapV2Router02 uniswapV2RouterForCollateral,
-    IRedemptionStrategy[] memory redemptionStrategies,
-    bytes[] memory strategyData,
-    uint256 ethToCoinbase
+    address,
+    uint256,
+    ICEther,
+    ICErc20,
+    uint256,
+    address,
+    IUniswapV2Router02,
+    IRedemptionStrategy[] memory,
+    bytes[] memory,
+    uint256
   ) external returns (uint256) {
     revert("not used anymore");
   }
@@ -458,9 +458,9 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    * @dev Callback function for Uniswap flashloans.
    */
   function uniswapV2Call(
-    address sender,
-    uint256 amount0,
-    uint256 amount1,
+    address,
+    uint256,
+    uint256,
     bytes calldata data
   ) public override {
     address cToken = abi.decode(data[100:132], (address));

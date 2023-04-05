@@ -11,9 +11,7 @@ import "../../external/compound/ICErc20.sol";
 import { IBalancerStablePool } from "../../external/balancer/IBalancerStablePool.sol";
 import { IBalancerVault } from "../../external/balancer/IBalancerVault.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
-
 import { BasePriceOracle } from "../BasePriceOracle.sol";
-
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 
 /**
@@ -39,7 +37,7 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
   function initialize(address[] memory _underlyings, address[][] memory _poolUnderlyings) public initializer {
     require(_underlyings.length == _poolUnderlyings.length, "No LP tokens supplied or array lengths not equal.");
 
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     for (uint256 i = 0; i < _underlyings.length; i++) {
       underlyingTokens[_underlyings[i]] = _poolUnderlyings[i];
     }

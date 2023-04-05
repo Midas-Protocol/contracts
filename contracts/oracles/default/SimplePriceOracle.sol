@@ -16,7 +16,7 @@ contract SimplePriceOracle is PriceOracle, SafeOwnableUpgradeable {
   );
 
   function initialize() public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
   }
 
   function getUnderlyingPrice(CTokenInterface cToken) public view override returns (uint256) {
