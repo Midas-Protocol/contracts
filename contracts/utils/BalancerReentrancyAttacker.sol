@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
 import { IBalancerStablePool } from "../external/balancer/IBalancerStablePool.sol";
 import "../external/balancer/IBalancerVault.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
