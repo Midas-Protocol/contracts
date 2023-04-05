@@ -22,25 +22,10 @@ import { MasterPriceOracle } from "../MasterPriceOracle.sol";
  */
 
 contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
-  /**
-   * @dev Maps Balancer LP Stabble token addresses to underlying token addresses.
-   */
-  mapping(address => address[]) public underlyingTokens;
-
-  /**
-   * @dev Supported underlying assets
-   */
-  address[] public underlyings;
-
   bytes32 internal constant REENTRANCY_ERROR_HASH = keccak256(abi.encodeWithSignature("Error(string)", "BAL#400"));
 
-  function initialize(address[] memory _underlyings, address[][] memory _poolUnderlyings) public initializer {
-    require(_underlyings.length == _poolUnderlyings.length, "No LP tokens supplied or array lengths not equal.");
-
+  function initialize() public initializer {
     __SafeOwnable_init(msg.sender);
-    for (uint256 i = 0; i < _underlyings.length; i++) {
-      underlyingTokens[_underlyings[i]] = _poolUnderlyings[i];
-    }
   }
 
   /**
@@ -72,48 +57,36 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     IBalancerStablePool pool = IBalancerStablePool(underlying);
     IBalancerVault vault = pool.getVault();
 
-    // read-only re-entracy protection - this call is always unsuccessful
+    // read-only re-entrancy protection - this call is always unsuccessful but we need to make sure
+    // it didn't fail due to a re-entrancy attack
     (, bytes memory revertData) = address(vault).staticcall(
       abi.encodeWithSelector(vault.manageUserBalance.selector, new address[](0))
     );
     require(keccak256(revertData) != REENTRANCY_ERROR_HASH, "Balancer vault view reentrancy");
 
-    address[] memory tokens = underlyingTokens[underlying];
+    bytes32 poolId = pool.getPoolId();
+    (IERC20Upgradeable[] memory tokens, , ) = vault.getPoolTokens(poolId);
+    uint256 bptIndex = pool.getBptIndex();
 
     uint256 minPrice = type(uint256).max;
 
     for (uint256 i = 0; i < tokens.length; i++) {
+      if (i == bptIndex) {
+        continue;
+      }
       // Get the price of each of the base tokens in ETH
       // This also includes the price of the nested LP tokens, if they are e.g. LinearPools
       // The only requirement is that the nested LP tokens have a price oracle registered
       // See BalancerLpLinearPoolPriceOracle.sol for an example, as well as the relevant tests
-      uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(address(tokens[i]));
-      if (baseTokenPrice < minPrice) minPrice = baseTokenPrice;
+      uint256 marketTokenPrice = BasePriceOracle(msg.sender).price(address(tokens[i]));
+      uint256 depositTokenPrice = pool.getTokenRate(address(tokens[i]));
+      uint256 finalPrice = (marketTokenPrice * 1e18) / depositTokenPrice;
+      if (finalPrice < minPrice) {
+        minPrice = finalPrice;
+      }
     }
     // Multiply the value of each of the base tokens' share in ETH by the rate of the pool
     // pool.getRate() is the rate of the pool, scaled by 1e18
     return (minPrice * pool.getRate()) / 1e18;
-  }
-
-  /**
-   * @dev Register the an underlying.
-   * @param _underlying Underlying token for which to add an oracle.
-   */
-  function registerToken(address _underlying, address[] memory _underlyingTokens) external onlyOwner {
-    bool skip = false;
-    for (uint256 j = 0; j < underlyings.length; j++) {
-      if (underlyings[j] == _underlying) {
-        skip = true;
-        break;
-      }
-    }
-    if (!skip) {
-      underlyings.push(_underlying);
-      underlyingTokens[_underlying] = _underlyingTokens;
-    }
-  }
-
-  function getAllUnderlyings() external view returns (address[] memory) {
-    return underlyings;
   }
 }
