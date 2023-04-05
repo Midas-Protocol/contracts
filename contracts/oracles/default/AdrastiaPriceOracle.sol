@@ -34,7 +34,7 @@ contract AdrastiaPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceO
    * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
    */
   function initialize(NativeUSDPriceOracle nativeUsdPriceFeed) public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     NATIVE_TOKEN_USD_PRICE_FEED = nativeUsdPriceFeed;
   }
 

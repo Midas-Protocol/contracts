@@ -11,7 +11,6 @@ import "../../external/compound/ICErc20.sol";
 import { IBalancerStablePool } from "../../external/balancer/IBalancerStablePool.sol";
 import { IBalancerVault } from "../../external/balancer/IBalancerVault.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
-
 import { BasePriceOracle } from "../BasePriceOracle.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 
@@ -26,7 +25,7 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
   bytes32 internal constant REENTRANCY_ERROR_HASH = keccak256(abi.encodeWithSignature("Error(string)", "BAL#400"));
 
   function initialize() public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
   }
 
   /**
@@ -81,7 +80,7 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
       // See BalancerLpLinearPoolPriceOracle.sol for an example, as well as the relevant tests
       uint256 marketTokenPrice = BasePriceOracle(msg.sender).price(address(tokens[i]));
       uint256 depositTokenPrice = pool.getTokenRate(address(tokens[i]));
-      uint256 finalPrice = marketTokenPrice * 1e18 / depositTokenPrice;
+      uint256 finalPrice = (marketTokenPrice * 1e18) / depositTokenPrice;
       if (finalPrice < minPrice) {
         minPrice = finalPrice;
       }

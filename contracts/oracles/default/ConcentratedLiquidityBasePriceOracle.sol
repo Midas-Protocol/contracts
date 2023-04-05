@@ -1,24 +1,24 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { PriceOracle } from "../../compound/PriceOracle.sol";
-import { BasePriceOracle } from "../BasePriceOracle.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
-import { IPair } from "../../external/solidly/IPair.sol";
-import { CTokenInterface } from "../../compound/CErc20.sol";
-import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 
+import { PriceOracle } from "../../compound/PriceOracle.sol";
+import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import { CTokenInterface } from "../../compound/CErc20.sol";
+
+import "../../external/uniswap/FullMath.sol";
 import "../../midas/SafeOwnableUpgradeable.sol";
 
 /**
- * @title SolidlyOracle
+ * @title ConcentratedLiquidityBasePriceOracle
  * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
- * @notice SolidlyOracle is a price oracle for Solidly-style pairs.
+ * @notice ConcentratedLiquidityBasePriceOracle is an abstract price oracle for concentrated liquidty (UniV3-like) pairs.
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
-contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
+abstract contract ConcentratedLiquidityBasePriceOracle is PriceOracle, SafeOwnableUpgradeable {
   /**
-   * @notice Maps ERC20 token addresses to UniswapV3Pool addresses.
+   * @notice Maps ERC20 token addresses to asset configs.
    */
   mapping(address => AssetConfig) public poolFeeds;
 
@@ -29,6 +29,7 @@ contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
 
   struct AssetConfig {
     address poolAddress;
+    uint256 twapWindow;
     address baseToken;
   }
 
@@ -59,7 +60,7 @@ contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
       // Set asset config for underlying
       require(
         assetConfig[i].baseToken == WTOKEN || _isBaseTokenSupported(assetConfig[i].baseToken),
-        "Underlying token must be supported"
+        "Base token must be supported"
       );
       poolFeeds[underlying] = assetConfig[i];
     }
@@ -83,43 +84,24 @@ contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
     address underlying = ICErc20(address(cToken)).underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-    return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
+    return (_price(underlying) * 1e18) / (10**uint256(EIP20Interface(underlying).decimals()));
   }
 
   /**
-   * @dev Fetches the price for a token from Solidly Pair
+   * @dev Fetches the price for a token from Uniswap v3
    */
-  function _price(address token) internal view virtual returns (uint256) {
-    address baseToken = poolFeeds[token].baseToken;
-    IPair pair = IPair(poolFeeds[token].poolAddress);
+  function _price(address token) internal view virtual returns (uint256);
 
-    address token0 = pair.token0();
-    address token1 = pair.token1();
-
-    address quoteToken;
-
-    baseToken == token0 ? quoteToken = token1 : quoteToken = token0;
-
-    // get how many baseTokens (WNATIVE or STABLE) are needed to get us 1 quote token
-    // i.e: the ration X/WNATIVE or X/STABLE
-    uint256 baseTokensPerQuoteToken = pair.current(quoteToken, 10**uint256(ERC20Upgradeable(quoteToken).decimals()));
-    if (baseToken == WTOKEN) {
-      // No need to scale either, because WNATIVE is always 1e18
-      return baseTokensPerQuoteToken;
+  function getPriceX96FromSqrtPriceX96(
+    address token0,
+    address priceToken,
+    uint160 sqrtPriceX96
+  ) public pure returns (uint256 price) {
+    if (token0 == priceToken) {
+      price = FullMath.mulDiv(sqrtPriceX96, sqrtPriceX96, uint256(2**(96 * 2)) / 1e18);
     } else {
-      // base token is USD or another token
-      uint256 baseTokenNativePrice = BasePriceOracle(msg.sender).price(baseToken);
-      // scale tokenPrice by 1e18
-      uint256 baseTokenDecimals = uint256(ERC20Upgradeable(baseToken).decimals());
-      uint256 tokenPriceScaled;
-
-      if (baseTokenDecimals > 18) {
-        tokenPriceScaled = baseTokensPerQuoteToken / (10**(baseTokenDecimals - 18));
-      } else {
-        tokenPriceScaled = baseTokensPerQuoteToken * (10**(18 - baseTokenDecimals));
-      }
-
-      return (tokenPriceScaled * baseTokenNativePrice) / 1e18;
+      price = FullMath.mulDiv(sqrtPriceX96, sqrtPriceX96, uint256(2**(96 * 2)) / 1e18);
+      price = 1e36 / price;
     }
   }
 
