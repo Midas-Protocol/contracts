@@ -39,19 +39,6 @@ abstract contract OptimizedAPRVaultExtension is
     if (totalAllocation != 1e18) revert InvalidConfig();
   }
 
-  function computeDomainSeparator() internal view virtual returns (bytes32) {
-    return
-      keccak256(
-        abi.encode(
-          keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-          keccak256(bytes(_name)),
-          keccak256("1"),
-          block.chainid,
-          address(this)
-        )
-      );
-  }
-
   function _msgSender() internal view override(ContextUpgradeable, Context) returns (address) {
     return msg.sender;
   }
@@ -59,6 +46,4 @@ abstract contract OptimizedAPRVaultExtension is
   function _msgData() internal view override(ContextUpgradeable, Context) returns (bytes calldata) {
     return msg.data;
   }
-
-  function initialize(bytes calldata data) public virtual;
 }

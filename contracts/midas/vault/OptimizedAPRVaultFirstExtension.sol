@@ -28,7 +28,7 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
   }
 
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 14;
+    uint8 fnsCount = 16;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.initialize.selector;
     functionSelectors[--fnsCount] = this.accruedManagementFee.selector;
@@ -44,12 +44,14 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
     functionSelectors[--fnsCount] = this.claimRewards.selector;
     functionSelectors[--fnsCount] = this.getAllFlywheels.selector;
     functionSelectors[--fnsCount] = this.addRewardToken.selector;
+    functionSelectors[--fnsCount] = this.DOMAIN_SEPARATOR.selector;
+    functionSelectors[--fnsCount] = this.permit.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
 
-  function initialize(bytes calldata data) public override initializer {
+  function initialize(bytes calldata data) public initializer {
     require(msg.sender == address(this), "!not self call");
 
     (
@@ -96,6 +98,72 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
       adapters[i] = adapters_[i];
       asset_.approve(address(adapters_[i].adapter), type(uint256).max);
     }
+  }
+
+  /*------------------------------------------------------------
+                            EIP-2612 LOGIC
+    ------------------------------------------------------------*/
+
+  error PermitDeadlineExpired(uint256 deadline);
+  error InvalidSigner(address signer);
+
+  function permit(
+    address owner,
+    address spender,
+    uint256 value,
+    uint256 deadline,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) public virtual {
+    if (deadline < block.timestamp) revert PermitDeadlineExpired(deadline);
+
+    // Unchecked because the only math done is incrementing
+    // the owner's nonce which cannot realistically overflow.
+    unchecked {
+      address recoveredAddress = ecrecover(
+        keccak256(
+          abi.encodePacked(
+            "\x19\x01",
+            DOMAIN_SEPARATOR(),
+            keccak256(
+              abi.encode(
+                keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
+                owner,
+                spender,
+                value,
+                nonces[owner]++,
+                deadline
+              )
+            )
+          )
+        ),
+        v,
+        r,
+        s
+      );
+
+      if (recoveredAddress == address(0) || recoveredAddress != owner) revert InvalidSigner(recoveredAddress);
+
+      _approve(recoveredAddress, spender, value);
+    }
+  }
+
+  function computeDomainSeparator() internal view virtual returns (bytes32) {
+    return
+      keccak256(
+        abi.encode(
+          keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+          keccak256(bytes(_name)),
+          keccak256("1"),
+          block.chainid,
+          address(this)
+        )
+      );
+  }
+
+  function DOMAIN_SEPARATOR() public view returns (bytes32) {
+    return block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : computeDomainSeparator();
   }
 
   /*------------------------------------------------------------

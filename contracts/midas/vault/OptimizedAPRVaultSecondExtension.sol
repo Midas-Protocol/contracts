@@ -14,14 +14,23 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   using SafeERC20 for IERC20;
   using Math for uint256;
 
+  uint64 internal constant _BPS = 1e18;
+
   error InvalidAllocations();
+  error InvalidReceiver();
+  error MaxError(uint256 amount);
+  error IncorrectListLength();
+  error IncorrectDistribution();
+
+  event DepositLimitSet(uint256 depositLimit);
+  event Harvested(uint256 totalAssets, uint256 aprBefore, uint256 aprAfter);
 
   constructor() {
     _disableInitializers();
   }
 
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 39;
+    uint8 fnsCount = 37;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.name.selector;
     functionSelectors[--fnsCount] = this.symbol.selector;
@@ -46,8 +55,6 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     functionSelectors[--fnsCount] = this.setDepositLimit.selector;
     functionSelectors[--fnsCount] = this.pause.selector;
     functionSelectors[--fnsCount] = this.unpause.selector;
-    functionSelectors[--fnsCount] = this.permit.selector;
-    functionSelectors[--fnsCount] = this.DOMAIN_SEPARATOR.selector;
     functionSelectors[--fnsCount] = this.lentTotalAssets.selector;
     functionSelectors[--fnsCount] = this.estimatedTotalAssets.selector;
     functionSelectors[--fnsCount] = this.supplyAPY.selector;
@@ -69,10 +76,6 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     return functionSelectors;
   }
 
-  function initialize(bytes calldata data) public override {
-    // the initializer has to be implemented in the first extension
-  }
-
   function name() public view override returns (string memory) {
     return _name;
   }
@@ -88,9 +91,6 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   /*------------------------------------------------------------
                       DEPOSIT/WITHDRAWAL LOGIC
     ------------------------------------------------------------*/
-
-  error InvalidReceiver();
-  error MaxError(uint256 amount);
 
   function deposit(uint256 assets) public returns (uint256) {
     return deposit(assets, msg.sender);
@@ -427,8 +427,6 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
                         DEPOSIT LIMIT LOGIC
     ------------------------------------------------------------*/
 
-  event DepositLimitSet(uint256 depositLimit);
-
   /**
    * @notice Sets a limit for deposits in assets. Caller must be Owner.
    * @param _depositLimit Maximum amount of assets that can be deposited.
@@ -453,68 +451,8 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     _unpause();
   }
 
-  /*------------------------------------------------------------
-                            EIP-2612 LOGIC
-    ------------------------------------------------------------*/
-
-  error PermitDeadlineExpired(uint256 deadline);
-  error InvalidSigner(address signer);
-
-  function permit(
-    address owner,
-    address spender,
-    uint256 value,
-    uint256 deadline,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public virtual {
-    if (deadline < block.timestamp) revert PermitDeadlineExpired(deadline);
-
-    // Unchecked because the only math done is incrementing
-    // the owner's nonce which cannot realistically overflow.
-    unchecked {
-      address recoveredAddress = ecrecover(
-        keccak256(
-          abi.encodePacked(
-            "\x19\x01",
-            DOMAIN_SEPARATOR(),
-            keccak256(
-              abi.encode(
-                keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
-                owner,
-                spender,
-                value,
-                nonces[owner]++,
-                deadline
-              )
-            )
-          )
-        ),
-        v,
-        r,
-        s
-      );
-
-      if (recoveredAddress == address(0) || recoveredAddress != owner) revert InvalidSigner(recoveredAddress);
-
-      _approve(recoveredAddress, spender, value);
-    }
-  }
-
-  function DOMAIN_SEPARATOR() public view returns (bytes32) {
-    return block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : computeDomainSeparator();
-  }
-
   /*-------------------------------------------
   -------------------------------------------*/
-
-  uint64 internal constant _BPS = 1e18;
-
-  event Harvested(uint256 totalAssets, uint256 aprBefore, uint256 aprAfter);
-
-  error IncorrectListLength();
-  error IncorrectDistribution();
 
   /// @notice View function to check the total assets lent
   function lentTotalAssets() public view returns (uint256) {
@@ -526,8 +464,8 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   }
 
   /// @notice View function to check the total assets managed by the strategy
-  function estimatedTotalAssets() public view returns (uint256 nav) {
-    nav = lentTotalAssets() + IERC20(asset()).balanceOf(address(this));
+  function estimatedTotalAssets() public view returns (uint256) {
+    return lentTotalAssets() + IERC20(asset()).balanceOf(address(this));
   }
 
   /// @notice view function to check the hypothetical APY after the deposit of some amount
