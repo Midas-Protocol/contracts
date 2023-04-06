@@ -14,8 +14,10 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   uint256 public blocksPerYear;
   OptimizedVaultsRegistry public registry;
 
+  event ClaimedVaultRewards(address indexed rewardToken, address indexed vault, uint256 amount);
+
   modifier onlyRegisteredVaults() {
-    OptimizedAPRVault[] memory vaults = registry.getAllVaults();
+    MultiStrategyVaultBase[] memory vaults = registry.getAllVaults();
     bool isMsgSender = false;
     for (uint256 i = 0; i < vaults.length; i++) {
       if (msg.sender == address(vaults[i])) {
@@ -154,12 +156,14 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
           afterDeposit(totalRewards, 0);
         } else {
           // redistribute the claimed rewards among the vaults
-          OptimizedAPRVault[] memory vaults = registry.getAllVaults();
+          MultiStrategyVaultBase[] memory vaults = registry.getAllVaults();
           for (uint256 i = 0; i < vaults.length; i++) {
             address vaultAddress = address(vaults[i]);
             uint256 vaultSharesInAdapter = balanceOf(vaultAddress);
             uint256 vaultShareOfRewards = (vaultSharesInAdapter * totalRewards) / totalSupply();
             rewardToken.transfer(vaultAddress, vaultShareOfRewards);
+
+            emit ClaimedVaultRewards(address(rewardToken), vaultAddress, vaultShareOfRewards);
           }
         }
       }

@@ -7,24 +7,14 @@ import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/cont
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 
-import { VaultFees, IERC4626, IERC20 } from "./IVault.sol";
-import "./MultiStrategyVaultStorage.sol";
-import "./OptimizedAPRVaultExtension.sol";
+import { IERC20 } from "./IVault.sol";
+import "./MultiStrategyVaultExtension.sol";
 
-struct LendStatus {
-  string name;
-  uint256 assets;
-  uint256 rate;
-  address addr;
-}
-
-contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
+contract MultiStrategyVaultSecondExtension is MultiStrategyVaultExtension {
   using SafeERC20 for IERC20;
   using Math for uint256;
 
-  uint8 public constant DECIMAL_OFFSET = 9;
-
-  event VaultInitialized(bytes32 contractName, address indexed asset);
+  event VaultInitialized(string contractName, address indexed asset);
 
   error InvalidAsset();
   error InvalidAdapter();
@@ -34,86 +24,52 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
     _disableInitializers();
   }
 
-  /**
-   * @notice Initialize a new Vault.
-   * @param asset_ Underlying Asset which users will deposit.
-   * @param adapters_ Adapter which will be used to interact with the wrapped protocol.
-   * @param adapterCount_ Amount of adapters to use.
-   * @param fees_ Desired fees in 1e18. (1e18 = 100%, 1e14 = 1 BPS)
-   * @param feeRecipient_ Recipient of all vault fees. (Must not be zero address)
-   * @param depositLimit_ Maximum amount of assets which can be deposited.
-   * @param owner_ Owner of the contract. Controls management functions.
-   * @dev This function is called by the factory contract when deploying a new vault.
-   * @dev Usually the adapter should already be pre configured. Otherwise a new one can only be added after a ragequit time.
-   */
-  function initialize(
-    IERC20 asset_,
-    AdapterConfig[10] calldata adapters_,
-    uint8 adapterCount_,
-    VaultFees calldata fees_,
-    address feeRecipient_,
-    uint256 depositLimit_,
-    address owner_
-  ) public virtual initializer {
-    __MultiStrategyVault_init(asset_, adapters_, adapterCount_, fees_, feeRecipient_, depositLimit_, owner_);
-  }
+  function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
+    uint8 fnsCount = 40;
+    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
+    functionSelectors[--fnsCount] = this.initializeWithRegistry.selector;
+    functionSelectors[--fnsCount] = this.name.selector;
+    functionSelectors[--fnsCount] = this.symbol.selector;
+    functionSelectors[--fnsCount] = this.decimals.selector;
+    functionSelectors[--fnsCount] = bytes4(keccak256(bytes("deposit(uint256,address)")));
+    functionSelectors[--fnsCount] = bytes4(keccak256(bytes("deposit(uint256)")));
+    functionSelectors[--fnsCount] = bytes4(keccak256(bytes("mint(uint256)")));
+    functionSelectors[--fnsCount] = bytes4(keccak256(bytes("mint(uint256,address)")));
+    functionSelectors[--fnsCount] = bytes4(keccak256(bytes("withdraw(uint256)")));
+    functionSelectors[--fnsCount] = bytes4(keccak256(bytes("withdraw(uint256,address)")));
+    functionSelectors[--fnsCount] = bytes4(keccak256(bytes("redeem(uint256)")));
+    functionSelectors[--fnsCount] = bytes4(keccak256(bytes("redeem(uint256,address)")));
+    functionSelectors[--fnsCount] = this.totalAssets.selector;
+    functionSelectors[--fnsCount] = this.previewDeposit.selector;
+    functionSelectors[--fnsCount] = this.previewMint.selector;
+    functionSelectors[--fnsCount] = this.previewWithdraw.selector;
+    functionSelectors[--fnsCount] = this.previewRedeem.selector;
+    functionSelectors[--fnsCount] = this.maxDeposit.selector;
+    functionSelectors[--fnsCount] = this.maxMint.selector;
+    functionSelectors[--fnsCount] = this.maxWithdraw.selector;
+    functionSelectors[--fnsCount] = this.maxRedeem.selector;
+    functionSelectors[--fnsCount] = this.setDepositLimit.selector;
+    functionSelectors[--fnsCount] = this.pause.selector;
+    functionSelectors[--fnsCount] = this.unpause.selector;
+    functionSelectors[--fnsCount] = this.permit.selector;
+    functionSelectors[--fnsCount] = this.DOMAIN_SEPARATOR.selector;
+    functionSelectors[--fnsCount] = this.lentTotalAssets.selector;
+    functionSelectors[--fnsCount] = this.estimatedTotalAssets.selector;
+    functionSelectors[--fnsCount] = this.supplyAPY.selector;
+    functionSelectors[--fnsCount] = bytes4(keccak256(bytes("estimatedAPR(uint64[])")));
+    functionSelectors[--fnsCount] = bytes4(keccak256(bytes("estimatedAPR()")));
+    functionSelectors[--fnsCount] = this.harvest.selector;
+    functionSelectors[--fnsCount] = this.balanceOf.selector;
+    functionSelectors[--fnsCount] = this.transfer.selector;
+    functionSelectors[--fnsCount] = this.transferFrom.selector;
+    functionSelectors[--fnsCount] = this.allowance.selector;
+    functionSelectors[--fnsCount] = this.approve.selector;
+    functionSelectors[--fnsCount] = this.convertToShares.selector;
+    functionSelectors[--fnsCount] = this.convertToAssets.selector;
+    functionSelectors[--fnsCount] = this.totalSupply.selector;
 
-  function __MultiStrategyVault_init(
-    IERC20 asset_,
-    AdapterConfig[10] calldata adapters_,
-    uint8 adapterCount_,
-    VaultFees calldata fees_,
-    address feeRecipient_,
-    uint256 depositLimit_,
-    address owner_
-  ) internal {
-    __ERC4626_init(IERC20Metadata(address(asset_)));
-    __SafeOwnable_init(owner_);
-
-    if (address(asset_) == address(0)) revert InvalidAsset();
-    _verifyAdapterConfig(adapters_, adapterCount_);
-
-    adapterCount = adapterCount_;
-    for (uint8 i; i < adapterCount_; i++) {
-      adapters[i] = adapters_[i];
-
-      asset_.approve(address(adapters_[i].adapter), type(uint256).max);
-    }
-
-    _decimals = IERC20Metadata(address(asset_)).decimals() + DECIMAL_OFFSET; // Asset decimals + decimal offset to combat inflation attacks
-
-    INITIAL_CHAIN_ID = block.chainid;
-    INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
-
-    if (fees_.deposit >= 1e18 || fees_.withdrawal >= 1e18 || fees_.management >= 1e18 || fees_.performance >= 1e18)
-      revert InvalidVaultFees();
-    fees = fees_;
-
-    if (feeRecipient_ == address(0)) revert InvalidFeeRecipient();
-    feeRecipient = feeRecipient_;
-
-    /// TODO figure out a distinct name for duplicating asset vaults - instead of using the block number
-    contractName = keccak256(abi.encodePacked("Midas ", name(), block.number, " Vault"));
-
-    feesUpdatedAt = block.timestamp;
-    highWaterMark = 1e9;
-    quitPeriod = 3 days;
-    depositLimit = depositLimit_;
-
-    emit VaultInitialized(contractName, address(asset_));
-
-    _name = string(bytes.concat("Midas Optimized ", bytes(IERC20Metadata(address(asset_)).name()), " Vault"));
-    _symbol = string(bytes.concat("mo-", bytes(IERC20Metadata(address(asset_)).symbol())));
-  }
-
-  /**
-   * @dev register a logic extension
-   * @param extensionToAdd the extension whose functions are to be added
-   * @param extensionToReplace the extension whose functions are to be removed/replaced
-   */
-  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external override {
-    require(msg.sender == owner(), "!unauthorized - no admin rights");
-    LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
+    require(fnsCount == 0, "use the correct array length");
+    return functionSelectors;
   }
 
   function name() public view override returns (string memory) {
@@ -192,7 +148,7 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
 
     // allocate all available assets = caller assets + cash
     uint256 assetsToAllocate = asset_.balanceOf(address(this));
-    for (uint8 i; i < adapterCount; i++) {
+    for (uint8 i; i < adaptersCount; i++) {
       uint256 adapterDeposit = assetsToAllocate.mulDiv(adapters[i].allocation, 1e18, Math.Rounding.Down);
       // don't do too small deposits, so that zero shares minting is avoided
       if (adapterDeposit > 100) {
@@ -282,7 +238,7 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
     uint256 totalSupplyBefore = totalSupply();
     _burn(owner, shares);
 
-    for (uint8 i; i < adapterCount; i++) {
+    for (uint8 i; i < adaptersCount; i++) {
       uint256 vaultAdapterShares = adapters[i].adapter.balanceOf(address(this));
       // round up the shares to make sure enough is withdrawn for the transfer
       uint256 shareOfAdapterShares = vaultAdapterShares.mulDiv(shares, totalSupplyBefore, Math.Rounding.Up);
@@ -304,7 +260,7 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
     assets = IERC20(asset()).balanceOf(address(this));
 
     // add the assets held in the adapters
-    for (uint8 i; i < adapterCount; i++) {
+    for (uint8 i; i < adaptersCount; i++) {
       uint256 vaultAdapterShares = adapters[i].adapter.balanceOf(address(this));
       assets += adapters[i].adapter.previewRedeem(vaultAdapterShares);
     }
@@ -400,7 +356,7 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
     if (paused() || assets >= depositLimit_) return 0;
 
     uint256 maxDeposit_ = depositLimit_;
-    for (uint8 i; i < adapterCount; i++) {
+    for (uint8 i; i < adaptersCount; i++) {
       uint256 adapterMax = adapters[i].adapter.maxDeposit(address(this));
       uint256 scalar = 1e18 / uint256(adapters[i].allocation);
 
@@ -426,7 +382,7 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
       ? type(uint256).max
       : _convertToShares(depositLimit_);
 
-    for (uint8 i; i < adapterCount; i++) {
+    for (uint8 i; i < adaptersCount; i++) {
       uint256 adapterMax = adapters[i].adapter.maxMint(address(this));
       uint256 scalar = 1e18 / uint256(adapters[i].allocation);
 
@@ -572,46 +528,10 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
   error IncorrectListLength();
   error IncorrectDistribution();
 
-  function initializeWithRegistry(
-    IERC20 asset_,
-    AdapterConfig[10] calldata adapters_,
-    uint8 adapterCount_,
-    VaultFees calldata fees_,
-    address feeRecipient_,
-    uint256 depositLimit_,
-    address owner_,
-    address registry_,
-    address flywheelLogic_
-  ) public initializer {
-    __MultiStrategyVault_init(asset_, adapters_, adapterCount_, fees_, feeRecipient_, depositLimit_, owner_);
-    rewardDestination = address(this);
-    registry = registry_;
-    flywheelLogic = flywheelLogic_;
-  }
-
-  function adaptersCount() public view returns (uint8) {
-    return adapterCount;
-  }
-
-  /// @notice View function to check the current state of the strategy
-  /// @return Returns the status of all lenders attached the strategy
-  function lendStatuses() external view returns (LendStatus[] memory) {
-    LendStatus[] memory statuses = new LendStatus[](adapterCount);
-    for (uint256 i; i < adapterCount; ++i) {
-      LendStatus memory s;
-      s.name = adapters[i].adapter.lenderName();
-      s.addr = address(adapters[i].adapter);
-      s.assets = adapters[i].adapter.balanceOfUnderlying(address(this));
-      s.rate = adapters[i].adapter.apr();
-      statuses[i] = s;
-    }
-    return statuses;
-  }
-
   /// @notice View function to check the total assets lent
   function lentTotalAssets() public view returns (uint256) {
     uint256 nav;
-    for (uint256 i; i < adapterCount; ++i) {
+    for (uint256 i; i < adaptersCount; ++i) {
       nav += adapters[i].adapter.balanceOfUnderlying(address(this));
     }
     return nav;
@@ -630,7 +550,7 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
     }
 
     uint256 weightedAPR;
-    for (uint256 i; i < adapterCount; ++i) {
+    for (uint256 i; i < adaptersCount; ++i) {
       weightedAPR += adapters[i].adapter.weightedAprAfterDeposit(amount);
     }
 
@@ -647,7 +567,7 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
     }
 
     uint256 weightedAPR;
-    for (uint256 i; i < adapterCount; ++i) {
+    for (uint256 i; i < adaptersCount; ++i) {
       weightedAPR += adapters[i].adapter.weightedApr();
     }
 
@@ -659,15 +579,15 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
   /// in respect to allocations
   /// @param allocations List of allocations (in bps of the nav) that should be allocated to each adapter
   function estimatedAPR(uint64[] calldata allocations) public view returns (uint256, int256[] memory) {
+    if (adaptersCount != allocations.length) revert IncorrectListLength();
     uint256 weightedAPRScaled = 0;
-    int256[] memory adapterAdjustedAmounts = new int256[](adapterCount);
-    if (adapterCount != allocations.length) revert IncorrectListLength();
+    int256[] memory adapterAdjustedAmounts = new int256[](adaptersCount);
 
     uint256 bal = estimatedTotalAssets();
     if (bal == 0) return (weightedAPRScaled, adapterAdjustedAmounts);
 
     uint256 allocation;
-    for (uint256 i; i < adapterCount; ++i) {
+    for (uint256 i; i < adaptersCount; ++i) {
       allocation += allocations[i];
       uint256 futureDeposit = (bal * allocations[i]) / _BPS;
 
@@ -689,16 +609,11 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
   /// @notice Harvests the Strategy, recognizing any profits or losses and adjusting
   /// the Strategy's position.
   function harvest(uint64[] calldata adapterAllocationsHint) external {
-    // TODO emit event about the harvested returns and currently deposited assets
-    _adjustPosition(adapterAllocationsHint);
-  }
-
-  function _adjustPosition(uint64[] calldata adapterAllocationsHint) internal {
     // do not redeposit if emergencyExit is activated
     if (emergencyExit) return;
 
     // We just keep all money in `asset` if we dont have any adapters
-    if (adapterCount == 0) return;
+    if (adaptersCount == 0) return;
 
     uint256 estimatedAprHint;
     int256[] memory adapterAdjustedAmounts;
@@ -712,7 +627,7 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
       // calculate the "delta" - the difference between
       // the requested amount to withdraw and the actually withdrawn amount
       uint256 deltaWithdraw;
-      for (uint256 i; i < adapterCount; ++i) {
+      for (uint256 i; i < adaptersCount; ++i) {
         if (adapterAdjustedAmounts[i] < 0) {
           deltaWithdraw +=
             uint256(-adapterAdjustedAmounts[i]) -
@@ -724,7 +639,7 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
       // If the strategy didn't succeed to withdraw the intended funds
       if (deltaWithdraw > withdrawalThreshold) revert IncorrectDistribution();
 
-      for (uint256 i; i < adapterCount; ++i) {
+      for (uint256 i; i < adaptersCount; ++i) {
         if (adapterAdjustedAmounts[i] > 0) {
           // As `deltaWithdraw` is less than `withdrawalThreshold` (a dust)
           // It is not a problem to compensate on an arbitrary adapter as it will only slightly impact global APR
@@ -745,28 +660,68 @@ contract OptimizedAPRVault is DiamondBase, MultiStrategyVaultStorage {
     emit Harvested(totalAssets(), currentAPR, estimatedAprHint);
   }
 
-  // TODO fix duplicate
-  function _verifyAdapterConfig(AdapterConfig[10] calldata newAdapters, uint8 adapterCount_) internal view {
-    if (adapterCount_ == 0 || adapterCount_ > 10) revert InvalidConfig();
-
-    uint256 totalAllocation;
-    for (uint8 i; i < adapterCount_; i++) {
-      if (newAdapters[i].adapter.asset() != asset()) revert AssetInvalid();
-
-      uint256 allocation = uint256(newAdapters[i].allocation);
-      if (allocation == 0) revert InvalidConfig();
-
-      totalAllocation += allocation;
-    }
-    if (totalAllocation != 1e18) revert InvalidConfig();
+  function initializeWithRegistry(
+    IERC20 asset_,
+    AdapterConfig[10] calldata adapters_,
+    uint8 adaptersCount_,
+    VaultFees calldata fees_,
+    address feeRecipient_,
+    uint256 depositLimit_,
+    address owner_,
+    address registry_,
+    address flywheelLogic_
+  ) public initializer onlyOwner {
+    initialize(IERC20Metadata(address(asset_)));
+    init(asset_, depositLimit_, owner_, registry_, flywheelLogic_);
+    configure(asset_, adapters_, adaptersCount_, fees_, feeRecipient_);
   }
 
-  error AssetInvalid();
-  error InvalidConfig();
-  error InvalidVaultFees();
-  error InvalidFeeRecipient();
+  function init(
+    IERC20 asset_,
+    uint256 depositLimit_,
+    address owner_,
+    address registry_,
+    address flywheelLogic_
+  ) internal {
+    INITIAL_CHAIN_ID = block.chainid;
+    INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
 
-  function asExtension() public view returns (OptimizedAPRVaultExtension) {
-    return OptimizedAPRVaultExtension(address(this));
+    feesUpdatedAt = block.timestamp;
+    highWaterMark = 1e9;
+    quitPeriod = 3 days;
+    depositLimit = depositLimit_;
+    _name = string(bytes.concat("Midas Optimized ", bytes(IERC20Metadata(address(asset_)).name()), " Vault"));
+    _symbol = string(bytes.concat("mo-", bytes(IERC20Metadata(address(asset_)).symbol())));
+    _decimals = IERC20Metadata(address(asset_)).decimals() + DECIMAL_OFFSET; // Asset decimals + decimal offset to combat inflation attacks
+
+    registry = registry_;
+    flywheelLogic = flywheelLogic_;
+  }
+
+  function configure(
+    IERC20 asset_,
+    AdapterConfig[10] calldata adapters_,
+    uint8 adaptersCount_,
+    VaultFees calldata fees_,
+    address feeRecipient_
+  ) internal {
+    if (address(asset_) == address(0)) revert InvalidAsset();
+
+    emit VaultInitialized(_name, address(asset_));
+
+    if (fees_.deposit >= 1e18 || fees_.withdrawal >= 1e18 || fees_.management >= 1e18 || fees_.performance >= 1e18)
+      revert InvalidVaultFees();
+    fees = fees_;
+
+    if (feeRecipient_ == address(0)) revert InvalidFeeRecipient();
+    feeRecipient = feeRecipient_;
+    _verifyAdapterConfig(adapters_, adaptersCount_);
+
+    adaptersCount = adaptersCount_;
+    for (uint8 i; i < adaptersCount_; i++) {
+      adapters[i] = adapters_[i];
+
+      asset_.approve(address(adapters_[i].adapter), type(uint256).max);
+    }
   }
 }

@@ -2,7 +2,8 @@
 pragma solidity ^0.8.10;
 
 import "../DiamondExtension.sol";
-import "./MultiStrategyVaultStorage.sol";
+import "./MultiStrategyVaultExtension.sol";
+import { MidasFlywheel } from "../strategies/flywheel/MidasFlywheel.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
@@ -12,17 +13,22 @@ import { FlywheelCore } from "flywheel/FlywheelCore.sol";
 
 import { SafeERC20Upgradeable as SafeERC20 } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { IERC20Upgradeable as IERC20 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
+import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
 
-contract OptimizedAPRVaultExtension is MultiStrategyVaultStorage, DiamondExtension {
+contract MultiStrategyVaultFirstExtension is MultiStrategyVaultExtension {
   using SafeERC20 for IERC20;
   using Math for uint256;
 
   event RewardDestinationUpdate(address indexed newDestination);
-  event ClaimRewards(address indexed rewardToken, uint256 amount);
   event EmergencyExitActivated();
 
+  constructor() {
+    _disableInitializers();
+  }
+
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 14;
+    uint8 fnsCount = 13;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.accruedManagementFee.selector;
     functionSelectors[--fnsCount] = this.accruedPerformanceFee.selector;
@@ -35,7 +41,6 @@ contract OptimizedAPRVaultExtension is MultiStrategyVaultStorage, DiamondExtensi
     functionSelectors[--fnsCount] = this.setQuitPeriod.selector;
     functionSelectors[--fnsCount] = this.setEmergencyExit.selector;
     functionSelectors[--fnsCount] = this.claimRewards.selector;
-    functionSelectors[--fnsCount] = this.setRewardDestination.selector;
     functionSelectors[--fnsCount] = this.getAllFlywheels.selector;
     functionSelectors[--fnsCount] = this.addRewardToken.selector;
 
@@ -92,7 +97,6 @@ contract OptimizedAPRVaultExtension is MultiStrategyVaultStorage, DiamondExtensi
   /// @notice Minimal function to call `takeFees` modifier.
   function takeManagementAndPerformanceFees()
     external
-    /*nonReentrant*/
     takeFees
   {}
 
@@ -126,19 +130,14 @@ contract OptimizedAPRVaultExtension is MultiStrategyVaultStorage, DiamondExtensi
   event ChangedFees(VaultFees oldFees, VaultFees newFees);
   event FeeRecipientUpdated(address oldFeeRecipient, address newFeeRecipient);
 
-  error InvalidVaultFees();
-  error InvalidFeeRecipient();
-  error NotPassedQuitPeriod();
-
   /**
    * @notice Propose new fees for this vault. Caller must be owner.
    * @param newFees Fees for depositing, withdrawal, management and performance in 1e18.
    * @dev Fees can be 0 but never 1e18 (1e18 = 100%, 1e14 = 1 BPS)
    */
   function proposeFees(VaultFees calldata newFees) external onlyOwner {
-    if (
-      newFees.deposit >= 1e18 || newFees.withdrawal >= 1e18 || newFees.management >= 1e18 || newFees.performance >= 1e18
-    ) revert InvalidVaultFees();
+    if (newFees.deposit >= 1e18 || newFees.withdrawal >= 1e18 || newFees.management >= 1e18 || newFees.performance >= 1e18)
+      revert InvalidVaultFees();
 
     proposedFees = newFees;
     proposedFeeTime = block.timestamp;
@@ -176,49 +175,31 @@ contract OptimizedAPRVaultExtension is MultiStrategyVaultStorage, DiamondExtensi
                             ADAPTER LOGIC
     ------------------------------------------------------------*/
 
-  event NewAdaptersProposed(AdapterConfig[10] newAdapter, uint8 adapterCount, uint256 timestamp);
+  event NewAdaptersProposed(AdapterConfig[10] newAdapter, uint8 adaptersCount, uint256 timestamp);
   event ChangedAdapters(
     AdapterConfig[10] oldAdapter,
-    uint8 oldAdapterCount,
+    uint8 oldAdaptersCount,
     AdapterConfig[10] newAdapter,
-    uint8 newAdapterCount
+    uint8 newAdaptersCount
   );
-
-  error AssetInvalid();
-  error InvalidConfig();
 
   /**
    * @notice Propose a new adapter for this vault. Caller must be Owner.
    * @param newAdapters A new ERC4626 that should be used as a yield adapter for this asset.
-   * @param newAdapterCount Amount of new adapters.
+   * @param newAdaptersCount Amount of new adapters.
    */
-  function proposeAdapters(AdapterConfig[10] calldata newAdapters, uint8 newAdapterCount) external onlyOwner {
-    _verifyAdapterConfig(newAdapters, newAdapterCount);
+  function proposeAdapters(AdapterConfig[10] calldata newAdapters, uint8 newAdaptersCount) external onlyOwner {
+    _verifyAdapterConfig(newAdapters, newAdaptersCount);
 
-    for (uint8 i; i < newAdapterCount; i++) {
+    for (uint8 i; i < newAdaptersCount; i++) {
       proposedAdapters[i] = newAdapters[i];
     }
 
-    proposedAdapterCount = newAdapterCount;
+    proposedAdaptersCount = newAdaptersCount;
 
     proposedAdapterTime = block.timestamp;
 
-    emit NewAdaptersProposed(newAdapters, proposedAdapterCount, block.timestamp);
-  }
-
-  function _verifyAdapterConfig(AdapterConfig[10] calldata newAdapters, uint8 adapterCount_) internal view {
-    if (adapterCount_ == 0 || adapterCount_ > 10) revert InvalidConfig();
-
-    uint256 totalAllocation;
-    for (uint8 i; i < adapterCount_; i++) {
-      if (newAdapters[i].adapter.asset() != asset()) revert AssetInvalid();
-
-      uint256 allocation = uint256(newAdapters[i].allocation);
-      if (allocation == 0) revert InvalidConfig();
-
-      totalAllocation += allocation;
-    }
-    if (totalAllocation != 1e18) revert InvalidConfig();
+    emit NewAdaptersProposed(newAdapters, proposedAdaptersCount, block.timestamp);
   }
 
   /**
@@ -230,20 +211,20 @@ contract OptimizedAPRVaultExtension is MultiStrategyVaultStorage, DiamondExtensi
   function changeAdapters() external takeFees {
     if (proposedAdapterTime == 0 || block.timestamp < proposedAdapterTime + quitPeriod) revert NotPassedQuitPeriod();
 
-    for (uint8 i; i < adapterCount; i++) {
+    for (uint8 i; i < adaptersCount; i++) {
       adapters[i].adapter.redeem(adapters[i].adapter.balanceOf(address(this)), address(this), address(this));
 
       IERC20(asset()).approve(address(adapters[i].adapter), 0);
     }
 
-    emit ChangedAdapters(adapters, adapterCount, proposedAdapters, proposedAdapterCount);
+    emit ChangedAdapters(adapters, adaptersCount, proposedAdapters, proposedAdaptersCount);
 
     adapters = proposedAdapters;
-    adapterCount = proposedAdapterCount;
+    adaptersCount = proposedAdaptersCount;
 
     uint256 cashAssets_ = IERC20(asset()).balanceOf(address(this));
 
-    for (uint8 i; i < adapterCount; i++) {
+    for (uint8 i; i < adaptersCount; i++) {
       IERC20(asset()).approve(address(adapters[i].adapter), type(uint256).max);
 
       adapters[i].adapter.deposit(
@@ -253,7 +234,7 @@ contract OptimizedAPRVaultExtension is MultiStrategyVaultStorage, DiamondExtensi
     }
 
     delete proposedAdapters;
-    delete proposedAdapterCount;
+    delete proposedAdaptersCount;
     delete proposedAdapterTime;
   }
 
@@ -282,7 +263,7 @@ contract OptimizedAPRVaultExtension is MultiStrategyVaultStorage, DiamondExtensi
   function setEmergencyExit() external {
     require(msg.sender == owner() || msg.sender == registry, "not registry or owner");
 
-    for (uint256 i; i < adapterCount; ++i) {
+    for (uint256 i; i < adaptersCount; ++i) {
       adapters[i].adapter.withdrawAll();
     }
 
@@ -294,28 +275,9 @@ contract OptimizedAPRVaultExtension is MultiStrategyVaultStorage, DiamondExtensi
 
   /// @notice claim all token rewards
   function claimRewards() public {
-    for (uint256 i; i < adapterCount; ++i) {
+    for (uint256 i; i < adaptersCount; ++i) {
       adapters[i].adapter.claimRewards();
     }
-
-    uint256 len = rewardTokens.length;
-    // send all tokens to destination
-    for (uint256 i = 0; i < len; i++) {
-      IERC20 token = rewardTokens[i];
-      uint256 amount = token.balanceOf(address(this));
-
-      token.safeTransfer(rewardDestination, amount);
-
-      emit ClaimRewards(address(token), amount);
-    }
-  }
-
-  /// @notice set the address of the new reward destination
-  /// @param newDestination the new reward destination
-  function setRewardDestination(address newDestination) external {
-    require(msg.sender == rewardDestination, "UNAUTHORIZED");
-    rewardDestination = newDestination;
-    emit RewardDestinationUpdate(newDestination);
   }
 
   function _afterTokenTransfer(

@@ -7,20 +7,25 @@ import { ICErc20 } from "../external/compound/ICErc20.sol";
 
 import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import { IERC4626Upgradeable as IERC4626, IERC20Upgradeable as IERC20 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
+import { IERC4626Upgradeable as IERC4626 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
+import { IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
+
 import { WETH } from "solmate/tokens/WETH.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 
-import { OptimizedAPRVault, AdapterConfig, VaultFees } from "../midas/vault/OptimizedAPRVault.sol";
+import { MultiStrategyVaultFirstExtension } from "../midas/vault/MultiStrategyVaultFirstExtension.sol";
+import { MultiStrategyVaultSecondExtension } from "../midas/vault/MultiStrategyVaultSecondExtension.sol";
+import { VaultFees } from "../midas/vault/IVault.sol";
 import { OptimizedVaultsRegistry } from "../midas/vault/OptimizedVaultsRegistry.sol";
-import { OptimizedAPRVaultExtension } from "../midas/vault/OptimizedAPRVaultExtension.sol";
+import { AdapterConfig } from "../midas/vault/MultiStrategyVaultStorage.sol";
+import { MultiStrategyVaultBase } from "../midas/vault/MultiStrategyVaultBase.sol";
 
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 
-interface TwoBRL is IERC20 {
+interface TwoBRL is IERC20Metadata {
   function minter() external view returns (address);
 
   function mint(address to, uint256 amount) external;
@@ -44,7 +49,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
   ICErc20 ankrWbnbMarket;
   ICErc20 ahWbnbMarket;
   address payable wnativeAddress;
-  OptimizedAPRVault vault;
+  MultiStrategyVaultBase vault;
   OptimizedVaultsRegistry registry;
   uint64[] lenderSharesHint = new uint64[](2);
   TwoBRL twoBrl;
@@ -121,15 +126,17 @@ contract OptimizedAPRVaultTest is MarketsTest {
   }
 
   function deployVault() internal {
-    vault = new OptimizedAPRVault();
-    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(vault), address(dpa), "");
-    vault = OptimizedAPRVault(address(proxy));
+    DiamondExtension[] memory exts = new DiamondExtension[](2);
+    exts[0] = new MultiStrategyVaultFirstExtension();
+    exts[1] = new MultiStrategyVaultSecondExtension();
+    vault = new MultiStrategyVaultBase();
     vm.label(address(vault), "vault");
+    vault.initialize(exts);
 
     MidasFlywheel flywheelLogic = new MidasFlywheel();
 
-    vault.initializeWithRegistry(
-      IERC20(wnativeAddress),
+    vault.asSecondExtension().initializeWithRegistry(
+      IERC20Metadata(wnativeAddress),
       adapters,
       2, // adapters count
       VaultFees(0, 0, 0, 0),
@@ -139,8 +146,6 @@ contract OptimizedAPRVaultTest is MarketsTest {
       address(registry),
       address(flywheelLogic)
     );
-    OptimizedAPRVaultExtension ext = new OptimizedAPRVaultExtension();
-    vault._registerExtension(ext, DiamondExtension(address(0)));
 
     registry.addVault(address(vault));
   }
@@ -148,7 +153,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
   function depositAssets() internal {
     vm.startPrank(wbnbWhale);
     wbnb.approve(address(vault), type(uint256).max);
-    vault.deposit(depositAmount);
+    vault.asSecondExtension().deposit(depositAmount);
     vm.stopPrank();
   }
 
@@ -166,21 +171,23 @@ contract OptimizedAPRVaultTest is MarketsTest {
   }
 
   function testVaultEmergencyShutdown() public fork(BSC_MAINNET) {
+    MultiStrategyVaultSecondExtension asSecondExtension = vault.asSecondExtension();
     registry.setEmergencyExit();
 
     assertTrue(vault.emergencyExit(), "!emergency set");
-    assertEq(vault.lentTotalAssets(), 0, "!still lending");
-    assertGt(vault.estimatedTotalAssets(), 0, "!emergency withdrawn");
+    assertEq(asSecondExtension.lentTotalAssets(), 0, "!still lending");
+    assertGt(asSecondExtension.estimatedTotalAssets(), 0, "!emergency withdrawn");
 
-    vault.harvest(lenderSharesHint);
+    asSecondExtension.harvest(lenderSharesHint);
   }
 
   function testVaultOptimization() public fork(BSC_MAINNET) {
+    MultiStrategyVaultSecondExtension asSecondExtension = vault.asSecondExtension();
     uint256 estimatedAprHint;
     {
       int256[] memory lenderAdjustedAmounts;
       if (lenderSharesHint.length != 0)
-        (estimatedAprHint, lenderAdjustedAmounts) = vault.estimatedAPR(lenderSharesHint);
+        (estimatedAprHint, lenderAdjustedAmounts) = asSecondExtension.estimatedAPR(lenderSharesHint);
 
       emit log_named_int("lenderAdjustedAmounts0", lenderAdjustedAmounts[0]);
       emit log_named_int("lenderAdjustedAmounts1", lenderAdjustedAmounts[1]);
@@ -188,7 +195,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
 
     // log before
-    uint256 aprBefore = vault.estimatedAPR();
+    uint256 aprBefore = asSecondExtension.estimatedAPR();
     {
       emit log_named_uint("aprBefore", aprBefore);
 
@@ -201,18 +208,18 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
     // harvest
     {
-      uint256 maxRedeemBefore = vault.maxRedeem(wbnbWhale);
+      uint256 maxRedeemBefore = asSecondExtension.maxRedeem(wbnbWhale);
       emit log_named_uint("maxRedeemBefore", maxRedeemBefore);
 
-      vault.harvest(lenderSharesHint);
+      asSecondExtension.harvest(lenderSharesHint);
 
-      uint256 maxRedeemAfter = vault.maxRedeem(wbnbWhale);
+      uint256 maxRedeemAfter = asSecondExtension.maxRedeem(wbnbWhale);
       emit log_named_uint("maxRedeemAfter", maxRedeemAfter);
     }
 
     // check if the APR improved as a result of the hinted better allocations
     {
-      uint256 aprAfter = vault.estimatedAPR();
+      uint256 aprAfter = asSecondExtension.estimatedAPR();
       emit log_named_uint("aprAfter", aprAfter);
 
       if (estimatedAprHint > aprBefore) {
@@ -222,28 +229,33 @@ contract OptimizedAPRVaultTest is MarketsTest {
   }
 
   function testVaultPreviewMint(uint256 assets) public fork(BSC_MAINNET) {
-    vm.assume(assets >= 10 * vault.adaptersCount() && assets < type(uint128).max);
+    MultiStrategyVaultSecondExtension asSecondExtension = vault.asSecondExtension();
+    vm.assume(assets >= 10 * asSecondExtension.adaptersCount() && assets < type(uint128).max);
+
     // previewDeposit should return the maximum shares that are minted for the assets input
-    uint256 maxShares = vault.previewDeposit(assets);
+    uint256 maxShares = asSecondExtension.previewDeposit(assets);
     // previewMint should return the minimum assets required for the shares input
-    uint256 shouldBeMoreThanAvailableAssets = vault.previewMint(maxShares + 1);
+    uint256 shouldBeMoreThanAvailableAssets = asSecondExtension.previewMint(maxShares + 1);
     // minting a share more should require more assets than the available
     assertGt(shouldBeMoreThanAvailableAssets, assets, "!not gt than available assets");
   }
 
   function testVaultPreviewRedeem(uint256 assets) public fork(BSC_MAINNET) {
     vm.assume(assets < type(uint128).max);
+    MultiStrategyVaultSecondExtension asSecondExtension = vault.asSecondExtension();
+
     // previewWithdraw should return the maximum shares that are burned for the assets input
-    uint256 maxShares = vault.previewWithdraw(assets);
-    uint256 sameAssets = vault.previewRedeem(maxShares);
-    uint256 shouldBeMoreThanRequestedAssets = vault.previewRedeem(maxShares + 1);
+    uint256 maxShares = asSecondExtension.previewWithdraw(assets);
+    uint256 sameAssets = asSecondExtension.previewRedeem(maxShares);
+    uint256 shouldBeMoreThanRequestedAssets = asSecondExtension.previewRedeem(maxShares + 1);
     assertGt(shouldBeMoreThanRequestedAssets, assets, "!not gt than requested assets");
 
     if (assets > 100) assertEq(sameAssets, assets, "!same");
   }
 
   function testOptVaultMint(uint256 mintAmount_) public fork(BSC_MAINNET) {
-    vault.harvest(lenderSharesHint);
+    MultiStrategyVaultSecondExtension asSecondExtension = vault.asSecondExtension();
+    asSecondExtension.harvest(lenderSharesHint);
 
     // advance time with a year
     vm.warp(block.timestamp + 365.25 days);
@@ -251,35 +263,36 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
     // test the shares before and after calling mint
     {
-      uint256 vaultSharesBefore = vault.balanceOf(wbnbWhale);
+      uint256 vaultSharesBefore = asSecondExtension.balanceOf(wbnbWhale);
       uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
       // preview deposit should return the max shares possible for the supplied amount of assets
-      uint256 maxShares = vault.previewDeposit(whaleAssets);
+      uint256 maxShares = asSecondExtension.previewDeposit(whaleAssets);
 
       // call mint
       bool shouldRevert = true;
       vm.startPrank(wbnbWhale);
       {
-        wbnb.approve(address(vault), whaleAssets);
-        if (vault.previewMint(mintAmount_) == 0) vm.expectRevert("too little shares");
+        wbnb.approve(address(asSecondExtension), whaleAssets);
+        if (asSecondExtension.previewMint(mintAmount_) == 0) vm.expectRevert("too little shares");
         else if (mintAmount_ > maxShares) vm.expectRevert("!insufficient balance");
         else shouldRevert = false;
 
-        vault.mint(mintAmount_);
+        asSecondExtension.mint(mintAmount_);
       }
       vm.stopPrank();
 
       if (!shouldRevert) {
-        uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
+        uint256 vaultSharesAfter = asSecondExtension.balanceOf(wbnbWhale);
         assertEq(vaultSharesAfter - vaultSharesBefore, mintAmount_, "!depositor did not mint the correct shares");
       }
     }
   }
 
   function testOptVaultDeposit(uint256 depositAmount_) public fork(BSC_MAINNET) {
-    vm.assume(depositAmount_ >= 10 * vault.adaptersCount() && depositAmount_ < type(uint128).max);
+    MultiStrategyVaultSecondExtension asSecondExtension = vault.asSecondExtension();
+    vm.assume(depositAmount_ >= 10 * asSecondExtension.adaptersCount() && depositAmount_ < type(uint128).max);
 
-    vault.harvest(lenderSharesHint);
+    asSecondExtension.harvest(lenderSharesHint);
 
     // advance time with a year
     vm.warp(block.timestamp + 365.25 days);
@@ -287,25 +300,25 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
     // test the shares before and after calling deposit
     {
-      uint256 vaultSharesBefore = vault.balanceOf(wbnbWhale);
+      uint256 vaultSharesBefore = asSecondExtension.balanceOf(wbnbWhale);
       uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
-      uint256 expectedVaultSharesMinted = vault.previewDeposit(depositAmount_);
+      uint256 expectedVaultSharesMinted = asSecondExtension.previewDeposit(depositAmount_);
 
       // call deposit
       bool shouldRevert = true;
       vm.startPrank(wbnbWhale);
       {
-        wbnb.approve(address(vault), whaleAssets);
+        wbnb.approve(address(asSecondExtension), whaleAssets);
         if (depositAmount_ > whaleAssets) vm.expectRevert("!insufficient balance");
         else if (expectedVaultSharesMinted == 0) vm.expectRevert("too little assets");
         else shouldRevert = false;
 
-        vault.deposit(depositAmount_);
+        asSecondExtension.deposit(depositAmount_);
       }
       vm.stopPrank();
 
       if (!shouldRevert) {
-        uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
+        uint256 vaultSharesAfter = asSecondExtension.balanceOf(wbnbWhale);
         assertEq(
           vaultSharesAfter - vaultSharesBefore,
           expectedVaultSharesMinted,
@@ -318,13 +331,14 @@ contract OptimizedAPRVaultTest is MarketsTest {
   function testOptVaultWithdraw(uint256 withdrawAmount_) public fork(BSC_MAINNET) {
     vm.assume(withdrawAmount_ < type(uint128).max);
 
-    vault.harvest(lenderSharesHint);
+    MultiStrategyVaultSecondExtension asSecondExtension = vault.asSecondExtension();
+    asSecondExtension.harvest(lenderSharesHint);
 
     // deposit some assets to test a wider range of withdrawable amounts
     vm.startPrank(wbnbWhale);
     uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
-    wbnb.approve(address(vault), whaleAssets);
-    vault.deposit(whaleAssets / 2);
+    wbnb.approve(address(asSecondExtension), whaleAssets);
+    asSecondExtension.deposit(whaleAssets / 2);
     vm.stopPrank();
 
     // advance time with a year
@@ -335,7 +349,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     {
       uint256 wbnbBalanceBefore = wbnb.balanceOf(wbnbWhale);
 
-      uint256 maxWithdrawWhale = vault.maxWithdraw(wbnbWhale);
+      uint256 maxWithdrawWhale = asSecondExtension.maxWithdraw(wbnbWhale);
 
       // call withdraw
       bool shouldRevert = true;
@@ -345,7 +359,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
         else if (withdrawAmount_ == 0) vm.expectRevert("too little assets");
         else shouldRevert = false;
 
-        vault.withdraw(withdrawAmount_);
+        asSecondExtension.withdraw(withdrawAmount_);
       }
       vm.stopPrank();
 
@@ -363,13 +377,14 @@ contract OptimizedAPRVaultTest is MarketsTest {
   function testOptVaultRedeem(uint256 redeemAmount_) public fork(BSC_MAINNET) {
     vm.assume(redeemAmount_ < type(uint128).max);
 
-    vault.harvest(lenderSharesHint);
+    MultiStrategyVaultSecondExtension asSecondExtension = vault.asSecondExtension();
+    asSecondExtension.harvest(lenderSharesHint);
 
     // deposit some assets to test a wider range of redeemable amounts
     vm.startPrank(wbnbWhale);
     uint256 whaleAssets = wbnb.balanceOf(wbnbWhale);
-    wbnb.approve(address(vault), whaleAssets);
-    vault.deposit(whaleAssets / 2);
+    wbnb.approve(address(asSecondExtension), whaleAssets);
+    asSecondExtension.deposit(whaleAssets / 2);
     vm.stopPrank();
 
     // advance time with a year
@@ -378,11 +393,11 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
     // test the balance before and after calling redeem
     {
-      uint256 vaultSharesBefore = vault.balanceOf(wbnbWhale);
+      uint256 vaultSharesBefore = asSecondExtension.balanceOf(wbnbWhale);
 
-      uint256 maxRedeemWhale = vault.maxRedeem(wbnbWhale);
+      uint256 maxRedeemWhale = asSecondExtension.maxRedeem(wbnbWhale);
 
-      uint256 assetsToReceive = vault.previewRedeem(redeemAmount_);
+      uint256 assetsToReceive = asSecondExtension.previewRedeem(redeemAmount_);
 
       // call redeem
       bool shouldRevert = true;
@@ -392,12 +407,12 @@ contract OptimizedAPRVaultTest is MarketsTest {
         else if (redeemAmount_ > maxRedeemWhale) vm.expectRevert("ERC20: burn amount exceeds balance");
         else shouldRevert = false;
 
-        vault.redeem(redeemAmount_);
+        asSecondExtension.redeem(redeemAmount_);
       }
       vm.stopPrank();
 
       if (!shouldRevert) {
-        uint256 vaultSharesAfter = vault.balanceOf(wbnbWhale);
+        uint256 vaultSharesAfter = asSecondExtension.balanceOf(wbnbWhale);
         assertEq(vaultSharesBefore - vaultSharesAfter, redeemAmount_, "!depositor did not redeem the requested shares");
       }
     }
@@ -426,7 +441,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     adapters[1].allocation = 1e17;
     adapters[2].allocation = 1e17;
 
-    OptimizedAPRVaultExtension ext = vault.asExtension();
+    MultiStrategyVaultFirstExtension ext = vault.asFirstExtension();
     ext.proposeAdapters(adapters, 3);
     vm.expectRevert(NotPassedQuitPeriod.selector);
     ext.changeAdapters();
@@ -436,8 +451,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
   }
 
   function testVaultAccrueRewards() public fork(BSC_MAINNET) {
-    IERC20 ddd = IERC20(dddAddress);
-    IERC20 epx = IERC20(epxAddress);
+    IERC20Metadata ddd = IERC20Metadata(dddAddress);
+    IERC20Metadata epx = IERC20Metadata(epxAddress);
 
     // set up the registry, the vault and the adapter
     {
@@ -459,21 +474,19 @@ contract OptimizedAPRVaultTest is MarketsTest {
       }
       twoBrlMarketAdapter.initialize(ICErc20(twoBrlMarketAddress), blocksPerYear, registry);
 
-      // deploy the vault
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-        address(new OptimizedAPRVault()),
-        address(dpa),
-        ""
-      );
-      vault = OptimizedAPRVault(address(proxy));
+      DiamondExtension[] memory exts = new DiamondExtension[](2);
+      exts[0] = new MultiStrategyVaultFirstExtension();
+      exts[1] = new MultiStrategyVaultSecondExtension();
+      vault = new MultiStrategyVaultBase();
       vm.label(address(vault), "vault");
+      vault.initialize(exts);
 
       AdapterConfig[10] memory _adapters;
       _adapters[0].adapter = twoBrlMarketAdapter;
       _adapters[0].allocation = 1e18;
 
       MidasFlywheel flywheelLogic = new MidasFlywheel();
-      vault.initializeWithRegistry(
+      vault.asSecondExtension().initializeWithRegistry(
         twoBrl,
         _adapters,
         1,
@@ -484,23 +497,21 @@ contract OptimizedAPRVaultTest is MarketsTest {
         address(registry),
         address(flywheelLogic)
       );
-      OptimizedAPRVaultExtension ext = new OptimizedAPRVaultExtension();
-      vault._registerExtension(ext, DiamondExtension(address(0)));
 
-      vault.asExtension().addRewardToken(ddd);
-      vault.asExtension().addRewardToken(epx);
+      vault.asFirstExtension().addRewardToken(ddd);
+      vault.asFirstExtension().addRewardToken(epx);
 
       registry.addVault(address(vault));
     }
 
-    MidasFlywheel flywheelDDD = vault.flywheelForRewardToken(ddd);
-    MidasFlywheel flywheelEPX = vault.flywheelForRewardToken(epx);
+    MidasFlywheel flywheelDDD = vault.asFirstExtension().flywheelForRewardToken(ddd);
+    MidasFlywheel flywheelEPX = vault.asFirstExtension().flywheelForRewardToken(epx);
 
     // deposit some funds
     vm.startPrank(twoBrlWhale);
     twoBrl.approve(address(vault), type(uint256).max);
     // accruing for the first time internally with _afterTokenTransfer
-    vault.deposit(depositAmount);
+    vault.asSecondExtension().deposit(depositAmount);
     vm.stopPrank();
 
     {
@@ -511,7 +522,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
 
     // pull from the adapters the rewards for the new cycle
-    vault.asExtension().claimRewards();
+    vault.asFirstExtension().claimRewards();
 
     {
       // TODO figure out why these accrue calls are necessary
