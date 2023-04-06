@@ -9,11 +9,8 @@ import { OptimizedAPRVaultSecondExtension } from "./OptimizedAPRVaultSecondExten
 
 import { IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
 
+// This contract is not upgradeable, but the storage can be amended for the extensions
 contract OptimizedAPRVaultBase is OptimizedAPRVaultStorage, DiamondBase {
-  // IMPORTANT: do not use this contract for storage/variables
-  //uint256[50] private __pausableGap;
-  //uint256[50] private __reentrancyGuardGap;
-  //uint256[51] private __erc4626Gap;
   /**
    * @dev register a logic extension
    * @param extensionToAdd the extension whose functions are to be added
@@ -35,8 +32,7 @@ contract OptimizedAPRVaultBase is OptimizedAPRVaultStorage, DiamondBase {
 
   // TODO if only safe ownable is non-initializeable, then covert this to a constructor
   // otherwise, make this a full-config constructor
-  function initialize(OptimizedAPRVaultExtension[] calldata extensions, bytes calldata initData) public initializer {
-    __SafeOwnable_init(msg.sender);
+  function initialize(OptimizedAPRVaultExtension[] calldata extensions, bytes calldata initData) public onlyOwner {
     for (uint256 i; i < extensions.length; i++)
       LibDiamond.registerExtension(extensions[i], DiamondExtension(address(0)));
 

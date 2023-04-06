@@ -49,7 +49,7 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
     return functionSelectors;
   }
 
-  function initialize(bytes calldata data) public override {
+  function initialize(bytes calldata data) public override initializer {
     require(msg.sender == address(this), "!not self call");
 
     (IERC20 asset_,

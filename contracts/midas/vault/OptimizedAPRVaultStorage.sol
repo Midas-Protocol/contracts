@@ -4,15 +4,14 @@ pragma solidity ^0.8.10;
 import { VaultFees, IERC20 } from "./IVault.sol";
 import { CompoundMarketERC4626 } from "../strategies/CompoundMarketERC4626.sol";
 import { MidasFlywheel } from "../strategies/flywheel/MidasFlywheel.sol";
-import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
+import { SafeOwnable } from "../../midas/SafeOwnable.sol";
 
 struct AdapterConfig {
   CompoundMarketERC4626 adapter;
   uint64 allocation;
 }
 
-// TODO use non-upgradeable safeownable
-abstract contract OptimizedAPRVaultStorage is SafeOwnableUpgradeable {
+abstract contract OptimizedAPRVaultStorage is SafeOwnable {
   uint256 internal constant SECONDS_PER_YEAR = 365.25 days;
 
   uint8 public constant DECIMAL_OFFSET = 9;

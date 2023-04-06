@@ -4,11 +4,12 @@ pragma solidity ^0.8.10;
 import { OptimizedAPRVaultStorage, VaultFees, AdapterConfig } from "./OptimizedAPRVaultStorage.sol";
 import { DiamondExtension } from "../DiamondExtension.sol";
 
-import { ERC4626Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
+import { ERC4626Upgradeable, ContextUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol";
 import { PausableUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/security/PausableUpgradeable.sol";
 import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
 import { IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
+import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 
 abstract contract OptimizedAPRVaultExtension is
   OptimizedAPRVaultStorage,
@@ -49,6 +50,14 @@ abstract contract OptimizedAPRVaultExtension is
         address(this)
       )
     );
+  }
+
+  function _msgSender() internal view override(ContextUpgradeable, Context) returns (address) {
+    return msg.sender;
+  }
+
+  function _msgData() internal view override(ContextUpgradeable, Context) returns (bytes calldata) {
+    return msg.data;
   }
 
   function initialize(bytes calldata data) public virtual;
