@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import "../DiamondExtension.sol";
-import "./MultiStrategyVaultExtension.sol";
+import "./OptimizedAPRVaultExtension.sol";
 import { MidasFlywheel } from "../strategies/flywheel/MidasFlywheel.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -16,7 +16,7 @@ import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/trans
 import { IERC20Upgradeable as IERC20 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
 import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
 
-contract MultiStrategyVaultFirstExtension is MultiStrategyVaultExtension {
+contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
   using SafeERC20 for IERC20;
   using Math for uint256;
 

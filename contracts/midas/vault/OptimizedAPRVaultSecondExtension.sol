@@ -8,9 +8,9 @@ import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/cont
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 
 import { IERC20 } from "./IVault.sol";
-import "./MultiStrategyVaultExtension.sol";
+import "./OptimizedAPRVaultExtension.sol";
 
-contract MultiStrategyVaultSecondExtension is MultiStrategyVaultExtension {
+contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   using SafeERC20 for IERC20;
   using Math for uint256;
 
@@ -59,6 +59,8 @@ contract MultiStrategyVaultSecondExtension is MultiStrategyVaultExtension {
     functionSelectors[--fnsCount] = bytes4(keccak256(bytes("estimatedAPR(uint64[])")));
     functionSelectors[--fnsCount] = bytes4(keccak256(bytes("estimatedAPR()")));
     functionSelectors[--fnsCount] = this.harvest.selector;
+
+    // inherited fns should also be listed
     functionSelectors[--fnsCount] = this.balanceOf.selector;
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;

@@ -11,7 +11,7 @@ struct AdapterConfig {
   uint64 allocation;
 }
 
-abstract contract MultiStrategyVaultStorage is SafeOwnableUpgradeable {
+abstract contract OptimizedAPRVaultStorage is SafeOwnableUpgradeable {
   uint256 internal constant SECONDS_PER_YEAR = 365.25 days;
 
   uint8 public constant DECIMAL_OFFSET = 9;

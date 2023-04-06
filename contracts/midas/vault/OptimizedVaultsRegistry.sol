@@ -1,7 +1,7 @@
 pragma solidity ^0.8.0;
 
 import "../SafeOwnableUpgradeable.sol";
-import "./MultiStrategyVaultBase.sol";
+import "./OptimizedAPRVaultBase.sol";
 import "../strategies/CompoundMarketERC4626.sol";
 import "../strategies/flywheel/MidasFlywheel.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
@@ -9,13 +9,13 @@ import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import { IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
 
 contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
-  MultiStrategyVaultBase[] public vaults;
+  OptimizedAPRVaultBase[] public vaults;
 
   function initialize() public initializer {
     __SafeOwnable_init(msg.sender);
   }
 
-  function getAllVaults() public view returns (MultiStrategyVaultBase[] memory) {
+  function getAllVaults() public view returns (OptimizedAPRVaultBase[] memory) {
     return vaults;
   }
 
@@ -25,7 +25,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
         return false;
       }
     }
-    vaults.push(MultiStrategyVaultBase(vault));
+    vaults.push(OptimizedAPRVaultBase(vault));
     return true;
   }
 
@@ -66,7 +66,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
     rewards_ = new uint256[](totalFlywheels);
 
     for (uint256 i = 0; i < vaults.length; i++) {
-      MultiStrategyVaultBase vault = vaults[i];
+      OptimizedAPRVaultBase vault = vaults[i];
       MidasFlywheel[] memory flywheels = vault.asFirstExtension().getAllFlywheels();
       uint256 flywheelsLen = flywheels.length;
 
@@ -102,7 +102,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
   function getVaultsData() public view returns (VaultInfo[] memory vaultsData) {
     vaultsData = new VaultInfo[](vaults.length);
     for (uint256 i; i < vaults.length; ++i) {
-      MultiStrategyVaultSecondExtension vault = vaults[i].asSecondExtension();
+      OptimizedAPRVaultSecondExtension vault = vaults[i].asSecondExtension();
       uint8 adaptersCount = vaults[i].adaptersCount();
       AdapterInfo[] memory adaptersData = new AdapterInfo[](adaptersCount);
 
