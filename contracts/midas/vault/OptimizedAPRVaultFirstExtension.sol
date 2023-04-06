@@ -52,15 +52,17 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
   function initialize(bytes calldata data) public override initializer {
     require(msg.sender == address(this), "!not self call");
 
-    (IERC20 asset_,
-    AdapterConfig[10] memory adapters_,
-    uint8 adaptersCount_,
-    VaultFees memory fees_,
-    address feeRecipient_,
-    uint256 depositLimit_,
-    address owner_,
-    address registry_,
-    address flywheelLogic_) = abi.decode(data, (IERC20, AdapterConfig[10], uint8, VaultFees, address, uint256, address, address, address));
+    (
+      IERC20 asset_,
+      AdapterConfig[10] memory adapters_,
+      uint8 adaptersCount_,
+      VaultFees memory fees_,
+      address feeRecipient_,
+      uint256 depositLimit_,
+      address owner_,
+      address registry_,
+      address flywheelLogic_
+    ) = abi.decode(data, (IERC20, AdapterConfig[10], uint8, VaultFees, address, uint256, address, address, address));
 
     if (address(asset_) == address(0)) revert AssetInvalid();
     __ERC4626_init(asset_);
