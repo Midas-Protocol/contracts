@@ -28,8 +28,9 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
   }
 
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 13;
+    uint8 fnsCount = 14;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
+    functionSelectors[--fnsCount] = this.initialize.selector;
     functionSelectors[--fnsCount] = this.accruedManagementFee.selector;
     functionSelectors[--fnsCount] = this.accruedPerformanceFee.selector;
     functionSelectors[--fnsCount] = this.takeManagementAndPerformanceFees.selector;
@@ -46,6 +47,53 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
+  }
+
+  function initialize(bytes calldata data) public override {
+    require(msg.sender == address(this), "!not self call");
+
+    (IERC20 asset_,
+    AdapterConfig[10] memory adapters_,
+    uint8 adaptersCount_,
+    VaultFees memory fees_,
+    address feeRecipient_,
+    uint256 depositLimit_,
+    address owner_,
+    address registry_,
+    address flywheelLogic_) = abi.decode(data, (IERC20, AdapterConfig[10], uint8, VaultFees, address, uint256, address, address, address));
+
+    if (address(asset_) == address(0)) revert AssetInvalid();
+    __ERC4626_init(asset_);
+
+    _name = string(bytes.concat("Midas Optimized ", bytes(IERC20Metadata(address(asset_)).name()), " Vault"));
+    _symbol = string(bytes.concat("mo-", bytes(IERC20Metadata(address(asset_)).symbol())));
+    _decimals = IERC20Metadata(address(asset_)).decimals() + DECIMAL_OFFSET; // Asset decimals + decimal offset to combat inflation attacks
+
+    depositLimit = depositLimit_;
+    registry = registry_;
+    flywheelLogic = flywheelLogic_;
+    INITIAL_CHAIN_ID = block.chainid;
+    INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
+    feesUpdatedAt = block.timestamp;
+    highWaterMark = 1e9;
+    quitPeriod = 3 days;
+
+    // vault fees
+    if (fees_.deposit >= 1e18 || fees_.withdrawal >= 1e18 || fees_.management >= 1e18 || fees_.performance >= 1e18)
+      revert InvalidVaultFees();
+    fees = fees_;
+
+    // fee recipient
+    if (feeRecipient_ == address(0)) revert InvalidFeeRecipient();
+    feeRecipient = feeRecipient_;
+
+    // adapters config
+    _verifyAdapterConfig(adapters_, adaptersCount_);
+    adaptersCount = adaptersCount_;
+    for (uint8 i; i < adaptersCount_; i++) {
+      adapters[i] = adapters_[i];
+      asset_.approve(address(adapters_[i].adapter), type(uint256).max);
+    }
   }
 
   /*------------------------------------------------------------

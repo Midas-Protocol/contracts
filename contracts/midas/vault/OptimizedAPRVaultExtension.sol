@@ -23,7 +23,7 @@ abstract contract OptimizedAPRVaultExtension is
   error InvalidVaultFees();
   error InvalidFeeRecipient();
 
-  function _verifyAdapterConfig(AdapterConfig[10] calldata newAdapters, uint8 adapterCount_) internal view {
+  function _verifyAdapterConfig(AdapterConfig[10] memory newAdapters, uint8 adapterCount_) internal view {
     if (adapterCount_ == 0 || adapterCount_ > 10) revert InvalidConfig();
 
     uint256 totalAllocation;
@@ -38,8 +38,18 @@ abstract contract OptimizedAPRVaultExtension is
     if (totalAllocation != 1e18) revert InvalidConfig();
   }
 
-  function initialize(IERC20Metadata asset_) internal {
-    __SafeOwnable_init(msg.sender);
-    __ERC4626_init(asset_);
+  function computeDomainSeparator() internal view virtual returns (bytes32) {
+    return
+    keccak256(
+      abi.encode(
+        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+        keccak256(bytes(_name)),
+        keccak256("1"),
+        block.chainid,
+        address(this)
+      )
+    );
   }
+
+  function initialize(bytes calldata data) public virtual;
 }

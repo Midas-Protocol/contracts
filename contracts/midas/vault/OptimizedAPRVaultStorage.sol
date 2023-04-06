@@ -11,6 +11,7 @@ struct AdapterConfig {
   uint64 allocation;
 }
 
+// TODO use non-upgradeable safeownable
 abstract contract OptimizedAPRVaultStorage is SafeOwnableUpgradeable {
   uint256 internal constant SECONDS_PER_YEAR = 365.25 days;
 

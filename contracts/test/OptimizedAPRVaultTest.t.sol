@@ -13,6 +13,7 @@ import { IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contra
 import { WETH } from "solmate/tokens/WETH.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 
+import { OptimizedAPRVaultExtension } from "../midas/vault/OptimizedAPRVaultExtension.sol";
 import { OptimizedAPRVaultFirstExtension } from "../midas/vault/OptimizedAPRVaultFirstExtension.sol";
 import { OptimizedAPRVaultSecondExtension } from "../midas/vault/OptimizedAPRVaultSecondExtension.sol";
 import { VaultFees } from "../midas/vault/IVault.sol";
@@ -126,16 +127,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
   }
 
   function deployVault() internal {
-    DiamondExtension[] memory exts = new DiamondExtension[](2);
-    exts[0] = new OptimizedAPRVaultFirstExtension();
-    exts[1] = new OptimizedAPRVaultSecondExtension();
-    vault = new OptimizedAPRVaultBase();
-    vm.label(address(vault), "vault");
-    vault.initialize(exts);
-
     MidasFlywheel flywheelLogic = new MidasFlywheel();
-
-    vault.asSecondExtension().initializeWithRegistry(
+    bytes memory params = abi.encode(
       IERC20Metadata(wnativeAddress),
       adapters,
       2, // adapters count
@@ -146,6 +139,13 @@ contract OptimizedAPRVaultTest is MarketsTest {
       address(registry),
       address(flywheelLogic)
     );
+
+    OptimizedAPRVaultExtension[] memory exts = new OptimizedAPRVaultExtension[](2);
+    exts[0] = new OptimizedAPRVaultFirstExtension();
+    exts[1] = new OptimizedAPRVaultSecondExtension();
+    vault = new OptimizedAPRVaultBase();
+    vm.label(address(vault), "vault");
+    vault.initialize(exts, params);
 
     registry.addVault(address(vault));
   }
@@ -474,19 +474,13 @@ contract OptimizedAPRVaultTest is MarketsTest {
       }
       twoBrlMarketAdapter.initialize(ICErc20(twoBrlMarketAddress), blocksPerYear, registry);
 
-      DiamondExtension[] memory exts = new DiamondExtension[](2);
-      exts[0] = new OptimizedAPRVaultFirstExtension();
-      exts[1] = new OptimizedAPRVaultSecondExtension();
-      vault = new OptimizedAPRVaultBase();
-      vm.label(address(vault), "vault");
-      vault.initialize(exts);
-
       AdapterConfig[10] memory _adapters;
       _adapters[0].adapter = twoBrlMarketAdapter;
       _adapters[0].allocation = 1e18;
 
       MidasFlywheel flywheelLogic = new MidasFlywheel();
-      vault.asSecondExtension().initializeWithRegistry(
+
+      bytes memory params = abi.encode(
         twoBrl,
         _adapters,
         1,
@@ -497,6 +491,13 @@ contract OptimizedAPRVaultTest is MarketsTest {
         address(registry),
         address(flywheelLogic)
       );
+
+      OptimizedAPRVaultExtension[] memory exts = new OptimizedAPRVaultExtension[](2);
+      exts[0] = new OptimizedAPRVaultFirstExtension();
+      exts[1] = new OptimizedAPRVaultSecondExtension();
+      vault = new OptimizedAPRVaultBase();
+      vm.label(address(vault), "vault");
+      vault.initialize(exts, params);
 
       vault.asFirstExtension().addRewardToken(ddd);
       vault.asFirstExtension().addRewardToken(epx);

@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import "../DiamondExtension.sol";
 import { OptimizedAPRVaultStorage, VaultFees, AdapterConfig } from "./OptimizedAPRVaultStorage.sol";
+import { OptimizedAPRVaultExtension } from "./OptimizedAPRVaultExtension.sol";
 import { OptimizedAPRVaultFirstExtension } from "./OptimizedAPRVaultFirstExtension.sol";
 import { OptimizedAPRVaultSecondExtension } from "./OptimizedAPRVaultSecondExtension.sol";
 
@@ -32,9 +33,13 @@ contract OptimizedAPRVaultBase is OptimizedAPRVaultStorage, DiamondBase {
     return OptimizedAPRVaultSecondExtension(address(this));
   }
 
-  function initialize(DiamondExtension[] calldata extensions) public {
-    _transferOwnership(msg.sender);
+  // TODO if only safe ownable is non-initializeable, then covert this to a constructor
+  // otherwise, make this a full-config constructor
+  function initialize(OptimizedAPRVaultExtension[] calldata extensions, bytes calldata initData) public initializer {
+    __SafeOwnable_init(msg.sender);
     for (uint256 i; i < extensions.length; i++)
       LibDiamond.registerExtension(extensions[i], DiamondExtension(address(0)));
+
+    asFirstExtension().initialize(initData);
   }
 }

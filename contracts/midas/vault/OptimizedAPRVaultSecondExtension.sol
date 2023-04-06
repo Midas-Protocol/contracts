@@ -14,10 +14,6 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   using SafeERC20 for IERC20;
   using Math for uint256;
 
-  event VaultInitialized(string contractName, address indexed asset);
-
-  error InvalidAsset();
-  error InvalidAdapter();
   error InvalidAllocations();
 
   constructor() {
@@ -25,9 +21,8 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   }
 
   function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 40;
+    uint8 fnsCount = 39;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
-    functionSelectors[--fnsCount] = this.initializeWithRegistry.selector;
     functionSelectors[--fnsCount] = this.name.selector;
     functionSelectors[--fnsCount] = this.symbol.selector;
     functionSelectors[--fnsCount] = this.decimals.selector;
@@ -72,6 +67,10 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
+  }
+
+  function initialize(bytes calldata data) public override {
+    // the initializer has to be implemented in the first extension
   }
 
   function name() public view override returns (string memory) {
@@ -507,19 +506,6 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     return block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : computeDomainSeparator();
   }
 
-  function computeDomainSeparator() internal view virtual returns (bytes32) {
-    return
-      keccak256(
-        abi.encode(
-          keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-          keccak256(bytes(name())),
-          keccak256("1"),
-          block.chainid,
-          address(this)
-        )
-      );
-  }
-
   /*-------------------------------------------
   -------------------------------------------*/
 
@@ -660,70 +646,5 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     }
 
     emit Harvested(totalAssets(), currentAPR, estimatedAprHint);
-  }
-
-  function initializeWithRegistry(
-    IERC20 asset_,
-    AdapterConfig[10] calldata adapters_,
-    uint8 adaptersCount_,
-    VaultFees calldata fees_,
-    address feeRecipient_,
-    uint256 depositLimit_,
-    address owner_,
-    address registry_,
-    address flywheelLogic_
-  ) public initializer onlyOwner {
-    initialize(IERC20Metadata(address(asset_)));
-    init(asset_, depositLimit_, owner_, registry_, flywheelLogic_);
-    configure(asset_, adapters_, adaptersCount_, fees_, feeRecipient_);
-  }
-
-  function init(
-    IERC20 asset_,
-    uint256 depositLimit_,
-    address owner_,
-    address registry_,
-    address flywheelLogic_
-  ) internal {
-    INITIAL_CHAIN_ID = block.chainid;
-    INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
-
-    feesUpdatedAt = block.timestamp;
-    highWaterMark = 1e9;
-    quitPeriod = 3 days;
-    depositLimit = depositLimit_;
-    _name = string(bytes.concat("Midas Optimized ", bytes(IERC20Metadata(address(asset_)).name()), " Vault"));
-    _symbol = string(bytes.concat("mo-", bytes(IERC20Metadata(address(asset_)).symbol())));
-    _decimals = IERC20Metadata(address(asset_)).decimals() + DECIMAL_OFFSET; // Asset decimals + decimal offset to combat inflation attacks
-
-    registry = registry_;
-    flywheelLogic = flywheelLogic_;
-  }
-
-  function configure(
-    IERC20 asset_,
-    AdapterConfig[10] calldata adapters_,
-    uint8 adaptersCount_,
-    VaultFees calldata fees_,
-    address feeRecipient_
-  ) internal {
-    if (address(asset_) == address(0)) revert InvalidAsset();
-
-    emit VaultInitialized(_name, address(asset_));
-
-    if (fees_.deposit >= 1e18 || fees_.withdrawal >= 1e18 || fees_.management >= 1e18 || fees_.performance >= 1e18)
-      revert InvalidVaultFees();
-    fees = fees_;
-
-    if (feeRecipient_ == address(0)) revert InvalidFeeRecipient();
-    feeRecipient = feeRecipient_;
-    _verifyAdapterConfig(adapters_, adaptersCount_);
-
-    adaptersCount = adaptersCount_;
-    for (uint8 i; i < adaptersCount_; i++) {
-      adapters[i] = adapters_[i];
-
-      asset_.approve(address(adapters_[i].adapter), type(uint256).max);
-    }
   }
 }
