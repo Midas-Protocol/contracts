@@ -10,10 +10,13 @@ import { PausableUpgradeable } from "openzeppelin-contracts-upgradeable/contract
 import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
 import { IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
 
-abstract contract MultiStrategyVaultExtension is MultiStrategyVaultStorage,
-PausableUpgradeable,
-ReentrancyGuardUpgradeable,
-ERC4626Upgradeable, DiamondExtension {
+abstract contract MultiStrategyVaultExtension is
+  MultiStrategyVaultStorage,
+  PausableUpgradeable,
+  ReentrancyGuardUpgradeable,
+  ERC4626Upgradeable,
+  DiamondExtension
+{
   error NotPassedQuitPeriod();
   error AssetInvalid();
   error InvalidConfig();

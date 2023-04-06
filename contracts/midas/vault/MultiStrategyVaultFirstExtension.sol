@@ -95,10 +95,7 @@ contract MultiStrategyVaultFirstExtension is MultiStrategyVaultExtension {
   error InsufficientWithdrawalAmount(uint256 amount);
 
   /// @notice Minimal function to call `takeFees` modifier.
-  function takeManagementAndPerformanceFees()
-    external
-    takeFees
-  {}
+  function takeManagementAndPerformanceFees() external takeFees {}
 
   /// @notice Collect management and performance fees and update vault share high water mark.
   modifier takeFees() {
@@ -136,8 +133,9 @@ contract MultiStrategyVaultFirstExtension is MultiStrategyVaultExtension {
    * @dev Fees can be 0 but never 1e18 (1e18 = 100%, 1e14 = 1 BPS)
    */
   function proposeFees(VaultFees calldata newFees) external onlyOwner {
-    if (newFees.deposit >= 1e18 || newFees.withdrawal >= 1e18 || newFees.management >= 1e18 || newFees.performance >= 1e18)
-      revert InvalidVaultFees();
+    if (
+      newFees.deposit >= 1e18 || newFees.withdrawal >= 1e18 || newFees.management >= 1e18 || newFees.performance >= 1e18
+    ) revert InvalidVaultFees();
 
     proposedFees = newFees;
     proposedFeeTime = block.timestamp;

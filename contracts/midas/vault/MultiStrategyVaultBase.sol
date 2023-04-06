@@ -34,6 +34,7 @@ contract MultiStrategyVaultBase is MultiStrategyVaultStorage, DiamondBase {
 
   function initialize(DiamondExtension[] calldata extensions) public {
     _transferOwnership(msg.sender);
-    for (uint256 i; i < extensions.length; i++) LibDiamond.registerExtension(extensions[i], DiamondExtension(address(0)));
+    for (uint256 i; i < extensions.length; i++)
+      LibDiamond.registerExtension(extensions[i], DiamondExtension(address(0)));
   }
 }

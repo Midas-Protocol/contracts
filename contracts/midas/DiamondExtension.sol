@@ -38,13 +38,13 @@ abstract contract DiamondBase {
     if (extension == address(0)) revert FunctionNotFound(msg.sig);
     // Execute external function from extension using delegatecall and return any value.
     assembly {
-    // copy function selector and any arguments
+      // copy function selector and any arguments
       calldatacopy(0, 0, calldatasize())
-    // execute function call using the extension
+      // execute function call using the extension
       let result := delegatecall(gas(), extension, 0, calldatasize(), 0, 0)
-    // get any return value
+      // get any return value
       returndatacopy(0, 0, returndatasize())
-    // return any return value or error back to the caller
+      // return any return value or error back to the caller
       switch result
       case 0 {
         revert(0, returndatasize())
