@@ -26,12 +26,18 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   address stMATIC_WMATIC_pool = 0x8159462d255C1D24915CB51ec361F700174cD994;
   address jBRL_BRZ_pool = 0xE22483774bd8611bE2Ad2F4194078DaC9159F4bA;
   address jEUR_agEUR_pool = 0xa48D164F6eB0EDC68bd03B56fa59E12F24499aD1;
-  address boostedAavePool = 0x48e6B98ef6329f8f0A30eBB8c7C960330d648085;
   address MATICx_WMATIC_pool = 0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0;
   address csMATIC_WMATIC_pool = 0x02d2e2D7a89D6c5CB3681cfCb6F7dAC02A55eDA4;
+
+  address boostedAavePool = 0x48e6B98ef6329f8f0A30eBB8c7C960330d648085;
   address linearAaveUsdtPool = 0xFf4ce5AAAb5a627bf82f4A571AB1cE94Aa365eA6;
   address linearAaveUsdcPool = 0xF93579002DBE8046c43FEfE86ec78b1112247BB8;
   address linearAaveDaiPool = 0x178E029173417b1F9C8bC16DCeC6f697bC323746;
+
+  address boostedTetuPool = 0xb3d658d5b95BF04E2932370DD1FF976fe18dd66A;
+  address linearTetuUsdtPool = 0x7c82A23B4C48D796dee36A9cA215b641C6a8709d;
+  address linearTetuUsdcPool = 0xae646817e458C0bE890b81e8d880206710E3c44e;
+  address linearTetuDaiPool = 0xDa1CD1711743e57Dd57102E9e61b75f3587703da;
 
   address wtoken;
   address stMATIC = 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4;
@@ -52,27 +58,40 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     wtoken = ap.getAddress("wtoken");
 
-    address[] memory linearLps = asArray(linearAaveUsdtPool, linearAaveUsdcPool, linearAaveDaiPool);
+    address[] memory linearAaveLps = asArray(linearAaveUsdtPool, linearAaveUsdcPool, linearAaveDaiPool);
+    address[] memory linearTetuLps = asArray(linearTetuUsdtPool, linearTetuUsdcPool, linearTetuDaiPool);
 
     stableLpOracle = new BalancerLpStablePoolPriceOracle();
     stableLpOracle.initialize();
 
     linearLpOracle = new BalancerLpLinearPoolPriceOracle();
-    linearLpOracle.initialize(linearLps);
+    linearLpOracle.initialize(linearAaveLps);
+
+    vm.startPrank(linearLpOracle.owner());
+    for (uint256 i = 0; i < linearTetuLps.length; i++) {
+      linearLpOracle.registerToken(linearTetuLps[i]);
+    }
+    vm.stopPrank();
 
     rateProviderOracle = new BalancerRateProviderOracle();
     rateProviderOracle.initialize(asArray(csMATICRateProvider), asArray(wtoken), asArray(csMATIC));
 
     // Add the oracles to the MPO
-    IPriceOracle[] memory lpOracles = new IPriceOracle[](linearLps.length);
-    for (uint256 i = 0; i < linearLps.length; i++) {
-      lpOracles[i] = linearLpOracle;
+    IPriceOracle[] memory aaveLinerlpOracles = new IPriceOracle[](linearAaveLps.length);
+    for (uint256 i = 0; i < linearAaveLps.length; i++) {
+      aaveLinerlpOracles[i] = linearLpOracle;
     }
+    IPriceOracle[] memory tetuLinearlpOracles = new IPriceOracle[](linearTetuLps.length);
+    for (uint256 i = 0; i < linearTetuLps.length; i++) {
+      tetuLinearlpOracles[i] = linearLpOracle;
+    }
+
     IPriceOracle[] memory csMATICOracle = new IPriceOracle[](1);
     csMATICOracle[0] = rateProviderOracle;
 
     vm.startPrank(mpo.admin());
-    mpo.add(linearLps, lpOracles);
+    mpo.add(linearAaveLps, aaveLinerlpOracles);
+    mpo.add(linearTetuLps, tetuLinearlpOracles);
     mpo.add(asArray(csMATIC), csMATICOracle);
     vm.stopPrank();
   }
@@ -211,6 +230,15 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
 
     assertTrue(price > 0);
     uint256 poolRate = IBalancerLinearPool(linearAaveUsdtPool).getRate();
+    uint256 expectedRate = (mpo.price(usdt) * poolRate) / 1e18;
+    assertEq(price, expectedRate);
+  }
+
+  function testLinearTetuUsdtLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
+    uint256 price = _getLpTokenPrice(linearTetuUsdtPool, linearLpOracle);
+
+    assertTrue(price > 0);
+    uint256 poolRate = IBalancerLinearPool(linearTetuUsdtPool).getRate();
     uint256 expectedRate = (mpo.price(usdt) * poolRate) / 1e18;
     assertEq(price, expectedRate);
   }

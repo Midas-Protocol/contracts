@@ -60,14 +60,8 @@ contract BalancerRateProviderOracle is SafeOwnableUpgradeable, BasePriceOracle {
   }
 
   function _price(address underlying) internal view returns (uint256) {
-    bool supported = false;
-    for (uint256 i = 0; i < underlyings.length; i++) {
-      if (underlyings[i] == underlying) {
-        supported = true;
-      }
-    }
     // throw if not supported
-    require(supported, "Unsupported underlying");
+    require(baseTokens[underlying] != address(0), "Unsupported underlying");
 
     // Rate is always 1e18 based
     // ER = TOKEN/BASE
