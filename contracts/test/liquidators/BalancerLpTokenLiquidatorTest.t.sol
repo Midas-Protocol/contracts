@@ -48,7 +48,6 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
   }
 
   function testMimoParBalancerLpLiquidatorRedeem() public fork(POLYGON_MAINNET) {
-    uint256 amount = 1e18;
     address lpToken = 0x82d7f08026e21c7713CfAd1071df7C8271B17Eae; //MIMO-PAR 8020
     address lpTokenWhale = 0xbB60ADbe38B4e6ab7fb0f9546C2C1b665B86af11;
     address outputTokenAddress = 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128; // PAR
@@ -57,7 +56,6 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
   }
 
   function testWmaticStmaticLiquidatorRedeem() public fork(POLYGON_MAINNET) {
-    uint256 amount = 1e18;
     address lpToken = 0x8159462d255C1D24915CB51ec361F700174cD994; // stMATIC-WMATIC stable
     address lpTokenWhale = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // Balancer V2
     address outputTokenAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // WMATIC
