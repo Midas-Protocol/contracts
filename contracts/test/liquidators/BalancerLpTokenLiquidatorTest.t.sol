@@ -22,10 +22,18 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     address lpTokenAddress,
     address outputTokenAddress
   ) internal {
+    return testRedeem(1e18, whaleAddress, lpTokenAddress, outputTokenAddress);
+  }
+
+  function testRedeem(
+    uint256 amount,
+    address whaleAddress,
+    address lpTokenAddress,
+    address outputTokenAddress
+  ) internal {
     IERC20Upgradeable lpToken = IERC20Upgradeable(lpTokenAddress);
     IERC20Upgradeable outputToken = IERC20Upgradeable(outputTokenAddress);
 
-    uint256 amount = 1e18;
     vm.prank(whaleAddress);
     lpToken.transfer(address(liquidator), amount);
 
@@ -53,5 +61,14 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     address outputTokenAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // WMATIC
 
     testRedeem(lpTokenWhale, lpToken, outputTokenAddress);
+  }
+
+  function testJbrlBrzLiquidatorRedeem() public fork(POLYGON_MAINNET) {
+    uint256 amount = 1e17;
+    address lpToken = 0xE22483774bd8611bE2Ad2F4194078DaC9159F4bA; // jBRL-BRZ stable
+    address lpTokenWhale = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // Balancer V2
+    address outputTokenAddress = 0xf2f77FE7b8e66571E0fca7104c4d670BF1C8d722; // jBRL
+
+    testRedeem(amount, lpTokenWhale, lpToken, outputTokenAddress);
   }
 }
