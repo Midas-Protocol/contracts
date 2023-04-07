@@ -20,12 +20,16 @@ contract BalancerLpTokenLiquidator is IRedemptionStrategy {
     uint256 outputTokenIndex = type(uint256).max;
     address outputTokenAddress = abi.decode(strategyData, (address));
 
+    uint256 offset = 0;
     for (uint256 i = 0; i < tokens.length; i++) {
       if (address(tokens[i]) == outputTokenAddress) {
         outputTokenIndex = i;
         break;
+      } else if (address(tokens[i]) == address(inputToken)) {
+        offset = 1;
       }
     }
+    outputTokenIndex -= offset;
 
     outputToken = tokens[outputTokenIndex];
 
