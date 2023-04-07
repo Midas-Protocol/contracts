@@ -29,17 +29,15 @@ contract BalancerLpTokenLiquidator is IRedemptionStrategy {
         offset = 1;
       }
     }
-    outputTokenIndex -= offset;
-
-    outputToken = tokens[outputTokenIndex];
 
     uint256[] memory minAmountsOut = new uint256[](tokens.length);
     minAmountsOut[outputTokenIndex] = 1;
+    outputToken = tokens[outputTokenIndex];
 
     bytes memory userData = abi.encode(
       IBalancerVault.ExitKind.EXACT_BPT_IN_FOR_ONE_TOKEN_OUT,
       inputAmount,
-      outputTokenIndex
+      outputTokenIndex - offset
     );
 
     IBalancerVault.ExitPoolRequest memory request = IBalancerVault.ExitPoolRequest(
