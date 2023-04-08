@@ -12,6 +12,18 @@ enum UserBalanceOpKind {
   TRANSFER_EXTERNAL
 }
 
+enum SwapKind {
+  GIVEN_IN,
+  GIVEN_OUT
+}
+
+enum ExitKind {
+  EXACT_BPT_IN_FOR_ONE_TOKEN_OUT,
+  EXACT_BPT_IN_FOR_TOKENS_OUT,
+  BPT_IN_FOR_EXACT_TOKENS_OUT,
+  MANAGEMENT_FEE_TOKENS_OUT
+}
+
 struct UserBalanceOp {
   UserBalanceOpKind kind;
   IAsset asset;
@@ -19,8 +31,37 @@ struct UserBalanceOp {
   address sender;
   address payable recipient;
 }
+struct FundManagement {
+  address sender;
+  bool fromInternalBalance;
+  address payable recipient;
+  bool toInternalBalance;
+}
+
+struct SingleSwap {
+  bytes32 poolId;
+  SwapKind kind;
+  IAsset assetIn;
+  IAsset assetOut;
+  uint256 amount;
+  bytes userData;
+}
+
+struct ExitPoolRequest {
+  IERC20Upgradeable[] assets;
+  uint256[] minAmountsOut;
+  bytes userData;
+  bool toInternalBalance;
+}
 
 interface IBalancerVault {
+  function swap(
+    SingleSwap memory singleSwap,
+    FundManagement memory funds,
+    uint256 limit,
+    uint256 deadline
+  ) external returns (uint256 amountCalculated);
+
   function manageUserBalance(UserBalanceOp[] memory ops) external payable;
 
   function getPoolTokens(bytes32 poolId)
@@ -38,18 +79,4 @@ interface IBalancerVault {
     address payable recipient,
     ExitPoolRequest memory request
   ) external;
-
-  struct ExitPoolRequest {
-    IERC20Upgradeable[] assets;
-    uint256[] minAmountsOut;
-    bytes userData;
-    bool toInternalBalance;
-  }
-
-  enum ExitKind {
-    EXACT_BPT_IN_FOR_ONE_TOKEN_OUT,
-    EXACT_BPT_IN_FOR_TOKENS_OUT,
-    BPT_IN_FOR_EXACT_TOKENS_OUT,
-    MANAGEMENT_FEE_TOKENS_OUT
-  }
 }
