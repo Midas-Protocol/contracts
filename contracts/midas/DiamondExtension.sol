@@ -9,7 +9,7 @@ abstract contract DiamondExtension {
   /**
    * @return a list of all the function selectors that this logic extension exposes
    */
-  function _getExtensionFunctions() external view virtual returns (bytes4[] memory);
+  function _getExtensionFunctions() external pure virtual returns (bytes4[] memory);
 }
 
 // When no function exists for function called

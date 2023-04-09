@@ -2,6 +2,7 @@ pragma solidity ^0.8.0;
 
 import "../SafeOwnableUpgradeable.sol";
 import "./OptimizedAPRVaultBase.sol";
+import "./OptimizedAPRVaultExtension.sol";
 import "../strategies/CompoundMarketERC4626.sol";
 import "../strategies/flywheel/MidasFlywheel.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
@@ -11,8 +12,18 @@ import { IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contra
 contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
   OptimizedAPRVaultBase[] public vaults;
 
+  mapping(address => OptimizedAPRVaultExtension[]) latestVaultExtensions;
+
   function initialize() public initializer {
     __SafeOwnable_init(msg.sender);
+  }
+
+  function getLatestVaultExtensions(address vault) public returns (OptimizedAPRVaultExtension[] memory) {
+    return latestVaultExtensions[vault];
+  }
+
+  function setLatestVaultExtensions(address vault, OptimizedAPRVaultExtension[] calldata extensions) public onlyOwner {
+    latestVaultExtensions[vault] = extensions;
   }
 
   function getAllVaults() public view returns (OptimizedAPRVaultBase[] memory) {

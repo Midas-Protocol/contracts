@@ -38,7 +38,7 @@ contract MockComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
     return allMarkets[1].symbol();
   }
 
-  function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
+  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
     uint8 fnsCount = 4;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this._setTransferPaused.selector;
@@ -55,7 +55,7 @@ contract MockSecondComptrollerExtension is DiamondExtension, ComptrollerV3Storag
     return allMarkets[2].symbol();
   }
 
-  function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
+  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
     uint8 fnsCount = 1;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.getThirdMarketSymbol.selector;
@@ -69,7 +69,7 @@ contract MockThirdComptrollerExtension is DiamondExtension, ComptrollerV3Storage
     return allMarkets[3].symbol();
   }
 
-  function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
+  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
     uint8 fnsCount = 1;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.getFourthMarketSymbol.selector;

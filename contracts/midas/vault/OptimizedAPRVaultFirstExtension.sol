@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import "../DiamondExtension.sol";
 import "./OptimizedAPRVaultExtension.sol";
+import { OptimizedVaultsRegistry } from "./OptimizedVaultsRegistry.sol";
 import { MidasFlywheel } from "../strategies/flywheel/MidasFlywheel.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -27,8 +28,8 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
     _disableInitializers();
   }
 
-  function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 16;
+  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
+    uint8 fnsCount = 17;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.initialize.selector;
     functionSelectors[--fnsCount] = this.accruedManagementFee.selector;
@@ -46,9 +47,22 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
     functionSelectors[--fnsCount] = this.addRewardToken.selector;
     functionSelectors[--fnsCount] = this.DOMAIN_SEPARATOR.selector;
     functionSelectors[--fnsCount] = this.permit.selector;
+    functionSelectors[--fnsCount] = this.upgradeVault.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
+  }
+
+  function upgradeVault() public onlyOwner {
+    address[] memory currentExtensions = LibDiamond.listExtensions();
+    for (uint256 i = 0; i < currentExtensions.length; i++) {
+      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
+    }
+
+    OptimizedAPRVaultExtension[] memory latestExtensions = registry.getLatestVaultExtensions(address(this));
+    for (uint256 i = 0; i < latestExtensions.length; i++) {
+      LibDiamond.addExtension(latestExtensions[i]);
+    }
   }
 
   function initialize(bytes calldata data) public initializer {
@@ -62,9 +76,9 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
       address feeRecipient_,
       uint256 depositLimit_,
       address owner_,
-      address registry_,
+      OptimizedVaultsRegistry registry_,
       address flywheelLogic_
-    ) = abi.decode(data, (IERC20, AdapterConfig[10], uint8, VaultFees, address, uint256, address, address, address));
+    ) = abi.decode(data, (IERC20, AdapterConfig[10], uint8, VaultFees, address, uint256, address, OptimizedVaultsRegistry, address));
 
     if (address(asset_) == address(0)) revert AssetInvalid();
     __ERC4626_init(asset_);
@@ -377,7 +391,7 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
   }
 
   function setEmergencyExit() external {
-    require(msg.sender == owner() || msg.sender == registry, "not registry or owner");
+    require(msg.sender == owner() || msg.sender == address(registry), "not registry or owner");
 
     for (uint256 i; i < adaptersCount; ++i) {
       adapters[i].adapter.withdrawAll();
@@ -418,7 +432,7 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
     require(msg.sender == owner() || msg.sender == address(this), "!owner or self");
     require(address(flywheelForRewardToken[token_]) == address(0), "already added");
 
-    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(flywheelLogic, registry, "");
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(flywheelLogic, address(registry), "");
     MidasFlywheel newFlywheel = MidasFlywheel(address(proxy));
 
     newFlywheel.initialize(

@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import { VaultFees, IERC20 } from "./IVault.sol";
 import { CompoundMarketERC4626 } from "../strategies/CompoundMarketERC4626.sol";
+import { OptimizedVaultsRegistry } from "./OptimizedVaultsRegistry.sol";
 import { MidasFlywheel } from "../strategies/flywheel/MidasFlywheel.sol";
 import { SafeOwnable } from "../../midas/SafeOwnable.sol";
 
@@ -47,7 +48,7 @@ abstract contract OptimizedAPRVaultStorage is SafeOwnable {
 
   bool public emergencyExit;
   uint256 public withdrawalThreshold;
-  address public registry;
+  OptimizedVaultsRegistry public registry;
   mapping(IERC20 => MidasFlywheel) public flywheelForRewardToken;
   address public flywheelLogic;
 

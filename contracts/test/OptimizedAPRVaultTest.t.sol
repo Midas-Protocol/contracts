@@ -551,5 +551,46 @@ contract OptimizedAPRVaultTest is MarketsTest {
     assertGt(epx.balanceOf(twoBrlWhale), 0, "!received EPX");
   }
 
+  function testUpgradeOptVault() public fork(BSC_MAINNET) {
+    OptimizedAPRVaultExtension[] memory exts = new OptimizedAPRVaultExtension[](2);
+    exts[0] = new TestingFirstExtension();
+    exts[1] = new TestingSecondExtension();
+    registry.setLatestVaultExtensions(address(vault), exts);
+
+    vault.asFirstExtension().upgradeVault();
+
+    address[] memory currentExtensions = vault._listExtensions();
+
+    for (uint256 i; i < exts.length; i++) {
+      assertEq(address(exts[i]), currentExtensions[i], "!matching");
+    }
+  }
+
   // TODO test claiming the rewards for multiple vaults
+}
+
+contract TestingFirstExtension is OptimizedAPRVaultExtension {
+  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
+    uint8 fnsCount = 1;
+    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
+    functionSelectors[--fnsCount] = this.dummy1.selector;
+
+    require(fnsCount == 0, "use the correct array length");
+    return functionSelectors;
+  }
+
+  function dummy1() public {}
+}
+
+contract TestingSecondExtension is OptimizedAPRVaultExtension {
+  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
+    uint8 fnsCount = 1;
+    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
+    functionSelectors[--fnsCount] = this.dummy2.selector;
+
+    require(fnsCount == 0, "use the correct array length");
+    return functionSelectors;
+  }
+
+  function dummy2() public {}
 }

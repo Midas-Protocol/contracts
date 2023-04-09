@@ -29,7 +29,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     _disableInitializers();
   }
 
-  function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
+  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
     uint8 fnsCount = 37;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.name.selector;
