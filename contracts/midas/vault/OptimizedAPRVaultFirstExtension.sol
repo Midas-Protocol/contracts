@@ -78,7 +78,10 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
       address owner_,
       OptimizedVaultsRegistry registry_,
       address flywheelLogic_
-    ) = abi.decode(data, (IERC20, AdapterConfig[10], uint8, VaultFees, address, uint256, address, OptimizedVaultsRegistry, address));
+    ) = abi.decode(
+        data,
+        (IERC20, AdapterConfig[10], uint8, VaultFees, address, uint256, address, OptimizedVaultsRegistry, address)
+      );
 
     if (address(asset_) == address(0)) revert AssetInvalid();
     __ERC4626_init(asset_);
