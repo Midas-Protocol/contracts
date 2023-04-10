@@ -18,7 +18,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
     __SafeOwnable_init(msg.sender);
   }
 
-  function getLatestVaultExtensions(address vault) public returns (OptimizedAPRVaultExtension[] memory) {
+  function getLatestVaultExtensions(address vault) public view returns (OptimizedAPRVaultExtension[] memory) {
     return latestVaultExtensions[vault];
   }
 
@@ -58,7 +58,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
         (CompoundMarketERC4626 adapter, ) = vaults[i].adapters(j);
         try adapter.emergencyWithdrawAndPause() {} catch {}
       }
-      vaults[i].asFirstExtension().setEmergencyExit();
+      vaults[i].asSecondExtension().setEmergencyExit();
     }
   }
 
@@ -91,11 +91,13 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
 
   struct AdapterInfo {
     address adapter;
+    uint64 allocation;
     address market;
     address pool;
   }
 
   struct VaultInfo {
+    address vault;
     address asset;
     string assetSymbol;
     uint8 assetDecimals;
@@ -118,9 +120,10 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
       AdapterInfo[] memory adaptersData = new AdapterInfo[](adaptersCount);
 
       for (uint256 j; j < adaptersCount; ++j) {
-        (CompoundMarketERC4626 adapter, ) = vaults[i].adapters(j);
+        (CompoundMarketERC4626 adapter, uint64 allocation) = vaults[i].adapters(j);
         ICErc20 market = adapter.market();
         adaptersData[j].adapter = address(adapter);
+        adaptersData[j].allocation = allocation;
         adaptersData[j].market = address(market);
         adaptersData[j].pool = market.comptroller();
       }
@@ -128,6 +131,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
       (uint64 performanceFee, uint64 depositFee, uint64 withdrawalFee, uint64 managementFee) = vault.fees();
 
       vaultsData[i] = VaultInfo({
+        vault: address(vault),
         asset: vault.asset(),
         assetSymbol: IERC20Metadata(vault.asset()).symbol(),
         assetDecimals: IERC20Metadata(vault.asset()).decimals(),
