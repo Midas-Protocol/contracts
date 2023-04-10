@@ -440,13 +440,14 @@ contract OptimizedAPRVaultTest is MarketsTest {
     adapters[1].allocation = 1e17;
     adapters[2].allocation = 1e17;
 
-    OptimizedAPRVaultFirstExtension ext = vault.asFirstExtension();
-    ext.proposeAdapters(adapters, 3);
+    OptimizedAPRVaultFirstExtension firstExt = vault.asFirstExtension();
+    OptimizedAPRVaultSecondExtension secondExt = vault.asSecondExtension();
+    firstExt.proposeAdapters(adapters, 3);
     vm.expectRevert(NotPassedQuitPeriod.selector);
-    ext.changeAdapters();
+    secondExt.changeAdapters();
 
     vm.warp(block.timestamp + 3.01 days);
-    ext.changeAdapters();
+    secondExt.changeAdapters();
   }
 
   function testVaultAccrueRewards() public fork(BSC_MAINNET) {

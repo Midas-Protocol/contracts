@@ -58,7 +58,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
         (CompoundMarketERC4626 adapter, ) = vaults[i].adapters(j);
         try adapter.emergencyWithdrawAndPause() {} catch {}
       }
-      vaults[i].asFirstExtension().setEmergencyExit();
+      vaults[i].asSecondExtension().setEmergencyExit();
     }
   }
 
