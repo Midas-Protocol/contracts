@@ -135,7 +135,6 @@ contract OptimizedAPRVaultTest is MarketsTest {
       VaultFees(0, 0, 0, 0),
       address(this),
       type(uint256).max,
-      address(this),
       address(registry),
       address(flywheelLogic)
     );
@@ -487,7 +486,6 @@ contract OptimizedAPRVaultTest is MarketsTest {
         VaultFees(0, 0, 0, 0),
         address(this),
         type(uint256).max,
-        address(this),
         address(registry),
         address(flywheelLogic)
       );

@@ -480,8 +480,8 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
       weightedAPR += adapters[i].adapter.weightedAprAfterDeposit(amount);
     }
 
-    uint8 decimals = IERC20Metadata(asset()).decimals();
-    return (weightedAPR * (10**decimals)) / (bal + amount);
+    uint8 decimals_ = IERC20Metadata(asset()).decimals();
+    return (weightedAPR * (10**decimals_)) / (bal + amount);
   }
 
   /// @notice Returns the weighted apr of all adapters
@@ -497,8 +497,8 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
       weightedAPR += adapters[i].adapter.weightedApr();
     }
 
-    uint8 decimals = IERC20Metadata(asset()).decimals();
-    return (weightedAPR * (10**decimals)) / bal;
+    uint8 decimals_ = IERC20Metadata(asset()).decimals();
+    return (weightedAPR * (10**decimals_)) / bal;
   }
 
   /// @notice Returns the weighted apr in an hypothetical world where the strategy splits its nav

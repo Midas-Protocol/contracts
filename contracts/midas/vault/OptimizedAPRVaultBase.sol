@@ -30,8 +30,7 @@ contract OptimizedAPRVaultBase is OptimizedAPRVaultStorage, DiamondBase {
     return OptimizedAPRVaultSecondExtension(address(this));
   }
 
-  // TODO if only safe ownable is non-initializeable, then covert this to a constructor
-  // otherwise, make this a full-config constructor
+  // delegatecall to self does not work inside a constructor, therefore an initializer is needed
   function initialize(OptimizedAPRVaultExtension[] calldata extensions, bytes calldata initData) public onlyOwner {
     for (uint256 i; i < extensions.length; i++)
       LibDiamond.registerExtension(extensions[i], DiamondExtension(address(0)));

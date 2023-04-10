@@ -5,6 +5,8 @@ import "../DiamondExtension.sol";
 import "./OptimizedAPRVaultExtension.sol";
 import { OptimizedVaultsRegistry } from "./OptimizedVaultsRegistry.sol";
 import { MidasFlywheel } from "../strategies/flywheel/MidasFlywheel.sol";
+import { AdapterConfig } from "./OptimizedAPRVaultStorage.sol";
+import { VaultFees } from "./IVault.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
@@ -15,6 +17,7 @@ import { FlywheelCore } from "flywheel/FlywheelCore.sol";
 import { SafeERC20Upgradeable as SafeERC20 } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { IERC20Upgradeable as IERC20 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
+import { IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
 import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
 
 contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
@@ -23,6 +26,12 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
 
   event RewardDestinationUpdate(address indexed newDestination);
   event EmergencyExitActivated();
+
+  error AssetInvalid();
+  error InvalidConfig();
+  error NotPassedQuitPeriod();
+  error InvalidVaultFees();
+  error InvalidFeeRecipient();
 
   constructor() {
     _disableInitializers();
@@ -75,12 +84,11 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
       VaultFees memory fees_,
       address feeRecipient_,
       uint256 depositLimit_,
-      address owner_,
       OptimizedVaultsRegistry registry_,
       address flywheelLogic_
     ) = abi.decode(
         data,
-        (IERC20, AdapterConfig[10], uint8, VaultFees, address, uint256, address, OptimizedVaultsRegistry, address)
+        (IERC20, AdapterConfig[10], uint8, VaultFees, address, uint256, OptimizedVaultsRegistry, address)
       );
 
     if (address(asset_) == address(0)) revert AssetInvalid();
@@ -115,6 +123,21 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
       adapters[i] = adapters_[i];
       asset_.approve(address(adapters_[i].adapter), type(uint256).max);
     }
+  }
+
+  function _verifyAdapterConfig(AdapterConfig[10] memory newAdapters, uint8 adapterCount_) internal view {
+    if (adapterCount_ == 0 || adapterCount_ > 10) revert InvalidConfig();
+
+    uint256 totalAllocation;
+    for (uint8 i; i < adapterCount_; i++) {
+      if (newAdapters[i].adapter.asset() != asset()) revert AssetInvalid();
+
+      uint256 allocation = uint256(newAdapters[i].allocation);
+      if (allocation == 0) revert InvalidConfig();
+
+      totalAllocation += allocation;
+    }
+    if (totalAllocation != 1e18) revert InvalidConfig();
   }
 
   /*------------------------------------------------------------
