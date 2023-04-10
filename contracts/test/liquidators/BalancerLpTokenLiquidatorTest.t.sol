@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
+import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { BalancerLpTokenLiquidator } from "../../liquidators/BalancerLpTokenLiquidator.sol";
+import { BalancerSwapLiquidator } from "../../liquidators/BalancerSwapLiquidator.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import "../../external/balancer/IBalancerPool.sol";
 import "../../external/balancer/IBalancerVault.sol";
@@ -11,10 +13,12 @@ import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/
 import { BaseTest } from "../config/BaseTest.t.sol";
 
 contract BalancerLpTokenLiquidatorTest is BaseTest {
-  BalancerLpTokenLiquidator private liquidator;
+  BalancerLpTokenLiquidator private lpTokenLiquidator;
+  BalancerSwapLiquidator private swapLiquidator;
 
   function afterForkSetUp() internal override {
-    liquidator = new BalancerLpTokenLiquidator();
+    lpTokenLiquidator = new BalancerLpTokenLiquidator();
+    swapLiquidator = new BalancerSwapLiquidator();
   }
 
   function testRedeem(
@@ -22,10 +26,19 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     address lpTokenAddress,
     address outputTokenAddress
   ) internal {
+    return testRedeem(lpTokenLiquidator, 1e18, whaleAddress, lpTokenAddress, outputTokenAddress);
+  }
+
+  function testRedeem(
+    IRedemptionStrategy liquidator,
+    uint256 amount,
+    address whaleAddress,
+    address lpTokenAddress,
+    address outputTokenAddress
+  ) internal {
     IERC20Upgradeable lpToken = IERC20Upgradeable(lpTokenAddress);
     IERC20Upgradeable outputToken = IERC20Upgradeable(outputTokenAddress);
 
-    uint256 amount = 1e18;
     vm.prank(whaleAddress);
     lpToken.transfer(address(liquidator), amount);
 
@@ -53,5 +66,31 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     address outputTokenAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // WMATIC
 
     testRedeem(lpTokenWhale, lpToken, outputTokenAddress);
+  }
+
+  function testJbrlBrzLiquidatorRedeem() public fork(POLYGON_MAINNET) {
+    address lpToken = 0xE22483774bd8611bE2Ad2F4194078DaC9159F4bA; // jBRL-BRZ stable
+    address lpTokenWhale = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // Balancer V2
+    address outputTokenAddress = 0xf2f77FE7b8e66571E0fca7104c4d670BF1C8d722; // jBRL
+
+    testRedeem(lpTokenWhale, lpToken, outputTokenAddress);
+  }
+
+  function testBoostedAaveRedeem() public fork(POLYGON_MAINNET) {
+    uint256 amount = 1e18;
+    address lpToken = 0x48e6B98ef6329f8f0A30eBB8c7C960330d648085; // bb-am-USD
+    address lpTokenWhale = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // Balancer V2
+    address outputTokenAddress = 0xF93579002DBE8046c43FEfE86ec78b1112247BB8; // linear aaver usdc
+
+    testRedeem(swapLiquidator, amount, lpTokenWhale, lpToken, outputTokenAddress);
+  }
+
+  function testLinearAaveRedeem() public fork(POLYGON_MAINNET) {
+    uint256 amount = 1e18;
+    address lpToken = 0xF93579002DBE8046c43FEfE86ec78b1112247BB8; // bb-am-USD
+    address lpTokenWhale = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // Balancer V2
+    address outputTokenAddress = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174; // USDC
+
+    testRedeem(swapLiquidator, amount, lpTokenWhale, lpToken, outputTokenAddress);
   }
 }
