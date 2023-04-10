@@ -236,7 +236,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     borrowingAgainstCollateralBlacklist[cTokenBorrow][cTokenCollateral] = blacklisted;
   }
 
-  function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
+  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
     uint8 fnsCount = 19;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;

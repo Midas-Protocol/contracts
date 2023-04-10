@@ -1,19 +1,32 @@
 pragma solidity ^0.8.0;
 
 import "../SafeOwnableUpgradeable.sol";
-import "./OptimizedAPRVault.sol";
+import "./OptimizedAPRVaultBase.sol";
+import "./OptimizedAPRVaultExtension.sol";
 import "../strategies/CompoundMarketERC4626.sol";
 import "../strategies/flywheel/MidasFlywheel.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
 
+import { IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
+
 contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
-  OptimizedAPRVault[] public vaults;
+  OptimizedAPRVaultBase[] public vaults;
+
+  mapping(address => OptimizedAPRVaultExtension[]) latestVaultExtensions;
 
   function initialize() public initializer {
     __SafeOwnable_init(msg.sender);
   }
 
-  function getAllVaults() public view returns (OptimizedAPRVault[] memory) {
+  function getLatestVaultExtensions(address vault) public returns (OptimizedAPRVaultExtension[] memory) {
+    return latestVaultExtensions[vault];
+  }
+
+  function setLatestVaultExtensions(address vault, OptimizedAPRVaultExtension[] calldata extensions) public onlyOwner {
+    latestVaultExtensions[vault] = extensions;
+  }
+
+  function getAllVaults() public view returns (OptimizedAPRVaultBase[] memory) {
     return vaults;
   }
 
@@ -23,7 +36,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
         return false;
       }
     }
-    vaults.push(OptimizedAPRVault(vault));
+    vaults.push(OptimizedAPRVaultBase(vault));
     return true;
   }
 
@@ -45,7 +58,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
         (CompoundMarketERC4626 adapter, ) = vaults[i].adapters(j);
         try adapter.emergencyWithdrawAndPause() {} catch {}
       }
-      vaults[i].setEmergencyExit();
+      vaults[i].asFirstExtension().setEmergencyExit();
     }
   }
 
@@ -56,7 +69,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
   {
     uint256 totalFlywheels = 0;
     for (uint256 i = 0; i < vaults.length; i++) {
-      MidasFlywheel[] memory flywheels = vaults[i].getAllFlywheels();
+      MidasFlywheel[] memory flywheels = vaults[i].asFirstExtension().getAllFlywheels();
       totalFlywheels += flywheels.length;
     }
 
@@ -64,8 +77,8 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
     rewards_ = new uint256[](totalFlywheels);
 
     for (uint256 i = 0; i < vaults.length; i++) {
-      OptimizedAPRVault vault = vaults[i];
-      MidasFlywheel[] memory flywheels = vault.getAllFlywheels();
+      OptimizedAPRVaultBase vault = vaults[i];
+      MidasFlywheel[] memory flywheels = vault.asFirstExtension().getAllFlywheels();
       uint256 flywheelsLen = flywheels.length;
 
       for (uint256 j = 0; j < flywheelsLen; j++) {
@@ -100,7 +113,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
   function getVaultsData() public view returns (VaultInfo[] memory vaultsData) {
     vaultsData = new VaultInfo[](vaults.length);
     for (uint256 i; i < vaults.length; ++i) {
-      OptimizedAPRVault vault = vaults[i];
+      OptimizedAPRVaultSecondExtension vault = vaults[i].asSecondExtension();
       uint8 adaptersCount = vaults[i].adaptersCount();
       AdapterInfo[] memory adaptersData = new AdapterInfo[](adaptersCount);
 
