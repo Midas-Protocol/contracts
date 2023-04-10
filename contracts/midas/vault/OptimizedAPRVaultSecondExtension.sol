@@ -619,33 +619,33 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
 
     // Unchecked because the only math done is incrementing
     // the owner's nonce which cannot realistically overflow.
-  unchecked {
-    address recoveredAddress = ecrecover(
-      keccak256(
-        abi.encodePacked(
-          "\x19\x01",
-          DOMAIN_SEPARATOR(),
-          keccak256(
-            abi.encode(
-              keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
-              owner,
-              spender,
-              value,
-              nonces[owner]++,
-              deadline
+    unchecked {
+      address recoveredAddress = ecrecover(
+        keccak256(
+          abi.encodePacked(
+            "\x19\x01",
+            DOMAIN_SEPARATOR(),
+            keccak256(
+              abi.encode(
+                keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
+                owner,
+                spender,
+                value,
+                nonces[owner]++,
+                deadline
+              )
             )
           )
-        )
-      ),
-      v,
-      r,
-      s
-    );
+        ),
+        v,
+        r,
+        s
+      );
 
-    if (recoveredAddress == address(0) || recoveredAddress != owner) revert InvalidSigner(recoveredAddress);
+      if (recoveredAddress == address(0) || recoveredAddress != owner) revert InvalidSigner(recoveredAddress);
 
-    _approve(recoveredAddress, spender, value);
-  }
+      _approve(recoveredAddress, spender, value);
+    }
   }
 
   function DOMAIN_SEPARATOR() public view returns (bytes32) {
@@ -666,13 +666,13 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   function accruedManagementFee() public view returns (uint256) {
     uint256 managementFee = fees.management;
     return
-    managementFee > 0
-    ? managementFee.mulDiv(
-      totalAssets() * (block.timestamp - feesUpdatedAt),
-      SECONDS_PER_YEAR,
-      Math.Rounding.Down
-    ) / 1e18
-    : 0;
+      managementFee > 0
+        ? managementFee.mulDiv(
+          totalAssets() * (block.timestamp - feesUpdatedAt),
+          SECONDS_PER_YEAR,
+          Math.Rounding.Down
+        ) / 1e18
+        : 0;
   }
 
   /**
@@ -687,9 +687,9 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     uint256 performanceFee = fees.performance;
 
     return
-    performanceFee > 0 && shareValue > highWaterMark_
-    ? performanceFee.mulDiv((shareValue - highWaterMark_) * totalSupply(), 1e36, Math.Rounding.Down)
-    : 0;
+      performanceFee > 0 && shareValue > highWaterMark_
+        ? performanceFee.mulDiv((shareValue - highWaterMark_) * totalSupply(), 1e36, Math.Rounding.Down)
+        : 0;
   }
 
   /*------------------------------------------------------------
@@ -713,8 +713,8 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     if (totalFee > 0 && currentAssets > 0) {
       uint256 supply = totalSupply();
       uint256 feeInShare = supply == 0
-      ? totalFee
-      : totalFee.mulDiv(supply, currentAssets - totalFee, Math.Rounding.Down);
+        ? totalFee
+        : totalFee.mulDiv(supply, currentAssets - totalFee, Math.Rounding.Down);
       _mint(feeRecipient, feeInShare);
     }
 

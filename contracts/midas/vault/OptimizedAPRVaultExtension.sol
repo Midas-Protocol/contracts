@@ -22,15 +22,15 @@ abstract contract OptimizedAPRVaultExtension is
 
   function computeDomainSeparator() internal view virtual returns (bytes32) {
     return
-    keccak256(
-      abi.encode(
-        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-        keccak256(bytes(_name)),
-        keccak256("1"),
-        block.chainid,
-        address(this)
-      )
-    );
+      keccak256(
+        abi.encode(
+          keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+          keccak256(bytes(_name)),
+          keccak256("1"),
+          block.chainid,
+          address(this)
+        )
+      );
   }
 
   function _msgSender() internal view override(ContextUpgradeable, Context) returns (address) {
