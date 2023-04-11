@@ -61,12 +61,11 @@ interface IERC4626 is EIP20Interface {
   /*----------------------------------------------------------------
                             View Functions
     ----------------------------------------------------------------*/
-
   /** 
-      @notice The underlying token the Vault accepts.
-      @return the ERC20 underlying implementation address.
+      @dev Returns the address of the underlying token used for the Vault for accounting, depositing, and withdrawing.
+      @return the address of the asset
     */
-  function underlying() external view returns (EIP20Interface);
+  function asset() external view returns (address);
 
   /** 
       @notice Returns a user's Vault balance in underlying tokens.
