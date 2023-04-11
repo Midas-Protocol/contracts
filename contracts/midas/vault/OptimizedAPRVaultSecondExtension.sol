@@ -84,6 +84,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     functionSelectors[--fnsCount] = this.convertToShares.selector;
     functionSelectors[--fnsCount] = this.convertToAssets.selector;
     functionSelectors[--fnsCount] = this.totalSupply.selector;
+    functionSelectors[--fnsCount] = this.asset.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
