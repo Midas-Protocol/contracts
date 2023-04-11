@@ -73,8 +73,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
   }
 
   // @notice lens function to list all flywheels for which the account can claim rewards
-  function getClaimableRewards(address account)   external returns (ClaimableRewardsInfo[] memory rewardsData)
-  {
+  function getClaimableRewards(address account) external returns (ClaimableRewardsInfo[] memory rewardsData) {
     {
       uint256 totalFlywheels = 0;
       for (uint256 i = 0; i < vaults.length; i++) {
