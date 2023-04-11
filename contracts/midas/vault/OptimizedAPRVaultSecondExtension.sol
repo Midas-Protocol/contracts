@@ -32,7 +32,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   }
 
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 48;
+    uint8 fnsCount = 49;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.name.selector;
     functionSelectors[--fnsCount] = this.symbol.selector;
