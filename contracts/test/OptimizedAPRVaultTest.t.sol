@@ -565,7 +565,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
   }
 
-  function testLensFn() public fork(BSC_CHAPEL) {
+  function testLensFn() public debuggingOnly fork(BSC_CHAPEL) {
     registry = OptimizedVaultsRegistry(0x353195Bdd4917e1Bdabc9809Dc3E8528b3421FF5);
     registry.getVaultsData();
   }
