@@ -65,28 +65,58 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
   // @notice lens function to list all flywheels for which the account can claim rewards
   function getClaimableRewards(address account)
     external
-    returns (address[] memory flywheels_, address[] memory rewardTokens_, uint256[] memory rewards_)
+    returns (
+    address[] memory flywheels_,
+    address[] memory rewardTokens_,
+    string[] memory rewardTokensNames_,
+    string[] memory rewardTokensSymbols_,
+    uint8[] memory rewardTokensDecimals_,
+    uint256[] memory rewards_
+  )
   {
-    uint256 totalFlywheels = 0;
-    for (uint256 i = 0; i < vaults.length; i++) {
-      MidasFlywheel[] memory flywheels = vaults[i].asFirstExtension().getAllFlywheels();
-      totalFlywheels += flywheels.length;
+    {
+      uint256 totalFlywheels = 0;
+      for (uint256 i = 0; i < vaults.length; i++) {
+        MidasFlywheel[] memory flywheels = vaults[i].asFirstExtension().getAllFlywheels();
+        totalFlywheels += flywheels.length;
+      }
+
+      flywheels_ = new address[](totalFlywheels);
+      rewards_ = new uint256[](totalFlywheels);
+      rewardTokens_ = new address[](totalFlywheels);
+      rewardTokensNames_ = new string[](totalFlywheels);
+      rewardTokensSymbols_ = new string[](totalFlywheels);
+      rewardTokensDecimals_ = new uint8[](totalFlywheels);
     }
 
-    flywheels_ = new address[](totalFlywheels);
-    rewardTokens_ = new address[](totalFlywheels);
-    rewards_ = new uint256[](totalFlywheels);
+    {
+      for (uint256 i = 0; i < vaults.length; i++) {
+        OptimizedAPRVaultBase vault = vaults[i];
+        MidasFlywheel[] memory flywheels = vault.asFirstExtension().getAllFlywheels();
+        uint256 flywheelsLen = flywheels.length;
 
-    for (uint256 i = 0; i < vaults.length; i++) {
-      OptimizedAPRVaultBase vault = vaults[i];
-      MidasFlywheel[] memory flywheels = vault.asFirstExtension().getAllFlywheels();
-      uint256 flywheelsLen = flywheels.length;
+        for (uint256 j = 0; j < flywheelsLen; j++) {
+          MidasFlywheel flywheel = flywheels[j];
+          flywheels_[i * flywheelsLen + j] = address(flywheel);
+          rewards_[i * flywheelsLen + j] = flywheel.accrue(ERC20(address(vault)), account);
+        }
+      }
+    }
 
-      for (uint256 j = 0; j < flywheelsLen; j++) {
-        MidasFlywheel flywheel = flywheels[j];
-        flywheels_[i * flywheelsLen + j] = address(flywheel);
-        rewardTokens_[i * flywheelsLen + j] = address(flywheel.rewardToken());
-        rewards_[i * flywheelsLen + j] = flywheel.accrue(ERC20(address(vault)), account);
+    {
+      for (uint256 i = 0; i < vaults.length; i++) {
+        OptimizedAPRVaultBase vault = vaults[i];
+        MidasFlywheel[] memory flywheels = vault.asFirstExtension().getAllFlywheels();
+        uint256 flywheelsLen = flywheels.length;
+
+        for (uint256 j = 0; j < flywheelsLen; j++) {
+          MidasFlywheel flywheel = flywheels[j];
+          ERC20 rewardToken = flywheel.rewardToken();
+          rewardTokens_[i * flywheelsLen + j] = address(rewardToken);
+          rewardTokensNames_[i * flywheelsLen + j] = rewardToken.name();
+          rewardTokensSymbols_[i * flywheelsLen + j] = rewardToken.symbol();
+          rewardTokensDecimals_[i * flywheelsLen + j] = rewardToken.decimals();
+        }
       }
     }
   }
