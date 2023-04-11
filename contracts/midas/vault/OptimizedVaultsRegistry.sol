@@ -66,13 +66,13 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
   function getClaimableRewards(address account)
     external
     returns (
-    address[] memory flywheels_,
-    address[] memory rewardTokens_,
-    string[] memory rewardTokensNames_,
-    string[] memory rewardTokensSymbols_,
-    uint8[] memory rewardTokensDecimals_,
-    uint256[] memory rewards_
-  )
+      address[] memory flywheels_,
+      address[] memory rewardTokens_,
+      string[] memory rewardTokensNames_,
+      string[] memory rewardTokensSymbols_,
+      uint8[] memory rewardTokensDecimals_,
+      uint256[] memory rewards_
+    )
   {
     {
       uint256 totalFlywheels = 0;
