@@ -65,7 +65,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
   // @notice lens function to list all flywheels for which the account can claim rewards
   function getClaimableRewards(address account)
     external
-    returns (address[] memory flywheels_, uint256[] memory rewards_)
+    returns (address[] memory flywheels_, address[] memory rewardTokens_, uint256[] memory rewards_)
   {
     uint256 totalFlywheels = 0;
     for (uint256 i = 0; i < vaults.length; i++) {
@@ -74,6 +74,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
     }
 
     flywheels_ = new address[](totalFlywheels);
+    rewardTokens_ = new address[](totalFlywheels);
     rewards_ = new uint256[](totalFlywheels);
 
     for (uint256 i = 0; i < vaults.length; i++) {
@@ -84,6 +85,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
       for (uint256 j = 0; j < flywheelsLen; j++) {
         MidasFlywheel flywheel = flywheels[j];
         flywheels_[i * flywheelsLen + j] = address(flywheel);
+        rewardTokens_[i * flywheelsLen + j] = address(flywheel.rewardToken());
         rewards_[i * flywheelsLen + j] = flywheel.accrue(ERC20(address(vault)), account);
       }
     }
