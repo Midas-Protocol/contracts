@@ -32,7 +32,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   }
 
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 48;
+    uint8 fnsCount = 49;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.name.selector;
     functionSelectors[--fnsCount] = this.symbol.selector;
@@ -84,6 +84,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     functionSelectors[--fnsCount] = this.convertToShares.selector;
     functionSelectors[--fnsCount] = this.convertToAssets.selector;
     functionSelectors[--fnsCount] = this.totalSupply.selector;
+    functionSelectors[--fnsCount] = this.asset.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
