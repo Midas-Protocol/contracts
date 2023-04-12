@@ -184,7 +184,7 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
 
     newFlywheel.initialize(
       ERC20(address(token_)),
-      IFlywheelRewards(address(this)),
+      IFlywheelRewards(address(0)),
       IFlywheelBooster(address(0)),
       address(this)
     );

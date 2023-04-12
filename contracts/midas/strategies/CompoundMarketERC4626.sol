@@ -161,9 +161,10 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
             address vaultAddress = address(vaults[i]);
             uint256 vaultSharesInAdapter = balanceOf(vaultAddress);
             uint256 vaultShareOfRewards = (vaultSharesInAdapter * totalRewards) / totalSupply();
-            rewardToken.transfer(vaultAddress, vaultShareOfRewards);
-
-            emit ClaimedVaultRewards(address(rewardToken), vaultAddress, vaultShareOfRewards);
+            if (vaultShareOfRewards > 0) {
+              rewardToken.transfer(vaultAddress, vaultShareOfRewards);
+              emit ClaimedVaultRewards(address(rewardToken), vaultAddress, vaultShareOfRewards);
+            }
           }
         }
       }
