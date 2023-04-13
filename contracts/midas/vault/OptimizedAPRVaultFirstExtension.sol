@@ -34,11 +34,13 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
   }
 
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 6;
+    uint8 fnsCount = 8;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.initialize.selector;
     functionSelectors[--fnsCount] = this.proposeAdapters.selector;
     functionSelectors[--fnsCount] = this.claimRewards.selector;
+    functionSelectors[--fnsCount] = this.claimRewardsForUser.selector;
+    functionSelectors[--fnsCount] = this.pullRewards.selector;
     functionSelectors[--fnsCount] = this.getAllFlywheels.selector;
     functionSelectors[--fnsCount] = this.addRewardToken.selector;
     functionSelectors[--fnsCount] = this.upgradeVault.selector;
@@ -152,6 +154,22 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
 
   /// @notice claim all token rewards
   function claimRewards() public {
+    _claimRewards(msg.sender);
+  }
+
+  function claimRewardsForUser(address user) public onlyOwner {
+    _claimRewards(user);
+  }
+
+  function _claimRewards(address user) internal {
+    for (uint256 i = 0; i < rewardTokens.length; i++) {
+      MidasFlywheel flywheel = flywheelForRewardToken[rewardTokens[i]];
+      flywheel.accrue(ERC20(address(this)), user);
+      flywheel.claimRewards(user);
+    }
+  }
+
+  function pullRewards() public {
     for (uint256 i; i < adaptersCount; ++i) {
       adapters[i].adapter.claimRewards();
     }
