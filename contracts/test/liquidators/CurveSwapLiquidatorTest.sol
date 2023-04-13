@@ -45,7 +45,6 @@ contract CurveSwapLiquidatorTest is BaseTest {
       address lpTokenXcStDot = xcDotStDotPool;
       curveV2Oracle = new CurveV2LpTokenPriceOracleNoRegistry();
       curveV2Oracle.initialize(asArray(lpTokenXcStDot), asArray(xcDotStDotPool));
-      curveV2Oracle.reinitialize(asArray(lpTokenXcStDot));
     }
   }
 
