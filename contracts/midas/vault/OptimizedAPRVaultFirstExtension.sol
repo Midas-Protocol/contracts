@@ -34,13 +34,10 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
   }
 
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 8;
+    uint8 fnsCount = 5;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.initialize.selector;
     functionSelectors[--fnsCount] = this.proposeAdapters.selector;
-    functionSelectors[--fnsCount] = this.claimRewards.selector;
-    functionSelectors[--fnsCount] = this.claimRewardsForUser.selector;
-    functionSelectors[--fnsCount] = this.pullRewards.selector;
     functionSelectors[--fnsCount] = this.getAllFlywheels.selector;
     functionSelectors[--fnsCount] = this.addRewardToken.selector;
     functionSelectors[--fnsCount] = this.upgradeVault.selector;
@@ -152,26 +149,10 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
     emit NewAdaptersProposed(newAdapters, proposedAdaptersCount, block.timestamp);
   }
 
-  /// @notice claim all token rewards
-  function claimRewards() public {
-    _claimRewards(msg.sender);
-  }
-
-  function claimRewardsForUser(address user) public onlyOwner {
-    _claimRewards(user);
-  }
-
-  function _claimRewards(address user) internal {
+  function getAllFlywheels() external view returns (MidasFlywheel[] memory allFlywheels) {
+    allFlywheels = new MidasFlywheel[](rewardTokens.length);
     for (uint256 i = 0; i < rewardTokens.length; i++) {
-      MidasFlywheel flywheel = flywheelForRewardToken[rewardTokens[i]];
-      flywheel.accrue(ERC20(address(this)), user);
-      flywheel.claimRewards(user);
-    }
-  }
-
-  function pullRewards() public {
-    for (uint256 i; i < adaptersCount; ++i) {
-      adapters[i].adapter.claimRewards();
+      allFlywheels[i] = flywheelForRewardToken[rewardTokens[i]];
     }
   }
 
@@ -183,13 +164,6 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
     super._afterTokenTransfer(from, to, amount);
     for (uint256 i; i < rewardTokens.length; ++i) {
       flywheelForRewardToken[rewardTokens[i]].accrue(ERC20(address(this)), from, to);
-    }
-  }
-
-  function getAllFlywheels() external view returns (MidasFlywheel[] memory allFlywheels) {
-    allFlywheels = new MidasFlywheel[](rewardTokens.length);
-    for (uint256 i = 0; i < rewardTokens.length; i++) {
-      allFlywheels[i] = flywheelForRewardToken[rewardTokens[i]];
     }
   }
 
