@@ -8,9 +8,8 @@ import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/cont
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 
 import { IERC20, VaultFees } from "./IVault.sol";
-import "./OptimizedAPRVaultExtension.sol";
+import { OptimizedAPRVaultExtension } from "./OptimizedAPRVaultExtension.sol";
 import { AdapterConfig } from "./OptimizedAPRVaultStorage.sol";
-import { MidasFlywheel } from "../strategies/flywheel/MidasFlywheel.sol";
 
 contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   using SafeERC20 for IERC20;
@@ -23,6 +22,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   error MaxError(uint256 amount);
   error IncorrectListLength();
   error IncorrectDistribution();
+  error NotPassedQuitPeriod();
 
   event DepositLimitSet(uint256 depositLimit);
   event Harvested(uint256 totalAssets, uint256 aprBefore, uint256 aprAfter);
@@ -33,7 +33,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   }
 
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 52;
+    uint8 fnsCount = 50;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.name.selector;
     functionSelectors[--fnsCount] = this.symbol.selector;
@@ -75,9 +75,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     functionSelectors[--fnsCount] = this.changeAdapters.selector;
     functionSelectors[--fnsCount] = this.setQuitPeriod.selector;
     functionSelectors[--fnsCount] = this.setEmergencyExit.selector;
-    functionSelectors[--fnsCount] = this.claimRewards.selector;
-    functionSelectors[--fnsCount] = this.claimRewardsForUser.selector;
-    functionSelectors[--fnsCount] = this.pullRewards.selector;
+    functionSelectors[--fnsCount] = this.pullAccruedVaultRewards.selector;
 
     // inherited fns should also be listed
     functionSelectors[--fnsCount] = this.balanceOf.selector;
@@ -856,24 +854,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     delete proposedAdapterTime;
   }
 
-  /// @notice claim all token rewards
-  function claimRewards() public {
-    _claimRewards(msg.sender);
-  }
-
-  function claimRewardsForUser(address user) public onlyOwner {
-    _claimRewards(user);
-  }
-
-  function _claimRewards(address user) internal {
-    for (uint256 i = 0; i < rewardTokens.length; i++) {
-      MidasFlywheel flywheel = flywheelForRewardToken[rewardTokens[i]];
-      flywheel.accrue(ERC20(address(this)), user);
-      flywheel.claimRewards(user);
-    }
-  }
-
-  function pullRewards() public {
+  function pullAccruedVaultRewards() public {
     for (uint256 i; i < adaptersCount; ++i) {
       adapters[i].adapter.claimRewards();
     }
