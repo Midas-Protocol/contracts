@@ -24,9 +24,9 @@ contract ContractsUpgradesTest is BaseTest {
     address contractToTest = ap.getAddress("FusePoolDirectory"); // FusePoolDirectory proxy
 
     // before upgrade
-    FusePoolDirectory oldImpl = FusePoolDirectory(contractToTest);
-    FusePoolDirectory.FusePool[] memory poolsBefore = oldImpl.getAllPools();
-    address ownerBefore = oldImpl.owner();
+    FusePoolDirectory fpdBefore = FusePoolDirectory(contractToTest);
+    FusePoolDirectory.FusePool[] memory poolsBefore = fpdBefore.getAllPools();
+    address ownerBefore = fpdBefore.owner();
     emit log_address(ownerBefore);
 
     uint256 lenBefore = poolsBefore.length;
@@ -43,11 +43,11 @@ contract ContractsUpgradesTest is BaseTest {
     }
 
     // after upgrade
-    FusePoolDirectory newImpl = FusePoolDirectory(contractToTest);
-    address ownerAfter = newImpl.owner();
+    FusePoolDirectory fpd = FusePoolDirectory(contractToTest);
+    address ownerAfter = fpd.owner();
     emit log_address(ownerAfter);
 
-    (, FusePoolDirectory.FusePool[] memory poolsAfter) = oldImpl.getActivePools();
+    (, FusePoolDirectory.FusePool[] memory poolsAfter) = fpd.getActivePools();
     uint256 lenAfter = poolsAfter.length;
     emit log_uint(poolsAfter.length);
 

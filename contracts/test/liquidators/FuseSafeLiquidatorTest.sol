@@ -16,10 +16,10 @@ import { BaseTest } from "../config/BaseTest.t.sol";
 
 contract MockRedemptionStrategy is IRedemptionStrategy {
   function redeem(
-    IERC20Upgradeable inputToken,
-    uint256 inputAmount,
-    bytes memory strategyData
-  ) external returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    IERC20Upgradeable,
+    uint256,
+    bytes memory
+  ) external returns (IERC20Upgradeable, uint256) {
     return (IERC20Upgradeable(address(0)), 1);
   }
 }
@@ -86,7 +86,6 @@ contract FuseSafeLiquidatorTest is BaseTest {
 
   function useThisToTestLiquidations() public fork(POLYGON_MAINNET) {
     address borrower = 0xA4F4406D3dc6482dB1397d0ad260fd223C8F37FC;
-    address poolAddr = 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2;
     address debtMarketAddr = 0x456b363D3dA38d3823Ce2e1955362bBd761B324b;
     address collateralMarketAddr = 0x28D0d45e593764C4cE88ccD1C033d0E2e8cE9aF3;
 
