@@ -10,6 +10,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { IERC20, VaultFees } from "./IVault.sol";
 import "./OptimizedAPRVaultExtension.sol";
 import { AdapterConfig } from "./OptimizedAPRVaultStorage.sol";
+import { MidasFlywheel } from "../strategies/flywheel/MidasFlywheel.sol";
 
 contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   using SafeERC20 for IERC20;

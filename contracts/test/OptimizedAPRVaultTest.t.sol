@@ -525,7 +525,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
 
     // pull from the adapters the rewards for the new cycle
-    vault.asFirstExtension().claimRewards();
+    vault.asSecondExtension().claimRewards();
 
     {
       // TODO figure out why these accrue calls are necessary
