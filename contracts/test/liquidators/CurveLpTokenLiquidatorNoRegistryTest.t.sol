@@ -45,7 +45,6 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
         asArray(pool3Eps, pool2Brl),
         _poolUnderlyings
       );
-      curveV1Oracle.reinitialize(asArray(address(lpToken3Eps), address(twobrl)));
     }
   }
 
