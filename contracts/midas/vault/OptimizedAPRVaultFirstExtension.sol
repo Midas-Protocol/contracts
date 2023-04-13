@@ -179,12 +179,12 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
     require(msg.sender == owner() || msg.sender == address(this), "!owner or self");
     require(address(flywheelForRewardToken[token_]) == address(0), "already added");
 
-    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(flywheelLogic, address(registry), "");
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(flywheelLogic, owner(), "");
     MidasFlywheel newFlywheel = MidasFlywheel(address(proxy));
 
     newFlywheel.initialize(
       ERC20(address(token_)),
-      IFlywheelRewards(address(this)),
+      IFlywheelRewards(address(0)),
       IFlywheelBooster(address(0)),
       address(this)
     );

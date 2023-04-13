@@ -453,12 +453,14 @@ contract OptimizedAPRVaultTest is MarketsTest {
   function testVaultAccrueRewards() public fork(BSC_MAINNET) {
     IERC20Metadata ddd = IERC20Metadata(dddAddress);
     IERC20Metadata epx = IERC20Metadata(epxAddress);
+    address someDeployer = address(321);
 
     // set up the registry, the vault and the adapter
     {
       // upgrade to enable the aprAfterDeposit fn for the vault
       _upgradeExistingCTokenExtension(CErc20Delegate(twoBrlMarketAddress));
 
+      vm.startPrank(someDeployer);
       deployVaultRegistry();
 
       // deploy the adapter
@@ -503,6 +505,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
       registry.addVault(address(vault));
     }
+    vm.stopPrank();
 
     MidasFlywheel flywheelDDD = vault.asFirstExtension().flywheelForRewardToken(ddd);
     MidasFlywheel flywheelEPX = vault.asFirstExtension().flywheelForRewardToken(epx);

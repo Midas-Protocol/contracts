@@ -47,16 +47,12 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     jarvisLiquidator = new JarvisLiquidatorFunder();
   }
 
-  function getPool(address inputToken) internal view returns (ISynthereumLiquidityPool) {
-    return synthereumLiquidityPool;
-  }
-
   function testRedeemToken() public fork(BSC_MAINNET) {
     vm.prank(minter);
     jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
     bytes memory data = abi.encode(address(jBRLToken), address(synthereumLiquidityPool), 60 * 40);
-    (uint256 redeemableAmount, ) = getPool(address(jBRLToken)).getRedeemTradeInfo(10e18);
+    (uint256 redeemableAmount, ) = synthereumLiquidityPool.getRedeemTradeInfo(10e18);
     (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, data);
 
     // should be BUSD
@@ -65,7 +61,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
   }
 
   function testEmergencyRedeemToken() public fork(BSC_MAINNET) {
-    ISynthereumLiquidityPool pool = getPool(address(jBRLToken));
+    ISynthereumLiquidityPool pool = synthereumLiquidityPool;
     address manager = pool.synthereumFinder().getImplementationAddress("Manager");
     vm.prank(manager);
     pool.emergencyShutdown();
@@ -74,7 +70,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     jBRLToken.mint(address(jarvisLiquidator), 10e18);
 
     bytes memory data = abi.encode(address(jBRLToken), address(synthereumLiquidityPool), 60 * 40);
-    (uint256 redeemableAmount, uint256 fee) = getPool(address(jBRLToken)).getRedeemTradeInfo(10e18);
+    (uint256 redeemableAmount, uint256 fee) = synthereumLiquidityPool.getRedeemTradeInfo(10e18);
     (IERC20Upgradeable outputToken, uint256 outputAmount) = jarvisLiquidator.redeem(jBRLToken, 10e18, data);
 
     // should be BUSD
