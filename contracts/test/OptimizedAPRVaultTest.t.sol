@@ -453,12 +453,14 @@ contract OptimizedAPRVaultTest is MarketsTest {
   function testVaultAccrueRewards() public fork(BSC_MAINNET) {
     IERC20Metadata ddd = IERC20Metadata(dddAddress);
     IERC20Metadata epx = IERC20Metadata(epxAddress);
+    address someDeployer = address(321);
 
     // set up the registry, the vault and the adapter
     {
       // upgrade to enable the aprAfterDeposit fn for the vault
       _upgradeExistingCTokenExtension(CErc20Delegate(twoBrlMarketAddress));
 
+      vm.startPrank(someDeployer);
       deployVaultRegistry();
 
       // deploy the adapter
@@ -503,9 +505,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
 
       registry.addVault(address(vault));
     }
-
-    MidasFlywheel flywheelDDD = vault.asFirstExtension().flywheelForRewardToken(ddd);
-    MidasFlywheel flywheelEPX = vault.asFirstExtension().flywheelForRewardToken(epx);
+    vm.stopPrank();
 
     // deposit some funds
     vm.startPrank(twoBrlWhale);
@@ -522,10 +522,13 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
 
     // pull from the adapters the rewards for the new cycle
-    vault.asFirstExtension().claimRewards();
+    vault.asSecondExtension().pullAccruedVaultRewards();
 
+    OptimizedAPRVaultFirstExtension vaultFirstExt = vault.asFirstExtension();
     {
       // TODO figure out why these accrue calls are necessary
+      MidasFlywheel flywheelDDD = vaultFirstExt.flywheelForRewardToken(ddd);
+      MidasFlywheel flywheelEPX = vaultFirstExt.flywheelForRewardToken(epx);
       flywheelDDD.accrue(ERC20(address(vault)), twoBrlWhale);
       flywheelEPX.accrue(ERC20(address(vault)), twoBrlWhale);
 
@@ -540,10 +543,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
     //vault.harvest(array);
 
     // accrue and claim
-    flywheelDDD.accrue(ERC20(address(vault)), twoBrlWhale);
-    flywheelDDD.claimRewards(twoBrlWhale);
-    flywheelEPX.accrue(ERC20(address(vault)), twoBrlWhale);
-    flywheelEPX.claimRewards(twoBrlWhale);
+    vm.prank(twoBrlWhale);
+    vaultFirstExt.claimRewards();
 
     // check if any rewards were claimed
     assertGt(ddd.balanceOf(twoBrlWhale), 0, "!received DDD");
@@ -556,7 +557,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     exts[1] = new TestingSecondExtension();
     registry.setLatestVaultExtensions(address(vault), exts);
 
-    vault.asFirstExtension().upgradeVault();
+    vault.upgradeVault();
 
     address[] memory currentExtensions = vault._listExtensions();
 

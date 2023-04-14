@@ -18,7 +18,6 @@ abstract contract OptimizedAPRVaultExtension is
 {
   error InvalidVaultFees();
   error InvalidFeeRecipient();
-  error NotPassedQuitPeriod();
 
   function computeDomainSeparator() internal view virtual returns (bytes32) {
     return

@@ -12,9 +12,8 @@ import "./CDelegateInterface.sol";
 contract CErc20Delegate is CDelegateInterface, CErc20 {
   /**
    * @notice Called by the delegator on a delegate to initialize it for duty
-   * @param data The encoded bytes data for any initialization
    */
-  function _becomeImplementation(bytes memory data) public virtual override {
+  function _becomeImplementation(bytes memory) public virtual override {
     require(msg.sender == address(this) || hasAdminRights(), "!self || !admin");
   }
 

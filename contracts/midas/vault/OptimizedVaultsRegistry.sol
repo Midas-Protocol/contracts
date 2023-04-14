@@ -85,6 +85,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
     }
 
     {
+      uint256 flywheelsCounter = 0;
       for (uint256 i = 0; i < vaults.length; i++) {
         OptimizedAPRVaultBase vault = vaults[i];
         MidasFlywheel[] memory flywheels = vault.asFirstExtension().getAllFlywheels();
@@ -92,15 +93,16 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
 
         for (uint256 j = 0; j < flywheelsLen; j++) {
           MidasFlywheel flywheel = flywheels[j];
-          rewardsData[i * flywheelsLen + j].vault = address(vault);
-          rewardsData[i * flywheelsLen + j].flywheel = address(flywheel);
-          rewardsData[i * flywheelsLen + j].rewards = flywheel.accrue(ERC20(address(vault)), account);
+          rewardsData[flywheelsCounter + j].vault = address(vault);
+          rewardsData[flywheelsCounter + j].flywheel = address(flywheel);
+          rewardsData[flywheelsCounter + j].rewards = flywheel.accrue(ERC20(address(vault)), account);
           ERC20 rewardToken = flywheel.rewardToken();
-          rewardsData[i * flywheelsLen + j].rewardToken = address(rewardToken);
-          rewardsData[i * flywheelsLen + j].rewardTokenName = rewardToken.name();
-          rewardsData[i * flywheelsLen + j].rewardTokenSymbol = rewardToken.symbol();
-          rewardsData[i * flywheelsLen + j].rewardTokenDecimals = rewardToken.decimals();
+          rewardsData[flywheelsCounter + j].rewardToken = address(rewardToken);
+          rewardsData[flywheelsCounter + j].rewardTokenName = rewardToken.name();
+          rewardsData[flywheelsCounter + j].rewardTokenSymbol = rewardToken.symbol();
+          rewardsData[flywheelsCounter + j].rewardTokenDecimals = rewardToken.decimals();
         }
+        flywheelsCounter += flywheelsLen;
       }
     }
   }

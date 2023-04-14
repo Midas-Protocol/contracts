@@ -405,21 +405,6 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     return distributeProfit(vars.exchangeProfitTo, vars.minProfitAmount, vars.ethToCoinbase);
   }
 
-  function safeLiquidateToEthWithFlashLoan(
-    address,
-    uint256,
-    ICEther,
-    ICErc20,
-    uint256,
-    address,
-    IUniswapV2Router02,
-    IRedemptionStrategy[] memory,
-    bytes[] memory,
-    uint256
-  ) external returns (uint256) {
-    revert("not used anymore");
-  }
-
   /**
    * Exchange profit, send NATIVE to coinbase if necessary, and transfer seized funds to sender.
    */

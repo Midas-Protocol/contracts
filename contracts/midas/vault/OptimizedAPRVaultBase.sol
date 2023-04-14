@@ -37,4 +37,16 @@ contract OptimizedAPRVaultBase is OptimizedAPRVaultStorage, DiamondBase {
 
     asFirstExtension().initialize(initData);
   }
+
+  function upgradeVault() public onlyOwner {
+    address[] memory currentExtensions = LibDiamond.listExtensions();
+    for (uint256 i = 0; i < currentExtensions.length; i++) {
+      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
+    }
+
+    OptimizedAPRVaultExtension[] memory latestExtensions = registry.getLatestVaultExtensions(address(this));
+    for (uint256 i = 0; i < latestExtensions.length; i++) {
+      LibDiamond.addExtension(latestExtensions[i]);
+    }
+  }
 }
