@@ -12,7 +12,7 @@ Main repository for Midas Capital's contracts
  ├── out                              <- (forge-generated, git ignored)
  │    ├── *.sol/*.json                <- All the built contracts
  │    └──  ...
- │ │
+ │
  ├── lib                              <- git submodules with forge-based dependencies
  │    ├── flywheel-v2                 <- Tribe flywheel contracts
  │    ├── fuse-flywheel               <- Fuse flywheel contracts
@@ -34,7 +34,7 @@ Main repository for Midas Capital's contracts
 
 ## Dev Workflow
 
-1. Install dependencies: npm & [foundry](https://github.com/foundry-rs/foundry/) (forge + cast)
+### 1. Install dependencies: npm & [foundry](https://github.com/foundry-rs/foundry/) (forge + cast)
 
 Forge dependencies
 
@@ -52,13 +52,13 @@ NPM dependencies
 >>> npm install
 ```
 
-2. Build the contracts
+### 2. Build the contracts
 
 ```shell
 >>> forge build
 ```
 
-3. Run the tests for a specific chain id
+### 3. Run the tests for a specific chain id
 
 ```shell
 # export the relevant env variables, or set them in an .env file
@@ -75,7 +75,7 @@ Run the entire test suite
 
 Check the [CI.yaml](https://github.com/Midas-Protocol/contracts/blob/development/.github/workflows/pull-request-build-and-test.yml) file to see what chains we run the tests against
 
-4. Lint
+### 4. Lint
 
 ```shell
 >>> npm run prettier
