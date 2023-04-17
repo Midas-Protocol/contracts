@@ -2,8 +2,10 @@
 pragma solidity >=0.8.0;
 
 import { UniswapV3PriceOracle } from "../../../oracles/default/UniswapV3PriceOracle.sol";
+import { ChainlinkPriceOracleV2 } from "../../../oracles/default/ChainlinkPriceOracleV2.sol";
 import { ConcentratedLiquidityBasePriceOracle } from "../../../oracles/default/ConcentratedLiquidityBasePriceOracle.sol";
 import { IUniswapV3Pool } from "../../../external/uniswap/IUniswapV3Pool.sol";
+import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { BaseTest } from "../../config/BaseTest.t.sol";
 
@@ -14,6 +16,10 @@ contract UniswapV3PriceOracleTest is BaseTest {
   address stable;
 
   function afterForkSetUp() internal override {
+    // TODO: remove this after deployment
+    if (block.chainid == ETHEREUM_MAINNET) {
+      return;
+    }
     stable = ap.getAddress("stableToken"); // USDC or arbitrum
     wtoken = ap.getAddress("wtoken"); // WETH
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
@@ -150,10 +156,81 @@ contract UniswapV3PriceOracleTest is BaseTest {
     }
   }
 
-  function getPriceFeed(address[] memory underlyings, UniswapV3PriceOracle.AssetConfig[] memory configs)
-    internal
-    returns (uint256[] memory price)
-  {
+  function testEthereumAssets() public fork(ETHEREUM_MAINNET) {
+    // TODO: Remove these after mainnet deployment
+    // Initialise MPO
+    stable = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    wtoken = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    setUpBaseOracles();
+
+    // Initialise Uniswap Oracle
+    oracle = new UniswapV3PriceOracle();
+    vm.prank(mpo.admin());
+    oracle.initialize(wtoken, asArray(stable));
+
+    address[] memory underlyings = new address[](1);
+    ConcentratedLiquidityBasePriceOracle.AssetConfig[]
+      memory configs = new ConcentratedLiquidityBasePriceOracle.AssetConfig[](1);
+
+    underlyings[0] = 0x68037790A0229e9Ce6EaA8A99ea92964106C4703; // PAR (18 decimals)
+    // PAR-USDC
+    configs[0] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
+      0xD7Dcb0eb6AaB643b85ba74cf9997c840fE32e695,
+      10 minutes,
+      stable
+    );
+    uint256[] memory prices = getPriceFeed(underlyings, configs);
+    uint256 mpoPrice = mpo.price(underlyings[0]);
+    // Compare univ3 (PAR/USDC) vs Chainlink prices (EUR/USD)
+    assertApproxEqRel(prices[0], mpoPrice, 1e16, "Oracle price != MPO price by > 1%");
+
+    bool[] memory cardinalityChecks = getCardinality(configs);
+    for (uint256 i = 0; i < cardinalityChecks.length; i++) {
+      assertEq(cardinalityChecks[i], true, "!Cardinality Error");
+    }
+  }
+
+  function setUpBaseOracles() public {
+    // TODO: Remove these after mainnet deployment
+    if (block.chainid == ETHEREUM_MAINNET) {
+      setUpMpoAndAddresses();
+      IPriceOracle[] memory oracles = new IPriceOracle[](2);
+      ChainlinkPriceOracleV2 chainlinkOracle = new ChainlinkPriceOracleV2(
+        mpo.admin(),
+        true,
+        wtoken,
+        0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
+      );
+      vm.prank(chainlinkOracle.admin());
+      chainlinkOracle.setPriceFeeds(
+        asArray(stable),
+        asArray(0x986b5E1e1755e3C2440e960477f25201B0a8bbD4),
+        ChainlinkPriceOracleV2.FeedBaseCurrency.ETH
+      );
+      chainlinkOracle.setPriceFeeds(
+        asArray(0x68037790A0229e9Ce6EaA8A99ea92964106C4703), // PAR
+        asArray(0xb49f677943BC038e9857d61E7d053CaA2C1734C1), // EUR/USD price feed
+        ChainlinkPriceOracleV2.FeedBaseCurrency.USD
+      );
+      oracles[0] = IPriceOracle(address(chainlinkOracle));
+      oracles[1] = IPriceOracle(address(chainlinkOracle));
+
+      vm.prank(mpo.admin());
+      mpo.add(asArray(stable, 0x68037790A0229e9Ce6EaA8A99ea92964106C4703), oracles);
+    }
+  }
+
+  function setUpMpoAndAddresses() public {
+    address[] memory assets = new address[](0);
+    IPriceOracle[] memory oracles = new IPriceOracle[](0);
+    mpo = new MasterPriceOracle();
+    mpo.initialize(assets, oracles, IPriceOracle(address(0)), address(this), true, address(wtoken));
+  }
+
+  function getPriceFeed(
+    address[] memory underlyings,
+    UniswapV3PriceOracle.AssetConfig[] memory configs
+  ) internal returns (uint256[] memory price) {
     vm.prank(oracle.owner());
     oracle.setPoolFeeds(underlyings, configs);
     vm.roll(1);
