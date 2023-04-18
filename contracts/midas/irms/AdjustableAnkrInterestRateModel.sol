@@ -77,6 +77,10 @@ abstract contract AdjustableAnkrInterestRateModel is Ownable, InterestRateModel 
 
   function getAnkrRate() public view virtual returns (uint256);
 
+  function getBaseRatePerBlock() public view returns (uint256) {
+    return getAnkrRate();
+  }
+
   function _setIrmParameters(AdjustableAnkrInterestRateModelParams memory params) public onlyOwner {
     blocksPerYear = params.blocksPerYear;
     multiplierPerBlock = params.multiplierPerYear.div(blocksPerYear);
