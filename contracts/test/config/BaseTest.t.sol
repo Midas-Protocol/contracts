@@ -148,7 +148,7 @@ abstract contract BaseTest is Test {
       } else if (chainid == FANTOM_OPERA) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("fantom_archive")) + 100;
       } else if (chainid == ETHEREUM_MAINNET) {
-        forkIds[chainid] = vm.createFork(vm.rpcUrl("ethereum_archive")) + 100;
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("ethereum_archive")) + 100;
       }
     }
     return forkIds[chainidWithOffset] - 100;
