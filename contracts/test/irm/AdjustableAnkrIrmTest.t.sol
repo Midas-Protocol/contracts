@@ -28,6 +28,7 @@ contract AdjustableAnkrIrmTest is BaseTest {
 
   function testAnkrBscIrm() public fork(BSC_MAINNET) {
     testAnkrBNBBorrowModelRate();
+    testUpdateIrmParams();
   }
 
   function _convertToPerYearBsc(uint256 value) internal pure returns (uint256) {
@@ -75,5 +76,20 @@ contract AdjustableAnkrIrmTest is BaseTest {
     util = adjustableAnkrBNBIrm.utilizationRate(8e18, 7.2e18, 7.2e18);
     assertEq(util, 0.9e18);
     assertApproxEqRel(_convertToPerYearBsc(borrowRate) * 100, 92.5e18, 1e16, "!borrow rate for utilization 90");
+  }
+
+  function testUpdateIrmParams() internal {
+    AdjustableAnkrInterestRateModelParams memory newParams = AdjustableAnkrInterestRateModelParams({
+      blocksPerYear: 10000,
+      multiplierPerYear: 0.4e18,
+      jumpMultiplierPerYear: 4e18,
+      kink: 0.75e18
+    });
+
+    adjustableAnkrBNBIrm._setIrmParameters(newParams);
+    vm.roll(1);
+
+    assertEq(adjustableAnkrBNBIrm.blocksPerYear(), newParams.blocksPerYear);
+    assertEq(adjustableAnkrBNBIrm.multiplierPerBlock(), newParams.multiplierPerYear / newParams.blocksPerYear);
   }
 }
