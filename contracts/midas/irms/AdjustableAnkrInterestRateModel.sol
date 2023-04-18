@@ -7,7 +7,7 @@ import "../../compound/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
- * @title Compound's JumpRateModel Contract
+ * @title Ajustable IRM For Ankr-based pools
  * @author Compound
  */
 
@@ -19,8 +19,6 @@ struct AdjustableAnkrInterestRateModelParams {
 }
 
 abstract contract AdjustableAnkrInterestRateModel is Ownable, InterestRateModel {
-  using SafeMath for uint256;
-
   event NewInterestParams(uint256 multiplierPerBlock, uint256 jumpMultiplierPerBlock, uint256 kink);
 
   /**
@@ -49,8 +47,8 @@ abstract contract AdjustableAnkrInterestRateModel is Ownable, InterestRateModel 
 
   constructor(AdjustableAnkrInterestRateModelParams memory params) {
     blocksPerYear = params.blocksPerYear;
-    multiplierPerBlock = params.multiplierPerYear.div(blocksPerYear);
-    jumpMultiplierPerBlock = params.jumpMultiplierPerYear.div(blocksPerYear);
+    multiplierPerBlock = params.multiplierPerYear / blocksPerYear;
+    jumpMultiplierPerBlock = params.jumpMultiplierPerYear / blocksPerYear;
     kink = params.kink;
     emit NewInterestParams(multiplierPerBlock, jumpMultiplierPerBlock, kink);
   }
@@ -72,7 +70,7 @@ abstract contract AdjustableAnkrInterestRateModel is Ownable, InterestRateModel 
       return 0;
     }
 
-    return borrows.mul(1e18).div(cash.add(borrows).sub(reserves));
+    return (borrows * 1e18) / (cash + borrows - reserves);
   }
 
   function getAnkrRate() public view virtual returns (uint256);
@@ -83,8 +81,8 @@ abstract contract AdjustableAnkrInterestRateModel is Ownable, InterestRateModel 
 
   function _setIrmParameters(AdjustableAnkrInterestRateModelParams memory params) public onlyOwner {
     blocksPerYear = params.blocksPerYear;
-    multiplierPerBlock = params.multiplierPerYear.div(blocksPerYear);
-    jumpMultiplierPerBlock = params.jumpMultiplierPerYear.div(blocksPerYear);
+    multiplierPerBlock = params.multiplierPerYear / blocksPerYear;
+    jumpMultiplierPerBlock = params.jumpMultiplierPerYear / blocksPerYear;
     kink = params.kink;
     emit NewInterestParams(multiplierPerBlock, jumpMultiplierPerBlock, kink);
   }
@@ -105,11 +103,11 @@ abstract contract AdjustableAnkrInterestRateModel is Ownable, InterestRateModel 
     uint256 baseRatePerBlock = getAnkrRate();
 
     if (util <= kink) {
-      return util.mul(multiplierPerBlock).div(1e18).add(baseRatePerBlock);
+      return (util * multiplierPerBlock) / 1e18 + baseRatePerBlock;
     } else {
-      uint256 normalRate = kink.mul(multiplierPerBlock).div(1e18).add(baseRatePerBlock);
-      uint256 excessUtil = util.sub(kink);
-      return excessUtil.mul(jumpMultiplierPerBlock).div(1e18).add(normalRate);
+      uint256 normalRate = (kink * multiplierPerBlock) / 1e18 + baseRatePerBlock;
+      uint256 excessUtil = util - kink;
+      return (excessUtil * jumpMultiplierPerBlock) / 1e18 + normalRate;
     }
   }
 
@@ -127,9 +125,9 @@ abstract contract AdjustableAnkrInterestRateModel is Ownable, InterestRateModel 
     uint256 reserves,
     uint256 reserveFactorMantissa
   ) public view virtual override returns (uint256) {
-    uint256 oneMinusReserveFactor = uint256(1e18).sub(reserveFactorMantissa);
+    uint256 oneMinusReserveFactor = 1e18 - reserveFactorMantissa;
     uint256 borrowRate = getBorrowRate(cash, borrows, reserves);
-    uint256 rateToPool = borrowRate.mul(oneMinusReserveFactor).div(1e18);
-    return utilizationRate(cash, borrows, reserves).mul(rateToPool).div(1e18);
+    uint256 rateToPool = (borrowRate * oneMinusReserveFactor) / 1e18;
+    return (utilizationRate(cash, borrows, reserves) * rateToPool) / 1e18;
   }
 }
