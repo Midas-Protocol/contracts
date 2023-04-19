@@ -16,4 +16,6 @@ interface ICErc20 is ICToken {
     uint256 repayAmount,
     ICToken cTokenCollateral
   ) external returns (uint256);
+
+  function balanceOfUnderlyingHypo(address owner) external view returns (uint256);
 }

@@ -24,6 +24,7 @@ contract LeveredPositionStrategyTest is BaseTest {
 
     jBRL.approve(address(position), 1e36);
 
-    position.leverUp(1e22, IERC20(jBRLAddress));
+    position.fundPosition(IERC20(jBRLAddress), 1e22);
+    position.adjustLeverageRatio(1.5e18);
   }
 }
