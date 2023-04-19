@@ -7,7 +7,7 @@ import "./LeveredVaultExtension.sol";
 
 contract LeveredVaultBase is LeveredVaultStorage, DiamondBase {
   /**
- * @dev register a logic extension
+   * @dev register a logic extension
    * @param extensionToAdd the extension whose functions are to be added
    * @param extensionToReplace the extension whose functions are to be removed/replaced
    */

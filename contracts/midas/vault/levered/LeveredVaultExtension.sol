@@ -7,7 +7,6 @@ import { DiamondExtension } from "../../DiamondExtension.sol";
 import { ReentrancyGuardUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol";
 
 abstract contract LeveredVaultExtension is ReentrancyGuardUpgradeable, LeveredVaultStorage, DiamondExtension {
-
   constructor() {
     _disableInitializers();
   }
@@ -36,15 +35,9 @@ abstract contract LeveredVaultExtension is ReentrancyGuardUpgradeable, LeveredVa
     require(collateral.mint(amount) == 0, "deposit collateral failed");
   }
 
-  function _borrowStable() internal {
+  function _borrowStable() internal {}
 
-  }
+  function _swapForCollateral() internal {}
 
-  function _swapForCollateral() internal {
-
-  }
-
-  function _leverUp() internal {
-
-  }
+  function _leverUp() internal {}
 }
