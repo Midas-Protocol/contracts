@@ -348,7 +348,6 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
       redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, address(this), false);
     }
 
-    /* If redeemTokensIn > 0: */
     if (redeemTokensIn > 0) {
       /*
        * We calculate the exchange rate and the amount of underlying to be redeemed:
@@ -384,6 +383,10 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
       vars.redeemAmount = redeemAmountIn;
     }
 
+    //    if (vars.redeemTokens == 0) {
+    //      return fail(Error.BAD_INPUT, FailureInfo.REDEEM_EXCHANGE_AMOUNT_CALCULATION_FAILED);
+    //    }
+
     /* Fail if redeem not allowed */
     uint256 allowed = comptroller.redeemAllowed(address(this), redeemer, vars.redeemTokens);
     if (allowed != 0) {
@@ -404,9 +407,9 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     if (vars.mathErr != MathError.NO_ERROR) {
       return
         failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_NEW_TOTAL_SUPPLY_CALCULATION_FAILED, uint256(vars.mathErr));
-    } else if (vars.totalSupplyNew < 10**decimals) {
-      // don't let the total supply go under 1 share to prevent inflation attacks
-      return fail(Error.BAD_INPUT, FailureInfo.REDEEM_NEW_TOTAL_SUPPLY_CALCULATION_FAILED);
+      //    } else if (vars.totalSupplyNew != 0 && vars.totalSupplyNew < 10**decimals) {
+      //      // don't let the total supply go under 1 scaled cToken to prevent inflation attacks
+      //      return fail(Error.BAD_INPUT, FailureInfo.REDEEM_NEW_TOTAL_SUPPLY_CALCULATION_FAILED);
     }
 
     (vars.mathErr, vars.accountTokensNew) = subUInt(accountTokens[redeemer], vars.redeemTokens);

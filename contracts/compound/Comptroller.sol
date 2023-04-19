@@ -330,6 +330,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(err);
     }
     if (shortfall > 0) {
+      this.log("returning insufficient liquidity due to positive shortfall", shortfall);
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
@@ -400,6 +401,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Return the minimum of the two maximums
     return maxBorrowOrRedeemAmount <= cTokenLiquidity ? maxBorrowOrRedeemAmount : cTokenLiquidity;
   }
+
+  function log(string memory, uint256) public pure {}
 
   /**
    * @dev Portion of the logic in `getMaxRedeemOrBorrow` above separated to avoid "stack too deep" errors.
