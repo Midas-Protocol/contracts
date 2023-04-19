@@ -55,6 +55,8 @@ contract ERC4626Liquidator is IRedemptionStrategy {
 
       return (_outputToken, outputAmount);
     } else {
+      // NOTE: for Sommelier, the underlying tokens can be fetched from the Sommelier contract
+      // E.g. https://etherscan.io/address/0x6b7f87279982d919bbf85182ddeab179b366d8f2#readContract#F20
       IERC4626(address(inputToken)).redeem(inputAmount, address(this), address(this));
 
       // for each token, we need to swap it for the output token

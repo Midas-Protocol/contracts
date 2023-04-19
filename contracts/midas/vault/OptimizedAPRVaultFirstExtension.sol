@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
-import "../DiamondExtension.sol";
 import "./OptimizedAPRVaultExtension.sol";
 import { OptimizedVaultsRegistry } from "./OptimizedVaultsRegistry.sol";
 import { MidasFlywheel } from "../strategies/flywheel/MidasFlywheel.sol";
@@ -38,25 +37,13 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.initialize.selector;
     functionSelectors[--fnsCount] = this.proposeAdapters.selector;
-    functionSelectors[--fnsCount] = this.claimRewards.selector;
     functionSelectors[--fnsCount] = this.getAllFlywheels.selector;
     functionSelectors[--fnsCount] = this.addRewardToken.selector;
-    functionSelectors[--fnsCount] = this.upgradeVault.selector;
+    functionSelectors[--fnsCount] = this.claimRewards.selector;
+    functionSelectors[--fnsCount] = this.claimRewardsForUser.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
-  }
-
-  function upgradeVault() public onlyOwner {
-    address[] memory currentExtensions = LibDiamond.listExtensions();
-    for (uint256 i = 0; i < currentExtensions.length; i++) {
-      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
-    }
-
-    OptimizedAPRVaultExtension[] memory latestExtensions = registry.getLatestVaultExtensions(address(this));
-    for (uint256 i = 0; i < latestExtensions.length; i++) {
-      LibDiamond.addExtension(latestExtensions[i]);
-    }
   }
 
   function initialize(bytes calldata data) public initializer {
@@ -150,10 +137,27 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
     emit NewAdaptersProposed(newAdapters, proposedAdaptersCount, block.timestamp);
   }
 
+  function getAllFlywheels() external view returns (MidasFlywheel[] memory allFlywheels) {
+    allFlywheels = new MidasFlywheel[](rewardTokens.length);
+    for (uint256 i = 0; i < rewardTokens.length; i++) {
+      allFlywheels[i] = flywheelForRewardToken[rewardTokens[i]];
+    }
+  }
+
   /// @notice claim all token rewards
   function claimRewards() public {
-    for (uint256 i; i < adaptersCount; ++i) {
-      adapters[i].adapter.claimRewards();
+    _claimRewards(msg.sender);
+  }
+
+  function claimRewardsForUser(address user) public {
+    _claimRewards(user);
+  }
+
+  function _claimRewards(address user) internal {
+    for (uint256 i = 0; i < rewardTokens.length; i++) {
+      MidasFlywheel flywheel = flywheelForRewardToken[rewardTokens[i]];
+      flywheel.accrue(ERC20(address(this)), user);
+      flywheel.claimRewards(user);
     }
   }
 
@@ -165,13 +169,6 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
     super._afterTokenTransfer(from, to, amount);
     for (uint256 i; i < rewardTokens.length; ++i) {
       flywheelForRewardToken[rewardTokens[i]].accrue(ERC20(address(this)), from, to);
-    }
-  }
-
-  function getAllFlywheels() external view returns (MidasFlywheel[] memory allFlywheels) {
-    allFlywheels = new MidasFlywheel[](rewardTokens.length);
-    for (uint256 i = 0; i < rewardTokens.length; i++) {
-      allFlywheels[i] = flywheelForRewardToken[rewardTokens[i]];
     }
   }
 

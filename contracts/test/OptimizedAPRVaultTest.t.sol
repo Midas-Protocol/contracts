@@ -507,9 +507,6 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
     vm.stopPrank();
 
-    MidasFlywheel flywheelDDD = vault.asFirstExtension().flywheelForRewardToken(ddd);
-    MidasFlywheel flywheelEPX = vault.asFirstExtension().flywheelForRewardToken(epx);
-
     // deposit some funds
     vm.startPrank(twoBrlWhale);
     twoBrl.approve(address(vault), type(uint256).max);
@@ -525,10 +522,13 @@ contract OptimizedAPRVaultTest is MarketsTest {
     }
 
     // pull from the adapters the rewards for the new cycle
-    vault.asFirstExtension().claimRewards();
+    vault.asSecondExtension().pullAccruedVaultRewards();
 
+    OptimizedAPRVaultFirstExtension vaultFirstExt = vault.asFirstExtension();
     {
       // TODO figure out why these accrue calls are necessary
+      MidasFlywheel flywheelDDD = vaultFirstExt.flywheelForRewardToken(ddd);
+      MidasFlywheel flywheelEPX = vaultFirstExt.flywheelForRewardToken(epx);
       flywheelDDD.accrue(ERC20(address(vault)), twoBrlWhale);
       flywheelEPX.accrue(ERC20(address(vault)), twoBrlWhale);
 
@@ -543,10 +543,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
     //vault.harvest(array);
 
     // accrue and claim
-    flywheelDDD.accrue(ERC20(address(vault)), twoBrlWhale);
-    flywheelDDD.claimRewards(twoBrlWhale);
-    flywheelEPX.accrue(ERC20(address(vault)), twoBrlWhale);
-    flywheelEPX.claimRewards(twoBrlWhale);
+    vm.prank(twoBrlWhale);
+    vaultFirstExt.claimRewards();
 
     // check if any rewards were claimed
     assertGt(ddd.balanceOf(twoBrlWhale), 0, "!received DDD");
@@ -559,7 +557,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     exts[1] = new TestingSecondExtension();
     registry.setLatestVaultExtensions(address(vault), exts);
 
-    vault.asFirstExtension().upgradeVault();
+    vault.upgradeVault();
 
     address[] memory currentExtensions = vault._listExtensions();
 

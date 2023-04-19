@@ -8,7 +8,7 @@ import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/cont
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 
 import { IERC20, VaultFees } from "./IVault.sol";
-import "./OptimizedAPRVaultExtension.sol";
+import { OptimizedAPRVaultExtension } from "./OptimizedAPRVaultExtension.sol";
 import { AdapterConfig } from "./OptimizedAPRVaultStorage.sol";
 
 contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
@@ -22,6 +22,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   error MaxError(uint256 amount);
   error IncorrectListLength();
   error IncorrectDistribution();
+  error NotPassedQuitPeriod();
 
   event DepositLimitSet(uint256 depositLimit);
   event Harvested(uint256 totalAssets, uint256 aprBefore, uint256 aprAfter);
@@ -32,7 +33,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   }
 
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 49;
+    uint8 fnsCount = 50;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.name.selector;
     functionSelectors[--fnsCount] = this.symbol.selector;
@@ -74,6 +75,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     functionSelectors[--fnsCount] = this.changeAdapters.selector;
     functionSelectors[--fnsCount] = this.setQuitPeriod.selector;
     functionSelectors[--fnsCount] = this.setEmergencyExit.selector;
+    functionSelectors[--fnsCount] = this.pullAccruedVaultRewards.selector;
 
     // inherited fns should also be listed
     functionSelectors[--fnsCount] = this.balanceOf.selector;
@@ -850,5 +852,11 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     delete proposedAdapters;
     delete proposedAdaptersCount;
     delete proposedAdapterTime;
+  }
+
+  function pullAccruedVaultRewards() public {
+    for (uint256 i; i < adaptersCount; ++i) {
+      adapters[i].adapter.claimRewards();
+    }
   }
 }
