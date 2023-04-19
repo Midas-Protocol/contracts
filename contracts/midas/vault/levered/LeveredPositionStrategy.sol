@@ -13,7 +13,11 @@ contract LeveredPositionStrategy {
   ICErc20 public collateralMarket;
   ICErc20 public stableMarket;
 
-  constructor(ICErc20 _collateralMarket, ICErc20 _stableMarket, address _positionOwner) {
+  constructor(
+    ICErc20 _collateralMarket,
+    ICErc20 _stableMarket,
+    address _positionOwner
+  ) {
     require(_collateralMarket.comptroller() == _stableMarket.comptroller(), "markets pools differ");
 
     positionOwner = _positionOwner;
@@ -46,9 +50,7 @@ contract LeveredPositionStrategy {
     //_swapForCollateral(IERC20(stableMarket.underlying()));
   }
 
-  function _depositCollateral(uint256 amount) internal {
-
-  }
+  function _depositCollateral(uint256 amount) internal {}
 
   function _borrowStable() internal {
     // TODO don't use max, use an amount that levers up to the desired ratio
