@@ -59,7 +59,7 @@ contract ThenaERC4626Test is AbstractERC4626Test {
   }
 
   function getDepositShares() public view override returns (uint256) {
-    return plugin.totalAssets(); //ThenaLpERC4626(address(plugin)).gauge().balanceOf(address(plugin));
+    return plugin.totalAssets();
   }
 
   function getStrategyBalance() public view override returns (uint256) {
