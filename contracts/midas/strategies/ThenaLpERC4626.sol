@@ -35,7 +35,7 @@ contract ThenaLpERC4626 is MidasERC4626, RewardsClaimer {
   MidasFlywheel public flywheel;
   GaugeV2 public gauge;
 
-  VoterV3 public constant GAUGES_FACTORY = VoterV3(0x3A1D0952809F4948d15EBCe8d345962A282C4fCb);
+  VoterV3 public constant GAUGES_FACTORY_VOTER = VoterV3(0x62Ee96e6365ab515Ec647C065c2707d1122d7b26);
 
   constructor() {
     _disableInitializers();
@@ -47,7 +47,7 @@ contract ThenaLpERC4626 is MidasERC4626, RewardsClaimer {
     MidasFlywheel _flywheel
   ) public initializer {
     __MidasER4626_init(_asset);
-    gauge = GAUGES_FACTORY.gauges(_asset);
+    gauge = GAUGES_FACTORY_VOTER.gauges(_asset);
     ERC20[] memory _rewardTokens = new ERC20[](1);
     ERC20 _rewardToken = gauge.rewardToken();
     _rewardTokens[0] = _rewardToken;
