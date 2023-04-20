@@ -11,14 +11,12 @@ contract ThenaTestConfigStorage is ITestConfigStorage {
   ThenaTestConfig[] internal testConfigs;
 
   constructor() {
-    // HAY-BUSD
+    // sAMM HAY-BUSD
     testConfigs.push(ThenaTestConfig(0x93B32a8dfE10e9196403dd111974E325219aec24));
     // Algebra (Gamma) USDC-USDC
     testConfigs.push(ThenaTestConfig(0x5EEca990E9B7489665F4B57D27D92c78BC2AfBF2));
-    // // Algebra THE-WBNB
-    // testConfigs.push(
-    //   ThenaTestConfig(0x5EEca990E9B7489665F4B57D27D92c78BC2AfBF2, 0x5EEca990E9B7489665F4B57D27D92c78BC2AfBF2)
-    // );
+    // // Algebra THE-WBNB Narrow
+    testConfigs.push(ThenaTestConfig(0xeD044cD5654ad208b1BC594Fd108C132224E3f3C));
   }
 
   function getTestConfig(uint256 i) public view returns (bytes memory) {

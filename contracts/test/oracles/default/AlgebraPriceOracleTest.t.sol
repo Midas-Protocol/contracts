@@ -26,6 +26,40 @@ contract AlgebraPriceOracleTest is BaseTest {
     oracle.initialize(wtoken, asArray(stable));
   }
 
+  function testBscAssets() public forkAtBlock(BSC_MAINNET, 27513712) {
+    address thena = 0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11; // THE (18 decimals)
+    address usdt = 0x55d398326f99059fF775485246999027B3197955; // USDT (18 decimals)
+
+    address[] memory underlyings = new address[](2);
+    ConcentratedLiquidityBasePriceOracle.AssetConfig[]
+      memory configs = new ConcentratedLiquidityBasePriceOracle.AssetConfig[](2);
+
+    underlyings[0] = thena;
+    underlyings[1] = usdt;
+
+    // THE-WBNB
+    configs[0] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
+      0x51Bd5e6d3da9064D59BcaA5A76776560aB42cEb8,
+      10 minutes,
+      wtoken
+    );
+    // USDT-USDC
+    configs[1] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
+      0x1b9a1120a17617D8eC4dC80B921A9A1C50Caef7d,
+      10 minutes,
+      stable
+    );
+
+    uint256[] memory expPrices = new uint256[](2);
+    expPrices[0] = 1279780177402873; // == 0,001279 BNB -> $0,418 / $326 = 0,0012822   (20/04/2023)
+    expPrices[1] = mpo.price(usdt);
+
+    uint256[] memory prices = getPriceFeed(underlyings, configs);
+
+    assertEq(prices[0], expPrices[0], "!Price Error");
+    assertApproxEqRel(prices[1], expPrices[1], 1e17, "!Price Error");
+  }
+
   function testPolygonAssets() public forkAtBlock(POLYGON_MAINNET, 40783999) {
     address maticX = 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6;
     address wbtc = 0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6;
