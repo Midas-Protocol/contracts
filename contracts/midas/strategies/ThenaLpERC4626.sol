@@ -47,13 +47,12 @@ contract ThenaLpERC4626 is MidasERC4626, RewardsClaimer {
     MidasFlywheel _flywheel
   ) public initializer {
     __MidasER4626_init(_asset);
-
+    gauge = GAUGES_FACTORY.gauges(_asset);
     ERC20[] memory _rewardTokens = new ERC20[](1);
     ERC20 _rewardToken = gauge.rewardToken();
     _rewardTokens[0] = _rewardToken;
     __RewardsClaimer_init(_rewardsDestination, _rewardTokens);
 
-    gauge = GAUGES_FACTORY.gauges(_asset);
     flywheel = _flywheel;
 
     _asset.approve(address(gauge), type(uint256).max);

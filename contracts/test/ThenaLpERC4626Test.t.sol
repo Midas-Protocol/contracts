@@ -17,14 +17,14 @@ contract ThenaLpERC4626Test is BaseTest {
   ThenaLpERC4626 public plugin;
   MidasFlywheel public flywheel;
   ERC20 public thenaToken = ERC20(0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11);
+  ERC20 public lpHayBusdToken = ERC20(0x93B32a8dfE10e9196403dd111974E325219aec24);
+  address public lpTokenWhale = 0xE43317c1f037CBbaF33F33C386f2cAF2B6b25C9C; // gauge v2
+  address public marketAddress = address(123);
 
-  function testThenaPluginDeposit() public fork(BSC_MAINNET) {
+  function afterForkSetUp() internal override {
     address dpa = address(929292);
-    ERC20 lpHayBusdToken = ERC20(0x93B32a8dfE10e9196403dd111974E325219aec24);
-    address lpTokenWhale = 0x29F82d09C2AfD12f3c10ee49CD713331f4A7228E;
     vm.prank(lpTokenWhale);
     lpHayBusdToken.transfer(address(this), 1e22);
-    address marketAddress = address(123);
 
     {
       ThenaLpERC4626 impl = new ThenaLpERC4626();
@@ -51,10 +51,32 @@ contract ThenaLpERC4626Test is BaseTest {
     flywheel.setFlywheelRewards(rewardsContract);
 
     plugin.initialize(lpHayBusdToken, marketAddress, flywheel);
+  }
 
+  function testThenaPluginDeposit() public fork(BSC_MAINNET) {
     lpHayBusdToken.approve(address(plugin), 1e36);
-    uint256 sharesMinted = plugin.deposit(1e6, address(this));
+    uint256 depositAmount = 1e6;
+    uint256 sharesMinted = plugin.deposit(depositAmount, address(this));
 
+    assertEq(sharesMinted, depositAmount, "!init shares");
+  }
+
+  function testThenaPluginAccrueRewards() public fork(BSC_MAINNET) {
+    lpHayBusdToken.approve(address(plugin), 1e36);
+    uint256 sharesMinted = plugin.deposit(1e16, address(this));
     emit log_named_uint("shares minted", sharesMinted);
+
+    ERC20 rewardToken = plugin.rewardTokens(0);
+    uint256 rewardsBalanceBefore = rewardToken.balanceOf(marketAddress);
+
+    vm.warp(block.timestamp + 1e7);
+    vm.roll(block.number + 9999);
+
+    plugin.claimRewards();
+
+    uint256 rewardsBalanceAfter = rewardToken.balanceOf(marketAddress);
+    uint256 rewardsDiff = rewardsBalanceAfter - rewardsBalanceBefore;
+    emit log_named_uint("rewards diff", rewardsDiff);
+    assertGt(rewardsDiff, 0, "!no rewards claimed");
   }
 }
