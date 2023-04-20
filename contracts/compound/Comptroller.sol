@@ -333,6 +333,12 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.INSUFFICIENT_LIQUIDITY);
     }
 
+    uint256 totalSupplyNew = CTokenInterface(cToken).totalSupply() - redeemTokens;
+    if (totalSupplyNew != 0 && totalSupplyNew < 100) {
+      // don't let the total supply go too low to prevent inflation attacks
+      return uint256(Error.REJECTION);
+    }
+
     return uint256(Error.NO_ERROR);
   }
 

@@ -404,9 +404,6 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     if (vars.mathErr != MathError.NO_ERROR) {
       return
         failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_NEW_TOTAL_SUPPLY_CALCULATION_FAILED, uint256(vars.mathErr));
-    } else if (vars.totalSupplyNew != 0 && vars.totalSupplyNew < 100) {
-      // don't let the total supply go too low to prevent inflation attacks
-      return fail(Error.BAD_INPUT, FailureInfo.REDEEM_NEW_TOTAL_SUPPLY_CALCULATION_FAILED);
     }
 
     (vars.mathErr, vars.accountTokensNew) = subUInt(accountTokens[redeemer], vars.redeemTokens);
