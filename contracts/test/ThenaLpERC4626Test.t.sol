@@ -24,6 +24,7 @@ contract ThenaLpERC4626Test is BaseTest {
     address lpTokenWhale = 0x29F82d09C2AfD12f3c10ee49CD713331f4A7228E;
     vm.prank(lpTokenWhale);
     lpHayBusdToken.transfer(address(this), 1e22);
+    address marketAddress = address(123);
 
     {
       ThenaLpERC4626 impl = new ThenaLpERC4626();
@@ -49,7 +50,7 @@ contract ThenaLpERC4626Test is BaseTest {
     );
     flywheel.setFlywheelRewards(rewardsContract);
 
-    plugin.initialize(lpHayBusdToken, flywheel);
+    plugin.initialize(lpHayBusdToken, marketAddress, flywheel);
 
     lpHayBusdToken.approve(address(plugin), 1e36);
     uint256 sharesMinted = plugin.deposit(1e6, address(this));

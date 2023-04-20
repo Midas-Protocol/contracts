@@ -2,11 +2,13 @@
 pragma solidity ^0.8.10;
 
 import "./MidasERC4626.sol";
+import { RewardsClaimer } from "../RewardsClaimer.sol";
+
 import { ERC20Upgradeable as ERC20 } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { MidasFlywheel } from "./flywheel/MidasFlywheel.sol";
 
 interface GaugeV2 {
-  function getReward(address) external;
+  function getReward() external;
 
   function deposit(uint256) external;
 
@@ -29,7 +31,7 @@ interface VoterV3 {
   function gauges(ERC20) external view returns (GaugeV2);
 }
 
-contract ThenaLpERC4626 is MidasERC4626 {
+contract ThenaLpERC4626 is MidasERC4626, RewardsClaimer {
   MidasFlywheel public flywheel;
   GaugeV2 public gauge;
 
@@ -39,13 +41,23 @@ contract ThenaLpERC4626 is MidasERC4626 {
     _disableInitializers();
   }
 
-  function initialize(ERC20 _asset, MidasFlywheel _flywheel) public initializer {
+  function initialize(
+    ERC20 _asset,
+    address _rewardsDestination,
+    MidasFlywheel _flywheel
+  ) public initializer {
     __MidasER4626_init(_asset);
+
+    ERC20[] memory _rewardTokens = new ERC20[](1);
+    ERC20 _rewardToken = gauge.rewardToken();
+    _rewardTokens[0] = _rewardToken;
+    __RewardsClaimer_init(_rewardsDestination, _rewardTokens);
+
     gauge = GAUGES_FACTORY.gauges(_asset);
     flywheel = _flywheel;
 
     _asset.approve(address(gauge), type(uint256).max);
-    gauge.rewardToken().approve(address(flywheel.flywheelRewards()), type(uint256).max);
+    _rewardToken.approve(address(flywheel.flywheelRewards()), type(uint256).max);
   }
 
   function afterDeposit(uint256 amount, uint256) internal override {
@@ -66,6 +78,10 @@ contract ThenaLpERC4626 is MidasERC4626 {
 
   function balanceOfUnderlying(address account) public view returns (uint256) {
     return convertToAssets(balanceOf(account));
+  }
+
+  function beforeClaim() internal override {
+    gauge.getReward();
   }
 
   function emergencyWithdrawAndPause() external override onlyOwner {
