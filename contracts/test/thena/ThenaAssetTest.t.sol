@@ -34,7 +34,7 @@ contract ThenaAssetTest is AbstractAssetTest {
 
         this.setUpTestContract(testConfig);
 
-        (address asset, ) = abi.decode(testConfig, (address, address));
+        address asset = abi.decode(testConfig, (address));
 
         test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
       }

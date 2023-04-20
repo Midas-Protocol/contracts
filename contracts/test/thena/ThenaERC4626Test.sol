@@ -24,7 +24,7 @@ contract ThenaERC4626Test is AbstractERC4626Test {
     MidasFlywheel flywheel;
     ThenaLpERC4626 thenaErc4626;
 
-    (address _asset, address _lpTokenWhale) = abi.decode(data, (address, address));
+    address _asset = abi.decode(data, (address));
 
     address dpa = address(929292);
     address marketAddress = address(123);

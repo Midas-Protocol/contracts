@@ -35,7 +35,7 @@ contract ThenaLpERC4626 is MidasERC4626, RewardsClaimer {
   MidasFlywheel public flywheel;
   GaugeV2 public gauge;
 
-  VoterV3 public constant GAUGES_FACTORY_VOTER = VoterV3(0x62Ee96e6365ab515Ec647C065c2707d1122d7b26);
+  VoterV3 public constant GAUGES_FACTORY_VOTER = VoterV3(0x3A1D0952809F4948d15EBCe8d345962A282C4fCb);
 
   constructor() {
     _disableInitializers();
