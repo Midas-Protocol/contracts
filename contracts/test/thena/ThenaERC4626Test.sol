@@ -29,8 +29,6 @@ contract ThenaERC4626Test is AbstractERC4626Test {
     address dpa = address(929292);
     address marketAddress = address(123);
     deal(_asset, address(this), 100e18);
-//    vm.prank(lpTokenWhale);
-//    lpHayBusdToken.transfer(address(this), 1e22);
 
     {
       ThenaLpERC4626 impl = new ThenaLpERC4626();

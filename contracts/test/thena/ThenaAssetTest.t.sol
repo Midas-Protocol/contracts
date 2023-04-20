@@ -20,7 +20,7 @@ contract ThenaAssetTest is AbstractAssetTest {
   }
 
   function setUpTestContract(bytes calldata testConfig) public override {
-    (address asset) = abi.decode(testConfig, (address));
+    address asset = abi.decode(testConfig, (address));
 
     test.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(asset));
 
