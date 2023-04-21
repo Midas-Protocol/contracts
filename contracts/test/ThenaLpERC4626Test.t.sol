@@ -3,10 +3,10 @@ pragma solidity >=0.8.0;
 
 import "./config/BaseTest.t.sol";
 import "../midas/strategies/ThenaLpERC4626.sol";
+import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 
 import { ERC20Upgradeable as ERC20 } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { ERC20 as SolERC20 } from "solmate/tokens/ERC20.sol";
-
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
@@ -19,7 +19,7 @@ contract ThenaLpERC4626Test is BaseTest {
   ERC20 public thenaToken = ERC20(0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11);
   ERC20 public lpHayBusdToken = ERC20(0x93B32a8dfE10e9196403dd111974E325219aec24);
   address public lpTokenWhale = 0xE43317c1f037CBbaF33F33C386f2cAF2B6b25C9C; // gauge v2
-  address public marketAddress = address(123);
+  address public marketAddress = 0x04b6895d7AD8b10a1a13C749159226249a3b8515; // V1 AMM - HAY/ankrBNB
 
   function afterForkSetUp() internal override {
     address dpa = address(929292);
@@ -66,6 +66,24 @@ contract ThenaLpERC4626Test is BaseTest {
     uint256 sharesMinted = plugin.deposit(1e16, address(this));
     emit log_named_uint("shares minted", sharesMinted);
 
+    ERC20 rewardToken = plugin.rewardTokens(0);
+    uint256 rewardsBalanceBefore = rewardToken.balanceOf(marketAddress);
+
+    vm.warp(block.timestamp + 1e7);
+    vm.roll(block.number + 9999);
+
+    plugin.claimRewards();
+
+    uint256 rewardsBalanceAfter = rewardToken.balanceOf(marketAddress);
+    uint256 rewardsDiff = rewardsBalanceAfter - rewardsBalanceBefore;
+    emit log_named_uint("rewards diff", rewardsDiff);
+    assertGt(rewardsDiff, 0, "!no rewards claimed");
+  }
+
+  function testAnkrThenaRewards() public fork(BSC_MAINNET) {
+    CErc20PluginDelegate market = CErc20PluginDelegate(marketAddress);
+
+    plugin = ThenaLpERC4626(address(market.plugin()));
     ERC20 rewardToken = plugin.rewardTokens(0);
     uint256 rewardsBalanceBefore = rewardToken.balanceOf(marketAddress);
 
