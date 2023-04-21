@@ -2,6 +2,14 @@
 pragma solidity >=0.8.0;
 
 interface IHypervisor {
+  function baseLower() external view returns (int24);
+
+  function baseUpper() external view returns (int24);
+
+  function limitLower() external view returns (int24);
+
+  function limitUpper() external view returns (int24);
+
   function pool() external view returns (address);
 
   function token0() external view returns (address);
