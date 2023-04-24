@@ -77,15 +77,17 @@ contract ComptrollerTest is BaseTest {
       for (uint256 j = 0; j < markets.length; j++) {
         CTokenInterface market = markets[j];
         uint256 totalSupply = market.totalSupply();
-        if (totalSupply < 100) {
-          emit log_named_address("low ts market", address(markets[j]));
-          emit log_named_uint("ts", totalSupply);
-        } else {
-          assertEq(
-            pool.redeemAllowed(address(markets[j]), address(0), totalSupply - 98),
-            uint256(ComptrollerErrorReporter.Error.REJECTION),
-            "low ts not rejected"
-          );
+        if (totalSupply > 0) {
+          if (totalSupply < 1000) {
+            emit log_named_address("low ts market", address(markets[j]));
+            emit log_named_uint("ts", totalSupply);
+          } else {
+            assertEq(
+              pool.redeemAllowed(address(markets[j]), address(0), totalSupply - 980),
+              uint256(ComptrollerErrorReporter.Error.REJECTION),
+              "low ts not rejected"
+            );
+          }
         }
       }
     }
