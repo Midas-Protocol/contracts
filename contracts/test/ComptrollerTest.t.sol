@@ -16,6 +16,7 @@ import { IFlywheelRewards } from "flywheel-v2/interfaces/IFlywheelRewards.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
 
 contract ComptrollerTest is BaseTest {
   Comptroller internal comptroller;
@@ -46,33 +47,49 @@ contract ComptrollerTest is BaseTest {
     comptroller._addRewardsDistributor(address(flywheel));
   }
 
-  function testBscRefactoredBorrowCaps() public debuggingOnly fork(BSC_MAINNET) {
-    _testRefactoredBorrowCaps();
+  function testBscInflationProtection() public debuggingOnly fork(BSC_MAINNET) {
+    _testInflationProtection();
   }
 
-  function testPolygonRefactoredBorrowCaps() public debuggingOnly fork(POLYGON_MAINNET) {
-    _testRefactoredBorrowCaps();
+  function testPolygonInflationProtection() public debuggingOnly fork(POLYGON_MAINNET) {
+    _testInflationProtection();
   }
 
-  function testMoonbeamRefactoredBorrowCaps() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testRefactoredBorrowCaps();
+  function testMoonbeamInflationProtection() public debuggingOnly fork(MOONBEAM_MAINNET) {
+    _testInflationProtection();
   }
 
-  function testEvmosRefactoredBorrowCaps() public debuggingOnly fork(EVMOS_MAINNET) {
-    _testRefactoredBorrowCaps();
+  function testEvmosInflationProtection() public debuggingOnly fork(EVMOS_MAINNET) {
+    _testInflationProtection();
   }
 
-  function testFantomRefactoredBorrowCaps() public debuggingOnly fork(FANTOM_OPERA) {
-    _testRefactoredBorrowCaps();
+  function testFantomInflationProtection() public debuggingOnly fork(FANTOM_OPERA) {
+    _testInflationProtection();
   }
 
-  function _testRefactoredBorrowCaps() internal {
+  function _testInflationProtection() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
     for (uint256 i = 0; i < pools.length; i++) {
       Comptroller pool = Comptroller(pools[i].comptroller);
-      uint256 borrowCap = pool.borrowCapForCollateral(address(1), address(2));
-      assertEq(borrowCap, 0, "dummy borrow cap non-zero");
+      ComptrollerFirstExtension cfe = pool.asComptrollerFirstExtension();
+      CTokenInterface[] memory markets = cfe.getAllMarkets();
+      for (uint256 j = 0; j < markets.length; j++) {
+        CTokenInterface market = markets[j];
+        uint256 totalSupply = market.totalSupply();
+        if (totalSupply > 0) {
+          if (totalSupply < 1000) {
+            emit log_named_address("low ts market", address(markets[j]));
+            emit log_named_uint("ts", totalSupply);
+          } else {
+            assertEq(
+              pool.redeemAllowed(address(markets[j]), address(0), totalSupply - 980),
+              uint256(ComptrollerErrorReporter.Error.REJECTION),
+              "low ts not rejected"
+            );
+          }
+        }
+      }
     }
   }
 }

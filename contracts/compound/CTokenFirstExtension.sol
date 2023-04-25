@@ -20,7 +20,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 20;
+    uint8 fnsCount = 21;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -42,9 +42,15 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.exchangeRateHypothetical.selector;
     functionSelectors[--fnsCount] = this.supplyRatePerBlockAfterDeposit.selector;
     functionSelectors[--fnsCount] = this.supplyRatePerBlockAfterWithdraw.selector;
+    functionSelectors[--fnsCount] = this.getTotalUnderlyingSupplied.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
+  }
+
+  function getTotalUnderlyingSupplied() public view returns (uint256) {
+    // (totalCash + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees))
+    return asCToken().getCash() + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees);
   }
 
   /* ERC20 fns */
