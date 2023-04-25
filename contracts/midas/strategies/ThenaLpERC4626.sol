@@ -72,7 +72,7 @@ contract ThenaLpERC4626 is MidasERC4626, RewardsClaimer {
       return _asset().balanceOf(address(this));
     }
 
-    return gauge.balanceOf(address(this)) + gauge.earned(address(this));
+    return gauge.balanceOf(address(this));
   }
 
   function balanceOfUnderlying(address account) public view returns (uint256) {

@@ -12,6 +12,8 @@ import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDy
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
+import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
+import { Comptroller } from "../compound/Comptroller.sol";
 
 contract ThenaLpERC4626Test is BaseTest {
   ThenaLpERC4626 public plugin;
@@ -25,40 +27,8 @@ contract ThenaLpERC4626Test is BaseTest {
     address dpa = address(929292);
     vm.prank(lpTokenWhale);
     lpHayBusdToken.transfer(address(this), 1e22);
-
-    {
-      ThenaLpERC4626 impl = new ThenaLpERC4626();
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), dpa, "");
-      plugin = ThenaLpERC4626(address(proxy));
-    }
-
-    {
-      MidasFlywheel impl = new MidasFlywheel();
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), dpa, "");
-      flywheel = MidasFlywheel(address(proxy));
-    }
-    flywheel.initialize(
-      SolERC20(address(thenaToken)),
-      IFlywheelRewards(address(0)),
-      IFlywheelBooster(address(0)),
-      address(this)
-    );
-
-    FuseFlywheelDynamicRewards rewardsContract = new FuseFlywheelDynamicRewards(
-      FlywheelCore(address(flywheel)),
-      1 days
-    );
-    flywheel.setFlywheelRewards(rewardsContract);
-
-    plugin.initialize(lpHayBusdToken, marketAddress, flywheel);
-  }
-
-  function testThenaPluginDeposit() public fork(BSC_MAINNET) {
-    lpHayBusdToken.approve(address(plugin), 1e36);
-    uint256 depositAmount = 1e6;
-    uint256 sharesMinted = plugin.deposit(depositAmount, address(this));
-
-    assertEq(sharesMinted, depositAmount, "!init shares");
+    CErc20PluginDelegate market = CErc20PluginDelegate(marketAddress);
+    plugin = ThenaLpERC4626(address(market.plugin()));
   }
 
   function testThenaPluginAccrueRewards() public fork(BSC_MAINNET) {
@@ -78,5 +48,35 @@ contract ThenaLpERC4626Test is BaseTest {
     uint256 rewardsDiff = rewardsBalanceAfter - rewardsBalanceBefore;
     emit log_named_uint("rewards diff", rewardsDiff);
     assertGt(rewardsDiff, 0, "!no rewards claimed");
+  }
+
+  function testAnkrThenaRewards() public debuggingOnly fork(BSC_MAINNET) {
+    CErc20PluginDelegate market = CErc20PluginDelegate(marketAddress);
+
+    address user = 0x28C0208b7144B511C73586Bb07dE2100495e92f3;
+    Comptroller pool = Comptroller(address(market.comptroller()));
+    MidasFlywheel flywheel = MidasFlywheel(pool.rewardsDistributors(2));
+    flywheel.accrue(SolERC20(address(market)), user);
+
+    plugin = ThenaLpERC4626(address(market.plugin()));
+    ERC20 rewardToken = plugin.rewardTokens(0);
+    assertEq(address(rewardToken), address(thenaToken), "not thena");
+
+    vm.warp(block.timestamp + 1e7);
+    vm.roll(block.number + 9999);
+
+    plugin.claimRewards();
+
+    uint256 rewardsBalanceBefore = rewardToken.balanceOf(user);
+
+    uint256 rewards = flywheel.accrue(SolERC20(address(market)), user);
+    assertGt(rewards, 0, "no rewards accrued");
+
+    flywheel.claimRewards(user);
+
+    uint256 rewardsBalanceAfter = rewardToken.balanceOf(user);
+    uint256 rewardsDiff = rewardsBalanceAfter - rewardsBalanceBefore;
+    emit log_named_uint("rewards diff", rewardsDiff);
+    assertGt(rewardsDiff, 0, "!no rewards claimed for user");
   }
 }
