@@ -40,4 +40,11 @@ interface IHypervisor {
   function removeWhitelisted() external;
 
   function transferOwnership(address newOwner) external;
+
+  function withdraw(
+    uint256 shares,
+    address to,
+    address from,
+    uint256[4] memory minAmounts
+  ) external returns (uint256 amount0, uint256 amount1);
 }

@@ -9,10 +9,8 @@ import "../../external/compound/ICToken.sol";
 import "../../external/compound/ICErc20.sol";
 import { LiquidityAmounts } from "../../external/uniswap/LiquidityAmounts.sol";
 import { TickMath } from "../../external/uniswap/TickMath.sol";
-import { IUniswapV3Pool } from "../../external/uniswap/IUniswapV3Pool.sol";
-
+import { IAlgebraPool } from "../../external/algebra/IAlgebraPool.sol";
 import { IHypervisor } from "../../external/gamma/IHypervisor.sol";
-
 import { BasePriceOracle } from "../BasePriceOracle.sol";
 
 /**
@@ -74,7 +72,7 @@ contract GammaPoolPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
 
     uint160 sqrtPriceX96 = toUint160(
       // sqrt((p0 * (10**token0.decimals()) * (1 << 96)) / (p1 * (10**token1.decimals()))) << 48
-      sqrt((p0 * (1 << 96)) / (p1)) << 48
+      sqrt((p0 * (1 << 96)) / p1) << 48
     );
 
     // Get balances of the tokens in the pool given fair underlying token prices
@@ -85,7 +83,7 @@ contract GammaPoolPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
       pool.baseLower(),
       pool.baseUpper(),
       token,
-      IUniswapV3Pool(pool.pool())
+      IAlgebraPool(pool.pool())
     );
 
     uint256 r0 = token0.balanceOf(address(token)) + basePlusLimit0;
@@ -107,7 +105,7 @@ contract GammaPoolPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
     int24 baseLower,
     int24 baseUpper,
     address token,
-    IUniswapV3Pool pool
+    IAlgebraPool pool
   ) internal view returns (uint256 total0, uint256 total1) {
     (uint256 base0, uint256 base1) = _getPositionAtPrice(baseLower, baseUpper, sqrtRatioX96, token, pool);
     (uint256 limit0, uint256 limit1) = _getPositionAtPrice(limitLower, limitUpper, sqrtRatioX96, token, pool);
@@ -119,7 +117,7 @@ contract GammaPoolPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
     int24 tickUpper,
     uint160 sqrtRatioX96,
     address token,
-    IUniswapV3Pool pool
+    IAlgebraPool pool
   ) public view returns (uint256 amount0, uint256 amount1) {
     (uint128 positionLiquidity, uint128 tokensOwed0, uint128 tokensOwed1) = _position(
       pool,
@@ -148,7 +146,7 @@ contract GammaPoolPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
   }
 
   function _position(
-    IUniswapV3Pool pool,
+    IAlgebraPool pool,
     address token,
     int24 lowerTick,
     int24 upperTick
@@ -165,7 +163,7 @@ contract GammaPoolPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
     assembly {
       positionKey := or(shl(24, or(shl(24, token), and(lowerTick, 0xFFFFFF))), and(upperTick, 0xFFFFFF))
     }
-    (liquidity, , , tokensOwed0, tokensOwed1) = pool.positions(positionKey);
+    (liquidity, , , , tokensOwed0, tokensOwed1) = pool.positions(positionKey);
   }
 
   /**
