@@ -67,8 +67,8 @@ contract GammaPoolPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
     ERC20Upgradeable token1 = ERC20Upgradeable(pool.token1());
 
     // Get underlying token prices
-    uint256 p0 = BasePriceOracle(msg.sender).price(address(token0)) * 10**uint256(18 - token0.decimals());
-    uint256 p1 = BasePriceOracle(msg.sender).price(address(token1)) * 10**uint256(18 - token1.decimals());
+    uint256 p0 = BasePriceOracle(msg.sender).price(address(token0)); // * 10**uint256(18 - token0.decimals());
+    uint256 p1 = BasePriceOracle(msg.sender).price(address(token1)); // * 10**uint256(18 - token1.decimals());
 
     uint160 sqrtPriceX96 = toUint160(
       sqrt((p0 * (10**token0.decimals()) * (1 << 96)) / (p1 * (10**token1.decimals()))) << 48
