@@ -19,17 +19,17 @@ interface IAlgebraPoolState {
    * Returns unlocked Whether the pool is currently locked to reentrancy;
    */
   function globalState()
-  external
-  view
-  returns (
-    uint160 price,
-    int24 tick,
-    uint16 fee,
-    uint16 timepointIndex,
-    uint8 communityFeeToken0,
-    uint8 communityFeeToken1,
-    bool unlocked
-  );
+    external
+    view
+    returns (
+      uint160 price,
+      int24 tick,
+      uint16 fee,
+      uint16 timepointIndex,
+      uint8 communityFeeToken0,
+      uint8 communityFeeToken1,
+      bool unlocked
+    );
 
   /**
    * @notice The fee growth as a Q128.128 fees of token0 collected per unit of liquidity for the entire life of the pool
@@ -68,18 +68,18 @@ interface IAlgebraPoolState {
    * a specific position.
    */
   function ticks(int24 tick)
-  external
-  view
-  returns (
-    uint128 liquidityTotal,
-    int128 liquidityDelta,
-    uint256 outerFeeGrowth0Token,
-    uint256 outerFeeGrowth1Token,
-    int56 outerTickCumulative,
-    uint160 outerSecondsPerLiquidity,
-    uint32 outerSecondsSpent,
-    bool initialized
-  );
+    external
+    view
+    returns (
+      uint128 liquidityTotal,
+      int128 liquidityDelta,
+      uint256 outerFeeGrowth0Token,
+      uint256 outerFeeGrowth1Token,
+      int56 outerTickCumulative,
+      uint160 outerSecondsPerLiquidity,
+      uint32 outerSecondsSpent,
+      bool initialized
+    );
 
   /** @notice Returns 256 packed tick initialized boolean values. See TickTable for more information */
   function tickTable(int16 wordPosition) external view returns (uint256);
@@ -96,16 +96,16 @@ interface IAlgebraPoolState {
    * Returns fees1 The computed amount of token1 owed to the position as of the last mint/burn/poke
    */
   function positions(bytes32 key)
-  external
-  view
-  returns (
-    uint128 liquidityAmount,
-    uint32 lastLiquidityAddTimestamp,
-    uint256 innerFeeGrowth0Token,
-    uint256 innerFeeGrowth1Token,
-    uint128 fees0,
-    uint128 fees1
-  );
+    external
+    view
+    returns (
+      uint128 liquidityAmount,
+      uint32 lastLiquidityAddTimestamp,
+      uint256 innerFeeGrowth0Token,
+      uint256 innerFeeGrowth1Token,
+      uint128 fees0,
+      uint128 fees1
+    );
 
   /**
    * @notice Returns data about a specific timepoint index
@@ -122,17 +122,17 @@ interface IAlgebraPoolState {
    * Returns volumePerLiquidityCumulative Cumulative swap volume per liquidity for the life of the pool as of the timepoint timestamp;
    */
   function timepoints(uint256 index)
-  external
-  view
-  returns (
-    bool initialized,
-    uint32 blockTimestamp,
-    int56 tickCumulative,
-    uint160 secondsPerLiquidityCumulative,
-    uint88 volatilityCumulative,
-    int24 averageTick,
-    uint144 volumePerLiquidityCumulative
-  );
+    external
+    view
+    returns (
+      bool initialized,
+      uint32 blockTimestamp,
+      int56 tickCumulative,
+      uint160 secondsPerLiquidityCumulative,
+      uint88 volatilityCumulative,
+      int24 averageTick,
+      uint144 volumePerLiquidityCumulative
+    );
 
   /**
    * @notice Returns the information about active incentive
