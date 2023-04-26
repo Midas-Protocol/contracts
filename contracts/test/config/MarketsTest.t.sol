@@ -68,7 +68,6 @@ contract MarketsTest is BaseTest {
     asDelegate._setImplementationSafe(newDelegate, false, becomeImplData);
   }
 
-
   function _prepareComptrollerUpgrade(address oldCompImpl) internal {
     // whitelist the upgrade
     vm.startPrank(ffd.owner());

@@ -139,7 +139,11 @@ contract ExtensionsTest is MarketsTest {
 
       address[] memory initExtensionsAfter = DiamondBase(payable(poolAddress))._listExtensions();
       assertEq(initExtensionsAfter.length, 1, "remove this if the ffd config is set up");
-      assertEq(initExtensionsAfter[0], address(newComptrollerExtension), "first extension is not the newComptrollerExtension");
+      assertEq(
+        initExtensionsAfter[0],
+        address(newComptrollerExtension),
+        "first extension is not the newComptrollerExtension"
+      );
     }
   }
 

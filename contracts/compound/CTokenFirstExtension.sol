@@ -582,6 +582,7 @@ contract CTokenFirstExtension is
     require(mErr == MathError.NO_ERROR, "!balance");
     return balance;
   }
+
   /**
    * @notice Returns a boolean indicating if the sender has admin rights
    */

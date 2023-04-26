@@ -52,9 +52,10 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
     emit log_named_uint("max ratio", position.getMaxLeverageRatio());
   }
 
-  function getFundingStrategy(
-    IERC20Upgradeable fundingToken
-  ) external returns (IFundsConversionStrategy fundingStrategy, bytes memory strategyData) {
+  function getFundingStrategy(IERC20Upgradeable fundingToken)
+    external
+    returns (IFundsConversionStrategy fundingStrategy, bytes memory strategyData)
+  {
     // bUSD
     if (address(fundingToken) == 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56) {
       // JarvisLiquidatorFunder
@@ -68,7 +69,6 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
           break;
         }
       }
-
     }
   }
 }
