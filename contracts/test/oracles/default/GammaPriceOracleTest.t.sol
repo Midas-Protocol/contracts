@@ -28,6 +28,41 @@ contract GammaPoolPriceOracleTest is BaseTest {
     oracle.initialize(wtoken);
   }
 
+  function testPriceGammaPolygonNow() public fork(POLYGON_MAINNET) {
+    {
+      address DAI_GNS_QS_GAMMA_VAULT = 0x7aE7FB44c92B4d41abB6E28494f46a2EB3c2a690; // QS aDAI-GNS (Narrow)
+      address DAI_GNS_QS_GAMMA_WHALE = 0x20ec0d06F447d550fC6edee42121bc8C1817b97D; // QS Masterchef
+
+      vm.prank(address(mpo));
+      uint256 price_DAI_GNS = oracle.price(DAI_GNS_QS_GAMMA_VAULT);
+
+      uint256 expectedPrice = priceAtWithdraw(DAI_GNS_QS_GAMMA_WHALE, DAI_GNS_QS_GAMMA_VAULT);
+      assertApproxEqAbs(price_DAI_GNS, expectedPrice, 1e16, "!aDAI-GNS price");
+    }
+
+    {
+      address DAI_USDT_QS_GAMMA_VAULT = 0x45A3A657b834699f5cC902e796c547F826703b79;
+      address DAI_USDT_QS_WHALE = 0x20ec0d06F447d550fC6edee42121bc8C1817b97D; // QS Masterchef
+
+      vm.prank(address(mpo));
+      uint256 price_DAI_USDT = oracle.price(DAI_USDT_QS_GAMMA_VAULT);
+
+      uint256 expectedPrice = priceAtWithdraw(DAI_USDT_QS_WHALE, DAI_USDT_QS_GAMMA_VAULT);
+      assertApproxEqAbs(price_DAI_USDT, expectedPrice, 1e16, "!aDAI-USDT price");
+    }
+
+    // {
+    //   address WBTC_WBNB_THENA_GAMMA_VAULT = 0xBd2383816Bab04E46b69801CCa7e92D34aB94D3F; // Wide
+    //   address WBTC_WBNB_THENA_WHALE = 0xb75942D49e7F455C47DebBDCA81DF67244fe7d40; // thena gauge
+
+    //   vm.prank(address(mpo));
+    //   uint256 price_WBTC_WBNB = oracle.price(WBTC_WBNB_THENA_GAMMA_VAULT);
+
+    //   uint256 expectedPrice = priceAtWithdraw(WBTC_WBNB_THENA_WHALE, WBTC_WBNB_THENA_GAMMA_VAULT);
+    //   assertApproxEqAbs(price_WBTC_WBNB, expectedPrice, 1e16, "!WBTC_WBNB price");
+    // }
+  }
+
   function testPriceGammaBscNow() public fork(BSC_MAINNET) {
     {
       address USDT_WBNB_THENA_GAMMA_VAULT = 0x921C7aC35D9a528440B75137066adb1547289555; // Wide
@@ -66,21 +101,21 @@ contract GammaPoolPriceOracleTest is BaseTest {
   function priceAtWithdraw(address whale, address vaultAddress) internal returns (uint256) {
     address emptyAddress = address(900202020);
     IHypervisor vault = IHypervisor(vaultAddress);
-    address token0 = vault.token0();
-    address token1 = vault.token1();
+    ERC20Upgradeable token0 = ERC20Upgradeable(vault.token0());
+    ERC20Upgradeable token1 = ERC20Upgradeable(vault.token1());
 
-    uint256 balance0Before = ERC20Upgradeable(token0).balanceOf(emptyAddress);
-    uint256 balance1Before = ERC20Upgradeable(token1).balanceOf(emptyAddress);
+    uint256 balance0Before = token0.balanceOf(emptyAddress);
+    uint256 balance1Before = token1.balanceOf(emptyAddress);
 
     uint256[4] memory minAmounts;
     vm.prank(whale);
-    vault.withdraw(1e18, emptyAddress, whale, minAmounts);
+    vault.withdraw(0.01e18, emptyAddress, whale, minAmounts);
 
-    uint256 balance0After = ERC20Upgradeable(token0).balanceOf(emptyAddress);
-    uint256 balance1After = ERC20Upgradeable(token1).balanceOf(emptyAddress);
+    uint256 balance0After = token0.balanceOf(emptyAddress);
+    uint256 balance1After = token1.balanceOf(emptyAddress);
 
-    uint256 price0 = mpo.price(token0);
-    uint256 price1 = mpo.price(token1);
+    uint256 price0 = mpo.price(address(token0)) * 10**uint256(18 - token0.decimals());
+    uint256 price1 = mpo.price(address(token1)) * 10**uint256(18 - token0.decimals());
 
     uint256 balance0Diff = balance0After - balance0Before;
     uint256 balance1Diff = balance1After - balance1Before;
@@ -89,7 +124,7 @@ contract GammaPoolPriceOracleTest is BaseTest {
     return (balance0Diff * price0 + balance1Diff * price1) / 1e18;
   }
 
-  function testFrokedPriceGammaBsc() public forkAtBlock(BSC_MAINNET, 27513712) {
+  function testForkedPriceGammaBsc() public forkAtBlock(BSC_MAINNET, 27513712) {
     address USDT_USDC_THENA_GAMMA_VAULT = 0x5EEca990E9B7489665F4B57D27D92c78BC2AfBF2;
     address USDT_WBNB_THENA_GAMMA_VAULT = 0x3ec1FFd5dc29190588608Ae9Fd4f93750e84CDA2; // Wide
     address WBTC_WBNB_THENA_GAMMA_VAULT = 0xBd2383816Bab04E46b69801CCa7e92D34aB94D3F; // Wide
