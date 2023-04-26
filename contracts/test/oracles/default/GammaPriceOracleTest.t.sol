@@ -63,22 +63,30 @@ contract GelatoGUniPriceOracleTest is BaseTest {
     }
   }
 
-  function priceAtWithdraw(address whale, address vault) internal returns (uint256) {
+  function priceAtWithdraw(address whale, address vaultAddress) internal returns (uint256) {
     address emptyAddress = address(900202020);
+    IHypervisor vault = IHypervisor(vaultAddress);
+    address token0 = vault.token0();
+    address token1 = vault.token1();
+
+    uint256 balance0Before = ERC20Upgradeable(token0).balanceOf(emptyAddress);
+    uint256 balance1Before = ERC20Upgradeable(token1).balanceOf(emptyAddress);
+
     uint256[4] memory minAmounts;
     vm.prank(whale);
-    IHypervisor(vault).withdraw(1e18, emptyAddress, whale, minAmounts);
-    address token0 = IHypervisor(vault).token0();
-    address token1 = IHypervisor(vault).token1();
+    vault.withdraw(1e18, emptyAddress, whale, minAmounts);
 
-    uint256 balance0 = ERC20Upgradeable(token0).balanceOf(emptyAddress);
-    uint256 balance1 = ERC20Upgradeable(token1).balanceOf(emptyAddress);
+    uint256 balance0After = ERC20Upgradeable(token0).balanceOf(emptyAddress);
+    uint256 balance1After = ERC20Upgradeable(token1).balanceOf(emptyAddress);
 
     uint256 price0 = mpo.price(token0);
     uint256 price1 = mpo.price(token1);
 
+    uint256 balance0Diff = balance0After - balance0Before;
+    uint256 balance1Diff = balance1After - balance1Before;
+
     // TODO tokens decimals
-    return (balance0 * price0 + balance1 * price1) / 1e18;
+    return (balance0Diff * price0 + balance1Diff * price1) / 1e18;
   }
 
   //   function testPriceGammaBsc() public fork(BSC_MAINNET) {
