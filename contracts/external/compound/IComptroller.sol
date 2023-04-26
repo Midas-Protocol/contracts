@@ -108,7 +108,7 @@ interface IComptroller {
     address account,
     ICToken cTokenModify,
     bool isBorrow
-  ) external returns (uint256);
+  ) external view returns (uint256);
 
   function borrowCapForCollateral(address borrowed, address collateral) external view returns (uint256);
 

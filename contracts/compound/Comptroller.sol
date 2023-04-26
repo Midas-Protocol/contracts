@@ -371,10 +371,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address account,
     address cToken,
     bool isBorrow
-  ) external override returns (uint256) {
+  ) external view override returns (uint256) {
     CTokenInterface cTokenModify = CTokenInterface(cToken);
     // Accrue interest
-    uint256 balanceOfUnderlying = cTokenModify.asCTokenExtensionInterface().balanceOfUnderlying(account);
+    uint256 balanceOfUnderlying = cTokenModify.asCTokenExtensionInterface().balanceOfUnderlyingHypo(account);
 
     // Get account liquidity
     (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(

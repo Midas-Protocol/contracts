@@ -79,63 +79,25 @@ contract MockThirdComptrollerExtension is DiamondExtension, ComptrollerV3Storage
 }
 
 contract ExtensionsTest is MarketsTest {
-  ComptrollerFirstExtension internal cfe;
   MockComptrollerExtension internal mockExtension;
   MockSecondComptrollerExtension internal second;
   MockThirdComptrollerExtension internal third;
-  address payable internal latestComptrollerImplementation;
 
   function afterForkSetUp() internal virtual override {
     super.afterForkSetUp();
-    cfe = new ComptrollerFirstExtension();
     mockExtension = new MockComptrollerExtension();
     second = new MockSecondComptrollerExtension();
     third = new MockThirdComptrollerExtension();
-    Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
-    latestComptrollerImplementation = payable(address(newComptrollerImplementation));
-  }
-
-  function _prepareComptrollerUpgrade(address oldCompImpl) internal {
-    // whitelist the upgrade
-    vm.startPrank(ffd.owner());
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(oldCompImpl),
-      asArray(latestComptrollerImplementation),
-      asArray(true)
-    );
-    // whitelist the new pool creation
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(address(0)),
-      asArray(latestComptrollerImplementation),
-      asArray(true)
-    );
-    DiamondExtension[] memory extensions = new DiamondExtension[](1);
-    extensions[0] = cfe;
-    ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);
-    vm.stopPrank();
-  }
-
-  function _upgradeExistingComptroller(Unitroller asUnitroller) internal {
-    // change the implementation to the new that can add extensions
-    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
-
-    _prepareComptrollerUpgrade(oldComptrollerImplementation);
-
-    // upgrade to the new comptroller
-    vm.startPrank(asUnitroller.admin());
-    asUnitroller._setPendingImplementation(latestComptrollerImplementation);
-    Comptroller(latestComptrollerImplementation)._become(asUnitroller);
-    vm.stopPrank();
   }
 
   function testExtensionReplace() public debuggingOnly fork(BSC_MAINNET) {
     address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
     Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
-    _upgradeExistingComptroller(asUnitroller);
+    _upgradePool(asUnitroller);
 
     // replace the first extension with the mock
     vm.prank(ffd.owner());
-    ffd._registerComptrollerExtension(jFiatPoolAddress, mockExtension, cfe);
+    ffd._registerComptrollerExtension(jFiatPoolAddress, mockExtension, newComptrollerExtension);
 
     // assert that the replacement worked
     MockComptrollerExtension asMockExtension = MockComptrollerExtension(jFiatPoolAddress);
@@ -177,7 +139,7 @@ contract ExtensionsTest is MarketsTest {
 
       address[] memory initExtensionsAfter = DiamondBase(payable(poolAddress))._listExtensions();
       assertEq(initExtensionsAfter.length, 1, "remove this if the ffd config is set up");
-      assertEq(initExtensionsAfter[0], address(cfe), "first extension is not the CFE");
+      assertEq(initExtensionsAfter[0], address(newComptrollerExtension), "first extension is not the newComptrollerExtension");
     }
   }
 
@@ -271,7 +233,7 @@ contract ExtensionsTest is MarketsTest {
     uint256 totalSupplyBefore = asDelegate.totalSupply();
     if (totalSupplyBefore == 0) return; // total supply should be non-zero
 
-    _upgradeExistingCTokenExtension(asDelegate);
+    _upgradeMarket(asDelegate);
 
     // check if the extension was added
     address[] memory extensions = asDelegate._listExtensions();

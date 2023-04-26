@@ -9,7 +9,7 @@ abstract contract ComptrollerInterface {
     address account,
     address cToken,
     bool isBorrow
-  ) external virtual returns (uint256);
+  ) external view virtual returns (uint256);
 
   /*** Assets You Are In ***/
 

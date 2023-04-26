@@ -20,7 +20,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 21;
+    uint8 fnsCount = 22;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -576,7 +576,7 @@ contract CTokenFirstExtension is
     return balance;
   }
 
-  function balanceOfUnderlyingHypo(address owner) public returns (uint256) {
+  function balanceOfUnderlyingHypo(address owner) public view returns (uint256) {
     Exp memory exchangeRate = Exp({ mantissa: exchangeRateHypothetical() });
     (MathError mErr, uint256 balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
     require(mErr == MathError.NO_ERROR, "!balance");
