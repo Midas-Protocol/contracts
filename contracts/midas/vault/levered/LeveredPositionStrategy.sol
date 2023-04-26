@@ -97,7 +97,10 @@ contract LeveredPositionStrategy {
     IPriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
-    (IFundsConversionStrategy fundingStrategy, bytes memory strategyData) = factory.getFundingStrategy(collateralAsset, stableAsset);
+    (IFundsConversionStrategy fundingStrategy, bytes memory strategyData) = factory.getFundingStrategy(
+      collateralAsset,
+      stableAsset
+    );
 
     // redeem and repay until the borrowed amount is repaid
     uint256 borrowBalance = stableMarket.borrowBalanceCurrent(address(this));
@@ -210,7 +213,10 @@ contract LeveredPositionStrategy {
   function _leverUp(uint256 ratioDiff) internal {
     IERC20Upgradeable stableAsset = IERC20Upgradeable(stableMarket.underlying());
     IERC20Upgradeable collateralAsset = IERC20Upgradeable(collateralMarket.underlying());
-    (IFundsConversionStrategy fundingStrategy, bytes memory strategyData) = factory.getFundingStrategy(stableAsset, collateralAsset);
+    (IFundsConversionStrategy fundingStrategy, bytes memory strategyData) = factory.getFundingStrategy(
+      stableAsset,
+      collateralAsset
+    );
 
     // estimate the borrow amount for each iteration
     uint256[] memory stableToBorrowAndSwap = new uint256[](MAX_LEVER_UP_ITERATIONS);
@@ -277,11 +283,14 @@ contract LeveredPositionStrategy {
     require(collateralMarket.mint(amountToDeposit) == 0, "deposit collateral failed");
   }
 
-  function convertAllTo(
-    IERC20Upgradeable inputToken,
-    IERC20Upgradeable outputToken
-  ) private returns (uint256 outputAmount) {
-    (IFundsConversionStrategy fundingStrategy, bytes memory strategyData) = factory.getFundingStrategy(inputToken, outputToken);
+  function convertAllTo(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    private
+    returns (uint256 outputAmount)
+  {
+    (IFundsConversionStrategy fundingStrategy, bytes memory strategyData) = factory.getFundingStrategy(
+      inputToken,
+      outputToken
+    );
     (, outputAmount) = convertCustomFunds(inputToken, fundingStrategy, strategyData);
   }
 
