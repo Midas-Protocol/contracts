@@ -13,9 +13,9 @@ contract ThenaTestConfigStorage is ITestConfigStorage {
   constructor() {
     // sAMM HAY-BUSD
     testConfigs.push(ThenaTestConfig(0x93B32a8dfE10e9196403dd111974E325219aec24));
-    // Algebra (Gamma) USDC-USDC
+    // Algebra (Gamma) USDT-USDC
     testConfigs.push(ThenaTestConfig(0x5EEca990E9B7489665F4B57D27D92c78BC2AfBF2));
-    // // Algebra THE-WBNB Narrow
+    // Algebra THE-WBNB Narrow
     testConfigs.push(ThenaTestConfig(0xeD044cD5654ad208b1BC594Fd108C132224E3f3C));
   }
 
