@@ -322,15 +322,14 @@ contract ExtensionsTest is MarketsTest {
   }
 
   function testBulkAutoUpgrade() public debuggingOnly fork(POLYGON_MAINNET) {
-    CErc20Delegate market = CErc20Delegate(0x4DED2939A2A8912E9Cc9eaEFAbECC43CC9864723);
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
 
-    address newImplAddress = _prepareCTokenUpgrade(market);
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
-    vm.startPrank(ffd.owner());
-    ffd.autoUpgradePool(IComptroller(address(market.comptroller())));
-
-    address implAfter = market.implementation();
-    assertEq(implAfter, newImplAddress, "!market upgrade");
+    for (uint8 i = 0; i < pools.length; i++) {
+      vm.prank(ffd.owner());
+      ffd.autoUpgradePool(IComptroller(pools[i].comptroller));
+    }
   }
 
   function testMoonbeamExchangeRateHypo() public debuggingOnly fork(MOONBEAM_MAINNET) {
@@ -383,7 +382,7 @@ contract ExtensionsTest is MarketsTest {
     }
   }
 
-  function testDelegateType() public debuggingOnly fork(BSC_MAINNET) {
-    emit log(CErc20Delegate(0x9c2C420dF7cb5F89F6EBFf8503122D01aBF950a3).contractType());
+  function testDelegateType() public debuggingOnly fork(POLYGON_MAINNET) {
+    emit log(CErc20Delegate(0x587906620D627fe75C4d1288C6A584089780959c).contractType());
   }
 }

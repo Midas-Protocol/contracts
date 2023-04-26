@@ -310,6 +310,12 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address redeemer,
     uint256 redeemTokens
   ) internal view returns (uint256) {
+    uint256 totalSupplyNew = CTokenInterface(cToken).totalSupply() - redeemTokens;
+    if (totalSupplyNew != 0 && totalSupplyNew < 1000) {
+      // don't let the total supply go too low to prevent inflation attacks
+      return uint256(Error.REJECTION);
+    }
+
     if (!markets[cToken].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
     }

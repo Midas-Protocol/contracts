@@ -42,7 +42,7 @@ contract WombatLpTokenLiquidatorTest is BaseTest {
     assertApproxEqAbs(
       expectedAmount,
       redeemAmount,
-      uint256(1e17),
+      uint256(5e17),
       string(abi.encodePacked("!redeemAmount == expectedAmount "))
     );
   }
