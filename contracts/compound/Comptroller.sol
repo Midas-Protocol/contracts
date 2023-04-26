@@ -1239,7 +1239,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    * @return uint 0=success, otherwise a failure. (See enum Error for details)
    */
   function _deployMarket(
-    bool isCEther,
+    bool,
     bytes calldata constructorData,
     uint256 collateralFactorMantissa
   ) external returns (uint256) {

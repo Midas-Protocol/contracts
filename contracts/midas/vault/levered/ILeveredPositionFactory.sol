@@ -6,7 +6,7 @@ import { IFundsConversionStrategy } from "../../../liquidators/IFundsConversionS
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 interface ILeveredPositionFactory {
-  function getFundingStrategy(IERC20Upgradeable fundingToken)
+  function getFundingStrategy(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     external
     returns (IFundsConversionStrategy fundingStrategy, bytes memory strategyData);
 }

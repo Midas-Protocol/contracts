@@ -50,24 +50,28 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
 
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
     emit log_named_uint("max ratio", position.getMaxLeverageRatio());
+    emit log_named_uint("withdraw amount", position.closePosition());
+    emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
   }
 
-  function getFundingStrategy(IERC20Upgradeable fundingToken)
+  function getFundingStrategy(IERC20Upgradeable fundingToken, IERC20Upgradeable outputToken)
     external
     returns (IFundsConversionStrategy fundingStrategy, bytes memory strategyData)
   {
-    // bUSD
-    if (address(fundingToken) == 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56) {
-      // JarvisLiquidatorFunder
-      AddressesProvider.JarvisPool[] memory pools = ap.getJarvisPools();
-      for (uint256 i = 0; i < pools.length; i++) {
-        AddressesProvider.JarvisPool memory pool = pools[i];
-        if (pool.collateralToken == address(fundingToken)) {
-          strategyData = abi.encode(pool.collateralToken, pool.liquidityPool, pool.expirationTime);
-          //outputToken = pool.synt;
-          fundingStrategy = new JarvisLiquidatorFunder();
-          break;
-        }
+    // JarvisLiquidatorFunder
+    AddressesProvider.JarvisPool[] memory pools = ap.getJarvisPools();
+    for (uint256 i = 0; i < pools.length; i++) {
+      AddressesProvider.JarvisPool memory pool = pools[i];
+      if (pool.collateralToken == address(fundingToken)) {
+        require(address(outputToken) == pool.syntheticToken, "!output token mismatch");
+        strategyData = abi.encode(pool.collateralToken, pool.liquidityPool, pool.expirationTime);
+        fundingStrategy = new JarvisLiquidatorFunder();
+        break;
+      } else if (pool.syntheticToken == address(fundingToken)) {
+        require(address(outputToken) == pool.collateralToken, "!output token mismatch");
+        strategyData = abi.encode(pool.syntheticToken, pool.liquidityPool, pool.expirationTime);
+        fundingStrategy = new JarvisLiquidatorFunder();
+        break;
       }
     }
   }
