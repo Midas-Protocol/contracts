@@ -13,7 +13,7 @@ import { IUniswapV3Pool } from "../../../external/uniswap/IUniswapV3Pool.sol";
 
 import { IHypervisor } from "../../../external/gamma/IHypervisor.sol";
 
-contract GelatoGUniPriceOracleTest is BaseTest {
+contract GammaPoolPriceOracleTest is BaseTest {
   GammaPoolPriceOracle private oracle;
   MasterPriceOracle mpo;
   address wtoken;
