@@ -21,7 +21,7 @@ contract ThenaLpERC4626Test is BaseTest {
   ERC20 public thenaToken = ERC20(0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11);
   ERC20 public lpHayBusdToken = ERC20(0x93B32a8dfE10e9196403dd111974E325219aec24);
   address public lpTokenWhale = 0xE43317c1f037CBbaF33F33C386f2cAF2B6b25C9C; // gauge v2
-  address public marketAddress = address(123);
+  address public marketAddress = 0xF8527Dc5611B589CbB365aCACaac0d1DC70b25cB; // HAY/BUSD
 
   function afterForkSetUp() internal override {
     address dpa = address(929292);
