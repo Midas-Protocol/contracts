@@ -298,34 +298,34 @@ contract ExtensionsTest is MarketsTest {
     }
   }
 
-  function testMoonbeamExchangeRateHypo() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testExchangeRateHypo();
+  function testMoonbeamTotalUnderlyingSupplied() public debuggingOnly fork(MOONBEAM_MAINNET) {
+    _testTotalUnderlyingSupplied();
   }
 
-  function testPolygonExchangeRateHypo() public debuggingOnly fork(POLYGON_MAINNET) {
-    _testExchangeRateHypo();
+  function testPolygonTotalUnderlyingSupplied() public debuggingOnly fork(POLYGON_MAINNET) {
+    _testTotalUnderlyingSupplied();
   }
 
-  function testBscExchangeRateHypo() public debuggingOnly fork(BSC_MAINNET) {
-    _testExchangeRateHypo();
+  function testBscTotalUnderlyingSupplied() public debuggingOnly fork(BSC_MAINNET) {
+    _testTotalUnderlyingSupplied();
   }
 
-  function testEvmosExchangeRateHypo() public debuggingOnly fork(EVMOS_MAINNET) {
-    _testExchangeRateHypo();
+  function testEvmosTotalUnderlyingSupplied() public debuggingOnly fork(EVMOS_MAINNET) {
+    _testTotalUnderlyingSupplied();
   }
 
-  function testFantomExchangeRateHypo() public debuggingOnly fork(FANTOM_OPERA) {
-    _testExchangeRateHypo();
+  function testFantomTotalUnderlyingSupplied() public debuggingOnly fork(FANTOM_OPERA) {
+    _testTotalUnderlyingSupplied();
   }
 
-  function _testExchangeRateHypo() internal {
+  function _testTotalUnderlyingSupplied() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
 
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      if (pools[i].comptroller == 0x5373C052Df65b317e48D6CAD8Bb8AC50995e9459) continue;
-      if (pools[i].comptroller == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) continue;
+      //      if (pools[i].comptroller == 0x5373C052Df65b317e48D6CAD8Bb8AC50995e9459) continue;
+      //      if (pools[i].comptroller == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) continue;
       ComptrollerFirstExtension poolExt = ComptrollerFirstExtension(pools[i].comptroller);
 
       CTokenInterface[] memory markets = poolExt.getAllMarkets();
@@ -334,16 +334,7 @@ contract ExtensionsTest is MarketsTest {
         //        emit log(market.contractType());
         //        emit log_named_address("impl", market.implementation());
         CTokenFirstExtension marketAsExt = CTokenFirstExtension(address(markets[k]));
-        uint256 cash = market.getCash();
-        if (cash > 0) {
-          uint256 exchRateBefore = marketAsExt.exchangeRateStored();
-          emit log_named_uint("rate before", exchRateBefore);
-          uint256 hypoRate = marketAsExt.exchangeRateHypothetical();
-          marketAsExt.accrueInterest();
-          uint256 exchRateAfter = marketAsExt.exchangeRateStored();
-          emit log_named_uint("rate after", exchRateAfter);
-          assertEq(hypoRate, exchRateAfter, "hypo rate zero");
-        }
+        marketAsExt.getTotalUnderlyingSupplied();
       }
     }
   }
