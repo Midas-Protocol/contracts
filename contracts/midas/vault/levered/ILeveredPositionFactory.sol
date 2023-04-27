@@ -8,8 +8,8 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 
 interface ILeveredPositionFactory {
   function getFundingStrategy(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  external
-  returns (IFundsConversionStrategy fundingStrategy, bytes memory strategyData);
+    external
+    returns (IFundsConversionStrategy fundingStrategy, bytes memory strategyData);
 
   function getFlashLoanStrategy(IERC20Upgradeable tokenToBorrow) external returns (IFlashLoanStrategy strategy);
 }

@@ -258,7 +258,6 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
           // 4% slippage
           newLeveredDeposits = (newLeveredDeposits * 96) / 100;
         }
-
       }
       totalNewLeveredDeposits += newLeveredDeposits;
       maxBorrowValueScaled = (maxBorrowValueScaled * collateralFactor) / 1e18;

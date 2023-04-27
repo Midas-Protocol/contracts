@@ -8,11 +8,15 @@ import "../external/solidly/IPair.sol";
 contract SolidlyFlashLoanStrategy is IFlashLoanStrategy {
   IRouter public router; // this cant work with delegatecall
 
-  constructor (IRouter _router) {
+  constructor(IRouter _router) {
     router = _router;
   }
 
-  function flashLoan(IERC20Upgradeable assetToBorrow, uint256 amountToBorrow, IERC20Upgradeable assetToRepay) external {
+  function flashLoan(
+    IERC20Upgradeable assetToBorrow,
+    uint256 amountToBorrow,
+    IERC20Upgradeable assetToRepay
+  ) external {
     bool stable; // TODO - check first for a stable, then for a volatile?
     address pairAddress = router.pairFor(address(assetToBorrow), address(assetToRepay), stable);
     require(pairAddress != address(0), "!pair not found");
@@ -26,8 +30,16 @@ contract SolidlyFlashLoanStrategy is IFlashLoanStrategy {
     pair.swap(amount0Out, amount1Out, address(this), abi.encode(assetToRepay, amountToRepay, pair));
   }
 
-  function hook(address, uint256 amount0, uint256 amount1, bytes calldata data) external {
-    (IERC20Upgradeable assetToRepay, uint256 amountToRepay, IPair pair) = abi.decode(data, (IERC20Upgradeable, uint256, IPair));
+  function hook(
+    address,
+    uint256 amount0,
+    uint256 amount1,
+    bytes calldata data
+  ) external {
+    (IERC20Upgradeable assetToRepay, uint256 amountToRepay, IPair pair) = abi.decode(
+      data,
+      (IERC20Upgradeable, uint256, IPair)
+    );
     //IPair pair = IPair(msg.sender);
 
     // TODO delegatecall?
@@ -40,7 +52,11 @@ contract SolidlyFlashLoanStrategy is IFlashLoanStrategy {
     );
   }
 
-  function repayFlashLoan(IERC20Upgradeable assetToRepay, uint256 amountToRepay, bytes calldata data) external {
+  function repayFlashLoan(
+    IERC20Upgradeable assetToRepay,
+    uint256 amountToRepay,
+    bytes calldata data
+  ) external {
     (, , address pair) = abi.decode(data, (address, uint256, address));
     assetToRepay.transfer(pair, amountToRepay);
   }
