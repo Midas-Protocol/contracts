@@ -8,7 +8,7 @@ import "../../liquidators/SolidlyLiquidator.sol";
 contract SolidlyLiquidatorTest is BaseTest {
   SolidlyLiquidator public liquidator;
   MasterPriceOracle public mpo;
-  address stable;
+  address stableToken;
   address solidlySwapRouter = 0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109;
   address hayAddress = 0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5;
   address ankrAddress = 0xf307910A4c7bbc79691fD374889b36d8531B08e3;
@@ -17,7 +17,7 @@ contract SolidlyLiquidatorTest is BaseTest {
   function afterForkSetUp() internal override {
     liquidator = new SolidlyLiquidator();
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-    stable = ap.getAddress("stableToken");
+    stableToken = ap.getAddress("stableToken");
   }
 
   function testSolidlyHayBusd() public fork(BSC_MAINNET) {
@@ -30,10 +30,10 @@ contract SolidlyLiquidatorTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       hay,
       inputAmount,
-      abi.encode(solidlySwapRouter, stable, true)
+      abi.encode(solidlySwapRouter, stableToken)
     );
 
-    assertEq(address(outputToken), stable, "!busd output");
+    assertEq(address(outputToken), stableToken, "!busd output");
     assertApproxEqRel(inputAmount, outputAmount, 8e16, "!busd amount");
   }
 
@@ -47,7 +47,7 @@ contract SolidlyLiquidatorTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       ankr,
       inputAmount,
-      abi.encode(solidlySwapRouter, hayAddress, false)
+      abi.encode(solidlySwapRouter, hayAddress)
     );
 
     uint256 outputValue = mpo.price(hayAddress) * outputAmount;

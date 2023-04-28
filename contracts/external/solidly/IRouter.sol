@@ -1,6 +1,14 @@
 pragma solidity >=0.8.0;
 
 interface IRouter {
+  function isPair(address pair) external view returns (bool);
+
+  function getReserves(
+    address tokenA,
+    address tokenB,
+    bool stable
+  ) external view returns (uint256 reserveA, uint256 reserveB);
+
   function pairFor(
     address tokenA,
     address tokenB,
