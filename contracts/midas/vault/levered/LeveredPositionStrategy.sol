@@ -105,7 +105,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
 
     _flashLoanStrategy = factory.getFlashLoanStrategy(stableAsset);
     // TODO delegatecall
-    _flashLoanStrategy.flashLoan(stableAsset, borrowBalance, collateralAsset);
+    _flashLoanStrategy.flashLoan(stableAsset, borrowBalance);
     // will receive first a callback to receiveFlashLoan()
     // then the execution continues from here
 
@@ -142,7 +142,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     require(collateralMarket.redeemUnderlying(maxRedeem) == 0, "redeem all failed");
 
     // TODO delegatecall
-    _flashLoanStrategy.repayFlashLoan(assetToRepay, amountToRepay, data);
+    _flashLoanStrategy.repayFlashLoan(assetToRepay, amountToRepay);
     _flashLoanStrategy = IFlashLoanStrategy(address(0));
   }
 

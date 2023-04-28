@@ -125,5 +125,7 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
     }
   }
 
-  function getFlashLoanStrategy(IERC20Upgradeable tokenToBorrow) external returns (IFlashLoanStrategy strategy) {}
+  function getFlashLoanStrategy(IERC20Upgradeable tokenToBorrow) external returns (IFlashLoanStrategy strategy) {
+
+  }
 }
