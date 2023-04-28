@@ -35,12 +35,12 @@ interface IAlgebraPoolActions {
     uint128 amount,
     bytes calldata data
   )
-  external
-  returns (
-    uint256 amount0,
-    uint256 amount1,
-    uint128 liquidityActual
-  );
+    external
+    returns (
+      uint256 amount0,
+      uint256 amount1,
+      uint128 liquidityActual
+    );
 
   /**
    * @notice Collects tokens owed to a position

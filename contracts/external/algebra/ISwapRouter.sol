@@ -70,6 +70,6 @@ interface ISwapRouter is IAlgebraSwapCallback {
   /// @param params The parameters necessary for the multi-hop swap, encoded as `ExactInputParams` in calldata
   /// @return amountOut The amount of the received token
   function exactInputSingleSupportingFeeOnTransferTokens(ExactInputSingleParams calldata params)
-  external
-  returns (uint256 amountOut);
+    external
+    returns (uint256 amountOut);
 }

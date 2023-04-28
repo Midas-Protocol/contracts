@@ -47,5 +47,4 @@ contract UniswapV3Liquidator is IRedemptionStrategy {
 
     outputAmount = swapRouter.exactInputSingle(params);
   }
-
 }
