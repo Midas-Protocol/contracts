@@ -160,13 +160,18 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
   }
 
   function testSolidlyLpRedeem() public fork(BSC_MAINNET) {
+    address ankrBNB = 0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827;
+
     address WBNB_BUSD = 0x483653bcF3a10d9a1c334CE16a19471a614F4385;
     address HAY_BUSD = 0x93B32a8dfE10e9196403dd111974E325219aec24;
+    address ANKR_ankrBNB = 0x7ef540f672Cd643B79D2488344944499F7518b1f;
 
     address WBNB_BUSD_whale = 0x7144851e51523a88EA6BeC9710cC07f3a9B3baa7;
     address HAY_BUSD_whale = 0x5f8a3d4ad41352A8145DDe8dC0aA3159C7B7649D;
+    address ANKR_ankrBNB_whale = 0x5FFEAe4E352Bf3789C9152Ef7eAfD9c1B3bfcE26;
 
     testSolidlyLpTokenRedeem(WBNB_BUSD_whale, WBNB_BUSD, wtoken, oracleSolidly);
     testSolidlyLpTokenRedeem(HAY_BUSD_whale, HAY_BUSD, stableToken, oracleSolidly);
+    testSolidlyLpTokenRedeem(ANKR_ankrBNB_whale, ANKR_ankrBNB, ankrBNB, oracleSolidly);
   }
 }
