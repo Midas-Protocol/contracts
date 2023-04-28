@@ -480,6 +480,10 @@ contract AnyLiquidationTest is BaseTest {
       address xbomb = inputToken;
       address bomb = outputToken;
       strategyData = abi.encode(inputToken, xbomb, bomb);
+    } else if (compareStrings(strategyContract, "AlgebraSwapLiquidator")) {
+      address ALGEBRA_SWAP_ROUTER = 0x327Dd3208f0bCF590A66110aCB6e5e6941A4EfA0;
+      outputToken = strategyOutputToken;
+      strategyData = abi.encode(outputToken, ALGEBRA_SWAP_ROUTER);
     } else {
       emit log(strategyContract);
       emit log_address(address(strategy));
