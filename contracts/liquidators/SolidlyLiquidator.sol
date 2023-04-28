@@ -45,6 +45,11 @@ contract SolidlyLiquidator is IRedemptionStrategy {
     address volatilePair = solidlyRouter.pairFor(address(inputToken), tokenTo, false);
     address stablePair = solidlyRouter.pairFor(address(inputToken), tokenTo, true);
 
+    require(
+      solidlyRouter.isPair(stablePair) || solidlyRouter.isPair(volatilePair),
+      "Invalid SolidlyLiquidator swap path."
+    );
+
     if (!solidlyRouter.isPair(stablePair)) {
       stable = false;
     } else if (!solidlyRouter.isPair(volatilePair)) {
