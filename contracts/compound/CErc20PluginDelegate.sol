@@ -59,6 +59,8 @@ contract CErc20PluginDelegate is CErc20Delegate {
       plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
     }
 
+    emit NewPluginImplementation(address(plugin), _plugin);
+
     plugin = IERC4626(_plugin);
 
     EIP20Interface(underlying).approve(_plugin, type(uint256).max);
@@ -67,8 +69,6 @@ contract CErc20PluginDelegate is CErc20Delegate {
     if (amount != 0) {
       deposit(amount);
     }
-
-    emit NewPluginImplementation(address(plugin), _plugin);
   }
 
   /*** CToken Overrides ***/

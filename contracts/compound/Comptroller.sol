@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { CTokenInterface, CErc20Interface } from "./CTokenInterfaces.sol";
+import { CDelegateInterface } from "./CDelegateInterface.sol";
 import { ComptrollerErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { PriceOracle } from "./PriceOracle.sol";
@@ -1253,14 +1254,23 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     fuseAdminHasRights = true;
 
     // Deploy via Fuse admin
-    CTokenInterface cToken = CTokenInterface(IFuseFeeDistributor(fuseAdmin).deployCErc20(constructorData));
+    address marketAddress = IFuseFeeDistributor(fuseAdmin).deployCErc20(constructorData);
     // Reset Fuse admin rights to the original value
     fuseAdminHasRights = oldFuseAdminHasRights;
-    // Support market here in the Comptroller
-    uint256 err = _supportMarket(cToken);
 
-    // Set collateral factor
-    return err == uint256(Error.NO_ERROR) ? _setCollateralFactor(cToken, collateralFactorMantissa) : err;
+    CTokenInterface cToken = CTokenInterface(marketAddress);
+    if (!compareStrings(CDelegateInterface(marketAddress).contractType(), "CErc20WrappingDelegate")) {
+      // Support market here in the Comptroller
+      uint256 err = _supportMarket(cToken);
+      // Set collateral factor
+      return err == uint256(Error.NO_ERROR) ? _setCollateralFactor(cToken, collateralFactorMantissa) : err;
+    }
+
+    return uint256(Error.NO_ERROR);
+  }
+
+  function compareStrings(string memory a, string memory b) public pure returns (bool) {
+    return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
   }
 
   /**

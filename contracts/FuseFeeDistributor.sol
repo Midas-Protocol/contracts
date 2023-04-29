@@ -10,18 +10,115 @@ import "./compound/ErrorReporter.sol";
 import "./external/compound/IComptroller.sol";
 import "./compound/CErc20Delegator.sol";
 import "./compound/CErc20PluginDelegate.sol";
+import "./compound/CErc20WrappingDelegate.sol";
 import "./midas/SafeOwnableUpgradeable.sol";
 import "./utils/PatchedStorage.sol";
 import "./oracles/BasePriceOracle.sol";
 import { CTokenExtensionInterface } from "./compound/CTokenInterfaces.sol";
 import { DiamondExtension, DiamondBase } from "./midas/DiamondExtension.sol";
 
+struct CDelegateUpgradeData {
+  address implementation;
+  bool allowResign;
+  bytes becomeImplementationData;
+}
+
+abstract contract FeeDistributorStorage {
+  /**
+   * @notice The proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
+   */
+  uint256 public defaultInterestFeeRate;
+
+  /**
+   * @dev Minimum borrow balance (in ETH) per user per Fuse pool asset (only checked on new borrows, not redemptions).
+   */
+  uint256 public minBorrowEth;
+
+  /**
+   * @dev Maximum supply balance (in ETH) per user per Fuse pool asset.
+   * No longer used as of `Rari-Capital/compound-protocol` version `fuse-v1.1.0`.
+   */
+  uint256 public maxSupplyEth;
+
+  /**
+   * @dev Maximum utilization rate (scaled by 1e18) for Fuse pool assets (only checked on new borrows, not redemptions).
+   * No longer used as of `Rari-Capital/compound-protocol` version `fuse-v1.1.0`.
+   */
+  uint256 public maxUtilizationRate;
+
+  /**
+   * @dev Whitelisted Comptroller implementation contract addresses for each existing implementation.
+   */
+  mapping(address => mapping(address => bool)) public comptrollerImplementationWhitelist;
+
+  /**
+   * @dev Whitelisted CErc20Delegate implementation contract addresses and `allowResign` values for each existing implementation.
+   */
+  mapping(address => mapping(address => mapping(bool => bool))) public cErc20DelegateWhitelist;
+
+  /**
+   * @dev Whitelisted CEtherDelegate implementation contract addresses and `allowResign` values for each existing implementation.
+   */
+  /// keep this in the storage to not break the layout
+  mapping(address => mapping(address => mapping(bool => bool))) public cEtherDelegateWhitelist;
+
+  /**
+   * @dev Latest Comptroller implementation for each existing implementation.
+   */
+  mapping(address => address) internal _latestComptrollerImplementation;
+  /**
+   * @dev Latest CErc20Delegate implementation for each existing implementation.
+   */
+  mapping(address => CDelegateUpgradeData) public _latestCErc20Delegate;
+
+  /**
+   * @dev Latest CEtherDelegate implementation for each existing implementation.
+   */
+  /// keep this in the storage to not break the layout
+  mapping(address => CDelegateUpgradeData) public _latestCEtherDelegate;
+
+  /**
+   * @notice Maps Unitroller (Comptroller proxy) addresses to the proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
+   * @dev A value of 0 means unset whereas a negative value means 0.
+   */
+  mapping(address => int256) public customInterestFeeRates;
+
+  /**
+   * @dev used as salt for the creation of new markets
+   */
+  uint256 public marketsCounter;
+
+  /**
+   * @dev Latest Plugin implementation for each existing implementation.
+   */
+  mapping(address => address) public _latestPluginImplementation;
+
+  /**
+   * @dev Whitelisted Plugin implementation contract addresses for each existing implementation.
+   */
+  mapping(address => mapping(address => bool)) public pluginImplementationWhitelist;
+
+  mapping(address => DiamondExtension[]) public comptrollerExtensions;
+
+  mapping(address => DiamondExtension[]) public cErc20DelegateExtensions;
+
+  /**
+   * @dev Whitelisted erc20Wrapping implementation contract addresses for each existing implementation.
+   */
+  mapping(address => mapping(address => bool)) public erc20WrapperUpgradeWhitelist;
+
+  /**
+   * @dev Latest erc20Wrapping implementation for each existing implementation.
+   */
+  mapping(address => address) public _latestERC20WrapperForUnderlying;
+}
+
 /**
  * @title FuseFeeDistributor
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FuseFeeDistributor controls and receives protocol fees from Fuse pools and relays admin actions to Fuse pools.
  */
-contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
+contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage, FeeDistributorStorage {
   using AddressUpgradeable for address;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -36,11 +133,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     maxSupplyEth = type(uint256).max;
     maxUtilizationRate = type(uint256).max;
   }
-
-  /**
-   * @notice The proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
-   */
-  uint256 public defaultInterestFeeRate;
 
   /**
    * @dev Sets the default proportion of Fuse pool interest taken as a protocol fee.
@@ -68,23 +160,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
       token.safeTransfer(owner(), balance);
     }
   }
-
-  /**
-   * @dev Minimum borrow balance (in ETH) per user per Fuse pool asset (only checked on new borrows, not redemptions).
-   */
-  uint256 public minBorrowEth;
-
-  /**
-   * @dev Maximum supply balance (in ETH) per user per Fuse pool asset.
-   * No longer used as of `Rari-Capital/compound-protocol` version `fuse-v1.1.0`.
-   */
-  uint256 public maxSupplyEth;
-
-  /**
-   * @dev Maximum utilization rate (scaled by 1e18) for Fuse pool assets (only checked on new borrows, not redemptions).
-   * No longer used as of `Rari-Capital/compound-protocol` version `fuse-v1.1.0`.
-   */
-  uint256 public maxUtilizationRate;
 
   /**
    * @dev Sets the proportion of Fuse pool interest taken as a protocol fee.
@@ -160,11 +235,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @dev Whitelisted Comptroller implementation contract addresses for each existing implementation.
-   */
-  mapping(address => mapping(address => bool)) public comptrollerImplementationWhitelist;
-
-  /**
    * @dev Adds/removes Comptroller implementations to the whitelist.
    * @param oldImplementations The old `Comptroller` implementation addresses to upgrade from for each `newImplementations` to upgrade to.
    * @param newImplementations Array of `Comptroller` implementations to be whitelisted/unwhitelisted.
@@ -184,11 +254,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     for (uint256 i = 0; i < newImplementations.length; i++)
       comptrollerImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
   }
-
-  /**
-   * @dev Whitelisted CErc20Delegate implementation contract addresses and `allowResign` values for each existing implementation.
-   */
-  mapping(address => mapping(address => mapping(bool => bool))) public cErc20DelegateWhitelist;
 
   /**
    * @dev Adds/removes CErc20Delegate implementations to the whitelist.
@@ -215,17 +280,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @dev Whitelisted CEtherDelegate implementation contract addresses and `allowResign` values for each existing implementation.
-   */
-  /// keep this in the storage to not break the layout
-  mapping(address => mapping(address => mapping(bool => bool))) public cEtherDelegateWhitelist;
-
-  /**
-   * @dev Latest Comptroller implementation for each existing implementation.
-   */
-  mapping(address => address) internal _latestComptrollerImplementation;
-
-  /**
    * @dev Latest Comptroller implementation for each existing implementation.
    */
   function latestComptrollerImplementation(address oldImplementation) external view returns (address) {
@@ -246,23 +300,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   {
     _latestComptrollerImplementation[oldImplementation] = newImplementation;
   }
-
-  struct CDelegateUpgradeData {
-    address implementation;
-    bool allowResign;
-    bytes becomeImplementationData;
-  }
-
-  /**
-   * @dev Latest CErc20Delegate implementation for each existing implementation.
-   */
-  mapping(address => CDelegateUpgradeData) public _latestCErc20Delegate;
-
-  /**
-   * @dev Latest CEtherDelegate implementation for each existing implementation.
-   */
-  /// keep this in the storage to not break the layout
-  mapping(address => CDelegateUpgradeData) public _latestCEtherDelegate;
 
   /**
    * @dev Latest CErc20Delegate implementation for each existing implementation.
@@ -305,27 +342,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @notice Maps Unitroller (Comptroller proxy) addresses to the proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
-   * @dev A value of 0 means unset whereas a negative value means 0.
-   */
-  mapping(address => int256) public customInterestFeeRates;
-
-  /**
-   * @dev used as salt for the creation of new markets
-   */
-  uint256 public marketsCounter;
-
-  /**
-   * @dev Latest Plugin implementation for each existing implementation.
-   */
-  mapping(address => address) public _latestPluginImplementation;
-
-  /**
-   * @dev Whitelisted Plugin implementation contract addresses for each existing implementation.
-   */
-  mapping(address => mapping(address => bool)) public pluginImplementationWhitelist;
-
-  /**
    * @dev Adds/removes plugin implementations to the whitelist.
    * @param oldImplementations The old plugin implementation addresses to upgrade from for each `newImplementations` to upgrade to.
    * @param newImplementations Array of plugin implementations to be whitelisted/unwhitelisted.
@@ -346,6 +362,19 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
       pluginImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
   }
 
+  function _editERC20WrapperUpgradeWhitelist(
+    address[] calldata oldWrappers,
+    address[] calldata newWrappers,
+    bool[] calldata statuses
+  ) external onlyOwner {
+    require(
+      newWrappers.length > 0 && newWrappers.length == oldWrappers.length && newWrappers.length == statuses.length,
+      "empty array or lengths not equal"
+    );
+    for (uint256 i = 0; i < newWrappers.length; i++)
+      erc20WrapperUpgradeWhitelist[oldWrappers[i]][newWrappers[i]] = statuses[i];
+  }
+
   /**
    * @dev Latest Plugin implementation for each existing implementation.
    */
@@ -363,6 +392,17 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
    */
   function _setLatestPluginImplementation(address oldImplementation, address newImplementation) external onlyOwner {
     _latestPluginImplementation[oldImplementation] = newImplementation;
+  }
+
+  function latestERC20WrapperForUnderlying(address oldWrapper) external view returns (address) {
+    return
+      _latestERC20WrapperForUnderlying[oldWrapper] != address(0)
+        ? _latestERC20WrapperForUnderlying[oldWrapper]
+        : oldWrapper;
+  }
+
+  function _setLatestERC20WrapperForUnderlying(address oldWrapper, address newWrapper) external onlyOwner {
+    _latestERC20WrapperForUnderlying[oldWrapper] = newWrapper;
   }
 
   /**
@@ -406,8 +446,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     customInterestFeeRates[comptroller] = rate;
   }
 
-  mapping(address => DiamondExtension[]) public comptrollerExtensions;
-
   function getComptrollerExtensions(address comptroller) external view returns (DiamondExtension[] memory) {
     return comptrollerExtensions[comptroller];
   }
@@ -423,8 +461,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   ) external onlyOwner {
     DiamondBase(pool)._registerExtension(extensionToAdd, extensionToReplace);
   }
-
-  mapping(address => DiamondExtension[]) public cErc20DelegateExtensions;
 
   function getCErc20DelegateExtensions(address cErc20Delegate) external view returns (DiamondExtension[] memory) {
     return cErc20DelegateExtensions[cErc20Delegate];

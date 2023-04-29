@@ -20,6 +20,11 @@ interface IFuseFeeDistributor {
     view
     returns (bool);
 
+  function erc20WrapperUpgradeWhitelist(address oldImplementation, address newImplementation)
+    external
+    view
+    returns (bool);
+
   function cErc20DelegateWhitelist(
     address oldImplementation,
     address newImplementation,
@@ -38,6 +43,8 @@ interface IFuseFeeDistributor {
     );
 
   function latestPluginImplementation(address oldImplementation) external view returns (address);
+
+  function latestERC20WrapperForUnderlying(address oldImplementation) external view returns (address);
 
   function getComptrollerExtensions(address comptroller) external view returns (address[] memory);
 
