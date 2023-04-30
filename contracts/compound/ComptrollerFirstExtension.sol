@@ -227,6 +227,16 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     borrowCapForCollateral[cTokenBorrow][cTokenCollateral] = borrowCap;
   }
 
+  function _setBorrowCapForCollateralWhitelist(
+    address cTokenBorrow,
+    address cTokenCollateral,
+    address account,
+    bool whitelisted
+  ) public {
+    require(hasAdminRights(), "!admin");
+    borrowCapForCollateralWhitelist[cTokenBorrow][cTokenCollateral][account] = whitelisted;
+  }
+
   function _blacklistBorrowingAgainstCollateral(
     address cTokenBorrow,
     address cTokenCollateral,
@@ -236,12 +246,36 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     borrowingAgainstCollateralBlacklist[cTokenBorrow][cTokenCollateral] = blacklisted;
   }
 
+  function _blacklistBorrowingAgainstCollateralWhitelist(
+    address cTokenBorrow,
+    address cTokenCollateral,
+    address account,
+    bool whitelisted
+  ) public {
+    require(hasAdminRights(), "!admin");
+    borrowingAgainstCollateralBlacklistWhitelist[cTokenBorrow][cTokenCollateral][account] = whitelisted;
+  }
+
+  function _supplyCapWhitelist(address cToken, address account) public {
+    require(hasAdminRights(), "!admin");
+    supplyCapWhitelist[cToken][account] = true;
+  }
+
+  function _borrowCapWhitelist(address cToken, address account) public {
+    require(hasAdminRights(), "!admin");
+    borrowCapWhitelist[cToken][account] = true;
+  }
+
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 19;
+    uint8 fnsCount = 23;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
     functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
     functionSelectors[--fnsCount] = this._setMarketBorrowCaps.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapForCollateralWhitelist.selector;
+    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateralWhitelist.selector;
+    functionSelectors[--fnsCount] = this._supplyCapWhitelist.selector;
+    functionSelectors[--fnsCount] = this._borrowCapWhitelist.selector;
     functionSelectors[--fnsCount] = this._setBorrowCapGuardian.selector;
     functionSelectors[--fnsCount] = this._setPauseGuardian.selector;
     functionSelectors[--fnsCount] = this._setMintPaused.selector;

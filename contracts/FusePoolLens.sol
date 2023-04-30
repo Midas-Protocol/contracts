@@ -11,11 +11,8 @@ import "./external/compound/ICToken.sol";
 import "./external/compound/ICErc20.sol";
 import "./external/compound/IRewardsDistributor.sol";
 
-import "./external/uniswap/IUniswapV2Pair.sol";
-
 import "./FusePoolDirectory.sol";
 import "./oracles/MasterPriceOracle.sol";
-import "./oracles/default/IKeydonixUniswapTwapPriceOracle.sol";
 
 /**
  * @title FusePoolLens
@@ -419,23 +416,6 @@ contract FusePoolLens is Initializable {
     string memory _name = tokenContract.name();
     string memory _symbol = tokenContract.symbol();
 
-    // Check for Uniswap V2/SushiSwap pair
-    // for (uint256 i = 0; i < uniswapData.length; i++) {
-    //   try IUniswapV2Pair(token).token0() returns (address _token0) {
-    //     UniswapData memory ud = uniswapData[i];
-    //     bool isUniswapToken = keccak256(abi.encodePacked(_name)) == keccak256(abi.encodePacked(ud.name)) &&
-    //       keccak256(abi.encodePacked(_symbol)) == keccak256(abi.encodePacked(ud.symbol));
-
-    //     if (isUniswapToken) {
-    //       ERC20Upgradeable token0 = ERC20Upgradeable(_token0);
-    //       ERC20Upgradeable token1 = ERC20Upgradeable(IUniswapV2Pair(token).token1());
-    //       _name = string(abi.encodePacked(ud.displayName, " ", token0.symbol(), "/", token1.symbol(), " LP")); // add space
-    //       _symbol = string(abi.encodePacked(token0.symbol(), "-", token1.symbol()));
-    //       return (_name, _symbol);
-    //     }
-    //   } catch {}
-    // }
-
     return (_name, _symbol);
   }
 
@@ -561,15 +541,5 @@ contract FusePoolLens is Initializable {
     );
     (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(accountPools);
     return (indexes, accountPools, data, errored);
-  }
-
-  /**
-   * @notice Verify that the price of `underlying` of the given cToken matches KeydonixUniswapTwapPriceOracle
-   * @param cToken The cToken which price we want to verify
-   * @param proofData UniswapOracle.ProofData
-   */
-  function verifyPrice(ICToken cToken, UniswapOracle.ProofData calldata proofData) public returns (uint256, uint256) {
-    IPriceOracle oracle = IComptroller(cToken.comptroller()).oracle();
-    return IKeydonixUniswapTwapPriceOracle(address(oracle)).verifyPrice(cToken, proofData);
   }
 }
