@@ -256,14 +256,22 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     borrowingAgainstCollateralBlacklistWhitelist[cTokenBorrow][cTokenCollateral][account] = whitelisted;
   }
 
-  function _supplyCapWhitelist(address cToken, address account) public {
+  function _supplyCapWhitelist(
+    address cToken,
+    address account,
+    bool whitelist
+  ) public {
     require(hasAdminRights(), "!admin");
-    supplyCapWhitelist[cToken][account] = true;
+    supplyCapWhitelist[cToken][account] = whitelist;
   }
 
-  function _borrowCapWhitelist(address cToken, address account) public {
+  function _borrowCapWhitelist(
+    address cToken,
+    address account,
+    bool whitelist
+  ) public {
     require(hasAdminRights(), "!admin");
-    borrowCapWhitelist[cToken][account] = true;
+    borrowCapWhitelist[cToken][account] = whitelist;
   }
 
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
