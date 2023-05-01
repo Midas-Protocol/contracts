@@ -198,7 +198,7 @@ contract MaxBorrowTest is WithPool {
   }
 
   // TODO test with the latest block and contracts and/or without the FSL
-  function testBorrowAndSupplyCapWhitelist() public debuggingOnly forkAtBlock(BSC_MAINNET, 27781418) {
+  function testBorrowAndSupplyCapWhitelist() public debuggingOnly forkAtBlock(BSC_MAINNET, 27827185) {
     address payable ankrBnbPool = payable(0x1851e32F34565cb95754310b031C5a2Fc0a8a905);
 
     address poolAddress = ankrBnbPool;
@@ -210,107 +210,78 @@ contract MaxBorrowTest is WithPool {
     ComptrollerFirstExtension asExtension = ComptrollerFirstExtension(poolAddress);
     address[] memory borrowers = asExtension.getAllBorrowers();
     address borrower = 0x28C0208b7144B511C73586Bb07dE2100495e92f3; // ANKR account
+    address otherSupplier = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc; // Supplier of ankrBNBAnkrMkt
+    CTokenInterface ankrBNBAnkrMkt = CTokenInterface(0x71693C84486B37096192c9942852f542543639Bf);
+    CTokenInterface ankrBNBMkt = CTokenInterface(0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa);
 
-    CTokenInterface[] memory markets = asExtension.getAllMarkets();
-    // for (uint256 i = 0; i < markets.length; i++) {
-    //   CTokenInterface market = markets[i];
-    //   uint256 borrowed = market.borrowBalanceStored(borrower);
-    //   if (borrowed > 0) {
-    //     emit log("borrower has borrowed");
-    //     emit log_uint(borrowed);
-    //     emit log("from market");
-    //     emit log_address(address(market));
-    //     emit log_uint(i);
-    //     emit log("");
-    //   }
+    uint256 borrowedAnkr = ankrBNBMkt.borrowBalanceStored(borrower);
+    emit log_named_uint("Ankr borrower balance", borrowedAnkr);
+    uint256 collateralAnkr = ankrBNBAnkrMkt.asCTokenExtensionInterface().balanceOf(borrower);
+    emit log_named_uint("Ankr collateral balance of ankrBNB-ANKR", collateralAnkr);
 
-    //   uint256 collateral = market.asCTokenExtensionInterface().balanceOf(someBorrower);
-    //   if (collateral > 0) {
-    //     emit log("has collateral");
-    //     emit log_uint(collateral);
-    //     emit log("in market");
-    //     emit log_address(address(market));
-    //     emit log_uint(i);
-    //     emit log("");
-    //   }
-    // }
+    uint256 borrowedOther = ankrBNBMkt.borrowBalanceStored(otherSupplier);
+    emit log_named_uint("Other supplier borrower balance", borrowedOther);
+    uint256 collateralOther = ankrBNBAnkrMkt.asCTokenExtensionInterface().balanceOf(otherSupplier);
+    emit log_named_uint("Other supplier collateral balance of ankrBNB-ANKR", collateralOther);
 
-    CTokenInterface marketToBorrow = markets[0];
-    CTokenInterface cappedCollateralMarket = markets[6];
-    uint256 borrowAmount = marketToBorrow.borrowBalanceStored(borrower);
-
+    emit log("");
+    emit log("Before collateral caps");
     {
-      (, uint256 liq, ) = _getAndLogLiquidity(pool, borrower, marketToBorrow, borrowAmount);
-      // (, uint256 liq1, ) = _getAndLogLiquidity(
-      //   pool,
-      //   someOtherBorrower,
-      //   marketToBorrow,
-      //   marketToBorrow.borrowBalanceStored(someOtherBorrower)
-      // );
+      (, uint256 liq, uint256 sf) = pool.getHypotheticalAccountLiquidity(borrower, address(ankrBNBMkt), 0, 0);
+      emit log_named_uint("Liq for account 1 before setting BC", liq); // 1366119859198693075092
+      emit log_named_uint("Shortfall for account 1 before setting BC", sf); // 0
+      emit log("");
+      (, uint256 liq1, uint256 sf1) = pool.getHypotheticalAccountLiquidity(otherSupplier, address(ankrBNBMkt), 0, 0);
+      emit log_named_uint("Liq for account 2 before setting BC", liq1); // 24108891649595017
+      emit log_named_uint("Shortfall for account 2 before setting BC", sf1); // 0
+
       assertGt(liq, 0, "expected positive liquidity");
-      // assertGt(liq1, 0, "expected positive liquidity");
+      assertGt(liq1, 0, "expected positive liquidity");
+      emit log("");
+    }
+    vm.prank(pool.admin());
+    asExtension._setBorrowCapForCollateral(address(ankrBNBMkt), address(ankrBNBAnkrMkt), 1);
+    emit log("");
+    emit log("Borrow Caps Set");
+    {
+      (, uint256 liqAfter, uint256 sfAfter) = pool.getHypotheticalAccountLiquidity(borrower, address(ankrBNBMkt), 0, 0);
+      emit log_named_uint("Liq for account 1 after setting BC", liqAfter);
+      emit log_named_uint("Shortfall for account 1 after setting BC", sfAfter);
+      (, uint256 liq1After, uint256 sf1After) = pool.getHypotheticalAccountLiquidity(
+        otherSupplier,
+        address(ankrBNBMkt),
+        0,
+        0
+      );
+      emit log("");
+      emit log_named_uint("Liq for account 2 after setting BC", liq1After);
+      emit log_named_uint("Shortfall for account 2 after setting BC", sf1After);
+      emit log("");
+
+      assertGt(sfAfter, 0, "expected some shortfall for ankr");
+      assertLt(liq1After, 24108891649595017, "expected liquidity for account 2 to decrease");
     }
 
     vm.prank(pool.admin());
-    asExtension._setBorrowCapForCollateral(address(marketToBorrow), address(cappedCollateralMarket), 1);
-    emit log("");
-    emit log("Borrow Caps Set");
-
-    // emit log("Liq for account 1");
-    (, , uint256 sfAfter) = _getAndLogLiquidity(pool, borrower, marketToBorrow, borrowAmount);
-    // emit log("Liq for account 2");
-    // (, , uint256 sf1After) = _getAndLogLiquidity(
-    //   pool,
-    //   someOtherBorrower,
-    //   marketToBorrow,
-    //   marketToBorrow.borrowBalanceStored(someOtherBorrower)
-    // );
-
-    assertGt(sfAfter, 0, "expected some shortfall");
-    // assertGt(sf1After, 0, "expected some shortfall");
-
-    vm.prank(pool.admin());
-    asExtension._setBorrowCapForCollateralWhitelist(
-      address(marketToBorrow),
-      address(cappedCollateralMarket),
-      borrower,
-      true
-    );
+    asExtension._setBorrowCapForCollateralWhitelist(address(ankrBNBMkt), address(ankrBNBAnkrMkt), borrower, true);
     emit log("");
 
-    (, uint256 liqAfterWl, uint256 sfAfterWl) = _getAndLogLiquidity(pool, borrower, marketToBorrow, borrowAmount);
-    // (, uint256 liq1AfterWl, uint256 sf1AfterWl) = _getAndLogLiquidity(
-    //   pool,
-    //   borrower,
-    //   marketToBorrow,
-    //   marketToBorrow.borrowBalanceStored(someOtherBorrower)
-    // );
-
-    assertGt(liq, liqAfterWl, "expected this");
-    // assertEq(sf1AfterWl, 0, "!expected this");
-  }
-
-  function _getAndLogLiquidity(
-    Comptroller pool,
-    address borrower,
-    CTokenInterface marketToBorrow,
-    uint256 borrowAmount
-  )
-    internal
-    returns (
-      uint256 err,
-      uint256 liq,
-      uint256 sf
-    )
-  {
-    (uint256 err, uint256 liq, uint256 sf) = pool.getHypotheticalAccountLiquidity(
+    (, uint256 liqAfterWl, uint256 sfAfterWl) = pool.getHypotheticalAccountLiquidity(
       borrower,
-      address(marketToBorrow),
+      address(ankrBNBMkt),
       0,
-      borrowAmount
+      0
     );
-    emit log_named_uint("err", err);
-    emit log_named_uint("liquidity", liq);
-    emit log_named_uint("shortfall", sf);
+    (, uint256 liq1AfterWl, uint256 sf1AfterWl) = pool.getHypotheticalAccountLiquidity(
+      otherSupplier,
+      address(ankrBNBMkt),
+      0,
+      0
+    );
+    assertEq(sfAfterWl, 0, "expected shortfall to go back to 0");
+    assertEq(liqAfterWl, 1366119859198693075092, "expected liq to go back to original");
+
+    // expect liq for second (not whitelisted) account to stay reduced
+    assertLt(liq1AfterWl, 24108891649595017, "expected liq to go back to prev value");
   }
 }
