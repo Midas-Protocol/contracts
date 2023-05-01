@@ -4,10 +4,11 @@ pragma solidity >=0.8.0;
 import "./config/MarketsTest.t.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 
-import "../midas/vault/levered/LeveredPositionStrategy.sol";
+import "../midas/levered/LeveredPositionStrategy.sol";
 import { AddressesProvider } from "../midas/AddressesProvider.sol";
 import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../liquidators/SolidlySwapLiquidator.sol";
+import "../external/algebra/IAlgebraFactory.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
@@ -124,8 +125,5 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
       }
     }
   }
-
-  function getFlashLoanStrategy(IERC20Upgradeable tokenToBorrow) external returns (IFlashLoanStrategy strategy) {
-
-  }
 }
+

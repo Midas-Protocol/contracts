@@ -2,7 +2,8 @@
 pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../midas/DiamondExtension.sol";
-import { CTokenBaseInterface, CTokenInterface } from "./CTokenInterfaces.sol";
+import { IFlashLoanReceiver } from "../midas/IFlashLoanReceiver.sol";
+import { CTokenExtensionInterface, CTokenInterface } from "./CTokenInterfaces.sol";
 import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
@@ -10,17 +11,18 @@ import { CDelegationStorage } from "./CDelegateInterface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 import { Multicall } from "../utils/Multicall.sol";
+import { EIP20Interface } from "./EIP20Interface.sol";
 
 contract CTokenFirstExtension is
   CDelegationStorage,
-  CTokenBaseInterface,
+  CTokenExtensionInterface,
   TokenErrorReporter,
   Exponential,
   DiamondExtension,
   Multicall
 {
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 22;
+    uint8 fnsCount = 23;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -44,12 +46,15 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.supplyRatePerBlockAfterDeposit.selector;
     functionSelectors[--fnsCount] = this.supplyRatePerBlockAfterWithdraw.selector;
     functionSelectors[--fnsCount] = this.getTotalUnderlyingSupplied.selector;
+    functionSelectors[--fnsCount] = this.flash.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
 
-  function getTotalUnderlyingSupplied() public view returns (uint256) {
+  event Flash(address receiver, uint256 amount);
+
+  function getTotalUnderlyingSupplied() public override view returns (uint256) {
     // (totalCash + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees))
     return asCToken().getCash() + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees);
   }
@@ -138,7 +143,7 @@ contract CTokenFirstExtension is
    * @param amount The number of tokens to transfer
    * @return Whether or not the transfer succeeded
    */
-  function transfer(address dst, uint256 amount) external nonReentrant(false) returns (bool) {
+  function transfer(address dst, uint256 amount) public override nonReentrant(false) returns (bool) {
     return transferTokens(msg.sender, msg.sender, dst, amount) == uint256(Error.NO_ERROR);
   }
 
@@ -153,7 +158,7 @@ contract CTokenFirstExtension is
     address src,
     address dst,
     uint256 amount
-  ) external nonReentrant(false) returns (bool) {
+  ) public override nonReentrant(false) returns (bool) {
     return transferTokens(msg.sender, src, dst, amount) == uint256(Error.NO_ERROR);
   }
 
@@ -165,7 +170,7 @@ contract CTokenFirstExtension is
    * @param amount The number of tokens that are approved (-1 means infinite)
    * @return Whether or not the approval succeeded
    */
-  function approve(address spender, uint256 amount) external returns (bool) {
+  function approve(address spender, uint256 amount) public override returns (bool) {
     address src = msg.sender;
     transferAllowances[src][spender] = amount;
     emit Approval(src, spender, amount);
@@ -178,7 +183,7 @@ contract CTokenFirstExtension is
    * @param spender The address of the account which may transfer tokens
    * @return The number of tokens allowed to be spent (-1 means infinite)
    */
-  function allowance(address owner, address spender) external view returns (uint256) {
+  function allowance(address owner, address spender) public override view returns (uint256) {
     return transferAllowances[owner][spender];
   }
 
@@ -187,7 +192,7 @@ contract CTokenFirstExtension is
    * @param owner The address of the account to query
    * @return The number of tokens owned by `owner`
    */
-  function balanceOf(address owner) external view returns (uint256) {
+  function balanceOf(address owner) public override view returns (uint256) {
     return accountTokens[owner];
   }
 
@@ -213,7 +218,7 @@ contract CTokenFirstExtension is
    * @dev Admin function to accrue interest and set a new reserve factor
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function _setReserveFactor(uint256 newReserveFactorMantissa) external nonReentrant(false) returns (uint256) {
+  function _setReserveFactor(uint256 newReserveFactorMantissa) public override nonReentrant(false) returns (uint256) {
     uint256 error = accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted reserve factor change failed.
@@ -248,7 +253,7 @@ contract CTokenFirstExtension is
    * @dev Admin function to accrue interest and set a new admin fee
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function _setAdminFee(uint256 newAdminFeeMantissa) external nonReentrant(false) returns (uint256) {
+  function _setAdminFee(uint256 newAdminFeeMantissa) public override nonReentrant(false) returns (uint256) {
     uint256 error = accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted admin fee change failed.
@@ -306,7 +311,7 @@ contract CTokenFirstExtension is
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _setInterestRateModel(InterestRateModel newInterestRateModel)
-    external
+  public override
     nonReentrant(false)
     returns (uint256)
   {
@@ -336,7 +341,7 @@ contract CTokenFirstExtension is
    * @notice Returns the current per-block borrow interest rate for this cToken
    * @return The borrow interest rate per block, scaled by 1e18
    */
-  function borrowRatePerBlock() external view returns (uint256) {
+  function borrowRatePerBlock() public override view returns (uint256) {
     return
       interestRateModel.getBorrowRate(
         asCToken().getCash(),
@@ -349,7 +354,7 @@ contract CTokenFirstExtension is
    * @notice Returns the current per-block supply interest rate for this cToken
    * @return The supply interest rate per block, scaled by 1e18
    */
-  function supplyRatePerBlock() external view returns (uint256) {
+  function supplyRatePerBlock() public override view returns (uint256) {
     return
       interestRateModel.getSupplyRate(
         asCToken().getCash(),
@@ -383,7 +388,7 @@ contract CTokenFirstExtension is
    * @notice Accrue interest then return the up-to-date exchange rate
    * @return Calculated exchange rate scaled by 1e18
    */
-  function exchangeRateCurrent() public returns (uint256) {
+  function exchangeRateCurrent() public override returns (uint256) {
     require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
     return exchangeRateStored();
   }
@@ -393,7 +398,7 @@ contract CTokenFirstExtension is
    * @dev This function does not accrue interest before calculating the exchange rate
    * @return Calculated exchange rate scaled by 1e18
    */
-  function exchangeRateStored() public view returns (uint256) {
+  function exchangeRateStored() public override view returns (uint256) {
     return
       _exchangeRateHypothetical(
         totalSupply,
@@ -406,7 +411,7 @@ contract CTokenFirstExtension is
       );
   }
 
-  function exchangeRateHypothetical() public view returns (uint256) {
+  function exchangeRateHypothetical() public override view returns (uint256) {
     uint256 cashPrior = asCToken().getCash();
     if (block.number == accrualBlockNumber) {
       return exchangeRateStored();
@@ -528,7 +533,7 @@ contract CTokenFirstExtension is
    * @dev This calculates interest accrued from the last checkpointed block
    *   up to the current block and writes new checkpoint to storage.
    */
-  function accrueInterest() public virtual returns (uint256) {
+  function accrueInterest() public override returns (uint256) {
     /* Remember the initial block number */
     uint256 currentBlockNumber = block.number;
 
@@ -557,7 +562,7 @@ contract CTokenFirstExtension is
    * @notice Returns the current total borrows plus accrued interest
    * @return The total borrows with interest
    */
-  function totalBorrowsCurrent() external returns (uint256) {
+  function totalBorrowsCurrent() public override returns (uint256) {
     require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
     return totalBorrows;
   }
@@ -568,7 +573,7 @@ contract CTokenFirstExtension is
    * @param owner The address of the account to query
    * @return The amount of underlying owned by `owner`
    */
-  function balanceOfUnderlying(address owner) public returns (uint256) {
+  function balanceOfUnderlying(address owner) public override returns (uint256) {
     require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
     Exp memory exchangeRate = Exp({ mantissa: exchangeRateStored() });
     (MathError mErr, uint256 balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
@@ -576,11 +581,29 @@ contract CTokenFirstExtension is
     return balance;
   }
 
-  function balanceOfUnderlyingHypo(address owner) public view returns (uint256) {
+  function balanceOfUnderlyingHypo(address owner) public override view returns (uint256) {
     Exp memory exchangeRate = Exp({ mantissa: exchangeRateHypothetical() });
     (MathError mErr, uint256 balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
     require(mErr == MathError.NO_ERROR, "!balance");
     return balance;
+  }
+
+  function flash(
+    uint256 amount,
+    bytes calldata data
+  ) public override {
+    // TODO is this enough to prevent manipulation?
+    accrueInterest();
+
+    uint256 balanceBefore = EIP20Interface(underlying).balanceOf(address(this));
+
+    if (amount > 0) EIP20Interface(underlying).transfer(msg.sender, amount);
+
+    IFlashLoanReceiver(msg.sender).receiveFlashLoan(underlying, amount, data);
+
+    require(EIP20Interface(underlying).balanceOf(address(this)) >= balanceBefore, "!fl bal");
+
+    emit Flash(msg.sender, amount);
   }
 
   /**
@@ -627,5 +650,9 @@ contract CTokenFirstExtension is
 
   function asCToken() internal view returns (CTokenInterface) {
     return CTokenInterface(address(this));
+  }
+
+  function multicall(bytes[] calldata data) public payable override (CTokenExtensionInterface, Multicall) returns (bytes[] memory results) {
+    return Multicall.multicall(data);
   }
 }

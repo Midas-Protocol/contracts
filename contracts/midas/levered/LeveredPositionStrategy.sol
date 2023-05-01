@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
-import { ICErc20 } from "../../../external/compound/ICErc20.sol";
-import { IComptroller, IPriceOracle } from "../../../external/compound/IComptroller.sol";
-import { IFundsConversionStrategy } from "../../../liquidators/IFundsConversionStrategy.sol";
-import { IFlashLoanStrategy, IFlashLoanReceiver } from "../../../flashloan/IFlashLoanStrategy.sol";
+import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import { IComptroller, IPriceOracle } from "../../external/compound/IComptroller.sol";
+import { IFundsConversionStrategy } from "../../liquidators/IFundsConversionStrategy.sol";
 import { ILeveredPositionFactory } from "./ILeveredPositionFactory.sol";
+import { IFlashLoanReceiver } from "../IFlashLoanReceiver.sol";
+import { CTokenExtensionInterface } from "../../compound/CTokenInterfaces.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
@@ -19,7 +20,6 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
   ICErc20 public stableMarket;
   uint256 public totalBaseCollateral;
   ILeveredPositionFactory public factory;
-  IFlashLoanStrategy private _flashLoanStrategy;
 
   uint8 public constant MAX_LEVER_UP_ITERATIONS = 15;
   uint8 public constant MAX_LEVER_DOWN_ITERATIONS = 20;
@@ -103,9 +103,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     IERC20Upgradeable stableAsset = IERC20Upgradeable(stableMarket.underlying());
     uint256 borrowBalance = stableMarket.borrowBalanceCurrent(address(this));
 
-    _flashLoanStrategy = factory.getFlashLoanStrategy(stableAsset);
-    // TODO delegatecall
-    _flashLoanStrategy.flashLoan(stableAsset, borrowBalance);
+    CTokenExtensionInterface(address(stableMarket)).flash(borrowBalance, "");
     // will receive first a callback to receiveFlashLoan()
     // then the execution continues from here
 
@@ -121,16 +119,8 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     }
   }
 
-  function receiveFlashLoan(
-    IERC20Upgradeable borrowedAsset,
-    uint256 borrowedAmount,
-    IERC20Upgradeable assetToRepay,
-    uint256 amountToRepay,
-    bytes calldata data
-  ) external override {
-    // TODO decide which of the two is enough
-    require(address(_flashLoanStrategy) != address(0), "not during a FL");
-    require(msg.sender == address(this), "!self call");
+  function receiveFlashLoan(address assetAddress, uint256 borrowedAmount, bytes calldata data) external override {
+    require(msg.sender == address(stableMarket), "!fl call from market");
 
     uint256 borrowBalance = stableMarket.borrowBalanceCurrent(address(this));
 
@@ -141,9 +131,13 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     uint256 maxRedeem = pool.getMaxRedeemOrBorrow(address(this), collateralMarket, false);
     require(collateralMarket.redeemUnderlying(maxRedeem) == 0, "redeem all failed");
 
-    // TODO delegatecall
-    _flashLoanStrategy.repayFlashLoan(assetToRepay, amountToRepay);
-    _flashLoanStrategy = IFlashLoanStrategy(address(0));
+    IERC20Upgradeable collateralAsset = IERC20Upgradeable(collateralMarket.underlying());
+    IERC20Upgradeable stableAsset = IERC20Upgradeable(stableMarket.underlying());
+
+    // swap for the FL asset
+    convertAllTo(collateralAsset, stableAsset);
+    // repay
+    stableAsset.safeTransfer(msg.sender, borrowedAmount);
   }
 
   // TODO use a flash loan to close the position
