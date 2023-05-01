@@ -196,4 +196,122 @@ contract MaxBorrowTest is WithPool {
 
     assertGt(shortfallAfter, 0, "expected some shortfall");
   }
+
+  // TODO test with the latest block and contracts and/or without the FSL
+  function testBorrowAndSupplyCapWhitelist() public debuggingOnly forkAtBlock(BSC_MAINNET, 27781418) {
+    address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
+
+    address poolAddress = jFiatPoolAddress;
+    Comptroller pool = Comptroller(poolAddress);
+
+    // TODO no need to upgrade after the next deploy
+    upgradePool(address(pool));
+
+    ComptrollerFirstExtension asExtension = ComptrollerFirstExtension(poolAddress);
+    address[] memory borrowers = asExtension.getAllBorrowers();
+    address someBorrower = borrowers[1];
+    address someOtherBorrower = borrowers[2];
+
+    CTokenInterface[] memory markets = asExtension.getAllMarkets();
+    // for (uint256 i = 0; i < markets.length; i++) {
+    //   CTokenInterface market = markets[i];
+    //   uint256 borrowed = market.borrowBalanceStored(someBorrower);
+    //   if (borrowed > 0) {
+    //     emit log("borrower has borrowed");
+    //     emit log_uint(borrowed);
+    //     emit log("from market");
+    //     emit log_address(address(market));
+    //     emit log_uint(i);
+    //     emit log("");
+    //   }
+
+    //   uint256 collateral = market.asCTokenExtensionInterface().balanceOf(someBorrower);
+    //   if (collateral > 0) {
+    //     emit log("has collateral");
+    //     emit log_uint(collateral);
+    //     emit log("in market");
+    //     emit log_address(address(market));
+    //     emit log_uint(i);
+    //     emit log("");
+    //   }
+    // }
+
+    CTokenInterface marketToBorrow = markets[0];
+    CTokenInterface cappedCollateralMarket = markets[6];
+    uint256 borrowAmount = marketToBorrow.borrowBalanceStored(someBorrower);
+
+    {
+      (, uint256 liq, ) = _getAndLogLiquidity(pool, someBorrower, marketToBorrow, borrowAmount);
+      (, uint256 liq1, ) = _getAndLogLiquidity(
+        pool,
+        someOtherBorrower,
+        marketToBorrow,
+        marketToBorrow.borrowBalanceStored(someOtherBorrower)
+      );
+      assertGt(liq, 0, "expected positive liquidity");
+      assertGt(liq1, 0, "expected positive liquidity");
+    }
+
+    vm.prank(pool.admin());
+    asExtension._setBorrowCapForCollateral(address(marketToBorrow), address(cappedCollateralMarket), 1);
+    emit log("");
+    emit log("Borrow Caps Set");
+
+    // emit log("Liq for account 1");
+    // (, , uint256 sfAfter) = _getAndLogLiquidity(pool, someBorrower, marketToBorrow, borrowAmount);
+    // emit log("Liq for account 2");
+    // (, , uint256 sf1After) = _getAndLogLiquidity(
+    //   pool,
+    //   someOtherBorrower,
+    //   marketToBorrow,
+    //   marketToBorrow.borrowBalanceStored(someOtherBorrower)
+    // );
+
+    // assertGt(sfAfter, 0, "expected some shortfall");
+    // assertGt(sf1After, 0, "expected some shortfall");
+
+    vm.prank(pool.admin());
+    asExtension._setBorrowCapForCollateralWhitelist(
+      address(marketToBorrow),
+      address(cappedCollateralMarket),
+      someBorrower,
+      true
+    );
+    emit log("");
+
+    (, uint256 liqAfterWl, uint256 sfAfterWl) = _getAndLogLiquidity(pool, someBorrower, marketToBorrow, borrowAmount);
+    (, uint256 liq1AfterWl, uint256 sf1AfterWl) = _getAndLogLiquidity(
+      pool,
+      someBorrower,
+      marketToBorrow,
+      marketToBorrow.borrowBalanceStored(someOtherBorrower)
+    );
+
+    assertGt(liq1AfterWl, liqAfterWl, "expected this");
+    assertEq(sf1AfterWl, 0, "!expected this");
+  }
+
+  function _getAndLogLiquidity(
+    Comptroller pool,
+    address borrower,
+    CTokenInterface marketToBorrow,
+    uint256 borrowAmount
+  )
+    internal
+    returns (
+      uint256 err,
+      uint256 liq,
+      uint256 sf
+    )
+  {
+    (uint256 err, uint256 liq, uint256 sf) = pool.getHypotheticalAccountLiquidity(
+      borrower,
+      address(marketToBorrow),
+      0,
+      borrowAmount
+    );
+    emit log_named_uint("err", err);
+    emit log_named_uint("liquidity", liq);
+    emit log_named_uint("shortfall", sf);
+  }
 }
