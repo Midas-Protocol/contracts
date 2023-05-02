@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { CTokenInterface, CErc20Interface } from "./CTokenInterfaces.sol";
+import { CTokenInterface, CTokenExtensionInterface, CErc20Interface } from "./CTokenInterfaces.sol";
 import { ComptrollerErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { PriceOracle } from "./PriceOracle.sol";
@@ -237,10 +237,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!mintGuardianPaused[cToken], "!mint:paused");
 
-    // Shh - currently unused
-    minter;
-    mintAmount;
-
     // Make sure market is listed
     if (!markets[cToken].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
@@ -256,25 +252,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Supply cap of 0 corresponds to unlimited supplying
     // supplyCapWhitelist[cToken][minter] is defaulted to false
     if (supplyCap != 0 && !supplyCapWhitelist[cToken][minter]) {
-      uint256 totalCash = CTokenInterface(cToken).getCash();
-      uint256 totalBorrows = CTokenInterface(cToken).totalBorrows();
-      uint256 totalReserves = CTokenInterface(cToken).totalReserves();
-      uint256 totalFuseFees = CTokenInterface(cToken).totalFuseFees();
-      uint256 totalAdminFees = CTokenInterface(cToken).totalAdminFees();
-
-      // totalUnderlyingSupply = totalCash + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees)
-      (MathError mathErr, uint256 totalUnderlyingSupply) = addThenSubUInt(
-        totalCash,
-        totalBorrows,
-        add_(add_(totalReserves, totalFuseFees), totalAdminFees)
-      );
-      if (mathErr != MathError.NO_ERROR) return uint256(Error.MATH_ERROR);
-
-      uint256 nextTotalUnderlyingSupply;
-      (mathErr, nextTotalUnderlyingSupply) = addUInt(totalUnderlyingSupply, mintAmount);
-      if (mathErr != MathError.NO_ERROR) return uint256(Error.MATH_ERROR);
-
-      require(nextTotalUnderlyingSupply < supplyCap, "!supply cap");
+      CTokenExtensionInterface asExt = CTokenInterface(cToken).asCTokenExtensionInterface();
+      uint256 totalUnderlyingSupply = asExt.getTotalUnderlyingSupplied();
+      require(totalUnderlyingSupply + mintAmount < supplyCap, "!supply cap");
     }
 
     // Keep the flywheel moving
@@ -482,9 +462,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // borrowCapWhitelist[cToken][minter] is defaulted to false
     if (borrowCap != 0 && !borrowCapWhitelist[cToken][borrower]) {
       uint256 totalBorrows = CTokenInterface(cToken).totalBorrows();
-      (MathError mathErr, uint256 nextTotalBorrows) = addUInt(totalBorrows, borrowAmount);
-      if (mathErr != MathError.NO_ERROR) return uint256(Error.MATH_ERROR);
-      require(nextTotalBorrows < borrowCap, "!borrow:cap");
+      require(totalBorrows + borrowAmount < borrowCap, "!borrow:cap");
     }
 
     // Keep the flywheel moving
