@@ -92,20 +92,40 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
   }
 
   function testBlacklistBorrowingAgainstCollateralWhitelist() public debuggingOnly fork(BSC_MAINNET) {
-    (, uint256 liquidityBefore, uint256 shortFallBefore) = pool.getHypotheticalAccountLiquidity(borrower, address(ankrBNBMkt), 0, 0);
+    (, uint256 liquidityBefore, uint256 shortFallBefore) = pool.getHypotheticalAccountLiquidity(
+      borrower,
+      address(ankrBNBMkt),
+      0,
+      0
+    );
     assertEq(shortFallBefore, 0, "should have no shortfall before");
     assertGt(liquidityBefore, 0, "should have positive liquidity before");
 
     vm.prank(pool.admin());
     asExtension._blacklistBorrowingAgainstCollateral(address(ankrBNBMkt), address(ankrBNBAnkrMkt), true);
 
-    (, uint256 liquidityAfterBlacklist, uint256 shortFallAfterBlacklist) = pool.getHypotheticalAccountLiquidity(borrower, address(ankrBNBMkt), 0, 0);
+    (, uint256 liquidityAfterBlacklist, uint256 shortFallAfterBlacklist) = pool.getHypotheticalAccountLiquidity(
+      borrower,
+      address(ankrBNBMkt),
+      0,
+      0
+    );
     assertGt(liquidityBefore - liquidityAfterBlacklist, 0, "should have lower liquidity after bl");
 
     vm.prank(pool.admin());
-    asExtension._blacklistBorrowingAgainstCollateralWhitelist(address(ankrBNBMkt), address(ankrBNBAnkrMkt), borrower, true);
+    asExtension._blacklistBorrowingAgainstCollateralWhitelist(
+      address(ankrBNBMkt),
+      address(ankrBNBAnkrMkt),
+      borrower,
+      true
+    );
 
-    (, uint256 liquidityAfterWhitelist, uint256 shortFallWhitelist) = pool.getHypotheticalAccountLiquidity(borrower, address(ankrBNBMkt), 0, 0);
+    (, uint256 liquidityAfterWhitelist, uint256 shortFallWhitelist) = pool.getHypotheticalAccountLiquidity(
+      borrower,
+      address(ankrBNBMkt),
+      0,
+      0
+    );
     assertEq(shortFallWhitelist, shortFallBefore, "should have the same sf after wl");
     assertEq(liquidityAfterWhitelist, liquidityBefore, "should have the same liquidity after wl");
   }
