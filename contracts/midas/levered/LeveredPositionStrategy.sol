@@ -124,7 +124,11 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     }
   }
 
-  function receiveFlashLoan(address assetAddress, uint256 borrowedAmount, bytes calldata data) external override {
+  function receiveFlashLoan(
+    address assetAddress,
+    uint256 borrowedAmount,
+    bytes calldata data
+  ) external override {
     require(msg.sender == address(stableMarket), "!fl call from market");
 
     uint256 borrowBalance = stableMarket.borrowBalanceCurrent(address(this));

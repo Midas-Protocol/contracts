@@ -93,8 +93,9 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
   }
 
   function getRedemptionStrategy(IERC20Upgradeable fundingToken, IERC20Upgradeable outputToken)
-  external view
-  returns (IRedemptionStrategy strategy, bytes memory strategyData)
+    external
+    view
+    returns (IRedemptionStrategy strategy, bytes memory strategyData)
   {
     // hay/ankrBnb -> SolidlySwapLiquidator
     {
@@ -113,8 +114,9 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
   }
 
   function getFundingStrategy(IERC20Upgradeable fundingToken, IERC20Upgradeable outputToken)
-  external view
-  returns (IFundsConversionStrategy fundingStrategy, bytes memory strategyData)
+    external
+    view
+    returns (IFundsConversionStrategy fundingStrategy, bytes memory strategyData)
   {
     // JarvisLiquidatorFunder
     {
@@ -136,4 +138,3 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
     }
   }
 }
-

@@ -54,7 +54,7 @@ contract CTokenFirstExtension is
 
   event Flash(address receiver, uint256 amount);
 
-  function getTotalUnderlyingSupplied() public override view returns (uint256) {
+  function getTotalUnderlyingSupplied() public view override returns (uint256) {
     // (totalCash + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees))
     return asCToken().getCash() + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees);
   }
@@ -183,7 +183,7 @@ contract CTokenFirstExtension is
    * @param spender The address of the account which may transfer tokens
    * @return The number of tokens allowed to be spent (-1 means infinite)
    */
-  function allowance(address owner, address spender) public override view returns (uint256) {
+  function allowance(address owner, address spender) public view override returns (uint256) {
     return transferAllowances[owner][spender];
   }
 
@@ -192,7 +192,7 @@ contract CTokenFirstExtension is
    * @param owner The address of the account to query
    * @return The number of tokens owned by `owner`
    */
-  function balanceOf(address owner) public override view returns (uint256) {
+  function balanceOf(address owner) public view override returns (uint256) {
     return accountTokens[owner];
   }
 
@@ -311,7 +311,8 @@ contract CTokenFirstExtension is
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _setInterestRateModel(InterestRateModel newInterestRateModel)
-  public override
+    public
+    override
     nonReentrant(false)
     returns (uint256)
   {
@@ -341,7 +342,7 @@ contract CTokenFirstExtension is
    * @notice Returns the current per-block borrow interest rate for this cToken
    * @return The borrow interest rate per block, scaled by 1e18
    */
-  function borrowRatePerBlock() public override view returns (uint256) {
+  function borrowRatePerBlock() public view override returns (uint256) {
     return
       interestRateModel.getBorrowRate(
         asCToken().getCash(),
@@ -354,7 +355,7 @@ contract CTokenFirstExtension is
    * @notice Returns the current per-block supply interest rate for this cToken
    * @return The supply interest rate per block, scaled by 1e18
    */
-  function supplyRatePerBlock() public override view returns (uint256) {
+  function supplyRatePerBlock() public view override returns (uint256) {
     return
       interestRateModel.getSupplyRate(
         asCToken().getCash(),
@@ -398,7 +399,7 @@ contract CTokenFirstExtension is
    * @dev This function does not accrue interest before calculating the exchange rate
    * @return Calculated exchange rate scaled by 1e18
    */
-  function exchangeRateStored() public override view returns (uint256) {
+  function exchangeRateStored() public view override returns (uint256) {
     return
       _exchangeRateHypothetical(
         totalSupply,
@@ -411,7 +412,7 @@ contract CTokenFirstExtension is
       );
   }
 
-  function exchangeRateHypothetical() public override view returns (uint256) {
+  function exchangeRateHypothetical() public view override returns (uint256) {
     uint256 cashPrior = asCToken().getCash();
     if (block.number == accrualBlockNumber) {
       return exchangeRateStored();
@@ -581,17 +582,14 @@ contract CTokenFirstExtension is
     return balance;
   }
 
-  function balanceOfUnderlyingHypo(address owner) public override view returns (uint256) {
+  function balanceOfUnderlyingHypo(address owner) public view override returns (uint256) {
     Exp memory exchangeRate = Exp({ mantissa: exchangeRateHypothetical() });
     (MathError mErr, uint256 balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
     require(mErr == MathError.NO_ERROR, "!balance");
     return balance;
   }
 
-  function flash(
-    uint256 amount,
-    bytes calldata data
-  ) public override {
+  function flash(uint256 amount, bytes calldata data) public override {
     // TODO is this enough to prevent manipulation?
     accrueInterest();
 
@@ -652,7 +650,12 @@ contract CTokenFirstExtension is
     return CTokenInterface(address(this));
   }
 
-  function multicall(bytes[] calldata data) public payable override (CTokenExtensionInterface, Multicall) returns (bytes[] memory results) {
+  function multicall(bytes[] calldata data)
+    public
+    payable
+    override(CTokenExtensionInterface, Multicall)
+    returns (bytes[] memory results)
+  {
     return Multicall.multicall(data);
   }
 }
