@@ -4,6 +4,7 @@ pragma solidity ^0.8.10;
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import { IComptroller, IPriceOracle } from "../../external/compound/IComptroller.sol";
 import { IFundsConversionStrategy } from "../../liquidators/IFundsConversionStrategy.sol";
+import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { ILeveredPositionFactory } from "./ILeveredPositionFactory.sol";
 import { IFlashLoanReceiver } from "../IFlashLoanReceiver.sol";
 import { CTokenExtensionInterface } from "../../compound/CTokenInterfaces.sol";
@@ -97,6 +98,10 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     return closePosition(msg.sender);
   }
 
+  function closePositionWithFL() public returns (uint256 withdrawAmount) {
+    return closePositionWithFL(msg.sender);
+  }
+
   function closePositionWithFL(address withdrawTo) public returns (uint256 withdrawAmount) {
     require(msg.sender == positionOwner, "only owner");
     IERC20Upgradeable collateralAsset = IERC20Upgradeable(collateralMarket.underlying());
@@ -149,7 +154,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     IPriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
-    (IFundsConversionStrategy fundingStrategy, bytes memory strategyData) = factory.getFundingStrategy(
+    (IRedemptionStrategy strategy, bytes memory strategyData) = factory.getRedemptionStrategy(
       collateralAsset,
       stableAsset
     );
@@ -182,7 +187,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
       }
 
       // swap for the borrowed asset
-      convertCustomFunds(collateralAsset, fundingStrategy, strategyData);
+      convertCustomFunds(collateralAsset, strategy, strategyData);
 
       // repay
       {
@@ -351,22 +356,22 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     private
     returns (uint256 outputAmount)
   {
-    (IFundsConversionStrategy fundingStrategy, bytes memory strategyData) = factory.getFundingStrategy(
+    (IRedemptionStrategy redemptionStrategy, bytes memory strategyData) = factory.getRedemptionStrategy(
       inputToken,
       outputToken
     );
-    (, outputAmount) = convertCustomFunds(inputToken, fundingStrategy, strategyData);
+    (, outputAmount) = convertCustomFunds(inputToken, redemptionStrategy, strategyData);
   }
 
   function convertCustomFunds(
     IERC20Upgradeable inputToken,
-    IFundsConversionStrategy strategy,
+    IRedemptionStrategy strategy,
     bytes memory strategyData
   ) private returns (IERC20Upgradeable, uint256) {
     uint256 inputAmount = inputToken.balanceOf(address(this));
     bytes memory returndata = _functionDelegateCall(
       address(strategy),
-      abi.encodeWithSelector(strategy.convert.selector, inputToken, inputAmount, strategyData)
+      abi.encodeWithSelector(strategy.redeem.selector, inputToken, inputAmount, strategyData)
     );
     return abi.decode(returndata, (IERC20Upgradeable, uint256));
   }

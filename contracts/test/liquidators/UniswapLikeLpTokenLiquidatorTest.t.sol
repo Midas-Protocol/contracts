@@ -19,7 +19,7 @@ import { BaseTest } from "../config/BaseTest.t.sol";
 
 contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
   UniswapLpTokenLiquidator private uniLiquidator;
-  SolidlyLpTokenLiquidator private solidlyLiquidator;
+  SolidlyLpTokenLiquidator private solidlyLpTokenLiquidator;
   SolidlyLpTokenPriceOracle private oracleSolidly;
   UniswapLpTokenPriceOracle private oracleUniswap;
   MasterPriceOracle mpo;
@@ -36,7 +36,7 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     stableToken = ap.getAddress("stableToken");
 
     uniLiquidator = new UniswapLpTokenLiquidator();
-    solidlyLiquidator = new SolidlyLpTokenLiquidator();
+    solidlyLpTokenLiquidator = new SolidlyLpTokenLiquidator();
     oracleSolidly = new SolidlyLpTokenPriceOracle(wtoken);
     oracleUniswap = new UniswapLpTokenPriceOracle(wtoken);
   }
@@ -116,7 +116,7 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
 
     IERC20Upgradeable outputToken = IERC20Upgradeable(outputTokenAddress);
 
-    uint256 outputBalanceBefore = outputToken.balanceOf(address(solidlyLiquidator));
+    uint256 outputBalanceBefore = outputToken.balanceOf(address(solidlyLpTokenLiquidator));
 
     uint256 redeemAmount = 1e18;
     // redeem
@@ -124,14 +124,14 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
       bytes memory data = abi.encode(solidlyRouter, outputTokenAddress);
 
       vm.prank(whale);
-      lpTokenContract.transfer(address(solidlyLiquidator), redeemAmount);
+      lpTokenContract.transfer(address(solidlyLpTokenLiquidator), redeemAmount);
 
-      vm.prank(address(solidlyLiquidator));
+      vm.prank(address(solidlyLpTokenLiquidator));
       lpTokenContract.approve(lpToken, redeemAmount);
-      solidlyLiquidator.redeem(lpTokenContract, redeemAmount, data);
+      solidlyLpTokenLiquidator.redeem(lpTokenContract, redeemAmount, data);
     }
 
-    uint256 outputBalanceAfter = outputToken.balanceOf(address(solidlyLiquidator));
+    uint256 outputBalanceAfter = outputToken.balanceOf(address(solidlyLpTokenLiquidator));
     uint256 outputBalanceDiff = outputBalanceAfter - outputBalanceBefore;
     assertGt(outputBalanceDiff, 0, "!redeem output");
 

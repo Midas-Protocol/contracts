@@ -15,9 +15,13 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
   ICErc20 collateralMarket;
   ICErc20 stableMarket;
+  IFundsConversionStrategy jarvisFunder;
+  IRedemptionStrategy solidlyLiquidator;
 
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
+    jarvisFunder = new JarvisLiquidatorFunder();
+    solidlyLiquidator = new SolidlySwapLiquidator();
   }
 
   function upgradePoolAndMarkets() internal {
@@ -83,33 +87,15 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
     emit log_named_uint("max lev ratio", position.getMaxLeverageRatio());
     position.adjustLeverageRatio(2.5e18);
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
-    emit log_named_uint("withdraw amount", position.closePosition());
+    //emit log_named_uint("close without FL", position.closePosition());
+    emit log_named_uint("close with FL", position.closePositionWithFL());
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
   }
 
-  function getFundingStrategy(IERC20Upgradeable fundingToken, IERC20Upgradeable outputToken)
-    external
-    returns (IFundsConversionStrategy fundingStrategy, bytes memory strategyData)
+  function getRedemptionStrategy(IERC20Upgradeable fundingToken, IERC20Upgradeable outputToken)
+  external view
+  returns (IRedemptionStrategy strategy, bytes memory strategyData)
   {
-    // JarvisLiquidatorFunder
-    {
-      AddressesProvider.JarvisPool[] memory pools = ap.getJarvisPools();
-      for (uint256 i = 0; i < pools.length; i++) {
-        AddressesProvider.JarvisPool memory pool = pools[i];
-        if (pool.collateralToken == address(fundingToken)) {
-          require(address(outputToken) == pool.syntheticToken, "!output token mismatch");
-          strategyData = abi.encode(pool.collateralToken, pool.liquidityPool, pool.expirationTime);
-          fundingStrategy = new JarvisLiquidatorFunder();
-          break;
-        } else if (pool.syntheticToken == address(fundingToken)) {
-          require(address(outputToken) == pool.collateralToken, "!output token mismatch");
-          strategyData = abi.encode(pool.syntheticToken, pool.liquidityPool, pool.expirationTime);
-          fundingStrategy = new JarvisLiquidatorFunder();
-          break;
-        }
-      }
-    }
-
     // hay/ankrBnb -> SolidlySwapLiquidator
     {
       address ankrBnb = 0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827; // token1
@@ -120,8 +106,32 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
       address router = 0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109;
 
       if (ankrBnbAndHay || hayAndAnkrBnb) {
-        //fundingStrategy = new SolidlySwapLiquidator();
+        strategy = solidlyLiquidator;
         strategyData = abi.encode(router);
+      }
+    }
+  }
+
+  function getFundingStrategy(IERC20Upgradeable fundingToken, IERC20Upgradeable outputToken)
+  external view
+  returns (IFundsConversionStrategy fundingStrategy, bytes memory strategyData)
+  {
+    // JarvisLiquidatorFunder
+    {
+      AddressesProvider.JarvisPool[] memory pools = ap.getJarvisPools();
+      for (uint256 i = 0; i < pools.length; i++) {
+        AddressesProvider.JarvisPool memory pool = pools[i];
+        if (pool.collateralToken == address(fundingToken)) {
+          require(address(outputToken) == pool.syntheticToken, "!output token mismatch");
+          strategyData = abi.encode(pool.collateralToken, pool.liquidityPool, pool.expirationTime);
+          fundingStrategy = jarvisFunder;
+          break;
+        } else if (pool.syntheticToken == address(fundingToken)) {
+          require(address(outputToken) == pool.collateralToken, "!output token mismatch");
+          strategyData = abi.encode(pool.syntheticToken, pool.liquidityPool, pool.expirationTime);
+          fundingStrategy = jarvisFunder;
+          break;
+        }
       }
     }
   }
