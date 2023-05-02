@@ -52,8 +52,6 @@ contract CTokenFirstExtension is
     return functionSelectors;
   }
 
-  event Flash(address receiver, uint256 amount);
-
   function getTotalUnderlyingSupplied() public view override returns (uint256) {
     // (totalCash + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees))
     return asCToken().getCash() + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees);
