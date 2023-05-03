@@ -11,7 +11,10 @@ import { CDelegationStorage } from "./CDelegateInterface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 import { Multicall } from "../utils/Multicall.sol";
-import { EIP20Interface } from "./EIP20Interface.sol";
+import {
+IERC20,
+SafeERC20
+} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract CTokenFirstExtension is
   CDelegationStorage,
@@ -411,10 +414,10 @@ contract CTokenFirstExtension is
   }
 
   function exchangeRateHypothetical() public view override returns (uint256) {
-    uint256 cashPrior = asCToken().getCash();
     if (block.number == accrualBlockNumber) {
       return exchangeRateStored();
     } else {
+      uint256 cashPrior = asCToken().getCash();
       InterestAccrual memory accrual = accrueInterestHypothetical(block.number, cashPrior);
 
       return
@@ -591,13 +594,15 @@ contract CTokenFirstExtension is
     // TODO is this enough to prevent manipulation?
     accrueInterest();
 
-    uint256 balanceBefore = EIP20Interface(underlying).balanceOf(address(this));
+    IERC20 token = IERC20(underlying);
 
-    if (amount > 0) EIP20Interface(underlying).transfer(msg.sender, amount);
+    totalBorrows += amount;
+    SafeERC20.safeTransfer(token, msg.sender, amount);
 
     IFlashLoanReceiver(msg.sender).receiveFlashLoan(underlying, amount, data);
 
-    require(EIP20Interface(underlying).balanceOf(address(this)) >= balanceBefore, "!fl bal");
+    SafeERC20.safeTransferFrom(token, msg.sender, address(this), amount);
+    totalBorrows -= amount;
 
     emit Flash(msg.sender, amount);
   }

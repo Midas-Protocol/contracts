@@ -185,6 +185,10 @@ contract ExtensionsTest is MarketsTest {
     _testAllPoolsAllMarketsCTokenExtensionUpgrade();
   }
 
+  function testArbitrumExistingCTokenExtensionUpgrade() public fork(ARBITRUM_ONE) {
+    _testAllPoolsAllMarketsCTokenExtensionUpgrade();
+  }
+
   function testMoonbeamExistingCTokenExtensionUpgrade() public fork(MOONBEAM_MAINNET) {
     _testAllPoolsAllMarketsCTokenExtensionUpgrade();
   }

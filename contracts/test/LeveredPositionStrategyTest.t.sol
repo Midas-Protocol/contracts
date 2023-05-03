@@ -62,7 +62,7 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
     emit log_named_uint("max lev ratio", position.getMaxLeverageRatio());
     position.adjustLeverageRatio(2.5e18);
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
-    emit log_named_uint("withdraw amount", position.closePosition());
+    emit log_named_uint("withdraw amount", position.closePositionWithFL());
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
   }
 
@@ -76,18 +76,17 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
     IERC20Upgradeable ankrBnb = IERC20Upgradeable(collateralMarket.underlying());
 
     vm.prank(ankrBnbWhale);
-    ankrBnb.transfer(positionOwner, 1e21);
+    ankrBnb.transfer(positionOwner, 1e19);
 
     LeveredPositionStrategy position = new LeveredPositionStrategy(positionOwner, collateralMarket, stableMarket);
 
     ankrBnb.approve(address(position), 1e36);
 
-    position.fundPosition(ankrBnb, 1e21);
+    position.fundPosition(ankrBnb, 1e19);
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
     emit log_named_uint("max lev ratio", position.getMaxLeverageRatio());
-    position.adjustLeverageRatio(2.5e18);
+    position.adjustLeverageRatio(1.5e18);
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
-    //emit log_named_uint("close without FL", position.closePosition());
     emit log_named_uint("close with FL", position.closePositionWithFL());
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
   }
@@ -108,7 +107,7 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
 
       if (ankrBnbAndHay || hayAndAnkrBnb) {
         strategy = solidlyLiquidator;
-        strategyData = abi.encode(router);
+        strategyData = abi.encode(router, outputToken, false);
       }
     }
   }
