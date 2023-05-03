@@ -267,10 +267,11 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     require(collateralMarket.mint(amountToDeposit) == 0, "deposit collateral failed");
   }
 
-  function convertTo(IERC20Upgradeable inputToken, uint256 inputAmount, IERC20Upgradeable outputToken)
-  private
-  returns (uint256 outputAmount)
-  {
+  function convertTo(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    IERC20Upgradeable outputToken
+  ) private returns (uint256 outputAmount) {
     (IRedemptionStrategy redemptionStrategy, bytes memory strategyData) = factory.getRedemptionStrategy(
       inputToken,
       outputToken
@@ -279,8 +280,8 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
   }
 
   function convertAllTo(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  private
-  returns (uint256 outputAmount)
+    private
+    returns (uint256 outputAmount)
   {
     uint256 inputAmount = inputToken.balanceOf(address(this));
     return convertTo(inputToken, inputAmount, outputToken);

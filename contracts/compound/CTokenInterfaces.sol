@@ -212,7 +212,6 @@ abstract contract CTokenBaseInterface is CErc20Storage {
 }
 
 abstract contract CTokenExtensionInterface is CTokenBaseInterface {
-
   event Flash(address receiver, uint256 amount);
 
   /*** User Interface ***/

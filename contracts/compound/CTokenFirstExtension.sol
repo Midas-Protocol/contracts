@@ -11,10 +11,7 @@ import { CDelegationStorage } from "./CDelegateInterface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 import { Multicall } from "../utils/Multicall.sol";
-import {
-IERC20,
-SafeERC20
-} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { IERC20, SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract CTokenFirstExtension is
   CDelegationStorage,

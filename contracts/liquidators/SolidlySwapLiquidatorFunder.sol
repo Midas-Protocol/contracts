@@ -14,12 +14,11 @@ contract SolidlySwapLiquidatorFunder is SolidlySwapLiquidator, IFundsConversionS
   }
 
   function estimateInputAmount(uint256 outputAmount, bytes memory strategyData)
-  external
-  view
-  returns (IERC20Upgradeable inputToken, uint256 inputAmount)
+    external
+    view
+    returns (IERC20Upgradeable inputToken, uint256 inputAmount)
   {
     // Get Solidly router and path
     (IRouter solidlyRouter, address tokenTo, bool stable) = abi.decode(strategyData, (IRouter, address, bool));
-
   }
 }
