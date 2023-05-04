@@ -62,7 +62,7 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
     emit log_named_uint("max lev ratio", position.getMaxLeverageRatio());
     position.adjustLeverageRatio(2.5e18);
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
-    emit log_named_uint("withdraw amount", position.closePositionWithFL());
+    emit log_named_uint("withdraw amount", position.closePosition());
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
   }
 
@@ -87,7 +87,7 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
     emit log_named_uint("max lev ratio", position.getMaxLeverageRatio());
     position.adjustLeverageRatio(1.5e18);
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
-    emit log_named_uint("close with FL", position.closePositionWithFL());
+    emit log_named_uint("close with FL", position.closePosition());
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
   }
 

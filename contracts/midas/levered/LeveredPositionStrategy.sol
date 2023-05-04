@@ -33,9 +33,9 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
 
     positionOwner = _positionOwner;
     collateralMarket = _collateralMarket;
-    collateralAsset = IERC20Upgradeable(collateralMarket.underlying());
+    collateralAsset = IERC20Upgradeable(_collateralMarket.underlying());
     stableMarket = _stableMarket;
-    stableAsset = IERC20Upgradeable(stableMarket.underlying());
+    stableAsset = IERC20Upgradeable(_stableMarket.underlying());
 
     totalBaseCollateral = 0;
     factory = ILeveredPositionFactory(msg.sender);
@@ -103,7 +103,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
 
     uint256 borrowBalance = stableMarket.borrowBalanceCurrent(address(this));
     if (borrowBalance == 0) {
-      totalBaseCollateral = collateralMarket.balanceOfUnderlyingHypo(address(this));
+      totalBaseCollateral = collateralMarket.balanceOfUnderlying(address(this));
     } else {
       if (totalBaseCollateral <= withdrawAmount) totalBaseCollateral = 0;
       else totalBaseCollateral -= withdrawAmount;
