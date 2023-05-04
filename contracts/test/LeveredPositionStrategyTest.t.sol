@@ -89,6 +89,9 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
     emit log_named_uint("close with FL", position.closePosition());
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
+
+    emit log_named_uint("total deposits", collateralMarket.balanceOfUnderlyingHypo(address(position)));
+    emit log_named_uint("total base collateral", position.totalBaseCollateral());
   }
 
   function getRedemptionStrategy(IERC20Upgradeable fundingToken, IERC20Upgradeable outputToken)

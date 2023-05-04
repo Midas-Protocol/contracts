@@ -12,7 +12,7 @@ import { CTokenExtensionInterface } from "../../compound/CTokenInterfaces.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-// TODO upgradeable
+// TODO upgradeable?
 contract LeveredPositionStrategy is IFlashLoanReceiver {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -73,14 +73,17 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
   function withdraw(uint256 amount, address withdrawTo) public {
     require(msg.sender == positionOwner, "only owner");
 
+    // it is assumed that all collateral is supplied to the market all the time
     require(collateralMarket.redeemUnderlying(amount) == 0, "redeem max failed");
-    // withdraw
+    // therefore, withdrawing only what is redeemed
     collateralAsset.safeTransfer(withdrawTo, amount);
 
-    uint256 borrowBalance = stableMarket.borrowBalanceStored(address(this));
+    uint256 borrowBalance = stableMarket.borrowBalanceCurrent(address(this));
     if (borrowBalance == 0) {
-      if (totalBaseCollateral <= amount) totalBaseCollateral = 0;
-      else totalBaseCollateral -= amount;
+      totalBaseCollateral = collateralMarket.balanceOfUnderlying(address(this));
+    } else {
+      if (totalBaseCollateral <= withdrawAmount) totalBaseCollateral = 0;
+      else totalBaseCollateral -= withdrawAmount;
     }
   }
 
@@ -117,7 +120,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     if (currentRatio < targetRatioMantissa) _leverUp(targetRatioMantissa - currentRatio);
     else _leverDown(currentRatio - targetRatioMantissa);
 
-    // return the de factor achieved ratio
+    // return the de facto achieved ratio
     return getCurrentLeverageRatio();
   }
 
@@ -129,9 +132,11 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     // then the execution continues from here
   }
 
-  function _leverUpPostFL(uint256 _flashLoanedCollateral) internal {
+  function _leverUpPostFL() internal {
+    // deposit the flashloaned collateral
     _depositCollateral(collateralAsset);
 
+    // borrow stables that will be swapped to repay the FL
     IComptroller pool = IComptroller(stableMarket.comptroller());
     uint256 maxBorrow = pool.getMaxRedeemOrBorrow(address(this), stableMarket, true);
     require(stableMarket.borrow(maxBorrow) == 0, "borrow stable failed");
@@ -141,6 +146,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
   }
 
   function _leverDown(uint256 ratioDiff) internal {
+    // redeems the supplied collateral by first repaying the debt with which it was levered
     uint256 amountToRedeem;
     uint256 borrowsToRepay;
 
@@ -148,18 +154,20 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     IPriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
-    (, uint256 stableCF) = pool.markets(address(stableMarket)); // CF = collateral factor
+    (, uint256 stableCollateralFactor) = pool.markets(address(stableMarket));
 
+    // if max levering down, then derive the amount to redeem from the debt to be repaid
     if (ratioDiff == type(uint256).max) {
       borrowsToRepay = stableMarket.borrowBalanceCurrent(address(this));
       uint256 borrowsToRepayValueScaled = borrowsToRepay * stableAssetPrice;
       // not accounting for swaps slippage
-      amountToRedeem = ((borrowsToRepayValueScaled / collateralAssetPrice) * 1e18) / stableCF;
+      amountToRedeem = ((borrowsToRepayValueScaled / collateralAssetPrice) * 1e18) / stableCollateralFactor;
     } else {
+      // else derive the debt to be repaid from the amount to redeem
       amountToRedeem = (totalBaseCollateral * ratioDiff) / 1e18;
       uint256 amountToRedeemValueScaled = amountToRedeem * collateralAssetPrice;
       // not accounting for swaps slippage
-      borrowsToRepay = ((amountToRedeemValueScaled / stableAssetPrice) * stableCF) / 1e18;
+      borrowsToRepay = ((amountToRedeemValueScaled / stableAssetPrice) * stableCollateralFactor) / 1e18;
     }
 
     CTokenExtensionInterface(address(stableMarket)).flash(borrowsToRepay, abi.encode(amountToRedeem));
@@ -177,8 +185,8 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     // redeem the corresponding amount needed to repay the FL
     IComptroller pool = IComptroller(collateralMarket.comptroller());
     // TODO is maxRedeem needed here?
-    uint256 maxRedeem = pool.getMaxRedeemOrBorrow(address(this), collateralMarket, false);
-    _amountToRedeem = _amountToRedeem > maxRedeem ? maxRedeem : _amountToRedeem;
+    //    uint256 maxRedeem = pool.getMaxRedeemOrBorrow(address(this), collateralMarket, false);
+    //    _amountToRedeem = _amountToRedeem > maxRedeem ? maxRedeem : _amountToRedeem;
     require(collateralMarket.redeemUnderlying(_amountToRedeem) == 0, "redeem failed");
 
     // swap for the FL asset
@@ -192,7 +200,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
   ) external override {
     if (msg.sender == address(collateralMarket)) {
       // increasing the leverage ratio
-      _leverUpPostFL(borrowedAmount);
+      _leverUpPostFL();
       require(collateralAsset.balanceOf(address(this)) >= borrowedAmount, "!cannot repay FL");
     } else if (msg.sender == address(stableMarket)) {
       // decreasing the leverage ratio
@@ -208,12 +216,13 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
   }
 
   // TODO figure out if needed
-  function withdrawBorrowedAssets(address withdrawTo) public {
+  function withdrawStableLeftovers(address withdrawTo) public returns (uint256) {
     require(msg.sender == positionOwner, "only owner");
     require(totalBaseCollateral == 0, "only when closed");
 
     uint256 stableLeftovers = stableAsset.balanceOf(address(this));
-    stableAsset.approve(withdrawTo, stableLeftovers);
+    stableAsset.safeTransfer(withdrawTo, stableLeftovers);
+    return stableLeftovers;
   }
 
   /*----------------------------------------------------------------
@@ -222,15 +231,16 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
 
   function getCurrentLeverageRatio() public view returns (uint256) {
     if (totalBaseCollateral == 0) return 0;
-    else {
-      uint256 totalDeposits = collateralMarket.balanceOfUnderlyingHypo(address(this));
-      return (totalDeposits * 1e18) / totalBaseCollateral;
-    }
+
+    uint256 totalDeposits = collateralMarket.balanceOfUnderlyingHypo(address(this));
+    return (totalDeposits * 1e18) / totalBaseCollateral;
   }
 
   function getMaxLeverageRatio() public view returns (uint256) {
+    if (totalBaseCollateral == 0) return 0;
+
     IComptroller pool = IComptroller(stableMarket.comptroller());
-    (, uint256 stableCF) = pool.markets(address(stableMarket)); // CF = collateral factor
+    (, uint256 stableCollateralFactor) = pool.markets(address(stableMarket));
     IPriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
@@ -239,7 +249,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
 
     // not accounting for swaps slippage
     uint256 maxTopUpRepay = maxBorrowValueScaled / collateralAssetPrice;
-    uint256 maxFlashLoaned = (maxTopUpRepay * 1e18) / (1e18 - stableCF);
+    uint256 maxFlashLoaned = (maxTopUpRepay * 1e18) / (1e18 - stableCollateralFactor);
 
     uint256 currentDeposits = collateralMarket.balanceOfUnderlyingHypo(address(this));
     return ((currentDeposits + maxFlashLoaned) * 1e18) / totalBaseCollateral;
