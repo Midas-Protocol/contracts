@@ -7,6 +7,9 @@ import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 import { MidasERC4626, DotDotLpERC4626, ILpDepositor } from "../../midas/strategies/DotDotLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { ComptrollerFirstExtension } from "../../compound/Comptroller.sol";
+import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
+
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
@@ -175,5 +178,44 @@ contract FlywheelPerformanceFeeTest is BaseTest {
       "the rewardsModule didnt properly send the fees"
     );
     assertEq(dddFlywheel.rewardsAccrued(feeRecipient), 0, "feeRecipient rewardsAccrued should be 0");
+  }
+
+  function testMoonbeamAllFlywheelsFeeRecipient() public debuggingOnly fork(MOONBEAM_MAINNET) {
+    _testAllFlywheelsFeeRecipient();
+  }
+
+  function testPolygonAllFlywheelsFeeRecipient() public debuggingOnly fork(POLYGON_MAINNET) {
+    _testAllFlywheelsFeeRecipient();
+  }
+
+  function testBscAllFlywheelsFeeRecipient() public debuggingOnly fork(BSC_MAINNET) {
+    _testAllFlywheelsFeeRecipient();
+  }
+
+  function testFantomAllFlywheelsFeeRecipient() public debuggingOnly fork(FANTOM_OPERA) {
+    _testAllFlywheelsFeeRecipient();
+  }
+
+  function testEvmosAllFlywheelsFeeRecipient() public debuggingOnly fork(EVMOS_MAINNET) {
+    _testAllFlywheelsFeeRecipient();
+  }
+
+  function testArbitrumAllFlywheelsFeeRecipient() public debuggingOnly fork(ARBITRUM_ONE) {
+    _testAllFlywheelsFeeRecipient();
+  }
+
+  function _testAllFlywheelsFeeRecipient() internal {
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      ComptrollerFirstExtension poolExt = ComptrollerFirstExtension(pools[i].comptroller);
+      address[] memory fws = poolExt.getRewardsDistributors();
+      for (uint256 j = 0; j < fws.length; j++) {
+        address fr = MidasFlywheelCore(fws[j]).feeRecipient();
+        if (fr != 0x27521eae4eE4153214CaDc3eCD703b9B0326C908) emit log_named_address("flywheel fr", fws[j]);
+        assertEq(fr, 0x27521eae4eE4153214CaDc3eCD703b9B0326C908, "fee recipient not correct");
+      }
+    }
   }
 }
