@@ -185,10 +185,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
   }
 
   function isFundingAssetSupported(IERC20Upgradeable fundingAsset) public view returns (bool) {
-    (IRedemptionStrategy redemptionStrategy,) = factory.getRedemptionStrategy(
-      fundingAsset,
-      collateralAsset
-    );
+    (IRedemptionStrategy redemptionStrategy, ) = factory.getRedemptionStrategy(fundingAsset, collateralAsset);
 
     return (address(redemptionStrategy) != address(0));
   }
@@ -266,7 +263,6 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
 
     // if max levering down, then derive the amount to redeem from the debt to be repaid
     if (targetRatioMantissa < 1e18) {
-
       // TODO only deleveraging allowed
 
       borrowsToRepay = borrowBalance;

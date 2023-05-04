@@ -90,12 +90,12 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
     assertApproxEqAbs(position.getCurrentLeverageRatio(), 1e18, 1e4, "initial leverage ratio should be 1.0 (1e18)");
 
     emit log_named_uint("max lev ratio", position.getMaxLeverageRatio());
-//    emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
-//    emit log_named_uint("close with FL", position.closePosition());
-//    emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
-//
-//    emit log_named_uint("total deposits", collateralMarket.balanceOfUnderlyingHypo(address(position)));
-//    emit log_named_uint("base collateral", position.baseCollateral());
+    //    emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
+    //    emit log_named_uint("close with FL", position.closePosition());
+    //    emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
+    //
+    //    emit log_named_uint("total deposits", collateralMarket.balanceOfUnderlyingHypo(address(position)));
+    //    emit log_named_uint("base collateral", position.baseCollateral());
   }
 
   function testHayAnkr15LeverageRatio() public fork(BSC_MAINNET) {
