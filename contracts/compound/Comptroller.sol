@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { CTokenInterface, CErc20Interface } from "./CTokenInterfaces.sol";
+import { CTokenInterface, CTokenExtensionInterface, CErc20Interface } from "./CTokenInterfaces.sol";
 import { ComptrollerErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { PriceOracle } from "./PriceOracle.sol";
@@ -237,10 +237,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!mintGuardianPaused[cToken], "!mint:paused");
 
-    // Shh - currently unused
-    minter;
-    mintAmount;
-
     // Make sure market is listed
     if (!markets[cToken].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
@@ -254,26 +250,11 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Check supply cap
     uint256 supplyCap = supplyCaps[cToken];
     // Supply cap of 0 corresponds to unlimited supplying
-    if (supplyCap != 0) {
-      uint256 totalCash = CTokenInterface(cToken).getCash();
-      uint256 totalBorrows = CTokenInterface(cToken).totalBorrows();
-      uint256 totalReserves = CTokenInterface(cToken).totalReserves();
-      uint256 totalFuseFees = CTokenInterface(cToken).totalFuseFees();
-      uint256 totalAdminFees = CTokenInterface(cToken).totalAdminFees();
-
-      // totalUnderlyingSupply = totalCash + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees)
-      (MathError mathErr, uint256 totalUnderlyingSupply) = addThenSubUInt(
-        totalCash,
-        totalBorrows,
-        add_(add_(totalReserves, totalFuseFees), totalAdminFees)
-      );
-      if (mathErr != MathError.NO_ERROR) return uint256(Error.MATH_ERROR);
-
-      uint256 nextTotalUnderlyingSupply;
-      (mathErr, nextTotalUnderlyingSupply) = addUInt(totalUnderlyingSupply, mintAmount);
-      if (mathErr != MathError.NO_ERROR) return uint256(Error.MATH_ERROR);
-
-      require(nextTotalUnderlyingSupply < supplyCap, "!supply cap");
+    // supplyCapWhitelist[cToken][minter] is defaulted to false
+    if (supplyCap != 0 && !supplyCapWhitelist[cToken][minter]) {
+      CTokenExtensionInterface asExt = CTokenInterface(cToken).asCTokenExtensionInterface();
+      uint256 totalUnderlyingSupply = asExt.getTotalUnderlyingSupplied();
+      require(totalUnderlyingSupply + mintAmount < supplyCap, "!supply cap");
     }
 
     // Keep the flywheel moving
@@ -478,11 +459,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Check borrow cap
     uint256 borrowCap = borrowCaps[cToken];
     // Borrow cap of 0 corresponds to unlimited borrowing
-    if (borrowCap != 0) {
+    // borrowCapWhitelist[cToken][minter] is defaulted to false
+    if (borrowCap != 0 && !borrowCapWhitelist[cToken][borrower]) {
       uint256 totalBorrows = CTokenInterface(cToken).totalBorrows();
-      (MathError mathErr, uint256 nextTotalBorrows) = addUInt(totalBorrows, borrowAmount);
-      if (mathErr != MathError.NO_ERROR) return uint256(Error.MATH_ERROR);
-      require(nextTotalBorrows < borrowCap, "!borrow:cap");
+      require(totalBorrows + borrowAmount < borrowCap, "!borrow:cap");
     }
 
     // Keep the flywheel moving
@@ -857,17 +837,22 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       uint256 assetAsCollateralValueCap = type(uint256).max;
       // Exclude the asset-to-be-borrowed from the liquidity, except for when redeeming
       if (address(asset) != address(cTokenModify) || redeemTokens > 0) {
-        // if the borrowed asset is capped against this collateral
         if (address(cTokenModify) != address(0)) {
-          bool blacklisted = borrowingAgainstCollateralBlacklist[address(cTokenModify)][address(asset)];
-          if (blacklisted) {
+          // if the borrowed asset is capped against this collateral & account is not whitelisted
+          if (
+            borrowingAgainstCollateralBlacklist[address(cTokenModify)][address(asset)] &&
+            !borrowingAgainstCollateralBlacklistWhitelist[address(cTokenModify)][address(asset)][account]
+          ) {
             assetAsCollateralValueCap = 0;
           } else {
             // for each user the value of this kind of collateral is capped regardless of the amount borrowed
             // denominated in the borrowed asset
             vars.borrowCapForCollateral = borrowCapForCollateral[address(cTokenModify)][address(asset)];
-            // check if set to any value
-            if (vars.borrowCapForCollateral != 0) {
+            // check if set to any value & account is not whitelisted
+            if (
+              vars.borrowCapForCollateral != 0 &&
+              !borrowCapForCollateralWhitelist[address(cTokenModify)][address(asset)][account]
+            ) {
               // this asset usage as collateral is capped at the native value of the borrow cap
               assetAsCollateralValueCap = (vars.borrowCapForCollateral * vars.borrowedAssetPrice) / 1e18;
             }

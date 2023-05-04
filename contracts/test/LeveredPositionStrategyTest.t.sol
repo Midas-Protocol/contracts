@@ -18,8 +18,7 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
 
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
-    address pool = collateralMarket.comptroller();
-    _upgradePool(Unitroller(payable(pool)));
+    _upgradeExistingPool(collateralMarket.comptroller());
     _upgradeMarket(CErc20Delegate(address(collateralMarket)));
     _upgradeMarket(CErc20Delegate(address(stableMarket)));
 
