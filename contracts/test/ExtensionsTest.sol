@@ -7,7 +7,6 @@ import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { Comptroller, ComptrollerV3Storage } from "../compound/Comptroller.sol";
-import { Unitroller } from "../compound/Unitroller.sol";
 import { CTokenInterface, CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
@@ -92,12 +91,11 @@ contract ExtensionsTest is MarketsTest {
 
   function testExtensionReplace() public debuggingOnly fork(BSC_MAINNET) {
     address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
-    Unitroller asUnitroller = Unitroller(jFiatPoolAddress);
-    _upgradePool(asUnitroller);
+    _upgradeExistingPool(jFiatPoolAddress);
 
     // replace the first extension with the mock
     vm.prank(ffd.owner());
-    ffd._registerComptrollerExtension(jFiatPoolAddress, mockExtension, newComptrollerExtension);
+    ffd._registerComptrollerExtension(jFiatPoolAddress, mockExtension, comptrollerExtension);
 
     // assert that the replacement worked
     MockComptrollerExtension asMockExtension = MockComptrollerExtension(jFiatPoolAddress);
@@ -139,11 +137,7 @@ contract ExtensionsTest is MarketsTest {
 
       address[] memory initExtensionsAfter = DiamondBase(payable(poolAddress))._listExtensions();
       assertEq(initExtensionsAfter.length, 1, "remove this if the ffd config is set up");
-      assertEq(
-        initExtensionsAfter[0],
-        address(newComptrollerExtension),
-        "first extension is not the newComptrollerExtension"
-      );
+      assertEq(initExtensionsAfter[0], address(comptrollerExtension), "first extension is not the CFE");
     }
   }
 

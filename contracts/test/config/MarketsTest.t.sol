@@ -7,25 +7,27 @@ import { CErc20Delegate } from "../../compound/CErc20Delegate.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { DiamondExtension } from "../../midas/DiamondExtension.sol";
 import { CTokenFirstExtension } from "../../compound/CTokenFirstExtension.sol";
+import { ComptrollerFirstExtension, Comptroller } from "../../compound/Comptroller.sol";
 import { Unitroller } from "../../compound/Unitroller.sol";
-import { Comptroller } from "../../compound/Comptroller.sol";
-import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
 
 contract MarketsTest is BaseTest {
   FuseFeeDistributor internal ffd;
+
   CErc20Delegate internal cErc20Delegate;
   CErc20PluginRewardsDelegate internal cErc20PluginRewardsDelegate;
   CTokenFirstExtension internal newCTokenExtension;
+
   address payable internal latestComptrollerImplementation;
-  ComptrollerFirstExtension internal newComptrollerExtension;
+  ComptrollerFirstExtension internal comptrollerExtension;
 
   function afterForkSetUp() internal virtual override {
     ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
     cErc20Delegate = new CErc20Delegate();
     cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
     newCTokenExtension = new CTokenFirstExtension();
-    newComptrollerExtension = new ComptrollerFirstExtension();
-    Comptroller newComptrollerImplementation = new Comptroller(payable(ap.getAddress("FuseFeeDistributor")));
+
+    comptrollerExtension = new ComptrollerFirstExtension();
+    Comptroller newComptrollerImplementation = new Comptroller(payable(address(ffd)));
     latestComptrollerImplementation = payable(address(newComptrollerImplementation));
   }
 
@@ -83,12 +85,13 @@ contract MarketsTest is BaseTest {
       asArray(true)
     );
     DiamondExtension[] memory extensions = new DiamondExtension[](1);
-    extensions[0] = newComptrollerExtension;
+    extensions[0] = comptrollerExtension;
     ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);
     vm.stopPrank();
   }
 
-  function _upgradePool(Unitroller asUnitroller) internal {
+  function _upgradeExistingPool(address poolAddress) internal {
+    Unitroller asUnitroller = Unitroller(payable(poolAddress));
     // change the implementation to the new that can add extensions
     address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
 

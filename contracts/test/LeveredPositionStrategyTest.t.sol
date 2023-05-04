@@ -25,8 +25,7 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
   }
 
   function upgradePoolAndMarkets() internal {
-    address pool = collateralMarket.comptroller();
-    _upgradePool(Unitroller(payable(pool)));
+    _upgradeExistingPool(collateralMarket.comptroller());
     _upgradeMarket(CErc20Delegate(address(collateralMarket)));
     _upgradeMarket(CErc20Delegate(address(stableMarket)));
   }
@@ -66,32 +65,53 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
   }
 
-  function testHayAnkrLeveredPosition() public fork(BSC_MAINNET) {
+  function _openHayAnkrLeveredPosition(address positionOwner) internal returns (LeveredPositionStrategy position) {
     collateralMarket = ICErc20(0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa); // ankrBNB market
     stableMarket = ICErc20(0x10b6f851225c203eE74c369cE876BEB56379FCa3); // HAY market
     address ankrBnbWhale = 0x366B523317Cc95B1a4D30b33f8637882825C5E23;
     upgradePoolAndMarkets();
 
-    address positionOwner = address(this);
     IERC20Upgradeable ankrBnb = IERC20Upgradeable(collateralMarket.underlying());
 
+    position = new LeveredPositionStrategy(positionOwner, collateralMarket, stableMarket);
+
     vm.prank(ankrBnbWhale);
-    ankrBnb.transfer(positionOwner, 1e19);
+    ankrBnb.transfer(positionOwner, 10e18);
 
-    LeveredPositionStrategy position = new LeveredPositionStrategy(positionOwner, collateralMarket, stableMarket);
-
+    vm.startPrank(positionOwner);
     ankrBnb.approve(address(position), 1e36);
+    position.fundPosition(ankrBnb, 10e18);
+    vm.stopPrank();
+  }
 
-    position.fundPosition(ankrBnb, 1e19);
-    emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
+  function testOpenHayAnkrLeveredPosition() public fork(BSC_MAINNET) {
+    LeveredPositionStrategy position = _openHayAnkrLeveredPosition(address(this));
+
+    assertApproxEqAbs(position.getCurrentLeverageRatio(), 1e18, 1e4, "initial leverage ratio should be 1.0 (1e18)");
+
     emit log_named_uint("max lev ratio", position.getMaxLeverageRatio());
-    position.adjustLeverageRatio(1.5e18);
-    emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
-    emit log_named_uint("close with FL", position.closePosition());
-    emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
+//    emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
+//    emit log_named_uint("close with FL", position.closePosition());
+//    emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
+//
+//    emit log_named_uint("total deposits", collateralMarket.balanceOfUnderlyingHypo(address(position)));
+//    emit log_named_uint("base collateral", position.baseCollateral());
+  }
 
-    emit log_named_uint("total deposits", collateralMarket.balanceOfUnderlyingHypo(address(position)));
-    emit log_named_uint("total base collateral", position.totalBaseCollateral());
+  function testHayAnkr15LeverageRatio() public fork(BSC_MAINNET) {
+    LeveredPositionStrategy position = _openHayAnkrLeveredPosition(address(this));
+    uint256 targetLeverageRatio = 1.5e18;
+    uint256 leverageRatioRealized = position.adjustLeverageRatio(targetLeverageRatio);
+    emit log_named_uint("base collateral", position.baseCollateral());
+    assertApproxEqAbs(leverageRatioRealized, targetLeverageRatio, 1e4, "target ratio not matching");
+  }
+
+  function testHayAnkrMaxLeverageRatio() public fork(BSC_MAINNET) {
+    LeveredPositionStrategy position = _openHayAnkrLeveredPosition(address(this));
+    uint256 targetLeverageRatio = position.getMaxLeverageRatio();
+    // 5% slippage
+    position.adjustLeverageRatio((targetLeverageRatio * 95) / 100);
+    assertApproxEqAbs(position.getCurrentLeverageRatio(), targetLeverageRatio, 1e4, "target max ratio not matching");
   }
 
   function getRedemptionStrategy(IERC20Upgradeable fundingToken, IERC20Upgradeable outputToken)
