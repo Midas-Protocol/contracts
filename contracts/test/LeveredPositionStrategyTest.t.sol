@@ -167,7 +167,6 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
     }
   }
 
-
   function getMinBorrowNative() external view returns (uint256) {
     return 0.31e18; // BNB = $324
   }
