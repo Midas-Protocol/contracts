@@ -382,9 +382,9 @@ contract FusePoolLens is Initializable {
   {
     ICToken[] memory poolMarkets = comptroller.getAllMarkets();
 
-    collateral = new address[](poolMarkets.length - 1);
-    borrowCapsAgainstCollateral = new uint256[](poolMarkets.length - 1);
-    borrowingBlacklistedAgainstCollateral = new bool[](poolMarkets.length - 1);
+    collateral = new address[](poolMarkets.length);
+    borrowCapsAgainstCollateral = new uint256[](poolMarkets.length);
+    borrowingBlacklistedAgainstCollateral = new bool[](poolMarkets.length);
 
     for (uint256 i = 0; i < poolMarkets.length; i++) {
       address collateralAddress = address(poolMarkets[i]);
@@ -456,8 +456,8 @@ contract FusePoolLens is Initializable {
   function getSupplyCapsForPool(IComptroller comptroller) public view returns (address[] memory, uint256[] memory) {
     ICToken[] memory poolMarkets = comptroller.getAllMarkets();
 
-    address[] memory assets = new address[](poolMarkets.length - 1);
-    uint256[] memory supplyCapsPerAsset = new uint256[](poolMarkets.length - 1);
+    address[] memory assets = new address[](poolMarkets.length);
+    uint256[] memory supplyCapsPerAsset = new uint256[](poolMarkets.length);
     for (uint256 i = 0; i < poolMarkets.length; i++) {
       assets[i] = address(poolMarkets[i]);
       supplyCapsPerAsset[i] = comptroller.supplyCaps(assets[i]);
@@ -481,9 +481,9 @@ contract FusePoolLens is Initializable {
   {
     ICToken[] memory poolMarkets = comptroller.getAllMarkets();
 
-    address[] memory assets = new address[](poolMarkets.length - 1);
-    uint256[] memory supplyCapsPerAsset = new uint256[](poolMarkets.length - 1);
-    uint256[] memory nonWhitelistedTotalSupply = new uint256[](poolMarkets.length - 1);
+    address[] memory assets = new address[](poolMarkets.length);
+    uint256[] memory supplyCapsPerAsset = new uint256[](poolMarkets.length);
+    uint256[] memory nonWhitelistedTotalSupply = new uint256[](poolMarkets.length);
     for (uint256 i = 0; i < poolMarkets.length; i++) {
       assets[i] = address(poolMarkets[i]);
       supplyCapsPerAsset[i] = comptroller.supplyCaps(assets[i]);
