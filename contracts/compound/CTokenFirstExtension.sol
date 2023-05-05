@@ -20,7 +20,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 21;
+    uint8 fnsCount = 22;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -38,6 +38,7 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.accrueInterest.selector;
     functionSelectors[--fnsCount] = this.totalBorrowsCurrent.selector;
     functionSelectors[--fnsCount] = this.balanceOfUnderlying.selector;
+    functionSelectors[--fnsCount] = this.balanceOfUnderlyingHypo.selector;
     functionSelectors[--fnsCount] = this.multicall.selector;
     functionSelectors[--fnsCount] = this.exchangeRateHypothetical.selector;
     functionSelectors[--fnsCount] = this.supplyRatePerBlockAfterDeposit.selector;
@@ -570,6 +571,13 @@ contract CTokenFirstExtension is
   function balanceOfUnderlying(address owner) public returns (uint256) {
     require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
     Exp memory exchangeRate = Exp({ mantissa: exchangeRateStored() });
+    (MathError mErr, uint256 balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
+    require(mErr == MathError.NO_ERROR, "!balance");
+    return balance;
+  }
+
+  function balanceOfUnderlyingHypo(address owner) public view returns (uint256) {
+    Exp memory exchangeRate = Exp({ mantissa: exchangeRateHypothetical() });
     (MathError mErr, uint256 balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
     require(mErr == MathError.NO_ERROR, "!balance");
     return balance;
